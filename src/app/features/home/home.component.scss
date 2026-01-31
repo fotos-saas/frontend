@@ -1,0 +1,753 @@
+// ============================================================================
+// HOME KOMPONENS - DARK MODE SUPPORT
+// ============================================================================
+
+// SCSS változók (Safari kompatibilitás)
+$blue-500: #3b82f6;
+$blue-600: #2563eb;
+
+// ============================================
+// ANIMATIONS - Keyframes
+// ============================================
+
+// Staggered card entry animation
+@keyframes cardEntry {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  // background: page-card class-tól jön, de CSS változók overrideolják ha kell
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.home__main {
+  flex: 1;
+  max-width: 640px;
+  margin: 0 auto;
+  // padding: page-card class-tól jön a külső div-re
+}
+
+// Hero Section - Typography focused
+.hero {
+  padding: 3rem 0 2rem;
+  text-align: center;
+}
+
+.hero__share-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.hero__share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px var(--shadow-color);
+
+  svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &--primary {
+    background: $blue-500;
+    border: 2px solid $blue-500;
+    color: white;
+
+    svg {
+      color: white;
+    }
+
+    &:hover {
+      background: $blue-600;
+      border-color: $blue-600;
+    }
+  }
+
+  &--secondary {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
+
+    svg {
+      color: var(--text-secondary);
+    }
+
+    &:hover {
+      border-color: $blue-500;
+      color: $blue-500;
+
+      svg {
+        color: $blue-500;
+      }
+    }
+  }
+}
+
+.hero__school {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+
+.hero__class {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin: 0;
+
+  span {
+    color: var(--text-muted);
+  }
+}
+
+// Contacts Section - White cards for contrast
+.contacts {
+  padding: 1.5rem 0;
+}
+
+.contacts__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contact {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: var(--bg-secondary);
+  padding: 1.25rem;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px var(--shadow-color);
+  border: 1px solid var(--border-color);
+
+  // Staggered entry animation
+  opacity: 0;
+  animation: cardEntry 0.4s ease forwards;
+
+  // Staggered delays for contact cards
+  &:nth-child(1) { animation-delay: 0.1s; }
+  &:nth-child(2) { animation-delay: 0.15s; }
+
+  &__edit {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: var(--bg-tertiary);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    opacity: 0.7;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-secondary);
+    }
+
+    &:hover {
+      opacity: 1;
+      background: rgba(37, 99, 235, 0.1);
+
+      svg {
+        color: $blue-600;
+      }
+    }
+  }
+}
+
+.contact__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--gradient-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: $blue-600;
+  }
+}
+
+.contact__avatar--partner {
+  background: var(--gradient-yellow);
+
+  svg {
+    color: #d97706;
+  }
+}
+
+.contact__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact__label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.contact__name {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+
+.contact__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.contact__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: $blue-600;
+  text-decoration: none;
+  transition: color 0.15s;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  &:hover {
+    color: $blue-500;
+  }
+}
+
+// Schedule Section - Fotózás időpontja kártya
+.schedule {
+  padding: 0.5rem 0 1rem;
+}
+
+.schedule__card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background: var(--bg-secondary);
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px var(--shadow-color);
+  border: 2px solid transparent;
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px var(--shadow-color-hover);
+  }
+
+  &--empty {
+    border-color: #f59e0b;
+    background: var(--gradient-yellow);
+  }
+}
+
+.schedule__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--gradient-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: $blue-600;
+  }
+
+  &--empty {
+    background: var(--gradient-yellow);
+
+    svg {
+      color: #d97706;
+    }
+  }
+}
+
+.schedule__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule__label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.125rem;
+}
+
+.schedule__value {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+
+  &--empty {
+    color: #d97706;
+    font-weight: 500;
+    font-style: italic;
+  }
+}
+
+.schedule__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: $blue-600;
+    background: rgba(37, 99, 235, 0.1);
+  }
+
+  &--primary {
+    color: white;
+    background: $blue-500;
+    transition: background 150ms ease, color 150ms ease;
+
+    &:hover {
+      background: var(--bg-primary);
+      color: $blue-500;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $blue-500;
+      outline-offset: 2px;
+    }
+  }
+}
+
+// Navigation - Two column elegant buttons (or full width if single)
+.navigation {
+  padding-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+
+  // If only one child, make it full width
+  .nav-card:only-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.nav-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-secondary);
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: 2px solid $blue-500;
+
+  // Staggered entry animation
+  opacity: 0;
+  animation: cardEntry 0.4s ease forwards;
+
+  // Staggered delays for nav cards
+  @for $i from 1 through 6 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{0.2 + ($i * 0.05)}s;
+    }
+  }
+
+  &:hover {
+    background: rgba(37, 99, 235, 0.05);
+    border-color: $blue-600;
+
+    .nav-card__arrow {
+      transform: translateX(4px);
+      color: $blue-600;
+    }
+
+    .nav-card__icon {
+      background: $blue-600;
+    }
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.nav-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: $blue-500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: white;
+  }
+}
+
+.nav-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.125rem;
+}
+
+.nav-card__desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.nav-card__arrow {
+  width: 20px;
+  height: 20px;
+  color: $blue-500;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+// Warning variant for nav-card
+.nav-card--warning {
+  border-color: #f59e0b;
+
+  &:hover {
+    background: #fffbeb;
+    border-color: #d97706;
+
+    .nav-card__icon--warning {
+      background: #d97706;
+    }
+
+    .nav-card__arrow {
+      color: #d97706;
+    }
+  }
+}
+
+.nav-card__icon--warning {
+  background: #f59e0b;
+}
+
+// Primary variant for nav-card (Minta Választó)
+.nav-card--primary {
+  border-color: $blue-500;
+  background: var(--gradient-blue);
+
+  &:hover {
+    background: rgba(37, 99, 235, 0.15);
+    border-color: $blue-600;
+
+    .nav-card__icon--primary {
+      background: $blue-600;
+    }
+
+    .nav-card__arrow {
+      color: $blue-600;
+    }
+  }
+}
+
+.nav-card__icon--primary {
+  background: $blue-500;
+}
+
+// Missing Alert Section
+.missing-alert {
+  padding: 0.5rem 0 1rem;
+}
+
+.missing-alert__card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--gradient-yellow);
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+
+    .missing-alert__arrow {
+      transform: translateX(4px);
+    }
+  }
+}
+
+.missing-alert__icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: #d97706;
+  }
+}
+
+.missing-alert__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.missing-alert__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #d97706;
+}
+
+.missing-alert__details {
+  font-size: 0.8125rem;
+  color: #f59e0b;
+}
+
+.missing-alert__arrow {
+  width: 20px;
+  height: 20px;
+  color: #d97706;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+// Copied Dialog
+.copied-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: 1rem;
+  animation: fadeIn 0.15s ease-out;
+  @media (prefers-color-scheme: dark) {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.copied-dialog {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 25px 50px var(--shadow-color-hover);
+  animation: scaleIn 0.2s ease-out;
+}
+
+.copied-dialog__icon {
+  width: 64px;
+  height: 64px;
+  background: var(--gradient-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+
+  svg {
+    width: 36px;
+    height: 36px;
+    color: #10b981;
+  }
+}
+
+.copied-dialog__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem;
+}
+
+.copied-dialog__text {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.copied-dialog__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: white;
+  background: $blue-500;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: $blue-600;
+  }
+}
+
+// Mobile adjustments
+@media (max-width: 480px) {
+  .home__main {
+    padding: 0 1rem 2rem;
+  }
+
+  .hero {
+    padding: 2rem 0 1.5rem;
+  }
+
+  .hero__school {
+    font-size: 1.5rem;
+  }
+
+  .hero__class {
+    font-size: 1rem;
+  }
+
+  .contact__links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .navigation {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ============================================
+// REDUCED MOTION SUPPORT (A11y)
+// ============================================
+@media (prefers-reduced-motion: reduce) {
+  .contact,
+  .nav-card {
+    animation: none;
+    opacity: 1;
+  }
+
+  .copied-dialog-overlay {
+    animation: none;
+  }
+
+  .copied-dialog {
+    animation: none;
+  }
+
+  .nav-card__arrow,
+  .missing-alert__arrow {
+    transition: none;
+  }
+}

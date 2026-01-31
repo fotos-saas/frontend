@@ -1,0 +1,196 @@
+<div class="partner-album-detail page-card">
+  <!-- Loading -->
+  @if (state.loading()) {
+    <div class="animate-pulse">
+      <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+      <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-8"></div>
+      <div class="grid grid-cols-4 gap-4">
+        @for (_ of [1,2,3,4,5,6,7,8]; track _) {
+          <div class="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!state.loading() && state.album()) {
+    <!-- Header Component -->
+    <app-album-header
+      [album]="state.album()!"
+      [activating]="state.activating()"
+      (activate)="onActivate()"
+      (edit)="onEditClick()"
+      (delete)="onDeleteClick()"
+    />
+
+    <!-- Info Bar Component -->
+    <app-album-info-bar
+      [album]="state.album()!"
+      [viewMode]="state.viewMode()"
+      [selectedCount]="state.selectedPhotoIds().length"
+      [extendingExpiry]="state.extendingExpiry()"
+      [expiryDateValue]="state.getExpiryDateValue()"
+      [tomorrowDate]="state.getTomorrowDate()"
+      [isExpired]="state.isAlbumExpired()"
+      (viewModeChange)="state.viewMode.set($event)"
+      (expiryChange)="onExpiryChange($event)"
+      (extendExpiry)="onExtendExpiry($event)"
+    />
+
+    <!-- Upload Section (only for draft) -->
+    @if (state.album()!.status === 'draft') {
+      <div class="mb-6">
+        <app-drop-zone
+          [uploading]="state.uploading()"
+          [uploadProgress]="state.uploadProgress()?.progress || 0"
+          accept=".jpg,.jpeg,.png,.webp,.zip"
+          hint="JPG, PNG, WebP vagy ZIP"
+          maxSize="max. 20MB/kép"
+          (filesSelected)="onFilesSelected($event)"
+        />
+      </div>
+    }
+
+    <!-- Delete mode toolbar -->
+    @if (state.deleteSelectedIds().length > 0) {
+      <div class="delete-toolbar">
+        <span class="delete-toolbar__count">
+          {{ state.deleteSelectedIds().length }} kép kijelölve törlésre
+        </span>
+        <div class="delete-toolbar__actions">
+          <button
+            type="button"
+            class="delete-toolbar__btn delete-toolbar__btn--cancel"
+            (click)="state.clearDeleteSelection()"
+          >
+            Mégsem
+          </button>
+          <button
+            type="button"
+            class="delete-toolbar__btn delete-toolbar__btn--delete"
+            [disabled]="state.deletingPhotos()"
+            (click)="onConfirmDeletePhotos()"
+          >
+            @if (state.deletingPhotos()) {
+              <div class="spinner"></div>
+            } @else {
+              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            }
+            Törlés
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Photos Grid - SelectionGrid komponens használata -->
+    @if (state.album()!.photos.length > 0 && state.viewMode() === 'grid') {
+      <div class="delete-hint" [class.delete-hint--visible]="state.deleteSelectedIds().length === 0 && state.album()!.status === 'draft'">
+        <lucide-icon [name]="ICONS.INFO" [size]="14" />
+        Ctrl/Cmd + kattintással jelölhetsz ki képeket törlésre
+      </div>
+      <app-selection-grid
+        [photos]="state.gridPhotos()"
+        [selectedIds]="state.selectedPhotoIds()"
+        [deleteMode]="state.album()!.status !== 'completed'"
+        [deleteSelectedIds]="state.deleteSelectedIds()"
+        [allowMultiple]="true"
+        [maxSelection]="null"
+        [isLoading]="false"
+        [readonly]="true"
+        [showHeader]="false"
+        [emptyMessage]="'Nincsenek képek'"
+        (zoomClick)="onZoomClick($event)"
+        (deleteSelect)="onDeleteSelect($event)"
+        (deleteSingleClick)="onSingleDeleteClick($event)"
+      />
+    }
+
+    <!-- Lista nézet - Photo List Component -->
+    @if (state.album()!.photos.length > 0 && state.viewMode() === 'list') {
+      <app-album-photo-list
+        [photos]="state.paginatedPhotos()"
+        [selectedIds]="state.selectedPhotoIds()"
+        [deleteSelectedIds]="state.deleteSelectedIds()"
+        [filter]="state.listFilter()"
+        [searchQuery]="state.searchQuery()"
+        [currentPage]="state.currentPage()"
+        [totalPages]="state.totalPages()"
+        [filteredCount]="state.filteredPhotos().length"
+        [totalCount]="state.album()!.photosCount"
+        [selectedCount]="state.selectedPhotoIds().length"
+        [downloading]="state.downloading()"
+        [exporting]="state.exporting()"
+        [albumStatus]="state.album()!.status"
+        (filterChange)="state.setListFilter($event)"
+        (searchChange)="state.setSearchQuery($event)"
+        (pageChange)="state.goToPage($event)"
+        (zoomClick)="onListZoomClick($event)"
+        (deleteClick)="onListDeleteClick($event)"
+        (listItemClick)="onListItemClick($event)"
+        (downloadZip)="onDownloadZip()"
+        (exportExcel)="onExportExcel()"
+      />
+    }
+
+    @if (state.album()!.photos.length === 0 && state.album()!.status !== 'draft') {
+      <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <lucide-icon [name]="ICONS.IMAGE" [size]="48" class="mx-auto text-gray-400 mb-4" />
+        <p class="text-gray-600 dark:text-gray-400">Nincsenek képek az albumban</p>
+      </div>
+    }
+  }
+</div>
+
+<!-- Dialógusok - page-card KÍVÜL a backdrop-filter stacking context miatt -->
+
+<!-- Delete Album Confirm -->
+@if (state.deleteAlbumDialog.isOpen()) {
+  <app-confirm-dialog
+    title="Album törlése"
+    [message]="'Biztosan törölni szeretnéd a(z) ' + state.album()!.name + ' albumot? Az összes kép törlődni fog!'"
+    confirmText="Törlés"
+    confirmType="danger"
+    (resultEvent)="onDeleteAlbumResult($event)"
+  />
+}
+
+<!-- Delete Photo Confirm -->
+@if (state.photoToDelete()) {
+  <app-confirm-dialog
+    title="Kép törlése"
+    message="Biztosan törölni szeretnéd ezt a képet?"
+    confirmText="Törlés"
+    confirmType="danger"
+    (resultEvent)="onDeletePhotoResult($event)"
+  />
+}
+
+<!-- Delete Multiple Photos Confirm -->
+@if (state.deletePhotosDialog.isOpen()) {
+  <app-confirm-dialog
+    title="Képek törlése"
+    [message]="'Biztosan törölni szeretnéd a kijelölt ' + state.deleteSelectedIds().length + ' képet? Ez a művelet nem visszavonható.'"
+    confirmText="Törlés"
+    confirmType="danger"
+    (resultEvent)="onDeletePhotosResult($event)"
+  />
+}
+
+<!-- Lightbox -->
+@if (state.lightboxOpen()) {
+  <app-media-lightbox
+    [media]="state.lightboxMedia()"
+    [currentIndex]="state.lightboxIndex()"
+    (close)="state.closeLightbox()"
+    (navigate)="onNavigateLightbox($event)"
+  />
+}
+
+<!-- Edit Album Modal -->
+<app-album-edit-modal
+  [album]="state.album()!"
+  [isOpen]="state.editDialog.isOpen()"
+  [saving]="state.saving()"
+  [initialFormData]="state.editForm"
+  (close)="state.closeEditModal()"
+  (save)="onSaveAlbum($event)"
+/>

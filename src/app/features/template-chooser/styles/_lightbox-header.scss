@@ -1,0 +1,94 @@
+/**
+ * Lightbox Header Styles
+ * Floating close button and counter overlay
+ */
+
+.lightbox {
+  // Modifier: no-header layout (header nélküli változat)
+  &__container--no-header {
+    // A main area felülről is kitöltődik
+    padding-top: 0;
+  }
+
+  // Element: floating close button (jobb felső sarok)
+  &__close-floating {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: var(--z-dropdown);
+    width: 44px;
+    height: 44px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: scale(1.05);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  // Element: floating counter (bal felső sarok a képen)
+  &__counter-floating {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: var(--z-dropdown);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  // Element: close icon (használható mindkét close gombhoz)
+  &__close-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+  }
+
+  // ===============================
+  // LEGACY: régi header (eltávolított, de megtartva visszafelé kompatibilitás miatt)
+  // ===============================
+  &__header {
+    display: none; // Eltávolítva
+  }
+
+  &__header-content {
+    display: none;
+  }
+
+  &__counter {
+    display: none;
+  }
+
+  &__close {
+    display: none;
+  }
+}

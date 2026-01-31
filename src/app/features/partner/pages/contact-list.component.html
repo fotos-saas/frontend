@@ -1,0 +1,188 @@
+<div class="contact-list-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Kapcsolattartók</h1>
+      <p class="subtitle">{{ totalContacts() }} kapcsolattartó összesen</p>
+    </div>
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="openCreateModal()"
+    >
+      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+      Új kapcsolattartó
+    </button>
+  </header>
+
+  <!-- Keresés -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés név, email vagy telefon alapján..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-row skeleton-row--tall skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (contacts().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.USERS" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      @if (filterState.search()) {
+        <p>Próbálj más keresési feltételekkel!</p>
+      } @else {
+        <p>Még nincsenek kapcsolattartók hozzáadva.</p>
+        <button type="button" class="btn-primary mt-4" (click)="openCreateModal()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+          Új kapcsolattartó
+        </button>
+      }
+    </div>
+  } @else {
+    <!-- Asztali fejléc (640px felett) -->
+    <div class="table-header">
+      <span class="th th-name">Név</span>
+      <span class="th th-contact">Elérhetőség</span>
+      <span class="th th-project">Projekt</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <!-- Kapcsolattartó sorok -->
+    <div class="contact-grid">
+      @for (contact of contacts(); track contact.id; let i = $index) {
+        <div
+          class="contact-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+        >
+          <div class="contact-name">
+            <lucide-icon [name]="ICONS.USER" [size]="18" class="contact-icon" />
+            <div class="name-details">
+              <span class="name">{{ contact.name }}</span>
+              @if (contact.isPrimary) {
+                <span class="primary-badge">Elsődleges</span>
+              }
+            </div>
+          </div>
+
+          <div class="contact-info">
+            @if (contact.email) {
+              <a [href]="'mailto:' + contact.email" class="contact-link" data-tooltip="Email küldése">
+                <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+                <span class="contact-text">{{ contact.email }}</span>
+              </a>
+            }
+            @if (contact.phone) {
+              <a [href]="'tel:' + contact.phone" class="contact-link" data-tooltip="Hívás">
+                <lucide-icon [name]="ICONS.PHONE" [size]="14" />
+                <span class="contact-text">{{ contact.phone }}</span>
+              </a>
+            }
+            @if (!contact.email && !contact.phone) {
+              <span class="no-contact">Nincs megadva</span>
+            }
+          </div>
+
+          <div class="contact-project" (click)="viewProject(contact)">
+            @if (contact.projectName) {
+              <span
+                class="project-link"
+                [matTooltip]="contact.projectName + (contact.schoolName ? ' (' + contact.schoolName + ')' : '')"
+              >
+                <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
+                <span>{{ contact.projectName }}</span>
+              </span>
+            } @else {
+              <span class="no-project">Nincs projekt</span>
+            }
+          </div>
+
+          <div class="contact-actions">
+            <button
+              class="action-btn"
+              data-tooltip="Szerkesztés"
+              (click)="editContact(contact)"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              data-tooltip="Törlés"
+              (click)="confirmDeleteContact(contact)"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Paginálás -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === 1"
+          (click)="goToPage(filterState.page() - 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+
+        <div class="page-info">
+          {{ filterState.page() }} / {{ totalPages() }} oldal
+          <span class="total-count">({{ totalContacts() }} kapcsolat)</span>
+        </div>
+
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === totalPages()"
+          (click)="goToPage(filterState.page() + 1)"
+        >
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Create/Edit Modal -->
+@if (showEditModal()) {
+  <app-contact-edit-modal
+    [contact]="selectedContact()"
+    [mode]="modalMode()"
+    (close)="closeEditModal()"
+    (saved)="onContactSaved($event)"
+  />
+}
+
+<!-- Delete Confirm Dialog -->
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Kapcsolattartó törlése"
+    [message]="'Biztosan törölni szeretnéd ' + selectedContact()?.name + ' kapcsolattartót?'"
+    confirmText="Törlés"
+    cancelText="Mégse"
+    variant="danger"
+    (confirmed)="deleteContact()"
+    (cancelled)="closeDeleteConfirm()"
+  />
+}

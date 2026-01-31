@@ -1,0 +1,173 @@
+{
+  "tech_stack": [
+    "TypeScript 5.1.3",
+    "Angular 16.2.0",
+    "RxJS 7.8.0",
+    "Tailwind CSS 3.4.19",
+    "SCSS",
+    "Angular Signals",
+    "Angular CLI 16.2.0"
+  ],
+  "features": [
+    {
+      "name": "Authentication - Code Login",
+      "description": "6-digit numeric code login for tablo guests with rate limiting and token management",
+      "files": [
+        "src/app/pages/login.component.ts",
+        "src/app/core/services/auth.service.ts",
+        "src/app/core/interceptors/auth.interceptor.ts",
+        "src/app/core/guards/auth.guard.ts"
+      ]
+    },
+    {
+      "name": "Authentication - Share Token",
+      "description": "64-character hex token login for external sharing with automatic redirect",
+      "files": [
+        "src/app/pages/share-login.component.ts",
+        "src/app/core/services/auth.service.ts"
+      ]
+    },
+    {
+      "name": "Authentication - Preview Token",
+      "description": "One-time preview token login for administrators",
+      "files": [
+        "src/app/pages/preview-login.component.ts",
+        "src/app/core/services/auth.service.ts"
+      ]
+    },
+    {
+      "name": "Home Dashboard",
+      "description": "Project dashboard with status information, contact details, photo date display, and share functionality",
+      "files": [
+        "src/app/features/home/home.component.ts",
+        "src/app/features/home/home.component.html",
+        "src/app/features/home/home.component.scss"
+      ]
+    },
+    {
+      "name": "Sample Photos Gallery",
+      "description": "Photo grid with thumbnails, lightbox viewer with advanced zoom capabilities (pinch, wheel, double-tap)",
+      "files": [
+        "src/app/features/samples/samples.component.ts",
+        "src/app/features/samples/samples.component.html",
+        "src/app/features/samples/samples.component.scss",
+        "src/app/features/samples/services/samples.service.ts"
+      ]
+    },
+    {
+      "name": "Order Data Management",
+      "description": "Display order information including contact details, school info, design preferences, AI summary and PDF download",
+      "files": [
+        "src/app/features/order-data/order-data.component.ts",
+        "src/app/features/order-data/order-data.component.html",
+        "src/app/features/order-data/order-data.component.scss",
+        "src/app/features/order-data/services/order-data.service.ts"
+      ]
+    },
+    {
+      "name": "Missing Persons Tracking",
+      "description": "List students and teachers without photos with search and filter functionality",
+      "files": [
+        "src/app/features/missing-persons/missing-persons.component.ts",
+        "src/app/features/missing-persons/missing-persons.component.html",
+        "src/app/features/missing-persons/missing-persons.component.scss",
+        "src/app/features/missing-persons/missing-persons.module.ts"
+      ]
+    },
+    {
+      "name": "Responsive Navbar",
+      "description": "Dynamic responsive navbar with ResizeObserver-based breakpoint switching, mobile hamburger menu with slide-in drawer",
+      "files": [
+        "src/app/shared/components/navbar/navbar.component.ts",
+        "src/app/shared/components/navbar/navbar.component.html",
+        "src/app/shared/components/navbar/navbar.component.scss"
+      ]
+    },
+    {
+      "name": "Zoom Directive",
+      "description": "Advanced image zoom and pan directive supporting mouse wheel, pinch-to-zoom, double-tap, and keyboard controls",
+      "files": [
+        "src/app/shared/directives/zoom/zoom.directive.ts",
+        "src/app/shared/directives/zoom/zoom.types.ts"
+      ]
+    },
+    {
+      "name": "Toast Notifications",
+      "description": "Signal-based notification system with success, error, and info toast types",
+      "files": [
+        "src/app/core/services/toast.service.ts",
+        "src/app/shared/components/toast/toast.component.ts",
+        "src/app/shared/components/toast/toast.component.html",
+        "src/app/shared/components/toast/toast.component.scss"
+      ]
+    },
+    {
+      "name": "Clipboard Service",
+      "description": "Copy to clipboard functionality with toast feedback for emails, phones, and links",
+      "files": [
+        "src/app/core/services/clipboard.service.ts"
+      ]
+    },
+    {
+      "name": "Schedule Reminder Dialog",
+      "description": "Photo session reminder dialog with snooze functionality and localStorage persistence",
+      "files": [
+        "src/app/core/services/schedule-reminder.service.ts",
+        "src/app/shared/components/schedule-reminder-dialog/schedule-reminder-dialog.component.ts",
+        "src/app/shared/components/schedule-reminder-dialog/schedule-reminder-dialog.component.html",
+        "src/app/shared/components/schedule-reminder-dialog/schedule-reminder-dialog.component.scss"
+      ]
+    },
+    {
+      "name": "Schedule Card",
+      "description": "Project information card component with status badge and contact details",
+      "files": [
+        "src/app/shared/components/schedule-card/schedule-card.component.ts",
+        "src/app/shared/components/schedule-card/schedule-card.component.html",
+        "src/app/shared/components/schedule-card/schedule-card.component.scss"
+      ]
+    },
+    {
+      "name": "Lightbox Component",
+      "description": "Full-screen image viewer with navigation arrows and zoom controls",
+      "files": [
+        "src/app/shared/components/lightbox/lightbox.component.ts",
+        "src/app/shared/components/lightbox/lightbox.component.html",
+        "src/app/shared/components/lightbox/lightbox.component.scss"
+      ]
+    },
+    {
+      "name": "Zoom Controls",
+      "description": "UI controls for zoom level adjustment with long-press support",
+      "files": [
+        "src/app/shared/components/zoom-controls/zoom-controls.component.ts",
+        "src/app/shared/components/zoom-controls/zoom-controls.component.html",
+        "src/app/shared/components/zoom-controls/zoom-controls.component.scss"
+      ]
+    },
+    {
+      "name": "Footer Component",
+      "description": "Application footer with branding and links",
+      "files": [
+        "src/app/shared/components/footer/footer.component.ts",
+        "src/app/shared/components/footer/footer.component.html",
+        "src/app/shared/components/footer/footer.component.scss"
+      ]
+    },
+    {
+      "name": "Main Layout",
+      "description": "Layout wrapper with navbar and router outlet for authenticated pages",
+      "files": [
+        "src/app/layouts/main-layout/main-layout.component.ts",
+        "src/app/layouts/main-layout/main-layout.component.html"
+      ]
+    },
+    {
+      "name": "Routing Configuration",
+      "description": "Angular routing with auth guards for protected routes and lazy loading",
+      "files": [
+        "src/app/app-routing.module.ts"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+.preset-selector {
+  .label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0 0 0.75rem 0;
+    text-transform: lowercase;
+  }
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.preset-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: #f9fafb;
+  border: 2px solid transparent;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+
+  &:hover {
+    background: #f3f4f6;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.selected {
+    background: #ede9fe;
+    border-color: #8b5cf6;
+
+    .text {
+      color: #6d28d9;
+    }
+  }
+
+  .emoji {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .text {
+    font-size: 0.85rem;
+    color: #374151;
+    text-transform: lowercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ==========================================
+// DARK MODE
+// ==========================================
+
+@media (prefers-color-scheme: dark) {
+  .preset-selector {
+    .label {
+      color: #9ca3af;
+    }
+  }
+
+  .preset-btn {
+    background: #374151;
+
+    &:hover {
+      background: #4b5563;
+    }
+
+    &.selected {
+      background: #2e1065;
+      border-color: #8b5cf6;
+
+      .text {
+        color: #c4b5fd;
+      }
+    }
+
+    .text {
+      color: #d1d5db;
+    }
+  }
+}
+
+// ==========================================
+// MOBILE
+// ==========================================
+
+@media (max-width: 400px) {
+  .preset-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ==========================================
+// REDUCED MOTION
+// ==========================================
+
+@media (prefers-reduced-motion: reduce) {
+  .preset-btn {
+    transition-duration: 0.01ms !important;
+  }
+}

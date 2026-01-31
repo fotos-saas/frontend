@@ -1,0 +1,98 @@
+@use '../../../../styles/colors' as colors;
+@use '../../../../styles/mixins' as *;
+
+// Host elem 100% szélesség
+:host {
+  display: block;
+  width: 100%;
+}
+
+.post-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid colors.get-color('gray', 100);
+  overflow: visible;
+
+  // Info section (bal oldal)
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: colors.get-color('gray', 500);
+  }
+
+  &__author {
+    font-weight: 500;
+    color: colors.get-color('gray', 700);
+  }
+
+  &__time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0;
+    margin: 0;
+    font-size: 0.75rem;
+    font-family: inherit;
+    color: colors.get-color('gray', 500);
+    background: transparent;
+    border: none;
+    cursor: default;
+    @include transition-normal;
+
+    svg {
+      width: 0.875rem;
+      height: 0.875rem;
+      opacity: 0.7;
+    }
+
+    // Kattintható verzió
+    &--clickable {
+      cursor: pointer;
+      border-radius: 0.25rem;
+      padding: 0.125rem 0.25rem;
+      margin: -0.125rem -0.25rem;
+
+      &:hover {
+        background: colors.get-color('gray', 100);
+        color: colors.get-color('gray', 700);
+
+        svg {
+          opacity: 1;
+        }
+      }
+
+      &:focus-visible {
+        outline: 2px solid colors.get-color('primary', 500);
+        outline-offset: 2px;
+      }
+    }
+
+    // Disabled state (nem kattintható)
+    &:disabled:not(.post-meta-bar__time--clickable) {
+      opacity: 1;
+      cursor: default;
+    }
+  }
+
+  // Actions section (jobb oldal)
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: visible;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .post-meta-bar {
+    &__time {
+      transition: none;
+    }
+  }
+}

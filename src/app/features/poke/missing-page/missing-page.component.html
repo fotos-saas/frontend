@@ -1,0 +1,228 @@
+<div class="poke-page page-card">
+  <!-- Header -->
+  <header class="poke-header">
+    <div class="poke-header__content">
+      <div class="poke-header__icon">
+        <span class="emoji">👀</span>
+      </div>
+      <div>
+        <h1 class="poke-header__title">hiányzók</h1>
+        <p class="poke-header__subtitle">bökj rájuk, hogy ne felejtsék el</p>
+      </div>
+    </div>
+
+    <div class="poke-header__actions">
+      <!-- Kapott bökések -->
+      @if (unreadCount() > 0) {
+        <button
+          class="received-btn has-unread"
+          (click)="openReceivedDialog()"
+          [attr.data-count]="unreadCount()">
+          <span class="emoji">📬</span>
+          <span class="label">kapott</span>
+          <span class="badge">{{ unreadCount() }}</span>
+        </button>
+      } @else {
+        <button
+          class="received-btn"
+          (click)="openReceivedDialog()">
+          <span class="emoji">📭</span>
+          <span class="label">kapott</span>
+        </button>
+      }
+
+      <!-- Napi limit -->
+      <app-daily-limit-badge [limit]="dailyLimit()" />
+    </div>
+  </header>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="skeleton-search"></div>
+      <div class="skeleton-filters"></div>
+      <div class="skeleton-tabs"></div>
+      <div class="skeleton-cards">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="skeleton-card"></div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage()) {
+    <div class="error-state">
+      <span class="emoji">😵</span>
+      <p>{{ errorMessage() }}</p>
+      <button class="retry-btn" (click)="refresh()">
+        újra próbálom
+      </button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!isLoading() && !errorMessage()) {
+    <!-- No missing users -->
+    @if (noMissing()) {
+      <div class="empty-state">
+        <span class="emoji float-animation">🎉</span>
+        <h2>mindenki kész!</h2>
+        <p>senki sem hiányzik, mindenki megtette a dolgát</p>
+      </div>
+    } @else {
+      <!-- Search -->
+      <div class="search-section">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="keresés név szerint..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+          @if (searchQuery()) {
+            <button class="clear-search-btn" (click)="clearSearch()">
+              <span>✕</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Category tabs -->
+      <div class="category-tabs">
+        <button
+          class="category-tab"
+          [class.active]="activeCategory() === 'photoshoot'"
+          [class.disabled]="!hasPhotoshootMissing()"
+          (click)="setCategory('photoshoot')"
+          [disabled]="!hasPhotoshootMissing()">
+          <span class="tab-emoji">📸</span>
+          <span class="tab-label">fotózás</span>
+          <span class="tab-count">{{ photoshootCount() }}</span>
+        </button>
+        <button
+          class="category-tab"
+          [class.active]="activeCategory() === 'voting'"
+          [class.disabled]="!hasVotingMissing()"
+          (click)="setCategory('voting')"
+          [disabled]="!hasVotingMissing()">
+          <span class="tab-emoji">🗳️</span>
+          <span class="tab-label">szavazás</span>
+          <span class="tab-count">{{ votingCount() }}</span>
+        </button>
+        <button
+          class="category-tab"
+          [class.active]="activeCategory() === 'image_selection'"
+          [class.disabled]="!hasImageSelectionMissing()"
+          (click)="setCategory('image_selection')"
+          [disabled]="!hasImageSelectionMissing()">
+          <span class="tab-emoji">🖼️</span>
+          <span class="tab-label">képválasztás</span>
+          <span class="tab-count">{{ imageSelectionCount() }}</span>
+        </button>
+        <div class="tab-indicator"></div>
+      </div>
+
+      <!-- Person tabs (csak fotózásnál) -->
+      @if (showPersonTabs()) {
+        <div class="person-tabs">
+          <button
+            class="person-tab"
+            [class.active]="personTab() === 'student'"
+            (click)="setPersonTab('student')">
+            <span class="person-tab__emoji">🎓</span>
+            <span class="person-tab__label">diákok</span>
+            <span class="person-tab__count">{{ studentCount() }}</span>
+          </button>
+          <button
+            class="person-tab person-tab--secondary"
+            [class.active]="personTab() === 'teacher'"
+            (click)="setPersonTab('teacher')">
+            <span class="person-tab__emoji">👨‍🏫</span>
+            <span class="person-tab__label">tanárok</span>
+            <span class="person-tab__count">{{ teacherCount() }}</span>
+          </button>
+        </div>
+      }
+
+      <!-- Results -->
+      <div class="results-section">
+        <!-- Results count -->
+        <div class="results-header">
+          @if (hasActiveFilters()) {
+            <span class="results-count">
+              {{ filteredCount() }} találat
+              @if (showPersonTabs()) {
+                <span class="of-total">/ {{ personTab() === 'student' ? studentCount() : teacherCount() }}</span>
+              } @else {
+                <span class="of-total">/ {{ activeCategoryData()?.count ?? 0 }}</span>
+              }
+            </span>
+          } @else {
+            <span class="results-count">
+              {{ filteredCount() }} hiányzó
+              @if (showPersonTabs()) {
+                {{ personTab() === 'student' ? 'diák' : 'tanár' }}
+              }
+            </span>
+          }
+        </div>
+
+        <!-- User list -->
+        @if (filteredUsers().length > 0) {
+          <div class="user-list">
+            @for (user of filteredUsers(); track trackByUserId($index, user); let i = $index) {
+              <app-missing-user-card
+                [user]="user"
+                appStaggerAnimation
+                [staggerIndex]="i"
+                [staggerTotal]="filteredUsers().length"
+                [staggerDelay]="30"
+                (pokeClick)="onPokeClick($event)" />
+            }
+          </div>
+        } @else {
+          <!-- Empty search results -->
+          <div class="empty-search-state">
+            <span class="emoji">🔍</span>
+            @if (searchQuery()) {
+              <p>nincs találat erre: <strong>„{{ searchQuery() }}"</strong></p>
+            } @else {
+              <p>nincs ilyen szűrési feltételnek megfelelő hiányzó</p>
+            }
+            <button class="clear-filters-btn" (click)="clearAllFilters()">
+              szűrők törlése
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Summary -->
+      @if (summary()) {
+        <div class="summary">
+          <span class="emoji">📊</span>
+          <span class="text">összesen {{ summary()!.totalMissing }} hiányzó</span>
+        </div>
+      }
+    }
+  }
+</div>
+
+<!-- Composer dialógus -->
+@if (showComposer() && composerUser()) {
+  <app-poke-composer
+    [user]="composerUser()!"
+    [category]="activeCategory()"
+    (resultEvent)="onComposerResult($event)" />
+}
+
+<!-- Kapott bökések dialógus -->
+@if (showReceivedDialog()) {
+  <app-received-pokes-dialog
+    [pokes]="receivedPokes()"
+    (closeEvent)="closeReceivedDialog()"
+    (reactionAddedEvent)="onReactionAdded($event)"
+    (markAllReadEvent)="markAllAsRead()" />
+}

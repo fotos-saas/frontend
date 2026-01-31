@@ -1,0 +1,80 @@
+<!-- Backdrop overlay (glassmorphism) -->
+<div
+  class="dialog-backdrop"
+  appClickOutside (appClickOutside)="cancel()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="dialog-title">
+
+  <!-- Dialog container -->
+  <div class="dialog">
+    <!-- Close button -->
+    <button
+      type="button"
+      class="dialog__close"
+      (click)="cancel()"
+      aria-label="Bezárás">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <!-- Header -->
+    <div class="dialog__header">
+      <div class="dialog__icon">
+        <span class="dialog__emoji" aria-hidden="true">👉</span>
+      </div>
+      <h2 id="dialog-title" class="dialog__title">Bökj: {{ user().name }}</h2>
+      <p class="dialog__description">Válassz egy előre megírt üzenetet vagy írj sajátot</p>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog__content">
+      <!-- Preset selector -->
+      <div class="dialog__section">
+        <app-preset-selector
+          [presets]="presets()"
+          [selected]="selectedPreset()"
+          (select)="onPresetSelect($event)" />
+      </div>
+
+      <!-- Custom message toggle -->
+      <button
+        type="button"
+        class="dialog__custom-toggle"
+        [class.dialog__custom-toggle--active]="showCustomInput()"
+        [attr.aria-pressed]="showCustomInput()"
+        (click)="toggleCustomInput()">
+        <span class="dialog__custom-emoji" aria-hidden="true">✍️</span>
+        <span class="dialog__custom-label">egyéni üzenet</span>
+      </button>
+
+      <!-- Custom message input -->
+      @if (showCustomInput()) {
+        <div class="dialog__custom-input">
+          <label for="custom-message" class="visually-hidden">Egyéni üzenet</label>
+          <textarea
+            id="custom-message"
+            [(ngModel)]="customMessage"
+            placeholder="írd ide az üzeneted..."
+            maxlength="500"
+            rows="3"
+            aria-describedby="char-count"
+            (ngModelChange)="customMessage.set($event)"></textarea>
+          <span id="char-count" class="dialog__char-count" aria-live="polite">{{ customMessage().length }}/500</span>
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog__actions">
+      <button type="button" class="dialog__btn dialog__btn--secondary" (click)="cancel()">
+        Mégse
+      </button>
+      <button type="button" class="dialog__btn dialog__btn--primary" (click)="send()">
+        <span class="dialog__btn-emoji" aria-hidden="true">👉</span>
+        Küldés
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,157 @@
+@if (currentSample) {
+  <div class="lightbox" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+    <div class="lightbox__content" (click)="$event.stopPropagation()">
+      <!-- Close button -->
+      <button class="lightbox__close" (click)="close.emit()" type="button" aria-label="Bezárás">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- Navigation: Previous -->
+      <button
+        class="lightbox__nav lightbox__nav--prev"
+        [disabled]="isFirst"
+        (click)="prevImage()"
+        type="button"
+        aria-label="Előző kép"
+      >
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <!-- Image with zoom -->
+      <img
+        class="lightbox__image"
+        [src]="getFullSizeUrl(currentSample.url)"
+        [alt]="'Mintakép nagyítva: ' + currentSample.fileName"
+        appZoom
+        #zoomDirective="appZoom"
+        [zoomEnabled]="zoomEnabled"
+        [zoomConfig]="zoomConfig"
+        (zoomChangeEvent)="onZoomChange($event)"
+      />
+
+      <!-- Info Panel (Glassmorphism) -->
+      <div class="lightbox__info-panel" [class.lightbox__info-panel--expanded]="descriptionOpen && currentSample.description">
+        <!-- Description content (slides up when expanded) -->
+        @if (currentSample.description && descriptionOpen) {
+          <div class="lightbox__description">
+            <div class="lightbox__description-header">
+              <h3 class="lightbox__description-title">Változások leírása</h3>
+              <button class="lightbox__description-close" (click)="descriptionOpen = false" type="button">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="lightbox__description-content" [innerHTML]="currentSample.description | safeHtml"></div>
+          </div>
+        }
+
+        <!-- Meta info bar (always visible) -->
+        <div class="lightbox__meta-bar">
+          <!-- Row 1: Version badge -->
+          <span class="lightbox__version-badge" [class.lightbox__version-badge--newest]="currentIndex === 0">
+            {{ currentIndex === 0 ? 'Legújabb változat' : 'Régebbi változat' }}
+          </span>
+
+          <!-- Date -->
+          <div class="lightbox__meta-item">
+            <svg class="lightbox__meta-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span class="lightbox__meta-text">{{ currentSample.createdAt | date:'MM. dd. HH:mm' }}</span>
+          </div>
+
+          <!-- Toggle button in meta bar -->
+          @if (currentSample.description) {
+            <button
+              class="lightbox__meta-toggle"
+              (click)="toggleDescription()"
+              type="button"
+            >
+              {{ descriptionOpen ? 'Elrejtés' : 'Változások' }}
+            </button>
+          }
+
+          <!-- Zoom controls in meta bar -->
+          <div class="lightbox__zoom-group">
+            <button
+              class="lightbox__zoom-btn"
+              (mousedown)="startContinuousZoom('out')"
+              (touchstart)="startContinuousZoom('out'); $event.preventDefault()"
+              (mouseup)="stopContinuousZoom()"
+              (mouseleave)="stopContinuousZoom()"
+              (touchend)="stopContinuousZoom()"
+              (touchcancel)="stopContinuousZoom()"
+              (contextmenu)="$event.preventDefault()"
+              [disabled]="currentZoom <= 1"
+              type="button"
+              title="Kicsinyítés (-) - tartsd nyomva"
+            >
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 11H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 16L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button
+              class="lightbox__zoom-btn lightbox__zoom-btn--reset"
+              (click)="resetZoom(); $event.stopPropagation()"
+              [disabled]="currentZoom === 1"
+              type="button"
+              title="Visszaállítás (0)"
+            >
+              <span class="lightbox__zoom-reset-text">1:1</span>
+            </button>
+            <span class="lightbox__zoom-level">{{ (currentZoom * 100) | number:'1.0-0' }}%</span>
+            <button
+              class="lightbox__zoom-btn"
+              (mousedown)="startContinuousZoom('in')"
+              (touchstart)="startContinuousZoom('in'); $event.preventDefault()"
+              (mouseup)="stopContinuousZoom()"
+              (mouseleave)="stopContinuousZoom()"
+              (touchend)="stopContinuousZoom()"
+              (touchcancel)="stopContinuousZoom()"
+              (contextmenu)="$event.preventDefault()"
+              [disabled]="currentZoom >= maxZoom"
+              type="button"
+              title="Nagyítás (+) - tartsd nyomva"
+            >
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                <path d="M11 8V14M8 11H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 16L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Counter -->
+          <div class="lightbox__meta-item">
+            <svg class="lightbox__meta-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M3 9H21M9 21V9" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="lightbox__meta-text">{{ currentIndex + 1 }}/{{ samples.length }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation: Next -->
+      <button
+        class="lightbox__nav lightbox__nav--next"
+        [disabled]="isLast"
+        (click)="nextImage()"
+        type="button"
+        aria-label="Következő kép"
+      >
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+}

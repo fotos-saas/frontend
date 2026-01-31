@@ -1,0 +1,555 @@
+// Tablókirály kék színvilág
+$blue-500: #3b82f6;
+$blue-600: #2563eb;
+
+// ============================================
+// ANIMATIONS
+// ============================================
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// LIGHTBOX CONTAINER
+// ============================================
+
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal, 1000);
+  animation: fadeIn 0.2s ease;
+}
+
+.lightbox__content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ============================================
+// CLOSE BUTTON
+// ============================================
+
+.lightbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: var(--z-dropdown, 100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// ============================================
+// NAVIGATION BUTTONS
+// ============================================
+
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 100px;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  z-index: var(--z-dropdown, 100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+  }
+
+  &--prev {
+    left: 0;
+    border-radius: 0 12px 12px 0;
+    padding-right: 4px;
+  }
+
+  &--next {
+    right: 0;
+    border-radius: 12px 0 0 12px;
+    padding-left: 4px;
+  }
+}
+
+// ============================================
+// IMAGE
+// ============================================
+
+.lightbox__image {
+  max-width: calc(100% - 120px);
+  max-height: calc(100vh - 180px);
+  object-fit: contain;
+  border-radius: 4px;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+// ============================================
+// INFO PANEL (Glassmorphism)
+// ============================================
+
+.lightbox__info-panel {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 600px;
+  width: calc(100% - 3rem);
+  z-index: var(--z-sticky, 50);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &--expanded {
+    bottom: 2rem;
+  }
+}
+
+// ============================================
+// DESCRIPTION PANEL
+// ============================================
+
+.lightbox__description {
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px 16px 0 0;
+  padding: 1.25rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lightbox__description-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lightbox__description-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.lightbox__description-close {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    svg {
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+}
+
+.lightbox__description-content {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  p {
+    margin: 0 0 0.75rem;
+    &:last-child { margin-bottom: 0; }
+  }
+
+  ul, ol {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+    &:last-child { margin-bottom: 0; }
+  }
+
+  strong {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  a {
+    color: rgba(147, 197, 253, 1);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(147, 197, 253, 0.3);
+    transition: border-color 0.2s;
+
+    &:hover {
+      border-bottom-color: rgba(147, 197, 253, 1);
+    }
+  }
+}
+
+// ============================================
+// META BAR
+// ============================================
+
+.lightbox__meta-bar {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  flex-wrap: nowrap;
+}
+
+.lightbox__meta-toggle {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: rgba(147, 197, 253, 1);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+}
+
+.lightbox__version-badge {
+  background: rgba(251, 146, 60, 0.2);
+  border: 1px solid rgba(251, 146, 60, 0.5);
+  color: #fdba74;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &--newest {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #6ee7b7;
+  }
+}
+
+.lightbox__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.lightbox__meta-icon {
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+.lightbox__meta-text {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+// ============================================
+// ZOOM CONTROLS
+// ============================================
+
+.lightbox__zoom-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(59, 130, 246, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  border-radius: 10px;
+  padding: 0.35rem 0.6rem;
+}
+
+.lightbox__zoom-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(59, 130, 246, 0.4);
+  border: 1px solid rgba(59, 130, 246, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: white;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(59, 130, 246, 0.6);
+    border-color: rgba(59, 130, 246, 0.8);
+    transform: scale(1.05);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.lightbox__zoom-btn--reset {
+  background: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.5);
+
+  &:hover:not(:disabled) {
+    background: rgba(16, 185, 129, 0.5);
+    border-color: rgba(16, 185, 129, 0.7);
+  }
+}
+
+.lightbox__zoom-reset-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.lightbox__zoom-level {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  min-width: 48px;
+  text-align: center;
+}
+
+// ============================================
+// RESPONSIVE
+// ============================================
+
+@media (max-width: 768px) {
+  .lightbox__image {
+    max-width: calc(100% - 80px);
+    max-height: calc(100vh - 200px);
+  }
+
+  .lightbox__nav {
+    width: 44px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.5);
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .lightbox__info-panel {
+    bottom: 1rem;
+    width: calc(100% - 2rem);
+    max-width: none;
+
+    &--expanded {
+      bottom: 1rem;
+    }
+  }
+
+  .lightbox__meta-toggle {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .lightbox__description {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .lightbox__description-title {
+    font-size: 0.9rem;
+  }
+
+  .lightbox__description-content {
+    font-size: 0.85rem;
+    max-height: 120px;
+  }
+
+  .lightbox__meta-bar {
+    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
+    border-radius: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .lightbox__meta-item {
+    gap: 0.25rem;
+  }
+
+  .lightbox__meta-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .lightbox__meta-text {
+    font-size: 0.7rem;
+  }
+
+  .lightbox__meta-toggle {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .lightbox__version-badge {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+    width: 100%;
+    text-align: center;
+    order: -1;
+  }
+
+  .lightbox__zoom-group {
+    padding: 0.25rem 0.4rem;
+    gap: 0.35rem;
+    order: 1;
+  }
+
+  .lightbox__zoom-btn {
+    width: 32px;
+    height: 32px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .lightbox__zoom-level {
+    font-size: 0.75rem;
+    min-width: 40px;
+  }
+}
+
+// ============================================
+// REDUCED MOTION SUPPORT
+// ============================================
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox {
+    animation: none;
+  }
+
+  .lightbox__description {
+    animation: none;
+  }
+
+  .lightbox__zoom-btn,
+  .lightbox__nav,
+  .lightbox__close {
+    transition: none;
+  }
+}

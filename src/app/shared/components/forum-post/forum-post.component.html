@@ -1,0 +1,82 @@
+<article
+  class="forum-post"
+  [class.forum-post--reply]="isReply()"
+  [class.forum-post--editing]="isEditing()"
+  [class.forum-post--highlighted]="!!highlightColor()"
+  [style.border-left-color]="highlightColor()"
+>
+  <app-post-avatar
+    [authorName]="authorName()"
+    [size]="isReply() ? 'small' : 'medium'"
+  />
+
+  <div class="forum-post__body">
+    <!-- Reply: header + actions egy sorban -->
+    @if (isReply()) {
+      <div class="forum-post__header-row">
+        <app-post-header
+          [authorName]="authorName()"
+          [authorType]="authorType()"
+          [createdAt]="createdAt()"
+          [isEdited]="isEdited()"
+          [badgeText]="badgeText()"
+        />
+        @if (!isEditing()) {
+          <app-post-actions
+            class="forum-post__header-actions"
+            [reactions]="reactions()"
+            [userReaction]="userReaction()"
+            [canReply]="false"
+            [canEdit]="canEdit()"
+            [canDelete]="canDelete()"
+            [remainingEditTime]="remainingEditTime()"
+            (reactionSelected)="onReactionSelected($event)"
+            (edit)="onEdit()"
+            (delete)="onDelete()"
+          />
+        }
+      </div>
+    } @else {
+      <app-post-header
+        [authorName]="authorName()"
+        [authorType]="authorType()"
+        [createdAt]="createdAt()"
+        [isEdited]="isEdited()"
+        [badgeText]="badgeText()"
+      />
+    }
+
+    @if (!isEditing()) {
+      <app-post-content
+        [content]="content()"
+        [fontSize]="isReply() ? 'small' : 'normal'"
+      />
+
+      @if (media().length > 0) {
+        <app-post-media-gallery
+          [media]="media()"
+          (mediaClick)="onMediaClick($event)"
+        />
+      }
+
+      <!-- Normál post: akciók külön sorban -->
+      @if (!isReply()) {
+        <app-post-actions
+          [reactions]="reactions()"
+          [userReaction]="userReaction()"
+          [canReply]="canReply()"
+          [canEdit]="canEdit()"
+          [canDelete]="canDelete()"
+          [remainingEditTime]="remainingEditTime()"
+          (reactionSelected)="onReactionSelected($event)"
+          (reply)="onReply()"
+          (edit)="onEdit()"
+          (delete)="onDelete()"
+        />
+      }
+    }
+
+    <!-- ng-content: edit form, reply form, nested replies -->
+    <ng-content></ng-content>
+  </div>
+</article>

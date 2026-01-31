@@ -1,0 +1,86 @@
+<form class="reply-form" [class.reply-form--reply]="isReply()" (ngSubmit)="onSubmit()">
+  <!-- Rich Text Editor (opcionális) -->
+  @if (useRichEditor()) {
+    <app-rich-text-editor
+      [(ngModel)]="content"
+      name="richContent"
+      [mode]="editorMode()"
+      [placeholder]="placeholder()"
+      [disabled]="isSubmitting()"
+      [minHeight]="isReply() ? 80 : 120"
+      [maxHeight]="300"
+      (textLengthChangeEvent)="onTextLengthChange($event)"
+    />
+  }
+
+  <!-- Simple Textarea (alapértelmezett) -->
+  @if (!useRichEditor()) {
+    <textarea
+      id="reply-content"
+      class="reply-form__input"
+      [(ngModel)]="content"
+      name="content"
+      [placeholder]="placeholder()"
+      rows="3"
+      [disabled]="isSubmitting()"
+      aria-label="Hozzászólás szövege"
+    ></textarea>
+  }
+
+  <!-- Media Editor -->
+  @if (allowMedia()) {
+    <div class="reply-form__media">
+      <app-media-editor
+        #mediaEditor
+        [disabled]="isSubmitting()"
+        [maxFiles]="3"
+        [maxSizeMB]="2"
+        [newLabel]="'Képek hozzáadása (max 3 kép, 2MB/kép)'"
+        (newFilesChange)="onMediaFilesChange($event)"
+        (error)="onMediaError($event)"
+      />
+      <!-- Média hiba üzenet -->
+      @if (mediaError()) {
+        <div class="reply-form__media-error" role="alert" aria-live="polite">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ mediaError() }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="reply-form__actions">
+    @if (isReply()) {
+      <button
+        type="button"
+        class="reply-form__cancel"
+        (click)="onCancel()"
+        [disabled]="isSubmitting()"
+      >
+        Mégse
+      </button>
+    }
+
+    <button
+      type="submit"
+      class="reply-form__submit"
+      [disabled]="!canSubmit()"
+    >
+      @if (isSubmitting()) {
+        <svg class="reply-form__spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke-dasharray="50" stroke-dashoffset="20"/>
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      }
+      {{ isSubmitting() ? 'Küldés...' : (isReply() ? 'Válasz küldése' : 'Hozzászólás küldése') }}
+    </button>
+  </div>
+</form>

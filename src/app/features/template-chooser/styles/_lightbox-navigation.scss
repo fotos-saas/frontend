@@ -1,0 +1,79 @@
+/**
+ * Lightbox Navigation Styles
+ * Left and right arrow buttons for template navigation
+ */
+
+.lightbox {
+  // Element: arrow button (abstract)
+  &__arrow {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+    flex-shrink: 0;
+    -webkit-user-select: none;
+    user-select: none;
+
+    // Extra spacing a kép és nyilak között
+    &--prev {
+      margin-left: 8px;
+    }
+
+    &--next {
+      margin-right: 8px;
+    }
+
+    &:hover:not(&--disabled) {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    // Alap focus outline eltávolítása
+    &:focus {
+      outline: none;
+    }
+
+    // Keyboard navigation outline (accessibility)
+    &:focus-visible {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
+
+    &:active:not(&--disabled) {
+      transform: scale(0.95);
+    }
+
+    // Modifier: disabled state
+    &--disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    // Touch device optimization
+    @media (hover: none) {
+      width: 56px;
+      height: 56px;
+      min-width: 56px;
+      min-height: 56px;
+    }
+  }
+
+  // Element: arrow icon
+  &__arrow-icon {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2;
+  }
+}

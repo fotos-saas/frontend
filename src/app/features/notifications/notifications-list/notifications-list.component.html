@@ -1,0 +1,134 @@
+<div class="page-card notifications-page">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-top">
+      <h1 class="page-title">Értesítések</h1>
+
+      @if (hasUnread()) {
+        <button
+          type="button"
+          class="mark-all-btn"
+          [disabled]="isMarkingAllRead()"
+          (click)="onMarkAllAsRead()"
+        >
+          @if (isMarkingAllRead()) {
+            <span class="spinner"></span>
+          } @else {
+            <span class="icon">✓</span>
+          }
+          <span>Összes olvasva</span>
+        </button>
+      }
+    </div>
+
+    <!-- Szűrők -->
+    <div class="filters">
+      <button
+        type="button"
+        class="filter-btn"
+        [class.active]="activeFilter() === 'all'"
+        (click)="onFilterChange('all')"
+      >
+        Összes
+      </button>
+      <button
+        type="button"
+        class="filter-btn"
+        [class.active]="activeFilter() === 'poke'"
+        (click)="onFilterChange('poke')"
+      >
+        👉 Bökések
+      </button>
+      <button
+        type="button"
+        class="filter-btn"
+        [class.active]="activeFilter() === 'reply'"
+        (click)="onFilterChange('reply')"
+      >
+        💬 Válaszok
+      </button>
+      <button
+        type="button"
+        class="filter-btn"
+        [class.active]="activeFilter() === 'mention'"
+        (click)="onFilterChange('mention')"
+      >
+        📢 Említések
+      </button>
+      <button
+        type="button"
+        class="filter-btn"
+        [class.active]="activeFilter() === 'like'"
+        (click)="onFilterChange('like')"
+      >
+        ❤️ Reakciók
+      </button>
+    </div>
+  </header>
+
+  <!-- Error Message -->
+  @if (errorMessage()) {
+    <div class="error-banner">
+      <span class="error-icon">⚠️</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Loading Skeleton -->
+  @if (isLoading()) {
+    <div class="notifications-list">
+      @for (item of skeletonCount; track item; let i = $index) {
+        <div class="notification-skeleton"
+             appStaggerAnimation
+             [staggerIndex]="i"
+             [staggerTotal]="skeletonCount.length">
+          <div class="skeleton-icon skeleton-shimmer"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-title skeleton-shimmer"></div>
+            <div class="skeleton-body skeleton-shimmer"></div>
+            <div class="skeleton-time skeleton-shimmer"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Értesítések listája -->
+  @if (!isLoading()) {
+    @if (filteredNotifications().length > 0) {
+      <div class="notifications-list">
+        @for (notification of filteredNotifications(); track trackById($index, notification); let i = $index) {
+          <app-notification-card
+            [notification]="notification"
+            appStaggerAnimation
+            [staggerIndex]="i"
+            [staggerTotal]="filteredNotifications().length"
+            (clicked)="onNotificationClick($event)"
+            (openPokeDialog)="onOpenPokeDialog($event)"
+          />
+        }
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <h2>Nincs értesítés</h2>
+        <p>
+          @if (activeFilter() === 'all') {
+            Jelenleg nincsenek értesítéseid
+          } @else {
+            Nincs ilyen típusú értesítés
+          }
+        </p>
+      </div>
+    }
+  }
+</div>
+
+<!-- Poke Detail Dialog - kívül a page-card-on! -->
+@if (showPokeDialog() && pokeIdForDialog()) {
+  <app-poke-detail-dialog
+    [pokeId]="pokeIdForDialog()!"
+    (closed)="onClosePokeDialog()"
+  />
+}

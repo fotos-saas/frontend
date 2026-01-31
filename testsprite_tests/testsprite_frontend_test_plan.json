@@ -1,0 +1,632 @@
+[
+  {
+    "id": "TC001",
+    "title": "6-digit Code Login - Successful Authentication",
+    "description": "Verify that users can successfully log in using a valid 6-digit numeric code and that the token is securely stored.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the 6-digit code login page."
+      },
+      {
+        "type": "action",
+        "description": "Input a valid 6-digit numeric code."
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the user is authenticated and redirected to the Home Dashboard."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the authentication token is securely stored in the client."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "6-digit Code Login - Invalid Code Handling",
+    "description": "Verify that login fails with an invalid 6-digit code and appropriate error messages are displayed; rate limiting is enforced.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the 6-digit code login page."
+      },
+      {
+        "type": "action",
+        "description": "Input an invalid 6-digit code (non-existent or malformed)."
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form multiple times exceeding allowed attempts."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that login is rejected with an error message on each attempt."
+      },
+      {
+        "type": "assertion",
+        "description": "After exceeding attempts, verify that further login attempts are blocked or delayed due to rate limiting."
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Share Token Login - Successful Authentication and Redirect",
+    "description": "Verify that users can log in using a valid 64-character hexadecimal share token, which authenticates and redirects them appropriately.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the share token login route."
+      },
+      {
+        "type": "action",
+        "description": "Input a valid 64-character hexadecimal share token."
+      },
+      {
+        "type": "action",
+        "description": "Submit the token."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that user is authenticated and redirected to corresponding project page."
+      },
+      {
+        "type": "assertion",
+        "description": "Check secure token storage for the session."
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Share Token Login - Invalid Token Handling",
+    "description": "Test login with invalid or tampered share tokens to verify error handling and prevention of unauthorized access.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the share token login route."
+      },
+      {
+        "type": "action",
+        "description": "Input invalid or corrupted share tokens."
+      },
+      {
+        "type": "action",
+        "description": "Submit the token."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login is rejected with a clear error message."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm no tokens are stored or session created."
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Admin Preview Token Login - One-time Use",
+    "description": "Verify that admin preview token logins authenticate once and the token cannot be reused, with tokens stored securely.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the admin preview token login page."
+      },
+      {
+        "type": "action",
+        "description": "Enter a valid one-time admin preview token."
+      },
+      {
+        "type": "action",
+        "description": "Submit token and authenticate."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm successful authentication and redirection to admin preview dashboard."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to reuse the same token for login again."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate that reuse login attempt fails with an appropriate error."
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Home Dashboard - Project Status and Contacts Display Correctly",
+    "description": "Verify that the Home Dashboard renders project information accurately including status badges with correct color coding and contact details.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in and navigate to the Home Dashboard."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the project status badge is present with the correct color according to status."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that contact persons and their details are displayed correctly."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm photo dates and schedule reminders display if applicable."
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Home Dashboard - Schedule Reminder Dialog with Snooze",
+    "description": "Verify that the photo date schedule reminder dialog appears appropriately, that snooze functionality works, and that snooze state is persisted.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Home Dashboard where a photo date exists with a schedule reminder."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm schedule reminder dialog shows up."
+      },
+      {
+        "type": "action",
+        "description": "Use the snooze option and close the dialog."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that the dialog does not reappear within the snooze period."
+      },
+      {
+        "type": "action",
+        "description": "Reload the page and verify snooze state is retained from LocalStorage."
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Home Dashboard - Share Functionality with Copy and Native Share",
+    "description": "Verify that the dashboard’s sharing options allow users to share project links via native share or clipboard copy with corresponding toast notifications.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Home Dashboard."
+      },
+      {
+        "type": "action",
+        "description": "Click the share button and use native share if available."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm native share dialog appears and share action completes."
+      },
+      {
+        "type": "action",
+        "description": "Use the copy to clipboard option for project link."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that the link is copied and a success toast notification is displayed."
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Sample Photo Gallery - Thumbnail Grid and Loading",
+    "description": "Verify that the sample photo gallery loads all thumbnails correctly in a responsive grid on desktop and mobile devices.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the Sample Photos gallery page."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that thumbnails appear in a grid layout."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate that the grid is responsive and adapts to different screen sizes."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no broken images or layout issues."
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Sample Photo Gallery - Lightbox Viewer and Zoom/Pan",
+    "description": "Verify lightbox is opened on thumbnail click with full-screen image, supports pinch, wheel zoom, double-tap zoom, keyboard navigation, and pan controls.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click on a sample photo thumbnail."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that lightbox opens full screen showing the selected image."
+      },
+      {
+        "type": "action",
+        "description": "Perform pinch zoom gesture on touch device."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate smooth zoom in/out behavior."
+      },
+      {
+        "type": "action",
+        "description": "Use mouse wheel on desktop to zoom."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate zoom updates smoothly."
+      },
+      {
+        "type": "action",
+        "description": "Double-tap the image on touch device."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that image zooms appropriately."
+      },
+      {
+        "type": "action",
+        "description": "Use arrow keys to navigate next and previous photos."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify images change accordingly without errors."
+      },
+      {
+        "type": "action",
+        "description": "Use pan gestures or drag mouse to move zoomed image."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure smooth pan interaction."
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Order Data - Display and PDF Download",
+    "description": "Verify order data page correctly displays detailed contact info, school/class details, design preferences, AI-generated summaries, and supports PDF download.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Order Data page."
+      },
+      {
+        "type": "assertion",
+        "description": "Check detailed contact information is displayed accurately."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify school and class details with counts and design preferences are visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm AI-generated summary and tags are shown correctly."
+      },
+      {
+        "type": "action",
+        "description": "Click the PDF download button."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate that the PDF file downloads correctly and is formatted properly."
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Missing Persons Module - Lazy Loading and Reactive Search/Filtering",
+    "description": "Verify the Missing Persons module loads only when navigated to and supports reactive search with filters for students and teachers without photos, displaying correct groups and statistics.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access application and navigate away from Missing Persons page."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm Missing Persons module is not loaded initially."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to Missing Persons page."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify module loads lazily with no errors."
+      },
+      {
+        "type": "action",
+        "description": "Enter search terms and apply filters for students and teachers."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm search and filters update results reactively."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify results are grouped properly, and statistics update accordingly in real time."
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Responsive Navbar - Dynamic Layout and Mobile Drawer with Accessibility",
+    "description": "Verify navbar switches dynamically on resize using ResizeObserver, mobile drawer slides in with scroll lock, and keyboard accessibility with focus trapping.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Load application on desktop screen size."
+      },
+      {
+        "type": "assertion",
+        "description": "Navbar displays in desktop mode."
+      },
+      {
+        "type": "action",
+        "description": "Resize the window to mobile breakpoint."
+      },
+      {
+        "type": "assertion",
+        "description": "Navbar switches to mobile mode dynamically without flicker."
+      },
+      {
+        "type": "action",
+        "description": "Click hamburger menu to open drawer."
+      },
+      {
+        "type": "assertion",
+        "description": "Drawer slides in smoothly and page scroll is locked."
+      },
+      {
+        "type": "action",
+        "description": "Navigate through drawer menu with keyboard tab and shift+tab."
+      },
+      {
+        "type": "assertion",
+        "description": "Focus traps inside the drawer and navigation is accessible."
+      },
+      {
+        "type": "action",
+        "description": "Close drawer and verify scroll unlocks."
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Zoom Directive - Multi-Input Zoom and Pan Operations",
+    "description": "Validate that the zoom directive supports mouse wheel, touch pinch, double-tap zoom, drag panning, and keyboard controls with GPU acceleration and stable performance.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attach zoom directive to image element."
+      },
+      {
+        "type": "action",
+        "description": "Perform mouse wheel zoom in and out."
+      },
+      {
+        "type": "assertion",
+        "description": "Zoom updates smoothly with GPU acceleration."
+      },
+      {
+        "type": "action",
+        "description": "Perform pinch zoom gesture on touch device."
+      },
+      {
+        "type": "assertion",
+        "description": "Zoom changes as expected with no lag."
+      },
+      {
+        "type": "action",
+        "description": "Double-tap the image to zoom in and out."
+      },
+      {
+        "type": "assertion",
+        "description": "Zoom toggles correctly."
+      },
+      {
+        "type": "action",
+        "description": "Drag the zoomed image to pan around."
+      },
+      {
+        "type": "assertion",
+        "description": "Pan operations are smooth and consistent."
+      },
+      {
+        "type": "action",
+        "description": "Use keyboard controls for zooming."
+      },
+      {
+        "type": "assertion",
+        "description": "Zoom level changes as per keyboard input."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no memory leaks occur after repeated zoom/pan actions."
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Toast Notifications - Appearance, Types, and Auto-hide",
+    "description": "Verify toast notifications appear promptly on different triggers with correct message types (success, error, info), proper animations, and auto-hide after timeout.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger a success toast (e.g., after copy to clipboard)."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm success toast displays with correct message and styling."
+      },
+      {
+        "type": "action",
+        "description": "Trigger an error toast (e.g., failed save)."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm error toast displays with correct styling and message."
+      },
+      {
+        "type": "action",
+        "description": "Trigger an info toast."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate info toast appearance."
+      },
+      {
+        "type": "assertion",
+        "description": "Observe toasts auto-hide after configured timeout with smooth animation."
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Clipboard Service - Copy and Toast Feedback",
+    "description": "Verify that emails, phone numbers, and links can be copied to clipboard using the Clipboard service with immediate and correct toast notifications.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to copy an email address using clipboard service."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm email is copied to clipboard."
+      },
+      {
+        "type": "assertion",
+        "description": "Toast notification indicating success appears."
+      },
+      {
+        "type": "action",
+        "description": "Copy a phone number using clipboard service."
+      },
+      {
+        "type": "assertion",
+        "description": "Phone number is copied and toast shows confirmation."
+      },
+      {
+        "type": "action",
+        "description": "Copy a project link using clipboard service."
+      },
+      {
+        "type": "assertion",
+        "description": "Link is copied with appropriate toast notification displayed."
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Auth Guard and HTTP Interceptor - Session Validation and Redirect",
+    "description": "Verify that auth guards prevent unauthorized access and HTTP interceptors detect expired or invalid tokens, clearing storage and redirecting to login seamlessly.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to access protected route with a valid token."
+      },
+      {
+        "type": "assertion",
+        "description": "Access is granted."
+      },
+      {
+        "type": "action",
+        "description": "Expire or revoke the token manually or via backend."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access protected routes or invoke API calls."
+      },
+      {
+        "type": "assertion",
+        "description": "HTTP interceptor detects invalid token, clears token storage, and redirects to login page."
+      },
+      {
+        "type": "assertion",
+        "description": "No application errors occur during this process."
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Schedule Reminder Service - LocalStorage Persistence and Daily Limits",
+    "description": "Verify that schedule reminders use LocalStorage to persist snooze state and enforce daily limits on reminder dialog visibility preventing repeated dialogs within snooze period.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger schedule reminder dialog on photo date."
+      },
+      {
+        "type": "action",
+        "description": "Use snooze option."
+      },
+      {
+        "type": "assertion",
+        "description": "LocalStorage entry is created or updated for snooze timestamp."
+      },
+      {
+        "type": "action",
+        "description": "Reload app multiple times within snooze period."
+      },
+      {
+        "type": "assertion",
+        "description": "Reminder dialog does not reappear during snooze."
+      },
+      {
+        "type": "action",
+        "description": "Simulate passage of daily limit and range expiration."
+      },
+      {
+        "type": "assertion",
+        "description": "Reminder dialog reappears as expected after snooze expiration."
+      }
+    ]
+  }
+]

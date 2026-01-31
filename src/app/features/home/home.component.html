@@ -1,0 +1,297 @@
+<div class="home page-card" *ngIf="project$ | async as project">
+  <main id="main-content" class="home__main" tabindex="-1">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1 class="hero__school">{{ project.schoolName || 'Projekt' }}</h1>
+      <p class="hero__class">{{ project.className }} <span *ngIf="project.classYear">• {{ project.classYear }}</span></p>
+      <!-- Share Buttons - csak teljes hozzáféréssel -->
+      <ng-container *appRequireFullAccess>
+        <div class="hero__share-buttons" *ngIf="project.shareUrl">
+          <button
+            type="button"
+            class="hero__share-btn hero__share-btn--primary"
+            (click)="shareLink(project.shareUrl!, project.name)"
+            title="Link megosztása"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+            </svg>
+            <span>Megosztás</span>
+          </button>
+          <button
+            type="button"
+            class="hero__share-btn hero__share-btn--secondary"
+            (click)="copyShareLink(project.shareUrl!)"
+            title="Link másolása vágólapra"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+            </svg>
+            <span>Link másolása</span>
+          </button>
+        </div>
+      </ng-container>
+    </section>
+
+    <!-- Contacts Section - csak kapcsolattartó -->
+    <section class="contacts" *ngIf="project.contacts && project.contacts.length > 0">
+      <div class="contacts__grid">
+        <!-- Kapcsolattartó - csak az elsődleges (backend már csak 1-et küld) -->
+        <div class="contact" *ngIf="project.contacts[0] as contact">
+          <div class="contact__avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="contact__info">
+            <span class="contact__label">Kapcsolattartó</span>
+            <span class="contact__name">{{ contact.name }}</span>
+            <div class="contact__links">
+              <a *ngIf="contact.phone" [href]="'tel:' + contact.phone" class="contact__link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+                </svg>
+                {{ contact.phone }}
+              </a>
+              <a *ngIf="contact.email" [href]="'mailto:' + contact.email" class="contact__link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="M22 7l-10 6L2 7"/>
+                </svg>
+                {{ contact.email }}
+              </a>
+            </div>
+          </div>
+          <!-- Edit button - csak teljes hozzáféréssel -->
+          <button
+            *appRequireFullAccess
+            type="button"
+            class="contact__edit"
+            (click)="openContactEditDialog(contact)"
+            title="Szerkesztés"
+            aria-label="Kapcsolattartó szerkesztése"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Schedule Section - Fotózás időpontja -->
+    <section class="schedule">
+      <div class="schedule__card" [class.schedule__card--empty]="!project.photoDate">
+        <!-- Avatar -->
+        <div class="schedule__avatar" [class.schedule__avatar--empty]="!project.photoDate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+          </svg>
+        </div>
+
+        <!-- Info -->
+        <div class="schedule__info">
+          <span class="schedule__label">Fotózás időpontja</span>
+
+          <!-- Van dátum -->
+          <span class="schedule__value" *ngIf="project.photoDate">
+            {{ formatPhotoDate(project.photoDate) }}
+          </span>
+
+          <!-- Nincs dátum -->
+          <span class="schedule__value schedule__value--empty" *ngIf="!project.photoDate">
+            Nincs beállítva
+          </span>
+        </div>
+
+        <!-- Action - csak teljes hozzáféréssel -->
+        <button
+          *appRequireFullAccess
+          type="button"
+          class="schedule__action"
+          [class.schedule__action--primary]="!project.photoDate"
+          (click)="openScheduleDialog()"
+          [attr.aria-label]="project.photoDate ? 'Fotózás időpontjának módosítása' : 'Fotózás időpontjának beállítása'"
+        >
+          <!-- Módosítás ikon (ha van dátum) -->
+          <svg *ngIf="project.photoDate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+          </svg>
+          <!-- Plus ikon (ha nincs dátum) -->
+          <svg *ngIf="!project.photoDate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>{{ project.photoDate ? 'Módosítás' : 'Beállítás' }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Missing Persons Alert - csak ha van kiválasztott minta -->
+    <section class="missing-alert" *ngIf="showMissingPersons(project) && project.missingStats && project.missingStats.withoutPhoto > 0">
+      <a routerLink="/missing-persons" class="missing-alert__card">
+        <div class="missing-alert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+        </div>
+        <div class="missing-alert__content">
+          <span class="missing-alert__title">{{ project.missingStats.withoutPhoto }} személynek nincs képe</span>
+          <span class="missing-alert__details">
+            {{ project.missingStats.studentsWithoutPhoto }} diák
+            <span *ngIf="project.missingStats.teachersWithoutPhoto > 0"> • {{ project.missingStats.teachersWithoutPhoto }} tanár</span>
+          </span>
+        </div>
+        <svg class="missing-alert__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </a>
+    </section>
+
+    <!-- Navigation -->
+    <section class="navigation">
+      <!-- Minták - csak ha van leadott megrendelés (samplesCount > 0) -->
+      <a routerLink="/samples" class="nav-card" *ngIf="showSamples(project)">
+        <div class="nav-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5L5 21"/>
+          </svg>
+        </div>
+        <div class="nav-card__content">
+          <h3 class="nav-card__title">Minták</h3>
+          <p class="nav-card__desc">Tabló mintaképek megtekintése</p>
+        </div>
+        <svg class="nav-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </a>
+
+      <!-- Minta Választó - csak ha nincs még kiválasztva minta -->
+      <a routerLink="/template-chooser" class="nav-card nav-card--primary" *ngIf="showTemplateChooser(project)">
+        <div class="nav-card__icon nav-card__icon--primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+          </svg>
+        </div>
+        <div class="nav-card__content">
+          <h3 class="nav-card__title">Minta Választó</h3>
+          <p class="nav-card__desc">Válaszd ki a kedvenc tabló mintáidat</p>
+        </div>
+        <svg class="nav-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </a>
+
+      <!-- Hiányzó képek - csak ha van kiválasztott minta -->
+      <a routerLink="/missing-persons" class="nav-card nav-card--warning" *ngIf="showMissingPersons(project) && project.missingStats && project.missingStats.total > 0">
+        <div class="nav-card__icon nav-card__icon--warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+          </svg>
+        </div>
+        <div class="nav-card__content">
+          <h3 class="nav-card__title">Hiányzó képek</h3>
+          <p class="nav-card__desc">Még {{ project.missingStats.withoutPhoto }} személynek nincs képe</p>
+        </div>
+        <svg class="nav-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </a>
+
+      <!-- Megrendelési adatok - csak ha van leadott megrendelés -->
+      <a routerLink="/order-data" class="nav-card" *ngIf="showOrderData(project)">
+        <div class="nav-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <path d="M14 2v6h6"/>
+            <path d="M16 13H8M16 17H8M10 9H8"/>
+          </svg>
+        </div>
+        <div class="nav-card__content">
+          <h3 class="nav-card__title">Megrendelési adatok</h3>
+          <p class="nav-card__desc">Leadott rendelés részletei</p>
+        </div>
+        <svg class="nav-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </a>
+
+      <!-- Szavazások -->
+      <a routerLink="/voting" class="nav-card">
+        <div class="nav-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+          </svg>
+        </div>
+        <div class="nav-card__content">
+          <h3 class="nav-card__title">Szavazások</h3>
+          <p class="nav-card__desc">Osztály szavazások kezelése</p>
+        </div>
+        <svg class="nav-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </a>
+
+      <!-- Fórum -->
+      <a routerLink="/forum" class="nav-card">
+        <div class="nav-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+          </svg>
+        </div>
+        <div class="nav-card__content">
+          <h3 class="nav-card__title">Fórum</h3>
+          <p class="nav-card__desc">Beszélgetések az osztállyal</p>
+        </div>
+        <svg class="nav-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </a>
+    </section>
+  </main>
+</div>
+
+<!-- ÖSSZES dialógus a page-card KÍVÜL (backdrop-filter stacking context miatt) -->
+
+<!-- Schedule Reminder Dialog -->
+@if (showReminderDialog) {
+  <app-schedule-reminder-dialog
+    (resultEvent)="onReminderResult($event)"
+  />
+}
+
+<!-- Finalization Reminder Dialog -->
+@if (showFinalizationReminderDialog) {
+  <app-finalization-reminder-dialog
+    (resultEvent)="onFinalizationReminderResult($event)"
+  />
+}
+
+<!-- Contact Edit Dialog -->
+@if (showContactEditDialog) {
+  <app-contact-edit-dialog
+    [initialData]="currentContactData"
+    [isSaving]="isContactSaving"
+    (resultEvent)="onContactEditResult($event)"
+  />
+}
+
+<!-- Onboarding Dialog (share token első belépés) -->
+@if (showOnboardingDialog()) {
+  <app-onboarding-dialog
+    [isSubmitting]="isOnboardingSubmitting()"
+    [errorMessage]="onboardingError()"
+    (resultEvent)="onOnboardingResult($event)"
+  />
+}
+
+<!-- Pending Verification (admin jóváhagyás várakozás) -->
+@if (showPendingVerification()) {
+  <app-pending-verification
+    [guestName]="guestService.guestName() || ''"
+    [missingPersonName]="guestService.missingPersonName()"
+    (cancelEvent)="onPendingVerificationCancel()"
+  />
+}

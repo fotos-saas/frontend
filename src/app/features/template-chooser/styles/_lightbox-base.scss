@@ -1,0 +1,106 @@
+/**
+ * Lightbox Base Styles
+ * Overlay, container, and fundamental layout
+ * Safari compatible (no gap property!)
+ */
+
+// Color variables
+$glass-bg: rgba(255, 255, 255, 0.1);
+$glass-border: rgba(255, 255, 255, 0.15);
+$overlay-bg: rgba(0, 0, 0, 0.85);
+$text-light: #ffffff;
+$text-muted: rgba(255, 255, 255, 0.7);
+$primary-color: #6366f1;
+
+// Block: lightbox (root element)
+.lightbox {
+  position: fixed;
+  inset: 0;           // Shorthand: top, right, bottom, left = 0
+  width: 100vw;       // Explicit viewport width - nem a containing block-ra
+  height: 100vh;      // Explicit viewport height - nem a containing block-ra
+  z-index: var(--z-lightbox);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+
+  // Modifier: open state
+  &--open {
+    display: flex;
+  }
+
+  // Element: overlay háttér
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: $overlay-bg;
+    backdrop-filter: blur(12px);
+    z-index: var(--z-lightbox-overlay);
+    opacity: 0;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease;
+  }
+
+  // Open state overlay
+  &--open &__overlay {
+    opacity: 1;
+  }
+
+  // Element: fő container (glassmorphism)
+  &__container {
+    position: relative;
+    width: 100%;
+    max-width: 1400px;
+    height: 100%;
+    max-height: 96vh;
+    display: flex;
+    flex-direction: column;
+    z-index: var(--z-lightbox-content);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+
+    // Safari kompatibilis spacing (NEM gap!)
+    margin: -8px;
+
+    > * {
+      margin: 8px;
+    }
+
+    // Focus outline eltávolítása
+    &:focus {
+      outline: none;
+    }
+  }
+
+  // Open state container
+  &--open &__container {
+    transform: scale(1);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 1024px) {
+  .lightbox {
+    &__container {
+      max-width: 95vw;
+      max-height: 95vh;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .lightbox {
+    padding: 0;
+    align-items: flex-end;
+
+    &__container {
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 24px 24px 0 0;
+    }
+  }
+}

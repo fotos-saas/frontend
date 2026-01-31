@@ -1,0 +1,310 @@
+<!-- Media Lightbox -->
+@if (isLightboxOpen()) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="lightboxCurrentIndex()"
+    (close)="onLightboxClose()"
+    (navigate)="onLightboxNavigate($event)"
+  />
+}
+
+<!-- Guest Name Dialog -->
+@if (state.guestDialog.isOpen()) {
+  <app-guest-name-dialog
+    [isSubmitting]="state.guestDialog.isSubmitting()"
+    [errorMessage]="state.guestDialog.error()"
+    [canClose]="false"
+    (resultEvent)="onGuestNameResult($event)"
+  />
+}
+
+<!-- Class Size Dialog -->
+@if (state.classSizeDialog.isOpen()) {
+  <app-class-size-dialog
+    [isSubmitting]="state.classSizeDialog.isSubmitting()"
+    [errorMessage]="state.classSizeDialog.error()"
+    [currentValue]="state.project()?.expectedClassSize ?? null"
+    (resultEvent)="onClassSizeResult($event)"
+  />
+}
+
+<!-- Create Poll Dialog -->
+@if (state.createDialog.isOpen()) {
+  <app-voting-create-dialog
+    [externalErrorMessage]="state.createDialog.error()"
+    [externalIsSubmitting]="state.createDialog.isSubmitting()"
+    (resultEvent)="onCreateDialogResult($event)"
+  />
+}
+
+<!-- Edit Poll Dialog -->
+@if (state.editDialog.isOpen() && state.selectedPollForEdit()) {
+  <app-voting-edit-dialog
+    [poll]="state.selectedPollForEdit()!"
+    [externalErrorMessage]="state.editDialog.error()"
+    [externalIsSubmitting]="state.editDialog.isSubmitting()"
+    (resultEvent)="onEditDialogResult($event)"
+  />
+}
+
+<!-- Delete Confirm Dialog -->
+@if (state.deleteDialog.isOpen() && state.selectedPollForDelete()) {
+  <app-confirm-dialog
+    title="Szavazás törlése"
+    [message]="'Biztosan törölni szeretnéd a \'' + state.selectedPollForDelete()!.title + '\' szavazást? Ez a művelet nem vonható vissza.'"
+    confirmText="Törlés"
+    confirmType="danger"
+    [isSubmitting]="state.deleteDialog.isSubmitting()"
+    (resultEvent)="onDeleteDialogResult($event)"
+  />
+}
+
+<!-- Participants Dialog -->
+@if (state.participantsDialog.isOpen()) {
+  <app-participants-dialog
+    [participants]="state.participants()"
+    [statistics]="state.participantStats()"
+    [hasFullAccess]="hasFullAccess"
+    [isLoading]="state.participantsDialog.isSubmitting()"
+    [togglingExtraId]="state.togglingExtraId()"
+    [currentGuestId]="state.currentGuestId()"
+    (closeEvent)="onParticipantsClose()"
+    (toggleExtraEvent)="onToggleExtra($event)"
+    (refreshEvent)="onRefreshParticipants()"
+  />
+}
+
+<div class="voting-page page-card">
+  <!-- Header -->
+  <header class="voting-header">
+    <div class="voting-header__content">
+      <div class="voting-header__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="voting-header__title">Szavazások</h1>
+        <p class="voting-header__subtitle">
+          Szavazz az osztály tablójáról!
+        </p>
+      </div>
+    </div>
+
+    <!-- Header actions -->
+    <div class="voting-header__actions">
+      <!-- Jelenlévők gomb (MINDENKI LÁTJA) -->
+      <button
+        class="voting-header__participants-btn"
+        (click)="onParticipantsClick()"
+        aria-label="Jelenlévők megtekintése"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        @if (state.participantStats()?.active !== undefined && state.project()?.expectedClassSize) {
+          <span>{{ state.participantStats()?.active }}/{{ state.project()?.expectedClassSize }} fő</span>
+        } @else {
+          <span>Jelenlévők</span>
+        }
+      </button>
+
+      <!-- Létszám szerkesztés gomb (CSAK kapcsolattartó) -->
+      @if (hasFullAccess) {
+        <button
+          class="voting-header__edit-size-btn"
+          (click)="onEditClassSize()"
+          [attr.aria-label]="state.project()?.expectedClassSize ? 'Létszám módosítása' : 'Létszám beállítása'"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+      }
+
+      <!-- Új szavazás gomb (CSAK kapcsolattartó) -->
+      @if (hasFullAccess) {
+        <button
+          class="voting-header__create-btn"
+          (click)="onCreatePoll()"
+          aria-label="Új szavazás létrehozása"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Új szavazás
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Loading Skeleton -->
+  @if (state.isLoading()) {
+    <div class="voting-skeleton" role="status" aria-live="polite" aria-label="Szavazások betöltése...">
+    <!-- Skeleton Card 1 -->
+    <div class="voting-skeleton__card" aria-hidden="true">
+      <div class="voting-skeleton__header">
+        <div class="voting-skeleton__badge skeleton-shimmer"></div>
+        <div class="voting-skeleton__icon skeleton-shimmer"></div>
+      </div>
+      <div class="voting-skeleton__title skeleton-shimmer"></div>
+      <div class="voting-skeleton__description skeleton-shimmer"></div>
+      <div class="voting-skeleton__description skeleton-shimmer"></div>
+      <div class="voting-skeleton__progress skeleton-shimmer"></div>
+      <div class="voting-skeleton__footer">
+        <div class="voting-skeleton__meta skeleton-shimmer"></div>
+        <div class="voting-skeleton__votes skeleton-shimmer"></div>
+      </div>
+    </div>
+    <!-- Skeleton Card 2 -->
+    <div class="voting-skeleton__card" aria-hidden="true">
+      <div class="voting-skeleton__header">
+        <div class="voting-skeleton__badge skeleton-shimmer"></div>
+        <div class="voting-skeleton__icon skeleton-shimmer"></div>
+      </div>
+      <div class="voting-skeleton__title skeleton-shimmer"></div>
+      <div class="voting-skeleton__description skeleton-shimmer"></div>
+      <div class="voting-skeleton__description skeleton-shimmer"></div>
+      <div class="voting-skeleton__progress skeleton-shimmer"></div>
+      <div class="voting-skeleton__footer">
+        <div class="voting-skeleton__meta skeleton-shimmer"></div>
+        <div class="voting-skeleton__votes skeleton-shimmer"></div>
+      </div>
+    </div>
+    <!-- Skeleton Card 3 -->
+    <div class="voting-skeleton__card" aria-hidden="true">
+      <div class="voting-skeleton__header">
+        <div class="voting-skeleton__badge skeleton-shimmer"></div>
+        <div class="voting-skeleton__icon skeleton-shimmer"></div>
+      </div>
+      <div class="voting-skeleton__title skeleton-shimmer"></div>
+      <div class="voting-skeleton__description skeleton-shimmer"></div>
+      <div class="voting-skeleton__description skeleton-shimmer"></div>
+      <div class="voting-skeleton__progress skeleton-shimmer"></div>
+      <div class="voting-skeleton__footer">
+        <div class="voting-skeleton__meta skeleton-shimmer"></div>
+        <div class="voting-skeleton__votes skeleton-shimmer"></div>
+      </div>
+    </div>
+    <!-- Skeleton Card 4 -->
+    <div class="voting-skeleton__card" aria-hidden="true">
+      <div class="voting-skeleton__header">
+        <div class="voting-skeleton__badge skeleton-shimmer"></div>
+        <div class="voting-skeleton__icon skeleton-shimmer"></div>
+      </div>
+      <div class="voting-skeleton__title skeleton-shimmer"></div>
+      <div class="voting-skeleton__description skeleton-shimmer"></div>
+      <div class="voting-skeleton__description skeleton-shimmer"></div>
+      <div class="voting-skeleton__progress skeleton-shimmer"></div>
+      <div class="voting-skeleton__footer">
+        <div class="voting-skeleton__meta skeleton-shimmer"></div>
+        <div class="voting-skeleton__votes skeleton-shimmer"></div>
+      </div>
+    </div>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!state.isLoading()) {
+    <div class="voting-content" aria-live="polite">
+      <!-- Empty state -->
+      @if (!state.hasPolls()) {
+        <div class="voting-empty">
+          <div class="voting-empty__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              <path d="M9 14l2 2 4-4"/>
+            </svg>
+          </div>
+          <h3 class="voting-empty__title">Még nincs szavazás</h3>
+          <p class="voting-empty__description">
+            @if (hasFullAccess) {
+              <span>Hozz létre egy új szavazást, hogy az osztály szavazhasson!</span>
+            } @else {
+              <span>Hamarosan itt megjelennek a szavazások.</span>
+            }
+          </p>
+          @if (hasFullAccess) {
+            <button
+              class="voting-empty__btn"
+              (click)="onCreatePoll()"
+              aria-label="Új szavazás létrehozása"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+              </svg>
+              Új szavazás létrehozása
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Active polls section -->
+      @if (state.activePolls().length > 0) {
+        <section class="voting-section" aria-labelledby="active-polls-heading">
+          <h2 id="active-polls-heading" class="voting-section__title">
+            <span class="voting-section__badge voting-section__badge--active" aria-hidden="true">
+              {{ state.activeCount() }}
+            </span>
+            Aktív szavazások
+            <span class="sr-only">({{ state.activeCount() }} darab)</span>
+          </h2>
+          <div class="voting-grid" role="list">
+            @for (poll of state.activePolls(); track poll.id) {
+              <app-voting-card
+                [poll]="poll"
+                [showActions]="hasFullAccess"
+                [showResultsButton]="hasFullAccess"
+                [expectedClassSize]="state.project()?.expectedClassSize ?? null"
+                (selectEvent)="onPollClick($event)"
+                (editEvent)="onEditPoll($event)"
+                (deleteEvent)="onDeletePoll($event)"
+                (viewResultsEvent)="onViewResults($event)"
+                (closePollEvent)="onClosePoll($event)"
+                (reopenPollEvent)="onReopenPoll($event)"
+                (lightboxOpenEvent)="onLightboxOpen($event)"
+                role="listitem"
+              />
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Closed polls section -->
+      @if (state.closedPolls().length > 0) {
+        <section class="voting-section" aria-labelledby="closed-polls-heading">
+          <h2 id="closed-polls-heading" class="voting-section__title">
+            <span class="voting-section__badge voting-section__badge--closed" aria-hidden="true">
+              {{ state.closedPolls().length }}
+            </span>
+            Lezárt szavazások
+            <span class="sr-only">({{ state.closedPolls().length }} darab)</span>
+          </h2>
+          <div class="voting-grid" role="list">
+            @for (poll of state.closedPolls(); track poll.id) {
+              <app-voting-card
+                [poll]="poll"
+                [isClosed]="true"
+                [showActions]="hasFullAccess"
+                [showResultsButton]="hasFullAccess"
+                [expectedClassSize]="state.project()?.expectedClassSize ?? null"
+                (selectEvent)="onPollClick($event)"
+                (editEvent)="onEditPoll($event)"
+                (deleteEvent)="onDeletePoll($event)"
+                (viewResultsEvent)="onViewResults($event)"
+                (closePollEvent)="onClosePoll($event)"
+                (reopenPollEvent)="onReopenPoll($event)"
+                (lightboxOpenEvent)="onLightboxOpen($event)"
+                role="listitem"
+              />
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>

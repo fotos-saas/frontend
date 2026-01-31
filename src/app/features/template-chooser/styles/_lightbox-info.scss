@@ -1,0 +1,205 @@
+/**
+ * Lightbox Info Styles
+ * Template information panel with selection button (simplified)
+ */
+
+.lightbox {
+  // Element: info panel
+  &__info {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 32px; // Egyenletes padding minden oldalon
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      padding: 16px 20px;
+      border-radius: 16px 16px 0 0;
+    }
+  }
+
+  // Element: info grid (2-column layout)
+  &__info-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    // Safari kompatibilis spacing (NEM gap!)
+    margin: -8px;
+
+    > * {
+      margin: 8px;
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+
+      margin: -6px;
+
+      > * {
+        margin: 6px;
+      }
+    }
+  }
+
+  // Element: left column (template info)
+  &__info-left {
+    flex: 1;
+  }
+
+  // Element: right column (selection button)
+  &__info-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+      align-items: flex-start;
+      width: 100%;
+    }
+  }
+
+  // Element: template title
+  &__template-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    line-height: 1.2;
+
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
+  }
+
+  // Element: template meta (category)
+  &__template-meta {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 6px;
+  }
+
+  // Element: category badge
+  &__template-category {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  // Element: actions (button container)
+  &__actions {
+    display: flex;
+
+    // Safari kompatibilis spacing (NEM gap!)
+    margin: -4px;
+
+    > * {
+      margin: 4px;
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  // Element: button (abstract)
+  &__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    min-height: 48px; // Touch-friendly (WCAG AAA min size)
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    // Icon spacing
+    margin-left: -4px;
+    margin-right: -4px;
+
+    > * {
+      margin-left: 4px;
+      margin-right: 4px;
+    }
+
+    // Alap focus outline eltávolítása
+    &:focus {
+      outline: none;
+    }
+
+    // Keyboard navigation outline (accessibility)
+    &:focus-visible {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    // Modifier: primary button
+    &--primary {
+      background: #6366f1;
+      color: white;
+
+      &:hover:not(:disabled):not(.lightbox__button--disabled) {
+        background: #4f46e5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+      }
+    }
+
+    // Modifier: selected state (kijelölve)
+    &--selected {
+      background: #10b981;
+
+      &:hover:not(:disabled):not(.lightbox__button--disabled) {
+        background: #059669;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      }
+    }
+
+    // Modifier: disabled state (visually disabled but clickable for toast)
+    // FONTOS: Ez a --primary és --selected UTÁN legyen a CSS-ben!
+    &--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      &:hover,
+      &:active {
+        transform: none !important;
+        box-shadow: none !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  // Element: button icon
+  &__button-icon {
+    width: 18px;
+    height: 18px;
+  }
+}

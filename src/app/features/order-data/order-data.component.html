@@ -1,0 +1,175 @@
+<div class="order-data page-card">
+  <!-- Header -->
+  <header id="main-content" class="order-data__header" tabindex="-1">
+    <h1 class="order-data__title">Megrendelési adatok</h1>
+    <p class="order-data__subtitle">A leadott rendelésből összegyűjtött információk</p>
+    <p class="order-data__date-header" *ngIf="orderData?.orderDate">
+      Leadva: {{ orderData?.orderDate | date:'yyyy. MM. dd.' }}
+    </p>
+  </header>
+
+  <!-- Loading -->
+  <div
+    class="order-data__loading"
+    *ngIf="loading"
+    role="status"
+    aria-live="polite"
+    aria-label="Megrendelési adatok betöltése folyamatban">
+    <div class="order-data__spinner" aria-hidden="true"></div>
+    <p>Adatok betöltése...</p>
+    <span class="sr-only">Kérem várjon, a megrendelési adatok betöltése folyamatban van</span>
+  </div>
+
+  <!-- Error -->
+  <div
+    class="order-data__error"
+    *ngIf="error && !loading"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true">
+    <p>{{ error }}</p>
+    <button class="order-data__retry-btn" (click)="loadOrderData()">
+      Újrapróbálkozás
+    </button>
+  </div>
+
+  <!-- Empty state -->
+  <div
+    class="order-data__empty"
+    *ngIf="!loading && !error && !orderData"
+    role="status"
+    aria-label="Még nincs leadott megrendelés">
+    <div class="order-data__empty-icon" aria-hidden="true">📋</div>
+    <p>Még nincs leadott megrendelés</p>
+  </div>
+
+  <!-- Content -->
+  <div class="order-data__content" *ngIf="!loading && !error && orderData">
+
+    <!-- Top row: Kapcsolattartó + Iskola és osztály -->
+    <div class="order-data__row order-data__row--two-cols">
+      <!-- Kapcsolattartó -->
+      <section class="order-data__section" *ngIf="orderData.contactName || orderData.contactPhone || orderData.contactEmail">
+        <h2 class="order-data__section-title">Kapcsolattartó</h2>
+        <div class="order-data__list">
+          <div class="order-data__item" *ngIf="orderData.contactName">
+            <span class="order-data__label">Név</span>
+            <span class="order-data__value">{{ orderData.contactName }}</span>
+          </div>
+          <div class="order-data__item" *ngIf="orderData.contactPhone">
+            <span class="order-data__label">Telefon</span>
+            <span class="order-data__value">{{ orderData.contactPhone }}</span>
+          </div>
+          <div class="order-data__item" *ngIf="orderData.contactEmail">
+            <span class="order-data__label">Email</span>
+            <span class="order-data__value">{{ orderData.contactEmail }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Iskola és osztály -->
+      <section class="order-data__section">
+        <h2 class="order-data__section-title">Iskola és osztály</h2>
+        <div class="order-data__list">
+          <div class="order-data__item" *ngIf="orderData.schoolName">
+            <span class="order-data__label">Iskola</span>
+            <span class="order-data__value">{{ orderData.schoolName }}</span>
+          </div>
+          <div class="order-data__item" *ngIf="orderData.className || orderData.classYear">
+            <span class="order-data__label">Osztály</span>
+            <span class="order-data__value">{{ orderData.className }} <span *ngIf="orderData.classYear">({{ orderData.classYear }})</span></span>
+          </div>
+          <div class="order-data__item" *ngIf="orderData.studentCount || orderData.teacherCount">
+            <span class="order-data__label">Létszám</span>
+            <span class="order-data__value">
+              <span *ngIf="orderData.studentCount">{{ orderData.studentCount }} diák</span>
+              <span *ngIf="orderData.studentCount && orderData.teacherCount">, </span>
+              <span *ngIf="orderData.teacherCount">{{ orderData.teacherCount }} tanár</span>
+            </span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tabló beállítások -->
+    <section class="order-data__section" *ngIf="orderData.color || orderData.fontFamily || orderData.sortType">
+      <h2 class="order-data__section-title">Tabló beállítások</h2>
+      <div class="order-data__grid order-data__grid--three">
+        <div class="order-data__item" *ngIf="orderData.color">
+          <span class="order-data__label">Szín</span>
+          <span class="order-data__value order-data__value--color">
+            <span class="order-data__color-swatch" [style.background-color]="orderData.color"></span>
+            {{ orderData.color }}
+          </span>
+        </div>
+        <div class="order-data__item" *ngIf="orderData.fontFamily">
+          <span class="order-data__label">Betűtípus</span>
+          <span class="order-data__value">{{ orderData.fontFamily }}</span>
+        </div>
+        <div class="order-data__item" *ngIf="orderData.sortType">
+          <span class="order-data__label">Rendezés</span>
+          <span class="order-data__value">{{ orderData.sortType }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Leírás -->
+    <section class="order-data__section" *ngIf="orderData.description">
+      <h2 class="order-data__section-title">Leírás / Megjegyzések</h2>
+      <div class="order-data__description" [innerHTML]="orderData.description | safeHtml"></div>
+    </section>
+
+    <!-- Idézet -->
+    <section class="order-data__section" *ngIf="orderData.quote">
+      <h2 class="order-data__section-title">Idézet</h2>
+      <blockquote class="order-data__quote">{{ orderData.quote }}</blockquote>
+    </section>
+
+    <!-- Névsorok - 2 oszlopban -->
+    <div class="order-data__row order-data__row--two-cols" *ngIf="orderData.studentDescription || orderData.teacherDescription">
+      <!-- Diákok névsora -->
+      <section class="order-data__section" *ngIf="orderData.studentDescription">
+        <h2 class="order-data__section-title">Diákok névsora</h2>
+        <pre class="order-data__namelist">{{ orderData.studentDescription }}</pre>
+      </section>
+
+      <!-- Tanárok névsora -->
+      <section class="order-data__section" *ngIf="orderData.teacherDescription">
+        <h2 class="order-data__section-title">Tanárok névsora</h2>
+        <pre class="order-data__namelist">{{ orderData.teacherDescription }}</pre>
+      </section>
+    </div>
+
+    <!-- Jellemzők (tags) -->
+    <section class="order-data__section" *ngIf="hasTags">
+      <h2 class="order-data__section-title">Jellemzők</h2>
+      <div class="order-data__tags">
+        <span class="order-data__tag" *ngFor="let tag of orderData.tags; trackBy: trackByTag">
+          {{ tag }}
+        </span>
+      </div>
+    </section>
+
+    <!-- AI összefoglaló -->
+    <section class="order-data__section" *ngIf="orderData.aiSummary">
+      <h2 class="order-data__section-title">AI összefoglaló</h2>
+      <p class="order-data__summary">{{ orderData.aiSummary }}</p>
+    </section>
+
+    <!-- Footer: PDF gomb + dátum -->
+    <footer class="order-data__footer">
+      <button
+        class="order-data__pdf-btn"
+        *ngIf="hasPdf"
+        (click)="openPdf()"
+        [disabled]="generatingPdf"
+        [class.order-data__pdf-btn--loading]="generatingPdf">
+        <span *ngIf="!generatingPdf">📄 Megrendelőlap megtekintése</span>
+        <span *ngIf="generatingPdf">⏳ PDF generálása...</span>
+      </button>
+      <p class="order-data__date" *ngIf="orderData.orderDate">
+        Megrendelés leadva: {{ orderData.orderDate | date:'yyyy. MM. dd.' }}
+      </p>
+    </footer>
+  </div>
+</div>

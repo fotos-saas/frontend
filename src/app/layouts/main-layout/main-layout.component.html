@@ -1,0 +1,29 @@
+<ng-container *ngIf="project$ | async as project">
+  <!-- Navbar -->
+  <app-navbar
+    [projectInfo]="{
+      schoolName: project.schoolName,
+      className: project.className,
+      classYear: project.classYear,
+      hasOrderData: project.hasOrderData,
+      hasMissingPersons: project.hasMissingPersons || (project.missingStats && project.missingStats.total > 0),
+      hasTemplateChooser: project.hasTemplateChooser,
+      selectedTemplatesCount: project.selectedTemplatesCount,
+      samplesCount: project.samplesCount,
+      activePollsCount: project.activePollsCount,
+      tabloStatus: project.tabloStatus,
+      userStatus: project.userStatus,
+      userStatusColor: project.userStatusColor
+    }"
+    [activePage]="(activePage$ | async) || 'home'"
+  ></app-navbar>
+
+  <!-- Partner Banner -->
+  <app-partner-banner></app-partner-banner>
+
+  <!-- Child route content -->
+  <router-outlet></router-outlet>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</ng-container>

@@ -1,0 +1,172 @@
+@use '../../../../styles/colors' as colors;
+
+// ViewEncapsulation.None - minden selektor prefixelve van .expandable-content-tel
+// hogy ne ütközzön más komponensekkel
+
+.expandable-content {
+  position: relative;
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: colors.get-color('gray', 900);
+    line-height: 1.4;
+  }
+
+  &__body {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+
+    &--collapsed {
+      position: relative;
+    }
+
+    // Collapsed állapotban kattintható - kinyitáshoz
+    &--clickable {
+      cursor: pointer;
+
+      &:hover {
+        .expandable-content__inner {
+          color: colors.get-color('gray', 800);
+        }
+      }
+    }
+
+    // Expanded állapotban normál cursor
+    &:not(&--clickable) {
+      cursor: default;
+    }
+  }
+
+  &__inner {
+    font-size: 0.875rem;
+    color: colors.get-color('gray', 700);
+    line-height: 1.6;
+    word-break: break-word;
+
+    // HTML formázás stílusok - innerHTML tartalomhoz
+    p {
+      margin: 0 0 0.75rem;
+      white-space: pre-line; // Sortörések megtartása p tagen belül
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    // Ha nincs p tag, csak sima szöveg
+    &:not(:has(p)) {
+      white-space: pre-line;
+    }
+
+    strong, b {
+      font-weight: 600;
+      color: colors.get-color('gray', 800);
+    }
+
+    em, i {
+      font-style: italic;
+    }
+
+    ul, ol {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.25rem;
+    }
+
+    a {
+      color: colors.get-color('primary', 500);
+      text-decoration: none;
+      transition: color 0.2s;
+
+      &:hover {
+        color: colors.get-color('primary', 600);
+        text-decoration: underline;
+      }
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1rem 0 0.5rem;
+      font-weight: 600;
+      color: colors.get-color('gray', 900);
+      line-height: 1.3;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    h1 { font-size: 1.25rem; }
+    h2 { font-size: 1.125rem; }
+    h3 { font-size: 1rem; }
+    h4, h5, h6 { font-size: 0.9375rem; }
+  }
+
+  &__fade {
+    position: absolute;
+    bottom: 24px; // Expand button magassága felett
+    left: 0;
+    right: 0;
+    height: 40px;
+    // CSS custom property-t használ a szülő komponens háttérszínéhez
+    background: linear-gradient(to bottom, transparent, var(--card-bg, white));
+    cursor: pointer; // Kattintható a kinyitáshoz
+    transition: opacity 0.2s;
+  }
+
+  // Expand button wrapper - mindig normál cursor, csak a gomb maga pointer
+  app-expand-button {
+    display: block;
+    margin-top: 0.5rem;
+    cursor: default;
+  }
+}
+
+// Dark mode támogatás - ViewEncapsulation.None miatt nem :host-context
+.dark-mode .expandable-content,
+[data-theme="dark"] .expandable-content {
+  .expandable-content__title {
+    color: colors.get-color('gray', 100);
+  }
+
+  .expandable-content__inner {
+    color: colors.get-color('gray', 300);
+
+    strong, b {
+      color: colors.get-color('gray', 200);
+    }
+
+    a {
+      color: colors.get-color('primary', 400);
+
+      &:hover {
+        color: colors.get-color('primary', 300);
+      }
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: colors.get-color('gray', 100);
+    }
+  }
+
+  .expandable-content__fade {
+    background: linear-gradient(to bottom, transparent, #1f2937);
+  }
+}
+
+// A11y - reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .expandable-content {
+    &__body {
+      transition-duration: 0.01ms !important;
+    }
+
+    &__fade {
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

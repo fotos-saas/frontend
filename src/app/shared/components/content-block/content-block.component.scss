@@ -1,0 +1,13 @@
+@use '../../../../styles/colors' as colors;
+
+.content-block {
+  &__title {
+    margin: 0 0 1rem;
+    padding-bottom: 1rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: colors.get-color('gray', 900);
+    line-height: 1.35;
+    border-bottom: 2px solid colors.get-color('primary', 100);
+  }
+}

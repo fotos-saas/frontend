@@ -1,0 +1,149 @@
+// Notification Card Component Styles
+
+.notification-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  // Animációt az appStaggerAnimation direktíva kezeli
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.unread {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: #3b82f6;
+  }
+}
+
+// ==================== ICON ====================
+
+.notification-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+
+  .notification-card:hover & {
+    transform: scale(1.1);
+  }
+}
+
+// Ikon színek típus szerint
+.icon-poke {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.icon-poke_reaction {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.icon-reply {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.icon-mention {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+}
+
+.icon-like {
+  background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+}
+
+.icon-badge {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde047 100%);
+  animation: badgeShine 2s ease-in-out infinite;
+}
+
+// ==================== CONTENT ====================
+
+.notification-content {
+  flex: 1;
+  min-width: 0; // text-overflow fix
+}
+
+.notification-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.4;
+}
+
+.notification-body {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+// ==================== UNREAD INDICATOR ====================
+
+.unread-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #3b82f6;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+// ==================== ANIMATIONS ====================
+// cardEntry animációt az appStaggerAnimation direktíva kezeli
+
+@keyframes badgeShine {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(253, 224, 71, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(253, 224, 71, 0.6);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+// ==================== ACCESSIBILITY ====================
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

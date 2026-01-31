@@ -1,0 +1,10 @@
+@use './action-button.mixin' as btn;
+
+.comment-button {
+  @include btn.action-button-default;
+
+  &--active {
+    color: #3b82f6;
+    background: #eff6ff;
+  }
+}

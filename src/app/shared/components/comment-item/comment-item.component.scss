@@ -1,0 +1,324 @@
+// Colors - Default (blue/gray)
+$gray-100: #f8fafc;
+$gray-200: #e2e8f0;
+$gray-400: #94a3b8;
+$gray-500: #64748b;
+$gray-700: #334155;
+$gray-900: #0f172a;
+$primary-500: #3b82f6;
+$primary-600: #2563eb;
+$error-500: #ef4444;
+
+// Pinned (yellow/orange) - soft warm tones
+$pinned-bg: #fef9c3;
+$pinned-bg-light: #fefce8;
+$pinned-border: #fde047;
+
+// Event (purple) - soft cool tones
+$event-bg: #f3e8ff;
+$event-bg-light: #faf5ff;
+$event-border: #c4b5fd;
+
+// Modern card-style comments (nem Facebook buborék!)
+.comment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  // No border variant
+  &--no-border {
+    border-bottom: none;
+  }
+
+  // Body wrapper
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // Card-style bubble - teljes szélesség
+  &__bubble {
+    position: relative;
+    display: block;
+    padding: 0.625rem 0.875rem;
+    background: $gray-100;
+    border: 1px solid $gray-200;
+    border-radius: 0.5rem;
+    margin-bottom: 0.375rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  // Hover actions - jobb felső sarokban
+  &__hover-actions {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  &__bubble:hover &__hover-actions,
+  &__hover-actions:focus-within {
+    opacity: 1;
+  }
+
+  &__hover-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    background: white;
+    border: 1px solid $gray-200;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    color: $gray-400;
+    transition: all 0.15s ease;
+
+    svg {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+
+    &:hover {
+      color: $error-500;
+      border-color: $error-500;
+      background: rgba($error-500, 0.05);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $primary-500;
+      outline-offset: 1px;
+    }
+  }
+
+  // Header inside bubble: author + time
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  // Author name
+  &__author {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $gray-900;
+    line-height: 1.2;
+  }
+
+  // Time
+  &__time {
+    font-size: 0.6875rem;
+    color: $gray-500;
+  }
+
+  // Edited indicator
+  &__edited {
+    font-size: 0.625rem;
+    color: $gray-400;
+    font-style: italic;
+  }
+
+  // Content text
+  &__content {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: $gray-700;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  // Actions row - below bubble
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-left: 0.25rem;
+
+    // Replies toggle - push to right
+    app-reply-toggle-button {
+      margin-left: auto;
+    }
+  }
+
+  // Action button (Válasz, X válasz)
+  &__action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $gray-500;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s;
+
+    svg {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+
+    &:hover {
+      color: $primary-600;
+    }
+
+    // Active state (replies expanded)
+    &--active {
+      color: $primary-500;
+      background: rgba($primary-500, 0.1);
+    }
+
+  }
+
+  // === COLOR VARIANTS ===
+
+  // Pinned variant (yellow/orange)
+  &--pinned &__bubble {
+    background: $pinned-bg;
+    border-color: $pinned-border;
+  }
+
+  &--pinned#{&}--reply &__bubble {
+    background: $pinned-bg-light;
+    border-color: rgba($pinned-border, 0.5);
+  }
+
+  // Event variant (purple)
+  &--event &__bubble {
+    background: $event-bg;
+    border-color: $event-border;
+  }
+
+  &--event#{&}--reply &__bubble {
+    background: $event-bg-light;
+    border-color: rgba($event-border, 0.5);
+  }
+
+  // Reply (lighter shade of default) - kisebb kártya
+  &--reply &__bubble {
+    padding: 0.5rem 0.75rem;
+  }
+
+  &--reply:not(&--pinned):not(&--event) &__bubble {
+    background: white;
+    border-color: $gray-200;
+  }
+}
+
+// === NEW COMMENT ANIMATION ===
+.comment-item--new {
+  animation: newCommentPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+
+  .comment-item__bubble {
+    animation: newCommentHighlight 2s ease-out forwards;
+  }
+}
+
+@keyframes newCommentPop {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes newCommentHighlight {
+  0% {
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.5), 0 2px 8px rgba($primary-500, 0.3);
+    background: rgba($primary-500, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.3), 0 2px 6px rgba($primary-500, 0.2);
+    background: rgba($primary-500, 0.04);
+  }
+  100% {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    background: $gray-100;
+  }
+}
+
+// Pinned variant new animation
+.comment-item--pinned.comment-item--new .comment-item__bubble {
+  animation: newCommentHighlightPinned 2s ease-out forwards;
+}
+
+@keyframes newCommentHighlightPinned {
+  0% {
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.5), 0 2px 8px rgba($primary-500, 0.3);
+    background: rgba($primary-500, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.3), 0 2px 6px rgba($primary-500, 0.2);
+  }
+  100% {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    background: $pinned-bg;
+  }
+}
+
+// Event variant new animation
+.comment-item--event.comment-item--new .comment-item__bubble {
+  animation: newCommentHighlightEvent 2s ease-out forwards;
+}
+
+@keyframes newCommentHighlightEvent {
+  0% {
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.5), 0 2px 8px rgba($primary-500, 0.3);
+    background: rgba($primary-500, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.3), 0 2px 6px rgba($primary-500, 0.2);
+  }
+  100% {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    background: $event-bg;
+  }
+}
+
+// A11y - reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .comment-item {
+    transition: none;
+  }
+
+  .comment-item--new,
+  .comment-item--new .comment-item__bubble {
+    animation: none;
+  }
+
+  .comment-item__hover-actions {
+    opacity: 1;
+    transition: none;
+  }
+
+  .comment-item__hover-btn {
+    transition: none;
+  }
+}

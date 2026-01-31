@@ -1,0 +1,306 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+
+/**
+ * Dashboard statisztikák
+ */
+export interface DashboardStats {
+  totalProjects: number;
+  activeQrCodes: number;
+  totalSchools: number;
+  projectsByStatus: Record<string, number>;
+}
+
+/**
+ * Kapcsolattartó interface
+ */
+export interface ProjectContact {
+  id?: number;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  isPrimary?: boolean;
+}
+
+/**
+ * Tablo Status interface
+ */
+export interface TabloStatus {
+  id: number;
+  name: string;
+  slug: string;
+  color: string;
+  icon: string | null;
+}
+
+/**
+ * QR kód interface
+ */
+export interface QrCode {
+  id: number;
+  code: string;
+  usageCount: number;
+  maxUsages: number | null;
+  expiresAt: string | null;
+  isValid: boolean;
+  registrationUrl: string;
+}
+
+/**
+ * QR kód előzmény (rövid)
+ */
+export interface QrCodeHistory {
+  id: number;
+  code: string;
+  isActive: boolean;
+  usageCount: number;
+  createdAt: string;
+}
+
+/**
+ * Projekt lista elem
+ */
+export interface ProjectListItem {
+  id: number;
+  name: string;
+  schoolName: string | null;
+  schoolCity: string | null;
+  className: string | null;
+  classYear: string | null;
+  status: string | null;
+  statusLabel: string;
+  tabloStatus: TabloStatus | null;
+  photoDate: string | null;
+  deadline: string | null;
+  contact: ProjectContact | null;
+  hasActiveQrCode: boolean;
+  qrCodeId: number | null;
+  createdAt: string;
+}
+
+/**
+ * Projekt részletek
+ */
+export interface ProjectDetails extends ProjectListItem {
+  school: {
+    id: number;
+    name: string;
+    city: string | null;
+  } | null;
+  partner: {
+    id: number;
+    name: string;
+  } | null;
+  expectedClassSize: number | null;
+  contacts: ProjectContact[];
+  qrCode: QrCode | null;
+  qrCodesHistory: QrCodeHistory[];
+  updatedAt: string;
+}
+
+/**
+ * Iskola lista elem
+ */
+export interface SchoolListItem {
+  id: number;
+  name: string;
+  city: string | null;
+  projectsCount: number;
+}
+
+/**
+ * Pagináció response interface
+ */
+export interface PaginatedResponse<T> {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null;
+  to: number | null;
+}
+
+/**
+ * Marketer API Service
+ * API hívások a marketinges/ügyintéző felülethez.
+ */
+@Injectable({
+  providedIn: 'root'
+})
+export class MarketerService {
+  private http = inject(HttpClient);
+  private baseUrl = `${environment.apiUrl}/marketer`;
+
+  /**
+   * Dashboard statisztikák lekérése
+   */
+  getStats(): Observable<DashboardStats> {
+    return this.http.get<DashboardStats>(`${this.baseUrl}/stats`);
+  }
+
+  /**
+   * Projektek listázása (paginált)
+   */
+  getProjects(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    sort_by?: 'created_at' | 'photo_date' | 'class_year';
+    sort_dir?: 'asc' | 'desc';
+    status?: string;
+  }): Observable<PaginatedResponse<ProjectListItem>> {
+    let httpParams = new HttpParams();
+
+    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
+    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+
+    return this.http.get<PaginatedResponse<ProjectListItem>>(`${this.baseUrl}/projects`, { params: httpParams });
+  }
+
+  /**
+   * Projekt részletek lekérése
+   */
+  getProjectDetails(id: number): Observable<ProjectDetails> {
+    return this.http.get<ProjectDetails>(`${this.baseUrl}/projects/${id}`);
+  }
+
+  /**
+   * Projekt QR kód lekérése
+   */
+  getProjectQrCode(projectId: number): Observable<{ hasQrCode: boolean; qrCode?: QrCode; message?: string }> {
+    return this.http.get<{ hasQrCode: boolean; qrCode?: QrCode; message?: string }>(
+      `${this.baseUrl}/projects/${projectId}/qr-code`
+    );
+  }
+
+  /**
+   * Új QR kód generálása projekthez
+   */
+  generateQrCode(projectId: number, options?: {
+    expires_at?: string;
+    max_usages?: number | null;
+  }): Observable<{ success: boolean; message: string; qrCode: QrCode }> {
+    return this.http.post<{ success: boolean; message: string; qrCode: QrCode }>(
+      `${this.baseUrl}/projects/${projectId}/qr-code`,
+      options ?? {}
+    );
+  }
+
+  /**
+   * QR kód inaktiválása (deaktiválás)
+   */
+  deactivateQrCode(projectId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}/qr-code`
+    );
+  }
+
+  /**
+   * Iskolák listázása (paginált)
+   */
+  getSchools(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    city?: string;
+  }): Observable<PaginatedResponse<SchoolListItem>> {
+    let httpParams = new HttpParams();
+
+    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.city) httpParams = httpParams.set('city', params.city);
+
+    return this.http.get<PaginatedResponse<SchoolListItem>>(`${this.baseUrl}/schools`, { params: httpParams });
+  }
+
+  /**
+   * Városok listájának lekérése (szűréshez)
+   */
+  getCities(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/schools/cities`);
+  }
+
+  // ============================================
+  // CONTACT MANAGEMENT
+  // ============================================
+
+  /**
+   * Kapcsolattartó hozzáadása projekthez
+   */
+  addContact(projectId: number, contact: {
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+    isPrimary?: boolean;
+  }): Observable<{ success: boolean; message: string; data: ProjectContact }> {
+    return this.http.post<{ success: boolean; message: string; data: ProjectContact }>(
+      `${this.baseUrl}/projects/${projectId}/contacts`,
+      contact
+    );
+  }
+
+  /**
+   * Kapcsolattartó módosítása
+   */
+  updateContact(projectId: number, contactId: number, contact: {
+    name?: string;
+    email?: string | null;
+    phone?: string | null;
+    isPrimary?: boolean;
+  }): Observable<{ success: boolean; message: string; data: ProjectContact }> {
+    return this.http.put<{ success: boolean; message: string; data: ProjectContact }>(
+      `${this.baseUrl}/projects/${projectId}/contacts/${contactId}`,
+      contact
+    );
+  }
+
+  /**
+   * Kapcsolattartó törlése
+   */
+  deleteContact(projectId: number, contactId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}/contacts/${contactId}`
+    );
+  }
+
+  // ============================================
+  // PROJECT CREATION
+  // ============================================
+
+  /**
+   * Összes iskola lekérése (projekt létrehozáshoz)
+   * Visszaadja az összes iskolát, nem csak azokat ahol van projekt.
+   */
+  getAllSchools(search?: string): Observable<Array<{ id: number; name: string; city: string | null }>> {
+    let httpParams = new HttpParams();
+    if (search) {
+      httpParams = httpParams.set('search', search);
+    }
+    return this.http.get<Array<{ id: number; name: string; city: string | null }>>(
+      `${this.baseUrl}/schools/all`,
+      { params: httpParams }
+    );
+  }
+
+  /**
+   * Új projekt létrehozása
+   */
+  createProject(data: {
+    school_id?: number | null;
+    class_name?: string | null;
+    class_year?: string | null;
+  }): Observable<{ success: boolean; message: string; data: ProjectListItem }> {
+    return this.http.post<{ success: boolean; message: string; data: ProjectListItem }>(
+      `${this.baseUrl}/projects`,
+      data
+    );
+  }
+}

@@ -1,0 +1,94 @@
+<!-- Schedule Card Container (BEM: block) -->
+<div
+  class="schedule-card"
+  [ngClass]="'schedule-card' + bemModifier()"
+  (click)="onCardClick()"
+  role="presentation"
+>
+  <!-- BEM Element: Icon/Avatar (balra) -->
+  <div class="schedule-card__icon">
+    <!-- Loading state: pulse animation -->
+    @if (isLoading()) {
+      <div class="schedule-card__icon-loader">
+        <span></span>
+      </div>
+    }
+
+    <!-- Success state: checkmark -->
+    @if (!isLoading() && isSuccess()) {
+      <svg
+        class="schedule-card__icon-inner"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    }
+
+    <!-- Warning/Empty state: calendar -->
+    @if (!isLoading() && !isSuccess()) {
+      <svg
+        class="schedule-card__icon-inner"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
+      </svg>
+    }
+  </div>
+
+  <!-- BEM Element: Content wrapper -->
+  <div class="schedule-card__content">
+    <!-- Label -->
+    <span class="schedule-card__label" [attr.id]="'schedule-label-' + label()">
+      {{ label() }}
+    </span>
+
+    <!-- Value (dátum/idő) -->
+    <span class="schedule-card__value" [attr.aria-label]="label() + ': ' + displayValue()">
+      {{ displayValue() }}
+    </span>
+
+    <!-- Status badge -->
+    <span class="schedule-card__status">
+      {{ statusText() }}
+    </span>
+  </div>
+
+  <!-- BEM Element: Action button (edit/set) -->
+  <button
+    class="schedule-card__action"
+    type="button"
+    [disabled]="isDisabled()"
+    (click)="onEditClick($event)"
+    [attr.aria-label]="label() + ' szerkesztése'"
+    title="Szerkesztés"
+  >
+    <svg
+      class="schedule-card__action-icon"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+      />
+    </svg>
+  </button>
+</div>

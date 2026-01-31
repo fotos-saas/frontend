@@ -1,0 +1,70 @@
+// Contact Badge Component Styles
+// Ezek a stílusok a navbar.component.scss-ből származnak
+
+.navbar__user-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+
+  &:focus-visible {
+    outline-offset: 2px;
+  }
+}
+
+.navbar__user-badge-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar__user-badge-icon {
+  width: 12px;
+  height: 12px;
+  margin-left: 6px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+
+  .navbar__user-badge:hover & {
+    opacity: 1;
+  }
+}
+
+// Contact variant (code token - kék szín)
+.navbar__user-badge--contact {
+  color: #1e40af;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 1px solid #3b82f6;
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
+
+  &:hover {
+    background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 3px solid #3b82f6;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .navbar__user-badge--contact {
+    color: #bfdbfe;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    border-color: #3b82f6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+  }
+}

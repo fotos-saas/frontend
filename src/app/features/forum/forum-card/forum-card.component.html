@@ -1,0 +1,71 @@
+<article class="forum-card" [class.forum-card--pinned]="isPinned()" [class.forum-card--locked]="isLocked()">
+  <!-- Status icons -->
+  <div class="forum-card__icons">
+    <!-- Pinned -->
+    @if (isPinned()) {
+      <span class="forum-card__icon forum-card__icon--pin" title="Kitűzött">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+        </svg>
+      </span>
+    }
+
+    <!-- Locked -->
+    @if (isLocked()) {
+      <span class="forum-card__icon forum-card__icon--lock" title="Lezárt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+      </span>
+    }
+
+    <!-- Template link -->
+    @if (hasTemplate()) {
+      <span class="forum-card__icon forum-card__icon--template" [title]="discussion().templateName">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </span>
+    }
+  </div>
+
+  <!-- Content -->
+  <div class="forum-card__content">
+    <h3 class="forum-card__title">{{ discussion().title }}</h3>
+
+    <div class="forum-card__meta">
+      <span class="forum-card__activity">
+        {{ lastActivity() }} · {{ lastActivityDate() | timeAgo }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="forum-card__stats">
+    <span class="forum-card__stat" title="Hozzászólások">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+      {{ discussion().postsCount }}
+    </span>
+
+    <span class="forum-card__stat" title="Megtekintések">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      {{ discussion().viewsCount }}
+    </span>
+  </div>
+
+  <!-- Arrow -->
+  <span class="forum-card__arrow">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+    </svg>
+  </span>
+</article>

@@ -1,0 +1,21 @@
+<div class="preset-selector">
+  <p class="label" id="preset-label">válassz üzenetet:</p>
+  <div class="preset-grid"
+       role="radiogroup"
+       aria-labelledby="preset-label">
+    @for (preset of presets(); track trackByKey($index, preset)) {
+      <button
+        class="preset-btn"
+        [class.selected]="isSelected(preset)"
+        [attr.aria-pressed]="isSelected(preset)"
+        role="radio"
+        [attr.aria-checked]="isSelected(preset)"
+        (click)="onSelect(preset)"
+        (keydown.enter)="onSelect(preset)"
+        (keydown.space)="$event.preventDefault(); onSelect(preset)">
+        <span class="emoji" aria-hidden="true">{{ preset.emoji }}</span>
+        <span class="text">{{ preset.text }}</span>
+      </button>
+    }
+  </div>
+</div>

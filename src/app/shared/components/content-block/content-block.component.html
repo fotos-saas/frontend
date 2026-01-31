@@ -1,0 +1,14 @@
+<div class="content-block">
+  <h3 class="content-block__title">{{ title() }}</h3>
+
+  @if (content()) {
+    <app-expandable-content
+      [content]="content()!"
+      [collapsedHeight]="collapsedHeight()"
+      [tolerancePercent]="tolerancePercent()"
+      [expandLabel]="expandLabel()"
+      [collapseLabel]="collapseLabel()"
+      (expandedChange)="onExpandedChange($event)"
+    />
+  }
+</div>

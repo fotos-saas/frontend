@@ -1,0 +1,930 @@
+/**
+ * Design System - SCSS Mixin Library
+ * Animációk, interakciók, és layout segédletek
+ * Safari kompatibilis
+ */
+
+@import 'colors';
+
+// ============================================================================
+// TRANSITION MIXIN-EK (Standardizált animáció)
+// ============================================================================
+
+/**
+ * Fast transition - micro interactions (150ms)
+ * Használat: button hover, small state changes
+ */
+@mixin transition-fast {
+  transition: all 150ms ease;
+}
+
+/**
+ * Normal transition - standard interactions (200ms)
+ * Használat: form state, modal, card hover
+ */
+@mixin transition-normal {
+  transition: all 200ms ease;
+}
+
+/**
+ * Slow transition - complex animations (300ms)
+ * Használat: page navigation, complex state changes
+ */
+@mixin transition-slow {
+  transition: all 300ms ease;
+}
+
+/**
+ * Custom transition mixin
+ * @param {string} $property - CSS property (all, background, opacity, stb.)
+ * @param {string} $duration - Duration (150ms, 200ms, 300ms)
+ * @param {string} $easing - Easing function (ease, ease-out, cubic-bezier, stb.)
+ */
+@mixin transition($property: all, $duration: 200ms, $easing: ease) {
+  transition: $property $duration $easing;
+}
+
+/**
+ * Multi-property transition
+ * @param {list} $properties - CSS properties
+ * @param {string} $duration - Duration
+ */
+@mixin transition-multi($properties: (background, color, border), $duration: 200ms) {
+  transition: $properties $duration ease;
+}
+
+// ============================================================================
+// SHADOW MIXIN-EK (Standardizált árnyékolás)
+// ============================================================================
+
+/**
+ * Small shadow - subtle elevation
+ */
+@mixin shadow-sm {
+  box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+/**
+ * Medium shadow - card elevation
+ */
+@mixin shadow-md {
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/**
+ * Large shadow - hover/active state
+ */
+@mixin shadow-lg {
+  box-shadow: 0 4px 12px var(--shadow-color-hover);
+}
+
+/**
+ * Extra large shadow - modal/lightbox
+ */
+@mixin shadow-xl {
+  box-shadow: 0 25px 50px var(--shadow-color-hover);
+}
+
+/**
+ * Custom shadow mixin
+ * @param {number} $offset-y - Y offset
+ * @param {number} $blur - Blur radius
+ * @param {string} $color - Shadow color variable
+ */
+@mixin shadow-custom($offset-y: 2px, $blur: 8px, $color: var(--shadow-color)) {
+  box-shadow: 0 $offset-y $blur $color;
+}
+
+// ============================================================================
+// LAYOUT MIXIN-EK (Flexbox + Grid)
+// ============================================================================
+
+/**
+ * Flexbox center (horizontális és vertikális)
+ */
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/**
+ * Flexbox row (sor, Safari gap nélkül)
+ * @param {number} $gap - Gap érték
+ */
+@mixin flex-row($gap: 1rem) {
+  display: flex;
+  margin: -($gap / 2);
+
+  > * {
+    margin: $gap / 2;
+  }
+}
+
+/**
+ * Flexbox column (oszlop, Safari gap nélkül)
+ * @param {number} $gap - Gap érték
+ */
+@mixin flex-column($gap: 1rem) {
+  display: flex;
+  flex-direction: column;
+  margin: -($gap / 2);
+
+  > * {
+    margin: $gap / 2 0;
+  }
+}
+
+/**
+ * Grid layout
+ * @param {number} $cols - Oszlopok száma
+ * @param {number} $gap - Gap érték
+ */
+@mixin grid($cols: 2, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat($cols, 1fr);
+  margin: -($gap / 2);
+
+  > * {
+    margin: $gap / 2;
+  }
+}
+
+/**
+ * Responsive grid (mobile-first)
+ * @param {number} $mobile-cols - Mobil oszlopok
+ * @param {number} $tablet-cols - Tablet oszlopok
+ * @param {number} $desktop-cols - Desktop oszlopok
+ */
+@mixin grid-responsive($mobile-cols: 1, $tablet-cols: 2, $desktop-cols: 3) {
+  display: grid;
+  grid-template-columns: repeat($mobile-cols, 1fr);
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat($tablet-cols, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat($desktop-cols, 1fr);
+  }
+}
+
+// ============================================================================
+// TYPOGRAPHY MIXIN-EK
+// ============================================================================
+
+/**
+ * Text truncation (1 sor)
+ */
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/**
+ * Multi-line text truncation
+ * @param {number} $lines - Maximum sorok száma
+ */
+@mixin text-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/**
+ * Font weight helper
+ * @param {string} $weight - regular, medium, semibold, bold
+ */
+@mixin font-weight($weight: normal) {
+  @if $weight == 'regular' {
+    font-weight: 400;
+  } @else if $weight == 'medium' {
+    font-weight: 500;
+  } @else if $weight == 'semibold' {
+    font-weight: 600;
+  } @else if $weight == 'bold' {
+    font-weight: 700;
+  } @else {
+    font-weight: $weight;
+  }
+}
+
+// ============================================================================
+// BUTTON MIXIN-EK
+// ============================================================================
+
+/**
+ * Primary button style
+ */
+@mixin button-primary {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  @include transition-normal;
+
+  &:hover:not(:disabled) {
+    background: #{get-get-color('primary', 700)};
+  }
+
+  &:active:not(:disabled) {
+    background: #{get-get-color('primary', 800)};
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @include focus-ring;
+}
+
+/**
+ * Secondary button style
+ */
+@mixin button-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  @include transition-normal;
+
+  &:hover:not(:disabled) {
+    background: rgba(#{get-get-color('primary', 600)}, 0.1);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @include focus-ring;
+}
+
+/**
+ * Danger button style
+ */
+@mixin button-danger {
+  background: var(--color-error);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  @include transition-normal;
+
+  &:hover:not(:disabled) {
+    background: #{get-get-color('error', 700)};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @include focus-ring(var(--color-error));
+}
+
+// ============================================================================
+// CARD MIXIN-EK
+// ============================================================================
+
+/**
+ * Base card style
+ */
+@mixin card-base {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  @include shadow-sm;
+  @include transition-normal;
+
+  &:hover {
+    @include shadow-md;
+  }
+}
+
+/**
+ * Interactive card (clickable)
+ */
+@mixin card-interactive {
+  @include card-base;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-primary);
+    background: rgba(#{get-get-color('primary', 500)}, 0.05);
+  }
+
+  @include focus-ring;
+}
+
+/**
+ * Alert/Banner card
+ * @param {string} $type - success, warning, error
+ */
+@mixin card-alert($type: 'info') {
+  @include card-base;
+
+  @if $type == 'success' {
+    background: var(--alert-success-bg);
+    border-color: var(--alert-success-border);
+    border-left: 4px solid var(--alert-success-border);
+  } @else if $type == 'warning' {
+    background: var(--alert-warning-bg);
+    border-color: var(--alert-warning-border);
+    border-left: 4px solid var(--alert-warning-border);
+  } @else if $type == 'error' {
+    background: var(--alert-error-bg);
+    border-color: var(--alert-error-border);
+    border-left: 4px solid var(--alert-error-border);
+  }
+}
+
+// ============================================================================
+// FORM MIXIN-EK
+// ============================================================================
+
+/**
+ * Input field style
+ */
+@mixin input-base {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  @include transition-normal;
+
+  &:hover {
+    border-color: var(--text-muted);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 4px rgba(#{get-get-color('primary', 600)}, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+/**
+ * Input error state
+ */
+@mixin input-error {
+  border-color: var(--input-error);
+
+  &:focus {
+    box-shadow: 0 0 0 4px rgba(#{get-get-color('error', 600)}, 0.1);
+  }
+}
+
+/**
+ * Input success state
+ */
+@mixin input-success {
+  border-color: var(--input-success);
+
+  &:focus {
+    box-shadow: 0 0 0 4px rgba(#{get-get-color('success', 500)}, 0.1);
+  }
+}
+
+// ============================================================================
+// ACCESSIBILITY MIXIN-EK
+// ============================================================================
+
+/**
+ * Focus ring (WCAG AA+ compliance)
+ * @param {color} $color - Focus ring color
+ */
+@mixin focus-ring($color: var(--color-primary)) {
+  &:focus-visible {
+    outline: 3px solid $color;
+    outline-offset: 2px;
+
+    @media (prefers-reduced-motion: reduce) {
+      outline: 2px solid $color;
+    }
+  }
+}
+
+/**
+ * Reduced motion support
+ */
+@mixin no-motion {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+  }
+}
+
+/**
+ * High contrast mode support
+ */
+@mixin high-contrast-border {
+  @media (prefers-contrast: more) {
+    border: 2px solid currentColor;
+  }
+}
+
+/**
+ * Screen reader only text
+ */
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ============================================================================
+// RESPONSIVE MIXIN-EK
+// ============================================================================
+
+/**
+ * Mobile-first responsive mixin
+ * @param {string} $breakpoint - Breakpoint name (sm, md, lg, xl)
+ */
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'mobile' {
+    @media (max-width: 479px) { @content; }
+  } @else if $breakpoint == 'sm' {
+    @media (min-width: 480px) { @content; }
+  } @else if $breakpoint == 'md' {
+    @media (min-width: 768px) { @content; }
+  } @else if $breakpoint == 'lg' {
+    @media (min-width: 1024px) { @content; }
+  } @else if $breakpoint == 'xl' {
+    @media (min-width: 1280px) { @content; }
+  } @else {
+    @media (min-width: $breakpoint) { @content; }
+  }
+}
+
+/**
+ * Touch-friendly sizing (min 44x44px)
+ */
+@mixin touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+}
+
+/**
+ * Aspect ratio container (16:9)
+ */
+@mixin aspect-ratio($width: 16, $height: 9) {
+  position: relative;
+  padding-bottom: percentage($height / $width);
+
+  > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// ============================================================================
+// UTILITY MIXIN-EK
+// ============================================================================
+
+/**
+ * Absolute center
+ */
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/**
+ * Fixed cover (full viewport)
+ */
+@mixin fixed-cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/**
+ * Smooth scrolling
+ */
+@mixin smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/**
+ * Disable tap highlight (mobile)
+ */
+@mixin no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+}
+
+// ============================================================================
+// SPINNER MIXIN
+// ============================================================================
+
+/**
+ * Spinner component with customizable size and color
+ * @param {string} $size - Spinner diameter (default: 24px)
+ * @param {string} $border-width - Border width (default: 3px)
+ * @param {color} $color - Spinner color (default: var(--color-primary))
+ * @param {string} $duration - Animation duration (default: 0.7s)
+ *
+ * Usage:
+ * .my-spinner {
+ *   @include spinner(32px, 4px, var(--color-primary));
+ * }
+ */
+@mixin spinner($size: 24px, $border-width: 3px, $color: var(--color-primary), $duration: 0.7s) {
+  display: inline-block;
+  width: $size;
+  height: $size;
+  border: $border-width solid rgba(0, 0, 0, 0.1);
+  border-top-color: $color;
+  border-radius: 50%;
+  animation: spin $duration linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    border-top-color: $color;
+    opacity: 0.8;
+  }
+}
+
+/**
+ * Button with loading spinner state
+ * Use with a .is-loading class on the button
+ * @param {string} $size - Spinner size (default: 16px)
+ */
+@mixin button-loading($size: 16px) {
+  position: relative;
+
+  &.is-loading {
+    color: transparent;
+    pointer-events: none;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      @include spinner($size, 2px, currentColor);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+    }
+  }
+}
+
+/**
+ * Full page loading overlay with centered spinner
+ */
+@mixin loading-overlay($spinner-size: 40px) {
+  @include fixed-cover;
+  @include flex-center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+
+  &::after {
+    content: '';
+    @include spinner($spinner-size, 4px, white);
+  }
+}
+
+/**
+ * Inline loading indicator for text content
+ * @param {string} $size - Spinner size (default: 1em)
+ */
+@mixin inline-spinner($size: 1em) {
+  display: inline-flex;
+  align-items: center;
+
+  &::before {
+    content: '';
+    @include spinner($size, 2px, currentColor, 0.6s);
+    margin-right: 0.5em;
+  }
+}
+
+// ============================================================================
+// CARD ANIMATION MIXIN-EK
+// ============================================================================
+
+/**
+ * Staggered card entry animation - OPTIMALIZÁLT VERZIÓ
+ *
+ * FONTOS: Nagy listákhoz (30+ elem) használd az appStaggerAnimation direktívát!
+ * A direktíva automatikusan kezeli a 30 elem limitet, a reduced motion-t,
+ * és a virtual scroll kompatibilitást.
+ *
+ * @param {number} $duration - Animation duration (default: 0.4s)
+ * @param {number} $delay-per-item - Delay between each item (default: 0.05s)
+ * @param {number} $max-items - Maximum items to animate (default: 30)
+ *
+ * Használat:
+ *   .card { @include card-stagger-animation(0.4s, 0.05s, 30); }
+ *
+ * Vagy Angular direktívával (AJÁNLOTT):
+ *   <div appStaggerAnimation [staggerIndex]="i" [staggerTotal]="items().length">
+ */
+@mixin card-stagger-animation($duration: 0.4s, $delay-per-item: 0.05s, $max-items: 30) {
+  opacity: 0;
+  animation: cardEntry $duration ease forwards;
+
+  // Stagger delay az első $max-items elemre
+  @for $i from 1 through $max-items {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * $delay-per-item};
+    }
+  }
+
+  // 30+ elem: azonnali megjelenés animáció nélkül (performance)
+  &:nth-child(n + #{$max-items + 1}) {
+    opacity: 1;
+    animation: none;
+  }
+
+  // Reduced motion support (A11y - WCAG 2.3.3)
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/**
+ * Card hover effect (lift + shadow + border color)
+ * @param {color} $border-color - Hover border color
+ * @param {number} $lift - Vertical lift amount (default: -2px)
+ */
+@mixin card-hover-lift($border-color: var(--color-primary), $lift: -2px) {
+  &:hover {
+    border-color: $border-color;
+    transform: translateY($lift);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
+  }
+}
+
+/**
+ * Arrow reveal on hover effect
+ * Requires a __arrow child element
+ */
+@mixin card-arrow-hover {
+  &__arrow {
+    color: #d1d5db;
+    transition: transform 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  &:hover &__arrow {
+    color: var(--color-primary, #2563eb);
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &__arrow {
+      transition: none;
+    }
+  }
+}
+
+/**
+ * Action buttons that appear on hover
+ * Use with &__actions container
+ */
+@mixin card-hover-actions {
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  &:hover &__actions,
+  &:focus-within &__actions {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &__actions {
+      opacity: 1;
+      transition: none;
+    }
+  }
+}
+
+/**
+ * Action button base style
+ * @param {string} $size - Button size (default: 28px)
+ */
+@mixin card-action-btn($size: 28px) {
+  width: $size;
+  height: $size;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: get-color('gray', 500);
+  transition: all 0.15s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/**
+ * Left border status indicator
+ * @param {color} $color - Status color
+ */
+@mixin card-status-border($color) {
+  border-left: 3px solid $color;
+}
+
+/**
+ * Status dot with optional pulse animation
+ * @param {boolean} $pulse - Enable pulse animation (default: true)
+ */
+@mixin card-status-dot($pulse: true) {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+
+  @if $pulse {
+    animation: pulse 2s infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+}
+
+/**
+ * Badge with shine effect
+ */
+@mixin card-badge-shine {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: badgeShine 3s infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::before {
+      animation: none;
+    }
+  }
+}
+
+/**
+ * Like button heart beat animation
+ */
+@mixin card-like-button {
+  cursor: pointer;
+  transition: color 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 0.25rem;
+
+  &:hover {
+    color: get-color('error', 500);
+  }
+
+  &:active {
+    transform: scale(0.85);
+  }
+
+  &:focus-visible {
+    outline: 2px solid get-color('error', 500);
+    outline-offset: 2px;
+  }
+
+  &--liked {
+    color: get-color('error', 500);
+
+    svg {
+      animation: heartBeat 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &--liked svg {
+      animation: none;
+    }
+  }
+}
+
+/**
+ * Card media thumbnail with zoom on hover
+ */
+@mixin card-thumbnail-hover {
+  overflow: hidden;
+  cursor: pointer;
+  background: #f3f4f6;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    img {
+      transition: none;
+    }
+
+    &:hover img {
+      transform: none;
+    }
+  }
+}
+
+/**
+ * Complete card reduced motion support
+ * Apply to card root element
+ */
+@mixin card-reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    opacity: 1 !important;
+    transition-duration: 0.01ms !important;
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

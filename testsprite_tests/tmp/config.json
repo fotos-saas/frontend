@@ -1,0 +1,17 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:4205",
+  "loginUser": "798665",
+  "executionArgs": {
+    "projectName": "frontend-tablo",
+    "projectPath": "/Users/forsat/www/maszek/tablokiraly/photo-stack/frontend-tablo",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-Kc_w0zWO2Wyc2sl32sN9CbtCEv7ahdGNn__-5qTFgrOpA8r33G13zSyq0mtNKaBMlT9OgG_goZmpsVGWVIPx4lmEOmeXiMp4hwbp4JLtYmEiTOZ35oj-o5W_mjhM_m2Bkwg"
+    }
+  },
+  "proxy": "http://9fe1c0c4-277d-4ff2-9d63-c523b84535b8:fNQhvwxIYEh6EFceU27glwHPgG0h41tz@tun.testsprite.com:8080"
+}

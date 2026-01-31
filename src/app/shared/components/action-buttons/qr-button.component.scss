@@ -1,0 +1,116 @@
+// QR Button stílusok
+// Három variáns: primary (kitöltött), ghost (áttetsző), icon-only (csak ikon)
+
+.qr-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  // Lucide ikon megjelenítése
+  lucide-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  // Primary variáns - kitöltött
+  &--primary {
+    padding: 8px 16px;
+    background: linear-gradient(to right, var(--color-primary, #2563eb), var(--color-primary-dark, #1d4ed8));
+    color: #ffffff;
+    font-size: 0.9375rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(to right, var(--color-primary-dark, #1d4ed8), var(--color-primary-800, #1e40af));
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+  }
+
+  // Ghost variáns - áttetsző
+  &--ghost {
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--color-primary, #2563eb);
+    font-size: 0.875rem;
+    border: 1px solid var(--color-primary, #2563eb);
+
+    &:hover:not(:disabled) {
+      background: rgba(37, 99, 235, 0.1);
+    }
+  }
+
+  // Icon-only variáns - kompakt, csak ikon
+  &--icon-only {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: #ffffff;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+
+    &:hover:not(:disabled) {
+      transform: scale(1.05);
+      color: var(--color-primary, #2563eb);
+      border-color: var(--color-primary, #2563eb);
+    }
+  }
+
+  // Aktív állapot (van QR kód)
+  &--active {
+    &.qr-button--icon-only {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #16a34a;
+
+      &:hover:not(:disabled) {
+        background: #bbf7d0;
+        color: #15803d;
+        border-color: #4ade80;
+      }
+    }
+
+    &.qr-button--primary {
+      background: linear-gradient(to right, #16a34a, #15803d);
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(to right, #15803d, #166534);
+      }
+    }
+
+    &.qr-button--ghost {
+      color: #16a34a;
+      border-color: #16a34a;
+
+      &:hover:not(:disabled) {
+        background: rgba(22, 163, 74, 0.1);
+      }
+    }
+  }
+}
+
+// Reduced motion támogatás
+@media (prefers-reduced-motion: reduce) {
+  .qr-button {
+    transition: none;
+
+    &:hover:not(:disabled) {
+      transform: none;
+    }
+  }
+}

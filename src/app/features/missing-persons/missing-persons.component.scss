@@ -1,0 +1,359 @@
+$blue-500: #3b82f6;
+$blue-600: #2563eb;
+$amber-500: #f59e0b;
+$amber-600: #d97706;
+
+.missing-persons {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.missing-persons__main {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  // padding: page-card class-tól jön a külső div-re
+}
+
+// Page Header
+.missing-persons__header {
+  padding: 2rem 0 1.5rem;
+  text-align: center;
+}
+
+.missing-persons__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 0.25rem;
+}
+
+.missing-persons__subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+// Stats Banner
+.stats-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid $amber-500;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.stats-banner__icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: $amber-600;
+  }
+}
+
+.stats-banner__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.stats-banner__count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.stats-banner__details {
+  font-size: 0.8125rem;
+  color: #b45309;
+}
+
+// Controls (Search + Filter)
+.controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.controls__search {
+  flex: 1;
+  position: relative;
+}
+
+.controls__search-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+  pointer-events: none;
+}
+
+.controls__input {
+  width: 100%;
+  padding: 0.625rem 0.875rem 0.625rem 2.5rem;
+  font-size: 0.9rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder {
+    color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+  }
+
+  &:focus {
+    border-color: $blue-500;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.controls__filter {
+  padding: 0.625rem 2rem 0.625rem 0.875rem;
+  font-size: 0.9rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 0.625rem center; // WCAG AA: slate-500 ikon
+  background-size: 18px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: $blue-500;
+  }
+}
+
+// Person Section
+.person-section {
+  margin-bottom: 2rem;
+}
+
+.person-section__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.person-section__emoji {
+  font-size: 1.25rem;
+}
+
+.person-section__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.person-section__count {
+  margin-left: auto;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+// Person Grid
+.person-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+// Person Card
+.person-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  transition: box-shadow 0.15s, border-color 0.15s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+  }
+}
+
+.person-card__avatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: $blue-600;
+  }
+
+  &--teacher {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+
+    svg {
+      color: $amber-600;
+    }
+  }
+}
+
+.person-card__badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: #ef4444;
+  border: 2px solid white;
+  border-radius: 50%;
+
+  &--teacher {
+    background: #f59e0b;
+  }
+}
+
+.person-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.person-card__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.person-card__id {
+  font-size: 0.75rem;
+  color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  margin-top: 1rem;
+}
+
+.empty-state__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  background: #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 32px;
+    height: 32px;
+    color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+  }
+
+  &--success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+
+    svg {
+      color: #059669;
+    }
+  }
+}
+
+.empty-state__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem;
+}
+
+.empty-state__text {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.empty-state--success {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+}
+
+// Mobile
+@media (max-width: 640px) {
+  .missing-persons__main {
+    padding: 0 1rem 2rem;
+  }
+
+  .missing-persons__header {
+    padding: 1.5rem 0 1rem;
+  }
+
+  .missing-persons__title {
+    font-size: 1.25rem;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .controls__filter {
+    width: 100%;
+  }
+
+  .person-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+// Tablet and up
+@media (min-width: 768px) {
+  .person-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

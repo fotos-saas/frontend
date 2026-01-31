@@ -1,0 +1,423 @@
+// Host elem - grid cellában kell korlátozni
+:host {
+  display: block;
+  min-width: 0; // Grid overflow fix
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid #3b82f6; // Kék bal sáv - mint a voting-card
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #3b82f6;
+    border-left-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+    transform: translateY(-1px);
+  }
+
+  // Nincs bejelentkezve - szürke bal sáv
+  &.no-session {
+    background: #f9fafb;
+    border-left-color: #9ca3af;
+    opacity: 0.75;
+
+    &:hover {
+      transform: none;
+      border-color: #e5e7eb;
+      border-left-color: #9ca3af;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  // Sikeres bökés feedback
+  &.just-poked {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #86efac;
+    border-left-color: #22c55e;
+    animation: pokedCardFlash 0.3s ease;
+
+    &:hover {
+      border-color: #86efac;
+      border-left-color: #22c55e;
+    }
+  }
+}
+
+@keyframes pokedCardFlash {
+  0% { background: white; }
+  50% { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); }
+  100% { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); }
+}
+
+// ==========================================
+// AVATAR
+// ==========================================
+
+.avatar {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // Tanár avatar - más szín
+  &.teacher {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  }
+
+  .initials {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+}
+
+// ==========================================
+// USER INFO
+// ==========================================
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+
+  .name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .type-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+
+    &.teacher {
+      background: #fef3c7;
+      color: #b45309;
+    }
+  }
+
+  .status {
+    font-size: 0.75rem;
+    text-transform: lowercase;
+
+    &.inactive {
+      color: #9ca3af;
+    }
+
+    &.not-logged-in {
+      color: #f59e0b;
+      font-weight: 500;
+    }
+  }
+}
+
+// ==========================================
+// POKE ACTION
+// ==========================================
+
+.poke-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.poke-count {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  background: #e5e7eb;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.5rem;
+  transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+
+  &.updated {
+    animation: countBump 0.3s ease;
+    color: #ea580c;
+    background: #ffedd5;
+  }
+}
+
+@keyframes countBump {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+.no-session-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: #e5e7eb;
+  border-radius: 50%;
+
+  .emoji {
+    font-size: 1rem;
+    opacity: 0.6;
+  }
+}
+
+// ==========================================
+// POKE BUTTON WRAPPER + TOOLTIP
+// ==========================================
+
+.poke-btn-wrapper {
+  position: relative;
+
+  // Tooltip megjelenítése disabled állapotban
+  &[data-tooltip]:hover::after,
+  &[data-tooltip]:focus-within::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+    animation: tooltipFadeIn 0.15s ease;
+  }
+
+  // Tooltip nyíl
+  &[data-tooltip]:hover::before,
+  &[data-tooltip]:focus-within::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 0.25rem);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.85);
+    z-index: 10;
+    pointer-events: none;
+    animation: tooltipFadeIn 0.15s ease;
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+// ==========================================
+// POKE SUCCESS STATE
+// ==========================================
+
+.poke-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #22c55e;
+  color: white;
+  border-radius: 50%;
+  animation: pokeSuccessPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  .emoji {
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+}
+
+@keyframes pokeSuccessPop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+// ==========================================
+// POKE BUTTON
+// ==========================================
+
+.poke-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  border: none;
+  border-radius: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+
+  &:hover:not(.disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  }
+
+  &:active:not(.disabled) {
+    transform: scale(0.95);
+  }
+
+  &.disabled {
+    background: #e5e7eb;
+    cursor: not-allowed;
+    color: #9ca3af;
+
+    .emoji {
+      opacity: 0.7;
+    }
+  }
+
+  .emoji {
+    font-size: 1rem;
+  }
+
+  .label {
+    text-transform: lowercase;
+  }
+}
+
+// ==========================================
+// DARK MODE
+// ==========================================
+
+@media (prefers-color-scheme: dark) {
+  .user-card {
+    background: #1f2937;
+    border-color: #374151;
+    border-left-color: #3b82f6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      border-color: #3b82f6;
+      border-left-color: #60a5fa;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    &.no-session {
+      background: #1f2937;
+      border-left-color: #6b7280;
+      opacity: 0.7;
+
+      &:hover {
+        border-color: #374151;
+        border-left-color: #6b7280;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    // Dark mode just-poked state
+    &.just-poked {
+      background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+      border-color: #22c55e;
+      border-left-color: #4ade80;
+    }
+  }
+
+  .user-info {
+    .name {
+      color: #f3f4f6;
+    }
+
+    .type-badge.teacher {
+      background: #78350f;
+      color: #fcd34d;
+    }
+
+    .status.inactive {
+      color: #6b7280;
+    }
+
+    .status.not-logged-in {
+      color: #fbbf24;
+    }
+  }
+
+  .poke-count {
+    background: #4b5563;
+    color: #9ca3af;
+
+    &.updated {
+      background: #7c2d12;
+      color: #fdba74;
+    }
+  }
+
+  .poke-btn.disabled {
+    background: #4b5563;
+    color: #6b7280;
+  }
+
+  .no-session-badge {
+    background: #4b5563;
+  }
+
+  // Tooltip dark mode
+  .poke-btn-wrapper {
+    &[data-tooltip]:hover::after,
+    &[data-tooltip]:focus-within::after {
+      background: rgba(31, 41, 55, 0.95);
+      border: 1px solid #4b5563;
+    }
+
+    &[data-tooltip]:hover::before,
+    &[data-tooltip]:focus-within::before {
+      border-top-color: rgba(31, 41, 55, 0.95);
+    }
+  }
+}
+
+// ==========================================
+// REDUCED MOTION
+// ==========================================
+
+@media (prefers-reduced-motion: reduce) {
+  .user-card,
+  .poke-btn,
+  .poke-count {
+    transition-duration: 0.01ms !important;
+  }
+
+  .poke-btn-wrapper[data-tooltip]::after,
+  .poke-btn-wrapper[data-tooltip]::before,
+  .poke-success,
+  .poke-count.updated,
+  .user-card.just-poked {
+    animation: none !important;
+  }
+}

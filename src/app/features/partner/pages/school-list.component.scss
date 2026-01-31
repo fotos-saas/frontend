@@ -1,0 +1,141 @@
+@use '../../../shared/styles/list-page' as list;
+
+.school-list-page {
+  @extend .list-page;
+}
+
+// Header - közös stílusok
+.page-header { @extend .page-header; }
+.subtitle { @extend .subtitle; }
+.btn-primary { @extend .btn-primary; }
+
+// Filters - közös stílusok
+.filters { @extend .filters; }
+.search-box { @extend .search-box; }
+.search-icon { @extend .search-icon; }
+.search-input { @extend .search-input; }
+.clear-btn { @extend .clear-btn; }
+
+// Table Header
+.table-header {
+  @extend .table-header;
+  grid-template-columns: 1fr 100px 80px;
+}
+
+.th { @extend .th; }
+.th-projects { text-align: center; }
+.th-actions { @extend .th-actions; }
+
+// School Grid - specifikus
+.school-grid {
+  @extend .row-grid;
+}
+
+.school-row {
+  @extend .list-row;
+  grid-template-columns: 1fr 100px 80px;
+}
+
+.school-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.school-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.school-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.school-name {
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.school-city {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.school-projects {
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.projects-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 4px 10px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+
+  &--active {
+    background: linear-gradient(135deg, var(--color-primary, #1e3a5f) 0%, var(--color-primary-light, #2d5a8a) 100%);
+    color: #ffffff;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.school-actions {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+// Action buttons - közös stílusok
+.action-btn { @extend .action-btn; }
+.action-btn--danger { @extend .action-btn--danger; }
+
+// States - közös stílusok
+.empty-state { @extend .empty-state; }
+.empty-icon { @extend .empty-icon; }
+.loading-state { @extend .loading-state; }
+.skeleton-row { @extend .skeleton-row; }
+.skeleton-shimmer { @extend .skeleton-shimmer; }
+.mt-4 { @extend .mt-4; }
+
+// Pagination - közös stílusok
+.pagination { @extend .pagination; }
+.page-btn { @extend .page-btn; }
+.page-info { @extend .page-info; }
+.total-count { @extend .total-count; }
+
+// Responsive
+@media (max-width: 640px) {
+  .table-header {
+    display: none;
+  }
+
+  .school-row {
+    grid-template-columns: 1fr 80px;
+  }
+
+  .school-actions {
+    display: none;
+  }
+}

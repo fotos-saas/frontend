@@ -1,0 +1,367 @@
+/**
+ * Lightbox Mobile & Responsive Styles
+ * Height-based és width-based adaptálás
+ */
+
+// ============================================
+// HEIGHT-BASED RESPONSIVE (KRITIKUS!)
+// ============================================
+
+// Közepes magasság (max 700px) - spacing csökkentés
+@media (max-height: 700px) {
+  .lightbox {
+    padding: 12px;
+
+    &__container {
+      // Tighter spacing
+      margin: -4px;
+
+      > * {
+        margin: 4px;
+      }
+    }
+
+    &__header {
+      padding: 10px 16px;
+    }
+
+    &__main {
+      margin: -12px;
+
+      > * {
+        margin: 12px;
+      }
+    }
+
+    &__gallery {
+      padding: 4px 0;
+
+      &-track {
+        margin: -2px;
+
+        > * {
+          margin: 2px;
+        }
+      }
+    }
+
+    &__thumbnail {
+      width: 64px;
+      height: 64px;
+    }
+
+    &__info {
+      padding: 20px 24px;
+    }
+  }
+}
+
+// Kis magasság (max 600px) - header átalakítás
+@media (max-height: 600px) {
+  .lightbox {
+    padding: 8px;
+
+    &__container {
+      margin: -2px;
+
+      > * {
+        margin: 2px;
+      }
+    }
+
+    // Header: counter eltávolítása, csak close gomb
+    &__header {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      left: auto;
+      width: auto;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border: none;
+      border-radius: 8px;
+      z-index: calc(var(--z-lightbox-content) + 1);
+    }
+
+    &__header-content {
+      justify-content: flex-end;
+    }
+
+    // Counter elrejtése kis magasságnál
+    &__counter {
+      display: none;
+    }
+
+    &__close {
+      padding: 4px;
+    }
+
+    &__main {
+      margin: -8px;
+
+      > * {
+        margin: 8px;
+      }
+    }
+
+    &__gallery {
+      padding: 2px 0;
+    }
+
+    &__thumbnail {
+      width: 56px;
+      height: 56px;
+    }
+
+    &__info {
+      padding: 16px 20px;
+
+      &-grid {
+        margin: -4px;
+
+        > * {
+          margin: 4px;
+        }
+      }
+    }
+
+    &__template-title {
+      font-size: 16px;
+    }
+
+    &__button {
+      padding: 10px 20px;
+      min-height: 44px;
+    }
+  }
+}
+
+// Nagyon kis magasság (max 500px) - minimális UI
+@media (max-height: 500px) {
+  .lightbox {
+    padding: 4px;
+
+    &__container {
+      margin: 0;
+
+      > * {
+        margin: 2px;
+      }
+    }
+
+    // Gallery elrejtése nagyon kis magasságnál
+    &__gallery {
+      display: none;
+    }
+
+    &__info {
+      padding: 12px 16px;
+    }
+
+    &__template-title {
+      font-size: 14px;
+    }
+
+    &__template-meta {
+      display: none;
+    }
+
+    &__button {
+      padding: 8px 16px;
+      min-height: 40px;
+      font-size: 13px;
+    }
+  }
+}
+
+// ============================================
+// WIDTH-BASED RESPONSIVE
+// ============================================
+
+// Mobile (max 640px)
+@media (max-width: 640px) {
+  .lightbox {
+    padding: 0;
+
+    &__container {
+      max-height: 100vh;
+      border-radius: 0;
+
+      // Tighter spacing on mobile
+      margin: -6px;
+
+      > * {
+        margin: 6px;
+      }
+    }
+
+    &__header {
+      border-radius: 0;
+      padding: 12px 16px;
+    }
+
+    &__main {
+      // Tighter spacing
+      margin: -8px;
+
+      > * {
+        margin: 8px;
+      }
+    }
+
+    &__arrow {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+
+      &-icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    &__gallery {
+      &-track {
+        padding: 0 4px;
+
+        // Tighter spacing
+        margin: -2px;
+
+        > * {
+          margin: 2px;
+        }
+      }
+    }
+
+    &__thumbnail {
+      width: 60px;
+      height: 60px;
+    }
+
+    &__info {
+      border-radius: 0;
+      padding: 16px;
+
+      &-grid {
+        // Tighter spacing
+        margin: -6px;
+
+        > * {
+          margin: 6px;
+        }
+      }
+    }
+  }
+}
+
+// Tablet (max 768px)
+@media (max-width: 768px) {
+  .lightbox {
+    &__container {
+      max-width: 100%;
+    }
+
+    // NEM állítunk fix max-height-et a képre!
+    // A kép dinamikusan alkalmazkodik a rendelkezésre álló helyhez
+
+    &__template-title {
+      font-size: 18px;
+    }
+
+    &__button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+// Large desktop (min 1400px)
+@media (min-width: 1400px) {
+  .lightbox {
+    &__container {
+      max-width: 1600px;
+    }
+
+    // NEM állítunk fix max-height-et a képre!
+    // A kép dinamikusan alkalmazkodik a rendelkezésre álló helyhez
+  }
+}
+
+// ============================================
+// COMBINED HEIGHT + WIDTH (Mobil landscape)
+// ============================================
+
+// Mobil landscape mód
+@media (max-height: 500px) and (max-width: 900px) {
+  .lightbox {
+    &__header {
+      top: 4px;
+      right: 4px;
+      padding: 6px;
+    }
+
+    &__arrow {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      min-height: 36px;
+
+      &-icon {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    &__info {
+      padding: 8px 12px;
+    }
+
+    &__button {
+      padding: 6px 12px;
+      min-height: 36px;
+      font-size: 12px;
+    }
+  }
+}
+
+// ============================================
+// TOUCH DEVICES
+// ============================================
+
+@media (hover: none) and (pointer: coarse) {
+  .lightbox {
+    &__arrow {
+      width: 56px;
+      height: 56px;
+      min-width: 56px;
+      min-height: 56px;
+    }
+
+    &__thumbnail {
+      width: 72px;
+      height: 72px;
+    }
+
+    &__button {
+      min-height: 52px; // Nagyobb touch target
+    }
+  }
+}
+
+// ============================================
+// REDUCED MOTION
+// ============================================
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox {
+    &__container,
+    &__overlay,
+    &__arrow,
+    &__thumbnail,
+    &__button {
+      transition: none;
+    }
+  }
+}

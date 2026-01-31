@@ -1,0 +1,172 @@
+<div class="order-finalization page-card">
+  <!-- Loading overlay -->
+  @if (loading()) {
+    <div class="order-finalization__loading">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- Header -->
+  <header class="order-finalization__header">
+    <h1 class="order-finalization__title">Megrendelés véglegesítése</h1>
+    <p class="order-finalization__subtitle">Töltsd ki az alábbi adatokat a tabló elkészítéséhez</p>
+  </header>
+
+  <!-- Stepper -->
+  <nav class="stepper" aria-label="Megrendelés lépései">
+    @for (step of steps; track step; let i = $index) {
+      <button
+        type="button"
+        class="stepper__step"
+        [class.stepper__step--active]="currentStep() === i"
+        [class.stepper__step--completed]="stepsCompleted()[i] && currentStep() !== i"
+        [class.stepper__step--accessible]="stepsAccessible()[i]"
+        [disabled]="!stepsAccessible()[i]"
+        [attr.aria-current]="currentStep() === i ? 'step' : null"
+        (click)="goToStep(i)"
+      >
+        <span class="stepper__number">
+          @if (stepsCompleted()[i] && currentStep() > i) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="sr-only">Kitöltve:</span>
+          } @else {
+            {{ i + 1 }}
+          }
+        </span>
+        <span class="stepper__label">{{ step }}</span>
+      </button>
+      @if (i < steps.length - 1) {
+        <div class="stepper__line" [class.stepper__line--completed]="stepsCompleted()[i]"></div>
+      }
+    }
+  </nav>
+
+  <!-- Form Content -->
+  <main id="main-content" #stepContent class="order-finalization__content" role="main" aria-live="polite" tabindex="-1">
+    @switch (currentStep()) {
+      <!-- Step 1: Kapcsolattartó -->
+      @case (0) {
+        <app-contact-step
+          [data]="contactData()"
+          (dataChange)="updateContactData($event)"
+        />
+      }
+
+      <!-- Step 2: Alap adatok -->
+      @case (1) {
+        <app-basic-info-step
+          [data]="basicInfoData()"
+          (dataChange)="updateBasicInfoData($event)"
+        />
+      }
+
+      <!-- Step 3: Elképzelés -->
+      @case (2) {
+        <app-design-step
+          [data]="designData()"
+          [backgroundFileName]="backgroundFileName()"
+          [attachmentFileNames]="attachmentFileNames()"
+          (dataChange)="updateDesignData($event)"
+          (backgroundFileNameChange)="backgroundFileName.set($event)"
+          (attachmentFileNamesChange)="attachmentFileNames.set($event)"
+        />
+      }
+
+      <!-- Step 4: Névsor -->
+      @case (3) {
+        <app-roster-step
+          [data]="rosterData()"
+          (dataChange)="updateRosterData($event)"
+        />
+      }
+    }
+  </main>
+
+  <!-- Navigation Buttons -->
+  <footer class="order-finalization__footer">
+    <div class="order-finalization__actions">
+      <!-- Auto-save indikátor -->
+      @if (autoSaveStatus() !== 'idle') {
+        <div class="autosave-indicator"
+             [class.autosave-indicator--saving]="autoSaveStatus() === 'saving'"
+             [class.autosave-indicator--saved]="autoSaveStatus() === 'saved'"
+             [class.autosave-indicator--error]="autoSaveStatus() === 'error'">
+          @if (autoSaveStatus() === 'saving') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+              <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+            </svg>
+            <span>Mentés...</span>
+          } @else if (autoSaveStatus() === 'saved') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Mentve</span>
+          } @else if (autoSaveStatus() === 'error') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+            <span>Hiba a mentéskor</span>
+          }
+        </div>
+      }
+
+      @if (currentStep() > 0) {
+        <button type="button" class="btn btn--secondary" (click)="prevStep()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Vissza
+        </button>
+      }
+
+      <div class="order-finalization__actions-right">
+        @if (currentStep() === 3) {
+          <button
+            type="button"
+            class="btn btn--outline"
+            (click)="openPreview()"
+            [disabled]="loading()"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Előnézet
+          </button>
+
+          <button
+            type="button"
+            class="btn btn--primary"
+            (click)="submitOrder()"
+            [disabled]="!allStepsValid() || submitting()"
+          >
+            @if (submitting()) {
+              <div class="spinner spinner--small" aria-hidden="true"></div>
+              Feldolgozás...
+            } @else {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Véglegesítem a tervet
+            }
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn btn--primary"
+            (click)="nextStep()"
+            [disabled]="!currentStepValid()"
+          >
+            Következő
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        }
+      </div>
+    </div>
+  </footer>
+</div>

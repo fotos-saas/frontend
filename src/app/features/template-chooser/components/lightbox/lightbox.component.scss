@@ -1,0 +1,15 @@
+/**
+ * Lightbox Component Styles - Modular Import
+ * Tablostudio product-lightbox alapján
+ * Safari kompatibilis (no CSS gap in flexbox)
+ */
+
+// Import all lightbox style modules
+@import '../../styles/lightbox-base';
+@import '../../styles/lightbox-header';
+@import '../../styles/lightbox-image';
+@import '../../styles/lightbox-navigation';
+@import '../../styles/lightbox-gallery';
+@import '../../styles/lightbox-info';
+@import '../../styles/lightbox-animations';
+@import '../../styles/lightbox-mobile';

@@ -1,0 +1,249 @@
+<!-- Guest Name Dialog -->
+@if (showGuestNameDialog()) {
+  <app-guest-name-dialog
+    [isSubmitting]="isGuestRegistering()"
+    [errorMessage]="guestError()"
+    [canClose]="false"
+    (resultEvent)="onGuestNameResult($event)"
+  />
+}
+
+<!-- Create/Edit Post Dialog -->
+<app-create-post-dialog
+  *ngIf="showCreateDialog()"
+  [editPost]="editingPost() ?? undefined"
+  (resultEvent)="onCreatePostResult($event)"
+/>
+
+<!-- Delete Confirm Dialog (Poszt) -->
+@if (showDeleteDialog()) {
+  <app-confirm-dialog
+    title="Bejegyzés törlése"
+    message="Biztosan törölni szeretnéd ezt a bejegyzést? A képek és hozzászólások is törlődnek. Ez a művelet nem visszavonható."
+    confirmText="Törlés"
+    cancelText="Mégse"
+    confirmType="danger"
+    [isSubmitting]="isDeleting()"
+    (resultEvent)="onDeleteDialogResult($event)"
+  />
+}
+
+<!-- Delete Confirm Dialog (Komment) -->
+@if (showCommentDeleteDialog()) {
+  <app-confirm-dialog
+    title="Hozzászólás törlése"
+    message="Biztosan törölni szeretnéd ezt a hozzászólást?"
+    confirmText="Törlés"
+    cancelText="Mégse"
+    confirmType="danger"
+    (resultEvent)="onCommentDeleteDialogResult($event)"
+  />
+}
+
+<div class="newsfeed-list page-card">
+  <!-- Header -->
+  <header class="newsfeed-list__header">
+    <div class="newsfeed-list__title-wrap">
+      <h1 class="newsfeed-list__title">Hírfolyam</h1>
+      <p class="newsfeed-list__subtitle">Az osztály közös hírportálja</p>
+    </div>
+
+    <!-- Create button (mindenki) -->
+    <button class="newsfeed-list__create-btn" (click)="createPost()" aria-label="Új bejegyzés létrehozása">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Új bejegyzés
+    </button>
+  </header>
+
+  <!-- Filter tabs -->
+  <div class="newsfeed-list__filters" role="tablist" aria-label="Bejegyzés típus szűrő" #filterContainer>
+    <button
+      class="newsfeed-list__filter-btn"
+      [class.newsfeed-list__filter-btn--active]="activeFilter() === 'all'"
+      (click)="onFilterChange('all')"
+      [attr.aria-pressed]="activeFilter() === 'all'"
+      role="tab"
+      #filterBtn
+    >
+      Mind
+    </button>
+    <button
+      class="newsfeed-list__filter-btn"
+      [class.newsfeed-list__filter-btn--active]="activeFilter() === 'announcement'"
+      (click)="onFilterChange('announcement')"
+      [attr.aria-pressed]="activeFilter() === 'announcement'"
+      role="tab"
+      #filterBtn
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+      </svg>
+      Bejelentések
+    </button>
+    <button
+      class="newsfeed-list__filter-btn"
+      [class.newsfeed-list__filter-btn--active]="activeFilter() === 'event'"
+      (click)="onFilterChange('event')"
+      [attr.aria-pressed]="activeFilter() === 'event'"
+      role="tab"
+      #filterBtn
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Események
+    </button>
+    <!-- Sliding indicator -->
+    <div class="newsfeed-list__filter-indicator" aria-hidden="true"></div>
+  </div>
+
+  <!-- Loading Skeleton -->
+  <div class="newsfeed-list__skeleton" *ngIf="isLoading()" role="status" aria-live="polite" aria-label="Bejegyzések betöltése...">
+    <!-- Skeleton Card 1 -->
+    <div class="newsfeed-list__skeleton-card" aria-hidden="true">
+      <div class="newsfeed-list__skeleton-header">
+        <div class="newsfeed-list__skeleton-badge skeleton-shimmer"></div>
+      </div>
+      <div class="newsfeed-list__skeleton-title skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-text skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-text skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-footer">
+        <div class="newsfeed-list__skeleton-meta skeleton-shimmer"></div>
+        <div class="newsfeed-list__skeleton-stats">
+          <div class="newsfeed-list__skeleton-stat skeleton-shimmer"></div>
+          <div class="newsfeed-list__skeleton-stat skeleton-shimmer"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Skeleton Card 2 -->
+    <div class="newsfeed-list__skeleton-card" aria-hidden="true">
+      <div class="newsfeed-list__skeleton-header">
+        <div class="newsfeed-list__skeleton-badge skeleton-shimmer"></div>
+      </div>
+      <div class="newsfeed-list__skeleton-title skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-text skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-text skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-footer">
+        <div class="newsfeed-list__skeleton-meta skeleton-shimmer"></div>
+        <div class="newsfeed-list__skeleton-stats">
+          <div class="newsfeed-list__skeleton-stat skeleton-shimmer"></div>
+          <div class="newsfeed-list__skeleton-stat skeleton-shimmer"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Skeleton Card 3 -->
+    <div class="newsfeed-list__skeleton-card" aria-hidden="true">
+      <div class="newsfeed-list__skeleton-header">
+        <div class="newsfeed-list__skeleton-badge skeleton-shimmer"></div>
+      </div>
+      <div class="newsfeed-list__skeleton-title skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-text skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-text skeleton-shimmer"></div>
+      <div class="newsfeed-list__skeleton-footer">
+        <div class="newsfeed-list__skeleton-meta skeleton-shimmer"></div>
+        <div class="newsfeed-list__skeleton-stats">
+          <div class="newsfeed-list__skeleton-stat skeleton-shimmer"></div>
+          <div class="newsfeed-list__skeleton-stat skeleton-shimmer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="newsfeed-list__error" *ngIf="errorMessage() && !isLoading()" role="alert">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <p>{{ errorMessage() }}</p>
+    <button (click)="loadPosts()" aria-label="Bejegyzések újratöltése">Újrapróbálkozás</button>
+  </div>
+
+  <!-- Main content -->
+  <div class="newsfeed-list__main" *ngIf="!isLoading() && !errorMessage()">
+    <!-- Empty state -->
+    <div class="newsfeed-list__empty" *ngIf="posts().length === 0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2"/>
+      </svg>
+      <h3>Még nincsenek bejegyzések</h3>
+      <p>Légy az első, aki hírt oszt meg!</p>
+      <button (click)="createPost()">
+        Új bejegyzés létrehozása
+      </button>
+    </div>
+
+    <!-- Posts list -->
+    <div class="newsfeed-list__content" *ngIf="posts().length > 0">
+      <!-- Pinned posts -->
+      <section class="newsfeed-list__section" *ngIf="pinnedPosts().length > 0">
+        <h2 class="newsfeed-list__section-title">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+          </svg>
+          Kitűzött bejegyzések
+        </h2>
+        <div class="newsfeed-list__posts">
+          <app-newsfeed-card
+            *ngFor="let post of pinnedPosts(); trackBy: trackByPostId"
+            [post]="post"
+            [comments]="getCommentsForPost(post.id)"
+            [commentsLoading]="isCommentsLoading(post.id)"
+            [canPin]="isContact()"
+            (reactionSelected)="onReaction(post, $event)"
+            (pinClick)="onTogglePin(post)"
+            (editClick)="onCardEditClick(post)"
+            (deleteClick)="onPostDeleteClick(post)"
+            (openLightbox)="onCardLightbox($event)"
+            (toggleComments)="onToggleComments(post)"
+            (submitComment)="onSubmitComment(post, $event)"
+            (deleteComment)="onDeleteComment(post, $event)"
+            (commentReaction)="onCommentReaction(post, $event.comment, $event.reaction)"
+          />
+        </div>
+      </section>
+
+      <!-- Regular posts -->
+      <section class="newsfeed-list__section" *ngIf="regularPosts().length > 0">
+        <h2 class="newsfeed-list__section-title" *ngIf="pinnedPosts().length > 0">
+          Legfrissebb bejegyzések
+        </h2>
+        <div class="newsfeed-list__posts">
+          <app-newsfeed-card
+            *ngFor="let post of regularPosts(); trackBy: trackByPostId"
+            [post]="post"
+            [comments]="getCommentsForPost(post.id)"
+            [commentsLoading]="isCommentsLoading(post.id)"
+            [canPin]="isContact()"
+            (reactionSelected)="onReaction(post, $event)"
+            (pinClick)="onTogglePin(post)"
+            (editClick)="onCardEditClick(post)"
+            (deleteClick)="onPostDeleteClick(post)"
+            (openLightbox)="onCardLightbox($event)"
+            (toggleComments)="onToggleComments(post)"
+            (submitComment)="onSubmitComment(post, $event)"
+            (deleteComment)="onDeleteComment(post, $event)"
+            (commentReaction)="onCommentReaction(post, $event.comment, $event.reaction)"
+          />
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Media Lightbox -->
+<app-media-lightbox
+  *ngIf="lightboxOpen()"
+  [media]="lightboxMedia()"
+  [currentIndex]="lightboxIndex()"
+  (close)="closeLightbox()"
+  (navigate)="onLightboxNavigate($event)"
+/>

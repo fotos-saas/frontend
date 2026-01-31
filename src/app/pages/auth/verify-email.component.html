@@ -1,0 +1,48 @@
+<app-auth-layout>
+  <div class="verify-email-page__card w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 text-center">
+
+    <!-- Loading state -->
+    @if (isLoading()) {
+      <div class="verify-email-page__loading py-4">
+        <span class="verify-email-page__spinner-large"></span>
+        <h2 class="text-xl font-bold text-gray-900 mt-4 mb-1">Email cím megerősítése...</h2>
+        <p class="text-sm text-gray-600">Kérlek várj...</p>
+      </div>
+    }
+
+    <!-- Success state -->
+    @else if (successMessage()) {
+      <div class="verify-email-page__success py-4">
+        <div class="verify-email-page__icon verify-email-page__icon--success mx-auto mb-4 w-20 h-20 rounded-full bg-green-50 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-green-500">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-gray-900 mb-1">
+          {{ alreadyVerified() ? 'Már megerősítve!' : 'Sikeres megerősítés!' }}
+        </h2>
+        <p class="text-sm text-gray-600 mb-4">{{ successMessage() }}</p>
+        <a routerLink="/login" class="verify-email-page__btn inline-block px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-md text-sm">
+          Bejelentkezés
+        </a>
+      </div>
+    }
+
+    <!-- Error state -->
+    @else if (errorMessage()) {
+      <div class="verify-email-page__error py-4">
+        <div class="verify-email-page__icon verify-email-page__icon--error mx-auto mb-4 w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-red-500">
+            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-gray-900 mb-1">Hiba történt</h2>
+        <p class="text-sm text-gray-600 mb-4">{{ errorMessage() }}</p>
+        <a routerLink="/login" class="verify-email-page__btn verify-email-page__btn--secondary inline-block px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors text-sm">
+          Bejelentkezés
+        </a>
+      </div>
+    }
+
+  </div>
+</app-auth-layout>

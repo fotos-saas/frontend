@@ -1,0 +1,12 @@
+# Playwright artifact-ok
+playwright-report/
+test-results/
+.auth/
+
+# Playwright cache
+.cache/
+.gradlew
+.gradle
+
+# Opcionális: vidéók és trace fájlok (nagy méretűek)
+# Megjegyzés: Git-ben nem tárolunk, CI pipeline-ban generálódnak

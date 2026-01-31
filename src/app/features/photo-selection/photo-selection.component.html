@@ -1,0 +1,153 @@
+<div class="photo-selection page-card">
+  @if (!projectContext.isLoaded()) {
+    <!-- Projekt betöltődik -->
+    <app-loading-skeleton />
+  } @else if (projectContext.isInactive()) {
+    <!-- Inaktív állapot - nincs galéria -->
+    <app-inactive-state
+      [isCoordinator]="projectContext.isCoordinator()"
+      [hasPhotoDate]="projectContext.hasPhotoDate()"
+      [formattedPhotoDate]="projectContext.formattedPhotoDate()"
+      (setPhotoDate)="onSetPhotoDate()"
+    />
+  }
+
+  @if (!projectContext.isInactive() && projectContext.hasGallery()) {
+    <!-- Workflow header + Step Indicator EGY SORBAN -->
+    <app-workflow-header
+      [title]="'Képválasztás'"
+      [description]="stepInfo?.description || null"
+    >
+      <!-- Stepper a header jobb oldalán -->
+      <app-step-indicator
+        [currentStep]="state.displayedStep()"
+        [allowClick]="false"
+        (infoClick)="onInfoIconClick($event)"
+      />
+    </app-workflow-header>
+
+    <!-- Error message -->
+    @if (state.errorMessage()) {
+      <app-error-message
+        [message]="state.errorMessage()!"
+        (closeEvent)="state.clearError()"
+      />
+    }
+
+    <!-- Main content -->
+    <main class="photo-selection__content">
+      @if (state.isLoading()) {
+        <!-- Loading skeleton -->
+        <app-loading-skeleton />
+      } @else if (state.isCompleted() && !state.viewingStep()) {
+        <!-- Completed state -->
+        <app-completed-summary
+          [progress]="state.progress()"
+          [tabloPhoto]="state.tabloPhoto()"
+          (tabloClick)="onTabloClick($event)"
+        />
+      } @else {
+        <!-- Selection grid (readonly ha finalized) -->
+        <app-selection-grid
+          [photos]="state.visiblePhotos()"
+          [selectedIds]="state.selectedPhotoIds()"
+          [allowMultiple]="state.allowMultiple()"
+          [maxSelection]="state.maxSelection()"
+          [isLoading]="state.isLoading()"
+          [isSaving]="state.isSaving()"
+          [saveSuccess]="state.saveSuccess()"
+          [emptyMessage]="state.emptyStateMessage()"
+          [emptyDescription]="state.emptyStateDescription()"
+          [readonly]="state.isFinalized()"
+          [useVirtualScroll]="state.useVirtualScroll()"
+          [pageSize]="state.paginationConfig().pageSize"
+          [totalPhotosCount]="state.totalPhotosCount()"
+          (selectionChange)="onSelectionChange($event)"
+          (zoomClick)="onZoomClick($event)"
+          (maxReachedClick)="onMaxReachedClick($event)"
+          (loadMore)="onLoadMore()"
+          (deselectAllClick)="onDeselectAllClick()"
+        />
+      }
+    </main>
+
+  }
+</div>
+
+<!-- NAVIGATION FOOTER A PAGE-CARD KÍVÜL (backdrop-filter stacking context miatt) -->
+<!-- A position: fixed csak így működik helyesen -->
+@if (!projectContext.isInactive() && projectContext.hasGallery() && !state.isLoading() && !state.isCompleted()) {
+  <app-navigation-footer
+    [currentStep]="state.currentStep()"
+    [canGoBack]="state.canGoBack()"
+    [canProceed]="state.canProceed()"
+    [isSaving]="state.isSaving()"
+    [validationError]="state.validationError()"
+    [showReturnButton]="state.showReturnButton()"
+    (previousStep)="onPreviousStep()"
+    (nextStep)="onNextStep()"
+    (returnToCompleted)="onReturnToCompleted()"
+  />
+}
+
+<!-- DIALÓGUSOK ÉS LIGHTBOXOK A PAGE-CARD KÍVÜL (backdrop-filter stacking context miatt) -->
+
+<!-- Info Dialog - lazy load idle állapotban -->
+@defer (on idle) {
+  @if (state.infoDialog.isOpen()) {
+    <app-step-info-dialog
+      [step]="state.currentStep()"
+      [projectId]="projectContext.projectId()"
+      [maxPhotos]="state.maxSelection()"
+      (closeEvent)="onInfoDialogClose()"
+    />
+  }
+}
+
+<!-- Confirm Dialog (véglegesítéshez) - lazy load idle állapotban -->
+@defer (on idle) {
+  @if (state.confirmDialog.isOpen()) {
+    <app-confirm-dialog
+      title="Képválasztás véglegesítése"
+      message="Biztosan véglegesíted a választásodat? Ez a művelet nem vonható vissza."
+      confirmText="Véglegesítés"
+      confirmType="primary"
+      [isSubmitting]="state.confirmDialog.isSubmitting()"
+      (resultEvent)="onConfirmDialogResult($event)"
+    />
+  }
+}
+
+<!-- Deselect Confirm Dialog (kijelölés törléséhez) - lazy load idle állapotban -->
+@defer (on idle) {
+  @if (state.deselectConfirmDialog.isOpen()) {
+    <app-confirm-dialog
+      title="Kijelölés törlése"
+      message="Biztosan törlöd az összes kijelölést? Ha már választottál retusálandó képeket, azokat újra ki kell majd választanod."
+      confirmText="Törlés"
+      confirmType="danger"
+      (resultEvent)="onDeselectConfirmResult($event)"
+    />
+  }
+}
+
+<!-- Workflow Media Lightbox - lazy load idle állapotban -->
+@defer (on idle) {
+  @if (state.lightboxOpen()) {
+    <app-media-lightbox
+      [media]="state.lightboxMedia()"
+      [currentIndex]="state.lightboxIndex()"
+      (close)="state.closeLightbox()"
+      (navigate)="state.navigateLightbox($event)"
+    />
+  }
+}
+
+<!-- Schedule Reminder Dialog (fotózás időpont beállítása) - lazy load idle állapotban -->
+@defer (on idle) {
+  @if (showScheduleDialog()) {
+    <app-schedule-reminder-dialog
+      (resultEvent)="onScheduleDialogResult($event)"
+    />
+  }
+}

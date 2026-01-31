@@ -1,0 +1,375 @@
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { UploadedPhoto } from '../../../services/partner.service';
+import { PersonWithPhoto } from './step-review.types';
+
+/**
+ * Személykártya drag & drop támogatással.
+ * Megjeleníti a személyt és a hozzárendelt fotót.
+ */
+@Component({
+  selector: 'app-review-person-card',
+  standalone: true,
+  imports: [DragDropModule, LucideAngularModule],
+  template: `
+    <div
+      class="person-card"
+      [class.person-card--empty]="!person().assignedPhoto && !person().hasExistingPhoto"
+      [class.person-card--assigned]="person().assignedPhoto"
+      [class.person-card--paired]="person().hasExistingPhoto && !person().assignedPhoto"
+      [class.person-card--high]="person().matchConfidence === 'high'"
+      [class.person-card--medium]="person().matchConfidence === 'medium'"
+      [style.animation-delay]="animationDelay()"
+      cdkDropList
+      [id]="'person-' + person().id"
+      [cdkDropListData]="person()"
+      [cdkDropListConnectedTo]="connectedDropLists()"
+      (cdkDropListDropped)="onDrop($event)"
+    >
+      <!-- Photo Area -->
+      <div
+        class="photo-area"
+        [class.photo-area--empty]="!person().assignedPhoto && !person().hasExistingPhoto"
+      >
+        @if (person().assignedPhoto) {
+          <!-- Új kép hozzárendelve -->
+          <div class="photo-drag-wrapper" cdkDrag [cdkDragData]="person()">
+            <img
+              [src]="person().assignedPhoto!.thumbUrl"
+              [alt]="person().name"
+              class="person-photo"
+              (click)="photoClick.emit(person().assignedPhoto!); $event.stopPropagation()"
+            />
+            <img *cdkDragPreview [src]="person().assignedPhoto!.thumbUrl" class="drag-preview-img" />
+            <div *cdkDragPlaceholder class="person-placeholder">
+              <span class="person-placeholder__name">{{ person().name }}</span>
+            </div>
+          </div>
+          <div class="photo-actions">
+            <button
+              class="action-btn action-btn--remove"
+              (click)="removeClick.emit(); $event.stopPropagation()"
+              title="Eltávolítás"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="12" />
+            </button>
+          </div>
+          @if (person().matchConfidence) {
+            <div class="confidence-badge" [class.confidence-badge--high]="person().matchConfidence === 'high'">
+              {{ person().matchConfidence === 'high' ? 'Biztos' : 'Valószínű' }}
+            </div>
+          }
+        } @else if (person().hasExistingPhoto) {
+          <!-- Meglévő kép (DB-ből) -->
+          <div class="existing-photo-indicator">
+            <img
+              [src]="person().photoThumbUrl"
+              [alt]="person().name"
+              class="person-photo person-photo--existing"
+            />
+            <div class="existing-badge">
+              <lucide-icon [name]="ICONS.CHECK" [size]="10" />
+              Megvan
+            </div>
+          </div>
+        } @else {
+          <!-- Üres - kép hiányzik -->
+          <div class="empty-photo">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="24" />
+            <span>Húzd ide</span>
+          </div>
+        }
+      </div>
+
+      <!-- Person Info -->
+      <div class="person-info">
+        <span class="person-name" [title]="person().name">{{ person().name }}</span>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .person-card {
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      border: 2px dashed #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      animation: cardFadeIn 0.3s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes cardFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .person-card--assigned {
+      border-style: solid;
+      border-color: #10b981;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+    }
+
+    .person-card--high {
+      border-color: #10b981;
+    }
+
+    .person-card--medium {
+      border-color: #f59e0b;
+    }
+
+    .person-card--empty {
+      border-color: #e2e8f0;
+    }
+
+    .person-card--empty:hover {
+      border-color: var(--color-primary, #1e3a5f);
+      background: #f8fafc;
+    }
+
+    .person-card--paired {
+      border-style: solid;
+      border-color: #10b981;
+    }
+
+    .photo-area {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      background: #f1f5f9;
+      cursor: grab;
+      overflow: hidden;
+    }
+
+    .photo-area:active {
+      cursor: grabbing;
+    }
+
+    .photo-area--empty {
+      cursor: pointer;
+    }
+
+    .photo-drag-wrapper {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    .photo-drag-wrapper:active {
+      cursor: grabbing;
+    }
+
+    .person-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .person-photo--existing {
+      opacity: 0.7;
+    }
+
+    .empty-photo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 6px;
+      color: #94a3b8;
+    }
+
+    .empty-photo span {
+      font-size: 0.6875rem;
+    }
+
+    .photo-actions {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .person-card:hover .photo-actions {
+      opacity: 1;
+    }
+
+    .action-btn {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn--remove {
+      background: rgba(239, 68, 68, 0.9);
+      color: #ffffff;
+    }
+
+    .action-btn--remove:hover {
+      background: #ef4444;
+      transform: scale(1.1);
+    }
+
+    .confidence-badge {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      padding: 2px 6px;
+      background: rgba(245, 158, 11, 0.9);
+      border-radius: 4px;
+      font-size: 0.5625rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .confidence-badge--high {
+      background: rgba(16, 185, 129, 0.9);
+    }
+
+    .existing-photo-indicator {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .existing-badge {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      background: rgba(16, 185, 129, 0.9);
+      border-radius: 4px;
+      font-size: 0.5625rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .person-info {
+      padding: 6px 8px;
+    }
+
+    .person-name {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: default;
+    }
+
+    /* Drag Preview */
+    .drag-preview-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      object-position: top;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border: 2px solid #ffffff;
+    }
+
+    .person-placeholder {
+      width: 72px;
+      min-height: 72px;
+      background: #fef3c7;
+      border: 2px dashed #f59e0b;
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .person-placeholder__name {
+      font-size: 0.5625rem;
+      font-weight: 500;
+      color: #92400e;
+      text-align: center;
+      padding: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    /* CDK Drag styles */
+    :host-context(.cdk-drop-list-receiving) .person-card {
+      border-color: #0ea5e9 !important;
+      background: #f0f9ff;
+    }
+
+    :host-context(.cdk-drop-list-receiving) .photo-area {
+      background: #e0f2fe;
+    }
+
+    :host-context(.cdk-drop-list-receiving) .person-photo {
+      opacity: 0.15;
+    }
+
+    :host-context(.cdk-drop-list-receiving) .empty-photo {
+      color: #0ea5e9;
+    }
+
+    :host-context(.cdk-drop-list-receiving) .photo-actions,
+    :host-context(.cdk-drop-list-receiving) .confidence-badge {
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .photo-area {
+        width: 120px;
+        height: 120px;
+      }
+
+      .person-name {
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ReviewPersonCardComponent {
+  readonly ICONS = ICONS;
+
+  readonly person = input.required<PersonWithPhoto>();
+  readonly animationDelay = input<string>('0s');
+  readonly connectedDropLists = input<string[]>([]);
+
+  readonly photoClick = output<UploadedPhoto>();
+  readonly removeClick = output<void>();
+  readonly drop = output<CdkDragDrop<any>>();
+
+  onDrop(event: CdkDragDrop<any>): void {
+    this.drop.emit(event);
+  }
+}

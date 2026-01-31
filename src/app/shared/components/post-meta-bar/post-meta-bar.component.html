@@ -1,0 +1,37 @@
+<div class="post-meta-bar">
+  <!-- Bal oldal: szerző + idő -->
+  <div class="post-meta-bar__info">
+    <span class="post-meta-bar__author">{{ authorName() }}</span>
+    <button
+      type="button"
+      class="post-meta-bar__time"
+      [class.post-meta-bar__time--clickable]="timeClickable()"
+      [disabled]="!timeClickable()"
+      (click)="onTimeClick()"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      {{ createdAt() | timeAgo }}
+    </button>
+  </div>
+
+  <!-- Jobb oldal: reakciók + hozzászólások -->
+  <div class="post-meta-bar__actions" (click)="$event.stopPropagation()">
+    <app-reaction-picker
+      [reactions]="reactions()"
+      [userReaction]="userReaction()"
+      (reactionSelected)="reactionSelected.emit($event)"
+    />
+
+    @if (showComments()) {
+      <app-comment-button
+        display="icon-text"
+        [label]="commentButtonLabel()"
+        [active]="commentsActive()"
+        (clicked)="commentsClick.emit()"
+      />
+    }
+  </div>
+</div>

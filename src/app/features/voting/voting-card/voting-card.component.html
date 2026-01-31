@@ -1,0 +1,194 @@
+<article class="voting-card"
+  [class.voting-card--active]="poll().isOpen && !hasVoted()"
+  [class.voting-card--voted]="poll().isOpen && hasVoted()"
+  [class.voting-card--closed]="!poll().isOpen">
+  <!-- Header -->
+  <div class="voting-card__header">
+    <!-- Type badge -->
+    <span class="voting-card__type" [class.voting-card__type--template]="poll().type === 'template'">
+      {{ typeBadge() }}
+    </span>
+
+    <!-- Status + Actions -->
+    <div class="voting-card__header-right">
+      <!-- Status indicator -->
+      <span class="voting-card__status"
+        [class.voting-card__status--active]="poll().isOpen && !hasVoted()"
+        [class.voting-card__status--voted]="poll().isOpen && hasVoted()"
+        [class.voting-card__status--closed]="!poll().isOpen"
+      >
+        <span class="voting-card__status-dot"></span>
+        {{ statusText() }}
+      </span>
+
+      <!-- Lakat ikon - mindig látható lezárt állapotban -->
+      @if (!poll().isOpen) {
+        <span class="voting-card__lock-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </span>
+      }
+
+      <!-- Actions (kapcsolattartó only) -->
+      @if (showActions() || showResultsButton()) {
+        <div class="voting-card__actions">
+          <!-- Eredmények gomb (kapcsolattartónak mindig) -->
+          @if (showResultsButton()) {
+            <button
+              type="button"
+              class="voting-card__action-btn voting-card__action-btn--results"
+              (click)="onViewResults($event)"
+              aria-label="Eredmények megtekintése"
+              title="Eredmények"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </button>
+          }
+          <!-- Lezárás gomb (csak ha nyitva van) -->
+          @if (showActions() && poll().isOpen) {
+            <button
+              type="button"
+              class="voting-card__action-btn voting-card__action-btn--close"
+              (click)="onClosePoll($event)"
+              aria-label="Lezárás"
+              title="Lezárás"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </button>
+          }
+          <!-- Megnyitás gomb (csak ha zárva van) -->
+          @if (showActions() && !poll().isOpen) {
+            <button
+              type="button"
+              class="voting-card__action-btn voting-card__action-btn--reopen"
+              (click)="onReopenPoll($event)"
+              aria-label="Megnyitás"
+              title="Megnyitás"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+              </svg>
+            </button>
+          }
+          <!-- Szerkesztés gomb -->
+          @if (showActions()) {
+            <app-edit-button
+              display="icon-only"
+              (clicked)="onEdit()"
+            />
+          }
+          <!-- Törlés gomb -->
+          @if (showActions()) {
+            <app-delete-button
+              display="icon-only"
+              (clicked)="onDelete()"
+            />
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="voting-card__content">
+    <!-- Text wrapper - flex: 1 tolja le a meta sort -->
+    <div class="voting-card__text">
+      <h3 class="voting-card__title">{{ poll().title }}</h3>
+
+      @if (plainDescription()) {
+        <p class="voting-card__description">
+          {{ plainDescription() }}
+        </p>
+      }
+
+      <!-- Media thumbnails - 30x30 kockák a leírás alatt -->
+      @if (hasMedia()) {
+        <div class="voting-card__media-thumbs">
+          @for (media of poll().media; track media.id; let i = $index) {
+            @if (i < 5) {
+              <div class="voting-card__media-thumb" (click)="onThumbnailClick($event, i)">
+                <img [src]="media.url" [alt]="media.fileName" />
+              </div>
+            }
+          }
+          @if (poll().media.length > 5) {
+            <span class="voting-card__media-more">+{{ poll().media.length - 5 }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Meta info -->
+    <div class="voting-card__meta">
+      @if (poll().optionsCount) {
+        <span class="voting-card__meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          {{ poll().optionsCount }} opció
+        </span>
+      }
+
+      @if (participationText()) {
+        <span class="voting-card__meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          {{ participationText() }}
+        </span>
+      }
+
+      @if (closeAtText() && poll().isOpen) {
+        <span class="voting-card__meta-item voting-card__meta-item--deadline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          {{ closeAtText() }}
+        </span>
+      }
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="voting-card__footer">
+    <!-- Multiple choice badge -->
+    @if (poll().isMultipleChoice) {
+      <span class="voting-card__badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <path d="M22 4L12 14.01l-3-3"/>
+        </svg>
+        Több választható
+      </span>
+    }
+
+    <!-- Vote count badge (if voted) -->
+    @if (hasVoted()) {
+      <span class="voting-card__votes">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        {{ poll().myVotes.length }} szavazatod
+      </span>
+    }
+
+    <!-- Arrow -->
+    <span class="voting-card__arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </span>
+  </div>
+</article>

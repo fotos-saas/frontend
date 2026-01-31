@@ -1,0 +1,193 @@
+@use '../../../shared/styles/list-page' as list;
+
+.contact-list-page {
+  @extend .list-page;
+}
+
+// Header - közös stílusok
+.page-header { @extend .page-header; }
+.subtitle { @extend .subtitle; }
+.btn-primary { @extend .btn-primary; }
+
+// Filters - közös stílusok
+.filters { @extend .filters; }
+.search-box { @extend .search-box; }
+.search-icon { @extend .search-icon; }
+.search-input { @extend .search-input; }
+.clear-btn { @extend .clear-btn; }
+
+// Table Header
+.table-header {
+  @extend .table-header;
+  grid-template-columns: 1fr 1fr 120px 80px;
+}
+
+.th { @extend .th; }
+.th-actions { @extend .th-actions; }
+
+// Contact Grid - specifikus
+.contact-grid {
+  @extend .row-grid;
+}
+
+.contact-row {
+  @extend .list-row;
+  grid-template-columns: 1fr 1fr 120px 80px;
+}
+
+.contact-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.contact-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.name-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.primary-badge {
+  display: inline-flex;
+  padding: 2px 6px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--color-primary, #1e3a5f);
+  }
+}
+
+.contact-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-contact {
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  font-style: italic;
+}
+
+.contact-project {
+  cursor: pointer;
+}
+
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary, #1e3a5f);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  max-width: 100%;
+  transition: all 0.15s ease;
+
+  // Szöveg levágása span-nel belül
+  > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.no-project {
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  font-style: italic;
+}
+
+.contact-actions {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+// Action buttons - közös stílusok
+.action-btn { @extend .action-btn; }
+.action-btn--danger { @extend .action-btn--danger; }
+
+// States - közös stílusok
+.empty-state { @extend .empty-state; }
+.empty-icon { @extend .empty-icon; }
+.loading-state { @extend .loading-state; }
+.skeleton-row { @extend .skeleton-row; }
+.skeleton-row--tall { @extend .skeleton-row--tall; }
+.skeleton-shimmer { @extend .skeleton-shimmer; }
+.mt-4 { @extend .mt-4; }
+
+// Pagination - közös stílusok
+.pagination { @extend .pagination; }
+.page-btn { @extend .page-btn; }
+.page-info { @extend .page-info; }
+.total-count { @extend .total-count; }
+
+// Responsive
+@media (max-width: 640px) {
+  .table-header {
+    display: none;
+  }
+
+  .contact-row {
+    grid-template-columns: 1fr 80px;
+    gap: 12px;
+  }
+
+  .contact-info,
+  .contact-project {
+    display: none;
+  }
+
+  .contact-name {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .name-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

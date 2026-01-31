@@ -1,0 +1,64 @@
+<div class="user-card"
+     [class.no-session]="!user().hasGuestSession"
+     [class.just-poked]="justPoked()">
+  <!-- Avatar -->
+  <div class="avatar" [class.teacher]="user().type === 'teacher'" aria-hidden="true">
+    <span class="initials">{{ initials() }}</span>
+  </div>
+
+  <!-- Info -->
+  <div class="user-info">
+    <div class="name-row">
+      <span class="name">{{ user().name }}</span>
+      @if (user().type === 'teacher') {
+        <span class="type-badge teacher">tanár</span>
+      }
+    </div>
+    @if (!user().hasGuestSession) {
+      <span class="status not-logged-in">még nem jelentkezett be</span>
+    } @else if (!user().hasActivity) {
+      <span class="status inactive">még nem aktív</span>
+    }
+  </div>
+
+  <!-- Poke button -->
+  <div class="poke-action">
+    @if (!user().hasGuestSession) {
+      <!-- Nincs session - nem bökhető -->
+      <span class="no-session-badge" aria-label="Nem bökhető - még nem jelentkezett be">
+        <span class="emoji" aria-hidden="true">🔒</span>
+      </span>
+    } @else {
+      @if (pokeCountText()) {
+        <span class="poke-count" [attr.aria-label]="'Küldött bökések: ' + pokeCountText()">{{ pokeCountText() }}</span>
+      }
+
+      @if (justPoked()) {
+        <!-- Sikeres bökés feedback -->
+        <span class="poke-success" aria-label="Bökés elküldve">
+          <span class="emoji" aria-hidden="true">✓</span>
+        </span>
+      } @else {
+        <!-- Tooltip wrapper a disabled állapot magyarázatához -->
+        <div class="poke-btn-wrapper"
+             [attr.data-tooltip]="!user().pokeStatus.canPoke ? pokeTooltip() : null">
+          <button
+            class="poke-btn"
+            [class.disabled]="!user().pokeStatus.canPoke"
+            [attr.aria-disabled]="!user().pokeStatus.canPoke"
+            [attr.aria-label]="pokeTooltip() + ' - ' + user().name"
+            (click)="onPokeClick()"
+            (keydown.enter)="onPokeClick()"
+            (keydown.space)="$event.preventDefault(); onPokeClick()">
+            @if (user().pokeStatus.canPoke) {
+              <span class="emoji" aria-hidden="true">👉</span>
+              <span class="label">bökj</span>
+            } @else {
+              <span class="emoji" aria-hidden="true">🚫</span>
+            }
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>

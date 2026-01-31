@@ -1,0 +1,231 @@
+<article
+  class="newsfeed-card"
+  [class.newsfeed-card--pinned]="isPinned()"
+  [class.newsfeed-card--event]="isEvent()"
+  [class.newsfeed-card--expanded]="isExpanded()"
+  role="article"
+  [attr.aria-label]="'Bejegyzés: ' + post().title"
+>
+  <!-- Header -->
+  <app-post-header-bar
+    class="newsfeed-card__header"
+    [badges]="headerBadges()"
+    [isPinned]="isPinned()"
+    [showActions]="canEdit() || canPin()"
+    [showPinAction]="canPin()"
+    [showEditDelete]="canEdit()"
+    (pinClick)="pinClick.emit()"
+    (editClick)="editClick.emit()"
+    (deleteClick)="deleteClick.emit()"
+  />
+
+  <!-- Content -->
+  <div class="newsfeed-card__content">
+    <!-- Event details -->
+    <div class="newsfeed-card__event-info" *ngIf="isEvent() && post().eventDate">
+      <span class="newsfeed-card__event-date">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        {{ formattedEventDate() }}
+        <span *ngIf="post().eventTime"> · {{ post().eventTime }}</span>
+      </span>
+      <span class="newsfeed-card__event-location" *ngIf="post().eventLocation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        {{ post().eventLocation }}
+      </span>
+    </div>
+
+    <!-- Title + Content -->
+    <app-content-block
+      [title]="post().title"
+      [content]="post().content"
+      [collapsedHeight]="100"
+    />
+
+    <!-- Media preview -->
+    <app-media-grid
+      [media]="mediaItems()"
+      [maxVisible]="3"
+      [thumbnailSize]="64"
+      (mediaClick)="onMediaGridClick($event)"
+    />
+  </div>
+
+  <!-- Footer -->
+  <app-post-meta-bar
+    class="newsfeed-card__footer"
+    [authorName]="post().authorName"
+    [createdAt]="post().createdAt"
+    [reactions]="post().reactions"
+    [userReaction]="post().userReaction"
+    [commentsCount]="post().commentsCount"
+    [commentsActive]="isExpanded()"
+    (reactionSelected)="onReaction($event)"
+    (commentsClick)="onCommentsToggle()"
+  />
+
+  <!-- Comments Section (expandable) -->
+  @if (isExpanded()) {
+    <div class="newsfeed-card__comments" (click)="$event.stopPropagation()">
+      <!-- Új hozzászólás form FELÜL (csak ha NEM válaszolunk) -->
+      @if (!replyingTo()) {
+        <div class="newsfeed-card__comment-section">
+          <form class="newsfeed-card__comment-form" (ngSubmit)="onSubmitComment($event)">
+            <textarea
+              #commentInput
+              class="newsfeed-card__comment-input"
+              [(ngModel)]="newCommentText"
+              name="comment"
+              placeholder="Írd be a hozzászólásodat..."
+              aria-label="Hozzászólás szövege"
+              rows="2"
+              maxlength="1000"
+            ></textarea>
+            <div class="newsfeed-card__comment-form-footer">
+              <span class="newsfeed-card__char-count">{{ charCount }}</span>
+              <button
+                type="submit"
+                class="newsfeed-card__comment-submit"
+                [disabled]="!isCommentValid"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+                Küldés
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Comments list -->
+      @if (commentsLoading()) {
+        <div class="newsfeed-card__comments-loading">
+          <div class="newsfeed-card__spinner"></div>
+          <span>Hozzászólások betöltése...</span>
+        </div>
+      } @else if (comments().length > 0) {
+        <div class="newsfeed-card__comments-list">
+          @for (comment of comments(); track trackByCommentId($index, comment)) {
+            <!-- Comment thread - egy blokkban a szülő és válaszok -->
+            <div class="newsfeed-card__comment-thread" [attr.data-comment-id]="comment.id" [class.newsfeed-card__comment-thread--has-replies]="comment.replies && comment.replies.length > 0">
+              <!-- Szülő komment -->
+              <div class="newsfeed-card__comment-parent">
+                <app-comment-item
+                  [authorName]="comment.authorName"
+                  [authorType]="comment.authorType"
+                  [content]="comment.content"
+                  [createdAt]="comment.createdAt"
+                  [isEdited]="comment.isEdited"
+                  [canDelete]="comment.canDelete"
+                  [showReactions]="true"
+                  [showReply]="true"
+                  [reactions]="comment.reactions ?? {}"
+                  [userReaction]="comment.userReaction ?? null"
+                  [noBorder]="true"
+                  [repliesCount]="comment.replies?.length ?? 0"
+                  [repliesExpanded]="areRepliesExpanded(comment.id)"
+                  [isNew]="comment.isNew ?? false"
+                  (delete)="onDeleteCommentClick(comment)"
+                  (reactionSelected)="onCommentReaction(comment, $event)"
+                  (reply)="onReplyToComment(comment)"
+                  (toggleReplies)="toggleReplies(comment.id)"
+                />
+              </div>
+
+              <!-- Replies (nested) - összecsukható -->
+              @if (comment.replies && comment.replies.length > 0 && areRepliesExpanded(comment.id)) {
+                <div class="newsfeed-card__replies">
+                  <!-- Válaszolok gomb a tetején -->
+                  @if (replyingTo()?.id !== comment.id) {
+                    <button
+                      type="button"
+                      class="newsfeed-card__reply-trigger"
+                      (click)="onReplyToComment(comment)"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polyline points="9 10 4 15 9 20"/>
+                        <path d="M20 4v7a4 4 0 01-4 4H4"/>
+                      </svg>
+                      Válaszolok
+                    </button>
+                  }
+                  @for (reply of comment.replies; track trackByCommentId($index, reply)) {
+                    <div class="newsfeed-card__reply-item">
+                      <app-comment-item
+                        [authorName]="reply.authorName"
+                        [authorType]="reply.authorType"
+                        [content]="reply.content"
+                        [createdAt]="reply.createdAt"
+                        [isEdited]="reply.isEdited"
+                        [canDelete]="reply.canDelete"
+                        [showReactions]="true"
+                        [showReply]="false"
+                        [reactions]="reply.reactions ?? {}"
+                        [userReaction]="reply.userReaction ?? null"
+                        [isReply]="true"
+                        [noBorder]="true"
+                        [isNew]="reply.isNew ?? false"
+                        (delete)="onDeleteCommentClick(reply)"
+                        (reactionSelected)="onCommentReaction(reply, $event)"
+                      />
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Inline reply form - közvetlenül a komment alatt -->
+              @if (replyingTo()?.id === comment.id) {
+                <div class="newsfeed-card__inline-reply">
+                  <form class="newsfeed-card__reply-form" (ngSubmit)="onSubmitComment($event)">
+                    <textarea
+                      #commentInput
+                      class="newsfeed-card__reply-input"
+                      [(ngModel)]="newCommentText"
+                      name="reply"
+                      placeholder="Írd be a válaszodat..."
+                      aria-label="Válasz szövege"
+                      rows="2"
+                      maxlength="1000"
+                    ></textarea>
+                    <div class="newsfeed-card__reply-form-footer">
+                      <button
+                        type="button"
+                        class="newsfeed-card__reply-cancel"
+                        (click)="cancelReply()"
+                      >
+                        Mégse
+                      </button>
+                      <button
+                        type="submit"
+                        class="newsfeed-card__reply-submit"
+                        [disabled]="!isCommentValid"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                          <line x1="22" y1="2" x2="11" y2="13"/>
+                          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                        Válasz küldése
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="newsfeed-card__comments-empty">Még nincsenek hozzászólások.</p>
+      }
+    </div>
+  }
+
+</article>

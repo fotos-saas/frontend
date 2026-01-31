@@ -1,0 +1,715 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Angular Material Tooltip stílusok
+@import '@angular/cdk/overlay-prebuilt.css';
+
+// Material tooltip custom stílus - fekete buborék, fehér betű
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  max-width: 280px !important;
+  line-height: 1.4 !important;
+}
+
+// ============================================================================
+// GLOBÁLIS DARK MODE CSS VÁLTOZÓK
+// ============================================================================
+
+:root {
+  // Primary és secondary szín paletta
+  --color-primary: #2563eb;
+  --color-primary-light: #3b82f6;
+  --color-error: #dc2626;
+  --color-error-light: #ef4444;
+
+  // Light mode háttér szín
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+
+  // Light mode szöveg szín (WCAG AA compliant kontrasztek)
+  --text-primary: #1f2937;      // 14.8:1 kontraszt fehér háttéren
+  --text-secondary: #4b5563;    // 7.1:1 kontraszt fehér háttéren (gray-600)
+  --text-muted: #6b7280;        // 4.6:1 kontraszt fehér háttéren (gray-500)
+
+  // Light mode border és árnyék
+  --border-color: #e5e7eb;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-hover: rgba(0, 0, 0, 0.15);
+
+  // Gradient háttérek (light mode)
+  --gradient-secondary: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  --gradient-blue: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  --gradient-yellow: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  --gradient-green: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+
+  // ==============================================
+  // Shell Layout téma változók (egységes TopBar + Sidebar)
+  // Alap: AppShell sötét téma (slate-900 sidebar, fehér topbar)
+  // ==============================================
+  // TopBar - fehér/világos háttér (AppShell eredeti)
+  --shell-topbar-bg: rgba(255, 255, 255, 0.8);
+  --shell-topbar-text: #1f2937;
+  --shell-topbar-height: 64px;
+  --shell-topbar-border: rgba(226, 232, 240, 0.5);
+  --shell-topbar-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  // Sidebar - sötét háttér (AppShell eredeti)
+  --shell-sidebar-bg: #0f172a;
+  --shell-sidebar-border: #1e293b;
+  --shell-sidebar-width: 240px;
+  --shell-sidebar-width-collapsed: 60px;
+
+  // Navigációs elemek (sötét téma)
+  --shell-nav-item-color: #cbd5e1;
+  --shell-nav-item-hover-bg: rgba(51, 65, 85, 0.6);
+  --shell-nav-item-hover-color: #e2e8f0;
+  --shell-nav-item-active-bg: linear-gradient(to right, rgba(147, 51, 234, 0.2), rgba(236, 72, 153, 0.2));
+  --shell-nav-item-active-color: #ffffff;
+  --shell-nav-item-active-border: #a855f7;
+
+  // Focus ring - purple a sötét témához
+  --shell-focus-ring: #a855f7;
+  --shell-focus-ring-offset: #0f172a;
+
+  // ==============================================
+  // Z-Index Skála (standardizált rétegek)
+  // ==============================================
+  // Base rétegek (0-100)
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 100;
+
+  // Fixed elemek (1000-1100)
+  --z-navbar: 1000;
+  --z-sidebar: 1020;
+
+  // Overlay és modal háttér (1040-1080)
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-modal-content: 1055;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  // Felső rétegek (1090+)
+  --z-lightbox: 60000;
+  --z-lightbox-overlay: 59999;
+  --z-lightbox-content: 60001;
+  --z-toast: 70000;
+  --z-skip-link: 10000;
+}
+
+// Dark mode media query - rendszer dark mode preferencia
+@media (prefers-color-scheme: dark) {
+  :root {
+    // Dark mode háttér szín
+    --bg-primary: #1f2937;
+    --bg-secondary: #111827;
+    --bg-tertiary: #374151;
+
+    // Dark mode szöveg szín (WCAG AA compliant kontrasztek)
+    --text-primary: #f9fafb;      // 15.3:1 kontraszt sötét háttéren
+    --text-secondary: #d1d5db;    // 9.7:1 kontraszt sötét háttéren (gray-300)
+    --text-muted: #6b7280;        // 4.8:1 kontraszt sötét háttéren (gray-400) - OK dark mode-ban
+
+    // Dark mode border és árnyék
+    --border-color: #374151;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-color-hover: rgba(0, 0, 0, 0.5);
+
+    // Gradient háttérek (dark mode)
+    --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    --gradient-yellow: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+    --gradient-green: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+  }
+}
+
+// Manuális dark mode class támogatás (ha a komponens manuálisan bekapcsolja)
+.dark {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --bg-tertiary: #374151;
+  // Dark mode szöveg szín (WCAG AA compliant kontrasztek)
+  --text-primary: #f9fafb;      // 15.3:1 kontraszt sötét háttéren
+  --text-secondary: #d1d5db;    // 9.7:1 kontraszt sötét háttéren (gray-300)
+  --text-muted: #6b7280;        // 4.8:1 kontraszt sötét háttéren (gray-400) - OK dark mode-ban
+  --border-color: #374151;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-color-hover: rgba(0, 0, 0, 0.5);
+  --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  --gradient-yellow: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+  --gradient-green: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+}
+
+// ============================================================================
+// GLOBÁLIS STILUSOK
+// ============================================================================
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// ==============================================
+// Globális Focus-Visible (WCAG 2.4.7)
+// ==============================================
+// Minden interaktív elem kap látható fókusz jelzést billentyűzetes navigációkor
+*:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// ==============================================
+// Dialog Scroll Lock - Body scroll blokkolás
+// ==============================================
+// Dialógus megnyitásakor megakadályozza a háttér scrollozását
+body.dialog-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  top: var(--scroll-position, 0);
+}
+
+// ==============================================
+// Skip Link - Akadálymentes navigáció (WCAG 2.4.1)
+// ==============================================
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--color-primary, #2563eb);
+  color: white;
+  padding: 12px 24px;
+  text-decoration: none;
+  border-radius: 0 0 8px 8px;
+  z-index: var(--z-skip-link, 10000);
+  font-weight: 600;
+  font-size: 14px;
+  transition: top 0.2s ease;
+
+  &:focus {
+    top: 0;
+    outline: 3px solid var(--color-primary, #2563eb);
+    outline-offset: 2px;
+  }
+}
+
+// ==============================================
+// PAGE CARD - Egységes tartalom wrapper
+// ==============================================
+// Modern kártya stílus a feature oldalakhoz
+// Glassmorphism effekt + subtle shadow + rounded corners
+// Safari kompatibilis: -webkit prefixes
+
+.page-card {
+  // Flexbox layout a tartalom elrendezéséhez (sticky footer támogatás)
+  // A min-height a szülő flex container-től jön (flex: 1 / flex-1 osztály)
+  display: flex;
+  flex-direction: column;
+  flex: 1; // Kitölti a rendelkezésre álló helyet
+  width: 100%; // Mindig teljes szélesség - ne ugorjon össze betöltés közben
+
+  // Egységes padding
+  padding: 2rem;
+
+  // Gradient háttér (subtle blue tint)
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(248, 250, 252, 0.95) 100%
+  );
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 16px;
+
+  // Gradient border (highlight effekt - fent világos, lent sötétebb)
+  border-top: 1px solid rgba(255, 255, 255, 0.9);
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba(226, 232, 240, 0.5);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+
+  // Erősebb shadow + inner glow
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 10px 20px -5px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  // Hover state - shadow elevation
+  &:hover {
+    box-shadow:
+      0 8px 16px -4px rgba(0, 0, 0, 0.1),
+      0 20px 40px -10px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+  }
+}
+
+// Hover variant (listákhoz, kártyákhoz) - erősebb hover effekt
+.page-card--hoverable:hover {
+  box-shadow:
+    0 12px 24px -6px rgba(0, 0, 0, 0.12),
+    0 24px 48px -12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+// Full-width variant (nincs max-width korlátozás)
+.page-card--full {
+  max-width: none;
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .page-card {
+    // Gradient háttér (subtle dark tint)
+    background: linear-gradient(135deg,
+      rgba(30, 41, 59, 0.98) 0%,
+      rgba(15, 23, 42, 0.95) 100%
+    );
+
+    // Gradient border (highlight effekt - fent világosabb, lent sötétebb)
+    border-top: 1px solid rgba(71, 85, 105, 0.6);
+    border-left: 1px solid rgba(71, 85, 105, 0.4);
+    border-right: 1px solid rgba(30, 41, 59, 0.5);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.7);
+
+    // Erősebb shadow + subtle inner glow
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.25),
+      0 10px 20px -5px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(71, 85, 105, 0.4);
+
+    &:hover {
+      box-shadow:
+        0 8px 16px -4px rgba(0, 0, 0, 0.3),
+        0 20px 40px -10px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(71, 85, 105, 0.5);
+    }
+  }
+
+  .page-card--hoverable:hover {
+    box-shadow:
+      0 12px 24px -6px rgba(0, 0, 0, 0.35),
+      0 24px 48px -12px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(71, 85, 105, 0.5);
+  }
+}
+
+.dark .page-card {
+  // Gradient háttér (subtle dark tint)
+  background: linear-gradient(135deg,
+    rgba(30, 41, 59, 0.98) 0%,
+    rgba(15, 23, 42, 0.95) 100%
+  );
+
+  // Gradient border (highlight effekt - fent világosabb, lent sötétebb)
+  border-top: 1px solid rgba(71, 85, 105, 0.6);
+  border-left: 1px solid rgba(71, 85, 105, 0.4);
+  border-right: 1px solid rgba(30, 41, 59, 0.5);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.7);
+
+  // Erősebb shadow + subtle inner glow
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.25),
+    0 10px 20px -5px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(71, 85, 105, 0.4);
+
+  &:hover {
+    box-shadow:
+      0 8px 16px -4px rgba(0, 0, 0, 0.3),
+      0 20px 40px -10px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(71, 85, 105, 0.5);
+  }
+}
+
+.dark .page-card--hoverable:hover {
+  box-shadow:
+    0 12px 24px -6px rgba(0, 0, 0, 0.35),
+    0 24px 48px -12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(71, 85, 105, 0.5);
+}
+
+// Reduced motion - animációk és transform kikapcsolása
+@media (prefers-reduced-motion: reduce) {
+  .page-card {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .page-card--hoverable:hover {
+    transform: none;
+  }
+}
+
+// ==============================================
+// CLICK FEEDBACK - Azonnali kattintás visszajelzés
+// ==============================================
+// Minden interaktív elemhez hozzáadható a .click-feedback class
+
+.click-feedback {
+  // Active state - azonnali vizuális feedback
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+    opacity: 0.85;
+    transition: transform 0.05s ease, opacity 0.05s ease;
+  }
+}
+
+// Button variáns - erősebb feedback gombokhoz
+.click-feedback--button {
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+// Reakció badge pending state
+.reaction-badge--pending {
+  position: relative;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(99, 102, 241, 0.2) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: pulsePending 0.8s ease-in-out infinite;
+  }
+}
+
+@keyframes pulsePending {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Reduced motion - click feedback kikapcsolása
+@media (prefers-reduced-motion: reduce) {
+  .click-feedback:active:not(:disabled) {
+    transform: none;
+    opacity: 1;
+  }
+
+  .click-feedback--button:active:not(:disabled) {
+    transform: none;
+    opacity: 1;
+  }
+
+  .reaction-badge--pending::after {
+    animation: none;
+    background: rgba(99, 102, 241, 0.1);
+  }
+}
+
+// ==============================================
+// DIALOG BACKDROP - Egységes dialógus háttér
+// ==============================================
+// FONTOS: Minden dialógusnak ezt a class-t kell használnia!
+// A backdrop-filter blur effekt elmossa a hátteret.
+// A dialógusokat a page-card KÍVÜL kell renderelni (stacking context miatt)!
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px); // Safari támogatás
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal-backdrop, 1040);
+  padding: 1rem;
+  animation: dialogFadeIn 0.2s ease-out;
+}
+
+// Animációk
+@keyframes dialogFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialogSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Dialog panel (a tartalom wrapper)
+// FONTOS: A padding-et a komponens belső tartalma kezeli!
+// Használj pl. Tailwind p-6 class-t vagy saját .modal-content wrapper-t
+.dialog-panel {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: dialogSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+// Szélesebb dialog variáns (pl. formokhoz)
+.dialog-panel--md {
+  max-width: 480px;
+}
+
+.dialog-panel--lg {
+  max-width: 600px;
+}
+
+// Dark mode dialog
+@media (prefers-color-scheme: dark) {
+  .dialog-panel {
+    background: #1e293b;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.dark .dialog-panel {
+  background: #1e293b;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+// Reduced motion - animációk kikapcsolása
+@media (prefers-reduced-motion: reduce) {
+  .dialog-backdrop {
+    animation: none;
+  }
+
+  .dialog-panel {
+    animation: none;
+  }
+}
+
+// ==============================================
+// LAZY IMAGE DIRECTIVE - Skeleton és animációk
+// ==============================================
+// LazyImageDirective által használt globális stílusok
+
+// Shimmer animáció a skeleton placeholder-hez
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Skeleton shimmer base class
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+// Dark mode skeleton shimmer
+@media (prefers-color-scheme: dark) {
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #374151 25%,
+      #4b5563 50%,
+      #374151 75%
+    );
+    background-size: 200% 100%;
+  }
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #374151 25%,
+    #4b5563 50%,
+    #374151 75%
+  );
+  background-size: 200% 100%;
+}
+
+// Lazy image wrapper (pozícionálás a skeleton-hez)
+.lazy-image-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+// Default lazy image skeleton stílus
+.lazy-image-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  transition: opacity 0.3s ease;
+}
+
+// Reduced motion - shimmer animáció kikapcsolása
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background: #e5e7eb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .skeleton-shimmer {
+      background: #4b5563;
+    }
+  }
+
+  .dark .skeleton-shimmer {
+    background: #4b5563;
+  }
+}
+
+// ==============================================
+// GLOBÁLIS TOOLTIP RENDSZER
+// ==============================================
+// Használat: [attr.data-tooltip]="szöveg" + has-tooltip class
+// Vagy csak data-tooltip attribútum
+//
+// Példa:
+// <div class="has-tooltip" [attr.data-tooltip]="item.name">...</div>
+// <button data-tooltip="Mentés">...</button>
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  background: #1e293b;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease, visibility 0.1s ease;
+  z-index: var(--z-tooltip, 1070);
+  pointer-events: none;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+// Tooltip nyíl
+[data-tooltip]::after {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1e293b;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease, visibility 0.1s ease;
+  z-index: var(--z-tooltip, 1070);
+  pointer-events: none;
+}
+
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+// Tooltip pozíció variánsok
+// Alul: data-tooltip-pos="bottom"
+[data-tooltip-pos="bottom"]::before {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+
+[data-tooltip-pos="bottom"]::after {
+  bottom: auto;
+  top: calc(100% + 1px);
+  border-top-color: transparent;
+  border-bottom-color: #1e293b;
+}
+
+// Balra: data-tooltip-pos="left"
+[data-tooltip-pos="left"]::before {
+  bottom: auto;
+  top: 50%;
+  left: auto;
+  right: calc(100% + 6px);
+  transform: translateY(-50%);
+}
+
+[data-tooltip-pos="left"]::after {
+  bottom: auto;
+  top: 50%;
+  left: auto;
+  right: calc(100% + 1px);
+  transform: translateY(-50%);
+  border-top-color: transparent;
+  border-left-color: #1e293b;
+}
+
+// Jobbra: data-tooltip-pos="right"
+[data-tooltip-pos="right"]::before {
+  bottom: auto;
+  top: 50%;
+  left: calc(100% + 6px);
+  transform: translateY(-50%);
+}
+
+[data-tooltip-pos="right"]::after {
+  bottom: auto;
+  top: 50%;
+  left: calc(100% + 1px);
+  transform: translateY(-50%);
+  border-top-color: transparent;
+  border-right-color: #1e293b;
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  [data-tooltip]::before,
+  [data-tooltip]::after {
+    transition: none;
+  }
+}

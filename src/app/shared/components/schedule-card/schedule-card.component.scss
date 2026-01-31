@@ -1,0 +1,233 @@
+// ============================================================================
+// Schedule Card Component Styles
+// ============================================================================
+// Importáld a globális schedule-card.scss-t az _index.scss-ből:
+// @import '../../../styles/schedule-card';
+// ============================================================================
+
+@import '../../../styles/schedule-card';
+
+// ============================================================================
+// Component-specifikus override (opcionális)
+// ============================================================================
+
+// Loading spinner animáció (kleine nástřel)
+.schedule-card__icon-loader {
+  position: relative;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    opacity: 0.6;
+    animation: spin 1s linear infinite;
+
+    &:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    &:nth-child(2) {
+      animation-delay: 0.1s;
+      border-width: 1px;
+      opacity: 0.3;
+    }
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Hover effect fokuszálva
+.schedule-card:hover:not(.schedule-card--disabled) {
+  .schedule-card__icon {
+    transform: scale(1.05);
+  }
+
+  .schedule-card__value {
+    color: var(--schedule-card-icon-primary);
+  }
+}
+
+// Focus ring (keyboard navigation)
+.schedule-card__action:focus-visible {
+  outline: 2px solid var(--schedule-card-icon-primary);
+  outline-offset: 2px;
+}
+
+// Active state (click)
+.schedule-card:active:not(.schedule-card--disabled) {
+  transform: scale(0.98);
+}
+
+// ============================================================================
+// Accessibility: High Contrast Mode
+// ============================================================================
+
+@media (prefers-contrast: more) {
+  .schedule-card {
+    border-width: 2px;
+
+    &__label,
+    &__status {
+      font-weight: 700;
+    }
+
+    &__action {
+      border-width: 2px;
+    }
+  }
+}
+
+// ============================================================================
+// Accessibility: Reduced Motion
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .schedule-card {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+
+    &--animate-in {
+      animation: none;
+    }
+
+    &--loading {
+      .schedule-card__icon {
+        animation: none;
+      }
+    }
+
+    &__icon {
+      transition: none;
+
+      &-loader span {
+        animation: none;
+      }
+    }
+
+    &__action {
+      transition: none;
+    }
+  }
+}
+
+// ============================================================================
+// Safari specifikus javítások
+// ============================================================================
+
+@supports (-webkit-appearance: none) {
+  .schedule-card {
+    // Safari CSS Grid támogatás
+    display: -webkit-flex;
+    display: flex;
+
+    // Flex gap Safari support
+    gap: 1rem;
+
+    @media (max-width: 640px) {
+      -webkit-flex-direction: column;
+      flex-direction: column;
+    }
+  }
+
+  .schedule-card__action {
+    // Disable iOS blue highlight
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+// ============================================================================
+// Compact variant
+// ============================================================================
+
+.schedule-card--compact {
+  padding: 0.75rem;
+  gap: 0.75rem;
+
+  .schedule-card__icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .schedule-card__value {
+    font-size: 0.875rem;
+  }
+
+  .schedule-card__action {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+// ============================================================================
+// List variant (több schedule card egymás után)
+// ============================================================================
+
+.schedule-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .schedule-card {
+    &:first-child {
+      animation: slideInFromLeft 0.3s ease-out 0.05s both;
+    }
+
+    &:nth-child(2) {
+      animation: slideInFromLeft 0.3s ease-out 0.1s both;
+    }
+
+    &:nth-child(n + 3) {
+      animation: slideInFromLeft 0.3s ease-out 0.15s both;
+    }
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// ============================================================================
+// Print styles
+// ============================================================================
+
+@media print {
+  .schedule-card__action {
+    display: none;
+  }
+
+  .schedule-card {
+    border-color: #000;
+    box-shadow: none;
+
+    &:hover {
+      box-shadow: none;
+      transform: none;
+    }
+  }
+}

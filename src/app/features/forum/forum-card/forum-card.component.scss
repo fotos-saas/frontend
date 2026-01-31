@@ -1,0 +1,128 @@
+@use '../../../../styles/colors' as colors;
+@use '../../../../styles/mixins' as *;
+@use '../../../../styles/animations' as *;
+
+.forum-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: white;
+  border: 1px solid colors.get-color('gray', 200);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  @include transition-normal;
+  @include card-stagger-animation;
+  @include card-arrow-hover;
+
+  &:hover {
+    border-color: colors.get-color('primary', 500);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+  }
+
+  &--pinned {
+    @include card-status-border(colors.get-color('warning', 500));
+    background: colors.get-color('warning', 50);
+  }
+
+  &--locked {
+    opacity: 0.75;
+
+    &:hover {
+      opacity: 1;
+      border-color: colors.get-color('gray', 400);
+    }
+  }
+
+  // Icons
+  &__icons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  &__icon {
+    @include flex-center;
+    width: 1.5rem;
+    height: 1.5rem;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    &--pin {
+      color: colors.get-color('warning', 500);
+    }
+
+    &--lock {
+      color: colors.get-color('gray', 400);
+    }
+
+    &--template {
+      color: #a855f7;
+    }
+  }
+
+  // Content
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: colors.get-color('gray', 900);
+    line-height: 1.4;
+    @include text-truncate;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__activity {
+    font-size: 0.75rem;
+    color: colors.get-color('gray', 500);
+  }
+
+  // Stats
+  &__stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  &__stat {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: colors.get-color('gray', 500);
+
+    svg {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+  }
+
+  // Arrow
+  &__arrow {
+    flex-shrink: 0;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  // Reduced motion support
+  @include card-reduced-motion;
+}

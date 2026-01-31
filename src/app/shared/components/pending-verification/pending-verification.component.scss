@@ -1,0 +1,288 @@
+// Amber theme (waiting/pending)
+$amber-500: #f59e0b;
+$amber-600: #d97706;
+$amber-100: #fef3c7;
+$amber-gradient-start: #fffbeb;
+$amber-gradient-end: #fef3c7;
+
+.pending-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fef3c7 100%);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pending-card {
+  width: 100%;
+  max-width: 26rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pending-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, $amber-gradient-start 0%, $amber-gradient-end 100%);
+  border-radius: 1.25rem;
+  animation: float 3s ease-in-out infinite;
+
+  svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: $amber-500;
+    animation: hourglass 2s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes hourglass {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  75% {
+    transform: rotate(-15deg);
+  }
+}
+
+.pending-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.pending-description {
+  margin: 0 0 1.5rem;
+  font-size: 0.9375rem;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.pending-info {
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.pending-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #e5e7eb;
+  }
+}
+
+.pending-info-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.pending-info-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.pending-polling {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.8125rem;
+  color: #059669;
+  background: #d1fae5;
+  border-radius: 2rem;
+}
+
+.pending-polling-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #059669;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.pending-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pending-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.625rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  &--primary {
+    color: white;
+    background: $amber-500;
+
+    &:hover:not(:disabled) {
+      background: $amber-600;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &--secondary {
+    color: #374151;
+    background: #f3f4f6;
+
+    &:hover {
+      background: #e5e7eb;
+    }
+  }
+
+  &-spinner {
+    width: 1.125rem;
+    height: 1.125rem;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pending-help {
+  margin: 1.25rem 0 0;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+// Mobile responsive
+@media (max-width: 480px) {
+  .pending-card {
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+  }
+
+  .pending-icon {
+    width: 4rem;
+    height: 4rem;
+
+    svg {
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  .pending-title {
+    font-size: 1.25rem;
+  }
+
+  .pending-description {
+    font-size: 0.875rem;
+  }
+
+  .pending-actions {
+    flex-direction: column;
+  }
+
+  .pending-btn {
+    width: 100%;
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .pending-overlay {
+    animation: none;
+  }
+
+  .pending-card {
+    animation: none;
+  }
+
+  .pending-icon {
+    animation: none;
+
+    svg {
+      animation: none;
+    }
+  }
+
+  .pending-polling-dot {
+    animation: none;
+  }
+
+  .pending-btn-spinner {
+    animation: none;
+  }
+}

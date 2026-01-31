@@ -1,0 +1,122 @@
+<!-- Backdrop overlay (glassmorphism) -->
+<div
+  class="dialog-backdrop"
+  (mousedown)="onBackdropMouseDown($event)" (click)="onBackdropClick($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="dialog-title"
+>
+  <!-- Dialog container -->
+  <div class="dialog" #dialogElement>
+    <!-- Close button (X) -->
+    <button
+      type="button"
+      class="dialog__close"
+      (click)="close()"
+      [disabled]="isSaving()"
+      aria-label="Bezárás"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Header -->
+    <div class="dialog__header">
+      <div class="dialog__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <h2 id="dialog-title" class="dialog__title">
+        Kapcsolattartó szerkesztése
+      </h2>
+      <p class="dialog__description">
+        Add meg a kapcsolattartó elérhetőségeit
+      </p>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog__content">
+      <!-- Name field -->
+      <div class="dialog__field">
+        <label class="dialog__label" for="contact-name">
+          Név <span class="dialog__required">*</span>
+        </label>
+        <input
+          #firstInput
+          type="text"
+          id="contact-name"
+          class="dialog__input"
+          [class.dialog__input--error]="errors.name"
+          [(ngModel)]="formData.name"
+          (ngModelChange)="onInputChange()"
+          placeholder="Kovács János"
+          [disabled]="isSaving()"
+        />
+        <span class="dialog__error" *ngIf="errors.name">{{ errors.name }}</span>
+      </div>
+
+      <!-- Email field -->
+      <div class="dialog__field">
+        <label class="dialog__label" for="contact-email">
+          Email <span class="dialog__required">*</span>
+        </label>
+        <input
+          type="email"
+          id="contact-email"
+          class="dialog__input"
+          [class.dialog__input--error]="errors.email"
+          [(ngModel)]="formData.email"
+          (ngModelChange)="onInputChange()"
+          placeholder="pelda@email.hu"
+          [disabled]="isSaving()"
+        />
+        <span class="dialog__error" *ngIf="errors.email">{{ errors.email }}</span>
+      </div>
+
+      <!-- Phone field -->
+      <div class="dialog__field">
+        <label class="dialog__label" for="contact-phone">
+          Telefonszám <span class="dialog__required">*</span>
+        </label>
+        <input
+          type="tel"
+          id="contact-phone"
+          class="dialog__input"
+          [class.dialog__input--error]="errors.phone"
+          [(ngModel)]="formData.phone"
+          (ngModelChange)="onInputChange()"
+          placeholder="+36 30 123 4567"
+          [disabled]="isSaving()"
+        />
+        <span class="dialog__error" *ngIf="errors.phone">{{ errors.phone }}</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="dialog__actions">
+        <button
+          type="button"
+          class="dialog__btn dialog__btn--secondary"
+          (click)="close()"
+          [disabled]="isSaving()"
+        >
+          Mégse
+        </button>
+        <button
+          type="button"
+          class="dialog__btn dialog__btn--primary"
+          (click)="save()"
+          [disabled]="!isFormValid || isSaving"
+        >
+          <svg *ngIf="isSaving()" class="dialog__btn-spinner" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          {{ isSaving() ? 'Mentés...' : 'Mentés' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

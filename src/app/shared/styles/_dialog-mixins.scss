@@ -1,0 +1,413 @@
+/**
+ * Dialog Mixins
+ *
+ * Központi SCSS mixin-ek a dialog komponensekhez.
+ * Közös stílusok: backdrop, container, animációk, a11y.
+ *
+ * Használat:
+ * ```scss
+ * @use '../../styles/dialog-mixins' as dialog;
+ *
+ * .dialog-backdrop {
+ *   @include dialog.backdrop;
+ * }
+ *
+ * .dialog {
+ *   @include dialog.container(28rem);
+ * }
+ * ```
+ */
+
+// ============================================
+// COLOR VARIABLES
+// ============================================
+$blue-500: #3b82f6 !default;
+$blue-600: #2563eb !default;
+$green-500: #22c55e !default;
+$green-600: #16a34a !default;
+$orange-500: #f97316 !default;
+$orange-600: #ea580c !default;
+$red-500: #ef4444 !default;
+$red-600: #dc2626 !default;
+
+// ============================================
+// BACKDROP MIXIN
+// ============================================
+@mixin backdrop($blur: 4px, $bg-opacity: 0.2) {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, $bg-opacity);
+  -webkit-backdrop-filter: blur($blur);
+  backdrop-filter: blur($blur);
+  animation: dialog-fadeIn 0.2s ease-out;
+}
+
+// ============================================
+// CONTAINER MIXIN
+// ============================================
+@mixin container($max-width: 28rem, $border-radius: 1rem) {
+  position: relative;
+  width: 100%;
+  max-width: $max-width;
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: dialog-slideUp 0.3s ease-out;
+}
+
+// ============================================
+// CLOSE BUTTON MIXIN
+// ============================================
+@mixin close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: var(--z-dropdown);
+  padding: 0.5rem;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    color: #4b5563;
+    background: #f3f4f6;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+// ============================================
+// HEADER MIXIN
+// ============================================
+@mixin header($gradient-start: #eff6ff, $gradient-end: #dbeafe) {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
+}
+
+// ============================================
+// ICON MIXIN
+// ============================================
+@mixin icon($bg-color: $blue-500, $size: 4rem, $border-radius: 1rem) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: $size;
+  height: $size;
+  margin-bottom: 1rem;
+  background: $bg-color;
+  border-radius: $border-radius;
+  box-shadow: 0 10px 15px -3px rgba($bg-color, 0.3);
+
+  svg {
+    width: calc($size / 2);
+    height: calc($size / 2);
+    color: white;
+  }
+}
+
+// ============================================
+// TITLE MIXIN
+// ============================================
+@mixin title($font-size: 1.5rem) {
+  margin: 0 0 0.5rem;
+  font-size: $font-size;
+  font-weight: 600;
+  color: #111827;
+}
+
+// ============================================
+// DESCRIPTION MIXIN
+// ============================================
+@mixin description($max-width: 18rem) {
+  margin: 0 auto;
+  font-size: 0.875rem;
+  color: #6b7280;
+  max-width: $max-width;
+}
+
+// ============================================
+// CONTENT MIXIN
+// ============================================
+@mixin content($padding: 1.5rem) {
+  padding: $padding;
+}
+
+// ============================================
+// INPUT MIXIN
+// ============================================
+@mixin input($focus-color: $blue-500) {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  color: #374151;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.625rem;
+  outline: none;
+  transition: all 0.2s;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: $focus-color;
+    background: white;
+    box-shadow: 0 0 0 3px rgba($focus-color, 0.15);
+  }
+
+  &--error {
+    border-color: $red-500;
+    background: #fef2f2;
+
+    &:focus {
+      border-color: $red-500;
+      box-shadow: 0 0 0 3px rgba($red-500, 0.1);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================
+// BUTTON MIXINS
+// ============================================
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.625rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  &--full {
+    width: 100%;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin btn-primary($bg-color: $blue-500, $hover-color: $blue-600) {
+  @include btn-base;
+  color: white;
+  background: $bg-color;
+
+  &:hover:not(:disabled) {
+    background: $hover-color;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($bg-color, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+@mixin btn-secondary {
+  @include btn-base;
+  color: #4b5563;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+  }
+}
+
+@mixin btn-danger {
+  @include btn-base;
+  color: white;
+  background: $red-500;
+
+  &:hover:not(:disabled) {
+    background: $red-600;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($red-500, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// ERROR MESSAGE MIXIN
+// ============================================
+@mixin error-message {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  color: $red-500;
+}
+
+// ============================================
+// ALERT MIXIN
+// ============================================
+@mixin alert($type: 'error') {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+
+  svg {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.125rem;
+  }
+
+  @if $type == 'error' {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+
+    svg {
+      color: #dc2626;
+    }
+  } @else if $type == 'warning' {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fed7aa;
+
+    svg {
+      color: #f97316;
+    }
+  } @else if $type == 'info' {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+
+    svg {
+      color: #3b82f6;
+    }
+  }
+}
+
+// ============================================
+// ANIMATIONS
+// ============================================
+@keyframes dialog-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dialog-slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+  }
+}
+
+@keyframes dialog-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================
+// SPINNER MIXIN
+// ============================================
+@mixin spinner($size: 1.25rem) {
+  width: $size;
+  height: $size;
+  animation: dialog-spin 1s linear infinite;
+}
+
+// ============================================
+// MOBILE RESPONSIVE MIXIN
+// ============================================
+@mixin mobile($breakpoint: 480px) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
+
+// ============================================
+// REDUCED MOTION MIXIN
+// ============================================
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+// ============================================
+// COMPLETE DIALOG A11Y SUPPORT
+// ============================================
+@mixin a11y-support {
+  @media (prefers-reduced-motion: reduce) {
+    .dialog-backdrop {
+      animation: none;
+    }
+
+    .dialog {
+      animation: none;
+    }
+
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

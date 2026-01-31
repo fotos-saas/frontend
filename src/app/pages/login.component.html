@@ -1,0 +1,189 @@
+<app-auth-layout>
+  <div class="login-page__card w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+
+    <!-- Header -->
+    <header id="main-content" class="login-page__header text-center mb-6" tabindex="-1">
+      <h1 class="login-page__title text-3xl font-bold text-gray-900 mb-2">Tablókirály</h1>
+      <p class="login-page__subtitle text-gray-600">Jelentkezz be a folytatáshoz</p>
+    </header>
+
+    <!-- Tab navigation -->
+    <div class="login-page__tabs mb-6">
+      <div class="login-page__tab-list flex bg-gray-100 rounded-lg p-1" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="activeTab() === 'code'"
+          [class.login-page__tab--active]="activeTab() === 'code'"
+          class="login-page__tab flex-1 py-2.5 px-4 text-sm font-medium rounded-md transition-all"
+          (click)="setActiveTab('code')"
+        >
+          6-jegyű kód
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="activeTab() === 'password'"
+          [class.login-page__tab--active]="activeTab() === 'password'"
+          class="login-page__tab flex-1 py-2.5 px-4 text-sm font-medium rounded-md transition-all"
+          (click)="setActiveTab('password')"
+        >
+          Email/Jelszó
+        </button>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    @if (error()) {
+      <div class="login-page__error mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 flex-shrink-0">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+        </svg>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <!-- CODE TAB CONTENT -->
+    @if (activeTab() === 'code') {
+      <div class="login-page__tab-content" role="tabpanel">
+        <div class="text-center mb-6">
+          <p class="text-sm text-gray-600">Add meg a 6-jegyű kódod</p>
+        </div>
+
+        <form (ngSubmit)="onCodeLogin()" class="login-page__form space-y-6">
+          <div class="login-page__field">
+            <label
+              for="code"
+              class="login-page__label block text-sm font-medium text-slate-900 mb-2"
+            >
+              Kód
+            </label>
+            <input
+              id="code"
+              type="text"
+              [(ngModel)]="code"
+              name="code"
+              required
+              maxlength="6"
+              pattern="[0-9]{6}"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              class="login-page__input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-center text-2xl tracking-widest font-mono hover:border-blue-400"
+              placeholder="123456"
+              [disabled]="loading()"
+              aria-required="true"
+              aria-describedby="code-hint"
+              [attr.aria-invalid]="error() ? 'true' : null"
+            />
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="login-page__submit w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-md"
+            [class.login-page__submit--loading]="loading()"
+          >
+            @if (loading()) {
+              <span class="flex items-center justify-center gap-2">
+                <span class="login-page__spinner"></span>
+                Bejelentkezés...
+              </span>
+            } @else {
+              Belépés kóddal
+            }
+          </button>
+        </form>
+
+        <p id="code-hint" class="login-page__hint mt-6 text-center text-xs text-gray-500">
+          A kódot a tablókirálytól kapod meg
+        </p>
+      </div>
+    }
+
+    <!-- PASSWORD TAB CONTENT -->
+    @if (activeTab() === 'password') {
+      <div class="login-page__tab-content" role="tabpanel">
+        <form [formGroup]="passwordForm" (ngSubmit)="onPasswordLogin()" class="login-page__form space-y-5">
+          <div class="login-page__field">
+            <label for="email" class="login-page__label block text-sm font-medium text-slate-900 mb-2">
+              Email cím
+            </label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="login-page__input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition hover:border-blue-400"
+              placeholder="pelda@email.hu"
+              [disabled]="loading()"
+              [class.border-red-500]="passwordForm.get('email')?.invalid && passwordForm.get('email')?.touched"
+            />
+            @if (passwordForm.get('email')?.errors?.['email'] && passwordForm.get('email')?.touched) {
+              <span class="text-red-500 text-xs mt-1 block">Érvénytelen email cím</span>
+            }
+          </div>
+
+          <div class="login-page__field">
+            <label for="password" class="login-page__label block text-sm font-medium text-slate-900 mb-2">
+              Jelszó
+            </label>
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              class="login-page__input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition hover:border-blue-400"
+              placeholder="Jelszó"
+              [disabled]="loading()"
+              [class.border-red-500]="passwordForm.get('password')?.invalid && passwordForm.get('password')?.touched"
+            />
+          </div>
+
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="rememberMe"
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span class="text-sm text-gray-600">Emlékezz rám</span>
+            </label>
+            <a
+              routerLink="/forgot-password"
+              class="text-sm text-blue-600 hover:text-blue-700 hover:underline font-medium"
+            >
+              Elfelejtett jelszó?
+            </a>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="login-page__submit w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-md"
+            [class.login-page__submit--loading]="loading()"
+          >
+            @if (loading()) {
+              <span class="flex items-center justify-center gap-2">
+                <span class="login-page__spinner"></span>
+                Bejelentkezés...
+              </span>
+            } @else {
+              Bejelentkezés
+            }
+          </button>
+        </form>
+
+        <!-- Registration link -->
+        @if (registrationEnabled()) {
+          <div class="login-page__footer mt-6 pt-6 border-t border-gray-200 text-center">
+            <p class="text-gray-600 text-sm">
+              Nincs még fiókod?
+              <a routerLink="/register" class="text-blue-600 hover:text-blue-700 hover:underline font-medium">
+                Regisztrálj
+              </a>
+            </p>
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</app-auth-layout>

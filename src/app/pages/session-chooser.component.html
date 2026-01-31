@@ -1,0 +1,178 @@
+<div class="session-chooser">
+
+  <!-- Header (compact) -->
+  <header class="session-chooser__header">
+    <div class="session-chooser__header-row">
+      <svg class="session-chooser__logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+      </svg>
+      <h1 class="session-chooser__title">Tablókirály</h1>
+    </div>
+    <p class="session-chooser__subtitle">Válassz egy fiókot</p>
+  </header>
+
+  <!-- Session Cards Grid -->
+  <div class="session-chooser__grid"
+       [class.session-chooser__grid--single]="sessions().length === 1"
+       [class.session-chooser__grid--double]="sessions().length === 2"
+       [class.session-chooser__grid--triple]="sessions().length >= 3">
+
+    @for (session of sessions(); track session.projectId + ':' + session.sessionType; let i = $index) {
+      <article
+        class="session-chooser__card"
+        [class.session-chooser__card--code]="session.sessionType === 'code'"
+        [class.session-chooser__card--share]="session.sessionType === 'share'"
+        [class.session-chooser__card--preview]="session.sessionType === 'preview'"
+        [style.--card-index]="i"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="'Válassz: ' + session.projectName + ' - ' + getSessionTypeLabel(session.sessionType)"
+        (click)="selectSession(session)"
+        (keydown)="onCardKeydown($event, session)"
+      >
+        <!-- Status Border (left side - via CSS) -->
+
+        <!-- Card Content -->
+        <div class="session-chooser__card-body">
+          <!-- Icon Container -->
+          <div class="session-chooser__icon-container" [ngClass]="getIconContainerClass(session.sessionType)">
+            @switch (session.sessionType) {
+              @case ('code') {
+                <!-- Person Icon -->
+                <svg class="session-chooser__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+                </svg>
+              }
+              @case ('share') {
+                <!-- Group Icon -->
+                <svg class="session-chooser__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="7" r="3"/>
+                  <circle cx="17" cy="7" r="3"/>
+                  <path d="M5 21v-2a4 4 0 0 1 4-4h2"/>
+                  <path d="M13 21v-2a4 4 0 0 1 4-4h2"/>
+                </svg>
+              }
+              @case ('preview') {
+                <!-- Eye Icon -->
+                <svg class="session-chooser__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              }
+            }
+          </div>
+
+          <!-- Project Name -->
+          <h2 class="session-chooser__card-title" [title]="session.projectName">
+            {{ formatProjectName(session.projectName) }}
+          </h2>
+
+          <!-- User Info -->
+          <div class="session-chooser__card-info">
+            <span class="session-chooser__badge" [ngClass]="getBadgeClass(session.sessionType)">
+              {{ getSessionTypeLabel(session.sessionType) }}
+            </span>
+            @if (session.userName) {
+              <span class="session-chooser__card-username">
+                {{ session.userName }}
+              </span>
+            }
+          </div>
+
+          <!-- Last Used -->
+          <div class="session-chooser__card-meta">
+            <span class="session-chooser__card-meta-label">Utoljára:</span>
+            <span class="session-chooser__card-meta-value">{{ formatLastUsed(session.lastUsed) }}</span>
+          </div>
+        </div>
+
+        <!-- Delete Button (shown on hover/focus) -->
+        <button
+          type="button"
+          class="session-chooser__delete-btn"
+          (click)="startDeleteSession($event, session)"
+          aria-label="Session törlése"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </article>
+    }
+
+    <!-- New Login Card -->
+    <article
+      class="session-chooser__card session-chooser__card--new"
+      [style.--card-index]="sessions().length"
+      tabindex="0"
+      role="button"
+      aria-label="Új belépés"
+      (click)="newLogin()"
+      (keydown.enter)="newLogin()"
+      (keydown.space)="newLogin()"
+    >
+      <div class="session-chooser__card-body">
+        <div class="session-chooser__icon-container session-chooser__icon-container--new">
+          <svg class="session-chooser__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </div>
+        <h2 class="session-chooser__card-title session-chooser__card-title--new">
+          Új belépés
+        </h2>
+        <p class="session-chooser__card-hint">
+          Jelentkezz be másik kóddal vagy vendég linkkel
+        </p>
+      </div>
+
+    </article>
+  </div>
+
+  <!-- Hint -->
+  <p class="session-chooser__hint">
+    A sessionök ebben a böngészőben tárolódnak
+  </p>
+</div>
+
+<!-- Delete Confirmation Dialog (OUTSIDE main container for backdrop-filter stacking context) -->
+@if (confirmDelete()) {
+  <div
+    class="session-chooser-dialog-backdrop"
+    (click)="cancelDelete()"
+    role="presentation"
+  >
+    <div
+      class="session-chooser-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-dialog-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h3 id="delete-dialog-title" class="session-chooser-dialog__title">
+        Session törlése
+      </h3>
+      <p class="session-chooser-dialog__message">
+        Biztosan törlöd a <strong>{{ confirmDelete()?.projectName }}</strong> sessiont?
+        Újra be kell majd jelentkezned.
+      </p>
+      <div class="session-chooser-dialog__actions">
+        <button
+          type="button"
+          class="session-chooser-dialog__btn session-chooser-dialog__btn--cancel"
+          (click)="cancelDelete()"
+        >
+          Mégse
+        </button>
+        <button
+          type="button"
+          class="session-chooser-dialog__btn session-chooser-dialog__btn--confirm"
+          (click)="confirmDeleteSession()"
+        >
+          Törlés
+        </button>
+      </div>
+    </div>
+  </div>
+}

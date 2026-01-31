@@ -1,0 +1,279 @@
+/**
+ * Step Pills - Kompakt Inline Stepper
+ *
+ * Modern pill-style horizontal stepper
+ * Mobile-first, Safari kompatibilis
+ */
+
+// Colors
+$color-active: #3b82f6;
+$color-active-dark: #2563eb;
+$color-completed: #10b981;
+$color-disabled: #94a3b8;
+$color-disabled-bg: #f1f5f9;
+
+.step-pills {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+
+  // === LEADVA BADGE ===
+  &__done-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, $color-completed 0%, darken($color-completed, 8%) 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 100px;
+    box-shadow: 0 2px 8px rgba($color-completed, 0.3);
+
+    svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+    }
+  }
+
+  // === PILLS TRACK ===
+  &__track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+
+  // === INDIVIDUAL PILL ===
+  &__pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    margin: 0;
+    border: 2px solid $color-disabled;
+    border-radius: 100px;
+    background: white;
+    color: $color-disabled;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    &:focus-visible {
+      outline: 2px solid $color-active;
+      outline-offset: 2px;
+    }
+
+    // === ACTIVE STATE ===
+    &--active {
+      background: $color-active;
+      border-color: $color-active;
+      color: white;
+      box-shadow: 0 2px 8px rgba($color-active, 0.3);
+
+      .step-pills__indicator {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      .step-pills__label {
+        color: white;
+      }
+
+      &:hover {
+        background: $color-active-dark;
+        border-color: $color-active-dark;
+      }
+    }
+
+    // === COMPLETED STATE ===
+    &--completed {
+      border-color: $color-completed;
+      color: $color-completed;
+      cursor: pointer;
+
+      .step-pills__indicator {
+        background: $color-completed;
+        color: white;
+
+        svg {
+          width: 12px;
+          height: 12px;
+        }
+      }
+
+      .step-pills__label {
+        color: $color-completed;
+      }
+
+      &:hover {
+        background: rgba($color-completed, 0.08);
+        transform: translateY(-1px);
+      }
+    }
+
+    // === DISABLED STATE ===
+    &--disabled {
+      cursor: pointer; // Kattintható, toast jön
+      opacity: 0.7;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+  }
+
+  // === INDICATOR (number or check) ===
+  &__indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    background: $color-disabled-bg;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    color: $color-disabled;
+    flex-shrink: 0;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  // === LABEL ===
+  &__label {
+    // Mobile: hidden (csak szám látszik)
+    display: none;
+
+    @media (min-width: 480px) {
+      display: inline;
+    }
+  }
+
+  // === INFO BUTTON ===
+  &__info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: scale(1.1);
+    }
+  }
+
+  // === ARROW CONNECTOR ===
+  &__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin: 0 4px;
+    color: $color-disabled;
+    flex-shrink: 0;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    @media (min-width: 480px) {
+      margin: 0 6px;
+    }
+  }
+}
+
+// === MOBILE ADJUSTMENTS ===
+@media (max-width: 479px) {
+  .step-pills {
+    &__pill {
+      padding: 6px 8px;
+
+      // Csak szám, nincs label
+      &--active,
+      &--completed {
+        .step-pills__indicator {
+          margin-right: 0;
+        }
+      }
+
+      // Active-nál mégis mutassuk a labelt, ha elfér
+      &--active {
+        .step-pills__indicator {
+          margin-right: 6px;
+        }
+
+        .step-pills__label {
+          display: inline;
+        }
+      }
+    }
+
+    &__info {
+      margin-left: 4px;
+    }
+  }
+}
+
+// === DARK MODE ===
+:host-context(.dark) {
+  .step-pills {
+    &__pill {
+      background: #1e293b;
+      border-color: #475569;
+      color: #94a3b8;
+
+      &--active {
+        background: $color-active;
+        border-color: $color-active;
+        color: white;
+      }
+
+      &--completed {
+        border-color: $color-completed;
+        color: $color-completed;
+
+        &:hover {
+          background: rgba($color-completed, 0.15);
+        }
+      }
+    }
+
+    &__indicator {
+      background: #334155;
+      color: #94a3b8;
+    }
+
+    &__arrow {
+      color: #475569;
+    }
+  }
+}
+
+// === REDUCED MOTION ===
+@media (prefers-reduced-motion: reduce) {
+  .step-pills {
+    &__pill,
+    &__info {
+      transition: none;
+    }
+  }
+}

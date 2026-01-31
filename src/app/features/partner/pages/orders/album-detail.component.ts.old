@@ -1,0 +1,2093 @@
+import { Component, inject, signal, OnInit, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ICONS } from '../../../../shared/constants/icons.constants';
+import {
+  PartnerOrdersService,
+  PartnerOrderAlbumDetails,
+  AlbumPhoto,
+  UploadProgress
+} from '../../services/partner-orders.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DropZoneComponent } from '../../../../shared/components/drop-zone/drop-zone.component';
+import { SelectionGridComponent } from '../../../photo-selection/components/selection-grid/selection-grid.component';
+import { MediaLightboxComponent } from '../../../../shared/components/media-lightbox/media-lightbox.component';
+import { WorkflowPhoto } from '../../../photo-selection/models/workflow.models';
+import { LightboxMediaItem } from '../../../../shared/components/media-lightbox/media-lightbox.types';
+import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
+
+@Component({
+  selector: 'app-partner-album-detail',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, RouterModule, FormsModule, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent, DropZoneComponent, SelectionGridComponent, MediaLightboxComponent],
+  template: `
+    <div class="partner-album-detail page-card">
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="animate-pulse">
+          <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-8"></div>
+          <div class="grid grid-cols-4 gap-4">
+            @for (_ of [1,2,3,4,5,6,7,8]; track _) {
+              <div class="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (!loading() && album()) {
+        <!-- Top Bar: Back + Actions -->
+        <div class="top-bar">
+          <a
+            [routerLink]="['/partner/orders/clients', album()!.client.id]"
+            class="back-link"
+          >
+            <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+            Vissza
+          </a>
+
+          <div class="top-actions">
+            @if (album()!.status === 'draft') {
+              <button
+                (click)="activateAlbum()"
+                [disabled]="album()!.photosCount === 0 || activating()"
+                class="btn-activate"
+                [matTooltip]="album()!.photosCount === 0 ? 'Tölts fel képeket az aktiváláshoz' : 'Aktiválás'"
+              >
+                @if (activating()) {
+                  <div class="spinner"></div>
+                } @else {
+                  <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+                }
+                Aktiválás
+              </button>
+            }
+            <button
+              (click)="openEditModal()"
+              [disabled]="album()!.status === 'completed'"
+              class="action-btn"
+              matTooltip="Szerkesztés"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="18" />
+            </button>
+            <button
+              (click)="confirmDelete()"
+              [disabled]="album()!.status === 'completed'"
+              class="action-btn action-btn--danger"
+              matTooltip="Törlés"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="18" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Header -->
+        <header class="detail-header">
+          <h1 class="detail-title">{{ album()!.name }}</h1>
+          <div class="detail-meta">
+            <span>{{ album()!.client.name }}</span>
+            <span
+              class="status-badge"
+              [class]="ordersService.getStatusColor(album()!.status)"
+            >
+              {{ ordersService.getStatusLabel(album()!.status) }}
+            </span>
+            <span class="type-label">
+              {{ ordersService.getTypeLabel(album()!.type) }}
+            </span>
+          </div>
+        </header>
+
+        <!-- Kompakt info bar -->
+        <div class="album-info-bar">
+          <div class="info-stats">
+            <span class="info-stat">
+              <strong>{{ album()!.photosCount }}</strong> kép
+            </span>
+            @if (album()!.type === 'selection') {
+              <span class="info-stat info-stat--selection" [class.info-stat--complete]="selectedPhotoIds().length >= (album()!.minSelections || 1)">
+                <strong>{{ selectedPhotoIds().length }}</strong> kiválasztva
+                @if (album()!.minSelections || album()!.maxSelections) {
+                  <span class="info-hint">(@if (album()!.minSelections) {min. {{ album()!.minSelections }}}@if (album()!.minSelections && album()!.maxSelections) {, }@if (album()!.maxSelections) {max. {{ album()!.maxSelections }}})</span>
+                }
+              </span>
+            }
+            @if (album()!.type === 'tablo' && album()!.maxRetouchPhotos) {
+              <span class="info-stat">
+                <strong>{{ album()!.maxRetouchPhotos }}</strong> retusálás
+              </span>
+            }
+          </div>
+
+          <div class="info-actions">
+            <!-- Nézet váltó -->
+            <div class="view-switcher">
+              <button
+                (click)="viewMode.set('grid')"
+                [class.view-switcher__btn--active]="viewMode() === 'grid'"
+                class="view-switcher__btn"
+                matTooltip="Rács nézet"
+              >
+                <lucide-icon [name]="ICONS.GRID" [size]="18" />
+              </button>
+              <button
+                (click)="viewMode.set('list')"
+                [class.view-switcher__btn--active]="viewMode() === 'list'"
+                class="view-switcher__btn"
+                matTooltip="Lista nézet"
+              >
+                <lucide-icon [name]="ICONS.LIST" [size]="18" />
+              </button>
+            </div>
+
+            @if (album()!.expiresAt && album()!.status !== 'completed') {
+              <div class="info-expiry">
+                <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                <input
+                  type="date"
+                  [value]="getExpiryDateValue()"
+                  (change)="onExpiryDateChange($event)"
+                  [min]="getTomorrowDate()"
+                  class="expiry-input-compact"
+                  [disabled]="extendingExpiry()"
+                />
+                @if (isAlbumExpired()) {
+                  <span class="expiry-badge-compact">Lejárt!</span>
+                }
+                <button
+                  (click)="extendExpiry(3)"
+                  [disabled]="extendingExpiry()"
+                  class="extend-btn-compact"
+                  matTooltip="+3 nap"
+                >
+                  +3
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Upload Section (only for draft) -->
+        @if (album()!.status === 'draft') {
+          <div class="mb-6">
+            <app-drop-zone
+              [uploading]="uploading()"
+              [uploadProgress]="uploadProgress()?.progress || 0"
+              accept=".jpg,.jpeg,.png,.webp,.zip"
+              hint="JPG, PNG, WebP vagy ZIP"
+              maxSize="max. 20MB/kép"
+              (filesSelected)="onFilesSelected($event)"
+            />
+          </div>
+        }
+
+        <!-- Delete mode toolbar -->
+        @if (deleteSelectedIds().length > 0) {
+          <div class="delete-toolbar">
+            <span class="delete-toolbar__count">
+              {{ deleteSelectedIds().length }} kép kijelölve törlésre
+            </span>
+            <div class="delete-toolbar__actions">
+              <button
+                type="button"
+                class="delete-toolbar__btn delete-toolbar__btn--cancel"
+                (click)="clearDeleteSelection()"
+              >
+                Mégsem
+              </button>
+              <button
+                type="button"
+                class="delete-toolbar__btn delete-toolbar__btn--delete"
+                [disabled]="deletingPhotos()"
+                (click)="confirmDeletePhotos()"
+              >
+                @if (deletingPhotos()) {
+                  <div class="spinner"></div>
+                } @else {
+                  <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+                }
+                Törlés
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Photos Grid - SelectionGrid komponens használata -->
+        @if (album()!.photos.length > 0 && viewMode() === 'grid') {
+          <div class="delete-hint" [class.delete-hint--visible]="deleteSelectedIds().length === 0 && album()!.status === 'draft'">
+            <lucide-icon [name]="ICONS.INFO" [size]="14" />
+            Ctrl/Cmd + kattintással jelölhetsz ki képeket törlésre
+          </div>
+          <app-selection-grid
+            [photos]="gridPhotos()"
+            [selectedIds]="selectedPhotoIds()"
+            [deleteMode]="album()!.status !== 'completed'"
+            [deleteSelectedIds]="deleteSelectedIds()"
+            [allowMultiple]="true"
+            [maxSelection]="null"
+            [isLoading]="false"
+            [readonly]="true"
+            [showHeader]="false"
+            [emptyMessage]="'Nincsenek képek'"
+            (zoomClick)="onZoomClick($event)"
+            (deleteSelect)="onDeleteSelect($event)"
+            (deleteSingleClick)="onSingleDeleteClick($event)"
+          />
+        }
+
+        <!-- Lista nézet -->
+        @if (album()!.photos.length > 0 && viewMode() === 'list') {
+          <div class="photo-list">
+            <!-- Filter bar -->
+            <div class="photo-list__filters">
+              <select
+                [ngModel]="listFilter()"
+                (ngModelChange)="onFilterChange($event)"
+                class="photo-list__select"
+              >
+                <option value="all">Összes kép ({{ album()!.photosCount }})</option>
+                <option value="selected">Kiválasztottak ({{ selectedPhotoIds().length }})</option>
+                <option value="unselected">Nem kiválasztottak ({{ album()!.photosCount - selectedPhotoIds().length }})</option>
+              </select>
+              <div class="photo-list__search">
+                <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+                <input
+                  type="text"
+                  [ngModel]="searchQuery()"
+                  (ngModelChange)="onSearchChange($event)"
+                  placeholder="Keresés névre vagy fájlnévre..."
+                  class="photo-list__search-input"
+                />
+              </div>
+            </div>
+
+            <!-- Action bar -->
+            <div class="photo-list__actions">
+              <button
+                (click)="downloadSelectedZip()"
+                [disabled]="!hasSelectedPhotos() || downloading()"
+                class="photo-list__action-btn"
+              >
+                @if (downloading()) {
+                  <div class="spinner"></div>
+                } @else {
+                  <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+                }
+                Kiválasztottak letöltése (ZIP)
+              </button>
+              <button
+                (click)="exportExcel()"
+                [disabled]="exporting()"
+                class="photo-list__action-btn photo-list__action-btn--secondary"
+              >
+                @if (exporting()) {
+                  <div class="spinner spinner--dark"></div>
+                } @else {
+                  <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
+                }
+                Excel export
+              </button>
+            </div>
+
+            <!-- Photo list items -->
+            <div class="photo-list__items">
+              @for (photo of paginatedPhotos(); track photo.id; let i = $index) {
+                <div
+                  class="photo-list__item"
+                  [class.photo-list__item--selected]="isPhotoSelected(photo.id)"
+                  [class.photo-list__item--delete-selected]="isDeleteSelected(photo.id)"
+                  [style.animation-delay]="i * 0.03 + 's'"
+                  (click)="onListItemClick(photo, $event)"
+                >
+                  <img
+                    [src]="photo.thumb_url"
+                    [alt]="photo.name"
+                    class="photo-list__thumb"
+                    loading="lazy"
+                    (click)="openLightboxAtPhoto(photo.id); $event.stopPropagation()"
+                  />
+                  <div class="photo-list__info">
+                    <span class="photo-list__title">{{ photo.title || getFilenameWithoutExt(photo.name) }}</span>
+                    @if (photo.title && photo.title !== getFilenameWithoutExt(photo.name)) {
+                      <span class="photo-list__filename">{{ getFilenameWithoutExt(photo.name) }}</span>
+                    }
+                  </div>
+                  @if (isPhotoSelected(photo.id)) {
+                    <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="photo-list__check" />
+                  }
+
+                  @if (album()!.status !== 'completed') {
+                    @if (isDeleteSelected(photo.id)) {
+                      <lucide-icon [name]="ICONS.CHECK" [size]="20" class="photo-list__delete-check" />
+                    } @else {
+                      <button
+                        class="photo-list__delete-btn"
+                        matTooltip="Törlés"
+                        (click)="onListItemDelete(photo); $event.stopPropagation()"
+                      >
+                        <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+                      </button>
+                    }
+                  }
+                </div>
+              } @empty {
+                <div class="photo-list__empty">
+                  <lucide-icon [name]="ICONS.SEARCH" [size]="32" />
+                  <p>Nincs találat a szűrési feltételeknek megfelelően</p>
+                </div>
+              }
+            </div>
+
+            <!-- Paginator -->
+            @if (totalPages() > 1) {
+              <div class="pagination">
+                <button
+                  class="page-btn"
+                  [disabled]="currentPage() === 1"
+                  (click)="goToPage(currentPage() - 1)"
+                >
+                  <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+                  Előző
+                </button>
+
+                <div class="page-info">
+                  {{ currentPage() }} / {{ totalPages() }} oldal
+                  <span class="total-count">({{ filteredPhotos().length }} kép)</span>
+                </div>
+
+                <button
+                  class="page-btn"
+                  [disabled]="currentPage() === totalPages()"
+                  (click)="goToPage(currentPage() + 1)"
+                >
+                  Következő
+                  <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        @if (album()!.photos.length === 0 && album()!.status !== 'draft') {
+          <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="48" class="mx-auto text-gray-400 mb-4" />
+            <p class="text-gray-600 dark:text-gray-400">Nincsenek képek az albumban</p>
+          </div>
+        }
+      }
+
+    </div>
+
+    <!-- Dialógusok - page-card KÍVÜL a backdrop-filter stacking context miatt -->
+
+    <!-- Delete Album Confirm -->
+    @if (showDeleteConfirm()) {
+      <app-confirm-dialog
+        title="Album törlése"
+        [message]="'Biztosan törölni szeretnéd a(z) ' + album()!.name + ' albumot? Az összes kép törlődni fog!'"
+        confirmText="Törlés"
+        confirmType="danger"
+        (resultEvent)="onDeleteAlbumResult($event)"
+      />
+    }
+
+    <!-- Delete Photo Confirm -->
+    @if (photoToDelete()) {
+      <app-confirm-dialog
+        title="Kép törlése"
+        message="Biztosan törölni szeretnéd ezt a képet?"
+        confirmText="Törlés"
+        confirmType="danger"
+        (resultEvent)="onDeletePhotoResult($event)"
+      />
+    }
+
+    <!-- Delete Multiple Photos Confirm -->
+    @if (showDeletePhotosConfirm()) {
+      <app-confirm-dialog
+        title="Képek törlése"
+        [message]="'Biztosan törölni szeretnéd a kijelölt ' + deleteSelectedIds().length + ' képet? Ez a művelet nem visszavonható.'"
+        confirmText="Törlés"
+        confirmType="danger"
+        (resultEvent)="onDeletePhotosResult($event)"
+      />
+    }
+
+    <!-- Lightbox -->
+    @if (lightboxOpen()) {
+      <app-media-lightbox
+        [media]="lightboxMedia()"
+        [currentIndex]="lightboxIndex()"
+        (close)="closeLightbox()"
+        (navigate)="navigateLightbox($event)"
+      />
+    }
+
+    <!-- Edit Album Modal -->
+    @if (showEditModal()) {
+      <div class="dialog-backdrop" (mousedown)="editBackdropHandler.onMouseDown($event)" (click)="editBackdropHandler.onClick($event)">
+        <div class="dialog-panel dialog-panel--md" (mousedown)="$event.stopPropagation()">
+          <div class="dialog-header">
+            <h2 class="dialog-title">Album szerkesztése</h2>
+            <button type="button" class="dialog-close" (click)="closeEditModal()">
+              <lucide-icon [name]="ICONS.X" [size]="20" />
+            </button>
+          </div>
+
+          <form (ngSubmit)="saveAlbum()" class="dialog-body">
+            <!-- Név -->
+            <div class="form-group">
+              <label class="form-label">Album neve *</label>
+              <input
+                type="text"
+                [(ngModel)]="editForm.name"
+                name="name"
+                class="form-input"
+                required
+              />
+            </div>
+
+            <!-- Típustól függő mezők -->
+            @if (album()!.type === 'selection') {
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Min. kiválasztás</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="editForm.minSelections"
+                    name="minSelections"
+                    class="form-input"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Max. kiválasztás</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="editForm.maxSelections"
+                    name="maxSelections"
+                    class="form-input"
+                    min="0"
+                  />
+                </div>
+              </div>
+            }
+
+            @if (album()!.type === 'tablo') {
+              <div class="form-group">
+                <label class="form-label">Max. retusálás</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editForm.maxRetouchPhotos"
+                  name="maxRetouchPhotos"
+                  class="form-input"
+                  min="0"
+                />
+              </div>
+            }
+
+            <div class="dialog-actions">
+              <button type="button" class="btn-secondary" (click)="closeEditModal()">
+                Mégse
+              </button>
+              <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) {
+                  <div class="spinner spinner--dark"></div>
+                }
+                Mentés
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+  `,
+  styles: [`
+    @keyframes cardEntry {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #64748b;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .back-link:hover {
+      color: var(--color-text-primary, #1e293b);
+    }
+
+    :host-context(.dark) .back-link:hover {
+      color: #f1f5f9;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      background: #f1f5f9;
+      color: var(--color-primary, #1e3a5f);
+      border-color: var(--color-primary, #1e3a5f);
+    }
+
+    .action-btn:disabled {
+      color: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    .action-btn--danger:hover:not(:disabled) {
+      background: #fef2f2;
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+
+    .btn-activate {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #16a34a;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-activate:hover:not(:disabled) {
+      background: #15803d;
+    }
+
+    .btn-activate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .detail-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .detail-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text-primary, #1e293b);
+      margin: 0 0 8px 0;
+    }
+
+    :host-context(.dark) .detail-title {
+      color: #f8fafc;
+    }
+
+    .detail-meta {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    .status-badge {
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: 4px;
+    }
+
+    .type-label {
+      color: #94a3b8;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .delete-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      color: #0369a1;
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .delete-hint--visible {
+      opacity: 1;
+      max-height: 50px;
+    }
+
+    :host-context(.dark) .delete-hint {
+      background: rgba(14, 165, 233, 0.1);
+      border-color: rgba(14, 165, 233, 0.3);
+      color: #7dd3fc;
+    }
+
+    .delete-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      animation: slideDown 0.2s ease;
+    }
+
+    :host-context(.dark) .delete-toolbar {
+      background: rgba(220, 38, 38, 0.1);
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .delete-toolbar__count {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #dc2626;
+    }
+
+    :host-context(.dark) .delete-toolbar__count {
+      color: #fca5a5;
+    }
+
+    .delete-toolbar__actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .delete-toolbar__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .delete-toolbar__btn--cancel {
+      background: transparent;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+    }
+
+    .delete-toolbar__btn--cancel:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .delete-toolbar__btn--delete {
+      background: #dc2626;
+      border: none;
+      color: white;
+    }
+
+    .delete-toolbar__btn--delete:hover:not(:disabled) {
+      background: #b91c1c;
+    }
+
+    .delete-toolbar__btn--delete:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Edit Modal Styles */
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    :host-context(.dark) .dialog-header {
+      border-color: #374151;
+    }
+
+    .dialog-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--color-text-primary, #1e293b);
+    }
+
+    :host-context(.dark) .dialog-title {
+      color: #f8fafc;
+    }
+
+    .dialog-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .dialog-close:hover {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    :host-context(.dark) .dialog-close:hover {
+      background: #374151;
+      color: #f8fafc;
+    }
+
+    .dialog-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    :host-context(.dark) .form-label {
+      color: #d1d5db;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.9375rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: white;
+      color: #1e293b;
+      transition: all 0.15s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary, #3b82f6);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    :host-context(.dark) .form-input {
+      background: #1f2937;
+      border-color: #4b5563;
+      color: #f8fafc;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 8px;
+    }
+
+    :host-context(.dark) .dialog-actions {
+      border-color: #374151;
+    }
+
+    .btn-secondary {
+      padding: 10px 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: transparent;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+
+    :host-context(.dark) .btn-secondary {
+      border-color: #4b5563;
+      color: #d1d5db;
+    }
+
+    :host-context(.dark) .btn-secondary:hover {
+      background: #374151;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: var(--color-primary, #3b82f6);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--color-primary-dark, #2563eb);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .spinner--dark {
+      border-color: rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+    }
+
+    /* Kompakt info bar */
+    .album-info-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    :host-context(.dark) .album-info-bar {
+      background: rgba(30, 41, 59, 0.5);
+      border-color: #334155;
+    }
+
+    .info-stats {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .info-stat {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    .info-stat strong {
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    :host-context(.dark) .info-stat {
+      color: #94a3b8;
+    }
+
+    :host-context(.dark) .info-stat strong {
+      color: #f1f5f9;
+    }
+
+    .info-stat--selection {
+      padding: 4px 10px;
+      background: #fef3c7;
+      border-radius: 6px;
+      color: #92400e;
+    }
+
+    .info-stat--selection strong {
+      color: #92400e;
+    }
+
+    :host-context(.dark) .info-stat--selection {
+      background: rgba(251, 191, 36, 0.15);
+      color: #fbbf24;
+    }
+
+    :host-context(.dark) .info-stat--selection strong {
+      color: #fbbf24;
+    }
+
+    .info-stat--complete {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .info-stat--complete strong {
+      color: #166534;
+    }
+
+    :host-context(.dark) .info-stat--complete {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+    }
+
+    :host-context(.dark) .info-stat--complete strong {
+      color: #4ade80;
+    }
+
+    .info-hint {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-left: 2px;
+    }
+
+    .info-expiry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+    }
+
+    :host-context(.dark) .info-expiry {
+      color: #94a3b8;
+    }
+
+    .expiry-input-compact {
+      padding: 4px 8px;
+      font-size: 0.8125rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      background: white;
+      color: #1e293b;
+      cursor: pointer;
+      width: 130px;
+    }
+
+    .expiry-input-compact:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    :host-context(.dark) .expiry-input-compact {
+      background: #0f172a;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+
+    .expiry-badge-compact {
+      padding: 2px 6px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: #fee2e2;
+      color: #dc2626;
+      border-radius: 4px;
+    }
+
+    :host-context(.dark) .expiry-badge-compact {
+      background: rgba(220, 38, 38, 0.2);
+      color: #f87171;
+    }
+
+    .extend-btn-compact {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #3b82f6;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .extend-btn-compact:hover:not(:disabled) {
+      background: #dbeafe;
+    }
+
+    .extend-btn-compact:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    :host-context(.dark) .extend-btn-compact {
+      background: #1e3a5f;
+      border-color: #1e40af;
+      color: #93c5fd;
+    }
+
+    /* Info actions container */
+    .info-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Nézet váltó */
+    .view-switcher {
+      display: flex;
+      background: #e2e8f0;
+      border-radius: 6px;
+      padding: 2px;
+    }
+
+    :host-context(.dark) .view-switcher {
+      background: #334155;
+    }
+
+    .view-switcher__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .view-switcher__btn:hover {
+      color: #1e293b;
+    }
+
+    :host-context(.dark) .view-switcher__btn:hover {
+      color: #f1f5f9;
+    }
+
+    .view-switcher__btn--active {
+      background: white;
+      color: var(--color-primary, #1e3a5f);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    :host-context(.dark) .view-switcher__btn--active {
+      background: #1e293b;
+      color: #60a5fa;
+    }
+
+    /* Lista nézet */
+    .photo-list {
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .photo-list__filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .photo-list__select {
+      padding: 8px 12px;
+      font-size: 0.875rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+      color: #1e293b;
+      cursor: pointer;
+      min-width: 200px;
+    }
+
+    .photo-list__select:focus {
+      outline: none;
+      border-color: var(--color-primary, #3b82f6);
+    }
+
+    :host-context(.dark) .photo-list__select {
+      background: #1f2937;
+      border-color: #4b5563;
+      color: #f8fafc;
+    }
+
+    .photo-list__search {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+      min-width: 200px;
+    }
+
+    :host-context(.dark) .photo-list__search {
+      background: #1f2937;
+      border-color: #4b5563;
+    }
+
+    .photo-list__search lucide-icon {
+      color: #94a3b8;
+    }
+
+    .photo-list__search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 0.875rem;
+      color: #1e293b;
+      outline: none;
+    }
+
+    :host-context(.dark) .photo-list__search-input {
+      color: #f8fafc;
+    }
+
+    .photo-list__search-input::placeholder {
+      color: #94a3b8;
+    }
+
+    .photo-list__actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .photo-list__action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: var(--color-primary, #1e3a5f);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .photo-list__action-btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .photo-list__action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .photo-list__action-btn--secondary {
+      background: white;
+      color: var(--color-primary, #1e3a5f);
+      border: 1px solid #e2e8f0;
+    }
+
+    .photo-list__action-btn--secondary:hover:not(:disabled) {
+      background: #f8fafc;
+      border-color: var(--color-primary, #1e3a5f);
+    }
+
+    :host-context(.dark) .photo-list__action-btn--secondary {
+      background: #1f2937;
+      border-color: #4b5563;
+      color: #60a5fa;
+    }
+
+    :host-context(.dark) .photo-list__action-btn--secondary:hover:not(:disabled) {
+      background: #374151;
+    }
+
+    .photo-list__items {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+    }
+
+    :host-context(.dark) .photo-list__items {
+      background: #1f2937;
+      border-color: #334155;
+    }
+
+    .photo-list__item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      transition: all 0.15s ease;
+      animation: listItemEntry 0.2s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes listItemEntry {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .photo-list__item:hover {
+      background: #f8fafc;
+    }
+
+    :host-context(.dark) .photo-list__item:hover {
+      background: #334155;
+    }
+
+    .photo-list__item--selected {
+      background: #eff6ff;
+    }
+
+    :host-context(.dark) .photo-list__item--selected {
+      background: rgba(59, 130, 246, 0.15);
+    }
+
+    .photo-list__item--selected:hover {
+      background: #dbeafe;
+    }
+
+    :host-context(.dark) .photo-list__item--selected:hover {
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    .photo-list__thumb {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f1f5f9;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .photo-list__thumb:hover {
+      opacity: 0.8;
+    }
+
+    :host-context(.dark) .photo-list__thumb {
+      background: #374151;
+    }
+
+    .photo-list__info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .photo-list__title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #1e293b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    :host-context(.dark) .photo-list__title {
+      color: #f8fafc;
+    }
+
+    .photo-list__filename {
+      font-size: 0.75rem;
+      color: #64748b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    :host-context(.dark) .photo-list__filename {
+      color: #94a3b8;
+    }
+
+    .photo-list__check {
+      color: #16a34a;
+      flex-shrink: 0;
+    }
+
+    .photo-list__delete-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: #94a3b8;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .photo-list__item:hover .photo-list__delete-btn {
+      opacity: 1;
+    }
+
+    .photo-list__delete-btn:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+
+    :host-context(.dark) .photo-list__delete-btn:hover {
+      background: rgba(220, 38, 38, 0.15);
+      border-color: rgba(220, 38, 38, 0.3);
+      color: #f87171;
+    }
+
+    .photo-list__item--delete-selected {
+      background: #fef2f2;
+      border-left: 3px solid #dc2626;
+    }
+
+    :host-context(.dark) .photo-list__item--delete-selected {
+      background: rgba(220, 38, 38, 0.1);
+      border-left-color: #f87171;
+    }
+
+    .photo-list__delete-check {
+      color: #dc2626;
+      flex-shrink: 0;
+    }
+
+    :host-context(.dark) .photo-list__delete-check {
+      color: #f87171;
+    }
+
+    .photo-list__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 48px 24px;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    .photo-list__empty p {
+      margin: 0;
+      font-size: 0.875rem;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 16px;
+      padding: 12px;
+    }
+
+    .page-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      background: #f8fafc;
+      border-color: var(--color-primary, #1e3a5f);
+      color: var(--color-primary, #1e3a5f);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    :host-context(.dark) .page-btn {
+      background: #1f2937;
+      border-color: #4b5563;
+      color: #94a3b8;
+    }
+
+    :host-context(.dark) .page-btn:hover:not(:disabled) {
+      background: #374151;
+      color: #60a5fa;
+    }
+
+    .page-info {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    :host-context(.dark) .page-info {
+      color: #94a3b8;
+    }
+
+    .total-count {
+      margin-left: 4px;
+      color: #94a3b8;
+    }
+
+    :host-context(.dark) .total-count {
+      color: #64748b;
+    }
+  `]
+})
+export class PartnerAlbumDetailComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
+  ordersService = inject(PartnerOrdersService);
+  private toast = inject(ToastService);
+
+  readonly ICONS = ICONS;
+
+  // State
+  loading = signal(true);
+  uploading = signal(false);
+  activating = signal(false);
+  extendingExpiry = signal(false);
+  album = signal<PartnerOrderAlbumDetails | null>(null);
+  uploadProgress = signal<UploadProgress | null>(null);
+
+  // List view state
+  viewMode = signal<'grid' | 'list'>('list');
+  listFilter = signal<'all' | 'selected' | 'unselected'>('all');
+  searchQuery = signal('');
+  downloading = signal(false);
+  exporting = signal(false);
+
+  // Pagination
+  currentPage = signal(1);
+  pageSize = signal(20);
+
+  // Modals
+  showDeleteConfirm = signal(false);
+  photoToDelete = signal<AlbumPhoto | null>(null);
+  showDeletePhotosConfirm = signal(false);
+
+  // Lightbox state
+  lightboxOpen = signal(false);
+  lightboxIndex = signal(0);
+
+  // Delete mode state
+  deleteSelectedIds = signal<number[]>([]);
+  deletingPhotos = signal(false);
+
+  // Edit modal state
+  showEditModal = signal(false);
+  saving = signal(false);
+  editForm = {
+    name: '',
+    minSelections: null as number | null,
+    maxSelections: null as number | null,
+    maxRetouchPhotos: null as number | null,
+  };
+  editBackdropHandler = createBackdropHandler(() => this.closeEditModal());
+
+  // Computed: átalakítja AlbumPhoto[] -> WorkflowPhoto[] formátumra
+  gridPhotos = computed<WorkflowPhoto[]>(() => {
+    const albumData = this.album();
+    if (!albumData) return [];
+
+    return albumData.photos.map(photo => ({
+      id: photo.id,
+      url: photo.original_url,
+      thumbnailUrl: photo.thumb_url,
+      filename: photo.name,
+    }));
+  });
+
+  // Computed: kiválasztott képek (progress alapján)
+  selectedPhotoIds = computed<number[]>(() => {
+    const albumData = this.album();
+    if (!albumData?.progress) return [];
+    return albumData.progress.claimedIds || [];
+  });
+
+  // Computed: lightbox media items
+  lightboxMedia = computed<LightboxMediaItem[]>(() => {
+    const albumData = this.album();
+    if (!albumData) return [];
+
+    return albumData.photos.map(photo => ({
+      id: photo.id,
+      url: photo.original_url,
+      fileName: photo.name,
+    }));
+  });
+
+  // Computed: szűrt képek a lista nézethez
+  filteredPhotos = computed<AlbumPhoto[]>(() => {
+    const albumData = this.album();
+    if (!albumData) return [];
+
+    let photos = [...albumData.photos];
+    const filter = this.listFilter();
+    const query = this.searchQuery().toLowerCase().trim();
+    const selectedIds = this.selectedPhotoIds();
+
+    // Szűrés kiválasztás szerint
+    if (filter === 'selected') {
+      photos = photos.filter(p => selectedIds.includes(p.id));
+    } else if (filter === 'unselected') {
+      photos = photos.filter(p => !selectedIds.includes(p.id));
+    }
+
+    // Szűrés keresés szerint (fájlnév és IPTC title is)
+    if (query) {
+      photos = photos.filter(p =>
+        p.name.toLowerCase().includes(query) ||
+        p.title.toLowerCase().includes(query)
+      );
+    }
+
+    return photos;
+  });
+
+  // Computed: van-e kiválasztott kép
+  hasSelectedPhotos = computed(() => this.selectedPhotoIds().length > 0);
+
+  // Computed: paginált fotók
+  paginatedPhotos = computed<AlbumPhoto[]>(() => {
+    const photos = this.filteredPhotos();
+    const page = this.currentPage();
+    const size = this.pageSize();
+    const start = (page - 1) * size;
+    return photos.slice(start, start + size);
+  });
+
+  // Computed: összes oldal száma
+  totalPages = computed(() => {
+    const total = this.filteredPhotos().length;
+    const size = this.pageSize();
+    return Math.ceil(total / size) || 1;
+  });
+
+  ngOnInit(): void {
+    const id = +this.route.snapshot.params['id'];
+    this.loadAlbum(id);
+  }
+
+  loadAlbum(id: number): void {
+    this.loading.set(true);
+    this.ordersService.getAlbum(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (album) => {
+        this.album.set(album);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.toast.error('Hiba', 'Az album nem található');
+        this.router.navigate(['/partner/orders/clients']);
+      }
+    });
+  }
+
+  onFilesSelected(files: File[]): void {
+    this.uploadFiles(files);
+  }
+
+  uploadFiles(files: File[]): void {
+    // Filter valid image and ZIP files
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/zip', 'application/x-zip-compressed'];
+    const validFiles = files.filter(f => {
+      const isValidType = validTypes.includes(f.type) || f.name.toLowerCase().endsWith('.zip');
+      const isValidSize = f.size <= 50 * 1024 * 1024; // ZIP-nek nagyobb limit (50MB)
+      return isValidType && isValidSize;
+    });
+
+    if (validFiles.length === 0) {
+      this.toast.error('Hiba', 'Nincs érvényes fájl a feltöltéshez');
+      return;
+    }
+
+    if (validFiles.length !== files.length) {
+      this.toast.warning('Figyelem', `${files.length - validFiles.length} fájl nem megfelelő formátumú vagy túl nagy`);
+    }
+
+    this.uploading.set(true);
+    this.uploadProgress.set({
+      uploadedCount: 0,
+      totalCount: validFiles.length,
+      photos: [],
+      currentChunk: 0,
+      totalChunks: Math.ceil(validFiles.length / 10),
+      progress: 0,
+      completed: false,
+      errorCount: 0
+    });
+
+    this.ordersService.uploadPhotosChunked(this.album()!.id, validFiles).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (progress) => {
+        this.uploadProgress.set(progress);
+        if (progress.completed) {
+          this.toast.success('Siker', `${progress.uploadedCount} kép sikeresen feltöltve`);
+          this.loadAlbum(this.album()!.id);
+          this.uploading.set(false);
+        }
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error('Hiba', err.error?.message || 'Hiba történt a feltöltés során');
+        this.uploading.set(false);
+      }
+    });
+  }
+
+  activateAlbum(): void {
+    this.activating.set(true);
+    this.ordersService.activateAlbum(this.album()!.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.toast.success('Siker', 'Album aktiválva! Az ügyfél mostantól elérheti.');
+        this.loadAlbum(this.album()!.id);
+        this.activating.set(false);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
+        this.activating.set(false);
+      }
+    });
+  }
+
+  confirmDelete(): void {
+    this.showDeleteConfirm.set(true);
+  }
+
+  onDeleteAlbumResult(result: ConfirmDialogResult): void {
+    this.showDeleteConfirm.set(false);
+    if (result.action === 'confirm') {
+      this.deleteAlbum();
+    }
+  }
+
+  deleteAlbum(): void {
+    const clientId = this.album()!.client.id;
+    this.ordersService.deleteAlbum(this.album()!.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.toast.success('Siker', 'Album törölve');
+        this.router.navigate(['/partner/orders/clients', clientId]);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
+      }
+    });
+  }
+
+  confirmDeletePhoto(photo: AlbumPhoto): void {
+    this.photoToDelete.set(photo);
+  }
+
+  onDeletePhotoResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      this.deletePhoto();
+    } else {
+      this.photoToDelete.set(null);
+    }
+  }
+
+  deletePhoto(): void {
+    const photo = this.photoToDelete();
+    if (!photo) return;
+
+    this.ordersService.deletePhoto(this.album()!.id, photo.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        // Remove from local array
+        const current = this.album()!;
+        this.album.set({
+          ...current,
+          photos: current.photos.filter(p => p.id !== photo.id),
+          photosCount: current.photosCount - 1
+        });
+        this.toast.success('Siker', 'Kép törölve');
+        this.photoToDelete.set(null);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
+        this.photoToDelete.set(null);
+      }
+    });
+  }
+
+  // Delete mode kezelés - Ctrl/Cmd+kattintás batch módhoz
+  onDeleteSelect(event: { photo: WorkflowPhoto; selected: boolean }): void {
+    const currentIds = this.deleteSelectedIds();
+    if (event.selected) {
+      this.deleteSelectedIds.set([...currentIds, event.photo.id]);
+    } else {
+      this.deleteSelectedIds.set(currentIds.filter(id => id !== event.photo.id));
+    }
+  }
+
+  // Kuka gomb kattintás - egyből confirm dialógus
+  onSingleDeleteClick(photo: WorkflowPhoto): void {
+    // Keressük meg az eredeti AlbumPhoto objektumot
+    const albumPhoto = this.album()?.photos.find(p => p.id === photo.id);
+    if (albumPhoto) {
+      this.photoToDelete.set(albumPhoto);
+    }
+  }
+
+  clearDeleteSelection(): void {
+    this.deleteSelectedIds.set([]);
+  }
+
+  confirmDeletePhotos(): void {
+    this.showDeletePhotosConfirm.set(true);
+  }
+
+  onDeletePhotosResult(result: ConfirmDialogResult): void {
+    this.showDeletePhotosConfirm.set(false);
+    if (result.action === 'confirm') {
+      this.deleteSelectedPhotos();
+    }
+  }
+
+  deleteSelectedPhotos(): void {
+    const idsToDelete = this.deleteSelectedIds();
+    if (idsToDelete.length === 0) return;
+
+    this.deletingPhotos.set(true);
+
+    // Töröljük az összes kijelölt képet egymás után
+    const deletePromises = idsToDelete.map(id =>
+      this.ordersService.deletePhoto(this.album()!.id, id).toPromise()
+    );
+
+    Promise.all(deletePromises)
+      .then(() => {
+        const current = this.album()!;
+        this.album.set({
+          ...current,
+          photos: current.photos.filter(p => !idsToDelete.includes(p.id)),
+          photosCount: current.photosCount - idsToDelete.length
+        });
+        this.toast.success('Siker', `${idsToDelete.length} kép törölve`);
+        this.deleteSelectedIds.set([]);
+        this.deletingPhotos.set(false);
+      })
+      .catch(() => {
+        this.toast.error('Hiba', 'Nem sikerült törölni néhány képet');
+        this.deletingPhotos.set(false);
+        this.loadAlbum(this.album()!.id);
+      });
+  }
+
+  // Lightbox kezelés
+  onZoomClick(event: { photo: WorkflowPhoto; index: number }): void {
+    this.lightboxIndex.set(event.index);
+    this.lightboxOpen.set(true);
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen.set(false);
+  }
+
+  navigateLightbox(direction: number): void {
+    const newIndex = this.lightboxIndex() + direction;
+    const photos = this.album()?.photos || [];
+    if (newIndex >= 0 && newIndex < photos.length) {
+      this.lightboxIndex.set(newIndex);
+    }
+  }
+
+  // Edit modal kezelés
+  openEditModal(): void {
+    const albumData = this.album();
+    if (!albumData) return;
+
+    this.editForm = {
+      name: albumData.name,
+      minSelections: albumData.minSelections,
+      maxSelections: albumData.maxSelections,
+      maxRetouchPhotos: albumData.maxRetouchPhotos,
+    };
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+  }
+
+  saveAlbum(): void {
+    if (!this.editForm.name.trim()) {
+      this.toast.error('Hiba', 'Az album neve kötelező');
+      return;
+    }
+
+    this.saving.set(true);
+    this.ordersService.updateAlbum(this.album()!.id, {
+      name: this.editForm.name.trim(),
+      min_selections: this.editForm.minSelections,
+      max_selections: this.editForm.maxSelections,
+      max_retouch_photos: this.editForm.maxRetouchPhotos,
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.toast.success('Siker', 'Album mentve');
+        this.loadAlbum(this.album()!.id);
+        this.closeEditModal();
+        this.saving.set(false);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error('Hiba', err.error?.message || 'Nem sikerült menteni');
+        this.saving.set(false);
+      }
+    });
+  }
+
+  // ============================================
+  // LEJÁRAT KEZELÉS
+  // ============================================
+
+  isAlbumExpired(): boolean {
+    const expiresAt = this.album()?.expiresAt;
+    if (!expiresAt) return false;
+    return new Date(expiresAt) < new Date();
+  }
+
+  getExpiryDateValue(): string {
+    const expiresAt = this.album()?.expiresAt;
+    if (!expiresAt) return '';
+    return new Date(expiresAt).toISOString().split('T')[0];
+  }
+
+  getTomorrowDate(): string {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  }
+
+  onExpiryDateChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.value) return;
+
+    const newExpiry = new Date(input.value);
+    newExpiry.setHours(23, 59, 59, 999); // Nap végéig érvényes
+
+    this.extendingExpiry.set(true);
+    this.ordersService.extendAlbumExpiry(this.album()!.id, newExpiry.toISOString()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        const a = this.album()!;
+        this.album.set({
+          ...a,
+          expiresAt: response.data.expiresAt
+        });
+        this.toast.success('Siker', 'Lejárat módosítva');
+        this.extendingExpiry.set(false);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
+        this.extendingExpiry.set(false);
+      }
+    });
+  }
+
+  extendExpiry(days: number): void {
+    const currentExpiry = this.album()?.expiresAt;
+    const baseDate = currentExpiry ? new Date(currentExpiry) : new Date();
+    // Ha lejárt, az aktuális dátumtól számoljuk
+    const startDate = baseDate < new Date() ? new Date() : baseDate;
+    const newExpiry = new Date(startDate);
+    newExpiry.setDate(newExpiry.getDate() + days);
+
+    this.extendingExpiry.set(true);
+    this.ordersService.extendAlbumExpiry(this.album()!.id, newExpiry.toISOString()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        const a = this.album()!;
+        this.album.set({
+          ...a,
+          expiresAt: response.data.expiresAt
+        });
+        this.toast.success('Siker', `Lejárat meghosszabbítva ${days} nappal`);
+        this.extendingExpiry.set(false);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
+        this.extendingExpiry.set(false);
+      }
+    });
+  }
+
+  // ============================================
+  // LISTA NÉZET METÓDUSOK
+  // ============================================
+
+  isPhotoSelected(photoId: number): boolean {
+    return this.selectedPhotoIds().includes(photoId);
+  }
+
+  onFilterChange(filter: 'all' | 'selected' | 'unselected'): void {
+    this.listFilter.set(filter);
+    this.currentPage.set(1);
+  }
+
+  onSearchChange(query: string): void {
+    this.searchQuery.set(query);
+    this.currentPage.set(1);
+  }
+
+  getFilenameWithoutExt(filename: string): string {
+    return filename.replace(/\.[^/.]+$/, '');
+  }
+
+  // Pagination metódusok
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  
+  onListItemDelete(photo: AlbumPhoto): void {
+    this.photoToDelete.set(photo);
+  }
+
+  onListItemClick(photo: AlbumPhoto, event: MouseEvent): void {
+    // Ctrl/Cmd + kattintás: batch törlésre kijelölés
+    if ((event.ctrlKey || event.metaKey) && this.album()!.status !== 'completed') {
+      const currentIds = this.deleteSelectedIds();
+      if (currentIds.includes(photo.id)) {
+        this.deleteSelectedIds.set(currentIds.filter(id => id !== photo.id));
+      } else {
+        this.deleteSelectedIds.set([...currentIds, photo.id]);
+      }
+    }
+  }
+
+  isDeleteSelected(photoId: number): boolean {
+    return this.deleteSelectedIds().includes(photoId);
+  }
+
+  openLightboxAtPhoto(photoId: number): void {
+    const photos = this.album()?.photos || [];
+    const index = photos.findIndex(p => p.id === photoId);
+    if (index >= 0) {
+      this.lightboxIndex.set(index);
+      this.lightboxOpen.set(true);
+    }
+  }
+
+  downloadSelectedZip(): void {
+    const photoIds = this.selectedPhotoIds();
+    if (photoIds.length === 0) {
+      this.toast.warning('Figyelem', 'Nincs kiválasztott kép');
+      return;
+    }
+
+    this.downloading.set(true);
+    this.ordersService.downloadSelectedZip(this.album()!.id, photoIds)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.triggerDownload(blob, `album-${this.album()!.id}-selected.zip`);
+          this.downloading.set(false);
+          this.toast.success('Siker', 'Letöltés elkezdődött');
+        },
+        error: () => {
+          this.toast.error('Hiba', 'Nem sikerült a letöltés');
+          this.downloading.set(false);
+        }
+      });
+  }
+
+  exportExcel(): void {
+    const photoIds = this.selectedPhotoIds();
+    // Ha nincs kiválasztott, exportáljuk az összeset
+    const idsToExport = photoIds.length > 0 ? photoIds : this.album()!.photos.map(p => p.id);
+
+    this.exporting.set(true);
+    this.ordersService.exportExcel(this.album()!.id, idsToExport)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.triggerDownload(blob, `album-${this.album()!.id}-export.xlsx`);
+          this.exporting.set(false);
+          this.toast.success('Siker', 'Excel export elkészült');
+        },
+        error: () => {
+          this.toast.error('Hiba', 'Nem sikerült az export');
+          this.exporting.set(false);
+        }
+      });
+  }
+
+  private triggerDownload(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+}

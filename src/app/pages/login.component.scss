@@ -1,0 +1,278 @@
+// Login Page - Animation Styles
+
+// ============================================
+// ANIMATIONS - Keyframes
+// ============================================
+
+// Card fade in and slide up
+@keyframes cardFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Subtle float animation for card shadow
+@keyframes cardFloat {
+  0%, 100% {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Button loading pulse
+@keyframes buttonPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// Input focus glow
+@keyframes inputGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+  }
+}
+
+// Spinner rotation
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Tab content fade
+@keyframes tabContentFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// LOGIN PAGE STYLES
+// ============================================
+
+.login-page {
+  // Card entry animation
+  &__card {
+    animation: cardFadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    // Subtle lift effect on hover
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  // Header staggered animation
+  &__header {
+    opacity: 0;
+    animation: cardFadeInUp 0.4s ease forwards;
+    animation-delay: 0.15s;
+  }
+
+  &__title {
+    transition: color 0.2s;
+  }
+
+  // ============================================
+  // TAB STYLES
+  // ============================================
+  &__tabs {
+    opacity: 0;
+    animation: cardFadeInUp 0.4s ease forwards;
+    animation-delay: 0.2s;
+  }
+
+  &__tab-list {
+    position: relative;
+  }
+
+  &__tab {
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+
+    &:hover:not(&--active) {
+      color: #374151;
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    &--active {
+      color: #1e40af;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &__tab-content {
+    animation: tabContentFade 0.3s ease forwards;
+  }
+
+  // Section header stagger
+  &__section-header {
+    opacity: 0;
+    animation: cardFadeInUp 0.4s ease forwards;
+    animation-delay: 0.25s;
+  }
+
+  // Form staggered animation
+  &__form {
+    opacity: 0;
+    animation: cardFadeInUp 0.4s ease forwards;
+    animation-delay: 0.3s;
+  }
+
+  // Input focus enhancement
+  &__input {
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s, transform 0.15s;
+
+    &:focus {
+      animation: inputGlow 1.5s ease-in-out infinite;
+      transform: scale(1.01);
+    }
+
+    &:hover:not(:focus):not(:disabled) {
+      transform: scale(1.005);
+    }
+  }
+
+  // Submit button enhancements
+  &__submit {
+    transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -5px rgba(37, 99, 235, 0.4);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0) scale(0.98);
+    }
+
+    &--loading {
+      animation: buttonPulse 1.5s ease-in-out infinite;
+      cursor: wait;
+    }
+  }
+
+  // Spinner styles
+  &__spinner {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  // Hint staggered animation
+  &__hint {
+    opacity: 0;
+    animation: cardFadeInUp 0.4s ease forwards;
+    animation-delay: 0.4s;
+  }
+
+  // Footer animation
+  &__footer {
+    opacity: 0;
+    animation: cardFadeInUp 0.4s ease forwards;
+    animation-delay: 0.45s;
+  }
+
+  // Error message animation
+  &__error {
+    animation: cardFadeInUp 0.3s ease forwards;
+  }
+}
+
+// ============================================
+// REDUCED MOTION SUPPORT (A11y)
+// ============================================
+@media (prefers-reduced-motion: reduce) {
+  .login-page {
+    &__card {
+      animation: none;
+      opacity: 1;
+      transition: none;
+
+      &:hover {
+        transform: none;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    &__header,
+    &__tabs,
+    &__section-header,
+    &__form,
+    &__hint,
+    &__footer,
+    &__error,
+    &__tab-content {
+      animation: none;
+      opacity: 1;
+    }
+
+    &__input {
+      transition: none;
+
+      &:focus {
+        animation: none;
+        transform: none;
+      }
+
+      &:hover:not(:focus):not(:disabled) {
+        transform: none;
+      }
+    }
+
+    &__submit {
+      transition: none;
+
+      &:hover:not(:disabled) {
+        transform: none;
+      }
+
+      &:active:not(:disabled) {
+        transform: none;
+      }
+
+      &--loading {
+        animation: none;
+      }
+    }
+
+    &__spinner {
+      animation: spin 0.8s linear infinite; // Keep spinner for usability
+    }
+
+    &__tab {
+      transition: none;
+    }
+  }
+}

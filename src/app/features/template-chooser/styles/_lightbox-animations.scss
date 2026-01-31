@@ -1,0 +1,36 @@
+/**
+ * Lightbox Animations
+ * Képváltás transition effektusok
+ */
+
+.lightbox {
+  // Element: image with transition
+  &__image {
+    opacity: 1;
+    filter: blur(0);
+    transition:
+      opacity 0.1s ease-out,
+      filter 0.1s ease-out,
+      transform 0.2s ease;
+
+    // Modifier: loading/changing state - gyors és finom blur
+    &--changing {
+      opacity: 0.85;
+      filter: blur(3px);
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .lightbox {
+    &__image {
+      transition: none;
+
+      &--changing {
+        opacity: 1;
+        filter: none;
+      }
+    }
+  }
+}

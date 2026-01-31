@@ -1,0 +1,191 @@
+<div class="client-list-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Ügyfelek</h1>
+      <p class="subtitle">{{ totalClients() }} ügyfél összesen</p>
+    </div>
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="openCreateModal()"
+    >
+      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+      Új ügyfél
+    </button>
+  </header>
+
+  <!-- Keresés -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés név, email vagy telefon alapján..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (clients().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.USERS" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      @if (filterState.search()) {
+        <p>Próbálj más keresési feltételekkel!</p>
+      } @else {
+        <p>Még nincsenek ügyfelek hozzáadva.</p>
+        <button type="button" class="btn-primary mt-4" (click)="openCreateModal()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+          Új ügyfél
+        </button>
+      }
+    </div>
+  } @else {
+    <!-- Asztali fejléc (640px felett) -->
+    <div class="table-header">
+      <span class="th th-client">Ügyfél</span>
+      <span class="th th-albums">Albumok</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <!-- Ügyfél sorok -->
+    <div class="client-grid">
+      @for (client of clients(); track client.id; let i = $index) {
+        <div
+          class="client-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+        >
+          <div class="client-info" (click)="viewClient(client)">
+            <div class="client-avatar" [class.client-avatar--registered]="client.isRegistered">
+              {{ getInitials(client.name) }}
+            </div>
+            <div class="client-details">
+              <div class="client-name-row">
+                <span class="client-name">{{ client.name }}</span>
+                @if (client.isRegistered) {
+                  <span class="reg-badge reg-badge--registered" matTooltip="Regisztrált felhasználó">
+                    <lucide-icon [name]="ICONS.USER_CHECK" [size]="12" />
+                  </span>
+                } @else if (client.allowRegistration) {
+                  <span class="reg-badge reg-badge--allowed" matTooltip="Regisztráció engedélyezve">
+                    <lucide-icon [name]="ICONS.USER_PLUS" [size]="12" />
+                  </span>
+                }
+              </div>
+              @if (client.email || client.phone) {
+                <span class="client-contact">
+                  @if (client.email) {
+                    <lucide-icon [name]="ICONS.MAIL" [size]="12" />
+                    {{ client.email }}
+                  }
+                  @if (client.email && client.phone) {
+                    <span class="separator">•</span>
+                  }
+                  @if (client.phone) {
+                    <lucide-icon [name]="ICONS.PHONE" [size]="12" />
+                    {{ client.phone }}
+                  }
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="client-albums" (click)="viewClient(client)">
+            <span
+              class="albums-badge"
+              [class.albums-badge--active]="client.albumsCount > 0"
+              [matTooltip]="client.albumsCount + ' album'"
+            >
+              {{ client.albumsCount }}
+            </span>
+          </div>
+
+          <div class="client-actions">
+            <button
+              class="action-btn"
+              matTooltip="Szerkesztés"
+              (click)="editClient(client)"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              matTooltip="Törlés"
+              [disabled]="client.albumsCount > 0"
+              (click)="confirmDeleteClient(client)"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Paginálás -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === 1"
+          (click)="goToPage(filterState.page() - 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+
+        <div class="page-info">
+          {{ filterState.page() }} / {{ totalPages() }} oldal
+          <span class="total-count">({{ totalClients() }} ügyfél)</span>
+        </div>
+
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === totalPages()"
+          (click)="goToPage(filterState.page() + 1)"
+        >
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Create/Edit Modal -->
+@if (showEditModal()) {
+  <app-client-edit-modal
+    [client]="selectedClient()"
+    [mode]="modalMode()"
+    (close)="closeEditModal()"
+    (saved)="onClientSaved($event)"
+  />
+}
+
+<!-- Delete Confirm Dialog -->
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Ügyfél törlése"
+    [message]="'Biztosan törölni szeretnéd ' + selectedClient()?.name + ' ügyfelet?'"
+    confirmText="Törlés"
+    cancelText="Mégse"
+    variant="danger"
+    (confirmed)="deleteClient()"
+    (cancelled)="closeDeleteConfirm()"
+  />
+}

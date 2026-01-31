@@ -1,0 +1,20 @@
+<div class="rich-text-editor" [class.rich-text-editor--disabled]="disabled" [ngStyle]="editorStyle()">
+  <quill-editor
+    [(ngModel)]="content"
+    [modules]="modules"
+    [placeholder]="placeholder()"
+    [readOnly]="disabled"
+    (onContentChanged)="onContentChanged($event)"
+    (onFocus)="onFocus()"
+    (onBlur)="onBlur()"
+    format="html"
+    theme="snow"
+  />
+
+  <!-- Karakterszámláló (opcionális) -->
+  <div class="rich-text-editor__footer" *ngIf="maxLength() > 0">
+    <span class="rich-text-editor__char-count" [class.rich-text-editor__char-count--warning]="textLength > maxLength() * 0.9">
+      {{ textLength }} / {{ maxLength() }}
+    </span>
+  </div>
+</div>

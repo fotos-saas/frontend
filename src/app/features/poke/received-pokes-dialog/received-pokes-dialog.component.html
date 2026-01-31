@@ -1,0 +1,77 @@
+<div class="dialog-backdrop" appClickOutside (appClickOutside)="onClose()">
+  <div class="dialog-container"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="received-pokes-title">
+    <!-- Header -->
+    <div class="dialog-header">
+      <h2 id="received-pokes-title">
+        <span class="emoji" aria-hidden="true">📬</span>
+        kapott bökések
+      </h2>
+      <div class="header-actions">
+        @if (unreadCount() > 0) {
+          <button class="mark-read-btn" (click)="onMarkAllRead()">
+            olvasottnak jelölöm
+          </button>
+        }
+        <button class="close-btn" (click)="onClose()" aria-label="Bezárás">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog-content">
+      @if (pokes().length === 0) {
+        <app-empty-state
+          emoji="📭"
+          message="még nem kaptál bökést" />
+      } @else {
+        <ul class="poke-list" role="list" aria-label="Kapott bökések listája">
+          @for (poke of pokes(); track trackByPokeId($index, poke)) {
+            <li class="poke-item" [class.unread]="!poke.isRead" role="listitem">
+              <!-- Avatar & Info -->
+              <div class="poke-main">
+                <div class="poke-avatar" aria-hidden="true">
+                  <span>{{ poke.from.name.charAt(0).toUpperCase() }}</span>
+                </div>
+                <div class="poke-info">
+                  <span class="from-name">{{ poke.from.name }}</span>
+                  <span class="poke-message">
+                    @if (poke.emoji) {
+                      <span class="emoji" aria-hidden="true">{{ poke.emoji }}</span>
+                    }
+                    {{ poke.text || 'bökött rád!' }}
+                  </span>
+                  <span class="poke-time">{{ getRelativeTime(poke.createdAt) }}</span>
+                </div>
+              </div>
+
+              <!-- Reaction -->
+              <div class="poke-reaction">
+                @if (poke.reaction) {
+                  <span class="reaction-display" role="img" [attr.aria-label]="'Reakció: ' + poke.reaction">{{ poke.reaction }}</span>
+                } @else {
+                  <app-reaction-picker
+                    [reactions]="{}"
+                    [userReaction]="null"
+                    (reactionSelected)="onReactionSelect(poke, $event)" />
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Live region for screen reader announcements -->
+    <div class="visually-hidden" aria-live="polite" role="status">
+      @if (unreadCount() > 0) {
+        {{ unreadCount() }} olvasatlan bökésed van
+      }
+    </div>
+  </div>
+</div>

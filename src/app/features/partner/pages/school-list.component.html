@@ -1,0 +1,173 @@
+<div class="school-list-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Iskolák</h1>
+      <p class="subtitle">{{ totalSchools() }} iskola összesen</p>
+    </div>
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="openCreateModal()"
+    >
+      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+      Új iskola
+    </button>
+  </header>
+
+  <!-- Keresés -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés iskola neve vagy város alapján..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (schools().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.SCHOOL" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      @if (filterState.search()) {
+        <p>Próbálj más keresési feltételekkel!</p>
+      } @else {
+        <p>Még nincsenek iskolák hozzáadva.</p>
+        <button type="button" class="btn-primary mt-4" (click)="openCreateModal()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+          Új iskola
+        </button>
+      }
+    </div>
+  } @else {
+    <!-- Asztali fejléc (640px felett) -->
+    <div class="table-header">
+      <span class="th th-school">Iskola</span>
+      <span class="th th-projects">Projektek</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <!-- Iskola sorok -->
+    <div class="school-grid">
+      @for (school of schools(); track school.id; let i = $index) {
+        <div
+          class="school-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+        >
+          <div class="school-info" (click)="viewSchoolProjects(school)">
+            <lucide-icon [name]="ICONS.SCHOOL" [size]="20" class="school-icon" />
+            <div class="school-details">
+              <span class="school-name">{{ school.name }}</span>
+              @if (school.city) {
+                <span class="school-city">
+                  <lucide-icon [name]="ICONS.MAP_PIN" [size]="12" />
+                  {{ school.city }}
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="school-projects" (click)="viewSchoolProjects(school)">
+            <span
+              class="projects-badge"
+              [class.projects-badge--active]="school.hasActiveProjects"
+              [attr.data-tooltip]="school.activeProjectsCount + ' aktív / ' + school.projectsCount + ' összes'"
+            >
+              @if (school.hasActiveProjects) {
+                {{ school.activeProjectsCount }}/{{ school.projectsCount }}
+              } @else {
+                {{ school.projectsCount }}
+              }
+            </span>
+          </div>
+
+          <div class="school-actions">
+            <button
+              class="action-btn"
+              data-tooltip="Szerkesztés"
+              (click)="editSchool(school)"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              data-tooltip="Törlés"
+              [disabled]="school.projectsCount > 0"
+              (click)="confirmDeleteSchool(school)"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Paginálás -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === 1"
+          (click)="goToPage(filterState.page() - 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+
+        <div class="page-info">
+          {{ filterState.page() }} / {{ totalPages() }} oldal
+          <span class="total-count">({{ totalSchools() }} iskola)</span>
+        </div>
+
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === totalPages()"
+          (click)="goToPage(filterState.page() + 1)"
+        >
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Create/Edit Modal -->
+@if (showEditModal()) {
+  <app-school-edit-modal
+    [school]="selectedSchool()"
+    [mode]="modalMode()"
+    (close)="closeEditModal()"
+    (saved)="onSchoolSaved($event)"
+  />
+}
+
+<!-- Delete Confirm Dialog -->
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Iskola törlése"
+    [message]="'Biztosan törölni szeretnéd a(z) ' + selectedSchool()?.name + ' iskolát?'"
+    confirmText="Törlés"
+    cancelText="Mégse"
+    variant="danger"
+    (confirmed)="deleteSchool()"
+    (cancelled)="closeDeleteConfirm()"
+  />
+}

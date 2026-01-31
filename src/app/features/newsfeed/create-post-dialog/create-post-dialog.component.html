@@ -1,0 +1,249 @@
+<!-- Backdrop overlay -->
+<div
+  class="dialog-backdrop"
+  (mousedown)="onBackdropMouseDown($event)"
+  (click)="onBackdropClick($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="dialog-title"
+>
+  <!-- Dialog container -->
+  <div class="dialog">
+    <!-- Close button (X) -->
+    <button
+      type="button"
+      class="dialog__close"
+      (click)="close()"
+      [disabled]="isSubmitting()"
+      aria-label="Bezárás"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Header -->
+    <div class="dialog__header">
+      <div class="dialog__icon">
+        <!-- Edit mód: ceruza ikon, Create mód: dokumentum ikon -->
+        <svg *ngIf="!isEditMode()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2"/>
+          <line x1="9" y1="9" x2="13" y2="9"/>
+          <line x1="9" y1="13" x2="15" y2="13"/>
+        </svg>
+        <svg *ngIf="isEditMode()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </div>
+      <h2 id="dialog-title" class="dialog__title">
+        {{ dialogTitle() }}
+      </h2>
+      <p class="dialog__description">
+        <ng-container *ngIf="!isEditMode()">
+          Oszd meg a híreidet az osztállyal. Bejelentést vagy eseményt is hozhatsz létre.
+        </ng-container>
+        <ng-container *ngIf="isEditMode()">
+          Szerkeszd a bejegyzés tartalmát. A típus és a média nem módosítható.
+        </ng-container>
+      </p>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog__content">
+      <!-- API hiba megjelenítése -->
+      <div class="dialog__alert dialog__alert--error" *ngIf="errorMessage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>{{ errorMessage() }}</span>
+      </div>
+
+      <!-- Type selector (disabled in edit mode) -->
+      <div class="dialog__field">
+        <label class="dialog__label">Típus</label>
+        <div class="dialog__type-selector">
+          <button
+            type="button"
+            class="dialog__type-btn"
+            [class.dialog__type-btn--active]="postType === 'announcement'"
+            (click)="onTypeChange('announcement')"
+            [disabled]="isSubmitting() || isEditMode()"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+            Bejelentés
+          </button>
+          <button
+            type="button"
+            class="dialog__type-btn"
+            [class.dialog__type-btn--active]="postType === 'event'"
+            (click)="onTypeChange('event')"
+            [disabled]="isSubmitting() || isEditMode()"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Esemény
+          </button>
+        </div>
+        <span class="dialog__hint" *ngIf="isEditMode()">A típus nem módosítható szerkesztéskor.</span>
+      </div>
+
+      <!-- Title field -->
+      <div class="dialog__field">
+        <label class="dialog__label" for="post-title">
+          Cím <span class="dialog__required">*</span>
+        </label>
+        <input
+          #titleInput
+          type="text"
+          id="post-title"
+          class="dialog__input"
+          [class.dialog__input--error]="errors.title"
+          [(ngModel)]="title"
+          (ngModelChange)="onInputChange()"
+          [placeholder]="postType === 'event' ? 'Pl.: Osztálykirándulás' : 'Pl.: Fontos bejelentés'"
+          [disabled]="isSubmitting()"
+          maxlength="255"
+          autocomplete="off"
+        />
+        <div class="dialog__field-footer">
+          <span class="dialog__error" *ngIf="errors.title">{{ errors.title }}</span>
+          <span class="dialog__char-count" *ngIf="!errors.title">{{ titleCharCount }}</span>
+        </div>
+      </div>
+
+      <!-- Event details (only for events) -->
+      <div class="dialog__event-details" *ngIf="postType === 'event'">
+        <!-- Event date -->
+        <div class="dialog__field dialog__field--half">
+          <label class="dialog__label" for="event-date">
+            Dátum <span class="dialog__required">*</span>
+          </label>
+          <input
+            type="date"
+            id="event-date"
+            class="dialog__input"
+            [class.dialog__input--error]="errors.eventDate"
+            [(ngModel)]="eventDate"
+            (ngModelChange)="onInputChange()"
+            [min]="minDate"
+            [disabled]="isSubmitting()"
+          />
+          <span class="dialog__error" *ngIf="errors.eventDate">{{ errors.eventDate }}</span>
+        </div>
+
+        <!-- Event time -->
+        <div class="dialog__field dialog__field--half">
+          <label class="dialog__label" for="event-time">
+            Időpont <span class="dialog__optional">(opcionális)</span>
+          </label>
+          <input
+            type="time"
+            id="event-time"
+            class="dialog__input"
+            [(ngModel)]="eventTime"
+            (ngModelChange)="onInputChange()"
+            [disabled]="isSubmitting()"
+          />
+        </div>
+
+        <!-- Event location -->
+        <div class="dialog__field">
+          <label class="dialog__label" for="event-location">
+            Helyszín <span class="dialog__optional">(opcionális)</span>
+          </label>
+          <input
+            type="text"
+            id="event-location"
+            class="dialog__input"
+            [(ngModel)]="eventLocation"
+            (ngModelChange)="onInputChange()"
+            placeholder="Pl.: Eger, Dobó tér"
+            [disabled]="isSubmitting()"
+            maxlength="255"
+          />
+        </div>
+      </div>
+
+      <!-- Content field -->
+      <div class="dialog__field">
+        <label class="dialog__label" for="post-content">
+          Tartalom <span class="dialog__optional">(opcionális)</span>
+        </label>
+        <app-rich-text-editor
+          [(ngModel)]="content"
+          name="richContent"
+          mode="standard"
+          placeholder="Írd le a részleteket..."
+          [disabled]="isSubmitting()"
+          [minHeight]="120"
+          [maxHeight]="200"
+          (textLengthChangeEvent)="onContentTextLengthChange($event)"
+        />
+        <div class="dialog__field-footer">
+          <span class="dialog__error" *ngIf="errors.content">{{ errors.content }}</span>
+          <span class="dialog__char-count" *ngIf="!errors.content">{{ contentTextLength }}/5000</span>
+        </div>
+      </div>
+
+      <!-- Media Editor Component -->
+      <div class="dialog__field">
+        <app-media-editor
+          [existingMedia]="existingMediaItems()"
+          [maxFiles]="validator.maxFiles"
+          [maxSizeMB]="10"
+          [disabled]="isSubmitting()"
+          [existingLabel]="'Meglévő képek/videók'"
+          [newLabel]="isEditMode() ? 'Új képek/videók hozzáadása' : 'Képek/Videók'"
+          (newFilesChange)="onNewFilesChange($event)"
+          (mediaToDeleteChange)="onMediaToDeleteChange($event)"
+          (error)="onMediaError($event)"
+        />
+        <span class="dialog__error" *ngIf="errors.media">{{ errors.media }}</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="dialog__actions">
+        <button
+          type="button"
+          class="dialog__btn dialog__btn--secondary"
+          (click)="close()"
+          [disabled]="isSubmitting()"
+        >
+          Mégse
+        </button>
+
+        <button
+          type="button"
+          class="dialog__btn dialog__btn--primary"
+          (click)="submit()"
+          [disabled]="!isFormValid || isSubmitting()"
+        >
+          <svg *ngIf="isSubmitting()" class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <!-- Create mód: küldés ikon, Edit mód: mentés ikon -->
+          <svg *ngIf="!isSubmitting() && !isEditMode()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          <svg *ngIf="!isSubmitting() && isEditMode()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          {{ submitButtonText() }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

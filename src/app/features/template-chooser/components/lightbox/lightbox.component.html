@@ -1,0 +1,262 @@
+<!-- Lightbox - Tablostudio product-lightbox alapján -->
+<div
+  class="lightbox"
+  [class.lightbox--open]="isOpen()"
+  [attr.aria-hidden]="!isOpen()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="lightbox-title"
+  >
+  <!-- Overlay háttér -->
+  <div
+    class="lightbox__overlay"
+    (mousedown)="backdropHandler.onMouseDown($event)"
+    (click)="backdropHandler.onClick($event)"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Fő container (focus trap) -->
+  @if (template()) {
+    <div
+      #lightboxElement
+      class="lightbox__container lightbox__container--no-header"
+      (click)="$event.stopPropagation()"
+      (keydown)="onKeydown($event)"
+      tabindex="0"
+      >
+      <!-- ====================================== -->
+      <!-- FLOATING CLOSE BUTTON (jobb felső sarok) -->
+      <!-- ====================================== -->
+      <button
+        class="lightbox__close-floating"
+        (click)="closeRequest.emit()"
+        aria-label="Lightbox bezárása"
+        type="button"
+        >
+        <svg
+          class="lightbox__close-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- ====================================== -->
+      <!-- FLOATING COUNTER (bal felső sarok a képen) -->
+      <!-- ====================================== -->
+      <span
+        class="lightbox__counter-floating"
+        aria-live="polite"
+        aria-atomic="true"
+        >
+        {{ currentIndex() + 1 }} / {{ templates().length }}
+      </span>
+
+      <!-- ====================================== -->
+      <!-- MAIN IMAGE AREA -->
+      <!-- ====================================== -->
+      <div class="lightbox__main">
+        <!-- Bal nyíl (Previous Template) -->
+        <button
+          class="lightbox__arrow lightbox__arrow--prev"
+          [class.lightbox__arrow--disabled]="!hasPrev()"
+          [disabled]="!hasPrev()"
+          (click)="navigate('prev')"
+          aria-label="Előző minta"
+          type="button"
+          >
+          <svg
+            class="lightbox__arrow-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            >
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <!-- Kép container (zoom directive) -->
+        <div class="lightbox__image-wrapper">
+          <!-- Template fő képe -->
+          <img
+            class="lightbox__image"
+            [class.lightbox__image--changing]="imageChanging()"
+            [src]="template()!.previewUrl"
+            [alt]="template()!.name + ' sablon nagyított előnézet'"
+            [attr.draggable]="false"
+            (dragstart)="$event.preventDefault()"
+            (selectstart)="$event.preventDefault()"
+            appZoom
+            #zoomDirective="appZoom"
+            [zoomEnabled]="true"
+            [zoomConfig]="zoomConfig"
+            (zoomChangeEvent)="onZoomChange($event)"
+            />
+          <!-- Zoom Controls -->
+          <div class="lightbox__zoom-controls">
+            <button
+              class="lightbox__zoom-btn"
+              (mousedown)="startContinuousZoom('out')"
+              (mouseup)="stopContinuousZoom()"
+              (mouseleave)="stopContinuousZoom()"
+              [disabled]="currentZoom() <= 1"
+              aria-label="Kicsinyítés"
+              type="button"
+              >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lightbox__zoom-icon">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                <line x1="8" y1="11" x2="14" y2="11"></line>
+              </svg>
+            </button>
+            <span class="lightbox__zoom-level">{{ (currentZoom() * 100) | number:'1.0-0' }}%</span>
+            <button
+              class="lightbox__zoom-btn"
+              (mousedown)="startContinuousZoom('in')"
+              (mouseup)="stopContinuousZoom()"
+              (mouseleave)="stopContinuousZoom()"
+              [disabled]="currentZoom() >= 4"
+              aria-label="Nagyítás"
+              type="button"
+              >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lightbox__zoom-icon">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                <line x1="11" y1="8" x2="11" y2="14"></line>
+                <line x1="8" y1="11" x2="14" y2="11"></line>
+              </svg>
+            </button>
+            <button
+              class="lightbox__zoom-btn lightbox__zoom-btn--reset"
+              (click)="resetZoom()"
+              [disabled]="currentZoom() === 1"
+              aria-label="Visszaállítás"
+              type="button"
+              >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lightbox__zoom-icon">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Jobb nyíl (Next Template) -->
+        <button
+          class="lightbox__arrow lightbox__arrow--next"
+          [class.lightbox__arrow--disabled]="!hasNext()"
+          [disabled]="!hasNext()"
+          (click)="navigate('next')"
+          aria-label="Következő minta"
+          type="button"
+          >
+          <svg
+            class="lightbox__arrow-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            >
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+      <!-- ====================================== -->
+      <!-- THUMBNAIL GALLERY (drag scroll support) -->
+      <!-- ====================================== -->
+      <div
+        class="lightbox__gallery"
+        #galleryContainer
+        (mousedown)="onGalleryMouseDown($event)"
+        (mousemove)="onGalleryMouseMove($event)"
+        (mouseup)="onGalleryMouseUp()"
+        (mouseleave)="onGalleryMouseUp()"
+        (touchstart)="onGalleryTouchStart($event)"
+        (touchmove)="onGalleryTouchMove($event)"
+        (touchend)="onGalleryTouchEnd()"
+        >
+        <div class="lightbox__gallery-track" #galleryTrack>
+          @for (t of templates(); track trackByTemplate($index, t); let i = $index) {
+            <button
+              class="lightbox__thumbnail"
+              [class.lightbox__thumbnail--active]="i === currentIndex()"
+              [class.lightbox__thumbnail--selected]="isSelected(t.id)"
+              (click)="selectByIndex(i)"
+              [attr.aria-label]="'Minta ' + (i + 1) + ': ' + t.name"
+              [attr.aria-pressed]="i === currentIndex()"
+              type="button"
+              >
+              <img
+                class="lightbox__thumbnail-image"
+                [class.lightbox__thumbnail-image--loading]="!isThumbnailLoaded(t.id)"
+                [src]="getThumbnailUrl(t)"
+                [attr.data-src]="t.thumbnailUrl"
+                [attr.data-template-id]="t.id"
+                [alt]="t.name + ' sablon előnézet'"
+                [attr.draggable]="false"
+                (dragstart)="$event.preventDefault()"
+                />
+            </button>
+          }
+        </div>
+      </div>
+      <!-- ====================================== -->
+      <!-- TEMPLATE INFO PANEL -->
+      <!-- ====================================== -->
+      <div class="lightbox__info">
+        <div class="lightbox__info-grid">
+          <!-- Baloldal: Template név és kategória -->
+          <div class="lightbox__info-left">
+            <h2 id="lightbox-title" class="lightbox__template-title">
+              {{ template()!.name }}
+            </h2>
+            @if (template()!.categories.length > 0) {
+              <div class="lightbox__template-meta">
+                <span class="lightbox__template-category">
+                  {{ template()!.categories[0].name }}
+                </span>
+              </div>
+            }
+          </div>
+          <!-- Jobboldal: Kijelölés gomb -->
+          <div class="lightbox__info-right">
+            <div class="lightbox__actions">
+              <button
+                class="lightbox__button lightbox__button--primary"
+                [class.lightbox__button--selected]="isSelected(template()!.id)"
+                [class.lightbox__button--disabled]="!canSelectMore() && !isSelected(template()!.id)"
+                (click)="toggleCurrentSelection()"
+                [attr.aria-label]="isSelected(template()!.id) ? 'Kijelölés törlése' : 'Kijelölés'"
+                type="button"
+                >
+                @if (isSelected(template()!.id)) {
+                  <svg
+                    class="lightbox__button-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    >
+                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                  </svg>
+                }
+                {{ isSelected(template()!.id) ? 'Kijelölve' : 'Kijelölés' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

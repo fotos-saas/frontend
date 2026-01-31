@@ -1,0 +1,35 @@
+<div class="expandable-content">
+  @if (title()) {
+    <h3 class="expandable-content__title">{{ title() }}</h3>
+  }
+
+  <!-- Body - collapsed állapotban kattintható a kinyitáshoz -->
+  <div
+    class="expandable-content__body"
+    [class.expandable-content__body--collapsed]="!isExpanded() && needsExpansion()"
+    [class.expandable-content__body--clickable]="!isExpanded() && needsExpansion()"
+    [style.max-height.px]="currentMaxHeight()"
+    (click)="onBodyClick()"
+  >
+    <div
+      class="expandable-content__inner"
+      [innerHTML]="content() | safeHtml"
+      #innerRef
+    ></div>
+  </div>
+
+  <!-- Gradient fade - kattintható a kinyitáshoz -->
+  @if (!isExpanded() && needsExpansion()) {
+    <div class="expandable-content__fade" (click)="expand()"></div>
+  }
+
+  <!-- Toggle gomb -->
+  @if (needsExpansion()) {
+    <app-expand-button
+      [expanded]="isExpanded()"
+      [expandLabel]="expandLabel()"
+      [collapseLabel]="collapseLabel()"
+      (clicked)="toggle()"
+    />
+  }
+</div>

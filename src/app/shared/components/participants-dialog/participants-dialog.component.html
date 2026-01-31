@@ -1,0 +1,161 @@
+<!-- Backdrop overlay (glassmorphism) -->
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+  (keydown)="onKeydown($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="participants-dialog-title"
+>
+  <!-- Dialog container -->
+  <div class="dialog dialog--wide">
+    <!-- Close button (X) -->
+    <button
+      type="button"
+      class="dialog__close"
+      (click)="onClose()"
+      aria-label="Bezárás"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Header -->
+    <div class="dialog__header">
+      <div class="dialog__icon">
+        <!-- Users icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <h2 id="participants-dialog-title" class="dialog__title">
+        Jelenlévők
+      </h2>
+      <p class="dialog__description">
+        {{ summaryText() }}
+      </p>
+      <p class="dialog__info" *ngIf="statistics() && statistics()!.extraCount > 0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        A „Nem osztálytárs" jelölésűek nem számítanak bele a létszámba
+      </p>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog__content">
+      <!-- Loading state -->
+      <div class="dialog__loading" *ngIf="isLoading() && participants().length === 0">
+        <svg class="dialog__loading-spinner" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span>Betöltés...</span>
+      </div>
+
+      <!-- Empty state -->
+      <div class="dialog__empty" *ngIf="!isLoading() && participants().length === 0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="22" y1="8" x2="22" y2="14"/>
+          <line x1="19" y1="11" x2="25" y2="11"/>
+        </svg>
+        <p>Még nincs regisztrált résztvevő.</p>
+      </div>
+
+      <!-- Participants list -->
+      <div class="participants-list" *ngIf="participants().length > 0">
+        <div
+          *ngFor="let participant of participants(); trackBy: trackById"
+          class="participant"
+          [ngClass]="[getStatusClass(participant), isCurrentUser(participant) ? 'participant--me' : '']"
+        >
+          <!-- Status indicator dot -->
+          <div class="participant__status-dot"></div>
+
+          <!-- Name and info -->
+          <div class="participant__info">
+            <div class="participant__name">
+              {{ participant.guestName }}
+              <span class="participant__me-badge" *ngIf="isCurrentUser(participant)">(Én)</span>
+              <span class="participant__badge" *ngIf="getStatusBadge(participant)">
+                {{ getStatusBadge(participant) }}
+              </span>
+            </div>
+            <div class="participant__meta">
+              <span class="participant__activity">
+                {{ formatLastActivity(participant.lastActivityAt) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Votes count -->
+          <div class="participant__votes" [title]="participant.votesCount + ' szavazat'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M9 12l2 2 4-4"/>
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+            </svg>
+            <span>{{ participant.votesCount }}</span>
+          </div>
+
+          <!-- Extra toggle (only for admins) -->
+          <button
+            *ngIf="hasFullAccess()"
+            type="button"
+            class="participant__extra-toggle"
+            [class.participant__extra-toggle--active]="participant.isExtra"
+            [class.participant__extra-toggle--loading]="togglingExtraId() === participant.id"
+            [disabled]="participant.isBanned || togglingExtraId() === participant.id"
+            (click)="onToggleExtra(participant.id)"
+            [title]="participant.isExtra ? 'Osztálytársnak jelölés' : 'Nem osztálytársnak jelölés'"
+          >
+            <svg *ngIf="togglingExtraId() !== participant.id" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path *ngIf="!participant.isExtra" d="M12 5v14M5 12h14"/>
+              <path *ngIf="participant.isExtra" d="M5 12h14"/>
+            </svg>
+            <svg *ngIf="togglingExtraId() === participant.id" class="participant__extra-spinner" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="dialog__actions">
+      <button
+        type="button"
+        class="dialog__btn dialog__btn--secondary"
+        (click)="onRefresh()"
+        [disabled]="isLoading()"
+      >
+        <svg *ngIf="!isLoading()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M23 4v6h-6"/>
+          <path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        <svg *ngIf="isLoading()" class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span>Frissítés</span>
+      </button>
+      <button
+        type="button"
+        class="dialog__btn dialog__btn--primary"
+        (click)="onClose()"
+      >
+        Bezárás
+      </button>
+    </div>
+  </div>
+</div>

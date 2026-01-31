@@ -1,0 +1,119 @@
+.forum-post {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.02);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-left: 3px solid rgb(59, 130, 246); // Mindig kék border-left
+  animation: cardEntry 0.4s ease forwards;
+  opacity: 0;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.04);
+  }
+
+  // highlighted class már nem kell, de megtartjuk visszafelé kompatibilitás miatt
+  &--highlighted {
+    border-left-width: 3px;
+    border-left-style: solid;
+  }
+
+  &--reply {
+    margin: 0;
+    padding: 0.25rem 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    border: none;
+    animation: none;
+    opacity: 1;
+    gap: 0.5rem;
+
+    // Reply-nál a body töltse ki a szélességet (hogy az akciók jobb szélre kerüljenek)
+    .forum-post__body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    // Kompaktabb spacing reply-knál
+    ::ng-deep {
+      .post-header {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  // Header sor (reply-knál: header + actions egy sorban)
+  &__header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+
+    ::ng-deep .post-header {
+      margin-bottom: 0;
+    }
+  }
+
+  // Header akciók (kompakt megjelenés)
+  &__header-actions {
+    flex-shrink: 0;
+
+    ::ng-deep .post-actions {
+      margin-top: 0;
+      gap: 0.25rem;
+
+      &__left {
+        gap: 0.25rem;
+      }
+
+      &__right {
+        margin-left: 0.25rem;
+      }
+    }
+  }
+
+  &--editing {
+    padding: 1rem;
+    background: #fafbfc;
+    border-radius: 0.75rem;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@keyframes cardEntry {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Staggered animation for list items
+:host:nth-child(1) .forum-post { animation-delay: 0.05s; }
+:host:nth-child(2) .forum-post { animation-delay: 0.1s; }
+:host:nth-child(3) .forum-post { animation-delay: 0.15s; }
+:host:nth-child(4) .forum-post { animation-delay: 0.2s; }
+:host:nth-child(5) .forum-post { animation-delay: 0.25s; }
+:host:nth-child(6) .forum-post { animation-delay: 0.3s; }
+:host:nth-child(7) .forum-post { animation-delay: 0.35s; }
+:host:nth-child(8) .forum-post { animation-delay: 0.4s; }
+:host:nth-child(9) .forum-post { animation-delay: 0.45s; }
+:host:nth-child(10) .forum-post { animation-delay: 0.5s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .forum-post {
+    animation: none;
+    opacity: 1;
+  }
+}

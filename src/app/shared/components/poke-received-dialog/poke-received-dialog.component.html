@@ -1,0 +1,100 @@
+<div class="dialog-overlay" (click)="close()" role="dialog" aria-modal="true" aria-labelledby="poke-dialog-title">
+  <div class="dialog" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <header class="dialog__header">
+      <div class="dialog__icon">
+        <span class="dialog__emoji">👉</span>
+      </div>
+      <h2 id="poke-dialog-title" class="dialog__title">Kapott bökések</h2>
+      <p class="dialog__subtitle">{{ subtitle() }}</p>
+      <button
+        type="button"
+        class="dialog__close"
+        (click)="close()"
+        aria-label="Bezárás"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Content -->
+    <div class="dialog__content">
+      <!-- Empty state -->
+      @if (pokes().length === 0) {
+        <div class="empty-state">
+          <div class="empty-state__icon">📭</div>
+          <h3 class="empty-state__title">Még nem kaptál bökést</h3>
+          <p class="empty-state__text">
+            Ha valaki emlékeztetni szeretne egy feladatra, itt fogod látni az üzenetét.
+          </p>
+        </div>
+      }
+
+      <!-- Poke lista -->
+      @if (pokes().length > 0) {
+        <div class="poke-list">
+          @for (poke of pokes(); track poke.id) {
+            <div class="poke-item" [class.poke-item--unread]="!poke.isRead">
+              <div class="poke-item__emoji">{{ poke.emoji || '👉' }}</div>
+              <div class="poke-item__content">
+                <div class="poke-item__sender">{{ poke.from.name }}</div>
+                <div class="poke-item__message">{{ poke.text }}</div>
+                <div class="poke-item__time">{{ formatTime(poke.createdAt) }}</div>
+
+                <!-- Reaction picker -->
+                @if (isPickerOpen(poke.id)) {
+                  <div class="reaction-picker">
+                    @for (reaction of reactions; track reaction) {
+                      <button
+                        type="button"
+                        class="reaction-picker__btn"
+                        [class.reaction-picker__btn--loading]="isSendingReaction(poke.id)"
+                        [disabled]="isSendingReaction(poke.id)"
+                        (click)="sendReaction(poke, reaction)"
+                        [title]="getReactionTooltip(reaction)"
+                      >
+                        {{ reaction }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Reaction display or trigger button -->
+              @if (poke.reaction) {
+                <div class="poke-item__reaction" [title]="getReactionTooltip(poke.reaction)">
+                  {{ poke.reaction }}
+                </div>
+              } @else {
+                <button
+                  type="button"
+                  class="poke-item__react-btn"
+                  [class.poke-item__react-btn--active]="isPickerOpen(poke.id)"
+                  (click)="toggleReactionPicker(poke)"
+                  title="Reagálj"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/>
+                    <line x1="15" y1="9" x2="15.01" y2="9"/>
+                  </svg>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Actions -->
+    <footer class="dialog__footer">
+      <button type="button" class="btn btn--primary" (click)="close()">
+        Bezárás
+      </button>
+    </footer>
+  </div>
+</div>

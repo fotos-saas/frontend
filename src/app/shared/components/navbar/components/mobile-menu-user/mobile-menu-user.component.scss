@@ -1,0 +1,141 @@
+// Mobile Menu User Component Styles
+// Ezek a stílusok a navbar.component.scss-ből származnak
+
+.navbar__mobile-menu-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-bottom: 1px solid #10b981;
+
+  // Contact variant (code token - kék szín)
+  &--contact {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #3b82f6;
+
+    .navbar__mobile-menu-user-name {
+      color: #1e40af;
+    }
+
+    .navbar__mobile-menu-user-label {
+      color: #2563eb;
+    }
+
+    .navbar__mobile-menu-user-edit {
+      background: rgba(255, 255, 255, 0.5);
+      border-color: #3b82f6;
+      color: #1e40af;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.8);
+      }
+
+      &:focus-visible {
+        outline-color: #3b82f6;
+      }
+    }
+  }
+}
+
+.navbar__mobile-menu-user-info {
+  display: flex;
+  flex-direction: column;
+  margin: -2px 0;
+
+  > * {
+    margin: 2px 0;
+  }
+}
+
+.navbar__mobile-menu-user-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.navbar__mobile-menu-user-label {
+  font-size: 0.75rem;
+  color: #047857;
+}
+
+.navbar__mobile-menu-user-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid #10b981;
+  border-radius: 0.5rem;
+  color: #065f46;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 3px solid #10b981;
+    outline-offset: 2px;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .navbar__mobile-menu-user {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+    border-color: #10b981;
+  }
+
+  .navbar__mobile-menu-user-name {
+    color: #a7f3d0;
+  }
+
+  .navbar__mobile-menu-user-label {
+    color: #6ee7b7;
+  }
+
+  .navbar__mobile-menu-user-edit {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: #10b981;
+    color: #a7f3d0;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  // Contact variant dark mode
+  .navbar__mobile-menu-user--contact {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    border-color: #3b82f6;
+
+    .navbar__mobile-menu-user-name {
+      color: #bfdbfe;
+    }
+
+    .navbar__mobile-menu-user-label {
+      color: #93c5fd;
+    }
+
+    .navbar__mobile-menu-user-edit {
+      background: rgba(0, 0, 0, 0.2);
+      border-color: #3b82f6;
+      color: #bfdbfe;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+}

@@ -123,8 +123,12 @@ export class LoginComponent implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
+          this.loading.set(false);
           // Role-alapú átirányítás
-          if (response.user.roles?.includes('partner')) {
+          if (response.user.roles?.includes('super_admin')) {
+            // Super admin → partner dashboard (admin funkciókkal)
+            this.router.navigate(['/partner/dashboard']);
+          } else if (response.user.roles?.includes('partner')) {
             this.router.navigate(['/partner/dashboard']);
           } else if (response.user.roles?.includes('marketer')) {
             this.router.navigate(['/marketer/dashboard']);

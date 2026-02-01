@@ -615,8 +615,10 @@ export class AuthService {
     return this.http.post<MarketerLoginResponse | LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
       .pipe(
         tap(response => {
-          // Marketer vagy Partner felhasználó esetén speciális kezelés
-          if (response.user.roles?.includes('marketer') || response.user.roles?.includes('partner')) {
+          // Super admin, Marketer vagy Partner felhasználó esetén speciális kezelés
+          if (response.user.roles?.includes('super_admin') ||
+              response.user.roles?.includes('marketer') ||
+              response.user.roles?.includes('partner')) {
             this.storeMarketerAuth(response as MarketerLoginResponse);
           } else if ('project' in response && response.project) {
             // Tablo-guest login (ha van project a válaszban)
@@ -673,6 +675,14 @@ export class AuthService {
   });
 
   /**
+   * Computed signal: true ha super admin felhasználó
+   */
+  public readonly isSuperAdmin = computed<boolean>(() => {
+    const user = this.currentUserSubject?.getValue();
+    return user?.roles?.includes('super_admin') ?? false;
+  });
+
+  /**
    * Marketer token lekérése
    */
   getMarketerToken(): string | null {
@@ -700,12 +710,16 @@ export class AuthService {
   }
 
   /**
-   * Marketer session inicializálása (page reload esetén)
+   * Marketer/Partner/Admin session inicializálása (page reload esetén)
    */
   initializeMarketerSession(): boolean {
     const token = this.getMarketerToken();
     const user = this.getCurrentUser();
-    if (token && user && user.roles?.includes('marketer')) {
+    if (token && user && (
+      user.roles?.includes('marketer') ||
+      user.roles?.includes('partner') ||
+      user.roles?.includes('super_admin')
+    )) {
       this.isAuthenticatedSubject.next(true);
       return true;
     }

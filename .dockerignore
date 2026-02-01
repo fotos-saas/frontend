@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+
+# Build output (will be rebuilt in container)
+dist
+
+# Angular cache
+.angular
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Tests
+coverage
+playwright-report
+test-results
+testsprite_tests
+
+# Docs
+*.md
+!README.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.*

@@ -1,0 +1,539 @@
+<app-auth-layout>
+  <div class="register-app w-full max-w-4xl">
+
+    <!-- Progress Steps -->
+    <div class="register-app__progress mb-8">
+      <div class="flex items-center justify-center">
+        @for (step of [1, 2, 3, 4]; track step) {
+          <div class="flex items-center">
+            <!-- Step circle -->
+            <button
+              type="button"
+              (click)="goToStep(step)"
+              [disabled]="step > currentStep()"
+              class="register-app__step-circle w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-300"
+              [class.bg-blue-600]="step <= currentStep()"
+              [class.text-white]="step <= currentStep()"
+              [class.bg-white]="step > currentStep()"
+              [class.text-gray-400]="step > currentStep()"
+              [class.border-2]="step > currentStep()"
+              [class.border-gray-300]="step > currentStep()"
+              [class.shadow-lg]="step === currentStep()"
+              [class.cursor-pointer]="step < currentStep()"
+              [class.cursor-default]="step >= currentStep()"
+            >
+              @if (step < currentStep()) {
+                <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+              } @else {
+                {{ step }}
+              }
+            </button>
+
+            <!-- Connector line -->
+            @if (step < 4) {
+              <div
+                class="register-app__step-line w-16 md:w-24 h-1 mx-2 rounded transition-all duration-300"
+                [class.bg-blue-600]="step < currentStep()"
+                [class.bg-gray-200]="step >= currentStep()"
+              ></div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Step labels -->
+      <div class="flex justify-between mt-3 text-xs text-gray-500 max-w-md mx-auto px-2">
+        <span [class.text-blue-600]="currentStep() >= 1" [class.font-medium]="currentStep() === 1">Csomag</span>
+        <span [class.text-blue-600]="currentStep() >= 2" [class.font-medium]="currentStep() === 2">Fiók</span>
+        <span [class.text-blue-600]="currentStep() >= 3" [class.font-medium]="currentStep() === 3">Számlázás</span>
+        <span [class.text-blue-600]="currentStep() >= 4" [class.font-medium]="currentStep() === 4">Összegzés</span>
+      </div>
+    </div>
+
+    <!-- Card Container -->
+    <div class="register-app__card bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+      <!-- Error message -->
+      @if (errorMessage()) {
+        <div class="m-6 mb-0 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" class="flex-shrink-0" />
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <!-- Success message -->
+      @if (successMessage()) {
+        <div class="m-6 mb-0 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-center gap-3">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="flex-shrink-0" />
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+
+      <!-- STEP 1: Plan Selection -->
+      @if (currentStep() === 1) {
+        <div class="p-6 md:p-8">
+          <div class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Válaszd ki a csomagodat</h1>
+            <p class="text-gray-600">Bármikor válthatóak, de most válassz egyet.</p>
+          </div>
+
+          <!-- Billing Toggle -->
+          <div class="flex items-center justify-center gap-4 mb-8">
+            <span class="text-sm" [class.text-gray-900]="!isYearly()" [class.text-gray-400]="isYearly()">Havi</span>
+            <button
+              type="button"
+              (click)="toggleBilling()"
+              class="relative w-14 h-8 rounded-full transition-colors duration-300"
+              [class.bg-blue-600]="isYearly()"
+              [class.bg-gray-300]="!isYearly()"
+            >
+              <span
+                class="absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300"
+                [class.left-1]="!isYearly()"
+                [class.left-7]="isYearly()"
+              ></span>
+            </button>
+            <span class="text-sm" [class.text-gray-900]="isYearly()" [class.text-gray-400]="!isYearly()">
+              Éves
+              <span class="ml-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">-17%</span>
+            </span>
+          </div>
+
+          <!-- Plans Grid -->
+          <div class="grid md:grid-cols-3 gap-4 md:gap-6">
+            @for (plan of plans; track plan.id) {
+              <div
+                (click)="selectPlan(plan.id)"
+                class="register-app__plan relative rounded-2xl p-6 cursor-pointer transition-all duration-300 border-2"
+                [class.border-blue-500]="selectedPlanId() === plan.id"
+                [class.bg-blue-50]="selectedPlanId() === plan.id"
+                [class.shadow-lg]="selectedPlanId() === plan.id"
+                [class.border-gray-200]="selectedPlanId() !== plan.id"
+                [class.hover:border-blue-300]="selectedPlanId() !== plan.id"
+                [class.hover:shadow-md]="selectedPlanId() !== plan.id"
+              >
+                <!-- Popular badge -->
+                @if (plan.popular) {
+                  <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs font-bold rounded-full shadow">
+                    Legnépszerűbb
+                  </div>
+                }
+
+                <!-- Selection indicator -->
+                <div class="absolute top-4 right-4">
+                  <div
+                    class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                    [class.border-blue-500]="selectedPlanId() === plan.id"
+                    [class.bg-blue-500]="selectedPlanId() === plan.id"
+                    [class.border-gray-300]="selectedPlanId() !== plan.id"
+                  >
+                    @if (selectedPlanId() === plan.id) {
+                      <lucide-icon [name]="ICONS.CHECK" [size]="14" class="text-white" />
+                    }
+                  </div>
+                </div>
+
+                <!-- Plan header -->
+                <h3 class="text-xl font-bold text-gray-900 mb-1" [class.mt-2]="plan.popular">{{ plan.name }}</h3>
+                <p class="text-sm text-gray-500 mb-4">{{ plan.description }}</p>
+
+                <!-- Price -->
+                <div class="mb-4">
+                  <span class="text-3xl font-bold" [class.text-blue-600]="selectedPlanId() === plan.id" [class.text-gray-900]="selectedPlanId() !== plan.id">
+                    {{ formatPrice(isYearly() ? plan.yearlyPrice : plan.monthlyPrice) }}
+                  </span>
+                  <span class="text-gray-500 text-sm ml-1">Ft/{{ isYearly() ? 'év' : 'hó' }}</span>
+                </div>
+
+                @if (isYearly()) {
+                  <p class="text-xs text-gray-400 mb-4">{{ formatPrice(getMonthlyEquivalent(plan.yearlyPrice)) }} Ft/hó-val egyenértékű</p>
+                }
+
+                <!-- Features -->
+                <ul class="space-y-2">
+                  @for (feature of plan.features; track feature) {
+                    <li class="flex items-center text-sm text-gray-600">
+                      <lucide-icon [name]="ICONS.CHECK" [size]="16" class="text-green-500 mr-2 flex-shrink-0" />
+                      {{ feature }}
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- STEP 2: Account Details -->
+      @if (currentStep() === 2) {
+        <div class="p-6 md:p-8 max-w-md mx-auto">
+          <div class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Fiók adatok</h1>
+            <p class="text-gray-600">Add meg a bejelentkezési adataidat.</p>
+          </div>
+
+          <form [formGroup]="accountForm" class="space-y-5">
+            <!-- Name -->
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-1.5">Teljes név</label>
+              <input
+                id="name"
+                type="text"
+                formControlName="name"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Kovács János"
+                autocomplete="name"
+              />
+              @if (accountForm.get('name')?.invalid && accountForm.get('name')?.touched) {
+                <span class="text-red-500 text-xs mt-1 block">Add meg a neved</span>
+              }
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email cím</label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="pelda&#64;email.hu"
+                autocomplete="email"
+              />
+              @if (accountForm.get('email')?.errors?.['email'] && accountForm.get('email')?.touched) {
+                <span class="text-red-500 text-xs mt-1 block">Érvénytelen email cím</span>
+              }
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Jelszó</label>
+              <input
+                id="password"
+                type="password"
+                formControlName="password"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Min. 8 karakter"
+                autocomplete="new-password"
+              />
+              <app-password-strength [password]="accountForm.get('password')?.value ?? ''" [compact]="true" />
+            </div>
+
+            <!-- Password Confirmation -->
+            <div>
+              <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1.5">Jelszó újra</label>
+              <input
+                id="password_confirmation"
+                type="password"
+                formControlName="password_confirmation"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Jelszó megerősítése"
+                autocomplete="new-password"
+              />
+              @if (accountForm.errors?.['passwordMismatch'] && accountForm.get('password_confirmation')?.touched) {
+                <span class="text-red-500 text-xs mt-1 block">A jelszavak nem egyeznek</span>
+              }
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- STEP 3: Billing Details -->
+      @if (currentStep() === 3) {
+        <div class="p-6 md:p-8 max-w-lg mx-auto">
+          <div class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Számlázási adatok</h1>
+            <p class="text-gray-600">A számlázáshoz szükséges adatok.</p>
+          </div>
+
+          <form [formGroup]="billingForm" class="space-y-5">
+            <!-- Company Name -->
+            <div>
+              <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1.5">Cégnév / Számlázási név</label>
+              <input
+                id="company_name"
+                type="text"
+                formControlName="company_name"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Cégnév vagy saját név"
+              />
+              @if (billingForm.get('company_name')?.invalid && billingForm.get('company_name')?.touched) {
+                <span class="text-red-500 text-xs mt-1 block">Add meg a számlázási nevet</span>
+              }
+            </div>
+
+            <!-- Tax Number -->
+            <div>
+              <label for="tax_number" class="block text-sm font-medium text-gray-700 mb-1.5">
+                Adószám
+                <span class="text-gray-400 font-normal">(opcionális)</span>
+              </label>
+              <input
+                id="tax_number"
+                type="text"
+                formControlName="tax_number"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="12345678-1-12"
+              />
+            </div>
+
+            <!-- Country -->
+            <div>
+              <label for="country" class="block text-sm font-medium text-gray-700 mb-1.5">Ország</label>
+              <select
+                id="country"
+                formControlName="country"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+              >
+                <option value="Magyarország">Magyarország</option>
+                <option value="Ausztria">Ausztria</option>
+                <option value="Németország">Németország</option>
+                <option value="Szlovákia">Szlovákia</option>
+                <option value="Románia">Románia</option>
+              </select>
+            </div>
+
+            <!-- Postal Code & City Row -->
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-1.5">Irányítószám</label>
+                <input
+                  id="postal_code"
+                  type="text"
+                  formControlName="postal_code"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  placeholder="1234"
+                  maxlength="4"
+                />
+              </div>
+              <div class="col-span-2">
+                <label for="city" class="block text-sm font-medium text-gray-700 mb-1.5">Város</label>
+                <input
+                  id="city"
+                  type="text"
+                  formControlName="city"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  placeholder="Budapest"
+                />
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div>
+              <label for="address" class="block text-sm font-medium text-gray-700 mb-1.5">Utca, házszám</label>
+              <input
+                id="address"
+                type="text"
+                formControlName="address"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Példa utca 12."
+              />
+              @if (billingForm.get('address')?.invalid && billingForm.get('address')?.touched) {
+                <span class="text-red-500 text-xs mt-1 block">Add meg a címet</span>
+              }
+            </div>
+
+            <!-- Phone -->
+            <div>
+              <label for="phone" class="block text-sm font-medium text-gray-700 mb-1.5">Telefonszám</label>
+              <input
+                id="phone"
+                type="tel"
+                formControlName="phone"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="+36 30 123 4567"
+              />
+              @if (billingForm.get('phone')?.invalid && billingForm.get('phone')?.touched) {
+                <span class="text-red-500 text-xs mt-1 block">Add meg a telefonszámot</span>
+              }
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- STEP 4: Summary -->
+      @if (currentStep() === 4) {
+        <div class="p-6 md:p-8">
+          <div class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Összegzés</h1>
+            <p class="text-gray-600">Ellenőrizd az adatokat és véglegesítsd a rendelést.</p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            <!-- Left: Order Summary -->
+            <div class="bg-gray-50 rounded-2xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <lucide-icon [name]="ICONS.PACKAGE" [size]="18" />
+                Választott csomag
+              </h3>
+
+              <div class="bg-white rounded-xl p-4 border border-gray-200 mb-4">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <span class="font-bold text-lg text-gray-900">{{ selectedPlan().name }}</span>
+                    <span class="ml-2 text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                      {{ isYearly() ? 'Éves' : 'Havi' }}
+                    </span>
+                  </div>
+                  <button type="button" (click)="goToStep(1)" class="text-blue-600 text-sm hover:underline">Módosítás</button>
+                </div>
+                <ul class="text-sm text-gray-600 space-y-1">
+                  @for (feature of selectedPlan().features.slice(0, 3); track feature) {
+                    <li class="flex items-center gap-2">
+                      <lucide-icon [name]="ICONS.CHECK" [size]="14" class="text-green-500" />
+                      {{ feature }}
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <div class="border-t border-gray-200 pt-4">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>Csomag ár</span>
+                  <span>{{ formatPrice(currentPrice()) }} Ft</span>
+                </div>
+                @if (isYearly()) {
+                  <div class="flex justify-between text-sm text-green-600 mb-2">
+                    <span>Éves megtakarítás</span>
+                    <span>-{{ formatPrice(selectedPlan().monthlyPrice * 12 - selectedPlan().yearlyPrice) }} Ft</span>
+                  </div>
+                }
+                <div class="flex justify-between font-bold text-lg text-gray-900 mt-4 pt-4 border-t border-gray-200">
+                  <span>Összesen</span>
+                  <span>{{ formatPrice(currentPrice()) }} Ft/{{ isYearly() ? 'év' : 'hó' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Account & Billing Summary -->
+            <div class="space-y-4">
+              <!-- Account Summary -->
+              <div class="bg-gray-50 rounded-2xl p-6">
+                <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <lucide-icon [name]="ICONS.USER" [size]="18" />
+                  Fiók adatok
+                </h3>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Név</span>
+                    <span class="text-gray-900">{{ accountForm.get('name')?.value }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Email</span>
+                    <span class="text-gray-900">{{ accountForm.get('email')?.value }}</span>
+                  </div>
+                </div>
+                <button type="button" (click)="goToStep(2)" class="text-blue-600 text-sm hover:underline mt-3">Módosítás</button>
+              </div>
+
+              <!-- Billing Summary -->
+              <div class="bg-gray-50 rounded-2xl p-6">
+                <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="18" />
+                  Számlázási adatok
+                </h3>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Név</span>
+                    <span class="text-gray-900">{{ billingForm.get('company_name')?.value }}</span>
+                  </div>
+                  @if (billingForm.get('tax_number')?.value) {
+                    <div class="flex justify-between">
+                      <span class="text-gray-500">Adószám</span>
+                      <span class="text-gray-900">{{ billingForm.get('tax_number')?.value }}</span>
+                    </div>
+                  }
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Cím</span>
+                    <span class="text-gray-900 text-right">
+                      {{ billingForm.get('postal_code')?.value }} {{ billingForm.get('city')?.value }},<br>
+                      {{ billingForm.get('address')?.value }}
+                    </span>
+                  </div>
+                </div>
+                <button type="button" (click)="goToStep(3)" class="text-blue-600 text-sm hover:underline mt-3">Módosítás</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms & Conditions -->
+          <div class="max-w-3xl mx-auto mt-6">
+            <label class="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                [checked]="termsAccepted()"
+                (change)="termsAccepted.set(!termsAccepted())"
+                class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span class="text-sm text-gray-600">
+                Elfogadom az
+                <a href="/terms" target="_blank" class="text-blue-600 hover:underline">Általános Szerződési Feltételeket</a>
+                és az
+                <a href="/privacy" target="_blank" class="text-blue-600 hover:underline">Adatkezelési Tájékoztatót</a>.
+              </span>
+            </label>
+          </div>
+        </div>
+      }
+
+      <!-- Navigation Buttons -->
+      <div class="register-app__nav px-6 md:px-8 py-5 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+        <!-- Back button -->
+        @if (currentStep() > 1) {
+          <button
+            type="button"
+            (click)="prevStep()"
+            class="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium transition"
+          >
+            <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+            Vissza
+          </button>
+        } @else {
+          <a routerLink="/login" class="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium transition">
+            <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+            Bejelentkezés
+          </a>
+        }
+
+        <!-- Next / Submit button -->
+        @if (currentStep() < totalSteps) {
+          <button
+            type="button"
+            (click)="nextStep()"
+            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-lg shadow-blue-500/30"
+          >
+            Tovább
+            <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="18" />
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="onSubmit()"
+            [disabled]="isLoading() || !termsAccepted()"
+            class="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-xl transition shadow-lg shadow-green-500/30"
+          >
+            @if (isLoading()) {
+              <span class="register-app__spinner"></span>
+              Feldolgozás...
+            } @else {
+              <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="18" />
+              Fizetés és regisztráció
+            }
+          </button>
+        }
+      </div>
+
+    </div>
+
+    <!-- Login link -->
+    <div class="text-center mt-6">
+      <p class="text-gray-400 text-sm">
+        Már van fiókod?
+        <a routerLink="/login" class="text-white hover:text-blue-300 font-medium hover:underline">
+          Jelentkezz be
+        </a>
+      </p>
+    </div>
+
+  </div>
+</app-auth-layout>

@@ -106,7 +106,11 @@ import {
   Save,
   // Lista nézet ikonok
   List,
-  FileSpreadsheet
+  FileSpreadsheet,
+  // Payment & Billing
+  CreditCard,
+  Package,
+  Wallet
 } from 'lucide-angular';
 
 /**
@@ -205,7 +209,11 @@ const LUCIDE_ICONS = {
   Save,
   // Lista nézet ikonok
   List,
-  FileSpreadsheet
+  FileSpreadsheet,
+  // Payment & Billing
+  CreditCard,
+  Package,
+  Wallet
 };
 
 @NgModule({

@@ -276,6 +276,11 @@ export const ICONS = {
   // Password visibility
   EYE: 'eye',
   EYE_OFF: 'eye-off',
+
+  // Payment & Billing
+  CREDIT_CARD: 'credit-card',
+  PACKAGE: 'package',
+  WALLET: 'wallet',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

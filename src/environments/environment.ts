@@ -1,10 +1,10 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://sk8g80kw0kswsc4w0ww04c8k.89.167.19.19.sslip.io/api',
+  apiUrl: 'https://api.tablostudio.hu/api',
   // WebSocket konfiguráció
-  wsHost: 'sk8g80kw0kswsc4w0ww04c8k.89.167.19.19.sslip.io',
-  wsPort: 80,
-  wsScheme: 'http',
+  wsHost: 'api.tablostudio.hu',
+  wsPort: 443,
+  wsScheme: 'https',
   wsKey: 'tablo-production-key',
   wsCluster: 'mt1',
   wsEnabled: true

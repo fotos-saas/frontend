@@ -126,8 +126,8 @@ export class LoginComponent implements OnDestroy {
           this.loading.set(false);
           // Role-alapú átirányítás
           if (response.user.roles?.includes('super_admin')) {
-            // Super admin → partner dashboard (admin funkciókkal)
-            this.router.navigate(['/partner/dashboard']);
+            // Super admin → super admin dashboard
+            this.router.navigate(['/super-admin/dashboard']);
           } else if (response.user.roles?.includes('partner')) {
             this.router.navigate(['/partner/dashboard']);
           } else if (response.user.roles?.includes('marketer')) {

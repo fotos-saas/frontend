@@ -10,6 +10,7 @@ import { SessionChooserGuard } from './core/guards/session-chooser.guard';
 import { marketerGuard } from './core/guards/marketer.guard';
 import { partnerGuard } from './core/guards/partner.guard';
 import { clientGuard } from './core/guards/client.guard';
+import { superAdminGuard } from './core/guards/super-admin.guard';
 
 const routes: Routes = [
   // Public routes (nincs layout, nincs navbar/footer) - lazy-loaded
@@ -74,6 +75,20 @@ const routes: Routes = [
   {
     path: 'choose-session',
     loadComponent: () => import('./pages/session-chooser.component').then(m => m.SessionChooserComponent)
+  },
+
+  // Super Admin routes - rendszer adminisztrációs felület
+  {
+    path: 'super-admin',
+    loadComponent: () => import('./features/super-admin/super-admin-shell.component').then(m => m.SuperAdminShellComponent),
+    canActivate: [superAdminGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/super-admin/pages/dashboard.component').then(m => m.SuperAdminDashboardComponent)
+      },
+    ]
   },
 
   // Marketer routes - marketinges/ügyintéző felület

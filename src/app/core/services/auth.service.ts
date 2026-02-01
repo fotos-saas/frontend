@@ -667,6 +667,18 @@ export class AuthService {
   }
 
   /**
+   * Super admin kijelentkezés
+   */
+  logoutSuperAdmin(): void {
+    localStorage.removeItem('marketer_token');
+    localStorage.removeItem('marketer_user');
+    this.filterPersistence.clearAllFilters();
+    this.currentUserSubject.next(null);
+    this.isAuthenticatedSubject.next(false);
+    this.router.navigate(['/login']);
+  }
+
+  /**
    * Computed signal: true ha partner felhasználó
    */
   public readonly isPartner = computed<boolean>(() => {

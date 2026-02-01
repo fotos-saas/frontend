@@ -1,11 +1,11 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8000/api',
+  production: true,
+  apiUrl: 'http://sk8g80kw0kswsc4w0ww04c8k.89.167.19.19.sslip.io/api',
   // WebSocket konfiguráció
-  wsHost: 'localhost',
-  wsPort: 8085,
+  wsHost: 'sk8g80kw0kswsc4w0ww04c8k.89.167.19.19.sslip.io',
+  wsPort: 80,
   wsScheme: 'http',
-  wsKey: 'tablo-local-key',
+  wsKey: 'tablo-production-key',
   wsCluster: 'mt1',
   wsEnabled: true
 };

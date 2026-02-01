@@ -1,0 +1,13 @@
+# Nixpacks configuration for Angular SPA
+# Enables client-side routing fallback
+
+[staticfile]
+# Enable SPA mode - all unknown routes redirect to index.html
+spa = true
+
+# GZIP compression
+gzip = true
+
+# Custom nginx settings
+[staticfile.nginx]
+root = "dist/frontend-tablo/browser"

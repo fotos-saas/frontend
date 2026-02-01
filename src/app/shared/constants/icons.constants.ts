@@ -281,6 +281,9 @@ export const ICONS = {
   CREDIT_CARD: 'credit-card',
   PACKAGE: 'package',
   WALLET: 'wallet',
+
+  // Loading & Spinners
+  LOADER: 'loader-2',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

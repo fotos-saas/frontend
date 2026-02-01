@@ -223,7 +223,7 @@ export class SuperAdminShellComponent {
   // Menü items (Lucide ikonokkal - desktop, tablet és mobile egyaránt)
   navItems: MenuItem[] = [
     { id: 'dashboard', route: '/super-admin/dashboard', label: 'Irányítópult', icon: 'home' },
-    { id: 'partners', route: '/super-admin/partners', label: 'Partnerek', icon: 'users' },
+    { id: 'subscribers', route: '/super-admin/subscribers', label: 'Előfizetők', icon: 'credit-card' },
     { id: 'settings', route: '/super-admin/settings', label: 'Beállítások', icon: 'settings' },
   ];
 

@@ -88,6 +88,14 @@ const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./features/super-admin/pages/dashboard.component').then(m => m.SuperAdminDashboardComponent)
       },
+      {
+        path: 'subscribers',
+        loadComponent: () => import('./features/super-admin/pages/subscribers-list.component').then(m => m.SubscribersListComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/super-admin/pages/settings.component').then(m => m.SettingsComponent)
+      },
     ]
   },
 

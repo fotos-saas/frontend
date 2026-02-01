@@ -1,0 +1,260 @@
+@use '../../../shared/styles/list-page' as list;
+
+.subscribers-list-page {
+  @extend .list-page;
+}
+
+// Header - közös stílusok
+.page-header { @extend .page-header; }
+.subtitle { @extend .subtitle; }
+
+// Filters - közös stílusok
+.filters { @extend .filters; }
+.search-box { @extend .search-box; }
+.search-icon { @extend .search-icon; }
+.search-input { @extend .search-input; }
+.clear-btn { @extend .clear-btn; }
+
+.filter-select {
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  background: #ffffff;
+  cursor: pointer;
+  min-width: 140px;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary, #1e3a5f);
+    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+  }
+}
+
+// Table Header
+.table-header {
+  @extend .table-header;
+  grid-template-columns: 1fr 120px 120px 120px 100px;
+}
+
+.th { @extend .th; }
+
+// Subscriber Grid
+.subscriber-grid {
+  @extend .row-grid;
+}
+
+.subscriber-row {
+  @extend .list-row;
+  grid-template-columns: 1fr 120px 120px 120px 100px;
+}
+
+.subscriber-name {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.subscriber-icon {
+  color: #64748b;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.name-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.email {
+  font-size: 0.8125rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.company {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subscriber-plan {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.plan-badge {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &--gray {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  &--blue {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  &--purple {
+    background: #ede9fe;
+    color: #6d28d9;
+  }
+}
+
+.billing-cycle {
+  font-size: 0.6875rem;
+  color: #94a3b8;
+}
+
+.subscriber-price {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.subscriber-date {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.subscriber-status {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &--green {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &--blue {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  &--yellow {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  &--red {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+}
+
+// Secondary button
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+}
+
+// States - közös stílusok
+.empty-state { @extend .empty-state; }
+.empty-icon { @extend .empty-icon; }
+.loading-state { @extend .loading-state; }
+.skeleton-row { @extend .skeleton-row; }
+.skeleton-row--tall { @extend .skeleton-row--tall; }
+.skeleton-shimmer { @extend .skeleton-shimmer; }
+.mt-4 { @extend .mt-4; }
+
+// Pagination - közös stílusok
+.pagination { @extend .pagination; }
+.page-btn { @extend .page-btn; }
+.page-info { @extend .page-info; }
+.total-count { @extend .total-count; }
+
+// Responsive
+@media (max-width: 768px) {
+  .filters {
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .filter-select {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .subscriber-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .subscriber-name {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .subscriber-plan,
+  .subscriber-price,
+  .subscriber-date {
+    display: none;
+  }
+
+  .subscriber-status {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+
+  .subscriber-row {
+    position: relative;
+  }
+}

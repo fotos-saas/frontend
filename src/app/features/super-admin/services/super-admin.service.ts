@@ -5,6 +5,51 @@ import { environment } from '../../../../environments/environment';
 import { DashboardStats, PaginatedResponse, DashboardProjectItem } from '../../../shared/components/dashboard';
 
 /**
+ * Előfizető lista item
+ */
+export interface SubscriberListItem {
+  id: number;
+  name: string;
+  email: string;
+  companyName: string | null;
+  plan: 'alap' | 'iskola' | 'studio';
+  planName: string;
+  billingCycle: 'monthly' | 'yearly';
+  price: number;
+  subscriptionStatus: 'active' | 'paused' | 'canceling' | 'trial';
+  subscriptionEndsAt: string | null;
+  createdAt: string;
+}
+
+/**
+ * Rendszer beállítások
+ */
+export interface SystemSettings {
+  system: {
+    registrationEnabled: boolean;
+    trialDays: number;
+    defaultPlan: 'alap' | 'iskola' | 'studio';
+  };
+  email: {
+    host: string | null;
+    port: number | null;
+    username: string | null;
+  };
+  stripe: {
+    publicKey: string | null;
+    webhookConfigured: boolean;
+  };
+  info: {
+    appVersion: string;
+    laravelVersion: string;
+    phpVersion: string;
+    environment: string;
+    cacheDriver: string;
+    queueDriver: string;
+  };
+}
+
+/**
  * Super Admin API Service
  * API hívások a super admin felülethez.
  */
@@ -41,5 +86,44 @@ export class SuperAdminService {
     if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
 
     return this.http.get<PaginatedResponse<DashboardProjectItem>>(`${this.baseUrl}/partners`, { params: httpParams });
+  }
+
+  /**
+   * Előfizetők listázása (paginált)
+   */
+  getSubscribers(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    plan?: string;
+    status?: string;
+    sort_by?: string;
+    sort_dir?: 'asc' | 'desc';
+  }): Observable<PaginatedResponse<SubscriberListItem>> {
+    let httpParams = new HttpParams();
+
+    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.plan) httpParams = httpParams.set('plan', params.plan);
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
+    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
+
+    return this.http.get<PaginatedResponse<SubscriberListItem>>(`${this.baseUrl}/subscribers`, { params: httpParams });
+  }
+
+  /**
+   * Rendszer beállítások lekérése
+   */
+  getSettings(): Observable<SystemSettings> {
+    return this.http.get<SystemSettings>(`${this.baseUrl}/settings`);
+  }
+
+  /**
+   * Rendszer beállítások mentése
+   */
+  updateSettings(settings: Partial<SystemSettings['system']>): Observable<{ success: boolean; message: string }> {
+    return this.http.put<{ success: boolean; message: string }>(`${this.baseUrl}/settings`, settings);
   }
 }

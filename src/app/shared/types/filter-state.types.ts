@@ -29,7 +29,12 @@ export interface MarketerFilterContext {
   page: 'projects' | 'schools';
 }
 
-export type FilterContext = PartnerFilterContext | MarketerFilterContext;
+export interface SuperAdminFilterContext {
+  type: 'super-admin';
+  page: 'subscribers' | 'partners';
+}
+
+export type FilterContext = PartnerFilterContext | MarketerFilterContext | SuperAdminFilterContext;
 
 /**
  * Perzisztált filter state struktúra

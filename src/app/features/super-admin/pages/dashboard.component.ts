@@ -12,12 +12,12 @@ import {
 import { SuperAdminService } from '../services/super-admin.service';
 
 const STAT_CARDS: StatCardConfig[] = [
-  { icon: 'users', valueKey: 'totalPartners', label: 'Partnerek', clickable: true },
+  { icon: 'credit-card', valueKey: 'totalSubscribers', label: 'Előfizetők', clickable: true },
   { icon: 'folder-open', valueKey: 'totalProjects', label: 'Projektek', clickable: false },
 ];
 
 const QUICK_ACTIONS: QuickActionConfig[] = [
-  { icon: 'users', label: 'Partnerek kezelése', route: '/partners', primary: true },
+  { icon: 'credit-card', label: 'Előfizetők kezelése', route: '/subscribers', primary: true },
   { icon: 'settings', label: 'Beállítások', route: '/settings', primary: false },
 ];
 

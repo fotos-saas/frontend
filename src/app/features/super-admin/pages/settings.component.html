@@ -1,0 +1,194 @@
+<div class="settings-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Beállítások</h1>
+      <p class="subtitle">Rendszer konfigurációk és információk</p>
+    </div>
+  </header>
+
+  <!-- Tab navigáció -->
+  <div class="tabs">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-btn--active]="activeTab() === tab.id"
+        (click)="setActiveTab(tab.id)"
+      >
+        <lucide-icon [name]="tab.icon" [size]="18" />
+        <span>{{ tab.label }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Tab tartalom -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="skeleton-card skeleton-shimmer"></div>
+      <div class="skeleton-card skeleton-shimmer"></div>
+    </div>
+  } @else if (settings(); as s) {
+    <div class="tab-content">
+      <!-- Rendszer beállítások -->
+      @if (activeTab() === 'system') {
+        <div class="settings-section">
+          <h2 class="section-title">Rendszer beállítások</h2>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">Regisztráció engedélyezése</label>
+              <span class="setting-description">Új felhasználók regisztrálhatnak a rendszerbe</span>
+            </div>
+            <label class="toggle">
+              <input
+                type="checkbox"
+                [ngModel]="registrationEnabled()"
+                (ngModelChange)="registrationEnabled.set($event)"
+              />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">Próbaidőszak napokban</label>
+              <span class="setting-description">Új regisztrációk próbaidőszakának hossza</span>
+            </div>
+            <input
+              type="number"
+              class="setting-input setting-input--small"
+              [ngModel]="trialDays()"
+              (ngModelChange)="trialDays.set($event)"
+              min="0"
+              max="90"
+            />
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">Alapértelmezett csomag</label>
+              <span class="setting-description">Új regisztrációk alapértelmezett csomagja</span>
+            </div>
+            <select
+              class="setting-select"
+              [ngModel]="defaultPlan()"
+              (ngModelChange)="defaultPlan.set($event)"
+            >
+              @for (option of planOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="actions">
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="saving()"
+              (click)="saveSettings()"
+            >
+              @if (saving()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+                Mentés...
+              } @else {
+                <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+                Mentés
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Email beállítások -->
+      @if (activeTab() === 'email') {
+        <div class="settings-section">
+          <h2 class="section-title">Email beállítások</h2>
+          <p class="section-description">Az email beállítások környezeti változókból kerülnek betöltésre.</p>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">SMTP Host</span>
+              <span class="info-value">{{ s.email.host || 'Nincs megadva' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">SMTP Port</span>
+              <span class="info-value">{{ s.email.port || 'Nincs megadva' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">SMTP Felhasználó</span>
+              <span class="info-value">{{ s.email.username || 'Nincs megadva' }}</span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Stripe beállítások -->
+      @if (activeTab() === 'stripe') {
+        <div class="settings-section">
+          <h2 class="section-title">Stripe beállítások</h2>
+          <p class="section-description">A Stripe beállítások környezeti változókból kerülnek betöltésre.</p>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Publikus kulcs</span>
+              <span class="info-value info-value--masked">{{ s.stripe.publicKey || 'Nincs megadva' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Webhook konfigurálva</span>
+              <span class="info-value">
+                @if (s.stripe.webhookConfigured) {
+                  <span class="status-indicator status-indicator--green">Igen</span>
+                } @else {
+                  <span class="status-indicator status-indicator--red">Nem</span>
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Rendszer infó -->
+      @if (activeTab() === 'info') {
+        <div class="settings-section">
+          <h2 class="section-title">Rendszer információk</h2>
+
+          <div class="info-grid info-grid--wide">
+            <div class="info-item">
+              <span class="info-label">App verzió</span>
+              <span class="info-value">{{ s.info.appVersion }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Laravel verzió</span>
+              <span class="info-value">{{ s.info.laravelVersion }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">PHP verzió</span>
+              <span class="info-value">{{ s.info.phpVersion }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Környezet</span>
+              <span class="info-value">
+                <span
+                  class="env-badge"
+                  [class.env-badge--production]="s.info.environment === 'production'"
+                  [class.env-badge--staging]="s.info.environment === 'staging'"
+                  [class.env-badge--local]="s.info.environment === 'local'"
+                >
+                  {{ s.info.environment }}
+                </span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Cache driver</span>
+              <span class="info-value">{{ s.info.cacheDriver }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Queue driver</span>
+              <span class="info-value">{{ s.info.queueDriver }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,149 @@
+import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { SuperAdminService, SubscriberListItem } from '../services/super-admin.service';
+import { ICONS } from '../../../shared/constants/icons.constants';
+import { useFilterState } from '../../../shared/utils/use-filter-state';
+
+/**
+ * Előfizetők lista - Super Admin felületen.
+ * Partner modellek megjelenítése előfizetési adatokkal.
+ */
+@Component({
+  selector: 'app-subscribers-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    MatTooltipModule
+  ],
+  templateUrl: './subscribers-list.component.html',
+  styleUrl: './subscribers-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class SubscribersListComponent implements OnInit {
+  private readonly service = inject(SuperAdminService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly ICONS = ICONS;
+
+  // Szűrő opciók
+  readonly planOptions = [
+    { value: '', label: 'Összes csomag' },
+    { value: 'alap', label: 'Alap' },
+    { value: 'iskola', label: 'Iskola' },
+    { value: 'studio', label: 'Stúdió' },
+  ];
+
+  readonly statusOptions = [
+    { value: '', label: 'Összes státusz' },
+    { value: 'active', label: 'Aktív' },
+    { value: 'trial', label: 'Próba' },
+    { value: 'paused', label: 'Szünetel' },
+    { value: 'canceling', label: 'Lemondva' },
+  ];
+
+  // Filter state - központosított perzisztencia rendszerrel
+  readonly filterState = useFilterState({
+    context: { type: 'super-admin', page: 'subscribers' },
+    defaultFilters: { plan: '', status: '' },
+    defaultSortBy: 'created_at',
+    defaultSortDir: 'desc',
+    validation: {
+      sortByOptions: ['name', 'email', 'plan', 'subscription_ends_at', 'created_at'],
+      filterOptions: {
+        plan: ['alap', 'iskola', 'studio'],
+        status: ['active', 'paused', 'canceling', 'trial'],
+      }
+    },
+    onStateChange: () => this.loadSubscribers(),
+  });
+
+  subscribers = signal<SubscriberListItem[]>([]);
+  totalPages = signal(1);
+  totalSubscribers = signal(0);
+
+  ngOnInit(): void {
+    this.loadSubscribers();
+  }
+
+  loadSubscribers(): void {
+    this.filterState.loading.set(true);
+
+    this.service.getSubscribers({
+      page: this.filterState.page(),
+      per_page: 18,
+      search: this.filterState.search() || undefined,
+      plan: this.filterState.filters().plan || undefined,
+      status: this.filterState.filters().status || undefined,
+      sort_by: this.filterState.sortBy(),
+      sort_dir: this.filterState.sortDir(),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.subscribers.set(response.data);
+          this.totalPages.set(response.last_page);
+          this.totalSubscribers.set(response.total);
+          this.filterState.loading.set(false);
+        },
+        error: () => {
+          this.filterState.loading.set(false);
+        }
+      });
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages()) return;
+    this.filterState.setPage(page);
+  }
+
+  getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      active: 'Aktív',
+      trial: 'Próba',
+      paused: 'Szünetel',
+      canceling: 'Lemondva',
+    };
+    return labels[status] || status;
+  }
+
+  getStatusClass(status: string): string {
+    const classes: Record<string, string> = {
+      active: 'status-badge--green',
+      trial: 'status-badge--blue',
+      paused: 'status-badge--yellow',
+      canceling: 'status-badge--red',
+    };
+    return classes[status] || '';
+  }
+
+  getPlanClass(plan: string): string {
+    const classes: Record<string, string> = {
+      alap: 'plan-badge--gray',
+      iskola: 'plan-badge--blue',
+      studio: 'plan-badge--purple',
+    };
+    return classes[plan] || '';
+  }
+
+  formatPrice(price: number, cycle: string): string {
+    const formatted = new Intl.NumberFormat('hu-HU').format(price);
+    const suffix = cycle === 'yearly' ? '/év' : '/hó';
+    return `${formatted} Ft${suffix}`;
+  }
+
+  formatDate(dateStr: string | null): string {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('hu-HU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  }
+}

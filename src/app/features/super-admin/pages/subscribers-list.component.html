@@ -1,0 +1,153 @@
+<div class="subscribers-list-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Előfizetők</h1>
+      <p class="subtitle">{{ totalSubscribers() }} előfizető összesen</p>
+    </div>
+  </header>
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés név, email vagy cégnév alapján..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <select
+      class="filter-select"
+      [ngModel]="filterState.filters().plan"
+      (ngModelChange)="filterState.setFilter('plan', $event)"
+    >
+      @for (option of planOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+
+    <select
+      class="filter-select"
+      [ngModel]="filterState.filters().status"
+      (ngModelChange)="filterState.setFilter('status', $event)"
+    >
+      @for (option of statusOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-row skeleton-row--tall skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (subscribers().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      @if (filterState.search() || filterState.filters().plan || filterState.filters().status) {
+        <p>Próbálj más keresési feltételekkel!</p>
+        <button type="button" class="btn-secondary mt-4" (click)="filterState.reset()">
+          <lucide-icon [name]="ICONS.X" [size]="18" />
+          Szűrők törlése
+        </button>
+      } @else {
+        <p>Még nincsenek előfizetők.</p>
+      }
+    </div>
+  } @else {
+    <!-- Asztali fejléc (768px felett) -->
+    <div class="table-header">
+      <span class="th th-name">Név</span>
+      <span class="th th-plan">Csomag</span>
+      <span class="th th-price">Ár</span>
+      <span class="th th-date">Hónapforduló</span>
+      <span class="th th-status">Státusz</span>
+    </div>
+
+    <!-- Előfizető sorok -->
+    <div class="subscriber-grid">
+      @for (subscriber of subscribers(); track subscriber.id; let i = $index) {
+        <div
+          class="subscriber-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+        >
+          <div class="subscriber-name">
+            <lucide-icon [name]="ICONS.USER" [size]="18" class="subscriber-icon" />
+            <div class="name-details">
+              <span class="name">{{ subscriber.name }}</span>
+              <span class="email">{{ subscriber.email }}</span>
+              @if (subscriber.companyName) {
+                <span class="company">{{ subscriber.companyName }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="subscriber-plan">
+            <span class="plan-badge" [ngClass]="getPlanClass(subscriber.plan)">
+              {{ subscriber.planName }}
+            </span>
+            <span class="billing-cycle">
+              {{ subscriber.billingCycle === 'yearly' ? 'Éves' : 'Havi' }}
+            </span>
+          </div>
+
+          <div class="subscriber-price">
+            {{ formatPrice(subscriber.price, subscriber.billingCycle) }}
+          </div>
+
+          <div class="subscriber-date">
+            {{ formatDate(subscriber.subscriptionEndsAt) }}
+          </div>
+
+          <div class="subscriber-status">
+            <span class="status-badge" [ngClass]="getStatusClass(subscriber.subscriptionStatus)">
+              {{ getStatusLabel(subscriber.subscriptionStatus) }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Paginálás -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === 1"
+          (click)="goToPage(filterState.page() - 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+
+        <div class="page-info">
+          {{ filterState.page() }} / {{ totalPages() }} oldal
+          <span class="total-count">({{ totalSubscribers() }} előfizető)</span>
+        </div>
+
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === totalPages()"
+          (click)="goToPage(filterState.page() + 1)"
+        >
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>

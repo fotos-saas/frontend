@@ -3,11 +3,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
+import { HttpClient } from '@angular/common/http';
 import { PasswordStrengthComponent } from '../../../shared/components/password-strength/password-strength.component';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../shared/constants/icons.constants';
+import { environment } from '../../../../environments/environment';
 
 interface PricingPlan {
   id: string;
@@ -36,7 +37,7 @@ interface PricingPlan {
 })
 export class RegisterAppComponent {
   private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
@@ -230,7 +231,9 @@ export class RegisterAppComponent {
 
     const registrationData = {
       // Account
-      ...this.accountForm.value,
+      name: this.accountForm.value.name,
+      email: this.accountForm.value.email,
+      password: this.accountForm.value.password,
       // Billing
       billing: this.billingForm.value,
       // Plan
@@ -238,34 +241,27 @@ export class RegisterAppComponent {
       billing_cycle: this.isYearly() ? 'yearly' : 'monthly'
     };
 
-    // TODO: Implement actual registration with payment
-    // For now, simulate success
-    setTimeout(() => {
-      this.isLoading.set(false);
-      this.successMessage.set('Sikeres regisztráció! Átirányítunk a fizetéshez...');
-
-      // Redirect after delay
-      setTimeout(() => {
-        this.router.navigate(['/login']);
-      }, 2000);
-    }, 1500);
-
-    /*
-    this.authService.registerWithPlan(registrationData).pipe(
+    // Call backend to create Stripe Checkout Session
+    this.http.post<{ checkout_url: string; session_id: string }>(
+      `${environment.apiUrl}/subscription/checkout`,
+      registrationData
+    ).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (response) => {
         this.isLoading.set(false);
-        // Redirect to Stripe checkout
+        this.successMessage.set('Átirányítás a fizetési oldalra...');
+
+        // Redirect to Stripe Checkout
         if (response.checkout_url) {
           window.location.href = response.checkout_url;
         }
       },
       error: (error) => {
         this.isLoading.set(false);
-        this.errorMessage.set(error.message);
+        const message = error.error?.message || 'Hiba történt a regisztráció során.';
+        this.errorMessage.set(message);
       }
     });
-    */
   }
 }

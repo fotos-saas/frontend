@@ -47,6 +47,11 @@ const routes: Routes = [
     canActivate: [NoAuthGuard]
   },
   {
+    path: 'register-success',
+    loadComponent: () => import('./pages/auth/register-success/register-success.component').then(m => m.RegisterSuccessComponent),
+    canActivate: [NoAuthGuard]
+  },
+  {
     path: 'forgot-password',
     loadComponent: () => import('./pages/auth/forgot-password.component').then(m => m.ForgotPasswordComponent),
     canActivate: [NoAuthGuard]

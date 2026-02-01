@@ -288,8 +288,11 @@ const routes: Routes = [
     ]
   },
 
-  // Fallback - ismeretlen route-ok átirányítása home-ra (AuthGuard kezeli a login redirect-et)
-  { path: '**', redirectTo: 'home' }
+  // 404 - ismeretlen route-ok
+  {
+    path: '**',
+    loadComponent: () => import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent)
+  }
 ];
 
 @NgModule({

@@ -1,4 +1,4 @@
-<div class="dialog-overlay" (click)="onCancel()">
+<div class="dialog-overlay" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
   <div #dialogContent class="dialog" (click)="$event.stopPropagation()" role="alertdialog" aria-modal="true" tabindex="-1">
     <!-- Header -->
     <header class="dialog__header">

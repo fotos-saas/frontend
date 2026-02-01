@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
+import { createBackdropHandler } from '../../utils/dialog.util';
 
 export interface ConfirmDialogResult {
   action: 'confirm' | 'cancel';
@@ -50,6 +51,9 @@ export class ConfirmDialogComponent implements AfterViewInit, OnDestroy {
 
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
+
+  /** Backdrop handler - megakadályozza a véletlen bezárást szöveg kijelöléskor */
+  readonly backdropHandler = createBackdropHandler(() => this.onCancel());
 
   ngAfterViewInit(): void {
     // Előző fókuszált elem mentése

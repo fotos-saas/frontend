@@ -60,12 +60,12 @@ export class VotingResultsComponent implements OnInit {
   /** Eredmények betöltése route paraméterből */
   private loadResultsFromRoute(): void {
     const pollId = Number(this.route.snapshot.paramMap.get('id'));
-    if (pollId) {
-      this.loadResults(pollId);
-    } else {
+    if (!pollId || isNaN(pollId) || pollId < 1) {
       this.errorMessage.set('Érvénytelen szavazás azonosító');
       this.isLoading.set(false);
+      return;
     }
+    this.loadResults(pollId);
   }
 
   /** Eredmények betöltése */

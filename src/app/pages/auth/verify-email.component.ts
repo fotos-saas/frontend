@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -15,6 +16,7 @@ export class VerifyEmailComponent implements OnInit {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   isLoading = signal(true);
   errorMessage = signal<string | null>(null);
@@ -25,13 +27,15 @@ export class VerifyEmailComponent implements OnInit {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     const hash = this.route.snapshot.paramMap.get('hash');
 
-    if (!id || !hash) {
+    if (!id || isNaN(id) || id < 1 || !hash) {
       this.isLoading.set(false);
       this.errorMessage.set('Érvénytelen verifikációs link.');
       return;
     }
 
-    this.authService.verifyEmail(id, hash).subscribe({
+    this.authService.verifyEmail(id, hash).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response) => {
         this.isLoading.set(false);
         this.successMessage.set(response.message);

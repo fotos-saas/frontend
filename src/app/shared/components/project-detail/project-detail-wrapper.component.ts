@@ -140,11 +140,11 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) {
-      this.loadProject(id);
-    } else {
+    if (!id || isNaN(id) || id < 1) {
       this.loading.set(false);
+      return;
     }
+    this.loadProject(id);
   }
 
   private loadProject(id: number): void {

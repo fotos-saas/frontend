@@ -1,0 +1,22 @@
+/**
+ * Client Detail Component Styles
+ *
+ * Minimális stílusok - a legtöbb a child komponensekben van.
+ * A globális dialog-backdrop és dialog-panel stílusok a styles.scss-ben.
+ */
+
+// Page card already defined globally
+
+// Loading skeleton
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

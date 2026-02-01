@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output, inject, signal, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PartnerService, ProjectContact } from '../services/partner.service';
@@ -127,6 +128,7 @@ import { formatHungarianPhone, validatePhone } from '../../../shared/utils/phone
 })
 export class ContactEditorModalComponent implements OnInit {
   private partnerService = inject(PartnerService);
+  private destroyRef = inject(DestroyRef);
 
   @Input() projectId!: number;
   @Input() contact: ProjectContact | null = null;
@@ -196,7 +198,9 @@ export class ContactEditorModalComponent implements OnInit {
     };
 
     if (this.isEditing && this.contact?.id) {
-      this.partnerService.updateContact(this.projectId, this.contact.id, contactData).subscribe({
+      this.partnerService.updateContact(this.projectId, this.contact.id, contactData).pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
         next: (response) => {
           this.saving.set(false);
           this.saved.emit(response.data);
@@ -207,7 +211,9 @@ export class ContactEditorModalComponent implements OnInit {
         }
       });
     } else {
-      this.partnerService.addContact(this.projectId, contactData).subscribe({
+      this.partnerService.addContact(this.projectId, contactData).pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
         next: (response) => {
           this.saving.set(false);
           this.saved.emit(response.data);

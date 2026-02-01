@@ -61,7 +61,7 @@
           <div class="existing-media">
             @for (media of existingMedia(); track trackByMediaId($index, media)) {
               <div class="existing-media__item">
-                <img [src]="media.url" [alt]="media.fileName" />
+                <img [src]="media.url" [alt]="media.fileName" loading="lazy" decoding="async" />
                 <button
                   type="button"
                   class="existing-media__remove"

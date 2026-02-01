@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -263,6 +264,7 @@ import { ICONS } from '../../../shared/constants/icons.constants';
 })
 export class ClientEditModalComponent {
   private readonly ordersService = inject(PartnerOrdersService);
+  private readonly destroyRef = inject(DestroyRef);
 
   @Input() client: PartnerClient | null = null;
   @Input() mode: 'create' | 'edit' = 'create';
@@ -306,7 +308,9 @@ export class ClientEditModalComponent {
       ? this.ordersService.createClient(payload)
       : this.ordersService.updateClient(this.client!.id, payload);
 
-    request$.subscribe({
+    request$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response) => {
         this.saving.set(false);
         if (response.success) {

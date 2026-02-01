@@ -1,4 +1,4 @@
-<div class="dialog-backdrop" appClickOutside (appClickOutside)="onClose()">
+<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
   <div class="dialog-container"
        role="dialog"
        aria-modal="true"

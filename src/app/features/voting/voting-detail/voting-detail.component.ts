@@ -124,9 +124,11 @@ export class VotingDetailComponent implements OnInit {
   /** Szavazás betöltése route paraméterből */
   private loadPollFromRoute(): void {
     const pollId = Number(this.route.snapshot.paramMap.get('id'));
-    if (pollId) {
-      this.loadPoll(pollId);
+    if (!pollId || isNaN(pollId) || pollId < 1) {
+      this.state.setError('Érvénytelen szavazás azonosító');
+      return;
     }
+    this.loadPoll(pollId);
   }
 
   /** Szavazás betöltése */

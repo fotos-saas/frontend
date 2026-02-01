@@ -1,4 +1,5 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -18,6 +19,7 @@ export class RegisterComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -49,7 +51,9 @@ export class RegisterComponent {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    this.authService.register(this.form.value).subscribe({
+    this.authService.register(this.form.value).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response) => {
         this.isLoading.set(false);
 

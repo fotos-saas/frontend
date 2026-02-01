@@ -521,7 +521,7 @@ export class ClientAlbumDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id || isNaN(id)) {
+    if (!id || isNaN(id) || id < 1) {
       this.router.navigate(['/client/albums']);
       return;
     }

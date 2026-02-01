@@ -1,4 +1,4 @@
-<div class="dialog-overlay" (click)="close()" role="dialog" aria-modal="true" aria-labelledby="poke-dialog-title">
+<div class="dialog-overlay" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)" role="dialog" aria-modal="true" aria-labelledby="poke-dialog-title">
   <div class="dialog" (click)="$event.stopPropagation()">
 
     <!-- Header -->

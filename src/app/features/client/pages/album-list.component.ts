@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -493,6 +494,7 @@ import { ICONS } from '../../../shared/constants/icons.constants';
 export class ClientAlbumListComponent implements OnInit {
   private clientService = inject(ClientService);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
   albums = signal<ClientAlbum[]>([]);
@@ -507,7 +509,9 @@ export class ClientAlbumListComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.clientService.getAlbums().subscribe({
+    this.clientService.getAlbums().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response) => {
         // Ha csak 1 album van, egyből átirányítás
         if (response.data.length === 1) {

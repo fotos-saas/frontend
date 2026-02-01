@@ -3,9 +3,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PresetSelectorComponent } from '../preset-selector/preset-selector.component';
-import { ClickOutsideDirective } from '../../../shared/directives';
 import { PokeService } from '../../../core/services/poke.service';
 import { MissingUser, PokeCategory, PokePreset } from '../../../core/models/poke.models';
+import { createBackdropHandler } from '../../../shared/utils/dialog.util';
 
 /**
  * Poke Composer Component
@@ -17,8 +17,7 @@ import { MissingUser, PokeCategory, PokePreset } from '../../../core/models/poke
   imports: [
     CommonModule,
     FormsModule,
-    PresetSelectorComponent,
-    ClickOutsideDirective
+    PresetSelectorComponent
   ],
   templateUrl: './poke-composer.component.html',
   styleUrls: ['./poke-composer.component.scss'],
@@ -50,6 +49,9 @@ export class PokeComposerComponent implements OnInit {
 
   /** Preset-ek */
   readonly presets = signal<PokePreset[]>([]);
+
+  /** Backdrop handler - megakadályozza a véletlen bezárást szöveg kijelöléskor */
+  readonly backdropHandler = createBackdropHandler(() => this.cancel());
 
   ngOnInit(): void {
     // Preset-ek betöltése (cache-ből vagy API-ból)

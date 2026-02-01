@@ -1,7 +1,8 @@
 <!-- Backdrop overlay (glassmorphism) -->
 <div
   class="dialog-backdrop"
-  appClickOutside (appClickOutside)="cancel()"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
   role="dialog"
   aria-modal="true"
   aria-labelledby="dialog-title">

@@ -8,7 +8,7 @@
           <div class="media-editor__existing-item">
             <!-- Kép -->
             @if (media.isImage) {
-              <img [src]="media.url" [alt]="media.fileName" />
+              <img [src]="media.url" [alt]="media.fileName" loading="lazy" decoding="async" />
             }
             <!-- Videó -->
             @if (!media.isImage) {

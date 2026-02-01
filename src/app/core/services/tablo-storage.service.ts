@@ -245,10 +245,8 @@ export class TabloStorageService {
   }
 
   setAuthToken(projectId: number, sessionType: TokenType, token: string): void {
-    console.log('[TabloStorage] setAuthToken called', { projectId, sessionType });
     this.setItem(this.sessionKey(projectId, sessionType, 'token'), token);
     this.setActiveSession(projectId, sessionType);
-    console.log('[TabloStorage] After setActiveSession, getActiveSession:', this.getActiveSession());
   }
 
   // === PROJECT DATA (SESSION-ISOLATED) ===

@@ -1,4 +1,5 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -16,6 +17,7 @@ import { AuthLayoutComponent } from '../../shared/components/auth-layout/auth-la
 export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
 
   isLoading = signal(false);
   submitted = signal(false);
@@ -32,7 +34,9 @@ export class ForgotPasswordComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    this.authService.requestPasswordReset(this.form.value.email!).subscribe({
+    this.authService.requestPasswordReset(this.form.value.email!).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response) => {
         this.isLoading.set(false);
         this.submitted.set(true);

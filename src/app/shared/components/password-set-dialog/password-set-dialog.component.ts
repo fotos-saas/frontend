@@ -7,8 +7,10 @@ import {
   ElementRef,
   inject,
   signal,
-  computed
+  computed,
+  DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
@@ -45,6 +47,7 @@ export type PasswordSetResult = { action: 'success' };
 export class PasswordSetDialogComponent extends BaseDialogComponent implements AfterViewInit {
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Signal-based outputs */
   readonly passwordSetEvent = output<PasswordSetResult>();
@@ -182,7 +185,9 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
       return;
     }
 
-    this.authService.setPassword(this.password, this.passwordConfirmation).subscribe({
+    this.authService.setPassword(this.password, this.passwordConfirmation).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: () => {
         this.submitSuccess();
         this.passwordSetEvent.emit({ action: 'success' });

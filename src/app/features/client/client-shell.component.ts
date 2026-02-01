@@ -333,9 +333,13 @@ export class ClientShellComponent implements OnInit {
 
   ngOnInit(): void {
     // Profile lekérése a canRegister flag frissítéséhez
-    this.clientService.getProfile().subscribe();
+    this.clientService.getProfile().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
     // Albumok lekérése a hasDownloadableAlbum flag frissítéséhez
-    this.clientService.getAlbums().subscribe();
+    this.clientService.getAlbums().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
   handleNavAction(action: string): void {

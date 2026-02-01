@@ -115,7 +115,7 @@
           @for (media of poll().media; track media.id; let i = $index) {
             @if (i < 5) {
               <div class="voting-card__media-thumb" (click)="onThumbnailClick($event, i)">
-                <img [src]="media.url" [alt]="media.fileName" />
+                <img [src]="media.url" [alt]="media.fileName" loading="lazy" decoding="async" />
               </div>
             }
           }

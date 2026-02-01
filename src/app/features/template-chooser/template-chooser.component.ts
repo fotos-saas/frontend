@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   signal,
   computed,
   inject,
@@ -88,7 +87,6 @@ export class TemplateChooserComponent implements OnInit {
   /** DI - Angular 19+ inject() pattern */
   private readonly templateService = inject(TemplateChooserService);
   private readonly toastService = inject(ToastService);
-  private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(LoggerService);
 
@@ -113,10 +111,7 @@ export class TemplateChooserComponent implements OnInit {
     this.templateService.loadCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (categories) => {
-          this.categories.set(categories);
-          this.cdr.markForCheck();
-        },
+        next: (categories) => this.categories.set(categories),
         error: (err) => {
           this.toastService.error('Hiba', 'Nem sikerült betölteni a kategóriákat');
           this.logger.error('Categories load error', err);
@@ -130,7 +125,6 @@ export class TemplateChooserComponent implements OnInit {
         next: (templates) => {
           this.templates.set(templates);
           this.loading.set(false);
-          this.cdr.markForCheck();
         },
         error: (err) => {
           this.loading.set(false);
@@ -143,29 +137,18 @@ export class TemplateChooserComponent implements OnInit {
     this.templateService.loadSelections()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (selections) => {
-          this.selections.set(selections);
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          this.logger.error('Selections load error', err);
-        }
+        next: (selections) => this.selections.set(selections),
+        error: (err) => this.logger.error('Selections load error', err)
       });
 
     // Subscribe to service state
     this.templateService.hasMore$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(hasMore => {
-        this.hasMore.set(hasMore);
-        this.cdr.markForCheck();
-      });
+      .subscribe(hasMore => this.hasMore.set(hasMore));
 
     this.templateService.maxSelections$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(max => {
-        this.maxSelections.set(max);
-        this.cdr.markForCheck();
-      });
+      .subscribe(max => this.maxSelections.set(max));
   }
 
   /**
@@ -203,7 +186,6 @@ export class TemplateChooserComponent implements OnInit {
         next: (templates) => {
           this.templates.set(templates);
           this.loading.set(false);
-          this.cdr.markForCheck();
         },
         error: (err) => {
           this.loading.set(false);
@@ -226,7 +208,6 @@ export class TemplateChooserComponent implements OnInit {
         next: (templates) => {
           this.templates.set(templates);
           this.loading.set(false);
-          this.cdr.markForCheck();
         },
         error: (err) => {
           this.loading.set(false);
@@ -250,7 +231,6 @@ export class TemplateChooserComponent implements OnInit {
         next: (templates) => {
           this.templates.set(templates);
           this.loading.set(false);
-          this.cdr.markForCheck();
         },
         error: (err) => {
           this.loading.set(false);
@@ -346,14 +326,12 @@ export class TemplateChooserComponent implements OnInit {
       const previousSelections = [...this.selections()];
 
       this.selections.update(sel => sel.filter(t => t.id !== template.id));
-      this.cdr.markForCheck();
 
       this.templateService.deselectTemplate(template.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           error: (err) => {
             this.selections.set(previousSelections);
-            this.cdr.markForCheck();
             this.toastService.error('Hiba', err.message || 'Nem sikerült eltávolítani');
           }
         });
@@ -372,14 +350,12 @@ export class TemplateChooserComponent implements OnInit {
         selectedAt: new Date().toISOString()
       };
       this.selections.update(sel => [...sel, newSelection]);
-      this.cdr.markForCheck();
 
       this.templateService.selectTemplate(template.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           error: (err) => {
             this.selections.set(previousSelections);
-            this.cdr.markForCheck();
             this.toastService.error('Hiba', err.message || 'Nem sikerült kiválasztani');
           }
         });

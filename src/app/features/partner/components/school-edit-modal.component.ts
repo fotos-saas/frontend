@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -234,6 +235,7 @@ import { ICONS } from '../../../shared/constants/icons.constants';
 })
 export class SchoolEditModalComponent {
   private readonly partnerService = inject(PartnerService);
+  private readonly destroyRef = inject(DestroyRef);
 
   @Input() school: SchoolListItem | null = null;
   @Input() mode: 'create' | 'edit' = 'create';
@@ -271,7 +273,9 @@ export class SchoolEditModalComponent {
       ? this.partnerService.createSchool(payload)
       : this.partnerService.updateSchool(this.school!.id, payload);
 
-    request$.subscribe({
+    request$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response) => {
         this.saving.set(false);
         if (response.success) {

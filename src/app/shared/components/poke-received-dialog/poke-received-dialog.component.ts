@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { PokeService } from '../../../core/services/poke.service';
 import { DateUtilsService } from '../../services/date-utils.service';
 import { POKE_REACTIONS, PokeReaction, Poke } from '../../../core/models/poke.models';
+import { createBackdropHandler } from '../../utils/dialog.util';
 
 /**
  * Poke Received Dialog Component
@@ -56,6 +57,9 @@ export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
 
   // Loading state for reaction
   readonly sendingReactionFor = signal<number | null>(null);
+
+  /** Backdrop handler - megakadályozza a véletlen bezárást szöveg kijelöléskor */
+  readonly backdropHandler = createBackdropHandler(() => this.close());
 
   // Computed subtitle
   readonly subtitle = computed(() => {

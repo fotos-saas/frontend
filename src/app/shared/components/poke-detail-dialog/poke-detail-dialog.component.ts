@@ -6,8 +6,10 @@ import {
   inject,
   OnInit,
   signal,
-  computed
+  computed,
+  DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { PokeService } from '../../../core/services/poke.service';
@@ -359,6 +361,7 @@ import { DateUtilsService } from '../../services/date-utils.service';
 export class PokeDetailDialogComponent extends BaseDialogComponent implements OnInit {
   private readonly pokeService = inject(PokeService);
   private readonly dateUtils = inject(DateUtilsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Bökés ID (értesítésből jön) */
   readonly pokeId = input.required<number>();
@@ -400,7 +403,9 @@ export class PokeDetailDialogComponent extends BaseDialogComponent implements On
     }
 
     // Ha nincs meg, frissítsük a listákat
-    this.pokeService.loadSentPokes().subscribe({
+    this.pokeService.loadSentPokes().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: () => {
         const poke = this.pokeService.sentPokes().find(p => p.id === id);
         this.poke.set(poke || null);

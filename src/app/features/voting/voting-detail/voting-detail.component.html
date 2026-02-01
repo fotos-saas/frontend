@@ -67,7 +67,7 @@
         <div class="voting-detail__gallery">
           @for (media of mediaItems; track trackByMediaId($index, media); let i = $index) {
             <div class="voting-detail__gallery-item" (click)="onMediaClick(i)">
-              <img [src]="media.url" [alt]="media.fileName" />
+              <img [src]="media.url" [alt]="media.fileName" loading="lazy" decoding="async" />
               @if (i === 0 && mediaItems.length > 1) {
                 <span class="voting-detail__gallery-badge">{{ mediaItems.length }} kép</span>
               }
@@ -128,7 +128,7 @@
       >
         <!-- Image -->
         <div class="voting-option__image" *ngIf="option.imageUrl" aria-hidden="true">
-          <img [src]="option.imageUrl" [alt]="option.label" />
+          <img [src]="option.imageUrl" [alt]="option.label" loading="lazy" decoding="async" />
         </div>
 
         <!-- Content -->

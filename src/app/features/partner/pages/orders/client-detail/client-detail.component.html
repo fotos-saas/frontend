@@ -1,0 +1,309 @@
+<div class="partner-client-detail page-card">
+  <!-- Loading -->
+  @if (state.loading()) {
+    <div class="animate-pulse">
+      <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+      <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-8"></div>
+      <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+    </div>
+  }
+
+  @if (!state.loading() && state.client()) {
+    <!-- Header Component -->
+    <app-client-header
+      [client]="state.client()!"
+      (edit)="onEdit()"
+      (delete)="onDelete()"
+      (disableCode)="onDisableCode()"
+    />
+
+    <!-- Access Code Component -->
+    <app-client-access-code
+      [client]="state.client()!"
+      [extendingCode]="state.extendingCode()"
+      [generatingCode]="state.generatingCode()"
+      (copyCode)="onCopyCode()"
+      (generateCode)="onGenerateCode()"
+      (extendExpiry)="onExtendExpiry($event)"
+      (expiryDateChange)="onExpiryDateChange($event)"
+    />
+
+    <!-- Album List Component -->
+    <app-client-album-list
+      [albums]="state.client()!.albums"
+      [extendingAlbumId]="state.extendingAlbumId()"
+      [togglingAlbumId]="state.togglingAlbumId()"
+      [togglingDownloadId]="state.togglingDownloadId()"
+      (createAlbum)="onCreateAlbum()"
+      (activateAlbum)="onActivateAlbum($event)"
+      (deactivateAlbum)="onDeactivateAlbum($event)"
+      (reopenAlbum)="onReopenAlbum($event)"
+      (toggleDownload)="onToggleDownload($event)"
+      (extendAlbumExpiry)="onExtendAlbumExpiry($event)"
+    />
+  }
+</div>
+
+<!-- Edit Modal -->
+@if (state.editDialog.isOpen()) {
+  <div
+    class="dialog-backdrop"
+    (mousedown)="editBackdropHandler.onMouseDown($event)"
+    (click)="editBackdropHandler.onClick($event)"
+  >
+    <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Ügyfél szerkesztése</h2>
+        <button
+          (click)="state.closeEditModal()"
+          class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+        >
+          <lucide-icon [name]="ICONS.X" [size]="20" />
+        </button>
+      </div>
+
+      <form (ngSubmit)="updateClient()" class="p-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Név <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="state.editForm.name"
+            name="name"
+            required
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+          <input
+            type="email"
+            [(ngModel)]="state.editForm.email"
+            name="email"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefonszám</label>
+          <input
+            type="tel"
+            [(ngModel)]="state.editForm.phone"
+            name="phone"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Megjegyzés</label>
+          <textarea
+            [(ngModel)]="state.editForm.note"
+            name="note"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Regisztráció engedélyezése -->
+        <div class="pt-4 mt-2 border-t border-gray-200 dark:border-gray-700">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              [(ngModel)]="state.editForm.allowRegistration"
+              name="allowRegistration"
+              class="mt-0.5 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+            />
+            <div>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                Regisztráció engedélyezése
+              </span>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Az ügyfél email/jelszóval regisztrálhat. Ezután csak azzal léphet be, a kód inaktív lesz.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            (click)="state.closeEditModal()"
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          >
+            Mégsem
+          </button>
+          <button
+            type="submit"
+            [disabled]="!state.editForm.name || state.saving()"
+            class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+          >
+            Mentés
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Create Album Modal -->
+@if (state.albumDialog.isOpen()) {
+  <div
+    class="dialog-backdrop"
+    (mousedown)="albumBackdropHandler.onMouseDown($event)"
+    (click)="albumBackdropHandler.onClick($event)"
+  >
+    <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Új album</h2>
+        <button
+          (click)="state.closeAlbumModal()"
+          class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+        >
+          <lucide-icon [name]="ICONS.X" [size]="20" />
+        </button>
+      </div>
+
+      <form (ngSubmit)="createAlbum()" class="p-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Album neve <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="state.albumForm.name"
+            name="name"
+            required
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500"
+            placeholder="pl. Esküvői fotók"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Album típusa <span class="text-red-500">*</span>
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              (click)="state.albumForm.type = 'selection'"
+              class="p-4 border-2 rounded-lg text-left transition-colors"
+              [class]="state.albumForm.type === 'selection' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'"
+            >
+              <lucide-icon [name]="ICONS.GRID" [size]="24" class="text-primary-600 dark:text-primary-400 mb-2" />
+              <h3 class="font-medium text-gray-900 dark:text-white">Képválasztás</h3>
+              <p class="text-sm text-gray-500 mt-1">Egyszerű képválasztás</p>
+            </button>
+            <button
+              type="button"
+              (click)="state.albumForm.type = 'tablo'"
+              class="p-4 border-2 rounded-lg text-left transition-colors"
+              [class]="state.albumForm.type === 'tablo' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'"
+            >
+              <lucide-icon [name]="ICONS.FRAME" [size]="24" class="text-primary-600 dark:text-primary-400 mb-2" />
+              <h3 class="font-medium text-gray-900 dark:text-white">Tablókép</h3>
+              <p class="text-sm text-gray-500 mt-1">Teljes workflow</p>
+            </button>
+          </div>
+        </div>
+
+        @if (state.albumForm.type === 'selection') {
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Min. kiválasztás
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="state.albumForm.min_selections"
+                name="min_selections"
+                min="1"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Max. kiválasztás
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="state.albumForm.max_selections"
+                name="max_selections"
+                min="1"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+              />
+            </div>
+          </div>
+        }
+
+        @if (state.albumForm.type === 'tablo') {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Max. retusálandó kép
+            </label>
+            <input
+              type="number"
+              [(ngModel)]="state.albumForm.max_retouch_photos"
+              name="max_retouch_photos"
+              min="1"
+              max="20"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+              placeholder="5"
+            />
+          </div>
+        }
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            (click)="state.closeAlbumModal()"
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          >
+            Mégsem
+          </button>
+          <button
+            type="submit"
+            [disabled]="!state.albumForm.name || !state.albumForm.type || state.saving()"
+            class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+          >
+            Létrehozás
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Disable Code Confirm Dialog -->
+@if (state.disableCodeDialog.isOpen()) {
+  <app-confirm-dialog
+    title="Belépési kód inaktiválása"
+    [message]="'Biztosan inaktiválni szeretnéd a belépési kódot? Az ügyfél nem fog tudni belépni ezzel a kóddal.'"
+    confirmText="Inaktiválás"
+    confirmType="warning"
+    (resultEvent)="onDisableCodeResult($event)"
+  />
+}
+
+<!-- Delete Confirm Dialog -->
+@if (state.deleteDialog.isOpen()) {
+  <app-confirm-dialog
+    title="Ügyfél törlése"
+    [message]="'Biztosan törölni szeretnéd a(z) ' + state.client()!.name + ' ügyfelet? Ez a művelet nem visszavonható.'"
+    confirmText="Törlés"
+    confirmType="danger"
+    (resultEvent)="onDeleteResult($event)"
+  />
+}
+
+<!-- Reopen Album Confirm Dialog -->
+@if (state.reopenDialog.isOpen() && state.albumToReopen()) {
+  <app-confirm-dialog
+    title="Album újranyitása"
+    [message]="'Biztosan újra szeretnéd nyitni a(z) ' + state.albumToReopen()!.name + ' albumot? Az ügyfél folytathatja a képválasztást.'"
+    confirmText="Újranyitás"
+    confirmType="primary"
+    (resultEvent)="onReopenResult($event)"
+  />
+}

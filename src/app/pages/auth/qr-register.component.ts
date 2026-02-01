@@ -433,16 +433,11 @@ export class QrRegisterComponent implements OnInit {
       email: this.form.value.email!,
       phone: this.form.value.phone || undefined
     }).subscribe({
-      next: (response) => {
-        console.log('[QrRegister] Registration success', response);
-        console.log('[QrRegister] hasToken:', this.authService.hasToken());
+      next: () => {
         this.isLoading.set(false);
-        // Navigate to dashboard
-        console.log('[QrRegister] Navigating to /home');
         this.router.navigate(['/home']);
       },
       error: (error) => {
-        console.error('[QrRegister] Registration error', error);
         this.isLoading.set(false);
         this.errorMessage.set(error.message);
       }

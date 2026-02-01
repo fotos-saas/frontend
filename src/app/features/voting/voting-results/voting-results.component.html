@@ -73,7 +73,7 @@
         <div class="voting-results__option-content">
           <!-- Image -->
           <div class="voting-results__option-image" *ngIf="option.imageUrl" aria-hidden="true">
-            <img [src]="option.imageUrl" [alt]="option.label" />
+            <img [src]="option.imageUrl" [alt]="option.label" loading="lazy" decoding="async" />
           </div>
 
           <!-- Label and description -->

@@ -134,7 +134,7 @@ const routes: Routes = [
       },
       {
         path: 'orders/clients/:id',
-        loadComponent: () => import('./features/partner/pages/orders/client-detail.component').then(m => m.PartnerClientDetailComponent)
+        loadComponent: () => import('./features/partner/pages/orders/client-detail/client-detail.component').then(m => m.PartnerClientDetailComponent)
       },
       {
         path: 'orders/albums/:id',

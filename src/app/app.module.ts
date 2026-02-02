@@ -119,7 +119,9 @@ import {
   PlayCircle,
   FileText,
   // Audit log toggle
-  Eye
+  Eye,
+  // Loading spinner
+  Loader2
 } from 'lucide-angular';
 
 /**
@@ -231,7 +233,9 @@ const LUCIDE_ICONS = {
   PlayCircle,
   FileText,
   // Audit log toggle
-  Eye
+  Eye,
+  // Loading spinner
+  Loader2
 };
 
 @NgModule({

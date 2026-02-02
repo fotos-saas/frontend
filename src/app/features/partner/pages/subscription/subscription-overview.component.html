@@ -1,0 +1,250 @@
+<div class="subscription-overview page-card">
+  <h1 class="page-title">
+    <lucide-icon [name]="ICONS.PACKAGE" [size]="24" />
+    Előfizetés áttekintés
+  </h1>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  } @else if (subscription()) {
+    <!-- Költség összesítő banner -->
+    <div class="billing-summary">
+      <div class="billing-main">
+        <span class="billing-label">Havi költség</span>
+        <span class="billing-amount">{{ formatPrice(totalMonthlyCost()) }}</span>
+      </div>
+      @if (hasExtras()) {
+        <div class="billing-breakdown">
+          <div class="breakdown-item">
+            <span>{{ subscription()!.plan_name }} csomag</span>
+            <span>{{ formatPrice(basePlanPrice()) }}</span>
+          </div>
+          @if (storageUsage()?.additional_gb && storageUsage()!.additional_gb > 0) {
+            <div class="breakdown-item extra">
+              <span>+{{ storageUsage()!.additional_gb }} GB extra tárhely</span>
+              <span>+{{ formatPrice(extraStoragePrice()) }}</span>
+            </div>
+          }
+          @if (subscription()!.has_addons && subscription()!.active_addons.length > 0) {
+            @for (addon of subscription()!.active_addons; track addon) {
+              <div class="breakdown-item extra">
+                <span>{{ getAddonName(addon) }}</span>
+                <span>+{{ formatPrice(getAddonPrice(addon)) }}</span>
+              </div>
+            }
+          }
+        </div>
+      }
+      <div class="billing-cycle-info">
+        <lucide-icon [name]="ICONS.CALENDAR" [size]="14" />
+        {{ subscription()!.billing_cycle === 'yearly' ? 'Éves számlázás' : 'Havi számlázás' }}
+        @if (subscription()!.current_period_end) {
+          · Következő fizetés: {{ formatDate(subscription()!.current_period_end!) }}
+        }
+      </div>
+    </div>
+
+    <div class="subscription-grid">
+      <!-- Jelenlegi csomag kártya -->
+      <div class="info-card plan-card">
+        <div class="card-header">
+          <h2 class="card-title">Jelenlegi csomag</h2>
+          <span
+            class="status-badge"
+            [class]="'status-badge--' + subscription()!.status"
+          >
+            {{ getStatusLabel(subscription()!.status) }}
+          </span>
+        </div>
+
+        <div class="plan-info">
+          <span class="plan-name">{{ subscription()!.plan_name }}</span>
+        </div>
+
+        @if (subscription()!.is_modified) {
+          <div class="modification-badges">
+            @if (subscription()!.has_extra_storage) {
+              <div class="mod-badge mod-badge--storage">
+                <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="14" />
+                +{{ subscription()!.extra_storage_gb }} GB
+              </div>
+            }
+            @if (subscription()!.has_addons) {
+              <div class="mod-badge mod-badge--addon">
+                <lucide-icon [name]="ICONS.PUZZLE" [size]="14" />
+                {{ subscription()!.active_addons.length }} kiegészítő
+              </div>
+            }
+          </div>
+        }
+
+        <div class="card-actions">
+          <button
+            class="btn btn--primary"
+            (click)="openPortal()"
+            [disabled]="portalLoading()"
+          >
+            @if (portalLoading()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+            } @else {
+              <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="18" />
+            }
+            Előfizetés kezelése
+          </button>
+        </div>
+      </div>
+
+      <!-- Tárhely kártya -->
+      <div class="info-card storage-card">
+        <div class="card-header">
+          <h2 class="card-title">Tárhely</h2>
+          <a routerLink="/partner/subscription/addons" class="card-link">
+            Bővítés
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+          </a>
+        </div>
+
+        <div class="storage-info">
+          <div class="storage-bar">
+            <div
+              class="storage-used"
+              [style.width.%]="storagePercent()"
+              [class.storage-used--warning]="storagePercent() > 80"
+              [class.storage-used--danger]="storagePercent() > 95"
+            ></div>
+          </div>
+          <div class="storage-text">
+            <span class="storage-current">{{ formatStorage(storageUsage()?.used_gb ?? 0) }} GB</span>
+            <span class="storage-separator">/</span>
+            <span class="storage-limit">{{ formatStorage(storageUsage()?.total_limit_gb ?? subscription()!.limits.storage_gb) }} GB</span>
+          </div>
+          @if (storageUsage()?.additional_gb) {
+            <div class="storage-detail">
+              <span class="detail-label">Alap:</span>
+              <span>{{ storageUsage()!.plan_limit_gb }} GB</span>
+              <span class="detail-plus">+</span>
+              <span class="detail-extra">{{ storageUsage()!.additional_gb }} GB extra</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Funkciók kártya -->
+      <div class="info-card features-card">
+        <div class="card-header">
+          <h2 class="card-title">Funkciók</h2>
+          <a routerLink="/partner/subscription/addons" class="card-link">
+            Kiegészítők
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+          </a>
+        </div>
+
+        <div class="features-list">
+          @for (feature of subscription()!.features; track feature) {
+            <div class="feature-item">
+              <lucide-icon [name]="ICONS.CHECK" [size]="16" class="feature-check" />
+              <span>{{ feature }}</span>
+            </div>
+          }
+        </div>
+
+        @if (subscription()!.has_addons && subscription()!.active_addons.length > 0) {
+          <div class="addons-section">
+            <h3 class="addons-title">Aktív kiegészítők</h3>
+            @for (addon of subscription()!.active_addons; track addon) {
+              <div class="addon-item">
+                <lucide-icon [name]="ICONS.PLUS_CIRCLE" [size]="16" class="addon-icon" />
+                <span>{{ getAddonName(addon) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Limit összesítő kártya -->
+      <div class="info-card limits-card">
+        <div class="card-header">
+          <h2 class="card-title">Használat</h2>
+        </div>
+
+        <div class="limits-list">
+          <!-- Iskolák -->
+          <div class="limit-item">
+            <div class="limit-header">
+              <lucide-icon [name]="ICONS.BUILDING" [size]="18" class="limit-icon" />
+              <span class="limit-label">Iskolák</span>
+            </div>
+            <div class="limit-value">
+              <span class="limit-current">{{ subscription()!.usage?.schools ?? 0 }}</span>
+              <span class="limit-separator">/</span>
+              <span class="limit-max">{{ subscription()!.limits.max_schools ?? '∞' }}</span>
+            </div>
+            <div class="limit-bar">
+              <div
+                class="limit-progress"
+                [style.width.%]="getLimitPercent('schools')"
+                [class.limit-progress--warning]="getLimitPercent('schools') > 80"
+                [class.limit-progress--danger]="getLimitPercent('schools') > 95"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Osztályok -->
+          <div class="limit-item">
+            <div class="limit-header">
+              <lucide-icon [name]="ICONS.USERS" [size]="18" class="limit-icon" />
+              <span class="limit-label">Osztályok</span>
+            </div>
+            <div class="limit-value">
+              <span class="limit-current">{{ subscription()!.usage?.classes ?? 0 }}</span>
+              <span class="limit-separator">/</span>
+              <span class="limit-max">{{ subscription()!.limits.max_classes ?? '∞' }}</span>
+            </div>
+            <div class="limit-bar">
+              <div
+                class="limit-progress"
+                [style.width.%]="getLimitPercent('classes')"
+                [class.limit-progress--warning]="getLimitPercent('classes') > 80"
+                [class.limit-progress--danger]="getLimitPercent('classes') > 95"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Sablon minták -->
+          <div class="limit-item">
+            <div class="limit-header">
+              <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="18" class="limit-icon" />
+              <span class="limit-label">Sablon minták</span>
+            </div>
+            <div class="limit-value">
+              <span class="limit-current">{{ subscription()!.usage?.templates ?? 0 }}</span>
+              <span class="limit-separator">/</span>
+              <span class="limit-max">{{ subscription()!.limits.max_templates ?? '∞' }}</span>
+            </div>
+            <div class="limit-bar">
+              <div
+                class="limit-progress"
+                [style.width.%]="getLimitPercent('templates')"
+                [class.limit-progress--warning]="getLimitPercent('templates') > 80"
+                [class.limit-progress--danger]="getLimitPercent('templates') > 95"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="error-state">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="48" />
+      <p>Nem sikerült betölteni az előfizetés adatokat.</p>
+      <button class="btn btn--secondary" (click)="loadData()">
+        <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
+        Újrapróbálás
+      </button>
+    </div>
+  }
+</div>

@@ -18,6 +18,12 @@ export interface SubscriptionInfo {
     storage_gb: number;
     max_classes: number | null;
   };
+  // Módosítás jelzők (extra tárhely, addonok)
+  is_modified: boolean;
+  has_extra_storage: boolean;
+  extra_storage_gb: number;
+  has_addons: boolean;
+  active_addons: string[];
   // Stripe adatok (ha elérhető)
   stripe_status?: string;
   current_period_end?: string;

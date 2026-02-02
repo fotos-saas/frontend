@@ -11,6 +11,7 @@ import { SubscriptionActionsComponent } from './components/subscription-actions.
 import { DeleteAccountDialogComponent } from './components/delete-account-dialog.component';
 import { StorageUsageCardComponent } from './components/storage-usage-card/storage-usage-card.component';
 import { StoragePurchaseDialogComponent } from './components/storage-purchase-dialog/storage-purchase-dialog.component';
+import { AddonsCardComponent } from './components/addons-card/addons-card.component';
 
 /**
  * Partner Settings Page
@@ -31,7 +32,8 @@ import { StoragePurchaseDialogComponent } from './components/storage-purchase-di
     SubscriptionActionsComponent,
     DeleteAccountDialogComponent,
     StorageUsageCardComponent,
-    StoragePurchaseDialogComponent
+    StoragePurchaseDialogComponent,
+    AddonsCardComponent
   ],
   template: `
     <div class="settings-page page-card">
@@ -92,6 +94,19 @@ import { StoragePurchaseDialogComponent } from './components/storage-purchase-di
             <p>Tárhely adatok nem elérhetők.</p>
           </div>
         }
+      </section>
+
+      <!-- Kiegészítők szekció -->
+      <section class="settings-section">
+        <h2>
+          <lucide-icon [name]="ICONS.PACKAGE" [size]="20" />
+          Kiegészítők
+        </h2>
+        <p class="section-description">
+          Bővítsd a funkcionalitást kiegészítő csomagokkal. Az aktív addonok azonnal elérhetők lesznek.
+        </p>
+
+        <app-addons-card (addonChanged)="onAddonChanged()" />
       </section>
 
       <!-- Veszélyes zóna szekció -->
@@ -446,5 +461,14 @@ export class PartnerSettingsComponent implements OnInit {
         this.isStorageSubmitting.set(false);
       }
     });
+  }
+
+  // ============================================
+  // ADDON HANDLERS
+  // ============================================
+
+  onAddonChanged(): void {
+    // Refresh subscription info when addon changes (to update billing)
+    this.loadSubscriptionInfo();
   }
 }

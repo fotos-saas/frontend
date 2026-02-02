@@ -54,11 +54,16 @@ import { ICONS } from '../../shared/constants/icons.constants';
           <a
             routerLink="/partner/settings"
             class="subscription-badge"
-            matTooltip="Előfizetés kezelése"
+            [matTooltip]="getSubscriptionTooltip()"
           >
             <span class="plan-badge" [ngClass]="'plan-badge--' + subscriptionInfo()!.plan">
               {{ subscriptionInfo()!.plan_name }}
             </span>
+            @if (subscriptionInfo()!.is_modified) {
+              <span class="modified-indicator" matTooltip="Módosított csomag">
+                <lucide-icon [name]="ICONS.PLUS_CIRCLE" [size]="14" />
+              </span>
+            }
             <span
               class="status-dot"
               [ngClass]="'status-dot--' + subscriptionInfo()!.status"
@@ -201,6 +206,19 @@ import { ICONS } from '../../shared/constants/icons.constants';
 
     .status-dot--pending {
       background: #9ca3af;
+    }
+
+    .modified-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22c55e;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
     }
 
     /* ============ Desktop/Tablet Sidebar ============ */
@@ -391,6 +409,28 @@ export class PartnerShellComponent implements OnInit {
       pending: 'Függőben'
     };
     return labels[status] ?? status;
+  }
+
+  getSubscriptionTooltip(): string {
+    const info = this.subscriptionInfo();
+    if (!info) return 'Előfizetés kezelése';
+
+    const parts: string[] = [`${info.plan_name} csomag`];
+
+    if (info.has_extra_storage) {
+      parts.push(`+${info.extra_storage_gb} GB extra tárhely`);
+    }
+
+    if (info.has_addons && info.active_addons?.length) {
+      const addonNames: Record<string, string> = {
+        'community_pack': 'Közösségi csomag'
+      };
+      const addons = info.active_addons.map(key => addonNames[key] || key).join(', ');
+      parts.push(`Addonok: ${addons}`);
+    }
+
+    parts.push('Kattints a kezeléshez');
+    return parts.join(' • ');
   }
 
   logout(): void {

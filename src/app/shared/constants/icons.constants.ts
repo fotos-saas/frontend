@@ -170,6 +170,7 @@ export const ICONS = {
 
   // Általános műveletek
   PLUS: 'plus',
+  PLUS_CIRCLE: 'plus-circle',
   MINUS: 'minus',
   EDIT: 'pencil',
   DELETE: 'trash-2',

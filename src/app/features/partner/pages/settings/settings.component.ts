@@ -3,17 +3,21 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, SubscriptionInfo } from '../../services/subscription.service';
+import { StorageService, StorageUsage } from '../../services/storage.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { SubscriptionCardComponent } from './components/subscription-card.component';
 import { SubscriptionActionsComponent } from './components/subscription-actions.component';
 import { DeleteAccountDialogComponent } from './components/delete-account-dialog.component';
+import { StorageUsageCardComponent } from './components/storage-usage-card/storage-usage-card.component';
+import { StoragePurchaseDialogComponent } from './components/storage-purchase-dialog/storage-purchase-dialog.component';
 
 /**
  * Partner Settings Page
  *
  * Partner beállítások oldal:
  * - Előfizetés kezelés (csomag, státusz, műveletek)
+ * - Tárhely kezelés (használat, bővítés)
  * - Fiók törlés (GDPR-kompatibilis soft delete)
  */
 @Component({
@@ -25,7 +29,9 @@ import { DeleteAccountDialogComponent } from './components/delete-account-dialog
     MatTooltipModule,
     SubscriptionCardComponent,
     SubscriptionActionsComponent,
-    DeleteAccountDialogComponent
+    DeleteAccountDialogComponent,
+    StorageUsageCardComponent,
+    StoragePurchaseDialogComponent
   ],
   template: `
     <div class="settings-page page-card">
@@ -65,6 +71,29 @@ import { DeleteAccountDialogComponent } from './components/delete-account-dialog
         }
       </section>
 
+      <!-- Tárhely szekció -->
+      <section class="settings-section">
+        <h2>
+          <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="20" />
+          Tárhely
+        </h2>
+
+        @if (isStorageLoading()) {
+          <div class="loading-skeleton">
+            <div class="skeleton-card skeleton-card--small"></div>
+          </div>
+        } @else if (storageUsage()) {
+          <app-storage-usage-card
+            [usage]="storageUsage()!"
+            (openPurchase)="openStoragePurchaseDialog()"
+          />
+        } @else {
+          <div class="empty-state">
+            <p>Tárhely adatok nem elérhetők.</p>
+          </div>
+        }
+      </section>
+
       <!-- Veszélyes zóna szekció -->
       <section class="settings-section settings-section--danger">
         <h2>
@@ -85,12 +114,21 @@ import { DeleteAccountDialogComponent } from './components/delete-account-dialog
       </section>
     </div>
 
-    <!-- Fiók törlés dialógus - page-card KÍVÜL! -->
+    <!-- Dialógusok - page-card KÍVÜL! -->
     @if (showDeleteDialog()) {
       <app-delete-account-dialog
         [isSubmitting]="isDeleting()"
         (close)="closeDeleteDialog()"
         (confirm)="handleDeleteAccount()"
+      />
+    }
+
+    @if (showStoragePurchaseDialog()) {
+      <app-storage-purchase-dialog
+        [usage]="storageUsage()!"
+        [isSubmitting]="isStorageSubmitting()"
+        (close)="closeStoragePurchaseDialog()"
+        (confirm)="handleStoragePurchase($event)"
       />
     }
   `,
@@ -187,6 +225,10 @@ import { DeleteAccountDialogComponent } from './components/delete-account-dialog
       animation: shimmer 1.5s infinite;
     }
 
+    .skeleton-card--small {
+      height: 150px;
+    }
+
     @keyframes shimmer {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
@@ -212,20 +254,32 @@ import { DeleteAccountDialogComponent } from './components/delete-account-dialog
 })
 export class PartnerSettingsComponent implements OnInit {
   private subscriptionService = inject(SubscriptionService);
+  private storageService = inject(StorageService);
   private toastService = inject(ToastService);
 
   protected readonly ICONS = ICONS;
 
-  // State
+  // Subscription state
   subscriptionInfo = signal<SubscriptionInfo | null>(null);
   isLoading = signal(true);
   isActionLoading = signal(false);
   showDeleteDialog = signal(false);
   isDeleting = signal(false);
 
+  // Storage state
+  storageUsage = signal<StorageUsage | null>(null);
+  isStorageLoading = signal(true);
+  showStoragePurchaseDialog = signal(false);
+  isStorageSubmitting = signal(false);
+
   ngOnInit(): void {
     this.loadSubscriptionInfo();
+    this.loadStorageUsage();
   }
+
+  // ============================================
+  // SUBSCRIPTION HANDLERS
+  // ============================================
 
   private loadSubscriptionInfo(): void {
     this.isLoading.set(true);
@@ -345,6 +399,51 @@ export class PartnerSettingsComponent implements OnInit {
         console.error('Failed to delete account:', err);
         this.toastService.error('Hiba', 'Nem sikerült törölni a fiókot.');
         this.isDeleting.set(false);
+      }
+    });
+  }
+
+  // ============================================
+  // STORAGE HANDLERS
+  // ============================================
+
+  private loadStorageUsage(): void {
+    this.isStorageLoading.set(true);
+    this.storageService.getUsage().subscribe({
+      next: (usage) => {
+        this.storageUsage.set(usage);
+        this.isStorageLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load storage usage:', err);
+        this.isStorageLoading.set(false);
+        this.toastService.error('Hiba', 'Nem sikerült betölteni a tárhely adatokat.');
+      }
+    });
+  }
+
+  openStoragePurchaseDialog(): void {
+    this.showStoragePurchaseDialog.set(true);
+  }
+
+  closeStoragePurchaseDialog(): void {
+    this.showStoragePurchaseDialog.set(false);
+  }
+
+  handleStoragePurchase(gb: number): void {
+    this.isStorageSubmitting.set(true);
+    this.storageService.setAddon(gb).subscribe({
+      next: (response) => {
+        this.toastService.success('Siker', response.message);
+        this.loadStorageUsage();
+        this.closeStoragePurchaseDialog();
+        this.isStorageSubmitting.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to update storage addon:', err);
+        const message = err.error?.message || 'Nem sikerült módosítani az extra tárhelyet.';
+        this.toastService.error('Hiba', message);
+        this.isStorageSubmitting.set(false);
       }
     });
   }

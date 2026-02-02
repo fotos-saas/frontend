@@ -58,6 +58,7 @@ export class SubscriberDetailComponent implements OnInit {
   auditSearch = signal('');
   auditActionFilter = signal('');
   auditSortDir = signal<'asc' | 'desc'>('desc');
+  auditShowViews = signal(false); // Megtekintések alapból rejtve
 
   // Dialógusok
   showChargeDialog = signal(false);
@@ -105,7 +106,8 @@ export class SubscriberDetailComponent implements OnInit {
       per_page: 10,
       search: this.auditSearch() || undefined,
       action: this.auditActionFilter() || undefined,
-      sort_dir: this.auditSortDir()
+      sort_dir: this.auditSortDir(),
+      show_views: this.auditShowViews()
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -156,6 +158,15 @@ export class SubscriberDetailComponent implements OnInit {
   goToAuditPage(page: number): void {
     if (page < 1 || page > this.auditTotalPages()) return;
     this.auditPage.set(page);
+    const sub = this.subscriber();
+    if (sub) {
+      this.loadAuditLogs(sub.id);
+    }
+  }
+
+  toggleShowViews(): void {
+    this.auditShowViews.update(v => !v);
+    this.auditPage.set(1); // Reset to first page
     const sub = this.subscriber();
     if (sub) {
       this.loadAuditLogs(sub.id);

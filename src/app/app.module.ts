@@ -117,7 +117,9 @@ import {
   HardDrive,
   PauseCircle,
   PlayCircle,
-  FileText
+  FileText,
+  // Audit log toggle
+  Eye
 } from 'lucide-angular';
 
 /**
@@ -227,7 +229,9 @@ const LUCIDE_ICONS = {
   HardDrive,
   PauseCircle,
   PlayCircle,
-  FileText
+  FileText,
+  // Audit log toggle
+  Eye
 };
 
 @NgModule({

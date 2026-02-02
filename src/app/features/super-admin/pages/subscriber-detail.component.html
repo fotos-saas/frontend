@@ -366,6 +366,15 @@
             <option value="remove_discount">Kedvezmény törlés</option>
             <option value="cancel_subscription">Törlés</option>
           </select>
+          <label class="show-views-toggle" matTooltip="Megtekintések megjelenítése/elrejtése">
+            <input
+              type="checkbox"
+              [checked]="auditShowViews()"
+              (change)="toggleShowViews()"
+            />
+            <lucide-icon [name]="ICONS.EYE" [size]="16" />
+            <span>Megtekintések</span>
+          </label>
         </div>
 
         @if (auditLogsLoading()) {

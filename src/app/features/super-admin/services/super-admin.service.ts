@@ -220,6 +220,7 @@ export class SuperAdminService {
     search?: string;
     action?: string;
     sort_dir?: 'asc' | 'desc';
+    show_views?: boolean;
   }): Observable<PaginatedResponse<AuditLogEntry>> {
     let httpParams = new HttpParams();
 
@@ -228,6 +229,7 @@ export class SuperAdminService {
     if (params?.search) httpParams = httpParams.set('search', params.search);
     if (params?.action) httpParams = httpParams.set('action', params.action);
     if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
+    if (params?.show_views) httpParams = httpParams.set('show_views', '1');
 
     return this.http.get<PaginatedResponse<AuditLogEntry>>(`${this.baseUrl}/subscribers/${id}/audit-logs`, { params: httpParams });
   }

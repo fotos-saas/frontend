@@ -35,7 +35,7 @@
 // Table Header
 .table-header {
   @extend .table-header;
-  grid-template-columns: 1fr 120px 120px 120px 100px;
+  grid-template-columns: 1fr 120px 120px 120px 100px 40px;
 }
 
 .th { @extend .th; }
@@ -47,7 +47,33 @@
 
 .subscriber-row {
   @extend .list-row;
-  grid-template-columns: 1fr 120px 120px 120px 100px;
+  grid-template-columns: 1fr 120px 120px 120px 100px 40px;
+
+  &--clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary, #1e3a5f);
+      box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+    }
+  }
+}
+
+.subscriber-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: color 0.15s ease;
+
+  .subscriber-row:hover & {
+    color: var(--color-primary, #1e3a5f);
+  }
 }
 
 .subscriber-name {
@@ -232,9 +258,10 @@
   }
 
   .subscriber-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr auto;
     gap: 12px;
     padding: 16px;
+    position: relative;
   }
 
   .subscriber-name {
@@ -251,10 +278,13 @@
   .subscriber-status {
     position: absolute;
     top: 12px;
-    right: 12px;
+    right: 48px;
   }
 
-  .subscriber-row {
-    position: relative;
+  .subscriber-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }

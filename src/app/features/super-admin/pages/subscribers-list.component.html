@@ -76,14 +76,20 @@
       <span class="th th-price">Ár</span>
       <span class="th th-date">Hónapforduló</span>
       <span class="th th-status">Státusz</span>
+      <span class="th"></span>
     </div>
 
     <!-- Előfizető sorok -->
     <div class="subscriber-grid">
       @for (subscriber of subscribers(); track subscriber.id; let i = $index) {
         <div
-          class="subscriber-row"
+          class="subscriber-row subscriber-row--clickable"
           [style.animation-delay]="i * 0.03 + 's'"
+          (click)="openSubscriber(subscriber)"
+          (keydown.enter)="openSubscriber(subscriber)"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Részletek: ' + subscriber.name"
         >
           <div class="subscriber-name">
             <lucide-icon [name]="ICONS.USER" [size]="18" class="subscriber-icon" />
@@ -114,9 +120,18 @@
           </div>
 
           <div class="subscriber-status">
-            <span class="status-badge" [ngClass]="getStatusClass(subscriber.subscriptionStatus)">
+            <span
+              class="status-badge"
+              [ngClass]="getStatusClass(subscriber.subscriptionStatus)"
+              [matTooltip]="getTrialTooltip(subscriber)"
+              [matTooltipDisabled]="subscriber.subscriptionStatus !== 'trial'"
+            >
               {{ getStatusLabel(subscriber.subscriptionStatus) }}
             </span>
+          </div>
+
+          <div class="subscriber-arrow">
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="18" />
           </div>
         </div>
       }

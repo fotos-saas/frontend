@@ -22,6 +22,49 @@ export interface SubscriberListItem {
 }
 
 /**
+ * Előfizető részletes adatok
+ */
+export interface SubscriberDetail {
+  id: number;
+  name: string;
+  email: string;
+  companyName: string | null;
+  taxNumber: string | null;
+  billingCountry: string | null;
+  billingPostalCode: string | null;
+  billingCity: string | null;
+  billingAddress: string | null;
+  phone: string | null;
+  plan: 'alap' | 'iskola' | 'studio';
+  planName: string;
+  billingCycle: 'monthly' | 'yearly';
+  price: number;
+  subscriptionStatus: 'active' | 'paused' | 'canceling' | 'trial' | 'canceled';
+  subscriptionStartedAt: string | null;
+  subscriptionEndsAt: string | null;
+  trialDaysRemaining: number | null;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  storageLimitGb: number | null;
+  maxClasses: number | null;
+  features: string[] | null;
+  createdAt: string;
+}
+
+/**
+ * Audit log bejegyzés
+ */
+export interface AuditLogEntry {
+  id: number;
+  adminName: string;
+  action: string;
+  actionLabel: string;
+  details: Record<string, unknown> | null;
+  ipAddress: string | null;
+  createdAt: string;
+}
+
+/**
  * Rendszer beállítások
  */
 export interface SystemSettings {
@@ -125,5 +168,47 @@ export class SuperAdminService {
    */
   updateSettings(settings: Partial<SystemSettings['system']>): Observable<{ success: boolean; message: string }> {
     return this.http.put<{ success: boolean; message: string }>(`${this.baseUrl}/settings`, settings);
+  }
+
+  /**
+   * Előfizető részletes adatainak lekérése
+   */
+  getSubscriber(id: number): Observable<SubscriberDetail> {
+    return this.http.get<SubscriberDetail>(`${this.baseUrl}/subscribers/${id}`);
+  }
+
+  /**
+   * Manuális terhelés Stripe Invoice-szal
+   */
+  chargeSubscriber(id: number, data: { amount: number; description: string }): Observable<{ success: boolean; message: string; invoiceId?: string }> {
+    return this.http.post<{ success: boolean; message: string; invoiceId?: string }>(`${this.baseUrl}/subscribers/${id}/charge`, data);
+  }
+
+  /**
+   * Csomag váltás
+   */
+  changePlan(id: number, data: { plan: 'alap' | 'iskola' | 'studio'; billing_cycle?: 'monthly' | 'yearly' }): Observable<{ success: boolean; message: string; newPrice?: number }> {
+    return this.http.put<{ success: boolean; message: string; newPrice?: number }>(`${this.baseUrl}/subscribers/${id}/change-plan`, data);
+  }
+
+  /**
+   * Előfizetés törlése
+   */
+  cancelSubscription(id: number, immediate: boolean): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/subscribers/${id}/subscription`, {
+      body: { immediate }
+    });
+  }
+
+  /**
+   * Audit logok lekérése
+   */
+  getAuditLogs(id: number, params?: { page?: number; per_page?: number }): Observable<PaginatedResponse<AuditLogEntry>> {
+    let httpParams = new HttpParams();
+
+    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+
+    return this.http.get<PaginatedResponse<AuditLogEntry>>(`${this.baseUrl}/subscribers/${id}/audit-logs`, { params: httpParams });
   }
 }

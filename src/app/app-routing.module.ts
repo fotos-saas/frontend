@@ -93,6 +93,10 @@ const routes: Routes = [
         loadComponent: () => import('./features/super-admin/pages/subscribers-list.component').then(m => m.SubscribersListComponent)
       },
       {
+        path: 'subscribers/:id',
+        loadComponent: () => import('./features/super-admin/pages/subscriber-detail.component').then(m => m.SubscriberDetailComponent)
+      },
+      {
         path: 'settings',
         loadComponent: () => import('./features/super-admin/pages/settings.component').then(m => m.SettingsComponent)
       },

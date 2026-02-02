@@ -1,0 +1,366 @@
+<div class="subscriber-detail-page page-card">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()" matTooltip="Vissza a listához">
+        <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+      </button>
+      <div class="header-content">
+        <h1>Előfizető részletei</h1>
+        @if (subscriber(); as sub) {
+          <p class="subtitle">{{ sub.name }} - {{ sub.email }}</p>
+        }
+      </div>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-card skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <div class="error-state__icon">
+        <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="56" />
+      </div>
+      <h3 class="error-state__title">Hiba történt</h3>
+      <p class="error-state__message">{{ error() }}</p>
+      <p class="error-state__hint">Próbáld újra később, vagy lépj vissza a listához.</p>
+      <div class="error-state__actions">
+        <button class="btn-secondary" (click)="goBack()">
+          <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+          Vissza a listához
+        </button>
+        <button class="btn-primary" (click)="retryLoad()">
+          <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
+          Újrapróbálás
+        </button>
+      </div>
+    </div>
+  } @else if (subscriber(); as sub) {
+    <div class="content-grid">
+      <!-- Partner adatok -->
+      <section class="card">
+        <h2 class="card__title">
+          <lucide-icon [name]="ICONS.USER" [size]="20" />
+          Partner adatok
+        </h2>
+        <div class="data-grid">
+          <div class="data-item">
+            <span class="data-label">Név</span>
+            <span class="data-value">{{ sub.name }}</span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">Email</span>
+            <span class="data-value">{{ sub.email }}</span>
+          </div>
+          @if (sub.companyName) {
+            <div class="data-item">
+              <span class="data-label">Cégnév</span>
+              <span class="data-value">{{ sub.companyName }}</span>
+            </div>
+          }
+          @if (sub.taxNumber) {
+            <div class="data-item">
+              <span class="data-label">Adószám</span>
+              <span class="data-value">{{ sub.taxNumber }}</span>
+            </div>
+          }
+          @if (sub.phone) {
+            <div class="data-item">
+              <span class="data-label">Telefon</span>
+              <span class="data-value">{{ sub.phone }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Számlázási cím -->
+      <section class="card">
+        <h2 class="card__title">
+          <lucide-icon [name]="ICONS.BUILDING" [size]="20" />
+          Számlázási cím
+        </h2>
+        <div class="data-grid">
+          @if (sub.billingCountry) {
+            <div class="data-item">
+              <span class="data-label">Ország</span>
+              <span class="data-value">{{ sub.billingCountry }}</span>
+            </div>
+          }
+          @if (sub.billingPostalCode) {
+            <div class="data-item">
+              <span class="data-label">Irányítószám</span>
+              <span class="data-value">{{ sub.billingPostalCode }}</span>
+            </div>
+          }
+          @if (sub.billingCity) {
+            <div class="data-item">
+              <span class="data-label">Város</span>
+              <span class="data-value">{{ sub.billingCity }}</span>
+            </div>
+          }
+          @if (sub.billingAddress) {
+            <div class="data-item data-item--full">
+              <span class="data-label">Cím</span>
+              <span class="data-value">{{ sub.billingAddress }}</span>
+            </div>
+          }
+          @if (!sub.billingCountry && !sub.billingCity && !sub.billingAddress) {
+            <p class="empty-text">Nincs megadva számlázási cím.</p>
+          }
+        </div>
+      </section>
+
+      <!-- Előfizetés adatok -->
+      <section class="card">
+        <h2 class="card__title">
+          <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="20" />
+          Előfizetés
+        </h2>
+        <div class="data-grid">
+          <div class="data-item">
+            <span class="data-label">Csomag</span>
+            <span class="data-value">
+              <span class="plan-badge" [ngClass]="getPlanClass(sub.plan)">
+                {{ sub.planName }}
+              </span>
+            </span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">Számlázási ciklus</span>
+            <span class="data-value">{{ sub.billingCycle === 'yearly' ? 'Éves' : 'Havi' }}</span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">Ár</span>
+            <span class="data-value data-value--price">{{ formatPrice(sub.price, sub.billingCycle) }}</span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">Státusz</span>
+            <span class="data-value">
+              <span class="status-badge" [ngClass]="getStatusClass(sub.subscriptionStatus)">
+                {{ getStatusLabel(sub.subscriptionStatus) }}
+              </span>
+              @if (sub.subscriptionStatus === 'trial' && sub.trialDaysRemaining !== null) {
+                <span class="trial-remaining">({{ sub.trialDaysRemaining }} nap van hátra)</span>
+              }
+            </span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">Előfizetés kezdete</span>
+            <span class="data-value">{{ formatDate(sub.subscriptionStartedAt) }}</span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">Következő terhelés/lejárat</span>
+            <span class="data-value">{{ formatDate(sub.subscriptionEndsAt) }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stripe adatok -->
+      <section class="card">
+        <h2 class="card__title">
+          <lucide-icon [name]="ICONS.WALLET" [size]="20" />
+          Stripe
+        </h2>
+        <div class="data-grid">
+          <div class="data-item">
+            <span class="data-label">Customer ID</span>
+            @if (sub.stripeCustomerId) {
+              <a [href]="getStripeCustomerUrl()" target="_blank" rel="noopener" class="stripe-link">
+                {{ sub.stripeCustomerId }}
+                <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
+              </a>
+            } @else {
+              <span class="data-value data-value--empty">Nincs</span>
+            }
+          </div>
+          <div class="data-item">
+            <span class="data-label">Subscription ID</span>
+            @if (sub.stripeSubscriptionId) {
+              <a [href]="getStripeSubscriptionUrl()" target="_blank" rel="noopener" class="stripe-link">
+                {{ sub.stripeSubscriptionId }}
+                <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
+              </a>
+            } @else {
+              <span class="data-value data-value--empty">Nincs</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Csomag limitek -->
+      <section class="card">
+        <h2 class="card__title">
+          <lucide-icon [name]="ICONS.PACKAGE" [size]="20" />
+          Csomag limitek
+        </h2>
+        <div class="data-grid">
+          <div class="data-item">
+            <span class="data-label">Tárhely limit</span>
+            <span class="data-value">{{ sub.storageLimitGb ?? '-' }} GB</span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">Max. osztályok</span>
+            <span class="data-value">{{ sub.maxClasses ?? 'Korlátlan' }}</span>
+          </div>
+          @if (sub.features && sub.features.length > 0) {
+            <div class="data-item data-item--full">
+              <span class="data-label">Funkciók</span>
+              <div class="features-list">
+                @for (feature of sub.features; track feature) {
+                  <span class="feature-tag">{{ feature }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Regisztráció -->
+      <section class="card">
+        <h2 class="card__title">
+          <lucide-icon [name]="ICONS.CALENDAR" [size]="20" />
+          Regisztráció
+        </h2>
+        <div class="data-grid">
+          <div class="data-item">
+            <span class="data-label">Regisztráció dátuma</span>
+            <span class="data-value">{{ formatDateTime(sub.createdAt) }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Akció gombok -->
+      <section class="card card--actions">
+        <h2 class="card__title">
+          <lucide-icon [name]="ICONS.SETTINGS" [size]="20" />
+          Műveletek
+        </h2>
+        <div class="actions-grid">
+          <button
+            class="action-btn action-btn--primary"
+            (click)="openChargeDialog()"
+            [disabled]="!sub.stripeCustomerId"
+            [matTooltip]="!sub.stripeCustomerId ? 'Nincs Stripe customer' : 'Manuális számla létrehozása'"
+          >
+            <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="18" />
+            Manuális terhelés
+          </button>
+
+          <button
+            class="action-btn action-btn--secondary"
+            (click)="openChangePlanDialog()"
+            matTooltip="Csomag és számlázási ciklus módosítása"
+          >
+            <lucide-icon [name]="ICONS.PACKAGE" [size]="18" />
+            Csomag váltás
+          </button>
+
+          @if (sub.subscriptionStatus !== 'canceled' && sub.subscriptionStatus !== 'canceling') {
+            <button
+              class="action-btn action-btn--danger"
+              (click)="openCancelDialog(false)"
+              matTooltip="Előfizetés törlése a periódus végén"
+            >
+              <lucide-icon [name]="ICONS.X_CIRCLE" [size]="18" />
+              Törlés (periódus végén)
+            </button>
+
+            <button
+              class="action-btn action-btn--danger-outline"
+              (click)="openCancelDialog(true)"
+              matTooltip="Előfizetés azonnali törlése"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="18" />
+              Azonnali törlés
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- Audit log -->
+      <section class="card card--full-width">
+        <h2 class="card__title">
+          <lucide-icon [name]="ICONS.HISTORY" [size]="20" />
+          Admin műveletek napló
+        </h2>
+        @if (auditLogsLoading()) {
+          <div class="audit-loading">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="skeleton-row skeleton-shimmer"></div>
+            }
+          </div>
+        } @else if (auditLogs().length === 0) {
+          <p class="empty-text">Még nincs bejegyzés.</p>
+        } @else {
+          <div class="audit-list">
+            @for (log of auditLogs(); track log.id) {
+              <div class="audit-item">
+                <div class="audit-item__header">
+                  <span class="audit-item__action">{{ log.actionLabel }}</span>
+                  <span class="audit-item__time">{{ formatDateTime(log.createdAt) }}</span>
+                </div>
+                <div class="audit-item__meta">
+                  <span class="audit-item__admin">{{ log.adminName }}</span>
+                  @if (log.ipAddress) {
+                    <span class="audit-item__ip">{{ log.ipAddress }}</span>
+                  }
+                </div>
+                @if (log.details) {
+                  <div class="audit-item__details">
+                    @if (log.action === 'charge') {
+                      <span>Összeg: {{ log.details['amount'] }} Ft</span>
+                      <span>Leírás: {{ log.details['description'] }}</span>
+                    } @else if (log.action === 'change_plan') {
+                      <span>{{ log.details['old_plan'] }} {{ log.details['old_billing_cycle'] === 'yearly' ? '(éves)' : '(havi)' }} &rarr; {{ log.details['new_plan'] }} {{ log.details['new_billing_cycle'] === 'yearly' ? '(éves)' : '(havi)' }}</span>
+                    } @else if (log.action === 'cancel_subscription') {
+                      <span>{{ log.details['immediate'] ? 'Azonnali törlés' : 'Periódus végén' }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  }
+</div>
+
+<!-- Dialógusok - page-card KÍVÜL! -->
+@if (showChargeDialog() && subscriber(); as sub) {
+  <app-charge-subscriber-dialog
+    [subscriberId]="sub.id"
+    [subscriberName]="sub.name"
+    (close)="closeChargeDialog()"
+    (charged)="onChargeComplete()"
+  />
+}
+
+@if (showChangePlanDialog() && subscriber(); as sub) {
+  <app-change-plan-dialog
+    [subscriberId]="sub.id"
+    [subscriberName]="sub.name"
+    [currentPlan]="sub.plan"
+    [currentBillingCycle]="sub.billingCycle"
+    (close)="closeChangePlanDialog()"
+    (changed)="onPlanChangeComplete()"
+  />
+}
+
+@if (showCancelDialog()) {
+  <app-confirm-dialog
+    [title]="cancelImmediate() ? 'Azonnali törlés' : 'Előfizetés törlése'"
+    [message]="cancelImmediate()
+      ? 'Biztosan azonnal törölni szeretnéd az előfizetést? Ez a művelet visszavonhatatlan!'
+      : 'Az előfizetés a jelenlegi periódus végén fog megszűnni. Biztosan folytatod?'"
+    [confirmText]="cancelImmediate() ? 'Azonnali törlés' : 'Törlés periódus végén'"
+    cancelText="Mégse"
+    [confirmType]="cancelImmediate() ? 'danger' : 'warning'"
+    [isSubmitting]="isSubmitting()"
+    (resultEvent)="onCancelConfirm($event)"
+  />
+}

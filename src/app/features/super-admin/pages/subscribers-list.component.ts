@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -28,6 +29,7 @@ import { useFilterState } from '../../../shared/utils/use-filter-state';
 export class SubscribersListComponent implements OnInit {
   private readonly service = inject(SuperAdminService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   readonly ICONS = ICONS;
 
@@ -145,5 +147,25 @@ export class SubscribersListComponent implements OnInit {
       month: '2-digit',
       day: '2-digit',
     });
+  }
+
+  /**
+   * Trial tooltip szöveg számítása
+   */
+  getTrialTooltip(subscriber: SubscriberListItem): string {
+    if (subscriber.subscriptionStatus !== 'trial' || !subscriber.subscriptionEndsAt) {
+      return '';
+    }
+    const endDate = new Date(subscriber.subscriptionEndsAt);
+    const now = new Date();
+    const daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    return `Próba: ${daysRemaining} nap van hátra`;
+  }
+
+  /**
+   * Navigálás az előfizető részletekhez
+   */
+  openSubscriber(subscriber: SubscriberListItem): void {
+    this.router.navigate(['/super-admin/subscribers', subscriber.id]);
   }
 }

@@ -21,35 +21,33 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
   imports: [CommonModule, FormsModule, LucideAngularModule, MatTooltipModule],
   template: `
     <div class="invoices-page page-card">
-      <div class="page-header">
-        <div class="header-title">
-          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="24" />
-          <h1>Számlák</h1>
-        </div>
-
-        <div class="filter-section">
-          <label for="statusFilter" class="filter-label">
-            <lucide-icon [name]="ICONS.FILTER" [size]="16" />
-            Szűrés:
-          </label>
-          <select
-            id="statusFilter"
-            class="filter-select"
-            [ngModel]="statusFilter()"
-            (ngModelChange)="onStatusFilterChange($event)"
-          >
-            <option value="">Összes</option>
-            <option value="paid">Fizetve</option>
-            <option value="open">Nyitott</option>
-            <option value="void">Érvénytelen</option>
-          </select>
-        </div>
+      <div class="header-title">
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="24" />
+        <h1>Számlák</h1>
       </div>
 
       <p class="page-description">
         Itt találod a korábbi számláidat. A számlák kezeléséhez és fizetési adatok módosításához
         használd a Stripe portált.
       </p>
+
+      <div class="filter-section">
+        <label for="statusFilter" class="filter-label">
+          <lucide-icon [name]="ICONS.FILTER" [size]="16" />
+          Szűrés:
+        </label>
+        <select
+          id="statusFilter"
+          class="filter-select"
+          [ngModel]="statusFilter()"
+          (ngModelChange)="onStatusFilterChange($event)"
+        >
+          <option value="">Összes</option>
+          <option value="paid">Fizetve</option>
+          <option value="open">Nyitott</option>
+          <option value="void">Érvénytelen</option>
+        </select>
+      </div>
 
       @if (loading() && invoices().length === 0) {
         <div class="loading-state">
@@ -147,19 +145,11 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       margin: 0 auto;
     }
 
-    .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
     .header-title {
       display: flex;
       align-items: center;
       gap: 12px;
+      margin-bottom: 8px;
 
       h1 {
         font-size: 1.5rem;
@@ -173,6 +163,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-bottom: 16px;
     }
 
     .filter-label {
@@ -451,11 +442,6 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 
     /* Mobile */
     @media (max-width: 768px) {
-      .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
       .table-header {
         display: none;
       }

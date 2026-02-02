@@ -214,14 +214,14 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     }
 
     .invoices-list {
-      min-width: 600px;
+      min-width: 700px;
     }
 
     /* Table */
     .table-header {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 0.8fr 0.8fr 140px;
-      gap: 12px;
+      grid-template-columns: 1.2fr 1fr 0.8fr 100px 180px;
+      gap: 16px;
       padding: 12px 16px;
       background: #f8fafc;
       border-radius: 8px 8px 0 0;
@@ -249,8 +249,8 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 
     .list-row {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 0.8fr 0.8fr 140px;
-      gap: 12px;
+      grid-template-columns: 1.2fr 1fr 0.8fr 100px 180px;
+      gap: 16px;
       padding: 12px 16px;
       background: white;
       border: 1px solid #e2e8f0;

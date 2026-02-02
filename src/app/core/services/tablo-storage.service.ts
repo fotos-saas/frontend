@@ -296,37 +296,6 @@ export class TabloStorageService {
     this.setItem(this.uiKey(projectId, 'current_step'), String(step));
   }
 
-  // === DEPRECATED - Backward compatibility ===
-
-  /**
-   * @deprecated Használd helyette: getActiveSession()
-   * Aktív projekt ID lekérése.
-   */
-  getActiveProjectId(): number | null {
-    const session = this.getActiveSession();
-    return session?.projectId ?? null;
-  }
-
-  /**
-   * @deprecated Használd helyette: setActiveSession()
-   * Aktív projekt beállítása - backward compatibility
-   */
-  setActiveProjectId(projectId: number): void {
-    // Ha nincs aktív session, code-ként mentjük (legacy)
-    const session = this.getActiveSession();
-    if (!session || session.projectId !== projectId) {
-      this.setActiveSession(projectId, 'code');
-    }
-  }
-
-  /**
-   * @deprecated Használd helyette: clearActiveSession()
-   * Aktív projekt törlése
-   */
-  clearActiveProjectId(): void {
-    this.clearActiveSession();
-  }
-
   // === REMINDER STATE (PROJEKTIZOLT) ===
 
   /**

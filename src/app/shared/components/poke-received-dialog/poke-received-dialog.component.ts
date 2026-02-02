@@ -13,7 +13,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { PokeService } from '../../../core/services/poke.service';
 import { DateUtilsService } from '../../services/date-utils.service';
-import { POKE_REACTIONS, PokeReaction, Poke } from '../../../core/models/poke.models';
+import { Poke } from '../../../core/models/poke.models';
+import { REACTION_EMOJIS, ReactionEmoji, REACTION_TOOLTIPS } from '@shared/constants';
 import { createBackdropHandler } from '../../utils/dialog.util';
 
 /**
@@ -50,7 +51,7 @@ export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
   readonly unreadCount = this.pokeService.unreadCount;
 
   // Available reactions
-  readonly reactions = POKE_REACTIONS;
+  readonly reactions = REACTION_EMOJIS;
 
   // Currently expanded poke for reaction picker
   readonly expandedPokeId = signal<number | null>(null);
@@ -114,7 +115,7 @@ export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
   /**
    * Send reaction to a poke
    */
-  sendReaction(poke: Poke, reaction: PokeReaction): void {
+  sendReaction(poke: Poke, reaction: ReactionEmoji): void {
     if (this.sendingReactionFor() === poke.id) return;
 
     this.sendingReactionFor.set(poke.id);
@@ -142,14 +143,7 @@ export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
   /**
    * Get tooltip text for a reaction emoji
    */
-  getReactionTooltip(reaction: PokeReaction): string {
-    const tooltips: Record<PokeReaction, string> = {
-      '💀': 'Meghaltam',
-      '😭': 'Bocs!',
-      '🫡': 'Igenis!',
-      '❤️': 'Köszi!',
-      '👀': 'Mivan???'
-    };
-    return tooltips[reaction] || '';
+  getReactionTooltip(reaction: ReactionEmoji): string {
+    return REACTION_TOOLTIPS[reaction] || '';
   }
 }

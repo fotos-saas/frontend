@@ -11,7 +11,6 @@ import {
   PokePreset,
   PokeDailyLimit,
   PokeCategory,
-  PokeReaction,
   MissingUser,
   MissingCategory,
   MissingSummary,
@@ -23,6 +22,7 @@ import {
   ApiMissingCategoryResponse,
   UserPokeStatus
 } from '../models/poke.models';
+import { ReactionEmoji } from '@shared/constants';
 
 /**
  * Poke Service
@@ -262,7 +262,7 @@ export class PokeService implements OnDestroy {
   /**
    * Reakció hozzáadása
    */
-  addReaction(pokeId: number, reaction: PokeReaction): Observable<Poke | null> {
+  addReaction(pokeId: number, reaction: ReactionEmoji): Observable<Poke | null> {
     return this.http.post<{
       success: boolean;
       data: { poke: ApiPokeResponse };
@@ -450,7 +450,7 @@ export class PokeService implements OnDestroy {
     emoji: api.emoji,
     text: api.text,
     status: api.status as any,
-    reaction: api.reaction as PokeReaction | null,
+    reaction: api.reaction as ReactionEmoji | null,
     isRead: api.isRead,
     reactedAt: api.reactedAt,
     resolvedAt: api.resolvedAt,

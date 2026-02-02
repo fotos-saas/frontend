@@ -4,7 +4,7 @@
  * Peer-to-peer bökés rendszer interfészei.
  */
 
-import { ReactionEmoji, REACTION_EMOJIS } from '@shared/constants';
+import { ReactionEmoji } from '@shared/constants';
 
 /**
  * Bökés kategóriák
@@ -15,18 +15,6 @@ export type PokeCategory = 'voting' | 'photoshoot' | 'image_selection' | 'genera
  * Bökés státusz
  */
 export type PokeStatus = 'sent' | 'pending' | 'resolved' | 'expired';
-
-/**
- * Reakció típusok (re-export a központi konstansból)
- * @deprecated - Használd közvetlenül a ReactionEmoji-t a @shared/constants-ból
- */
-export type PokeReaction = ReactionEmoji;
-
-/**
- * Reakciók listája (re-export a központi konstansból)
- * @deprecated - Használd közvetlenül a REACTION_EMOJIS-t a @shared/constants-ból
- */
-export const POKE_REACTIONS: PokeReaction[] = [...REACTION_EMOJIS];
 
 /**
  * Preset üzenet interface
@@ -58,7 +46,7 @@ export interface Poke {
   emoji: string | null;
   text: string | null;
   status: PokeStatus;
-  reaction: PokeReaction | null;
+  reaction: ReactionEmoji | null;
   isRead: boolean;
   reactedAt: string | null;
   resolvedAt: string | null;

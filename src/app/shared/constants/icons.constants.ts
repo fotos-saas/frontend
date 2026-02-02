@@ -281,6 +281,7 @@ export const ICONS = {
   CREDIT_CARD: 'credit-card',
   PACKAGE: 'package',
   WALLET: 'wallet',
+  PERCENT: 'percent',
 
   // Loading & Spinners
   LOADER: 'loader-2',

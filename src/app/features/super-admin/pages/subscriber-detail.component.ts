@@ -5,11 +5,12 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SuperAdminService, SubscriberDetail, AuditLogEntry } from '../services/super-admin.service';
+import { SuperAdminService, SubscriberDetail, AuditLogEntry, DiscountInfo } from '../services/super-admin.service';
 import { ICONS } from '../../../shared/constants/icons.constants';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ChargeSubscriberDialogComponent } from '../components/charge-subscriber-dialog.component';
 import { ChangePlanDialogComponent } from '../components/change-plan-dialog.component';
+import { DiscountDialogComponent } from '../components/discount-dialog.component';
 
 /**
  * Előfizető részletek oldal - Super Admin felületen.
@@ -26,7 +27,8 @@ import { ChangePlanDialogComponent } from '../components/change-plan-dialog.comp
     MatTooltipModule,
     ConfirmDialogComponent,
     ChargeSubscriberDialogComponent,
-    ChangePlanDialogComponent
+    ChangePlanDialogComponent,
+    DiscountDialogComponent
   ],
   templateUrl: './subscriber-detail.component.html',
   styleUrl: './subscriber-detail.component.scss',
@@ -48,6 +50,9 @@ export class SubscriberDetailComponent implements OnInit {
   // Audit logok
   auditLogs = signal<AuditLogEntry[]>([]);
   auditLogsLoading = signal(false);
+  auditPage = signal(1);
+  auditTotalPages = signal(1);
+  auditTotal = signal(0);
 
   // Audit log filter state
   auditSearch = signal('');
@@ -58,6 +63,8 @@ export class SubscriberDetailComponent implements OnInit {
   showChargeDialog = signal(false);
   showChangePlanDialog = signal(false);
   showCancelDialog = signal(false);
+  showDiscountDialog = signal(false);
+  showRemoveDiscountDialog = signal(false);
   cancelImmediate = signal(false);
   isSubmitting = signal(false);
 
@@ -94,7 +101,8 @@ export class SubscriberDetailComponent implements OnInit {
     this.auditLogsLoading.set(true);
 
     this.service.getAuditLogs(id, {
-      per_page: 50,
+      page: this.auditPage(),
+      per_page: 10,
       search: this.auditSearch() || undefined,
       action: this.auditActionFilter() || undefined,
       sort_dir: this.auditSortDir()
@@ -103,6 +111,8 @@ export class SubscriberDetailComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.auditLogs.set(response.data);
+          this.auditTotalPages.set(response.last_page);
+          this.auditTotal.set(response.total);
           this.auditLogsLoading.set(false);
         },
         error: () => {
@@ -114,6 +124,7 @@ export class SubscriberDetailComponent implements OnInit {
   // Audit log filter kezelők
   setAuditSearch(value: string): void {
     this.auditSearch.set(value);
+    this.auditPage.set(1); // Reset to first page on search
     const sub = this.subscriber();
     if (sub) {
       this.loadAuditLogs(sub.id);
@@ -122,6 +133,7 @@ export class SubscriberDetailComponent implements OnInit {
 
   setAuditActionFilter(value: string): void {
     this.auditActionFilter.set(value);
+    this.auditPage.set(1); // Reset to first page on filter
     const sub = this.subscriber();
     if (sub) {
       this.loadAuditLogs(sub.id);
@@ -134,6 +146,16 @@ export class SubscriberDetailComponent implements OnInit {
 
   toggleAuditSort(): void {
     this.auditSortDir.set(this.auditSortDir() === 'desc' ? 'asc' : 'desc');
+    this.auditPage.set(1); // Reset to first page on sort change
+    const sub = this.subscriber();
+    if (sub) {
+      this.loadAuditLogs(sub.id);
+    }
+  }
+
+  goToAuditPage(page: number): void {
+    if (page < 1 || page > this.auditTotalPages()) return;
+    this.auditPage.set(page);
     const sub = this.subscriber();
     if (sub) {
       this.loadAuditLogs(sub.id);
@@ -216,6 +238,8 @@ export class SubscriberDetailComponent implements OnInit {
       view: 'audit-badge--view',
       charge: 'audit-badge--charge',
       change_plan: 'audit-badge--change_plan',
+      set_discount: 'audit-badge--discount',
+      remove_discount: 'audit-badge--discount-remove',
       cancel_subscription: 'audit-badge--cancel',
     };
     return classes[action] || 'audit-badge--view';
@@ -300,5 +324,74 @@ export class SubscriberDetailComponent implements OnInit {
       this.loadSubscriber(id);
       this.loadAuditLogs(id);
     }
+  }
+
+  // Kedvezmény dialógus események
+  openDiscountDialog(): void {
+    this.showDiscountDialog.set(true);
+  }
+
+  closeDiscountDialog(): void {
+    this.showDiscountDialog.set(false);
+  }
+
+  onDiscountSaved(discount: DiscountInfo): void {
+    this.showDiscountDialog.set(false);
+    const sub = this.subscriber();
+    if (sub) {
+      // Frissítjük a kedvezmény adatokat
+      this.subscriber.set({
+        ...sub,
+        activeDiscount: discount
+      });
+      this.loadAuditLogs(sub.id);
+    }
+  }
+
+  openRemoveDiscountDialog(): void {
+    this.showRemoveDiscountDialog.set(true);
+  }
+
+  closeRemoveDiscountDialog(): void {
+    this.showRemoveDiscountDialog.set(false);
+  }
+
+  onRemoveDiscountConfirm(result: { action: 'confirm' | 'cancel' }): void {
+    if (result.action !== 'confirm') {
+      this.closeRemoveDiscountDialog();
+      return;
+    }
+
+    const sub = this.subscriber();
+    if (!sub) return;
+
+    this.isSubmitting.set(true);
+
+    this.service.removeDiscount(sub.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.closeRemoveDiscountDialog();
+          // Frissítjük a subscriber adatokat
+          this.subscriber.set({
+            ...sub,
+            activeDiscount: null
+          });
+          this.loadAuditLogs(sub.id);
+        },
+        error: () => {
+          this.isSubmitting.set(false);
+        }
+      });
+  }
+
+  // Kedvezmény formázás
+  formatDiscountedPrice(sub: SubscriberDetail): string {
+    if (!sub.activeDiscount) return '';
+    const discountedPrice = Math.round(sub.price * (1 - sub.activeDiscount.percent / 100));
+    const formatted = new Intl.NumberFormat('hu-HU').format(discountedPrice);
+    const suffix = sub.billingCycle === 'yearly' ? '/év' : '/hó';
+    return `${formatted} Ft${suffix}`;
   }
 }

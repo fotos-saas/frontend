@@ -130,9 +130,65 @@
     font-weight: 600;
   }
 
+  &--strikethrough {
+    text-decoration: line-through;
+    color: #94a3b8;
+  }
+
+  &--discounted {
+    color: #16a34a;
+  }
+
   &--empty {
     color: #94a3b8;
     font-style: italic;
+  }
+}
+
+// === KEDVEZMÉNY MEGJELENÍTÉS ===
+.discount-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.discount-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  lucide-icon {
+    flex-shrink: 0;
+  }
+}
+
+.discount-until {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.discount-forever {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.discount-note-icon {
+  color: #64748b;
+  cursor: help;
+
+  &:hover {
+    color: #1e293b;
   }
 }
 
@@ -421,6 +477,16 @@
     color: #6d28d9;
   }
 
+  &--discount {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &--discount-remove {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
   &--cancel {
     background: #fee2e2;
     color: #dc2626;
@@ -435,6 +501,12 @@
 .text-muted {
   color: #cbd5e1;
 }
+
+// === PAGINATION (extends _list-page.scss) ===
+.pagination { @extend .pagination; }
+.page-btn { @extend .page-btn; }
+.page-info { @extend .page-info; }
+.total-count { @extend .total-count; }
 
 // Responsive
 @media (max-width: 768px) {

@@ -65,6 +65,7 @@ import {
   UserPlus,
   Calendar,
   Clock,
+  Building,
   Building2,
   AlertCircle,
   AlertTriangle,
@@ -110,7 +111,8 @@ import {
   // Payment & Billing
   CreditCard,
   Package,
-  Wallet
+  Wallet,
+  Percent
 } from 'lucide-angular';
 
 /**
@@ -168,6 +170,7 @@ const LUCIDE_ICONS = {
   UserPlus,
   Calendar,
   Clock,
+  Building,
   Building2,
   AlertCircle,
   AlertTriangle,
@@ -213,7 +216,8 @@ const LUCIDE_ICONS = {
   // Payment & Billing
   CreditCard,
   Package,
-  Wallet
+  Wallet,
+  Percent
 };
 
 @NgModule({

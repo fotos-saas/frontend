@@ -135,8 +135,40 @@
           </div>
           <div class="data-item">
             <span class="data-label">Ár</span>
-            <span class="data-value data-value--price">{{ formatPrice(sub.price, sub.billingCycle) }}</span>
+            <span class="data-value data-value--price" [class.data-value--strikethrough]="sub.activeDiscount">
+              {{ formatPrice(sub.price, sub.billingCycle) }}
+            </span>
           </div>
+          @if (sub.activeDiscount) {
+            <div class="data-item">
+              <span class="data-label">Kedvezmény</span>
+              <div class="discount-display">
+                <span class="discount-badge">
+                  <lucide-icon [name]="ICONS.PERCENT" [size]="14" />
+                  {{ sub.activeDiscount.percent }}%
+                </span>
+                @if (sub.activeDiscount.validUntil) {
+                  <span class="discount-until">{{ formatDate(sub.activeDiscount.validUntil) }}-ig</span>
+                } @else {
+                  <span class="discount-forever">örök</span>
+                }
+                @if (sub.activeDiscount.note) {
+                  <lucide-icon
+                    [name]="ICONS.INFO"
+                    [size]="14"
+                    [matTooltip]="sub.activeDiscount.note"
+                    class="discount-note-icon"
+                  />
+                }
+              </div>
+            </div>
+            <div class="data-item">
+              <span class="data-label">Kedvezményes ár</span>
+              <span class="data-value data-value--price data-value--discounted">
+                {{ formatDiscountedPrice(sub) }}
+              </span>
+            </div>
+          }
           <div class="data-item">
             <span class="data-label">Státusz</span>
             <span class="data-value">
@@ -259,6 +291,26 @@
             Csomag váltás
           </button>
 
+          <button
+            class="detail-btn detail-btn--secondary"
+            (click)="openDiscountDialog()"
+            matTooltip="Egyedi kedvezmény beállítása"
+          >
+            <lucide-icon [name]="ICONS.PERCENT" [size]="18" />
+            {{ sub.activeDiscount ? 'Kedvezmény módosítása' : 'Kedvezmény beállítása' }}
+          </button>
+
+          @if (sub.activeDiscount) {
+            <button
+              class="detail-btn detail-btn--danger-outline"
+              (click)="openRemoveDiscountDialog()"
+              matTooltip="Kedvezmény eltávolítása"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="18" />
+              Kedvezmény törlése
+            </button>
+          }
+
           @if (sub.subscriptionStatus !== 'canceled' && sub.subscriptionStatus !== 'canceling') {
             <button
               class="detail-btn detail-btn--danger"
@@ -310,6 +362,8 @@
             <option value="view">Megtekintés</option>
             <option value="charge">Terhelés</option>
             <option value="change_plan">Csomagváltás</option>
+            <option value="set_discount">Kedvezmény beállítás</option>
+            <option value="remove_discount">Kedvezmény törlés</option>
             <option value="cancel_subscription">Törlés</option>
           </select>
         </div>
@@ -347,6 +401,10 @@
                     {{ log.details['amount'] }} Ft - {{ log.details['description'] }}
                   } @else if (log.action === 'change_plan' && log.details) {
                     {{ log.details['old_plan'] }} → {{ log.details['new_plan'] }}
+                  } @else if (log.action === 'set_discount' && log.details) {
+                    {{ log.details['percent'] }}%{{ log.details['duration_months'] ? ' (' + log.details['duration_months'] + ' hónap)' : ' (örök)' }}
+                  } @else if (log.action === 'remove_discount' && log.details) {
+                    {{ log.details['old_percent'] }}% törölve
                   } @else if (log.action === 'cancel_subscription' && log.details) {
                     {{ log.details['immediate'] ? 'Azonnali' : 'Periódus végén' }}
                   } @else {
@@ -363,6 +421,34 @@
               </div>
             }
           </div>
+
+          <!-- Paginálás -->
+          @if (auditTotalPages() > 1) {
+            <div class="pagination">
+              <button
+                class="page-btn"
+                [disabled]="auditPage() === 1"
+                (click)="goToAuditPage(auditPage() - 1)"
+              >
+                <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+                Előző
+              </button>
+
+              <div class="page-info">
+                {{ auditPage() }} / {{ auditTotalPages() }} oldal
+                <span class="total-count">({{ auditTotal() }} bejegyzés)</span>
+              </div>
+
+              <button
+                class="page-btn"
+                [disabled]="auditPage() === auditTotalPages()"
+                (click)="goToAuditPage(auditPage() + 1)"
+              >
+                Következő
+                <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+              </button>
+            </div>
+          }
         }
       </section>
     </div>
@@ -401,5 +487,27 @@
     [confirmType]="cancelImmediate() ? 'danger' : 'warning'"
     [isSubmitting]="isSubmitting()"
     (resultEvent)="onCancelConfirm($event)"
+  />
+}
+
+@if (showDiscountDialog() && subscriber(); as sub) {
+  <app-discount-dialog
+    [subscriberId]="sub.id"
+    [subscriberName]="sub.name"
+    [currentDiscount]="sub.activeDiscount?.percent ?? null"
+    (close)="closeDiscountDialog()"
+    (saved)="onDiscountSaved($event)"
+  />
+}
+
+@if (showRemoveDiscountDialog() && subscriber(); as sub) {
+  <app-confirm-dialog
+    title="Kedvezmény törlése"
+    [message]="'Biztosan törölni szeretnéd a ' + sub.activeDiscount?.percent + '% kedvezményt? A következő számlázási ciklustól az eredeti ár kerül felszámításra.'"
+    confirmText="Kedvezmény törlése"
+    cancelText="Mégse"
+    confirmType="danger"
+    [isSubmitting]="isSubmitting()"
+    (resultEvent)="onRemoveDiscountConfirm($event)"
   />
 }

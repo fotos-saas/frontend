@@ -5,6 +5,16 @@ import { environment } from '../../../../environments/environment';
 import { DashboardStats, PaginatedResponse, DashboardProjectItem } from '../../../shared/components/dashboard';
 
 /**
+ * Kedvezmény adatok
+ */
+export interface DiscountInfo {
+  percent: number;
+  validUntil: string | null;
+  note: string | null;
+  createdAt: string;
+}
+
+/**
  * Előfizető lista item
  */
 export interface SubscriberListItem {
@@ -49,6 +59,7 @@ export interface SubscriberDetail {
   maxClasses: number | null;
   features: string[] | null;
   createdAt: string;
+  activeDiscount: DiscountInfo | null;
 }
 
 /**
@@ -219,5 +230,28 @@ export class SuperAdminService {
     if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
 
     return this.http.get<PaginatedResponse<AuditLogEntry>>(`${this.baseUrl}/subscribers/${id}/audit-logs`, { params: httpParams });
+  }
+
+  /**
+   * Kedvezmény beállítása
+   */
+  setDiscount(id: number, data: {
+    percent: number;
+    duration_months: number | null;
+    note?: string;
+  }): Observable<{ success: boolean; message: string; discount?: DiscountInfo }> {
+    return this.http.post<{ success: boolean; message: string; discount?: DiscountInfo }>(
+      `${this.baseUrl}/subscribers/${id}/discount`,
+      data
+    );
+  }
+
+  /**
+   * Kedvezmény eltávolítása
+   */
+  removeDiscount(id: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.baseUrl}/subscribers/${id}/discount`
+    );
   }
 }

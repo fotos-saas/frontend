@@ -115,21 +115,20 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
           </div>
         </div>
 
-          @if (hasMore()) {
-            <div class="load-more">
-              <button
-                class="btn btn--secondary"
-                (click)="loadMore()"
-                [disabled]="loadingMore()"
-              >
-                @if (loadingMore()) {
-                  <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-                }
-                Több betöltése
-              </button>
-            </div>
-          }
-        </div>
+        @if (hasMore()) {
+          <div class="load-more">
+            <button
+              class="btn btn--secondary"
+              (click)="loadMore()"
+              [disabled]="loadingMore()"
+            >
+              @if (loadingMore()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+              }
+              Több betöltése
+            </button>
+          </div>
+        }
       }
 
       <div class="portal-section">

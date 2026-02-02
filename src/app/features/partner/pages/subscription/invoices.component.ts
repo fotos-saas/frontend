@@ -209,8 +209,6 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      margin: 0 -16px;
-      padding: 0 16px;
     }
 
     .invoices-list {
@@ -463,13 +461,6 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       to { transform: rotate(360deg); }
     }
 
-    /* Mobile - horizontal scroll hint */
-    @media (max-width: 640px) {
-      .table-wrapper {
-        margin: 0 -20px;
-        padding: 0 20px;
-      }
-    }
 
     @media (prefers-reduced-motion: reduce) {
       .skeleton-row,

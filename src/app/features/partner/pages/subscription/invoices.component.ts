@@ -463,10 +463,16 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       .list-row {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 4px;
         border-radius: 8px;
         margin-bottom: 8px;
         border: 1px solid #e2e8f0;
+        align-items: flex-start;
+        text-align: left;
+      }
+
+      .td {
+        width: 100%;
       }
 
       .td::before {
@@ -479,8 +485,11 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       }
 
       .td-actions {
+        display: flex;
         justify-content: flex-start;
-        padding-top: 8px;
+        width: 100%;
+        padding-top: 12px;
+        margin-top: 4px;
         border-top: 1px solid #e2e8f0;
       }
 

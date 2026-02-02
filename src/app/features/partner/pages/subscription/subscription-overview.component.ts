@@ -1,23 +1,18 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, SubscriptionInfo } from '../../services/subscription.service';
+import { StorageService, StorageUsage } from '../../services/storage.service';
+import { PlansService } from '../../../../shared/services/plans.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { forkJoin } from 'rxjs';
 
-/**
- * Subscription Overview Page
- *
- * Előfizetés áttekintés:
- * - Jelenlegi csomag információk
- * - Tárhely használat
- * - Státusz (aktív, trial, szüneteltetett, stb.)
- * - Stripe portal link
- */
 @Component({
   selector: 'app-subscription-overview',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatTooltipModule],
+  imports: [CommonModule, RouterLink, LucideAngularModule, MatTooltipModule],
   template: `
     <div class="subscription-overview page-card">
       <h1 class="page-title">
@@ -28,9 +23,47 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       @if (loading()) {
         <div class="loading-state">
           <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
         </div>
       } @else if (subscription()) {
+        <!-- Költség összesítő banner -->
+        <div class="billing-summary">
+          <div class="billing-main">
+            <span class="billing-label">Havi költség</span>
+            <span class="billing-amount">{{ formatPrice(totalMonthlyCost()) }}</span>
+          </div>
+          @if (hasExtras()) {
+            <div class="billing-breakdown">
+              <div class="breakdown-item">
+                <span>{{ subscription()!.plan_name }} csomag</span>
+                <span>{{ formatPrice(basePlanPrice()) }}</span>
+              </div>
+              @if (storageUsage()?.additional_gb && storageUsage()!.additional_gb > 0) {
+                <div class="breakdown-item extra">
+                  <span>+{{ storageUsage()!.additional_gb }} GB extra tárhely</span>
+                  <span>+{{ formatPrice(extraStoragePrice()) }}</span>
+                </div>
+              }
+              @if (subscription()!.has_addons && subscription()!.active_addons.length > 0) {
+                @for (addon of subscription()!.active_addons; track addon) {
+                  <div class="breakdown-item extra">
+                    <span>{{ getAddonName(addon) }}</span>
+                    <span>+{{ formatPrice(getAddonPrice(addon)) }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+          <div class="billing-cycle-info">
+            <lucide-icon [name]="ICONS.CALENDAR" [size]="14" />
+            {{ subscription()!.billing_cycle === 'yearly' ? 'Éves számlázás' : 'Havi számlázás' }}
+            @if (subscription()!.current_period_end) {
+              · Következő fizetés: {{ formatDate(subscription()!.current_period_end!) }}
+            }
+          </div>
+        </div>
+
         <div class="subscription-grid">
           <!-- Jelenlegi csomag kártya -->
           <div class="info-card plan-card">
@@ -46,15 +79,22 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 
             <div class="plan-info">
               <span class="plan-name">{{ subscription()!.plan_name }}</span>
-              <span class="billing-cycle">
-                {{ subscription()!.billing_cycle === 'monthly' ? 'Havi' : 'Éves' }} számlázás
-              </span>
             </div>
 
             @if (subscription()!.is_modified) {
-              <div class="modification-badge">
-                <lucide-icon [name]="ICONS.PLUS_CIRCLE" [size]="16" />
-                Módosított csomag
+              <div class="modification-badges">
+                @if (subscription()!.has_extra_storage) {
+                  <div class="mod-badge mod-badge--storage">
+                    <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="14" />
+                    +{{ subscription()!.extra_storage_gb }} GB
+                  </div>
+                }
+                @if (subscription()!.has_addons) {
+                  <div class="mod-badge mod-badge--addon">
+                    <lucide-icon [name]="ICONS.PUZZLE" [size]="14" />
+                    {{ subscription()!.active_addons.length }} kiegészítő
+                  </div>
+                }
               </div>
             }
 
@@ -78,48 +118,34 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
           <div class="info-card storage-card">
             <div class="card-header">
               <h2 class="card-title">Tárhely</h2>
-              <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="20" />
+              <a routerLink="/partner/subscription/addons" class="card-link">
+                Bővítés
+                <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+              </a>
             </div>
 
             <div class="storage-info">
               <div class="storage-bar">
                 <div
                   class="storage-used"
-                  [style.width.%]="getStoragePercent()"
-                  [class.storage-used--warning]="getStoragePercent() > 80"
-                  [class.storage-used--danger]="getStoragePercent() > 95"
+                  [style.width.%]="storagePercent()"
+                  [class.storage-used--warning]="storagePercent() > 80"
+                  [class.storage-used--danger]="storagePercent() > 95"
                 ></div>
               </div>
               <div class="storage-text">
-                <span class="storage-current">{{ formatStorage(0) }}</span>
+                <span class="storage-current">{{ formatStorage(storageUsage()?.used_gb ?? 0) }} GB</span>
                 <span class="storage-separator">/</span>
-                <span class="storage-limit">{{ formatStorage(subscription()!.limits.storage_gb) }} GB</span>
+                <span class="storage-limit">{{ formatStorage(storageUsage()?.total_limit_gb ?? subscription()!.limits.storage_gb) }} GB</span>
               </div>
-            </div>
-
-            @if (subscription()!.has_extra_storage) {
-              <div class="extra-storage-badge">
-                <lucide-icon [name]="ICONS.PLUS" [size]="14" />
-                +{{ subscription()!.extra_storage_gb }} GB extra tárhely
-              </div>
-            }
-          </div>
-
-          <!-- Limitek kártya -->
-          <div class="info-card limits-card">
-            <div class="card-header">
-              <h2 class="card-title">Limitek</h2>
-              <lucide-icon [name]="ICONS.FILTER" [size]="20" />
-            </div>
-
-            <div class="limits-list">
-              <div class="limit-item">
-                <lucide-icon [name]="ICONS.FOLDER" [size]="18" />
-                <span class="limit-label">Max osztályok:</span>
-                <span class="limit-value">
-                  {{ subscription()!.limits.max_classes ?? 'Korlátlan' }}
-                </span>
-              </div>
+              @if (storageUsage()?.additional_gb) {
+                <div class="storage-detail">
+                  <span class="detail-label">Alap:</span>
+                  <span>{{ storageUsage()!.plan_limit_gb }} GB</span>
+                  <span class="detail-plus">+</span>
+                  <span class="detail-extra">{{ storageUsage()!.additional_gb }} GB extra</span>
+                </div>
+              }
             </div>
           </div>
 
@@ -127,14 +153,17 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
           <div class="info-card features-card">
             <div class="card-header">
               <h2 class="card-title">Funkciók</h2>
-              <lucide-icon [name]="ICONS.SPARKLES" [size]="20" />
+              <a routerLink="/partner/subscription/addons" class="card-link">
+                Kiegészítők
+                <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+              </a>
             </div>
 
             <div class="features-list">
               @for (feature of subscription()!.features; track feature) {
                 <div class="feature-item">
                   <lucide-icon [name]="ICONS.CHECK" [size]="16" class="feature-check" />
-                  <span>{{ getFeatureName(feature) }}</span>
+                  <span>{{ feature }}</span>
                 </div>
               }
             </div>
@@ -156,7 +185,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
         <div class="error-state">
           <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="48" />
           <p>Nem sikerült betölteni az előfizetés adatokat.</p>
-          <button class="btn btn--secondary" (click)="loadSubscription()">
+          <button class="btn btn--secondary" (click)="loadData()">
             <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
             Újrapróbálás
           </button>
@@ -167,6 +196,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
   styles: [`
     .subscription-overview {
       max-width: 1000px;
+      margin: 0 auto;
     }
 
     .page-title {
@@ -177,6 +207,62 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       font-weight: 600;
       color: #1e293b;
       margin-bottom: 24px;
+    }
+
+    /* Billing Summary */
+    .billing-summary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      color: white;
+    }
+
+    .billing-main {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .billing-label {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .billing-amount {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .billing-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 12px;
+    }
+
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .breakdown-item.extra {
+      color: #93c5fd;
+    }
+
+    .billing-cycle-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8125rem;
+      opacity: 0.8;
     }
 
     /* Grid */
@@ -217,23 +303,29 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       margin: 0;
     }
 
+    .card-link {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8125rem;
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .card-link:hover {
+      text-decoration: underline;
+    }
+
     /* Plan Card */
     .plan-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .plan-name {
       font-size: 1.5rem;
       font-weight: 700;
       color: #1e293b;
-    }
-
-    .billing-cycle {
-      font-size: 0.875rem;
-      color: #64748b;
     }
 
     .status-badge {
@@ -244,43 +336,38 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       text-transform: uppercase;
     }
 
-    .status-badge--active {
-      background: #dcfce7;
-      color: #16a34a;
-    }
-
-    .status-badge--trial {
-      background: #dbeafe;
-      color: #2563eb;
-    }
-
-    .status-badge--paused {
-      background: #fef3c7;
-      color: #d97706;
-    }
-
+    .status-badge--active { background: #dcfce7; color: #16a34a; }
+    .status-badge--trial { background: #dbeafe; color: #2563eb; }
+    .status-badge--paused { background: #fef3c7; color: #d97706; }
     .status-badge--canceling,
-    .status-badge--canceled {
-      background: #fee2e2;
-      color: #dc2626;
+    .status-badge--canceled { background: #fee2e2; color: #dc2626; }
+    .status-badge--pending { background: #f1f5f9; color: #64748b; }
+
+    .modification-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
     }
 
-    .status-badge--pending {
-      background: #f1f5f9;
-      color: #64748b;
-    }
-
-    .modification-badge {
+    .mod-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: #f0fdf4;
-      color: #16a34a;
+      gap: 4px;
+      padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      margin-bottom: 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .mod-badge--storage {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+
+    .mod-badge--addon {
+      background: #fef3c7;
+      color: #d97706;
     }
 
     .card-actions {
@@ -289,86 +376,58 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 
     /* Storage Card */
     .storage-info {
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .storage-bar {
-      height: 8px;
+      height: 10px;
       background: #e2e8f0;
-      border-radius: 4px;
+      border-radius: 5px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .storage-used {
       height: 100%;
       background: #3b82f6;
-      border-radius: 4px;
+      border-radius: 5px;
       transition: width 0.3s ease;
     }
 
-    .storage-used--warning {
-      background: #f59e0b;
-    }
-
-    .storage-used--danger {
-      background: #ef4444;
-    }
+    .storage-used--warning { background: #f59e0b; }
+    .storage-used--danger { background: #ef4444; }
 
     .storage-text {
       display: flex;
       align-items: baseline;
       gap: 4px;
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
+      margin-bottom: 8px;
     }
 
     .storage-current {
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1.125rem;
       color: #1e293b;
     }
 
-    .storage-separator {
-      color: #94a3b8;
-    }
+    .storage-separator { color: #94a3b8; }
+    .storage-limit { color: #64748b; }
 
-    .storage-limit {
+    .storage-detail {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8125rem;
       color: #64748b;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-radius: 6px;
     }
 
-    .extra-storage-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 8px;
-      background: #ede9fe;
-      color: #7c3aed;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    /* Limits Card */
-    .limits-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .limit-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #475569;
-    }
-
-    .limit-label {
-      flex: 1;
-    }
-
-    .limit-value {
-      font-weight: 600;
-      color: #1e293b;
-    }
+    .detail-label { font-weight: 500; }
+    .detail-plus { color: #94a3b8; }
+    .detail-extra { color: #7c3aed; font-weight: 500; }
 
     /* Features Card */
     .features-list {
@@ -385,9 +444,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       font-size: 0.875rem;
     }
 
-    .feature-check {
-      color: #22c55e;
-    }
+    .feature-check { color: #22c55e; }
 
     .addons-section {
       margin-top: 16px;
@@ -412,9 +469,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       font-weight: 500;
     }
 
-    .addon-icon {
-      color: #7c3aed;
-    }
+    .addon-icon { color: #7c3aed; }
 
     /* Buttons */
     .btn {
@@ -457,11 +512,19 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     .loading-state {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
     }
 
     .skeleton-card {
-      height: 200px;
+      height: 140px;
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 16px;
+    }
+
+    .skeleton-row {
+      height: 160px;
       background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
@@ -495,6 +558,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 
     @media (prefers-reduced-motion: reduce) {
       .skeleton-card,
+      .skeleton-row,
       .spin {
         animation: none;
       }
@@ -504,25 +568,107 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 })
 export class SubscriptionOverviewComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly storageService = inject(StorageService);
+  private readonly plansService = inject(PlansService);
   protected readonly ICONS = ICONS;
 
   subscription = signal<SubscriptionInfo | null>(null);
+  storageUsage = signal<StorageUsage | null>(null);
+  planPrices = signal<Record<string, { monthly: number; yearly: number }>>({});
   loading = signal(true);
   portalLoading = signal(false);
 
+  // Computed values
+  storagePercent = computed(() => this.storageUsage()?.usage_percent ?? 0);
+
+  hasExtras = computed(() => {
+    const sub = this.subscription();
+    const storage = this.storageUsage();
+    // Ellenőrizzük a storage additional_gb-t is, mert lehet hogy a backend flag nincs szinkronban
+    const hasExtraStorage = sub?.has_extra_storage || (storage?.additional_gb && storage.additional_gb > 0);
+    return hasExtraStorage || (sub?.has_addons && sub.active_addons.length > 0);
+  });
+
+  basePlanPrice = computed(() => {
+    const sub = this.subscription();
+    if (!sub) return 0;
+
+    // Backend-ből jövő árak (prioritás)
+    if (sub.prices) {
+      const price = sub.billing_cycle === 'yearly' ? sub.prices.plan_yearly : sub.prices.plan_monthly;
+      return sub.billing_cycle === 'yearly' ? Math.round(price / 12) : price;
+    }
+
+    // Fallback - PlansService-ből
+    const prices = this.planPrices()[sub.plan];
+    if (prices) {
+      return sub.billing_cycle === 'yearly' ? Math.round(prices.yearly / 12) : prices.monthly;
+    }
+
+    return 0;
+  });
+
+  extraStoragePrice = computed(() => {
+    const usage = this.storageUsage();
+    const sub = this.subscription();
+    if (!usage || !sub || !usage.additional_gb) return 0;
+
+    // Backend-ből jövő árak (prioritás)
+    let pricePerGb: number;
+    if (sub.prices) {
+      pricePerGb = sub.billing_cycle === 'yearly'
+        ? Math.round(sub.prices.storage_yearly / 12)
+        : sub.prices.storage_monthly;
+    } else {
+      // Fallback a storage service-ből
+      pricePerGb = sub.billing_cycle === 'yearly'
+        ? Math.round(usage.addon_price_yearly / 12)
+        : usage.addon_price_monthly;
+    }
+
+    return usage.additional_gb * pricePerGb;
+  });
+
+  totalMonthlyCost = computed(() => {
+    const sub = this.subscription();
+    // Ha van Stripe-ból költség, azt használjuk (ez a pontos)
+    if (sub?.monthly_cost) {
+      return sub.monthly_cost;
+    }
+
+    // Fallback: számoljuk manuálisan (lehet pontatlan)
+    let total = this.basePlanPrice();
+    total += this.extraStoragePrice();
+
+    if (sub?.has_addons) {
+      for (const addon of sub.active_addons) {
+        total += this.getAddonPrice(addon);
+      }
+    }
+
+    return total;
+  });
+
   ngOnInit(): void {
-    this.loadSubscription();
+    this.loadData();
   }
 
-  loadSubscription(): void {
+  loadData(): void {
     this.loading.set(true);
-    this.subscriptionService.getSubscription().subscribe({
-      next: (info) => {
-        this.subscription.set(info);
+
+    forkJoin({
+      subscription: this.subscriptionService.getSubscription(),
+      storage: this.storageService.getUsage(),
+      prices: this.plansService.getPlanPrices(),
+    }).subscribe({
+      next: ({ subscription, storage, prices }) => {
+        this.subscription.set(subscription);
+        this.storageUsage.set(storage);
+        this.planPrices.set(prices);
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Failed to load subscription:', err);
+        console.error('Failed to load data:', err);
         this.loading.set(false);
       }
     });
@@ -532,7 +678,8 @@ export class SubscriptionOverviewComponent implements OnInit {
     this.portalLoading.set(true);
     this.subscriptionService.openPortal().subscribe({
       next: (res) => {
-        window.location.href = res.portal_url;
+        window.open(res.portal_url, '_blank');
+        this.portalLoading.set(false);
       },
       error: (err) => {
         console.error('Failed to open portal:', err);
@@ -553,39 +700,56 @@ export class SubscriptionOverviewComponent implements OnInit {
     return labels[status] ?? status;
   }
 
-  getStoragePercent(): number {
-    // TODO: Igazi tárhely használat a backendről
-    return 35;
-  }
-
   formatStorage(gb: number): string {
     return gb.toFixed(1);
   }
 
-  getFeatureName(feature: string): string {
-    const names: Record<string, string> = {
-      online_selection: 'Online képválasztás',
-      templates: 'Sablonok',
-      qr_sharing: 'QR kódos megosztás',
-      email_support: 'Email támogatás',
-      subdomain: 'Saját aldomain',
-      stripe_payments: 'Stripe fizetések',
-      sms_notifications: 'SMS értesítések',
-      priority_support: 'Prioritásos támogatás',
-      forum: 'Fórum',
-      polls: 'Szavazás',
-      custom_domain: 'Saját domain',
-      white_label: 'White label',
-      api_access: 'API hozzáférés',
-      dedicated_support: 'Dedikált támogatás',
-    };
-    return names[feature] ?? feature;
+  formatPrice(amount: number): string {
+    return new Intl.NumberFormat('hu-HU', {
+      style: 'currency',
+      currency: 'HUF',
+      maximumFractionDigits: 0
+    }).format(amount);
+  }
+
+  formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('hu-HU', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
   getAddonName(addon: string): string {
     const names: Record<string, string> = {
-      community_pack: 'Közösségi csomag (Fórum + Szavazás)',
+      community_pack: 'Közösségi csomag',
     };
     return names[addon] ?? addon;
+  }
+
+  getAddonPrice(addon: string): number {
+    const sub = this.subscription();
+    if (!sub) return 0;
+
+    // Backend-ből jövő árak (prioritás)
+    if (sub.prices?.addons?.[addon]) {
+      const addonPrices = sub.prices.addons[addon];
+      return sub.billing_cycle === 'yearly'
+        ? Math.round(addonPrices.yearly / 12)
+        : addonPrices.monthly;
+    }
+
+    // Fallback
+    const fallbackPrices: Record<string, { monthly: number; yearly: number }> = {
+      community_pack: { monthly: 1490, yearly: 14900 },
+    };
+
+    const addonPrices = fallbackPrices[addon];
+    if (!addonPrices) return 0;
+
+    return sub.billing_cycle === 'yearly'
+      ? Math.round(addonPrices.yearly / 12)
+      : addonPrices.monthly;
   }
 }

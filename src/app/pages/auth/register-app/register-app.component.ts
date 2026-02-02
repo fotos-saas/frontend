@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -9,16 +9,7 @@ import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../shared/constants/icons.constants';
 import { environment } from '../../../../environments/environment';
-
-interface PricingPlan {
-  id: string;
-  name: string;
-  description: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  features: string[];
-  popular?: boolean;
-}
+import { PlansService, PricingPlan } from '../../../shared/services/plans.service';
 
 @Component({
   selector: 'app-register-app',
@@ -35,12 +26,13 @@ interface PricingPlan {
   styleUrls: ['./register-app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RegisterAppComponent {
+export class RegisterAppComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
+  private plansService = inject(PlansService);
 
   readonly ICONS = ICONS;
 
@@ -50,6 +42,7 @@ export class RegisterAppComponent {
 
   // Loading & messages
   isLoading = signal(false);
+  plansLoading = signal(true);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
@@ -59,59 +52,21 @@ export class RegisterAppComponent {
   // Selected plan
   selectedPlanId = signal<string>('iskola');
 
-  // Pricing plans
-  readonly plans: PricingPlan[] = [
-    {
-      id: 'alap',
-      name: 'Alap',
-      description: 'Kezdő fotósoknak',
-      monthlyPrice: 4990,
-      yearlyPrice: 49900,
-      features: [
-        '20 GB tárhely',
-        'Max. 3 osztály',
-        'Online képválasztás',
-        'Sablon szerkesztő',
-        'QR kódos megosztás',
-        'Email támogatás'
-      ]
-    },
-    {
-      id: 'iskola',
-      name: 'Iskola',
-      description: 'Legtöbb fotósnak ideális',
-      monthlyPrice: 14990,
-      yearlyPrice: 149900,
-      popular: true,
-      features: [
-        '100 GB tárhely',
-        'Max. 20 osztály',
-        'Saját subdomain',
-        'Online fizetés (Stripe)',
-        'SMS értesítések',
-        'Prioritás támogatás'
-      ]
-    },
-    {
-      id: 'studio',
-      name: 'Stúdió',
-      description: 'Nagyobb stúdióknak',
-      monthlyPrice: 29990,
-      yearlyPrice: 299900,
-      features: [
-        '500 GB tárhely',
-        'Korlátlan osztály',
-        'Custom domain',
-        'White-label (saját márka)',
-        'API hozzáférés',
-        'Dedikált support'
-      ]
-    }
-  ];
+  // Pricing plans (betöltve API-ból)
+  plans = signal<PricingPlan[]>([]);
 
   // Selected plan computed
   selectedPlan = computed(() => {
-    return this.plans.find(p => p.id === this.selectedPlanId()) || this.plans[1];
+    const allPlans = this.plans();
+    return allPlans.find(p => p.id === this.selectedPlanId()) || allPlans[1] || {
+      id: 'iskola',
+      name: 'Iskola',
+      description: '',
+      monthlyPrice: 14990,
+      yearlyPrice: 149900,
+      features: [],
+      popular: true,
+    };
   });
 
   // Current price computed
@@ -150,16 +105,35 @@ export class RegisterAppComponent {
   // Terms accepted
   termsAccepted = signal(false);
 
-  constructor() {
-    // Check for plan from query params
-    this.route.queryParams.pipe(
+  ngOnInit(): void {
+    this.loadPlans();
+  }
+
+  private loadPlans(): void {
+    this.plansLoading.set(true);
+    this.plansService.getPricingPlans().pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(params => {
-      if (params['plan'] && this.plans.find(p => p.id === params['plan'])) {
-        this.selectedPlanId.set(params['plan']);
-      }
-      if (params['yearly'] === 'true') {
-        this.isYearly.set(true);
+    ).subscribe({
+      next: (plans) => {
+        this.plans.set(plans);
+        this.plansLoading.set(false);
+
+        // Check for plan from query params after plans are loaded
+        this.route.queryParams.pipe(
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe(params => {
+          if (params['plan'] && plans.find(p => p.id === params['plan'])) {
+            this.selectedPlanId.set(params['plan']);
+          }
+          if (params['yearly'] === 'true') {
+            this.isYearly.set(true);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Failed to load plans:', err);
+        this.plansLoading.set(false);
+        this.errorMessage.set('Nem sikerült betölteni a csomagokat.');
       }
     });
   }

@@ -5,6 +5,7 @@ import {
   ElementRef,
   AfterViewInit,
   OnDestroy,
+  OnInit,
   HostListener,
   input,
   output,
@@ -20,6 +21,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { createBackdropHandler } from '../../../shared/utils/dialog.util';
 import { SuperAdminService } from '../services/super-admin.service';
+import { PlansService } from '../../../shared/services/plans.service';
 import { ICONS } from '../../../shared/constants/icons.constants';
 
 type PlanType = 'alap' | 'iskola' | 'studio';
@@ -157,9 +159,10 @@ type BillingCycleType = 'monthly' | 'yearly';
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChangePlanDialogComponent implements AfterViewInit, OnDestroy {
+export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly service = inject(SuperAdminService);
+  private readonly plansService = inject(PlansService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
@@ -186,12 +189,12 @@ export class ChangePlanDialogComponent implements AfterViewInit, OnDestroy {
     { value: 'studio', label: 'Stúdió' },
   ];
 
-  // Plan prices
-  private readonly planPrices: Record<PlanType, Record<BillingCycleType, number>> = {
+  // Plan prices (betöltve API-ból)
+  planPrices = signal<Record<PlanType, Record<BillingCycleType, number>>>({
     alap: { monthly: 4990, yearly: 49900 },
     iskola: { monthly: 14990, yearly: 149900 },
     studio: { monthly: 29990, yearly: 299900 },
-  };
+  });
 
   // Form state
   selectedPlan = signal<PlanType>('alap');
@@ -201,8 +204,26 @@ export class ChangePlanDialogComponent implements AfterViewInit, OnDestroy {
 
   // Computed
   readonly newPrice = computed(() => {
-    return this.planPrices[this.selectedPlan()][this.selectedBillingCycle()];
+    const prices = this.planPrices();
+    return prices[this.selectedPlan()][this.selectedBillingCycle()];
   });
+
+  ngOnInit(): void {
+    this.loadPlanPrices();
+  }
+
+  private loadPlanPrices(): void {
+    this.plansService.getPlanPrices().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (prices) => {
+        this.planPrices.set(prices as Record<PlanType, Record<BillingCycleType, number>>);
+      },
+      error: (err) => {
+        console.error('Failed to load plan prices:', err);
+      }
+    });
+  }
 
   readonly hasChanges = computed(() => {
     return this.selectedPlan() !== this.currentPlan() ||

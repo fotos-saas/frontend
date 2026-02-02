@@ -100,18 +100,34 @@
           </div>
 
           <!-- Plans Grid -->
-          <div class="grid md:grid-cols-3 gap-4 md:gap-6">
-            @for (plan of plans; track plan.id) {
-              <div
-                (click)="selectPlan(plan.id)"
-                class="register-app__plan relative rounded-2xl p-6 cursor-pointer transition-all duration-300 border-2"
-                [class.border-blue-500]="selectedPlanId() === plan.id"
-                [class.bg-blue-50]="selectedPlanId() === plan.id"
-                [class.shadow-lg]="selectedPlanId() === plan.id"
-                [class.border-gray-200]="selectedPlanId() !== plan.id"
-                [class.hover:border-blue-300]="selectedPlanId() !== plan.id"
-                [class.hover:shadow-md]="selectedPlanId() !== plan.id"
-              >
+          @if (plansLoading()) {
+            <div class="grid md:grid-cols-3 gap-4 md:gap-6">
+              @for (i of [1, 2, 3]; track i) {
+                <div class="rounded-2xl p-6 border-2 border-gray-200 animate-pulse">
+                  <div class="h-6 bg-gray-200 rounded w-24 mb-4"></div>
+                  <div class="h-4 bg-gray-200 rounded w-32 mb-6"></div>
+                  <div class="h-10 bg-gray-200 rounded w-28 mb-4"></div>
+                  <div class="space-y-2">
+                    <div class="h-3 bg-gray-200 rounded w-full"></div>
+                    <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                    <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="grid md:grid-cols-3 gap-4 md:gap-6">
+              @for (plan of plans(); track plan.id) {
+                <div
+                  (click)="selectPlan(plan.id)"
+                  class="register-app__plan relative rounded-2xl p-6 cursor-pointer transition-all duration-300 border-2"
+                  [class.border-blue-500]="selectedPlanId() === plan.id"
+                  [class.bg-blue-50]="selectedPlanId() === plan.id"
+                  [class.shadow-lg]="selectedPlanId() === plan.id"
+                  [class.border-gray-200]="selectedPlanId() !== plan.id"
+                  [class.hover:border-blue-300]="selectedPlanId() !== plan.id"
+                  [class.hover:shadow-md]="selectedPlanId() !== plan.id"
+                >
                 <!-- Popular badge -->
                 @if (plan.popular) {
                   <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs font-bold rounded-full shadow">
@@ -158,9 +174,10 @@
                     </li>
                   }
                 </ul>
-              </div>
-            }
-          </div>
+                </div>
+              }
+            </div>
+          }
         </div>
       }
 

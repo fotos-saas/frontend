@@ -112,7 +112,12 @@ import {
   CreditCard,
   Package,
   Wallet,
-  Percent
+  Percent,
+  // Subscription & Settings
+  HardDrive,
+  PauseCircle,
+  PlayCircle,
+  FileText
 } from 'lucide-angular';
 
 /**
@@ -217,7 +222,12 @@ const LUCIDE_ICONS = {
   CreditCard,
   Package,
   Wallet,
-  Percent
+  Percent,
+  // Subscription & Settings
+  HardDrive,
+  PauseCircle,
+  PlayCircle,
+  FileText
 };
 
 @NgModule({

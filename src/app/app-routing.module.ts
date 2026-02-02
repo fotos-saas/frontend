@@ -176,6 +176,12 @@ const routes: Routes = [
       {
         path: 'orders/albums/:id',
         loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
+      },
+      // Settings
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/partner/pages/settings/settings.component').then(m => m.PartnerSettingsComponent),
+        title: 'Beállítások'
       }
     ]
   },

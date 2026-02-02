@@ -285,6 +285,11 @@ export const ICONS = {
 
   // Loading & Spinners
   LOADER: 'loader-2',
+
+  // Subscription & Settings
+  HARD_DRIVE: 'hard-drive',
+  PAUSE_CIRCLE: 'pause-circle',
+  PLAY_CIRCLE: 'play-circle',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

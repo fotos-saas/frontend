@@ -1,12 +1,15 @@
-import { Component, inject, signal, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/services/auth.service';
 import { SidebarStateService } from '../../core/layout/services/sidebar-state.service';
 import { MobileNavOverlayComponent } from '../../core/layout/components/mobile-nav-overlay/mobile-nav-overlay.component';
 import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.component';
 import { MenuItem } from '../../core/layout/models/menu-item.model';
+import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
+import { ICONS } from '../../shared/constants/icons.constants';
 
 /**
  * Partner Shell - Layout komponens a fotós/partner felülethez.
@@ -18,7 +21,17 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 @Component({
   selector: 'app-partner-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    RouterLink,
+    RouterLinkActive,
+    NgClass,
+    LucideAngularModule,
+    MatTooltipModule,
+    MobileNavOverlayComponent,
+    TopBarComponent
+  ],
   template: `
     <div class="partner-layout">
       <!-- Top Bar (közös komponens) -->
@@ -35,7 +48,25 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
         homeRoute="/partner/dashboard"
         [useExternalLogout]="true"
         (logoutEvent)="logout()"
-      />
+      >
+        <!-- Subscription badge slot -->
+        @if (subscriptionInfo()) {
+          <a
+            routerLink="/partner/settings"
+            class="subscription-badge"
+            matTooltip="Előfizetés kezelése"
+          >
+            <span class="plan-badge" [ngClass]="'plan-badge--' + subscriptionInfo()!.plan">
+              {{ subscriptionInfo()!.plan_name }}
+            </span>
+            <span
+              class="status-dot"
+              [ngClass]="'status-dot--' + subscriptionInfo()!.status"
+              [matTooltip]="getStatusLabel(subscriptionInfo()!.status)"
+            ></span>
+          </a>
+        }
+      </app-top-bar>
 
       <!-- Content with Sidebar -->
       <div class="main-container">
@@ -94,6 +125,82 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
       flex: 1;
       overflow: hidden;
       position: relative;
+    }
+
+    /* ============ Subscription Badge ============ */
+    .subscription-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      text-decoration: none;
+      transition: background 0.2s ease;
+      margin-right: 8px;
+    }
+
+    .subscription-badge:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .plan-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .plan-badge--alap {
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+      color: white;
+    }
+
+    .plan-badge--iskola {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    .plan-badge--studio {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: white;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot--active {
+      background: #22c55e;
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+    }
+
+    .status-dot--trial {
+      background: #3b82f6;
+      box-shadow: 0 0 6px rgba(59, 130, 246, 0.6);
+    }
+
+    .status-dot--paused {
+      background: #f59e0b;
+      box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+    }
+
+    .status-dot--canceling {
+      background: #ef4444;
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+
+    .status-dot--canceled {
+      background: #6b7280;
+    }
+
+    .status-dot--pending {
+      background: #9ca3af;
     }
 
     /* ============ Desktop/Tablet Sidebar ============ */
@@ -209,16 +316,29 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
     /* ============ Reduced Motion ============ */
     @media (prefers-reduced-motion: reduce) {
       .nav-item,
-      .sidebar {
+      .sidebar,
+      .subscription-badge {
         transition: none;
+      }
+    }
+
+    /* ============ Mobile ============ */
+    @media (max-width: 767px) {
+      .subscription-badge {
+        display: none;
       }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PartnerShellComponent {
+export class PartnerShellComponent implements OnInit {
   private authService = inject(AuthService);
+  private subscriptionService = inject(SubscriptionService);
   protected sidebarState = inject(SidebarStateService);
+  protected readonly ICONS = ICONS;
+
+  // Subscription info
+  subscriptionInfo = signal<SubscriptionInfo | null>(null);
 
   // Menü items (Lucide ikonokkal - desktop, tablet és mobile egyaránt)
   navItems: MenuItem[] = [
@@ -227,6 +347,7 @@ export class PartnerShellComponent {
     { id: 'schools', route: '/partner/schools', label: 'Iskolák', icon: 'school' },
     { id: 'contacts', route: '/partner/contacts', label: 'Kapcsolatok', icon: 'users' },
     { id: 'orders', route: '/partner/orders/clients', label: 'Megrendelések', icon: 'shopping-bag' },
+    { id: 'settings', route: '/partner/settings', label: 'Beállítások', icon: 'settings' },
   ];
 
   // Mobile menü items (ugyanazok mint desktop, de computed-ként a MobileNavOverlay-hez)
@@ -247,6 +368,29 @@ export class PartnerShellComponent {
       this.userName.set(user.name);
       this.userEmail.set(user.email ?? '');
     }
+  }
+
+  ngOnInit(): void {
+    this.loadSubscriptionInfo();
+  }
+
+  private loadSubscriptionInfo(): void {
+    this.subscriptionService.getSubscription().subscribe({
+      next: (info) => this.subscriptionInfo.set(info),
+      error: (err) => console.error('Failed to load subscription info:', err)
+    });
+  }
+
+  getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      active: 'Aktív',
+      trial: 'Próbaidőszak',
+      paused: 'Szüneteltetve',
+      canceling: 'Lemondva',
+      canceled: 'Lejárt',
+      pending: 'Függőben'
+    };
+    return labels[status] ?? status;
   }
 
   logout(): void {

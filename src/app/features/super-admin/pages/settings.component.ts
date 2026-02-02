@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SystemSettings } from '../services/super-admin.service';
-import { ICONS } from '../../../shared/constants/icons.constants';
+import { ICONS, PLAN_SELECT_OPTIONS } from '../../../shared/constants';
 
 type TabId = 'system' | 'email' | 'stripe' | 'info';
 
@@ -50,11 +50,8 @@ export class SettingsComponent implements OnInit {
   trialDays = signal(14);
   defaultPlan = signal<'alap' | 'iskola' | 'studio'>('alap');
 
-  readonly planOptions = [
-    { value: 'alap', label: 'Alap' },
-    { value: 'iskola', label: 'Iskola' },
-    { value: 'studio', label: 'Stúdió' },
-  ];
+  // Plan opciók - központi konstansból
+  readonly planOptions = PLAN_SELECT_OPTIONS;
 
   ngOnInit(): void {
     this.loadSettings();

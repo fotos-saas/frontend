@@ -22,7 +22,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { createBackdropHandler } from '../../../shared/utils/dialog.util';
 import { SuperAdminService } from '../services/super-admin.service';
 import { PlansService } from '../../../shared/services/plans.service';
-import { ICONS } from '../../../shared/constants/icons.constants';
+import { ICONS, PLAN_SELECT_OPTIONS, PLANS } from '../../../shared/constants';
 
 type PlanType = 'alap' | 'iskola' | 'studio';
 type BillingCycleType = 'monthly' | 'yearly';
@@ -182,18 +182,14 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
 
-  // Plan options
-  readonly planOptions = [
-    { value: 'alap', label: 'Alap' },
-    { value: 'iskola', label: 'Iskola' },
-    { value: 'studio', label: 'Stúdió' },
-  ];
+  // Plan options - központi konstansból
+  readonly planOptions = PLAN_SELECT_OPTIONS;
 
-  // Plan prices (betöltve API-ból)
+  // Plan prices - központi konstansból, API-val felülírható
   planPrices = signal<Record<PlanType, Record<BillingCycleType, number>>>({
-    alap: { monthly: 4990, yearly: 49900 },
-    iskola: { monthly: 14990, yearly: 149900 },
-    studio: { monthly: 29990, yearly: 299900 },
+    alap: { monthly: PLANS['alap'].monthlyPrice, yearly: PLANS['alap'].yearlyPrice },
+    iskola: { monthly: PLANS['iskola'].monthlyPrice, yearly: PLANS['iskola'].yearlyPrice },
+    studio: { monthly: PLANS['studio'].monthlyPrice, yearly: PLANS['studio'].yearlyPrice },
   });
 
   // Form state

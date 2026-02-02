@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SubscriberListItem } from '../services/super-admin.service';
-import { ICONS } from '../../../shared/constants/icons.constants';
+import { ICONS, PLAN_FILTER_OPTIONS } from '../../../shared/constants';
 import { useFilterState } from '../../../shared/utils/use-filter-state';
 
 /**
@@ -33,13 +33,8 @@ export class SubscribersListComponent implements OnInit {
 
   readonly ICONS = ICONS;
 
-  // Szűrő opciók
-  readonly planOptions = [
-    { value: '', label: 'Összes csomag' },
-    { value: 'alap', label: 'Alap' },
-    { value: 'iskola', label: 'Iskola' },
-    { value: 'studio', label: 'Stúdió' },
-  ];
+  // Szűrő opciók - központi konstansból
+  readonly planOptions = PLAN_FILTER_OPTIONS;
 
   readonly statusOptions = [
     { value: '', label: 'Összes státusz' },

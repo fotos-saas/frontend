@@ -6,10 +6,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .delete-hint {
   display: flex;
   align-items: center;

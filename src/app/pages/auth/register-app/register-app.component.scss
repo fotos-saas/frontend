@@ -35,12 +35,6 @@
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 // Reduced motion
 @media (prefers-reduced-motion: reduce) {
   .register-app {

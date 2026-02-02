@@ -97,10 +97,6 @@ $blue-700: #1d4ed8;
   animation: shimmer 1.5s infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 // Error
 .samples__error {
   text-align: center;

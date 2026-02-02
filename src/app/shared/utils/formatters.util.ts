@@ -4,6 +4,75 @@
  * Általános formázó függvények újrafelhasználásra.
  */
 
+// ============================================
+// PÉNZNEM FORMÁZÓK
+// ============================================
+
+/**
+ * Ár formázása HUF-ban (alapértelmezett pénznem)
+ *
+ * @param amount - Összeg (Ft-ban, nem fillérben!)
+ * @returns Formázott string (pl. "4 990 Ft")
+ *
+ * @example
+ * formatPrice(4990) // => "4 990 Ft"
+ * formatPrice(0) // => "0 Ft"
+ */
+export function formatPrice(amount: number): string {
+  return new Intl.NumberFormat('hu-HU', {
+    style: 'currency',
+    currency: 'HUF',
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+/**
+ * Összeg formázása tetszőleges pénznemben
+ * FONTOS: Stripe-ból érkező értékek esetén 100-zal kell osztani!
+ *
+ * @param amount - Összeg (a legkisebb egységben, pl. fillér/cent)
+ * @param currency - Pénznem kód (pl. 'HUF', 'EUR', 'USD')
+ * @param divideBy100 - Ha true, automatikusan 100-zal osztja az összeget (Stripe formátum)
+ * @returns Formázott string
+ *
+ * @example
+ * formatAmount(499000, 'HUF', true) // => "4 990 Ft" (Stripe-ból)
+ * formatAmount(4990, 'HUF') // => "4 990 Ft"
+ * formatAmount(1999, 'EUR', true) // => "19,99 €"
+ */
+export function formatAmount(
+  amount: number,
+  currency: string,
+  divideBy100 = false
+): string {
+  const value = divideBy100 ? amount / 100 : amount;
+
+  return new Intl.NumberFormat('hu-HU', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    maximumFractionDigits: currency.toUpperCase() === 'HUF' ? 0 : 2,
+  }).format(value);
+}
+
+/**
+ * Ár formázása számlázási ciklussal
+ *
+ * @param price - Ár (Ft-ban)
+ * @param cycle - 'monthly' | 'yearly'
+ * @returns Formázott string (pl. "4 990 Ft/hó")
+ *
+ * @example
+ * formatPriceWithCycle(4990, 'monthly') // => "4 990 Ft/hó"
+ * formatPriceWithCycle(49900, 'yearly') // => "49 900 Ft/év"
+ */
+export function formatPriceWithCycle(
+  price: number,
+  cycle: 'monthly' | 'yearly'
+): string {
+  const suffix = cycle === 'yearly' ? '/év' : '/hó';
+  return formatPrice(price) + suffix;
+}
+
 /**
  * Név kezdőbetűinek kinyerése
  *

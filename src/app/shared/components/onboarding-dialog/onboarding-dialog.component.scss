@@ -647,11 +647,6 @@ $amber-100: #fef3c7;
   }
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 // Mobile responsive
 @media (max-width: 480px) {
   .dialog {

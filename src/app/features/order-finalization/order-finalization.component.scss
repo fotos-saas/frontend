@@ -754,12 +754,6 @@ $green-600: #16a34a;
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 // Mobile Adjustments
 @media (max-width: 480px) {
   .order-finalization__header {

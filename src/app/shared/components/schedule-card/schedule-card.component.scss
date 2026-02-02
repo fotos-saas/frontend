@@ -42,15 +42,6 @@
   }
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 // Hover effect fokuszálva
 .schedule-card:hover:not(.schedule-card--disabled) {
   .schedule-card__icon {

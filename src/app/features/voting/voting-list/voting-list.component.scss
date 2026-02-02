@@ -259,12 +259,6 @@ $gray-700: #374151;
   animation: shimmer 1.5s infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 // Empty state
 .voting-empty {
   display: flex;

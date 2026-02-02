@@ -426,12 +426,6 @@ $green-600: #16a34a;
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 // Rich Text Editor
 .editor-container {
   border: 2px solid #e2e8f0;

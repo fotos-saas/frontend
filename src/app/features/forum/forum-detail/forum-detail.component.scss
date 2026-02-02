@@ -231,12 +231,6 @@ $purple-600: #9333ea; // Darker purple for better contrast
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .forum-detail__spinner {
     animation: none;

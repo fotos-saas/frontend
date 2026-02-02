@@ -149,12 +149,6 @@ $gray-500: #6b7280;
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 // Accessibility: Reduced motion
 @media (prefers-reduced-motion: reduce) {
   .reply-form {

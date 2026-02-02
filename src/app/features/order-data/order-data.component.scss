@@ -61,10 +61,6 @@ $blue-700: #1d4ed8;
   margin-bottom: 1rem;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 // Error
 .order-data__error {
   text-align: center;

@@ -52,7 +52,7 @@ import { ICONS } from '../../shared/constants/icons.constants';
         <!-- Subscription badge slot -->
         @if (subscriptionInfo()) {
           <a
-            routerLink="/partner/settings"
+            routerLink="/partner/subscription"
             class="subscription-badge"
             [matTooltip]="getSubscriptionTooltip()"
           >
@@ -365,7 +365,7 @@ export class PartnerShellComponent implements OnInit {
     { id: 'schools', route: '/partner/schools', label: 'Iskolák', icon: 'school' },
     { id: 'contacts', route: '/partner/contacts', label: 'Kapcsolatok', icon: 'users' },
     { id: 'orders', route: '/partner/orders/clients', label: 'Megrendelések', icon: 'shopping-bag' },
-    { id: 'settings', route: '/partner/settings', label: 'Beállítások', icon: 'settings' },
+    { id: 'subscription', route: '/partner/subscription', label: 'Előfizetésem', icon: 'credit-card' },
   ];
 
   // Mobile menü items (ugyanazok mint desktop, de computed-ként a MobileNavOverlay-hez)

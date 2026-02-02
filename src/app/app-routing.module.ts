@@ -177,11 +177,38 @@ const routes: Routes = [
         path: 'orders/albums/:id',
         loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
       },
-      // Settings
+      // Előfizetésem - subscription management
+      {
+        path: 'subscription',
+        children: [
+          { path: '', redirectTo: 'overview', pathMatch: 'full' },
+          {
+            path: 'overview',
+            loadComponent: () => import('./features/partner/pages/subscription/subscription-overview.component').then(m => m.SubscriptionOverviewComponent),
+            title: 'Előfizetés'
+          },
+          {
+            path: 'invoices',
+            loadComponent: () => import('./features/partner/pages/subscription/invoices.component').then(m => m.InvoicesComponent),
+            title: 'Számlák'
+          },
+          {
+            path: 'addons',
+            loadComponent: () => import('./features/partner/pages/subscription/addons.component').then(m => m.AddonsComponent),
+            title: 'Kiegészítők'
+          },
+          {
+            path: 'account',
+            loadComponent: () => import('./features/partner/pages/subscription/account-delete.component').then(m => m.AccountDeleteComponent),
+            title: 'Fiók törlése'
+          }
+        ]
+      },
+      // Régi settings redirect (backwards compatibility)
       {
         path: 'settings',
-        loadComponent: () => import('./features/partner/pages/settings/settings.component').then(m => m.PartnerSettingsComponent),
-        title: 'Beállítások'
+        redirectTo: 'subscription/overview',
+        pathMatch: 'full'
       }
     ]
   },

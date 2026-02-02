@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SubscriberDetail, AuditLogEntry, DiscountInfo } from '../services/super-admin.service';
-import { ICONS } from '../../../shared/constants/icons.constants';
+import { ICONS, getSubscriptionStatusLabel } from '../../../shared/constants';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ChargeSubscriberDialogComponent } from '../components/charge-subscriber-dialog.component';
 import { ChangePlanDialogComponent } from '../components/change-plan-dialog.component';
@@ -213,15 +213,9 @@ export class SubscriberDetailComponent implements OnInit {
     return `${formatted} Ft${suffix}`;
   }
 
+  // Központi konstansból (rövid verzió)
   getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      active: 'Aktív',
-      trial: 'Próba',
-      paused: 'Szünetel',
-      canceling: 'Lemondva',
-      canceled: 'Törölve',
-    };
-    return labels[status] || status;
+    return getSubscriptionStatusLabel(status, true);
   }
 
   getStatusClass(status: string): string {

@@ -6,7 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, SubscriptionInfo } from '../../services/subscription.service';
 import { StorageService, StorageUsage } from '../../services/storage.service';
 import { PlansService } from '../../../../shared/services/plans.service';
-import { ICONS } from '../../../../shared/constants/icons.constants';
+import { ICONS, getSubscriptionStatusLabel } from '../../../../shared/constants';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -832,17 +832,8 @@ export class SubscriptionOverviewComponent implements OnInit {
     });
   }
 
-  getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      active: 'Aktív',
-      trial: 'Próbaidőszak',
-      paused: 'Szüneteltetve',
-      canceling: 'Lemondva',
-      canceled: 'Lejárt',
-      pending: 'Függőben'
-    };
-    return labels[status] ?? status;
-  }
+  // Központi konstansból
+  getStatusLabel = getSubscriptionStatusLabel;
 
   formatStorage(gb: number): string {
     return gb.toFixed(1);

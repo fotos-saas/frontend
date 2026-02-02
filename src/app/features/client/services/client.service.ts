@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { safeJsonParse } from '../../../shared/utils/safe-json-parse';
+import { getAlbumStatusLabel } from '../../../shared/constants';
 
 /**
  * Client info stored in localStorage
@@ -346,17 +347,10 @@ export class ClientService {
   // ============================================
 
   /**
-   * Get status label in Hungarian
+   * Get status label in Hungarian (központi konstansból, client nézet)
    */
   getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      draft: 'Előkészítés',
-      claiming: 'Kiválasztás',
-      retouch: 'Retusálás',
-      tablo: 'Tablókép',
-      completed: 'Lezárva',
-    };
-    return labels[status] ?? status;
+    return getAlbumStatusLabel(status, true);
   }
 
   /**

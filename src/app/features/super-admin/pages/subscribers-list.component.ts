@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SubscriberListItem } from '../services/super-admin.service';
-import { ICONS, PLAN_FILTER_OPTIONS } from '../../../shared/constants';
+import { ICONS, PLAN_FILTER_OPTIONS, getSubscriptionStatusLabel } from '../../../shared/constants';
 import { useFilterState } from '../../../shared/utils/use-filter-state';
 
 /**
@@ -99,14 +99,9 @@ export class SubscribersListComponent implements OnInit {
     this.filterState.setPage(page);
   }
 
+  // Központi konstansból (rövid verzió)
   getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      active: 'Aktív',
-      trial: 'Próba',
-      paused: 'Szünetel',
-      canceling: 'Lemondva',
-    };
-    return labels[status] || status;
+    return getSubscriptionStatusLabel(status, true);
   }
 
   getStatusClass(status: string): string {

@@ -2,7 +2,7 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
 import { CommonModule, DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { SubscriptionInfo } from '../../../services/subscription.service';
-import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { ICONS, getSubscriptionStatusLabel } from '../../../../../shared/constants';
 
 /**
  * Subscription Card Component
@@ -312,16 +312,9 @@ export class SubscriptionCardComponent {
 
   protected readonly ICONS = ICONS;
 
+  // Központi konstansból
   getStatusLabel(): string {
-    const labels: Record<string, string> = {
-      active: 'Aktív',
-      trial: 'Próbaidőszak',
-      paused: 'Szüneteltetve',
-      canceling: 'Lemondva',
-      canceled: 'Lejárt',
-      pending: 'Függőben'
-    };
-    return labels[this.info().status] ?? this.info().status;
+    return getSubscriptionStatusLabel(this.info().status);
   }
 
   getFeatureLabel(feature: string): string {

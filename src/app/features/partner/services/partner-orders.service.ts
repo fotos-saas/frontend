@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, from, concatMap, scan, map, catchError, of, finalize } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { getAlbumStatusLabel } from '../../../shared/constants';
 
 /**
  * Partner Client (ügyfél) interface
@@ -542,17 +543,10 @@ export class PartnerOrdersService {
   }
 
   /**
-   * Állapot fordítása magyarra
+   * Állapot fordítása magyarra (központi konstansból)
    */
   getStatusLabel(status: AlbumStatus): string {
-    const labels: Record<AlbumStatus, string> = {
-      draft: 'Piszkozat',
-      claiming: 'Kiválasztás',
-      retouch: 'Retusálás',
-      tablo: 'Tablókép',
-      completed: 'Befejezett',
-    };
-    return labels[status] || status;
+    return getAlbumStatusLabel(status);
   }
 
   /**

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, Invoice } from '../../services/subscription.service';
-import { ICONS } from '../../../../shared/constants/icons.constants';
+import { ICONS, getInvoiceStatusLabel } from '../../../../shared/constants';
 
 /**
  * Invoices Page
@@ -569,14 +569,6 @@ export class InvoicesComponent implements OnInit {
     }).format(amount / 100);
   }
 
-  getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      draft: 'Piszkozat',
-      paid: 'Fizetve',
-      open: 'Nyitott',
-      void: 'Érvénytelen',
-      uncollectible: 'Behajtható'
-    };
-    return labels[status] ?? status;
-  }
+  // Központi konstansból
+  getStatusLabel = getInvoiceStatusLabel;
 }

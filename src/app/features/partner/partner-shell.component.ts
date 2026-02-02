@@ -9,7 +9,7 @@ import { MobileNavOverlayComponent } from '../../core/layout/components/mobile-n
 import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.component';
 import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
-import { ICONS } from '../../shared/constants/icons.constants';
+import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
 
 /**
  * Partner Shell - Layout komponens a fotós/partner felülethez.
@@ -521,17 +521,8 @@ export class PartnerShellComponent implements OnInit {
     });
   }
 
-  getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      active: 'Aktív',
-      trial: 'Próbaidőszak',
-      paused: 'Szüneteltetve',
-      canceling: 'Lemondva',
-      canceled: 'Lejárt',
-      pending: 'Függőben'
-    };
-    return labels[status] ?? status;
-  }
+  // Központi konstansból
+  getStatusLabel = getSubscriptionStatusLabel;
 
   getSubscriptionTooltip(): string {
     const info = this.subscriptionInfo();

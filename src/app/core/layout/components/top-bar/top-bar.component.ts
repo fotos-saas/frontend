@@ -133,6 +133,9 @@ import { TabloStorageService } from '../../../services/tablo-storage.service';
         <!-- Spacer a jobb oldali elemekhez -->
         <div class="flex-1"></div>
 
+        <!-- Projected content (pl. subscription badge) -->
+        <ng-content></ng-content>
+
         <!-- Right: Actions -->
         <div class="flex items-center gap-1 md:gap-2 flex-shrink-0">
           <!-- Inline user info (marketinges módhoz) -->

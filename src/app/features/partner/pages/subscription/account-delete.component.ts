@@ -131,6 +131,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
   styles: [`
     .account-delete-page {
       max-width: 700px;
+      margin: 0 auto; /* Középre igazítás */
     }
 
     .page-title {

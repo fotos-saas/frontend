@@ -119,6 +119,7 @@ interface Invoice {
   styles: [`
     .invoices-page {
       max-width: 900px;
+      margin: 0 auto; /* Középre igazítás */
     }
 
     .page-title {
@@ -401,7 +402,8 @@ export class InvoicesComponent implements OnInit {
     this.portalLoading.set(true);
     this.subscriptionService.openPortal().subscribe({
       next: (res) => {
-        window.location.href = res.portal_url;
+        window.open(res.portal_url, '_blank');
+        this.portalLoading.set(false);
       },
       error: (err) => {
         console.error('Failed to open portal:', err);

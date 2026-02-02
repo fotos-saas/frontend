@@ -4,6 +4,9 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AddonService, Addon, AddonListResponse } from '../../services/addon.service';
 import { SubscriptionService, SubscriptionInfo } from '../../services/subscription.service';
+import { StorageService, StorageUsage } from '../../services/storage.service';
+import { StorageUsageCardComponent } from '../settings/components/storage-usage-card/storage-usage-card.component';
+import { StoragePurchaseDialogComponent } from '../settings/components/storage-purchase-dialog/storage-purchase-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 /**
@@ -13,11 +16,18 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
  * - Elérhető addonok listázása
  * - Addon aktiválása (Stripe)
  * - Aktív addonok lemondása
+ * - Extra tárhely vásárlás (slider dialógus)
  */
 @Component({
   selector: 'app-addons',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    MatTooltipModule,
+    StorageUsageCardComponent,
+    StoragePurchaseDialogComponent
+  ],
   template: `
     <div class="addons-page page-card">
       <h1 class="page-title">
@@ -38,97 +48,126 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       @if (loading()) {
         <div class="loading-state">
           <div class="skeleton-card"></div>
+          <div class="skeleton-card skeleton-card--small"></div>
         </div>
       } @else {
-        <div class="addons-grid">
-          @for (addon of addons(); track addon.key) {
-            <div class="addon-card" [class.addon-card--active]="addon.isActive" [class.addon-card--included]="addon.isIncludedInPlan">
-              <div class="addon-header">
-                <div class="addon-icon">
-                  <lucide-icon [name]="ICONS.SPARKLES" [size]="24" />
-                </div>
-                <div class="addon-status">
-                  @if (addon.isIncludedInPlan) {
-                    <span class="status-tag status-tag--included">Csomagban</span>
-                  } @else if (addon.isActive) {
-                    <span class="status-tag status-tag--active">Aktív</span>
-                  }
-                </div>
-              </div>
+        <!-- Extra tárhely szekció -->
+        <section class="section">
+          <div class="section-header">
+            <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="20" />
+            <h2 class="section-title">Tárhely</h2>
+          </div>
 
-              <h2 class="addon-name">{{ addon.name }}</h2>
-              <p class="addon-description">{{ addon.description }}</p>
+          @if (storageUsage()) {
+            <app-storage-usage-card
+              [usage]="storageUsage()!"
+              (openPurchase)="showStorageDialog.set(true)"
+            />
+          } @else {
+            <div class="storage-loading">
+              <div class="skeleton-bar"></div>
+            </div>
+          }
+        </section>
 
-              <div class="addon-features">
-                <h3 class="features-title">Tartalmazza:</h3>
-                @for (feature of addon.includes; track feature) {
-                  <div class="feature-item">
-                    <lucide-icon [name]="getFeatureIcon(feature)" [size]="16" />
-                    <span>{{ getFeatureName(feature) }}</span>
+        <!-- Funkció addonok szekció -->
+        <section class="section">
+          <div class="section-header">
+            <lucide-icon [name]="ICONS.SPARKLES" [size]="20" />
+            <h2 class="section-title">Funkció kiegészítők</h2>
+          </div>
+
+          <div class="addons-grid">
+            @for (addon of addons(); track addon.key) {
+              <div class="addon-card" [class.addon-card--active]="addon.isActive" [class.addon-card--included]="addon.isIncludedInPlan">
+                <div class="addon-main">
+                  <div class="addon-icon">
+                    <lucide-icon [name]="ICONS.SPARKLES" [size]="18" />
+                  </div>
+                  <div class="addon-info">
+                    <div class="addon-title-row">
+                      <h3 class="addon-name">{{ addon.name }}</h3>
+                      @if (addon.isIncludedInPlan) {
+                        <span class="status-tag status-tag--included">Csomagban</span>
+                      } @else if (addon.isActive) {
+                        <span class="status-tag status-tag--active">Aktív</span>
+                      }
+                    </div>
+                    <p class="addon-description">{{ addon.description }}</p>
+                    <div class="addon-features-inline">
+                      @for (feature of addon.includes; track feature; let last = $last) {
+                        <span class="feature-tag">{{ getFeatureName(feature) }}</span>
+                        @if (!last) {<span class="feature-sep">+</span>}
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                @if (!addon.isIncludedInPlan) {
+                  <div class="addon-footer">
+                    <div class="addon-pricing-inline">
+                      @if (subscription()?.billing_cycle === 'yearly') {
+                        <span class="price-main">{{ formatPrice(addon.yearlyPrice) }}/év</span>
+                      } @else {
+                        <span class="price-main">{{ formatPrice(addon.monthlyPrice) }}/hó</span>
+                      }
+                    </div>
+                    @if (addon.isActive) {
+                      <button
+                        class="btn btn--sm btn--danger-outline"
+                        (click)="cancelAddon(addon.key)"
+                        [disabled]="actionLoading() === addon.key"
+                      >
+                        @if (actionLoading() === addon.key) {
+                          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                        }
+                        Lemondás
+                      </button>
+                    } @else if (addon.canPurchase) {
+                      <button
+                        class="btn btn--sm btn--primary"
+                        (click)="subscribeAddon(addon.key)"
+                        [disabled]="actionLoading() === addon.key"
+                      >
+                        @if (actionLoading() === addon.key) {
+                          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                        } @else {
+                          <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+                        }
+                        Aktiválás
+                      </button>
+                    }
                   </div>
                 }
               </div>
+            }
+          </div>
 
-              @if (!addon.isIncludedInPlan) {
-                <div class="addon-pricing">
-                  <div class="price-row">
-                    <span class="price-label">Havi:</span>
-                    <span class="price-value">{{ formatPrice(addon.monthlyPrice) }}/hó</span>
-                  </div>
-                  <div class="price-row">
-                    <span class="price-label">Éves:</span>
-                    <span class="price-value">{{ formatPrice(addon.yearlyPrice) }}/év</span>
-                    <span class="price-discount">~17% kedvezmény</span>
-                  </div>
-                </div>
-
-                <div class="addon-actions">
-                  @if (addon.isActive) {
-                    <button
-                      class="btn btn--danger-outline"
-                      (click)="cancelAddon(addon.key)"
-                      [disabled]="actionLoading() === addon.key"
-                    >
-                      @if (actionLoading() === addon.key) {
-                        <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-                      } @else {
-                        <lucide-icon [name]="ICONS.X_CIRCLE" [size]="18" />
-                      }
-                      Lemondás
-                    </button>
-                  } @else if (addon.canPurchase) {
-                    <button
-                      class="btn btn--primary"
-                      (click)="subscribeAddon(addon.key)"
-                      [disabled]="actionLoading() === addon.key"
-                    >
-                      @if (actionLoading() === addon.key) {
-                        <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-                      } @else {
-                        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
-                      }
-                      Aktiválás
-                    </button>
-                  }
-                </div>
-              }
+          @if (addons().length === 0) {
+            <div class="empty-state">
+              <lucide-icon [name]="ICONS.SPARKLE" [size]="48" />
+              <h3>Nincsenek elérhető kiegészítők</h3>
+              <p>Jelenleg nincs aktiválható kiegészítő a csomagodhoz.</p>
             </div>
           }
-        </div>
-
-        @if (addons().length === 0) {
-          <div class="empty-state">
-            <lucide-icon [name]="ICONS.SPARKLE" [size]="48" />
-            <h2>Nincsenek elérhető kiegészítők</h2>
-            <p>Jelenleg nincs aktiválható kiegészítő a csomagodhoz.</p>
-          </div>
-        }
+        </section>
       }
     </div>
+
+    <!-- Storage Purchase Dialog -->
+    @if (showStorageDialog() && storageUsage()) {
+      <app-storage-purchase-dialog
+        [usage]="storageUsage()!"
+        [isSubmitting]="storageSubmitting()"
+        (close)="showStorageDialog.set(false)"
+        (confirm)="handleStoragePurchase($event)"
+      />
+    }
   `,
   styles: [`
     .addons-page {
       max-width: 800px;
+      margin: 0 auto;
     }
 
     .page-title {
@@ -164,58 +203,99 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       opacity: 0.9;
     }
 
+    /* Sections */
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #64748b;
+    }
+
+    .section-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+      color: #64748b;
+    }
+
     /* Addons Grid */
     .addons-grid {
       display: grid;
       gap: 20px;
     }
 
-    /* Addon Card */
+    /* Addon Card - Compact */
     .addon-card {
       background: white;
       border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 24px;
+      border-radius: 10px;
+      padding: 16px;
       transition: all 0.2s ease;
     }
 
     .addon-card:hover {
       border-color: #cbd5e1;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     .addon-card--active {
       border-color: #22c55e;
-      background: linear-gradient(to bottom right, white, #f0fdf4);
+      background: #fafff9;
     }
 
     .addon-card--included {
       border-color: #3b82f6;
-      background: linear-gradient(to bottom right, white, #eff6ff);
+      background: #fafbff;
     }
 
-    .addon-header {
+    .addon-main {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
+      gap: 12px;
     }
 
     .addon-icon {
-      width: 48px;
-      height: 48px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: linear-gradient(135deg, #8b5cf6, #7c3aed);
       color: white;
-      border-radius: 12px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .addon-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .addon-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .addon-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0;
     }
 
     .status-tag {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.6875rem;
       font-weight: 600;
     }
 
@@ -229,98 +309,87 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       color: #2563eb;
     }
 
-    .addon-name {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #1e293b;
-      margin: 0 0 8px 0;
-    }
-
     .addon-description {
       color: #64748b;
-      font-size: 0.9375rem;
-      margin: 0 0 16px 0;
+      font-size: 0.8125rem;
+      margin: 0 0 6px 0;
     }
 
-    /* Features */
-    .addon-features {
-      margin-bottom: 20px;
-    }
-
-    .features-title {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 0 0 12px 0;
-    }
-
-    .feature-item {
+    /* Features inline */
+    .addon-features-inline {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 0;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .feature-tag {
+      font-size: 0.75rem;
       color: #475569;
-      font-size: 0.9375rem;
-    }
-
-    .feature-item lucide-icon {
-      color: #22c55e;
-    }
-
-    /* Pricing */
-    .addon-pricing {
-      background: #f8fafc;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .price-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 0;
-    }
-
-    .price-label {
-      color: #64748b;
-      font-size: 0.875rem;
-      min-width: 50px;
-    }
-
-    .price-value {
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    .price-discount {
-      font-size: 0.75rem;
-      color: #16a34a;
-      background: #dcfce7;
+      background: #f1f5f9;
       padding: 2px 8px;
       border-radius: 4px;
     }
 
-    /* Actions */
-    .addon-actions {
+    .feature-sep {
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+
+    /* Footer with pricing & action */
+    .addon-footer {
       display: flex;
-      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .addon-pricing-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .price-main {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+
+    .price-alt {
+      color: #64748b;
+      font-size: 0.8125rem;
+    }
+
+    .price-discount {
+      font-size: 0.6875rem;
+      color: #16a34a;
+      background: #dcfce7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
     }
 
     /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 8px;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 6px;
       font-weight: 500;
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
+    }
+
+    .btn--sm {
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      border-radius: 6px;
     }
 
     .btn:disabled {
@@ -355,11 +424,27 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     }
 
     .skeleton-card {
-      height: 300px;
+      height: 200px;
       background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 12px;
+    }
+
+    .skeleton-card--small {
+      height: 150px;
+    }
+
+    .skeleton-bar {
+      height: 12px;
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+
+    .storage-loading {
+      padding: 20px 0;
     }
 
     @keyframes shimmer {
@@ -379,14 +464,15 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       text-align: center;
     }
 
-    .empty-state h2 {
+    .empty-state h3 {
       margin: 16px 0 8px;
-      font-size: 1.125rem;
+      font-size: 1rem;
       color: #1e293b;
     }
 
     .empty-state p {
       margin: 0;
+      font-size: 0.875rem;
     }
 
     .spin {
@@ -400,6 +486,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 
     @media (prefers-reduced-motion: reduce) {
       .skeleton-card,
+      .skeleton-bar,
       .spin {
         animation: none;
       }
@@ -410,12 +497,18 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 export class AddonsComponent implements OnInit {
   private readonly addonService = inject(AddonService);
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly storageService = inject(StorageService);
   protected readonly ICONS = ICONS;
 
   addons = signal<Addon[]>([]);
   subscription = signal<SubscriptionInfo | null>(null);
+  storageUsage = signal<StorageUsage | null>(null);
   loading = signal(true);
   actionLoading = signal<string | null>(null);
+
+  // Storage dialog
+  showStorageDialog = signal(false);
+  storageSubmitting = signal(false);
 
   ngOnInit(): void {
     this.loadData();
@@ -429,10 +522,12 @@ export class AddonsComponent implements OnInit {
       next: (info) => {
         this.subscription.set(info);
         this.loadAddons();
+        this.loadStorageUsage();
       },
       error: (err) => {
         console.error('Failed to load subscription:', err);
         this.loadAddons();
+        this.loadStorageUsage();
       }
     });
   }
@@ -447,6 +542,13 @@ export class AddonsComponent implements OnInit {
         console.error('Failed to load addons:', err);
         this.loading.set(false);
       }
+    });
+  }
+
+  loadStorageUsage(): void {
+    this.storageService.getUsage().subscribe({
+      next: (usage) => this.storageUsage.set(usage),
+      error: (err) => console.error('Failed to load storage usage:', err)
     });
   }
 
@@ -478,6 +580,21 @@ export class AddonsComponent implements OnInit {
       error: (err) => {
         console.error('Failed to cancel addon:', err);
         this.actionLoading.set(null);
+      }
+    });
+  }
+
+  handleStoragePurchase(gb: number): void {
+    this.storageSubmitting.set(true);
+    this.storageService.setAddon(gb).subscribe({
+      next: () => {
+        this.showStorageDialog.set(false);
+        this.storageSubmitting.set(false);
+        this.loadStorageUsage();
+      },
+      error: (err) => {
+        console.error('Failed to update storage:', err);
+        this.storageSubmitting.set(false);
       }
     });
   }

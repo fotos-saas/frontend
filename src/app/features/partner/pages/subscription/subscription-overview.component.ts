@@ -180,6 +180,78 @@ import { forkJoin } from 'rxjs';
               </div>
             }
           </div>
+
+          <!-- Limit összesítő kártya -->
+          <div class="info-card limits-card">
+            <div class="card-header">
+              <h2 class="card-title">Használat</h2>
+            </div>
+
+            <div class="limits-list">
+              <!-- Iskolák -->
+              <div class="limit-item">
+                <div class="limit-header">
+                  <lucide-icon [name]="ICONS.BUILDING" [size]="18" class="limit-icon" />
+                  <span class="limit-label">Iskolák</span>
+                </div>
+                <div class="limit-value">
+                  <span class="limit-current">{{ subscription()!.usage?.schools ?? 0 }}</span>
+                  <span class="limit-separator">/</span>
+                  <span class="limit-max">{{ subscription()!.limits.max_schools ?? '∞' }}</span>
+                </div>
+                <div class="limit-bar">
+                  <div
+                    class="limit-progress"
+                    [style.width.%]="getLimitPercent('schools')"
+                    [class.limit-progress--warning]="getLimitPercent('schools') > 80"
+                    [class.limit-progress--danger]="getLimitPercent('schools') > 95"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Osztályok -->
+              <div class="limit-item">
+                <div class="limit-header">
+                  <lucide-icon [name]="ICONS.USERS" [size]="18" class="limit-icon" />
+                  <span class="limit-label">Osztályok</span>
+                </div>
+                <div class="limit-value">
+                  <span class="limit-current">{{ subscription()!.usage?.classes ?? 0 }}</span>
+                  <span class="limit-separator">/</span>
+                  <span class="limit-max">{{ subscription()!.limits.max_classes ?? '∞' }}</span>
+                </div>
+                <div class="limit-bar">
+                  <div
+                    class="limit-progress"
+                    [style.width.%]="getLimitPercent('classes')"
+                    [class.limit-progress--warning]="getLimitPercent('classes') > 80"
+                    [class.limit-progress--danger]="getLimitPercent('classes') > 95"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Sablonok -->
+              <div class="limit-item">
+                <div class="limit-header">
+                  <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="18" class="limit-icon" />
+                  <span class="limit-label">Sablonok</span>
+                </div>
+                <div class="limit-value">
+                  <span class="limit-current">{{ subscription()!.usage?.templates ?? 0 }}</span>
+                  <span class="limit-separator">/</span>
+                  <span class="limit-max">{{ subscription()!.limits.max_templates ?? '∞' }}</span>
+                </div>
+                <div class="limit-bar">
+                  <div
+                    class="limit-progress"
+                    [style.width.%]="getLimitPercent('templates')"
+                    [class.limit-progress--warning]="getLimitPercent('templates') > 80"
+                    [class.limit-progress--danger]="getLimitPercent('templates') > 95"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       } @else {
         <div class="error-state">
@@ -471,6 +543,78 @@ import { forkJoin } from 'rxjs';
 
     .addon-icon { color: #7c3aed; }
 
+    /* Limits Card */
+    .limits-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .limit-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .limit-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .limit-icon {
+      color: #64748b;
+    }
+
+    .limit-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #475569;
+    }
+
+    .limit-value {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      font-size: 0.8125rem;
+    }
+
+    .limit-current {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1e293b;
+    }
+
+    .limit-separator {
+      color: #94a3b8;
+    }
+
+    .limit-max {
+      color: #64748b;
+    }
+
+    .limit-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .limit-progress {
+      height: 100%;
+      background: #3b82f6;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .limit-progress--warning {
+      background: #f59e0b;
+    }
+
+    .limit-progress--danger {
+      background: #ef4444;
+    }
+
     /* Buttons */
     .btn {
       display: inline-flex;
@@ -751,5 +895,19 @@ export class SubscriptionOverviewComponent implements OnInit {
     return sub.billing_cycle === 'yearly'
       ? Math.round(addonPrices.yearly / 12)
       : addonPrices.monthly;
+  }
+
+  getLimitPercent(type: 'schools' | 'classes' | 'templates'): number {
+    const sub = this.subscription();
+    if (!sub) return 0;
+
+    const usage = sub.usage?.[type] ?? 0;
+    const limitKey = type === 'schools' ? 'max_schools' : type === 'classes' ? 'max_classes' : 'max_templates';
+    const limit = sub.limits?.[limitKey];
+
+    // Ha nincs limit (korlátlan), 0%-ot mutatunk
+    if (!limit) return 0;
+
+    return Math.min(100, Math.round((usage / limit) * 100));
   }
 }

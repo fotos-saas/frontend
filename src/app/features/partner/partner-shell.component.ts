@@ -84,15 +84,49 @@ import { ICONS } from '../../shared/constants/icons.constants';
           }"
         >
           @for (item of navItems; track item.id) {
-            <a
-              [routerLink]="item.route"
-              routerLinkActive="active"
-              class="nav-item"
-              [title]="sidebarState.isTablet() ? item.label : ''"
-            >
-              <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
-              <span class="nav-label">{{ item.label }}</span>
-            </a>
+            @if (item.children && item.children.length > 0) {
+              <!-- Szekció gyermek elemekkel -->
+              <div class="nav-section">
+                <button
+                  class="nav-item nav-item--section"
+                  [class.expanded]="isSectionExpanded(item.id)"
+                  [title]="sidebarState.isTablet() ? item.label : ''"
+                  (click)="toggleSection(item.id)"
+                >
+                  <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
+                  <span class="nav-label">{{ item.label }}</span>
+                  <lucide-icon
+                    [name]="isSectionExpanded(item.id) ? 'chevron-up' : 'chevron-down'"
+                    [size]="16"
+                    class="nav-chevron"
+                  ></lucide-icon>
+                </button>
+                @if (isSectionExpanded(item.id) && !sidebarState.isTablet()) {
+                  <div class="nav-children">
+                    @for (child of item.children; track child.id) {
+                      <a
+                        [routerLink]="child.route"
+                        routerLinkActive="active"
+                        class="nav-child"
+                      >
+                        {{ child.label }}
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <!-- Egyszerű menüpont -->
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                class="nav-item"
+                [title]="sidebarState.isTablet() ? item.label : ''"
+              >
+                <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
+                <span class="nav-label">{{ item.label }}</span>
+              </a>
+            }
           }
         </nav>
 
@@ -269,6 +303,66 @@ import { ICONS } from '../../shared/constants/icons.constants';
       border-left: 2px solid var(--shell-nav-item-active-border);
     }
 
+    /* ============ Section with children ============ */
+    .nav-section {
+      margin-bottom: 4px;
+    }
+
+    .nav-item--section {
+      width: calc(100% - 16px);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      justify-content: flex-start;
+    }
+
+    .nav-item--section .nav-chevron {
+      margin-left: auto;
+      opacity: 0.6;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-item--section.expanded .nav-chevron {
+      transform: rotate(180deg);
+    }
+
+    .nav-children {
+      margin-left: 20px;
+      padding-left: 12px;
+      border-left: 1px solid var(--shell-sidebar-border);
+    }
+
+    .nav-child {
+      display: block;
+      padding: 8px 12px;
+      margin: 2px 8px 2px 0;
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--shell-nav-item-color);
+      font-size: 0.8125rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-child:hover {
+      background: var(--shell-nav-item-hover-bg);
+      color: var(--shell-nav-item-hover-color);
+    }
+
+    .nav-child.active {
+      background: var(--shell-nav-item-active-bg);
+      color: var(--shell-nav-item-active-color);
+      font-weight: 500;
+    }
+
+    .sidebar--collapsed .nav-item--section .nav-chevron,
+    .sidebar--collapsed .nav-item--section .nav-label {
+      display: none;
+    }
+
+    .sidebar--collapsed .nav-children {
+      display: none;
+    }
+
     .nav-icon {
       width: 20px;
       height: 20px;
@@ -365,8 +459,36 @@ export class PartnerShellComponent implements OnInit {
     { id: 'schools', route: '/partner/schools', label: 'Iskolák', icon: 'school' },
     { id: 'contacts', route: '/partner/contacts', label: 'Kapcsolatok', icon: 'users' },
     { id: 'orders', route: '/partner/orders/clients', label: 'Megrendelések', icon: 'shopping-bag' },
-    { id: 'subscription', route: '/partner/subscription', label: 'Előfizetésem', icon: 'credit-card' },
+    {
+      id: 'subscription',
+      label: 'Előfizetésem',
+      icon: 'credit-card',
+      children: [
+        { id: 'subscription-overview', route: '/partner/subscription/overview', label: 'Előfizetés' },
+        { id: 'subscription-invoices', route: '/partner/subscription/invoices', label: 'Számlák' },
+        { id: 'subscription-addons', route: '/partner/subscription/addons', label: 'Kiegészítők' },
+        { id: 'subscription-account', route: '/partner/subscription/account', label: 'Fiók törlése' },
+      ]
+    },
   ];
+
+  // Kibontott szekciók
+  expandedSections = signal<Set<string>>(new Set(['subscription']));
+
+  toggleSection(sectionId: string): void {
+    const current = this.expandedSections();
+    const updated = new Set(current);
+    if (updated.has(sectionId)) {
+      updated.delete(sectionId);
+    } else {
+      updated.add(sectionId);
+    }
+    this.expandedSections.set(updated);
+  }
+
+  isSectionExpanded(sectionId: string): boolean {
+    return this.expandedSections().has(sectionId);
+  }
 
   // Mobile menü items (ugyanazok mint desktop, de computed-ként a MobileNavOverlay-hez)
   mobileMenuItems = computed<MenuItem[]>(() => this.navItems);

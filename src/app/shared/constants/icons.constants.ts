@@ -239,6 +239,7 @@ export const ICONS = {
   IMAGE: 'image',
   EXPAND: 'expand',
   FOLDER_PLUS: 'folder-plus',
+  LAYOUT_TEMPLATE: 'layout-template',
 
   // Navigáció és rendezés
   ARROW_UP: 'arrow-up',
@@ -291,6 +292,7 @@ export const ICONS = {
   HARD_DRIVE: 'hard-drive',
   PAUSE_CIRCLE: 'pause-circle',
   PLAY_CIRCLE: 'play-circle',
+  PUZZLE: 'puzzle',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

@@ -17,6 +17,13 @@ export interface SubscriptionInfo {
   limits: {
     storage_gb: number;
     max_classes: number | null;
+    max_schools: number | null;
+    max_templates: number | null;
+  };
+  usage?: {
+    schools: number;
+    classes: number;
+    templates: number;
   };
   // Módosítás jelzők (extra tárhely, addonok)
   is_modified: boolean;
@@ -28,6 +35,17 @@ export interface SubscriptionInfo {
   stripe_status?: string;
   current_period_end?: string;
   cancel_at_period_end?: boolean;
+  // Költség Stripe-ból (fillérben)
+  monthly_cost?: number;
+  currency?: string;
+  // Árak (config-ból)
+  prices?: {
+    plan_monthly: number;
+    plan_yearly: number;
+    storage_monthly: number;
+    storage_yearly: number;
+    addons: Record<string, { monthly: number; yearly: number }>;
+  };
 }
 
 /**

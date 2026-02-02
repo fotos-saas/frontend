@@ -73,6 +73,7 @@ import {
   CheckCircle,
   FolderPlus,
   Expand,
+  LayoutTemplate,
   Filter,
   // Státusz ikonok
   Circle,
@@ -119,6 +120,7 @@ import {
   PauseCircle,
   PlayCircle,
   FileText,
+  Puzzle,
   // Audit log toggle
   Eye,
   // Loading spinner
@@ -188,6 +190,7 @@ const LUCIDE_ICONS = {
   CheckCircle,
   FolderPlus,
   Expand,
+  LayoutTemplate,
   Filter,
   // Státusz ikonok
   Circle,
@@ -234,6 +237,7 @@ const LUCIDE_ICONS = {
   PauseCircle,
   PlayCircle,
   FileText,
+  Puzzle,
   // Audit log toggle
   Eye,
   // Loading spinner

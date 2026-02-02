@@ -62,53 +62,58 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
           <p>{{ statusFilter() ? 'Nincs a szűrésnek megfelelő számla.' : 'Még nem állítottunk ki számlát.' }}</p>
         </div>
       } @else {
-        <div class="invoices-list">
-          <div class="table-header">
-            <span class="th th-number">Számlaszám</span>
-            <span class="th th-date">Dátum</span>
-            <span class="th th-amount">Összeg</span>
-            <span class="th th-status">Státusz</span>
-            <span class="th th-actions">Műveletek</span>
-          </div>
+        <div class="table-wrapper">
+          <div class="invoices-list">
+            <div class="table-header">
+              <span class="th th-number">Számlaszám</span>
+              <span class="th th-date">Dátum</span>
+              <span class="th th-amount">Összeg</span>
+              <span class="th th-status">Státusz</span>
+              <span class="th th-actions">Műveletek</span>
+            </div>
 
-          <div class="row-grid">
-            @for (invoice of invoices(); track invoice.id; let i = $index) {
-              <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
-                <span class="td td-number" data-label="Számlaszám">{{ invoice.number || '-' }}</span>
-                <span class="td td-date" data-label="Dátum">{{ formatDate(invoice.created_at) }}</span>
-                <span class="td td-amount" data-label="Összeg">{{ formatAmount(invoice.amount, invoice.currency) }}</span>
-                <span class="td td-status" data-label="Státusz">
-                  <span class="status-badge" [class]="'status-badge--' + invoice.status">
-                    {{ getStatusLabel(invoice.status) }}
+            <div class="row-grid">
+              @for (invoice of invoices(); track invoice.id; let i = $index) {
+                <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+                  <span class="td td-number">{{ invoice.number || '-' }}</span>
+                  <span class="td td-date">{{ formatDate(invoice.created_at) }}</span>
+                  <span class="td td-amount">{{ formatAmount(invoice.amount, invoice.currency) }}</span>
+                  <span class="td td-status">
+                    <span class="status-badge" [class]="'status-badge--' + invoice.status">
+                      {{ getStatusLabel(invoice.status) }}
+                    </span>
                   </span>
-                </span>
-                <span class="td td-actions">
-                  @if (invoice.pdf_url) {
-                    <a
-                      [href]="invoice.pdf_url"
-                      target="_blank"
-                      rel="noopener"
-                      class="action-btn"
-                      matTooltip="PDF letöltése"
-                    >
-                      <lucide-icon [name]="ICONS.DOWNLOAD" [size]="18" />
-                    </a>
-                  }
-                  @if (invoice.hosted_url) {
-                    <a
-                      [href]="invoice.hosted_url"
-                      target="_blank"
-                      rel="noopener"
-                      class="action-btn"
-                      matTooltip="Megtekintés"
-                    >
-                      <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="18" />
-                    </a>
-                  }
-                </span>
-              </div>
-            }
+                  <span class="td td-actions">
+                    @if (invoice.pdf_url) {
+                      <a
+                        [href]="invoice.pdf_url"
+                        target="_blank"
+                        rel="noopener"
+                        class="action-btn"
+                        matTooltip="PDF letöltése"
+                      >
+                        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+                        <span class="action-label">Letöltés</span>
+                      </a>
+                    }
+                    @if (invoice.hosted_url) {
+                      <a
+                        [href]="invoice.hosted_url"
+                        target="_blank"
+                        rel="noopener"
+                        class="action-btn"
+                        matTooltip="Megtekintés"
+                      >
+                        <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="16" />
+                        <span class="action-label">Megnyitás</span>
+                      </a>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
           </div>
+        </div>
 
           @if (hasMore()) {
             <div class="load-more">
@@ -197,15 +202,27 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 
     .page-description {
       color: #64748b;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       font-size: 0.9375rem;
+    }
+
+    /* Table wrapper for horizontal scroll on mobile */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -16px;
+      padding: 0 16px;
+    }
+
+    .invoices-list {
+      min-width: 600px;
     }
 
     /* Table */
     .table-header {
       display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr 100px;
-      gap: 16px;
+      grid-template-columns: 1.2fr 1fr 0.8fr 0.8fr 140px;
+      gap: 12px;
       padding: 12px 16px;
       background: #f8fafc;
       border-radius: 8px 8px 0 0;
@@ -219,6 +236,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       color: #64748b;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      white-space: nowrap;
     }
 
     .th-actions {
@@ -232,9 +250,9 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 
     .list-row {
       display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr 100px;
-      gap: 16px;
-      padding: 16px;
+      grid-template-columns: 1.2fr 1fr 0.8fr 0.8fr 140px;
+      gap: 12px;
+      padding: 12px 16px;
       background: white;
       border: 1px solid #e2e8f0;
       border-top: none;
@@ -322,18 +340,24 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     .action-btn {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
+      gap: 4px;
+      padding: 6px 10px;
       border-radius: 6px;
       color: #64748b;
       text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
       transition: all 0.2s ease;
     }
 
     .action-btn:hover {
       background: #e2e8f0;
       color: #3b82f6;
+    }
+
+    .action-label {
+      display: inline;
     }
 
     /* Load More */
@@ -440,47 +464,11 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       to { transform: rotate(360deg); }
     }
 
-    /* Mobile */
-    @media (max-width: 768px) {
-      .table-header {
-        display: none;
-      }
-
-      .list-row {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-        border: 1px solid #e2e8f0;
-        align-items: flex-start;
-        text-align: left;
-      }
-
-      .td {
-        width: 100%;
-      }
-
-      .td::before {
-        content: attr(data-label);
-        font-size: 0.75rem;
-        color: #64748b;
-        text-transform: uppercase;
-        display: block;
-        margin-bottom: 2px;
-      }
-
-      .td-actions {
-        display: flex;
-        justify-content: flex-start;
-        width: 100%;
-        padding-top: 12px;
-        margin-top: 4px;
-        border-top: 1px solid #e2e8f0;
-      }
-
-      .td-actions::before {
-        display: none;
+    /* Mobile - horizontal scroll hint */
+    @media (max-width: 640px) {
+      .table-wrapper {
+        margin: 0 -20px;
+        padding: 0 20px;
       }
     }
 

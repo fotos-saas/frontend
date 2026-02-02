@@ -1,49 +1,57 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SubscriptionService } from '../../services/subscription.service';
+import { SubscriptionService, Invoice } from '../../services/subscription.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-
-/**
- * Számla adat interface
- */
-interface Invoice {
-  id: string;
-  number: string;
-  amount: number;
-  currency: string;
-  status: 'paid' | 'open' | 'void' | 'uncollectible';
-  created_at: string;
-  pdf_url: string | null;
-  hosted_url: string | null;
-}
 
 /**
  * Invoices Page
  *
  * Számlák listája:
- * - Korábbi számlák
+ * - Korábbi számlák Stripe-ból
  * - PDF letöltés
- * - Stripe hosted invoice link
+ * - Státusz szűrő
+ * - Cursor-based paginálás
  */
 @Component({
   selector: 'app-invoices',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatTooltipModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, MatTooltipModule],
   template: `
     <div class="invoices-page page-card">
-      <h1 class="page-title">
-        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="24" />
-        Számlák
-      </h1>
+      <div class="page-header">
+        <div class="header-title">
+          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="24" />
+          <h1>Számlák</h1>
+        </div>
+
+        <div class="filter-section">
+          <label for="statusFilter" class="filter-label">
+            <lucide-icon [name]="ICONS.FILTER" [size]="16" />
+            Szűrés:
+          </label>
+          <select
+            id="statusFilter"
+            class="filter-select"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="onStatusFilterChange($event)"
+          >
+            <option value="">Összes</option>
+            <option value="paid">Fizetve</option>
+            <option value="open">Nyitott</option>
+            <option value="void">Érvénytelen</option>
+          </select>
+        </div>
+      </div>
 
       <p class="page-description">
         Itt találod a korábbi számláidat. A számlák kezeléséhez és fizetési adatok módosításához
         használd a Stripe portált.
       </p>
 
-      @if (loading()) {
+      @if (loading() && invoices().length === 0) {
         <div class="loading-state">
           @for (i of [1, 2, 3]; track i) {
             <div class="skeleton-row"></div>
@@ -53,7 +61,7 @@ interface Invoice {
         <div class="empty-state">
           <lucide-icon [name]="ICONS.FILE_TEXT" [size]="48" />
           <h2>Nincsenek számlák</h2>
-          <p>Még nem állítottunk ki számlát.</p>
+          <p>{{ statusFilter() ? 'Nincs a szűrésnek megfelelő számla.' : 'Még nem állítottunk ki számlát.' }}</p>
         </div>
       } @else {
         <div class="invoices-list">
@@ -65,40 +73,57 @@ interface Invoice {
             <span class="th th-actions">Műveletek</span>
           </div>
 
-          @for (invoice of invoices(); track invoice.id) {
-            <div class="invoice-row">
-              <span class="td td-number">{{ invoice.number }}</span>
-              <span class="td td-date">{{ formatDate(invoice.created_at) }}</span>
-              <span class="td td-amount">{{ formatAmount(invoice.amount, invoice.currency) }}</span>
-              <span class="td td-status">
-                <span class="status-badge" [class]="'status-badge--' + invoice.status">
-                  {{ getStatusLabel(invoice.status) }}
+          <div class="row-grid">
+            @for (invoice of invoices(); track invoice.id; let i = $index) {
+              <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+                <span class="td td-number" data-label="Számlaszám">{{ invoice.number || '-' }}</span>
+                <span class="td td-date" data-label="Dátum">{{ formatDate(invoice.created_at) }}</span>
+                <span class="td td-amount" data-label="Összeg">{{ formatAmount(invoice.amount, invoice.currency) }}</span>
+                <span class="td td-status" data-label="Státusz">
+                  <span class="status-badge" [class]="'status-badge--' + invoice.status">
+                    {{ getStatusLabel(invoice.status) }}
+                  </span>
                 </span>
-              </span>
-              <span class="td td-actions">
-                @if (invoice.pdf_url) {
-                  <a
-                    [href]="invoice.pdf_url"
-                    target="_blank"
-                    rel="noopener"
-                    class="action-btn"
-                    matTooltip="PDF letöltése"
-                  >
-                    <lucide-icon [name]="ICONS.DOWNLOAD" [size]="18" />
-                  </a>
+                <span class="td td-actions">
+                  @if (invoice.pdf_url) {
+                    <a
+                      [href]="invoice.pdf_url"
+                      target="_blank"
+                      rel="noopener"
+                      class="action-btn"
+                      matTooltip="PDF letöltése"
+                    >
+                      <lucide-icon [name]="ICONS.DOWNLOAD" [size]="18" />
+                    </a>
+                  }
+                  @if (invoice.hosted_url) {
+                    <a
+                      [href]="invoice.hosted_url"
+                      target="_blank"
+                      rel="noopener"
+                      class="action-btn"
+                      matTooltip="Megtekintés"
+                    >
+                      <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="18" />
+                    </a>
+                  }
+                </span>
+              </div>
+            }
+          </div>
+
+          @if (hasMore()) {
+            <div class="load-more">
+              <button
+                class="btn btn--secondary"
+                (click)="loadMore()"
+                [disabled]="loadingMore()"
+              >
+                @if (loadingMore()) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
                 }
-                @if (invoice.hosted_url) {
-                  <a
-                    [href]="invoice.hosted_url"
-                    target="_blank"
-                    rel="noopener"
-                    class="action-btn"
-                    matTooltip="Megtekintés"
-                  >
-                    <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="18" />
-                  </a>
-                }
-              </span>
+                Több betöltése
+              </button>
             </div>
           }
         </div>
@@ -119,17 +144,64 @@ interface Invoice {
   styles: [`
     .invoices-page {
       max-width: 900px;
-      margin: 0 auto; /* Középre igazítás */
+      margin: 0 auto;
     }
 
-    .page-title {
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .header-title {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 1.5rem;
-      font-weight: 600;
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+      }
+    }
+
+    .filter-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    .filter-select {
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.875rem;
       color: #1e293b;
-      margin-bottom: 8px;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+
+      &:hover {
+        border-color: #cbd5e1;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+      }
     }
 
     .page-description {
@@ -162,7 +234,12 @@ interface Invoice {
       text-align: right;
     }
 
-    .invoice-row {
+    .row-grid {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .list-row {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr 100px;
       gap: 16px;
@@ -172,13 +249,26 @@ interface Invoice {
       border-top: none;
       align-items: center;
       transition: background 0.2s ease;
+      animation: fadeSlideIn 0.3s ease forwards;
+      opacity: 0;
     }
 
-    .invoice-row:last-child {
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .list-row:last-child {
       border-radius: 0 0 8px 8px;
     }
 
-    .invoice-row:hover {
+    .list-row:hover {
       background: #f8fafc;
     }
 
@@ -226,10 +316,15 @@ interface Invoice {
       color: #d97706;
     }
 
-    .status-badge--void,
-    .status-badge--uncollectible {
+    .status-badge--draft {
       background: #f1f5f9;
       color: #64748b;
+    }
+
+    .status-badge--void,
+    .status-badge--uncollectible {
+      background: #fee2e2;
+      color: #dc2626;
     }
 
     /* Action Button */
@@ -248,6 +343,13 @@ interface Invoice {
     .action-btn:hover {
       background: #e2e8f0;
       color: #3b82f6;
+    }
+
+    /* Load More */
+    .load-more {
+      display: flex;
+      justify-content: center;
+      margin-top: 16px;
     }
 
     /* Portal Section */
@@ -283,6 +385,17 @@ interface Invoice {
 
     .btn--primary:hover:not(:disabled) {
       background: #2563eb;
+    }
+
+    .btn--secondary {
+      background: white;
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn--secondary:hover:not(:disabled) {
+      background: #f8fafc;
+      border-color: #cbd5e1;
     }
 
     /* Loading & Empty */
@@ -338,11 +451,16 @@ interface Invoice {
 
     /* Mobile */
     @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
       .table-header {
         display: none;
       }
 
-      .invoice-row {
+      .list-row {
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -365,12 +483,21 @@ interface Invoice {
         padding-top: 8px;
         border-top: 1px solid #e2e8f0;
       }
+
+      .td-actions::before {
+        display: none;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .skeleton-row,
-      .spin {
+      .spin,
+      .list-row {
         animation: none;
+      }
+
+      .list-row {
+        opacity: 1;
       }
     }
   `],
@@ -382,7 +509,10 @@ export class InvoicesComponent implements OnInit {
 
   invoices = signal<Invoice[]>([]);
   loading = signal(true);
+  loadingMore = signal(false);
+  hasMore = signal(false);
   portalLoading = signal(false);
+  statusFilter = signal('');
 
   ngOnInit(): void {
     this.loadInvoices();
@@ -390,12 +520,49 @@ export class InvoicesComponent implements OnInit {
 
   loadInvoices(): void {
     this.loading.set(true);
-    // TODO: Implement invoices endpoint
-    // Egyelőre mock data
-    setTimeout(() => {
-      this.invoices.set([]);
-      this.loading.set(false);
-    }, 500);
+    this.subscriptionService.getInvoices({
+      status: this.statusFilter() || undefined,
+    }).subscribe({
+      next: (res) => {
+        this.invoices.set(res.invoices);
+        this.hasMore.set(res.has_more);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load invoices:', err);
+        this.invoices.set([]);
+        this.hasMore.set(false);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  loadMore(): void {
+    const currentInvoices = this.invoices();
+    if (currentInvoices.length === 0) return;
+
+    const lastInvoice = currentInvoices[currentInvoices.length - 1];
+    this.loadingMore.set(true);
+
+    this.subscriptionService.getInvoices({
+      status: this.statusFilter() || undefined,
+      starting_after: lastInvoice.id,
+    }).subscribe({
+      next: (res) => {
+        this.invoices.update(prev => [...prev, ...res.invoices]);
+        this.hasMore.set(res.has_more);
+        this.loadingMore.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load more invoices:', err);
+        this.loadingMore.set(false);
+      }
+    });
+  }
+
+  onStatusFilterChange(value: string): void {
+    this.statusFilter.set(value);
+    this.loadInvoices();
   }
 
   openPortal(): void {
@@ -426,11 +593,12 @@ export class InvoicesComponent implements OnInit {
       style: 'currency',
       currency: currency.toUpperCase(),
       maximumFractionDigits: 0
-    }).format(amount / 100); // Stripe returns cents
+    }).format(amount / 100);
   }
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
+      draft: 'Piszkozat',
       paid: 'Fizetve',
       open: 'Nyitott',
       void: 'Érvénytelen',

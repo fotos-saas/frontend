@@ -49,6 +49,37 @@ export interface SubscriptionInfo {
 }
 
 /**
+ * Stripe számla adat
+ */
+export interface Invoice {
+  id: string;
+  number: string;
+  amount: number;
+  currency: string;
+  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+  created_at: string;
+  pdf_url: string | null;
+  hosted_url: string | null;
+}
+
+/**
+ * Számlák lekérés válasz
+ */
+export interface InvoicesResponse {
+  invoices: Invoice[];
+  has_more: boolean;
+}
+
+/**
+ * Számlák lekérés paraméterei
+ */
+export interface InvoicesParams {
+  per_page?: number;
+  starting_after?: string;
+  status?: string;
+}
+
+/**
  * Fiók törlés válasz
  */
 export interface DeleteAccountResponse {
@@ -87,6 +118,18 @@ export class SubscriptionService {
    */
   getSubscription(): Observable<SubscriptionInfo> {
     return this.http.get<SubscriptionInfo>(`${this.baseUrl}/subscription`);
+  }
+
+  /**
+   * Számlák lekérése Stripe-ból
+   */
+  getInvoices(params?: InvoicesParams): Observable<InvoicesResponse> {
+    const httpParams: Record<string, string> = {};
+    if (params?.per_page) httpParams['per_page'] = params.per_page.toString();
+    if (params?.starting_after) httpParams['starting_after'] = params.starting_after;
+    if (params?.status) httpParams['status'] = params.status;
+
+    return this.http.get<InvoicesResponse>(`${this.baseUrl}/subscription/invoices`, { params: httpParams });
   }
 
   /**

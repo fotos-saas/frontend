@@ -230,11 +230,11 @@ import { forkJoin } from 'rxjs';
                 </div>
               </div>
 
-              <!-- Sablonok -->
+              <!-- Sablon minták -->
               <div class="limit-item">
                 <div class="limit-header">
                   <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="18" class="limit-icon" />
-                  <span class="limit-label">Sablonok</span>
+                  <span class="limit-label">Sablon minták</span>
                 </div>
                 <div class="limit-value">
                   <span class="limit-current">{{ subscription()!.usage?.templates ?? 0 }}</span>

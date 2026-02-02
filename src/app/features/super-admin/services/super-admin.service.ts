@@ -203,11 +203,20 @@ export class SuperAdminService {
   /**
    * Audit logok lekérése
    */
-  getAuditLogs(id: number, params?: { page?: number; per_page?: number }): Observable<PaginatedResponse<AuditLogEntry>> {
+  getAuditLogs(id: number, params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    action?: string;
+    sort_dir?: 'asc' | 'desc';
+  }): Observable<PaginatedResponse<AuditLogEntry>> {
     let httpParams = new HttpParams();
 
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());
     if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.action) httpParams = httpParams.set('action', params.action);
+    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
 
     return this.http.get<PaginatedResponse<AuditLogEntry>>(`${this.baseUrl}/subscribers/${id}/audit-logs`, { params: httpParams });
   }

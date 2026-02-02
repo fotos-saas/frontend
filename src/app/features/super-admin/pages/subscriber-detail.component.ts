@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -19,6 +20,7 @@ import { ChangePlanDialogComponent } from '../components/change-plan-dialog.comp
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterLink,
     LucideAngularModule,
     MatTooltipModule,
@@ -46,6 +48,11 @@ export class SubscriberDetailComponent implements OnInit {
   // Audit logok
   auditLogs = signal<AuditLogEntry[]>([]);
   auditLogsLoading = signal(false);
+
+  // Audit log filter state
+  auditSearch = signal('');
+  auditActionFilter = signal('');
+  auditSortDir = signal<'asc' | 'desc'>('desc');
 
   // Dialógusok
   showChargeDialog = signal(false);
@@ -86,7 +93,12 @@ export class SubscriberDetailComponent implements OnInit {
   loadAuditLogs(id: number): void {
     this.auditLogsLoading.set(true);
 
-    this.service.getAuditLogs(id, { per_page: 50 })
+    this.service.getAuditLogs(id, {
+      per_page: 50,
+      search: this.auditSearch() || undefined,
+      action: this.auditActionFilter() || undefined,
+      sort_dir: this.auditSortDir()
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -97,6 +109,35 @@ export class SubscriberDetailComponent implements OnInit {
           this.auditLogsLoading.set(false);
         }
       });
+  }
+
+  // Audit log filter kezelők
+  setAuditSearch(value: string): void {
+    this.auditSearch.set(value);
+    const sub = this.subscriber();
+    if (sub) {
+      this.loadAuditLogs(sub.id);
+    }
+  }
+
+  setAuditActionFilter(value: string): void {
+    this.auditActionFilter.set(value);
+    const sub = this.subscriber();
+    if (sub) {
+      this.loadAuditLogs(sub.id);
+    }
+  }
+
+  clearAuditSearch(): void {
+    this.setAuditSearch('');
+  }
+
+  toggleAuditSort(): void {
+    this.auditSortDir.set(this.auditSortDir() === 'desc' ? 'asc' : 'desc');
+    const sub = this.subscriber();
+    if (sub) {
+      this.loadAuditLogs(sub.id);
+    }
   }
 
   // Stripe linkek
@@ -168,6 +209,16 @@ export class SubscriberDetailComponent implements OnInit {
       studio: 'plan-badge--purple',
     };
     return classes[plan] || '';
+  }
+
+  getActionClass(action: string): string {
+    const classes: Record<string, string> = {
+      view: 'audit-badge--view',
+      charge: 'audit-badge--charge',
+      change_plan: 'audit-badge--change_plan',
+      cancel_subscription: 'audit-badge--cancel',
+    };
+    return classes[action] || 'audit-badge--view';
   }
 
   // Dialógus események

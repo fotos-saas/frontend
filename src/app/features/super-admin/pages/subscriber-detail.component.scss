@@ -243,16 +243,26 @@
   gap: 12px;
 }
 
-.action-btn {
+.detail-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 10px 20px;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  line-height: 1.25;
+
+  lucide-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   &:disabled {
     opacity: 0.5;
@@ -302,68 +312,158 @@
   }
 }
 
-// === AUDIT LOG ===
-.audit-list {
+// === AUDIT LOG FILTERS ===
+// Közös stílusok: .search-box, .search-icon, .search-input, .clear-btn, .filter-select a _list-page.scss-ből
+.audit-filters {
   display: flex;
-  flex-direction: column;
   gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+
+  // Kompaktabb méret az audit log filterekhez
+  .search-box {
+    @extend .search-box;
+    max-width: 320px;
+  }
+
+  .search-icon {
+    @extend .search-icon;
+  }
+
+  .search-input {
+    @extend .search-input;
+    padding: 8px 36px;
+    font-size: 0.875rem;
+    border-radius: 8px;
+  }
+
+  .clear-btn {
+    @extend .clear-btn;
+  }
+
+  .filter-select {
+    @extend .filter-select;
+    min-width: 160px;
+  }
 }
 
-.audit-item {
-  padding: 12px 16px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+// === AUDIT LOG (uses _list-page.scss base styles) ===
+.audit-section {
+  .table-header,
+  .list-row {
+    grid-template-columns: 120px 1fr 140px 130px;
+  }
+}
 
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
+.th-sortable {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--color-primary, #1e3a5f);
   }
 
-  &__action {
-    font-weight: 600;
-    color: #1e293b;
-    font-size: 0.875rem;
+  lucide-icon {
+    color: #64748b;
+    transition: color 0.15s ease;
   }
 
-  &__time {
-    font-size: 0.75rem;
+  &:hover lucide-icon {
+    color: var(--color-primary, #1e3a5f);
+  }
+}
+
+.audit-cell {
+  font-size: 0.8125rem;
+  color: #475569;
+
+  &--details {
     color: #64748b;
   }
 
-  &__meta {
-    display: flex;
-    gap: 12px;
-    font-size: 0.8125rem;
-    color: #64748b;
-  }
-
-  &__admin {
-    font-weight: 500;
-  }
-
-  &__ip {
-    color: #94a3b8;
-  }
-
-  &__details {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid #e2e8f0;
+  &--admin {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 0.8125rem;
-    color: #475569;
+    gap: 2px;
+  }
+
+  &--date {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    text-align: right;
   }
 }
 
-.audit-loading {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.audit-badge {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &--view {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+
+  &--charge {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  &--change_plan {
+    background: #ede9fe;
+    color: #6d28d9;
+  }
+
+  &--cancel {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+}
+
+.audit-ip {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.text-muted {
+  color: #cbd5e1;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .audit-filters {
+    flex-direction: column;
+
+    .search-box {
+      max-width: none;
+    }
+
+    .filter-select {
+      width: 100%;
+    }
+  }
+
+  .audit-section {
+    .table-header {
+      display: none;
+    }
+
+    .list-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .audit-cell--date {
+      text-align: left;
+    }
+  }
 }
 
 // === EMPTY TEXT ===

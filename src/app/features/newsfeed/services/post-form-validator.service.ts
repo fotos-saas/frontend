@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { formatFileSize } from '@shared/utils/formatters.util';
 
 /**
  * Validációs hibák típus
@@ -159,11 +160,10 @@ export class PostFormValidatorService {
 
   /**
    * Fájl méret formázás
+   * @deprecated Használd a `formatFileSize` függvényt a `@shared/utils/formatters.util`-ból
    */
   formatFileSize(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return formatFileSize(bytes);
   }
 
   /**

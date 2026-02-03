@@ -11,6 +11,7 @@ import {
   effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { formatFileSize } from '@shared/utils/formatters.util';
 
 /**
  * Média elem interface (újrahasználható)
@@ -222,9 +223,7 @@ export class MediaEditorComponent {
    * Fájl méret formázás
    */
   formatFileSize(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return formatFileSize(bytes);
   }
 
   /**

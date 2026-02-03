@@ -7,6 +7,7 @@ import {
   computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { formatFileSize } from '@shared/utils/formatters.util';
 
 /**
  * Feltöltendő kép előnézet
@@ -192,12 +193,6 @@ export class MediaUploaderComponent {
    * Fájlméret formázása
    */
   private formatFileSize(bytes: number): string {
-    if (bytes >= 1048576) {
-      return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-    if (bytes >= 1024) {
-      return (bytes / 1024).toFixed(0) + ' KB';
-    }
-    return bytes + ' B';
+    return formatFileSize(bytes);
   }
 }

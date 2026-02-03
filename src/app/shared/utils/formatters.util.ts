@@ -128,3 +128,30 @@ export function formatDate(date: string | null): string {
     day: 'numeric'
   });
 }
+
+// ============================================
+// FÁJLMÉRET FORMÁZÓ
+// ============================================
+
+/**
+ * Fájlméret formázása olvasható formátumban
+ *
+ * @param bytes - Méret byte-ban
+ * @returns Formázott string (pl. "2.5 MB")
+ *
+ * @example
+ * formatFileSize(0) // => "0 B"
+ * formatFileSize(500) // => "500 B"
+ * formatFileSize(1024) // => "1 KB"
+ * formatFileSize(2560) // => "2.5 KB"
+ * formatFileSize(1024 * 1024) // => "1 MB"
+ * formatFileSize(5.5 * 1024 * 1024) // => "5.5 MB"
+ * formatFileSize(1024 * 1024 * 1024) // => "1 GB"
+ */
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}

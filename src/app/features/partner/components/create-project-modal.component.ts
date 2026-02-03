@@ -42,7 +42,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                   [(ngModel)]="schoolSearch"
                   name="schoolSearch"
                   (input)="onSchoolSearch()"
-                  (focus)="showSchoolDropdown = true"
+                  (focus)="onSchoolFocus()"
                   class="form-input"
                   autocomplete="off"
                 />
@@ -95,7 +95,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                   [(ngModel)]="contactSearch"
                   name="contactSearch"
                   (input)="onContactSearch()"
-                  (focus)="showContactDropdown = true"
+                  (focus)="onContactFocus()"
                   class="form-input"
                   autocomplete="off"
                 />
@@ -659,6 +659,22 @@ export class CreateProjectModalComponent {
 
   private schoolSearchTimeout: ReturnType<typeof setTimeout> | null = null;
   private contactSearchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  onSchoolFocus(): void {
+    this.showSchoolDropdown = true;
+    // Ha még nincs betöltve a lista, töltsd be
+    if (this.schools().length === 0) {
+      this.loadSchools();
+    }
+  }
+
+  onContactFocus(): void {
+    this.showContactDropdown = true;
+    // Ha még nincs betöltve a lista, töltsd be
+    if (this.contacts().length === 0) {
+      this.loadContacts();
+    }
+  }
 
   onSchoolSearch(): void {
     if (this.schoolSearchTimeout) {

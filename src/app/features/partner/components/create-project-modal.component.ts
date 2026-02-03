@@ -62,7 +62,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                       type="button"
                       class="school-option"
                       [class.school-option--selected]="selectedSchool?.id === school.id"
-                      (click)="selectSchool(school)"
+                      (mousedown)="selectSchool(school); $event.preventDefault()"
                     >
                       <span class="school-name">{{ school.name }}</span>
                       @if (school.city) {
@@ -116,7 +116,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                       type="button"
                       class="contact-option"
                       [class.contact-option--selected]="selectedContact?.id === contact.id"
-                      (click)="selectContact(contact)"
+                      (mousedown)="selectContact(contact); $event.preventDefault()"
                     >
                       <span class="contact-name">{{ contact.name }}</span>
                       @if (contact.email || contact.phone) {
@@ -674,7 +674,7 @@ export class CreateProjectModalComponent {
     // Kis késleltetés, hogy a dropdown kattintás működjön
     setTimeout(() => {
       this.showSchoolDropdown = false;
-    }, 200);
+    }, 150);
   }
 
   onContactFocus(): void {
@@ -689,7 +689,7 @@ export class CreateProjectModalComponent {
     // Kis késleltetés, hogy a dropdown kattintás működjön
     setTimeout(() => {
       this.showContactDropdown = false;
-    }, 200);
+    }, 150);
   }
 
   onSchoolSearch(): void {

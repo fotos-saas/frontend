@@ -472,6 +472,15 @@ export class PartnerService {
     );
   }
 
+  /**
+   * Projekt törlése
+   */
+  deleteProject(projectId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}`
+    );
+  }
+
   // ============================================
   // SAMPLES & MISSING PERSONS
   // ============================================

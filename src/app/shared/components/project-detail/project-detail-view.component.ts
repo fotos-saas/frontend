@@ -43,24 +43,25 @@ import { ICONS } from '../../constants/icons.constants';
             [display]="'icon-text'"
             (clicked)="back.emit()"
           />
-          <app-qr-button
-            [variant]="'primary'"
-            [isActive]="!!project()!.qrCode"
-            [display]="'icon-text'"
-            (clicked)="openQrModal.emit()"
-          />
-        </div>
-        <div class="mt-4 text-center">
-          <div class="flex items-center justify-center gap-2">
-            <h1 class="text-2xl font-bold text-gray-900">{{ project()!.school?.name ?? 'Ismeretlen iskola' }}</h1>
+          <div class="flex items-center gap-2">
             <button
-              class="p-1.5 text-gray-400 hover:text-primary hover:bg-primary-50 rounded-lg transition-colors"
+              class="p-2 text-gray-500 hover:text-primary hover:bg-primary-50 rounded-lg transition-colors"
               (click)="editProject.emit()"
               title="Projekt szerkesztése"
             >
-              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+              <lucide-icon [name]="ICONS.EDIT" [size]="18" />
+            </button>
+            <button
+              class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              (click)="deleteProject.emit()"
+              title="Projekt törlése"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="18" />
             </button>
           </div>
+        </div>
+        <div class="mt-4 text-center">
+          <h1 class="text-2xl font-bold text-gray-900">{{ project()!.school?.name ?? 'Ismeretlen iskola' }}</h1>
           <p class="mt-1 text-gray-500 flex items-center justify-center gap-1">
             <lucide-icon [name]="ICONS.MAP_PIN" [size]="14" class="inline-flex" />
             {{ project()!.school?.city ?? '' }}
@@ -269,6 +270,7 @@ export class ProjectDetailViewComponent {
   readonly deleteContact = output<ProjectContact>();
   readonly qrCodeChanged = output<QrCode | null>();
   readonly editProject = output<void>();
+  readonly deleteProject = output<void>();
 
   formatDateTime(dateStr: string): string {
     const date = new Date(dateStr);

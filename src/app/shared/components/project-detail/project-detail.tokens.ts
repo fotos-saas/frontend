@@ -9,6 +9,7 @@ import { ProjectContact, ProjectDetailData, QrCode } from './project-detail.type
 export interface IProjectDetailService {
   getProjectDetails(id: number): Observable<any>;
   deleteContact(projectId: number, contactId: number): Observable<any>;
+  deleteProject(projectId: number): Observable<any>;
   getProjectQrCode(projectId: number): Observable<{ hasQrCode: boolean; qrCode?: QrCode }>;
   generateQrCode(projectId: number): Observable<{ qrCode: QrCode }>;
   deactivateQrCode(projectId: number): Observable<any>;

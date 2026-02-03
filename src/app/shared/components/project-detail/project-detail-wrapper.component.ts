@@ -62,6 +62,7 @@ import { ICONS } from '../../constants/icons.constants';
         (openContactModal)="openContactModal($event)"
         (deleteContact)="confirmDeleteContact($event)"
         (editProject)="openEditProjectModal()"
+        (deleteProject)="confirmDeleteProject()"
       />
     </div>
 
@@ -74,7 +75,7 @@ import { ICONS } from '../../constants/icons.constants';
     <!-- Project Edit Modal container -->
     <ng-container #projectEditModalContainer></ng-container>
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Delete Contact Confirmation Modal -->
     @if (showDeleteConfirm()) {
       <div class="dialog-backdrop" (click)="cancelDelete()">
         <div class="dialog-panel max-w-sm p-5" (click)="$event.stopPropagation()">
@@ -97,6 +98,34 @@ import { ICONS } from '../../constants/icons.constants';
               (click)="deleteContact()"
               [disabled]="deleting()"
             >{{ deleting() ? 'Törlés...' : 'Törlés' }}</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Delete Project Confirmation Modal -->
+    @if (showDeleteProjectConfirm()) {
+      <div class="dialog-backdrop" (click)="cancelDeleteProject()">
+        <div class="dialog-panel max-w-sm p-5" (click)="$event.stopPropagation()">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <lucide-icon [name]="ICONS.DELETE" [size]="28" class="text-red-500" />
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Projekt törlése</h3>
+            <p class="text-sm text-gray-600 mb-5">
+              Biztosan törölni szeretnéd a <strong>{{ projectData()?.name }}</strong> projektet? Ez a művelet nem visszavonható!
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <button
+              class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+              (click)="cancelDeleteProject()"
+            >Mégse</button>
+            <button
+              class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
+              (click)="deleteProjectConfirmed()"
+              [disabled]="deletingProject()"
+            >{{ deletingProject() ? 'Törlés...' : 'Törlés' }}</button>
           </div>
         </div>
       </div>
@@ -136,10 +165,14 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   showContactModal = signal(false);
   editingContact = signal<ProjectContact | null>(null);
 
-  // Delete confirmation states
+  // Delete contact confirmation states
   showDeleteConfirm = signal(false);
   deletingContact = signal<ProjectContact | null>(null);
   deleting = signal(false);
+
+  // Delete project confirmation states
+  showDeleteProjectConfirm = signal(false);
+  deletingProject = signal(false);
 
   // Dynamic component references
   private qrModalRef: ComponentRef<any> | null = null;
@@ -312,5 +345,33 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     if (id) {
       this.loadProject(id);
     }
+  }
+
+  // Project Delete methods
+  confirmDeleteProject(): void {
+    this.showDeleteProjectConfirm.set(true);
+  }
+
+  cancelDeleteProject(): void {
+    this.showDeleteProjectConfirm.set(false);
+  }
+
+  deleteProjectConfirmed(): void {
+    const projectId = this.projectData()?.id;
+    if (!projectId) return;
+
+    this.deletingProject.set(true);
+    this.projectService.deleteProject(projectId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => {
+        this.deletingProject.set(false);
+        this.cancelDeleteProject();
+        this.goBack();
+      },
+      error: () => {
+        this.deletingProject.set(false);
+      },
+    });
   }
 }

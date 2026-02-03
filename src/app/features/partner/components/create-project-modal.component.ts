@@ -43,7 +43,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                   name="schoolSearch"
                   (input)="onSchoolSearch()"
                   (focus)="onSchoolFocus()"
-                  (blur)="onSchoolBlur()"
+                  (blur)="onSchoolBlur($event)"
                   class="form-input"
                   autocomplete="off"
                 />
@@ -104,7 +104,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                   name="contactSearch"
                   (input)="onContactSearch()"
                   (focus)="onContactFocus()"
-                  (blur)="onContactBlur()"
+                  (blur)="onContactBlur($event)"
                   class="form-input"
                   autocomplete="off"
                 />
@@ -706,11 +706,13 @@ export class CreateProjectModalComponent {
     }
   }
 
-  onSchoolBlur(): void {
-    // Kis késleltetés, hogy a dropdown kattintás működjön
-    setTimeout(() => {
-      this.showSchoolDropdown = false;
-    }, 150);
+  onSchoolBlur(event: FocusEvent): void {
+    // Ha a dropdown-ra kattintottak, ne zárd be
+    const relatedTarget = event.relatedTarget as HTMLElement;
+    if (relatedTarget?.closest('.school-dropdown')) {
+      return;
+    }
+    this.showSchoolDropdown = false;
   }
 
   onContactFocus(): void {
@@ -721,11 +723,13 @@ export class CreateProjectModalComponent {
     }
   }
 
-  onContactBlur(): void {
-    // Kis késleltetés, hogy a dropdown kattintás működjön
-    setTimeout(() => {
-      this.showContactDropdown = false;
-    }, 150);
+  onContactBlur(event: FocusEvent): void {
+    // Ha a dropdown-ra kattintottak, ne zárd be
+    const relatedTarget = event.relatedTarget as HTMLElement;
+    if (relatedTarget?.closest('.contact-dropdown')) {
+      return;
+    }
+    this.showContactDropdown = false;
   }
 
   onSchoolSearch(): void {

@@ -481,6 +481,16 @@ export class PartnerService {
     );
   }
 
+  /**
+   * Tudnak róla státusz toggle
+   */
+  toggleProjectAware(projectId: number): Observable<{ success: boolean; message: string; isAware: boolean }> {
+    return this.http.patch<{ success: boolean; message: string; isAware: boolean }>(
+      `${this.baseUrl}/projects/${projectId}/toggle-aware`,
+      {}
+    );
+  }
+
   // ============================================
   // SAMPLES & MISSING PERSONS
   // ============================================

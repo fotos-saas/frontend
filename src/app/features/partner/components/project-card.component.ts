@@ -48,13 +48,16 @@ import { ICONS } from '../../../shared/constants/icons.constants';
       </div>
 
       <!-- Col 3: Tudnak róla -->
-      <div class="col col-aware">
+      <div
+        class="col col-aware col-aware--clickable"
+        (click)="onAwareClick($event)"
+        [attr.title]="project.isAware ? 'Tudnak róla - kattints a módosításhoz' : 'Nem tudnak róla - kattints a módosításhoz'"
+      >
         <lucide-icon
           [name]="project.isAware ? ICONS.CHECK_CIRCLE : ICONS.CIRCLE"
           [size]="16"
           [class.aware--yes]="project.isAware"
           [class.aware--no]="!project.isAware"
-          [attr.data-tooltip]="project.isAware ? 'Tudnak róla' : 'Nem tudnak róla'"
         />
       </div>
 
@@ -178,6 +181,18 @@ import { ICONS } from '../../../shared/constants/icons.constants';
     /* Col: Tudnak róla */
     .col-aware {
       justify-content: center;
+    }
+
+    .col-aware--clickable {
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 4px;
+      margin: -4px;
+      transition: background 0.15s ease;
+    }
+
+    .col-aware--clickable:hover {
+      background: #f1f5f9;
     }
 
     .aware--yes {
@@ -367,6 +382,7 @@ export class ProjectCardComponent {
   @Output() samplesClick = new EventEmitter<PartnerProjectListItem>();
   @Output() missingClick = new EventEmitter<PartnerProjectListItem>();
   @Output() qrClick = new EventEmitter<PartnerProjectListItem>();
+  @Output() awareClick = new EventEmitter<PartnerProjectListItem>();
 
   /**
    * Rövidített státusz címke a badge-hez
@@ -443,5 +459,10 @@ export class ProjectCardComponent {
   onQrClick(event: MouseEvent): void {
     event.stopPropagation();
     this.qrClick.emit(this.project);
+  }
+
+  onAwareClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.awareClick.emit(this.project);
   }
 }

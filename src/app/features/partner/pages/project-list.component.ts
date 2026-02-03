@@ -189,6 +189,7 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
               (samplesClick)="openSamplesModal($event)"
               (missingClick)="openMissingModal($event)"
               (qrClick)="openQrModal($event)"
+              (awareClick)="toggleAware($event)"
             />
           }
         </div>
@@ -999,5 +1000,26 @@ export class PartnerProjectListComponent implements OnInit {
   onUploadWizardCompleted(result: { assignedCount: number }): void {
     this.closeUploadWizard();
     this.loadProjects();
+  }
+
+  /**
+   * Toggle "Tudnak róla" státusz
+   */
+  toggleAware(project: PartnerProjectListItem): void {
+    this.partnerService.toggleProjectAware(project.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          // Frissítjük lokálisan a projektet
+          this.projects.update(projects =>
+            projects.map(p =>
+              p.id === project.id ? { ...p, isAware: response.isAware } : p
+            )
+          );
+        },
+        error: (err) => {
+          console.error('Failed to toggle aware:', err);
+        }
+      });
   }
 }

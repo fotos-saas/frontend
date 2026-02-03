@@ -315,6 +315,15 @@ export interface CreateSchoolRequest {
 }
 
 /**
+ * Projekt limitek interface
+ */
+export interface ProjectLimits {
+  current: number;
+  max: number | null;
+  can_create: boolean;
+}
+
+/**
  * Pagináció response interface
  */
 export interface PaginatedResponse<T> {
@@ -325,6 +334,13 @@ export interface PaginatedResponse<T> {
   total: number;
   from: number | null;
   to: number | null;
+}
+
+/**
+ * Projekt lista válasz interface (limitekkel)
+ */
+export interface ProjectListResponse extends PaginatedResponse<PartnerProjectListItem> {
+  limits?: ProjectLimits;
 }
 
 /**
@@ -377,7 +393,7 @@ export class PartnerService {
   // ============================================
 
   /**
-   * Projektek listázása (paginált)
+   * Projektek listázása (paginált, limitekkel)
    */
   getProjects(params?: {
     page?: number;
@@ -388,7 +404,7 @@ export class PartnerService {
     status?: string;
     is_aware?: boolean;
     has_draft?: boolean;
-  }): Observable<PaginatedResponse<PartnerProjectListItem>> {
+  }): Observable<ProjectListResponse> {
     let httpParams = new HttpParams();
 
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());
@@ -400,7 +416,7 @@ export class PartnerService {
     if (params?.is_aware !== undefined) httpParams = httpParams.set('is_aware', params.is_aware.toString());
     if (params?.has_draft !== undefined) httpParams = httpParams.set('has_draft', params.has_draft.toString());
 
-    return this.http.get<PaginatedResponse<PartnerProjectListItem>>(`${this.baseUrl}/projects`, { params: httpParams });
+    return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });
   }
 
   /**

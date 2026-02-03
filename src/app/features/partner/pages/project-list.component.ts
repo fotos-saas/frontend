@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
-import { PartnerService, PartnerProjectListItem, SampleItem } from '../services/partner.service';
+import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../services/partner.service';
 import { ProjectCardComponent } from '../components/project-card.component';
 import { MissingPersonsModalComponent } from '../components/missing-persons-modal';
 import { CreateProjectModalComponent } from '../components/create-project-modal.component';
@@ -12,6 +12,7 @@ import { QrCodeModalComponent } from '../components/qr-code-modal.component';
 import { PhotoUploadWizardComponent } from '../components/photo-upload-wizard/photo-upload-wizard.component';
 import { SamplesLightboxComponent, SampleLightboxItem } from '../../../shared/components/samples-lightbox';
 import { ExpandableFiltersComponent, FilterConfig, FilterChangeEvent } from '../../../shared/components/expandable-filters';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter-state';
 
@@ -25,6 +26,7 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
     CommonModule,
     FormsModule,
     LucideAngularModule,
+    MatTooltipModule,
     ProjectCardComponent,
     MissingPersonsModalComponent,
     CreateProjectModalComponent,
@@ -38,11 +40,17 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
       <header class="page-header">
         <div class="header-content">
           <h1>Projektek</h1>
-          <p class="subtitle">{{ totalProjects() }} projekt összesen</p>
+          @if (projectLimits()?.max !== null) {
+            <p class="subtitle">{{ projectLimits()?.current }} / {{ projectLimits()?.max }} projekt</p>
+          } @else {
+            <p class="subtitle">{{ totalProjects() }} projekt összesen</p>
+          }
         </div>
         <button
           type="button"
           class="btn-primary"
+          [disabled]="projectLimits() && !projectLimits()!.can_create"
+          [matTooltip]="projectLimits() && !projectLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum projektszámot' : ''"
           (click)="openCreateModal()"
         >
           <lucide-icon [name]="ICONS.PLUS" [size]="18" />
@@ -306,8 +314,13 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
       transition: all 0.15s ease;
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
       background: var(--color-primary-dark, #152a45);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     /* Filters */
@@ -756,6 +769,7 @@ export class PartnerProjectListComponent implements OnInit {
   projects = signal<PartnerProjectListItem[]>([]);
   totalPages = signal(1);
   totalProjects = signal(0);
+  projectLimits = signal<ProjectLimits | null>(null);
 
   // Státusz opciók (TabloProjectStatus enum alapján)
   readonly statusOptions = [
@@ -858,6 +872,7 @@ export class PartnerProjectListComponent implements OnInit {
           this.projects.set(response.data);
           this.totalPages.set(response.last_page);
           this.totalProjects.set(response.total);
+          this.projectLimits.set(response.limits ?? null);
           this.filterState.loading.set(false);
         },
         error: (err) => {

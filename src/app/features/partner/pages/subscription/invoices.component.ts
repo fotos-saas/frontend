@@ -1,9 +1,11 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, Invoice } from '../../services/subscription.service';
+import { LoggerService } from '../../../../core/services/logger.service';
 import { ICONS, getInvoiceStatusLabel } from '../../../../shared/constants';
 
 /**
@@ -477,7 +479,9 @@ import { ICONS, getInvoiceStatusLabel } from '../../../../shared/constants';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InvoicesComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly logger = inject(LoggerService);
   protected readonly ICONS = ICONS;
 
   invoices = signal<Invoice[]>([]);
@@ -495,19 +499,21 @@ export class InvoicesComponent implements OnInit {
     this.loading.set(true);
     this.subscriptionService.getInvoices({
       status: this.statusFilter() || undefined,
-    }).subscribe({
-      next: (res) => {
-        this.invoices.set(res.invoices);
-        this.hasMore.set(res.has_more);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to load invoices:', err);
-        this.invoices.set([]);
-        this.hasMore.set(false);
-        this.loading.set(false);
-      }
-    });
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.invoices.set(res.invoices);
+          this.hasMore.set(res.has_more);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load invoices:', err);
+          this.invoices.set([]);
+          this.hasMore.set(false);
+          this.loading.set(false);
+        }
+      });
   }
 
   loadMore(): void {
@@ -520,17 +526,19 @@ export class InvoicesComponent implements OnInit {
     this.subscriptionService.getInvoices({
       status: this.statusFilter() || undefined,
       starting_after: lastInvoice.id,
-    }).subscribe({
-      next: (res) => {
-        this.invoices.update(prev => [...prev, ...res.invoices]);
-        this.hasMore.set(res.has_more);
-        this.loadingMore.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to load more invoices:', err);
-        this.loadingMore.set(false);
-      }
-    });
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.invoices.update(prev => [...prev, ...res.invoices]);
+          this.hasMore.set(res.has_more);
+          this.loadingMore.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load more invoices:', err);
+          this.loadingMore.set(false);
+        }
+      });
   }
 
   onStatusFilterChange(value: string): void {
@@ -540,16 +548,18 @@ export class InvoicesComponent implements OnInit {
 
   openPortal(): void {
     this.portalLoading.set(true);
-    this.subscriptionService.openPortal().subscribe({
-      next: (res) => {
-        window.open(res.portal_url, '_blank');
-        this.portalLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to open portal:', err);
-        this.portalLoading.set(false);
-      }
-    });
+    this.subscriptionService.openPortal()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          window.open(res.portal_url, '_blank');
+          this.portalLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to open portal:', err);
+          this.portalLoading.set(false);
+        }
+      });
   }
 
   formatDate(dateStr: string): string {

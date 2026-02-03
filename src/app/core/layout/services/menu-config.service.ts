@@ -109,17 +109,8 @@ export class MenuConfigService {
 
   /**
    * Alsó menüelemek (bottom position)
-   * Jelenleg üres, mert nincs implementált settings oldal
-   * TODO: Engedélyezni, ha lesz settings route
    */
-  readonly bottomMenuItems = computed<MenuItem[]>(() => [
-    // {
-    //   id: 'settings',
-    //   label: 'beállítások',
-    //   icon: 'settings',
-    //   route: '/settings',
-    // },
-  ]);
+  readonly bottomMenuItems = computed<MenuItem[]>(() => []);
 
   /**
    * Összes menüelem (flat list a kereséshez)
@@ -261,12 +252,9 @@ export class MenuConfigService {
   /**
    * Képválasztás menüpont látható-e?
    * Csak ha a projekt engedélyezte a tablo workflow-t (hasPhotoSelection=true)
-   * TODO: Backend kell küldenie hasPhotoSelection mezőt
    */
   private showPhotoSelection(project: ProjectModeInfo | null): boolean {
     if (!project) return false;
-    // TEMP: Mindig mutassuk teszteléshez, amíg a backend nem küldi a mezőt
-    return true;
-    // return !!project.hasPhotoSelection;
+    return !!project.hasPhotoSelection;
   }
 }

@@ -1,9 +1,11 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, output } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, output, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AddonService, Addon, AddonListResponse } from '../../../../services/addon.service';
 import { ToastService } from '../../../../../../core/services/toast.service';
+import { LoggerService } from '../../../../../../core/services/logger.service';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -355,8 +357,10 @@ import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../../../s
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddonsCardComponent implements OnInit {
-  private addonService = inject(AddonService);
-  private toastService = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly addonService = inject(AddonService);
+  private readonly toastService = inject(ToastService);
+  private readonly logger = inject(LoggerService);
 
   protected readonly ICONS = ICONS;
 
@@ -379,41 +383,45 @@ export class AddonsCardComponent implements OnInit {
 
   private loadAddons(): void {
     this.isLoading.set(true);
-    this.addonService.getAddons().subscribe({
-      next: (response) => {
-        this.addons.set(response.addons);
-        this.plan.set(response.plan);
-        this.billingCycle.set(response.billing_cycle);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to load addons:', err);
-        this.isLoading.set(false);
-        this.toastService.error('Hiba', 'Nem sikerült betölteni az addonokat.');
-      }
-    });
+    this.addonService.getAddons()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.addons.set(response.addons);
+          this.plan.set(response.plan);
+          this.billingCycle.set(response.billing_cycle);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load addons:', err);
+          this.isLoading.set(false);
+          this.toastService.error('Hiba', 'Nem sikerült betölteni az addonokat.');
+        }
+      });
   }
 
   handleSubscribe(addon: Addon): void {
     this.isSubmitting.set(true);
     this.processingAddon.set(addon.key);
 
-    this.addonService.subscribe(addon.key).subscribe({
-      next: () => {
-        this.toastService.success('Siker', `${addon.name} sikeresen aktiválva!`);
-        this.loadAddons();
-        this.isSubmitting.set(false);
-        this.processingAddon.set(null);
-        this.addonChanged.emit();
-      },
-      error: (err) => {
-        console.error('Failed to subscribe to addon:', err);
-        const message = err.error?.message || 'Nem sikerült aktiválni az addont.';
-        this.toastService.error('Hiba', message);
-        this.isSubmitting.set(false);
-        this.processingAddon.set(null);
-      }
-    });
+    this.addonService.subscribe(addon.key)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toastService.success('Siker', `${addon.name} sikeresen aktiválva!`);
+          this.loadAddons();
+          this.isSubmitting.set(false);
+          this.processingAddon.set(null);
+          this.addonChanged.emit();
+        },
+        error: (err) => {
+          this.logger.error('Failed to subscribe to addon:', err);
+          const message = err.error?.message || 'Nem sikerült aktiválni az addont.';
+          this.toastService.error('Hiba', message);
+          this.isSubmitting.set(false);
+          this.processingAddon.set(null);
+        }
+      });
   }
 
   openCancelDialog(addon: Addon): void {
@@ -440,21 +448,23 @@ export class AddonsCardComponent implements OnInit {
 
     this.isSubmitting.set(true);
 
-    this.addonService.cancel(addon.key).subscribe({
-      next: () => {
-        this.toastService.success('Siker', `${addon.name} sikeresen lemondva.`);
-        this.closeCancelDialog();
-        this.loadAddons();
-        this.isSubmitting.set(false);
-        this.addonChanged.emit();
-      },
-      error: (err) => {
-        console.error('Failed to cancel addon:', err);
-        const message = err.error?.message || 'Nem sikerült lemondani az addont.';
-        this.toastService.error('Hiba', message);
-        this.isSubmitting.set(false);
-      }
-    });
+    this.addonService.cancel(addon.key)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toastService.success('Siker', `${addon.name} sikeresen lemondva.`);
+          this.closeCancelDialog();
+          this.loadAddons();
+          this.isSubmitting.set(false);
+          this.addonChanged.emit();
+        },
+        error: (err) => {
+          this.logger.error('Failed to cancel addon:', err);
+          const message = err.error?.message || 'Nem sikerült lemondani az addont.';
+          this.toastService.error('Hiba', message);
+          this.isSubmitting.set(false);
+        }
+      });
   }
 
   formatPrice(price: number): string {

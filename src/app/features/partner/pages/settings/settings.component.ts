@@ -1,10 +1,12 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, SubscriptionInfo } from '../../services/subscription.service';
 import { StorageService, StorageUsage } from '../../services/storage.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { LoggerService } from '../../../../core/services/logger.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { SubscriptionCardComponent } from './components/subscription-card.component';
 import { SubscriptionActionsComponent } from './components/subscription-actions.component';
@@ -268,9 +270,11 @@ import { AddonsCardComponent } from './components/addons-card/addons-card.compon
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PartnerSettingsComponent implements OnInit {
-  private subscriptionService = inject(SubscriptionService);
-  private storageService = inject(StorageService);
-  private toastService = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly subscriptionService = inject(SubscriptionService);
+  private readonly storageService = inject(StorageService);
+  private readonly toastService = inject(ToastService);
+  private readonly logger = inject(LoggerService);
 
   protected readonly ICONS = ICONS;
 
@@ -298,96 +302,108 @@ export class PartnerSettingsComponent implements OnInit {
 
   private loadSubscriptionInfo(): void {
     this.isLoading.set(true);
-    this.subscriptionService.getSubscription().subscribe({
-      next: (info) => {
-        this.subscriptionInfo.set(info);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to load subscription:', err);
-        this.isLoading.set(false);
-        this.toastService.error('Hiba', 'Nem sikerült betölteni az előfizetési adatokat.');
-      }
-    });
+    this.subscriptionService.getSubscription()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (info) => {
+          this.subscriptionInfo.set(info);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load subscription:', err);
+          this.isLoading.set(false);
+          this.toastService.error('Hiba', 'Nem sikerült betölteni az előfizetési adatokat.');
+        }
+      });
   }
 
   handleOpenPortal(): void {
     this.isActionLoading.set(true);
-    this.subscriptionService.openPortal().subscribe({
-      next: (response) => {
-        window.open(response.portal_url, '_blank');
-        this.isActionLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to open portal:', err);
-        this.toastService.error('Hiba', 'Nem sikerült megnyitni a fiókkezelőt.');
-        this.isActionLoading.set(false);
-      }
-    });
+    this.subscriptionService.openPortal()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          window.open(response.portal_url, '_blank');
+          this.isActionLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to open portal:', err);
+          this.toastService.error('Hiba', 'Nem sikerült megnyitni a fiókkezelőt.');
+          this.isActionLoading.set(false);
+        }
+      });
   }
 
   handlePause(): void {
     this.isActionLoading.set(true);
-    this.subscriptionService.pause().subscribe({
-      next: (response) => {
-        this.toastService.success('Siker', response.message);
-        this.loadSubscriptionInfo();
-        this.isActionLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to pause:', err);
-        this.toastService.error('Hiba', 'Nem sikerült szüneteltetni az előfizetést.');
-        this.isActionLoading.set(false);
-      }
-    });
+    this.subscriptionService.pause()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.toastService.success('Siker', response.message);
+          this.loadSubscriptionInfo();
+          this.isActionLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to pause:', err);
+          this.toastService.error('Hiba', 'Nem sikerült szüneteltetni az előfizetést.');
+          this.isActionLoading.set(false);
+        }
+      });
   }
 
   handleUnpause(): void {
     this.isActionLoading.set(true);
-    this.subscriptionService.unpause().subscribe({
-      next: (response) => {
-        this.toastService.success('Siker', response.message);
-        this.loadSubscriptionInfo();
-        this.isActionLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to unpause:', err);
-        this.toastService.error('Hiba', 'Nem sikerült feloldani a szüneteltetést.');
-        this.isActionLoading.set(false);
-      }
-    });
+    this.subscriptionService.unpause()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.toastService.success('Siker', response.message);
+          this.loadSubscriptionInfo();
+          this.isActionLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to unpause:', err);
+          this.toastService.error('Hiba', 'Nem sikerült feloldani a szüneteltetést.');
+          this.isActionLoading.set(false);
+        }
+      });
   }
 
   handleCancel(): void {
     this.isActionLoading.set(true);
-    this.subscriptionService.cancel().subscribe({
-      next: (response) => {
-        this.toastService.success('Siker', response.message);
-        this.loadSubscriptionInfo();
-        this.isActionLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to cancel:', err);
-        this.toastService.error('Hiba', 'Nem sikerült lemondani az előfizetést.');
-        this.isActionLoading.set(false);
-      }
-    });
+    this.subscriptionService.cancel()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.toastService.success('Siker', response.message);
+          this.loadSubscriptionInfo();
+          this.isActionLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to cancel:', err);
+          this.toastService.error('Hiba', 'Nem sikerült lemondani az előfizetést.');
+          this.isActionLoading.set(false);
+        }
+      });
   }
 
   handleResume(): void {
     this.isActionLoading.set(true);
-    this.subscriptionService.resume().subscribe({
-      next: (response) => {
-        this.toastService.success('Siker', response.message);
-        this.loadSubscriptionInfo();
-        this.isActionLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to resume:', err);
-        this.toastService.error('Hiba', 'Nem sikerült folytatni az előfizetést.');
-        this.isActionLoading.set(false);
-      }
-    });
+    this.subscriptionService.resume()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.toastService.success('Siker', response.message);
+          this.loadSubscriptionInfo();
+          this.isActionLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to resume:', err);
+          this.toastService.error('Hiba', 'Nem sikerült folytatni az előfizetést.');
+          this.isActionLoading.set(false);
+        }
+      });
   }
 
   openDeleteDialog(): void {
@@ -400,22 +416,24 @@ export class PartnerSettingsComponent implements OnInit {
 
   handleDeleteAccount(): void {
     this.isDeleting.set(true);
-    this.subscriptionService.deleteAccount().subscribe({
-      next: (response) => {
-        this.toastService.success('Fiók törölve', response.message);
-        this.closeDeleteDialog();
-        this.isDeleting.set(false);
-        // Logout after deletion
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
-      },
-      error: (err) => {
-        console.error('Failed to delete account:', err);
-        this.toastService.error('Hiba', 'Nem sikerült törölni a fiókot.');
-        this.isDeleting.set(false);
-      }
-    });
+    this.subscriptionService.deleteAccount()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.toastService.success('Fiók törölve', response.message);
+          this.closeDeleteDialog();
+          this.isDeleting.set(false);
+          // Logout after deletion
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
+        },
+        error: (err) => {
+          this.logger.error('Failed to delete account:', err);
+          this.toastService.error('Hiba', 'Nem sikerült törölni a fiókot.');
+          this.isDeleting.set(false);
+        }
+      });
   }
 
   // ============================================
@@ -424,17 +442,19 @@ export class PartnerSettingsComponent implements OnInit {
 
   private loadStorageUsage(): void {
     this.isStorageLoading.set(true);
-    this.storageService.getUsage().subscribe({
-      next: (usage) => {
-        this.storageUsage.set(usage);
-        this.isStorageLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to load storage usage:', err);
-        this.isStorageLoading.set(false);
-        this.toastService.error('Hiba', 'Nem sikerült betölteni a tárhely adatokat.');
-      }
-    });
+    this.storageService.getUsage()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (usage) => {
+          this.storageUsage.set(usage);
+          this.isStorageLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load storage usage:', err);
+          this.isStorageLoading.set(false);
+          this.toastService.error('Hiba', 'Nem sikerült betölteni a tárhely adatokat.');
+        }
+      });
   }
 
   openStoragePurchaseDialog(): void {
@@ -447,20 +467,22 @@ export class PartnerSettingsComponent implements OnInit {
 
   handleStoragePurchase(gb: number): void {
     this.isStorageSubmitting.set(true);
-    this.storageService.setAddon(gb).subscribe({
-      next: (response) => {
-        this.toastService.success('Siker', response.message);
-        this.loadStorageUsage();
-        this.closeStoragePurchaseDialog();
-        this.isStorageSubmitting.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to update storage addon:', err);
-        const message = err.error?.message || 'Nem sikerült módosítani az extra tárhelyet.';
-        this.toastService.error('Hiba', message);
-        this.isStorageSubmitting.set(false);
-      }
-    });
+    this.storageService.setAddon(gb)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.toastService.success('Siker', response.message);
+          this.loadStorageUsage();
+          this.closeStoragePurchaseDialog();
+          this.isStorageSubmitting.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to update storage addon:', err);
+          const message = err.error?.message || 'Nem sikerült módosítani az extra tárhelyet.';
+          this.toastService.error('Hiba', message);
+          this.isStorageSubmitting.set(false);
+        }
+      });
   }
 
   // ============================================

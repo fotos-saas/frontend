@@ -43,6 +43,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                   name="schoolSearch"
                   (input)="onSchoolSearch()"
                   (focus)="onSchoolFocus()"
+                  (blur)="onSchoolBlur()"
                   class="form-input"
                   autocomplete="off"
                 />
@@ -96,6 +97,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                   name="contactSearch"
                   (input)="onContactSearch()"
                   (focus)="onContactFocus()"
+                  (blur)="onContactBlur()"
                   class="form-input"
                   autocomplete="off"
                 />
@@ -668,12 +670,26 @@ export class CreateProjectModalComponent {
     }
   }
 
+  onSchoolBlur(): void {
+    // Kis késleltetés, hogy a dropdown kattintás működjön
+    setTimeout(() => {
+      this.showSchoolDropdown = false;
+    }, 200);
+  }
+
   onContactFocus(): void {
     this.showContactDropdown = true;
     // Ha még nincs betöltve a lista, töltsd be
     if (this.contacts().length === 0) {
       this.loadContacts();
     }
+  }
+
+  onContactBlur(): void {
+    // Kis késleltetés, hogy a dropdown kattintás működjön
+    setTimeout(() => {
+      this.showContactDropdown = false;
+    }, 200);
   }
 
   onSchoolSearch(): void {

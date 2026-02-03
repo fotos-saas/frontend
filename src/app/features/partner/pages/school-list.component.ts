@@ -7,7 +7,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, SchoolListItem, SchoolItem, SchoolLimits } from '../services/partner.service';
 import { SchoolEditModalComponent } from '../components/school-edit-modal.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter-state';
 
@@ -126,6 +126,14 @@ export class PartnerSchoolListComponent implements OnInit {
   closeDeleteConfirm(): void {
     this.showDeleteConfirm.set(false);
     this.selectedSchool.set(null);
+  }
+
+  onDeleteConfirmResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      this.deleteSchool();
+    } else {
+      this.closeDeleteConfirm();
+    }
   }
 
   deleteSchool(): void {

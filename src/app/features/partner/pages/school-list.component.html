@@ -172,8 +172,7 @@
     [message]="'Biztosan törölni szeretnéd a(z) ' + selectedSchool()?.name + ' iskolát?'"
     confirmText="Törlés"
     cancelText="Mégse"
-    variant="danger"
-    (confirmed)="deleteSchool()"
-    (cancelled)="closeDeleteConfirm()"
+    confirmType="danger"
+    (resultEvent)="onDeleteConfirmResult($event)"
   />
 }

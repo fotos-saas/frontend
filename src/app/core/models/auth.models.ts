@@ -61,6 +61,8 @@ export interface TabloProject {
   schoolName: string | null;
   className: string | null;
   classYear: string | null;
+  /** Partner ID (Sentry context-hez) */
+  partnerId?: number | null;
   partnerName?: string | null;
   partnerEmail?: string | null;
   partnerPhone?: string | null;
@@ -126,6 +128,8 @@ export interface AuthUser {
   roles?: string[];
   /** Jelszó be van-e állítva (QR regisztráció után false) */
   passwordSet?: boolean;
+  /** Partner ID (marketer/partner felhasználóknál) */
+  partner_id?: number | null;
 }
 
 /**

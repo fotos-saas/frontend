@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   HttpRequest,
   HttpHandler,
@@ -10,6 +10,8 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ToastService } from '../services/toast.service';
 import { LoggerService } from '../services/logger.service';
+import { SentryService } from '../services/sentry.service';
+import { ErrorBoundaryService } from '../services/error-boundary.service';
 
 /**
  * Error Interceptor - Központosított HTTP hibakezelés
@@ -32,6 +34,8 @@ import { LoggerService } from '../services/logger.service';
  */
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
+  private sentryService = inject(SentryService);
+  private errorBoundary = inject(ErrorBoundaryService);
 
   constructor(
     private toastService: ToastService,
@@ -60,6 +64,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   private handleError(error: HttpErrorResponse, url: string): void {
     let title = 'Hiba';
     let message = 'Ismeretlen hiba történt.';
+    let showDialog = false;
 
     switch (error.status) {
       case 0:
@@ -97,29 +102,48 @@ export class ErrorInterceptor implements HttpInterceptor {
       case 500:
         title = 'Szerverhiba';
         message = 'Belső szerverhiba történt. Kérlek próbáld újra később.';
+        showDialog = true;
         break;
 
       case 502:
         title = 'Szerver nem elérhető';
         message = 'A szerver ideiglenesen nem elérhető.';
+        showDialog = true;
         break;
 
       case 503:
         title = 'Karbantartás';
         message = 'A szerver karbantartás alatt. Kérlek próbáld újra később.';
+        showDialog = true;
         break;
 
       case 504:
         title = 'Időtúllépés';
         message = 'A szerver nem válaszolt időben. Kérlek próbáld újra.';
+        showDialog = true;
         break;
 
       default:
         if (error.status >= 500) {
           title = 'Szerverhiba';
           message = 'Váratlan hiba történt. Kérlek próbáld újra később.';
+          showDialog = true;
         }
         break;
+    }
+
+    // 5xx hibáknál Sentry-nek küldjük és dialógust jelenítünk meg
+    if (showDialog) {
+      const eventId = this.sentryService.captureException(error, {
+        url,
+        status: error.status,
+        statusText: error.statusText,
+        errorBody: error.error
+      });
+
+      if (eventId) {
+        this.errorBoundary.reportError(error, eventId);
+      }
     }
 
     // Toast megjelenítése (hosszabb időtartam súlyosabb hibáknál)

@@ -7,5 +7,8 @@ export const environment = {
   wsScheme: 'https',
   wsKey: 'tablo-production-key',
   wsCluster: 'mt1',
-  wsEnabled: true
+  wsEnabled: true,
+  // Sentry DSN - Coolify env-ből: SENTRY_DSN
+  // Ha üres, a Sentry nem inicializálódik
+  sentryDsn: ''
 };

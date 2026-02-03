@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -10,9 +10,14 @@ import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 
+// Sentry
+import { provideSentry, SentryService } from './core/services/sentry.service';
+
 // Standalone komponensek amik az AppComponent-ben kellenek
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { TopLoadingBarComponent } from './shared/components/top-loading-bar/top-loading-bar.component';
+import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
+import { ErrorFeedbackDialogComponent } from './shared/components/error-feedback-dialog/error-feedback-dialog.component';
 
 // Lucide ikonok globális konfigurálása
 import {
@@ -124,7 +129,14 @@ import {
   // Audit log toggle
   Eye,
   // Loading spinner
-  Loader2
+  Loader2,
+  // Biometric / Security
+  ScanFace,
+  Fingerprint,
+  ShieldCheck,
+  // Network / Offline
+  Wifi,
+  WifiOff
 } from 'lucide-angular';
 
 /**
@@ -241,7 +253,14 @@ const LUCIDE_ICONS = {
   // Audit log toggle
   Eye,
   // Loading spinner
-  Loader2
+  Loader2,
+  // Biometric / Security
+  ScanFace,
+  Fingerprint,
+  ShieldCheck,
+  // Network / Offline
+  Wifi,
+  WifiOff
 };
 
 @NgModule({
@@ -258,10 +277,23 @@ const LUCIDE_ICONS = {
         ToastComponent,
         // Top Loading Bar - navigáció közben jelenik meg
         TopLoadingBarComponent,
+        // Offline Banner - offline mod jelzese
+        OfflineBannerComponent,
+        // Error Feedback Dialog - 5xx hibáknál
+        ErrorFeedbackDialogComponent,
         // Lucide ikonok globálisan
         LucideAngularModule.pick(LUCIDE_ICONS)
     ],
     providers: [
+        // Sentry inicializálás az app induláskor
+        {
+            provide: APP_INITIALIZER,
+            useFactory: (sentryService: SentryService) => () => sentryService.init(),
+            deps: [SentryService],
+            multi: true
+        },
+        // Sentry providers (ErrorHandler + TraceService)
+        ...provideSentry(),
         // Minden service providedIn: 'root' használ - csak az interceptorok kellenek itt!
         // FONTOS: A sorrend számít! AuthInterceptor előbb fut (token hozzáadás),
         // ErrorInterceptor utána (hibakezelés)

@@ -9,6 +9,7 @@ import { TokenService, type TokenType } from './token.service';
 import { GuestService } from './guest.service';
 import { FilterPersistenceService } from './filter-persistence.service';
 import { safeJsonParse } from '../../shared/utils/safe-json-parse';
+import { SentryService } from './sentry.service';
 import type {
   ContactPerson,
   TabloProject,
@@ -131,6 +132,7 @@ export class AuthService {
 
   private guestService = inject(GuestService);
   private filterPersistence = inject(FilterPersistenceService);
+  private sentryService = inject(SentryService);
 
   constructor(
     private http: HttpClient,
@@ -358,6 +360,9 @@ export class AuthService {
       this.passwordSet.set(response.user.passwordSet);
     }
 
+    // Sentry user context beállítása
+    this.updateSentryUserContext(response.user, project.partnerId ?? undefined);
+
     // BehaviorSubject-ek frissítése
     this.projectSubject.next(project);
     this.isAuthenticatedSubject.next(true);
@@ -540,6 +545,9 @@ export class AuthService {
     // Szűrők törlése - nehogy összekeveredjenek a felhasználók adatai!
     this.filterPersistence.clearAllFilters();
 
+    // Sentry user context törlése
+    this.clearSentryUserContext();
+
     // Állapot visszaállítása
     this.projectSubject.next(null);
     this.isAuthenticatedSubject.next(false);
@@ -637,6 +645,9 @@ export class AuthService {
     localStorage.setItem('marketer_token', response.token);
     localStorage.setItem('marketer_user', JSON.stringify(response.user));
 
+    // Sentry user context beállítása
+    this.updateSentryUserContext(response.user, response.user.partner_id ?? undefined);
+
     // Állapot frissítése
     this.currentUserSubject.next(response.user);
     this.isAuthenticatedSubject.next(true);
@@ -649,6 +660,7 @@ export class AuthService {
     localStorage.removeItem('marketer_token');
     localStorage.removeItem('marketer_user');
     this.filterPersistence.clearAllFilters(); // Szűrők törlése, nehogy összekeveredjenek!
+    this.clearSentryUserContext();
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/login']);
@@ -661,6 +673,7 @@ export class AuthService {
     localStorage.removeItem('marketer_token');
     localStorage.removeItem('marketer_user');
     this.filterPersistence.clearAllFilters(); // Szűrők törlése, nehogy összekeveredjenek!
+    this.clearSentryUserContext();
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/login']);
@@ -673,6 +686,7 @@ export class AuthService {
     localStorage.removeItem('marketer_token');
     localStorage.removeItem('marketer_user');
     this.filterPersistence.clearAllFilters();
+    this.clearSentryUserContext();
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/login']);
@@ -911,5 +925,33 @@ export class AuthService {
       }),
       catchError(this.handleError.bind(this))
     );
+  }
+
+  // ==========================================
+  // SENTRY USER CONTEXT
+  // ==========================================
+
+  /**
+   * Sentry user context frissítése login/logout esetén
+   */
+  private updateSentryUserContext(user: AuthUser | null, partnerId?: number): void {
+    if (user) {
+      this.sentryService.setUser({
+        id: String(user.id),
+        email: user.email ?? undefined,
+        username: user.name,
+        role: user.roles?.[0],
+        partnerId: partnerId ? String(partnerId) : undefined
+      });
+    } else {
+      this.sentryService.setUser(null);
+    }
+  }
+
+  /**
+   * Sentry user context törlése (logout)
+   */
+  private clearSentryUserContext(): void {
+    this.sentryService.setUser(null);
   }
 }

@@ -177,29 +177,6 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
             </div>
           </div>
 
-          <!-- Dátumok (egy sorban) -->
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Fotózás dátuma</label>
-              <input
-                type="date"
-                [(ngModel)]="formData.photo_date"
-                name="photoDate"
-                class="form-input"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Határidő</label>
-              <input
-                type="date"
-                [(ngModel)]="formData.deadline"
-                name="deadline"
-                class="form-input"
-              />
-            </div>
-          </div>
-
           @if (error()) {
             <div class="error-message">
               <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />

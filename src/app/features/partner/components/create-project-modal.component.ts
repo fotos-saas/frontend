@@ -55,7 +55,14 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
               </div>
 
               <!-- Iskola dropdown -->
-              @if (showSchoolDropdown && schools().length > 0) {
+              @if (showSchoolDropdown && schoolsLoading()) {
+                <div class="school-dropdown">
+                  <div class="dropdown-loading">
+                    <span class="dropdown-spinner"></span>
+                    Betöltés...
+                  </div>
+                </div>
+              } @else if (showSchoolDropdown && schools().length > 0) {
                 <div class="school-dropdown">
                   @for (school of schools(); track school.id) {
                     <button
@@ -109,7 +116,14 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
               </div>
 
               <!-- Kapcsolattartó dropdown -->
-              @if (showContactDropdown && contacts().length > 0) {
+              @if (showContactDropdown && contactsLoading()) {
+                <div class="contact-dropdown">
+                  <div class="dropdown-loading">
+                    <span class="dropdown-spinner"></span>
+                    Betöltés...
+                  </div>
+                </div>
+              } @else if (showContactDropdown && contacts().length > 0) {
                 <div class="contact-dropdown">
                   @for (contact of contacts(); track contact.id) {
                     <button
@@ -600,6 +614,26 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
       animation: spin 0.8s linear infinite;
     }
 
+    /* Dropdown loading */
+    .dropdown-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .dropdown-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e5e7eb;
+      border-top-color: var(--color-primary, #1e3a5f);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -635,6 +669,8 @@ export class CreateProjectModalComponent {
 
   schools = signal<SchoolItem[]>([]);
   contacts = signal<ProjectContact[]>([]);
+  schoolsLoading = signal(false);
+  contactsLoading = signal(false);
   submitting = signal(false);
   error = signal<string | null>(null);
   showAddSchoolModal = signal(false);
@@ -713,15 +749,18 @@ export class CreateProjectModalComponent {
   }
 
   private loadContacts(): void {
+    this.contactsLoading.set(true);
     this.partnerService.getAllContacts(this.contactSearch || undefined)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (contacts) => {
           this.contacts.set(contacts);
+          this.contactsLoading.set(false);
           this.showContactDropdown = true;
         },
         error: () => {
           this.contacts.set([]);
+          this.contactsLoading.set(false);
         }
       });
   }
@@ -736,15 +775,18 @@ export class CreateProjectModalComponent {
   }
 
   private loadSchools(): void {
+    this.schoolsLoading.set(true);
     this.partnerService.getAllSchools(this.schoolSearch || undefined)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (schools) => {
           this.schools.set(schools);
+          this.schoolsLoading.set(false);
           this.showSchoolDropdown = true;
         },
         error: () => {
           this.schools.set([]);
+          this.schoolsLoading.set(false);
         }
       });
   }

@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
-import { PartnerService, SchoolListItem, SchoolItem } from '../services/partner.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { PartnerService, SchoolListItem, SchoolItem, SchoolLimits } from '../services/partner.service';
 import { SchoolEditModalComponent } from '../components/school-edit-modal.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../shared/constants/icons.constants';
@@ -21,6 +22,7 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
     CommonModule,
     FormsModule,
     LucideAngularModule,
+    MatTooltipModule,
     SchoolEditModalComponent,
     ConfirmDialogComponent
   ],
@@ -47,6 +49,7 @@ export class PartnerSchoolListComponent implements OnInit {
   schools = signal<SchoolListItem[]>([]);
   totalPages = signal(1);
   totalSchools = signal(0);
+  schoolLimits = signal<SchoolLimits | null>(null);
 
   // Modals
   showEditModal = signal(false);
@@ -72,6 +75,7 @@ export class PartnerSchoolListComponent implements OnInit {
           this.schools.set(response.data);
           this.totalPages.set(response.last_page);
           this.totalSchools.set(response.total);
+          this.schoolLimits.set(response.limits ?? null);
           this.filterState.loading.set(false);
         },
         error: () => {

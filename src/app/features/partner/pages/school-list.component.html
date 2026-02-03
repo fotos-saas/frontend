@@ -2,12 +2,18 @@
   <header class="page-header">
     <div class="header-content">
       <h1>Iskolák</h1>
-      <p class="subtitle">{{ totalSchools() }} iskola összesen</p>
+      @if (schoolLimits()?.max !== null) {
+        <p class="subtitle">{{ schoolLimits()?.current }} / {{ schoolLimits()?.max }} iskola</p>
+      } @else {
+        <p class="subtitle">{{ totalSchools() }} iskola összesen</p>
+      }
     </div>
     <button
       type="button"
       class="btn-primary"
       (click)="openCreateModal()"
+      [disabled]="schoolLimits() && !schoolLimits()!.can_create"
+      [matTooltip]="schoolLimits() && !schoolLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum iskola számot' : ''"
     >
       <lucide-icon [name]="ICONS.PLUS" [size]="18" />
       Új iskola

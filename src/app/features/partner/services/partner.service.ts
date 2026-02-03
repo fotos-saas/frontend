@@ -266,6 +266,15 @@ export interface SchoolListItem {
 }
 
 /**
+ * Iskola limitek
+ */
+export interface SchoolLimits {
+  current: number;
+  max: number | null;
+  can_create: boolean;
+}
+
+/**
  * Kapcsolattartó lista elem (partner kapcsolattartói)
  */
 export interface ContactListItem {
@@ -925,14 +934,14 @@ export class PartnerService {
     page?: number;
     per_page?: number;
     search?: string;
-  }): Observable<PaginatedResponse<SchoolListItem>> {
+  }): Observable<PaginatedResponse<SchoolListItem> & { limits?: SchoolLimits }> {
     let httpParams = new HttpParams();
 
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());
     if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
     if (params?.search) httpParams = httpParams.set('search', params.search);
 
-    return this.http.get<PaginatedResponse<SchoolListItem>>(`${this.baseUrl}/schools`, { params: httpParams });
+    return this.http.get<PaginatedResponse<SchoolListItem> & { limits?: SchoolLimits }>(`${this.baseUrl}/schools`, { params: httpParams });
   }
 
   /**

@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, ContactListItem, ContactLimits } from '../services/partner.service';
 import { ContactEditModalComponent } from '../components/contact-edit-modal.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { UpgradeDialogComponent } from '../../../shared/components/upgrade-dialog/upgrade-dialog.component';
 import { ICONS } from '../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter-state';
 
@@ -24,7 +25,8 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
     LucideAngularModule,
     MatTooltipModule,
     ContactEditModalComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    UpgradeDialogComponent
   ],
   templateUrl: './contact-list.component.html',
   styleUrl: './contact-list.component.scss',
@@ -54,6 +56,7 @@ export class PartnerContactListComponent implements OnInit {
   // Modals
   showEditModal = signal(false);
   showDeleteConfirm = signal(false);
+  showUpgradeDialog = signal(false);
   selectedContact = signal<ContactListItem | null>(null);
   modalMode = signal<'create' | 'edit'>('create');
 
@@ -90,8 +93,18 @@ export class PartnerContactListComponent implements OnInit {
   }
 
   viewProject(contact: ContactListItem): void {
-    if (contact.projectId) {
-      this.router.navigate(['/partner/projects', contact.projectId]);
+    // Navigate to the first project if available
+    const projectId = contact.projectIds?.[0] ?? contact.projectId;
+    if (projectId) {
+      this.router.navigate(['/partner/projects', projectId]);
+    }
+  }
+
+  onNewContactClick(): void {
+    if (this.contactLimits() && !this.contactLimits()!.can_create) {
+      this.showUpgradeDialog.set(true);
+    } else {
+      this.openCreateModal();
     }
   }
 

@@ -90,9 +90,9 @@ import { ICONS } from '../../../shared/constants/icons.constants';
             ></textarea>
           </div>
 
-          <!-- Projekt autocomplete -->
+          <!-- Projekt autocomplete (opcionális) -->
           <div class="form-group">
-            <label for="project">Projekt *</label>
+            <label for="project">Projekt <span class="optional-label">(opcionális)</span></label>
             <div class="autocomplete-container">
               <div class="autocomplete-input-wrapper">
                 <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="autocomplete-icon" />
@@ -257,6 +257,12 @@ import { ICONS } from '../../../shared/constants/icons.constants';
       font-size: 0.8125rem;
       font-weight: 500;
       color: #475569;
+    }
+
+    .optional-label {
+      font-weight: 400;
+      color: #94a3b8;
+      font-size: 0.75rem;
     }
 
     .form-input {
@@ -586,7 +592,8 @@ export class ContactEditModalComponent implements OnInit {
   }
 
   canSave(): boolean {
-    return this.name.trim().length > 0 && this.selectedProject() !== null && !this.phoneError();
+    // Projekt választás már nem kötelező
+    return this.name.trim().length > 0 && !this.phoneError();
   }
 
   /** Telefon formázás és validáció */
@@ -643,13 +650,23 @@ export class ContactEditModalComponent implements OnInit {
     this.saving.set(true);
     this.errorMessage.set(null);
 
-    const data = {
+    const data: {
+      name: string;
+      email: string | null;
+      phone: string | null;
+      note: string | null;
+      project_id?: number | null;
+    } = {
       name: this.name.trim(),
       email: this.email.trim() || null,
       phone: this.phone.trim() || null,
       note: this.note.trim() || null,
-      project_id: this.selectedProject()!.id
     };
+
+    // Projekt már opcionális
+    if (this.selectedProject()) {
+      data.project_id = this.selectedProject()!.id;
+    }
 
     const request$ = this.mode === 'create'
       ? this.partnerService.createStandaloneContact(data)

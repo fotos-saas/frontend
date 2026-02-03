@@ -272,6 +272,7 @@ export interface SchoolLimits {
   current: number;
   max: number | null;
   can_create: boolean;
+  plan_id: string;
 }
 
 /**
@@ -284,7 +285,12 @@ export interface ContactListItem {
   phone: string | null;
   note: string | null;
   isPrimary: boolean;
-  projectId: number;
+  // New: multiple projects support
+  projectIds: number[];
+  projectNames: string[];
+  schoolNames: string[];
+  // Backward compatibility: first project
+  projectId: number | null;
   projectName: string | null;
   schoolName: string | null;
   callCount: number;
@@ -298,6 +304,7 @@ export interface ContactLimits {
   current: number;
   max: number | null;
   can_create: boolean;
+  plan_id: string;
 }
 
 /**
@@ -339,6 +346,7 @@ export interface ProjectLimits {
   current: number;
   max: number | null;
   can_create: boolean;
+  plan_id: string;
 }
 
 /**
@@ -985,14 +993,15 @@ export class PartnerService {
   }
 
   /**
-   * Új kapcsolattartó létrehozása (projekthez kötve)
+   * Új kapcsolattartó létrehozása (opcionálisan projektekhez kötve)
    */
   createStandaloneContact(data: {
     name: string;
     email?: string | null;
     phone?: string | null;
     note?: string | null;
-    project_id: number;
+    project_id?: number | null;
+    project_ids?: number[];
   }): Observable<{ success: boolean; message: string; data: ContactListItem }> {
     return this.http.post<{ success: boolean; message: string; data: ContactListItem }>(
       `${this.baseUrl}/contacts`,
@@ -1001,14 +1010,15 @@ export class PartnerService {
   }
 
   /**
-   * Kapcsolattartó módosítása (projektId is módosítható)
+   * Kapcsolattartó módosítása (projekt ID-k is módosíthatók)
    */
   updateStandaloneContact(id: number, data: {
     name?: string;
     email?: string | null;
     phone?: string | null;
     note?: string | null;
-    project_id?: number;
+    project_id?: number | null;
+    project_ids?: number[];
   }): Observable<{ success: boolean; message: string; data: ContactListItem }> {
     return this.http.put<{ success: boolean; message: string; data: ContactListItem }>(
       `${this.baseUrl}/contacts/${id}`,

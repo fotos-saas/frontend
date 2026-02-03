@@ -108,7 +108,49 @@
 }
 
 .contact-project {
+  display: flex;
+  align-items: center;
+}
+
+.project-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.project-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: #f1f5f9;
+  color: var(--color-primary, #1e3a5f);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.15s ease;
+  max-width: 100px;
+
+  > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    background: #e2e8f0;
+  }
+}
+
+.project-chip--more {
+  background: #dbeafe;
+  color: #1e40af;
+  cursor: default;
+
+  &:hover {
+    background: #dbeafe;
+  }
 }
 
 .project-link {

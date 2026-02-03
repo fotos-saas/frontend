@@ -11,9 +11,7 @@
     <button
       type="button"
       class="btn-primary"
-      (click)="openCreateModal()"
-      [disabled]="contactLimits() && !contactLimits()!.can_create"
-      [matTooltip]="contactLimits() && !contactLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum kapcsolattartó számot' : ''"
+      (click)="onNewContactClick()"
     >
       <lucide-icon [name]="ICONS.PLUS" [size]="18" />
       Új kapcsolattartó
@@ -106,15 +104,30 @@
             }
           </div>
 
-          <div class="contact-project" (click)="viewProject(contact)">
-            @if (contact.projectName) {
-              <span
-                class="project-link"
-                [matTooltip]="contact.projectName + (contact.schoolName ? ' (' + contact.schoolName + ')' : '')"
-              >
-                <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
-                <span>{{ contact.projectName }}</span>
-              </span>
+          <div class="contact-project">
+            @if (contact.projectIds.length > 0) {
+              <div class="project-chips">
+                @for (projectName of contact.projectNames; track $index; let first = $first) {
+                  @if (first || contact.projectNames.length <= 2) {
+                    <span
+                      class="project-chip"
+                      [matTooltip]="contact.schoolNames[$index] ?? ''"
+                      (click)="viewProject(contact)"
+                    >
+                      <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="12" />
+                      <span>{{ projectName }}</span>
+                    </span>
+                  }
+                }
+                @if (contact.projectNames.length > 2) {
+                  <span
+                    class="project-chip project-chip--more"
+                    [matTooltip]="contact.projectNames.slice(1).join(', ')"
+                  >
+                    +{{ contact.projectNames.length - 1 }}
+                  </span>
+                }
+              </div>
             } @else {
               <span class="no-project">Nincs projekt</span>
             }
@@ -190,5 +203,14 @@
     variant="danger"
     (confirmed)="deleteContact()"
     (cancelled)="closeDeleteConfirm()"
+  />
+}
+
+<!-- Upgrade Dialog -->
+@if (showUpgradeDialog()) {
+  <app-upgrade-dialog
+    feature="contacts"
+    [currentPlanId]="contactLimits()?.plan_id ?? 'alap'"
+    (close)="showUpgradeDialog.set(false)"
   />
 }

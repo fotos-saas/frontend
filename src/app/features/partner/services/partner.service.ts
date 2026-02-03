@@ -283,6 +283,15 @@ export interface ContactListItem {
 }
 
 /**
+ * Kapcsolattartó limitek
+ */
+export interface ContactLimits {
+  current: number;
+  max: number | null;
+  can_create: boolean;
+}
+
+/**
  * Projekt autocomplete elem (kapcsolattartó modalhoz)
  */
 export interface ProjectAutocompleteItem {
@@ -950,20 +959,20 @@ export class PartnerService {
   // ============================================
 
   /**
-   * Partner kapcsolattartóinak lekérése (paginált)
+   * Partner kapcsolattartóinak lekérése (paginált, limitekkel)
    */
   getContacts(params?: {
     page?: number;
     per_page?: number;
     search?: string;
-  }): Observable<PaginatedResponse<ContactListItem>> {
+  }): Observable<PaginatedResponse<ContactListItem> & { limits?: ContactLimits }> {
     let httpParams = new HttpParams();
 
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());
     if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
     if (params?.search) httpParams = httpParams.set('search', params.search);
 
-    return this.http.get<PaginatedResponse<ContactListItem>>(`${this.baseUrl}/contacts`, { params: httpParams });
+    return this.http.get<PaginatedResponse<ContactListItem> & { limits?: ContactLimits }>(`${this.baseUrl}/contacts`, { params: httpParams });
   }
 
   /**

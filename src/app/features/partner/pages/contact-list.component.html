@@ -2,12 +2,18 @@
   <header class="page-header">
     <div class="header-content">
       <h1>Kapcsolattartók</h1>
-      <p class="subtitle">{{ totalContacts() }} kapcsolattartó összesen</p>
+      @if (contactLimits()?.max !== null) {
+        <p class="subtitle">{{ contactLimits()?.current }} / {{ contactLimits()?.max }} kapcsolattartó</p>
+      } @else {
+        <p class="subtitle">{{ totalContacts() }} kapcsolattartó összesen</p>
+      }
     </div>
     <button
       type="button"
       class="btn-primary"
       (click)="openCreateModal()"
+      [disabled]="contactLimits() && !contactLimits()!.can_create"
+      [matTooltip]="contactLimits() && !contactLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum kapcsolattartó számot' : ''"
     >
       <lucide-icon [name]="ICONS.PLUS" [size]="18" />
       Új kapcsolattartó

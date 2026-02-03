@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PartnerService, ContactListItem } from '../services/partner.service';
+import { PartnerService, ContactListItem, ContactLimits } from '../services/partner.service';
 import { ContactEditModalComponent } from '../components/contact-edit-modal.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../shared/constants/icons.constants';
@@ -49,6 +49,7 @@ export class PartnerContactListComponent implements OnInit {
   contacts = signal<ContactListItem[]>([]);
   totalPages = signal(1);
   totalContacts = signal(0);
+  contactLimits = signal<ContactLimits | null>(null);
 
   // Modals
   showEditModal = signal(false);
@@ -74,6 +75,7 @@ export class PartnerContactListComponent implements OnInit {
           this.contacts.set(response.data);
           this.totalPages.set(response.last_page);
           this.totalContacts.set(response.total);
+          this.contactLimits.set(response.limits ?? null);
           this.filterState.loading.set(false);
         },
         error: () => {

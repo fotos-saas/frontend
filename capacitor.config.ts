@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
 
   // Server config - load from hosted URL (same as Electron)
   server: {
-    url: 'https://tablostudio.hu',
+    url: 'https://app.tablostudio.hu',
     cleartext: false, // HTTPS only
   },
 

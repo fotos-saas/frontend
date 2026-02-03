@@ -462,6 +462,16 @@ export class PartnerService {
     );
   }
 
+  /**
+   * Projekt módosítása
+   */
+  updateProject(projectId: number, data: Partial<CreateProjectRequest>): Observable<{ success: boolean; message: string }> {
+    return this.http.put<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}`,
+      data
+    );
+  }
+
   // ============================================
   // SAMPLES & MISSING PERSONS
   // ============================================

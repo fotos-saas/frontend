@@ -51,7 +51,16 @@ import { ICONS } from '../../constants/icons.constants';
           />
         </div>
         <div class="mt-4 text-center">
-          <h1 class="text-2xl font-bold text-gray-900">{{ project()!.school?.name ?? 'Ismeretlen iskola' }}</h1>
+          <div class="flex items-center justify-center gap-2">
+            <h1 class="text-2xl font-bold text-gray-900">{{ project()!.school?.name ?? 'Ismeretlen iskola' }}</h1>
+            <button
+              class="p-1.5 text-gray-400 hover:text-primary hover:bg-primary-50 rounded-lg transition-colors"
+              (click)="editProject.emit()"
+              title="Projekt szerkesztése"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </button>
+          </div>
           <p class="mt-1 text-gray-500 flex items-center justify-center gap-1">
             <lucide-icon [name]="ICONS.MAP_PIN" [size]="14" class="inline-flex" />
             {{ project()!.school?.city ?? '' }}
@@ -259,6 +268,7 @@ export class ProjectDetailViewComponent {
   readonly openContactModal = output<ProjectContact | null>();
   readonly deleteContact = output<ProjectContact>();
   readonly qrCodeChanged = output<QrCode | null>();
+  readonly editProject = output<void>();
 
   formatDateTime(dateStr: string): string {
     const date = new Date(dateStr);

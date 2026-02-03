@@ -22,6 +22,7 @@ import {
   PROJECT_BACK_ROUTE,
   PROJECT_QR_MODAL_COMPONENT,
   PROJECT_CONTACT_MODAL_COMPONENT,
+  PROJECT_EDIT_MODAL_COMPONENT,
   IProjectDetailService,
   ProjectDataMapper,
 } from './project-detail.tokens';
@@ -60,6 +61,7 @@ import { ICONS } from '../../constants/icons.constants';
         (openQrModal)="openQrModal()"
         (openContactModal)="openContactModal($event)"
         (deleteContact)="confirmDeleteContact($event)"
+        (editProject)="openEditProjectModal()"
       />
     </div>
 
@@ -68,6 +70,9 @@ import { ICONS } from '../../constants/icons.constants';
 
     <!-- Contact Editor Modal container -->
     <ng-container #contactModalContainer></ng-container>
+
+    <!-- Project Edit Modal container -->
+    <ng-container #projectEditModalContainer></ng-container>
 
     <!-- Delete Confirmation Modal -->
     @if (showDeleteConfirm()) {
@@ -110,11 +115,13 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private backRoute = inject(PROJECT_BACK_ROUTE);
   private qrModalComponent = inject(PROJECT_QR_MODAL_COMPONENT);
   private contactModalComponent = inject(PROJECT_CONTACT_MODAL_COMPONENT);
+  private projectEditModalComponent = inject(PROJECT_EDIT_MODAL_COMPONENT, { optional: true });
   private destroyRef = inject(DestroyRef);
 
   // ViewChild references for dynamic component creation
   private qrModalContainer = viewChild('qrModalContainer', { read: ViewContainerRef });
   private contactModalContainer = viewChild('contactModalContainer', { read: ViewContainerRef });
+  private projectEditModalContainer = viewChild('projectEditModalContainer', { read: ViewContainerRef });
 
   /** ICONS konstansok a template-hez */
   readonly ICONS = ICONS;
@@ -137,6 +144,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   // Dynamic component references
   private qrModalRef: ComponentRef<any> | null = null;
   private contactModalRef: ComponentRef<any> | null = null;
+  private projectEditModalRef: ComponentRef<any> | null = null;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -270,5 +278,39 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
         this.deleting.set(false);
       },
     });
+  }
+
+  // Project Edit Modal methods
+  openEditProjectModal(): void {
+    if (!this.projectEditModalComponent) return;
+
+    const container = this.projectEditModalContainer();
+    if (!container) return;
+
+    const projectData = this.projectData();
+    if (!projectData) return;
+
+    container.clear();
+    this.projectEditModalRef = container.createComponent(this.projectEditModalComponent);
+
+    // Set inputs
+    this.projectEditModalRef.instance.project = projectData;
+
+    // Subscribe to outputs
+    this.projectEditModalRef.instance.close?.subscribe(() => this.closeEditProjectModal());
+    this.projectEditModalRef.instance.saved?.subscribe(() => this.onProjectSaved());
+  }
+
+  closeEditProjectModal(): void {
+    this.projectEditModalRef?.destroy();
+    this.projectEditModalRef = null;
+  }
+
+  onProjectSaved(): void {
+    this.closeEditProjectModal();
+    const id = this.projectData()?.id;
+    if (id) {
+      this.loadProject(id);
+    }
   }
 }

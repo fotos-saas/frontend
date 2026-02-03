@@ -41,6 +41,12 @@ export const PROJECT_QR_MODAL_COMPONENT = new InjectionToken<Type<any>>('Project
 export const PROJECT_CONTACT_MODAL_COMPONENT = new InjectionToken<Type<any>>('ProjectContactModalComponent');
 
 /**
+ * InjectionToken a Project Edit Modal komponenshez.
+ * Projekt szerkesztés modal (iskola, osztály, évfolyam, dátumok).
+ */
+export const PROJECT_EDIT_MODAL_COMPONENT = new InjectionToken<Type<any>>('ProjectEditModalComponent');
+
+/**
  * Projekt adat mapping függvény típusa.
  * Feature-specifikus mapping a közös ProjectDetailData típusra.
  */

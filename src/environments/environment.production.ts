@@ -8,7 +8,6 @@ export const environment = {
   wsKey: 'tablo-production-key',
   wsCluster: 'mt1',
   wsEnabled: true,
-  // Sentry DSN - Coolify env-ből: SENTRY_DSN
-  // Ha üres, a Sentry nem inicializálódik
-  sentryDsn: ''
+  // Sentry DSN - tablostudio-frontend projekt
+  sentryDsn: 'https://4d96a0286a44e92a8829450f5cf9859c0b0451082365652172B.ingest.de.sentry.io/4510823682146384'
 };

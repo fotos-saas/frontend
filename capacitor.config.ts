@@ -18,6 +18,7 @@ const config: CapacitorConfig = {
     preferredContentMode: 'mobile', // Force mobile viewport
     limitsNavigationsToAppBoundDomains: true, // Security
     allowsLinkPreview: false,
+    scrollEnabled: false, // Disable bounce scroll
   },
 
   // Android specific
@@ -25,6 +26,7 @@ const config: CapacitorConfig = {
     allowMixedContent: false, // Security
     captureInput: true, // Better keyboard handling
     webContentsDebuggingEnabled: false, // Disable in prod!
+    initialFocus: false,
   },
 
   // Plugins config

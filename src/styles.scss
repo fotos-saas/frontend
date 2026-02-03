@@ -22,6 +22,36 @@
 }
 
 // ============================================================================
+// MOBILE APP - PINCH ZOOM CONTROL
+// ============================================================================
+
+// Disable pinch zoom globally on mobile
+html, body {
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+// Enable pinch zoom ONLY for zoomable images
+.zoomable-image,
+.photo-zoomable,
+[data-zoomable="true"] {
+  touch-action: manipulation;
+}
+
+// iOS specific: prevent double-tap zoom
+* {
+  -webkit-touch-callout: none;
+}
+
+// Allow text selection where needed
+input, textarea, [contenteditable="true"] {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+// ============================================================================
 // GLOBÁLIS DARK MODE CSS VÁLTOZÓK
 // ============================================================================
 

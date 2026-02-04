@@ -1,11 +1,14 @@
-import { Component, OnDestroy, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../core/services/auth.service';
 import { AuthLayoutComponent } from '../shared/components/auth-layout/auth-layout.component';
+import { BiometricService } from '../core/services/biometric.service';
+import { CapacitorService } from '../core/services/capacitor.service';
+import { ElectronService } from '../core/services/electron.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 type LoginTab = 'code' | 'password';
 
@@ -19,15 +22,29 @@ type LoginTab = 'code' | 'password';
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, AuthLayoutComponent]
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, AuthLayoutComponent, LucideAngularModule]
 })
-export class LoginComponent implements OnDestroy {
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
-  private router = inject(Router);
+export class LoginComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  readonly biometricService = inject(BiometricService);
+  readonly capacitorService = inject(CapacitorService);
+  readonly electronService = inject(ElectronService);
 
   /** Aktív tab */
   activeTab = signal<LoginTab>('code');
+
+  /** Biometrikus bejelentkezés elérhető (mobil) */
+  biometricAvailable = signal(false);
+
+  /** Biometrikus bejelentkezés betöltés */
+  biometricLoading = signal(false);
+
+  /** Electron auto-login elérhető */
+  electronAutoLoginAvailable = signal(false);
 
   /** 6-jegyű belépési kód */
   code = '';
@@ -48,12 +65,138 @@ export class LoginComponent implements OnDestroy {
   /** Regisztráció engedélyezve (backend settings) */
   registrationEnabled = signal(false);
 
-  /** Subject for unsubscribe pattern */
-  private readonly destroy$ = new Subject<void>();
-
   constructor() {
     // Ellenőrizzük a regisztráció státuszt (opcionális)
     this.checkRegistrationEnabled();
+  }
+
+  async ngOnInit(): Promise<void> {
+    // Check biometric availability on mobile
+    await this.checkBiometricAvailability();
+
+    // Check Electron auto-login availability
+    await this.checkElectronAutoLogin();
+  }
+
+  /**
+   * Check if biometric login is available (mobile)
+   */
+  private async checkBiometricAvailability(): Promise<void> {
+    if (!this.capacitorService.isNative()) {
+      return;
+    }
+
+    const isAvailable = await this.biometricService.checkAvailability();
+    if (isAvailable) {
+      const hasCredentials = await this.biometricService.hasStoredCredentials();
+      this.biometricAvailable.set(hasCredentials);
+    }
+  }
+
+  /**
+   * Check if Electron auto-login is available (desktop)
+   * Tries to auto-login if credentials are stored
+   */
+  private async checkElectronAutoLogin(): Promise<void> {
+    if (!this.electronService.isElectron) {
+      return;
+    }
+
+    const hasCredentials = await this.electronService.hasCredentials();
+    if (hasCredentials) {
+      this.electronAutoLoginAvailable.set(true);
+      // Auto-login on desktop app start
+      this.performElectronAutoLogin();
+    }
+  }
+
+  /**
+   * Auto-login using stored Keychain credentials (Electron)
+   */
+  private async performElectronAutoLogin(): Promise<void> {
+    this.loading.set(true);
+    this.error.set(null);
+
+    try {
+      const credentials = await this.electronService.getCredentials();
+      if (!credentials) {
+        this.loading.set(false);
+        return;
+      }
+
+      this.authService.loginWithPassword(credentials.username, credentials.password)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            this.loading.set(false);
+            // Role-alapú átirányítás
+            if (response.user.roles?.includes('super_admin')) {
+              this.router.navigate(['/super-admin/dashboard']);
+            } else if (response.user.roles?.includes('partner')) {
+              this.router.navigate(['/partner/dashboard']);
+            } else if (response.user.roles?.includes('marketer')) {
+              this.router.navigate(['/marketer/dashboard']);
+            } else {
+              this.router.navigate(['/home']);
+            }
+          },
+          error: async (err: Error) => {
+            this.loading.set(false);
+            // Credentials might be outdated - delete them
+            await this.electronService.deleteCredentials();
+            this.electronAutoLoginAvailable.set(false);
+            // Auto-login failed, credentials cleared
+          }
+        });
+    } catch {
+      this.loading.set(false);
+    }
+  }
+
+  /**
+   * Biometrikus bejelentkezés kezelése
+   */
+  async onBiometricLogin(): Promise<void> {
+    this.biometricLoading.set(true);
+    this.error.set(null);
+
+    try {
+      const credentials = await this.biometricService.biometricLogin();
+
+      if (!credentials) {
+        this.biometricLoading.set(false);
+        return; // User cancelled or auth failed
+      }
+
+      // Login with stored credentials
+      this.authService.loginWithPassword(credentials.username, credentials.password)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            this.biometricLoading.set(false);
+            // Role-alapú átirányítás
+            if (response.user.roles?.includes('super_admin')) {
+              this.router.navigate(['/super-admin/dashboard']);
+            } else if (response.user.roles?.includes('partner')) {
+              this.router.navigate(['/partner/dashboard']);
+            } else if (response.user.roles?.includes('marketer')) {
+              this.router.navigate(['/marketer/dashboard']);
+            } else {
+              this.router.navigate(['/home']);
+            }
+          },
+          error: (err: Error) => {
+            this.biometricLoading.set(false);
+            this.error.set(err.message);
+            // If login fails, credentials might be outdated - delete them
+            this.biometricService.deleteCredentials();
+            this.biometricAvailable.set(false);
+          }
+        });
+    } catch {
+      this.biometricLoading.set(false);
+      this.error.set('Biometrikus azonosítás sikertelen');
+    }
   }
 
   /**
@@ -85,7 +228,7 @@ export class LoginComponent implements OnDestroy {
 
     // API hívás az AuthService-en keresztül
     this.authService.login(this.code)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.loading.set(false);
@@ -120,10 +263,21 @@ export class LoginComponent implements OnDestroy {
     const { email, password } = this.passwordForm.value;
 
     this.authService.loginWithPassword(email!, password!)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
+        next: async (response) => {
           this.loading.set(false);
+
+          // Store credentials for biometric login (mobile) or Keychain (desktop)
+          if (this.passwordForm.value.rememberMe) {
+            if (this.biometricService.isAvailable()) {
+              await this.biometricService.storeCredentials(email!, password!);
+            }
+            if (this.electronService.isElectron) {
+              await this.electronService.storeCredentials(email!, password!);
+            }
+          }
+
           // Role-alapú átirányítás
           if (response.user.roles?.includes('super_admin')) {
             // Super admin → super admin dashboard
@@ -150,13 +304,5 @@ export class LoginComponent implements OnDestroy {
     // TODO: Lehetne backend endpoint ami visszaadja a beállításokat
     // Egyelőre engedélyezzük a linket, backend úgyis ellenőrzi
     this.registrationEnabled.set(true);
-  }
-
-  /**
-   * Cleanup on destroy
-   */
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

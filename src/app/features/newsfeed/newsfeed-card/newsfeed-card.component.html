@@ -22,25 +22,31 @@
   <!-- Content -->
   <div class="newsfeed-card__content">
     <!-- Event details -->
-    <div class="newsfeed-card__event-info" *ngIf="isEvent() && post().eventDate">
-      <span class="newsfeed-card__event-date">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        {{ formattedEventDate() }}
-        <span *ngIf="post().eventTime"> · {{ post().eventTime }}</span>
-      </span>
-      <span class="newsfeed-card__event-location" *ngIf="post().eventLocation">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        {{ post().eventLocation }}
-      </span>
-    </div>
+    @if (isEvent() && post().eventDate) {
+      <div class="newsfeed-card__event-info">
+        <span class="newsfeed-card__event-date">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          {{ formattedEventDate() }}
+          @if (post().eventTime) {
+            <span> · {{ post().eventTime }}</span>
+          }
+        </span>
+        @if (post().eventLocation) {
+          <span class="newsfeed-card__event-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            {{ post().eventLocation }}
+          </span>
+        }
+      </div>
+    }
 
     <!-- Title + Content -->
     <app-content-block

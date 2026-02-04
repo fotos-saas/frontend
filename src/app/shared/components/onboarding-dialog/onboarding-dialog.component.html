@@ -38,20 +38,26 @@
     <div class="dialog__header">
       <div class="dialog__icon">
         <!-- Search icon (step 1) -->
-        <svg *ngIf="currentStep() === 'search'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
-        </svg>
+        @if (currentStep() === 'search') {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
+          </svg>
+        }
         <!-- User icon (step 2) -->
-        <svg *ngIf="currentStep() === 'nickname'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
+        @if (currentStep() === 'nickname') {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        }
         <!-- Email icon (step 3) -->
-        <svg *ngIf="currentStep() === 'email'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
+        @if (currentStep() === 'email') {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        }
       </div>
       <h2 id="dialog-title" class="dialog__title">
         {{ stepTitles[currentStep()] }}
@@ -64,179 +70,211 @@
     <!-- Content -->
     <div class="dialog__content">
       <!-- API hiba megjelenítése -->
-      <div class="dialog__alert dialog__alert--error" *ngIf="errorMessage()" role="alert" aria-live="assertive">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span>{{ errorMessage() }}</span>
-      </div>
+      @if (errorMessage()) {
+        <div class="dialog__alert dialog__alert--error" role="alert" aria-live="assertive">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
 
       <!-- STEP 1: Search -->
-      <div *ngIf="currentStep() === 'search'" class="dialog__step" @fadeSlide>
-        <div class="dialog__field">
-          <label class="dialog__label" for="search-name">
-            Neved a tablón
-          </label>
-          <div class="dialog__search-wrapper">
-            <input
-              #searchInput
-              type="text"
-              id="search-name"
-              class="dialog__input dialog__input--search"
-              [class.dialog__input--error]="errors.search"
-              [(ngModel)]="searchQuery"
-              (input)="onSearchInput()"
-              placeholder="Pl. Balaton Levente"
-              [disabled]="isSubmitting()"
-              maxlength="100"
-              autocomplete="off"
-            />
-            <svg *ngIf="isSearching()" class="dialog__search-spinner" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            </svg>
+      @if (currentStep() === 'search') {
+        <div class="dialog__step" @fadeSlide>
+          <div class="dialog__field">
+            <label class="dialog__label" for="search-name">
+              Neved a tablón
+            </label>
+            <div class="dialog__search-wrapper">
+              <input
+                #searchInput
+                type="text"
+                id="search-name"
+                class="dialog__input dialog__input--search"
+                [class.dialog__input--error]="errors.search"
+                [(ngModel)]="searchQuery"
+                (input)="onSearchInput()"
+                placeholder="Pl. Balaton Levente"
+                [disabled]="isSubmitting()"
+                maxlength="100"
+                autocomplete="off"
+              />
+              @if (isSearching()) {
+                <svg class="dialog__search-spinner" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                </svg>
+              }
+            </div>
+            @if (errors.search) {
+              <span class="dialog__error" role="alert">{{ errors.search }}</span>
+            }
           </div>
-          <span class="dialog__error" *ngIf="errors.search" role="alert">{{ errors.search }}</span>
-        </div>
 
-        <!-- Keresési eredmények -->
-        <div class="dialog__results" *ngIf="searchResults().length > 0">
-          <button
-            type="button"
-            class="dialog__result-item"
-            *ngFor="let person of searchResults()"
-            (click)="selectPerson(person)"
-            [class.dialog__result-item--claimed]="person.is_claimed"
-          >
-            <div class="dialog__result-avatar" [class.dialog__result-avatar--has-photo]="person.has_photo">
-              <svg *ngIf="!person.has_photo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              <svg *ngIf="person.has_photo" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
+          <!-- Keresési eredmények -->
+          @if (searchResults().length > 0) {
+            <div class="dialog__results">
+              @for (person of searchResults(); track person.id) {
+                <button
+                  type="button"
+                  class="dialog__result-item"
+                  (click)="selectPerson(person)"
+                  [class.dialog__result-item--claimed]="person.is_claimed"
+                >
+                  <div class="dialog__result-avatar" [class.dialog__result-avatar--has-photo]="person.has_photo">
+                    @if (!person.has_photo) {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                    }
+                    @if (person.has_photo) {
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                    }
+                  </div>
+                  <div class="dialog__result-info">
+                    <span class="dialog__result-name">{{ person.name }}</span>
+                    <span class="dialog__result-type">{{ person.type_label }}</span>
+                  </div>
+                  @if (person.is_claimed) {
+                    <span class="dialog__result-badge">Foglalt</span>
+                  }
+                </button>
+              }
             </div>
-            <div class="dialog__result-info">
-              <span class="dialog__result-name">{{ person.name }}</span>
-              <span class="dialog__result-type">{{ person.type_label }}</span>
+          }
+
+          <!-- Kiválasztott személy -->
+          @if (selectedPerson()) {
+            <div class="dialog__selected">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>Kiválasztva: <strong>{{ selectedPerson()!.name }}</strong></span>
+              <button type="button" class="dialog__selected-clear" (click)="selectedPerson.set(null); searchQuery = ''">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
             </div>
-            <span class="dialog__result-badge" *ngIf="person.is_claimed">Foglalt</span>
-          </button>
-        </div>
+          }
 
-        <!-- Kiválasztott személy -->
-        <div class="dialog__selected" *ngIf="selectedPerson()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-          <span>Kiválasztva: <strong>{{ selectedPerson()!.name }}</strong></span>
-          <button type="button" class="dialog__selected-clear" (click)="selectedPerson.set(null); searchQuery = ''">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
+          <!-- "Nem találom magam" -->
+          @if (searchQuery.length >= 2 && !selectedPerson() && !notFoundSelected()) {
+            <div class="dialog__not-found">
+              <button type="button" class="dialog__not-found-btn" (click)="selectNotFound()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M8 15s1.5-2 4-2 4 2 4 2"/>
+                  <line x1="9" y1="9" x2="9.01" y2="9"/>
+                  <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+                <span>Nem találom magam a listában</span>
+              </button>
+            </div>
+          }
 
-        <!-- "Nem találom magam" -->
-        <div class="dialog__not-found" *ngIf="searchQuery.length >= 2 && !selectedPerson() && !notFoundSelected()">
-          <button type="button" class="dialog__not-found-btn" (click)="selectNotFound()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M8 15s1.5-2 4-2 4 2 4 2"/>
-              <line x1="9" y1="9" x2="9.01" y2="9"/>
-              <line x1="15" y1="9" x2="15.01" y2="9"/>
-            </svg>
-            <span>Nem találom magam a listában</span>
-          </button>
+          <!-- "Nem találom" kiválasztva -->
+          @if (notFoundSelected()) {
+            <div class="dialog__selected dialog__selected--not-found">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>Nem szerepelek a tablón - folytatom: <strong>{{ searchQuery }}</strong></span>
+              <button type="button" class="dialog__selected-clear" (click)="notFoundSelected.set(false)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          }
         </div>
-
-        <!-- "Nem találom" kiválasztva -->
-        <div class="dialog__selected dialog__selected--not-found" *ngIf="notFoundSelected()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-          <span>Nem szerepelek a tablón - folytatom: <strong>{{ searchQuery }}</strong></span>
-          <button type="button" class="dialog__selected-clear" (click)="notFoundSelected.set(false)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+      }
 
       <!-- STEP 2: Nickname -->
-      <div *ngIf="currentStep() === 'nickname'" class="dialog__step" @fadeSlide>
-        <div class="dialog__field">
-          <label class="dialog__label" for="nickname">
-            Becenév <span class="dialog__required">*</span>
-          </label>
-          <input
-            #nicknameInput
-            type="text"
-            id="nickname"
-            class="dialog__input"
-            [class.dialog__input--error]="errors.nickname"
-            [(ngModel)]="nickname"
-            (input)="clearErrors()"
-            placeholder="Pl. Levi"
-            [disabled]="isSubmitting()"
-            maxlength="100"
-            autocomplete="given-name"
-          />
-          <span class="dialog__error" *ngIf="errors.nickname" role="alert">{{ errors.nickname }}</span>
-          <span class="dialog__hint">
-            Ezen a néven fogsz megjelenni a hozzászólásaidnál és szavazataidnál.
-          </span>
+      @if (currentStep() === 'nickname') {
+        <div class="dialog__step" @fadeSlide>
+          <div class="dialog__field">
+            <label class="dialog__label" for="nickname">
+              Becenév <span class="dialog__required">*</span>
+            </label>
+            <input
+              #nicknameInput
+              type="text"
+              id="nickname"
+              class="dialog__input"
+              [class.dialog__input--error]="errors.nickname"
+              [(ngModel)]="nickname"
+              (input)="clearErrors()"
+              placeholder="Pl. Levi"
+              [disabled]="isSubmitting()"
+              maxlength="100"
+              autocomplete="given-name"
+            />
+            @if (errors.nickname) {
+              <span class="dialog__error" role="alert">{{ errors.nickname }}</span>
+            }
+            <span class="dialog__hint">
+              Ezen a néven fogsz megjelenni a hozzászólásaidnál és szavazataidnál.
+            </span>
+          </div>
         </div>
-      </div>
+      }
 
       <!-- STEP 3: Email -->
-      <div *ngIf="currentStep() === 'email'" class="dialog__step" @fadeSlide>
-        <div class="dialog__field">
-          <label class="dialog__label" for="email">
-            Email <span class="dialog__required">*</span>
-          </label>
-          <input
-            #emailInput
-            type="email"
-            id="email"
-            class="dialog__input"
-            [class.dialog__input--error]="errors.email"
-            [(ngModel)]="email"
-            (input)="clearErrors()"
-            placeholder="pelda@email.hu"
-            [disabled]="isSubmitting()"
-            maxlength="255"
-            autocomplete="email"
-          />
-          <span class="dialog__error" *ngIf="errors.email" role="alert">{{ errors.email }}</span>
-          <span class="dialog__hint">
-            Az email címedre küldünk egy linket, amivel más eszközön is beléphetsz.
-          </span>
+      @if (currentStep() === 'email') {
+        <div class="dialog__step" @fadeSlide>
+          <div class="dialog__field">
+            <label class="dialog__label" for="email">
+              Email <span class="dialog__required">*</span>
+            </label>
+            <input
+              #emailInput
+              type="email"
+              id="email"
+              class="dialog__input"
+              [class.dialog__input--error]="errors.email"
+              [(ngModel)]="email"
+              (input)="clearErrors()"
+              placeholder="pelda@email.hu"
+              [disabled]="isSubmitting()"
+              maxlength="255"
+              autocomplete="email"
+            />
+            @if (errors.email) {
+              <span class="dialog__error" role="alert">{{ errors.email }}</span>
+            }
+            <span class="dialog__hint">
+              Az email címedre küldünk egy linket, amivel más eszközön is beléphetsz.
+            </span>
+          </div>
         </div>
-      </div>
+      }
 
       <!-- Actions -->
       <div class="dialog__actions">
         <!-- Back button (step 2-3) -->
-        <button
-          *ngIf="currentStep() !== 'search'"
-          type="button"
-          class="dialog__btn dialog__btn--secondary"
-          (click)="prevStep()"
-          [disabled]="isSubmitting()"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-          </svg>
-          Vissza
-        </button>
+        @if (currentStep() !== 'search') {
+          <button
+            type="button"
+            class="dialog__btn dialog__btn--secondary"
+            (click)="prevStep()"
+            [disabled]="isSubmitting()"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+            </svg>
+            Vissza
+          </button>
+        }
 
         <!-- Next/Submit button -->
         <button
@@ -246,29 +284,36 @@
           (click)="currentStep() === 'email' ? submit() : nextStep()"
           [disabled]="!isStepValid || isSubmitting()"
         >
-          <svg *ngIf="isSubmitting()" class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
-          <svg *ngIf="!isSubmitting() && currentStep() !== 'email'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-          <svg *ngIf="!isSubmitting() && currentStep() === 'email'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+          @if (isSubmitting()) {
+            <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          }
+          @if (!isSubmitting() && currentStep() !== 'email') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          }
+          @if (!isSubmitting() && currentStep() === 'email') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          }
           {{ nextButtonText }}
         </button>
       </div>
 
       <!-- "Már regisztráltál?" link - csak az első lépésen -->
-      <button
-        *ngIf="currentStep() === 'search' && !showRestoreMode()"
-        type="button"
-        class="dialog__restore-link"
-        (click)="enterRestoreMode()"
-      >
-        Már regisztráltál korábban?
-      </button>
+      @if (currentStep() === 'search' && !showRestoreMode()) {
+        <button
+          type="button"
+          class="dialog__restore-link"
+          (click)="enterRestoreMode()"
+        >
+          Már regisztráltál korábban?
+        </button>
+      }
 
       <!-- Privacy hint -->
       <p class="dialog__privacy">
@@ -277,92 +322,105 @@
     </div>
 
     <!-- RESTORE MODE OVERLAY -->
-    <div class="dialog__restore-overlay" *ngIf="showRestoreMode()">
-      <div class="dialog__restore-content" @fadeSlide>
-        <div class="dialog__restore-header">
-          <div class="dialog__icon dialog__icon--restore">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-              <polyline points="22,6 12,13 2,6"/>
-            </svg>
+    @if (showRestoreMode()) {
+      <div class="dialog__restore-overlay">
+        <div class="dialog__restore-content" @fadeSlide>
+          <div class="dialog__restore-header">
+            <div class="dialog__icon dialog__icon--restore">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </div>
+            <h3 class="dialog__restore-title">Belépés email címmel</h3>
+            <p class="dialog__restore-description">
+              Add meg az email címed, amivel korábban regisztráltál. Küldünk egy linket a belépéshez.
+            </p>
           </div>
-          <h3 class="dialog__restore-title">Belépés email címmel</h3>
-          <p class="dialog__restore-description">
-            Add meg az email címed, amivel korábban regisztráltál. Küldünk egy linket a belépéshez.
-          </p>
-        </div>
 
-        <!-- Hiba megjelenítése -->
-        <div class="dialog__alert dialog__alert--error" *ngIf="restoreError()" role="alert" aria-live="assertive">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>{{ restoreError() }}</span>
-        </div>
+          <!-- Hiba megjelenítése -->
+          @if (restoreError()) {
+            <div class="dialog__alert dialog__alert--error" role="alert" aria-live="assertive">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{{ restoreError() }}</span>
+            </div>
+          }
 
-        <!-- Sikeres küldés -->
-        <div class="dialog__restore-success" *ngIf="restoreSuccess()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-          <span>Ellenőrizd az email fiókodat!</span>
-          <p class="dialog__restore-success-hint">
-            Ha létezik fiók ezzel az email címmel, küldtünk egy belépési linket.
-          </p>
-        </div>
+          <!-- Sikeres küldés -->
+          @if (restoreSuccess()) {
+            <div class="dialog__restore-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>Ellenőrizd az email fiókodat!</span>
+              <p class="dialog__restore-success-hint">
+                Ha létezik fiók ezzel az email címmel, küldtünk egy belépési linket.
+              </p>
+            </div>
+          }
 
-        <!-- Email input (ha még nem sikerült) -->
-        <div class="dialog__field" *ngIf="!restoreSuccess()">
-          <label class="dialog__label" for="restore-email">Email címed</label>
-          <input
-            #restoreEmailInput
-            type="email"
-            id="restore-email"
-            class="dialog__input"
-            [(ngModel)]="restoreEmail"
-            (input)="restoreError.set(null)"
-            placeholder="pelda@email.hu"
-            [disabled]="isRestoreSending()"
-            maxlength="255"
-            autocomplete="email"
-          />
-        </div>
+          <!-- Email input (ha még nem sikerült) -->
+          @if (!restoreSuccess()) {
+            <div class="dialog__field">
+              <label class="dialog__label" for="restore-email">Email címed</label>
+              <input
+                #restoreEmailInput
+                type="email"
+                id="restore-email"
+                class="dialog__input"
+                [(ngModel)]="restoreEmail"
+                (input)="restoreError.set(null)"
+                placeholder="pelda@email.hu"
+                [disabled]="isRestoreSending()"
+                maxlength="255"
+                autocomplete="email"
+              />
+            </div>
+          }
 
-        <!-- Gombok -->
-        <div class="dialog__restore-actions">
-          <button
-            type="button"
-            class="dialog__btn dialog__btn--secondary"
-            (click)="exitRestoreMode()"
-            [disabled]="isRestoreSending()"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-            </svg>
-            Vissza
-          </button>
+          <!-- Gombok -->
+          <div class="dialog__restore-actions">
+            <button
+              type="button"
+              class="dialog__btn dialog__btn--secondary"
+              (click)="exitRestoreMode()"
+              [disabled]="isRestoreSending()"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+              </svg>
+              Vissza
+            </button>
 
-          <button
-            *ngIf="!restoreSuccess()"
-            type="button"
-            class="dialog__btn dialog__btn--primary"
-            (click)="requestRestoreLink()"
-            [disabled]="isRestoreSending() || !restoreEmail.trim()"
-          >
-            <svg *ngIf="isRestoreSending()" class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            </svg>
-            <svg *ngIf="!isRestoreSending()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-            </svg>
-            {{ isRestoreSending() ? 'Küldés...' : 'Link küldése' }}
-          </button>
+            @if (!restoreSuccess()) {
+              <button
+                type="button"
+                class="dialog__btn dialog__btn--primary"
+                (click)="requestRestoreLink()"
+                [disabled]="isRestoreSending() || !restoreEmail.trim()"
+              >
+                @if (isRestoreSending()) {
+                  <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  </svg>
+                }
+                @if (!isRestoreSending()) {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                  </svg>
+                }
+                {{ isRestoreSending() ? 'Küldés...' : 'Link küldése' }}
+              </button>
+            }
+          </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 </div>

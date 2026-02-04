@@ -1,26 +1,29 @@
-<footer class="footer" *ngIf="project$ | async as project">
-  <div class="footer__content">
-    <!-- Last Activity -->
-    <div class="footer__activity">
-      <svg class="footer__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-        <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <span class="footer__label">Utolsó aktivitás:</span>
-      <span class="footer__value" *ngIf="project.lastActivityAt; else noActivity">
-        {{ getRelativeTime(project.lastActivityAt) }}
-        <span class="footer__date">({{ formatDate(project.lastActivityAt) }})</span>
-      </span>
-      <ng-template #noActivity>
-        <span class="footer__value footer__value--empty">Nincs aktivitás</span>
-      </ng-template>
-    </div>
+@if (project$ | async; as project) {
+  <footer class="footer">
+    <div class="footer__content">
+      <!-- Last Activity -->
+      <div class="footer__activity">
+        <svg class="footer__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="footer__label">Utolsó aktivitás:</span>
+        @if (project.lastActivityAt) {
+          <span class="footer__value">
+            {{ getRelativeTime(project.lastActivityAt) }}
+            <span class="footer__date">({{ formatDate(project.lastActivityAt) }})</span>
+          </span>
+        } @else {
+          <span class="footer__value footer__value--empty">Nincs aktivitás</span>
+        }
+      </div>
 
-    <!-- Copyright -->
-    <div class="footer__copyright">
-      <span>Tablókirály</span>
-      <span class="footer__separator">|</span>
-      <span>{{ currentYear }}</span>
+      <!-- Copyright -->
+      <div class="footer__copyright">
+        <span>Tablókirály</span>
+        <span class="footer__separator">|</span>
+        <span>{{ currentYear }}</span>
+      </div>
     </div>
-  </div>
-</footer>
+  </footer>
+}

@@ -9,32 +9,37 @@
   <!-- Dialog container -->
   <div class="dialog">
     <!-- Close button (X) - csak ha bezárható -->
-    <button
-      *ngIf="canClose()"
-      type="button"
-      class="dialog__close"
-      (click)="close()"
-      [disabled]="isBusy()"
-      aria-label="Bezárás"
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
+    @if (canClose()) {
+      <button
+        type="button"
+        class="dialog__close"
+        (click)="close()"
+        [disabled]="isBusy()"
+        aria-label="Bezárás"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    }
 
     <!-- Header -->
     <div class="dialog__header" [class.dialog__header--edit]="mode() === 'edit'">
       <div class="dialog__icon" [class.dialog__icon--edit]="mode() === 'edit'">
         <!-- User wave icon (register) / Edit icon (edit) -->
-        <svg *ngIf="mode() === 'register'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-          <path d="M22 8c-1-1-2.5-1.5-4-1.5" stroke-linecap="round"/>
-        </svg>
-        <svg *ngIf="mode() === 'edit'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        @if (mode() === 'register') {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+            <path d="M22 8c-1-1-2.5-1.5-4-1.5" stroke-linecap="round"/>
+          </svg>
+        }
+        @if (mode() === 'edit') {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        }
       </div>
       <h2 id="dialog-title" class="dialog__title">
         {{ dialogTitle() }}
@@ -47,14 +52,16 @@
     <!-- Content -->
     <div class="dialog__content">
       <!-- API hiba megjelenítése -->
-      <div class="dialog__alert dialog__alert--error" *ngIf="apiError()" role="alert" aria-live="assertive">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span>{{ apiError() }}</span>
-      </div>
+      @if (apiError()) {
+        <div class="dialog__alert dialog__alert--error" role="alert" aria-live="assertive">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ apiError() }}</span>
+        </div>
+      }
 
       <!-- Name field -->
       <div class="dialog__field">
@@ -74,7 +81,9 @@
           maxlength="100"
           autocomplete="name"
         />
-        <span class="dialog__error" *ngIf="errors.name" role="alert" aria-live="polite">{{ errors.name }}</span>
+        @if (errors.name) {
+          <span class="dialog__error" role="alert" aria-live="polite">{{ errors.name }}</span>
+        }
       </div>
 
       <!-- Email field (opcionális) -->
@@ -94,7 +103,9 @@
           maxlength="255"
           autocomplete="email"
         />
-        <span class="dialog__error" *ngIf="errors.email" role="alert" aria-live="polite">{{ errors.email }}</span>
+        @if (errors.email) {
+          <span class="dialog__error" role="alert" aria-live="polite">{{ errors.email }}</span>
+        }
         <span class="dialog__hint">
           Ha megadod, emailben küldünk egy linket, amivel más eszközön is beléphetsz.
         </span>
@@ -110,18 +121,24 @@
           (click)="submit()"
           [disabled]="!isFormValid || isBusy"
         >
-          <svg *ngIf="isBusy()" class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
+          @if (isBusy()) {
+            <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          }
           <!-- Arrow icon for register -->
-          <svg *ngIf="!isBusy() && mode() === 'register'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
+          @if (!isBusy() && mode() === 'register') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          }
           <!-- Check icon for edit -->
-          <svg *ngIf="!isBusy() && mode() === 'edit'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+          @if (!isBusy() && mode() === 'edit') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          }
           {{ submitButtonText() }}
         </button>
       </div>

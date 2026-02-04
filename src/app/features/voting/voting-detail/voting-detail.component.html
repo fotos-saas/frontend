@@ -28,164 +28,195 @@
   </button>
 
   <!-- Loading -->
-  <div class="voting-detail__loading" *ngIf="state.isLoading()" role="status" aria-live="polite">
-    <div class="voting-detail__spinner" aria-hidden="true"></div>
-    <p>Szavazás betöltése...</p>
-  </div>
+  @if (state.isLoading()) {
+    <div class="voting-detail__loading" role="status" aria-live="polite">
+      <div class="voting-detail__spinner" aria-hidden="true"></div>
+      <p>Szavazás betöltése...</p>
+    </div>
+  }
 
   <!-- Error -->
-  <div class="voting-detail__error" *ngIf="state.errorMessage() && !state.isLoading()" role="alert" aria-live="assertive">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="12" y1="8" x2="12" y2="12"/>
-      <line x1="12" y1="16" x2="12.01" y2="16"/>
-    </svg>
-    <p>{{ state.errorMessage() }}</p>
-    <button (click)="goBack()">Vissza</button>
-  </div>
+  @if (state.errorMessage() && !state.isLoading()) {
+    <div class="voting-detail__error" role="alert" aria-live="assertive">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p>{{ state.errorMessage() }}</p>
+      <button (click)="goBack()">Vissza</button>
+    </div>
+  }
 
   <!-- Content -->
-  <div class="voting-detail__content" *ngIf="state.poll() && !state.isLoading()">
-    <!-- Header -->
-    <header class="voting-detail__header">
-      <div class="voting-detail__status"
-        [class.voting-detail__status--open]="state.poll()!.isOpen"
-        [class.voting-detail__status--closed]="!state.poll()!.isOpen"
-      >
-        <span class="voting-detail__status-dot"></span>
-        {{ state.poll()!.isOpen ? 'Aktív szavazás' : 'Lezárt szavazás' }}
-      </div>
+  @if (state.poll() && !state.isLoading()) {
+    <div class="voting-detail__content">
+      <!-- Header -->
+      <header class="voting-detail__header">
+        <div class="voting-detail__status"
+          [class.voting-detail__status--open]="state.poll()!.isOpen"
+          [class.voting-detail__status--closed]="!state.poll()!.isOpen"
+        >
+          <span class="voting-detail__status-dot"></span>
+          {{ state.poll()!.isOpen ? 'Aktív szavazás' : 'Lezárt szavazás' }}
+        </div>
 
-      <h1 class="voting-detail__title">{{ state.poll()!.title }}</h1>
+        <h1 class="voting-detail__title">{{ state.poll()!.title }}</h1>
 
-      <div class="voting-detail__description" *ngIf="state.poll()!.description"
-        [innerHTML]="state.poll()!.description | safeHtml">
-      </div>
+        @if (state.poll()!.description) {
+          <div class="voting-detail__description"
+            [innerHTML]="state.poll()!.description | safeHtml">
+          </div>
+        }
 
-      <!-- Media Gallery -->
-      @if (hasMedia) {
-        <div class="voting-detail__gallery">
-          @for (media of mediaItems; track trackByMediaId($index, media); let i = $index) {
-            <div class="voting-detail__gallery-item" (click)="onMediaClick(i)">
-              <img [src]="media.url" [alt]="media.fileName" loading="lazy" decoding="async" />
-              @if (i === 0 && mediaItems.length > 1) {
-                <span class="voting-detail__gallery-badge">{{ mediaItems.length }} kép</span>
+        <!-- Media Gallery -->
+        @if (hasMedia) {
+          <div class="voting-detail__gallery">
+            @for (media of mediaItems; track trackByMediaId($index, media); let i = $index) {
+              <div class="voting-detail__gallery-item" (click)="onMediaClick(i)">
+                <img [src]="media.url" [alt]="media.fileName" loading="lazy" decoding="async" />
+                @if (i === 0 && mediaItems.length > 1) {
+                  <span class="voting-detail__gallery-badge">{{ mediaItems.length }} kép</span>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Meta -->
+        <div class="voting-detail__meta">
+          @if (state.poll()!.uniqueVoters !== undefined) {
+            <span class="voting-detail__meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+              </svg>
+              {{ state.poll()!.uniqueVoters }} szavazó
+            </span>
+          }
+
+          @if (state.poll()!.totalVotes !== undefined) {
+            <span class="voting-detail__meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ state.poll()!.totalVotes }} szavazat összesen
+            </span>
+          }
+
+          @if (state.poll()!.isMultipleChoice) {
+            <span class="voting-detail__meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              Több opció választható (max {{ state.poll()!.maxVotesPerGuest }})
+            </span>
+          }
+        </div>
+      </header>
+
+      <!-- Success message -->
+      @if (state.successMessage()) {
+        <div class="voting-detail__message voting-detail__message--success" role="status" aria-live="polite">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {{ state.successMessage() }}
+        </div>
+      }
+
+      <!-- Options grid -->
+      <div class="voting-detail__options" role="list" aria-label="Szavazási opciók">
+        @for (option of state.poll()!.options; track option.id) {
+          <div class="voting-option"
+            [class.voting-option--selected]="state.hasVotedFor(option)"
+            [class.voting-option--disabled]="!state.poll()!.isOpen || state.isVoting() || (!state.poll()!.canVote && state.poll()!.myVotes.length > 0 && !state.hasVotedFor(option))"
+            [attr.tabindex]="state.poll()!.isOpen && (state.poll()!.canVote || state.poll()!.myVotes.length === 0 || state.hasVotedFor(option)) ? 0 : -1"
+            [attr.aria-pressed]="state.hasVotedFor(option)"
+            [attr.aria-disabled]="!state.poll()!.isOpen || state.isVoting() || (!state.poll()!.canVote && state.poll()!.myVotes.length > 0 && !state.hasVotedFor(option))"
+            [attr.aria-label]="state.getOptionAriaLabel(option)"
+            role="button"
+            (click)="onOptionClick(option)"
+            (keydown.enter)="onOptionClick(option)"
+            (keydown.space)="onOptionKeySpace($event, option)"
+          >
+            <!-- Image -->
+            @if (option.imageUrl) {
+              <div class="voting-option__image" aria-hidden="true">
+                <img [src]="option.imageUrl" [alt]="option.label" loading="lazy" decoding="async" />
+              </div>
+            }
+
+            <!-- Content -->
+            <div class="voting-option__content">
+              <div class="voting-option__header">
+                <h3 class="voting-option__label" [id]="'option-label-' + option.id">{{ option.label }}</h3>
+                @if (state.hasVotedFor(option)) {
+                  <span class="voting-option__check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </span>
+                }
+              </div>
+
+              @if (option.description) {
+                <p class="voting-option__description" [id]="'option-desc-' + option.id">
+                  {{ option.description }}
+                </p>
+              }
+
+              <!-- Results bar -->
+              @if (state.showResults() && option.votesCount !== undefined) {
+                <div class="voting-option__results">
+                  <div class="voting-option__bar"
+                    role="progressbar"
+                    [attr.aria-valuenow]="option.percentage || 0"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    [attr.aria-label]="option.label + ': ' + (option.percentage || 0) + '%'"
+                  >
+                    <div class="voting-option__bar-fill"
+                      [style.width.%]="option.percentage || 0"
+                      [class.voting-option__bar-fill--voted]="state.hasVotedFor(option)"
+                    ></div>
+                  </div>
+                  <div class="voting-option__stats" aria-hidden="true">
+                    <span class="voting-option__percentage">{{ option.percentage || 0 }}%</span>
+                    <span class="voting-option__votes">{{ option.votesCount }} szavazat</span>
+                  </div>
+                </div>
               }
             </div>
+          </div>
+        }
+      </div>
+
+      <!-- My votes summary -->
+      @if (state.poll()!.myVotes.length > 0) {
+        <div class="voting-detail__summary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>{{ state.poll()!.myVotes.length }} szavazatod van leadva</span>
+          @if (state.poll()!.isOpen) {
+            <span class="voting-detail__summary-hint">
+              Kattints egy opcióra a szavazat visszavonásához
+            </span>
           }
         </div>
       }
 
-      <!-- Meta -->
-      <div class="voting-detail__meta">
-        <span class="voting-detail__meta-item" *ngIf="state.poll()!.uniqueVoters !== undefined">
+      <!-- Voting hint - megjelenik ha még nem szavazott (canVote true VAGY myVotes üres) -->
+      @if (state.poll()!.isOpen && state.poll()!.myVotes.length === 0) {
+        <div class="voting-detail__hint">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
+            <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          {{ state.poll()!.uniqueVoters }} szavazó
-        </span>
-
-        <span class="voting-detail__meta-item" *ngIf="state.poll()!.totalVotes !== undefined">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          {{ state.poll()!.totalVotes }} szavazat összesen
-        </span>
-
-        <span class="voting-detail__meta-item" *ngIf="state.poll()!.isMultipleChoice">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-            <path d="M22 4L12 14.01l-3-3"/>
-          </svg>
-          Több opció választható (max {{ state.poll()!.maxVotesPerGuest }})
-        </span>
-      </div>
-    </header>
-
-    <!-- Success message -->
-    <div class="voting-detail__message voting-detail__message--success" *ngIf="state.successMessage()" role="status" aria-live="polite">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      {{ state.successMessage() }}
-    </div>
-
-    <!-- Options grid -->
-    <div class="voting-detail__options" role="list" aria-label="Szavazási opciók">
-      <div class="voting-option"
-        *ngFor="let option of state.poll()!.options; trackBy: trackByOptionId"
-        [class.voting-option--selected]="state.hasVotedFor(option)"
-        [class.voting-option--disabled]="!state.poll()!.isOpen || state.isVoting() || (!state.poll()!.canVote && state.poll()!.myVotes.length > 0 && !state.hasVotedFor(option))"
-        [attr.tabindex]="state.poll()!.isOpen && (state.poll()!.canVote || state.poll()!.myVotes.length === 0 || state.hasVotedFor(option)) ? 0 : -1"
-        [attr.aria-pressed]="state.hasVotedFor(option)"
-        [attr.aria-disabled]="!state.poll()!.isOpen || state.isVoting() || (!state.poll()!.canVote && state.poll()!.myVotes.length > 0 && !state.hasVotedFor(option))"
-        [attr.aria-label]="state.getOptionAriaLabel(option)"
-        role="button"
-        (click)="onOptionClick(option)"
-        (keydown.enter)="onOptionClick(option)"
-        (keydown.space)="onOptionKeySpace($event, option)"
-      >
-        <!-- Image -->
-        <div class="voting-option__image" *ngIf="option.imageUrl" aria-hidden="true">
-          <img [src]="option.imageUrl" [alt]="option.label" loading="lazy" decoding="async" />
+          Kattints egy opcióra a szavazáshoz!
         </div>
-
-        <!-- Content -->
-        <div class="voting-option__content">
-          <div class="voting-option__header">
-            <h3 class="voting-option__label" [id]="'option-label-' + option.id">{{ option.label }}</h3>
-            <span class="voting-option__check" *ngIf="state.hasVotedFor(option)" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </span>
-          </div>
-
-          <p class="voting-option__description" *ngIf="option.description" [id]="'option-desc-' + option.id">
-            {{ option.description }}
-          </p>
-
-          <!-- Results bar -->
-          <div class="voting-option__results" *ngIf="state.showResults() && option.votesCount !== undefined">
-            <div class="voting-option__bar"
-              role="progressbar"
-              [attr.aria-valuenow]="option.percentage || 0"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              [attr.aria-label]="option.label + ': ' + (option.percentage || 0) + '%'"
-            >
-              <div class="voting-option__bar-fill"
-                [style.width.%]="option.percentage || 0"
-                [class.voting-option__bar-fill--voted]="state.hasVotedFor(option)"
-              ></div>
-            </div>
-            <div class="voting-option__stats" aria-hidden="true">
-              <span class="voting-option__percentage">{{ option.percentage || 0 }}%</span>
-              <span class="voting-option__votes">{{ option.votesCount }} szavazat</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      }
     </div>
-
-    <!-- My votes summary -->
-    <div class="voting-detail__summary" *ngIf="state.poll()!.myVotes.length > 0">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      <span>{{ state.poll()!.myVotes.length }} szavazatod van leadva</span>
-      <span class="voting-detail__summary-hint" *ngIf="state.poll()!.isOpen">
-        Kattints egy opcióra a szavazat visszavonásához
-      </span>
-    </div>
-
-    <!-- Voting hint - megjelenik ha még nem szavazott (canVote true VAGY myVotes üres) -->
-    <div class="voting-detail__hint" *ngIf="state.poll()!.isOpen && state.poll()!.myVotes.length === 0">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      Kattints egy opcióra a szavazáshoz!
-    </div>
-  </div>
+  }
 </div>

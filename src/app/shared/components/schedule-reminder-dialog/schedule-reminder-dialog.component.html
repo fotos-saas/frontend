@@ -61,31 +61,35 @@
       </button>
 
       <!-- Inline date picker -->
-      <div class="dialog__date-picker" *ngIf="isDatePickerOpen">
-        <!-- Custom date input wrapper for Hungarian format -->
-        <div class="dialog__date-input-wrapper" (click)="openDatePicker()">
-          <input
-            #dateInput
-            type="date"
-            class="dialog__date-input"
-            [(ngModel)]="selectedDate"
-            [min]="minDate"
-            [max]="maxDate"
-            aria-label="Fotózás időpontja"
-          />
-          <span class="dialog__date-display" *ngIf="selectedDate">
-            {{ formattedDateShort }}
-          </span>
+      @if (isDatePickerOpen) {
+        <div class="dialog__date-picker">
+          <!-- Custom date input wrapper for Hungarian format -->
+          <div class="dialog__date-input-wrapper" (click)="openDatePicker()">
+            <input
+              #dateInput
+              type="date"
+              class="dialog__date-input"
+              [(ngModel)]="selectedDate"
+              [min]="minDate"
+              [max]="maxDate"
+              aria-label="Fotózás időpontja"
+            />
+            @if (selectedDate) {
+              <span class="dialog__date-display">
+                {{ formattedDateShort }}
+              </span>
+            }
+          </div>
+          <button
+            type="button"
+            class="dialog__save-btn"
+            [disabled]="!selectedDate || isSaving"
+            (click)="saveDate()"
+          >
+            {{ isSaving ? 'Mentés...' : 'Mentés' }}
+          </button>
         </div>
-        <button
-          type="button"
-          class="dialog__save-btn"
-          [disabled]="!selectedDate || isSaving"
-          (click)="saveDate()"
-        >
-          {{ isSaving ? 'Mentés...' : 'Mentés' }}
-        </button>
-      </div>
+      }
 
       <!-- Divider -->
       <div class="dialog__divider">

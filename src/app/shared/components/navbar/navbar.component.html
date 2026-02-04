@@ -20,48 +20,58 @@
     <div class="navbar__mobile-brand">
       <a routerLink="/home" class="navbar__logo" aria-label="Tablókirály - Kezdőlap">Tablókirály</a>
       <!-- Kapcsolattartó neve (code token esetén - kattintható) -->
-      <app-contact-badge
-        *ngIf="isCode() && contactDisplayName()"
-        [contactName]="contactDisplayName()"
-        (editEvent)="openContactEditDialog()"
-      />
+      @if (isCode() && contactDisplayName()) {
+        <app-contact-badge
+          [contactName]="contactDisplayName()"
+          (editEvent)="openContactEditDialog()"
+        />
+      }
       <!-- Regisztrált vendég neve (share token esetén - kattintható) -->
-      <app-user-badge
-        *ngIf="isGuest() && hasGuestSession()"
-        [displayName]="displayName()"
-        (editEvent)="openEditDialog()"
-      />
+      @if (isGuest() && hasGuestSession()) {
+        <app-user-badge
+          [displayName]="displayName()"
+          (editEvent)="openEditDialog()"
+        />
+      }
       <!-- Vendég badge (ha share token ÉS nincs regisztrált session) -->
-      <app-guest-badge *ngIf="isGuest() && !hasGuestSession()" />
+      @if (isGuest() && !hasGuestSession()) {
+        <app-guest-badge />
+      }
       <!-- Admin előnézet badge -->
-      <span
-        class="navbar__preview-badge"
-        *ngIf="isPreview()"
-        role="status"
-        aria-label="Admin előnézet módban böngészel"
-      >
-        Admin előnézet
-      </span>
-      <span class="navbar__status" *ngIf="getStatusName()" [ngClass]="getStatusBadgeClasses()">
-        {{ getStatusName() }}
-      </span>
+      @if (isPreview()) {
+        <span
+          class="navbar__preview-badge"
+          role="status"
+          aria-label="Admin előnézet módban böngészel"
+        >
+          Admin előnézet
+        </span>
+      }
+      @if (getStatusName()) {
+        <span class="navbar__status" [ngClass]="getStatusBadgeClasses()">
+          {{ getStatusName() }}
+        </span>
+      }
     </div>
 
     <!-- Notification Bell + Logout (Right - mobile only) -->
     <div class="navbar__mobile-actions">
       <!-- Bökés értesítések (ha van guest session) -->
-      <a routerLink="/poke"
-         class="navbar__poke-badge"
-         *ngIf="hasGuestSession()"
-         (click)="closeMobileMenu()"
-         aria-label="Bökések"
-         title="Bökések">
-        <span class="navbar__poke-badge-icon">👉</span>
-        @if (pokeUnreadCount() > 0) {
-          <span class="navbar__poke-badge-count">{{ pokeUnreadCount() > 99 ? '99+' : pokeUnreadCount() }}</span>
-        }
-      </a>
-      <app-notification-bell *ngIf="hasGuestSession() || isCode()" />
+      @if (hasGuestSession()) {
+        <a routerLink="/poke"
+           class="navbar__poke-badge"
+           (click)="closeMobileMenu()"
+           aria-label="Bökések"
+           title="Bökések">
+          <span class="navbar__poke-badge-icon">👉</span>
+          @if (pokeUnreadCount() > 0) {
+            <span class="navbar__poke-badge-count">{{ pokeUnreadCount() > 99 ? '99+' : pokeUnreadCount() }}</span>
+          }
+        </a>
+      }
+      @if (hasGuestSession() || isCode()) {
+        <app-notification-bell />
+      }
       <button
         class="navbar__mobile-logout"
         (click)="logout()"
@@ -85,38 +95,51 @@
         <div class="navbar__brand-row">
           <a routerLink="/home" class="navbar__logo" aria-label="Tablókirály - Kezdőlap">Tablókirály</a>
           <!-- Kapcsolattartó neve (code token esetén - kattintható) -->
-          <app-contact-badge
-            *ngIf="isCode() && contactDisplayName()"
-            [contactName]="contactDisplayName()"
-            (editEvent)="openContactEditDialog()"
-          />
+          @if (isCode() && contactDisplayName()) {
+            <app-contact-badge
+              [contactName]="contactDisplayName()"
+              (editEvent)="openContactEditDialog()"
+            />
+          }
           <!-- Regisztrált vendég neve (share token esetén - kattintható) -->
-          <app-user-badge
-            *ngIf="isGuest() && hasGuestSession()"
-            [displayName]="displayName()"
-            (editEvent)="openEditDialog()"
-          />
+          @if (isGuest() && hasGuestSession()) {
+            <app-user-badge
+              [displayName]="displayName()"
+              (editEvent)="openEditDialog()"
+            />
+          }
           <!-- Vendég badge (ha share token ÉS nincs regisztrált session) -->
-          <app-guest-badge *ngIf="isGuest() && !hasGuestSession()" />
+          @if (isGuest() && !hasGuestSession()) {
+            <app-guest-badge />
+          }
           <!-- Admin előnézet badge -->
-          <span
-            class="navbar__preview-badge"
-            *ngIf="isPreview()"
-            role="status"
-            aria-label="Admin előnézet módban böngészel"
-          >
-            Admin előnézet
-          </span>
+          @if (isPreview()) {
+            <span
+              class="navbar__preview-badge"
+              role="status"
+              aria-label="Admin előnézet módban böngészel"
+            >
+              Admin előnézet
+            </span>
+          }
         </div>
-        <span class="navbar__status" *ngIf="getStatusName()" [ngClass]="getStatusBadgeClasses()">
-          {{ getStatusName() }}
-        </span>
+        @if (getStatusName()) {
+          <span class="navbar__status" [ngClass]="getStatusBadgeClasses()">
+            {{ getStatusName() }}
+          </span>
+        }
       </div>
-      <span class="navbar__project" *ngIf="projectInfo()?.schoolName">
-        {{ projectInfo()?.schoolName }}
-        <span *ngIf="projectInfo()?.className"> · {{ projectInfo()?.className }}</span>
-        <span *ngIf="projectInfo()?.classYear"> ({{ projectInfo()?.classYear }})</span>
-      </span>
+      @if (projectInfo()?.schoolName) {
+        <span class="navbar__project">
+          {{ projectInfo()?.schoolName }}
+          @if (projectInfo()?.className) {
+            <span> · {{ projectInfo()?.className }}</span>
+          }
+          @if (projectInfo()?.classYear) {
+            <span> ({{ projectInfo()?.classYear }})</span>
+          }
+        </span>
+      }
     </div>
     <div class="navbar__right">
       <div class="navbar__links">
@@ -124,28 +147,32 @@
            class="navbar__link"
            [class.navbar__link--active]="activePage() === 'home'"
            [attr.aria-current]="activePage() === 'home' ? 'page' : null">Kezdőlap</a>
-        <a routerLink="/samples"
-           class="navbar__link"
-           [class.navbar__link--active]="activePage() === 'samples'"
-           [attr.aria-current]="activePage() === 'samples' ? 'page' : null"
-           *ngIf="showSamples()">Minták</a>
-        <a routerLink="/template-chooser"
-           class="navbar__link"
-           [class.navbar__link--active]="activePage() === 'template-chooser'"
-           [attr.aria-current]="activePage() === 'template-chooser' ? 'page' : null"
-           *ngIf="showTemplateChooser()">
-          Minta Választó
-        </a>
-        <a routerLink="/missing-persons"
-           class="navbar__link"
-           [class.navbar__link--active]="activePage() === 'missing'"
-           [attr.aria-current]="activePage() === 'missing' ? 'page' : null"
-           *ngIf="showMissingPersons()">Hiányzó képek</a>
-        <a routerLink="/voting"
-           class="navbar__link"
-           [class.navbar__link--active]="activePage() === 'voting'"
-           [attr.aria-current]="activePage() === 'voting' ? 'page' : null"
-           *ngIf="showVoting()">Szavazások</a>
+        @if (showSamples()) {
+          <a routerLink="/samples"
+             class="navbar__link"
+             [class.navbar__link--active]="activePage() === 'samples'"
+             [attr.aria-current]="activePage() === 'samples' ? 'page' : null">Minták</a>
+        }
+        @if (showTemplateChooser()) {
+          <a routerLink="/template-chooser"
+             class="navbar__link"
+             [class.navbar__link--active]="activePage() === 'template-chooser'"
+             [attr.aria-current]="activePage() === 'template-chooser' ? 'page' : null">
+            Minta Választó
+          </a>
+        }
+        @if (showMissingPersons()) {
+          <a routerLink="/missing-persons"
+             class="navbar__link"
+             [class.navbar__link--active]="activePage() === 'missing'"
+             [attr.aria-current]="activePage() === 'missing' ? 'page' : null">Hiányzó képek</a>
+        }
+        @if (showVoting()) {
+          <a routerLink="/voting"
+             class="navbar__link"
+             [class.navbar__link--active]="activePage() === 'voting'"
+             [attr.aria-current]="activePage() === 'voting' ? 'page' : null">Szavazások</a>
+        }
         <a routerLink="/newsfeed"
            class="navbar__link"
            [class.navbar__link--active]="activePage() === 'newsfeed'"
@@ -154,30 +181,35 @@
            class="navbar__link"
            [class.navbar__link--active]="activePage() === 'forum'"
            [attr.aria-current]="activePage() === 'forum' ? 'page' : null">Beszélgetések</a>
-        <a routerLink="/order-data"
-           class="navbar__link"
-           [class.navbar__link--active]="activePage() === 'order-data'"
-           [attr.aria-current]="activePage() === 'order-data' ? 'page' : null"
-           *ngIf="showOrderData()">Megrendelés</a>
-        <a routerLink="/order-finalization"
-           class="navbar__link navbar__link--primary"
-           [class.navbar__link--active]="activePage() === 'order-finalization'"
-           [attr.aria-current]="activePage() === 'order-finalization' ? 'page' : null"
-           *ngIf="showFinalization()">Véglegesítés</a>
+        @if (showOrderData()) {
+          <a routerLink="/order-data"
+             class="navbar__link"
+             [class.navbar__link--active]="activePage() === 'order-data'"
+             [attr.aria-current]="activePage() === 'order-data' ? 'page' : null">Megrendelés</a>
+        }
+        @if (showFinalization()) {
+          <a routerLink="/order-finalization"
+             class="navbar__link navbar__link--primary"
+             [class.navbar__link--active]="activePage() === 'order-finalization'"
+             [attr.aria-current]="activePage() === 'order-finalization' ? 'page' : null">Véglegesítés</a>
+        }
       </div>
       <!-- Bökés értesítések (ha van guest session) -->
-      <a routerLink="/poke"
-         class="navbar__poke-badge"
-         *ngIf="hasGuestSession()"
-         aria-label="Bökések"
-         title="Bökések">
-        <span class="navbar__poke-badge-icon">👉</span>
-        @if (pokeUnreadCount() > 0) {
-          <span class="navbar__poke-badge-count">{{ pokeUnreadCount() > 99 ? '99+' : pokeUnreadCount() }}</span>
-        }
-      </a>
+      @if (hasGuestSession()) {
+        <a routerLink="/poke"
+           class="navbar__poke-badge"
+           aria-label="Bökések"
+           title="Bökések">
+          <span class="navbar__poke-badge-icon">👉</span>
+          @if (pokeUnreadCount() > 0) {
+            <span class="navbar__poke-badge-count">{{ pokeUnreadCount() > 99 ? '99+' : pokeUnreadCount() }}</span>
+          }
+        </a>
+      }
       <!-- Értesítések csengő (ha bejelentkezett guest vagy code token) -->
-      <app-notification-bell *ngIf="hasGuestSession() || isCode()" />
+      @if (hasGuestSession() || isCode()) {
+        <app-notification-bell />
+      }
       <button
         class="navbar__logout"
         (click)="logout()"
@@ -232,31 +264,39 @@
     </div>
 
     <!-- User Info (in mobile menu) - kapcsolattartó (code token esetén) -->
-    <app-mobile-menu-user
-      *ngIf="isCode() && contactDisplayName()"
-      [displayName]="contactDisplayName()"
-      [mode]="'contact'"
-      (editEvent)="openContactEditDialog()"
-      (closeMenuEvent)="closeMobileMenu()"
-    />
+    @if (isCode() && contactDisplayName()) {
+      <app-mobile-menu-user
+        [displayName]="contactDisplayName()"
+        [mode]="'contact'"
+        (editEvent)="openContactEditDialog()"
+        (closeMenuEvent)="closeMobileMenu()"
+      />
+    }
 
     <!-- User Info (in mobile menu) - ha van guest session (share token) -->
-    <app-mobile-menu-user
-      *ngIf="isGuest() && hasGuestSession()"
-      [displayName]="displayName()"
-      [mode]="'guest'"
-      (editEvent)="openEditDialog()"
-      (closeMenuEvent)="closeMobileMenu()"
-    />
+    @if (isGuest() && hasGuestSession()) {
+      <app-mobile-menu-user
+        [displayName]="displayName()"
+        [mode]="'guest'"
+        (editEvent)="openEditDialog()"
+        (closeMenuEvent)="closeMobileMenu()"
+      />
+    }
 
     <!-- Project Info (in mobile menu) -->
-    <div class="navbar__mobile-menu-project" *ngIf="projectInfo()?.schoolName">
-      <span class="navbar__mobile-menu-project-name">{{ projectInfo()?.schoolName }}</span>
-      <span class="navbar__mobile-menu-project-details" *ngIf="projectInfo()?.className || projectInfo()?.classYear">
-        {{ projectInfo()?.className }}
-        <span *ngIf="projectInfo()?.classYear">({{ projectInfo()?.classYear }})</span>
-      </span>
-    </div>
+    @if (projectInfo()?.schoolName) {
+      <div class="navbar__mobile-menu-project">
+        <span class="navbar__mobile-menu-project-name">{{ projectInfo()?.schoolName }}</span>
+        @if (projectInfo()?.className || projectInfo()?.classYear) {
+          <span class="navbar__mobile-menu-project-details">
+            {{ projectInfo()?.className }}
+            @if (projectInfo()?.classYear) {
+              <span>({{ projectInfo()?.classYear }})</span>
+            }
+          </span>
+        }
+      </div>
+    }
 
     <!-- Navigation Links -->
     <ul class="navbar__mobile-menu-list">
@@ -274,62 +314,70 @@
           <span>Kezdőlap</span>
         </a>
       </li>
-      <li class="navbar__mobile-menu-item" *ngIf="showSamples()">
-        <a
-          routerLink="/samples"
-          class="navbar__mobile-menu-link"
-          [class.navbar__mobile-menu-link--active]="activePage === 'samples'"
-          [attr.aria-current]="activePage === 'samples' ? 'page' : null"
-          (click)="closeMobileMenu()"
-        >
-          <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-          </svg>
-          <span>Minták</span>
-        </a>
-      </li>
-      <li class="navbar__mobile-menu-item" *ngIf="showTemplateChooser()">
-        <a
-          routerLink="/template-chooser"
-          class="navbar__mobile-menu-link"
-          [class.navbar__mobile-menu-link--active]="activePage === 'template-chooser'"
-          [attr.aria-current]="activePage === 'template-chooser' ? 'page' : null"
-          (click)="closeMobileMenu()"
-        >
-          <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-          </svg>
-          <span>Minta Választó</span>
-        </a>
-      </li>
-      <li class="navbar__mobile-menu-item" *ngIf="showMissingPersons()">
-        <a
-          routerLink="/missing-persons"
-          class="navbar__mobile-menu-link"
-          [class.navbar__mobile-menu-link--active]="activePage === 'missing'"
-          [attr.aria-current]="activePage === 'missing' ? 'page' : null"
-          (click)="closeMobileMenu()"
-        >
-          <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-          </svg>
-          <span>Hiányzó képek</span>
-        </a>
-      </li>
-      <li class="navbar__mobile-menu-item" *ngIf="showVoting()">
-        <a
-          routerLink="/voting"
-          class="navbar__mobile-menu-link"
-          [class.navbar__mobile-menu-link--active]="activePage === 'voting'"
-          [attr.aria-current]="activePage === 'voting' ? 'page' : null"
-          (click)="closeMobileMenu()"
-        >
-          <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Szavazások</span>
-        </a>
-      </li>
+      @if (showSamples()) {
+        <li class="navbar__mobile-menu-item">
+          <a
+            routerLink="/samples"
+            class="navbar__mobile-menu-link"
+            [class.navbar__mobile-menu-link--active]="activePage === 'samples'"
+            [attr.aria-current]="activePage === 'samples' ? 'page' : null"
+            (click)="closeMobileMenu()"
+          >
+            <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            <span>Minták</span>
+          </a>
+        </li>
+      }
+      @if (showTemplateChooser()) {
+        <li class="navbar__mobile-menu-item">
+          <a
+            routerLink="/template-chooser"
+            class="navbar__mobile-menu-link"
+            [class.navbar__mobile-menu-link--active]="activePage === 'template-chooser'"
+            [attr.aria-current]="activePage === 'template-chooser' ? 'page' : null"
+            (click)="closeMobileMenu()"
+          >
+            <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+            <span>Minta Választó</span>
+          </a>
+        </li>
+      }
+      @if (showMissingPersons()) {
+        <li class="navbar__mobile-menu-item">
+          <a
+            routerLink="/missing-persons"
+            class="navbar__mobile-menu-link"
+            [class.navbar__mobile-menu-link--active]="activePage === 'missing'"
+            [attr.aria-current]="activePage === 'missing' ? 'page' : null"
+            (click)="closeMobileMenu()"
+          >
+            <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+            <span>Hiányzó képek</span>
+          </a>
+        </li>
+      }
+      @if (showVoting()) {
+        <li class="navbar__mobile-menu-item">
+          <a
+            routerLink="/voting"
+            class="navbar__mobile-menu-link"
+            [class.navbar__mobile-menu-link--active]="activePage === 'voting'"
+            [attr.aria-current]="activePage === 'voting' ? 'page' : null"
+            (click)="closeMobileMenu()"
+          >
+            <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Szavazások</span>
+          </a>
+        </li>
+      }
       <li class="navbar__mobile-menu-item">
         <a
           routerLink="/newsfeed"
@@ -358,34 +406,38 @@
           <span>Beszélgetések</span>
         </a>
       </li>
-      <li class="navbar__mobile-menu-item" *ngIf="showOrderData()">
-        <a
-          routerLink="/order-data"
-          class="navbar__mobile-menu-link"
-          [class.navbar__mobile-menu-link--active]="activePage === 'order-data'"
-          [attr.aria-current]="activePage === 'order-data' ? 'page' : null"
-          (click)="closeMobileMenu()"
-        >
-          <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-          </svg>
-          <span>Megrendelés</span>
-        </a>
-      </li>
-      <li class="navbar__mobile-menu-item navbar__mobile-menu-item--primary" *ngIf="showFinalization()">
-        <a
-          routerLink="/order-finalization"
-          class="navbar__mobile-menu-link navbar__mobile-menu-link--primary"
-          [class.navbar__mobile-menu-link--active]="activePage === 'order-finalization'"
-          [attr.aria-current]="activePage === 'order-finalization' ? 'page' : null"
-          (click)="closeMobileMenu()"
-        >
-          <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Véglegesítés</span>
-        </a>
-      </li>
+      @if (showOrderData()) {
+        <li class="navbar__mobile-menu-item">
+          <a
+            routerLink="/order-data"
+            class="navbar__mobile-menu-link"
+            [class.navbar__mobile-menu-link--active]="activePage === 'order-data'"
+            [attr.aria-current]="activePage === 'order-data' ? 'page' : null"
+            (click)="closeMobileMenu()"
+          >
+            <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            <span>Megrendelés</span>
+          </a>
+        </li>
+      }
+      @if (showFinalization()) {
+        <li class="navbar__mobile-menu-item navbar__mobile-menu-item--primary">
+          <a
+            routerLink="/order-finalization"
+            class="navbar__mobile-menu-link navbar__mobile-menu-link--primary"
+            [class.navbar__mobile-menu-link--active]="activePage === 'order-finalization'"
+            [attr.aria-current]="activePage === 'order-finalization' ? 'page' : null"
+            (click)="closeMobileMenu()"
+          >
+            <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Véglegesítés</span>
+          </a>
+        </li>
+      }
     </ul>
 
     <!-- Logout Button (in mobile menu) -->
@@ -408,21 +460,23 @@
 </nav>
 
 <!-- Guest Name Edit Dialog (share token esetén) -->
-<app-guest-name-dialog
-  *ngIf="showEditDialog()"
-  [mode]="'edit'"
-  [initialName]="guestName() || ''"
-  [initialEmail]="guestEmail() || ''"
-  [canClose]="true"
-  [isSubmitting]="isUpdating()"
-  [errorMessage]="updateError()"
-  (resultEvent)="onEditDialogResult($event)"
-/>
+@if (showEditDialog()) {
+  <app-guest-name-dialog
+    [mode]="'edit'"
+    [initialName]="guestName() || ''"
+    [initialEmail]="guestEmail() || ''"
+    [canClose]="true"
+    [isSubmitting]="isUpdating()"
+    [errorMessage]="updateError()"
+    (resultEvent)="onEditDialogResult($event)"
+  />
+}
 
 <!-- Contact Edit Dialog (code token esetén) -->
-<app-contact-edit-dialog
-  *ngIf="showContactEditDialog()"
-  [initialData]="contactEditData()"
-  [isSaving]="isContactUpdating()"
-  (resultEvent)="onContactEditResult($event)"
-/>
+@if (showContactEditDialog()) {
+  <app-contact-edit-dialog
+    [initialData]="contactEditData()"
+    [isSaving]="isContactUpdating()"
+    (resultEvent)="onContactEditResult($event)"
+  />
+}

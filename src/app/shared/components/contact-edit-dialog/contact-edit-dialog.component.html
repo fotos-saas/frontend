@@ -55,7 +55,9 @@
           placeholder="Kovács János"
           [disabled]="isSaving()"
         />
-        <span class="dialog__error" *ngIf="errors.name">{{ errors.name }}</span>
+        @if (errors.name) {
+          <span class="dialog__error">{{ errors.name }}</span>
+        }
       </div>
 
       <!-- Email field -->
@@ -73,7 +75,9 @@
           placeholder="pelda@email.hu"
           [disabled]="isSaving()"
         />
-        <span class="dialog__error" *ngIf="errors.email">{{ errors.email }}</span>
+        @if (errors.email) {
+          <span class="dialog__error">{{ errors.email }}</span>
+        }
       </div>
 
       <!-- Phone field -->
@@ -91,7 +95,9 @@
           placeholder="+36 30 123 4567"
           [disabled]="isSaving()"
         />
-        <span class="dialog__error" *ngIf="errors.phone">{{ errors.phone }}</span>
+        @if (errors.phone) {
+          <span class="dialog__error">{{ errors.phone }}</span>
+        }
       </div>
 
       <!-- Actions -->
@@ -110,10 +116,12 @@
           (click)="save()"
           [disabled]="!isFormValid || isSaving"
         >
-          <svg *ngIf="isSaving()" class="dialog__btn-spinner" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
+          @if (isSaving()) {
+            <svg class="dialog__btn-spinner" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          }
           {{ isSaving() ? 'Mentés...' : 'Mentés' }}
         </button>
       </div>

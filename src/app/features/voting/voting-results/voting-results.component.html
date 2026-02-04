@@ -8,113 +8,128 @@
   </button>
 
   <!-- Loading -->
-  <div class="voting-results__loading" *ngIf="isLoading()" role="status" aria-live="polite">
-    <div class="voting-results__spinner" aria-hidden="true"></div>
-    <p>Eredmények betöltése...</p>
-  </div>
+  @if (isLoading()) {
+    <div class="voting-results__loading" role="status" aria-live="polite">
+      <div class="voting-results__spinner" aria-hidden="true"></div>
+      <p>Eredmények betöltése...</p>
+    </div>
+  }
 
   <!-- Error -->
-  <div class="voting-results__error" *ngIf="errorMessage() && !isLoading()" role="alert" aria-live="assertive">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="12" y1="8" x2="12" y2="12"/>
-      <line x1="12" y1="16" x2="12.01" y2="16"/>
-    </svg>
-    <p>{{ errorMessage() }}</p>
-    <button (click)="goBack()">Vissza</button>
-  </div>
+  @if (errorMessage() && !isLoading()) {
+    <div class="voting-results__error" role="alert" aria-live="assertive">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p>{{ errorMessage() }}</p>
+      <button (click)="goBack()">Vissza</button>
+    </div>
+  }
 
   <!-- Content -->
-  <div class="voting-results__content" *ngIf="results() && !isLoading()">
-    <!-- Header -->
-    <header class="voting-results__header">
-      <div class="voting-results__status"
-        [class.voting-results__status--open]="results()!.isOpen"
-        [class.voting-results__status--closed]="!results()!.isOpen"
-      >
-        <span class="voting-results__status-dot"></span>
-        {{ results()!.isOpen ? 'Aktív szavazás' : 'Lezárt szavazás' }}
+  @if (results() && !isLoading()) {
+    <div class="voting-results__content">
+      <!-- Header -->
+      <header class="voting-results__header">
+        <div class="voting-results__status"
+          [class.voting-results__status--open]="results()!.isOpen"
+          [class.voting-results__status--closed]="!results()!.isOpen"
+        >
+          <span class="voting-results__status-dot"></span>
+          {{ results()!.isOpen ? 'Aktív szavazás' : 'Lezárt szavazás' }}
+        </div>
+
+        <h1 class="voting-results__title">{{ results()!.title }}</h1>
+
+        <!-- Stats -->
+        <div class="voting-results__stats">
+          <div class="voting-results__stat">
+            <span class="voting-results__stat-value">{{ results()!.uniqueVoters }}</span>
+            <span class="voting-results__stat-label">szavazó</span>
+          </div>
+          <div class="voting-results__stat">
+            <span class="voting-results__stat-value">{{ results()!.totalVotes }}</span>
+            <span class="voting-results__stat-label">szavazat</span>
+          </div>
+          @if (results()!.participationRate !== undefined) {
+            <div class="voting-results__stat">
+              <span class="voting-results__stat-value">{{ results()!.participationRate }}%</span>
+              <span class="voting-results__stat-label">részvétel</span>
+            </div>
+          }
+        </div>
+      </header>
+
+      <!-- Options list with results -->
+      <div class="voting-results__options" role="list" aria-label="Szavazási eredmények">
+        @for (option of results()!.options; track option.id) {
+          <div class="voting-results__option"
+            [class.voting-results__option--winner]="isWinner(option)"
+            role="listitem"
+          >
+            <!-- Winner badge -->
+            @if (isWinner(option)) {
+              <div class="voting-results__winner-badge" aria-label="Vezető">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+            }
+
+            <!-- Option content -->
+            <div class="voting-results__option-content">
+              <!-- Image -->
+              @if (option.imageUrl) {
+                <div class="voting-results__option-image" aria-hidden="true">
+                  <img [src]="option.imageUrl" [alt]="option.label" loading="lazy" decoding="async" />
+                </div>
+              }
+
+              <!-- Label and description -->
+              <div class="voting-results__option-info">
+                <h3 class="voting-results__option-label">{{ option.label }}</h3>
+                @if (option.description) {
+                  <p class="voting-results__option-description">
+                    {{ option.description }}
+                  </p>
+                }
+              </div>
+
+              <!-- Results -->
+              <div class="voting-results__option-results">
+                <div class="voting-results__bar"
+                  role="progressbar"
+                  [attr.aria-valuenow]="option.percentage || 0"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-label]="option.label + ': ' + (option.percentage || 0) + '%'"
+                >
+                  <div class="voting-results__bar-fill"
+                    [style.width.%]="option.percentage || 0"
+                    [class.voting-results__bar-fill--winner]="isWinner(option)"
+                  ></div>
+                </div>
+                <div class="voting-results__option-stats">
+                  <span class="voting-results__percentage">{{ option.percentage || 0 }}%</span>
+                  <span class="voting-results__votes">{{ option.votesCount || 0 }} szavazat</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
       </div>
 
-      <h1 class="voting-results__title">{{ results()!.title }}</h1>
-
-      <!-- Stats -->
-      <div class="voting-results__stats">
-        <div class="voting-results__stat">
-          <span class="voting-results__stat-value">{{ results()!.uniqueVoters }}</span>
-          <span class="voting-results__stat-label">szavazó</span>
-        </div>
-        <div class="voting-results__stat">
-          <span class="voting-results__stat-value">{{ results()!.totalVotes }}</span>
-          <span class="voting-results__stat-label">szavazat</span>
-        </div>
-        <div class="voting-results__stat" *ngIf="results()!.participationRate !== undefined">
-          <span class="voting-results__stat-value">{{ results()!.participationRate }}%</span>
-          <span class="voting-results__stat-label">részvétel</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Options list with results -->
-    <div class="voting-results__options" role="list" aria-label="Szavazási eredmények">
-      <div class="voting-results__option"
-        *ngFor="let option of results()!.options; trackBy: trackByOptionId"
-        [class.voting-results__option--winner]="isWinner(option)"
-        role="listitem"
-      >
-        <!-- Winner badge -->
-        <div class="voting-results__winner-badge" *ngIf="isWinner(option)" aria-label="Vezető">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      <!-- Actions -->
+      <div class="voting-results__actions">
+        <button class="voting-results__action-btn voting-results__action-btn--secondary" (click)="goBack()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
-        </div>
-
-        <!-- Option content -->
-        <div class="voting-results__option-content">
-          <!-- Image -->
-          <div class="voting-results__option-image" *ngIf="option.imageUrl" aria-hidden="true">
-            <img [src]="option.imageUrl" [alt]="option.label" loading="lazy" decoding="async" />
-          </div>
-
-          <!-- Label and description -->
-          <div class="voting-results__option-info">
-            <h3 class="voting-results__option-label">{{ option.label }}</h3>
-            <p class="voting-results__option-description" *ngIf="option.description">
-              {{ option.description }}
-            </p>
-          </div>
-
-          <!-- Results -->
-          <div class="voting-results__option-results">
-            <div class="voting-results__bar"
-              role="progressbar"
-              [attr.aria-valuenow]="option.percentage || 0"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              [attr.aria-label]="option.label + ': ' + (option.percentage || 0) + '%'"
-            >
-              <div class="voting-results__bar-fill"
-                [style.width.%]="option.percentage || 0"
-                [class.voting-results__bar-fill--winner]="isWinner(option)"
-              ></div>
-            </div>
-            <div class="voting-results__option-stats">
-              <span class="voting-results__percentage">{{ option.percentage || 0 }}%</span>
-              <span class="voting-results__votes">{{ option.votesCount || 0 }} szavazat</span>
-            </div>
-          </div>
-        </div>
+          Vissza a listához
+        </button>
       </div>
     </div>
-
-    <!-- Actions -->
-    <div class="voting-results__actions">
-      <button class="voting-results__action-btn voting-results__action-btn--secondary" (click)="goBack()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-        </svg>
-        Vissza a listához
-      </button>
-    </div>
-  </div>
+  }
 </div>

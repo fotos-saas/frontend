@@ -39,193 +39,206 @@
   </button>
 
   <!-- Loading -->
-  <div class="forum-detail__loading" *ngIf="isLoading()" role="status" aria-live="polite">
-    <div class="forum-detail__spinner" aria-hidden="true"></div>
-    <p>Beszélgetés betöltése...</p>
-  </div>
+  @if (isLoading()) {
+    <div class="forum-detail__loading" role="status" aria-live="polite">
+      <div class="forum-detail__spinner" aria-hidden="true"></div>
+      <p>Beszélgetés betöltése...</p>
+    </div>
+  }
 
   <!-- Error -->
-  <div class="forum-detail__error" *ngIf="errorMessage() && !isLoading()" role="alert">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="12" y1="8" x2="12" y2="12"/>
-      <line x1="12" y1="16" x2="12.01" y2="16"/>
-    </svg>
-    <p>{{ errorMessage() }}</p>
-    <button (click)="goBack()" aria-label="Vissza a beszélgetések listájához">Vissza</button>
-  </div>
+  @if (errorMessage() && !isLoading()) {
+    <div class="forum-detail__error" role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p>{{ errorMessage() }}</p>
+      <button (click)="goBack()" aria-label="Vissza a beszélgetések listájához">Vissza</button>
+    </div>
+  }
 
   <!-- Content -->
-  <div class="forum-detail__content" *ngIf="discussion() && !isLoading()">
-    <!-- Header bar with badges and actions -->
-    @if (headerBadges().length > 0 || hasFullAccess() || isTopicAuthor()) {
-      <app-post-header-bar
-        class="forum-detail__header-bar"
-        [badges]="headerBadges()"
-        [showActions]="hasFullAccess() || isTopicAuthor()"
-        (editClick)="onEditTopic()"
-        (deleteClick)="onDeleteTopic()"
-      />
-    }
-
-    <!-- Success message -->
-    <div class="forum-detail__message forum-detail__message--success" *ngIf="successMessage()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      {{ successMessage() }}
-    </div>
-
-    <!-- Topic description (első post = leírás) -->
-    @if (topicDescription(); as description) {
-      <div class="forum-detail__description">
-        <app-content-block
-          [title]="discussion()!.title"
-          [content]="description.content"
-          [collapsedHeight]="200"
+  @if (discussion() && !isLoading()) {
+    <div class="forum-detail__content">
+      <!-- Header bar with badges and actions -->
+      @if (headerBadges().length > 0 || hasFullAccess() || isTopicAuthor()) {
+        <app-post-header-bar
+          class="forum-detail__header-bar"
+          [badges]="headerBadges()"
+          [showActions]="hasFullAccess() || isTopicAuthor()"
+          (editClick)="onEditTopic()"
+          (deleteClick)="onDeleteTopic()"
         />
+      }
 
-        <app-post-meta-bar
-          class="forum-detail__meta"
-          [authorName]="discussion()!.creatorName"
-          [createdAt]="discussion()!.createdAt"
-          [reactions]="description.reactions"
-          [userReaction]="description.userReaction"
-          [commentsCount]="discussion()!.postsCount"
-          [showComments]="true"
-          [commentsActive]="false"
-          (reactionSelected)="onReaction(description, $event)"
-          (commentsClick)="scrollToComments()"
-        />
-      </div>
-    }
-
-    <!-- Posts list (hozzászólások - a leírás nélkül) -->
-    <div class="forum-detail__posts">
-      <ng-container *ngFor="let post of topicComments(); trackBy: trackByPost">
-        <div class="forum-detail__post-thread">
-          <!-- Main post - ForumPostComponent használata -->
-          <app-forum-post
-            [authorName]="post.authorName"
-            [authorType]="post.authorType"
-            [content]="post.content"
-            [createdAt]="post.createdAt"
-            [isEdited]="post.isEdited"
-            [canEdit]="post.canEdit && !isEditTimeExpired(post)"
-            [canDelete]="post.canDelete || hasFullAccess()"
-            [canReply]="canReply()"
-            [reactions]="post.reactions"
-            [userReaction]="post.userReaction"
-            [media]="post.media || []"
-            [isEditing]="postEditService.editingPostId() === post.id"
-            [highlightColor]="post.authorType === 'contact' ? '#3b82f6' : undefined"
-            [remainingEditTime]="getRemainingEditTime(post)"
-            (reactionSelected)="onReaction(post, $event)"
-            (reply)="startReply(post.id)"
-            (edit)="startEdit(post)"
-            (delete)="onDeletePost(post)"
-            (mediaClick)="openLightbox(post.media!, $event.index)"
-          >
-            <!-- Szerkesztés mód -->
-            @if (postEditService.editingPostId() === post.id) {
-              <app-post-edit-form
-                [initialContent]="post.content"
-                [existingMedia]="post.media || []"
-                [remainingTime]="getRemainingEditTime(post)"
-                [isSubmitting]="postEditService.isSubmitting()"
-                (save)="saveEditContent(post, $event)"
-                (cancel)="cancelEdit()"
-              />
-            }
-
-            <!-- Reply form for this post -->
-            @if (replyingToId() === post.id && postEditService.editingPostId() !== post.id) {
-              <app-reply-form
-                [parentId]="post.id"
-                [isSubmitting]="isSubmitting()"
-                [allowMedia]="true"
-                (submitEvent)="submitReply($event)"
-                (cancelEvent)="cancelReply()"
-              />
-            }
-
-            <!-- Replies (nested) - BELÜL a szülő app-forum-post-ban -->
-            @if (post.replies && post.replies.length > 0) {
-              <div class="forum-detail__replies">
-                @for (reply of post.replies; track reply.id) {
-                  <div class="forum-detail__reply-item">
-                    <app-forum-post
-                      [authorName]="reply.authorName"
-                      [authorType]="reply.authorType"
-                      [content]="reply.content"
-                      [createdAt]="reply.createdAt"
-                      [isEdited]="reply.isEdited"
-                      [canEdit]="reply.canEdit && !isEditTimeExpired(reply)"
-                      [canDelete]="reply.canDelete || hasFullAccess()"
-                      [canReply]="false"
-                      [reactions]="reply.reactions"
-                      [userReaction]="reply.userReaction"
-                      [media]="reply.media || []"
-                      [isReply]="true"
-                      [isEditing]="postEditService.editingPostId() === reply.id"
-                      [highlightColor]="reply.authorType === 'contact' ? '#3b82f6' : undefined"
-                      [remainingEditTime]="getRemainingEditTime(reply)"
-                      (reactionSelected)="onReaction(reply, $event)"
-                      (edit)="startEdit(reply)"
-                      (delete)="onDeletePost(reply)"
-                      (mediaClick)="openLightbox(reply.media!, $event.index)"
-                    >
-                      <!-- Szerkesztés mód -->
-                      @if (postEditService.editingPostId() === reply.id) {
-                        <app-post-edit-form
-                          [initialContent]="reply.content"
-                          [existingMedia]="reply.media || []"
-                          [allowMedia]="true"
-                          [remainingTime]="getRemainingEditTime(reply)"
-                          [isSubmitting]="postEditService.isSubmitting()"
-                          [rows]="3"
-                          (save)="saveEditContent(reply, $event)"
-                          (cancel)="cancelEdit()"
-                        />
-                      }
-                    </app-forum-post>
-                  </div>
-                }
-              </div>
-            }
-          </app-forum-post>
+      <!-- Success message -->
+      @if (successMessage()) {
+        <div class="forum-detail__message forum-detail__message--success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {{ successMessage() }}
         </div>
-      </ng-container>
-    </div>
+      }
 
-    <!-- Main reply form -->
-    <div class="forum-detail__reply-section" *ngIf="canReply() && !replyingToId()">
-      <h3 class="forum-detail__reply-title">Hozzászólás írása</h3>
-      <app-reply-form
-        #mainReplyForm
-        [isSubmitting]="isSubmitting()"
-        [useRichEditor]="true"
-        [allowMedia]="true"
-        (submitEvent)="submitReply($event)"
-      />
-    </div>
+      <!-- Topic description (első post = leírás) -->
+      @if (topicDescription(); as description) {
+        <div class="forum-detail__description">
+          <app-content-block
+            [title]="discussion()!.title"
+            [content]="description.content"
+            [collapsedHeight]="200"
+          />
 
-    <!-- Locked message -->
-    <div class="forum-detail__locked" *ngIf="discussion()!.isLocked">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0110 0v4"/>
-      </svg>
-      <span>Ez a beszélgetés le van zárva. Új hozzászólás nem lehetséges.</span>
+          <app-post-meta-bar
+            class="forum-detail__meta"
+            [authorName]="discussion()!.creatorName"
+            [createdAt]="discussion()!.createdAt"
+            [reactions]="description.reactions"
+            [userReaction]="description.userReaction"
+            [commentsCount]="discussion()!.postsCount"
+            [showComments]="true"
+            [commentsActive]="false"
+            (reactionSelected)="onReaction(description, $event)"
+            (commentsClick)="scrollToComments()"
+          />
+        </div>
+      }
+
+      <!-- Posts list (hozzászólások - a leírás nélkül) -->
+      <div class="forum-detail__posts">
+        @for (post of topicComments(); track post.id) {
+          <div class="forum-detail__post-thread">
+            <!-- Main post - ForumPostComponent használata -->
+            <app-forum-post
+              [authorName]="post.authorName"
+              [authorType]="post.authorType"
+              [content]="post.content"
+              [createdAt]="post.createdAt"
+              [isEdited]="post.isEdited"
+              [canEdit]="post.canEdit && !isEditTimeExpired(post)"
+              [canDelete]="post.canDelete || hasFullAccess()"
+              [canReply]="canReply()"
+              [reactions]="post.reactions"
+              [userReaction]="post.userReaction"
+              [media]="post.media || []"
+              [isEditing]="postEditService.editingPostId() === post.id"
+              [highlightColor]="post.authorType === 'contact' ? '#3b82f6' : undefined"
+              [remainingEditTime]="getRemainingEditTime(post)"
+              (reactionSelected)="onReaction(post, $event)"
+              (reply)="startReply(post.id)"
+              (edit)="startEdit(post)"
+              (delete)="onDeletePost(post)"
+              (mediaClick)="openLightbox(post.media!, $event.index)"
+            >
+              <!-- Szerkesztés mód -->
+              @if (postEditService.editingPostId() === post.id) {
+                <app-post-edit-form
+                  [initialContent]="post.content"
+                  [existingMedia]="post.media || []"
+                  [remainingTime]="getRemainingEditTime(post)"
+                  [isSubmitting]="postEditService.isSubmitting()"
+                  (save)="saveEditContent(post, $event)"
+                  (cancel)="cancelEdit()"
+                />
+              }
+
+              <!-- Reply form for this post -->
+              @if (replyingToId() === post.id && postEditService.editingPostId() !== post.id) {
+                <app-reply-form
+                  [parentId]="post.id"
+                  [isSubmitting]="isSubmitting()"
+                  [allowMedia]="true"
+                  (submitEvent)="submitReply($event)"
+                  (cancelEvent)="cancelReply()"
+                />
+              }
+
+              <!-- Replies (nested) - BELÜL a szülő app-forum-post-ban -->
+              @if (post.replies && post.replies.length > 0) {
+                <div class="forum-detail__replies">
+                  @for (reply of post.replies; track reply.id) {
+                    <div class="forum-detail__reply-item">
+                      <app-forum-post
+                        [authorName]="reply.authorName"
+                        [authorType]="reply.authorType"
+                        [content]="reply.content"
+                        [createdAt]="reply.createdAt"
+                        [isEdited]="reply.isEdited"
+                        [canEdit]="reply.canEdit && !isEditTimeExpired(reply)"
+                        [canDelete]="reply.canDelete || hasFullAccess()"
+                        [canReply]="false"
+                        [reactions]="reply.reactions"
+                        [userReaction]="reply.userReaction"
+                        [media]="reply.media || []"
+                        [isReply]="true"
+                        [isEditing]="postEditService.editingPostId() === reply.id"
+                        [highlightColor]="reply.authorType === 'contact' ? '#3b82f6' : undefined"
+                        [remainingEditTime]="getRemainingEditTime(reply)"
+                        (reactionSelected)="onReaction(reply, $event)"
+                        (edit)="startEdit(reply)"
+                        (delete)="onDeletePost(reply)"
+                        (mediaClick)="openLightbox(reply.media!, $event.index)"
+                      >
+                        <!-- Szerkesztés mód -->
+                        @if (postEditService.editingPostId() === reply.id) {
+                          <app-post-edit-form
+                            [initialContent]="reply.content"
+                            [existingMedia]="reply.media || []"
+                            [allowMedia]="true"
+                            [remainingTime]="getRemainingEditTime(reply)"
+                            [isSubmitting]="postEditService.isSubmitting()"
+                            [rows]="3"
+                            (save)="saveEditContent(reply, $event)"
+                            (cancel)="cancelEdit()"
+                          />
+                        }
+                      </app-forum-post>
+                    </div>
+                  }
+                </div>
+              }
+            </app-forum-post>
+          </div>
+        }
+      </div>
+
+      <!-- Main reply form -->
+      @if (canReply() && !replyingToId()) {
+        <div class="forum-detail__reply-section">
+          <h3 class="forum-detail__reply-title">Hozzászólás írása</h3>
+          <app-reply-form
+            #mainReplyForm
+            [isSubmitting]="isSubmitting()"
+            [useRichEditor]="true"
+            [allowMedia]="true"
+            (submitEvent)="submitReply($event)"
+          />
+        </div>
+      }
+
+      <!-- Locked message -->
+      @if (discussion()!.isLocked) {
+        <div class="forum-detail__locked">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <span>Ez a beszélgetés le van zárva. Új hozzászólás nem lehetséges.</span>
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>
 
 <!-- Media Lightbox -->
-<app-media-lightbox
-  *ngIf="lightboxService.isOpen()"
-  [media]="lightboxService.media()"
-  [currentIndex]="lightboxService.currentIndex()"
-  (close)="closeLightbox()"
-  (navigate)="onLightboxNavigate($event)"
-/>
+@if (lightboxService.isOpen()) {
+  <app-media-lightbox
+    [media]="lightboxService.media()"
+    [currentIndex]="lightboxService.currentIndex()"
+    (close)="closeLightbox()"
+    (navigate)="onLightboxNavigate($event)"
+  />
+}

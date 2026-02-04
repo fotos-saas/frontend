@@ -1,78 +1,82 @@
 <div class="media-uploader" [class.media-uploader--disabled]="disabled()">
   <!-- Előnézetek -->
-  <div class="media-uploader__previews" *ngIf="previews().length > 0">
-    <div
-      *ngFor="let preview of previews(); let i = index"
-      class="media-uploader__preview"
-    >
-      <img
-        [src]="preview.previewUrl"
-        [alt]="preview.name"
-        class="media-uploader__image"
-      />
-      <div class="media-uploader__info">
-        <span class="media-uploader__name" [title]="preview.name">{{ preview.name }}</span>
-        <span class="media-uploader__size">{{ preview.size }}</span>
-      </div>
-      <button
-        type="button"
-        class="media-uploader__remove"
-        (click)="removeFile(i)"
-        [disabled]="disabled()"
-        aria-label="Kép eltávolítása"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
+  @if (previews().length > 0) {
+    <div class="media-uploader__previews">
+      @for (preview of previews(); track preview.previewUrl; let i = $index) {
+        <div class="media-uploader__preview">
+          <img
+            [src]="preview.previewUrl"
+            [alt]="preview.name"
+            class="media-uploader__image"
+          />
+          <div class="media-uploader__info">
+            <span class="media-uploader__name" [title]="preview.name">{{ preview.name }}</span>
+            <span class="media-uploader__size">{{ preview.size }}</span>
+          </div>
+          <button
+            type="button"
+            class="media-uploader__remove"
+            (click)="removeFile(i)"
+            [disabled]="disabled()"
+            aria-label="Kép eltávolítása"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      }
     </div>
-  </div>
+  }
 
   <!-- Drop zone -->
-  <div
-    class="media-uploader__dropzone"
-    [class.media-uploader__dropzone--dragging]="isDragging()"
-    [class.media-uploader__dropzone--hidden]="!canAddMore()"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave($event)"
-    (drop)="onDrop($event)"
-    *ngIf="canAddMore()"
-  >
-    <input
-      type="file"
-      class="media-uploader__input"
-      [disabled]="disabled()"
-      accept="image/jpeg,image/png,image/gif,image/webp"
-      multiple
-      (change)="onFileSelect($event)"
-      #fileInput
-    />
+  @if (canAddMore()) {
+    <div
+      class="media-uploader__dropzone"
+      [class.media-uploader__dropzone--dragging]="isDragging()"
+      [class.media-uploader__dropzone--hidden]="!canAddMore()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <input
+        type="file"
+        class="media-uploader__input"
+        [disabled]="disabled()"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        multiple
+        (change)="onFileSelect($event)"
+        #fileInput
+      />
 
-    <div class="media-uploader__content" (click)="fileInput.click()">
-      <svg class="media-uploader__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <polyline points="21 15 16 10 5 21"/>
-      </svg>
-      <span class="media-uploader__text">
-        {{ isDragging() ? 'Engedd el a képeket' : 'Húzd ide a képeket' }}
-      </span>
-      <span class="media-uploader__hint">
-        vagy kattints ide a böngészéshez
-      </span>
-      <span class="media-uploader__limit">
-        Max {{ maxFiles() }} kép, {{ maxSizeMB() }}MB/kép (JPG, PNG, GIF, WebP)
-      </span>
+      <div class="media-uploader__content" (click)="fileInput.click()">
+        <svg class="media-uploader__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        <span class="media-uploader__text">
+          {{ isDragging() ? 'Engedd el a képeket' : 'Húzd ide a képeket' }}
+        </span>
+        <span class="media-uploader__hint">
+          vagy kattints ide a böngészéshez
+        </span>
+        <span class="media-uploader__limit">
+          Max {{ maxFiles() }} kép, {{ maxSizeMB() }}MB/kép (JPG, PNG, GIF, WebP)
+        </span>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Limit elérve -->
-  <div class="media-uploader__limit-reached" *ngIf="!canAddMore() && previews().length > 0">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"/>
-      <path d="M9 12l2 2 4-4"/>
-    </svg>
-    <span>Maximum {{ maxFiles() }} kép feltöltve</span>
-  </div>
+  @if (!canAddMore() && previews().length > 0) {
+    <div class="media-uploader__limit-reached">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+      <span>Maximum {{ maxFiles() }} kép feltöltve</span>
+    </div>
+  }
 </div>

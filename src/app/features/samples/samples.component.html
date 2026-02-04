@@ -2,59 +2,72 @@
   <!-- Header -->
   <header id="main-content" class="samples__header" tabindex="-1">
     <h1 class="samples__title">Mintaképek</h1>
-    <p class="samples__subtitle" *ngIf="samples.length > 0">
-      {{ samples.length }} minta
-    </p>
+    @if (samples.length > 0) {
+      <p class="samples__subtitle">
+        {{ samples.length }} minta
+      </p>
+    }
   </header>
 
   <!-- Loading Skeleton -->
-  <div class="samples__skeleton" *ngIf="loading" role="status" aria-live="polite" aria-label="Minták betöltése...">
-    <div class="samples__skeleton-item" aria-hidden="true"></div>
-    <div class="samples__skeleton-item" aria-hidden="true"></div>
-    <div class="samples__skeleton-item" aria-hidden="true"></div>
-    <div class="samples__skeleton-item" aria-hidden="true"></div>
-    <div class="samples__skeleton-item" aria-hidden="true"></div>
-    <div class="samples__skeleton-item" aria-hidden="true"></div>
-    <div class="samples__skeleton-item" aria-hidden="true"></div>
-    <div class="samples__skeleton-item" aria-hidden="true"></div>
-  </div>
+  @if (loading) {
+    <div class="samples__skeleton" role="status" aria-live="polite" aria-label="Minták betöltése...">
+      <div class="samples__skeleton-item" aria-hidden="true"></div>
+      <div class="samples__skeleton-item" aria-hidden="true"></div>
+      <div class="samples__skeleton-item" aria-hidden="true"></div>
+      <div class="samples__skeleton-item" aria-hidden="true"></div>
+      <div class="samples__skeleton-item" aria-hidden="true"></div>
+      <div class="samples__skeleton-item" aria-hidden="true"></div>
+      <div class="samples__skeleton-item" aria-hidden="true"></div>
+      <div class="samples__skeleton-item" aria-hidden="true"></div>
+    </div>
+  }
 
   <!-- Error -->
-  <div class="samples__error" *ngIf="error && !loading">
-    <p>{{ error }}</p>
-    <button class="samples__retry-btn" (click)="loadSamples()">
-      Újrapróbálkozás
-    </button>
-  </div>
+  @if (error && !loading) {
+    <div class="samples__error">
+      <p>{{ error }}</p>
+      <button class="samples__retry-btn" (click)="loadSamples()">
+        Újrapróbálkozás
+      </button>
+    </div>
+  }
 
   <!-- Empty state -->
-  <div class="samples__empty" *ngIf="!loading && !error && samples.length === 0">
-    <div class="samples__empty-icon">🖼️</div>
-    <p>Még nincsenek mintaképek feltöltve</p>
-  </div>
+  @if (!loading && !error && samples.length === 0) {
+    <div class="samples__empty">
+      <div class="samples__empty-icon">🖼️</div>
+      <p>Még nincsenek mintaképek feltöltve</p>
+    </div>
+  }
 
   <!-- Grid -->
-  <div class="samples__grid" *ngIf="!loading && !error && samples.length > 0">
-    <div
-      class="samples__item"
-      [class.samples__item--newest]="i === 0"
-      *ngFor="let sample of samples; let i = index; trackBy: trackBySample"
-      (click)="openLightbox(i)"
-    >
-      <!-- Newest badge -->
-      <span class="samples__badge" *ngIf="i === 0">Legújabb</span>
-      <img
-        class="samples__image"
-        [src]="sample.thumbUrl || sample.url"
-        [alt]="'Mintakép: ' + sample.fileName"
-        loading="lazy"
-      />
-      <div class="samples__overlay">
-        <span class="samples__relative-time">{{ getRelativeTime(sample.createdAt) }}</span>
-        <span class="samples__date">{{ sample.createdAt | date:'yyyy. MM. dd.' }}</span>
-      </div>
+  @if (!loading && !error && samples.length > 0) {
+    <div class="samples__grid">
+      @for (sample of samples; track sample.id; let i = $index) {
+        <div
+          class="samples__item"
+          [class.samples__item--newest]="i === 0"
+          (click)="openLightbox(i)"
+        >
+          <!-- Newest badge -->
+          @if (i === 0) {
+            <span class="samples__badge">Legújabb</span>
+          }
+          <img
+            class="samples__image"
+            [src]="sample.thumbUrl || sample.url"
+            [alt]="'Mintakép: ' + sample.fileName"
+            loading="lazy"
+          />
+          <div class="samples__overlay">
+            <span class="samples__relative-time">{{ getRelativeTime(sample.createdAt) }}</span>
+            <span class="samples__date">{{ sample.createdAt | date:'yyyy. MM. dd.' }}</span>
+          </div>
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>
 
 <!-- Lightbox - közös SamplesLightbox komponens -->

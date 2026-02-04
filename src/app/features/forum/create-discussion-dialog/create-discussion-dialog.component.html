@@ -41,14 +41,16 @@
     <!-- Content -->
     <div class="dialog__content">
       <!-- API hiba megjelenítése -->
-      <div class="dialog__alert dialog__alert--error" *ngIf="errorMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span>{{ errorMessage() }}</span>
-      </div>
+      @if (errorMessage()) {
+        <div class="dialog__alert dialog__alert--error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
 
       <!-- Title field -->
       <div class="dialog__field">
@@ -69,8 +71,11 @@
           autocomplete="off"
         />
         <div class="dialog__field-footer">
-          <span class="dialog__error" *ngIf="errors.title">{{ errors.title }}</span>
-          <span class="dialog__char-count" *ngIf="!errors.title">{{ titleCharCount }}</span>
+          @if (errors.title) {
+            <span class="dialog__error">{{ errors.title }}</span>
+          } @else {
+            <span class="dialog__char-count">{{ titleCharCount }}</span>
+          }
         </div>
       </div>
 
@@ -81,79 +86,89 @@
         </label>
 
         <!-- Rich Text Editor -->
-        <app-rich-text-editor
-          *ngIf="useRichEditor()"
-          [(ngModel)]="content"
-          name="richContent"
-          mode="standard"
-          placeholder="Írd le részletesen, miről szól a téma..."
-          [disabled]="isSubmitting()"
-          [minHeight]="150"
-          [maxHeight]="300"
-          (textLengthChangeEvent)="onContentTextLengthChange($event)"
-        />
-
-        <!-- Simple Textarea fallback -->
-        <textarea
-          *ngIf="!useRichEditor()"
-          id="discussion-content"
-          class="dialog__textarea"
-          [class.dialog__textarea--error]="errors.content"
-          [(ngModel)]="content"
-          (ngModelChange)="onInputChange()"
-          placeholder="Írd le részletesen, miről szól a téma..."
-          [disabled]="isSubmitting()"
-          maxlength="10000"
-          rows="5"
-        ></textarea>
+        @if (useRichEditor()) {
+          <app-rich-text-editor
+            [(ngModel)]="content"
+            name="richContent"
+            mode="standard"
+            placeholder="Írd le részletesen, miről szól a téma..."
+            [disabled]="isSubmitting()"
+            [minHeight]="150"
+            [maxHeight]="300"
+            (textLengthChangeEvent)="onContentTextLengthChange($event)"
+          />
+        } @else {
+          <!-- Simple Textarea fallback -->
+          <textarea
+            id="discussion-content"
+            class="dialog__textarea"
+            [class.dialog__textarea--error]="errors.content"
+            [(ngModel)]="content"
+            (ngModelChange)="onInputChange()"
+            placeholder="Írd le részletesen, miről szól a téma..."
+            [disabled]="isSubmitting()"
+            maxlength="10000"
+            rows="5"
+          ></textarea>
+        }
 
         <div class="dialog__field-footer">
-          <span class="dialog__error" *ngIf="errors.content">{{ errors.content }}</span>
-          <span class="dialog__char-count" *ngIf="!errors.content && !useRichEditor()">{{ contentCharCount }}</span>
-          <span class="dialog__char-count" *ngIf="!errors.content && useRichEditor()">{{ contentTextLength }} karakter</span>
+          @if (errors.content) {
+            <span class="dialog__error">{{ errors.content }}</span>
+          } @else if (!useRichEditor()) {
+            <span class="dialog__char-count">{{ contentCharCount }}</span>
+          } @else {
+            <span class="dialog__char-count">{{ contentTextLength }} karakter</span>
+          }
         </div>
       </div>
 
       <!-- Media Editor (edit módban) -->
-      <div class="dialog__field" *ngIf="mode() === 'edit' && editData()">
-        <label class="dialog__label">
-          Képek <span class="dialog__optional">(opcionális)</span>
-        </label>
-        <app-media-editor
-          [existingMedia]="existingMediaItems()"
-          [maxFiles]="3"
-          [maxSizeMB]="5"
-          [acceptedTypes]="'image/jpeg,image/png,image/gif,image/webp'"
-          [disabled]="isSubmitting()"
-          existingLabel="Meglévő képek"
-          newLabel="Új képek hozzáadása"
-          (newFilesChange)="onNewFilesChange($event)"
-          (mediaToDeleteChange)="onMediaToDeleteChange($event)"
-          (error)="onMediaError($event)"
-        />
-      </div>
+      @if (mode() === 'edit' && editData()) {
+        <div class="dialog__field">
+          <label class="dialog__label">
+            Képek <span class="dialog__optional">(opcionális)</span>
+          </label>
+          <app-media-editor
+            [existingMedia]="existingMediaItems()"
+            [maxFiles]="3"
+            [maxSizeMB]="5"
+            [acceptedTypes]="'image/jpeg,image/png,image/gif,image/webp'"
+            [disabled]="isSubmitting()"
+            existingLabel="Meglévő képek"
+            newLabel="Új képek hozzáadása"
+            (newFilesChange)="onNewFilesChange($event)"
+            (mediaToDeleteChange)="onMediaToDeleteChange($event)"
+            (error)="onMediaError($event)"
+          />
+        </div>
+      }
 
       <!-- Template selector (opcionális, csak create módban) -->
-      <div class="dialog__field" *ngIf="templates().length > 0 && mode() === 'create'">
-        <label class="dialog__label" for="discussion-template">
-          Kapcsolódó sablon <span class="dialog__optional">(opcionális)</span>
-        </label>
-        <select
-          id="discussion-template"
-          class="dialog__select"
-          [(ngModel)]="templateId"
-          (ngModelChange)="onInputChange()"
-          [disabled]="isSubmitting()"
-        >
-          <option [ngValue]="null">— Nincs kapcsolódó sablon —</option>
-          <option *ngFor="let template of templates()" [ngValue]="template.id">
-            {{ template.name }}
-          </option>
-        </select>
-        <span class="dialog__hint">
-          Ha a téma egy konkrét sablonhoz kapcsolódik, válaszd ki itt.
-        </span>
-      </div>
+      @if (templates().length > 0 && mode() === 'create') {
+        <div class="dialog__field">
+          <label class="dialog__label" for="discussion-template">
+            Kapcsolódó sablon <span class="dialog__optional">(opcionális)</span>
+          </label>
+          <select
+            id="discussion-template"
+            class="dialog__select"
+            [(ngModel)]="templateId"
+            (ngModelChange)="onInputChange()"
+            [disabled]="isSubmitting()"
+          >
+            <option [ngValue]="null">— Nincs kapcsolódó sablon —</option>
+            @for (template of templates(); track template.id) {
+              <option [ngValue]="template.id">
+                {{ template.name }}
+              </option>
+            }
+          </select>
+          <span class="dialog__hint">
+            Ha a téma egy konkrét sablonhoz kapcsolódik, válaszd ki itt.
+          </span>
+        </div>
+      }
 
       <!-- Actions -->
       <div class="dialog__actions">
@@ -172,14 +187,17 @@
           (click)="submit()"
           [disabled]="!isFormValid || isSubmitting()"
         >
-          <svg *ngIf="isSubmitting()" class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
-          <svg *ngIf="!isSubmitting()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <line x1="22" y1="2" x2="11" y2="13"/>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
+          @if (isSubmitting()) {
+            <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          }
           {{ isSubmitting() ? (mode() === 'edit' ? 'Mentés...' : 'Létrehozás...') : (mode() === 'edit' ? 'Mentés' : 'Téma létrehozása') }}
         </button>
       </div>

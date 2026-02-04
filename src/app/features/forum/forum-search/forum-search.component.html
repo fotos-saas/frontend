@@ -14,18 +14,19 @@
         placeholder="Keresés a beszélgetésekben..."
         aria-label="Keresés"
       />
-      <button
-        type="button"
-        class="forum-search__clear"
-        *ngIf="searchText"
-        (click)="clearSearch()"
-        aria-label="Keresés törlése"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
+      @if (searchText) {
+        <button
+          type="button"
+          class="forum-search__clear"
+          (click)="clearSearch()"
+          aria-label="Keresés törlése"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      }
     </div>
 
     <!-- Search button -->
@@ -48,51 +49,62 @@
         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
       </svg>
       Szűrők
-      <span class="forum-search__badge" *ngIf="hasActiveFilters">!</span>
+      @if (hasActiveFilters) {
+        <span class="forum-search__badge">!</span>
+      }
     </button>
   </div>
 
   <!-- Filter panel -->
-  <div class="forum-search__filters" *ngIf="showFilters()">
-    <!-- Template filter -->
-    <div class="forum-search__filter" *ngIf="templates().length > 0">
-      <label class="forum-search__label" for="template-filter">Sablon</label>
-      <select
-        id="template-filter"
-        class="forum-search__select"
-        [(ngModel)]="selectedTemplateId"
-        (ngModelChange)="onTemplateChange()"
-      >
-        <option [ngValue]="null">Összes sablon</option>
-        <option *ngFor="let tpl of templates()" [ngValue]="tpl.id">{{ tpl.name }}</option>
-      </select>
-    </div>
+  @if (showFilters()) {
+    <div class="forum-search__filters">
+      <!-- Template filter -->
+      @if (templates().length > 0) {
+        <div class="forum-search__filter">
+          <label class="forum-search__label" for="template-filter">Sablon</label>
+          <select
+            id="template-filter"
+            class="forum-search__select"
+            [(ngModel)]="selectedTemplateId"
+            (ngModelChange)="onTemplateChange()"
+          >
+            <option [ngValue]="null">Összes sablon</option>
+            @for (tpl of templates(); track tpl.id) {
+              <option [ngValue]="tpl.id">{{ tpl.name }}</option>
+            }
+          </select>
+        </div>
+      }
 
-    <!-- Sort -->
-    <div class="forum-search__filter">
-      <label class="forum-search__label" for="sort-filter">Rendezés</label>
-      <select
-        id="sort-filter"
-        class="forum-search__select"
-        [(ngModel)]="sortBy"
-        (ngModelChange)="onSortChange()"
-      >
-        <option *ngFor="let opt of sortOptions" [ngValue]="opt.value">{{ opt.label }}</option>
-      </select>
-    </div>
+      <!-- Sort -->
+      <div class="forum-search__filter">
+        <label class="forum-search__label" for="sort-filter">Rendezés</label>
+        <select
+          id="sort-filter"
+          class="forum-search__select"
+          [(ngModel)]="sortBy"
+          (ngModelChange)="onSortChange()"
+        >
+          @for (opt of sortOptions; track opt.value) {
+            <option [ngValue]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
 
-    <!-- Clear all -->
-    <button
-      type="button"
-      class="forum-search__clear-all"
-      *ngIf="hasActiveFilters"
-      (click)="clearAllFilters()"
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-      Szűrők törlése
-    </button>
-  </div>
+      <!-- Clear all -->
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          class="forum-search__clear-all"
+          (click)="clearAllFilters()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Szűrők törlése
+        </button>
+      }
+    </div>
+  }
 </div>

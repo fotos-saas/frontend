@@ -12,35 +12,46 @@
   ></textarea>
 
   <!-- Autocomplete dropdown -->
-  <div class="mention-input__dropdown" *ngIf="showSuggestions()">
-    <!-- Loading -->
-    <div class="mention-input__loading" *ngIf="isSearching()">
-      <div class="mention-input__spinner"></div>
-      <span>Keresés...</span>
-    </div>
-
-    <!-- Results -->
-    <ul class="mention-input__list" *ngIf="!isSearching() && suggestions().length > 0">
-      <li
-        *ngFor="let suggestion of suggestions(); let i = index"
-        class="mention-input__item"
-        [class.mention-input__item--selected]="i === selectedIndex()"
-        (click)="onSuggestionClick(suggestion)"
-        (mouseenter)="selectedIndex.set(i)"
-      >
-        <div class="mention-input__avatar" [class.mention-input__avatar--contact]="suggestion.type === 'contact'">
-          {{ suggestion.name.charAt(0).toUpperCase() }}
+  @if (showSuggestions()) {
+    <div class="mention-input__dropdown">
+      <!-- Loading -->
+      @if (isSearching()) {
+        <div class="mention-input__loading">
+          <div class="mention-input__spinner"></div>
+          <span>Keresés...</span>
         </div>
-        <div class="mention-input__info">
-          <span class="mention-input__name">{{ suggestion.name }}</span>
-          <span class="mention-input__type" *ngIf="suggestion.type === 'contact'">Kapcsolattartó</span>
-        </div>
-      </li>
-    </ul>
+      }
 
-    <!-- No results -->
-    <div class="mention-input__empty" *ngIf="!isSearching() && suggestions().length === 0">
-      Nincs találat
+      <!-- Results -->
+      @if (!isSearching() && suggestions().length > 0) {
+        <ul class="mention-input__list">
+          @for (suggestion of suggestions(); track suggestion.id; let i = $index) {
+            <li
+              class="mention-input__item"
+              [class.mention-input__item--selected]="i === selectedIndex()"
+              (click)="onSuggestionClick(suggestion)"
+              (mouseenter)="selectedIndex.set(i)"
+            >
+              <div class="mention-input__avatar" [class.mention-input__avatar--contact]="suggestion.type === 'contact'">
+                {{ suggestion.name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="mention-input__info">
+                <span class="mention-input__name">{{ suggestion.name }}</span>
+                @if (suggestion.type === 'contact') {
+                  <span class="mention-input__type">Kapcsolattartó</span>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- No results -->
+      @if (!isSearching() && suggestions().length === 0) {
+        <div class="mention-input__empty">
+          Nincs találat
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>

@@ -9,11 +9,12 @@
 }
 
 <!-- Create/Edit Post Dialog -->
-<app-create-post-dialog
-  *ngIf="showCreateDialog()"
-  [editPost]="editingPost() ?? undefined"
-  (resultEvent)="onCreatePostResult($event)"
-/>
+@if (showCreateDialog()) {
+  <app-create-post-dialog
+    [editPost]="editingPost() ?? undefined"
+    (resultEvent)="onCreatePostResult($event)"
+  />
+}
 
 <!-- Delete Confirm Dialog (Poszt) -->
 @if (showDeleteDialog()) {
@@ -104,7 +105,8 @@
   </div>
 
   <!-- Loading Skeleton -->
-  <div class="newsfeed-list__skeleton" *ngIf="isLoading()" role="status" aria-live="polite" aria-label="Bejegyzések betöltése...">
+  @if (isLoading()) {
+  <div class="newsfeed-list__skeleton" role="status" aria-live="polite" aria-label="Bejegyzések betöltése...">
     <!-- Skeleton Card 1 -->
     <div class="newsfeed-list__skeleton-card" aria-hidden="true">
       <div class="newsfeed-list__skeleton-header">
@@ -154,9 +156,11 @@
       </div>
     </div>
   </div>
+  }
 
   <!-- Error -->
-  <div class="newsfeed-list__error" *ngIf="errorMessage() && !isLoading()" role="alert">
+  @if (errorMessage() && !isLoading()) {
+  <div class="newsfeed-list__error" role="alert">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <circle cx="12" cy="12" r="10"/>
       <line x1="12" y1="8" x2="12" y2="12"/>
@@ -165,11 +169,14 @@
     <p>{{ errorMessage() }}</p>
     <button (click)="loadPosts()" aria-label="Bejegyzések újratöltése">Újrapróbálkozás</button>
   </div>
+  }
 
   <!-- Main content -->
-  <div class="newsfeed-list__main" *ngIf="!isLoading() && !errorMessage()">
+  @if (!isLoading() && !errorMessage()) {
+  <div class="newsfeed-list__main">
     <!-- Empty state -->
-    <div class="newsfeed-list__empty" *ngIf="posts().length === 0">
+    @if (posts().length === 0) {
+    <div class="newsfeed-list__empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2"/>
       </svg>
@@ -179,11 +186,14 @@
         Új bejegyzés létrehozása
       </button>
     </div>
+    }
 
     <!-- Posts list -->
-    <div class="newsfeed-list__content" *ngIf="posts().length > 0">
+    @if (posts().length > 0) {
+    <div class="newsfeed-list__content">
       <!-- Pinned posts -->
-      <section class="newsfeed-list__section" *ngIf="pinnedPosts().length > 0">
+      @if (pinnedPosts().length > 0) {
+      <section class="newsfeed-list__section">
         <h2 class="newsfeed-list__section-title">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
@@ -192,58 +202,68 @@
           Kitűzött bejegyzések
         </h2>
         <div class="newsfeed-list__posts">
-          <app-newsfeed-card
-            *ngFor="let post of pinnedPosts(); trackBy: trackByPostId"
-            [post]="post"
-            [comments]="getCommentsForPost(post.id)"
-            [commentsLoading]="isCommentsLoading(post.id)"
-            [canPin]="isContact()"
-            (reactionSelected)="onReaction(post, $event)"
-            (pinClick)="onTogglePin(post)"
-            (editClick)="onCardEditClick(post)"
-            (deleteClick)="onPostDeleteClick(post)"
-            (openLightbox)="onCardLightbox($event)"
-            (toggleComments)="onToggleComments(post)"
-            (submitComment)="onSubmitComment(post, $event)"
-            (deleteComment)="onDeleteComment(post, $event)"
-            (commentReaction)="onCommentReaction(post, $event.comment, $event.reaction)"
-          />
+          @for (post of pinnedPosts(); track post.id) {
+            <app-newsfeed-card
+              [post]="post"
+              [comments]="getCommentsForPost(post.id)"
+              [commentsLoading]="isCommentsLoading(post.id)"
+              [canPin]="isContact()"
+              (reactionSelected)="onReaction(post, $event)"
+              (pinClick)="onTogglePin(post)"
+              (editClick)="onCardEditClick(post)"
+              (deleteClick)="onPostDeleteClick(post)"
+              (openLightbox)="onCardLightbox($event)"
+              (toggleComments)="onToggleComments(post)"
+              (submitComment)="onSubmitComment(post, $event)"
+              (deleteComment)="onDeleteComment(post, $event)"
+              (commentReaction)="onCommentReaction(post, $event.comment, $event.reaction)"
+            />
+          }
         </div>
       </section>
+      }
 
       <!-- Regular posts -->
-      <section class="newsfeed-list__section" *ngIf="regularPosts().length > 0">
-        <h2 class="newsfeed-list__section-title" *ngIf="pinnedPosts().length > 0">
-          Legfrissebb bejegyzések
-        </h2>
+      @if (regularPosts().length > 0) {
+      <section class="newsfeed-list__section">
+        @if (pinnedPosts().length > 0) {
+          <h2 class="newsfeed-list__section-title">
+            Legfrissebb bejegyzések
+          </h2>
+        }
         <div class="newsfeed-list__posts">
-          <app-newsfeed-card
-            *ngFor="let post of regularPosts(); trackBy: trackByPostId"
-            [post]="post"
-            [comments]="getCommentsForPost(post.id)"
-            [commentsLoading]="isCommentsLoading(post.id)"
-            [canPin]="isContact()"
-            (reactionSelected)="onReaction(post, $event)"
-            (pinClick)="onTogglePin(post)"
-            (editClick)="onCardEditClick(post)"
-            (deleteClick)="onPostDeleteClick(post)"
-            (openLightbox)="onCardLightbox($event)"
-            (toggleComments)="onToggleComments(post)"
-            (submitComment)="onSubmitComment(post, $event)"
-            (deleteComment)="onDeleteComment(post, $event)"
-            (commentReaction)="onCommentReaction(post, $event.comment, $event.reaction)"
-          />
+          @for (post of regularPosts(); track post.id) {
+            <app-newsfeed-card
+              [post]="post"
+              [comments]="getCommentsForPost(post.id)"
+              [commentsLoading]="isCommentsLoading(post.id)"
+              [canPin]="isContact()"
+              (reactionSelected)="onReaction(post, $event)"
+              (pinClick)="onTogglePin(post)"
+              (editClick)="onCardEditClick(post)"
+              (deleteClick)="onPostDeleteClick(post)"
+              (openLightbox)="onCardLightbox($event)"
+              (toggleComments)="onToggleComments(post)"
+              (submitComment)="onSubmitComment(post, $event)"
+              (deleteComment)="onDeleteComment(post, $event)"
+              (commentReaction)="onCommentReaction(post, $event.comment, $event.reaction)"
+            />
+          }
         </div>
       </section>
+      }
     </div>
+    }
   </div>
+  }
 </div>
 
 <!-- Media Lightbox -->
-<app-media-lightbox
-  *ngIf="lightboxOpen()"
-  [media]="lightboxMedia()"
-  [currentIndex]="lightboxIndex()"
-  (close)="closeLightbox()"
-  (navigate)="onLightboxNavigate($event)"
-/>
+@if (lightboxOpen()) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="lightboxIndex()"
+    (close)="closeLightbox()"
+    (navigate)="onLightboxNavigate($event)"
+  />
+}

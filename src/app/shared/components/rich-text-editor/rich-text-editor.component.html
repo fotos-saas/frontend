@@ -12,9 +12,11 @@
   />
 
   <!-- Karakterszámláló (opcionális) -->
-  <div class="rich-text-editor__footer" *ngIf="maxLength() > 0">
-    <span class="rich-text-editor__char-count" [class.rich-text-editor__char-count--warning]="textLength > maxLength() * 0.9">
-      {{ textLength }} / {{ maxLength() }}
-    </span>
-  </div>
+  @if (maxLength() > 0) {
+    <div class="rich-text-editor__footer">
+      <span class="rich-text-editor__char-count" [class.rich-text-editor__char-count--warning]="textLength > maxLength() * 0.9">
+        {{ textLength }} / {{ maxLength() }}
+      </span>
+    </div>
+  }
 </div>

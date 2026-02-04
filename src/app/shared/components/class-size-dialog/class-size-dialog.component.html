@@ -43,14 +43,16 @@
     <!-- Content -->
     <div class="dialog__content">
       <!-- API hiba megjelenítése -->
-      <div class="dialog__alert dialog__alert--error" *ngIf="apiError()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span>{{ apiError() }}</span>
-      </div>
+      @if (apiError()) {
+        <div class="dialog__alert dialog__alert--error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ apiError() }}</span>
+        </div>
+      }
 
       <!-- Class size field -->
       <div class="dialog__field">
@@ -75,10 +77,14 @@
           />
           <span class="dialog__input-suffix">fő</span>
         </div>
-        <span class="dialog__error" *ngIf="error">{{ error }}</span>
-        <span class="dialog__hint" *ngIf="!error">
-          {{ MIN_SIZE }}-{{ MAX_SIZE }} fő között
-        </span>
+        @if (error) {
+          <span class="dialog__error">{{ error }}</span>
+        }
+        @if (!error) {
+          <span class="dialog__hint">
+            {{ MIN_SIZE }}-{{ MAX_SIZE }} fő között
+          </span>
+        }
       </div>
 
       <!-- Actions -->
@@ -97,14 +103,20 @@
           (click)="submit()"
           [disabled]="!isFormValid || isBusy"
         >
-          <svg *ngIf="isBusy()" class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
-          <span *ngIf="!isBusy()">
-            {{ currentValue() ? 'Mentés' : 'Mentés és tovább' }}
-          </span>
-          <span *ngIf="isBusy()">Mentés...</span>
+          @if (isBusy()) {
+            <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          }
+          @if (!isBusy()) {
+            <span>
+              {{ currentValue() ? 'Mentés' : 'Mentés és tovább' }}
+            </span>
+          }
+          @if (isBusy()) {
+            <span>Mentés...</span>
+          }
         </button>
       </div>
     </div>

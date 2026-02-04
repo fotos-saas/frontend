@@ -18,9 +18,11 @@
     <!-- Content -->
     <div class="dialog__content">
       <!-- Error message -->
-      <div class="dialog__error" *ngIf="errorMessage()">
-        {{ errorMessage() }}
-      </div>
+      @if (errorMessage()) {
+        <div class="dialog__error">
+          {{ errorMessage() }}
+        </div>
+      }
 
       <!-- Title -->
       <div class="form-group">
@@ -129,15 +131,16 @@
       <div class="form-group">
         <label class="form-label">Határidő</label>
         <div class="deadline-options">
-          <button
-            type="button"
-            *ngFor="let option of deadlineOptions; trackBy: trackByDeadline"
-            class="deadline-option"
-            [class.deadline-option--selected]="selectedDeadline === option.days"
-            (click)="selectedDeadline = option.days"
-          >
-            {{ option.label }}
-          </button>
+          @for (option of deadlineOptions; track option.days) {
+            <button
+              type="button"
+              class="deadline-option"
+              [class.deadline-option--selected]="selectedDeadline === option.days"
+              (click)="selectedDeadline = option.days"
+            >
+              {{ option.label }}
+            </button>
+          }
         </div>
         <span class="form-hint">A szavazás automatikusan lezárul a határidő lejártakor</span>
       </div>
@@ -154,18 +157,20 @@
             <span class="checkbox-text">Több választás engedélyezése</span>
           </label>
           <!-- Max votes input - csak ha több választás engedélyezve -->
-          <div class="max-votes-row" *ngIf="isMultipleChoice">
-            <label for="max-votes" class="max-votes-label">Maximum választható:</label>
-            <input
-              type="number"
-              id="max-votes"
-              class="max-votes-input"
-              [(ngModel)]="maxVotesPerGuest"
-              [min]="1"
-              [max]="poll().options && poll().options!.length > 0 ? poll().options!.length : 10"
-            />
-            <span class="max-votes-hint">db</span>
-          </div>
+          @if (isMultipleChoice) {
+            <div class="max-votes-row">
+              <label for="max-votes" class="max-votes-label">Maximum választható:</label>
+              <input
+                type="number"
+                id="max-votes"
+                class="max-votes-input"
+                [(ngModel)]="maxVotesPerGuest"
+                [min]="1"
+                [max]="poll().options && poll().options!.length > 0 ? poll().options!.length : 10"
+              />
+              <span class="max-votes-hint">db</span>
+            </div>
+          }
           <label class="checkbox-label">
             <input
               type="checkbox"
@@ -193,8 +198,11 @@
         (click)="onSubmit()"
         [disabled]="!isValid || isSubmitting()"
       >
-        <span *ngIf="isSubmitting()">Mentés...</span>
-        <span *ngIf="!isSubmitting()">Módosítások mentése</span>
+        @if (isSubmitting()) {
+          <span>Mentés...</span>
+        } @else {
+          <span>Módosítások mentése</span>
+        }
       </button>
     </footer>
   </div>

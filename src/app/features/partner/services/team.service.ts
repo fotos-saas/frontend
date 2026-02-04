@@ -24,6 +24,8 @@ export interface PendingInvitation {
   email: string;
   role: TeamRole;
   roleName: string;
+  code: string;
+  inviteUrl: string;
   createdAt: string;
   expiresAt: string | null;
 }

@@ -44,6 +44,9 @@ export class PartnerTeamListComponent implements OnInit {
   selectedMember = signal<TeamMember | null>(null);
   selectedInvitation = signal<PendingInvitation | null>(null);
 
+  // Lenyitott meghívó id-k
+  expandedInvitations = signal<Set<number>>(new Set());
+
   ngOnInit(): void {
     this.loadTeam();
   }
@@ -161,5 +164,26 @@ export class PartnerTeamListComponent implements OnInit {
     if (days <= 0) return 'Lejárt';
     if (days === 1) return '1 nap múlva lejár';
     return `${days} nap múlva lejár`;
+  }
+
+  // Lenyitás toggle
+  toggleExpand(invitationId: number): void {
+    const current = this.expandedInvitations();
+    const newSet = new Set(current);
+    if (newSet.has(invitationId)) {
+      newSet.delete(invitationId);
+    } else {
+      newSet.add(invitationId);
+    }
+    this.expandedInvitations.set(newSet);
+  }
+
+  isExpanded(invitationId: number): boolean {
+    return this.expandedInvitations().has(invitationId);
+  }
+
+  // Clipboard másolás
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text);
   }
 }

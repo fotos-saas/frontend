@@ -462,20 +462,22 @@ export class PartnerShellComponent implements OnInit {
   protected sidebarState = inject(SidebarStateService);
   protected readonly ICONS = ICONS;
 
-  /** Base URL a route-okhoz (/partner vagy /designer) */
+  /** Base URL a route-okhoz - role alapján */
   protected baseUrl = computed(() => {
-    const url = this.router.url;
-    if (url.startsWith('/designer')) {
-      return '/designer';
-    }
+    const roles = this.userRoles();
+    // Csapattagok saját URL-t kapnak
+    if (roles.includes('designer')) return '/designer';
+    if (roles.includes('printer')) return '/printer';
+    if (roles.includes('assistant')) return '/assistant';
+    // Marketer marad a /marketer shell-en, ide nem jut el
     return '/partner';
   });
 
   // Subscription info
   subscriptionInfo = signal<SubscriptionInfo | null>(null);
 
-  // User role info
-  private userRoles = signal<string[]>([]);
+  // User role info - azonnal inicializálva a computed-ok miatt
+  private userRoles = signal<string[]>(this.authService.getCurrentUser()?.roles ?? []);
   partnerName = signal<string>(''); // Főnök neve csapattagok számára
 
   /** Aktuális role badge (Partner, Grafikus, stb.) */
@@ -530,9 +532,9 @@ export class PartnerShellComponent implements OnInit {
       return allItems;
     }
 
-    // Csapattagok: nincs Csapatom, nincs Előfizetésem (de van Fiók törlése)
+    // Csapattagok: nincs Csapatom, nincs Megrendelések, nincs Előfizetésem (de van Fiók törlése)
     return allItems
-      .filter(item => item.id !== 'team' && item.id !== 'subscription')
+      .filter(item => !['team', 'orders', 'subscription'].includes(item.id))
       .concat([
         // Fiók törlése külön menüpontként
         { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' }
@@ -586,7 +588,7 @@ export class PartnerShellComponent implements OnInit {
     if (user) {
       this.userName.set(user.name);
       this.userEmail.set(user.email ?? '');
-      this.userRoles.set(user.roles ?? []);
+      // userRoles már inicializálva van a deklarációnál
     }
   }
 

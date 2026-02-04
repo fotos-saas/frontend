@@ -1,9 +1,13 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, AccountStatusResponse } from '../../services/subscription.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+
+/** Csapattag role-ok */
+const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
 
 /**
  * Account Delete Page
@@ -78,26 +82,43 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
           <div class="consequences">
             <h3>A törlés következményei:</h3>
             <ul class="consequences-list">
-              <li>
-                <lucide-icon [name]="ICONS.X" [size]="16" />
-                Minden projektjed és osztályod törlődik
-              </li>
-              <li>
-                <lucide-icon [name]="ICONS.X" [size]="16" />
-                Az összes feltöltött kép véglegesen törlődik
-              </li>
-              <li>
-                <lucide-icon [name]="ICONS.X" [size]="16" />
-                A megrendelési előzmények elvesznek
-              </li>
-              <li>
-                <lucide-icon [name]="ICONS.X" [size]="16" />
-                Az előfizetésed automatikusan lemondásra kerül
-              </li>
-              <li>
-                <lucide-icon [name]="ICONS.X" [size]="16" />
-                A számlázási adatok törlődnek
-              </li>
+              @if (isTeamMember()) {
+                <!-- Csapattag: csak saját fiók törlése -->
+                <li>
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  A fiókod véglegesen törlődik a rendszerből
+                </li>
+                <li>
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  Kilépsz a csapatból
+                </li>
+                <li>
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  A bejelentkezési adataid törlődnek
+                </li>
+              } @else {
+                <!-- Partner (tulajdonos): minden törlődik -->
+                <li>
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  Minden projektjed és osztályod törlődik
+                </li>
+                <li>
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  Az összes feltöltött kép véglegesen törlődik
+                </li>
+                <li>
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  A megrendelési előzmények elvesznek
+                </li>
+                <li>
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  Az előfizetésed automatikusan lemondásra kerül
+                </li>
+                <li>
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  A számlázási adatok törlődnek
+                </li>
+              }
             </ul>
           </div>
 
@@ -366,12 +387,19 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 })
 export class AccountDeleteComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly authService = inject(AuthService);
   protected readonly ICONS = ICONS;
 
   accountStatus = signal<AccountStatusResponse | null>(null);
   loading = signal(true);
   actionLoading = signal(false);
   confirmChecked = signal(false);
+
+  /** Csapattag (nem tulajdonos) */
+  protected isTeamMember = computed(() => {
+    const roles = this.authService.getCurrentUser()?.roles ?? [];
+    return TEAM_MEMBER_ROLES.some(r => roles.includes(r));
+  });
 
   ngOnInit(): void {
     this.loadAccountStatus();

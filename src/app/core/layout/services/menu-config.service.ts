@@ -80,12 +80,13 @@ export class MenuConfigService {
         icon: 'image',
         children: this.getTabloChildren(project, canFinalizeValue),
       },
-      {
-        id: 'order',
-        label: 'Rendelés',
+      // Megrendelési adatok - közvetlen link, nem lenyíló menü
+      ...(this.projectModeService.showOrderData(project) ? [{
+        id: 'order-data',
+        label: 'Megrendelés',
         icon: 'shopping-cart',
-        children: this.getOrderChildren(project, canFinalizeValue),
-      },
+        route: '/order-data',
+      }] : []),
       {
         id: 'newsfeed',
         label: 'Hírek',
@@ -211,24 +212,6 @@ export class MenuConfigService {
         id: 'finalization',
         label: 'Véglegesítés',
         route: '/order-finalization',
-      });
-    }
-
-    return children;
-  }
-
-  /**
-   * Rendelés szekció gyermekeinek generálása
-   */
-  private getOrderChildren(project: ProjectModeInfo | null, canFinalizeValue: boolean): MenuItem[] {
-    const children: MenuItem[] = [];
-
-    // Megrendelési adatok (rendelés után)
-    if (this.projectModeService.showOrderData(project)) {
-      children.push({
-        id: 'order-data',
-        label: 'Adatok',
-        route: '/order-data',
       });
     }
 

@@ -280,16 +280,14 @@ export class SessionService {
   }
 
   /**
-   * Marketer/Partner/Admin session inicializálása (page reload esetén)
+   * Marketer/Partner/Admin/Csapattag session inicializálása (page reload esetén)
    */
   initializeMarketerSession(): { success: boolean; user: AuthUser | null } {
     const token = this.getMarketerToken();
     const user = this.getStoredMarketerUser();
-    if (token && user && (
-      user.roles?.includes('marketer') ||
-      user.roles?.includes('partner') ||
-      user.roles?.includes('super_admin')
-    )) {
+    // Partner, csapattagok és admin role-ok
+    const validRoles = ['marketer', 'partner', 'super_admin', 'designer', 'printer', 'assistant'];
+    if (token && user && validRoles.some(role => user.roles?.includes(role))) {
       return { success: true, user };
     }
     return { success: false, user: null };

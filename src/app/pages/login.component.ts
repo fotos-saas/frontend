@@ -129,16 +129,7 @@ export class LoginComponent implements OnInit {
         .subscribe({
           next: (response) => {
             this.loading.set(false);
-            // Role-alapú átirányítás
-            if (response.user.roles?.includes('super_admin')) {
-              this.router.navigate(['/super-admin/dashboard']);
-            } else if (response.user.roles?.includes('partner')) {
-              this.router.navigate(['/partner/dashboard']);
-            } else if (response.user.roles?.includes('marketer')) {
-              this.router.navigate(['/marketer/dashboard']);
-            } else {
-              this.router.navigate(['/home']);
-            }
+            this.navigateByRole(response.user.roles);
           },
           error: async (err: Error) => {
             this.loading.set(false);
@@ -174,16 +165,7 @@ export class LoginComponent implements OnInit {
         .subscribe({
           next: (response) => {
             this.biometricLoading.set(false);
-            // Role-alapú átirányítás
-            if (response.user.roles?.includes('super_admin')) {
-              this.router.navigate(['/super-admin/dashboard']);
-            } else if (response.user.roles?.includes('partner')) {
-              this.router.navigate(['/partner/dashboard']);
-            } else if (response.user.roles?.includes('marketer')) {
-              this.router.navigate(['/marketer/dashboard']);
-            } else {
-              this.router.navigate(['/home']);
-            }
+            this.navigateByRole(response.user.roles);
           },
           error: (err: Error) => {
             this.biometricLoading.set(false);
@@ -278,23 +260,29 @@ export class LoginComponent implements OnInit {
             }
           }
 
-          // Role-alapú átirányítás
-          if (response.user.roles?.includes('super_admin')) {
-            // Super admin → super admin dashboard
-            this.router.navigate(['/super-admin/dashboard']);
-          } else if (response.user.roles?.includes('partner')) {
-            this.router.navigate(['/partner/dashboard']);
-          } else if (response.user.roles?.includes('marketer')) {
-            this.router.navigate(['/marketer/dashboard']);
-          } else {
-            this.router.navigate(['/home']);
-          }
+          this.navigateByRole(response.user.roles);
         },
         error: (err: Error) => {
           this.loading.set(false);
           this.error.set(err.message);
         }
       });
+  }
+
+  /**
+   * Role-alapú átirányítás
+   */
+  private navigateByRole(roles?: string[]): void {
+    if (roles?.includes('super_admin')) {
+      this.router.navigate(['/super-admin/dashboard']);
+    } else if (roles?.includes('partner')) {
+      this.router.navigate(['/partner/dashboard']);
+    } else if (roles?.some(r => ['designer', 'marketer', 'printer', 'assistant'].includes(r))) {
+      // Csapattagok is partner dashboardra mennek
+      this.router.navigate(['/partner/dashboard']);
+    } else {
+      this.router.navigate(['/home']);
+    }
   }
 
   /**

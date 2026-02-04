@@ -136,11 +136,27 @@ export class AuthService {
   });
 
   /**
-   * Computed signal: true ha partner felhasználó
+   * Computed signal: true ha partner felhasználó (tulajdonos)
    */
   public readonly isPartner = computed<boolean>(() => {
     const user = this.currentUserSubject?.getValue();
     return user?.roles?.includes('partner') ?? false;
+  });
+
+  /**
+   * Computed signal: true ha partner csapattag (designer, marketer, printer, assistant)
+   */
+  public readonly isTeamMember = computed<boolean>(() => {
+    const user = this.currentUserSubject?.getValue();
+    const teamRoles = ['designer', 'marketer', 'printer', 'assistant'];
+    return teamRoles.some(role => user?.roles?.includes(role)) ?? false;
+  });
+
+  /**
+   * Computed signal: true ha partner VAGY csapattag (partner felülethez hozzáfér)
+   */
+  public readonly hasPartnerAccess = computed<boolean>(() => {
+    return this.isPartner() || this.isTeamMember();
   });
 
   /**

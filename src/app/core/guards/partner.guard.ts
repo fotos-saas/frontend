@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth.service';
 
 /**
  * Guard a fotós/partner felületre való belépéshez.
- * Csak partner role-lal rendelkező felhasználók férhetnek hozzá.
+ * Partner tulajdonosok és csapattagok (designer, marketer, printer, assistant) férhetnek hozzá.
  */
 export const partnerGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
@@ -13,7 +13,11 @@ export const partnerGuard: CanActivateFn = () => {
   // Próbáljuk inicializálni a partner session-t (page reload esetén)
   const user = authService.getCurrentUser();
 
-  if (user?.roles?.includes('partner')) {
+  // Partner tulajdonos VAGY csapattag role-ok
+  const partnerRoles = ['partner', 'designer', 'marketer', 'printer', 'assistant'];
+  const hasAccess = partnerRoles.some(role => user?.roles?.includes(role));
+
+  if (hasAccess) {
     return true;
   }
 

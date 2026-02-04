@@ -69,10 +69,11 @@ export class PasswordAuthService {
     return this.http.post<MarketerLoginResponse | LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
       .pipe(
         tap(response => {
-          // Super admin, Marketer vagy Partner felhasználó esetén speciális kezelés
-          if (response.user.roles?.includes('super_admin') ||
-              response.user.roles?.includes('marketer') ||
-              response.user.roles?.includes('partner')) {
+          // Partner, csapattagok és admin role-ok
+          const partnerRoles = ['super_admin', 'marketer', 'partner', 'designer', 'printer', 'assistant'];
+          const hasPartnerAccess = partnerRoles.some(role => response.user.roles?.includes(role));
+
+          if (hasPartnerAccess) {
             this.storeMarketerAuth(response as MarketerLoginResponse);
           } else if ('project' in response && response.project) {
             // Tablo-guest login (ha van project a válaszban)

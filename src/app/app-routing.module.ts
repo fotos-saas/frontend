@@ -224,6 +224,59 @@ const routes: Routes = [
     ]
   },
 
+  // Designer routes - alias a partner route-okra csapattagoknak
+  // Ugyanazokat a komponenseket használja, csak /designer/* URL alatt
+  {
+    path: 'designer',
+    loadComponent: () => import('./features/partner/partner-shell.component').then(m => m.PartnerShellComponent),
+    canActivate: [partnerGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/partner/pages/dashboard.component').then(m => m.PartnerDashboardComponent)
+      },
+      {
+        path: 'projects',
+        loadComponent: () => import('./features/partner/pages/project-list.component').then(m => m.PartnerProjectListComponent)
+      },
+      {
+        path: 'projects/new',
+        loadComponent: () => import('./features/partner/pages/project-create.component').then(m => m.PartnerProjectCreateComponent)
+      },
+      {
+        path: 'projects/:id',
+        loadComponent: () => import('./features/partner/pages/project-detail.component').then(m => m.PartnerProjectDetailComponent)
+      },
+      {
+        path: 'schools',
+        loadComponent: () => import('./features/partner/pages/school-list.component').then(m => m.PartnerSchoolListComponent)
+      },
+      {
+        path: 'contacts',
+        loadComponent: () => import('./features/partner/pages/contact-list.component').then(m => m.PartnerContactListComponent)
+      },
+      {
+        path: 'orders/clients',
+        loadComponent: () => import('./features/partner/pages/orders/client-list.component').then(m => m.PartnerClientListComponent)
+      },
+      {
+        path: 'orders/clients/:id',
+        loadComponent: () => import('./features/partner/pages/orders/client-detail/client-detail.component').then(m => m.PartnerClientDetailComponent)
+      },
+      {
+        path: 'orders/albums/:id',
+        loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
+      },
+      // Fiók törlése (csapattagoknak csak ez érhető el)
+      {
+        path: 'account',
+        loadComponent: () => import('./features/partner/pages/subscription/account-delete.component').then(m => m.AccountDeleteComponent),
+        title: 'Fiók törlése'
+      }
+    ]
+  },
+
   // Client routes - partner ügyfél felület (album választás)
   {
     path: 'client',

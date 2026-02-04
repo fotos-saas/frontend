@@ -277,8 +277,10 @@ export class LoginComponent implements OnInit {
       this.router.navigate(['/super-admin/dashboard']);
     } else if (roles?.includes('partner')) {
       this.router.navigate(['/partner/dashboard']);
-    } else if (roles?.some(r => ['designer', 'marketer', 'printer', 'assistant'].includes(r))) {
-      // Csapattagok is partner dashboardra mennek
+    } else if (roles?.includes('designer')) {
+      this.router.navigate(['/designer/dashboard']);
+    } else if (roles?.some(r => ['marketer', 'printer', 'assistant'].includes(r))) {
+      // Többi csapattag egyelőre partner URL-en (később saját URL)
       this.router.navigate(['/partner/dashboard']);
     } else {
       this.router.navigate(['/home']);

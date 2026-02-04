@@ -1,6 +1,6 @@
 import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
-import { RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/services/auth.service';
@@ -57,7 +57,7 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
         [showAccountSwitch]="false"
         userInfoMode="inline"
         [externalUserInfo]="userInfo()"
-        homeRoute="/partner/dashboard"
+        [homeRoute]="baseUrl() + '/dashboard'"
         [useExternalLogout]="true"
         (logoutEvent)="logout()"
       >
@@ -458,8 +458,18 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
 export class PartnerShellComponent implements OnInit {
   private authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
+  private router = inject(Router);
   protected sidebarState = inject(SidebarStateService);
   protected readonly ICONS = ICONS;
+
+  /** Base URL a route-okhoz (/partner vagy /designer) */
+  protected baseUrl = computed(() => {
+    const url = this.router.url;
+    if (url.startsWith('/designer')) {
+      return '/designer';
+    }
+    return '/partner';
+  });
 
   // Subscription info
   subscriptionInfo = signal<SubscriptionInfo | null>(null);
@@ -491,39 +501,41 @@ export class PartnerShellComponent implements OnInit {
     return TEAM_MEMBER_ROLES.some(r => roles.includes(r));
   });
 
-  // Teljes menü (partner tulajdonosnak)
-  private allNavItems: MenuItem[] = [
-    { id: 'dashboard', route: '/partner/dashboard', label: 'Irányítópult', icon: 'home' },
-    { id: 'projects', route: '/partner/projects', label: 'Projektek', icon: 'folder-open' },
-    { id: 'schools', route: '/partner/schools', label: 'Iskolák', icon: 'school' },
-    { id: 'contacts', route: '/partner/contacts', label: 'Kapcsolatok', icon: 'users' },
-    { id: 'team', route: '/partner/team', label: 'Csapatom', icon: 'user-plus' },
-    { id: 'orders', route: '/partner/orders/clients', label: 'Megrendelések', icon: 'shopping-bag' },
-    {
-      id: 'subscription',
-      label: 'Előfizetésem',
-      icon: 'credit-card',
-      children: [
-        { id: 'subscription-overview', route: '/partner/subscription/overview', label: 'Előfizetés' },
-        { id: 'subscription-invoices', route: '/partner/subscription/invoices', label: 'Számlák' },
-        { id: 'subscription-addons', route: '/partner/subscription/addons', label: 'Kiegészítők' },
-        { id: 'subscription-account', route: '/partner/subscription/account', label: 'Fiók törlése' },
-      ]
-    },
-  ];
-
-  /** Szűrt menü a role alapján */
+  /** Szűrt menü a role és baseUrl alapján */
   navItems = computed<MenuItem[]>(() => {
+    const base = this.baseUrl();
+
+    // Teljes menü (partner tulajdonosnak)
+    const allItems: MenuItem[] = [
+      { id: 'dashboard', route: `${base}/dashboard`, label: 'Irányítópult', icon: 'home' },
+      { id: 'projects', route: `${base}/projects`, label: 'Projektek', icon: 'folder-open' },
+      { id: 'schools', route: `${base}/schools`, label: 'Iskolák', icon: 'school' },
+      { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
+      { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
+      { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag' },
+      {
+        id: 'subscription',
+        label: 'Előfizetésem',
+        icon: 'credit-card',
+        children: [
+          { id: 'subscription-overview', route: `${base}/subscription/overview`, label: 'Előfizetés' },
+          { id: 'subscription-invoices', route: `${base}/subscription/invoices`, label: 'Számlák' },
+          { id: 'subscription-addons', route: `${base}/subscription/addons`, label: 'Kiegészítők' },
+          { id: 'subscription-account', route: `${base}/subscription/account`, label: 'Fiók törlése' },
+        ]
+      },
+    ];
+
     if (this.isOwner()) {
-      return this.allNavItems;
+      return allItems;
     }
 
     // Csapattagok: nincs Csapatom, nincs Előfizetésem (de van Fiók törlése)
-    return this.allNavItems
+    return allItems
       .filter(item => item.id !== 'team' && item.id !== 'subscription')
       .concat([
         // Fiók törlése külön menüpontként
-        { id: 'account-delete', route: '/partner/subscription/account', label: 'Fiók törlése', icon: 'user-x' }
+        { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' }
       ]);
   });
 

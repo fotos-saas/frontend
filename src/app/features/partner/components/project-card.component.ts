@@ -43,6 +43,12 @@ import { ICONS } from '../../../shared/constants/icons.constants';
               {{ project.draftPhotoCount }}
             </span>
           }
+          @if (project.finalizedAt) {
+            <span class="finalized-badge" [title]="'Tablóterv leadva: ' + formatDate(project.finalizedAt)">
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
+              Leadva
+            </span>
+          }
         </div>
         <span class="school-meta">{{ project.className ?? '-' }} @if (project.classYear) {({{ project.classYear }})} @if (project.contact) { · {{ project.contact.name }}}</span>
       </div>
@@ -172,6 +178,22 @@ import { ICONS } from '../../../shared/constants/icons.constants';
       padding: 2px 5px;
       border-radius: 4px;
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      white-space: nowrap;
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    /* Finalized badge - leadott tablóterv jelzése */
+    .finalized-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.625rem;
+      font-weight: 600;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
       color: #ffffff;
       white-space: nowrap;
       cursor: default;

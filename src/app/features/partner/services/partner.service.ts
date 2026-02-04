@@ -78,6 +78,7 @@ export interface PartnerProjectListItem {
   hasActiveQrCode: boolean;
   isAware: boolean;
   createdAt: string;
+  finalizedAt: string | null;
 }
 
 /**

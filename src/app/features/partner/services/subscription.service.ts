@@ -7,6 +7,7 @@ import { environment } from '../../../../environments/environment';
  * Subscription információ a partner előfizetéséről
  */
 export interface SubscriptionInfo {
+  partner_name: string; // Partner (főnök) neve
   plan: 'alap' | 'iskola' | 'studio' | 'vip';
   plan_name: string;
   billing_cycle: 'monthly' | 'yearly';

@@ -11,6 +11,18 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
 
+/** Role badge nevek */
+const ROLE_BADGES: Record<string, string> = {
+  partner: 'Partner',
+  designer: 'Grafikus',
+  marketer: 'Marketinges',
+  printer: 'Nyomdász',
+  assistant: 'Ügyintéző',
+};
+
+/** Csapattag role-ok (nem partner tulajdonos) */
+const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
+
 /**
  * Partner Shell - Layout komponens a fotós/partner felülethez.
  * Saját TopBar és Sidebar menüvel.
@@ -38,7 +50,7 @@ import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
       <app-top-bar
         position="sticky"
         logoIcon="📷"
-        roleBadge="Partner"
+        [roleBadge]="roleBadge()"
         [showNotifications]="false"
         [showPokeBadge]="false"
         [showUserBadges]="false"
@@ -49,8 +61,8 @@ import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
         [useExternalLogout]="true"
         (logoutEvent)="logout()"
       >
-        <!-- Subscription badge slot -->
-        @if (subscriptionInfo()) {
+        <!-- Subscription badge slot (csak tulajdonosnak) -->
+        @if (subscriptionInfo() && isOwner()) {
           <a
             routerLink="/partner/subscription"
             class="subscription-badge"
@@ -83,7 +95,7 @@ import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
             'sidebar--hidden': sidebarState.isMobile()
           }"
         >
-          @for (item of navItems; track item.id) {
+          @for (item of navItems(); track item.id) {
             @if (item.children && item.children.length > 0) {
               <!-- Szekció gyermek elemekkel -->
               <div class="nav-section">
@@ -452,8 +464,35 @@ export class PartnerShellComponent implements OnInit {
   // Subscription info
   subscriptionInfo = signal<SubscriptionInfo | null>(null);
 
-  // Menü items (Lucide ikonokkal - desktop, tablet és mobile egyaránt)
-  navItems: MenuItem[] = [
+  // User role info
+  private userRoles = signal<string[]>([]);
+  partnerName = signal<string>(''); // Főnök neve csapattagok számára
+
+  /** Aktuális role badge (Partner, Grafikus, stb.) */
+  roleBadge = computed(() => {
+    const roles = this.userRoles();
+    for (const role of TEAM_MEMBER_ROLES) {
+      if (roles.includes(role)) {
+        return ROLE_BADGES[role] || role;
+      }
+    }
+    return ROLE_BADGES['partner'];
+  });
+
+  /** Partner tulajdonos-e (nem csapattag) */
+  isOwner = computed(() => {
+    const roles = this.userRoles();
+    return roles.includes('partner') && !TEAM_MEMBER_ROLES.some(r => roles.includes(r));
+  });
+
+  /** Csapattag-e */
+  isTeamMember = computed(() => {
+    const roles = this.userRoles();
+    return TEAM_MEMBER_ROLES.some(r => roles.includes(r));
+  });
+
+  // Teljes menü (partner tulajdonosnak)
+  private allNavItems: MenuItem[] = [
     { id: 'dashboard', route: '/partner/dashboard', label: 'Irányítópult', icon: 'home' },
     { id: 'projects', route: '/partner/projects', label: 'Projektek', icon: 'folder-open' },
     { id: 'schools', route: '/partner/schools', label: 'Iskolák', icon: 'school' },
@@ -472,6 +511,21 @@ export class PartnerShellComponent implements OnInit {
       ]
     },
   ];
+
+  /** Szűrt menü a role alapján */
+  navItems = computed<MenuItem[]>(() => {
+    if (this.isOwner()) {
+      return this.allNavItems;
+    }
+
+    // Csapattagok: nincs Csapatom, nincs Előfizetésem (de van Fiók törlése)
+    return this.allNavItems
+      .filter(item => item.id !== 'team' && item.id !== 'subscription')
+      .concat([
+        // Fiók törlése külön menüpontként
+        { id: 'account-delete', route: '/partner/subscription/account', label: 'Fiók törlése', icon: 'user-x' }
+      ]);
+  });
 
   // Kibontott szekciók
   expandedSections = signal<Set<string>>(new Set(['subscription']));
@@ -492,22 +546,35 @@ export class PartnerShellComponent implements OnInit {
   }
 
   // Mobile menü items (ugyanazok mint desktop, de computed-ként a MobileNavOverlay-hez)
-  mobileMenuItems = computed<MenuItem[]>(() => this.navItems);
+  mobileMenuItems = computed<MenuItem[]>(() => this.navItems());
 
   userName = signal<string>('');
   userEmail = signal<string>('');
 
   /** User info a TopBar inline megjelenítéséhez */
-  userInfo = computed(() => ({
-    name: this.userName(),
-    email: this.userEmail() || undefined
-  }));
+  userInfo = computed(() => {
+    const baseInfo = {
+      name: this.userName(),
+      email: this.userEmail() || undefined
+    };
+
+    // Csapattagoknál mutassuk a főnök nevét
+    if (this.isTeamMember() && this.partnerName()) {
+      return {
+        ...baseInfo,
+        subtitle: `@ ${this.partnerName()}`
+      };
+    }
+
+    return baseInfo;
+  });
 
   constructor() {
     const user = this.authService.getCurrentUser();
     if (user) {
       this.userName.set(user.name);
       this.userEmail.set(user.email ?? '');
+      this.userRoles.set(user.roles ?? []);
     }
   }
 
@@ -517,7 +584,13 @@ export class PartnerShellComponent implements OnInit {
 
   private loadSubscriptionInfo(): void {
     this.subscriptionService.getSubscription().subscribe({
-      next: (info) => this.subscriptionInfo.set(info),
+      next: (info) => {
+        this.subscriptionInfo.set(info);
+        // Partner név beállítása (csapattagoknak a főnök neve)
+        if (info.partner_name) {
+          this.partnerName.set(info.partner_name);
+        }
+      },
       error: (err) => console.error('Failed to load subscription info:', err)
     });
   }

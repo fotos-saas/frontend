@@ -1,0 +1,149 @@
+<div class="team-list page-card">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Csapatom</h1>
+      <p class="subtitle">Munkatársak és meghívók kezelése</p>
+    </div>
+    <button class="btn btn-primary" (click)="openInviteModal()">
+      <lucide-icon [name]="ICONS.USER_PLUS" [size]="18" />
+      <span>Meghívás</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  } @else {
+    <!-- Active Members Section -->
+    <section class="section">
+      <div class="section-header">
+        <h2>
+          <lucide-icon [name]="ICONS.USERS" [size]="20" />
+          Aktív tagok
+        </h2>
+        <span class="badge badge-count">{{ members().length }}</span>
+      </div>
+
+      @if (members().length === 0) {
+        <div class="empty-state">
+          <lucide-icon [name]="ICONS.USER_PLUS" [size]="48" />
+          <p>Még nincs csapattag</p>
+          <button class="btn btn-secondary" (click)="openInviteModal()">
+            Első meghívó küldése
+          </button>
+        </div>
+      } @else {
+        <div class="member-grid">
+          @for (member of members(); track member.id) {
+            <div class="member-card">
+              <div class="member-avatar">
+                <lucide-icon [name]="ICONS.USER" [size]="24" />
+              </div>
+              <div class="member-info">
+                <div class="member-name">{{ member.name }}</div>
+                <div class="member-email">{{ member.email }}</div>
+                <span class="role-badge" [class]="getRoleBadgeClass(member.role)">
+                  {{ member.roleName }}
+                </span>
+              </div>
+              <div class="member-actions">
+                <button
+                  class="action-btn"
+                  matTooltip="Eltávolítás"
+                  (click)="confirmRemoveMember(member)"
+                >
+                  <lucide-icon [name]="ICONS.USER_X" [size]="18" />
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Pending Invitations Section -->
+    @if (pendingInvitations().length > 0) {
+      <section class="section">
+        <div class="section-header">
+          <h2>
+            <lucide-icon [name]="ICONS.MAIL" [size]="20" />
+            Függőben lévő meghívók
+          </h2>
+          <span class="badge badge-count badge-pending">{{ pendingInvitations().length }}</span>
+        </div>
+
+        <div class="invitation-list">
+          @for (invitation of pendingInvitations(); track invitation.id) {
+            <div class="invitation-row">
+              <div class="invitation-icon">
+                <lucide-icon [name]="ICONS.MAIL" [size]="20" />
+              </div>
+              <div class="invitation-info">
+                <div class="invitation-email">{{ invitation.email }}</div>
+                <span class="role-badge" [class]="getRoleBadgeClass(invitation.role)">
+                  {{ invitation.roleName }}
+                </span>
+                <span class="expiry-text">{{ formatExpiry(invitation.expiresAt) }}</span>
+              </div>
+              <div class="invitation-actions">
+                <button
+                  class="action-btn"
+                  matTooltip="Újraküldés"
+                  (click)="resendInvitation(invitation)"
+                >
+                  <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
+                </button>
+                <button
+                  class="action-btn action-btn--danger"
+                  matTooltip="Visszavonás"
+                  (click)="confirmRevokeInvitation(invitation)"
+                >
+                  <lucide-icon [name]="ICONS.X" [size]="18" />
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
+
+<!-- Invite Dialog -->
+@if (showInviteModal()) {
+  <app-invite-dialog
+    (close)="closeInviteModal()"
+    (saved)="onInviteSent()"
+  />
+}
+
+<!-- Remove Member Confirm -->
+@if (showRemoveConfirm()) {
+  <app-confirm-dialog
+    title="Csapattag eltávolítása"
+    [message]="'Biztosan eltávolítod ' + selectedMember()?.name + ' nevű csapattagot?'"
+    confirmText="Eltávolítás"
+    cancelText="Mégse"
+    variant="danger"
+    (confirm)="removeMember()"
+    (cancel)="closeRemoveConfirm()"
+  />
+}
+
+<!-- Revoke Invitation Confirm -->
+@if (showRevokeConfirm()) {
+  <app-confirm-dialog
+    title="Meghívó visszavonása"
+    [message]="'Biztosan visszavonod a meghívót? (' + selectedInvitation()?.email + ')'"
+    confirmText="Visszavonás"
+    cancelText="Mégse"
+    variant="warning"
+    (confirm)="revokeInvitation()"
+    (cancel)="closeRevokeConfirm()"
+  />
+}

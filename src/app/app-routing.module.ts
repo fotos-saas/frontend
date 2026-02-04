@@ -70,6 +70,12 @@ const routes: Routes = [
     path: 'tablo/register',
     loadComponent: () => import('./pages/auth/qr-register.component').then(m => m.QrRegisterComponent)
   },
+  // Invite registration - meghívó kóddal
+  {
+    path: 'auth/invite',
+    loadComponent: () => import('./pages/auth/invite-register.component').then(m => m.InviteRegisterComponent),
+    canActivate: [NoAuthGuard]
+  },
 
   // Session Chooser - ha több tárolt session van
   {
@@ -163,6 +169,11 @@ const routes: Routes = [
       {
         path: 'contacts',
         loadComponent: () => import('./features/partner/pages/contact-list.component').then(m => m.PartnerContactListComponent)
+      },
+      // Team - Csapatkezelés
+      {
+        path: 'team',
+        loadComponent: () => import('./features/partner/pages/team/team-list.component').then(m => m.PartnerTeamListComponent)
       },
       // Orders - Fotós megrendelések (ügyfelek + albumok)
       {

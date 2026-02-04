@@ -458,6 +458,7 @@ export class PartnerShellComponent implements OnInit {
     { id: 'projects', route: '/partner/projects', label: 'Projektek', icon: 'folder-open' },
     { id: 'schools', route: '/partner/schools', label: 'Iskolák', icon: 'school' },
     { id: 'contacts', route: '/partner/contacts', label: 'Kapcsolatok', icon: 'users' },
+    { id: 'team', route: '/partner/team', label: 'Csapatom', icon: 'user-plus' },
     { id: 'orders', route: '/partner/orders/clients', label: 'Megrendelések', icon: 'shopping-bag' },
     {
       id: 'subscription',

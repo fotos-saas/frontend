@@ -4,6 +4,7 @@ import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
+import { HttpError } from '../../shared/types/http-error.types';
 
 /**
  * Discussion (Beszélgetés) interfész
@@ -605,7 +606,7 @@ export class ForumService {
   /**
    * Hiba kezelése
    */
-  private handleError(error: any): Error {
+  private handleError(error: HttpError): Error {
     let message = 'Ismeretlen hiba történt';
 
     if (error.error?.message) {

@@ -5,6 +5,7 @@ import { map, tap, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
 import { LoggerService } from './logger.service';
+import { HttpError } from '../../shared/types/http-error.types';
 
 /**
  * Newsfeed Post típus
@@ -737,7 +738,7 @@ export class NewsfeedService {
   /**
    * Hiba kezelése
    */
-  private handleError(error: any): Error {
+  private handleError(error: HttpError): Error {
     let message = 'Ismeretlen hiba történt';
 
     if (error.error?.message) {

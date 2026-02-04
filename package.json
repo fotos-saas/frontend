@@ -19,11 +19,12 @@
     "e2e:debug": "playwright test --debug",
     "electron:compile": "tsc -p electron/tsconfig.json",
     "electron:dev": "npm run electron:compile && concurrently \"npm run start\" \"wait-on http://localhost:4205 && NODE_ENV=development electron .\"",
-    "electron:build": "npm run build && npm run electron:compile && electron-builder --mac",
-    "electron:build:win": "npm run build && npm run electron:compile && electron-builder --win",
-    "electron:build:linux": "npm run build && npm run electron:compile && electron-builder --linux",
-    "electron:build:all": "npm run build && npm run electron:compile && electron-builder --mac --win --linux",
-    "electron:build:dir": "npm run build && npm run electron:compile && electron-builder --mac --dir",
+    "electron:build": "npm run build && npm run electron:compile && electron-builder --mac && npm run sentry:sourcemaps",
+    "electron:build:win": "npm run build && npm run electron:compile && electron-builder --win && npm run sentry:sourcemaps",
+    "electron:build:linux": "npm run build && npm run electron:compile && electron-builder --linux && npm run sentry:sourcemaps",
+    "electron:build:all": "npm run build && npm run electron:compile && electron-builder --mac --win --linux && npm run sentry:sourcemaps",
+    "electron:build:dir": "npm run build && npm run electron:compile && electron-builder --mac --dir && npm run sentry:sourcemaps",
+    "sentry:sourcemaps": "node scripts/sentry-sourcemaps.js",
     "cap:sync": "npx cap sync",
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android",
@@ -57,9 +58,19 @@
     "@capacitor/keyboard": "^6.0.4",
     "@capacitor/network": "^6.0.4",
     "@capacitor/preferences": "^6.0.4",
+    "@capacitor/push-notifications": "^6.0.5",
+    "@capacitor/share": "^6.0.4",
     "@capacitor/splash-screen": "^6.0.4",
     "@capacitor/status-bar": "^6.0.3",
+    "@capgo/capacitor-updater": "^6.42.3",
+    "@sentry/angular": "^10.38.0",
+    "@sentry/electron": "^7.7.1",
+    "capacitor-native-biometric": "^4.2.2",
     "dompurify": "^3.3.1",
+    "electron-log": "^5.4.3",
+    "electron-store": "^11.0.2",
+    "electron-updater": "^6.7.3",
+    "keytar": "^7.9.0",
     "laravel-echo": "^2.3.0",
     "lucide-angular": "^0.562.0",
     "ngx-editor": "^19.0.0-beta.1",
@@ -76,13 +87,14 @@
     "@angular/cli": "~21.1.1",
     "@angular/compiler-cli": "^21.1.1",
     "@playwright/test": "^1.57.0",
+    "@sentry/cli": "^3.1.0",
     "@testing-library/angular": "^19.0.0",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/user-event": "^14.5.0",
-    "@vitest/ui": "^2.1.0",
+    "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.1.0",
-    "electron": "^33.2.0",
+    "electron": "^35.7.5",
     "electron-builder": "^25.1.8",
     "jsdom": "^25.0.0",
     "msw": "^2.12.7",
@@ -90,12 +102,20 @@
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.3",
     "vite": "^6.0.0",
-    "vitest": "^2.1.0",
+    "vitest": "^4.0.18",
     "wait-on": "^8.0.1"
   },
   "build": {
     "appId": "com.photostack.app",
     "productName": "PhotoStack",
+    "protocols": [
+      {
+        "name": "PhotoStack",
+        "schemes": [
+          "photostack"
+        ]
+      }
+    ],
     "directories": {
       "output": "release"
     },
@@ -124,7 +144,10 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "electron/entitlements.mac.plist",
-      "entitlementsInherit": "electron/entitlements.mac.plist"
+      "entitlementsInherit": "electron/entitlements.mac.inherit.plist",
+      "notarize": {
+        "teamId": "${APPLE_TEAM_ID}"
+      }
     },
     "dmg": {
       "title": "${productName}",
@@ -175,6 +198,12 @@
       ],
       "icon": "electron/assets/icons",
       "category": "Graphics"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "fotos-saas",
+      "repo": "photostack-frontend",
+      "releaseType": "release"
     }
   }
 }

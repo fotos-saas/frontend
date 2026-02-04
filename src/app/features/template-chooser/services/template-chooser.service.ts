@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { HttpError } from '../../../shared/types/http-error.types';
 
 /**
  * Template kategória interface
@@ -293,7 +294,7 @@ export class TemplateChooserService {
   /**
    * HTTP hiba kezelés
    */
-  private handleError(error: any): Observable<never> {
+  private handleError(error: HttpError): Observable<never> {
     let errorMessage = 'Ismeretlen hiba történt';
 
     if (error.error?.message) {

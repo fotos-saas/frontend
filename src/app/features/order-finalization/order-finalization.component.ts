@@ -10,6 +10,7 @@ import {
   ViewChild,
   ElementRef
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime } from 'rxjs/operators';
 import { OrderFinalizationService } from './services/order-finalization.service';
@@ -65,6 +66,7 @@ export class OrderFinalizationComponent implements OnInit, OnDestroy {
   private initialized = false;
 
   // Services
+  private readonly router = inject(Router);
   private readonly orderFinalizationService = inject(OrderFinalizationService);
   private readonly validationService = inject(OrderValidationService);
   private readonly toastService = inject(ToastService);
@@ -254,13 +256,12 @@ export class OrderFinalizationComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.success) {
             this.toastService.success('Siker!', response.message || 'Megrendelés sikeresen véglegesítve!');
-            if (response.pdfUrl && isSecureUrl(response.pdfUrl)) {
-              openSecureUrl(response.pdfUrl);
-            }
+            // Navigate to order data page after successful finalization
+            this.router.navigate(['/order-data']);
           } else {
             this.toastService.error('Hiba', response.message || 'Hiba történt a véglegesítéskor');
+            this.submitting.set(false);
           }
-          this.submitting.set(false);
         },
         error: (err) => {
           this.logger.error('Order finalization failed', err);

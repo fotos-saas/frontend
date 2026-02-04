@@ -42,11 +42,11 @@
   transition: all 0.15s ease;
 
   &-primary {
-    background: var(--color-primary);
+    background: var(--color-primary, #3b82f6);
     color: white;
 
     &:hover {
-      background: var(--color-primary-dark);
+      background: var(--color-primary-dark, #2563eb);
     }
   }
 

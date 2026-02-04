@@ -283,7 +283,7 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
         color: white;
 
         &:hover:not(:disabled) {
-          background: var(--color-primary-dark);
+          background: var(--color-primary-dark, #2563eb);
         }
       }
 

@@ -5,7 +5,6 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TeamService, TeamMember, PendingInvitation, TeamRole } from '../../services/team.service';
 import { InviteDialogComponent } from './invite-dialog.component';
-import { TeamWikiComponent } from './team-wiki.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
@@ -21,7 +20,6 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     LucideAngularModule,
     MatTooltipModule,
     InviteDialogComponent,
-    TeamWikiComponent,
     ConfirmDialogComponent
   ],
   templateUrl: './team-list.component.html',
@@ -43,7 +41,6 @@ export class PartnerTeamListComponent implements OnInit {
   showInviteModal = signal(false);
   showRemoveConfirm = signal(false);
   showRevokeConfirm = signal(false);
-  showWikiModal = signal(false);
   selectedMember = signal<TeamMember | null>(null);
   selectedInvitation = signal<PendingInvitation | null>(null);
 

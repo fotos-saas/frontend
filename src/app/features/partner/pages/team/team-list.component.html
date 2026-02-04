@@ -11,11 +11,6 @@
     </button>
   </div>
 
-  <!-- Wiki/Help link -->
-  <div class="wiki-link" (click)="showWikiModal.set(true)">
-    <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="16" />
-    <span>Mi ez? Hogyan működik?</span>
-  </div>
 
   <!-- Loading State -->
   @if (loading()) {
@@ -154,7 +149,3 @@
   />
 }
 
-<!-- Wiki Modal -->
-@if (showWikiModal()) {
-  <app-team-wiki (close)="showWikiModal.set(false)" />
-}

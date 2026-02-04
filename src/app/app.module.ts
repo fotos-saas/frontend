@@ -136,7 +136,14 @@ import {
   ShieldCheck,
   // Network / Offline
   Wifi,
-  WifiOff
+  WifiOff,
+  // Help & Documentation
+  HelpCircle,
+  BookOpen,
+  // Design & Roles
+  Palette,
+  ClipboardList,
+  Megaphone
 } from 'lucide-angular';
 
 /**
@@ -260,7 +267,14 @@ const LUCIDE_ICONS = {
   ShieldCheck,
   // Network / Offline
   Wifi,
-  WifiOff
+  WifiOff,
+  // Help & Documentation
+  HelpCircle,
+  BookOpen,
+  // Design & Roles
+  Palette,
+  ClipboardList,
+  Megaphone
 };
 
 @NgModule({

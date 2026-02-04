@@ -302,6 +302,15 @@ export const ICONS = {
   // Network / Offline
   WIFI: 'wifi',
   WIFI_OFF: 'wifi-off',
+
+  // Help & Documentation
+  HELP_CIRCLE: 'help-circle',
+  BOOK_OPEN: 'book-open',
+
+  // Design & Roles
+  PALETTE: 'palette',
+  CLIPBOARD_LIST: 'clipboard-list',
+  MEGAPHONE: 'megaphone',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

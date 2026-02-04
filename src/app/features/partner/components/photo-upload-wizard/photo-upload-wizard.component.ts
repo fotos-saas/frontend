@@ -16,7 +16,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import {
   PartnerService,
   UploadedPhoto,
-  MissingPersonItem,
+  TabloPersonItem,
   MatchResult,
   PhotoAssignment,
   AlbumsSummary,
@@ -120,7 +120,7 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
             @case ('review') {
               <app-step-review
                 [projectId]="projectId()"
-                [missingPersons]="missingPersons()"
+                [persons]="persons()"
                 [matchResult]="matchResult()"
                 [uploadedPhotos]="uploadedPhotos()"
                 [assignments]="assignments()"
@@ -260,7 +260,7 @@ export class PhotoUploadWizardComponent implements OnInit {
   // === STATE ===
   currentStep = signal<WizardStep>('albums');
   uploadedPhotos = signal<UploadedPhoto[]>([]);
-  missingPersons = signal<MissingPersonItem[]>([]);
+  persons = signal<TabloPersonItem[]>([]);
   matchResult = signal<MatchResult | null>(null);
   assignments = signal<PhotoAssignment[]>([]);
   matchingMode = signal<MatchingMode>(null);
@@ -345,11 +345,11 @@ export class PhotoUploadWizardComponent implements OnInit {
       });
   }
 
-  private loadMissingPersons(): void {
-    this.partnerService.getProjectMissingPersons(this.projectId(), false)
+  private loadPersons(): void {
+    this.partnerService.getProjectPersons(this.projectId(), false)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => this.missingPersons.set(response.data)
+        next: (response) => this.persons.set(response.data)
       });
   }
 
@@ -411,7 +411,7 @@ export class PhotoUploadWizardComponent implements OnInit {
     const newAssignments: PhotoAssignment[] = [];
     for (const match of result.matches) {
       if (match.mediaId) {
-        const person = this.missingPersons().find(p => p.name === match.name);
+        const person = this.persons().find(p => p.name === match.name);
         if (person) {
           newAssignments.push({ personId: person.id, mediaId: match.mediaId });
         }
@@ -423,10 +423,10 @@ export class PhotoUploadWizardComponent implements OnInit {
   // === ALBUM HANDLERS ===
   onAlbumSelected(album: AlbumType): void {
     this.uploadedPhotos.set([]);
-    this.missingPersons.set([]);
+    this.persons.set([]);
     this.assignments.set([]);
     this.selectedAlbum.set(album);
-    this.loadMissingPersons();
+    this.loadPersons();
     this.loadAlbumDetails(album);
     this.currentStep.set('upload');
   }

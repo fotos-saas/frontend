@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { MissingPersonSearchResult } from '../../../core/models/guest.models';
+import { PersonSearchResult } from '../../../core/models/guest.models';
 
 /** Onboarding lépés */
 export type OnboardingStep = 'search' | 'nickname' | 'email';
@@ -22,13 +22,13 @@ export class OnboardingFormService {
   readonly currentStep = signal<OnboardingStep>('search');
 
   /** Kiválasztott személy */
-  readonly selectedPerson = signal<MissingPersonSearchResult | null>(null);
+  readonly selectedPerson = signal<PersonSearchResult | null>(null);
 
   /** "Nem találom magam" kiválasztva */
   readonly notFoundSelected = signal(false);
 
   /** Keresési eredmények */
-  readonly searchResults = signal<MissingPersonSearchResult[]>([]);
+  readonly searchResults = signal<PersonSearchResult[]>([]);
 
   /** Keresés folyamatban */
   readonly isSearching = signal(false);
@@ -64,7 +64,7 @@ export class OnboardingFormService {
   /**
    * Személy kiválasztása a listából
    */
-  selectPerson(person: MissingPersonSearchResult): string {
+  selectPerson(person: PersonSearchResult): string {
     this.selectedPerson.set(person);
     this.notFoundSelected.set(false);
     this.searchResults.set([]);

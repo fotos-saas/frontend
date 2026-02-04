@@ -25,7 +25,7 @@ export const mockProject = {
   hasOrderData: true,
   photoDate: '2026-03-15',
   deadline: '2026-04-30',
-  hasMissingPersons: true,
+  hasPersons: true,
   hasTemplateChooser: true,
   selectedTemplatesCount: 2,
   tabloStatus: {
@@ -39,7 +39,7 @@ export const mockProject = {
   shareUrl: 'https://test.com/share/abc123',
   isFinalized: false,
   samplesCount: 0,
-  missingStats: {
+  personStats: {
     total: 5,
     withoutPhoto: 3,
     studentsWithoutPhoto: 2,

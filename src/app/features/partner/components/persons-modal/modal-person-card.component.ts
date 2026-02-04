@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { MissingPersonItem } from './missing-persons-modal.types';
+import { TabloPersonItem } from './persons-modal.types';
 
 /**
- * Személy kártya a hiányzók listájában.
+ * Személy kártya a személyek listájában.
  */
 @Component({
   selector: 'app-modal-person-card',
@@ -154,10 +154,10 @@ import { MissingPersonItem } from './missing-persons-modal.types';
 export class ModalPersonCardComponent {
   readonly ICONS = ICONS;
 
-  readonly person = input.required<MissingPersonItem>();
+  readonly person = input.required<TabloPersonItem>();
   readonly animationDelay = input<string>('0s');
 
-  readonly cardClick = output<MissingPersonItem>();
+  readonly cardClick = output<TabloPersonItem>();
 
   onCardClick(): void {
     if (this.person().photoUrl) {

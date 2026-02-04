@@ -18,14 +18,14 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil, switchMap } from 'rxjs/operators';
 import { GuestService } from '../../../core/services/guest.service';
-import { MissingPersonSearchResult } from '../../../core/models/guest.models';
+import { PersonSearchResult } from '../../../core/models/guest.models';
 import { OnboardingFormService, OnboardingStep } from './onboarding-form.service';
 
 /**
  * Dialog eredmény típus
  */
 export type OnboardingResult =
-  | { action: 'submit'; nickname: string; missingPersonId?: number; email?: string }
+  | { action: 'submit'; nickname: string; personId?: number; email?: string }
   | { action: 'close' };
 
 // Re-export for backwards compatibility
@@ -117,7 +117,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
       switchMap(query => {
         if (query.length < 2) return [];
         this.formService.isSearching.set(true);
-        return this.guestService.searchMissingPersons(query);
+        return this.guestService.searchPersons(query);
       })
     ).subscribe(results => {
       this.formService.searchResults.set(results);
@@ -154,7 +154,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
     this.searchInput$.next(this.searchQuery);
   }
 
-  selectPerson(person: MissingPersonSearchResult): void {
+  selectPerson(person: PersonSearchResult): void {
     this.nickname = this.formService.selectPerson(person);
     this.searchQuery = person.name;
   }
@@ -186,7 +186,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
     this.resultEvent.emit({
       action: 'submit',
       nickname: this.nickname.trim(),
-      missingPersonId: this.selectedPerson()?.id,
+      personId: this.selectedPerson()?.id,
       email: this.email.trim() || undefined
     });
   }

@@ -48,7 +48,7 @@ export class MenuConfigService {
       samplesCount: project.samplesCount,
       hasOrderData: project.hasOrderData,
       hasTemplateChooser: project.hasTemplateChooser,
-      hasMissingPersons: project.hasMissingPersons,
+      hasMissingPersons: project.hasMissingPersons ?? project.hasPersons,
       selectedTemplatesCount: project.selectedTemplatesCount,
       activePollsCount: project.activePollsCount,
       hasPhotoSelection: project.hasPhotoSelection,
@@ -164,12 +164,12 @@ export class MenuConfigService {
       });
     }
 
-    // Hiányzók (rendelés előtt, ha hasMissingPersons és VAN kiválasztott minta)
+    // Személyek (rendelés előtt, ha hasPersons és VAN kiválasztott minta)
     if (this.projectModeService.showMissingPersons(project)) {
       children.push({
-        id: 'missing',
+        id: 'persons',
         label: 'Hiányzók',
-        route: '/missing-persons',
+        route: '/persons',
       });
     }
 

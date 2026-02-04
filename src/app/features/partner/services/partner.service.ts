@@ -123,9 +123,9 @@ export interface SampleItem {
 }
 
 /**
- * Hiányzó személy interface
+ * Tablo személy interface (partner view)
  */
-export interface MissingPersonItem {
+export interface TabloPersonItem {
   id: number;
   name: string;
   type: 'student' | 'teacher';
@@ -134,6 +134,11 @@ export interface MissingPersonItem {
   photoThumbUrl: string | null;
   photoUrl: string | null;
 }
+
+/**
+ * @deprecated Use TabloPersonItem instead
+ */
+export type MissingPersonItem = TabloPersonItem;
 
 /**
  * Feltöltött kép interface
@@ -503,17 +508,24 @@ export class PartnerService {
   }
 
   /**
-   * Projekt hiányzók lekérése
+   * Projekt személyeinek lekérése
    */
-  getProjectMissingPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: MissingPersonItem[] }> {
+  getProjectPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: TabloPersonItem[] }> {
     let httpParams = new HttpParams();
     if (withoutPhoto) {
       httpParams = httpParams.set('without_photo', 'true');
     }
-    return this.http.get<{ data: MissingPersonItem[] }>(
-      `${this.baseUrl}/projects/${projectId}/missing-persons`,
+    return this.http.get<{ data: TabloPersonItem[] }>(
+      `${this.baseUrl}/projects/${projectId}/persons`,
       { params: httpParams }
     );
+  }
+
+  /**
+   * @deprecated Use getProjectPersons instead
+   */
+  getProjectMissingPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: TabloPersonItem[] }> {
+    return this.getProjectPersons(projectId, withoutPhoto);
   }
 
   // ============================================
@@ -957,7 +969,7 @@ export class PartnerService {
         thumbUrl: string;
         version: number;
       };
-    }>(`${this.baseUrl}/projects/${projectId}/missing-persons/${personId}/photo`, formData);
+    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/photo`, formData);
   }
 
   // ============================================

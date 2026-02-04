@@ -3,13 +3,13 @@ $blue-600: #2563eb;
 $amber-500: #f59e0b;
 $amber-600: #d97706;
 
-.missing-persons {
+.persons {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.missing-persons__main {
+.persons__main {
   flex: 1;
   max-width: 800px;
   width: 100%;
@@ -18,19 +18,19 @@ $amber-600: #d97706;
 }
 
 // Page Header
-.missing-persons__header {
+.persons__header {
   padding: 2rem 0 1.5rem;
   text-align: center;
 }
 
-.missing-persons__title {
+.persons__title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1a202c;
   margin: 0 0 0.25rem;
 }
 
-.missing-persons__subtitle {
+.persons__subtitle {
   font-size: 0.9rem;
   color: #64748b;
   margin: 0;
@@ -319,15 +319,15 @@ $amber-600: #d97706;
 
 // Mobile
 @media (max-width: 640px) {
-  .missing-persons__main {
+  .persons__main {
     padding: 0 1rem 2rem;
   }
 
-  .missing-persons__header {
+  .persons__header {
     padding: 1.5rem 0 1rem;
   }
 
-  .missing-persons__title {
+  .persons__title {
     font-size: 1.25rem;
   }
 

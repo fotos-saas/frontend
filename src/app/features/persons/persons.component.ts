@@ -1,12 +1,12 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService, TabloProject, MissingPerson } from '../../core/services/auth.service';
+import { AuthService, TabloProject, TabloPerson } from '../../core/services/auth.service';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 /**
- * Missing Persons Component - Hiányzó személyek oldal
+ * Persons Component - Személyek oldal
  *
  * Megjeleníti a diákokat és tanárokat akiknek nincs még feltöltve a képük.
  * Csoportosítva típus szerint (diák/tanár), kereséssel és szűréssel.
@@ -14,14 +14,14 @@ import { map } from 'rxjs/operators';
  * Lazy-loaded standalone komponens.
  */
 @Component({
-    selector: 'app-missing-persons',
+    selector: 'app-persons',
     standalone: true,
     imports: [CommonModule, FormsModule],
-    templateUrl: './missing-persons.component.html',
-    styleUrls: ['./missing-persons.component.scss'],
+    templateUrl: './persons.component.html',
+    styleUrls: ['./persons.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MissingPersonsComponent implements OnInit {
+export class PersonsComponent implements OnInit {
   /** Aktuális projekt */
   project$: Observable<TabloProject | null>;
 
@@ -33,8 +33,8 @@ export class MissingPersonsComponent implements OnInit {
 
   /** Szűrt és keresett személyek */
   filteredPersons$!: Observable<{
-    students: MissingPerson[];
-    teachers: MissingPerson[];
+    students: TabloPerson[];
+    teachers: TabloPerson[];
     studentsWithoutPhoto: number;
     teachersWithoutPhoto: number;
   }>;
@@ -53,12 +53,12 @@ export class MissingPersonsComponent implements OnInit {
       this.filterType$
     ]).pipe(
       map(([project, search, filterType]) => {
-        if (!project?.missingPersons) {
+        if (!project?.persons) {
           return { students: [], teachers: [], studentsWithoutPhoto: 0, teachersWithoutPhoto: 0 };
         }
 
         // Only show persons without photo
-        let persons = project.missingPersons.filter(p => !p.hasPhoto);
+        let persons = project.persons.filter(p => !p.hasPhoto);
 
         // Apply search filter
         if (search.trim()) {
@@ -81,8 +81,8 @@ export class MissingPersonsComponent implements OnInit {
         return {
           students,
           teachers,
-          studentsWithoutPhoto: project.missingStats?.studentsWithoutPhoto ?? 0,
-          teachersWithoutPhoto: project.missingStats?.teachersWithoutPhoto ?? 0
+          studentsWithoutPhoto: project.personStats?.studentsWithoutPhoto ?? 0,
+          teachersWithoutPhoto: project.personStats?.teachersWithoutPhoto ?? 0
         };
       })
     );
@@ -107,7 +107,7 @@ export class MissingPersonsComponent implements OnInit {
   /**
    * TrackBy függvény
    */
-  trackByPerson(index: number, person: MissingPerson): number {
+  trackByPerson(index: number, person: TabloPerson): number {
     return person.id;
   }
 }

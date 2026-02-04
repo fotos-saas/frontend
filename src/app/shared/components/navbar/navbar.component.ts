@@ -347,10 +347,10 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Hiányzó képek menüpont látható-e?
+   * Személyek menüpont látható-e?
    * Delegálva: ProjectModeService
    */
-  showMissingPersons(): boolean {
+  showPersons(): boolean {
     return this.projectModeService.showMissingPersons(this.projectInfo());
   }
 

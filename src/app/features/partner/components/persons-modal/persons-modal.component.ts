@@ -4,16 +4,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerService } from '../../services/partner.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { TypeFilter, MissingPersonItem } from './missing-persons-modal.types';
+import { TypeFilter, TabloPersonItem } from './persons-modal.types';
 import { ModalPersonCardComponent } from './modal-person-card.component';
 import { PhotoLightboxComponent } from './photo-lightbox.component';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 
 /**
- * Missing Persons Modal - Hiányzók listája modal (grid nézet thumbnail-ekkel + lightbox).
+ * Persons Modal - Személyek listája modal (grid nézet thumbnail-ekkel + lightbox).
  */
 @Component({
-  selector: 'app-missing-persons-modal',
+  selector: 'app-persons-modal',
   standalone: true,
   imports: [FormsModule, LucideAngularModule, ModalPersonCardComponent, PhotoLightboxComponent],
   template: /* html */`
@@ -22,7 +22,7 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
         <!-- Header -->
         <div class="modal-header">
           <div class="header-content">
-            <h2>Hiányzók</h2>
+            <h2>Személyek</h2>
             <p class="subtitle">{{ projectName() }}</p>
           </div>
           <button type="button" class="close-btn" (click)="close.emit()">
@@ -453,7 +453,7 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MissingPersonsModalComponent implements OnInit {
+export class PersonsModalComponent implements OnInit {
   readonly ICONS = ICONS;
 
   /** Backdrop handler a kijelölés közbeni bezárás megelőzéséhez */
@@ -469,7 +469,7 @@ export class MissingPersonsModalComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   loading = signal(true);
-  allPersons = signal<MissingPersonItem[]>([]);
+  allPersons = signal<TabloPersonItem[]>([]);
 
   // Filters
   typeFilter = signal<TypeFilter>('student');
@@ -477,7 +477,7 @@ export class MissingPersonsModalComponent implements OnInit {
   searchQuery = signal('');
 
   // Lightbox
-  lightboxPerson = signal<MissingPersonItem | null>(null);
+  lightboxPerson = signal<TabloPersonItem | null>(null);
 
   // Computed counts
   readonly allCount = computed(() => this.allPersons().length);
@@ -506,22 +506,22 @@ export class MissingPersonsModalComponent implements OnInit {
   readonly emptyStateTitle = computed(() => {
     if (this.searchQuery()) return 'Nincs találat';
     if (this.showOnlyWithoutPhoto()) return 'Mindenkinél megvan a kép';
-    return 'Nincsenek hiányzók';
+    return 'Nincsenek személyek';
   });
 
   readonly emptyStateText = computed(() => {
     if (this.searchQuery()) return 'Próbálj más keresési kifejezéssel!';
-    if (this.showOnlyWithoutPhoto()) return 'Minden hiányzónak van feltöltött képe.';
-    return 'Ehhez a projekthez nincs regisztrálva hiányzó.';
+    if (this.showOnlyWithoutPhoto()) return 'Minden személynek van feltöltött képe.';
+    return 'Ehhez a projekthez nincs regisztrálva személy.';
   });
 
   ngOnInit(): void {
-    this.loadMissingPersons();
+    this.loadPersons();
   }
 
-  loadMissingPersons(): void {
+  loadPersons(): void {
     this.loading.set(true);
-    this.partnerService.getProjectMissingPersons(this.projectId())
+    this.partnerService.getProjectPersons(this.projectId())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -534,7 +534,7 @@ export class MissingPersonsModalComponent implements OnInit {
       });
   }
 
-  openLightbox(person: MissingPersonItem): void {
+  openLightbox(person: TabloPersonItem): void {
     if (person.photoUrl) {
       this.lightboxPerson.set(person);
     }

@@ -161,8 +161,8 @@
             Minta Választó
           </a>
         }
-        @if (showMissingPersons()) {
-          <a routerLink="/missing-persons"
+        @if (showPersons()) {
+          <a routerLink="/persons"
              class="navbar__link"
              [class.navbar__link--active]="activePage() === 'missing'"
              [attr.aria-current]="activePage() === 'missing' ? 'page' : null">Hiányzó képek</a>
@@ -346,10 +346,10 @@
           </a>
         </li>
       }
-      @if (showMissingPersons()) {
+      @if (showPersons()) {
         <li class="navbar__mobile-menu-item">
           <a
-            routerLink="/missing-persons"
+            routerLink="/persons"
             class="navbar__mobile-menu-link"
             [class.navbar__mobile-menu-link--active]="activePage === 'missing'"
             [attr.aria-current]="activePage === 'missing' ? 'page' : null"

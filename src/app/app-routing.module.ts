@@ -326,10 +326,16 @@ const routes: Routes = [
         data: { page: 'order-data' }
       },
       {
+        path: 'persons',
+        loadComponent: () => import('./features/persons/persons.component')
+          .then(m => m.PersonsComponent),
+        data: { page: 'persons' }
+      },
+      // Backward compatibility redirect
+      {
         path: 'missing-persons',
-        loadComponent: () => import('./features/missing-persons/missing-persons.component')
-          .then(m => m.MissingPersonsComponent),
-        data: { page: 'missing' }
+        redirectTo: 'persons',
+        pathMatch: 'full'
       },
       {
         path: 'template-chooser',

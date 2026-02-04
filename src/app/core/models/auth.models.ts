@@ -11,9 +11,9 @@ export interface ContactPerson {
 }
 
 /**
- * Hiányzó személy interface
+ * Tablo személy interface (diák vagy tanár)
  */
-export interface MissingPerson {
+export interface TabloPerson {
   id: number;
   name: string;
   type: 'student' | 'teacher';
@@ -22,14 +22,24 @@ export interface MissingPerson {
 }
 
 /**
- * Hiányzó személyek statisztika
+ * @deprecated Use TabloPerson instead
  */
-export interface MissingStats {
+export type MissingPerson = TabloPerson;
+
+/**
+ * Személyek statisztika
+ */
+export interface PersonStats {
   total: number;
   withoutPhoto: number;
   studentsWithoutPhoto: number;
   teachersWithoutPhoto: number;
 }
+
+/**
+ * @deprecated Use PersonStats instead
+ */
+export type MissingStats = PersonStats;
 
 /**
  * Tablo Status interface
@@ -74,9 +84,17 @@ export interface TabloProject {
   lastActivityAt?: string | null;
   photoDate?: string | null;
   deadline?: string | null;
-  missingPersons?: MissingPerson[];
-  missingStats?: MissingStats;
-  /** Has missing persons flag for navbar menu */
+  /** @deprecated Use persons instead */
+  missingPersons?: TabloPerson[];
+  /** Projekt személyei (diákok és tanárok) */
+  persons?: TabloPerson[];
+  /** @deprecated Use personStats instead */
+  missingStats?: PersonStats;
+  /** Személyek statisztika */
+  personStats?: PersonStats;
+  /** Has persons flag for navbar menu */
+  hasPersons?: boolean;
+  /** @deprecated Use hasPersons instead */
   hasMissingPersons?: boolean;
   /** Has template chooser flag for navbar menu */
   hasTemplateChooser?: boolean;

@@ -51,7 +51,7 @@ const sectionItem: MenuItem = {
   icon: '📸',
   children: [
     { id: 'samples', label: 'minták', route: '/samples' },
-    { id: 'missing', label: 'hiányzók', route: '/missing-persons' },
+    { id: 'persons', label: 'hiányzók', route: '/persons' },
     { id: 'voting', label: 'szavazások', route: '/voting' },
   ],
 };

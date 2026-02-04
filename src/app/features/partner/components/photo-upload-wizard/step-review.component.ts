@@ -12,7 +12,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import {
   UploadedPhoto,
-  MissingPersonItem,
+  TabloPersonItem,
   MatchResult,
   PhotoAssignment
 } from '../../services/partner.service';
@@ -243,7 +243,7 @@ export class StepReviewComponent {
 
   // === INPUTS ===
   readonly projectId = input.required<number>();
-  readonly missingPersons = input<MissingPersonItem[]>([]);
+  readonly persons = input<TabloPersonItem[]>([]);
   readonly matchResult = input<MatchResult | null>(null);
   readonly uploadedPhotos = input<UploadedPhoto[]>([]);
   readonly assignments = input<PhotoAssignment[]>([]);
@@ -266,7 +266,7 @@ export class StepReviewComponent {
   // === COMPUTED ===
 
   readonly personsWithPhotos = computed<PersonWithPhoto[]>(() => {
-    return this.missingPersons().map(person => {
+    return this.persons().map(person => {
       const assignment = this.assignments().find(a => a.personId === person.id);
       const assignedPhoto = assignment
         ? this.uploadedPhotos().find(p => p.mediaId === assignment.mediaId) ?? null

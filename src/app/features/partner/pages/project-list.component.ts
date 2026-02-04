@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../services/partner.service';
 import { ProjectCardComponent } from '../components/project-card.component';
-import { MissingPersonsModalComponent } from '../components/missing-persons-modal';
+import { PersonsModalComponent } from '../components/persons-modal';
 import { CreateProjectModalComponent } from '../components/create-project-modal.component';
 import { QrCodeModalComponent } from '../components/qr-code-modal.component';
 import { PhotoUploadWizardComponent } from '../components/photo-upload-wizard/photo-upload-wizard.component';
@@ -28,7 +28,7 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
     LucideAngularModule,
     MatTooltipModule,
     ProjectCardComponent,
-    MissingPersonsModalComponent,
+    PersonsModalComponent,
     CreateProjectModalComponent,
     QrCodeModalComponent,
     PhotoUploadWizardComponent,
@@ -234,9 +234,9 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
       />
     }
 
-    <!-- Missing Persons Modal -->
+    <!-- Persons Modal -->
     @if (showMissingModal()) {
-      <app-missing-persons-modal
+      <app-persons-modal
         [projectId]="selectedProject()!.id"
         [projectName]="selectedProject()!.name"
         (close)="closeMissingModal()"

@@ -5,13 +5,13 @@
  */
 
 // ==========================================
-// MISSING PERSON SEARCH (Autocomplete)
+// PERSON SEARCH (Autocomplete)
 // ==========================================
 
 /**
  * Tablón szereplő személy (keresési eredmény)
  */
-export interface MissingPersonSearchResult {
+export interface PersonSearchResult {
   id: number;
   name: string;
   type: 'student' | 'teacher';
@@ -19,6 +19,9 @@ export interface MissingPersonSearchResult {
   has_photo: boolean;
   is_claimed: boolean; // Már van-e hozzá verified session
 }
+
+/** @deprecated Use PersonSearchResult instead */
+export type MissingPersonSearchResult = PersonSearchResult;
 
 // ==========================================
 // REGISTER WITH IDENTIFICATION (Onboarding)
@@ -90,8 +93,13 @@ export interface ExtendedGuestSession {
   guestEmail: string | null;
   verificationStatus: VerificationStatus;
   isPending: boolean;
+  /** @deprecated Use personId instead */
   missingPersonId: number | null;
+  /** @deprecated Use personName instead */
   missingPersonName: string | null;
+  // Alias for new naming
+  personId?: number | null;
+  personName?: string | null;
 }
 
 // ==========================================

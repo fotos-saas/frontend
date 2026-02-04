@@ -1,15 +1,15 @@
 @if (project$ | async; as project) {
-  <div class="missing-persons page-card">
-    <main id="main-content" class="missing-persons__main" tabindex="-1">
+  <div class="persons page-card">
+    <main id="main-content" class="persons__main" tabindex="-1">
       <!-- Page Header -->
-      <header class="missing-persons__header">
-        <h1 class="missing-persons__title">Hiányzó képek</h1>
-        <p class="missing-persons__subtitle">Az alábbi személyeknek még nincs feltöltve a képük</p>
+      <header class="persons__header">
+        <h1 class="persons__title">Hiányzó képek</h1>
+        <p class="persons__subtitle">Az alábbi személyeknek még nincs feltöltve a képük</p>
       </header>
 
       @if (filteredPersons$ | async; as data) {
         <!-- Stats Banner -->
-        @if (project.missingStats?.withoutPhoto; as totalMissing) {
+        @if (project.personStats?.withoutPhoto; as totalMissing) {
           <div class="stats-banner">
             <div class="stats-banner__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -29,7 +29,7 @@
         }
 
         <!-- Empty State - All photos uploaded -->
-        @if (project.missingStats?.withoutPhoto === 0) {
+        @if (project.personStats?.withoutPhoto === 0) {
           <div class="empty-state empty-state--success">
             <div class="empty-state__icon empty-state__icon--success">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -42,7 +42,7 @@
         }
 
         <!-- Search and Filter -->
-        @if (project.missingStats && project.missingStats.withoutPhoto > 0) {
+        @if (project.personStats && project.personStats.withoutPhoto > 0) {
           <div class="controls">
             <div class="controls__search">
               <svg class="controls__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -123,7 +123,7 @@
         }
 
         <!-- No Results State -->
-        @if (project.missingStats && project.missingStats.withoutPhoto > 0 && data.students.length === 0 && data.teachers.length === 0) {
+        @if (project.personStats && project.personStats.withoutPhoto > 0 && data.students.length === 0 && data.teachers.length === 0) {
           <div class="empty-state">
             <div class="empty-state__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">

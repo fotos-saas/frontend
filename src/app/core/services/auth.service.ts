@@ -29,6 +29,9 @@ export type { MarketerLoginResponse } from './auth/password-auth.service';
 export type { TokenType } from './token.service';
 export type {
   ContactPerson,
+  TabloPerson,
+  PersonStats,
+  // Backward compatible aliases
   MissingPerson,
   MissingStats,
   TabloStatus,

@@ -399,7 +399,7 @@ export class HomeComponent implements OnInit {
 
     this.guestService.registerWithIdentification(
       result.nickname,
-      result.missingPersonId,
+      result.personId,
       result.email
     ).pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({

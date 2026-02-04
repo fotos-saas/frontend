@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, HostListener } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { MissingPersonItem } from './missing-persons-modal.types';
+import { TabloPersonItem } from './persons-modal.types';
 
 /**
  * Lightbox komponens képek nagyított nézetéhez navigációval.
@@ -173,13 +173,13 @@ export class PhotoLightboxComponent {
   readonly ICONS = ICONS;
 
   /** Aktuálisan megjelenített személy */
-  readonly person = input<MissingPersonItem | null>(null);
+  readonly person = input<TabloPersonItem | null>(null);
 
   /** Képes személyek listája navigációhoz */
-  readonly personsWithPhotos = input<MissingPersonItem[]>([]);
+  readonly personsWithPhotos = input<TabloPersonItem[]>([]);
 
   readonly close = output<void>();
-  readonly navigate = output<MissingPersonItem>();
+  readonly navigate = output<TabloPersonItem>();
 
   readonly canNavigatePrev = computed(() => {
     const p = this.person();

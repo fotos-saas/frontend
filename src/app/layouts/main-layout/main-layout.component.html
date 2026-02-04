@@ -6,7 +6,7 @@
       className: project.className,
       classYear: project.classYear,
       hasOrderData: project.hasOrderData,
-      hasMissingPersons: project.hasMissingPersons || (project.missingStats && project.missingStats.total > 0),
+      hasMissingPersons: project.hasMissingPersons || (project.personStats?.total ?? project.missingStats?.total ?? 0) > 0,
       hasTemplateChooser: project.hasTemplateChooser,
       selectedTemplatesCount: project.selectedTemplatesCount,
       samplesCount: project.samplesCount,

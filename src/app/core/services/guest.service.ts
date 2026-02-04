@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 import { TabloStorageService } from './tablo-storage.service';
 import { TokenType } from './token.service';
 import {
-  MissingPersonSearchResult,
+  PersonSearchResult,
   RegisterWithIdentificationRequest,
   RegisterWithIdentificationResponse,
   VerificationStatus,
@@ -159,8 +159,13 @@ export class GuestService implements OnDestroy {
   /** Bővített session adatok (onboarding után) */
   public readonly verificationStatus = signal<VerificationStatus>('verified');
   public readonly isPending = signal<boolean>(false);
-  public readonly missingPersonId = signal<number | null>(null);
-  public readonly missingPersonName = signal<string | null>(null);
+  public readonly personId = signal<number | null>(null);
+  public readonly personName = signal<string | null>(null);
+
+  /** @deprecated Use personId instead */
+  public readonly missingPersonId = this.personId;
+  /** @deprecated Use personName instead */
+  public readonly missingPersonName = this.personName;
 
   private readonly injector = inject(Injector);
   private _authService?: any; // AuthService - lusta betöltés a cirkuláris függőség elkerülésére
@@ -654,18 +659,25 @@ export class GuestService implements OnDestroy {
   /**
    * Tablón szereplő személyek keresése (autocomplete)
    */
-  searchMissingPersons(query: string): Observable<MissingPersonSearchResult[]> {
+  searchPersons(query: string): Observable<PersonSearchResult[]> {
     if (query.length < 2) {
       return of([]);
     }
 
-    return this.http.get<{ success: boolean; data: MissingPersonSearchResult[] }>(
-      `${environment.apiUrl}/tablo-frontend/guest/missing-persons/search`,
+    return this.http.get<{ success: boolean; data: PersonSearchResult[] }>(
+      `${environment.apiUrl}/tablo-frontend/guest/persons/search`,
       { params: { q: query, limit: '10' } }
     ).pipe(
       map(response => response.success ? response.data : []),
       catchError(() => of([]))
     );
+  }
+
+  /**
+   * @deprecated Use searchPersons instead
+   */
+  searchMissingPersons(query: string): Observable<PersonSearchResult[]> {
+    return this.searchPersons(query);
   }
 
   /**
@@ -726,8 +738,8 @@ export class GuestService implements OnDestroy {
         this.hasGuestSession.set(true);
         this.verificationStatus.set(response.data.verification_status);
         this.isPending.set(response.data.is_pending);
-        this.missingPersonId.set(response.data.missing_person_id);
-        this.missingPersonName.set(response.data.missing_person_name);
+        this.personId.set(response.data.missing_person_id);
+        this.personName.set(response.data.missing_person_name);
 
         return extendedSession;
       }),
@@ -849,7 +861,7 @@ export class GuestService implements OnDestroy {
    * Ellenőrzi, hogy van-e személy azonosítás (tablón szereplő)
    */
   hasPersonIdentification(): boolean {
-    return this.missingPersonId() !== null;
+    return this.personId() !== null;
   }
 
   // ==========================================

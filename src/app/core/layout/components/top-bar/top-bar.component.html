@@ -1,0 +1,121 @@
+<header
+  class="h-14 md:h-16 backdrop-blur-md border-b border-slate-200/50 shadow-sm left-0 right-0 z-40"
+  [class.fixed]="position() === 'fixed'"
+  [class.sticky]="position() === 'sticky'"
+  [class.top-0]="true"
+  [style.background]="'var(--shell-topbar-bg, rgba(255, 255, 255, 0.8))'"
+>
+  <div class="h-full flex items-center justify-between px-3 md:px-4 lg:px-6"
+       [class.pl-20]="isElectronMac()">
+    <!-- Left: Hamburger + Logo -->
+    <div class="flex items-center gap-2 md:gap-3 flex-shrink-0">
+      <!-- Hamburger (mobile only) -->
+      <button
+        class="p-2 hover:bg-slate-100 rounded-lg md:hidden
+               transition-colors duration-150
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+        (click)="sidebarState.toggle()"
+        [attr.aria-expanded]="sidebarState.isOpen()"
+        aria-label="Menü megnyitása"
+        type="button"
+      >
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <!-- Logo -->
+      <a [routerLink]="homeRoute()" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        @if (logoIcon()) {
+          <span class="text-xl md:text-2xl">{{ logoIcon() }}</span>
+        }
+        <span class="text-base md:text-lg font-bold text-gray-900">
+          Tablókirály
+        </span>
+        @if (roleBadge()) {
+          <span class="hidden sm:inline-block px-2 py-1 text-[0.6875rem] md:text-xs font-semibold uppercase tracking-wide bg-purple-100 text-purple-700 rounded-xl">
+            {{ roleBadge() }}
+          </span>
+        }
+      </a>
+
+      <!-- User badges -->
+      <app-top-bar-user-badges
+        [showUserBadges]="showUserBadges()"
+        [userInfoMode]="userInfoMode()"
+        [isCode]="isCode()"
+        [isGuest]="isGuest()"
+        [isPreview]="isPreview()"
+        [hasGuestSession]="hasGuestSession()"
+        [displayName]="displayName()"
+        [contactDisplayName]="contactDisplayName()"
+        (guestEditClick)="openEditDialog()"
+        (contactEditClick)="openContactEditDialog()"
+      />
+    </div>
+
+    <!-- Spacer -->
+    <div class="flex-1"></div>
+
+    <!-- Projected content -->
+    <ng-content></ng-content>
+
+    <!-- Actions -->
+    <app-top-bar-actions
+      [userInfoMode]="userInfoMode()"
+      [externalUserInfo]="externalUserInfo()"
+      [showPokeBadge]="showPokeBadge()"
+      [showNotifications]="showNotifications()"
+      [showAccountSwitch]="showAccountSwitch()"
+      [hasGuestSession]="hasGuestSession()"
+      [isCode]="isCode()"
+      [isDev]="isDev"
+      [hasMultipleSessions]="hasMultipleSessions()"
+      [pokeUnreadCount]="pokeUnreadCount()"
+      [loggingOut]="loggingOut()"
+      (pokeClick)="showPokeDialog.set(true)"
+      (switchAccountClick)="switchAccount()"
+      (logoutClick)="handleLogout()"
+    />
+  </div>
+</header>
+
+<!-- Guest Name Edit Dialog -->
+@if (showEditDialog()) {
+  <app-guest-name-dialog
+    [mode]="'edit'"
+    [initialName]="guestName() || ''"
+    [initialEmail]="guestEmail() || ''"
+    [canClose]="true"
+    [isSubmitting]="isUpdating()"
+    [errorMessage]="updateError()"
+    (resultEvent)="onEditDialogResult($event)"
+  />
+}
+
+<!-- Contact Edit Dialog -->
+@if (showContactEditDialog()) {
+  <app-contact-edit-dialog
+    [initialData]="contactEditData()"
+    [isSaving]="isContactUpdating()"
+    (resultEvent)="onContactEditResult($event)"
+  />
+}
+
+<!-- Poke Received Dialog -->
+@if (showPokeDialog()) {
+  <app-poke-received-dialog (closedEvent)="showPokeDialog.set(false)" />
+}
+
+<!-- Logout Confirm Dialog -->
+@if (showLogoutConfirm()) {
+  <app-confirm-dialog
+    title="Kijelentkezés"
+    message="Biztosan ki szeretnél jelentkezni?"
+    confirmText="Kijelentkezés"
+    cancelText="Mégse"
+    confirmType="warning"
+    [isSubmitting]="loggingOut()"
+    (resultEvent)="onLogoutConfirmResult($event)"
+  />
+}

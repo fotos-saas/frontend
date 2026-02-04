@@ -1,0 +1,72 @@
+<div class="notification-bell">
+  <!-- Bell icon -->
+  <button
+    type="button"
+    class="notification-bell__trigger"
+    [class.notification-bell__trigger--has-unread]="hasUnread()"
+    (click)="toggleDropdown()"
+    [attr.aria-expanded]="isOpen()"
+    aria-label="Értesítések"
+  >
+    <svg
+      class="notification-bell__icon"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+      />
+    </svg>
+
+    @if (hasUnread()) {
+      <span class="notification-bell__badge">
+        {{ unreadCount() > 99 ? '99+' : unreadCount() }}
+      </span>
+    }
+  </button>
+
+  <!-- Dropdown -->
+  @if (isOpen()) {
+    <div class="notification-bell__dropdown">
+      <!-- Header -->
+      <div class="notification-bell__header">
+        <h3 class="notification-bell__title">Értesítések</h3>
+        @if (hasUnread()) {
+          <button
+            type="button"
+            class="notification-bell__mark-all"
+            (click)="markAllAsRead()"
+          >
+            Összes olvasott
+          </button>
+        }
+      </div>
+
+      <!-- Content -->
+      <div class="notification-bell__content">
+        <app-notification-list
+          [notifications]="notifications()"
+          [loading]="loading()"
+          (notificationClick)="onNotificationClick($event)"
+        />
+      </div>
+
+      <!-- Footer -->
+      @if (notifications().length > 0 || hasUnread()) {
+        <div class="notification-bell__footer">
+          <a
+            routerLink="/notifications"
+            class="notification-bell__view-all"
+            (click)="closeDropdown()"
+          >
+            Összes értesítés
+          </a>
+        </div>
+      }
+    </div>
+  }
+</div>

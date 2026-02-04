@@ -1,0 +1,120 @@
+<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="header-icon">
+        <lucide-icon [name]="ICONS.FOLDER_PLUS" [size]="24" />
+      </div>
+      <h2>Új projekt létrehozása</h2>
+      <p class="subtitle">Add meg a projekt alapadatait</p>
+    </div>
+
+    <!-- Content -->
+    <form class="modal-content" (ngSubmit)="onSubmit()">
+      <!-- Iskola kiválasztás -->
+      <div class="form-group">
+        <label class="form-label">Iskola</label>
+        <app-searchable-dropdown
+          placeholder="Keress iskola név vagy város alapján..."
+          addLabel="Új iskola hozzáadása"
+          [options]="schoolOptions()"
+          [loading]="schoolsLoading()"
+          [selectedItem]="selectedSchoolOption()"
+          (searchChange)="onSchoolSearch($event)"
+          (itemSelected)="onSchoolSelected($event)"
+          (cleared)="clearSchool()"
+          (addNew)="openAddSchoolModal()"
+        />
+      </div>
+
+      <!-- Kapcsolattartó -->
+      <div class="form-group">
+        <label class="form-label">Kapcsolattartó</label>
+        <app-searchable-dropdown
+          placeholder="Keress kapcsolattartó név, email vagy telefon alapján..."
+          addLabel="Új kapcsolattartó hozzáadása"
+          [options]="contactOptions()"
+          [loading]="contactsLoading()"
+          [selectedItem]="selectedContactOption()"
+          (searchChange)="onContactSearch($event)"
+          (itemSelected)="onContactSelected($event)"
+          (cleared)="clearContact()"
+          (addNew)="openAddContactModal()"
+        />
+      </div>
+
+      <!-- Osztály és Évfolyam -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Osztály neve</label>
+          <input
+            type="text"
+            placeholder="pl. 12.A"
+            [(ngModel)]="formData.class_name"
+            name="className"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Évfolyam</label>
+          <input
+            type="text"
+            placeholder="pl. 2024"
+            [(ngModel)]="formData.class_year"
+            name="classYear"
+            class="form-input"
+          />
+        </div>
+      </div>
+
+      @if (error()) {
+        <div class="error-message">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+          {{ error() }}
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="close.emit()"
+          [disabled]="submitting()"
+        >
+          Mégse
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="submitting()"
+        >
+          @if (submitting()) {
+            <span class="spinner"></span>
+            Létrehozás...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+            Projekt létrehozása
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add School Modal -->
+@if (showAddSchoolModal()) {
+  <app-add-school-modal
+    (close)="closeAddSchoolModal()"
+    (schoolCreated)="onSchoolCreated($event)"
+  />
+}
+
+<!-- Add Contact Modal -->
+@if (showAddContactModal()) {
+  <app-add-contact-modal
+    (close)="closeAddContactModal()"
+    (contactCreated)="onContactCreated($event)"
+  />
+}

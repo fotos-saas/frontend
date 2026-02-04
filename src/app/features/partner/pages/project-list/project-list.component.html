@@ -1,0 +1,164 @@
+<div class="project-list-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Projektek</h1>
+      @if (projectLimits()?.max !== null) {
+        <p class="subtitle">{{ projectLimits()?.current }} / {{ projectLimits()?.max }} projekt</p>
+      } @else {
+        <p class="subtitle">{{ totalProjects() }} projekt összesen</p>
+      }
+    </div>
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="projectLimits() && !projectLimits()!.can_create"
+      [matTooltip]="projectLimits() && !projectLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum projektszámot' : ''"
+      (click)="openCreateModal()"
+    >
+      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+      Új projekt
+    </button>
+  </header>
+
+  <!-- Keresés és szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+      <input
+        type="text"
+        placeholder='Keresés (#ID, @ügyintéző, "pontos kifejezés")...'
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <div class="filter-controls">
+      <app-expandable-filters
+        [filters]="filterConfigs"
+        [values]="filterState.filters()"
+        [visibleCount]="1"
+        (filterChange)="onFilterChange($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-card skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (projects().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      @if (filterState.search()) {
+        <p>Próbálj más keresési feltételekkel!</p>
+      } @else {
+        <p>Még nincsenek projektek. Hozz létre egyet!</p>
+        <button type="button" class="btn-primary mt-4" (click)="openCreateModal()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+          Új projekt létrehozása
+        </button>
+      }
+    </div>
+  } @else {
+    <!-- Mobil rendezés -->
+    <app-project-mobile-sort
+      [options]="sortOptions"
+      [sortBy]="filterState.sortBy()"
+      [sortDir]="filterState.sortDir()"
+      (sortByChange)="filterState.setSortBy($event)"
+      (sortDirChange)="filterState.toggleSortDir()"
+    />
+
+    <!-- Asztali fejléc -->
+    <app-project-table-header
+      [sortBy]="filterState.sortBy()"
+      [sortDir]="filterState.sortDir()"
+      (sortChange)="filterState.setSortBy($event)"
+    />
+
+    <!-- Projekt sorok -->
+    <div class="project-grid">
+      @for (project of projects(); track project.id; let i = $index) {
+        <app-partner-project-card
+          [project]="project"
+          [style.animation-delay]="i * 0.05 + 's'"
+          (cardClick)="viewProject($event)"
+          (samplesClick)="openSamplesModal($event)"
+          (missingClick)="openMissingModal($event)"
+          (qrClick)="openQrModal($event)"
+          (awareClick)="toggleAware($event)"
+        />
+      }
+    </div>
+
+    <!-- Paginálás -->
+    <app-project-pagination
+      [currentPage]="filterState.page()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalProjects()"
+      itemLabel="projekt"
+      (pageChange)="filterState.setPage($event)"
+    />
+  }
+</div>
+
+<!-- Samples Lightbox -->
+@if (samplesLightboxIndex() !== null) {
+  <app-samples-lightbox
+    [samples]="lightboxSamples()"
+    [currentIndex]="samplesLightboxIndex()!"
+    (close)="closeSamplesLightbox()"
+    (navigate)="samplesLightboxIndex.set($event)"
+  />
+}
+
+<!-- Persons Modal -->
+@if (showMissingModal()) {
+  <app-persons-modal
+    [projectId]="selectedProject()!.id"
+    [projectName]="selectedProject()!.name"
+    (close)="closeMissingModal()"
+    (openUploadWizard)="openUploadWizardFromMissing()"
+  />
+}
+
+<!-- Photo Upload Wizard -->
+@if (showUploadWizard()) {
+  <app-photo-upload-wizard
+    [projectId]="selectedProject()!.id"
+    [projectName]="selectedProject()!.name"
+    (close)="closeUploadWizard()"
+    (completed)="onUploadWizardCompleted($event)"
+  />
+}
+
+<!-- Create Project Modal -->
+@if (showCreateModal()) {
+  <app-create-project-modal
+    (close)="closeCreateModal()"
+    (projectCreated)="onProjectCreated($event)"
+  />
+}
+
+<!-- QR Code Modal -->
+@if (showQrModal()) {
+  <app-shared-qr-code-modal
+    [projectId]="selectedProject()!.id"
+    [projectName]="selectedProject()!.name"
+    [qrService]="qrService"
+    (close)="closeQrModal()"
+    (qrCodeChanged)="onQrCodeChanged()"
+  />
+}

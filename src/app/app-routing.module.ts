@@ -152,7 +152,7 @@ const routes: Routes = [
       },
       {
         path: 'projects',
-        loadComponent: () => import('./features/partner/pages/project-list.component').then(m => m.PartnerProjectListComponent)
+        loadComponent: () => import('./features/partner/pages/project-list/project-list.component').then(m => m.PartnerProjectListComponent)
       },
       {
         path: 'projects/new',
@@ -238,7 +238,7 @@ const routes: Routes = [
       },
       {
         path: 'projects',
-        loadComponent: () => import('./features/partner/pages/project-list.component').then(m => m.PartnerProjectListComponent)
+        loadComponent: () => import('./features/partner/pages/project-list/project-list.component').then(m => m.PartnerProjectListComponent)
       },
       {
         path: 'projects/new',

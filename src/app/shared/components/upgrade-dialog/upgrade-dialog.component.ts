@@ -23,6 +23,10 @@ import { createBackdropHandler } from '../../utils/dialog.util';
 import { ICONS } from '../../constants/icons.constants';
 import { PlansService, PlanConfig, PricingPlan } from '../../services/plans.service';
 import { PaymentService } from '../../../core/services/payment.service';
+import { AuthService } from '../../../core/services/auth.service';
+
+/** Csapattag role-ok */
+const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
 
 export type UpgradeFeature = 'schools' | 'contacts' | 'projects' | 'storage' | 'templates';
 
@@ -45,9 +49,16 @@ export class UpgradeDialogComponent implements OnInit, AfterViewInit, OnDestroy 
   private readonly router = inject(Router);
   private readonly plansService = inject(PlansService);
   private readonly paymentService = inject(PaymentService);
+  private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+
+  /** Csapattag-e (nem válthat csomagot) */
+  readonly isTeamMember = computed(() => {
+    const roles = this.authService.getCurrentUser()?.roles ?? [];
+    return TEAM_MEMBER_ROLES.some(r => roles.includes(r));
+  });
 
   /** Signal-based inputs */
   readonly feature = input<UpgradeFeature>('schools');

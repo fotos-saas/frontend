@@ -102,6 +102,7 @@ export class PartnerContactListComponent implements OnInit {
 
   onNewContactClick(): void {
     if (this.contactLimits() && !this.contactLimits()!.can_create) {
+      // UpgradeDialog kezeli a csapattag üzenetet is
       this.showUpgradeDialog.set(true);
     } else {
       this.openCreateModal();

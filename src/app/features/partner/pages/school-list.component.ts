@@ -100,6 +100,7 @@ export class PartnerSchoolListComponent implements OnInit {
 
   onNewSchoolClick(): void {
     if (this.schoolLimits() && !this.schoolLimits()!.can_create) {
+      // UpgradeDialog kezeli a csapattag üzenetet is
       this.showUpgradeDialog.set(true);
     } else {
       this.openCreateModal();

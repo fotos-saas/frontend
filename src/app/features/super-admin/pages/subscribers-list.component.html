@@ -29,7 +29,7 @@
       [ngModel]="filterState.filters().plan"
       (ngModelChange)="filterState.setFilter('plan', $event)"
     >
-      @for (option of planOptions; track option.value) {
+      @for (option of planOptions(); track option.value) {
         <option [value]="option.value">{{ option.label }}</option>
       }
     </select>

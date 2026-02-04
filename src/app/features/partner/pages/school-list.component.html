@@ -11,9 +11,7 @@
     <button
       type="button"
       class="btn-primary"
-      (click)="openCreateModal()"
-      [disabled]="schoolLimits() && !schoolLimits()!.can_create"
-      [matTooltip]="schoolLimits() && !schoolLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum iskola számot' : ''"
+      (click)="onNewSchoolClick()"
     >
       <lucide-icon [name]="ICONS.PLUS" [size]="18" />
       Új iskola
@@ -174,5 +172,14 @@
     cancelText="Mégse"
     confirmType="danger"
     (resultEvent)="onDeleteConfirmResult($event)"
+  />
+}
+
+<!-- Upgrade Dialog -->
+@if (showUpgradeDialog()) {
+  <app-upgrade-dialog
+    feature="schools"
+    [currentPlanId]="schoolLimits()?.plan_id ?? 'alap'"
+    (close)="showUpgradeDialog.set(false)"
   />
 }

@@ -4,6 +4,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AuthService, type LoginResponse } from './auth.service';
 import { TabloStorageService } from './tablo-storage.service';
+import { TabloAuthService } from './auth/tablo-auth.service';
 
 /**
  * AuthService unit tesztek
@@ -15,6 +16,7 @@ import { TabloStorageService } from './tablo-storage.service';
  */
 describe('AuthService - Guest User System', () => {
   let service: AuthService;
+  let tabloAuthService: TabloAuthService;
   let storageService: TabloStorageService;
 
   const mockProject = {
@@ -39,10 +41,11 @@ describe('AuthService - Guest User System', () => {
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, RouterTestingModule],
-      providers: [AuthService, TabloStorageService],
+      providers: [AuthService, TabloStorageService, TabloAuthService],
     });
 
     service = TestBed.inject(AuthService);
+    tabloAuthService = TestBed.inject(TabloAuthService);
     storageService = TestBed.inject(TabloStorageService);
   });
 
@@ -60,7 +63,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](loginResponse, 'share');
+      tabloAuthService.storeAuthData(loginResponse, 'share');
 
       // Assert
       expect(service.isGuest()).toBe(true);
@@ -77,7 +80,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](loginResponse, 'code');
+      tabloAuthService.storeAuthData(loginResponse, 'code');
 
       // Assert
       expect(service.isGuest()).toBe(false);
@@ -94,7 +97,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](loginResponse, 'preview');
+      tabloAuthService.storeAuthData(loginResponse, 'preview');
 
       // Assert
       expect(service.isGuest()).toBe(false);
@@ -115,7 +118,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](loginResponse, 'code');
+      tabloAuthService.storeAuthData(loginResponse, 'code');
 
       // Assert
       expect(service.hasFullAccess()).toBe(true);
@@ -132,7 +135,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](loginResponse, 'share');
+      tabloAuthService.storeAuthData(loginResponse, 'share');
 
       // Assert
       expect(service.hasFullAccess()).toBe(false);
@@ -149,7 +152,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](loginResponse, 'preview');
+      tabloAuthService.storeAuthData(loginResponse, 'preview');
 
       // Assert - preview is full access (admin előnézet)
       expect(service.hasFullAccess()).toBe(true);
@@ -170,7 +173,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](loginResponse, 'preview');
+      tabloAuthService.storeAuthData(loginResponse, 'preview');
 
       // Assert
       expect(service.isPreview()).toBe(true);
@@ -187,7 +190,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](loginResponse, 'code');
+      tabloAuthService.storeAuthData(loginResponse, 'code');
 
       // Assert
       expect(service.isPreview()).toBe(false);
@@ -207,7 +210,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](shareResponse, 'share');
+      tabloAuthService.storeAuthData(shareResponse, 'share');
 
       // Assert - csak isGuest legyen true
       expect(service.isGuest()).toBe(true);
@@ -225,7 +228,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](codeResponse, 'code');
+      tabloAuthService.storeAuthData(codeResponse, 'code');
 
       // Assert - csak hasFullAccess legyen true
       expect(service.isGuest()).toBe(false);
@@ -243,7 +246,7 @@ describe('AuthService - Guest User System', () => {
       };
 
       // Act
-      service['storeAuthData'](previewResponse, 'preview');
+      tabloAuthService.storeAuthData(previewResponse, 'preview');
 
       // Assert - preview esetén mind isPreview MIND hasFullAccess true
       // (admin előnézet = teljes hozzáférés)

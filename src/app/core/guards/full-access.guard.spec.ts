@@ -5,6 +5,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { fullAccessGuard } from './full-access.guard';
 import { AuthService, LoginResponse, TokenType } from '../services/auth.service';
+import { TabloAuthService } from '../services/auth/tablo-auth.service';
 
 /**
  * fullAccessGuard unit tesztek
@@ -15,6 +16,7 @@ import { AuthService, LoginResponse, TokenType } from '../services/auth.service'
  */
 describe('fullAccessGuard', () => {
   let authService: AuthService;
+  let tabloAuthService: TabloAuthService;
   let routerSpy: { navigate: ReturnType<typeof vi.fn> };
 
   /**
@@ -55,11 +57,13 @@ describe('fullAccessGuard', () => {
       imports: [HttpClientTestingModule, RouterTestingModule],
       providers: [
         AuthService,
+        TabloAuthService,
         { provide: Router, useValue: routerSpy }
       ]
     });
 
     authService = TestBed.inject(AuthService);
+    tabloAuthService = TestBed.inject(TabloAuthService);
   });
 
   // ============ Guard Pass Tests ============
@@ -68,8 +72,7 @@ describe('fullAccessGuard', () => {
     it('átengedi ha tokenType === "code"', () => {
       // Arrange
       const response = createMockResponse('code');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (authService as any).storeAuthData(response, 'code');
+      tabloAuthService.storeAuthData(response, 'code');
 
       // Act
       const result = TestBed.runInInjectionContext(() => fullAccessGuard({} as any, {} as any));
@@ -86,8 +89,7 @@ describe('fullAccessGuard', () => {
     it('redirect-el /samples-re ha tokenType === "share"', () => {
       // Arrange
       const response = createMockResponse('share');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (authService as any).storeAuthData(response, 'share');
+      tabloAuthService.storeAuthData(response, 'share');
 
       // Act
       const result = TestBed.runInInjectionContext(() => fullAccessGuard({} as any, {} as any));
@@ -129,8 +131,7 @@ describe('fullAccessGuard', () => {
     it('mindig /samples-re redirect-el, nem más route-ra', () => {
       // Arrange
       const response = createMockResponse('share');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (authService as any).storeAuthData(response, 'share');
+      tabloAuthService.storeAuthData(response, 'share');
 
       // Act
       TestBed.runInInjectionContext(() => fullAccessGuard({} as any, {} as any));
@@ -148,8 +149,7 @@ describe('fullAccessGuard', () => {
     it('egymás után többször hívható a guard', () => {
       // Arrange
       const response = createMockResponse('code');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (authService as any).storeAuthData(response, 'code');
+      tabloAuthService.storeAuthData(response, 'code');
 
       // Act
       const result1 = TestBed.runInInjectionContext(() => fullAccessGuard({} as any, {} as any));

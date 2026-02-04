@@ -21,10 +21,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { createBackdropHandler } from '../../../shared/utils/dialog.util';
 import { SuperAdminService } from '../services/super-admin.service';
-import { PlansService } from '../../../shared/services/plans.service';
-import { ICONS, PLAN_SELECT_OPTIONS, PLANS } from '../../../shared/constants';
+import { PlansService, PlanOption } from '../../../shared/services/plans.service';
+import { ICONS } from '../../../shared/constants';
 
-type PlanType = 'alap' | 'iskola' | 'studio';
+type PlanType = 'alap' | 'iskola' | 'studio' | 'vip';
 type BillingCycleType = 'monthly' | 'yearly';
 
 /**
@@ -59,7 +59,7 @@ type BillingCycleType = 'monthly' | 'yearly';
                 name="plan"
                 required
               >
-                @for (plan of planOptions; track plan.value) {
+                @for (plan of planOptions(); track plan.value) {
                   <option [value]="plan.value">{{ plan.label }}</option>
                 }
               </select>
@@ -182,15 +182,11 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
 
-  // Plan options - központi konstansból
-  readonly planOptions = PLAN_SELECT_OPTIONS;
+  // Plan options - PlansService-ből töltve
+  planOptions = signal<PlanOption[]>([]);
 
-  // Plan prices - központi konstansból, API-val felülírható
-  planPrices = signal<Record<PlanType, Record<BillingCycleType, number>>>({
-    alap: { monthly: PLANS['alap'].monthlyPrice, yearly: PLANS['alap'].yearlyPrice },
-    iskola: { monthly: PLANS['iskola'].monthlyPrice, yearly: PLANS['iskola'].yearlyPrice },
-    studio: { monthly: PLANS['studio'].monthlyPrice, yearly: PLANS['studio'].yearlyPrice },
-  });
+  // Plan prices - PlansService-ből töltve
+  planPrices = signal<Record<string, Record<BillingCycleType, number>>>({});
 
   // Form state
   selectedPlan = signal<PlanType>('alap');
@@ -201,19 +197,26 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
   // Computed
   readonly newPrice = computed(() => {
     const prices = this.planPrices();
-    return prices[this.selectedPlan()][this.selectedBillingCycle()];
+    const planPrices = prices[this.selectedPlan()];
+    return planPrices?.[this.selectedBillingCycle()] ?? 0;
   });
 
   ngOnInit(): void {
-    this.loadPlanPrices();
+    this.loadPlanData();
   }
 
-  private loadPlanPrices(): void {
+  private loadPlanData(): void {
+    // Load plan options
+    this.plansService.getPlanSelectOptions().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(options => this.planOptions.set(options));
+
+    // Load plan prices
     this.plansService.getPlanPrices().pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (prices) => {
-        this.planPrices.set(prices as Record<PlanType, Record<BillingCycleType, number>>);
+        this.planPrices.set(prices as Record<string, Record<BillingCycleType, number>>);
       },
       error: (err) => {
         console.error('Failed to load plan prices:', err);

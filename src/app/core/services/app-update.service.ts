@@ -1,0 +1,193 @@
+import { Injectable, signal } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
+
+interface BundleInfo {
+  id: string;
+  version: string;
+  downloaded: string;
+  checksum: string;
+  status: string;
+}
+
+/**
+ * App Update Service - OTA Updates with Capgo
+ *
+ * Allows instant updates without App Store review.
+ * Only JS/HTML/CSS can be updated, not native code.
+ */
+@Injectable({ providedIn: 'root' })
+export class AppUpdateService {
+  // Update state
+  readonly updateAvailable = signal(false);
+  readonly downloading = signal(false);
+  readonly downloadProgress = signal(0);
+  readonly currentVersion = signal<string | null>(null);
+  readonly latestVersion = signal<string | null>(null);
+
+  private initialized = false;
+
+  constructor() {
+    if (Capacitor.isNativePlatform()) {
+      this.initialize();
+    }
+  }
+
+  /**
+   * Initialize the updater and check for updates
+   */
+  async initialize(): Promise<void> {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    try {
+      // Notify that the app is ready (important for rollback protection)
+      await CapacitorUpdater.notifyAppReady();
+
+      // Get current bundle info
+      const current = await CapacitorUpdater.current();
+      if (current.bundle.version) {
+        this.currentVersion.set(current.bundle.version);
+      }
+
+      // Listen for update events
+      CapacitorUpdater.addListener('updateAvailable', (info) => {
+        console.log('Update available:', info);
+        this.updateAvailable.set(true);
+        this.latestVersion.set(info.bundle.version);
+      });
+
+      // Note: Capgo event names - use any to bypass strict typing
+      (CapacitorUpdater as any).addListener('download', (state: { percent: number }) => {
+        this.downloadProgress.set(state.percent);
+      });
+
+      (CapacitorUpdater as any).addListener('downloadComplete', (bundle: BundleInfo) => {
+        console.log('Download complete:', bundle);
+        this.downloading.set(false);
+      });
+
+      (CapacitorUpdater as any).addListener('downloadFailed', (error: { version: string }) => {
+        console.error('Download failed:', error);
+        this.downloading.set(false);
+      });
+
+      (CapacitorUpdater as any).addListener('updateFailed', (error: { version: string }) => {
+        console.error('Update failed:', error);
+        // The plugin will automatically rollback
+      });
+
+      // Check for updates
+      await this.checkForUpdate();
+
+    } catch (error) {
+      console.error('AppUpdateService initialization error:', error);
+    }
+  }
+
+  /**
+   * Check for available updates
+   */
+  async checkForUpdate(): Promise<boolean> {
+    if (!Capacitor.isNativePlatform()) return false;
+
+    try {
+      const latest = await CapacitorUpdater.getLatest();
+      if (latest.version) {
+        this.latestVersion.set(latest.version);
+
+        const current = await CapacitorUpdater.current();
+        if (current.bundle.version !== latest.version) {
+          this.updateAvailable.set(true);
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to check for updates:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Download and install the latest update
+   * @param reloadImmediately - If true, reload the app immediately after download
+   */
+  async downloadAndInstall(reloadImmediately = false): Promise<boolean> {
+    if (!Capacitor.isNativePlatform() || !this.updateAvailable()) {
+      return false;
+    }
+
+    this.downloading.set(true);
+    this.downloadProgress.set(0);
+
+    try {
+      // Download the bundle
+      const bundle = await CapacitorUpdater.download({
+        url: '', // Capgo will use the configured URL
+        version: this.latestVersion()!,
+      });
+
+      // Set the bundle to be used on next reload
+      await CapacitorUpdater.set(bundle);
+
+      if (reloadImmediately) {
+        await CapacitorUpdater.reload();
+      }
+
+      this.updateAvailable.set(false);
+      return true;
+
+    } catch (error) {
+      console.error('Failed to download update:', error);
+      this.downloading.set(false);
+      return false;
+    }
+  }
+
+  /**
+   * Get list of downloaded bundles
+   */
+  async getDownloadedBundles(): Promise<BundleInfo[]> {
+    if (!Capacitor.isNativePlatform()) return [];
+
+    try {
+      const result = await CapacitorUpdater.list();
+      return result.bundles;
+    } catch (error) {
+      console.error('Failed to get bundles:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Delete a specific bundle
+   */
+  async deleteBundle(id: string): Promise<boolean> {
+    if (!Capacitor.isNativePlatform()) return false;
+
+    try {
+      await CapacitorUpdater.delete({ id });
+      return true;
+    } catch (error) {
+      console.error('Failed to delete bundle:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Reset to the built-in bundle (factory reset)
+   */
+  async resetToBuiltin(): Promise<boolean> {
+    if (!Capacitor.isNativePlatform()) return false;
+
+    try {
+      await CapacitorUpdater.reset();
+      await CapacitorUpdater.reload();
+      return true;
+    } catch (error) {
+      console.error('Failed to reset:', error);
+      return false;
+    }
+  }
+}

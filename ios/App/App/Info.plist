@@ -45,5 +45,32 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+
+	<!-- Permission Descriptions -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>A PhotoStack Face ID-t használ a gyors és biztonságos bejelentkezéshez.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>A PhotoStack kamerát használ fotók készítéséhez és QR kódok beolvasásához.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>A PhotoStack hozzáfér a fotókönyvtáradhoz képek feltöltéséhez.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>A PhotoStack képeket ment a fotókönyvtáradba.</string>
+
+	<!-- Deep Linking / Universal Links -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>hu.tablostudio.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>photostack</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Associated Domains for Universal Links (needs entitlements too) -->
+	<!-- Configure in Xcode: Signing & Capabilities → Associated Domains -->
+	<!-- Add: applinks:app.tablostudio.hu -->
 </dict>
 </plist>

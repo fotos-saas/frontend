@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, SchoolListItem, SchoolItem, SchoolLimits } from '../services/partner.service';
 import { SchoolEditModalComponent } from '../components/school-edit-modal.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { UpgradeDialogComponent } from '../../../shared/components/upgrade-dialog/upgrade-dialog.component';
 import { ICONS } from '../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter-state';
 
@@ -24,7 +25,8 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
     LucideAngularModule,
     MatTooltipModule,
     SchoolEditModalComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    UpgradeDialogComponent
   ],
   templateUrl: './school-list.component.html',
   styleUrl: './school-list.component.scss',
@@ -54,6 +56,7 @@ export class PartnerSchoolListComponent implements OnInit {
   // Modals
   showEditModal = signal(false);
   showDeleteConfirm = signal(false);
+  showUpgradeDialog = signal(false);
   selectedSchool = signal<SchoolListItem | null>(null);
   modalMode = signal<'create' | 'edit'>('create');
 
@@ -93,6 +96,14 @@ export class PartnerSchoolListComponent implements OnInit {
     this.router.navigate(['/partner/projects'], {
       queryParams: { search: school.name }
     });
+  }
+
+  onNewSchoolClick(): void {
+    if (this.schoolLimits() && !this.schoolLimits()!.can_create) {
+      this.showUpgradeDialog.set(true);
+    } else {
+      this.openCreateModal();
+    }
   }
 
   openCreateModal(): void {

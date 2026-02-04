@@ -6,8 +6,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SubscriberListItem } from '../services/super-admin.service';
-import { ICONS, PLAN_FILTER_OPTIONS, getSubscriptionStatusLabel } from '../../../shared/constants';
+import { ICONS, getSubscriptionStatusLabel } from '../../../shared/constants';
 import { useFilterState } from '../../../shared/utils/use-filter-state';
+import { PlansService, PlanOption } from '../../../shared/services/plans.service';
 
 /**
  * Előfizetők lista - Super Admin felületen.
@@ -30,11 +31,12 @@ export class SubscribersListComponent implements OnInit {
   private readonly service = inject(SuperAdminService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly plansService = inject(PlansService);
 
   readonly ICONS = ICONS;
 
-  // Szűrő opciók - központi konstansból
-  readonly planOptions = PLAN_FILTER_OPTIONS;
+  // Szűrő opciók - PlansService-ből töltve
+  planOptions = signal<PlanOption[]>([{ value: '', label: 'Összes csomag' }]);
 
   readonly statusOptions = [
     { value: '', label: 'Összes státusz' },
@@ -53,7 +55,7 @@ export class SubscribersListComponent implements OnInit {
     validation: {
       sortByOptions: ['name', 'email', 'plan', 'subscription_ends_at', 'created_at'],
       filterOptions: {
-        plan: ['alap', 'iskola', 'studio'],
+        plan: ['alap', 'iskola', 'studio', 'vip'],
         status: ['active', 'paused', 'canceling', 'trial'],
       }
     },
@@ -65,7 +67,14 @@ export class SubscribersListComponent implements OnInit {
   totalSubscribers = signal(0);
 
   ngOnInit(): void {
+    this.loadPlanOptions();
     this.loadSubscribers();
+  }
+
+  private loadPlanOptions(): void {
+    this.plansService.getPlanFilterOptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(options => this.planOptions.set(options));
   }
 
   loadSubscribers(): void {
@@ -119,6 +128,7 @@ export class SubscribersListComponent implements OnInit {
       alap: 'plan-badge--gray',
       iskola: 'plan-badge--blue',
       studio: 'plan-badge--purple',
+      vip: 'plan-badge--gold',
     };
     return classes[plan] || '';
   }

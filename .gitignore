@@ -50,3 +50,6 @@ test-results/
 # System files
 .DS_Store
 Thumbs.db
+# Build outputs
+release/
+electron/dist/

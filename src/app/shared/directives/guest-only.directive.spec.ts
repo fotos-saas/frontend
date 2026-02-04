@@ -5,7 +5,8 @@ import { By } from '@angular/platform-browser';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GuestOnlyDirective } from './guest-only.directive';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService, type LoginResponse, type TokenType } from '../../core/services/auth.service';
+import { TabloAuthService } from '../../core/services/auth/tablo-auth.service';
 
 /**
  * GuestOnlyDirective unit tesztek
@@ -31,6 +32,7 @@ describe('GuestOnlyDirective', () => {
   let component: TestComponent;
   let fixture: ComponentFixture<TestComponent>;
   let authService: AuthService;
+  let tabloAuthService: TabloAuthService;
   let localStorageMock: Record<string, string>;
 
   const mockProject = {
@@ -51,12 +53,13 @@ describe('GuestOnlyDirective', () => {
 
     TestBed.configureTestingModule({
       imports: [TestComponent, GuestOnlyDirective, HttpClientTestingModule, RouterTestingModule],
-      providers: [AuthService],
+      providers: [AuthService, TabloAuthService],
     });
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService);
+    tabloAuthService = TestBed.inject(TabloAuthService);
   });
 
   afterEach(() => {
@@ -68,15 +71,15 @@ describe('GuestOnlyDirective', () => {
   describe('Directive visibility (isGuest)', () => {
     it('element megjelenik ha isGuest() === true (share token)', () => {
       // Arrange
-      const shareResponse = {
+      const shareResponse: LoginResponse = {
         user: { id: 1, name: 'Guest', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'share-token',
-        tokenType: 'share',
+        tokenType: 'share' as TokenType,
       };
 
       // Act - bejelentkezés share tokennel (guest)
-      authService['storeAuthData'](shareResponse, 'share');
+      tabloAuthService.storeAuthData(shareResponse, 'share');
       fixture.detectChanges();
 
       // Assert - elem látható legyen
@@ -86,15 +89,15 @@ describe('GuestOnlyDirective', () => {
 
     it('element elrejtve ha isGuest() === false (code token)', () => {
       // Arrange
-      const codeResponse = {
+      const codeResponse: LoginResponse = {
         user: { id: 1, name: 'Full', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'code-token',
-        tokenType: 'code',
+        tokenType: 'code' as TokenType,
       };
 
       // Act - bejelentkezés code tokennel (nem guest)
-      authService['storeAuthData'](codeResponse, 'code');
+      tabloAuthService.storeAuthData(codeResponse, 'code');
       fixture.detectChanges();
 
       // Assert - elem rejtett legyen
@@ -104,15 +107,15 @@ describe('GuestOnlyDirective', () => {
 
     it('element elrejtve ha isGuest() === false (preview token)', () => {
       // Arrange
-      const previewResponse = {
+      const previewResponse: LoginResponse = {
         user: { id: 1, name: 'Admin', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'preview-token',
-        tokenType: 'preview',
+        tokenType: 'preview' as TokenType,
       };
 
       // Act - bejelentkezés preview tokennel (nem guest)
-      authService['storeAuthData'](previewResponse, 'preview');
+      tabloAuthService.storeAuthData(previewResponse, 'preview');
       fixture.detectChanges();
 
       // Assert - elem rejtett legyen

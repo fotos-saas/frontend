@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { PasswordStrengthComponent } from '../../../shared/components/password-strength/password-strength.component';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
 import { LucideAngularModule } from 'lucide-angular';
-import { ICONS, PLANS } from '../../../shared/constants';
+import { ICONS } from '../../../shared/constants';
 import { environment } from '../../../../environments/environment';
 import { PlansService, PricingPlan } from '../../../shared/services/plans.service';
 
@@ -55,16 +55,18 @@ export class RegisterAppComponent implements OnInit {
   // Pricing plans (betöltve API-ból)
   plans = signal<PricingPlan[]>([]);
 
-  // Selected plan computed - fallback a központi konstansból
+  // Selected plan computed - fallback hardcoded értékkel
   selectedPlan = computed(() => {
     const allPlans = this.plans();
     return allPlans.find(p => p.id === this.selectedPlanId()) || allPlans[1] || {
       id: 'iskola',
-      name: PLANS['iskola'].name,
-      description: '',
-      monthlyPrice: PLANS['iskola'].monthlyPrice,
-      yearlyPrice: PLANS['iskola'].yearlyPrice,
+      name: 'Iskola',
+      description: 'Legtöbb fotósnak ideális',
+      monthlyPrice: 14990,
+      yearlyPrice: 149900,
+      pausedPrice: 2500,
       features: [],
+      limits: { storage_gb: 100, max_classes: 20, max_schools: null, max_contacts: null, max_templates: null },
       popular: true,
     };
   });

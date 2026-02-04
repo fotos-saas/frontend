@@ -5,7 +5,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SystemSettings } from '../services/super-admin.service';
-import { ICONS, PLAN_SELECT_OPTIONS } from '../../../shared/constants';
+import { ICONS } from '../../../shared/constants';
+import { PlansService, PlanOption } from '../../../shared/services/plans.service';
 
 type TabId = 'system' | 'email' | 'stripe' | 'info';
 
@@ -29,6 +30,7 @@ type TabId = 'system' | 'email' | 'stripe' | 'info';
 export class SettingsComponent implements OnInit {
   private readonly service = inject(SuperAdminService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly plansService = inject(PlansService);
 
   readonly ICONS = ICONS;
 
@@ -48,13 +50,20 @@ export class SettingsComponent implements OnInit {
   // Form values
   registrationEnabled = signal(true);
   trialDays = signal(14);
-  defaultPlan = signal<'alap' | 'iskola' | 'studio'>('alap');
+  defaultPlan = signal<'alap' | 'iskola' | 'studio' | 'vip'>('alap');
 
-  // Plan opciók - központi konstansból
-  readonly planOptions = PLAN_SELECT_OPTIONS;
+  // Plan opciók - PlansService-ből töltve
+  planOptions = signal<PlanOption[]>([]);
 
   ngOnInit(): void {
+    this.loadPlanOptions();
     this.loadSettings();
+  }
+
+  private loadPlanOptions(): void {
+    this.plansService.getPlanSelectOptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(options => this.planOptions.set(options));
   }
 
   loadSettings(): void {

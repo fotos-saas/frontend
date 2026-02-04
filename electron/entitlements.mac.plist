@@ -2,20 +2,38 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- Allow the app to be code signed -->
+    <!-- Hardened Runtime: Allow JIT compilation (required for Electron/V8) -->
     <key>com.apple.security.cs.allow-jit</key>
     <true/>
+
+    <!-- Hardened Runtime: Allow unsigned executable memory (required for Electron) -->
     <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
     <true/>
+
+    <!-- Hardened Runtime: Allow DYLD environment variables (for native modules) -->
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
+
+    <!-- Hardened Runtime: Disable library validation (for native modules like keytar) -->
     <key>com.apple.security.cs.disable-library-validation</key>
     <true/>
 
-    <!-- Network access for API calls and WebSocket -->
+    <!-- Network: Allow outgoing network connections (API calls, WebSocket) -->
     <key>com.apple.security.network.client</key>
     <true/>
 
-    <!-- Allow reading/writing user-selected files -->
+    <!-- File Access: Allow reading/writing user-selected files -->
     <key>com.apple.security.files.user-selected.read-write</key>
     <true/>
+
+    <!-- File Access: Allow downloads folder access -->
+    <key>com.apple.security.files.downloads.read-write</key>
+    <true/>
+
+    <!-- Keychain: Access keychain for secure credential storage (auto-login) -->
+    <key>com.apple.security.keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)com.photostack.app</string>
+    </array>
 </dict>
 </plist>

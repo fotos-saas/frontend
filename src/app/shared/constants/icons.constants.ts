@@ -293,6 +293,15 @@ export const ICONS = {
   PAUSE_CIRCLE: 'pause-circle',
   PLAY_CIRCLE: 'play-circle',
   PUZZLE: 'puzzle',
+
+  // Biometric / Security
+  SCAN_FACE: 'scan-face',
+  FINGERPRINT: 'fingerprint',
+  SHIELD_CHECK: 'shield-check',
+
+  // Network / Offline
+  WIFI: 'wifi',
+  WIFI_OFF: 'wifi-off',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

@@ -1,4 +1,5 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { App, type URLOpenListenerEvent } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -7,6 +8,8 @@ import { Keyboard, KeyboardResize } from '@capacitor/keyboard';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Network, type ConnectionStatus } from '@capacitor/network';
 import { Device, type DeviceInfo } from '@capacitor/device';
+import { Share } from '@capacitor/share';
+import { PushNotifications, type Token, type PushNotificationSchema, type ActionPerformed } from '@capacitor/push-notifications';
 
 /**
  * Capacitor Service - Mobile platform detection and native features
@@ -27,6 +30,12 @@ export class CapacitorService {
 
   // Device info
   readonly deviceInfo = signal<DeviceInfo | null>(null);
+
+  // Push notifications
+  readonly pushToken = signal<string | null>(null);
+
+  // Deep link callback
+  private deepLinkCallback: ((path: string) => void) | null = null;
 
   constructor() {
     if (this.isNative()) {
@@ -56,6 +65,9 @@ export class CapacitorService {
 
       // App lifecycle events
       this.setupAppListeners();
+
+      // Setup push notifications
+      await this.setupPushNotifications();
     } catch (error) {
       console.error('Capacitor initialization error:', error);
     }
@@ -162,13 +174,106 @@ export class CapacitorService {
 
   private async setupDeepLinks(): Promise<void> {
     App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
-      // Handle deep link: photostack://gallery/123
-      const url = new URL(event.url);
-      const path = url.pathname;
+      // Handle deep link: photostack://gallery/123 or https://app.tablostudio.hu/path
+      try {
+        const url = new URL(event.url);
+        const path = url.pathname + url.search;
 
-      // TODO: Navigate to the path
-      console.log('Deep link received:', path);
+        console.log('Deep link received:', path);
+
+        // Call registered callback if exists
+        if (this.deepLinkCallback) {
+          this.deepLinkCallback(path);
+        }
+      } catch (error) {
+        console.error('Failed to parse deep link:', error);
+      }
     });
+  }
+
+  /**
+   * Register a callback for deep links
+   * @param callback - Function to call with the path when a deep link is received
+   */
+  onDeepLink(callback: (path: string) => void): void {
+    this.deepLinkCallback = callback;
+  }
+
+  // ============ Push Notifications ============
+
+  private async setupPushNotifications(): Promise<void> {
+    try {
+      // Request permission
+      const permStatus = await PushNotifications.requestPermissions();
+
+      if (permStatus.receive === 'granted') {
+        await PushNotifications.register();
+      }
+
+      // Get FCM/APNs token
+      PushNotifications.addListener('registration', (token: Token) => {
+        this.pushToken.set(token.value);
+        console.log('Push token:', token.value);
+        // TODO: Send to backend
+      });
+
+      // Handle registration error
+      PushNotifications.addListener('registrationError', (error) => {
+        console.error('Push registration error:', error);
+      });
+
+      // Handle received notification (app in foreground)
+      PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
+        console.log('Push received:', notification);
+        // Show in-app notification or handle silently
+      });
+
+      // Handle notification tap (app opened from notification)
+      PushNotifications.addListener('pushNotificationActionPerformed', (action: ActionPerformed) => {
+        console.log('Push action:', action);
+        // Navigate based on notification data
+        const data = action.notification.data;
+        if (data?.path && this.deepLinkCallback) {
+          this.deepLinkCallback(data.path);
+        }
+      });
+    } catch (error) {
+      console.error('Push notifications setup error:', error);
+    }
+  }
+
+  // ============ Share ============
+
+  /**
+   * Share content using native share dialog
+   */
+  async share(options: {
+    title?: string;
+    text?: string;
+    url?: string;
+    dialogTitle?: string;
+  }): Promise<boolean> {
+    if (!this.isNative()) {
+      // Fallback for web - copy to clipboard
+      if (options.url) {
+        await navigator.clipboard.writeText(options.url);
+        return true;
+      }
+      return false;
+    }
+
+    try {
+      await Share.share({
+        title: options.title,
+        text: options.text,
+        url: options.url,
+        dialogTitle: options.dialogTitle ?? 'Megosztás',
+      });
+      return true;
+    } catch (error) {
+      console.error('Share failed:', error);
+      return false;
+    }
   }
 
   // ============ App Lifecycle ============

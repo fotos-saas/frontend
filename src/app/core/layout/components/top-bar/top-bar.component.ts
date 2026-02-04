@@ -18,6 +18,7 @@ import { GuestService, GuestSession } from '../../../services/guest.service';
 import { ClipboardService } from '../../../services/clipboard.service';
 import { NotificationBellComponent } from '../../../../shared/components/notification-bell/notification-bell.component';
 import { PokeService } from '../../../services/poke.service';
+import { ElectronService } from '../../../services/electron.service';
 
 // Navbar child komponensek újrafelhasználása
 import { UserBadgeComponent } from '../../../../shared/components/navbar/components/user-badge/user-badge.component';
@@ -60,8 +61,9 @@ import { TabloStorageService } from '../../../services/tablo-storage.service';
       [class.top-0]="true"
       [style.background]="'var(--shell-topbar-bg, rgba(255, 255, 255, 0.8))'"
     >
-      <div class="h-full flex items-center justify-between px-3 md:px-4 lg:px-6">
-        <!-- Left: Hamburger + Logo -->
+      <div class="h-full flex items-center justify-between px-3 md:px-4 lg:px-6"
+           [class.pl-20]="isElectronMac()">
+        <!-- Left: Hamburger + Logo (extra padding for macOS traffic lights in Electron) -->
         <div class="flex items-center gap-2 md:gap-3 flex-shrink-0">
           <!-- Hamburger (mobile only) -->
           <button
@@ -268,6 +270,10 @@ export class TopBarComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly storage = inject(TabloStorageService);
   private readonly router = inject(Router);
+  private readonly electronService = inject(ElectronService);
+
+  /** Electron macOS - traffic light gombok miatt extra padding kell */
+  readonly isElectronMac = computed(() => this.electronService.isElectron && this.electronService.isMac);
 
   // ============ Konfigurálható Input-ok (backward compatible defaults) ============
 

@@ -82,7 +82,7 @@ export interface SystemSettings {
   system: {
     registrationEnabled: boolean;
     trialDays: number;
-    defaultPlan: 'alap' | 'iskola' | 'studio';
+    defaultPlan: 'alap' | 'iskola' | 'studio' | 'vip';
   };
   email: {
     host: string | null;
@@ -198,7 +198,7 @@ export class SuperAdminService {
   /**
    * Csomag váltás
    */
-  changePlan(id: number, data: { plan: 'alap' | 'iskola' | 'studio'; billing_cycle?: 'monthly' | 'yearly' }): Observable<{ success: boolean; message: string; newPrice?: number }> {
+  changePlan(id: number, data: { plan: string; billing_cycle?: 'monthly' | 'yearly' }): Observable<{ success: boolean; message: string; newPrice?: number }> {
     return this.http.put<{ success: boolean; message: string; newPrice?: number }>(`${this.baseUrl}/subscribers/${id}/change-plan`, data);
   }
 

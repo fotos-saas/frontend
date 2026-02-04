@@ -3,13 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, tap, map, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+import { UpgradeFeature } from '../components/upgrade-dialog/upgrade-dialog.component';
+
 /**
  * Plan limitekhez tartozó interfész
  */
 export interface PlanLimits {
-  storage_gb: number;
+  storage_gb: number | null;
   max_classes: number | null;
   max_schools: number | null;
+  max_contacts: number | null;
   max_templates: number | null;
 }
 
@@ -73,6 +76,26 @@ export interface PricingPlan {
 }
 
 /**
+ * Plan opció dropdown-hoz
+ */
+export interface PlanOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * Upgrade adatok interfész
+ */
+export interface UpgradeData {
+  currentPlan: PlanConfig | null;
+  nextPlan: PlanConfig | null;
+  currentPlanName: string;
+  nextPlanName: string;
+  currentLimit: number | null;
+  nextLimit: number | null;
+}
+
+/**
  * Plans Service
  *
  * Központi csomag konfiguráció lekérdezése a backend API-ból.
@@ -95,6 +118,18 @@ export class PlansService {
   // Cache signal
   private plansCache = signal<PlansResponse | null>(null);
   private plansRequest$: Observable<PlansResponse> | null = null;
+
+  /** Csomag sorrend az upgrade-hez */
+  private readonly PLAN_ORDER = ['alap', 'iskola', 'studio', 'vip'];
+
+  /** Feature → limit key mapping */
+  private readonly FEATURE_LIMIT_MAP: Record<UpgradeFeature, keyof PlanLimits> = {
+    schools: 'max_schools',
+    contacts: 'max_contacts',
+    projects: 'max_classes',
+    storage: 'storage_gb',
+    templates: 'max_templates',
+  };
 
   /**
    * Plans konfiguráció lekérése (cache-elt)
@@ -200,5 +235,132 @@ export class PlansService {
   clearCache(): void {
     this.plansCache.set(null);
     this.plansRequest$ = null;
+  }
+
+  /**
+   * Következő magasabb csomag lekérése
+   */
+  getNextPlan(currentPlanId: string): Observable<PlanConfig | null> {
+    return this.getPlans().pipe(
+      map(response => {
+        const currentIndex = this.PLAN_ORDER.indexOf(currentPlanId);
+        if (currentIndex === -1 || currentIndex >= this.PLAN_ORDER.length - 1) {
+          return null;
+        }
+        const nextPlanId = this.PLAN_ORDER[currentIndex + 1];
+        return response.plans[nextPlanId] ?? null;
+      })
+    );
+  }
+
+  /**
+   * Következő csomag ID lekérése
+   */
+  getNextPlanId(currentPlanId: string): string | null {
+    const currentIndex = this.PLAN_ORDER.indexOf(currentPlanId);
+    if (currentIndex === -1 || currentIndex >= this.PLAN_ORDER.length - 1) {
+      return null;
+    }
+    return this.PLAN_ORDER[currentIndex + 1];
+  }
+
+  /**
+   * Csomag limit lekérése feature-re
+   */
+  getPlanLimit(planId: string, limitKey: keyof PlanLimits): Observable<number | null> {
+    return this.getPlans().pipe(
+      map(response => {
+        const plan = response.plans[planId];
+        if (!plan) return null;
+        return plan.limits[limitKey];
+      })
+    );
+  }
+
+  /**
+   * Feature → limit key mapping
+   */
+  getFeatureLimitKey(feature: UpgradeFeature): keyof PlanLimits {
+    return this.FEATURE_LIMIT_MAP[feature];
+  }
+
+  /**
+   * Upgrade adatok lekérése dinamikus dialog-hoz
+   */
+  getUpgradeData(currentPlanId: string, feature: UpgradeFeature): Observable<UpgradeData> {
+    return this.getPlans().pipe(
+      map(response => {
+        const currentPlan = response.plans[currentPlanId] ?? null;
+        const nextPlanId = this.getNextPlanId(currentPlanId);
+        const nextPlan = nextPlanId ? response.plans[nextPlanId] ?? null : null;
+
+        const limitKey = this.FEATURE_LIMIT_MAP[feature];
+        const currentLimit = currentPlan?.limits[limitKey] ?? null;
+        const nextLimit = nextPlan?.limits[limitKey] ?? null;
+
+        return {
+          currentPlan,
+          nextPlan,
+          currentPlanName: currentPlan?.name.replace('TablóStúdió ', '') ?? currentPlanId,
+          nextPlanName: nextPlan?.name.replace('TablóStúdió ', '') ?? 'Következő',
+          currentLimit,
+          nextLimit,
+        };
+      })
+    );
+  }
+
+  /**
+   * Plan opciók szűrő dropdown-hoz (tartalmazza az "Összes" opciót)
+   */
+  getPlanFilterOptions(): Observable<PlanOption[]> {
+    return this.getPlans().pipe(
+      map(response => {
+        const options: PlanOption[] = [{ value: '', label: 'Összes csomag' }];
+        for (const planId of this.PLAN_ORDER) {
+          const plan = response.plans[planId];
+          if (plan) {
+            options.push({
+              value: planId,
+              label: plan.name.replace('TablóStúdió ', ''),
+            });
+          }
+        }
+        return options;
+      })
+    );
+  }
+
+  /**
+   * Plan opciók kiválasztó dropdown-hoz (nincs "Összes" opció)
+   */
+  getPlanSelectOptions(): Observable<PlanOption[]> {
+    return this.getPlans().pipe(
+      map(response => {
+        const options: PlanOption[] = [];
+        for (const planId of this.PLAN_ORDER) {
+          const plan = response.plans[planId];
+          if (plan) {
+            options.push({
+              value: planId,
+              label: plan.name.replace('TablóStúdió ', ''),
+            });
+          }
+        }
+        return options;
+      })
+    );
+  }
+
+  /**
+   * Plan név lekérése kulcs alapján
+   */
+  getPlanName(planId: string): Observable<string> {
+    return this.getPlans().pipe(
+      map(response => {
+        const plan = response.plans[planId];
+        return plan?.name.replace('TablóStúdió ', '') ?? planId;
+      })
+    );
   }
 }

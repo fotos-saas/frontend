@@ -5,7 +5,8 @@ import { By } from '@angular/platform-browser';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { RequireFullAccessDirective } from './require-full-access.directive';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService, type LoginResponse, type TokenType } from '../../core/services/auth.service';
+import { TabloAuthService } from '../../core/services/auth/tablo-auth.service';
 
 /**
  * RequireFullAccessDirective unit tesztek
@@ -32,6 +33,7 @@ describe('RequireFullAccessDirective', () => {
   let component: TestComponent;
   let fixture: ComponentFixture<TestComponent>;
   let authService: AuthService;
+  let tabloAuthService: TabloAuthService;
   let localStorageMock: Record<string, string>;
 
   const mockProject = {
@@ -52,12 +54,13 @@ describe('RequireFullAccessDirective', () => {
 
     TestBed.configureTestingModule({
       imports: [TestComponent, RequireFullAccessDirective, HttpClientTestingModule, RouterTestingModule],
-      providers: [AuthService],
+      providers: [AuthService, TabloAuthService],
     });
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService);
+    tabloAuthService = TestBed.inject(TabloAuthService);
   });
 
   afterEach(() => {
@@ -69,16 +72,16 @@ describe('RequireFullAccessDirective', () => {
   describe('Directive visibility (canFinalize$)', () => {
     it('element megjelenik ha canFinalize === true (code token)', () => {
       // Arrange
-      const codeResponse = {
+      const codeResponse: LoginResponse = {
         user: { id: 1, name: 'Full', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'code-token',
-        tokenType: 'code',
+        tokenType: 'code' as TokenType,
         // canFinalize nincs explicit megadva → default: tokenType === 'code' → true
       };
 
       // Act - bejelentkezés code tokennel
-      authService['storeAuthData'](codeResponse, 'code');
+      tabloAuthService.storeAuthData(codeResponse, 'code');
       fixture.detectChanges();
 
       // Assert - elem látható legyen
@@ -88,16 +91,16 @@ describe('RequireFullAccessDirective', () => {
 
     it('element elrejtve ha canFinalize === false (share token)', () => {
       // Arrange
-      const shareResponse = {
+      const shareResponse: LoginResponse = {
         user: { id: 1, name: 'Guest', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'share-token',
-        tokenType: 'share',
+        tokenType: 'share' as TokenType,
         // canFinalize nincs explicit megadva → default: tokenType === 'code' → false
       };
 
       // Act - bejelentkezés share tokennel
-      authService['storeAuthData'](shareResponse, 'share');
+      tabloAuthService.storeAuthData(shareResponse, 'share');
       fixture.detectChanges();
 
       // Assert - elem rejtett legyen
@@ -110,16 +113,16 @@ describe('RequireFullAccessDirective', () => {
       // FONTOS: A RequireFullAccessDirective canFinalize$-t használ, NEM hasFullAccess()-t!
       // Preview tokennel canFinalize alapértelmezetten false (csak code esetén true)
       // A preview token csak olvasási előnézet, NEM véglegesítési jog
-      const previewResponse = {
+      const previewResponse: LoginResponse = {
         user: { id: 1, name: 'Admin', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'preview-token',
-        tokenType: 'preview',
+        tokenType: 'preview' as TokenType,
         // canFinalize nincs explicit megadva → default: tokenType === 'code' → false
       };
 
       // Act - bejelentkezés preview tokennel
-      authService['storeAuthData'](previewResponse, 'preview');
+      tabloAuthService.storeAuthData(previewResponse, 'preview');
       fixture.detectChanges();
 
       // Assert - elem REJTETT legyen (preview != canFinalize)
@@ -130,16 +133,16 @@ describe('RequireFullAccessDirective', () => {
     it('element megjelenik ha preview token explicit canFinalize: true-val', () => {
       // Arrange
       // Ha az API explicit canFinalize: true-t küld preview tokenhez
-      const previewWithFinalizeResponse = {
+      const previewWithFinalizeResponse: LoginResponse = {
         user: { id: 1, name: 'Admin', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'preview-token',
-        tokenType: 'preview',
+        tokenType: 'preview' as TokenType,
         canFinalize: true, // Explicit beállítva
       };
 
       // Act - bejelentkezés preview tokennel és canFinalize: true
-      authService['storeAuthData'](previewWithFinalizeResponse, 'preview');
+      tabloAuthService.storeAuthData(previewWithFinalizeResponse, 'preview');
       fixture.detectChanges();
 
       // Assert - elem látható legyen (explicit canFinalize = true)
@@ -164,29 +167,29 @@ describe('RequireFullAccessDirective', () => {
   describe('Dynamic element toggle', () => {
     it('reactive: elem megjelenik/eltűnik tokenType változáskor', () => {
       // Arrange
-      const shareResponse = {
+      const shareResponse: LoginResponse = {
         user: { id: 1, name: 'Guest', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'share-token',
-        tokenType: 'share',
+        tokenType: 'share' as TokenType,
       };
 
-      const codeResponse = {
+      const codeResponse: LoginResponse = {
         user: { id: 1, name: 'Full', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'code-token',
-        tokenType: 'code',
+        tokenType: 'code' as TokenType,
       };
 
       // Act 1 - Share bejelentkezés (rejtett)
-      authService['storeAuthData'](shareResponse, 'share');
+      tabloAuthService.storeAuthData(shareResponse, 'share');
       fixture.detectChanges();
 
       let content = fixture.debugElement.query(By.css('.full-access-content'));
       expect(content).toBeFalsy();
 
       // Act 2 - Code bejelentkezés (látható)
-      authService['storeAuthData'](codeResponse, 'code');
+      tabloAuthService.storeAuthData(codeResponse, 'code');
       fixture.detectChanges();
 
       content = fixture.debugElement.query(By.css('.full-access-content'));
@@ -195,15 +198,15 @@ describe('RequireFullAccessDirective', () => {
 
     it('reactive: elem eltűnik amikor clearAuth() hívódik', () => {
       // Arrange
-      const codeResponse = {
+      const codeResponse: LoginResponse = {
         user: { id: 1, name: 'Full', email: null, type: 'tablo-guest' },
         project: mockProject,
         token: 'code-token',
-        tokenType: 'code',
+        tokenType: 'code' as TokenType,
       };
 
       // Act 1 - Bejelentkezés
-      authService['storeAuthData'](codeResponse, 'code');
+      tabloAuthService.storeAuthData(codeResponse, 'code');
       fixture.detectChanges();
 
       let content = fixture.debugElement.query(By.css('.full-access-content'));

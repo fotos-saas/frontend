@@ -1,0 +1,1024 @@
+// ============================================
+// ANIMATIONS - Keyframes
+// ============================================
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+@keyframes cardEntry {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes benefitEntry {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+// ============================================
+// DIALOG BASE
+// ============================================
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1040;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.dialog-panel {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+// ============================================
+// LIMIT VIEW - Header
+// ============================================
+.upgrade-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 1rem;
+  position: relative;
+}
+
+.upgrade-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.upgrade-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  flex: 1;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+}
+
+// ============================================
+// LIMIT VIEW - Content
+// ============================================
+.upgrade-content {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.upgrade-description {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+.plan-comparison {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+
+  &--loaded {
+    animation: contentFadeIn 0.3s ease-out;
+  }
+}
+
+.plan-card {
+  flex: 1;
+  padding: 1rem;
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &--current {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+  }
+
+  &--next {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border: 2px solid #6366f1;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+    }
+  }
+}
+
+.plan-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.plan-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.plan-limit {
+  font-size: 0.875rem;
+  color: #6b7280;
+
+  &--unlimited {
+    color: #6366f1;
+    font-weight: 500;
+  }
+}
+
+.plan-price {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6366f1;
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(99, 102, 241, 0.3);
+}
+
+.plan-arrow {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+// ============================================
+// BENEFITS SECTION
+// ============================================
+.benefits-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border-color: #6366f1;
+  }
+
+  .sparkle-icon {
+    color: #f59e0b;
+  }
+
+  span {
+    flex: 1;
+    text-align: left;
+  }
+
+  .chevron-icon {
+    color: #9ca3af;
+    transition: transform 0.2s ease;
+  }
+}
+
+.benefits-list {
+  overflow: hidden;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 10px;
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  font-size: 0.8125rem;
+  color: #374151;
+  opacity: 0;
+  animation: benefitEntry 0.3s ease-out forwards;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .benefit-check {
+    color: #22c55e;
+    flex-shrink: 0;
+  }
+}
+
+.upgrade-benefit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 8px;
+
+  .benefit-icon {
+    color: #22c55e;
+    flex-shrink: 0;
+  }
+}
+
+// ============================================
+// QUICK PLAN SELECTOR
+// ============================================
+.quick-plans {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.quick-plans-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.quick-plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quick-plan-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  opacity: 0;
+  animation: benefitEntry 0.3s ease-out forwards;
+
+  &:hover {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.05);
+    transform: translateX(4px);
+  }
+
+  &--recommended {
+    border-color: #6366f1;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+
+    &:hover {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
+    }
+  }
+}
+
+.quick-plan-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  flex: 1;
+}
+
+.quick-plan-price {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #6366f1;
+}
+
+.quick-plan-badge {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border-radius: 4px;
+}
+
+.quick-plan-btn--selected {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+
+  .quick-plan-name {
+    color: #16a34a;
+  }
+}
+
+.quick-plan-check {
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+// ============================================
+// SELECTED PLAN DETAILS
+// ============================================
+.selected-plan-details {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.08) 100%);
+  border: 2px solid #22c55e;
+  border-radius: 12px;
+  animation: contentFadeIn 0.3s ease-out;
+}
+
+.selected-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.selected-plan-info {
+  flex: 1;
+}
+
+.selected-plan-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.25rem;
+}
+
+.selected-plan-desc {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.selected-plan-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #374151;
+  }
+}
+
+.selected-plan-pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(34, 197, 94, 0.2);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+  margin-bottom: 0.75rem;
+}
+
+.selected-plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+
+  .price-main {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .price-unit {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+}
+
+.selected-plan-yearly {
+  font-size: 0.8125rem;
+  color: #6b7280;
+
+  .yearly-discount {
+    color: #22c55e;
+    font-weight: 600;
+  }
+}
+
+.selected-plan-features {
+  .features-title {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+
+  .features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.375rem 1rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.75rem;
+      color: #374151;
+      opacity: 0;
+      animation: benefitEntry 0.25s ease-out forwards;
+
+      lucide-icon {
+        color: #22c55e;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+// Footer button variant
+.btn-primary--confirm {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+  }
+}
+
+.view-all-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border: none;
+  background: none;
+  color: #9ca3af;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: #6366f1;
+  }
+}
+
+// ============================================
+// LIMIT VIEW - Footer
+// ============================================
+.upgrade-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem 1rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #374151;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  }
+}
+
+// ============================================
+// COMPARISON VIEW - Header
+// ============================================
+.comparison-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.back-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+}
+
+.comparison-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  flex: 1;
+}
+
+// ============================================
+// COMPARISON VIEW - Content
+// ============================================
+.comparison-content {
+  padding: 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.comparison-card {
+  position: relative;
+  padding: 1.25rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: cardEntry 0.4s ease-out forwards;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  &--current {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.05);
+  }
+
+  &--popular {
+    border-color: #6366f1;
+    border-width: 2px;
+  }
+}
+
+.popular-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.current-badge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  padding: 0.25rem 0.75rem;
+  background: #22c55e;
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 20px;
+}
+
+.card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  text-align: center;
+}
+
+.card-description {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+  text-align: center;
+}
+
+.card-price {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.price-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.price-period {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.card-yearly {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+}
+
+.yearly-save {
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  flex: 1;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0;
+    font-size: 0.75rem;
+    color: #374151;
+
+    lucide-icon {
+      color: #22c55e;
+      flex-shrink: 0;
+    }
+  }
+
+  .more-features {
+    color: #6366f1;
+    font-weight: 500;
+    justify-content: center;
+    font-style: italic;
+  }
+}
+
+.card-btn {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  &--primary {
+    border: none;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+  }
+}
+
+// ============================================
+// COMPARISON VIEW - Footer
+// ============================================
+.comparison-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.btn-link {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  color: #6366f1;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: #4f46e5;
+  }
+}
+
+// ============================================
+// SKELETON LOADERS
+// ============================================
+.skeleton-card {
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      #e5e7eb 0%,
+      #f3f4f6 50%,
+      #e5e7eb 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 4px;
+  }
+
+  // Limit view skeletons
+  .skeleton--label {
+    width: 80%;
+    height: 12px;
+    margin: 0 auto 6px;
+  }
+
+  .skeleton--name {
+    width: 60%;
+    height: 18px;
+    margin: 0 auto 6px;
+  }
+
+  .skeleton--limit {
+    width: 50%;
+    height: 14px;
+    margin: 0 auto;
+  }
+
+  .skeleton--price {
+    width: 70%;
+    height: 14px;
+    margin: 8px auto 0;
+  }
+
+  // Comparison view skeletons
+  .skeleton--card-name {
+    width: 70%;
+    height: 20px;
+    margin: 0 auto 8px;
+  }
+
+  .skeleton--card-desc {
+    width: 90%;
+    height: 14px;
+    margin: 0 auto 12px;
+  }
+
+  .skeleton--card-price {
+    width: 60%;
+    height: 28px;
+    margin: 0 auto 4px;
+  }
+
+  .skeleton--card-yearly {
+    width: 80%;
+    height: 12px;
+    margin: 0 auto 16px;
+  }
+
+  .skeleton-features {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .skeleton--feature {
+    width: 100%;
+    height: 16px;
+  }
+
+  .skeleton--card-btn {
+    width: 100%;
+    height: 38px;
+    margin-top: auto;
+  }
+}
+
+// Spinner animation
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// Fade in for loaded content
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// REDUCED MOTION SUPPORT (A11y)
+// ============================================
+@media (prefers-reduced-motion: reduce) {
+  .dialog-backdrop,
+  .dialog-panel,
+  .comparison-card,
+  .benefit-item,
+  .benefits-list {
+    animation: none;
+  }
+
+  .plan-card,
+  .comparison-card,
+  .btn-primary,
+  .card-btn,
+  .skeleton,
+  .spin {
+    animation: none;
+  }
+}
+
+// ============================================
+// RESPONSIVE
+// ============================================
+@media (max-width: 768px) {
+  .dialog-panel--comparison {
+    max-width: 100%;
+    max-height: 90vh;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .comparison-content {
+    padding: 1rem;
+    max-height: calc(90vh - 140px);
+  }
+
+  .comparison-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .btn-secondary {
+      width: 100%;
+    }
+  }
+}

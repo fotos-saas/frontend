@@ -6,5 +6,6 @@
 
 export * from './form.constants';
 export * from './icons.constants';
-export * from './plans.constants';
 export * from './status.constants';
+
+// NOTE: plans.constants.ts removed - use PlansService instead (Single Source of Truth from backend)

@@ -5,3 +5,4 @@ export * from './file-upload.directive';
 export * from './click-outside.directive';
 export * from './lazy-image.directive';
 export * from './stagger-animation.directive';
+export * from './native-drag.directive';

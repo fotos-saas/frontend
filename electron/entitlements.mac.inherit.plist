@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Inherited entitlements for child processes and helper apps -->
+
+    <!-- Hardened Runtime: Allow JIT compilation -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+
+    <!-- Hardened Runtime: Allow unsigned executable memory -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+
+    <!-- Hardened Runtime: Allow DYLD environment variables -->
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
+
+    <!-- Hardened Runtime: Disable library validation -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+
+    <!-- Network: Allow outgoing network connections -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!-- File Access: Allow reading/writing user-selected files -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+</dict>
+</plist>

@@ -171,6 +171,26 @@
           </button>
         </form>
 
+        <!-- Biometric login button -->
+        @if (biometricAvailable()) {
+          <div class="login-page__biometric mt-6 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              (click)="onBiometricLogin()"
+              [disabled]="biometricLoading()"
+              class="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            >
+              @if (biometricLoading()) {
+                <span class="login-page__spinner"></span>
+                <span>Azonosítás...</span>
+              } @else {
+                <lucide-icon [name]="biometricService.biometryIcon()" [size]="20" />
+                <span>Bejelentkezés {{ biometricService.biometryName() }}-dal</span>
+              }
+            </button>
+          </div>
+        }
+
         <!-- Registration link -->
         @if (registrationEnabled()) {
           <div class="login-page__footer mt-6 pt-6 border-t border-gray-200 text-center">

@@ -4,16 +4,15 @@ import {
   ProjectDetailData,
   PROJECT_DETAIL_SERVICE,
   PROJECT_BACK_ROUTE,
-  PROJECT_QR_MODAL_COMPONENT,
   PROJECT_CONTACT_MODAL_COMPONENT,
 } from '../../../shared/components/project-detail';
 import { MarketerService, ProjectDetails } from '../services/marketer.service';
-import { QrCodeModalComponent } from '../components/qr-code-modal.component';
 import { ContactEditorModalComponent } from '../components/contact-editor-modal.component';
 
 /**
  * Marketer Project Detail - Smart wrapper komponens.
  * Service inject és modal kezelés a közös wrapper-ben.
+ * QR Modal: SharedQrCodeModalComponent (automatikusan a wrapper-ben)
  */
 @Component({
   selector: 'app-project-detail',
@@ -22,7 +21,6 @@ import { ContactEditorModalComponent } from '../components/contact-editor-modal.
   providers: [
     { provide: PROJECT_DETAIL_SERVICE, useExisting: MarketerService },
     { provide: PROJECT_BACK_ROUTE, useValue: '/marketer/projects' },
-    { provide: PROJECT_QR_MODAL_COMPONENT, useValue: QrCodeModalComponent },
     { provide: PROJECT_CONTACT_MODAL_COMPONENT, useValue: ContactEditorModalComponent },
   ],
   template: `<app-project-detail-wrapper [mapToDetailData]="mapProject" />`,

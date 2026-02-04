@@ -1,18 +1,18 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, output, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
-import { MarketerService, QrCode } from '../services/marketer.service';
-import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { ICONS } from '../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../shared/utils/dialog.util';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '../confirm-dialog/confirm-dialog.component';
+import { ICONS } from '../../constants/icons.constants';
+import { createBackdropHandler } from '../../utils/dialog.util';
+import { QrCode, IQrCodeService } from '../../interfaces/qr-code.interface';
 
 /**
- * QR Code Modal - QR kód megjelenítése és generálása.
- * Modern Tailwind design - "Új bejegyzés" modal stílusban.
+ * Shared QR Code Modal - QR kód megjelenítése és kezelése.
+ * Partner és Marketer modulok közös komponense.
  */
 @Component({
-  selector: 'app-qr-code-modal',
+  selector: 'app-shared-qr-code-modal',
   standalone: true,
   imports: [CommonModule, LucideAngularModule, ConfirmDialogComponent],
   template: `
@@ -22,7 +22,6 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
       (click)="backdropHandler.onClick($event)"
     >
       <div class="dialog-panel dialog-panel--md relative" (click)="$event.stopPropagation()">
-        <!-- Close button - jobb felső sarok -->
         <button
           type="button"
           class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-500 hover:text-gray-700 transition-colors z-10"
@@ -31,13 +30,11 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
 
         <div class="p-6">
           @if (loading()) {
-            <!-- Loading -->
             <div class="text-center py-12">
               <div class="w-10 h-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin mx-auto"></div>
               <p class="mt-4 text-gray-500">Betöltés...</p>
             </div>
           } @else if (qrCode()) {
-            <!-- Header: ikon + cím középen -->
             <div class="text-center mb-6">
               <div class="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg text-white">
                 <lucide-icon [name]="ICONS.QR_CODE" [size]="32" />
@@ -46,9 +43,8 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
               <p class="text-gray-500 text-sm mt-1">Oszd meg a regisztrációs linket</p>
             </div>
 
-            <!-- QR kód kép -->
             <div class="flex justify-center mb-6">
-              <div class="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-sm">
+              <div class="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-sm relative">
                 <div class="relative w-48 h-48">
                   @if (imageLoading()) {
                     <div class="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg">
@@ -67,10 +63,14 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
                 <div class="text-center mt-3">
                   <code class="text-xl font-bold font-mono tracking-wider text-gray-900">{{ qrCode()!.code }}</code>
                 </div>
+                <button
+                  class="absolute bottom-2 right-2 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
+                  matTooltip="Nyomtatás"
+                  (click)="printQrCode()"
+                ><lucide-icon [name]="ICONS.PRINTER" [size]="16" /></button>
               </div>
             </div>
 
-            <!-- Info táblázat -->
             <div class="bg-gray-50 rounded-xl p-4 mb-4 space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-500">Kód</span>
@@ -111,7 +111,6 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
               </div>
             </div>
 
-            <!-- Regisztrációs link -->
             <div class="mb-6">
               <label class="block text-sm text-gray-500 mb-2">Regisztrációs link</label>
               <div class="flex gap-2">
@@ -128,40 +127,37 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
               </div>
             </div>
 
-            <!-- Akció gombok -->
-            <div class="flex flex-col gap-3">
-              <div class="flex gap-3">
-                <button
-                  class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
-                  (click)="printQrCode()"
-                >
-                  <lucide-icon [name]="ICONS.PRINTER" [size]="18" />
-                  Nyomtatás
-                </button>
-                <button
-                  class="flex-1 px-4 py-3 bg-primary hover:bg-primary-dark text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
-                  (click)="generateNewQrCode()"
-                >
-                  <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
-                  Új kód
-                </button>
-              </div>
+            <div class="flex gap-3 mb-3">
               <button
-                class="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 border border-red-200"
+                class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                (click)="close.emit()"
+              >
+                Bezárás
+              </button>
+              <button
+                class="flex-1 px-4 py-3 bg-primary hover:bg-primary-dark text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                (click)="generateNewQrCode()"
+              >
+                <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
+                Új kód
+              </button>
+            </div>
+
+            <div class="text-center">
+              <button
+                class="px-3 py-2 text-red-500 hover:text-red-700 text-sm font-medium transition-colors inline-flex items-center gap-1.5"
                 (click)="confirmDeactivate()"
                 [disabled]="deactivating()"
               >
                 @if (deactivating()) {
                   <span class="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin"></span>
-                  Inaktiválás...
                 } @else {
-                  <lucide-icon [name]="ICONS.BAN" [size]="18" />
-                  QR kód inaktiválása
+                  <lucide-icon [name]="ICONS.BAN" [size]="14" />
                 }
+                QR kód inaktiválása
               </button>
             </div>
           } @else {
-            <!-- Nincs QR kód -->
             <div class="text-center py-8">
               <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-400">
                 <lucide-icon [name]="ICONS.QR_CODE" [size]="32" />
@@ -187,7 +183,6 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
       </div>
     </div>
 
-    <!-- Inaktiválás megerősítő dialog -->
     @if (showDeactivateConfirm()) {
       <app-confirm-dialog
         [title]="'QR kód inaktiválása'"
@@ -199,22 +194,27 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
       />
     }
   `,
-  styles: [``],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class QrCodeModalComponent implements OnInit, OnDestroy {
-  /** Ikon konstansok template-hez */
+export class SharedQrCodeModalComponent implements OnInit, OnDestroy {
   readonly ICONS = ICONS;
+  backdropHandler = createBackdropHandler(() => this.close.emit());
 
-  /** Backdrop handler a kijelölés közbeni bezárás megelőzéséhez */
-  readonly backdropHandler = createBackdropHandler(() => this.close.emit());
+  /** Input: projekt azonosító */
+  projectId = input.required<number>();
 
-  @Input({ required: true }) projectId!: number;
-  @Input() projectName = '';
-  @Output() close = new EventEmitter<void>();
-  @Output() qrCodeChanged = new EventEmitter<QrCode | null>();
+  /** Input: projekt neve (nyomtatáshoz) */
+  projectName = input<string>('');
 
-  private marketerService = inject(MarketerService);
+  /** Input: QR service (Partner vagy Marketer) */
+  qrService = input.required<IQrCodeService>();
+
+  /** Output: bezárás */
+  close = output<void>();
+
+  /** Output: QR kód változás */
+  qrCodeChanged = output<QrCode | null>();
+
   private destroyRef = inject(DestroyRef);
 
   loading = signal(true);
@@ -226,11 +226,8 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
   showDeactivateConfirm = signal(false);
   imageLoading = signal(true);
 
-  /** Timeout ID-k cleanup-hoz */
   private copyTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private linkCopyTimeoutId: ReturnType<typeof setTimeout> | null = null;
-
-  /** Generálás folyamatban flag - dupla kattintás ellen */
   private isGenerating = false;
 
   ngOnInit(): void {
@@ -238,13 +235,8 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Timeout cleanup
-    if (this.copyTimeoutId) {
-      clearTimeout(this.copyTimeoutId);
-    }
-    if (this.linkCopyTimeoutId) {
-      clearTimeout(this.linkCopyTimeoutId);
-    }
+    if (this.copyTimeoutId) clearTimeout(this.copyTimeoutId);
+    if (this.linkCopyTimeoutId) clearTimeout(this.linkCopyTimeoutId);
   }
 
   private loadQrCode(): void {
@@ -252,15 +244,11 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.imageLoading.set(true);
 
-    this.marketerService.getProjectQrCode(this.projectId).pipe(
+    this.qrService().getProjectQrCode(this.projectId()).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (response) => {
-        if (response.hasQrCode && response.qrCode) {
-          this.qrCode.set(response.qrCode);
-        } else {
-          this.qrCode.set(null);
-        }
+        this.qrCode.set(response.hasQrCode && response.qrCode ? response.qrCode : null);
         this.loading.set(false);
       },
       error: () => {
@@ -271,14 +259,12 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
   }
 
   generateNewQrCode(): void {
-    // Dupla kattintás elleni védelem
     if (this.isGenerating) return;
     this.isGenerating = true;
-
     this.loading.set(true);
     this.error.set(null);
 
-    this.marketerService.generateQrCode(this.projectId).pipe(
+    this.qrService().generateQrCode(this.projectId()).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (response) => {
@@ -296,7 +282,6 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
   }
 
   getQrCodeImageUrl(code: string): string {
-    // QR kód generálás QR Server API-val (ingyenes, működő megoldás)
     const url = encodeURIComponent(this.qrCode()?.registrationUrl ?? '');
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${url}`;
   }
@@ -306,7 +291,6 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
   }
 
   onImageError(event: Event): void {
-    // Ha nem sikerül a kép betöltése, placeholder-t mutatunk
     this.imageLoading.set(false);
     (event.target as HTMLImageElement).style.display = 'none';
   }
@@ -328,21 +312,19 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
   }
 
   printQrCode(): void {
-    // Egyszerű nyomtatás - a natív print dialog használata
     const qrCodeData = this.qrCode();
     if (!qrCodeData) return;
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    // Biztonságos DOM manipuláció document.write helyett
     const doc = printWindow.document;
     doc.open();
 
     const html = doc.createElement('html');
     const head = doc.createElement('head');
     const title = doc.createElement('title');
-    title.textContent = `QR Kód - ${this.projectName}`;
+    title.textContent = `QR Kód - ${this.projectName()}`;
     head.appendChild(title);
 
     const style = doc.createElement('style');
@@ -363,7 +345,7 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
     const body = doc.createElement('body');
 
     const h1 = doc.createElement('h1');
-    h1.textContent = this.projectName;
+    h1.textContent = this.projectName();
     body.appendChild(h1);
 
     const img = doc.createElement('img');
@@ -385,7 +367,6 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
     doc.appendChild(html);
     doc.close();
 
-    // Nyomtatás indítása a kép betöltése után
     img.onload = () => printWindow.print();
   }
 
@@ -417,7 +398,7 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
     this.deactivating.set(true);
     this.error.set(null);
 
-    this.marketerService.deactivateQrCode(this.projectId).pipe(
+    this.qrService().deactivateQrCode(this.projectId()).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: () => {
@@ -433,5 +414,4 @@ export class QrCodeModalComponent implements OnInit, OnDestroy {
       }
     });
   }
-
 }

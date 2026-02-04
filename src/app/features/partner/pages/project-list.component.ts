@@ -8,7 +8,8 @@ import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } fro
 import { ProjectCardComponent } from '../components/project-card.component';
 import { PersonsModalComponent } from '../components/persons-modal';
 import { CreateProjectModalComponent } from '../components/create-project-modal.component';
-import { QrCodeModalComponent } from '../components/qr-code-modal.component';
+import { SharedQrCodeModalComponent } from '../../../shared/components/qr-code-modal/qr-code-modal.component';
+import { IQrCodeService } from '../../../shared/interfaces/qr-code.interface';
 import { PhotoUploadWizardComponent } from '../components/photo-upload-wizard/photo-upload-wizard.component';
 import { SamplesLightboxComponent, SampleLightboxItem } from '../../../shared/components/samples-lightbox';
 import { ExpandableFiltersComponent, FilterConfig, FilterChangeEvent } from '../../../shared/components/expandable-filters';
@@ -30,7 +31,7 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
     ProjectCardComponent,
     PersonsModalComponent,
     CreateProjectModalComponent,
-    QrCodeModalComponent,
+    SharedQrCodeModalComponent,
     PhotoUploadWizardComponent,
     SamplesLightboxComponent,
     ExpandableFiltersComponent,
@@ -264,9 +265,10 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
 
     <!-- QR Code Modal -->
     @if (showQrModal()) {
-      <app-qr-code-modal
+      <app-shared-qr-code-modal
         [projectId]="selectedProject()!.id"
         [projectName]="selectedProject()!.name"
+        [qrService]="qrService"
         (close)="closeQrModal()"
         (qrCodeChanged)="onQrCodeChanged()"
       />
@@ -750,6 +752,9 @@ export class PartnerProjectListComponent implements OnInit {
 
   /** ICONS konstansok */
   readonly ICONS = ICONS;
+
+  /** QR Service interface a shared modalhoz */
+  readonly qrService: IQrCodeService = this.partnerService;
 
   // Filter state - központosított perzisztencia rendszerrel
   readonly filterState = useFilterState({

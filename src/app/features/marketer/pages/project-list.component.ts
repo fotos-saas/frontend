@@ -5,7 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MarketerService, ProjectListItem, PaginatedResponse } from '../services/marketer.service';
-import { QrCodeModalComponent } from '../components/qr-code-modal.component';
+import { SharedQrCodeModalComponent } from '../../../shared/components/qr-code-modal/qr-code-modal.component';
+import { IQrCodeService } from '../../../shared/interfaces/qr-code.interface';
 import { QrButtonComponent, AddButtonComponent } from '../../../shared/components/action-buttons';
 import { ICONS } from '../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter-state';
@@ -16,7 +17,7 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LucideAngularModule, QrCodeModalComponent, QrButtonComponent, AddButtonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, LucideAngularModule, SharedQrCodeModalComponent, QrButtonComponent, AddButtonComponent],
   template: `
     <div class="project-list-page page-card">
       <header class="page-header">
@@ -147,9 +148,10 @@ import { useFilterState, FilterStateApi } from '../../../shared/utils/use-filter
 
     <!-- QR Code Modal -->
     @if (showQrModal()) {
-      <app-qr-code-modal
+      <app-shared-qr-code-modal
         [projectId]="selectedProjectId()!"
         [projectName]="selectedProjectName()"
+        [qrService]="qrService"
         (close)="closeQrModal()"
         (qrCodeChanged)="onQrCodeChanged()"
       />
@@ -566,6 +568,9 @@ export class ProjectListComponent implements OnInit {
 
   /** ICONS konstansok a template-hez */
   readonly ICONS = ICONS;
+
+  /** QR Service interface a shared modalhoz */
+  readonly qrService: IQrCodeService = this.marketerService;
 
   // Filter state - központosított perzisztencia rendszerrel
   readonly filterState = useFilterState({

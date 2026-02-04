@@ -27,6 +27,8 @@ import {
   ProjectDataMapper,
 } from './project-detail.tokens';
 import { ICONS } from '../../constants/icons.constants';
+import { SharedQrCodeModalComponent } from '../qr-code-modal/qr-code-modal.component';
+import { IQrCodeService } from '../../interfaces/qr-code.interface';
 
 /**
  * Generikus Project Detail Wrapper - közös smart wrapper komponens.
@@ -142,7 +144,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private router = inject(Router);
   private projectService = inject(PROJECT_DETAIL_SERVICE);
   private backRoute = inject(PROJECT_BACK_ROUTE);
-  private qrModalComponent = inject(PROJECT_QR_MODAL_COMPONENT);
+  private qrModalComponent = inject(PROJECT_QR_MODAL_COMPONENT, { optional: true });
   private contactModalComponent = inject(PROJECT_CONTACT_MODAL_COMPONENT);
   private projectEditModalComponent = inject(PROJECT_EDIT_MODAL_COMPONENT, { optional: true });
   private destroyRef = inject(DestroyRef);
@@ -216,16 +218,19 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     if (!project) return;
 
     container.clear();
-    this.qrModalRef = container.createComponent(this.qrModalComponent);
 
-    // Set inputs
+    // Shared QR modal komponens használata - a projectService implementálja az IQrCodeService-t
+    this.qrModalRef = container.createComponent(SharedQrCodeModalComponent);
+
+    // Set inputs - Angular 17+ signal inputs
     const projectData = this.projectData();
-    this.qrModalRef.instance.projectId = projectData?.id;
-    this.qrModalRef.instance.projectName = projectData?.name ?? '';
+    this.qrModalRef.setInput('projectId', projectData?.id);
+    this.qrModalRef.setInput('projectName', projectData?.name ?? '');
+    this.qrModalRef.setInput('qrService', this.projectService as unknown as IQrCodeService);
 
     // Subscribe to outputs
-    this.qrModalRef.instance.close?.subscribe(() => this.closeQrModal());
-    this.qrModalRef.instance.qrCodeChanged?.subscribe((qr: QrCode | null) => this.onQrCodeChanged(qr));
+    this.qrModalRef.instance.close.subscribe(() => this.closeQrModal());
+    this.qrModalRef.instance.qrCodeChanged.subscribe((qr: QrCode | null) => this.onQrCodeChanged(qr));
 
     this.showQrModal.set(true);
   }

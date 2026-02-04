@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData, ProjectContact, QrCode } from './project-detail.types';
 import {
   BackButtonComponent,
@@ -22,6 +23,7 @@ import { ICONS } from '../../constants/icons.constants';
   imports: [
     CommonModule,
     LucideAngularModule,
+    MatTooltipModule,
     BackButtonComponent,
     QrButtonComponent,
     AddButtonComponent,
@@ -36,105 +38,169 @@ import { ICONS } from '../../constants/icons.constants';
       </div>
     } @else if (project()) {
       <!-- Hero Header -->
-      <header class="relative mb-6">
-        <div class="flex items-start justify-between">
+      <header class="relative mb-8">
+        <!-- Top Bar -->
+        <div class="flex items-center justify-between mb-6">
           <app-back-button
             [label]="'Vissza'"
             [display]="'icon-text'"
             (clicked)="back.emit()"
           />
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1">
             <button
-              class="p-2 text-gray-500 hover:text-primary hover:bg-primary-50 rounded-lg transition-colors"
+              class="p-2.5 text-gray-400 hover:text-primary hover:bg-primary-50 rounded-xl transition-all"
               (click)="editProject.emit()"
-              title="Projekt szerkesztése"
+              matTooltip="Projekt szerkesztése"
             >
               <lucide-icon [name]="ICONS.EDIT" [size]="18" />
             </button>
             <button
-              class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              class="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
               (click)="deleteProject.emit()"
-              title="Projekt törlése"
+              matTooltip="Projekt törlése"
             >
               <lucide-icon [name]="ICONS.DELETE" [size]="18" />
             </button>
           </div>
         </div>
-        <div class="mt-4 text-center">
-          <h1 class="text-2xl font-bold text-gray-900">{{ project()!.school?.name ?? 'Ismeretlen iskola' }}</h1>
-          <p class="mt-1 text-gray-500 flex items-center justify-center gap-1">
-            <lucide-icon [name]="ICONS.MAP_PIN" [size]="14" class="inline-flex" />
-            {{ project()!.school?.city ?? '' }}
-            <span class="mx-2">·</span>
-            <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="14" class="inline-flex" />
-            {{ project()!.className ?? '-' }} {{ project()!.classYear ? '(' + project()!.classYear + ')' : '' }}
-          </p>
+        <!-- Hero Card - Clean version -->
+        <div class="text-center py-2">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ project()!.school?.name ?? 'Ismeretlen iskola' }}</h1>
+          <div class="flex items-center justify-center gap-4 text-sm text-gray-500">
+            <span class="flex items-center gap-1.5">
+              <lucide-icon [name]="ICONS.MAP_PIN" [size]="14" class="text-gray-400" />
+              {{ project()!.school?.city ?? 'Nincs megadva' }}
+            </span>
+            <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+            <span class="flex items-center gap-1.5">
+              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="14" class="text-gray-400" />
+              {{ project()!.className ?? '-' }}
+              @if (project()!.classYear) {
+                <span class="text-gray-400">({{ project()!.classYear }})</span>
+              }
+            </span>
+          </div>
         </div>
       </header>
 
-      <!-- Two Column Layout -->
-      <div class="grid md:grid-cols-2 gap-4 mb-4">
-        <!-- Kapcsolattartók -->
-        <section class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="font-semibold text-gray-900 flex items-center gap-2">
-              <span class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                <lucide-icon [name]="ICONS.PHONE" [size]="16" class="text-primary" />
-              </span>
-              Kapcsolattartók
-            </h2>
-            <app-add-button
-              [label]="'Új'"
-              [variant]="'compact'"
-              (clicked)="openContactModal.emit(null)"
-            />
+      <!-- QR Kód - kompakt sor -->
+      <section class="mb-6">
+        @if (project()!.qrCode) {
+          <!-- Van QR kód - kompakt megjelenítés -->
+          <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl">
+            <div class="flex items-center gap-4">
+              <img
+                [src]="getQrCodeImageUrl(project()!.qrCode!.registrationUrl)"
+                [alt]="'QR kód: ' + project()!.qrCode!.code"
+                class="w-14 h-14 rounded-lg border border-gray-200"
+              />
+              <div>
+                <div class="flex items-center gap-2">
+                  <code class="px-3 py-1 bg-gray-900 text-white text-sm font-mono font-bold tracking-wider rounded-lg">
+                    {{ project()!.qrCode!.code }}
+                  </code>
+                  @if (project()!.qrCode!.isValid) {
+                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">Aktív</span>
+                  } @else {
+                    <span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">Inaktív</span>
+                  }
+                </div>
+                <p class="text-sm text-gray-500 mt-1">{{ project()!.qrCode!.usageCount }}× használva</p>
+              </div>
+            </div>
+            <button
+              class="px-4 py-2 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors"
+              (click)="openQrModal.emit()"
+            >
+              Részletek
+            </button>
           </div>
+        } @else {
+          <!-- Nincs QR kód - egyszerű generálás sor -->
+          <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
+            <div class="flex items-center gap-3">
+              <lucide-icon [name]="ICONS.QR_CODE" [size]="20" class="text-gray-400" />
+              <span class="text-sm text-gray-500">Nincs QR kód generálva</span>
+            </div>
+            <button
+              class="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+              (click)="openQrModal.emit()"
+            >
+              <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+              Generálás
+            </button>
+          </div>
+        }
+      </section>
+
+      <!-- Kapcsolattartók -->
+      <section class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <!-- Section Header -->
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 class="font-semibold text-gray-900">Kapcsolattartók</h2>
+          <app-add-button
+            [label]="'Új'"
+            [variant]="'compact'"
+            (clicked)="openContactModal.emit(null)"
+          />
+        </div>
+        <!-- Contact List -->
+        <div class="p-4">
           @if (project()!.contacts && project()!.contacts.length > 0) {
             <div class="space-y-2">
-              @for (contact of project()!.contacts; track contact.id) {
+              @for (contact of project()!.contacts; track contact.id; let i = $index) {
                 <div
-                  class="group bg-white rounded-lg p-3 border border-gray-100 hover:border-primary-200 hover:shadow-sm transition-all"
-                  [class.border-primary-300]="contact.isPrimary"
+                  class="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
                   [class.bg-primary-50/50]="contact.isPrimary"
+                  [style.animation-delay]="i * 0.03 + 's'"
                 >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <span class="font-medium text-gray-900">{{ contact.name }}</span>
-                      @if (contact.isPrimary) {
-                        <span class="px-2 py-0.5 bg-primary text-white text-[10px] font-semibold rounded-full">FŐ</span>
-                      }
+                  <div class="flex items-center gap-3">
+                    <!-- Avatar -->
+                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0">
+                      {{ getInitials(contact.name) }}
                     </div>
-                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <app-edit-button
-                        [display]="'icon-only'"
-                        (clicked)="openContactModal.emit(contact)"
-                      />
-                      <app-delete-button
-                        [display]="'icon-only'"
-                        (clicked)="deleteContact.emit(contact)"
-                      />
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium text-gray-900">{{ contact.name }}</span>
+                        @if (contact.isPrimary) {
+                          <span class="px-1.5 py-0.5 bg-primary text-white text-[10px] font-bold rounded">FŐ</span>
+                        }
+                      </div>
+                      <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-sm text-gray-500">
+                        @if (contact.email) {
+                          <a [href]="'mailto:' + contact.email" class="hover:text-primary transition-colors flex items-center gap-1">
+                            <lucide-icon [name]="ICONS.MAIL" [size]="12" />
+                            {{ contact.email }}
+                          </a>
+                        }
+                        @if (contact.phone) {
+                          <a [href]="'tel:' + contact.phone" class="hover:text-primary transition-colors flex items-center gap-1">
+                            <lucide-icon [name]="ICONS.PHONE" [size]="12" />
+                            {{ contact.phone }}
+                          </a>
+                        }
+                      </div>
                     </div>
                   </div>
-                  <div class="mt-1 flex flex-wrap gap-3 text-sm text-gray-600">
-                    @if (contact.email) {
-                      <a [href]="'mailto:' + contact.email" class="hover:text-primary transition-colors flex items-center gap-1">
-                        <lucide-icon [name]="ICONS.MAIL" [size]="14" />
-                        {{ contact.email }}
-                      </a>
-                    }
-                    @if (contact.phone) {
-                      <a [href]="'tel:' + contact.phone" class="hover:text-primary transition-colors flex items-center gap-1">
-                        <lucide-icon [name]="ICONS.SMARTPHONE" [size]="14" />
-                        {{ contact.phone }}
-                      </a>
-                    }
+                  <!-- Actions -->
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    <app-edit-button
+                      [display]="'icon-only'"
+                      (clicked)="openContactModal.emit(contact)"
+                    />
+                    <app-delete-button
+                      [display]="'icon-only'"
+                      (clicked)="deleteContact.emit(contact)"
+                    />
                   </div>
                 </div>
               }
             </div>
           } @else {
-            <div class="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-              <p class="text-gray-400 mb-3">Még nincs kapcsolattartó</p>
+            <!-- Empty State -->
+            <div class="text-center py-8">
+              <lucide-icon [name]="ICONS.USER_PLUS" [size]="32" class="text-gray-300 mx-auto mb-3" />
+              <p class="text-sm text-gray-500 mb-3">Még nincs kapcsolattartó</p>
               <app-add-button
                 [label]="'Hozzáadás'"
                 [variant]="'primary'"
@@ -142,100 +208,44 @@ import { ICONS } from '../../constants/icons.constants';
               />
             </div>
           }
-        </section>
-
-        <!-- QR Kód -->
-        <section class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
-          <h2 class="font-semibold text-gray-900 flex items-center gap-2 mb-3">
-            <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <lucide-icon [name]="ICONS.QR_CODE" [size]="16" class="text-green-600" />
-            </span>
-            QR Kód
-          </h2>
-          @if (project()!.qrCode) {
-            <div class="bg-white rounded-lg p-4 border border-gray-100">
-              <!-- QR kód kép + kód -->
-              <div class="flex flex-col items-center gap-3">
-                <!-- QR kód kép -->
-                <img
-                  [src]="getQrCodeImageUrl(project()!.qrCode!.registrationUrl)"
-                  [alt]="'QR kód: ' + project()!.qrCode!.code"
-                  class="w-20 h-20 rounded-lg border border-gray-200"
-                />
-                <!-- Kód -->
-                <code class="px-4 py-2 bg-gray-900 text-white text-base font-mono font-bold tracking-wider rounded-lg">
-                  {{ project()!.qrCode!.code }}
-                </code>
-                <!-- Infók -->
-                <div class="flex flex-wrap justify-center items-center gap-2 text-sm">
-                  <span class="text-gray-600">
-                    Használat: <span class="font-semibold text-gray-900">{{ project()!.qrCode!.usageCount }}</span>
-                  </span>
-                  @if (project()!.qrCode!.isValid) {
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
-                      <lucide-icon [name]="ICONS.CHECK" [size]="12" /> Aktív
-                    </span>
-                  } @else {
-                    <span class="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
-                      <lucide-icon [name]="ICONS.X" [size]="12" /> Inaktív
-                    </span>
-                  }
-                </div>
-              </div>
-              <button
-                class="mt-3 w-full text-primary hover:text-primary-dark text-sm font-medium"
-                (click)="openQrModal.emit()"
-              >Részletek megtekintése →</button>
-            </div>
-          } @else {
-            <div class="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-              <p class="text-gray-400 mb-3">Nincs aktív QR kód</p>
-              <app-add-button
-                [label]="'Generálás'"
-                [variant]="'primary'"
-                (clicked)="openQrModal.emit()"
-              />
-            </div>
-          }
-        </section>
-      </div>
+        </div>
+      </section>
 
       <!-- QR History -->
       @if (project()!.qrCodesHistory && project()!.qrCodesHistory.length > 0) {
-        <section class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm mb-4">
-          <h2 class="font-semibold text-gray-900 flex items-center gap-2 mb-3">
-            <span class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
-              <lucide-icon [name]="ICONS.HISTORY" [size]="16" class="text-amber-600" />
-            </span>
-            QR Kód előzmények
-          </h2>
-          <div class="space-y-2">
+        <section class="mt-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="font-semibold text-gray-900">QR Kód előzmények</h2>
+            <span class="text-xs text-gray-400">{{ project()!.qrCodesHistory.length }} kód</span>
+          </div>
+          <div class="divide-y divide-gray-100">
             @for (qr of project()!.qrCodesHistory; track qr.id) {
-              <div
-                class="px-3 py-2 rounded-lg text-sm"
-                [class.bg-green-50]="qr.isActive"
-                [class.bg-gray-50]="!qr.isActive"
-              >
-                <div class="flex items-center justify-between gap-2">
-                  <code class="font-mono font-bold text-gray-900">{{ qr.code }}</code>
-                  @if (qr.isActive) {
-                    <span class="px-2 py-0.5 bg-green-600 text-white text-xs font-semibold rounded-full">Aktív</span>
-                  }
+              <div class="flex items-center justify-between px-5 py-3">
+                <div class="flex items-center gap-3">
+                  <code class="font-mono font-semibold text-gray-900">{{ qr.code }}</code>
+                  <span class="text-sm text-gray-500">{{ qr.usageCount }}× · {{ formatDateTime(qr.createdAt) }}</span>
                 </div>
-                <div class="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                  <span>{{ qr.usageCount }}× használat</span>
-                  <span>{{ formatDateTime(qr.createdAt) }}</span>
-                </div>
+                @if (qr.isActive) {
+                  <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">Aktív</span>
+                }
               </div>
             }
           </div>
         </section>
       }
 
-      <!-- Meta -->
-      <footer class="flex justify-center gap-6 pt-4 text-xs text-gray-400">
-        <span>Létrehozva: {{ formatDateTime(project()!.createdAt) }}</span>
-        <span>Módosítva: {{ formatDateTime(project()!.updatedAt) }}</span>
+      <!-- Meta Footer -->
+      <footer class="mt-6 pt-4 border-t border-gray-100">
+        <div class="flex items-center justify-center gap-6 text-xs text-gray-400">
+          <span class="flex items-center gap-1.5">
+            <lucide-icon [name]="ICONS.CALENDAR" [size]="12" />
+            Létrehozva: {{ formatDateTime(project()!.createdAt) }}
+          </span>
+          <span class="flex items-center gap-1.5">
+            <lucide-icon [name]="ICONS.CLOCK" [size]="12" />
+            Módosítva: {{ formatDateTime(project()!.updatedAt) }}
+          </span>
+        </div>
       </footer>
     } @else {
       <div class="text-center py-16">
@@ -286,6 +296,16 @@ export class ProjectDetailViewComponent {
   /** QR kód kép URL generálása */
   getQrCodeImageUrl(registrationUrl: string): string {
     const url = encodeURIComponent(registrationUrl);
-    return `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${url}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
+  }
+
+  /** Név iniciálék lekérése (avatar-hoz) */
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 }

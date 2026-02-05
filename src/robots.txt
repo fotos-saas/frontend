@@ -1,0 +1,8 @@
+# TablóStúdió App - robots.txt
+# Az alkalmazás nem publikus tartalom, nem indexelendő.
+
+User-agent: *
+Disallow: /
+
+# API route-ok blokkolása
+Disallow: /api/

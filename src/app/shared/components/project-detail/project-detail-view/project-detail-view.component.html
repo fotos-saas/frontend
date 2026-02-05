@@ -69,7 +69,7 @@
               {{ project()!.draftPhotoCount }} kép vár
             </span>
           }
-          @if (project()!.finalizedAt) {
+          @if (project()!.finalizedAt && !isMarketer()) {
             <span
               class="detail-badge detail-badge--green"
               [matTooltip]="'Tablóterv leadva: ' + formatDate(project()!.finalizedAt!)"
@@ -132,6 +132,30 @@
       </div>
     }
   </section>
+
+  <!-- Megrendelési adatok - kompakt sor (csak ha leadva van ÉS nem marketinges) -->
+  @if (project()!.finalizedAt && !isMarketer()) {
+    <section class="mb-6">
+      <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="20" class="text-emerald-600" />
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-gray-900">Megrendelési adatok</p>
+            <p class="text-xs text-gray-500">Leadva: {{ formatDate(project()!.finalizedAt!) }}</p>
+          </div>
+        </div>
+        <button
+          class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+          (click)="openOrderData.emit()"
+        >
+          <lucide-icon [name]="ICONS.EYE" [size]="16" />
+          Megtekintés
+        </button>
+      </div>
+    </section>
+  }
 
   <!-- Kapcsolattartók -->
   <section class="bg-white border border-gray-200 rounded-xl overflow-hidden">

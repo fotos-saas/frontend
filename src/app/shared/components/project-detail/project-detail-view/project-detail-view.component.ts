@@ -41,6 +41,7 @@ export class ProjectDetailViewComponent {
   // Inputs - Signal-based (Angular 17+)
   readonly project = input<ProjectDetailData | null>(null);
   readonly loading = input<boolean>(true);
+  readonly isMarketer = input<boolean>(false);
 
   // Outputs - Signal-based (Angular 17+)
   readonly back = output<void>();
@@ -50,6 +51,7 @@ export class ProjectDetailViewComponent {
   readonly qrCodeChanged = output<QrCode | null>();
   readonly editProject = output<void>();
   readonly deleteProject = output<void>();
+  readonly openOrderData = output<void>();
 
   formatDateTime(dateStr: string): string {
     const date = new Date(dateStr);

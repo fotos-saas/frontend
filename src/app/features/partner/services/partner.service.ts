@@ -1077,6 +1077,29 @@ export class PartnerService {
     );
   }
 
+  // ============================================
+  // ORDER DATA
+  // ============================================
+
+  /**
+   * Megrendelési adatok lekérése projekthez (partner view)
+   */
+  getProjectOrderData(projectId: number): Observable<{ success: boolean; data: any; message?: string }> {
+    return this.http.get<{ success: boolean; data: any; message?: string }>(
+      `${this.baseUrl}/projects/${projectId}/order-data`
+    );
+  }
+
+  /**
+   * Megrendelési adatlap PDF generálása (partner view)
+   */
+  viewProjectOrderPdf(projectId: number): Observable<{ success: boolean; pdfUrl?: string; message?: string }> {
+    return this.http.post<{ success: boolean; pdfUrl?: string; message?: string }>(
+      `${this.baseUrl}/projects/${projectId}/order-data/view-pdf`,
+      {}
+    );
+  }
+
   /**
    * Projektek lekérése autocomplete-hez (kapcsolattartó modalhoz)
    */

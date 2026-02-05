@@ -13,6 +13,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
@@ -21,6 +22,7 @@ import {
   PROJECT_QR_MODAL_COMPONENT,
   PROJECT_CONTACT_MODAL_COMPONENT,
   PROJECT_EDIT_MODAL_COMPONENT,
+  PROJECT_ORDER_DATA_DIALOG_COMPONENT,
   IProjectDetailService,
   ProjectDataMapper,
 } from '../project-detail.tokens';
@@ -61,20 +63,24 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   // Injected dependencies
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private authService = inject(AuthService);
   private projectService = inject(PROJECT_DETAIL_SERVICE);
   private backRoute = inject(PROJECT_BACK_ROUTE);
   private qrModalComponent = inject(PROJECT_QR_MODAL_COMPONENT, { optional: true });
   private contactModalComponent = inject(PROJECT_CONTACT_MODAL_COMPONENT);
   private projectEditModalComponent = inject(PROJECT_EDIT_MODAL_COMPONENT, { optional: true });
+  private orderDataDialogComponent = inject(PROJECT_ORDER_DATA_DIALOG_COMPONENT, { optional: true });
   private destroyRef = inject(DestroyRef);
 
   // ViewChild references for dynamic component creation
   private qrModalContainer = viewChild('qrModalContainer', { read: ViewContainerRef });
   private contactModalContainer = viewChild('contactModalContainer', { read: ViewContainerRef });
   private projectEditModalContainer = viewChild('projectEditModalContainer', { read: ViewContainerRef });
+  private orderDataDialogContainer = viewChild('orderDataDialogContainer', { read: ViewContainerRef });
 
   /** ICONS konstansok a template-hez */
   readonly ICONS = ICONS;
+  readonly isMarketer = this.authService.isMarketer;
 
   // State signals
   loading = signal(true);
@@ -99,6 +105,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private qrModalRef: ComponentRef<any> | null = null;
   private contactModalRef: ComponentRef<any> | null = null;
   private projectEditModalRef: ComponentRef<any> | null = null;
+  private orderDataDialogRef: ComponentRef<any> | null = null;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -297,5 +304,27 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
         this.deletingProject.set(false);
       },
     });
+  }
+
+  // Order Data Dialog methods
+  openOrderDataDialog(): void {
+    if (!this.orderDataDialogComponent) return;
+
+    const container = this.orderDataDialogContainer();
+    if (!container) return;
+
+    const projectData = this.projectData();
+    if (!projectData?.id) return;
+
+    container.clear();
+    this.orderDataDialogRef = container.createComponent(this.orderDataDialogComponent);
+
+    this.orderDataDialogRef.setInput('projectId', projectData.id);
+    this.orderDataDialogRef.instance.close?.subscribe(() => this.closeOrderDataDialog());
+  }
+
+  closeOrderDataDialog(): void {
+    this.orderDataDialogRef?.destroy();
+    this.orderDataDialogRef = null;
   }
 }

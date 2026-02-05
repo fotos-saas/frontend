@@ -99,6 +99,7 @@
           (missingClick)="openMissingModal($event)"
           (qrClick)="openQrModal($event)"
           (awareClick)="toggleAware($event)"
+          (orderDataClick)="openOrderDataDialog($event)"
         />
       }
     </div>
@@ -162,3 +163,6 @@
     (qrCodeChanged)="onQrCodeChanged()"
   />
 }
+
+<!-- Order Data Dialog Container -->
+<ng-container #orderDataContainer></ng-container>

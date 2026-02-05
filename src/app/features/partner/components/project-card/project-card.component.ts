@@ -1,7 +1,9 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerProjectListItem } from '../../services/partner.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 /**
@@ -11,13 +13,15 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-partner-project-card',
   standalone: true,
-  imports: [LucideAngularModule, NgClass],
+  imports: [LucideAngularModule, NgClass, MatTooltipModule],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectCardComponent {
   readonly ICONS = ICONS;
+  private authService = inject(AuthService);
+  readonly isMarketer = this.authService.isMarketer;
 
   readonly project = input.required<PartnerProjectListItem>();
 
@@ -26,6 +30,7 @@ export class ProjectCardComponent {
   readonly missingClick = output<PartnerProjectListItem>();
   readonly qrClick = output<PartnerProjectListItem>();
   readonly awareClick = output<PartnerProjectListItem>();
+  readonly orderDataClick = output<PartnerProjectListItem>();
 
   /**
    * Rövidített státusz címke a badge-hez
@@ -110,5 +115,10 @@ export class ProjectCardComponent {
   onAwareClick(event: MouseEvent): void {
     event.stopPropagation();
     this.awareClick.emit(this.project());
+  }
+
+  onOrderDataClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.orderDataClick.emit(this.project());
   }
 }

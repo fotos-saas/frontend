@@ -3,12 +3,14 @@
   <app-project-detail-view
     [project]="projectData()"
     [loading]="loading()"
+    [isMarketer]="isMarketer()"
     (back)="goBack()"
     (openQrModal)="openQrModal()"
     (openContactModal)="openContactModal($event)"
     (deleteContact)="confirmDeleteContact($event)"
     (editProject)="openEditProjectModal()"
     (deleteProject)="confirmDeleteProject()"
+    (openOrderData)="openOrderDataDialog()"
   />
 </div>
 
@@ -20,6 +22,9 @@
 
 <!-- Project Edit Modal container -->
 <ng-container #projectEditModalContainer></ng-container>
+
+<!-- Order Data Dialog container -->
+<ng-container #orderDataDialogContainer></ng-container>
 
 <!-- Delete Contact Confirmation Modal -->
 @if (showDeleteConfirm()) {

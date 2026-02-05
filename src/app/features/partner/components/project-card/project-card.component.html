@@ -28,11 +28,19 @@
           {{ project().draftPhotoCount }}
         </span>
       }
-      @if (project().finalizedAt) {
+      @if (project().finalizedAt && !isMarketer()) {
         <span class="finalized-badge" [title]="'Tablóterv leadva: ' + formatDate(project().finalizedAt!)">
           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
           Leadva
         </span>
+        <button
+          type="button"
+          class="order-data-btn"
+          matTooltip="Megrendelési adatok"
+          (click)="onOrderDataClick($event)"
+        >
+          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="12" />
+        </button>
       }
     </div>
     <span class="school-meta">{{ project().className ?? '-' }} @if (project().classYear) {({{ project().classYear }})} @if (project().contact) { · {{ project().contact!.name }}}</span>

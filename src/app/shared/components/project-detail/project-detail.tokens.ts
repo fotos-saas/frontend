@@ -48,6 +48,12 @@ export const PROJECT_CONTACT_MODAL_COMPONENT = new InjectionToken<Type<any>>('Pr
 export const PROJECT_EDIT_MODAL_COMPONENT = new InjectionToken<Type<any>>('ProjectEditModalComponent');
 
 /**
+ * InjectionToken az Order Data Dialog komponenshez.
+ * Opcionális - csak a partner felület adja meg.
+ */
+export const PROJECT_ORDER_DATA_DIALOG_COMPONENT = new InjectionToken<Type<any>>('ProjectOrderDataDialogComponent');
+
+/**
  * Projekt adat mapping függvény típusa.
  * Feature-specifikus mapping a közös ProjectDetailData típusra.
  */

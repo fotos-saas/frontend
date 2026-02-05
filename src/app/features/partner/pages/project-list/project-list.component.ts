@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild, ComponentRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -18,6 +18,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { ProjectTableHeaderComponent } from './components/project-table-header/project-table-header.component';
 import { ProjectMobileSortComponent, SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
 import { ProjectPaginationComponent } from './components/project-pagination/project-pagination.component';
+import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
 
 /**
  * Partner Project List - Projektek listája a fotós felületen.
@@ -115,6 +116,10 @@ export class PartnerProjectListComponent implements OnInit {
   showQrModal = signal(false);
   showUploadWizard = signal(false);
   selectedProject = signal<PartnerProjectListItem | null>(null);
+
+  // Order Data Dialog
+  private orderDataContainer = viewChild('orderDataContainer', { read: ViewContainerRef });
+  private orderDataRef: ComponentRef<OrderDataDialogComponent> | null = null;
 
   // Samples Lightbox
   samplesLightboxIndex = signal<number | null>(null);
@@ -260,5 +265,21 @@ export class PartnerProjectListComponent implements OnInit {
         },
         error: (err) => console.error('Failed to toggle aware:', err)
       });
+  }
+
+  // Order Data Dialog
+  openOrderDataDialog(project: PartnerProjectListItem): void {
+    const container = this.orderDataContainer();
+    if (!container) return;
+
+    container.clear();
+    this.orderDataRef = container.createComponent(OrderDataDialogComponent);
+    this.orderDataRef.setInput('projectId', project.id);
+    this.orderDataRef.instance.close.subscribe(() => this.closeOrderDataDialog());
+  }
+
+  closeOrderDataDialog(): void {
+    this.orderDataRef?.destroy();
+    this.orderDataRef = null;
   }
 }

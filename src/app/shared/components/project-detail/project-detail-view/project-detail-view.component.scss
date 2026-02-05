@@ -33,4 +33,16 @@
   &--purple {
     background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
   }
+
+  &--clickable {
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+      filter: brightness(1.1);
+    }
+  }
 }

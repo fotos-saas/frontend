@@ -6,10 +6,12 @@ import {
   PROJECT_BACK_ROUTE,
   PROJECT_CONTACT_MODAL_COMPONENT,
   PROJECT_EDIT_MODAL_COMPONENT,
+  PROJECT_ORDER_DATA_DIALOG_COMPONENT,
 } from '../../../../shared/components/project-detail';
 import { PartnerService, PartnerProjectDetails } from '../../services/partner.service';
 import { ContactEditorModalComponent } from '../../components/contact-editor-modal/contact-editor-modal.component';
 import { ProjectEditModalComponent } from '../../components/project-edit-modal/project-edit-modal.component';
+import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
 
 /**
  * Partner Project Detail - Smart wrapper komponens.
@@ -25,6 +27,7 @@ import { ProjectEditModalComponent } from '../../components/project-edit-modal/p
     { provide: PROJECT_BACK_ROUTE, useValue: '/partner/projects' },
     { provide: PROJECT_CONTACT_MODAL_COMPONENT, useValue: ContactEditorModalComponent },
     { provide: PROJECT_EDIT_MODAL_COMPONENT, useValue: ProjectEditModalComponent },
+    { provide: PROJECT_ORDER_DATA_DIALOG_COMPONENT, useValue: OrderDataDialogComponent },
   ],
   template: `<app-project-detail-wrapper [mapToDetailData]="mapProject" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,

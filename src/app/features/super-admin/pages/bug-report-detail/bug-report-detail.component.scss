@@ -56,6 +56,21 @@
   }
 }
 
+.title-with-id {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.report-id {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
 .badges {
   display: flex;
   gap: 8px;

@@ -2,7 +2,6 @@
   class="dialog-backdrop"
   (mousedown)="backdropHandler.onMouseDown($event)"
   (click)="backdropHandler.onClick($event)"
-  (paste)="onPaste($event)"
 >
   <div class="dialog-panel dialog-panel--lg">
     <!-- Fejléc -->
@@ -72,7 +71,8 @@
           @if (attachments().length > 0) {
             <div class="attachment-list">
               @for (file of attachments(); track $index) {
-                <div class="attachment-item">
+                <div class="attachment-item" [class.attachment-item--fresh]="freshIndex() === $index">
+                  <lucide-icon [name]="ICONS.IMAGE" [size]="14" class="attachment-icon" />
                   <span class="attachment-name">{{ file.name }}</span>
                   <button class="attachment-remove" (click)="removeAttachment($index)">
                     <lucide-icon [name]="ICONS.X" [size]="14" />

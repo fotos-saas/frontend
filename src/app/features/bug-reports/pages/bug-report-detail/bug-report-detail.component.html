@@ -14,7 +14,10 @@
     </div>
 
     <div class="detail-title-row">
-      <h1>{{ r.title }}</h1>
+      <div class="title-with-id">
+        <span class="report-id">#{{ r.id }}</span>
+        <h1>{{ r.title }}</h1>
+      </div>
       <div class="badges">
         <span class="badge" [class]="getStatusClass(r.status)">{{ r.status_label }}</span>
         <span class="badge" [class]="getPriorityClass(r.priority)">{{ r.priority_label }}</span>

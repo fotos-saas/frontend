@@ -71,7 +71,10 @@
           [style.animation-delay]="i * 0.03 + 's'"
           (click)="openReport(report)"
         >
-          <span class="cell cell-title">{{ report.title }}</span>
+          <span class="cell cell-title">
+            <span class="report-id">#{{ report.id }}</span>
+            {{ report.title }}
+          </span>
           <span class="cell cell-status">
             <span class="badge" [class]="getStatusClass(report.status)">
               {{ report.status_label }}

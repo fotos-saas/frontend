@@ -83,6 +83,7 @@
             @if (isUnread(report)) {
               <span class="unread-dot"></span>
             }
+            <span class="report-id">#{{ report.id }}</span>
             {{ report.title }}
           </span>
           <span class="cell cell-reporter">

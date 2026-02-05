@@ -6,6 +6,7 @@ import { catchError, tap, map, takeUntil, switchMap, retry, debounceTime, distin
 import { environment } from '../../../environments/environment';
 import { TabloStorageService } from './tablo-storage.service';
 import { TokenType } from './token.service';
+import { AuthService } from './auth.service';
 import {
   PersonSearchResult,
   RegisterWithIdentificationRequest,
@@ -170,7 +171,7 @@ export class GuestService implements OnDestroy {
   public readonly missingPersonName = this.personName;
 
   private readonly injector = inject(Injector);
-  private _authService?: any; // AuthService - lusta betöltés a cirkuláris függőség elkerülésére
+  private _authService?: AuthService;
 
   constructor(
     private http: HttpClient,
@@ -183,10 +184,8 @@ export class GuestService implements OnDestroy {
   /**
    * AuthService lusta betöltése (cirkuláris függőség elkerülése)
    */
-  private get authService(): any {
+  private get authService(): AuthService {
     if (!this._authService) {
-      // Dinamikus import a cirkuláris függőség elkerülésére
-      const { AuthService } = require('./auth.service');
       this._authService = this.injector.get(AuthService);
     }
     return this._authService;

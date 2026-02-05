@@ -7,7 +7,6 @@ import {
   effect,
   computed
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import DOMPurify from 'dompurify';
 import { MediaEditorComponent, MediaEditorItem } from '../media-editor/media-editor.component';
@@ -40,7 +39,7 @@ export interface PostEditSaveData {
 @Component({
   selector: 'app-post-edit-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, MediaEditorComponent],
+  imports: [FormsModule, MediaEditorComponent],
   template: `
     <div class="post-edit-form">
       <textarea

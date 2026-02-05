@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, computed, input, inject, signal, ViewChild, DestroyRef, ElementRef, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
@@ -25,7 +24,7 @@ import { MAX_COMMENT_LENGTH } from '../../../shared/constants';
  */
 @Component({
   selector: 'app-newsfeed-card',
-  imports: [CommonModule, FormsModule, CommentItemComponent, ContentBlockComponent, PostMetaBarComponent, MediaGridComponent, PostHeaderBarComponent],
+  imports: [FormsModule, CommentItemComponent, ContentBlockComponent, PostMetaBarComponent, MediaGridComponent, PostHeaderBarComponent],
   templateUrl: './newsfeed-card.component.html',
   styleUrls: ['./newsfeed-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
@@ -22,7 +21,7 @@ export interface AlbumEditFormData {
   selector: 'app-album-edit-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     @if (isOpen()) {
       <div

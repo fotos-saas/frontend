@@ -1,6 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, output, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AddonService, Addon, AddonListResponse } from '../../../../services/addon.service';
@@ -21,10 +20,9 @@ import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../../../s
   selector: 'app-addons-card',
   standalone: true,
   imports: [
-    CommonModule,
     LucideAngularModule,
     MatTooltipModule,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
   ],
   template: `
     <div class="addons-card">

@@ -6,7 +6,6 @@ import {
   signal,
   computed
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { formatFileSize } from '@shared/utils/formatters.util';
 
 /**
@@ -29,7 +28,7 @@ export interface MediaPreview {
  */
 @Component({
   selector: 'app-media-uploader',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './media-uploader.component.html',
   styleUrls: ['./media-uploader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,6 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-// Minden komponens standalone és lazy-loaded
+import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
 import { FinalizationGuard } from './core/guards/finalization.guard';
@@ -12,7 +10,7 @@ import { partnerGuard } from './core/guards/partner.guard';
 import { clientGuard } from './core/guards/client.guard';
 import { superAdminGuard } from './core/guards/super-admin.guard';
 
-const routes: Routes = [
+export const routes: Routes = [
   // Public routes (nincs layout, nincs navbar/footer) - lazy-loaded
   {
     path: 'login',
@@ -401,9 +399,3 @@ const routes: Routes = [
     loadComponent: () => import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent)
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }

@@ -1,6 +1,4 @@
 import { Component, input, output, ChangeDetectionStrategy, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Mobile Menu User Component
  *
@@ -10,7 +8,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-mobile-menu-user',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './mobile-menu-user.component.html',
   styleUrls: ['./mobile-menu-user.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

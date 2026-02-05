@@ -1,6 +1,5 @@
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
 import { PasswordSetDialogComponent } from './password-set-dialog.component';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PasswordStrengthComponent } from '../password-strength/password-strength.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -26,11 +25,10 @@ const meta: Meta<PasswordSetDialogComponent> = {
   decorators: [
     moduleMetadata({
       imports: [
-        CommonModule,
         FormsModule,
         PasswordStrengthComponent,
-        HttpClientModule
-      ]
+        HttpClientModule,
+  ]
     })
   ],
   parameters: {

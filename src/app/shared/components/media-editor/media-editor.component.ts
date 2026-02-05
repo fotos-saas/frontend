@@ -10,7 +10,6 @@ import {
   viewChild,
   effect
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { formatFileSize } from '@shared/utils/formatters.util';
 
 /**
@@ -37,7 +36,7 @@ export interface MediaEditorItem {
 @Component({
   selector: 'app-media-editor',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './media-editor.component.html',
   styleUrls: ['./media-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

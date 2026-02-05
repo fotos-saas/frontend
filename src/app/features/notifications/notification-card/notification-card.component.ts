@@ -1,5 +1,4 @@
 import { Component, input, output, inject, ChangeDetectionStrategy, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Notification, NotificationType } from '../../../core/services/notification.service';
 import { LoggerService } from '../../../core/services/logger.service';
@@ -16,7 +15,7 @@ import { LoggerService } from '../../../core/services/logger.service';
 @Component({
   selector: 'app-notification-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div
       class="notification-card"

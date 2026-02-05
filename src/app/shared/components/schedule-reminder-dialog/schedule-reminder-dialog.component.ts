@@ -1,5 +1,4 @@
 import { Component, output, ChangeDetectionStrategy, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { LoggerService } from '../../../core/services/logger.service';
@@ -27,7 +26,7 @@ export type ScheduleReminderResult =
 @Component({
   selector: 'app-schedule-reminder-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './schedule-reminder-dialog.component.html',
   styleUrls: ['./schedule-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

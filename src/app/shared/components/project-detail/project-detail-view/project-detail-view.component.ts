@@ -1,5 +1,4 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
@@ -21,7 +20,6 @@ import { ICONS } from '../../../constants/icons.constants';
   selector: 'app-project-detail-view',
   standalone: true,
   imports: [
-    CommonModule,
     LucideAngularModule,
     MatTooltipModule,
     BackButtonComponent,

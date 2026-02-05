@@ -1,5 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, computed } from '@angular/core';
-import { CommonModule, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
@@ -18,7 +18,7 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 @Component({
   selector: 'app-super-admin-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent],
+  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent],
   template: `
     <div class="super-admin-layout">
       <!-- Top Bar (közös komponens) -->

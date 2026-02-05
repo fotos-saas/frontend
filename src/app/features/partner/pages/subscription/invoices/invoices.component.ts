@@ -1,6 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -20,7 +19,7 @@ import { ICONS, getInvoiceStatusLabel } from '../../../../../shared/constants';
 @Component({
   selector: 'app-invoices',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule],
   template: `
     <div class="invoices-page page-card">
       <div class="header-title">

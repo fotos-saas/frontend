@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { UserBadgeComponent } from '../../../../../../shared/components/navbar/components/user-badge/user-badge.component';
 import { ContactBadgeComponent } from '../../../../../../shared/components/navbar/components/contact-badge/contact-badge.component';
 import { GuestBadgeComponent } from '../../../../../../shared/components/navbar/components/guest-badge/guest-badge.component';
@@ -11,10 +10,9 @@ import { GuestBadgeComponent } from '../../../../../../shared/components/navbar/
   selector: 'app-top-bar-user-badges',
   standalone: true,
   imports: [
-    CommonModule,
     UserBadgeComponent,
     ContactBadgeComponent,
-    GuestBadgeComponent
+    GuestBadgeComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

@@ -1,5 +1,4 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -12,7 +11,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-subscription-overview',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, MatTooltipModule],
+  imports: [RouterLink, LucideAngularModule, MatTooltipModule],
   templateUrl: './subscription-overview.component.html',
   styleUrl: './subscription-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -4,7 +4,6 @@ import {
   input,
   output
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   ReactionsSummary,
   ReactionEmoji,
@@ -62,11 +61,10 @@ export type CommentVariant = 'default' | 'pinned' | 'event';
   selector: 'app-comment-item',
   standalone: true,
   imports: [
-    CommonModule,
     PostAvatarComponent,
     ReactionPickerComponent,
     ReplyToggleButtonComponent,
-    TimeAgoPipe
+    TimeAgoPipe,
   ],
   templateUrl: './comment-item.component.html',
   styleUrls: ['./comment-item.component.scss'],

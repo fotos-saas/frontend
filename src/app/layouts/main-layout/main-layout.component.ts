@@ -1,8 +1,8 @@
 import { Component, ChangeDetectionStrategy, OnInit, OnDestroy, DestroyRef, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter, map, startWith, Observable } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AsyncPipe } from '@angular/common';
 import { AuthService, TabloProject } from '../../core/services/auth.service';
 import { GuestService } from '../../core/services/guest.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -23,11 +23,11 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     imports: [
-        CommonModule,
         RouterOutlet,
         NavbarComponent,
         PartnerBannerComponent,
-        FooterComponent
+        FooterComponent,
+        AsyncPipe,
     ]
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {

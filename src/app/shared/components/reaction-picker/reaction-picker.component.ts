@@ -8,7 +8,6 @@ import {
   ElementRef,
   inject
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   ReactionEmoji,
   REACTION_EMOJIS,
@@ -41,7 +40,7 @@ export const REACTIONS = [...REACTION_EMOJIS];
 @Component({
   selector: 'app-reaction-picker',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="reaction-container" (click)="$event.stopPropagation()">
       <!-- Reactions summary (megjelenített reakciók) -->

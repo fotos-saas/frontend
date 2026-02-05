@@ -1,3 +1,4 @@
+import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   Component,
   Input,
@@ -12,7 +13,6 @@ import {
   inject,
   HostListener
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ZoomDirective } from '../../directives/zoom';
 import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 import { SampleLightboxItem } from './samples-lightbox.types';
@@ -32,7 +32,7 @@ import { createBackdropHandler } from '../../utils/dialog.util';
 @Component({
   selector: 'app-samples-lightbox',
   standalone: true,
-  imports: [CommonModule, ZoomDirective, SafeHtmlPipe],
+  imports: [ZoomDirective, SafeHtmlPipe, DatePipe, DecimalPipe],
   templateUrl: './samples-lightbox.component.html',
   styleUrls: ['./samples-lightbox.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

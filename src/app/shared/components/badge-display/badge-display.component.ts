@@ -7,7 +7,6 @@ import {
   input,
   output
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   GamificationService,
   UserBadge,
@@ -23,7 +22,7 @@ import { GuestService } from '../../../core/services/guest.service';
 @Component({
   selector: 'app-badge-display',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="badges">

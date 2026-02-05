@@ -6,7 +6,6 @@ import {
   ChangeDetectionStrategy,
   input
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   GamificationService,
   LeaderboardEntry
@@ -23,7 +22,7 @@ type LeaderboardType = 'points' | 'posts' | 'likes';
 @Component({
   selector: 'app-leaderboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="leaderboard">

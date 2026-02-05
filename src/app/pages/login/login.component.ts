@@ -1,5 +1,4 @@
 import { Component, OnInit, signal, inject, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -23,7 +22,7 @@ type LoginTab = 'code' | 'password';
     styleUrls: ['./login.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, AuthLayoutComponent, LucideAngularModule]
+    imports: [FormsModule, ReactiveFormsModule, RouterModule, AuthLayoutComponent, LucideAngularModule]
 })
 export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

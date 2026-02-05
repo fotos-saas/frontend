@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 import { StorageUsage } from '../../../../services/storage.service';
@@ -13,7 +13,7 @@ import { StorageUsage } from '../../../../services/storage.service';
 @Component({
   selector: 'app-storage-usage-card',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DecimalPipe],
+  imports: [LucideAngularModule, DecimalPipe],
   template: `
     <div class="storage-card">
       <!-- Progress bar -->

@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, computed, input, signal, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MissingUser } from '../../../core/models/poke.models';
 
 /**
@@ -9,7 +8,7 @@ import { MissingUser } from '../../../core/models/poke.models';
  */
 @Component({
   selector: 'app-missing-user-card',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './missing-user-card.component.html',
   styleUrls: ['./missing-user-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

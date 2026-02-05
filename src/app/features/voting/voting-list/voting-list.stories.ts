@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { moduleMetadata } from '@storybook/angular';
-import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { VotingListComponent } from './voting-list.component';
@@ -85,10 +84,9 @@ const meta: Meta<VotingListComponent> = {
   decorators: [
     moduleMetadata({
       imports: [
-        CommonModule,
         BrowserAnimationsModule,
         VotingCardComponent,
-      ],
+  ],
       providers: [
         { provide: VotingService, useValue: mockVotingService },
         { provide: AuthService, useValue: mockAuthService },

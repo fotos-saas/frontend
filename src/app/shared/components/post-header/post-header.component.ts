@@ -4,7 +4,6 @@ import {
   computed,
   input
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { formatTimeAgo } from '../../utils/time-formatter.util';
 
 /**
@@ -29,7 +28,7 @@ export type AuthorType = 'contact' | 'guest' | 'user';
 @Component({
   selector: 'app-post-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="post-header">
       <span

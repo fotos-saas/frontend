@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { NgClass } from '@angular/common';
 import { TabloStorageService, StoredSession } from '../../core/services/tablo-storage.service';
 import { TokenType } from '../../core/services/token.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -14,7 +14,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-session-chooser',
   standalone: true,
-  imports: [CommonModule],
+  imports: [NgClass],
   templateUrl: './session-chooser.component.html',
   styleUrl: './session-chooser.component.scss',
 })

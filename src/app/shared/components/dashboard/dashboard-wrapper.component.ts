@@ -6,7 +6,6 @@ import {
   ChangeDetectionStrategy,
   DestroyRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -39,7 +38,7 @@ import { DashboardStats, DashboardProjectItem, StatCardConfig, QuickActionConfig
 @Component({
   selector: 'app-dashboard-wrapper',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     <div class="dashboard page-card">
       <header class="dashboard-header">

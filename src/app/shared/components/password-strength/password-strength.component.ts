@@ -1,6 +1,4 @@
 import { Component, input, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 interface PasswordRequirement {
   label: string;
   validator: (password: string) => boolean;
@@ -9,7 +7,7 @@ interface PasswordRequirement {
 @Component({
   selector: 'app-password-strength',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="password-strength" [class.password-strength--compact]="compact()">
       <!-- Strength bar -->

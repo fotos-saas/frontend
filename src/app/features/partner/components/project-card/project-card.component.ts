@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerProjectListItem } from '../../services/partner.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -11,7 +11,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-partner-project-card',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule, NgClass],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

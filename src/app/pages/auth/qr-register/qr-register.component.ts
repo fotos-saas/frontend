@@ -1,5 +1,4 @@
 import { Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -9,7 +8,7 @@ import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth
 @Component({
   selector: 'app-qr-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AuthLayoutComponent],
+  imports: [ReactiveFormsModule, RouterModule, AuthLayoutComponent],
   template: `
     <app-auth-layout>
       <div class="auth-card">

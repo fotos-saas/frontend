@@ -10,7 +10,6 @@ import {
   output,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { createBackdropHandler } from '../../utils/dialog.util';
 
@@ -27,7 +26,7 @@ export interface ConfirmDialogResult {
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule, A11yModule],
+  imports: [A11yModule],
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

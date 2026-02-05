@@ -1,6 +1,5 @@
 import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
@@ -8,7 +7,7 @@ import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth
 @Component({
   selector: 'app-verify-email',
   standalone: true,
-  imports: [CommonModule, RouterModule, AuthLayoutComponent],
+  imports: [RouterModule, AuthLayoutComponent],
   templateUrl: './verify-email.component.html',
   styleUrls: ['./verify-email.component.scss']
 })

@@ -1,6 +1,5 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -15,12 +14,11 @@ import { PlansService, PricingPlan } from '../../../shared/services/plans.servic
   selector: 'app-register-app',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     RouterModule,
     PasswordStrengthComponent,
     AuthLayoutComponent,
-    LucideAngularModule
+    LucideAngularModule,
   ],
   templateUrl: './register-app.component.html',
   styleUrls: ['./register-app.component.scss'],

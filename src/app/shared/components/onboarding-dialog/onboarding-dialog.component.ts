@@ -12,7 +12,6 @@ import {
   ChangeDetectorRef,
   signal
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Subject } from 'rxjs';
@@ -42,7 +41,7 @@ export { OnboardingStep } from './onboarding-form.service';
 @Component({
   selector: 'app-onboarding-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   providers: [OnboardingFormService],
   templateUrl: './onboarding-dialog.component.html',
   styleUrls: ['./onboarding-dialog.component.scss'],

@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PokePreset } from '../../../core/models/poke.models';
 
 /**
@@ -9,7 +8,7 @@ import { PokePreset } from '../../../core/models/poke.models';
  */
 @Component({
   selector: 'app-preset-selector',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './preset-selector.component.html',
   styleUrls: ['./preset-selector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

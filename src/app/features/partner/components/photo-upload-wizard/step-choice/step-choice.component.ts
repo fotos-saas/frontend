@@ -5,7 +5,6 @@ import {
   ChangeDetectionStrategy,
   input
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 
@@ -19,7 +18,7 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-step-choice',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     <div class="step-choice">
       <div class="choice-header">

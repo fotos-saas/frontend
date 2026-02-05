@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, inject, input, output, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Poll, PollMedia } from '../../../core/services/voting.service';
 import { TextUtilsService } from '../../../shared/services/text-utils.service';
 import { DateUtilsService } from '../../../shared/services/date-utils.service';
@@ -17,7 +16,7 @@ import { DeleteButtonComponent, EditButtonComponent } from '../../../shared/comp
  */
 @Component({
     selector: 'app-voting-card',
-    imports: [CommonModule, DeleteButtonComponent, EditButtonComponent],
+    imports: [DeleteButtonComponent, EditButtonComponent],
     templateUrl: './voting-card.component.html',
     styleUrls: ['./voting-card.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,

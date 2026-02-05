@@ -9,7 +9,6 @@ import {
   output,
   computed
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, of } from 'rxjs';
@@ -48,7 +47,7 @@ export type CreatePostResult =
  */
 @Component({
   selector: 'app-create-post-dialog',
-  imports: [CommonModule, FormsModule, RichTextEditorComponent, MediaEditorComponent],
+  imports: [FormsModule, RichTextEditorComponent, MediaEditorComponent],
   templateUrl: './create-post-dialog.component.html',
   styleUrls: ['./create-post-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

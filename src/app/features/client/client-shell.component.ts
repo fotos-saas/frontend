@@ -1,6 +1,6 @@
 import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ClientService } from './services/client.service';
@@ -21,7 +21,7 @@ import { ICONS } from '../../shared/constants/icons.constants';
 @Component({
   selector: 'app-client-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent, ClientRegisterDialogComponent],
+  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent, ClientRegisterDialogComponent],
   template: `
     <div class="client-layout">
       <!-- Top Bar (közös komponens) -->

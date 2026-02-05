@@ -1,5 +1,4 @@
 import { Component, input, output, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -19,7 +18,7 @@ import { PartnerOrdersService, PartnerOrderAlbumSummary } from '../../../../../s
 @Component({
   selector: 'app-client-album-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, MatTooltipModule],
+  imports: [RouterModule, LucideAngularModule, MatTooltipModule],
   template: `
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
       <div class="flex items-center justify-between mb-4">

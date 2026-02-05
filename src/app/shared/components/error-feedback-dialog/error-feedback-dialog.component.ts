@@ -4,7 +4,6 @@ import {
   inject,
   signal
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -21,7 +20,7 @@ import { createBackdropHandler } from '@shared/utils/dialog.util';
 @Component({
   selector: 'app-error-feedback-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   templateUrl: './error-feedback-dialog.component.html',
   styleUrls: ['./error-feedback-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

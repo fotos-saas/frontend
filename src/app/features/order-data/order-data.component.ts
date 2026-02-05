@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { OrderDataService, OrderData } from './services/order-data.service';
 import { LoggerService } from '../../core/services/logger.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -17,7 +17,7 @@ import { isSecureUrl, openSecureUrl } from '../../core/utils/url-validator.util'
 @Component({
     selector: 'app-order-data',
     standalone: true,
-    imports: [CommonModule, SafeHtmlPipe],
+    imports: [SafeHtmlPipe, AsyncPipe, DatePipe],
     templateUrl: './order-data.component.html',
     styleUrls: ['./order-data.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

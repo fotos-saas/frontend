@@ -10,7 +10,6 @@ import {
   DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { PokeService } from '../../../core/services/poke.service';
 import { Poke } from '../../../core/models/poke.models';
@@ -25,7 +24,7 @@ import { DateUtilsService } from '../../services/date-utils.service';
 @Component({
   selector: 'app-poke-detail-dialog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div
       class="dialog-overlay"

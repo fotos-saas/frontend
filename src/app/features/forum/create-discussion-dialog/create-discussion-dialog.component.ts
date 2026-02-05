@@ -9,7 +9,6 @@ import {
   input,
   output
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import DOMPurify from 'dompurify';
@@ -63,7 +62,7 @@ export interface EditDiscussionData {
  */
 @Component({
   selector: 'app-create-discussion-dialog',
-  imports: [CommonModule, FormsModule, RichTextEditorComponent, MediaEditorComponent],
+  imports: [FormsModule, RichTextEditorComponent, MediaEditorComponent],
   templateUrl: './create-discussion-dialog.component.html',
   styleUrls: ['./create-discussion-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

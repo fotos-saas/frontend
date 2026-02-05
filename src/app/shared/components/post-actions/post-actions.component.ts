@@ -4,7 +4,6 @@ import {
   input,
   output
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   ReactionPickerComponent,
   ReactionEmoji,
@@ -40,11 +39,10 @@ import {
   selector: 'app-post-actions',
   standalone: true,
   imports: [
-    CommonModule,
     ReactionPickerComponent,
     DeleteButtonComponent,
     EditButtonComponent,
-    ReplyButtonComponent
+    ReplyButtonComponent,
   ],
   template: `
     <div class="post-actions">

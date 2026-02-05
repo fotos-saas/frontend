@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Discussion } from '../../../core/services/forum.service';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 
@@ -13,7 +12,7 @@ import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
  */
 @Component({
     selector: 'app-forum-card',
-    imports: [CommonModule, TimeAgoPipe],
+    imports: [TimeAgoPipe],
     templateUrl: './forum-card.component.html',
     styleUrls: ['./forum-card.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

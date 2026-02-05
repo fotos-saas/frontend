@@ -6,7 +6,6 @@ import {
   output,
   effect
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { MediaUploaderComponent } from '../../../shared/components/media-uploader/media-uploader.component';
@@ -57,7 +56,7 @@ export interface VotingCreateResult {
 @Component({
   selector: 'app-voting-create-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, RichTextEditorComponent, MediaUploaderComponent],
+  imports: [FormsModule, RichTextEditorComponent, MediaUploaderComponent],
   templateUrl: './voting-create-dialog.component.html',
   styleUrls: ['./voting-create-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

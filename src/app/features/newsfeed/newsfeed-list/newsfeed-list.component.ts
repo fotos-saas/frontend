@@ -2,7 +2,6 @@ import { Component, OnInit, ChangeDetectionStrategy, signal, inject, DestroyRef,
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NewsfeedService, NewsfeedPost, NewsfeedFilters, NewsfeedMedia, NewsfeedComment } from '../../../core/services/newsfeed.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -27,13 +26,12 @@ import { calculateOptimisticReaction, calculateLikesCount } from '../../../share
 @Component({
   selector: 'app-newsfeed-list',
   imports: [
-    CommonModule,
     RouterModule,
     GuestNameDialogComponent,
     NewsfeedCardComponent,
     CreatePostDialogComponent,
     MediaLightboxComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
   ],
   templateUrl: './newsfeed-list.component.html',
   styleUrls: ['./newsfeed-list.component.scss'],

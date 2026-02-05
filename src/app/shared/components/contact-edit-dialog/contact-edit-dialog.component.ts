@@ -1,5 +1,4 @@
 import { Component, input, output, ChangeDetectionStrategy, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { isValidEmail, isValidPhone } from '../../utils/validators.util';
@@ -29,7 +28,7 @@ export type ContactEditResult =
 @Component({
   selector: 'app-contact-edit-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './contact-edit-dialog.component.html',
   styleUrls: ['./contact-edit-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

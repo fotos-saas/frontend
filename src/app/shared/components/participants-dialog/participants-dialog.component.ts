@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import {
   Component,
   input,
@@ -6,7 +7,6 @@ import {
   ChangeDetectionStrategy,
   AfterViewInit
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   Participant,
   ParticipantStatistics
@@ -36,7 +36,7 @@ import { createBackdropHandler } from '../../utils/dialog.util';
  */
 @Component({
     selector: 'app-participants-dialog',
-    imports: [CommonModule],
+    imports: [NgClass],
     templateUrl: './participants-dialog.component.html',
     styleUrls: ['./participants-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

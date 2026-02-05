@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MarketerService, ProjectContact } from '../../services/marketer.service';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
@@ -11,7 +10,7 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-contact-editor-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div
       class="dialog-backdrop"

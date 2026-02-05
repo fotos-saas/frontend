@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef, DestroyRef, inject, signal } from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { AuthService, TabloProject, ContactPerson } from '../../core/services/auth.service';
 import { ProjectModeService } from '../../core/services/project-mode.service';
 import { ClipboardService } from '../../core/services/clipboard.service';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AsyncPipe } from '@angular/common';
 import { ScheduleReminderService } from '../../core/services/schedule-reminder.service';
 import { ScheduleReminderResult, ScheduleReminderDialogComponent } from '../../shared/components/schedule-reminder-dialog/schedule-reminder-dialog.component';
 import { FinalizationReminderService } from '../../core/services/finalization-reminder.service';
@@ -28,14 +28,14 @@ import { PendingVerificationComponent } from '../../shared/components/pending-ve
     selector: 'app-home',
     standalone: true,
     imports: [
-        CommonModule,
         RouterLink,
         ScheduleReminderDialogComponent,
         FinalizationReminderDialogComponent,
         ContactEditDialogComponent,
         RequireFullAccessDirective,
         OnboardingDialogComponent,
-        PendingVerificationComponent
+        PendingVerificationComponent,
+        AsyncPipe,
     ],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],

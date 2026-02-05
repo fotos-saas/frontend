@@ -250,8 +250,8 @@ export class SessionService {
    * Egységes admin kijelentkezés (marketer, partner, super_admin)
    */
   logoutAdmin(): void {
-    localStorage.removeItem('marketer_token');
-    localStorage.removeItem('marketer_user');
+    sessionStorage.removeItem('marketer_token');
+    sessionStorage.removeItem('marketer_user');
     this.filterPersistence.clearAllFilters();
     this.sentryService.setUser(null);
 
@@ -265,14 +265,14 @@ export class SessionService {
    * Marketer token lekérése
    */
   getMarketerToken(): string | null {
-    return localStorage.getItem('marketer_token');
+    return sessionStorage.getItem('marketer_token');
   }
 
   /**
    * Marketer felhasználó lekérése localStorage-ból
    */
   getStoredMarketerUser(): AuthUser | null {
-    const stored = localStorage.getItem('marketer_user');
+    const stored = sessionStorage.getItem('marketer_user');
     if (stored) {
       return safeJsonParse<AuthUser | null>(stored, null);
     }

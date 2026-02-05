@@ -1,5 +1,4 @@
 import { Component, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProjectContact } from '../../services/partner.service';
@@ -12,7 +11,7 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-add-contact-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     <div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
       <div class="dialog-panel" (click)="$event.stopPropagation()">

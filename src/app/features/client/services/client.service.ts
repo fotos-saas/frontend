@@ -212,7 +212,7 @@ export class ClientService {
    * Initialize from localStorage
    */
   private initializeFromStorage(): void {
-    const stored = localStorage.getItem('client_info');
+    const stored = sessionStorage.getItem('client_info');
     if (stored) {
       const info = safeJsonParse<ClientInfo | null>(stored, null);
       if (info) {
@@ -225,7 +225,7 @@ export class ClientService {
    * Get auth token
    */
   getToken(): string | null {
-    return localStorage.getItem('client_token');
+    return sessionStorage.getItem('client_token');
   }
 
   /**
@@ -250,9 +250,9 @@ export class ClientService {
    * Logout and clear storage
    */
   logout(): void {
-    localStorage.removeItem('client_token');
-    localStorage.removeItem('client_info');
-    localStorage.removeItem('client_albums');
+    sessionStorage.removeItem('client_token');
+    sessionStorage.removeItem('client_info');
+    sessionStorage.removeItem('client_albums');
     this._clientInfo.set(null);
     this.router.navigate(['/login']);
   }
@@ -418,13 +418,13 @@ export class ClientService {
     ).pipe(
       tap(response => {
         // Update token and client info
-        localStorage.setItem('client_token', response.token);
+        sessionStorage.setItem('client_token', response.token);
         this._clientInfo.set({
           ...this._clientInfo()!,
           email: response.client.email,
           isRegistered: true,
         });
-        localStorage.setItem('client_info', JSON.stringify(this._clientInfo()));
+        sessionStorage.setItem('client_info', JSON.stringify(this._clientInfo()));
         this._canRegister.set(false);
       }),
       catchError(this.handleError.bind(this))
@@ -441,8 +441,8 @@ export class ClientService {
     ).pipe(
       tap(response => {
         // Save token and client info
-        localStorage.setItem('client_token', response.token);
-        localStorage.setItem('client_info', JSON.stringify({
+        sessionStorage.setItem('client_token', response.token);
+        sessionStorage.setItem('client_info', JSON.stringify({
           id: response.client.id,
           name: response.client.name,
           email: response.client.email,
@@ -459,7 +459,7 @@ export class ClientService {
           wantsNotifications: response.client.wantsNotifications,
         });
         // Store albums in localStorage for quick access
-        localStorage.setItem('client_albums', JSON.stringify(response.albums));
+        sessionStorage.setItem('client_albums', JSON.stringify(response.albums));
       }),
       catchError(err => {
         const message = err.error?.message ?? 'Hiba történt. Kérlek próbáld újra.';
@@ -484,7 +484,7 @@ export class ClientService {
             ...current,
             wantsNotifications: response.data.wantsNotifications,
           });
-          localStorage.setItem('client_info', JSON.stringify(this._clientInfo()));
+          sessionStorage.setItem('client_info', JSON.stringify(this._clientInfo()));
         }
       }),
       catchError(this.handleError.bind(this))

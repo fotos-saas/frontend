@@ -1,5 +1,4 @@
 import { Component, Input, Output, EventEmitter, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -16,7 +15,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-contact-edit-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   templateUrl: './contact-edit-modal.component.html',
   styleUrl: './contact-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

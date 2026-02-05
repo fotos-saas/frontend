@@ -5,7 +5,8 @@ import {
   output,
   ViewChild,
   ElementRef,
-  OnDestroy
+  inject,
+  DestroyRef
 } from '@angular/core';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -250,8 +251,9 @@ import { UploadedPhoto } from '../../../../services/partner.service';
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReviewUnassignedPanelComponent implements OnDestroy {
+export class ReviewUnassignedPanelComponent {
   readonly ICONS = ICONS;
+  private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('gridElement') gridElement!: ElementRef<HTMLElement>;
 
@@ -269,9 +271,11 @@ export class ReviewUnassignedPanelComponent implements OnDestroy {
   private scrollStartY = 0;
   private scrollLeft = 0;
 
-  ngOnDestroy(): void {
-    document.removeEventListener('mousemove', this.onMouseMove);
-    document.removeEventListener('mouseup', this.onMouseUp);
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      document.removeEventListener('mousemove', this.onMouseMove);
+      document.removeEventListener('mouseup', this.onMouseUp);
+    });
   }
 
   onDrop(event: CdkDragDrop<any>): void {

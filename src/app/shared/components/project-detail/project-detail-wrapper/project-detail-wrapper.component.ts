@@ -11,7 +11,6 @@ import {
   Type,
   viewChild,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -52,7 +51,7 @@ import { IQrCodeService } from '../../../interfaces/qr-code.interface';
 @Component({
   selector: 'app-project-detail-wrapper',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ProjectDetailViewComponent],
+  imports: [LucideAngularModule, ProjectDetailViewComponent],
   template: `
     <div class="max-w-3xl mx-auto page-card">
       <!-- Közös detail view komponens -->

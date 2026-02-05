@@ -1,6 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, signal, inject, DestroyRef, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { NotificationService, Notification, NotificationType } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationCardComponent } from '../notification-card/notification-card.component';
@@ -20,10 +19,9 @@ import { StaggerAnimationDirective } from '../../../shared/directives';
   selector: 'app-notifications-list',
   standalone: true,
   imports: [
-    CommonModule,
     NotificationCardComponent,
     PokeDetailDialogComponent,
-    StaggerAnimationDirective
+    StaggerAnimationDirective,
   ],
   templateUrl: './notifications-list.component.html',
   styleUrls: ['./notifications-list.component.scss'],

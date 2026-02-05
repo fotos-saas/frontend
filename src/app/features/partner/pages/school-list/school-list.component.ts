@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -20,13 +19,12 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
   selector: 'app-partner-school-list',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
     SchoolEditModalComponent,
     ConfirmDialogComponent,
-    UpgradeDialogComponent
+    UpgradeDialogComponent,
   ],
   templateUrl: './school-list.component.html',
   styleUrl: './school-list.component.scss',

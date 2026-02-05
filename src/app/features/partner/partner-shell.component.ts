@@ -1,5 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit } from '@angular/core';
-import { CommonModule, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Router, RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -34,7 +34,6 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
   selector: 'app-partner-shell',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     RouterLink,
     RouterLinkActive,
@@ -42,7 +41,7 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
     LucideAngularModule,
     MatTooltipModule,
     MobileNavOverlayComponent,
-    TopBarComponent
+    TopBarComponent,
   ],
   templateUrl: './partner-shell.component.html',
   styleUrl: './partner-shell.component.scss',

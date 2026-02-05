@@ -4,7 +4,6 @@ import {
   input,
   signal
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { UserRankCardComponent } from '../../../shared/components/user-rank-card/user-rank-card.component';
 import { LeaderboardComponent } from '../../../shared/components/leaderboard/leaderboard.component';
 import { BadgeDisplayComponent } from '../../../shared/components/badge-display/badge-display.component';
@@ -25,10 +24,9 @@ type SidebarSection = 'rank' | 'leaderboard' | 'badges';
   selector: 'app-forum-sidebar',
   standalone: true,
   imports: [
-    CommonModule,
     UserRankCardComponent,
     LeaderboardComponent,
-    BadgeDisplayComponent
+    BadgeDisplayComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

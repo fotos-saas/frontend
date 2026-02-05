@@ -5,7 +5,6 @@ import {
   input,
   output
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 /**
@@ -35,7 +34,7 @@ export interface TemplateOption {
  */
 @Component({
   selector: 'app-forum-search',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './forum-search.component.html',
   styleUrls: ['./forum-search.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

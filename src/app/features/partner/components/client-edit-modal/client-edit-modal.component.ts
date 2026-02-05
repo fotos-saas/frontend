@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerOrdersService, PartnerClient } from '../../services/partner-orders.service';
@@ -13,7 +12,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-client-edit-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     <div
       class="dialog-backdrop"

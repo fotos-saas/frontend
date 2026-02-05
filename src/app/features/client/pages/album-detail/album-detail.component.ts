@@ -1,6 +1,5 @@
 import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ClientService, ClientAlbumDetail, ClientPhoto } from '../../services/client.service';
@@ -22,14 +21,13 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
   selector: 'app-client-album-detail',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     LucideAngularModule,
     SelectionGridComponent,
     MediaLightboxComponent,
     ConfirmDialogComponent,
     StickyFooterComponent,
-    FloatingInfoComponent
+    FloatingInfoComponent,
   ],
   template: `
     <div class="album-detail-page page-card">

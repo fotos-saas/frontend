@@ -1,5 +1,4 @@
 import { Component, Output, EventEmitter, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -17,12 +16,11 @@ import { SearchableDropdownComponent, DropdownOption } from './components/search
   selector: 'app-create-project-modal',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     LucideAngularModule,
     AddSchoolModalComponent,
     AddContactModalComponent,
-    SearchableDropdownComponent
+    SearchableDropdownComponent,
   ],
   templateUrl: './create-project-modal.component.html',
   styleUrl: './create-project-modal.component.scss',

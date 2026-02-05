@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { moduleMetadata } from '@storybook/angular';
 import { signal } from '@angular/core';
+import { JsonPipe } from '@angular/common';
 import { LucideAngularModule, Filter, ChevronUp, ChevronDown, X } from 'lucide-angular';
 import { ExpandableFiltersComponent, FilterConfig } from './expandable-filters.component';
 
@@ -17,7 +18,7 @@ const meta: Meta<ExpandableFiltersComponent> = {
     moduleMetadata({
       imports: [
         LucideAngularModule.pick({ Filter, ChevronUp, ChevronDown, X })
-      ],
+      , JsonPipe],
     }),
   ],
   tags: ['autodocs'],

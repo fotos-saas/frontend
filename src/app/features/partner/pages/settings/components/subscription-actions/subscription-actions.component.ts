@@ -1,5 +1,4 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { SubscriptionInfo } from '../../../../services/subscription.service';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
@@ -12,7 +11,7 @@ import { ICONS } from '../../../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-subscription-actions',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     <div class="subscription-actions">
       @switch (info().status) {

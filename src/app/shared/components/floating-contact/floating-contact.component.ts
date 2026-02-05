@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClipboardService } from '../../../core/services/clipboard.service';
@@ -18,7 +17,7 @@ import { FloatingFabComponent } from '../floating-fab/floating-fab.component';
 @Component({
   selector: 'app-floating-contact',
   standalone: true,
-  imports: [CommonModule, FloatingFabComponent],
+  imports: [FloatingFabComponent],
   template: `
     <app-floating-fab icon="question" color="purple" ariaLabel="Kontakt információk">
       <!-- Partner szekció (ha van) -->

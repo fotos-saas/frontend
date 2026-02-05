@@ -1,6 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Zoom controls component for lightbox
  *
@@ -10,7 +8,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-zoom-controls',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="zoom-controls" role="toolbar" aria-label="Képnagyítás vezérlők">
       <!-- Zoom out -->

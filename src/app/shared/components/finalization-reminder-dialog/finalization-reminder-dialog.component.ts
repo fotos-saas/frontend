@@ -1,5 +1,4 @@
 import { Component, output, ChangeDetectionStrategy, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { LoggerService } from '../../../core/services/logger.service';
 
@@ -26,7 +25,7 @@ export type FinalizationReminderResult =
 @Component({
   selector: 'app-finalization-reminder-dialog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './finalization-reminder-dialog.component.html',
   styleUrls: ['./finalization-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 
@@ -9,7 +8,7 @@ import { ICONS } from '../../../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-project-pagination',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (totalPages() > 1) {

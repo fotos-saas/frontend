@@ -1,5 +1,4 @@
 import { Component, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { OfflineService } from '../../../core/services/offline.service';
 import { ICONS } from '../../constants/icons.constants';
@@ -17,7 +16,7 @@ import { ICONS } from '../../constants/icons.constants';
 @Component({
   selector: 'app-offline-banner',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     @if (showBanner()) {
       <div class="offline-banner" [class.syncing]="offlineService.isSyncing()">

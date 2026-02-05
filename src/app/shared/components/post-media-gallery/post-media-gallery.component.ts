@@ -4,8 +4,6 @@ import {
   input,
   output
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Média elem interface
  */
@@ -29,7 +27,7 @@ export interface PostMediaItem {
 @Component({
   selector: 'app-post-media-gallery',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     @if (media().length > 0) {
       <div class="post-media">

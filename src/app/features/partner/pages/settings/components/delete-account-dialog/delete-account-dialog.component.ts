@@ -1,5 +1,4 @@
 import { Component, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
@@ -14,7 +13,7 @@ import { createBackdropHandler } from '../../../../../../shared/utils/dialog.uti
 @Component({
   selector: 'app-delete-account-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     <div
       class="dialog-backdrop"

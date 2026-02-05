@@ -3,7 +3,6 @@ import {
   input,
   output
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PostAvatarComponent } from '../post-avatar/post-avatar.component';
 import { PostHeaderComponent, AuthorType } from '../post-header/post-header.component';
 import { PostContentComponent } from '../post-content/post-content.component';
@@ -48,12 +47,11 @@ import { ReactionEmoji, ReactionsSummary } from '../reaction-picker/reaction-pic
   selector: 'app-forum-post',
   standalone: true,
   imports: [
-    CommonModule,
     PostAvatarComponent,
     PostHeaderComponent,
     PostContentComponent,
     PostMediaGalleryComponent,
-    PostActionsComponent
+    PostActionsComponent,
   ],
   templateUrl: './forum-post.component.html',
   styleUrls: ['./forum-post.component.scss']

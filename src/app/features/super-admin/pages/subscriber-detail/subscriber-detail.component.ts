@@ -1,10 +1,10 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { NgClass } from '@angular/common';
 import { SuperAdminService, SubscriberDetail, AuditLogEntry, DiscountInfo } from '../../services/super-admin.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../../../shared/constants';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -20,7 +20,6 @@ import { DiscountDialogComponent } from '../../components/discount-dialog/discou
   selector: 'app-subscriber-detail',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RouterLink,
     LucideAngularModule,
@@ -28,7 +27,8 @@ import { DiscountDialogComponent } from '../../components/discount-dialog/discou
     ConfirmDialogComponent,
     ChargeSubscriberDialogComponent,
     ChangePlanDialogComponent,
-    DiscountDialogComponent
+    DiscountDialogComponent,
+    NgClass,
   ],
   templateUrl: './subscriber-detail.component.html',
   styleUrl: './subscriber-detail.component.scss',

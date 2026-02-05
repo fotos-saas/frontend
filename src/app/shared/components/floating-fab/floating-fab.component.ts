@@ -7,8 +7,6 @@ import {
   ElementRef,
   input,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Floating FAB Component
  *
@@ -25,7 +23,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-floating-fab',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <!-- FAB gomb -->
     <button

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { AuthService, TabloProject } from '../../../core/services/auth.service';
 
@@ -13,7 +13,7 @@ import { AuthService, TabloProject } from '../../../core/services/auth.service';
     styleUrls: ['./footer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule]
+    imports: [AsyncPipe]
 })
 export class FooterComponent {
   project$: Observable<TabloProject | null>;

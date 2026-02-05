@@ -9,7 +9,6 @@ import {
   inject,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants';
 
@@ -61,7 +60,7 @@ export interface FilterChangeEvent {
 @Component({
   selector: 'app-expandable-filters',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     <div class="expandable-filters">
       <!-- Látható szűrők (első N db) - inline -->

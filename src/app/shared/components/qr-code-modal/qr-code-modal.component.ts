@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy, input, output, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../confirm-dialog/confirm-dialog.component';
@@ -14,7 +13,7 @@ import { QrCode, IQrCodeService } from '../../interfaces/qr-code.interface';
 @Component({
   selector: 'app-shared-qr-code-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ConfirmDialogComponent],
+  imports: [LucideAngularModule, ConfirmDialogComponent],
   template: `
     <div
       class="dialog-backdrop"

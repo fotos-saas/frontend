@@ -1,5 +1,4 @@
 import { Component, input, signal, effect, HostListener, ChangeDetectionStrategy, ElementRef, ViewChild, OnDestroy, AfterViewInit, OnInit, DestroyRef, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService, ContactPerson } from '../../../core/services/auth.service';
 import { BreakpointService } from '../../../core/services/breakpoint.service';
@@ -11,6 +10,7 @@ import { GuestNameResult, GuestNameDialogComponent } from '../../components/gues
 import { ContactEditResult, ContactData, ContactEditDialogComponent } from '../../components/contact-edit-dialog/contact-edit-dialog.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { NgClass } from '@angular/common';
 // Child komponensek (refaktorált badge-ek és mobile menu részek)
 import { UserBadgeComponent } from './components/user-badge/user-badge.component';
 import { ContactBadgeComponent } from './components/contact-badge/contact-badge.component';
@@ -67,7 +67,6 @@ export interface NavbarProjectInfo {
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     imports: [
-        CommonModule,
         RouterLink,
         UserBadgeComponent,
         ContactBadgeComponent,
@@ -75,7 +74,8 @@ export interface NavbarProjectInfo {
         MobileMenuUserComponent,
         GuestNameDialogComponent,
         ContactEditDialogComponent,
-        NotificationBellComponent
+        NotificationBellComponent,
+        NgClass,
     ]
 })
 export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {

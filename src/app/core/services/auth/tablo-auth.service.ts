@@ -110,14 +110,20 @@ export class TabloAuthService {
   /**
    * Partner client auth adat tárolása
    * Egyszerűsített tárolás - nem projekt alapú
+   *
+   * SECURITY: sessionStorage használata localStorage helyett
+   * - Tab-izolált: más tabok nem férnek hozzá
+   * - XSS támadás esetén csak az aktuális tab érintett
+   * - Tab bezáráskor automatikusan törlődik
    */
   private storeClientAuthData(response: LoginResponse): void {
     if (!response.token || !response.client) return;
 
-    localStorage.setItem('client_token', response.token);
-    localStorage.setItem('client_info', JSON.stringify(response.client));
+    // SECURITY: sessionStorage XSS mitigation
+    sessionStorage.setItem('client_token', response.token);
+    sessionStorage.setItem('client_info', JSON.stringify(response.client));
     if (response.albums) {
-      localStorage.setItem('client_albums', JSON.stringify(response.albums));
+      sessionStorage.setItem('client_albums', JSON.stringify(response.albums));
     }
   }
 

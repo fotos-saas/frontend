@@ -1,6 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -10,7 +9,7 @@ import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, PasswordStrengthComponent, AuthLayoutComponent],
+  imports: [ReactiveFormsModule, RouterModule, PasswordStrengthComponent, AuthLayoutComponent],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

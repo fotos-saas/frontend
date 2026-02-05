@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PokeDailyLimit } from '../../../core/models/poke.models';
 
 /**
@@ -9,7 +8,7 @@ import { PokeDailyLimit } from '../../../core/models/poke.models';
  */
 @Component({
   selector: 'app-daily-limit-badge',
-  imports: [CommonModule],
+  imports: [],
   template: `
     @if (limit()) {
       <div class="limit-badge" [class.exhausted]="limit()!.hasReachedLimit">

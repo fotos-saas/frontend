@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Notification } from '../../../../../core/services/notification.service';
 import { NotificationItemComponent } from '../notification-item/notification-item.component';
 
@@ -10,7 +9,7 @@ import { NotificationItemComponent } from '../notification-item/notification-ite
 @Component({
   selector: 'app-notification-list',
   standalone: true,
-  imports: [CommonModule, NotificationItemComponent],
+  imports: [NotificationItemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (loading()) {

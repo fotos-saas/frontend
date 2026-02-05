@@ -1,6 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Schedule Card Component
  * Fotózás időpontja kártya - BEM naming convention
@@ -22,7 +20,7 @@ export interface ScheduleCardState {
 @Component({
   selector: 'app-schedule-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './schedule-card.component.html',
   styleUrl: './schedule-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

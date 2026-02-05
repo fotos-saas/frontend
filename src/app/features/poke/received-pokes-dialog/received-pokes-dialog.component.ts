@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, inject, computed, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactionPickerComponent, ReactionEmoji } from '@shared/components/reaction-picker/reaction-picker.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { DateUtilsService } from '@shared/services/date-utils.service';
@@ -14,7 +13,7 @@ import { createBackdropHandler } from '@shared/utils/dialog.util';
  */
 @Component({
   selector: 'app-received-pokes-dialog',
-  imports: [CommonModule, ReactionPickerComponent, EmptyStateComponent],
+  imports: [ReactionPickerComponent, EmptyStateComponent],
   templateUrl: './received-pokes-dialog.component.html',
   styleUrls: ['./received-pokes-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

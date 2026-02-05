@@ -1,5 +1,4 @@
 import { Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -10,7 +9,7 @@ import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, PasswordStrengthComponent, AuthLayoutComponent],
+  imports: [ReactiveFormsModule, RouterModule, PasswordStrengthComponent, AuthLayoutComponent],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

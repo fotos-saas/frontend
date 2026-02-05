@@ -9,7 +9,6 @@ import {
   signal,
   computed
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, distinctUntilChanged, map, skip } from 'rxjs/operators';
@@ -58,7 +57,6 @@ import { PhotoSelectionReminderService, ReminderWorkflowStep } from '../../../se
   selector: 'app-shell',
   standalone: true,
   imports: [
-    CommonModule,
     RouterOutlet,
     TopBarComponent,
     SidebarComponent,
@@ -66,7 +64,7 @@ import { PhotoSelectionReminderService, ReminderWorkflowStep } from '../../../se
     FooterComponent,
     FloatingContactComponent,
     PhotoSelectionReminderDialogComponent,
-    PasswordSetDialogComponent
+    PasswordSetDialogComponent,
   ],
   template: `
     <!-- Skip to main content link (A11y) -->

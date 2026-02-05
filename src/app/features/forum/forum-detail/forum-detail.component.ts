@@ -1,5 +1,4 @@
 import { Component, OnInit, ChangeDetectionStrategy, signal, DestroyRef, inject, computed, viewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -43,7 +42,6 @@ import { calculateOptimisticReaction, calculateLikesCount } from '../../../share
 @Component({
     selector: 'app-forum-detail',
     imports: [
-        CommonModule,
         RouterModule,
         FormsModule,
         GuestNameDialogComponent,
@@ -55,8 +53,8 @@ import { calculateOptimisticReaction, calculateLikesCount } from '../../../share
         ContentBlockComponent,
         PostMetaBarComponent,
         PostHeaderBarComponent,
-        CreateDiscussionDialogComponent
-    ],
+        CreateDiscussionDialogComponent,
+  ],
     templateUrl: './forum-detail.component.html',
     styleUrls: ['./forum-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

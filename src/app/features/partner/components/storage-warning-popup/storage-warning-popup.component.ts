@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, OnInit } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { StorageUsage } from '../../services/storage.service';
@@ -16,7 +16,7 @@ const DISMISS_DURATION_HOURS = 24;
 @Component({
   selector: 'app-storage-warning-popup',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DecimalPipe],
+  imports: [LucideAngularModule, DecimalPipe],
   template: `
     @if (isVisible()) {
       <div class="popup-overlay" (click)="handleDismiss()">

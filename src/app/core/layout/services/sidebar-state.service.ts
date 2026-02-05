@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, NgZone, inject, DestroyRef, OnDestroy } from '@angular/core';
+import { Injectable, signal, computed, NgZone, inject, DestroyRef } from '@angular/core';
 import { TabloStorageService } from '../../services/tablo-storage.service';
 
 /**
@@ -15,7 +15,7 @@ export type SidebarMode = 'expanded' | 'collapsed' | 'hidden' | 'overlay';
 @Injectable({
   providedIn: 'root'
 })
-export class SidebarStateService implements OnDestroy {
+export class SidebarStateService {
   private readonly ngZone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
   private readonly storage = inject(TabloStorageService);
@@ -83,12 +83,12 @@ export class SidebarStateService implements OnDestroy {
   constructor() {
     this.initResponsiveListeners();
     this.loadExpandedSections();
-  }
 
-  ngOnDestroy(): void {
-    if (this.resizeDebounceTimeout) {
-      clearTimeout(this.resizeDebounceTimeout);
-    }
+    this.destroyRef.onDestroy(() => {
+      if (this.resizeDebounceTimeout) {
+        clearTimeout(this.resizeDebounceTimeout);
+      }
+    });
   }
 
   // ============ Actions ============

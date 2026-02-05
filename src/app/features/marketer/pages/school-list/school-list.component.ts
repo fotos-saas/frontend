@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,7 +11,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
 @Component({
   selector: 'app-school-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [FormsModule, RouterModule],
   template: `
     <div class="school-list-page page-card">
       <header class="page-header">

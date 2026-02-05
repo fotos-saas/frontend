@@ -6,7 +6,6 @@ import {
   output,
   effect
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Poll, PollMedia } from '../../../core/services/voting.service';
 import { DEADLINE_OPTIONS } from '../voting-create-dialog/voting-create-dialog.component';
@@ -42,7 +41,7 @@ export interface VotingEditResult {
 @Component({
   selector: 'app-voting-edit-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MediaUploaderComponent, RichTextEditorComponent],
+  imports: [FormsModule, MediaUploaderComponent, RichTextEditorComponent],
   templateUrl: './voting-edit-dialog.component.html',
   styleUrls: ['./voting-edit-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

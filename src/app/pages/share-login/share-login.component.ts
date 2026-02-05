@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -13,7 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
     selector: 'app-share-login',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [RouterLink],
     template: `
     <div class="share-login">
       <div class="share-login__card">

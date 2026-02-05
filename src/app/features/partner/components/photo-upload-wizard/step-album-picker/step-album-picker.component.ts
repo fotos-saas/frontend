@@ -4,7 +4,6 @@ import {
   output,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { AlbumsSummary, AlbumType } from '../../../services/partner.service';
@@ -24,7 +23,7 @@ import { AlbumsSummary, AlbumType } from '../../../services/partner.service';
 @Component({
   selector: 'app-step-album-picker',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     <div class="album-picker">
       <div class="picker-header">

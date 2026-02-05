@@ -12,7 +12,6 @@ import {
   DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PasswordStrengthComponent } from '../../../../shared/components/password-strength/password-strength.component';
@@ -41,7 +40,7 @@ export type ClientRegisterResult =
 @Component({
   selector: 'app-client-register-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, PasswordStrengthComponent],
+  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent],
   template: `
     <div
       class="dialog-backdrop"

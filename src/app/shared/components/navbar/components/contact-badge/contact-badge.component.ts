@@ -1,6 +1,4 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Contact Badge Component
  *
@@ -10,7 +8,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-contact-badge',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './contact-badge.component.html',
   styleUrls: ['./contact-badge.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,4 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { VotingService, Poll, PollMedia } from '../../../core/services/voting.service';
@@ -28,7 +27,6 @@ import { VotingListState } from './voting-list.state';
 @Component({
   selector: 'app-voting-list',
   imports: [
-    CommonModule,
     VotingCardComponent,
     GuestNameDialogComponent,
     ClassSizeDialogComponent,
@@ -36,7 +34,7 @@ import { VotingListState } from './voting-list.state';
     VotingEditDialogComponent,
     ConfirmDialogComponent,
     ParticipantsDialogComponent,
-    MediaLightboxComponent
+    MediaLightboxComponent,
   ],
   templateUrl: './voting-list.component.html',
   styleUrls: ['./voting-list.component.scss'],

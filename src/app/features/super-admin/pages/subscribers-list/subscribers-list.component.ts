@@ -1,10 +1,10 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { NgClass } from '@angular/common';
 import { SuperAdminService, SubscriberListItem } from '../../services/super-admin.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../../../shared/constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
@@ -18,10 +18,10 @@ import { PlansService, PlanOption } from '../../../../shared/services/plans.serv
   selector: 'app-subscribers-list',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     LucideAngularModule,
-    MatTooltipModule
+    MatTooltipModule,
+    NgClass,
   ],
   templateUrl: './subscribers-list.component.html',
   styleUrl: './subscribers-list.component.scss',

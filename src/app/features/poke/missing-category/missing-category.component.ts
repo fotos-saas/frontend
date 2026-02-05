@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, signal, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MissingUserCardComponent } from '../missing-user-card/missing-user-card.component';
 import { PokeComposerComponent } from '../poke-composer/poke-composer.component';
 import { MissingCategory, MissingUser, PokeCategory } from '../../../core/models/poke.models';
@@ -12,9 +11,8 @@ import { MissingCategory, MissingUser, PokeCategory } from '../../../core/models
 @Component({
   selector: 'app-missing-category',
   imports: [
-    CommonModule,
     MissingUserCardComponent,
-    PokeComposerComponent
+    PokeComposerComponent,
   ],
   templateUrl: './missing-category.component.html',
   styleUrls: ['./missing-category.component.scss'],

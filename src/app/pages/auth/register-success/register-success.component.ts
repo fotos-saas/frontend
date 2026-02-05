@@ -1,6 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
@@ -12,10 +11,9 @@ import { environment } from '../../../../environments/environment';
   selector: 'app-register-success',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     AuthLayoutComponent,
-    LucideAngularModule
+    LucideAngularModule,
   ],
   template: `
     <app-auth-layout>

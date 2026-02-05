@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -16,11 +15,10 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
   selector: 'app-partner-team-list',
   standalone: true,
   imports: [
-    CommonModule,
     LucideAngularModule,
     MatTooltipModule,
     InviteDialogComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
   ],
   templateUrl: './team-list.component.html',
   styleUrl: './team-list.component.scss',

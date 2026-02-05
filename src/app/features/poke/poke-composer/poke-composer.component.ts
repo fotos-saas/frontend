@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit, DestroyRef, input, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PresetSelectorComponent } from '../preset-selector/preset-selector.component';
 import { PokeService } from '../../../core/services/poke.service';
@@ -15,9 +14,8 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-poke-composer',
   imports: [
-    CommonModule,
     FormsModule,
-    PresetSelectorComponent
+    PresetSelectorComponent,
   ],
   templateUrl: './poke-composer.component.html',
   styleUrls: ['./poke-composer.component.scss'],

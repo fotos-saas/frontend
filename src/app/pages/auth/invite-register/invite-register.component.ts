@@ -1,5 +1,4 @@
 import { Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -36,7 +35,7 @@ interface InviteRegisterResponse {
 @Component({
   selector: 'app-invite-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AuthLayoutComponent],
+  imports: [ReactiveFormsModule, RouterModule, AuthLayoutComponent],
   template: `
     <app-auth-layout>
       <div class="auth-card">

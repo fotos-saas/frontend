@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -33,7 +32,6 @@ import { AlbumEditModalComponent, AlbumEditFormData } from './components/album-e
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     LucideAngularModule,
     MatTooltipModule,
@@ -44,7 +42,7 @@ import { AlbumEditModalComponent, AlbumEditFormData } from './components/album-e
     AlbumHeaderComponent,
     AlbumInfoBarComponent,
     AlbumPhotoListComponent,
-    AlbumEditModalComponent
+    AlbumEditModalComponent,
   ],
   templateUrl: './album-detail.component.html',
   styleUrl: './album-detail.component.scss'

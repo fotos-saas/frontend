@@ -11,7 +11,6 @@ import {
   DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { PasswordStrengthComponent } from '../password-strength/password-strength.component';
@@ -39,7 +38,7 @@ export type PasswordSetResult = { action: 'success' };
 @Component({
   selector: 'app-password-set-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, PasswordStrengthComponent],
+  imports: [FormsModule, PasswordStrengthComponent],
   templateUrl: './password-set-dialog.component.html',
   styleUrls: ['./password-set-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

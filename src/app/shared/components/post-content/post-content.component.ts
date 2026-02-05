@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   input
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 /**
@@ -24,7 +23,7 @@ export type ContentFontSize = 'small' | 'normal';
 @Component({
   selector: 'app-post-content',
   standalone: true,
-  imports: [CommonModule, SafeHtmlPipe],
+  imports: [SafeHtmlPipe],
   template: `
     <div
       class="post-content"

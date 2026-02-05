@@ -1,5 +1,4 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
@@ -18,7 +17,7 @@ import { formatDateTime } from '../../../../../../../shared/utils/formatters.uti
 @Component({
   selector: 'app-client-access-code',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatTooltipModule],
+  imports: [LucideAngularModule, MatTooltipModule],
   template: `
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Belépési kód</h2>

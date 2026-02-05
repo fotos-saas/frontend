@@ -1,6 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, SubscriptionInfo } from '../../services/subscription.service';
@@ -27,7 +26,6 @@ import { AddonsCardComponent } from './components/addons-card/addons-card.compon
   selector: 'app-partner-settings',
   standalone: true,
   imports: [
-    CommonModule,
     LucideAngularModule,
     MatTooltipModule,
     SubscriptionCardComponent,
@@ -35,7 +33,7 @@ import { AddonsCardComponent } from './components/addons-card/addons-card.compon
     DeleteAccountDialogComponent,
     StorageUsageCardComponent,
     StoragePurchaseDialogComponent,
-    AddonsCardComponent
+    AddonsCardComponent,
   ],
   template: `
     <div class="settings-page page-card">

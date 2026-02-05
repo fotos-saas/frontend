@@ -1,5 +1,4 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -19,7 +18,7 @@ import { formatDateTime } from '../../../../../../../shared/utils/formatters.uti
 @Component({
   selector: 'app-client-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, MatTooltipModule],
+  imports: [RouterModule, LucideAngularModule, MatTooltipModule],
   template: `
     <!-- Top Bar: Back + Actions -->
     <div class="top-bar">

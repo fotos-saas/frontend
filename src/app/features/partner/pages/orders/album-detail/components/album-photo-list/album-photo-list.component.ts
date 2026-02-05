@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,7 +14,7 @@ import { AlbumPhoto, AlbumStatus } from '../../../../../services/partner-orders.
   selector: 'app-album-photo-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule],
   template: `
     <div class="photo-list">
       <!-- Filter bar -->

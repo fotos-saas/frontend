@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -32,7 +31,6 @@ import { ClientAlbumListComponent } from './components/client-album-list/client-
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     FormsModule,
     LucideAngularModule,
@@ -40,7 +38,7 @@ import { ClientAlbumListComponent } from './components/client-album-list/client-
     ConfirmDialogComponent,
     ClientHeaderComponent,
     ClientAccessCodeComponent,
-    ClientAlbumListComponent
+    ClientAlbumListComponent,
   ],
   templateUrl: './client-detail.component.html',
   styleUrl: './client-detail.component.scss'

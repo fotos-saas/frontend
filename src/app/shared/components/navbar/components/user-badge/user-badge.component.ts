@@ -1,6 +1,4 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * User Badge Component
  *
@@ -10,7 +8,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-user-badge',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './user-badge.component.html',
   styleUrls: ['./user-badge.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

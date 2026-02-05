@@ -1,6 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ClientService, ClientAlbum } from '../../services/client.service';
@@ -12,7 +11,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-client-album-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [RouterLink, LucideAngularModule],
   template: `
     <div class="album-list-page page-card">
       <!-- Header -->

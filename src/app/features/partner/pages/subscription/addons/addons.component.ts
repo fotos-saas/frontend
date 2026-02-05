@@ -1,6 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AddonService, Addon, AddonListResponse } from '../../../services/addon.service';
@@ -26,12 +25,11 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
   selector: 'app-addons',
   standalone: true,
   imports: [
-    CommonModule,
     LucideAngularModule,
     MatTooltipModule,
     StorageUsageCardComponent,
     StoragePurchaseDialogComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
   ],
   template: `
     <div class="addons-page page-card">

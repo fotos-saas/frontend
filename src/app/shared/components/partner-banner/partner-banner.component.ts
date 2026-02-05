@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { AuthService, TabloProject } from '../../../core/services/auth.service';
 import { ClipboardService } from '../../../core/services/clipboard.service';
 import { Observable } from 'rxjs';
@@ -16,7 +15,7 @@ import { Observable } from 'rxjs';
     styleUrls: ['./partner-banner.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule]
+    imports: []
 })
 export class PartnerBannerComponent {
   /** Projekt adatok */

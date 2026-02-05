@@ -7,7 +7,6 @@ import {
   HostListener,
   DestroyRef
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NotificationService, Notification } from '../../../core/services/notification.service';
@@ -24,7 +23,7 @@ import { NotificationListComponent } from './components/notification-list/notifi
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationListComponent],
+  imports: [RouterModule, NotificationListComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notification-bell.component.html',
   styleUrl: './notification-bell.component.scss'

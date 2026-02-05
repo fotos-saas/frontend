@@ -4,7 +4,6 @@ import {
   OnInit,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { GamificationService } from '../../../core/services/gamification.service';
 import { GuestService } from '../../../core/services/guest.service';
 
@@ -17,7 +16,7 @@ import { GuestService } from '../../../core/services/guest.service';
 @Component({
   selector: 'app-user-rank-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="rank-card">

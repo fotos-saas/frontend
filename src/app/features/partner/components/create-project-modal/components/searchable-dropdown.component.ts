@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -16,7 +15,7 @@ export interface DropdownOption {
 @Component({
   selector: 'app-searchable-dropdown',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dropdown-wrapper">

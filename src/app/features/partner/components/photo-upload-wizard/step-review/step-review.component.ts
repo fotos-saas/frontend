@@ -6,7 +6,6 @@ import {
   computed,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -35,7 +34,6 @@ import {
   selector: 'app-step-review',
   standalone: true,
   imports: [
-    CommonModule,
     DragDropModule,
     LucideAngularModule,
     SamplesLightboxComponent,
@@ -43,7 +41,7 @@ import {
     ReviewFilterTabsComponent,
     ReviewSearchBoxComponent,
     ReviewPersonCardComponent,
-    ReviewUnassignedPanelComponent
+    ReviewUnassignedPanelComponent,
   ],
   template: `
     <div class="step-review">

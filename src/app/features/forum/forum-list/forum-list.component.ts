@@ -1,6 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, signal, inject, DestroyRef, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { LoggerService } from '../../../core/services/logger.service';
 import { Router, RouterModule } from '@angular/router';
 import { ForumService, Discussion, DiscussionFilters } from '../../../core/services/forum.service';
@@ -22,13 +21,12 @@ import { ForumSearchComponent, ForumFilters, TemplateOption } from '../forum-sea
 @Component({
     selector: 'app-forum-list',
     imports: [
-        CommonModule,
         RouterModule,
         GuestNameDialogComponent,
         ForumCardComponent,
         CreateDiscussionDialogComponent,
-        ForumSearchComponent
-    ],
+        ForumSearchComponent,
+  ],
     templateUrl: './forum-list.component.html',
     styleUrls: ['./forum-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

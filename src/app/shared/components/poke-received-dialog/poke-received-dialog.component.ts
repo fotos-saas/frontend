@@ -10,7 +10,6 @@ import {
   DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { PokeService } from '../../../core/services/poke.service';
 import { DateUtilsService } from '../../services/date-utils.service';
 import { Poke } from '../../../core/models/poke.models';
@@ -33,7 +32,7 @@ import { createBackdropHandler } from '../../utils/dialog.util';
 @Component({
   selector: 'app-poke-received-dialog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './poke-received-dialog.component.html',
   styleUrls: ['./poke-received-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

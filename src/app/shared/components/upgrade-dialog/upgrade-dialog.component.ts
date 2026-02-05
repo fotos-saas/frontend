@@ -14,7 +14,6 @@ import {
   computed,
   DestroyRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
@@ -39,7 +38,7 @@ export type UpgradeFeature = 'schools' | 'contacts' | 'projects' | 'storage' | '
 @Component({
   selector: 'app-upgrade-dialog',
   standalone: true,
-  imports: [CommonModule, A11yModule, LucideAngularModule],
+  imports: [A11yModule, LucideAngularModule],
   templateUrl: './upgrade-dialog.component.html',
   styleUrls: ['./upgrade-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

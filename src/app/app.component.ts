@@ -1,16 +1,27 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, DestroyRef } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { CapacitorService } from './core/services/capacitor.service';
 import { AppUpdateService } from './core/services/app-update.service';
 import { SentryService } from './core/services/sentry.service';
+import { ToastComponent } from './shared/components/toast/toast.component';
+import { TopLoadingBarComponent } from './shared/components/top-loading-bar/top-loading-bar.component';
+import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
+import { ErrorFeedbackDialogComponent } from './shared/components/error-feedback-dialog/error-feedback-dialog.component';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
-    standalone: false,
+    standalone: true,
+    imports: [
+        RouterOutlet,
+        ToastComponent,
+        TopLoadingBarComponent,
+        OfflineBannerComponent,
+        ErrorFeedbackDialogComponent,
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {

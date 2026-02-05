@@ -1,5 +1,4 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ClientService } from '../../services/client.service';
@@ -11,7 +10,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-client-welcome',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [RouterLink, LucideAngularModule],
   template: `
     <div class="welcome-page page-card">
       <!-- Hero section -->

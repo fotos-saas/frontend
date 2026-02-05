@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -13,7 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
     selector: 'app-preview-login',
     standalone: true,
-    imports: [CommonModule],
+    imports: [],
     template: `
     <div class="preview-login">
       <div class="preview-login__card">

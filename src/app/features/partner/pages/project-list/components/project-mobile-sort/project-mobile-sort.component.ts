@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 
@@ -14,7 +13,7 @@ export interface SortOption {
 @Component({
   selector: 'app-project-mobile-sort',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mobile-sort-bar">

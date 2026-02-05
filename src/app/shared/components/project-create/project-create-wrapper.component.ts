@@ -6,7 +6,6 @@ import {
   DestroyRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -21,7 +20,7 @@ import { SchoolOption } from './project-create.types';
 @Component({
   selector: 'app-project-create-wrapper',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LucideAngularModule],
+  imports: [RouterModule, FormsModule, LucideAngularModule],
   template: `
     <div class="project-create-page page-card">
       <header class="page-header">

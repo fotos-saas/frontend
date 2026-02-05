@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
@@ -14,7 +13,7 @@ import { PartnerOrderAlbumDetails } from '../../../../../services/partner-orders
   selector: 'app-album-info-bar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LucideAngularModule, MatTooltipModule],
+  imports: [LucideAngularModule, MatTooltipModule],
   template: `
     <div class="album-info-bar">
       <div class="info-stats">

@@ -14,7 +14,6 @@ import {
   computed,
   DestroyRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -34,7 +33,7 @@ type BillingCycleType = 'monthly' | 'yearly';
 @Component({
   selector: 'app-change-plan-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, A11yModule, LucideAngularModule],
+  imports: [FormsModule, A11yModule, LucideAngularModule],
   template: `
     <div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
       <div #dialogContent class="dialog dialog--md" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">

@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
 import { AuthService, TabloProject, TabloPerson } from '../../core/services/auth.service';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import { map } from 'rxjs/operators';
 @Component({
     selector: 'app-persons',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [FormsModule, AsyncPipe],
     templateUrl: './persons.component.html',
     styleUrls: ['./persons.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

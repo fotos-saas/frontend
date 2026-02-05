@@ -7,8 +7,8 @@ import {
   forwardRef,
   OnInit
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { NgStyle } from '@angular/common';
 import { QuillModule, QuillEditorComponent } from 'ngx-quill';
 
 /**
@@ -61,7 +61,7 @@ const TOOLBAR_CONFIGS = {
  */
 @Component({
   selector: 'app-rich-text-editor',
-  imports: [CommonModule, FormsModule, QuillModule],
+  imports: [FormsModule, QuillModule, NgStyle],
   templateUrl: './rich-text-editor.component.html',
   styleUrls: ['./rich-text-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

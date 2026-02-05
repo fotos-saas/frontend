@@ -1,3 +1,4 @@
+import { SlicePipe } from '@angular/common';
 import {
   Component,
   Input,
@@ -6,7 +7,6 @@ import {
   signal,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { UploadedPhoto } from '../../../services/partner.service';
@@ -19,7 +19,7 @@ import { DropZoneComponent } from '../../../../../shared/components/drop-zone/dr
 @Component({
   selector: 'app-step-upload',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DropZoneComponent],
+  imports: [LucideAngularModule, DropZoneComponent, SlicePipe],
   template: `
     <div class="step-upload">
       <!-- Drop Zone - csak ha nincs még kép VAGY ha showDropZone aktív -->

@@ -1,4 +1,4 @@
-import { Directive, input, HostListener, HostBinding, inject, signal, OnDestroy } from '@angular/core';
+import { Directive, input, HostListener, HostBinding, inject, signal, DestroyRef } from '@angular/core';
 import { ElectronService, NativeDragFile } from '../../core/services/electron.service';
 
 /**
@@ -22,8 +22,9 @@ import { ElectronService, NativeDragFile } from '../../core/services/electron.se
   selector: '[appNativeDrag]',
   standalone: true,
 })
-export class NativeDragDirective implements OnDestroy {
+export class NativeDragDirective {
   private readonly electronService = inject(ElectronService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Files to be dragged (required) */
   readonly appNativeDrag = input.required<NativeDragFile[]>();
@@ -137,15 +138,13 @@ export class NativeDragDirective implements OnDestroy {
     }
   }
 
-  /**
-   * Cleanup temp files when directive is destroyed
-   */
-  ngOnDestroy(): void {
-    if (this.cleanupNeeded && this.preparedPaths.length > 0) {
-      // Cleanup async, don't block destruction
-      this.electronService.cleanupDragFiles(this.preparedPaths).catch(() => {
-        // Silently fail - temp cleanup is not critical
-      });
-    }
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.cleanupNeeded && this.preparedPaths.length > 0) {
+        this.electronService.cleanupDragFiles(this.preparedPaths).catch(() => {
+          // Silently fail - temp cleanup is not critical
+        });
+      }
+    });
   }
 }

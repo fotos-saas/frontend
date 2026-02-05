@@ -9,7 +9,6 @@ import {
   ChangeDetectionStrategy,
   OnInit
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -44,7 +43,6 @@ import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
   selector: 'app-photo-upload-wizard',
   standalone: true,
   imports: [
-    CommonModule,
     LucideAngularModule,
     StepUploadComponent,
     StepChoiceComponent,
@@ -53,7 +51,7 @@ import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
     ConfirmDialogComponent,
     WizardHeaderComponent,
     WizardStepperComponent,
-    WizardFooterComponent
+    WizardFooterComponent,
   ],
   templateUrl: './photo-upload-wizard.component.html',
   styleUrl: './photo-upload-wizard.component.scss',

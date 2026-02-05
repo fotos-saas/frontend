@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -27,7 +26,6 @@ import { ProjectPaginationComponent } from './components/project-pagination/proj
   selector: 'app-partner-project-list',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,

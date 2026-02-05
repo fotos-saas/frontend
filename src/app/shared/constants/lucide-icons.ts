@@ -1,27 +1,12 @@
-import { APP_INITIALIZER, NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-
-// Core interceptors
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-import { ErrorInterceptor } from './core/interceptors/error.interceptor';
-
-// Sentry
-import { provideSentry, SentryService } from './core/services/sentry.service';
-
-// Standalone komponensek amik az AppComponent-ben kellenek
-import { ToastComponent } from './shared/components/toast/toast.component';
-import { TopLoadingBarComponent } from './shared/components/top-loading-bar/top-loading-bar.component';
-import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
-import { ErrorFeedbackDialogComponent } from './shared/components/error-feedback-dialog/error-feedback-dialog.component';
-
-// Lucide ikonok globális konfigurálása
+/**
+ * Lucide ikonok - globálisan regisztrálva az egész appban
+ *
+ * Új ikon hozzáadásához:
+ * 1. Import hozzáadása fent
+ * 2. Hozzáadás a LUCIDE_ICONS_MAP objektumhoz
+ * 3. ICONS konstanshoz is add hozzá az icons.constants.ts-ben!
+ */
 import {
-  LucideAngularModule,
   Home,
   Image,
   ShoppingCart,
@@ -146,13 +131,7 @@ import {
   Megaphone
 } from 'lucide-angular';
 
-/**
- * Lucide ikonok - globálisan regisztrálva az egész appban
- * Új ikon hozzáadásához:
- * 1. Import hozzáadása fent
- * 2. Hozzáadás az ICONS objektumhoz
- */
-const LUCIDE_ICONS = {
+export const LUCIDE_ICONS_MAP = {
   Home,
   Image,
   ShoppingCart,
@@ -276,52 +255,3 @@ const LUCIDE_ICONS = {
   ClipboardList,
   Megaphone
 };
-
-@NgModule({
-    declarations: [
-        AppComponent
-        // Minden más komponens standalone és lazy-loaded
-    ],
-    bootstrap: [AppComponent],
-    imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
-        AppRoutingModule,
-        // Toast az AppComponent-ben van használva
-        ToastComponent,
-        // Top Loading Bar - navigáció közben jelenik meg
-        TopLoadingBarComponent,
-        // Offline Banner - offline mod jelzese
-        OfflineBannerComponent,
-        // Error Feedback Dialog - 5xx hibáknál
-        ErrorFeedbackDialogComponent,
-        // Lucide ikonok globálisan
-        LucideAngularModule.pick(LUCIDE_ICONS)
-    ],
-    providers: [
-        // Sentry inicializálás az app induláskor
-        {
-            provide: APP_INITIALIZER,
-            useFactory: (sentryService: SentryService) => () => sentryService.init(),
-            deps: [SentryService],
-            multi: true
-        },
-        // Sentry providers (ErrorHandler + TraceService)
-        ...provideSentry(),
-        // Minden service providedIn: 'root' használ - csak az interceptorok kellenek itt!
-        // FONTOS: A sorrend számít! AuthInterceptor előbb fut (token hozzáadás),
-        // ErrorInterceptor utána (hibakezelés)
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: AuthInterceptor,
-            multi: true
-        },
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: ErrorInterceptor,
-            multi: true
-        },
-        provideHttpClient(withInterceptorsFromDi())
-    ]
-})
-export class AppModule { }

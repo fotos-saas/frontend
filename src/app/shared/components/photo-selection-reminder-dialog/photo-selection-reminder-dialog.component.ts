@@ -1,5 +1,4 @@
 import { Component, output, input, computed, ChangeDetectionStrategy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { ReminderWorkflowStep, STEP_REMINDER_MESSAGES, StepReminderMessage } from '../../../core/services/photo-selection-reminder.service';
 
@@ -31,7 +30,7 @@ export type PhotoSelectionReminderResult =
 @Component({
   selector: 'app-photo-selection-reminder-dialog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './photo-selection-reminder-dialog.component.html',
   styleUrls: ['./photo-selection-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -8,7 +8,6 @@ import {
   ChangeDetectionStrategy,
   DestroyRef
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
@@ -37,14 +36,13 @@ import { TopBarUserBadgesComponent } from './components/top-bar-user-badges/top-
   selector: 'app-top-bar',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     GuestNameDialogComponent,
     ContactEditDialogComponent,
     PokeReceivedDialogComponent,
     ConfirmDialogComponent,
     TopBarActionsComponent,
-    TopBarUserBadgesComponent
+    TopBarUserBadgesComponent,
   ],
   templateUrl: './top-bar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

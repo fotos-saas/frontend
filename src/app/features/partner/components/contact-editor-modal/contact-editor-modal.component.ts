@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output, inject, signal, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PartnerService, ProjectContact } from '../../services/partner.service';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
@@ -13,7 +12,7 @@ import { formatHungarianPhone, validatePhone } from '../../../../shared/utils/ph
 @Component({
   selector: 'app-contact-editor-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div
       class="dialog-backdrop"

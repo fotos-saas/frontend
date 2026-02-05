@@ -1,6 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, signal, inject, DestroyRef, computed, viewChildren } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PokeService } from '../../../core/services/poke.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -22,13 +21,12 @@ import { StaggerAnimationDirective } from '../../../shared/directives';
 @Component({
   selector: 'app-missing-page',
   imports: [
-    CommonModule,
     FormsModule,
     MissingUserCardComponent,
     PokeComposerComponent,
     DailyLimitBadgeComponent,
     ReceivedPokesDialogComponent,
-    StaggerAnimationDirective
+    StaggerAnimationDirective,
   ],
   providers: [MissingFilterService],
   templateUrl: './missing-page.component.html',

@@ -7,7 +7,6 @@ import {
   ChangeDetectionStrategy,
   HostListener
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../constants/icons.constants';
 
@@ -29,7 +28,7 @@ import { ICONS } from '../../constants/icons.constants';
 @Component({
   selector: 'app-drop-zone',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     <div
       class="drop-zone"

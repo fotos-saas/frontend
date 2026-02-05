@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { NotificationBellComponent } from '../../../../../../shared/components/notification-bell/notification-bell.component';
 
 /**
@@ -8,7 +7,7 @@ import { NotificationBellComponent } from '../../../../../../shared/components/n
 @Component({
   selector: 'app-top-bar-actions',
   standalone: true,
-  imports: [CommonModule, NotificationBellComponent],
+  imports: [NotificationBellComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex items-center gap-1 md:gap-2 flex-shrink-0">

@@ -2,7 +2,6 @@ import {
   Component,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FloatingFabComponent } from '../../../../shared/components/floating-fab/floating-fab.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -16,7 +15,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-floating-info',
   standalone: true,
-  imports: [CommonModule, FloatingFabComponent, LucideAngularModule],
+  imports: [FloatingFabComponent, LucideAngularModule],
   template: `
     <app-floating-fab icon="info" color="blue" ariaLabel="Súgó" panelWidth="wide">
       <div class="info-content">

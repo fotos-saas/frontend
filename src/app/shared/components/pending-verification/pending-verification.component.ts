@@ -8,7 +8,6 @@ import {
   input,
   output
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { GuestService } from '../../../core/services/guest.service';
 
 /**
@@ -20,7 +19,7 @@ import { GuestService } from '../../../core/services/guest.service';
 @Component({
   selector: 'app-pending-verification',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './pending-verification.component.html',
   styleUrls: ['./pending-verification.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

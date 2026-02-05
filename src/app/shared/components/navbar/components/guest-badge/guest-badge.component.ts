@@ -1,6 +1,4 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Guest Badge Component
  *
@@ -10,7 +8,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-guest-badge',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <span
       class="navbar__guest-badge"

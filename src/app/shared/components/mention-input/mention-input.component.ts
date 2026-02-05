@@ -7,11 +7,9 @@ import {
   ViewChild,
   ChangeDetectionStrategy,
   signal,
-  OnDestroy,
   inject,
   DestroyRef
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
@@ -25,12 +23,12 @@ import { MentionService, MentionParticipant } from '../../../core/services/menti
  */
 @Component({
   selector: 'app-mention-input',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './mention-input.component.html',
   styleUrls: ['./mention-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MentionInputComponent implements OnDestroy {
+export class MentionInputComponent {
   /** Signal-based inputs */
   readonly placeholder = input<string>('Írd ide a szöveget...');
   readonly disabled = input<boolean>(false);
@@ -71,10 +69,10 @@ export class MentionInputComponent implements OnDestroy {
       this.showSuggestions.set(results.length > 0);
       this.selectedIndex.set(0);
     });
-  }
 
-  ngOnDestroy(): void {
-    this.searchQuery$.complete();
+    this.destroyRef.onDestroy(() => {
+      this.searchQuery$.complete();
+    });
   }
 
   /**

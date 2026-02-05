@@ -1,5 +1,4 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, AccountStatusResponse } from '../../../services/subscription.service';
@@ -20,7 +19,7 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
 @Component({
   selector: 'app-account-delete',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatTooltipModule],
+  imports: [LucideAngularModule, MatTooltipModule],
   template: `
     <div class="account-delete-page page-card">
       <h1 class="page-title">

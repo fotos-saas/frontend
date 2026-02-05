@@ -1,5 +1,4 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { VotingService, PollOption, PollMedia } from '../../../core/services/voting.service';
@@ -21,11 +20,10 @@ import { VotingDetailState } from './voting-detail.state';
 @Component({
   selector: 'app-voting-detail',
   imports: [
-    CommonModule,
     RouterModule,
     GuestNameDialogComponent,
     MediaLightboxComponent,
-    SafeHtmlPipe
+    SafeHtmlPipe,
   ],
   templateUrl: './voting-detail.component.html',
   styleUrls: ['./voting-detail.component.scss'],

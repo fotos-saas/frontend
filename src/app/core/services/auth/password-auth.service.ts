@@ -86,11 +86,19 @@ export class PasswordAuthService {
 
   /**
    * Marketer auth adatok tárolása
+   *
+   * SECURITY: sessionStorage használata localStorage helyett
+   * - Tab-izolált: más tabok nem férnek hozzá
+   * - XSS támadás esetén csak az aktuális tab érintett
+   * - Tab bezáráskor automatikusan törlődik
+   *
+   * Megjegyzés: A felhasználónak újra be kell jelentkeznie új tab nyitáskor,
+   * de ez biztonságosabb mint a localStorage használata.
    */
   private storeMarketerAuth(response: MarketerLoginResponse): void {
-    // Token tárolása localStorage-ba
-    localStorage.setItem('marketer_token', response.token);
-    localStorage.setItem('marketer_user', JSON.stringify(response.user));
+    // SECURITY: sessionStorage XSS mitigation
+    sessionStorage.setItem('marketer_token', response.token);
+    sessionStorage.setItem('marketer_user', JSON.stringify(response.user));
 
     // Sentry user context beállítása
     this.updateSentryUserContext(response.user, response.user.partner_id ?? undefined);

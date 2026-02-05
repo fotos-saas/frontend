@@ -1,5 +1,4 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { VotingService, PollResults, PollOption } from '../../../core/services/voting.service';
@@ -16,7 +15,7 @@ import { VotingService, PollResults, PollOption } from '../../../core/services/v
  */
 @Component({
   selector: 'app-voting-results',
-  imports: [CommonModule, RouterModule],
+  imports: [RouterModule],
   templateUrl: './voting-results.component.html',
   styleUrls: ['./voting-results.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

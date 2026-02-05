@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, computed, OnInit } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
@@ -15,7 +15,7 @@ import { StorageUsage } from '../../../../services/storage.service';
 @Component({
   selector: 'app-storage-purchase-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DecimalPipe],
+  imports: [FormsModule, LucideAngularModule, DecimalPipe],
   template: `
     <div
       class="dialog-backdrop"

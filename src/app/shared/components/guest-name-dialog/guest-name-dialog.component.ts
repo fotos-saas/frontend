@@ -1,5 +1,4 @@
 import { Component, input, output, ChangeDetectionStrategy, AfterViewInit, ViewChild, ElementRef, OnInit, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { isValidEmail } from '../../utils/validators.util';
@@ -29,7 +28,7 @@ export type GuestNameResult =
 @Component({
   selector: 'app-guest-name-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './guest-name-dialog.component.html',
   styleUrls: ['./guest-name-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

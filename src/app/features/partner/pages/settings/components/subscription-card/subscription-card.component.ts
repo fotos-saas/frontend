@@ -1,5 +1,5 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { SubscriptionInfo } from '../../../../services/subscription.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../../../../../shared/constants';
@@ -12,7 +12,7 @@ import { ICONS, getSubscriptionStatusLabel } from '../../../../../../shared/cons
 @Component({
   selector: 'app-subscription-card',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DatePipe],
+  imports: [LucideAngularModule, DatePipe],
   template: `
     <div class="subscription-card">
       <!-- Header -->

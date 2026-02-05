@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -18,10 +17,9 @@ type TabId = 'system' | 'email' | 'stripe' | 'info';
   selector: 'app-settings',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     LucideAngularModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

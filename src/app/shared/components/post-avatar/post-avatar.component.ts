@@ -5,8 +5,6 @@ import {
   computed,
   input
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Avatar méret típus
  */
@@ -25,7 +23,7 @@ export type AvatarSize = 'tiny' | 'small' | 'medium';
 @Component({
   selector: 'app-post-avatar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div
       class="post-avatar"

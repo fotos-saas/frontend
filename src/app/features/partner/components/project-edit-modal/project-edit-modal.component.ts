@@ -1,5 +1,4 @@
 import { Component, Input, Output, EventEmitter, inject, signal, DestroyRef, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -15,7 +14,7 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-project-edit-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   templateUrl: './project-edit-modal.component.html',
   styleUrl: './project-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -20,12 +19,11 @@ import { getInitials } from '../../../../../shared/utils/formatters.util';
   selector: 'app-partner-client-list',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
     ClientEditModalComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
   ],
   templateUrl: './client-list.component.html',
   styleUrl: './client-list.component.scss',

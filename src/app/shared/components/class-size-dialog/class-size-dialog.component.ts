@@ -8,7 +8,6 @@ import {
   ElementRef,
   computed
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { validateNumberRange } from '../../utils/validators.util';
@@ -30,7 +29,7 @@ export type ClassSizeResult =
 @Component({
   selector: 'app-class-size-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './class-size-dialog.component.html',
   styleUrls: ['./class-size-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { NavigationLoadingService } from '../../../core/services/navigation-loading.service';
 
 /**
@@ -17,7 +16,7 @@ import { NavigationLoadingService } from '../../../core/services/navigation-load
 @Component({
   selector: 'app-top-loading-bar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     @if (isVisible()) {
       <div

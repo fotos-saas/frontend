@@ -47,6 +47,39 @@
           }
         </span>
       </div>
+
+      <!-- Státusz + Leadva badge-ek -->
+      @if (project()!.statusLabel || project()!.finalizedAt) {
+        <div class="flex items-center justify-center gap-2 mt-3">
+          @if (project()!.statusLabel) {
+            <span
+              class="detail-badge"
+              [ngClass]="'detail-badge--' + (project()!.statusColor ?? 'gray')"
+            >
+              <lucide-icon [name]="getStatusIcon(project()!.status)" [size]="12" />
+              {{ project()!.statusLabel }}
+            </span>
+          }
+          @if (project()!.draftPhotoCount && project()!.draftPhotoCount! > 0) {
+            <span
+              class="detail-badge detail-badge--amber"
+              [matTooltip]="'Véglegesítésre vár: ' + project()!.draftPhotoCount + ' kép'"
+            >
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="12" />
+              {{ project()!.draftPhotoCount }} kép vár
+            </span>
+          }
+          @if (project()!.finalizedAt) {
+            <span
+              class="detail-badge detail-badge--green"
+              [matTooltip]="'Tablóterv leadva: ' + formatDate(project()!.finalizedAt!)"
+            >
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" />
+              Leadva
+            </span>
+          }
+        </div>
+      }
     </div>
   </header>
 

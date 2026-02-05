@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
@@ -20,6 +21,7 @@ import { ICONS } from '../../../constants/icons.constants';
   selector: 'app-project-detail-view',
   standalone: true,
   imports: [
+    NgClass,
     LucideAngularModule,
     MatTooltipModule,
     BackButtonComponent,
@@ -29,6 +31,7 @@ import { ICONS } from '../../../constants/icons.constants';
     DeleteButtonComponent,
   ],
   templateUrl: './project-detail-view.component.html',
+  styleUrl: './project-detail-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectDetailViewComponent {
@@ -63,6 +66,36 @@ export class ProjectDetailViewComponent {
   getQrCodeImageUrl(registrationUrl: string): string {
     const url = encodeURIComponent(registrationUrl);
     return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
+  }
+
+  /** Dátum formázás (rövid, idő nélkül) */
+  formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('hu-HU', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  /** Státusz ikon */
+  getStatusIcon(status: string | null): string {
+    const iconMap: Record<string, string> = {
+      'not_started': ICONS.CIRCLE,
+      'should_finish': ICONS.CLOCK,
+      'waiting_for_response': ICONS.MAIL,
+      'done': ICONS.CHECK,
+      'waiting_for_finalization': ICONS.FILE_CHECK,
+      'in_print': ICONS.PRINTER,
+      'waiting_for_photos': ICONS.CAMERA,
+      'got_response': ICONS.MAIL_CHECK,
+      'needs_forwarding': ICONS.FORWARD,
+      'at_teacher_for_finalization': ICONS.USER_CHECK,
+      'needs_call': ICONS.PHONE,
+      'sos_waiting_for_photos': ICONS.ALERT_TRIANGLE,
+      'push_could_be_done': ICONS.ARROW_RIGHT,
+    };
+    return iconMap[status ?? ''] ?? ICONS.CIRCLE;
   }
 
   /** Név iniciálék lekérése (avatar-hoz) */

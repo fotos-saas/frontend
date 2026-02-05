@@ -68,10 +68,13 @@ export interface ProjectDetailData {
   classYear: string | null;
   status: string | null;
   statusLabel: string;
+  statusColor?: string;
   tabloStatus: TabloStatus | null;
   photoDate: string | null;
   deadline: string | null;
   expectedClassSize: number | null;
+  finalizedAt?: string | null;
+  draftPhotoCount?: number;
   contact: ProjectContact | null;
   contacts: ProjectContact[];
   qrCode: QrCode | null;

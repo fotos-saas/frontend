@@ -3,7 +3,8 @@ import { moduleMetadata } from '@storybook/angular';
 import { signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { LucideAngularModule, Filter, ChevronUp, ChevronDown, X } from 'lucide-angular';
-import { ExpandableFiltersComponent, FilterConfig } from './expandable-filters.component';
+import { ExpandableFiltersComponent } from './expandable-filters.component';
+import { FilterConfig } from './expandable-filters.model';
 
 /**
  * ExpandableFilters - Újrahasználható szűrő komponens

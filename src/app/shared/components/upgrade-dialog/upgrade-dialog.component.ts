@@ -1,7 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  ViewChild,
+  viewChild,
   ElementRef,
   AfterViewInit,
   OnDestroy,
@@ -66,7 +66,7 @@ export class UpgradeDialogComponent implements OnInit, AfterViewInit, OnDestroy 
   /** Signal-based output */
   readonly close = output<void>();
 
-  @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLElement>;
+  readonly dialogContent = viewChild.required<ElementRef<HTMLElement>>('dialogContent');
 
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
@@ -240,8 +240,9 @@ export class UpgradeDialogComponent implements OnInit, AfterViewInit, OnDestroy 
   ngAfterViewInit(): void {
     this.previousActiveElement = document.activeElement as HTMLElement;
 
-    if (this.dialogContent?.nativeElement) {
-      this.focusTrap = this.focusTrapFactory.create(this.dialogContent.nativeElement);
+    const contentEl = this.dialogContent()?.nativeElement;
+    if (contentEl) {
+      this.focusTrap = this.focusTrapFactory.create(contentEl);
       this.focusTrap.focusInitialElementWhenReady();
     }
   }
@@ -261,7 +262,7 @@ export class UpgradeDialogComponent implements OnInit, AfterViewInit, OnDestroy 
     if (!(event instanceof KeyboardEvent)) return;
 
     if (event.key === 'Escape' || event.key === 'Esc') {
-      if (this.dialogContent?.nativeElement) {
+      if (this.dialogContent()?.nativeElement) {
         this.onClose();
       }
     }

@@ -1,4 +1,4 @@
-import { Component, output, ChangeDetectionStrategy, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy, viewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { LoggerService } from '../../../core/services/logger.service';
 
@@ -40,13 +40,13 @@ export class FinalizationReminderDialogComponent extends BaseDialogComponent imp
   private readonly allowedSnoozeDays = [7, 14];
 
   /** ViewChild referencia a focus management-hez */
-  @ViewChild('primaryButton') primaryButton?: ElementRef<HTMLButtonElement>;
+  readonly primaryButton = viewChild<ElementRef<HTMLButtonElement>>('primaryButton');
 
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
     // Focus a primary action gombra
     setTimeout(() => {
-      this.primaryButton?.nativeElement.focus();
+      this.primaryButton()?.nativeElement.focus();
     }, 100);
   }
 

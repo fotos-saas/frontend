@@ -1,0 +1,93 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+>
+  <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+    <header class="modal-header">
+      <h2>{{ mode() === 'create' ? 'Új ügyfél' : 'Ügyfél szerkesztése' }}</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </header>
+
+    <form (ngSubmit)="save()" class="modal-form">
+      <div class="form-group">
+        <label for="name">Név *</label>
+        <input
+          type="text"
+          id="name"
+          [(ngModel)]="name"
+          name="name"
+          required
+          class="form-input"
+          placeholder="Pl. Kiss Péter"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="email"
+          name="email"
+          class="form-input"
+          placeholder="Pl. pelda@email.hu"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Telefon</label>
+        <input
+          type="tel"
+          id="phone"
+          [(ngModel)]="phone"
+          name="phone"
+          class="form-input"
+          placeholder="Pl. +36 30 123 4567"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="note">Megjegyzés</label>
+        <textarea
+          id="note"
+          [(ngModel)]="note"
+          name="note"
+          class="form-input form-textarea"
+          rows="3"
+          placeholder="Egyéb megjegyzések..."
+        ></textarea>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-message">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="close.emit()">
+          Mégse
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="saving() || !name.trim()"
+        >
+          @if (saving()) {
+            <span class="spinner"></span>
+            Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}
+          }
+        </button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>

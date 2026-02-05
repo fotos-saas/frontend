@@ -1,0 +1,74 @@
+<div
+  class="person-card"
+  [class.person-card--empty]="!person().assignedPhoto && !person().hasExistingPhoto"
+  [class.person-card--assigned]="person().assignedPhoto"
+  [class.person-card--paired]="person().hasExistingPhoto && !person().assignedPhoto"
+  [class.person-card--high]="person().matchConfidence === 'high'"
+  [class.person-card--medium]="person().matchConfidence === 'medium'"
+  [style.animation-delay]="animationDelay()"
+  cdkDropList
+  [id]="'person-' + person().id"
+  [cdkDropListData]="person()"
+  [cdkDropListConnectedTo]="connectedDropLists()"
+  (cdkDropListDropped)="onDrop($event)"
+>
+  <!-- Photo Area -->
+  <div
+    class="photo-area"
+    [class.photo-area--empty]="!person().assignedPhoto && !person().hasExistingPhoto"
+  >
+    @if (person().assignedPhoto) {
+      <!-- Új kép hozzárendelve -->
+      <div class="photo-drag-wrapper" cdkDrag [cdkDragData]="person()">
+        <img
+          [src]="person().assignedPhoto!.thumbUrl"
+          [alt]="person().name"
+          class="person-photo"
+          (click)="photoClick.emit(person().assignedPhoto!); $event.stopPropagation()"
+        />
+        <img *cdkDragPreview [src]="person().assignedPhoto!.thumbUrl" class="drag-preview-img" />
+        <div *cdkDragPlaceholder class="person-placeholder">
+          <span class="person-placeholder__name">{{ person().name }}</span>
+        </div>
+      </div>
+      <div class="photo-actions">
+        <button
+          class="action-btn action-btn--remove"
+          (click)="removeClick.emit(); $event.stopPropagation()"
+          title="Eltávolítás"
+        >
+          <lucide-icon [name]="ICONS.X" [size]="12" />
+        </button>
+      </div>
+      @if (person().matchConfidence) {
+        <div class="confidence-badge" [class.confidence-badge--high]="person().matchConfidence === 'high'">
+          {{ person().matchConfidence === 'high' ? 'Biztos' : 'Valószínű' }}
+        </div>
+      }
+    } @else if (person().hasExistingPhoto) {
+      <!-- Meglévő kép (DB-ből) -->
+      <div class="existing-photo-indicator">
+        <img
+          [src]="person().photoThumbUrl"
+          [alt]="person().name"
+          class="person-photo person-photo--existing"
+        />
+        <div class="existing-badge">
+          <lucide-icon [name]="ICONS.CHECK" [size]="10" />
+          Megvan
+        </div>
+      </div>
+    } @else {
+      <!-- Üres - kép hiányzik -->
+      <div class="empty-photo">
+        <lucide-icon [name]="ICONS.IMAGE" [size]="24" />
+        <span>Húzd ide</span>
+      </div>
+    }
+  </div>
+
+  <!-- Person Info -->
+  <div class="person-info">
+    <span class="person-name" [title]="person().name">{{ person().name }}</span>
+  </div>
+</div>

@@ -7,7 +7,7 @@ import {
   input,
   output,
   signal,
-  ViewChild,
+  viewChild,
   ViewEncapsulation
 } from '@angular/core';
 import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
@@ -60,7 +60,7 @@ export class ExpandableContentComponent implements AfterViewInit {
   readonly isExpanded = signal(false);
 
   /** Belső tartalom referencia a magasság méréshez */
-  @ViewChild('innerRef') innerRef!: ElementRef<HTMLDivElement>;
+  readonly innerRef = viewChild.required<ElementRef<HTMLDivElement>>('innerRef');
 
   /** Valós tartalom magasság */
   private contentHeight = signal<number>(0);
@@ -94,8 +94,8 @@ export class ExpandableContentComponent implements AfterViewInit {
    * Tartalom magasság mérése
    */
   private measureContent(): void {
-    if (this.innerRef?.nativeElement) {
-      const height = this.innerRef.nativeElement.scrollHeight;
+    if (this.innerRef()?.nativeElement) {
+      const height = this.innerRef().nativeElement.scrollHeight;
       this.contentHeight.set(height);
     }
   }

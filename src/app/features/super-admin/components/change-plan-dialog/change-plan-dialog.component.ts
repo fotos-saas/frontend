@@ -1,7 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  ViewChild,
+  viewChild,
   ElementRef,
   AfterViewInit,
   OnDestroy,
@@ -176,7 +176,7 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
   readonly close = output<void>();
   readonly changed = output<void>();
 
-  @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLElement>;
+  readonly dialogContent = viewChild<ElementRef<HTMLElement>>('dialogContent');
 
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
@@ -237,8 +237,8 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
 
     this.previousActiveElement = document.activeElement as HTMLElement;
 
-    if (this.dialogContent?.nativeElement) {
-      this.focusTrap = this.focusTrapFactory.create(this.dialogContent.nativeElement);
+    if (this.dialogContent()?.nativeElement) {
+      this.focusTrap = this.focusTrapFactory.create(this.dialogContent()!.nativeElement);
       this.focusTrap.focusInitialElementWhenReady();
     }
   }
@@ -258,7 +258,7 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
     if (!(event instanceof KeyboardEvent)) return;
 
     if (event.key === 'Escape' || event.key === 'Esc') {
-      if (this.dialogContent?.nativeElement) {
+      if (this.dialogContent()?.nativeElement) {
         this.onCancel();
       }
     }

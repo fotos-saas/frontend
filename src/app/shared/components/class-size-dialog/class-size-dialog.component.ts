@@ -4,7 +4,7 @@ import {
   output,
   ChangeDetectionStrategy,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   ElementRef,
   computed
 } from '@angular/core';
@@ -58,7 +58,7 @@ export class ClassSizeDialogComponent extends BaseDialogComponent implements Aft
   readonly MAX_SIZE = 500;
 
   /** ViewChild referencia */
-  @ViewChild('sizeInput') sizeInput?: ElementRef<HTMLInputElement>;
+  readonly sizeInput = viewChild<ElementRef<HTMLInputElement>>('sizeInput');
 
   override ngAfterViewInit(): void {
     // Current value beállítása ha van
@@ -71,8 +71,8 @@ export class ClassSizeDialogComponent extends BaseDialogComponent implements Aft
 
     // Focus az input mezőre
     setTimeout(() => {
-      this.sizeInput?.nativeElement.focus();
-      this.sizeInput?.nativeElement.select();
+      this.sizeInput()?.nativeElement.focus();
+      this.sizeInput()?.nativeElement.select();
     }, 100);
   }
 

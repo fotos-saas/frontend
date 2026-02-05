@@ -1,0 +1,97 @@
+<div class="school-list-page page-card">
+  <header class="page-header">
+    <h1>Iskolák</h1>
+    <p class="subtitle">{{ totalSchools() }} iskola összesen</p>
+  </header>
+
+  <!-- Keresés és szűrés -->
+  <div class="filters">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Keresés iskola neve vagy város alapján..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">✕</button>
+      }
+    </div>
+
+    <div class="filter-controls">
+      <select [ngModel]="filterState.filters()['city'] || ''" (ngModelChange)="filterState.setFilter('city', $event)" class="filter-select">
+        <option value="">Minden város</option>
+        @for (city of cities(); track city) {
+          <option [value]="city">{{ city }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="school-card skeleton skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (schools().length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">🏫</span>
+      <h3>Nincs találat</h3>
+      <p>Próbálj más keresési feltételekkel!</p>
+    </div>
+  } @else {
+    <div class="school-grid">
+      @for (school of schools(); track school.id; let i = $index) {
+        <div
+          class="school-card"
+          [style.animation-delay]="i * 0.03 + 's'"
+          (click)="viewSchoolProjects(school)"
+        >
+          <div class="school-icon">🏫</div>
+          <div class="school-info">
+            <h3 class="school-name">{{ school.name }}</h3>
+            @if (school.city) {
+              <p class="school-city">📍 {{ school.city }}</p>
+            }
+          </div>
+          <div class="school-stats">
+            <span class="projects-count">
+              {{ school.projectsCount }}
+              <span class="count-label">projekt</span>
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Paginálás -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === 1"
+          (click)="goToPage(filterState.page() - 1)"
+        >
+          ← Előző
+        </button>
+
+        <div class="page-info">
+          {{ filterState.page() }} / {{ totalPages() }} oldal
+          <span class="total-count">({{ totalSchools() }} iskola)</span>
+        </div>
+
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === totalPages()"
+          (click)="goToPage(filterState.page() + 1)"
+        >
+          Következő →
+        </button>
+      </div>
+    }
+  }
+</div>

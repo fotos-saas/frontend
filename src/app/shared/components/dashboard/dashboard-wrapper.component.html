@@ -1,0 +1,76 @@
+<div class="dashboard page-card">
+  <header class="dashboard-header">
+    <h1>Irányítópult</h1>
+    <p class="subtitle">{{ subtitle }}</p>
+  </header>
+
+  <!-- Stats Cards -->
+  @if (loading()) {
+    <div class="stats-grid skeleton">
+      @for (card of statCards; track card.valueKey) {
+        <div class="stat-card skeleton-shimmer"></div>
+      }
+    </div>
+  } @else {
+    <div class="stats-grid">
+      @for (card of statCards; track card.valueKey) {
+        <div
+          class="stat-card"
+          [class.stat-card--clickable]="card.clickable"
+          (click)="card.clickable ? navigateTo(routePrefix + '/projects') : null"
+        >
+          <div class="stat-icon">
+            <lucide-icon [name]="card.icon" [size]="28"></lucide-icon>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ getStatValue(card.valueKey) }}</span>
+            <span class="stat-label">{{ card.label }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Quick Actions -->
+  <section class="actions-section">
+    <h2>Gyors műveletek</h2>
+    <div class="actions-grid">
+      @for (action of quickActions; track action.route) {
+        <button
+          class="action-btn"
+          [class.action-btn--primary]="action.primary"
+          [class.action-btn--secondary]="!action.primary"
+          (click)="navigateTo(routePrefix + action.route)"
+        >
+          <lucide-icon [name]="action.icon" [size]="action.primary ? 22 : 20" class="action-icon"></lucide-icon>
+          <span class="action-label">{{ action.label }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Recent Projects -->
+  @if (recentProjects().length > 0) {
+    <section class="recent-section">
+      <h2>Legutóbbi projektek</h2>
+      <div class="recent-list">
+        @for (project of recentProjects(); track project.id) {
+          <div class="recent-item" (click)="navigateTo(routePrefix + '/projects/' + project.id)">
+            <div class="recent-info">
+              <span class="recent-name">{{ project.name }}</span>
+              <span class="recent-school">{{ project.schoolName ?? 'Ismeretlen iskola' }}</span>
+            </div>
+            <div class="recent-meta">
+              @if (project.hasActiveQrCode) {
+                <span class="qr-badge">QR</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <button class="view-all-btn" (click)="navigateTo(routePrefix + '/projects')">
+        Összes projekt megtekintése →
+      </button>
+    </section>
+  }
+</div>

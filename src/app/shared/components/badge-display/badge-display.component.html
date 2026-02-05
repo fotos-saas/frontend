@@ -1,0 +1,154 @@
+<div class="badges">
+  <!-- Header -->
+  <div class="badges__header">
+    <h3 class="badges__title">
+      <svg class="badges__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+      Kitűzők
+    </h3>
+    @if (hasNewBadges()) {
+      <span class="badges__new-count">{{ newCount() }} új!</span>
+    }
+  </div>
+
+  <!-- Content -->
+  <div class="badges__content">
+    @if (loading()) {
+      <div class="badges__loading">
+        <div class="badges__spinner"></div>
+      </div>
+    } @else if (badges().length === 0) {
+      <div class="badges__empty">
+        <svg class="badges__empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p>Még nincs kitűződ</p>
+        <span>Aktív fórum részvétellel szerezhetsz!</span>
+      </div>
+    } @else {
+      <!-- Gold badges -->
+      @if (goldBadges().length > 0) {
+        <div class="badges__tier badges__tier--gold">
+          <h4 class="badges__tier-title">
+            <span class="badges__tier-icon">🏆</span>
+            Arany
+          </h4>
+          <div class="badges__grid">
+            @for (userBadge of goldBadges(); track userBadge.id) {
+              <div
+                class="badges__item"
+                [class.badges__item--new]="userBadge.is_new"
+                (click)="onBadgeClick(userBadge)"
+              >
+                <div class="badges__item-icon badges__item-icon--gold">
+                  <span>⭐</span>
+                </div>
+                <span class="badges__item-name">{{ userBadge.badge.name }}</span>
+                @if (userBadge.is_new) {
+                  <span class="badges__item-new">ÚJ</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Silver badges -->
+      @if (silverBadges().length > 0) {
+        <div class="badges__tier badges__tier--silver">
+          <h4 class="badges__tier-title">
+            <span class="badges__tier-icon">🥈</span>
+            Ezüst
+          </h4>
+          <div class="badges__grid">
+            @for (userBadge of silverBadges(); track userBadge.id) {
+              <div
+                class="badges__item"
+                [class.badges__item--new]="userBadge.is_new"
+                (click)="onBadgeClick(userBadge)"
+              >
+                <div class="badges__item-icon badges__item-icon--silver">
+                  <span>⭐</span>
+                </div>
+                <span class="badges__item-name">{{ userBadge.badge.name }}</span>
+                @if (userBadge.is_new) {
+                  <span class="badges__item-new">ÚJ</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Bronze badges -->
+      @if (bronzeBadges().length > 0) {
+        <div class="badges__tier badges__tier--bronze">
+          <h4 class="badges__tier-title">
+            <span class="badges__tier-icon">🥉</span>
+            Bronz
+          </h4>
+          <div class="badges__grid">
+            @for (userBadge of bronzeBadges(); track userBadge.id) {
+              <div
+                class="badges__item"
+                [class.badges__item--new]="userBadge.is_new"
+                (click)="onBadgeClick(userBadge)"
+              >
+                <div class="badges__item-icon badges__item-icon--bronze">
+                  <span>⭐</span>
+                </div>
+                <span class="badges__item-name">{{ userBadge.badge.name }}</span>
+                @if (userBadge.is_new) {
+                  <span class="badges__item-new">ÚJ</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Badge detail modal -->
+@if (selectedBadge()) {
+  <div class="badges__modal-backdrop" (click)="closeBadgeDetail()">
+    <div class="badges__modal" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="badges__modal-close"
+        (click)="closeBadgeDetail()"
+        aria-label="Bezárás"
+      >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div
+        class="badges__modal-icon"
+        [class.badges__modal-icon--gold]="selectedBadge()!.badge.tier === 'gold'"
+        [class.badges__modal-icon--silver]="selectedBadge()!.badge.tier === 'silver'"
+        [class.badges__modal-icon--bronze]="selectedBadge()!.badge.tier === 'bronze'"
+      >
+        <span>⭐</span>
+      </div>
+
+      <h3 class="badges__modal-title">{{ selectedBadge()!.badge.name }}</h3>
+      <span class="badges__modal-tier">{{ getTierLabel(selectedBadge()!.badge.tier) }}</span>
+      <p class="badges__modal-description">{{ selectedBadge()!.badge.description }}</p>
+
+      <div class="badges__modal-info">
+        <div class="badges__modal-info-item">
+          <span class="badges__modal-info-label">Pont érték</span>
+          <span class="badges__modal-info-value">+{{ selectedBadge()!.badge.points }}</span>
+        </div>
+        <div class="badges__modal-info-item">
+          <span class="badges__modal-info-label">Megszerzés</span>
+          <span class="badges__modal-info-value">{{ formatDate(selectedBadge()!.earned_at) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+}

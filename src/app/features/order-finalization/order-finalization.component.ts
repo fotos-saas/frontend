@@ -7,27 +7,17 @@ import {
   OnInit,
   OnDestroy,
   inject,
-  ViewChild,
+  viewChild,
   ElementRef
 } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil, debounceTime } from 'rxjs/operators';
-import { OrderFinalizationService } from './services/order-finalization.service';
 import { OrderValidationService } from './services/order-validation.service';
-import { ToastService } from '../../core/services/toast.service';
-import { LoggerService } from '../../core/services/logger.service';
-import { AuthService } from '../../core/services/auth.service';
-import { TabloStorageService } from '../../core/services/tablo-storage.service';
-import { isSecureUrl, openSecureUrl } from '../../core/utils/url-validator.util';
+import { OrderFinalizationFacadeService } from './services/order-finalization-facade.service';
 import {
-  OrderFinalizationData,
   ContactData,
   BasicInfoData,
   DesignData,
   RosterData,
-  STEPPER_STEPS,
-  EMPTY_ORDER_FINALIZATION_DATA
+  STEPPER_STEPS
 } from './models/order-finalization.models';
 
 // Child komponensek
@@ -40,9 +30,7 @@ import { RosterStepComponent } from './components/steps/roster-step/roster-step.
  * Order Finalization Component
  * Megrendelés véglegesítő - 4 lépéses stepper form
  *
- * Refaktorált verzió: 689 sor → ~180 sor (-74%)
- * - Child komponensekbe kiemelve a step formok
- * - Service-ekbe kiemelve a validáció és file upload
+ * Facade service kezeli: auto-save, storage, data loading, preview, submit
  */
 @Component({
   selector: 'app-order-finalization',
@@ -55,24 +43,15 @@ import { RosterStepComponent } from './components/steps/roster-step/roster-step.
     BasicInfoStepComponent,
     DesignStepComponent,
     RosterStepComponent
-  ]
+  ],
+  providers: [OrderFinalizationFacadeService]
 })
 export class OrderFinalizationComponent implements OnInit, OnDestroy {
-  @ViewChild('stepContent') stepContent?: ElementRef<HTMLElement>;
+  readonly stepContent = viewChild<ElementRef<HTMLElement>>('stepContent');
 
-  private readonly destroy$ = new Subject<void>();
-  private readonly autoSaveTrigger$ = new Subject<void>();
-  private autoSaveResetTimer?: ReturnType<typeof setTimeout>;
-  private initialized = false;
-
-  // Services
-  private readonly router = inject(Router);
-  private readonly orderFinalizationService = inject(OrderFinalizationService);
+  private readonly facade = inject(OrderFinalizationFacadeService);
   private readonly validationService = inject(OrderValidationService);
-  private readonly toastService = inject(ToastService);
-  private readonly logger = inject(LoggerService);
-  private readonly authService = inject(AuthService);
-  private readonly storage = inject(TabloStorageService);
+  private initialized = false;
 
   /** Stepper lépések */
   readonly steps = STEPPER_STEPS;
@@ -153,25 +132,45 @@ export class OrderFinalizationComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
+    // Facade inicializálás
+    this.facade.init(
+      {
+        contactData: this.contactData,
+        basicInfoData: this.basicInfoData,
+        designData: this.designData,
+        rosterData: this.rosterData,
+        loading: this.loading,
+        submitting: this.submitting,
+        backgroundFileName: this.backgroundFileName,
+        allStepsValid: this.allStepsValid
+      },
+      this.autoSaveStatus,
+      {
+        setContact: (d) => this.contactData.set(d),
+        setBasicInfo: (d) => this.basicInfoData.set(d),
+        setDesign: (d) => this.designData.set(d),
+        setRoster: (d) => this.rosterData.set(d)
+      }
+    );
+
     effect(() => {
       const step = this.currentStep();
       if (this.initialized) {
-        queueMicrotask(() => this.saveStepToStorage(step));
+        queueMicrotask(() => this.facade.saveStepToStorage(step));
       }
     });
   }
 
   ngOnInit(): void {
-    this.loadSavedStep();
-    this.loadExistingData();
-    this.setupAutoSave();
+    const savedStep = this.facade.loadSavedStep();
+    if (savedStep > 0) this.currentStep.set(savedStep);
+    this.facade.loadExistingData();
+    this.facade.setupAutoSave();
     this.initialized = true;
   }
 
   ngOnDestroy(): void {
-    clearTimeout(this.autoSaveResetTimer);
-    this.destroy$.next();
-    this.destroy$.complete();
+    // Facade uses DestroyRef, no manual cleanup needed
   }
 
   // ========== STEP NAVIGATION ==========
@@ -202,161 +201,40 @@ export class OrderFinalizationComponent implements OnInit, OnDestroy {
 
   updateContactData(data: ContactData): void {
     this.contactData.set(data);
-    this.triggerAutoSave();
+    this.facade.triggerAutoSave();
   }
 
   updateBasicInfoData(data: BasicInfoData): void {
     this.basicInfoData.set(data);
-    this.triggerAutoSave();
+    this.facade.triggerAutoSave();
   }
 
   updateDesignData(data: DesignData): void {
     this.designData.set(data);
-    this.triggerAutoSave();
+    this.facade.triggerAutoSave();
   }
 
   updateRosterData(data: RosterData): void {
     this.rosterData.set(data);
-    this.triggerAutoSave();
+    this.facade.triggerAutoSave();
   }
 
-  // ========== ACTIONS ==========
+  // ========== ACTIONS (delegated to facade) ==========
 
   openPreview(): void {
-    this.loading.set(true);
-    this.orderFinalizationService.generatePreviewPdf(this.collectFormData())
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.success && response.pdfUrl && isSecureUrl(response.pdfUrl)) {
-            openSecureUrl(response.pdfUrl);
-          } else {
-            this.toastService.error('Hiba', response.message || 'Hiba a PDF generálásakor');
-          }
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Preview PDF generation failed', err);
-          this.toastService.error('Hiba', 'Hiba történt az előnézet generálásakor');
-          this.loading.set(false);
-        }
-      });
+    this.facade.openPreview();
   }
 
   submitOrder(): void {
-    if (!this.allStepsValid()) {
-      this.toastService.error('Hiányzó adatok', 'Kérlek, töltsd ki az összes kötelező mezőt!');
-      return;
-    }
-
-    this.submitting.set(true);
-    this.orderFinalizationService.finalizeOrder(this.collectFormData())
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.toastService.success('Siker!', response.message || 'Megrendelés sikeresen véglegesítve!');
-            // Navigate to order data page after successful finalization
-            this.router.navigate(['/order-data']);
-          } else {
-            this.toastService.error('Hiba', response.message || 'Hiba történt a véglegesítéskor');
-            this.submitting.set(false);
-          }
-        },
-        error: (err) => {
-          this.logger.error('Order finalization failed', err);
-          this.toastService.error('Hiba', 'Hiba történt a megrendelés véglegesítésekor');
-          this.submitting.set(false);
-        }
-      });
+    this.facade.submitOrder();
   }
 
-  // ========== PRIVATE METHODS ==========
+  // ========== PRIVATE ==========
 
   private focusStepContent(): void {
     setTimeout(() => {
-      const heading = this.stepContent?.nativeElement?.querySelector('h2');
+      const heading = this.stepContent()?.nativeElement?.querySelector('h2');
       if (heading) (heading as HTMLElement).focus();
     }, 100);
-  }
-
-  private loadSavedStep(): void {
-    const project = this.authService.getProject();
-    if (!project) return;
-    try {
-      const step = this.storage.getCurrentStep(project.id);
-      if (step >= 0 && step <= 3) this.currentStep.set(step);
-    } catch { /* ignore */ }
-  }
-
-  private saveStepToStorage(step: number): void {
-    const project = this.authService.getProject();
-    if (!project) return;
-    try {
-      this.storage.setCurrentStep(project.id, step);
-    } catch { /* ignore */ }
-  }
-
-  private setupAutoSave(): void {
-    this.autoSaveTrigger$.pipe(debounceTime(2000), takeUntil(this.destroy$))
-      .subscribe(() => this.performAutoSave());
-  }
-
-  private triggerAutoSave(): void {
-    this.autoSaveTrigger$.next();
-  }
-
-  private performAutoSave(): void {
-    if (this.submitting()) return;
-    this.autoSaveStatus.set('saving');
-
-    this.orderFinalizationService.autoSaveDraft(this.collectFormData())
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.autoSaveStatus.set('saved');
-          clearTimeout(this.autoSaveResetTimer);
-          this.autoSaveResetTimer = setTimeout(() => {
-            if (this.autoSaveStatus() === 'saved') this.autoSaveStatus.set('idle');
-          }, 2000);
-        },
-        error: (err) => {
-          this.logger.error('Auto-save failed', err);
-          this.autoSaveStatus.set('error');
-          clearTimeout(this.autoSaveResetTimer);
-          this.autoSaveResetTimer = setTimeout(() => {
-            if (this.autoSaveStatus() === 'error') this.autoSaveStatus.set('idle');
-          }, 3000);
-        }
-      });
-  }
-
-  private loadExistingData(): void {
-    this.loading.set(true);
-    this.orderFinalizationService.getExistingData()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          const mapped = this.orderFinalizationService.mapResponseToFormData(response);
-          this.contactData.set(mapped.contact);
-          this.basicInfoData.set(mapped.basicInfo);
-          this.designData.set(mapped.design);
-          this.rosterData.set(mapped.roster);
-          if (mapped.design.backgroundImageId) {
-            this.backgroundFileName.set('Korábban feltöltött háttérkép');
-          }
-          this.loading.set(false);
-        },
-        error: () => this.loading.set(false)
-      });
-  }
-
-  private collectFormData(): OrderFinalizationData {
-    return {
-      contact: this.contactData(),
-      basicInfo: this.basicInfoData(),
-      design: this.designData(),
-      roster: this.rosterData()
-    };
   }
 }

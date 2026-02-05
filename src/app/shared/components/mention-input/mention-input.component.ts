@@ -4,7 +4,7 @@ import {
   output,
   model,
   ElementRef,
-  ViewChild,
+  viewChild,
   ChangeDetectionStrategy,
   signal,
   inject,
@@ -41,7 +41,7 @@ export class MentionInputComponent {
   readonly valueChangeEvent = output<string>();
 
   /** ViewChild */
-  @ViewChild('textarea') textareaRef?: ElementRef<HTMLTextAreaElement>;
+  readonly textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textarea');
 
   /** Services */
   private readonly mentionService = inject(MentionService);
@@ -127,9 +127,9 @@ export class MentionInputComponent {
    * Suggestion kiválasztása
    */
   selectSuggestion(participant: MentionParticipant): void {
-    if (!this.textareaRef) return;
+    if (!this.textareaRef()) return;
 
-    const textarea = this.textareaRef.nativeElement;
+    const textarea = this.textareaRef()!.nativeElement;
     const text = this.value();
     const cursorPos = textarea.selectionStart;
 

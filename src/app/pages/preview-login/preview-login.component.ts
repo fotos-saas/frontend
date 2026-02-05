@@ -1,7 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 
 /**
@@ -17,21 +16,25 @@ import { AuthService } from '../../core/services/auth.service';
     <div class="preview-login">
       <div class="preview-login__card">
         <!-- Loading state -->
-        <div class="preview-login__loading" *ngIf="loading">
+        @if (loading) {
+        <div class="preview-login__loading">
           <svg class="preview-login__spinner" viewBox="0 0 50 50">
             <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"></circle>
           </svg>
           <span class="preview-login__text">Admin előnézet betöltése...</span>
         </div>
+        }
 
         <!-- Error state -->
-        <div class="preview-login__error" *ngIf="error">
+        @if (error) {
+        <div class="preview-login__error">
           <svg class="preview-login__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
           <span class="preview-login__text">{{ error }}</span>
           <p class="preview-login__hint">Az előnézeti link egyszer használatos.<br>Kérj új linket az adminisztrátortól.</p>
         </div>
+        }
       </div>
     </div>
   `,
@@ -112,19 +115,17 @@ import { AuthService } from '../../core/services/auth.service';
       margin: 0;
       line-height: 1.5;
     }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PreviewLoginComponent implements OnInit, OnDestroy {
+export class PreviewLoginComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
-  private readonly destroy$ = new Subject<void>();
-
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     // Token kinyerése az URL-ből
@@ -145,7 +146,7 @@ export class PreviewLoginComponent implements OnInit, OnDestroy {
 
     // Bejelentkezés a preview tokennel (egyszer használatos)
     this.authService.loginWithPreviewToken(token)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.router.navigate(['/home']);
@@ -155,10 +156,5 @@ export class PreviewLoginComponent implements OnInit, OnDestroy {
           this.error = err.message;
         }
       });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

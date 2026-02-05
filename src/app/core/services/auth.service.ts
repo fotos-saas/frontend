@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { TabloStorageService } from './tablo-storage.service';
@@ -75,26 +76,32 @@ export class AuthService {
   private sessionService = inject(SessionService);
 
   // ==========================================
-  // STATE (BehaviorSubjects & Signals)
+  // STATE (Signals)
   // ==========================================
 
   /** Aktuális projekt (reaktív) */
-  private projectSubject: BehaviorSubject<TabloProject | null>;
-  public project$: Observable<TabloProject | null>;
+  private readonly _project = signal<TabloProject | null>(null);
+  readonly projectSignal = this._project.asReadonly();
+  /** @deprecated Használj projectSignal-t helyette */
+  readonly project$: Observable<TabloProject | null> = toObservable(this._project);
 
   /** Bejelentkezve van-e */
-  private isAuthenticatedSubject: BehaviorSubject<boolean>;
-  public isAuthenticated$: Observable<boolean>;
+  private readonly _isAuthenticated = signal<boolean>(false);
+  readonly isAuthenticatedSignal = this._isAuthenticated.asReadonly();
+  /** @deprecated Használj isAuthenticatedSignal-t helyette */
+  readonly isAuthenticated$: Observable<boolean> = toObservable(this._isAuthenticated);
 
   /** Véglegesíthet-e (csak kódos belépés esetén true) - átirányítás TokenService-re */
-  public canFinalize$: Observable<boolean>;
+  readonly canFinalize$ = this.tokenService.canFinalize$;
 
   /** Token típus - átirányítás TokenService-re */
-  public tokenType$: Observable<TokenType>;
+  readonly tokenType$ = this.tokenService.tokenType$;
 
   /** Aktuális felhasználó (marketer login esetén) */
-  private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private readonly _currentUser = signal<AuthUser | null>(null);
+  readonly currentUserSignal = this._currentUser.asReadonly();
+  /** @deprecated Használj currentUserSignal-t helyette */
+  readonly currentUser$: Observable<AuthUser | null> = toObservable(this._currentUser);
 
   /**
    * Signal: true ha a jelszó be van állítva
@@ -134,25 +141,22 @@ export class AuthService {
    * Computed signal: true ha marketer felhasználó
    */
   public readonly isMarketer = computed<boolean>(() => {
-    const user = this.currentUserSubject?.getValue();
-    return user?.roles?.includes('marketer') ?? false;
+    return this._currentUser()?.roles?.includes('marketer') ?? false;
   });
 
   /**
    * Computed signal: true ha partner felhasználó (tulajdonos)
    */
   public readonly isPartner = computed<boolean>(() => {
-    const user = this.currentUserSubject?.getValue();
-    return user?.roles?.includes('partner') ?? false;
+    return this._currentUser()?.roles?.includes('partner') ?? false;
   });
 
   /**
    * Computed signal: true ha partner csapattag (designer, marketer, printer, assistant)
    */
   public readonly isTeamMember = computed<boolean>(() => {
-    const user = this.currentUserSubject?.getValue();
     const teamRoles = ['designer', 'marketer', 'printer', 'assistant'];
-    return teamRoles.some(role => user?.roles?.includes(role)) ?? false;
+    return teamRoles.some(role => this._currentUser()?.roles?.includes(role)) ?? false;
   });
 
   /**
@@ -166,8 +170,7 @@ export class AuthService {
    * Computed signal: true ha super admin felhasználó
    */
   public readonly isSuperAdmin = computed<boolean>(() => {
-    const user = this.currentUserSubject?.getValue();
-    return user?.roles?.includes('super_admin') ?? false;
+    return this._currentUser()?.roles?.includes('super_admin') ?? false;
   });
 
   // ==========================================
@@ -180,16 +183,8 @@ export class AuthService {
 
     // Inicializálás storage-ból
     const initialState = this.sessionService.initializeFromStorage();
-
-    this.projectSubject = new BehaviorSubject<TabloProject | null>(initialState.project);
-    this.project$ = this.projectSubject.asObservable();
-
-    this.isAuthenticatedSubject = new BehaviorSubject<boolean>(initialState.isAuthenticated);
-    this.isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-
-    // TokenService observable-ök
-    this.canFinalize$ = this.tokenService.canFinalize$;
-    this.tokenType$ = this.tokenService.tokenType$;
+    this._project.set(initialState.project);
+    this._isAuthenticated.set(initialState.isAuthenticated);
   }
 
   /**
@@ -199,8 +194,8 @@ export class AuthService {
     // TabloAuthService callbacks
     this.tabloAuth.registerCallbacks({
       onAuthSuccess: (project: TabloProject, passwordSet?: boolean) => {
-        this.projectSubject.next(project);
-        this.isAuthenticatedSubject.next(true);
+        this._project.set(project);
+        this._isAuthenticated.set(true);
         if (passwordSet !== undefined) {
           this.passwordSet.set(passwordSet);
         }
@@ -213,8 +208,8 @@ export class AuthService {
     // PasswordAuthService callbacks
     this.passwordAuth.registerCallbacks({
       onMarketerAuthSuccess: (user: AuthUser) => {
-        this.currentUserSubject.next(user);
-        this.isAuthenticatedSubject.next(true);
+        this._currentUser.set(user);
+        this._isAuthenticated.set(true);
       },
       onPasswordSetChange: (value: boolean) => {
         this.passwordSet.set(value);
@@ -224,22 +219,22 @@ export class AuthService {
     // SessionService callbacks
     this.sessionService.registerCallbacks({
       onSessionRestored: (project: TabloProject) => {
-        this.projectSubject.next(project);
-        this.isAuthenticatedSubject.next(true);
+        this._project.set(project);
+        this._isAuthenticated.set(true);
       },
       onSessionValidated: (project: TabloProject, canFinalize?: boolean, passwordSet?: boolean) => {
-        this.projectSubject.next(project);
+        this._project.set(project);
         if (passwordSet !== undefined) {
           this.passwordSet.set(passwordSet);
         }
       },
       onAuthCleared: () => {
-        this.projectSubject.next(null);
-        this.isAuthenticatedSubject.next(false);
+        this._project.set(null);
+        this._isAuthenticated.set(false);
       },
       onMarketerLogout: () => {
-        this.currentUserSubject.next(null);
-        this.isAuthenticatedSubject.next(false);
+        this._currentUser.set(null);
+        this._isAuthenticated.set(false);
       }
     });
   }
@@ -399,8 +394,8 @@ export class AuthService {
    * Auth állapot törlése átirányítás és session törlés NÉLKÜL
    */
   clearAuthState(): void {
-    this.projectSubject.next(null);
-    this.isAuthenticatedSubject.next(false);
+    this._project.set(null);
+    this._isAuthenticated.set(false);
   }
 
   /**
@@ -463,13 +458,13 @@ export class AuthService {
    * Marketer felhasználó lekérése
    */
   getCurrentUser(): AuthUser | null {
-    if (this.currentUserSubject.getValue()) {
-      return this.currentUserSubject.getValue();
+    if (this._currentUser()) {
+      return this._currentUser();
     }
     const stored = this.sessionService.getStoredMarketerUser();
     if (stored) {
-      this.currentUserSubject.next(stored);
-      this.isAuthenticatedSubject.next(true);
+      this._currentUser.set(stored);
+      this._isAuthenticated.set(true);
       return stored;
     }
     return null;
@@ -481,8 +476,8 @@ export class AuthService {
   initializeMarketerSession(): boolean {
     const result = this.sessionService.initializeMarketerSession();
     if (result.success && result.user) {
-      this.currentUserSubject.next(result.user);
-      this.isAuthenticatedSubject.next(true);
+      this._currentUser.set(result.user);
+      this._isAuthenticated.set(true);
       return true;
     }
     return false;
@@ -516,7 +511,7 @@ export class AuthService {
    * Aktuális projekt lekérése
    */
   getProject(): TabloProject | null {
-    return this.projectSubject.getValue();
+    return this._project();
   }
 
   /**
@@ -535,7 +530,7 @@ export class AuthService {
     if (project && activeSession) {
       project.expectedClassSize = classSize;
       this.storage.setProject(project.id, activeSession.sessionType, project);
-      this.projectSubject.next({ ...project });
+      this._project.set({ ...project });
     }
   }
 
@@ -553,7 +548,7 @@ export class AuthService {
         if (project && response.success && activeSession) {
           project.photoDate = response.photoDate;
           this.storage.setProject(project.id, activeSession.sessionType, project);
-          this.projectSubject.next(project);
+          this._project.set(project);
         }
       })
     );
@@ -573,7 +568,7 @@ export class AuthService {
         if (project && response.success && response.data && activeSession) {
           project.contacts = [response.data];
           this.storage.setProject(project.id, activeSession.sessionType, project);
-          this.projectSubject.next(project);
+          this._project.set(project);
         }
       })
     );

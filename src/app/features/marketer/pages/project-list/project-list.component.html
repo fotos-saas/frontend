@@ -1,0 +1,137 @@
+<div class="project-list-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Projektek</h1>
+      <p class="subtitle">{{ totalProjects() }} projekt összesen</p>
+    </div>
+    <app-add-button
+      [label]="'Új projekt'"
+      [variant]="'primary'"
+      (clicked)="createProject()"
+    />
+  </header>
+
+  <!-- Keresés -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés iskola vagy osztály neve alapján..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <div class="filter-controls">
+      <select [ngModel]="filterState.sortBy()" (ngModelChange)="filterState.setSortBy($event)" class="filter-select">
+        <option value="created_at">Létrehozás dátuma</option>
+        <option value="class_year">Évfolyam</option>
+      </select>
+
+      <button class="sort-dir-btn" (click)="filterState.toggleSortDir()">
+        <lucide-icon [name]="filterState.sortDir() === 'desc' ? ICONS.ARROW_DOWN : ICONS.ARROW_UP" [size]="16" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="project-row skeleton skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (projects().length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">📭</span>
+      <h3>Nincs találat</h3>
+      <p>Próbálj más keresési feltételekkel!</p>
+    </div>
+  } @else {
+    <!-- Táblázat fejléc -->
+    <div class="table-header">
+      <div class="col-school">Iskola / Osztály</div>
+      <div class="col-contact">Kapcsolattartó</div>
+      <div class="col-actions">Műveletek</div>
+    </div>
+
+    <!-- Projekt sorok -->
+    <div class="project-list">
+      @for (project of projects(); track project.id; let i = $index) {
+        <div
+          class="project-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+          (click)="viewProject(project)"
+        >
+          <div class="col-school">
+            <span class="school-name">{{ project.schoolName ?? 'Ismeretlen iskola' }}</span>
+            <span class="class-info">
+              {{ project.className }} {{ project.classYear }}
+            </span>
+          </div>
+
+          <div class="col-contact">
+            @if (project.contact) {
+              <span class="contact-name">{{ project.contact.name }}</span>
+              <span class="contact-email">{{ project.contact.email }}</span>
+            } @else {
+              <span class="no-contact">-</span>
+            }
+          </div>
+
+          <div class="col-actions" (click)="$event.stopPropagation()">
+            <app-qr-button
+              [isActive]="project.hasActiveQrCode"
+              [variant]="'icon-only'"
+              (clicked)="openQrModal(project)"
+            />
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Paginálás -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === 1"
+          (click)="goToPage(filterState.page() - 1)"
+        >
+          ← Előző
+        </button>
+
+        <div class="page-info">
+          {{ filterState.page() }} / {{ totalPages() }} oldal
+          <span class="total-count">({{ totalProjects() }} projekt)</span>
+        </div>
+
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === totalPages()"
+          (click)="goToPage(filterState.page() + 1)"
+        >
+          Következő →
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- QR Code Modal -->
+@if (showQrModal()) {
+  <app-shared-qr-code-modal
+    [projectId]="selectedProjectId()!"
+    [projectName]="selectedProjectName()"
+    [qrService]="qrService"
+    (close)="closeQrModal()"
+    (qrCodeChanged)="onQrCodeChanged()"
+  />
+}

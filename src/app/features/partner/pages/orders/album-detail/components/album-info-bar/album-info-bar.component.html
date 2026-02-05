@@ -1,0 +1,67 @@
+<div class="album-info-bar">
+  <div class="info-stats">
+    <span class="info-stat">
+      <strong>{{ album().photosCount }}</strong> kép
+    </span>
+    @if (album().type === 'selection') {
+      <span class="info-stat info-stat--selection" [class.info-stat--complete]="selectedCount() >= (album().minSelections || 1)">
+        <strong>{{ selectedCount() }}</strong> kiválasztva
+        @if (album().minSelections || album().maxSelections) {
+          <span class="info-hint">(@if (album().minSelections) {min. {{ album().minSelections }}}@if (album().minSelections && album().maxSelections) {, }@if (album().maxSelections) {max. {{ album().maxSelections }}})</span>
+        }
+      </span>
+    }
+    @if (album().type === 'tablo' && album().maxRetouchPhotos) {
+      <span class="info-stat">
+        <strong>{{ album().maxRetouchPhotos }}</strong> retusálás
+      </span>
+    }
+  </div>
+
+  <div class="info-actions">
+    <!-- Nézet váltó -->
+    <div class="view-switcher">
+      <button
+        (click)="viewModeChange.emit('grid')"
+        [class.view-switcher__btn--active]="viewMode() === 'grid'"
+        class="view-switcher__btn"
+        matTooltip="Rács nézet"
+      >
+        <lucide-icon [name]="ICONS.GRID" [size]="18" />
+      </button>
+      <button
+        (click)="viewModeChange.emit('list')"
+        [class.view-switcher__btn--active]="viewMode() === 'list'"
+        class="view-switcher__btn"
+        matTooltip="Lista nézet"
+      >
+        <lucide-icon [name]="ICONS.LIST" [size]="18" />
+      </button>
+    </div>
+
+    @if (album().expiresAt && album().status !== 'completed') {
+      <div class="info-expiry">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+        <input
+          type="date"
+          [value]="expiryDateValue()"
+          (change)="onExpiryChange($event)"
+          [min]="tomorrowDate()"
+          class="expiry-input-compact"
+          [disabled]="extendingExpiry()"
+        />
+        @if (isExpired()) {
+          <span class="expiry-badge-compact">Lejárt!</span>
+        }
+        <button
+          (click)="extendExpiry.emit(3)"
+          [disabled]="extendingExpiry()"
+          class="extend-btn-compact"
+          matTooltip="+3 nap"
+        >
+          +3
+        </button>
+      </div>
+    }
+  </div>
+</div>

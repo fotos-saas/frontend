@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, input, output, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -24,10 +24,10 @@ export class ContactEditModalComponent implements OnInit {
   private readonly partnerService = inject(PartnerService);
   private readonly destroyRef = inject(DestroyRef);
 
-  @Input() contact: ContactListItem | null = null;
-  @Input() mode: 'create' | 'edit' = 'create';
-  @Output() close = new EventEmitter<void>();
-  @Output() saved = new EventEmitter<ContactListItem>();
+  readonly contact = input<ContactListItem | null>(null);
+  readonly mode = input<'create' | 'edit'>('create');
+  readonly close = output<void>();
+  readonly saved = output<ContactListItem>();
 
   readonly ICONS = ICONS;
 
@@ -55,20 +55,21 @@ export class ContactEditModalComponent implements OnInit {
 
   ngOnInit(): void {
     // Populate form if editing
-    if (this.contact && this.mode === 'edit') {
-      this.name = this.contact.name;
-      this.email = this.contact.email ?? '';
-      this.phone = this.contact.phone ?? '';
-      this.note = this.contact.note ?? '';
+    const contact = this.contact();
+    if (contact && this.mode() === 'edit') {
+      this.name = contact.name;
+      this.email = contact.email ?? '';
+      this.phone = contact.phone ?? '';
+      this.note = contact.note ?? '';
 
       // Set selected project
-      if (this.contact.projectId) {
+      if (contact.projectId) {
         this.selectedProject.set({
-          id: this.contact.projectId,
-          name: this.contact.projectName ?? 'Projekt',
-          schoolName: this.contact.schoolName ?? null
+          id: contact.projectId,
+          name: contact.projectName ?? 'Projekt',
+          schoolName: contact.schoolName ?? null
         });
-        this.projectSearch = this.contact.projectName ?? '';
+        this.projectSearch = contact.projectName ?? '';
       }
     }
 
@@ -172,9 +173,9 @@ export class ContactEditModalComponent implements OnInit {
       data.project_id = this.selectedProject()!.id;
     }
 
-    const request$ = this.mode === 'create'
+    const request$ = this.mode() === 'create'
       ? this.partnerService.createStandaloneContact(data)
-      : this.partnerService.updateStandaloneContact(this.contact!.id, data);
+      : this.partnerService.updateStandaloneContact(this.contact()!.id, data);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {

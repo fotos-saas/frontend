@@ -5,15 +5,12 @@ import {
   signal,
   computed,
   inject,
-  DestroyRef,
   ChangeDetectionStrategy,
   OnInit
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import {
-  PartnerService,
   UploadedPhoto,
   TabloPersonItem,
   MatchResult,
@@ -34,6 +31,7 @@ import {
   WizardFooterComponent
 } from '../wizard/index';
 import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
+import { PhotoUploadWizardActionsService } from './photo-upload-wizard-actions.service';
 
 /**
  * Photo Upload Wizard - Album-alapú verzió.
@@ -53,6 +51,7 @@ import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
     WizardStepperComponent,
     WizardFooterComponent,
   ],
+  providers: [PhotoUploadWizardActionsService],
   templateUrl: './photo-upload-wizard.component.html',
   styleUrl: './photo-upload-wizard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -68,8 +67,7 @@ export class PhotoUploadWizardComponent implements OnInit {
   readonly close = output<void>();
   readonly completed = output<{ assignedCount: number }>();
 
-  private partnerService = inject(PartnerService);
-  private destroyRef = inject(DestroyRef);
+  private actions = inject(PhotoUploadWizardActionsService);
 
   // === STATE ===
   currentStep = signal<WizardStep>('albums');
@@ -142,37 +140,7 @@ export class PhotoUploadWizardComponent implements OnInit {
 
   // === LIFECYCLE ===
   ngOnInit(): void {
-    this.loadAlbums();
-  }
-
-  // === DATA LOADING ===
-  private loadAlbums(): void {
-    this.loadingAlbums.set(true);
-    this.partnerService.getAlbums(this.projectId())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.albumsSummary.set(response.albums);
-          this.loadingAlbums.set(false);
-        },
-        error: () => this.loadingAlbums.set(false)
-      });
-  }
-
-  private loadPersons(): void {
-    this.partnerService.getProjectPersons(this.projectId(), false)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => this.persons.set(response.data)
-      });
-  }
-
-  private loadAlbumDetails(album: AlbumType): void {
-    this.partnerService.getAlbum(this.projectId(), album)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => this.uploadedPhotos.set(response.album.photos)
-      });
+    this.actions.loadAlbums(this.projectId(), this.albumsSummary, this.loadingAlbums);
   }
 
   // === NAVIGATION ===
@@ -199,20 +167,16 @@ export class PhotoUploadWizardComponent implements OnInit {
   // === CHOICE HANDLERS ===
   onChoiceAi(): void {
     this.matchingMode.set('ai');
-    this.matching.set(true);
-
     const photoIds = this.uploadedPhotos().map(p => p.mediaId);
-    this.partnerService.matchPhotos(this.projectId(), photoIds)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.matchResult.set(response);
-          this.matching.set(false);
-          this.buildInitialAssignments(response);
-          setTimeout(() => this.currentStep.set('review'), 300);
-        },
-        error: () => this.matching.set(false)
-      });
+    this.actions.startAiMatching(
+      this.projectId(),
+      photoIds,
+      this.persons(),
+      this.matchResult,
+      this.assignments,
+      this.matching,
+      () => this.currentStep.set('review')
+    );
   }
 
   onChoiceManual(): void {
@@ -221,27 +185,14 @@ export class PhotoUploadWizardComponent implements OnInit {
     this.currentStep.set('review');
   }
 
-  private buildInitialAssignments(result: MatchResult): void {
-    const newAssignments: PhotoAssignment[] = [];
-    for (const match of result.matches) {
-      if (match.mediaId) {
-        const person = this.persons().find(p => p.name === match.name);
-        if (person) {
-          newAssignments.push({ personId: person.id, mediaId: match.mediaId });
-        }
-      }
-    }
-    this.assignments.set(newAssignments);
-  }
-
   // === ALBUM HANDLERS ===
   onAlbumSelected(album: AlbumType): void {
     this.uploadedPhotos.set([]);
     this.persons.set([]);
     this.assignments.set([]);
     this.selectedAlbum.set(album);
-    this.loadPersons();
-    this.loadAlbumDetails(album);
+    this.actions.loadPersons(this.projectId(), this.persons);
+    this.actions.loadAlbumDetails(this.projectId(), album, this.uploadedPhotos);
     this.currentStep.set('upload');
   }
 
@@ -249,35 +200,14 @@ export class PhotoUploadWizardComponent implements OnInit {
   onFilesSelected(files: File[]): void {
     const album = this.selectedAlbum();
     if (!album) return;
-
-    this.uploading.set(true);
-    this.uploadProgress.set(0);
-
-    const isZip = files.length === 1 && files[0].name.toLowerCase().endsWith('.zip');
-    const upload$ = isZip
-      ? this.partnerService.uploadZipToAlbum(this.projectId(), album, files[0])
-      : this.partnerService.uploadToAlbum(this.projectId(), album, files);
-
-    upload$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.uploadedPhotos.update(current => [...response.photos, ...current]);
-          this.uploading.set(false);
-          this.uploadProgress.set(100);
-        },
-        error: () => this.uploading.set(false)
-      });
+    this.actions.uploadFiles(
+      this.projectId(), album, files,
+      this.uploadedPhotos, this.uploading, this.uploadProgress
+    );
   }
 
   onRemovePhoto(mediaId: number): void {
-    this.partnerService.deletePendingPhotos(this.projectId(), [mediaId])
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.uploadedPhotos.update(photos => photos.filter(p => p.mediaId !== mediaId));
-        }
-      });
+    this.actions.removePhoto(this.projectId(), mediaId, this.uploadedPhotos);
   }
 
   onRemoveAllPhotos(): void {
@@ -293,16 +223,12 @@ export class PhotoUploadWizardComponent implements OnInit {
   }
 
   onFinalize(): void {
-    this.saving.set(true);
-    this.partnerService.assignPhotos(this.projectId(), this.assignments())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.saving.set(false);
-          this.completed.emit({ assignedCount: response.assignedCount });
-        },
-        error: () => this.saving.set(false)
-      });
+    this.actions.finalize(
+      this.projectId(),
+      this.assignments(),
+      this.saving,
+      (assignedCount) => this.completed.emit({ assignedCount })
+    );
   }
 
   onDeleteAllUnassigned(): void {
@@ -315,39 +241,17 @@ export class PhotoUploadWizardComponent implements OnInit {
   // === DELETE CONFIRM ===
   onDeleteConfirmResult(result: ConfirmDialogResult): void {
     if (result.action === 'confirm') {
-      this.confirmDelete();
+      const data = this.deleteConfirmData();
+      if (!data) return;
+      this.actions.confirmDelete(
+        this.projectId(), data.mediaIds,
+        this.uploadedPhotos, this.assignments, this.saving,
+        this.deleteConfirmData, this.showDeleteConfirm
+      );
     } else {
-      this.cancelDelete();
+      this.showDeleteConfirm.set(false);
+      this.deleteConfirmData.set(null);
     }
-  }
-
-  private confirmDelete(): void {
-    const data = this.deleteConfirmData();
-    if (!data) return;
-
-    this.showDeleteConfirm.set(false);
-    this.saving.set(true);
-
-    this.partnerService.deletePendingPhotos(this.projectId(), data.mediaIds)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          const deletedSet = new Set(data.mediaIds);
-          this.uploadedPhotos.update(photos => photos.filter(p => !deletedSet.has(p.mediaId)));
-          this.assignments.update(a => a.filter(x => !deletedSet.has(x.mediaId)));
-          this.saving.set(false);
-          this.deleteConfirmData.set(null);
-        },
-        error: () => {
-          this.saving.set(false);
-          this.deleteConfirmData.set(null);
-        }
-      });
-  }
-
-  private cancelDelete(): void {
-    this.showDeleteConfirm.set(false);
-    this.deleteConfirmData.set(null);
   }
 
   // === DIALOG ===

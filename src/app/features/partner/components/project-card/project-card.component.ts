@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerProjectListItem } from '../../services/partner.service';
@@ -19,13 +19,13 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 export class ProjectCardComponent {
   readonly ICONS = ICONS;
 
-  @Input({ required: true }) project!: PartnerProjectListItem;
+  readonly project = input.required<PartnerProjectListItem>();
 
-  @Output() cardClick = new EventEmitter<PartnerProjectListItem>();
-  @Output() samplesClick = new EventEmitter<PartnerProjectListItem>();
-  @Output() missingClick = new EventEmitter<PartnerProjectListItem>();
-  @Output() qrClick = new EventEmitter<PartnerProjectListItem>();
-  @Output() awareClick = new EventEmitter<PartnerProjectListItem>();
+  readonly cardClick = output<PartnerProjectListItem>();
+  readonly samplesClick = output<PartnerProjectListItem>();
+  readonly missingClick = output<PartnerProjectListItem>();
+  readonly qrClick = output<PartnerProjectListItem>();
+  readonly awareClick = output<PartnerProjectListItem>();
 
   /**
    * Rövidített státusz címke a badge-hez
@@ -72,8 +72,9 @@ export class ProjectCardComponent {
   }
 
   isGuestsLow(): boolean {
-    if (!this.project.expectedClassSize) return false;
-    return this.project.guestsCount < this.project.expectedClassSize * 0.8;
+    const project = this.project();
+    if (!project.expectedClassSize) return false;
+    return project.guestsCount < project.expectedClassSize * 0.8;
   }
 
   formatDate(dateStr: string): string {
@@ -87,25 +88,27 @@ export class ProjectCardComponent {
 
   onSamplesClick(event: MouseEvent): void {
     event.stopPropagation();
-    if (this.project.sampleThumbUrl) {
-      this.samplesClick.emit(this.project);
+    const project = this.project();
+    if (project.sampleThumbUrl) {
+      this.samplesClick.emit(project);
     }
   }
 
   onMissingClick(event: MouseEvent): void {
     event.stopPropagation();
-    if (this.project.missingCount > 0) {
-      this.missingClick.emit(this.project);
+    const project = this.project();
+    if (project.missingCount > 0) {
+      this.missingClick.emit(project);
     }
   }
 
   onQrClick(event: MouseEvent): void {
     event.stopPropagation();
-    this.qrClick.emit(this.project);
+    this.qrClick.emit(this.project());
   }
 
   onAwareClick(event: MouseEvent): void {
     event.stopPropagation();
-    this.awareClick.emit(this.project);
+    this.awareClick.emit(this.project());
   }
 }

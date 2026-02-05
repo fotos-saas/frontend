@@ -1,0 +1,147 @@
+<div class="addons-page page-card">
+  <h1 class="page-title">
+    <lucide-icon [name]="ICONS.SPARKLE" [size]="24" />
+    Kiegészítők
+  </h1>
+
+  @if (subscription()?.plan !== 'alap') {
+    <div class="info-banner">
+      <lucide-icon [name]="ICONS.INFO" [size]="20" />
+      <div class="banner-content">
+        <strong>{{ subscription()?.plan_name }} csomag</strong>
+        <p>A jelenlegi csomagodban minden kiegészítő funkció automatikusan elérhető.</p>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card skeleton-card--small"></div>
+    </div>
+  } @else {
+    <!-- Extra tárhely szekció -->
+    <section class="section">
+      <div class="section-header">
+        <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="20" />
+        <h2 class="section-title">Tárhely</h2>
+      </div>
+
+      @if (storageUsage()) {
+        <app-storage-usage-card
+          [usage]="storageUsage()!"
+          (openPurchase)="showStorageDialog.set(true)"
+        />
+      } @else {
+        <div class="storage-loading">
+          <div class="skeleton-bar"></div>
+        </div>
+      }
+    </section>
+
+    <!-- Funkció addonok szekció -->
+    <section class="section">
+      <div class="section-header">
+        <lucide-icon [name]="ICONS.SPARKLES" [size]="20" />
+        <h2 class="section-title">Funkció kiegészítők</h2>
+      </div>
+
+      <div class="addons-grid">
+        @for (addon of addons(); track addon.key) {
+          <div class="addon-card" [class.addon-card--active]="addon.isActive" [class.addon-card--included]="addon.isIncludedInPlan">
+            <div class="addon-main">
+              <div class="addon-icon">
+                <lucide-icon [name]="ICONS.SPARKLES" [size]="18" />
+              </div>
+              <div class="addon-info">
+                <div class="addon-title-row">
+                  <h3 class="addon-name">{{ addon.name }}</h3>
+                  @if (addon.isIncludedInPlan) {
+                    <span class="status-tag status-tag--included">Csomagban</span>
+                  } @else if (addon.isActive) {
+                    <span class="status-tag status-tag--active">Aktív</span>
+                  }
+                </div>
+                <p class="addon-description">{{ addon.description }}</p>
+                <div class="addon-features-inline">
+                  @for (feature of addon.includes; track feature; let last = $last) {
+                    <span class="feature-tag">{{ getFeatureName(feature) }}</span>
+                    @if (!last) {<span class="feature-sep">+</span>}
+                  }
+                </div>
+              </div>
+            </div>
+
+            @if (!addon.isIncludedInPlan) {
+              <div class="addon-footer">
+                <div class="addon-pricing-inline">
+                  @if (subscription()?.billing_cycle === 'yearly') {
+                    <span class="price-main">{{ formatPrice(addon.yearlyPrice) }}/év</span>
+                  } @else {
+                    <span class="price-main">{{ formatPrice(addon.monthlyPrice) }}/hó</span>
+                  }
+                </div>
+                @if (addon.isActive) {
+                  <button
+                    class="btn btn--sm btn--danger-outline"
+                    (click)="cancelAddon(addon.key)"
+                    [disabled]="actionLoading() === addon.key"
+                  >
+                    @if (actionLoading() === addon.key) {
+                      <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                    }
+                    Lemondás
+                  </button>
+                } @else if (addon.canPurchase) {
+                  <button
+                    class="btn btn--sm btn--primary"
+                    (click)="subscribeAddon(addon.key)"
+                    [disabled]="actionLoading() === addon.key"
+                  >
+                    @if (actionLoading() === addon.key) {
+                      <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                    } @else {
+                      <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+                    }
+                    Aktiválás
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (addons().length === 0) {
+        <div class="empty-state">
+          <lucide-icon [name]="ICONS.SPARKLE" [size]="48" />
+          <h3>Nincsenek elérhető kiegészítők</h3>
+          <p>Jelenleg nincs aktiválható kiegészítő a csomagodhoz.</p>
+        </div>
+      }
+    </section>
+  }
+</div>
+
+<!-- Storage Purchase Dialog -->
+@if (showStorageDialog() && storageUsage()) {
+  <app-storage-purchase-dialog
+    [usage]="storageUsage()!"
+    [isSubmitting]="storageSubmitting()"
+    (close)="showStorageDialog.set(false)"
+    (confirm)="handleStoragePurchase($event)"
+  />
+}
+
+<!-- Cancel Addon Confirm Dialog -->
+@if (showCancelDialog()) {
+  <app-confirm-dialog
+    title="Addon lemondása"
+    [message]="'Biztosan lemondod ezt a kiegészítőt? A szolgáltatás a számlázási időszak végéig aktív marad.'"
+    confirmText="Lemondás"
+    cancelText="Mégsem"
+    confirmType="danger"
+    [isSubmitting]="cancelSubmitting()"
+    (resultEvent)="handleCancelDialogResult($event)"
+  />
+}

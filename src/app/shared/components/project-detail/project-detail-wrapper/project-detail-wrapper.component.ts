@@ -8,7 +8,6 @@ import {
   input,
   ViewContainerRef,
   ComponentRef,
-  Type,
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -52,86 +51,7 @@ import { IQrCodeService } from '../../../interfaces/qr-code.interface';
   selector: 'app-project-detail-wrapper',
   standalone: true,
   imports: [LucideAngularModule, ProjectDetailViewComponent],
-  template: `
-    <div class="max-w-3xl mx-auto page-card">
-      <!-- Közös detail view komponens -->
-      <app-project-detail-view
-        [project]="projectData()"
-        [loading]="loading()"
-        (back)="goBack()"
-        (openQrModal)="openQrModal()"
-        (openContactModal)="openContactModal($event)"
-        (deleteContact)="confirmDeleteContact($event)"
-        (editProject)="openEditProjectModal()"
-        (deleteProject)="confirmDeleteProject()"
-      />
-    </div>
-
-    <!-- QR Code Modal container -->
-    <ng-container #qrModalContainer></ng-container>
-
-    <!-- Contact Editor Modal container -->
-    <ng-container #contactModalContainer></ng-container>
-
-    <!-- Project Edit Modal container -->
-    <ng-container #projectEditModalContainer></ng-container>
-
-    <!-- Delete Contact Confirmation Modal -->
-    @if (showDeleteConfirm()) {
-      <div class="dialog-backdrop" (click)="cancelDelete()">
-        <div class="dialog-panel max-w-sm p-5" (click)="$event.stopPropagation()">
-          <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <lucide-icon [name]="ICONS.DELETE" [size]="28" class="text-red-500" />
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Kapcsolattartó törlése</h3>
-            <p class="text-sm text-gray-600 mb-5">
-              Biztosan törölni szeretnéd <strong>{{ deletingContact()?.name }}</strong> kapcsolattartót?
-            </p>
-          </div>
-          <div class="flex gap-3">
-            <button
-              class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-              (click)="cancelDelete()"
-            >Mégse</button>
-            <button
-              class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
-              (click)="deleteContact()"
-              [disabled]="deleting()"
-            >{{ deleting() ? 'Törlés...' : 'Törlés' }}</button>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- Delete Project Confirmation Modal -->
-    @if (showDeleteProjectConfirm()) {
-      <div class="dialog-backdrop" (click)="cancelDeleteProject()">
-        <div class="dialog-panel max-w-sm p-5" (click)="$event.stopPropagation()">
-          <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <lucide-icon [name]="ICONS.DELETE" [size]="28" class="text-red-500" />
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Projekt törlése</h3>
-            <p class="text-sm text-gray-600 mb-5">
-              Biztosan törölni szeretnéd a <strong>{{ projectData()?.name }}</strong> projektet? Ez a művelet nem visszavonható!
-            </p>
-          </div>
-          <div class="flex gap-3">
-            <button
-              class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-              (click)="cancelDeleteProject()"
-            >Mégse</button>
-            <button
-              class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
-              (click)="deleteProjectConfirmed()"
-              [disabled]="deletingProject()"
-            >{{ deletingProject() ? 'Törlés...' : 'Törlés' }}</button>
-          </div>
-        </div>
-      </div>
-    }
-  `,
+  templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailWrapperComponent<T> implements OnInit {

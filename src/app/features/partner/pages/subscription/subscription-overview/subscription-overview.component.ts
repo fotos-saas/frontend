@@ -1,7 +1,8 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SubscriptionService, SubscriptionInfo } from '../../../services/subscription.service';
 import { StorageService, StorageUsage } from '../../../services/storage.service';
 import { PlansService } from '../../../../../shared/services/plans.service';
@@ -20,6 +21,7 @@ export class SubscriptionOverviewComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly storageService = inject(StorageService);
   private readonly plansService = inject(PlansService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
   subscription = signal<SubscriptionInfo | null>(null);
@@ -110,7 +112,7 @@ export class SubscriptionOverviewComponent implements OnInit {
       subscription: this.subscriptionService.getSubscription(),
       storage: this.storageService.getUsage(),
       prices: this.plansService.getPlanPrices(),
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ subscription, storage, prices }) => {
         this.subscription.set(subscription);
         this.storageUsage.set(storage);
@@ -126,7 +128,7 @@ export class SubscriptionOverviewComponent implements OnInit {
 
   openPortal(): void {
     this.portalLoading.set(true);
-    this.subscriptionService.openPortal().subscribe({
+    this.subscriptionService.openPortal().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         window.open(res.portal_url, '_blank');
         this.portalLoading.set(false);

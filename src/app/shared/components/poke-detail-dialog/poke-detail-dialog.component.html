@@ -1,0 +1,86 @@
+<div
+  class="dialog-overlay"
+  (mousedown)="onBackdropMouseDown($event)"
+  (click)="onBackdropClick($event)"
+>
+  <div class="dialog-content" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <!-- Header -->
+    <header class="dialog-header">
+      <h2 id="dialog-title" class="dialog-title">Bökés részletei</h2>
+      <button
+        type="button"
+        class="dialog-close"
+        (click)="close()"
+        aria-label="Bezárás"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Body -->
+    <div class="dialog-body">
+      @if (loading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Betöltés...</p>
+        </div>
+      } @else if (poke()) {
+        <div class="poke-detail">
+          <!-- Emoji + Message -->
+          <div class="poke-message">
+            @if (poke()!.emoji) {
+              <span class="poke-emoji">{{ poke()!.emoji }}</span>
+            }
+            <p class="poke-text">{{ poke()!.text || 'Bökés' }}</p>
+          </div>
+
+          <!-- Meta info -->
+          <div class="poke-meta">
+            <div class="meta-row">
+              <span class="meta-label">Címzett:</span>
+              <span class="meta-value">{{ poke()!.target.name }}</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Kategória:</span>
+              <span class="meta-value category-badge" [class]="'category--' + poke()!.category">
+                {{ getCategoryLabel(poke()!.category) }}
+              </span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Időpont:</span>
+              <span class="meta-value">{{ formatDate(poke()!.createdAt) }}</span>
+            </div>
+          </div>
+
+          <!-- Reaction (if any) -->
+          @if (poke()!.reaction) {
+            <div class="poke-reaction">
+              <span class="reaction-label">Reakció:</span>
+              <span class="reaction-emoji">{{ poke()!.reaction }}</span>
+              @if (poke()!.reactedAt) {
+                <span class="reaction-time">{{ formatTime(poke()!.reactedAt!) }}</span>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <p>A bökés nem található.</p>
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <footer class="dialog-footer">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="close()"
+      >
+        Bezárás
+      </button>
+    </footer>
+  </div>
+</div>

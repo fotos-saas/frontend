@@ -1,4 +1,4 @@
-import { Component, input, output, ChangeDetectionStrategy, AfterViewInit, ViewChild, ElementRef, OnInit, computed } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy, AfterViewInit, viewChild, ElementRef, OnInit, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { isValidEmail } from '../../utils/validators.util';
@@ -57,7 +57,7 @@ export class GuestNameDialogComponent extends BaseDialogComponent implements OnI
   errors: { name?: string; email?: string } = {};
 
   /** ViewChild referenciák */
-  @ViewChild('firstInput') firstInput?: ElementRef<HTMLInputElement>;
+  readonly firstInput = viewChild<ElementRef<HTMLInputElement>>('firstInput');
 
   ngOnInit(): void {
     // Kezdeti értékek beállítása Input-okból
@@ -69,7 +69,7 @@ export class GuestNameDialogComponent extends BaseDialogComponent implements OnI
     super.ngAfterViewInit();
     // Focus az első input mezőre
     setTimeout(() => {
-      this.firstInput?.nativeElement.focus();
+      this.firstInput()?.nativeElement.focus();
     }, 100);
   }
 

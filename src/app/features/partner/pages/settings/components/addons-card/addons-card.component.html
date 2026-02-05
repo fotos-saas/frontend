@@ -1,0 +1,100 @@
+<div class="addons-card">
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="skeleton-addon"></div>
+    </div>
+  } @else if (addons().length > 0) {
+    <div class="addons-list">
+      @for (addon of addons(); track addon.key) {
+        <div class="addon-item" [class.addon-item--active]="addon.isActive">
+          <div class="addon-header">
+            <div class="addon-info">
+              <h3 class="addon-name">{{ addon.name }}</h3>
+              <p class="addon-description">{{ addon.description }}</p>
+            </div>
+            <div class="addon-status">
+              @if (addon.isIncludedInPlan) {
+                <span class="status-badge status-badge--included">
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                  Csomagban
+                </span>
+              } @else if (addon.isActive) {
+                <span class="status-badge status-badge--active">
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                  Aktív
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="addon-features">
+            @for (feature of addon.includes; track feature) {
+              <div class="feature-badge">
+                <lucide-icon [name]="getFeatureIcon(feature)" [size]="14" />
+                {{ getFeatureName(feature) }}
+              </div>
+            }
+          </div>
+
+          <div class="addon-footer">
+            <div class="addon-price">
+              @if (!addon.isIncludedInPlan) {
+                <span class="price-value">{{ formatPrice(billingCycle() === 'yearly' ? addon.yearlyPrice : addon.monthlyPrice) }}</span>
+                <span class="price-period">/ {{ billingCycle() === 'yearly' ? 'év' : 'hó' }}</span>
+              }
+            </div>
+            <div class="addon-actions">
+              @if (addon.isIncludedInPlan) {
+                <span class="included-text">A csomagod tartalmazza</span>
+              } @else if (addon.isActive) {
+                <button
+                  class="btn btn--outline btn--danger"
+                  (click)="openCancelDialog(addon)"
+                  [disabled]="isSubmitting()"
+                  matTooltip="Addon lemondása"
+                >
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  Lemondás
+                </button>
+              } @else if (addon.canPurchase) {
+                <button
+                  class="btn btn--primary"
+                  (click)="handleSubscribe(addon)"
+                  [disabled]="isSubmitting()"
+                  matTooltip="Addon aktiválása"
+                >
+                  @if (isSubmitting() && processingAddon() === addon.key) {
+                    <span class="btn-spinner"></span>
+                  } @else {
+                    <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+                  }
+                  Aktiválás
+                </button>
+              } @else {
+                <span class="upgrade-hint">Csak Alap csomagban vásárolható</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.PACKAGE" [size]="32" />
+      <p>Nincs elérhető addon.</p>
+    </div>
+  }
+</div>
+
+<!-- Cancel Confirm Dialog -->
+@if (showCancelDialog()) {
+  <app-confirm-dialog
+    title="Addon lemondása"
+    [message]="'Biztosan lemondod a ' + cancellingAddon()?.name + ' addont? A funkciók azonnal elérhetetlenné válnak.'"
+    confirmText="Lemondás"
+    cancelText="Mégsem"
+    confirmType="danger"
+    [isSubmitting]="isSubmitting()"
+    (resultEvent)="handleDialogResult($event)"
+  />
+}

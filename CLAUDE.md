@@ -14,6 +14,87 @@
 
 ---
 
+## 🧠 PROJECT MEMORY (ÚJ SESSION ELEJÉN!)
+
+```
+⚠️ MINDEN ÚJ BESZÉLGETÉS ELEJÉN:
+
+1. OLVASD BE az aktív terveket:
+   ls .claude/plans/active/
+   → Ha van fájl, olvasd be mindegyiket!
+
+2. KÉRDEZD MEG a usert:
+   "Van aktív terv: [fájlnevek]. Folytatjuk valamelyiket?"
+
+3. Ha TERVET készítesz (>30 perc munka):
+   → MENTSD: .claude/plans/active/[feature-name].md
+   → Használd a template-et: .claude/plans/README.md
+
+4. Ha BEFEJEZTED a tervet:
+   → MOZGASD: .claude/plans/completed/[date]-[name].md
+   → Állítsd át: Státusz: ✅ Completed
+```
+
+### Plan Mentési Kötelezettség
+
+| Feladat típus | Kell plan fájl? |
+|---------------|-----------------|
+| Gyors fix (<20 sor) | ❌ Nem |
+| Közepes feature | ✅ Igen, `active/` |
+| Nagy refactor | ✅ Igen, `active/` + ADR |
+| Architektúra döntés | ✅ `decisions/` (ADR formátum) |
+
+### Fájl Elnevezés
+
+```
+active/
+  electron-mac-app.md          ← Feature neve
+  filament-removal.md          ← Tervezett munka
+
+completed/
+  2025-02-05-onpush-refactor.md  ← Dátum + név
+
+decisions/
+  001-electron-over-tauri.md     ← Sorszám + döntés
+  002-signals-over-rxjs.md
+```
+
+### 🔄 CHUNKED WORKFLOW (NAGY REFAKTOROKHOZ!)
+
+```
+⚠️ Ha a terv >1 óra munka VAGY >10 fájl érintett:
+
+1. BONTSD SZÉT session-méretű taskokra:
+   → Használd: .claude/plans/active/_TEMPLATE_CHUNKED.md
+   → 1 task = ~15-30 perc, 1-3 fájl
+
+2. MINDEN SESSION:
+   a) Olvasd be a chunked plan-t
+   b) Keresd az ELSŐ [ ] (üres) taskot
+   c) CSAK AZT CSINÁLD, ne többet!
+   d) Ha kész → [x] jelölés + session log
+   e) MONDD: "TASK-XXX kész! Clearelj és folytatjuk."
+
+3. NE CSINÁLJ TÖBBET 1 TASKNÁL!
+   → A user CLEAR-el a session között
+   → Így friss context marad
+   → Hatékonyabb mint 1 nagy session
+
+4. MINDEN TASK VÉGÉN FRISSÍTSD:
+   - [ ] → [x] a taskra
+   - Session log bejegyzés
+   - "Összesen: X task | ✅ Y kész | ⏳ Z hátra"
+```
+
+| Feladat | Chunked kell? |
+|---------|---------------|
+| Kis fix (<30 perc) | ❌ Nem |
+| Közepes feature (30-60 perc) | ⚠️ Opcionális |
+| Nagy refaktor (>1 óra) | ✅ KÖTELEZŐ |
+| Service szétbontás | ✅ KÖTELEZŐ |
+
+---
+
 ## 🔄 DEFAULT WORKFLOW
 
 ### ⚡ GYORS MÓD (kis javításokhoz)

@@ -1,0 +1,170 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+      Albumok ({{ albums().length }})
+    </h2>
+    <button
+      (click)="createAlbum.emit()"
+      class="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+    >
+      <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+      Új album
+    </button>
+  </div>
+
+  @if (albums().length === 0) {
+    <div class="text-center py-8">
+      <lucide-icon [name]="ICONS.IMAGE" [size]="48" class="mx-auto text-gray-400 mb-3" />
+      <p class="text-gray-600 dark:text-gray-400">
+        Még nincs album az ügyfélhez
+      </p>
+    </div>
+  } @else {
+    <div class="space-y-3">
+      @for (album of albums(); track album.id) {
+        <div class="album-card">
+          <div
+            class="album-card__main"
+            [routerLink]="['/partner/orders/albums', album.id]"
+          >
+            <div class="flex items-center gap-3">
+              <!-- Thumbnail vagy ikon -->
+              @if (album.thumbnails && album.thumbnails.length > 0) {
+                <img
+                  [src]="album.thumbnails[0]"
+                  class="album-thumb-single"
+                  alt=""
+                />
+              } @else {
+                <div class="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                  <lucide-icon
+                    [name]="album.type === 'selection' ? ICONS.GRID : ICONS.FRAME"
+                    [size]="24"
+                    class="text-primary-600 dark:text-primary-400"
+                  />
+                </div>
+              }
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-medium text-gray-900 dark:text-white">{{ album.name }}</h3>
+                  <span
+                    class="px-2 py-0.5 text-xs font-medium rounded"
+                    [class]="ordersService.getStatusColor(album.status)"
+                  >
+                    {{ ordersService.getStatusLabel(album.status) }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                  <span>{{ ordersService.getTypeLabel(album.type) }}</span>
+                  <span>•</span>
+                  <span>{{ album.photosCount }} kép</span>
+                </div>
+              </div>
+            </div>
+
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="18" class="text-gray-400" />
+          </div>
+
+          <!-- Completed album: letöltés és újranyitás gombok -->
+          @if (album.status === 'completed') {
+            <div class="album-card__actions" (click)="$event.stopPropagation()">
+              <div class="album-actions">
+                <!-- Letöltés engedélyezés toggle -->
+                <button
+                  class="album-download-toggle"
+                  [class.album-download-toggle--active]="album.allowDownload"
+                  (click)="toggleDownload.emit(album)"
+                  [disabled]="togglingDownloadId() === album.id"
+                >
+                  @if (togglingDownloadId() === album.id) {
+                    <div class="btn-spinner btn-spinner--small"></div>
+                  } @else {
+                    <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+                    @if (album.allowDownload) {
+                      <span>Letöltés ON</span>
+                    } @else {
+                      <span>Letöltés OFF</span>
+                    }
+                  }
+                </button>
+                <button
+                  class="album-reopen-btn-inline"
+                  (click)="reopenAlbum.emit(album)"
+                  [disabled]="togglingAlbumId() === album.id"
+                >
+                  @if (togglingAlbumId() === album.id) {
+                    <div class="btn-spinner btn-spinner--purple"></div>
+                  } @else {
+                    <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+                    Újranyitás
+                  }
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Album lejárat és aktiválás sor - csak nem completed állapotnál -->
+          @if (album.status !== 'completed') {
+            <div class="album-card__expiry" (click)="$event.stopPropagation()">
+              <div class="album-expiry-info">
+                <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                @if (album.expiresAt) {
+                  <span>Lejárat: {{ formatExpiryDate(album.expiresAt) }}</span>
+                  @if (isAlbumExpired(album.expiresAt)) {
+                    <span class="album-expiry-badge album-expiry-badge--expired">Lejárt!</span>
+                  }
+                } @else {
+                  <span class="text-gray-400">Nincs lejárat</span>
+                }
+              </div>
+              <div class="album-actions">
+                @if (album.expiresAt) {
+                  <button
+                    class="album-extend-btn"
+                    (click)="extendAlbumExpiry.emit({ album, days: 3 })"
+                    [disabled]="extendingAlbumId() === album.id"
+                    matTooltip="+3 nap"
+                  >
+                    @if (extendingAlbumId() === album.id) {
+                      <div class="btn-spinner"></div>
+                    } @else {
+                      +3 nap
+                    }
+                  </button>
+                }
+                @if (album.status === 'draft') {
+                  <button
+                    class="album-activate-btn"
+                    (click)="activateAlbum.emit(album)"
+                    [disabled]="togglingAlbumId() === album.id || album.photosCount === 0"
+                    [matTooltip]="album.photosCount === 0 ? 'Tölts fel képeket' : 'Aktiválás'"
+                  >
+                    @if (togglingAlbumId() === album.id) {
+                      <div class="btn-spinner btn-spinner--white"></div>
+                    } @else {
+                      <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                      Aktiválás
+                    }
+                  </button>
+                } @else {
+                  <button
+                    class="album-deactivate-btn"
+                    (click)="deactivateAlbum.emit(album)"
+                    [disabled]="togglingAlbumId() === album.id"
+                    matTooltip="Inaktiválás"
+                  >
+                    @if (togglingAlbumId() === album.id) {
+                      <div class="btn-spinner"></div>
+                    } @else {
+                      <lucide-icon [name]="ICONS.BAN" [size]="14" />
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

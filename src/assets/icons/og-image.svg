@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="ogbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f"/>
+      <stop offset="50%" style="stop-color:#1d4ed8"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+    <linearGradient id="oglens" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#bfdbfe"/>
+      <stop offset="50%" style="stop-color:#dbeafe"/>
+      <stop offset="100%" style="stop-color:#93c5fd"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#ogbg)"/>
+
+  <!-- Subtle dot pattern -->
+  <g opacity="0.06">
+    <circle cx="40" cy="40" r="1.5" fill="#fff"/><circle cx="80" cy="40" r="1.5" fill="#fff"/>
+    <circle cx="120" cy="40" r="1.5" fill="#fff"/><circle cx="160" cy="40" r="1.5" fill="#fff"/>
+    <circle cx="40" cy="80" r="1.5" fill="#fff"/><circle cx="80" cy="80" r="1.5" fill="#fff"/>
+    <circle cx="120" cy="80" r="1.5" fill="#fff"/><circle cx="160" cy="80" r="1.5" fill="#fff"/>
+  </g>
+
+  <!-- Decorative circles -->
+  <circle cx="1000" cy="80" r="220" fill="#3b82f6" opacity="0.15"/>
+  <circle cx="1100" cy="520" r="160" fill="#2563eb" opacity="0.12"/>
+  <circle cx="50" cy="580" r="140" fill="#60a5fa" opacity="0.1"/>
+
+  <!-- Camera icon (left side, bigger) -->
+  <g transform="translate(120, 130) scale(1.4)">
+    <rect x="0" y="48" width="200" height="140" rx="20" fill="#fff" opacity="0.95"/>
+    <rect x="60" y="24" width="60" height="32" rx="8" fill="#fff" opacity="0.95"/>
+    <circle cx="100" cy="118" r="50" fill="#1d4ed8" opacity="0.9"/>
+    <circle cx="100" cy="118" r="38" fill="url(#oglens)"/>
+    <circle cx="100" cy="118" r="18" fill="#1e40af"/>
+    <circle cx="91" cy="109" r="6" fill="#fff" opacity="0.6"/>
+    <circle cx="160" cy="72" r="8" fill="#fbbf24"/>
+  </g>
+
+  <!-- Text group - bigger, centered vertically -->
+  <!-- Brand name -->
+  <text x="480" y="240" font-family="sans-serif" font-size="86" font-weight="700" fill="#ffffff" letter-spacing="2">TablóStúdió</text>
+
+  <!-- Tagline -->
+  <text x="480" y="310" font-family="sans-serif" font-size="32" font-weight="400" fill="#bfdbfe">Professzionális tablófotó platform</text>
+
+  <!-- Separator line -->
+  <rect x="480" y="340" width="140" height="3" rx="1.5" fill="#3b82f6" opacity="0.8"/>
+
+  <!-- Features -->
+  <text x="480" y="390" font-family="sans-serif" font-size="24" fill="#93c5fd">Képválasztó  ·  Tablószerkesztő  ·  Rendelés</text>
+
+  <!-- Domain -->
+  <text x="600" y="570" text-anchor="middle" font-family="sans-serif" font-size="24" fill="#60a5fa" letter-spacing="1">tablostudio.hu</text>
+
+  <!-- Bottom gradient overlay -->
+  <rect y="595" width="1200" height="35" fill="#1e3a5f" opacity="0.3"/>
+</svg>

@@ -1,0 +1,90 @@
+<div class="client-layout">
+  <!-- Top Bar (közös komponens) -->
+  <app-top-bar
+    position="sticky"
+    logoIcon="📸"
+    roleBadge="Ügyfél"
+    [showNotifications]="false"
+    [showPokeBadge]="false"
+    [showUserBadges]="false"
+    [showAccountSwitch]="false"
+    userInfoMode="inline"
+    [externalUserInfo]="userInfo()"
+    homeRoute="/client/albums"
+    [useExternalLogout]="true"
+    (logoutEvent)="logout()"
+  />
+
+  <!-- Content with Sidebar -->
+  <div class="main-container">
+    <!-- Desktop/Tablet Sidebar -->
+    <nav
+      class="sidebar"
+      [ngClass]="{
+        'sidebar--collapsed': sidebarState.isTablet(),
+        'sidebar--hidden': sidebarState.isMobile()
+      }"
+    >
+      @for (item of dynamicNavItems(); track item.id) {
+        @if (item.action) {
+          <button
+            class="nav-item nav-item--action"
+            [title]="sidebarState.isTablet() ? item.label : ''"
+            (click)="handleNavAction(item.action)"
+          >
+            <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
+            <span class="nav-label">{{ item.label }}</span>
+          </button>
+        } @else {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="nav-item"
+            [title]="sidebarState.isTablet() ? item.label : ''"
+          >
+            <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        }
+      }
+
+      <!-- Kijelentkezés (sidebar alján) -->
+      <div class="sidebar-spacer"></div>
+      <button
+        (click)="logout()"
+        class="nav-item nav-item--logout"
+        [title]="sidebarState.isTablet() ? 'Kijelentkezés' : ''"
+      >
+        <lucide-icon [name]="ICONS.LOGOUT" [size]="20" class="nav-icon"></lucide-icon>
+        <span class="nav-label">Kijelentkezés</span>
+      </button>
+    </nav>
+
+    <!-- Mobile Overlay (közös komponens) -->
+    <app-mobile-nav-overlay
+      [customMenuItems]="mobileMenuItems()"
+      [userInfo]="{ name: clientName(), email: '' }"
+      (logoutEvent)="logout()"
+    />
+
+    <!-- Main Content -->
+    <main
+      class="content"
+      [ngClass]="{
+        'content--full': sidebarState.isMobile(),
+        'content--with-collapsed': sidebarState.isTablet() && !sidebarState.isMobile()
+      }"
+    >
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<!-- Register Dialog -->
+@if (showRegisterDialog()) {
+  <app-client-register-dialog
+    [initialEmail]="clientEmail()"
+    [hasDownloadableAlbum]="hasDownloadableAlbum()"
+    (resultEvent)="onRegisterResult($event)"
+  />
+}

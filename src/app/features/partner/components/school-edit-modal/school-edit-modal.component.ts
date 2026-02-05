@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, input, output, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -22,7 +22,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
         <div class="modal-content">
         <header class="modal-header">
-          <h2>{{ mode === 'create' ? 'Új iskola' : 'Iskola szerkesztése' }}</h2>
+          <h2>{{ mode() === 'create' ? 'Új iskola' : 'Iskola szerkesztése' }}</h2>
           <button class="close-btn" (click)="close.emit()">
             <lucide-icon [name]="ICONS.X" [size]="20" />
           </button>
@@ -75,7 +75,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
                 Mentés...
               } @else {
                 <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-                {{ mode === 'create' ? 'Létrehozás' : 'Mentés' }}
+                {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}
               }
             </button>
           </div>
@@ -236,10 +236,10 @@ export class SchoolEditModalComponent {
   private readonly partnerService = inject(PartnerService);
   private readonly destroyRef = inject(DestroyRef);
 
-  @Input() school: SchoolListItem | null = null;
-  @Input() mode: 'create' | 'edit' = 'create';
-  @Output() close = new EventEmitter<void>();
-  @Output() saved = new EventEmitter<SchoolItem>();
+  readonly school = input<SchoolListItem | null>(null);
+  readonly mode = input<'create' | 'edit'>('create');
+  readonly close = output<void>();
+  readonly saved = output<SchoolItem>();
 
   readonly ICONS = ICONS;
 
@@ -251,9 +251,10 @@ export class SchoolEditModalComponent {
   backdropHandler = createBackdropHandler(() => this.close.emit());
 
   ngOnInit(): void {
-    if (this.school && this.mode === 'edit') {
-      this.name = this.school.name;
-      this.city = this.school.city ?? '';
+    const school = this.school();
+    if (school && this.mode() === 'edit') {
+      this.name = school.name;
+      this.city = school.city ?? '';
     }
   }
 
@@ -268,9 +269,9 @@ export class SchoolEditModalComponent {
       city: this.city.trim() || null
     };
 
-    const request$ = this.mode === 'create'
+    const request$ = this.mode() === 'create'
       ? this.partnerService.createSchool(payload)
-      : this.partnerService.updateSchool(this.school!.id, payload);
+      : this.partnerService.updateSchool(this.school()!.id, payload);
 
     request$.pipe(
       takeUntilDestroyed(this.destroyRef)

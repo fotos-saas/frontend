@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { HttpError } from '../../../shared/types/http-error.types';
@@ -104,28 +105,34 @@ export class TemplateChooserService {
   private readonly API_BASE = `${environment.apiUrl}/tablo-frontend/templates`;
 
   /** Kategóriák (cache) */
-  private categoriesSubject = new BehaviorSubject<TemplateCategory[]>([]);
-  public categories$ = this.categoriesSubject.asObservable();
+  private readonly _categories = signal<TemplateCategory[]>([]);
+  readonly categories = this._categories.asReadonly();
+  readonly categories$: Observable<TemplateCategory[]> = toObservable(this._categories);
 
   /** Betöltött template-ek */
-  private templatesSubject = new BehaviorSubject<Template[]>([]);
-  public templates$ = this.templatesSubject.asObservable();
+  private readonly _templates = signal<Template[]>([]);
+  readonly templates = this._templates.asReadonly();
+  readonly templates$: Observable<Template[]> = toObservable(this._templates);
 
   /** Kiválasztott template-ek */
-  private selectionsSubject = new BehaviorSubject<SelectedTemplate[]>([]);
-  public selections$ = this.selectionsSubject.asObservable();
+  private readonly _selections = signal<SelectedTemplate[]>([]);
+  readonly selections = this._selections.asReadonly();
+  readonly selections$: Observable<SelectedTemplate[]> = toObservable(this._selections);
 
   /** Maximum kiválasztható */
-  private maxSelectionsSubject = new BehaviorSubject<number>(3);
-  public maxSelections$ = this.maxSelectionsSubject.asObservable();
+  private readonly _maxSelections = signal<number>(3);
+  readonly maxSelectionsSignal = this._maxSelections.asReadonly();
+  readonly maxSelections$: Observable<number> = toObservable(this._maxSelections);
 
   /** Betöltés állapot */
-  private loadingSubject = new BehaviorSubject<boolean>(false);
-  public loading$ = this.loadingSubject.asObservable();
+  private readonly _loading = signal<boolean>(false);
+  readonly loading = this._loading.asReadonly();
+  readonly loading$: Observable<boolean> = toObservable(this._loading);
 
   /** Has more flag (pagination) */
-  private hasMoreSubject = new BehaviorSubject<boolean>(false);
-  public hasMore$ = this.hasMoreSubject.asObservable();
+  private readonly _hasMore = signal<boolean>(false);
+  readonly hasMore = this._hasMore.asReadonly();
+  readonly hasMore$: Observable<boolean> = toObservable(this._hasMore);
 
   /** Current page */
   private currentPage = 1;
@@ -140,7 +147,7 @@ export class TemplateChooserService {
   loadCategories(): Observable<TemplateCategory[]> {
     return this.http.get<CategoryListResponse>(`${this.API_BASE}/categories`).pipe(
       map(response => response.data),
-      tap(categories => this.categoriesSubject.next(categories)),
+      tap(categories => this._categories.set(categories)),
       catchError(this.handleError.bind(this))
     );
   }
@@ -152,12 +159,12 @@ export class TemplateChooserService {
     this.currentPage = 1;
     this.currentCategory = category || null;
     this.currentSearch = search || null;
-    this.templatesSubject.next([]);
+    this._templates.set([]);
 
     return this.fetchTemplates(1, category, search).pipe(
       tap(response => {
-        this.templatesSubject.next(response.data);
-        this.hasMoreSubject.next(response.meta.hasMore);
+        this._templates.set(response.data);
+        this._hasMore.set(response.meta.hasMore);
       }),
       map(response => response.data)
     );
@@ -167,9 +174,9 @@ export class TemplateChooserService {
    * Több template betöltése (load more)
    */
   loadMoreTemplates(): Observable<Template[]> {
-    if (!this.hasMoreSubject.getValue() || this.loadingSubject.getValue()) {
+    if (!this._hasMore() || this._loading()) {
       return new Observable(observer => {
-        observer.next(this.templatesSubject.getValue());
+        observer.next(this._templates());
         observer.complete();
       });
     }
@@ -178,11 +185,11 @@ export class TemplateChooserService {
 
     return this.fetchTemplates(this.currentPage, this.currentCategory, this.currentSearch).pipe(
       tap(response => {
-        const current = this.templatesSubject.getValue();
-        this.templatesSubject.next([...current, ...response.data]);
-        this.hasMoreSubject.next(response.meta.hasMore);
+        const current = this._templates();
+        this._templates.set([...current, ...response.data]);
+        this._hasMore.set(response.meta.hasMore);
       }),
-      map(response => this.templatesSubject.getValue())
+      map(response => this._templates())
     );
   }
 
@@ -190,7 +197,7 @@ export class TemplateChooserService {
    * Template-ek lekérése API-ból
    */
   private fetchTemplates(page: number, category?: string | null, search?: string | null): Observable<TemplateListResponse> {
-    this.loadingSubject.next(true);
+    this._loading.set(true);
 
     let params: Record<string, string> = {
       page: page.toString(),
@@ -206,9 +213,9 @@ export class TemplateChooserService {
     }
 
     return this.http.get<TemplateListResponse>(this.API_BASE, { params }).pipe(
-      tap(() => this.loadingSubject.next(false)),
+      tap(() => this._loading.set(false)),
       catchError(error => {
-        this.loadingSubject.next(false);
+        this._loading.set(false);
         return this.handleError(error);
       })
     );
@@ -220,8 +227,8 @@ export class TemplateChooserService {
   loadSelections(): Observable<SelectedTemplate[]> {
     return this.http.get<SelectionsResponse>(`${this.API_BASE}/selections/current`).pipe(
       tap(response => {
-        this.selectionsSubject.next(response.data.selections);
-        this.maxSelectionsSubject.next(response.data.maxSelections);
+        this._selections.set(response.data.selections);
+        this._maxSelections.set(response.data.maxSelections);
       }),
       map(response => response.data.selections),
       catchError(this.handleError.bind(this))
@@ -255,8 +262,8 @@ export class TemplateChooserService {
       tap(response => {
         if (response.success) {
           // Remove from local state
-          const current = this.selectionsSubject.getValue();
-          this.selectionsSubject.next(current.filter(t => t.id !== templateId));
+          const current = this._selections();
+          this._selections.set(current.filter(t => t.id !== templateId));
         }
       }),
       catchError(this.handleError.bind(this))
@@ -267,28 +274,28 @@ export class TemplateChooserService {
    * Ellenőrzi, hogy egy template ki van-e választva
    */
   isSelected(templateId: number): boolean {
-    return this.selectionsSubject.getValue().some(t => t.id === templateId);
+    return this._selections().some(t => t.id === templateId);
   }
 
   /**
    * Ellenőrzi, hogy választható-e még template
    */
   canSelectMore(): boolean {
-    return this.selectionsSubject.getValue().length < this.maxSelectionsSubject.getValue();
+    return this._selections().length < this._maxSelections();
   }
 
   /**
    * Getter a kiválasztott template-ek számához
    */
   get selectedCount(): number {
-    return this.selectionsSubject.getValue().length;
+    return this._selections().length;
   }
 
   /**
    * Getter a maximum kiválaszthatóhoz
    */
   get maxSelections(): number {
-    return this.maxSelectionsSubject.getValue();
+    return this._maxSelections();
   }
 
   /**

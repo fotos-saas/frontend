@@ -3,7 +3,7 @@ import {
   output,
   ChangeDetectionStrategy,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   ElementRef,
   inject,
   signal,
@@ -63,19 +63,19 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
   errors: { password?: string; passwordConfirmation?: string } = {};
 
   /** ViewChild referenciák */
-  @ViewChild('firstInput') firstInput?: ElementRef<HTMLInputElement>;
-  @ViewChild(PasswordStrengthComponent) passwordStrength?: PasswordStrengthComponent;
+  readonly firstInput = viewChild<ElementRef<HTMLInputElement>>('firstInput');
+  readonly passwordStrength = viewChild(PasswordStrengthComponent);
 
   /** Computed: Jelszó erősség OK (min 8 karakter + összes követelmény teljesül) */
   readonly isPasswordStrong = computed(() => {
-    return this.passwordStrength?.isValid() ?? false;
+    return this.passwordStrength()?.isValid() ?? false;
   });
 
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
     // Focus az első input mezőre
     setTimeout(() => {
-      this.firstInput?.nativeElement.focus();
+      this.firstInput()?.nativeElement.focus();
     }, 100);
   }
 
@@ -118,7 +118,7 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
     }
 
     // Ellenőrizzük a jelszó erősséget
-    if (this.passwordStrength && !this.passwordStrength.isValid()) {
+    if (this.passwordStrength() && !this.passwordStrength()!.isValid()) {
       this.errors.password = 'A jelszó nem elég erős. Teljesítsd az összes követelményt!';
       return false;
     }

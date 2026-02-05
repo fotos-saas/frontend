@@ -1,5 +1,6 @@
 import {
   Component,
+  ChangeDetectionStrategy,
   input,
   output
 } from '@angular/core';
@@ -54,7 +55,8 @@ import { ReactionEmoji, ReactionsSummary } from '../reaction-picker/reaction-pic
     PostActionsComponent,
   ],
   templateUrl: './forum-post.component.html',
-  styleUrls: ['./forum-post.component.scss']
+  styleUrls: ['./forum-post.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ForumPostComponent {
   // ==================== INPUTS ====================

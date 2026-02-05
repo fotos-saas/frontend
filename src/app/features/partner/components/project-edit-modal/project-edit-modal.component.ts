@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal, DestroyRef, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, input, output, inject, signal, DestroyRef, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -23,9 +23,9 @@ export class ProjectEditModalComponent implements OnInit {
   readonly ICONS = ICONS;
   backdropHandler = createBackdropHandler(() => this.close.emit());
 
-  @Input() project!: ProjectDetailData;
-  @Output() close = new EventEmitter<void>();
-  @Output() saved = new EventEmitter<void>();
+  readonly project = input.required<ProjectDetailData>();
+  readonly close = output<void>();
+  readonly saved = output<void>();
 
   private partnerService = inject(PartnerService);
   private destroyRef = inject(DestroyRef);
@@ -51,20 +51,21 @@ export class ProjectEditModalComponent implements OnInit {
 
   ngOnInit(): void {
     // Inicializálás a meglévő adatokkal
-    if (this.project) {
-      this.formData.school_id = this.project.school?.id ?? null;
-      this.formData.class_name = this.project.className ?? null;
-      this.formData.class_year = this.project.classYear ?? null;
-      this.formData.photo_date = this.project.photoDate ?? null;
-      this.formData.deadline = this.project.deadline ?? null;
+    const project = this.project();
+    if (project) {
+      this.formData.school_id = project.school?.id ?? null;
+      this.formData.class_name = project.className ?? null;
+      this.formData.class_year = project.classYear ?? null;
+      this.formData.photo_date = project.photoDate ?? null;
+      this.formData.deadline = project.deadline ?? null;
 
-      if (this.project.school) {
+      if (project.school) {
         this.selectedSchool = {
-          id: this.project.school.id,
-          name: this.project.school.name,
-          city: this.project.school.city ?? null,
+          id: project.school.id,
+          name: project.school.name,
+          city: project.school.city ?? null,
         };
-        this.schoolSearch = this.project.school.name + (this.project.school.city ? ` (${this.project.school.city})` : '');
+        this.schoolSearch = project.school.name + (project.school.city ? ` (${project.school.city})` : '');
       }
     }
   }
@@ -127,7 +128,7 @@ export class ProjectEditModalComponent implements OnInit {
     this.error.set(null);
     this.submitting.set(true);
 
-    this.partnerService.updateProject(this.project.id, this.formData)
+    this.partnerService.updateProject(this.project().id, this.formData)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

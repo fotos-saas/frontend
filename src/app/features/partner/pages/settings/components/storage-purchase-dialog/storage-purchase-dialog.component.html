@@ -1,0 +1,119 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+>
+  <div class="dialog-panel dialog-panel--md">
+    <!-- Header -->
+    <div class="dialog-header">
+      <h2 class="dialog-title">
+        <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="20" />
+        Tárhely bővítése
+      </h2>
+      <button class="dialog-close" (click)="close.emit()" [disabled]="isSubmitting()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog-content">
+      <!-- Slider -->
+      <div class="slider-section">
+        <label class="slider-label">
+          Extra tárhely mennyisége
+        </label>
+        <div class="slider-container">
+          <input
+            type="range"
+            class="slider"
+            [min]="0"
+            [max]="100"
+            [step]="5"
+            [(ngModel)]="selectedGb"
+          />
+          <div class="slider-value">
+            <span class="slider-value__number">{{ selectedGb() }}</span>
+            <span class="slider-value__unit">GB</span>
+          </div>
+        </div>
+        <div class="slider-marks">
+          <span>0 GB</span>
+          <span>50 GB</span>
+          <span>100 GB</span>
+        </div>
+      </div>
+
+      <!-- Összegzés -->
+      <div class="summary">
+        <div class="summary__row">
+          <span>Jelenlegi extra tárhely:</span>
+          <span>{{ usage().additional_gb }} GB</span>
+        </div>
+        <div class="summary__row summary__row--highlight">
+          <span>Új extra tárhely:</span>
+          <span>{{ selectedGb() }} GB</span>
+        </div>
+        <div class="summary__row">
+          <span>Teljes tárhely:</span>
+          <span>{{ totalAfterPurchase() }} GB</span>
+        </div>
+      </div>
+
+      <!-- Ár -->
+      <div class="price-box">
+        <div class="price-box__main">
+          <span class="price-box__label">
+            {{ isYearly() ? 'Éves díj' : 'Havi díj' }}:
+          </span>
+          <span class="price-box__value">
+            {{ totalPrice() | number:'1.0-0' }} Ft
+          </span>
+        </div>
+        @if (isYearly()) {
+          <div class="price-box__hint">
+            ({{ monthlyEquivalent() | number:'1.0-0' }} Ft/hó - 10% kedvezmény)
+          </div>
+        }
+        @if (!isYearly() && selectedGb() > 0) {
+          <div class="price-box__hint">
+            Éves előfizetéssel 10% kedvezmény!
+          </div>
+        }
+      </div>
+
+      <!-- Változás jelző -->
+      @if (hasChanged()) {
+        <div class="change-indicator" [class.change-indicator--increase]="selectedGb() > usage().additional_gb" [class.change-indicator--decrease]="selectedGb() < usage().additional_gb">
+          @if (selectedGb() > usage().additional_gb) {
+            <lucide-icon [name]="ICONS.ARROW_UP" [size]="16" />
+            <span>+{{ selectedGb() - usage().additional_gb }} GB bővítés</span>
+          } @else if (selectedGb() < usage().additional_gb) {
+            <lucide-icon [name]="ICONS.ARROW_DOWN" [size]="16" />
+            <span>-{{ usage().additional_gb - selectedGb() }} GB csökkentés</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog-footer">
+      <button class="btn btn--secondary" (click)="close.emit()" [disabled]="isSubmitting()">
+        Mégse
+      </button>
+      <button
+        class="btn btn--primary"
+        (click)="handleConfirm()"
+        [disabled]="isSubmitting() || !hasChanged()"
+      >
+        @if (isSubmitting()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="18" class="animate-spin" />
+          Feldolgozás...
+        } @else if (selectedGb() === 0 && usage().additional_gb > 0) {
+          Extra tárhely eltávolítása
+        } @else {
+          Módosítás mentése
+        }
+      </button>
+    </div>
+  </div>
+</div>

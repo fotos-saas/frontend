@@ -1,0 +1,94 @@
+<!-- Top Bar: Back + Actions -->
+<div class="top-bar">
+  <a
+    [routerLink]="['/partner/orders/clients']"
+    class="back-link"
+  >
+    <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+    Vissza
+  </a>
+
+  <div class="top-actions">
+    @if (client().accessCodeEnabled && client().accessCode) {
+      <button
+        (click)="disableCode.emit()"
+        class="action-btn action-btn--warning"
+        matTooltip="Kód inaktiválása"
+      >
+        <lucide-icon [name]="ICONS.BAN" [size]="18" />
+      </button>
+    }
+    <button
+      (click)="edit.emit()"
+      class="action-btn"
+      matTooltip="Szerkesztés"
+    >
+      <lucide-icon [name]="ICONS.EDIT" [size]="18" />
+    </button>
+    <button
+      (click)="delete.emit()"
+      class="action-btn action-btn--danger"
+      [disabled]="client().albumsCount > 0"
+      [matTooltip]="client().albumsCount > 0 ? 'Törléshez először töröld az albumokat' : 'Törlés'"
+    >
+      <lucide-icon [name]="ICONS.DELETE" [size]="18" />
+    </button>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="detail-header">
+  <h1 class="detail-title">{{ client().name }}</h1>
+
+  <!-- Regisztráció státusz badge-ek -->
+  <div class="registration-status-badges">
+    @if (client().isRegistered) {
+      <span class="status-badge status-badge--registered">
+        <lucide-icon [name]="ICONS.USER_CHECK" [size]="14" />
+        Regisztrált
+      </span>
+    } @else if (client().allowRegistration) {
+      <span class="status-badge status-badge--allowed">
+        <lucide-icon [name]="ICONS.USER_PLUS" [size]="14" />
+        Regisztráció engedélyezve
+      </span>
+    } @else {
+      <span class="status-badge status-badge--disabled">
+        <lucide-icon [name]="ICONS.USER_X" [size]="14" />
+        Regisztráció nincs engedélyezve
+      </span>
+    }
+  </div>
+
+  <div class="detail-meta">
+    @if (client().email) {
+      <span class="meta-item">
+        <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+        {{ client().email }}
+      </span>
+    }
+    @if (client().email && client().phone) {
+      <span class="meta-separator">·</span>
+    }
+    @if (client().phone) {
+      <span class="meta-item">
+        <lucide-icon [name]="ICONS.PHONE" [size]="14" />
+        {{ client().phone }}
+      </span>
+    }
+  </div>
+</header>
+
+<!-- Note -->
+@if (client().note) {
+  <div class="note-box">
+    <h3 class="note-title">Megjegyzés</h3>
+    <p class="note-text">{{ client().note }}</p>
+  </div>
+}
+
+<!-- Timestamps -->
+<div class="detail-timestamps">
+  <span>Létrehozva: {{ formatDate(client().createdAt) }}</span>
+  <span>Módosítva: {{ formatDate(client().updatedAt) }}</span>
+</div>

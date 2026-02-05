@@ -1,0 +1,58 @@
+<div class="reaction-container" (click)="$event.stopPropagation()">
+  <!-- Reactions summary (megjelenített reakciók) -->
+  @if (hasReactions()) {
+    <div class="reactions-summary">
+      @for (item of sortedReactions(); track item.emoji) {
+        <button
+          type="button"
+          class="reaction-badge click-feedback"
+          [class.reaction-badge--selected]="userReaction() === item.emoji"
+          [disabled]="disabled()"
+          (click)="onReactionClick(item.emoji)"
+          [title]="getTooltip(item.emoji)"
+        >
+          <span class="reaction-badge__emoji">{{ item.emoji }}</span>
+          <span class="reaction-badge__count">{{ item.count }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Add reaction button (csak ha még nincs reakció) -->
+  @if (!userReaction()) {
+    <div class="reaction-add-wrapper">
+      <button
+        type="button"
+        class="reaction-add-btn click-feedback"
+        [class.reaction-add-btn--active]="isPickerOpen()"
+        [disabled]="disabled()"
+        (click)="togglePicker(); $event.stopPropagation()"
+        title="Reakció hozzáadása"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+          <line x1="9" y1="9" x2="9.01" y2="9"/>
+          <line x1="15" y1="9" x2="15.01" y2="9"/>
+        </svg>
+      </button>
+
+      <!-- Picker dropdown -->
+      @if (isPickerOpen()) {
+        <div class="reaction-picker" (click)="$event.stopPropagation()">
+          @for (emoji of availableReactions; track emoji) {
+            <button
+              type="button"
+              class="reaction-picker__btn click-feedback--button"
+              [disabled]="disabled()"
+              (click)="selectReaction(emoji)"
+              [title]="getTooltip(emoji)"
+            >
+              {{ emoji }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

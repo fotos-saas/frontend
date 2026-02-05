@@ -1,9 +1,9 @@
 import {
   Component,
+  inject,
   input,
   output,
-  signal,
-  computed,
+  effect,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
@@ -15,7 +15,7 @@ import {
   MatchResult,
   PhotoAssignment
 } from '../../../services/partner.service';
-import { SamplesLightboxComponent, SampleLightboxItem } from '../../../../../shared/components/samples-lightbox';
+import { SamplesLightboxComponent } from '../../../../../shared/components/samples-lightbox';
 import {
   PersonWithPhoto,
   ReviewStatsBarComponent,
@@ -23,12 +23,12 @@ import {
   ReviewSearchBoxComponent,
   ReviewPersonCardComponent,
   ReviewUnassignedPanelComponent,
-  TypeFilter
 } from './index';
+import { StepReviewService } from './step-review.service';
 
 /**
  * Step Review - Parkolópálya drag & drop párosítás.
- * Refaktorált verzió alkomponensekkel.
+ * Üzleti logika a StepReviewService-ben.
  */
 @Component({
   selector: 'app-step-review',
@@ -43,6 +43,7 @@ import {
     ReviewPersonCardComponent,
     ReviewUnassignedPanelComponent,
   ],
+  providers: [StepReviewService],
   template: `
     <div class="step-review">
       <!-- Stats Bar -->
@@ -146,97 +147,11 @@ import {
       />
     }
   `,
-  styles: [`
-    .step-review {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .section {
-      margin-bottom: 24px;
-    }
-
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      margin: 0 0 12px 0;
-      padding: 8px 12px;
-      border-radius: 8px;
-    }
-
-    .section-title--success {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .section-title--warning {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .section-hint {
-      font-size: 0.75rem;
-      font-weight: 400;
-      opacity: 0.8;
-      margin-left: auto;
-    }
-
-    .persons-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 150px);
-      gap: 12px;
-      justify-content: center;
-    }
-
-    .persons-grid--paired {
-      grid-template-columns: repeat(auto-fill, 120px);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: #64748b;
-    }
-
-    .empty-state p {
-      margin: 12px 0 0;
-      font-size: 0.875rem;
-    }
-
-    .all-assigned-message {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px;
-      background: #d1fae5;
-      border-radius: 8px;
-      color: #065f46;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    @media (max-width: 480px) {
-      .persons-grid {
-        grid-template-columns: repeat(auto-fill, 120px);
-        gap: 8px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-  `],
+  styleUrl: './step-review.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StepReviewComponent {
+  private readonly svc = inject(StepReviewService);
   readonly ICONS = ICONS;
 
   // === INPUTS ===
@@ -253,189 +168,49 @@ export class StepReviewComponent {
   readonly finalize = output<void>();
   readonly deleteAllUnassigned = output<void>();
 
-  // === STATE ===
-  searchQuery = signal('');
-  typeFilter = signal<TypeFilter>('student');
-
-  // Lightbox
-  lightboxOpen = signal(false);
-  lightboxIndex = signal(0);
-
-  // === COMPUTED ===
-
-  readonly personsWithPhotos = computed<PersonWithPhoto[]>(() => {
-    return this.persons().map(person => {
-      const assignment = this.assignments().find(a => a.personId === person.id);
-      const assignedPhoto = assignment
-        ? this.uploadedPhotos().find(p => p.mediaId === assignment.mediaId) ?? null
-        : null;
-
-      const match = this.matchResult()?.matches.find(m =>
-        m.name === person.name && m.mediaId === assignment?.mediaId
-      );
-
-      return {
-        ...person,
-        assignedPhoto,
-        matchConfidence: match?.confidence ?? null,
-        hasExistingPhoto: person.hasPhoto
-      };
-    });
-  });
-
-  readonly pairedPersons = computed(() => {
-    return this.applyFilters(this.personsWithPhotos())
-      .filter(p => p.assignedPhoto || p.hasExistingPhoto);
-  });
-
-  readonly missingPersonsList = computed(() => {
-    return this.applyFilters(this.personsWithPhotos())
-      .filter(p => !p.assignedPhoto && !p.hasExistingPhoto);
-  });
-
-  readonly allDropListIds = computed(() => {
-    const pairedIds = this.pairedPersons().map(p => `person-${p.id}`);
-    const missingIds = this.missingPersonsList().map(p => `person-${p.id}`);
-    return [...pairedIds, ...missingIds, 'unassigned-list'];
-  });
-
-  readonly lightboxItems = computed<SampleLightboxItem[]>(() => {
-    return this.uploadedPhotos().map(photo => ({
-      id: photo.mediaId,
-      url: photo.fullUrl,
-      thumbUrl: photo.thumbUrl,
-      fileName: photo.filename,
-      createdAt: new Date().toISOString()
-    }));
-  });
-
-  readonly filteredPersonsWithPhotos = computed(() => {
-    return this.applyFilters(this.personsWithPhotos());
-  });
-
-  readonly studentStats = computed(() => {
-    const students = this.personsWithPhotos().filter(p => p.type === 'student');
-    return {
-      total: students.length,
-      assigned: students.filter(s => s.assignedPhoto || s.hasExistingPhoto).length
-    };
-  });
-
-  readonly teacherStats = computed(() => {
-    const teachers = this.personsWithPhotos().filter(p => p.type === 'teacher');
-    return {
-      total: teachers.length,
-      assigned: teachers.filter(t => t.assignedPhoto || t.hasExistingPhoto).length
-    };
-  });
-
-  readonly assignedCount = computed(() => {
-    return this.applyFilters(this.personsWithPhotos())
-      .filter(p => p.assignedPhoto || p.hasExistingPhoto).length;
-  });
-
-  readonly missingCount = computed(() => {
-    return this.applyFilters(this.personsWithPhotos())
-      .filter(p => !p.assignedPhoto && !p.hasExistingPhoto).length;
-  });
-
-  // === METHODS ===
-
-  private applyFilters(persons: PersonWithPhoto[]): PersonWithPhoto[] {
-    let result = persons;
-
-    // Type filter
-    const typeF = this.typeFilter();
-    if (typeF !== 'all') {
-      result = result.filter(p => p.type === typeF);
-    }
-
-    // Search filter
-    const query = this.searchQuery().trim().toLowerCase();
-    if (query) {
-      result = result.filter(p => p.name.toLowerCase().includes(query));
-    }
-
-    return result;
+  // === Szinkronizálás: input → service ===
+  constructor() {
+    effect(() => this.svc.setPersons(this.persons()));
+    effect(() => this.svc.setMatchResult(this.matchResult()));
+    effect(() => this.svc.setUploadedPhotos(this.uploadedPhotos()));
+    effect(() => this.svc.setAssignments(this.assignments()));
+    effect(() => this.svc.setUnassignedPhotos(this.unassignedPhotos()));
   }
 
-  onDropOnPersonCard(event: CdkDragDrop<any>, targetPerson: PersonWithPhoto): void {
-    const draggedItem = event.item.data;
+  // === Template-delegálás: signal-ek ===
+  readonly searchQuery = this.svc.searchQuery;
+  readonly typeFilter = this.svc.typeFilter;
+  readonly lightboxOpen = this.svc.lightboxOpen;
+  readonly lightboxIndex = this.svc.lightboxIndex;
 
-    if (this.isUploadedPhoto(draggedItem)) {
-      this.assignPhotoToPerson(draggedItem.mediaId, targetPerson.id);
-      return;
-    }
+  // === Template-delegálás: computed-ek ===
+  readonly pairedPersons = this.svc.pairedPersons;
+  readonly missingPersonsList = this.svc.missingPersonsList;
+  readonly allDropListIds = this.svc.allDropListIds;
+  readonly lightboxItems = this.svc.lightboxItems;
+  readonly filteredPersonsWithPhotos = this.svc.filteredPersonsWithPhotos;
+  readonly studentStats = this.svc.studentStats;
+  readonly teacherStats = this.svc.teacherStats;
+  readonly assignedCount = this.svc.assignedCount;
+  readonly missingCount = this.svc.missingCount;
 
-    if (this.isPersonWithPhoto(draggedItem) && draggedItem.assignedPhoto) {
-      this.swapAssignments(draggedItem, targetPerson);
-    }
+  // === Template-delegálás: metódusok ===
+
+  onDropOnPersonCard(event: CdkDragDrop<unknown>, targetPerson: PersonWithPhoto): void {
+    const result = this.svc.onDropOnPersonCard(event, targetPerson);
+    if (result) this.assignmentsChange.emit(result);
   }
 
-  onDropOnUnassigned(event: CdkDragDrop<any>): void {
-    if (event.previousContainer === event.container) return;
-
-    const draggedItem = event.item.data;
-    if (this.isPersonWithPhoto(draggedItem) && draggedItem.assignedPhoto) {
-      this.removeAssignment(draggedItem);
-    }
-  }
-
-  private assignPhotoToPerson(mediaId: number, personId: number): void {
-    const newAssignments = this.assignments().filter(a =>
-      a.personId !== personId && a.mediaId !== mediaId
-    );
-    newAssignments.push({ personId, mediaId });
-    this.assignmentsChange.emit(newAssignments);
-  }
-
-  private swapAssignments(sourcePerson: PersonWithPhoto, targetPerson: PersonWithPhoto): void {
-    if (!sourcePerson.assignedPhoto) return;
-
-    const sourceMediaId = sourcePerson.assignedPhoto.mediaId;
-    const targetMediaId = targetPerson.assignedPhoto?.mediaId;
-
-    let newAssignments = this.assignments().filter(a =>
-      a.personId !== sourcePerson.id && a.personId !== targetPerson.id
-    );
-
-    newAssignments.push({ personId: targetPerson.id, mediaId: sourceMediaId });
-
-    if (targetMediaId) {
-      newAssignments.push({ personId: sourcePerson.id, mediaId: targetMediaId });
-    }
-
-    this.assignmentsChange.emit(newAssignments);
+  onDropOnUnassigned(event: CdkDragDrop<unknown>): void {
+    const result = this.svc.onDropOnUnassigned(event);
+    if (result) this.assignmentsChange.emit(result);
   }
 
   removeAssignment(person: PersonWithPhoto): void {
-    const newAssignments = this.assignments().filter(a => a.personId !== person.id);
-    this.assignmentsChange.emit(newAssignments);
+    this.assignmentsChange.emit(this.svc.removeAssignment(person));
   }
 
-  private isUploadedPhoto(item: any): item is UploadedPhoto {
-    return item && 'mediaId' in item && 'thumbUrl' in item && !('name' in item);
-  }
-
-  private isPersonWithPhoto(item: any): item is PersonWithPhoto {
-    return item && 'id' in item && 'name' in item && 'assignedPhoto' in item;
-  }
-
-  // === LIGHTBOX ===
-
-  openLightbox(photo: UploadedPhoto): void {
-    const index = this.uploadedPhotos().findIndex(p => p.mediaId === photo.mediaId);
-    if (index >= 0) {
-      this.lightboxIndex.set(index);
-      this.lightboxOpen.set(true);
-    }
-  }
-
-  closeLightbox(): void {
-    this.lightboxOpen.set(false);
-  }
-
-  onLightboxNavigate(index: number): void {
-    this.lightboxIndex.set(index);
-  }
+  openLightbox(photo: UploadedPhoto): void { this.svc.openLightbox(photo); }
+  closeLightbox(): void { this.svc.closeLightbox(); }
+  onLightboxNavigate(index: number): void { this.svc.onLightboxNavigate(index); }
 }

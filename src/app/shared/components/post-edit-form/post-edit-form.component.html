@@ -1,0 +1,74 @@
+<div class="post-edit-form">
+  <textarea
+    class="post-edit-form__textarea"
+    [(ngModel)]="content"
+    [disabled]="isSubmitting()"
+    [rows]="rows()"
+    placeholder="Szerkeszd a hozzászólásodat..."
+  ></textarea>
+
+  <!-- Media Editor (ha van meglévő média VAGY engedélyezve van) -->
+  @if (showMediaEditor()) {
+    <div class="post-edit-form__media">
+      <app-media-editor
+        [existingMedia]="mediaItems()"
+        [disabled]="isSubmitting()"
+        [maxFiles]="3"
+        [maxSizeMB]="2"
+        [existingLabel]="'Meglévő képek'"
+        [newLabel]="'Új képek hozzáadása (max 3 kép, 2MB/kép)'"
+        (newFilesChange)="onNewFilesChange($event)"
+        (mediaToDeleteChange)="onMediaToDeleteChange($event)"
+        (error)="onMediaError($event)"
+      />
+    </div>
+  }
+
+  @if (mediaError()) {
+    <div class="post-edit-form__media-error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span>{{ mediaError() }}</span>
+    </div>
+  }
+
+  @if (remainingTime()) {
+    <div class="post-edit-form__info">
+      <span class="post-edit-form__timer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Még {{ remainingTime() }} van a szerkesztésre
+      </span>
+    </div>
+  }
+
+  <div class="post-edit-form__actions">
+    <button
+      type="button"
+      class="post-edit-form__btn post-edit-form__btn--cancel"
+      (click)="onCancel()"
+      [disabled]="isSubmitting()"
+    >
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="post-edit-form__btn post-edit-form__btn--save"
+      (click)="onSave()"
+      [disabled]="!content.trim() || isSubmitting()"
+    >
+      @if (isSubmitting()) {
+        <svg class="post-edit-form__spinner" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      }
+      {{ isSubmitting() ? 'Mentés...' : 'Mentés' }}
+    </button>
+  </div>
+</div>

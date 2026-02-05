@@ -5,7 +5,7 @@ import {
   output,
   AfterViewInit,
   ElementRef,
-  ViewChild,
+  viewChild,
   OnDestroy,
   HostListener,
   inject,
@@ -101,8 +101,8 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StepInfoDialogComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('confirmButton') confirmButton!: ElementRef<HTMLButtonElement>;
-  @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLDivElement>;
+  readonly confirmButton = viewChild<ElementRef<HTMLButtonElement>>('confirmButton');
+  readonly dialogContent = viewChild<ElementRef<HTMLDivElement>>('dialogContent');
 
   private readonly storage = inject(TabloStorageService);
 
@@ -165,7 +165,7 @@ export class StepInfoDialogComponent implements AfterViewInit, OnDestroy {
 
     // Initial focus a gombra
     requestAnimationFrame(() => {
-      this.confirmButton?.nativeElement?.focus();
+      this.confirmButton()?.nativeElement?.focus();
     });
   }
 
@@ -242,7 +242,7 @@ export class StepInfoDialogComponent implements AfterViewInit, OnDestroy {
    * Focusable elemek gyűjtése a dialógusból
    */
   private collectFocusableElements(): void {
-    if (!this.dialogContent?.nativeElement) return;
+    if (!this.dialogContent()?.nativeElement) return;
 
     const selector = [
       'button:not([disabled])',
@@ -254,7 +254,7 @@ export class StepInfoDialogComponent implements AfterViewInit, OnDestroy {
     ].join(',');
 
     this.focusableElements = Array.from(
-      this.dialogContent.nativeElement.querySelectorAll<HTMLElement>(selector)
+      this.dialogContent()!.nativeElement.querySelectorAll<HTMLElement>(selector)
     );
   }
 

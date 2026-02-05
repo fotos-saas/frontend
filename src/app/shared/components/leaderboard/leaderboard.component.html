@@ -1,0 +1,96 @@
+<div class="leaderboard">
+  <!-- Header -->
+  <div class="leaderboard__header">
+    <h3 class="leaderboard__title">
+      <svg class="leaderboard__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+      </svg>
+      Toplista
+    </h3>
+
+    <!-- Type selector -->
+    <div class="leaderboard__tabs">
+      @for (tab of tabs; track tab.value) {
+        <button
+          type="button"
+          class="leaderboard__tab"
+          [class.leaderboard__tab--active]="selectedType() === tab.value"
+          (click)="selectType(tab.value)"
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="leaderboard__content">
+    @if (loading()) {
+      <div class="leaderboard__loading">
+        <div class="leaderboard__spinner"></div>
+      </div>
+    } @else if (entries().length === 0) {
+      <div class="leaderboard__empty">
+        Még nincs adat a toplistán
+      </div>
+    } @else {
+      <ul class="leaderboard__list">
+        @for (entry of entries(); track entry.rank) {
+          <li
+            class="leaderboard__entry"
+            [class.leaderboard__entry--top3]="entry.rank <= 3"
+            [class.leaderboard__entry--current]="isCurrentUser(entry)"
+          >
+            <!-- Rank -->
+            <div class="leaderboard__rank" [attr.data-rank]="entry.rank">
+              @if (entry.rank === 1) {
+                <span class="leaderboard__medal leaderboard__medal--gold">🥇</span>
+              } @else if (entry.rank === 2) {
+                <span class="leaderboard__medal leaderboard__medal--silver">🥈</span>
+              } @else if (entry.rank === 3) {
+                <span class="leaderboard__medal leaderboard__medal--bronze">🥉</span>
+              } @else {
+                <span class="leaderboard__rank-number">{{ entry.rank }}</span>
+              }
+            </div>
+
+            <!-- User info -->
+            <div class="leaderboard__user">
+              <span class="leaderboard__name">{{ entry.guest_name }}</span>
+              <span class="leaderboard__rank-name">{{ entry.rank_name }}</span>
+            </div>
+
+            <!-- Value -->
+            <div class="leaderboard__value">
+              @switch (selectedType()) {
+                @case ('points') {
+                  <span class="leaderboard__points">{{ entry.points }}</span>
+                  <span class="leaderboard__label">pont</span>
+                }
+                @case ('posts') {
+                  <span class="leaderboard__points">{{ entry.stats?.posts ?? 0 }}</span>
+                  <span class="leaderboard__label">poszt</span>
+                }
+                @case ('likes') {
+                  <span class="leaderboard__points">{{ entry.stats?.likes ?? 0 }}</span>
+                  <span class="leaderboard__label">like</span>
+                }
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Current user rank (if not in top 10) -->
+  @if (currentUserRank() && !isInLeaderboard()) {
+    <div class="leaderboard__current-user">
+      <div class="leaderboard__current-label">Te helyezésed:</div>
+      <div class="leaderboard__current-rank">
+        <span class="leaderboard__current-position">{{ currentUserRank()!.rank }}.</span>
+        <span class="leaderboard__current-points">{{ currentUserRank()!.points }} pont</span>
+      </div>
+    </div>
+  }
+</div>

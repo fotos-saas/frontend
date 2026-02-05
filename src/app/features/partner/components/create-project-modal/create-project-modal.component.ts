@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -30,8 +30,8 @@ export class CreateProjectModalComponent {
   readonly ICONS = ICONS;
   backdropHandler = createBackdropHandler(() => this.close.emit());
 
-  @Output() close = new EventEmitter<void>();
-  @Output() projectCreated = new EventEmitter<PartnerProjectListItem>();
+  readonly close = output<void>();
+  readonly projectCreated = output<PartnerProjectListItem>();
 
   private readonly partnerService = inject(PartnerService);
   private readonly destroyRef = inject(DestroyRef);

@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { TabloStorageService } from './tablo-storage.service';
 
 /**
@@ -23,22 +24,24 @@ export type TokenType = 'code' | 'share' | 'preview' | 'unknown';
   providedIn: 'root'
 })
 export class TokenService {
+  private readonly storage = inject(TabloStorageService);
+
   /** Véglegesíthet-e (csak kódos belépés esetén true) */
-  private canFinalizeSubject: BehaviorSubject<boolean>;
-  public canFinalize$: Observable<boolean>;
+  private readonly _canFinalize = signal<boolean>(false);
+  readonly canFinalizeSignal = this._canFinalize.asReadonly();
+  /** @deprecated Használj canFinalizeSignal-t helyette */
+  readonly canFinalize$: Observable<boolean> = toObservable(this._canFinalize);
 
   /** Token típus */
-  private tokenTypeSubject: BehaviorSubject<TokenType>;
-  public tokenType$: Observable<TokenType>;
+  private readonly _tokenType = signal<TokenType>('unknown');
+  readonly tokenTypeSignal = this._tokenType.asReadonly();
+  /** @deprecated Használj tokenTypeSignal-t helyette */
+  readonly tokenType$: Observable<TokenType> = toObservable(this._tokenType);
 
-  constructor(private storage: TabloStorageService) {
+  constructor() {
     const initialState = this.initializeFromStorage();
-
-    this.canFinalizeSubject = new BehaviorSubject<boolean>(initialState.canFinalize);
-    this.canFinalize$ = this.canFinalizeSubject.asObservable();
-
-    this.tokenTypeSubject = new BehaviorSubject<TokenType>(initialState.tokenType);
-    this.tokenType$ = this.tokenTypeSubject.asObservable();
+    this._canFinalize.set(initialState.canFinalize);
+    this._tokenType.set(initialState.tokenType);
   }
 
   /**
@@ -102,8 +105,8 @@ export class TokenService {
    */
   clearToken(): void {
     this.storage.clearCurrentSessionAuth();
-    this.canFinalizeSubject.next(false);
-    this.tokenTypeSubject.next('unknown');
+    this._canFinalize.set(false);
+    this._tokenType.set('unknown');
   }
 
   /**
@@ -111,28 +114,28 @@ export class TokenService {
    */
   setCanFinalize(projectId: number, sessionType: TokenType, canFinalize: boolean): void {
     this.storage.setCanFinalize(projectId, sessionType, canFinalize);
-    this.canFinalizeSubject.next(canFinalize);
+    this._canFinalize.set(canFinalize);
   }
 
   /**
    * Véglegesíthet-e szinkron lekérése
    */
   canFinalize(): boolean {
-    return this.canFinalizeSubject.getValue();
+    return this._canFinalize();
   }
 
   /**
    * Token típus tárolása
    */
   setTokenType(tokenType: TokenType): void {
-    this.tokenTypeSubject.next(tokenType);
+    this._tokenType.set(tokenType);
   }
 
   /**
    * Token típus szinkron lekérése
    */
   getTokenType(): TokenType {
-    return this.tokenTypeSubject.getValue();
+    return this._tokenType();
   }
 
   /**
@@ -152,7 +155,7 @@ export class TokenService {
    */
   reinitialize(): void {
     const state = this.initializeFromStorage();
-    this.canFinalizeSubject.next(state.canFinalize);
-    this.tokenTypeSubject.next(state.tokenType);
+    this._canFinalize.set(state.canFinalize);
+    this._tokenType.set(state.tokenType);
   }
 }

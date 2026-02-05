@@ -1,11 +1,6 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SubscriptionService, SubscriptionInfo } from '../../services/subscription.service';
-import { StorageService, StorageUsage } from '../../services/storage.service';
-import { ToastService } from '../../../../core/services/toast.service';
-import { LoggerService } from '../../../../core/services/logger.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { SubscriptionCardComponent } from './components/subscription-card/subscription-card.component';
 import { SubscriptionActionsComponent } from './components/subscription-actions/subscription-actions.component';
@@ -13,6 +8,7 @@ import { DeleteAccountDialogComponent } from './components/delete-account-dialog
 import { StorageUsageCardComponent } from './components/storage-usage-card/storage-usage-card.component';
 import { StoragePurchaseDialogComponent } from './components/storage-purchase-dialog/storage-purchase-dialog.component';
 import { AddonsCardComponent } from './components/addons-card/addons-card.component';
+import { SettingsStateService } from './settings-state.service';
 
 /**
  * Partner Settings Page
@@ -265,230 +261,39 @@ import { AddonsCardComponent } from './components/addons-card/addons-card.compon
       }
     }
   `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [SettingsStateService]
 })
 export class PartnerSettingsComponent implements OnInit {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly subscriptionService = inject(SubscriptionService);
-  private readonly storageService = inject(StorageService);
-  private readonly toastService = inject(ToastService);
-  private readonly logger = inject(LoggerService);
-
+  protected readonly state = inject(SettingsStateService);
   protected readonly ICONS = ICONS;
 
-  // Subscription state
-  subscriptionInfo = signal<SubscriptionInfo | null>(null);
-  isLoading = signal(true);
-  isActionLoading = signal(false);
-  showDeleteDialog = signal(false);
-  isDeleting = signal(false);
-
-  // Storage state
-  storageUsage = signal<StorageUsage | null>(null);
-  isStorageLoading = signal(true);
-  showStoragePurchaseDialog = signal(false);
-  isStorageSubmitting = signal(false);
+  // Signal delegálás a template-nek
+  readonly subscriptionInfo = this.state.subscriptionInfo;
+  readonly isLoading = this.state.isLoading;
+  readonly isActionLoading = this.state.isActionLoading;
+  readonly showDeleteDialog = this.state.showDeleteDialog;
+  readonly isDeleting = this.state.isDeleting;
+  readonly storageUsage = this.state.storageUsage;
+  readonly isStorageLoading = this.state.isStorageLoading;
+  readonly showStoragePurchaseDialog = this.state.showStoragePurchaseDialog;
+  readonly isStorageSubmitting = this.state.isStorageSubmitting;
 
   ngOnInit(): void {
-    this.loadSubscriptionInfo();
-    this.loadStorageUsage();
+    this.state.init();
   }
 
-  // ============================================
-  // SUBSCRIPTION HANDLERS
-  // ============================================
-
-  private loadSubscriptionInfo(): void {
-    this.isLoading.set(true);
-    this.subscriptionService.getSubscription()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (info) => {
-          this.subscriptionInfo.set(info);
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Failed to load subscription:', err);
-          this.isLoading.set(false);
-          this.toastService.error('Hiba', 'Nem sikerült betölteni az előfizetési adatokat.');
-        }
-      });
-  }
-
-  handleOpenPortal(): void {
-    this.isActionLoading.set(true);
-    this.subscriptionService.openPortal()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          window.open(response.portal_url, '_blank');
-          this.isActionLoading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Failed to open portal:', err);
-          this.toastService.error('Hiba', 'Nem sikerült megnyitni a fiókkezelőt.');
-          this.isActionLoading.set(false);
-        }
-      });
-  }
-
-  handlePause(): void {
-    this.isActionLoading.set(true);
-    this.subscriptionService.pause()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.toastService.success('Siker', response.message);
-          this.loadSubscriptionInfo();
-          this.isActionLoading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Failed to pause:', err);
-          this.toastService.error('Hiba', 'Nem sikerült szüneteltetni az előfizetést.');
-          this.isActionLoading.set(false);
-        }
-      });
-  }
-
-  handleUnpause(): void {
-    this.isActionLoading.set(true);
-    this.subscriptionService.unpause()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.toastService.success('Siker', response.message);
-          this.loadSubscriptionInfo();
-          this.isActionLoading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Failed to unpause:', err);
-          this.toastService.error('Hiba', 'Nem sikerült feloldani a szüneteltetést.');
-          this.isActionLoading.set(false);
-        }
-      });
-  }
-
-  handleCancel(): void {
-    this.isActionLoading.set(true);
-    this.subscriptionService.cancel()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.toastService.success('Siker', response.message);
-          this.loadSubscriptionInfo();
-          this.isActionLoading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Failed to cancel:', err);
-          this.toastService.error('Hiba', 'Nem sikerült lemondani az előfizetést.');
-          this.isActionLoading.set(false);
-        }
-      });
-  }
-
-  handleResume(): void {
-    this.isActionLoading.set(true);
-    this.subscriptionService.resume()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.toastService.success('Siker', response.message);
-          this.loadSubscriptionInfo();
-          this.isActionLoading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Failed to resume:', err);
-          this.toastService.error('Hiba', 'Nem sikerült folytatni az előfizetést.');
-          this.isActionLoading.set(false);
-        }
-      });
-  }
-
-  openDeleteDialog(): void {
-    this.showDeleteDialog.set(true);
-  }
-
-  closeDeleteDialog(): void {
-    this.showDeleteDialog.set(false);
-  }
-
-  handleDeleteAccount(): void {
-    this.isDeleting.set(true);
-    this.subscriptionService.deleteAccount()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.toastService.success('Fiók törölve', response.message);
-          this.closeDeleteDialog();
-          this.isDeleting.set(false);
-          // Logout after deletion
-          setTimeout(() => {
-            window.location.href = '/login';
-          }, 2000);
-        },
-        error: (err) => {
-          this.logger.error('Failed to delete account:', err);
-          this.toastService.error('Hiba', 'Nem sikerült törölni a fiókot.');
-          this.isDeleting.set(false);
-        }
-      });
-  }
-
-  // ============================================
-  // STORAGE HANDLERS
-  // ============================================
-
-  private loadStorageUsage(): void {
-    this.isStorageLoading.set(true);
-    this.storageService.getUsage()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (usage) => {
-          this.storageUsage.set(usage);
-          this.isStorageLoading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Failed to load storage usage:', err);
-          this.isStorageLoading.set(false);
-          this.toastService.error('Hiba', 'Nem sikerült betölteni a tárhely adatokat.');
-        }
-      });
-  }
-
-  openStoragePurchaseDialog(): void {
-    this.showStoragePurchaseDialog.set(true);
-  }
-
-  closeStoragePurchaseDialog(): void {
-    this.showStoragePurchaseDialog.set(false);
-  }
-
-  handleStoragePurchase(gb: number): void {
-    this.isStorageSubmitting.set(true);
-    this.storageService.setAddon(gb)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.toastService.success('Siker', response.message);
-          this.loadStorageUsage();
-          this.closeStoragePurchaseDialog();
-          this.isStorageSubmitting.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Failed to update storage addon:', err);
-          const message = err.error?.message || 'Nem sikerült módosítani az extra tárhelyet.';
-          this.toastService.error('Hiba', message);
-          this.isStorageSubmitting.set(false);
-        }
-      });
-  }
-
-  // ============================================
-  // ADDON HANDLERS
-  // ============================================
-
-  onAddonChanged(): void {
-    // Refresh subscription info when addon changes (to update billing)
-    this.loadSubscriptionInfo();
-  }
+  // === Template-facing metódusok ===
+  handleOpenPortal(): void { this.state.openPortal(); }
+  handlePause(): void { this.state.pause(); }
+  handleUnpause(): void { this.state.unpause(); }
+  handleCancel(): void { this.state.cancel(); }
+  handleResume(): void { this.state.resume(); }
+  openDeleteDialog(): void { this.state.openDeleteDialog(); }
+  closeDeleteDialog(): void { this.state.closeDeleteDialog(); }
+  handleDeleteAccount(): void { this.state.deleteAccount(); }
+  openStoragePurchaseDialog(): void { this.state.openStoragePurchaseDialog(); }
+  closeStoragePurchaseDialog(): void { this.state.closeStoragePurchaseDialog(); }
+  handleStoragePurchase(gb: number): void { this.state.purchaseStorage(gb); }
+  onAddonChanged(): void { this.state.onAddonChanged(); }
 }

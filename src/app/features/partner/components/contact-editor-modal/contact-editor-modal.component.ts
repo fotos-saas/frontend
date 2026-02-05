@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { Component, input, output, inject, signal, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PartnerService, ProjectContact } from '../../services/partner.service';
@@ -129,10 +129,10 @@ export class ContactEditorModalComponent implements OnInit {
   private partnerService = inject(PartnerService);
   private destroyRef = inject(DestroyRef);
 
-  @Input() projectId!: number;
-  @Input() contact: ProjectContact | null = null;
-  @Output() close = new EventEmitter<void>();
-  @Output() saved = new EventEmitter<ProjectContact>();
+  readonly projectId = input.required<number>();
+  readonly contact = input<ProjectContact | null>(null);
+  readonly close = output<void>();
+  readonly saved = output<ProjectContact>();
 
   /** Backdrop kezelő - megakadályozza a véletlen bezárást szöveg kijelöléskor */
   backdropHandler = createBackdropHandler(() => this.close.emit());
@@ -166,16 +166,18 @@ export class ContactEditorModalComponent implements OnInit {
   }
 
   get isEditing(): boolean {
-    return this.contact !== null && this.contact.id !== undefined;
+    const contact = this.contact();
+    return contact !== null && contact.id !== undefined;
   }
 
   ngOnInit(): void {
-    if (this.contact) {
+    const contact = this.contact();
+    if (contact) {
       this.formData = {
-        name: this.contact.name,
-        email: this.contact.email ?? '',
-        phone: this.contact.phone ?? '',
-        isPrimary: this.contact.isPrimary ?? false
+        name: contact.name,
+        email: contact.email ?? '',
+        phone: contact.phone ?? '',
+        isPrimary: contact.isPrimary ?? false
       };
     }
   }
@@ -196,8 +198,9 @@ export class ContactEditorModalComponent implements OnInit {
       isPrimary: this.formData.isPrimary
     };
 
-    if (this.isEditing && this.contact?.id) {
-      this.partnerService.updateContact(this.projectId, this.contact.id, contactData).pipe(
+    const contact = this.contact();
+    if (this.isEditing && contact?.id) {
+      this.partnerService.updateContact(this.projectId(), contact.id, contactData).pipe(
         takeUntilDestroyed(this.destroyRef)
       ).subscribe({
         next: (response) => {
@@ -210,7 +213,7 @@ export class ContactEditorModalComponent implements OnInit {
         }
       });
     } else {
-      this.partnerService.addContact(this.projectId, contactData).pipe(
+      this.partnerService.addContact(this.projectId(), contactData).pipe(
         takeUntilDestroyed(this.destroyRef)
       ).subscribe({
         next: (response) => {

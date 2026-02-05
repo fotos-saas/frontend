@@ -4,18 +4,20 @@ import {
   output,
   ChangeDetectionStrategy,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   ElementRef,
   OnInit,
   OnDestroy,
   inject,
+  DestroyRef,
   ChangeDetectorRef,
   signal
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GuestService } from '../../../core/services/guest.service';
 import { PersonSearchResult } from '../../../core/models/guest.models';
 import { OnboardingFormService, OnboardingStep } from './onboarding-form.service';
@@ -68,6 +70,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
 
   private readonly guestService = inject(GuestService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
   readonly formService = inject(OnboardingFormService);
 
   /** Form értékek */
@@ -76,10 +79,10 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
   email = '';
 
   /** ViewChild referenciák */
-  @ViewChild('searchInput') searchInputRef?: ElementRef<HTMLInputElement>;
-  @ViewChild('nicknameInput') nicknameInputRef?: ElementRef<HTMLInputElement>;
-  @ViewChild('emailInput') emailInputRef?: ElementRef<HTMLInputElement>;
-  @ViewChild('restoreEmailInput') restoreEmailInputRef?: ElementRef<HTMLInputElement>;
+  readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+  readonly nicknameInputRef = viewChild<ElementRef<HTMLInputElement>>('nicknameInput');
+  readonly emailInputRef = viewChild<ElementRef<HTMLInputElement>>('emailInput');
+  readonly restoreEmailInputRef = viewChild<ElementRef<HTMLInputElement>>('restoreEmailInput');
 
   /** Restore mode (már regisztráltál korábban?) */
   showRestoreMode = signal(false);
@@ -90,7 +93,6 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
 
   private previousActiveElement?: HTMLElement;
   private scrollPosition = 0;
-  private readonly destroy$ = new Subject<void>();
   private readonly searchInput$ = new Subject<string>();
 
   // Service delegálás template-hez
@@ -112,7 +114,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
     this.searchInput$.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      takeUntil(this.destroy$),
+      takeUntilDestroyed(this.destroyRef),
       switchMap(query => {
         if (query.length < 2) return [];
         this.formService.isSearching.set(true);
@@ -137,15 +139,13 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
     document.body.classList.remove('dialog-open');
     document.body.style.removeProperty('--scroll-position');
     window.scrollTo(0, this.scrollPosition);
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private focusCurrentStepInput(): void {
     const step = this.currentStep();
-    if (step === 'search') this.searchInputRef?.nativeElement.focus();
-    else if (step === 'nickname') this.nicknameInputRef?.nativeElement.focus();
-    else if (step === 'email') this.emailInputRef?.nativeElement.focus();
+    if (step === 'search') this.searchInputRef()?.nativeElement.focus();
+    else if (step === 'nickname') this.nicknameInputRef()?.nativeElement.focus();
+    else if (step === 'email') this.emailInputRef()?.nativeElement.focus();
   }
 
   onSearchInput(): void {
@@ -232,7 +232,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
     this.restoreEmail = '';
     this.restoreSuccess.set(false);
     this.restoreError.set(null);
-    setTimeout(() => this.restoreEmailInputRef?.nativeElement.focus(), 100);
+    setTimeout(() => this.restoreEmailInputRef()?.nativeElement.focus(), 100);
   }
 
   exitRestoreMode(): void {
@@ -263,7 +263,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
     this.restoreError.set(null);
 
     this.guestService.requestRestoreLink(email)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.restoreSuccess.set(true);

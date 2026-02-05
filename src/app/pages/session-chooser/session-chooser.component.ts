@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { TabloStorageService, StoredSession } from '../../core/services/tablo-storage.service';
@@ -17,6 +17,7 @@ import { AuthService } from '../../core/services/auth.service';
   imports: [NgClass],
   templateUrl: './session-chooser.component.html',
   styleUrl: './session-chooser.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SessionChooserComponent implements OnInit {
   private readonly storage = inject(TabloStorageService);

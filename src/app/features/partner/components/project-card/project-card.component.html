@@ -1,13 +1,13 @@
-<div class="project-row" (click)="cardClick.emit(project)">
+<div class="project-row" (click)="cardClick.emit(project())">
   <!-- Col 1: Minta kép -->
   <div
     class="col col-sample"
-    [class.col-sample--clickable]="project.sampleThumbUrl"
+    [class.col-sample--clickable]="project().sampleThumbUrl"
     (click)="onSamplesClick($event)"
   >
-    @if (project.sampleThumbUrl) {
+    @if (project().sampleThumbUrl) {
       <img
-        [src]="project.sampleThumbUrl"
+        [src]="project().sampleThumbUrl"
         [alt]="'Minta'"
         class="sample-thumb"
       />
@@ -21,47 +21,47 @@
   <!-- Col 2: Iskola + Osztály + Draft jelző -->
   <div class="col col-school">
     <div class="school-name-row">
-      <span class="school-name">{{ project.schoolName ?? 'Ismeretlen iskola' }}</span>
-      @if (project.draftPhotoCount > 0) {
-        <span class="draft-badge" [title]="'Véglegesítésre vár: ' + project.draftPhotoCount + ' kép'">
+      <span class="school-name">{{ project().schoolName ?? 'Ismeretlen iskola' }}</span>
+      @if (project().draftPhotoCount > 0) {
+        <span class="draft-badge" [title]="'Véglegesítésre vár: ' + project().draftPhotoCount + ' kép'">
           <lucide-icon [name]="ICONS.UPLOAD" [size]="10" />
-          {{ project.draftPhotoCount }}
+          {{ project().draftPhotoCount }}
         </span>
       }
-      @if (project.finalizedAt) {
-        <span class="finalized-badge" [title]="'Tablóterv leadva: ' + formatDate(project.finalizedAt)">
+      @if (project().finalizedAt) {
+        <span class="finalized-badge" [title]="'Tablóterv leadva: ' + formatDate(project().finalizedAt!)">
           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
           Leadva
         </span>
       }
     </div>
-    <span class="school-meta">{{ project.className ?? '-' }} @if (project.classYear) {({{ project.classYear }})} @if (project.contact) { · {{ project.contact.name }}}</span>
+    <span class="school-meta">{{ project().className ?? '-' }} @if (project().classYear) {({{ project().classYear }})} @if (project().contact) { · {{ project().contact!.name }}}</span>
   </div>
 
   <!-- Col 3: Tudnak róla -->
   <div
     class="col col-aware col-aware--clickable"
     (click)="onAwareClick($event)"
-    [attr.title]="project.isAware ? 'Tudnak róla - kattints a módosításhoz' : 'Nem tudnak róla - kattints a módosításhoz'"
+    [attr.title]="project().isAware ? 'Tudnak róla - kattints a módosításhoz' : 'Nem tudnak róla - kattints a módosításhoz'"
   >
     <lucide-icon
-      [name]="project.isAware ? ICONS.CHECK_CIRCLE : ICONS.CIRCLE"
+      [name]="project().isAware ? ICONS.CHECK_CIRCLE : ICONS.CIRCLE"
       [size]="16"
-      [class.aware--yes]="project.isAware"
-      [class.aware--no]="!project.isAware"
+      [class.aware--yes]="project().isAware"
+      [class.aware--no]="!project().isAware"
     />
   </div>
 
   <!-- Col 4: Státusz -->
   <div class="col col-status">
-    @if (project.statusLabel) {
+    @if (project().statusLabel) {
       <span
         class="badge"
-        [ngClass]="'badge--' + (project.statusColor ?? 'gray')"
-        [title]="project.statusLabel"
+        [ngClass]="'badge--' + (project().statusColor ?? 'gray')"
+        [title]="project().statusLabel"
       >
-        <lucide-icon [name]="getStatusIcon(project.status)" [size]="11" />
-        {{ getShortStatusLabel(project.statusLabel) }}
+        <lucide-icon [name]="getStatusIcon(project().status)" [size]="11" />
+        {{ getShortStatusLabel(project().statusLabel) }}
       </span>
     }
   </div>
@@ -69,18 +69,18 @@
   <!-- Col 5: Hiányzók D:X/T:Y -->
   <div
     class="col col-missing"
-    [class.col-missing--danger]="project.missingCount > 0"
-    [class.col-missing--clickable]="project.missingCount > 0"
+    [class.col-missing--danger]="project().missingCount > 0"
+    [class.col-missing--clickable]="project().missingCount > 0"
     (click)="onMissingClick($event)"
   >
-    <span class="missing-label">D:</span><span class="missing-num" [class.missing-num--active]="project.missingStudentsCount > 0">{{ project.missingStudentsCount }}</span>
+    <span class="missing-label">D:</span><span class="missing-num" [class.missing-num--active]="project().missingStudentsCount > 0">{{ project().missingStudentsCount }}</span>
     <span class="missing-sep">/</span>
-    <span class="missing-label">T:</span><span class="missing-num" [class.missing-num--active]="project.missingTeachersCount > 0">{{ project.missingTeachersCount }}</span>
+    <span class="missing-label">T:</span><span class="missing-num" [class.missing-num--active]="project().missingTeachersCount > 0">{{ project().missingTeachersCount }}</span>
   </div>
 
   <!-- Col 6: QR -->
   <div class="col col-actions">
-    @if (project.hasActiveQrCode) {
+    @if (project().hasActiveQrCode) {
       <button
         type="button"
         class="action-btn"

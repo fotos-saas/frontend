@@ -1,0 +1,126 @@
+<div class="account-delete-page page-card">
+  <h1 class="page-title">
+    <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="24" />
+    Fiók törlése
+  </h1>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="skeleton-card"></div>
+    </div>
+  } @else if (accountStatus()?.is_deleted) {
+    <!-- Törlés folyamatban -->
+    <div class="deletion-pending">
+      <div class="pending-icon">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="48" />
+      </div>
+      <h2>Fiók törlés folyamatban</h2>
+      <p>
+        A fiókod törlésre van ütemezve.
+        @if (accountStatus()?.days_until_permanent_deletion) {
+          <strong>{{ accountStatus()?.days_until_permanent_deletion }} nap</strong> múlva véglegesen törlődik.
+        }
+      </p>
+
+      <div class="pending-info">
+        <div class="info-item">
+          <lucide-icon [name]="ICONS.CALENDAR" [size]="18" />
+          <span>Törlés időpontja: {{ formatDate(accountStatus()!.deletion_scheduled_at!) }}</span>
+        </div>
+      </div>
+
+      <div class="pending-actions">
+        <button
+          class="btn btn--success"
+          (click)="cancelDeletion()"
+          [disabled]="actionLoading()"
+        >
+          @if (actionLoading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+          }
+          Törlés visszavonása
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- Fiók törlés űrlap -->
+    <div class="danger-zone">
+      <div class="warning-banner">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="24" />
+        <div class="warning-content">
+          <h3>Figyelem! Ez a művelet nem vonható vissza.</h3>
+          <p>A fiók törlése után 30 napon belül visszavonhatod a törlést, utána minden adatod véglegesen törlődik.</p>
+        </div>
+      </div>
+
+      <div class="consequences">
+        <h3>A törlés következményei:</h3>
+        <ul class="consequences-list">
+          @if (isTeamMember()) {
+            <!-- Csapattag: csak saját fiók törlése -->
+            <li>
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              A fiókod véglegesen törlődik a rendszerből
+            </li>
+            <li>
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              Kilépsz a csapatból
+            </li>
+            <li>
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              A bejelentkezési adataid törlődnek
+            </li>
+          } @else {
+            <!-- Partner (tulajdonos): minden törlődik -->
+            <li>
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              Minden projektjed és osztályod törlődik
+            </li>
+            <li>
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              Az összes feltöltött kép véglegesen törlődik
+            </li>
+            <li>
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              A megrendelési előzmények elvesznek
+            </li>
+            <li>
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              Az előfizetésed automatikusan lemondásra kerül
+            </li>
+            <li>
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              A számlázási adatok törlődnek
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="confirmation-section">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="confirmChecked()"
+            (change)="confirmChecked.set(!confirmChecked())"
+          />
+          <span>Megértettem és elfogadom a következményeket</span>
+        </label>
+
+        <button
+          class="btn btn--danger"
+          (click)="deleteAccount()"
+          [disabled]="!confirmChecked() || actionLoading()"
+        >
+          @if (actionLoading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+          } @else {
+            <lucide-icon [name]="ICONS.DELETE" [size]="18" />
+          }
+          Fiók törlése
+        </button>
+      </div>
+    </div>
+  }
+</div>

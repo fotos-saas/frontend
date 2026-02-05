@@ -1,0 +1,166 @@
+<div class="album-detail-page page-card">
+  <!-- Loading state -->
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="skeleton-header skeleton-shimmer"></div>
+      <div class="skeleton-grid">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="skeleton-photo skeleton-shimmer"></div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (error()) {
+    <div class="error-container">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="48" class="error-icon"></lucide-icon>
+      <p class="error-message">{{ error() }}</p>
+      <button (click)="loadAlbum()" class="btn btn-primary">
+        <lucide-icon [name]="ICONS.REFRESH" [size]="16"></lucide-icon>
+        Újrapróbálás
+      </button>
+    </div>
+  }
+
+  <!-- Album content -->
+  @if (!loading() && !error() && album()) {
+    <!-- Compact Header -->
+    <header class="album-header">
+      @if (hasMultipleAlbums()) {
+        <a routerLink="/client/albums" class="back-link">
+          <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18"></lucide-icon>
+          Vissza
+        </a>
+      }
+      <h1 class="album-title">{{ album()!.name }}</h1>
+      @if (album()!.isCompleted) {
+        <span class="completed-badge">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14"></lucide-icon>
+          Lezárva
+        </span>
+      }
+    </header>
+
+    <!-- Completed banner -->
+    @if (album()!.isCompleted) {
+      <div class="completed-banner">
+        <div class="completed-banner__icon">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="24"></lucide-icon>
+        </div>
+        <div class="completed-banner__content">
+          <h3 class="completed-banner__title">Választás véglegesítve!</h3>
+          <p class="completed-banner__text">
+            Sikeresen kiválasztottad a képeket. A fotós megkapta a választásodat és hamarosan dolgozni kezd rajtuk.
+          </p>
+          <div class="completed-banner__dates">
+            @if (album()!.createdAt) {
+              <span class="date-item">
+                <lucide-icon [name]="ICONS.CALENDAR" [size]="12"></lucide-icon>
+                Megnyitva: {{ formatDate(album()!.createdAt) }}
+              </span>
+            }
+            @if (album()!.finalizedAt) {
+              <span class="date-item">
+                <lucide-icon [name]="ICONS.CHECK" [size]="12"></lucide-icon>
+                Lezárva: {{ formatDate(album()!.finalizedAt) }}
+              </span>
+            }
+          </div>
+        </div>
+        <div class="completed-banner__stats">
+          <span class="stat-badge">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14"></lucide-icon>
+            {{ selectedIds().length }} kép kiválasztva
+          </span>
+        </div>
+      </div>
+    } @else {
+      <!-- Info bar - csak nem lezárt albumoknál -->
+      <div class="album-info-bar">
+        <span class="info-item">
+          <lucide-icon [name]="ICONS.IMAGES" [size]="14"></lucide-icon>
+          {{ album()!.photosCount }}
+        </span>
+        @if (album()!.minSelections || album()!.maxSelections) {
+          <span class="info-divider">·</span>
+          <span class="info-item info-item--limits">
+            @if (album()!.minSelections) {min {{ album()!.minSelections }}}
+            @if (album()!.minSelections && album()!.maxSelections) { / }
+            @if (album()!.maxSelections) {max {{ album()!.maxSelections }}}
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Selection Grid (meglévő komponens!) -->
+    <app-selection-grid
+      [photos]="workflowPhotos()"
+      [selectedIds]="selectedIds()"
+      [allowMultiple]="true"
+      [maxSelection]="album()!.maxSelections"
+      [readonly]="album()!.isCompleted"
+      [isLoading]="loading()"
+      [isSaving]="saving()"
+      [showHeader]="!album()!.isCompleted"
+      [useVirtualScroll]="false"
+      emptyMessage="Nincsenek képek az albumban"
+      (selectionChange)="onSelectionChange($event)"
+      (zoomClick)="onZoomClick($event)"
+      (deselectAllClick)="onDeselectAll()"
+    />
+
+  }
+</div>
+
+<!-- Sticky footer (page-card KÍVÜL a backdrop-filter stacking context miatt!) -->
+@if (!loading() && !error() && album() && !album()!.isCompleted) {
+  <app-sticky-footer
+    [withSidebar]="true"
+    [isSaving]="saving()"
+    [primaryDisabled]="false"
+    [secondaryDisabled]="selectedIds().length === 0"
+    (primaryClick)="confirmFinalize()"
+    (secondaryClick)="saveSelection(false)"
+  />
+}
+
+<!-- Lightbox (page-card KÍVÜL a backdrop-filter stacking context miatt!) -->
+@if (lightboxOpen()) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="lightboxIndex()"
+    (close)="closeLightbox()"
+    (navigate)="navigateLightbox($event)"
+  />
+}
+
+<!-- Confirm dialog (page-card KÍVÜL!) -->
+@if (showConfirmDialog()) {
+  <app-confirm-dialog
+    title="Választás véglegesítése"
+    message="Biztosan véglegesíted a választásodat? Ez a művelet nem vonható vissza."
+    confirmText="Véglegesítés"
+    cancelText="Mégse"
+    confirmType="primary"
+    [isSubmitting]="saving()"
+    (resultEvent)="onConfirmResult($event)"
+  />
+}
+
+<!-- Minimum warning dialog -->
+@if (showMinWarningDialog()) {
+  <app-confirm-dialog
+    title="Kevés kép kiválasztva"
+    [message]="'Minimum ' + album()!.minSelections + ' képet kell kiválasztanod, de csak ' + selectedIds().length + ' van. Kérlek válassz ki még ' + (album()!.minSelections! - selectedIds().length) + ' képet!'"
+    confirmText="Rendben"
+    [showCancel]="false"
+    confirmType="warning"
+    (resultEvent)="onMinWarningResult()"
+  />
+}
+
+<!-- Floating info gomb (page-card KÍVÜL!) -->
+@if (!loading() && !error() && album() && !album()!.isCompleted) {
+  <app-floating-info />
+}

@@ -1,24 +1,26 @@
-import { Component, input, signal, effect, HostListener, ChangeDetectionStrategy, ElementRef, ViewChild, OnDestroy, AfterViewInit, OnInit, DestroyRef, inject, computed } from '@angular/core';
+import {
+  Component, input, signal, effect, HostListener,
+  ChangeDetectionStrategy, ElementRef, viewChild,
+  OnDestroy, AfterViewInit, OnInit, inject
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService, ContactPerson } from '../../../core/services/auth.service';
 import { BreakpointService } from '../../../core/services/breakpoint.service';
-import { ProjectModeService } from '../../../core/services/project-mode.service';
-import { GuestService } from '../../../core/services/guest.service';
 import { ScrollLockService } from '../../../core/services/scroll-lock.service';
-import { PokeService } from '../../../core/services/poke.service';
 import { GuestNameResult, GuestNameDialogComponent } from '../../components/guest-name-dialog/guest-name-dialog.component';
-import { ContactEditResult, ContactData, ContactEditDialogComponent } from '../../components/contact-edit-dialog/contact-edit-dialog.component';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ContactEditResult, ContactEditDialogComponent } from '../../components/contact-edit-dialog/contact-edit-dialog.component';
 
 import { NgClass } from '@angular/common';
-// Child komponensek (refaktorált badge-ek és mobile menu részek)
+// Child komponensek (refaktoralt badge-ek es mobile menu reszek)
 import { UserBadgeComponent } from './components/user-badge/user-badge.component';
 import { ContactBadgeComponent } from './components/contact-badge/contact-badge.component';
 import { GuestBadgeComponent } from './components/guest-badge/guest-badge.component';
 import { MobileMenuUserComponent } from './components/mobile-menu-user/mobile-menu-user.component';
 
-// Értesítési komponens
+// Ertesitesi komponens
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
+
+// Navbar state service
+import { NavbarStateService } from './navbar-state.service';
 
 /**
  * Tablo Status interface
@@ -42,11 +44,11 @@ export interface NavbarProjectInfo {
   hasOrderAnalysis?: boolean;
   hasMissingPersons?: boolean;
   hasTemplateChooser?: boolean;
-  /** Kiválasztott minták száma (0 = még nincs kiválasztva) */
+  /** Kivalasztott mintak szama (0 = meg nincs kivalasztva) */
   selectedTemplatesCount?: number;
-  /** Minták száma (ha > 0, nem kell véglegesítés/minta választó) */
+  /** Mintak szama (ha > 0, nem kell veglegesites/minta valaszto) */
   samplesCount?: number;
-  /** Aktív szavazások száma (ha > 0, megjelenik a Szavazások menüpont) */
+  /** Aktiv szavazasok szama (ha > 0, megjelenik a Szavazasok menupont) */
   activePollsCount?: number;
   tabloStatus?: TabloStatus | null;
   userStatus?: string | null;
@@ -76,109 +78,62 @@ export interface NavbarProjectInfo {
         ContactEditDialogComponent,
         NotificationBellComponent,
         NgClass,
-    ]
+    ],
+    providers: [NavbarStateService],
 })
 export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
+  private readonly state = inject(NavbarStateService);
+  private readonly breakpointService = inject(BreakpointService);
+  private readonly scrollLockService = inject(ScrollLockService);
+
   /** Signal-based inputs */
   readonly projectInfo = input<NavbarProjectInfo | null>(null);
   readonly activePage = input<'home' | 'samples' | 'order-data' | 'missing' | 'template-chooser' | 'order-finalization' | 'voting' | 'newsfeed' | 'forum'>('samples');
 
-  /** Kijelentkezés folyamatban */
-  loggingOut = false;
-
-  /** Mobile menü nyitott állapot (signal) */
+  /** Mobile menu nyitott allapot (signal) */
   mobileMenuOpen = signal<boolean>(false);
 
-  /** Dinamikus mobile mód (true = hamburger menü, false = desktop) */
+  /** Dinamikus mobile mod (true = hamburger menu, false = desktop) */
   isMobileMode = signal<boolean>(false);
 
-  /** Véglegesíthet-e (csak kódos belépés esetén true) */
-  canFinalize = signal<boolean>(false);
+  // --- Signal delegaciok a template szamara ---
+  readonly canFinalize = this.state.canFinalize;
+  readonly isGuest = this.state.isGuest;
+  readonly isPreview = this.state.isPreview;
+  readonly isCode = this.state.isCode;
+  readonly primaryContact = this.state.primaryContact;
+  readonly hasGuestSession = this.state.hasGuestSession;
+  readonly guestName = this.state.guestName;
+  readonly guestEmail = this.state.guestEmail;
+  readonly displayName = this.state.displayName;
+  readonly contactDisplayName = this.state.contactDisplayName;
+  readonly pokeUnreadCount = this.state.pokeUnreadCount;
 
-  /** Vendég felhasználó-e (share token) */
-  isGuest = signal<boolean>(false);
+  // --- Dialog signal delegaciok ---
+  readonly showEditDialog = this.state.showEditDialog;
+  readonly isUpdating = this.state.isUpdating;
+  readonly updateError = this.state.updateError;
+  readonly showContactEditDialog = this.state.showContactEditDialog;
+  readonly isContactUpdating = this.state.isContactUpdating;
+  readonly contactUpdateError = this.state.contactUpdateError;
+  readonly contactEditData = this.state.contactEditData;
 
-  /** Admin előnézet-e (preview token) */
-  isPreview = signal<boolean>(false);
-
-  /** Kódos belépés-e (code token) */
-  isCode = signal<boolean>(false);
-
-  /** Elsődleges kapcsolattartó (code token esetén) */
-  primaryContact = signal<ContactPerson | null>(null);
-
-  /** Van-e regisztrált guest session */
-  hasGuestSession = signal<boolean>(false);
-
-  /** Guest neve (ha van session) */
-  guestName = signal<string | null>(null);
-
-  /** Guest email (ha van session) */
-  guestEmail = signal<string | null>(null);
-
-  /** Edit dialog megjelenítése */
-  showEditDialog = signal<boolean>(false);
-
-  /** Update folyamatban */
-  isUpdating = signal<boolean>(false);
-
-  /** Update hiba */
-  updateError = signal<string | null>(null);
-
-  /** ContactEditDialog megjelenítése (code token esetén) */
-  showContactEditDialog = signal<boolean>(false);
-
-  /** Contact update folyamatban */
-  isContactUpdating = signal<boolean>(false);
-
-  /** Contact update hiba */
-  contactUpdateError = signal<string | null>(null);
-
-  /** ContactEditDialog kezdeti adatai */
-  contactEditData = signal<ContactData>({ name: '', email: '', phone: '' });
-
-  /** Megjelenített név (guest session neve) */
-  displayName = computed(() => this.guestName());
-
-  /** Megjelenített név a code token esetén (kapcsolattartó neve) */
-  contactDisplayName = computed(() => this.primaryContact()?.name ?? null);
-
-  /** DestroyRef az automatikus unsubscribe-hoz (Angular 19+, modern pattern) */
-  private destroyRef = inject(DestroyRef);
+  /** Kijelentkezes folyamatban (template binding) */
+  get loggingOut(): boolean {
+    return this.state.loggingOut;
+  }
 
   /** Mobile menu element reference */
-  @ViewChild('mobileMenu') mobileMenuRef!: ElementRef<HTMLElement>;
+  readonly mobileMenuRef = viewChild.required<ElementRef<HTMLElement>>('mobileMenu');
 
   /** Desktop content container reference */
-  @ViewChild('desktopContent') desktopContentRef!: ElementRef<HTMLElement>;
+  readonly desktopContentRef = viewChild.required<ElementRef<HTMLElement>>('desktopContent');
 
   /** Navbar container reference */
-  @ViewChild('navbarContainer') navbarContainerRef!: ElementRef<HTMLElement>;
+  readonly navbarContainerRef = viewChild.required<ElementRef<HTMLElement>>('navbarContainer');
 
-  /** Tailwind color mapping for status badges */
-  private readonly colorMap: Record<string, { bg: string; text: string }> = {
-    gray: { bg: 'bg-gray-100', text: 'text-gray-700' },
-    blue: { bg: 'bg-blue-100', text: 'text-blue-700' },
-    amber: { bg: 'bg-amber-100', text: 'text-amber-700' },
-    green: { bg: 'bg-green-100', text: 'text-green-700' },
-    purple: { bg: 'bg-purple-100', text: 'text-purple-700' },
-    red: { bg: 'bg-red-100', text: 'text-red-700' },
-  };
-
-  /** Poke service (bökés értesítések) */
-  private readonly pokeService = inject(PokeService);
-
-  /** Olvasatlan bökések száma */
-  readonly pokeUnreadCount = this.pokeService.unreadCount;
-
-  constructor(
-    private authService: AuthService,
-    private breakpointService: BreakpointService,
-    private projectModeService: ProjectModeService,
-    private guestService: GuestService,
-    private scrollLockService: ScrollLockService
-  ) {
-    // Body scroll lock effect - reagál a menü állapotára
+  constructor() {
+    // Body scroll lock effect - reagal a menu allapotara
     effect(() => {
       if (this.mobileMenuOpen()) {
         this.scrollLockService.lock();
@@ -189,72 +144,25 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Feliratkozás a canFinalize állapotra (takeUntilDestroyed: automatikus cleanup komponens destroy-kor)
-    this.authService.canFinalize$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(value => {
-        this.canFinalize.set(value);
-      });
-
-    // Feliratkozás a tokenType-ra a vendég/preview/code státusz követéséhez
-    this.authService.tokenType$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(tokenType => {
-        this.isGuest.set(tokenType === 'share');
-        this.isPreview.set(tokenType === 'preview');
-        this.isCode.set(tokenType === 'code');
-      });
-
-    // Feliratkozás a project$-ra a kapcsolattartó követéséhez (code token esetén)
-    this.authService.project$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(project => {
-        const contact = project?.contacts?.[0] ?? null;
-        this.primaryContact.set(contact);
-      });
-
-    // Feliratkozás a guest session-re
-    this.guestService.guestSession$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(session => {
-        this.hasGuestSession.set(!!session);
-        this.guestName.set(session?.guestName ?? null);
-        this.guestEmail.set(session?.guestEmail ?? null);
-
-        // Ha van guest session, töltsük be a bökés unread count-ot
-        if (session) {
-          this.pokeService.refreshUnreadCount()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe();
-        }
-      });
+    this.state.initSubscriptions();
   }
 
   ngAfterViewInit(): void {
-    // Késleltetett inicializálás, hogy a DOM stabil legyen
     setTimeout(() => {
       this.breakpointService.observeElement(
-        this.navbarContainerRef.nativeElement,
-        this.desktopContentRef.nativeElement,
+        this.navbarContainerRef().nativeElement,
+        this.desktopContentRef().nativeElement,
         this.isMobileMode
       );
     }, 100);
   }
 
   ngOnDestroy(): void {
-    // Cleanup: unlock scroll ha komponens destroy-olódik
     this.scrollLockService.unlock();
-
-    // BreakpointService cleanup
-    this.breakpointService.unobserve(this.navbarContainerRef.nativeElement);
-
-    // MEGJEGYZÉS: A takeUntilDestroyed() automatikusan leiratkozik a subscriptionokról,
-    // így nincs szükség manuális destroy$.next() és complete() hívásra
+    this.breakpointService.unobserve(this.navbarContainerRef().nativeElement);
   }
 
-  /**
-   * Escape billentyű bezárja a menüt
-   */
+  /** Escape billentyű bezárja a menüt */
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.mobileMenuOpen()) {
@@ -262,14 +170,12 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  /**
-   * Focus trap - Tab billentyű kezelése nyitott menüben
-   */
+  /** Focus trap - Tab billentyű kezelése nyitott menüben */
   @HostListener('document:keydown.tab', ['$event'])
   onTabKey(event: KeyboardEvent): void {
-    if (!this.mobileMenuOpen() || !this.mobileMenuRef) return;
+    if (!this.mobileMenuOpen() || !this.mobileMenuRef()) return;
 
-    const focusableElements = this.mobileMenuRef.nativeElement.querySelectorAll(
+    const focusableElements = this.mobileMenuRef().nativeElement.querySelectorAll(
       'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
     );
 
@@ -278,217 +184,90 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     const firstElement = focusableElements[0] as HTMLElement;
     const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
-    // Shift+Tab az első elemen -> utolsóra ugrás
     if (event.shiftKey && document.activeElement === firstElement) {
       event.preventDefault();
       lastElement.focus();
-    }
-    // Tab az utolsó elemen -> elsőre ugrás
-    else if (!event.shiftKey && document.activeElement === lastElement) {
+    } else if (!event.shiftKey && document.activeElement === lastElement) {
       event.preventDefault();
       firstElement.focus();
     }
   }
 
-  /**
-   * Mobil menü ki/be kapcsolása
-   */
+  // --- Mobile menu ---
+
   toggleMobileMenu(): void {
     this.mobileMenuOpen.update(isOpen => !isOpen);
   }
 
-  /**
-   * Mobil menü bezárása
-   */
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
   }
 
-  /**
-   * Get status badge classes
-   */
+  // --- Status badge (delegalt) ---
+
   getStatusBadgeClasses(): string {
-    const info = this.projectInfo();
-    const color = info?.tabloStatus?.color || info?.userStatusColor || 'gray';
-    const colorClasses = this.colorMap[color] || this.colorMap['gray'];
-    return `${colorClasses.bg} ${colorClasses.text}`;
+    return this.state.getStatusBadgeClasses(this.projectInfo());
   }
 
-  /**
-   * Get status name
-   */
   getStatusName(): string | null {
-    const info = this.projectInfo();
-    return info?.tabloStatus?.name || info?.userStatus || null;
+    return this.state.getStatusName(this.projectInfo());
   }
 
-  /**
-   * Minták menüpont látható-e?
-   * Delegálva: ProjectModeService
-   */
+  // --- Navigacios menupont lathatasag (delegalt) ---
+
   showSamples(): boolean {
-    return this.projectModeService.showSamples(this.projectInfo());
+    return this.state.showSamples(this.projectInfo());
   }
 
-  /**
-   * Megrendelési adatok menüpont látható-e?
-   * Delegálva: ProjectModeService
-   */
   showOrderData(): boolean {
-    return this.projectModeService.showOrderData(this.projectInfo());
+    return this.state.showOrderData(this.projectInfo());
   }
 
-  /**
-   * Minta Választó menüpont látható-e?
-   * Delegálva: ProjectModeService
-   */
   showTemplateChooser(): boolean {
-    return this.projectModeService.showTemplateChooser(this.projectInfo());
+    return this.state.showTemplateChooser(this.projectInfo());
   }
 
-  /**
-   * Személyek menüpont látható-e?
-   * Delegálva: ProjectModeService
-   */
   showPersons(): boolean {
-    return this.projectModeService.showMissingPersons(this.projectInfo());
+    return this.state.showPersons(this.projectInfo());
   }
 
-  /**
-   * Véglegesítés menüpont látható-e?
-   * Delegálva: ProjectModeService + canFinalize ellenőrzés
-   */
   showFinalization(): boolean {
-    if (!this.projectModeService.canShowFinalization(this.projectInfo())) return false;
-    return this.canFinalize();
+    return this.state.showFinalization(this.projectInfo());
   }
 
-  /**
-   * Szavazások menüpont látható-e?
-   * Delegálva: ProjectModeService
-   */
   showVoting(): boolean {
-    return this.projectModeService.showVoting(this.projectInfo());
+    return this.state.showVoting(this.projectInfo());
   }
 
-  /**
-   * Edit dialog megnyitása
-   */
+  // --- Dialog muveletek (delegalt) ---
+
   openEditDialog(): void {
-    this.updateError.set(null);
-    this.showEditDialog.set(true);
+    this.state.openEditDialog();
   }
 
-  /**
-   * Edit dialog bezárása (GuestNameDialog)
-   */
   closeEditDialog(): void {
-    this.showEditDialog.set(false);
-    this.updateError.set(null);
+    this.state.closeEditDialog();
   }
 
-  /**
-   * ContactEditDialog megnyitása (code token esetén)
-   */
   openContactEditDialog(): void {
-    const contact = this.primaryContact();
-    this.contactEditData.set({
-      name: contact?.name ?? '',
-      email: contact?.email ?? '',
-      phone: contact?.phone ?? ''
-    });
-    this.contactUpdateError.set(null);
-    this.showContactEditDialog.set(true);
+    this.state.openContactEditDialog();
   }
 
-  /**
-   * ContactEditDialog bezárása
-   */
   closeContactEditDialog(): void {
-    this.showContactEditDialog.set(false);
-    this.contactUpdateError.set(null);
+    this.state.closeContactEditDialog();
   }
 
-  /**
-   * ContactEditDialog eredmény kezelése
-   */
-  onContactEditResult(result: ContactEditResult): void {
-    if (result.action === 'close') {
-      this.closeContactEditDialog();
-      return;
-    }
-
-    // Save action
-    this.isContactUpdating.set(true);
-    this.contactUpdateError.set(null);
-
-    const contactData = {
-      name: result.data.name,
-      email: result.data.email || null,
-      phone: result.data.phone || null
-    };
-
-    this.authService.updateContact(contactData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isContactUpdating.set(false);
-          this.closeContactEditDialog();
-        },
-        error: (err: Error) => {
-          this.isContactUpdating.set(false);
-          this.contactUpdateError.set(err.message || 'Hiba történt a mentés során');
-        }
-      });
-  }
-
-  /**
-   * Guest adatok frissítése (dialog eredménye alapján)
-   */
   onEditDialogResult(result: GuestNameResult): void {
-    if (result.action === 'close') {
-      this.closeEditDialog();
-      return;
-    }
-
-    // Submit action
-    this.isUpdating.set(true);
-    this.updateError.set(null);
-
-    this.guestService.updateGuestInfo(result.name, result.email)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isUpdating.set(false);
-          this.closeEditDialog();
-        },
-        error: (err: Error) => {
-          this.isUpdating.set(false);
-          this.updateError.set(err.message || 'Hiba történt a mentés során');
-        }
-      });
+    this.state.onEditDialogResult(result);
   }
 
-  /**
-   * Kijelentkezés
-   */
+  onContactEditResult(result: ContactEditResult): void {
+    this.state.onContactEditResult(result);
+  }
+
+  // --- Kijelentkezes (delegalt) ---
+
   logout(): void {
-    if (this.loggingOut) return;
-
-    this.loggingOut = true;
-    this.closeMobileMenu();
-
-    // Kijelentkezés (takeUntilDestroyed: automatikus cleanup komponens destroy-kor)
-    this.authService.logout()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          // AuthService.clearAuth() már átirányít /login-ra
-        },
-        error: () => {
-          // Hiba esetén is megtörtént a kijelentkezés (clearAuth)
-          this.loggingOut = false;
-        }
-      });
+    this.state.logout(() => this.closeMobileMenu());
   }
 }

@@ -1,0 +1,132 @@
+<app-auth-layout>
+  <div class="auth-card">
+    @if (isValidating()) {
+      <div class="loading-state">
+        <span class="spinner-large"></span>
+        <h2>Meghívó ellenőrzése...</h2>
+      </div>
+    } @else if (invalidCode()) {
+      <div class="error-state">
+        <div class="icon-circle error">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h2>Érvénytelen meghívó</h2>
+        <p>{{ errorMessage() }}</p>
+        <a routerLink="/login" class="btn-secondary">Vissza a bejelentkezéshez</a>
+      </div>
+    } @else if (registrationSuccess()) {
+      <div class="success-state">
+        <div class="icon-circle success">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h2>Sikeres regisztráció!</h2>
+        <p>Csatlakoztál a {{ invitationInfo()?.partnerName }} csapatához.</p>
+        <a routerLink="/login" class="btn-primary-link">Bejelentkezés</a>
+      </div>
+    } @else {
+      <!-- Valid code - show registration form -->
+      <header class="auth-header">
+        <h1>Csatlakozás a csapathoz</h1>
+        @if (invitationInfo()) {
+          <div class="invitation-info">
+            <span class="partner-badge">{{ invitationInfo()!.partnerName }}</span>
+            <span class="role-badge">{{ invitationInfo()!.roleName }}</span>
+          </div>
+        }
+        <p class="auth-subtitle">Add meg az adataidat a regisztrációhoz</p>
+      </header>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+          </svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="name">Neved</label>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            placeholder="Teljes neved"
+            autocomplete="name"
+            [class.invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+          />
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <span class="error-text">Add meg a neved (min. 2 karakter)</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email címed</label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="pelda@email.hu"
+            autocomplete="email"
+            [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+            [readonly]="!!invitationInfo()?.email"
+          />
+          @if (form.get('email')?.errors?.['email'] && form.get('email')?.touched) {
+            <span class="error-text">Érvénytelen email cím</span>
+          }
+          @if (invitationInfo()?.email) {
+            <span class="hint-text">A meghívóhoz tartozó email cím</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password">Jelszó</label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="Min. 8 karakter"
+            autocomplete="new-password"
+            [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+          />
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <span class="error-text">A jelszó legalább 8 karakter legyen</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password_confirmation">Jelszó megerősítése</label>
+          <input
+            type="password"
+            id="password_confirmation"
+            formControlName="password_confirmation"
+            placeholder="Jelszó újra"
+            autocomplete="new-password"
+            [class.invalid]="form.get('password_confirmation')?.invalid && form.get('password_confirmation')?.touched"
+          />
+          @if (form.get('password_confirmation')?.errors?.['passwordMismatch'] && form.get('password_confirmation')?.touched) {
+            <span class="error-text">A két jelszó nem egyezik</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="isLoading() || form.invalid">
+          @if (isLoading()) {
+            <span class="spinner"></span>
+            Regisztráció...
+          } @else {
+            Regisztráció
+          }
+        </button>
+      </form>
+
+      <footer class="auth-footer">
+        <p>Már van fiókod? <a routerLink="/login">Jelentkezz be</a></p>
+      </footer>
+    }
+  </div>
+</app-auth-layout>

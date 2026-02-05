@@ -3,11 +3,13 @@ import {
   ChangeDetectionStrategy,
   OnInit,
   OnDestroy,
+  DestroyRef,
   inject,
   signal,
   input,
   output
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GuestService } from '../../../core/services/guest.service';
 
 /**
@@ -34,6 +36,7 @@ export class PendingVerificationComponent implements OnInit, OnDestroy {
   readonly cancelEvent = output<void>();
 
   private readonly guestService = inject(GuestService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Frissítés folyamatban */
   readonly isRefreshing = signal(false);
@@ -58,14 +61,16 @@ export class PendingVerificationComponent implements OnInit, OnDestroy {
     this.refreshEvent.emit();
 
     // Ellenőrizzük a státuszt
-    this.guestService.checkVerificationStatus().subscribe({
-      next: () => {
-        this.isRefreshing.set(false);
-      },
-      error: () => {
-        this.isRefreshing.set(false);
-      }
-    });
+    this.guestService.checkVerificationStatus()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isRefreshing.set(false);
+        },
+        error: () => {
+          this.isRefreshing.set(false);
+        }
+      });
   }
 
   /**

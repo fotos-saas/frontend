@@ -1,4 +1,4 @@
-import { Component, output, input, computed, ChangeDetectionStrategy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, output, input, computed, ChangeDetectionStrategy, viewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { ReminderWorkflowStep, STEP_REMINDER_MESSAGES, StepReminderMessage } from '../../../core/services/photo-selection-reminder.service';
 
@@ -43,7 +43,7 @@ export class PhotoSelectionReminderDialogComponent extends BaseDialogComponent i
   readonly resultEvent = output<PhotoSelectionReminderResult>();
 
   /** ViewChild referencia a focus management-hez */
-  @ViewChild('primaryButton') primaryButton?: ElementRef<HTMLButtonElement>;
+  readonly primaryButton = viewChild<ElementRef<HTMLButtonElement>>('primaryButton');
 
   /** Dinamikus üzenet a step alapján */
   readonly message = computed<StepReminderMessage>(() => {
@@ -61,7 +61,7 @@ export class PhotoSelectionReminderDialogComponent extends BaseDialogComponent i
     super.ngAfterViewInit();
     // Focus a primary action gombra
     setTimeout(() => {
-      this.primaryButton?.nativeElement.focus();
+      this.primaryButton()?.nativeElement.focus();
     }, 100);
   }
 

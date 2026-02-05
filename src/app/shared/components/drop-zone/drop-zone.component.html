@@ -1,0 +1,36 @@
+<div
+  class="drop-zone"
+  [class.drop-zone--active]="isDragging()"
+  [class.drop-zone--uploading]="uploading()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+  (click)="fileInput.click()"
+>
+  <input
+    #fileInput
+    type="file"
+    multiple
+    [accept]="accept()"
+    (change)="onFileInputChange($event)"
+    class="hidden"
+  />
+
+  @if (uploading()) {
+    <div class="upload-progress">
+      <div class="progress-spinner"></div>
+      <span class="progress-text">Feltöltés folyamatban...</span>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+      </div>
+    </div>
+  } @else {
+    <div class="drop-content">
+      <div class="drop-icon" [class.drop-icon--active]="isDragging()">
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="32" />
+      </div>
+      <h3>Húzd ide a képeket vagy kattints!</h3>
+      <p>{{ hint() }} ({{ maxSize() }})</p>
+    </div>
+  }
+</div>

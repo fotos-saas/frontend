@@ -1,4 +1,4 @@
-import { Component, output, ChangeDetectionStrategy, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy, viewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { LoggerService } from '../../../core/services/logger.service';
@@ -41,10 +41,10 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
   isDatePickerOpen = false;
 
   /** ViewChild referencia a focus management-hez */
-  @ViewChild('dateToggleButton') dateToggleButton?: ElementRef<HTMLButtonElement>;
+  readonly dateToggleButton = viewChild<ElementRef<HTMLButtonElement>>('dateToggleButton');
 
   /** ViewChild referencia a date input-hoz */
-  @ViewChild('dateInput') dateInput?: ElementRef<HTMLInputElement>;
+  readonly dateInput = viewChild<ElementRef<HTMLInputElement>>('dateInput');
 
   /** Kiválasztott dátum */
   selectedDate: string = '';
@@ -66,7 +66,7 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
     super.ngAfterViewInit();
     // Focus a dátum választó gombra
     setTimeout(() => {
-      this.dateToggleButton?.nativeElement.focus();
+      this.dateToggleButton()?.nativeElement.focus();
     }, 100);
   }
 
@@ -81,7 +81,7 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
    * Dátumválasztó megnyitása (natív picker)
    */
   openDatePicker(): void {
-    this.dateInput?.nativeElement.showPicker();
+    this.dateInput()?.nativeElement.showPicker();
   }
 
   /**

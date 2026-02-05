@@ -1,0 +1,169 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+  (keydown.escape)="onCancel()"
+>
+  <div
+    class="dialog-panel dialog-panel--md"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="register-dialog-title"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="dialog-header">
+      <h2 id="register-dialog-title" class="dialog-title">
+        <lucide-icon [name]="ICONS.USER_PLUS" [size]="20" class="dialog-icon"></lucide-icon>
+        Regisztráció
+      </h2>
+      <button
+        type="button"
+        class="dialog-close"
+        (click)="onCancel()"
+        aria-label="Bezárás"
+      >
+        <lucide-icon [name]="ICONS.X" [size]="20"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <form (ngSubmit)="onSubmit()" class="dialog-content">
+      <!-- Info box -->
+      <div class="info-box">
+        <lucide-icon [name]="ICONS.INFO" [size]="18" class="info-box__icon"></lucide-icon>
+        <div class="info-box__content">
+          <p class="info-box__title">Mire jó a regisztráció?</p>
+          <ul class="info-box__list">
+            @if (hasDownloadableAlbum()) {
+              <li>Letöltheted a kiválasztott képeidet</li>
+            }
+            <li>Email értesítéseket kapsz az albumokról</li>
+            <li>Visszanézheted korábbi albumjaidat</li>
+          </ul>
+          <p class="info-box__warning">
+            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
+            A regisztráció után a belépési kód megszűnik, és csak email/jelszóval léphetsz be.
+          </p>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email" class="form-label">Email cím</label>
+        <input
+          #emailInput
+          type="email"
+          id="email"
+          name="email"
+          class="form-input"
+          [(ngModel)]="email"
+          [class.form-input--error]="errors['email']"
+          (input)="onInputChange()"
+          placeholder="pelda@email.hu"
+          autocomplete="email"
+          required
+        />
+        @if (errors['email']) {
+          <p class="form-error">{{ errors['email'] }}</p>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password" class="form-label">Jelszó</label>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            id="password"
+            name="password"
+            class="form-input"
+            [(ngModel)]="password"
+            [class.form-input--error]="errors['password']"
+            (input)="onInputChange()"
+            placeholder="Legalább 8 karakter"
+            autocomplete="new-password"
+            required
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword() ? 'Jelszó elrejtése' : 'Jelszó megjelenítése'"
+          >
+            <lucide-icon [name]="showPassword() ? ICONS.EYE_OFF : ICONS.EYE" [size]="18"></lucide-icon>
+          </button>
+        </div>
+        @if (errors['password']) {
+          <p class="form-error">{{ errors['password'] }}</p>
+        }
+
+        <!-- Password strength -->
+        <app-password-strength [password]="password" [compact]="true" />
+      </div>
+
+      <!-- Password confirmation -->
+      <div class="form-group">
+        <label for="passwordConfirmation" class="form-label">Jelszó megerősítése</label>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPasswordConfirmation() ? 'text' : 'password'"
+            id="passwordConfirmation"
+            name="passwordConfirmation"
+            class="form-input"
+            [(ngModel)]="passwordConfirmation"
+            [class.form-input--error]="errors['passwordConfirmation']"
+            (input)="onInputChange()"
+            placeholder="Írd be újra a jelszót"
+            autocomplete="new-password"
+            required
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleConfirmationVisibility()"
+            [attr.aria-label]="showPasswordConfirmation() ? 'Jelszó elrejtése' : 'Jelszó megjelenítése'"
+          >
+            <lucide-icon [name]="showPasswordConfirmation() ? ICONS.EYE_OFF : ICONS.EYE" [size]="18"></lucide-icon>
+          </button>
+        </div>
+        @if (errors['passwordConfirmation']) {
+          <p class="form-error">{{ errors['passwordConfirmation'] }}</p>
+        }
+      </div>
+
+      <!-- API error -->
+      @if (apiError()) {
+        <div class="api-error">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16"></lucide-icon>
+          {{ apiError() }}
+        </div>
+      }
+
+      <!-- Footer -->
+      <div class="dialog-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isSubmitting()"
+        >
+          Mégse
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="!isFormValid() || isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="spinner"></span>
+            Regisztráció...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="16"></lucide-icon>
+            Regisztráció
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

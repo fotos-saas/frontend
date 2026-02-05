@@ -1,0 +1,57 @@
+<div class="step-choice">
+  <div class="choice-header">
+    <h3>Hogyan szeretnéd párosítani a képeket?</h3>
+    <p>{{ photoCount() }} kép vár párosításra</p>
+  </div>
+
+  <div class="choice-cards">
+    <!-- AI Párosítás -->
+    <button
+      type="button"
+      class="choice-card choice-card--ai"
+      [disabled]="loading()"
+      (click)="aiSelected.emit()"
+    >
+      <div class="card-icon">
+        <lucide-icon [name]="ICONS.WAND" [size]="40" />
+      </div>
+      <h4>AI párosítás</h4>
+      <p>Automatikusan párosítjuk a képeket a fájlnevek és metaadatok alapján</p>
+      <div class="card-features">
+        <span><lucide-icon [name]="ICONS.CHECK" [size]="14" /> Gyors</span>
+        <span><lucide-icon [name]="ICONS.CHECK" [size]="14" /> Automatikus</span>
+        <span><lucide-icon [name]="ICONS.CHECK" [size]="14" /> Utólag módosítható</span>
+      </div>
+      @if (loading()) {
+        <div class="card-loading">
+          <span class="spinner"></span>
+          <span>Párosítás folyamatban...</span>
+        </div>
+      }
+    </button>
+
+    <!-- Manuális Párosítás -->
+    <button
+      type="button"
+      class="choice-card choice-card--manual"
+      [disabled]="loading()"
+      (click)="manualSelected.emit()"
+    >
+      <div class="card-icon">
+        <lucide-icon [name]="ICONS.HAND" [size]="40" />
+      </div>
+      <h4>Manuális párosítás</h4>
+      <p>Te húzod a képeket a megfelelő személyekhez drag & drop módszerrel</p>
+      <div class="card-features">
+        <span><lucide-icon [name]="ICONS.CHECK" [size]="14" /> Teljes kontroll</span>
+        <span><lucide-icon [name]="ICONS.CHECK" [size]="14" /> Egyedi esetekhez</span>
+        <span><lucide-icon [name]="ICONS.CHECK" [size]="14" /> Pontos párosítás</span>
+      </div>
+    </button>
+  </div>
+
+  <div class="choice-hint">
+    <lucide-icon [name]="ICONS.INFO" [size]="16" />
+    <span>Mindkét esetben lehetőséged van utólag módosítani a párosításokat.</span>
+  </div>
+</div>

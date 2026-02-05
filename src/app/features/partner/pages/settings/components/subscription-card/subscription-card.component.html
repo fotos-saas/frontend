@@ -1,0 +1,84 @@
+<div class="subscription-card">
+  <!-- Header -->
+  <div class="card-header">
+    <div class="plan-info">
+      <span class="plan-badge" [class]="'plan-badge--' + info().plan">
+        {{ info().plan_name }}
+      </span>
+      <span class="status-badge" [class]="'status-badge--' + info().status">
+        {{ getStatusLabel() }}
+      </span>
+    </div>
+    <span class="billing-cycle">
+      {{ info().billing_cycle === 'yearly' ? 'Éves' : 'Havi' }} számlázás
+    </span>
+  </div>
+
+  <!-- Details -->
+  <div class="card-details">
+    <div class="detail-row">
+      <span class="detail-label">
+        <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="16" />
+        Tárhely limit
+      </span>
+      <span class="detail-value">{{ info().limits.storage_gb }} GB</span>
+    </div>
+
+    <div class="detail-row">
+      <span class="detail-label">
+        <lucide-icon [name]="ICONS.USERS" [size]="16" />
+        Osztályok
+      </span>
+      <span class="detail-value">
+        {{ info().limits.max_classes !== null ? info().limits.max_classes : 'Korlátlan' }}
+      </span>
+    </div>
+
+    @if (info().current_period_end) {
+      <div class="detail-row">
+        <span class="detail-label">
+          <lucide-icon [name]="ICONS.CALENDAR" [size]="16" />
+          Következő számlázás
+        </span>
+        <span class="detail-value">
+          {{ info().current_period_end | date:'yyyy. MM. dd.' }}
+        </span>
+      </div>
+    }
+
+    @if (info().cancel_at_period_end) {
+      <div class="detail-row detail-row--warning">
+        <span class="detail-label">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+          Lemondva
+        </span>
+        <span class="detail-value">
+          Lejár: {{ info().current_period_end | date:'yyyy. MM. dd.' }}
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- Features -->
+  @if (info().features.length > 0) {
+    <div class="card-features">
+      <h4>Funkciók:</h4>
+      <ul class="feature-list">
+        @for (feature of info().features; track feature) {
+          <li>
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" class="check-icon" />
+            {{ getFeatureLabel(feature) }}
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <!-- Actions -->
+  <div class="card-actions">
+    <button class="btn btn--secondary" (click)="openPortal.emit()">
+      <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="18" />
+      Csomag váltása / Fizetési adatok
+    </button>
+  </div>
+</div>

@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "name": "PhotoStack Frontend",
+    "version": "1.0.0",
+    "framework": "Angular 21",
+    "styling": "Tailwind CSS + Angular Material",
+    "lastUpdated": "2026-02-04"
+  },
+  "platforms": {
+    "web": {
+      "entry": "src/main.ts",
+      "port": 4205
+    },
+    "desktop": {
+      "framework": "Electron",
+      "entry": "electron/main.ts",
+      "platforms": ["mac", "windows", "linux"]
+    },
+    "mobile": {
+      "framework": "Capacitor",
+      "platforms": ["ios", "android"]
+    }
+  },
+  "architecture": {
+    "pattern": "Feature-based modular",
+    "stateManagement": "Services + RxJS BehaviorSubject",
+    "apiCommunication": "HttpClient + Interceptors",
+    "realtime": "Laravel Echo + Pusher WebSocket"
+  },
+  "directories": {
+    "src/app/core": {
+      "purpose": "Singleton services, guards, interceptors",
+      "singleton": true,
+      "contents": {
+        "services": [
+          {"name": "AuthService", "file": "services/auth.service.ts", "purpose": "Authentication & authorization"},
+          {"name": "ToastService", "file": "services/toast.service.ts", "purpose": "Toast notifications"},
+          {"name": "ElectronService", "file": "services/electron.service.ts", "purpose": "Desktop native API bridge"},
+          {"name": "WebsocketService", "file": "services/websocket.service.ts", "purpose": "Real-time communication"},
+          {"name": "FileUploadService", "file": "services/file-upload.service.ts", "purpose": "File upload with progress"},
+          {"name": "LightboxService", "file": "services/lightbox.service.ts", "purpose": "Image lightbox/gallery"},
+          {"name": "ClipboardService", "file": "services/clipboard.service.ts", "purpose": "Clipboard operations"},
+          {"name": "FilterPersistenceService", "file": "services/filter-persistence.service.ts", "purpose": "Save/restore filters"},
+          {"name": "NotificationService", "file": "services/notification.service.ts", "purpose": "Push notifications"},
+          {"name": "ScrollLockService", "file": "services/scroll-lock.service.ts", "purpose": "Body scroll locking"}
+        ],
+        "layout": [
+          {"name": "AppShellComponent", "file": "layout/components/app-shell", "purpose": "Main app layout wrapper"},
+          {"name": "SidebarComponent", "file": "layout/components/sidebar", "purpose": "Navigation sidebar"},
+          {"name": "TopBarComponent", "file": "layout/components/top-bar", "purpose": "Top navigation bar"},
+          {"name": "MobileNavOverlayComponent", "file": "layout/components/mobile-nav-overlay", "purpose": "Mobile navigation"}
+        ]
+      }
+    },
+    "src/app/shared": {
+      "purpose": "Reusable components, directives, pipes, utils",
+      "singleton": false,
+      "contents": {
+        "components": [
+          {"name": "ConfirmDialogComponent", "purpose": "Confirmation modal", "useFor": "delete, save confirmation"},
+          {"name": "LoadingSpinnerComponent", "purpose": "Loading indicator", "useFor": "async operations"},
+          {"name": "SkeletonComponent", "purpose": "Skeleton loading", "useFor": "content loading state"},
+          {"name": "AlertDialogComponent", "purpose": "Alert modal", "useFor": "info, warning messages"},
+          {"name": "InputDialogComponent", "purpose": "Input modal", "useFor": "single input prompts"}
+        ],
+        "constants": [
+          {"name": "ICONS", "file": "constants/icons.constants.ts", "purpose": "Lucide icon references"}
+        ],
+        "utils": [
+          {"name": "createBackdropHandler", "file": "utils/dialog.util.ts", "purpose": "Dialog backdrop click handling"}
+        ]
+      }
+    },
+    "src/app/features": {
+      "purpose": "Feature modules (lazy loaded)",
+      "singleton": false,
+      "modules": [
+        {"name": "dashboard", "route": "/dashboard"},
+        {"name": "projects", "route": "/projects"},
+        {"name": "gallery", "route": "/gallery"},
+        {"name": "orders", "route": "/orders"},
+        {"name": "settings", "route": "/settings"},
+        {"name": "auth", "route": "/auth"}
+      ]
+    },
+    "electron": {
+      "purpose": "Electron desktop app code",
+      "contents": {
+        "main.ts": "Main process (Node.js)",
+        "preload.ts": "Context bridge (IPC)",
+        "sentry.ts": "Error tracking"
+      }
+    }
+  },
+  "patterns": {
+    "cleanup": {
+      "description": "RxJS subscription cleanup pattern",
+      "required": true,
+      "template": "private destroy$ = new Subject<void>(); ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }"
+    },
+    "loading": {
+      "description": "Async loading state pattern",
+      "template": "loading = false; error = null; try { loading = true; ... } catch { error = ... } finally { loading = false; }"
+    },
+    "form": {
+      "description": "Reactive form pattern",
+      "library": "@angular/forms",
+      "template": "form = this.fb.group({...}); onSubmit() { if (this.form.invalid) return; ... }"
+    }
+  },
+  "rules": {
+    "components": {
+      "maxLines": 300,
+      "naming": "kebab-case for files, PascalCase for classes",
+      "suffix": ".component.ts"
+    },
+    "services": {
+      "location": "src/app/core/services for singletons, feature folder for feature-specific",
+      "suffix": ".service.ts"
+    },
+    "styling": {
+      "framework": "Tailwind CSS",
+      "icons": "Lucide via ICONS constant",
+      "dialogs": "page-card KÍVÜL, dialog-backdrop + dialog-panel classes"
+    },
+    "language": {
+      "ui": "Hungarian (Magyar)",
+      "code": "English",
+      "comments": "English"
+    }
+  },
+  "dependencies": {
+    "ui": ["@angular/material", "lucide-angular", "tailwindcss"],
+    "state": ["rxjs"],
+    "http": ["@angular/common/http"],
+    "realtime": ["laravel-echo", "pusher-js"],
+    "editor": ["ngx-quill", "quill"],
+    "desktop": ["electron", "electron-store", "electron-updater", "keytar", "@sentry/electron"],
+    "mobile": ["@capacitor/core", "@capacitor/ios", "@capacitor/android"]
+  },
+  "apiEndpoints": {
+    "base": "https://api.tablostudio.hu",
+    "websocket": "wss://api.tablostudio.hu",
+    "auth": "/api/auth/*",
+    "projects": "/api/projects/*",
+    "photos": "/api/photos/*",
+    "orders": "/api/orders/*"
+  }
+}

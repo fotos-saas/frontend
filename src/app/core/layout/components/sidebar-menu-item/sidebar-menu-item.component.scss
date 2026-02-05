@@ -1,0 +1,95 @@
+/* Child item staggered animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.child-item {
+  opacity: 0;
+  animation: slideIn 0.2s ease-out forwards;
+}
+
+/* Badge pulse animation - figyelemfelkeltő */
+.child-badge {
+  animation: badgePulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.8);
+  }
+}
+
+/* Menu item click feedback - feltűnőbb effekt */
+.menu-item:active:not(.menu-item--pending) {
+  transform: scale(0.95);
+  opacity: 0.8;
+  background: rgba(139, 92, 246, 0.25) !important;
+  transition: transform 0.05s ease, opacity 0.05s ease, background 0.05s ease;
+}
+
+/* Pending state - navigáció közben */
+.menu-item--pending {
+  pointer-events: none;
+  position: relative;
+  overflow: hidden;
+  /* Szöveg szín megőrzése */
+  color: #e2e8f0 !important; /* slate-200 */
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.2) 0%, rgba(168, 85, 247, 0.25) 100%) !important;
+  border-left: 2px solid #a855f7;
+}
+
+.menu-item--pending::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: pendingShimmer 0.8s ease-in-out infinite;
+}
+
+@keyframes pendingShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Safari support: prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .child-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .menu-item:active:not(.menu-item--pending) {
+    transform: none;
+  }
+
+  .menu-item--pending::after {
+    animation: none;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .child-badge {
+    animation: none;
+  }
+}

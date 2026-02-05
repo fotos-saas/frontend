@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProjectContact } from '../../services/partner.service';
@@ -238,8 +238,8 @@ export class AddContactModalComponent {
   /** Backdrop kezelő - megakadályozza a véletlen bezárást szöveg kijelöléskor */
   backdropHandler = createBackdropHandler(() => this.close.emit());
 
-  @Output() close = new EventEmitter<void>();
-  @Output() contactCreated = new EventEmitter<ProjectContact>();
+  readonly close = output<void>();
+  readonly contactCreated = output<ProjectContact>();
 
   error = signal<string | null>(null);
 

@@ -1,0 +1,129 @@
+<div class="photo-list">
+  <!-- Filter bar -->
+  <div class="photo-list__filters">
+    <select
+      [ngModel]="filter()"
+      (ngModelChange)="filterChange.emit($event)"
+      class="photo-list__select"
+    >
+      <option value="all">Összes kép ({{ totalCount() }})</option>
+      <option value="selected">Kiválasztottak ({{ selectedCount() }})</option>
+      <option value="unselected">Nem kiválasztottak ({{ totalCount() - selectedCount() }})</option>
+    </select>
+    <div class="photo-list__search">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+      <input
+        type="text"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchChange.emit($event)"
+        placeholder="Keresés névre vagy fájlnévre..."
+        class="photo-list__search-input"
+      />
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="photo-list__actions">
+    <button
+      (click)="downloadZip.emit()"
+      [disabled]="selectedCount() === 0 || downloading()"
+      class="photo-list__action-btn"
+    >
+      @if (downloading()) {
+        <div class="spinner"></div>
+      } @else {
+        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+      }
+      Kiválasztottak letöltése (ZIP)
+    </button>
+    <button
+      (click)="exportExcel.emit()"
+      [disabled]="exporting()"
+      class="photo-list__action-btn photo-list__action-btn--secondary"
+    >
+      @if (exporting()) {
+        <div class="spinner spinner--dark"></div>
+      } @else {
+        <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
+      }
+      Excel export
+    </button>
+  </div>
+
+  <!-- Photo list items -->
+  <div class="photo-list__items">
+    @for (photo of photos(); track photo.id; let i = $index) {
+      <div
+        class="photo-list__item"
+        [class.photo-list__item--selected]="isSelected(photo.id)"
+        [class.photo-list__item--delete-selected]="isDeleteSelected(photo.id)"
+        [style.animation-delay]="i * 0.03 + 's'"
+        (click)="onItemClick(photo, $event)"
+      >
+        <img
+          [src]="photo.thumb_url"
+          [alt]="photo.name"
+          class="photo-list__thumb"
+          loading="lazy"
+          (click)="onThumbClick(photo); $event.stopPropagation()"
+        />
+        <div class="photo-list__info">
+          <span class="photo-list__title">{{ photo.title || getFilenameWithoutExt(photo.name) }}</span>
+          @if (photo.title && photo.title !== getFilenameWithoutExt(photo.name)) {
+            <span class="photo-list__filename">{{ getFilenameWithoutExt(photo.name) }}</span>
+          }
+        </div>
+        @if (isSelected(photo.id)) {
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="photo-list__check" />
+        }
+
+        @if (albumStatus() !== 'completed') {
+          @if (isDeleteSelected(photo.id)) {
+            <lucide-icon [name]="ICONS.CHECK" [size]="20" class="photo-list__delete-check" />
+          } @else {
+            <button
+              class="photo-list__delete-btn"
+              matTooltip="Törlés"
+              (click)="onDeleteClick(photo); $event.stopPropagation()"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            </button>
+          }
+        }
+      </div>
+    } @empty {
+      <div class="photo-list__empty">
+        <lucide-icon [name]="ICONS.SEARCH" [size]="32" />
+        <p>Nincs találat a szűrési feltételeknek megfelelően</p>
+      </div>
+    }
+  </div>
+
+  <!-- Paginator -->
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === 1"
+        (click)="pageChange.emit(currentPage() - 1)"
+      >
+        <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+        Előző
+      </button>
+
+      <div class="page-info">
+        {{ currentPage() }} / {{ totalPages() }} oldal
+        <span class="total-count">({{ filteredCount() }} kép)</span>
+      </div>
+
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === totalPages()"
+        (click)="pageChange.emit(currentPage() + 1)"
+      >
+        Következő
+        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+      </button>
+    </div>
+  }
+</div>

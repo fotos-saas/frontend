@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -246,8 +246,8 @@ export class AddSchoolModalComponent {
   /** Backdrop kezelő - megakadályozza a véletlen bezárást szöveg kijelöléskor */
   backdropHandler = createBackdropHandler(() => this.close.emit());
 
-  @Output() close = new EventEmitter<void>();
-  @Output() schoolCreated = new EventEmitter<SchoolItem>();
+  readonly close = output<void>();
+  readonly schoolCreated = output<SchoolItem>();
 
   private partnerService = inject(PartnerService);
   private destroyRef = inject(DestroyRef);

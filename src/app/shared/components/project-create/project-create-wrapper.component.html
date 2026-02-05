@@ -1,0 +1,128 @@
+<div class="project-create-page page-card">
+  <header class="page-header">
+    <button class="back-btn" [routerLink]="routePrefix + '/projects'">
+      <lucide-icon name="arrow-left" [size]="20"></lucide-icon>
+      Vissza
+    </button>
+    <h1>Új projekt létrehozása</h1>
+    <p class="subtitle">Adj meg egy iskolát és osztályt az új projekthez</p>
+  </header>
+
+  <form class="create-form" (ngSubmit)="onSubmit()">
+    <!-- Iskola választó -->
+    <div class="form-group">
+      <label for="school">Iskola</label>
+      <div class="autocomplete-wrapper">
+        <input
+          type="text"
+          id="school"
+          class="form-input"
+          placeholder="Kezdj el gépelni az iskola nevét..."
+          [(ngModel)]="schoolSearchQuery"
+          name="schoolSearch"
+          (ngModelChange)="onSchoolSearch($event)"
+          (focus)="showSchoolDropdown.set(true)"
+          (blur)="onSchoolBlur()"
+          (keydown)="onSchoolKeydown($event)"
+          autocomplete="off"
+        />
+        @if (selectedSchool()) {
+          <button type="button" class="clear-selection" (click)="clearSchool()">
+            <lucide-icon name="x" [size]="16"></lucide-icon>
+          </button>
+        }
+
+        @if (showSchoolDropdown() && !selectedSchool()) {
+          <div class="autocomplete-dropdown">
+            @if (loadingSchools()) {
+              <div class="dropdown-loading">
+                <span class="spinner"></span>
+                Keresés...
+              </div>
+            } @else if (schoolOptions().length === 0 && schoolSearchQuery.length >= 2) {
+              <div class="dropdown-empty">Nincs találat</div>
+            } @else {
+              @for (school of schoolOptions(); track school.id; let i = $index) {
+                <button
+                  type="button"
+                  class="dropdown-item"
+                  [class.highlighted]="i === highlightedIndex()"
+                  (mousedown)="selectSchool(school)"
+                  (mouseenter)="highlightedIndex.set(i)"
+                >
+                  <span class="school-name">{{ school.name }}</span>
+                  @if (school.city) {
+                    <span class="school-city">{{ school.city }}</span>
+                  }
+                </button>
+              }
+            }
+          </div>
+        }
+      </div>
+      <span class="form-hint">Opcionális - keress rá az iskola nevére vagy városára</span>
+    </div>
+
+    <!-- Osztály neve -->
+    <div class="form-group">
+      <label for="className">Osztály neve</label>
+      <input
+        type="text"
+        id="className"
+        class="form-input"
+        placeholder="pl. 12.A"
+        [(ngModel)]="className"
+        name="className"
+        maxlength="255"
+      />
+      <span class="form-hint">Opcionális - pl. 12.A, Ballagók 2024</span>
+    </div>
+
+    <!-- Évfolyam -->
+    <div class="form-group">
+      <label for="classYear">Évfolyam</label>
+      <input
+        type="text"
+        id="classYear"
+        class="form-input"
+        placeholder="pl. 2024"
+        [(ngModel)]="classYear"
+        name="classYear"
+        maxlength="50"
+      />
+      <span class="form-hint">Opcionális - pl. 2024, 2024/2025</span>
+    </div>
+
+    <!-- Hibaüzenet -->
+    @if (errorMessage()) {
+      <div class="error-message">
+        <lucide-icon name="alert-circle" [size]="18"></lucide-icon>
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <!-- Submit gomb -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [routerLink]="routePrefix + '/projects'"
+      >
+        Mégse
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="saving()"
+      >
+        @if (saving()) {
+          <span class="spinner"></span>
+          Mentés...
+        } @else {
+          <lucide-icon name="plus" [size]="18"></lucide-icon>
+          Projekt létrehozása
+        }
+      </button>
+    </div>
+  </form>
+</div>

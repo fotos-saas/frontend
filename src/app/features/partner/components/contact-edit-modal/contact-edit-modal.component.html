@@ -6,7 +6,7 @@
   <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
     <div class="modal-content">
     <header class="modal-header">
-      <h2>{{ mode === 'create' ? 'Új kapcsolattartó' : 'Kapcsolattartó szerkesztése' }}</h2>
+      <h2>{{ mode() === 'create' ? 'Új kapcsolattartó' : 'Kapcsolattartó szerkesztése' }}</h2>
       <button class="close-btn" (click)="close.emit()">
         <lucide-icon [name]="ICONS.X" [size]="20" />
       </button>
@@ -166,7 +166,7 @@
             Mentés...
           } @else {
             <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-            {{ mode === 'create' ? 'Létrehozás' : 'Mentés' }}
+            {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}
           }
         </button>
       </div>

@@ -1,0 +1,56 @@
+<!-- Skip to main content link (A11y) -->
+<a
+  href="#main-content"
+  class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2
+         focus:z-50 focus:bg-purple-600 focus:text-white focus:px-4 focus:py-2
+         focus:rounded-lg focus:shadow-lg"
+>
+  Ugrás a tartalomhoz
+</a>
+
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <!-- Top Bar (fixed) -->
+  <app-top-bar />
+
+  <!-- Sidebar (desktop/tablet, fixed) -->
+  <app-sidebar />
+
+  <!-- Main Content -->
+  <main
+    id="main-content"
+    class="min-h-screen flex flex-col pt-14 md:pt-16 md:ml-[60px] lg:ml-[240px]"
+    tabindex="-1"
+  >
+    <!-- Page content with padding -->
+    <div class="flex-1 flex flex-col p-3 md:p-4 lg:p-6">
+      <router-outlet />
+    </div>
+
+    <!-- Footer -->
+    <app-footer />
+  </main>
+
+  <!-- Mobile Overlay -->
+  <app-mobile-nav-overlay
+    [userInfo]="mobileUserInfo()"
+    (logoutEvent)="onLogout()"
+  />
+
+  <!-- Floating Contact FAB -->
+  <app-floating-contact />
+
+  <!-- Photo Selection Reminder Dialog (globális, minden oldalon KIVÉVE /photo-selection) -->
+  @if (showPhotoSelectionReminderDialog()) {
+    <app-photo-selection-reminder-dialog
+      [currentStep]="currentPhotoSelectionStep()"
+      (resultEvent)="onPhotoSelectionReminderResult($event)"
+    />
+  }
+
+  <!-- Password Set Dialog (QR regisztráció után kötelező jelszó beállítás) -->
+  @if (showPasswordSetDialog()) {
+    <app-password-set-dialog
+      (passwordSetEvent)="onPasswordSet($event)"
+    />
+  }
+</div>

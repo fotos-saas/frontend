@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, computed, input, inject, signal, ViewChild, DestroyRef, ElementRef, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input, inject, signal, viewChild, DestroyRef, ElementRef, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
@@ -72,7 +72,7 @@ export class NewsfeedCardComponent {
   readonly replyingTo = signal<NewsfeedComment | null>(null);
 
   /** Textarea referencia a fókuszáláshoz */
-  @ViewChild('commentInput') commentInput!: ElementRef<HTMLTextAreaElement>;
+  readonly commentInput = viewChild<ElementRef<HTMLTextAreaElement>>('commentInput');
 
   /** Szerkeszthető-e a poszt (tulajdonos-e) */
   readonly canEdit = computed(() => this.post().canEdit);
@@ -241,8 +241,8 @@ export class NewsfeedCardComponent {
       take(1),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
-      this.commentInput?.nativeElement?.focus();
-      this.commentInput?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.commentInput()?.nativeElement?.focus();
+      this.commentInput()?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   }
 

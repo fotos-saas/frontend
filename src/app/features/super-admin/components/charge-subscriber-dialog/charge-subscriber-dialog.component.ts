@@ -1,7 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  ViewChild,
+  viewChild,
   ElementRef,
   AfterViewInit,
   OnDestroy,
@@ -126,7 +126,7 @@ export class ChargeSubscriberDialogComponent implements AfterViewInit, OnDestroy
   readonly close = output<void>();
   readonly charged = output<void>();
 
-  @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLElement>;
+  readonly dialogContent = viewChild<ElementRef<HTMLElement>>('dialogContent');
 
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
@@ -142,8 +142,8 @@ export class ChargeSubscriberDialogComponent implements AfterViewInit, OnDestroy
   ngAfterViewInit(): void {
     this.previousActiveElement = document.activeElement as HTMLElement;
 
-    if (this.dialogContent?.nativeElement) {
-      this.focusTrap = this.focusTrapFactory.create(this.dialogContent.nativeElement);
+    if (this.dialogContent()?.nativeElement) {
+      this.focusTrap = this.focusTrapFactory.create(this.dialogContent()!.nativeElement);
       this.focusTrap.focusInitialElementWhenReady();
     }
   }
@@ -163,7 +163,7 @@ export class ChargeSubscriberDialogComponent implements AfterViewInit, OnDestroy
     if (!(event instanceof KeyboardEvent)) return;
 
     if (event.key === 'Escape' || event.key === 'Esc') {
-      if (this.dialogContent?.nativeElement) {
+      if (this.dialogContent()?.nativeElement) {
         this.onCancel();
       }
     }

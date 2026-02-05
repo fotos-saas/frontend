@@ -1,5 +1,6 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, NgZone, OnDestroy, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 
 type CleanupFn = () => void;
 
@@ -189,9 +190,14 @@ declare global {
   providedIn: 'root'
 })
 export class ElectronService implements OnDestroy {
-  private darkMode$ = new BehaviorSubject<boolean>(false);
-  private onlineStatus$ = new BehaviorSubject<boolean>(true);
+  private readonly _darkMode = signal<boolean>(false);
+  private readonly _onlineStatus = signal<boolean>(true);
   private cleanupFunctions: CleanupFn[] = [];
+
+  /** Public readonly signal for dark mode */
+  readonly darkMode = this._darkMode.asReadonly();
+  /** Public readonly signal for online status */
+  readonly onlineStatus = this._onlineStatus.asReadonly();
 
   constructor(private ngZone: NgZone) {
     this.initDarkModeListener();
@@ -234,31 +240,27 @@ export class ElectronService implements OnDestroy {
   }
 
   /**
-   * Observable for dark mode changes
+   * Observable for dark mode changes (backward compat)
    */
-  get darkModeChanges(): Observable<boolean> {
-    return this.darkMode$.asObservable();
-  }
+  readonly darkModeChanges: Observable<boolean> = toObservable(this._darkMode);
 
   /**
    * Get current dark mode value
    */
   get isDarkMode(): boolean {
-    return this.darkMode$.value;
+    return this._darkMode();
   }
 
   /**
-   * Observable for online status changes
+   * Observable for online status changes (backward compat)
    */
-  get onlineStatusChanges(): Observable<boolean> {
-    return this.onlineStatus$.asObservable();
-  }
+  readonly onlineStatusChanges: Observable<boolean> = toObservable(this._onlineStatus);
 
   /**
    * Get current online status
    */
   get isOnline(): boolean {
-    return this.onlineStatus$.value;
+    return this._onlineStatus();
   }
 
   /**
@@ -406,13 +408,13 @@ export class ElectronService implements OnDestroy {
   private async initDarkModeListener(): Promise<void> {
     // Get initial value
     const isDark = await this.getDarkMode();
-    this.darkMode$.next(isDark);
+    this._darkMode.set(isDark);
 
     if (this.isElectron) {
       // Listen for Electron dark mode changes with cleanup
       const cleanup = window.electronAPI!.onDarkModeChange((isDark) => {
         this.ngZone.run(() => {
-          this.darkMode$.next(isDark);
+          this._darkMode.set(isDark);
         });
       });
       this.cleanupFunctions.push(cleanup);
@@ -421,7 +423,7 @@ export class ElectronService implements OnDestroy {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handler = (e: MediaQueryListEvent) => {
         this.ngZone.run(() => {
-          this.darkMode$.next(e.matches);
+          this._darkMode.set(e.matches);
         });
       };
       mediaQuery.addEventListener('change', handler);
@@ -445,24 +447,24 @@ export class ElectronService implements OnDestroy {
     if (this.isElectron) {
       // Get initial status from Electron
       const isOnline = await window.electronAPI!.getOnlineStatus();
-      this.onlineStatus$.next(isOnline);
+      this._onlineStatus.set(isOnline);
 
       // Listen for status changes
       const cleanup = window.electronAPI!.onOnlineStatusChange((isOnline) => {
         this.ngZone.run(() => {
-          this.onlineStatus$.next(isOnline);
+          this._onlineStatus.set(isOnline);
         });
       });
       this.cleanupFunctions.push(cleanup);
     } else {
       // Browser fallback using navigator.onLine
-      this.onlineStatus$.next(navigator.onLine);
+      this._onlineStatus.set(navigator.onLine);
 
       const handleOnline = () => {
-        this.ngZone.run(() => this.onlineStatus$.next(true));
+        this.ngZone.run(() => this._onlineStatus.set(true));
       };
       const handleOffline = () => {
-        this.ngZone.run(() => this.onlineStatus$.next(false));
+        this.ngZone.run(() => this._onlineStatus.set(false));
       };
 
       window.addEventListener('online', handleOnline);

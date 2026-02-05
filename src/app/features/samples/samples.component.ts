@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SamplesService, Sample, ProjectInfo } from './services/samples.service';
-import { forkJoin, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 import { LoggerService } from '../../core/services/logger.service';
 import { SamplesLightboxComponent, SampleLightboxItem } from '../../shared/components/samples-lightbox';
 
@@ -26,7 +26,7 @@ import { SamplesLightboxComponent, SampleLightboxItem } from '../../shared/compo
     styleUrls: ['./samples.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SamplesComponent implements OnInit, OnDestroy {
+export class SamplesComponent implements OnInit {
   /** Mintaképek listája */
   samples: Sample[] = [];
 
@@ -42,14 +42,10 @@ export class SamplesComponent implements OnInit, OnDestroy {
   /** Kiválasztott kép indexe (null ha nincs lightbox nyitva) */
   selectedIndex: number | null = null;
 
-  /** Subject for unsubscribe pattern */
-  private readonly destroy$ = new Subject<void>();
-
-  constructor(
-    private samplesService: SamplesService,
-    private cdr: ChangeDetectorRef,
-    private logger: LoggerService
-  ) {}
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly samplesService = inject(SamplesService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly logger = inject(LoggerService);
 
   ngOnInit(): void {
     this.loadData();
@@ -66,7 +62,7 @@ export class SamplesComponent implements OnInit, OnDestroy {
       samples: this.samplesService.getSamples(),
       projectInfo: this.samplesService.getProjectInfo()
     }).pipe(
-      takeUntil(this.destroy$)
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (responses) => {
         if (responses.samples.success) {
@@ -159,11 +155,4 @@ export class SamplesComponent implements OnInit, OnDestroy {
     }));
   }
 
-  /**
-   * Cleanup on destroy
-   */
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 }

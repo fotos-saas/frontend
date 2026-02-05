@@ -1,4 +1,4 @@
-import { Component, input, output, ChangeDetectionStrategy, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy, OnInit, viewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { isValidEmail, isValidPhone } from '../../utils/validators.util';
@@ -48,7 +48,7 @@ export class ContactEditDialogComponent extends BaseDialogComponent implements O
   errors: { name?: string; email?: string; phone?: string } = {};
 
   /** ViewChild referenciák a focus management-hez */
-  @ViewChild('firstInput') firstInput?: ElementRef<HTMLInputElement>;
+  readonly firstInput = viewChild<ElementRef<HTMLInputElement>>('firstInput');
 
   ngOnInit(): void {
     // Bemásoljuk a kezdeti adatokat
@@ -59,7 +59,7 @@ export class ContactEditDialogComponent extends BaseDialogComponent implements O
     super.ngAfterViewInit();
     // Focus az első input mezőre
     setTimeout(() => {
-      this.firstInput?.nativeElement.focus();
+      this.firstInput()?.nativeElement.focus();
     }, 100);
   }
 

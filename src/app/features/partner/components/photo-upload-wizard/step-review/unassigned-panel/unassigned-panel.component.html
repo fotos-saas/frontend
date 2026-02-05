@@ -1,0 +1,54 @@
+<div class="unassigned-section">
+  <div class="unassigned-header">
+    <h4>
+      <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+      Párosítatlan képek ({{ photos().length }})
+    </h4>
+    <button
+      class="delete-unassigned-btn"
+      (click)="deleteAll.emit()"
+      data-tooltip="Összes párosítatlan kép törlése"
+    >
+      <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+      Törlés
+    </button>
+  </div>
+  <div
+    #gridElement
+    class="unassigned-grid"
+    cdkDropList
+    [cdkDropListData]="photos()"
+    [cdkDropListConnectedTo]="connectedDropLists()"
+    (cdkDropListDropped)="onDrop($event)"
+    id="unassigned-list"
+    (mousedown)="onMouseDown($event)"
+  >
+    @for (photo of photos(); track photo.mediaId; let i = $index) {
+      <div
+        class="unassigned-photo"
+        [style.animation-delay]="i * 0.02 + 's'"
+        cdkDrag
+        [cdkDragData]="photo"
+      >
+        <img
+          [src]="photo.thumbUrl"
+          [alt]="photo.iptcTitle || photo.filename"
+          [matTooltip]="photo.iptcTitle || photo.filename"
+          matTooltipPosition="above"
+          [matTooltipShowDelay]="0"
+          (click)="photoClick.emit(photo); $event.stopPropagation()"
+        />
+        <div
+          class="unassigned-name"
+          [matTooltip]="photo.iptcTitle || photo.filename"
+          matTooltipPosition="below"
+          [matTooltipShowDelay]="0"
+        >
+          {{ photo.iptcTitle || photo.filename }}
+        </div>
+        <img *cdkDragPreview [src]="photo.thumbUrl" class="drag-preview-img" />
+        <div *cdkDragPlaceholder class="drag-placeholder"></div>
+      </div>
+    }
+  </div>
+</div>

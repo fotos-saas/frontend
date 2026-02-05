@@ -2,12 +2,11 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   Component,
   Input,
-  Output,
-  EventEmitter,
+  output,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Renderer2,
-  ViewChild,
+  viewChild,
   OnInit,
   OnDestroy,
   inject,
@@ -48,10 +47,10 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
   @Input({ required: true }) currentIndex = 0;
 
   /** Bezárás event */
-  @Output() close = new EventEmitter<void>();
+  readonly close = output<void>();
 
   /** Navigáció event - új index */
-  @Output() navigate = new EventEmitter<number>();
+  readonly navigate = output<number>();
 
   private cdr = inject(ChangeDetectorRef);
   private renderer = inject(Renderer2);
@@ -77,7 +76,7 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
   }
 
   /** Reference to zoom directive */
-  @ViewChild('zoomDirective') zoomDirective?: ZoomDirective;
+  readonly zoomDirective = viewChild<ZoomDirective>('zoomDirective');
 
   /** Long press zoom interval */
   private zoomInterval: ReturnType<typeof setInterval> | null = null;
@@ -140,7 +139,7 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
   prevImage(): void {
     if (this.currentIndex > 0) {
       this.currentZoom = 1;
-      this.zoomDirective?.reinitialize();
+      this.zoomDirective()?.reinitialize();
       this.navigate.emit(this.currentIndex - 1);
     }
   }
@@ -149,7 +148,7 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
   nextImage(): void {
     if (this.currentIndex < this.samples.length - 1) {
       this.currentZoom = 1;
-      this.zoomDirective?.reinitialize();
+      this.zoomDirective()?.reinitialize();
       this.navigate.emit(this.currentIndex + 1);
     }
   }
@@ -162,15 +161,15 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
 
   /** Zoom controls */
   zoomIn(): void {
-    this.zoomDirective?.zoomIn();
+    this.zoomDirective()?.zoomIn();
   }
 
   zoomOut(): void {
-    this.zoomDirective?.zoomOut();
+    this.zoomDirective()?.zoomOut();
   }
 
   resetZoom(): void {
-    this.zoomDirective?.resetZoom();
+    this.zoomDirective()?.resetZoom();
   }
 
   /** Start continuous zoom on long press */

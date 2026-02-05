@@ -1,0 +1,122 @@
+<div class="invoices-page page-card">
+  <div class="header-title">
+    <lucide-icon [name]="ICONS.FILE_TEXT" [size]="24" />
+    <h1>Számlák</h1>
+  </div>
+
+  <p class="page-description">
+    Itt találod a korábbi számláidat. A számlák kezeléséhez és fizetési adatok módosításához
+    használd a Stripe portált.
+  </p>
+
+  <div class="filter-section">
+    <label for="statusFilter" class="filter-label">
+      <lucide-icon [name]="ICONS.FILTER" [size]="16" />
+      Szűrés:
+    </label>
+    <select
+      id="statusFilter"
+      class="filter-select"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="onStatusFilterChange($event)"
+    >
+      <option value="">Összes</option>
+      <option value="paid">Fizetve</option>
+      <option value="open">Nyitott</option>
+      <option value="void">Érvénytelen</option>
+    </select>
+  </div>
+
+  @if (loading() && invoices().length === 0) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else if (invoices().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.FILE_TEXT" [size]="48" />
+      <h2>Nincsenek számlák</h2>
+      <p>{{ statusFilter() ? 'Nincs a szűrésnek megfelelő számla.' : 'Még nem állítottunk ki számlát.' }}</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <div class="invoices-list">
+        <div class="table-header">
+          <span class="th th-number">Számlaszám</span>
+          <span class="th th-date">Dátum</span>
+          <span class="th th-amount">Összeg</span>
+          <span class="th th-status">Státusz</span>
+          <span class="th th-actions">Műveletek</span>
+        </div>
+
+        <div class="row-grid">
+          @for (invoice of invoices(); track invoice.id; let i = $index) {
+            <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+              <span class="td td-number">{{ invoice.number || '-' }}</span>
+              <span class="td td-date">{{ formatDate(invoice.created_at) }}</span>
+              <span class="td td-amount">{{ formatAmount(invoice.amount, invoice.currency) }}</span>
+              <span class="td td-status">
+                <span class="status-badge" [class]="'status-badge--' + invoice.status">
+                  {{ getStatusLabel(invoice.status) }}
+                </span>
+              </span>
+              <span class="td td-actions">
+                @if (invoice.pdf_url) {
+                  <a
+                    [href]="invoice.pdf_url"
+                    target="_blank"
+                    rel="noopener"
+                    class="action-btn"
+                    matTooltip="PDF letöltése"
+                  >
+                    <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+                    <span class="action-label">Letöltés</span>
+                  </a>
+                }
+                @if (invoice.hosted_url) {
+                  <a
+                    [href]="invoice.hosted_url"
+                    target="_blank"
+                    rel="noopener"
+                    class="action-btn"
+                    matTooltip="Megtekintés"
+                  >
+                    <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="16" />
+                    <span class="action-label">Megnyitás</span>
+                  </a>
+                }
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (hasMore()) {
+      <div class="load-more">
+        <button
+          class="btn btn--secondary"
+          (click)="loadMore()"
+          [disabled]="loadingMore()"
+        >
+          @if (loadingMore()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+          }
+          Több betöltése
+        </button>
+      </div>
+    }
+  }
+
+  <div class="portal-section">
+    <button class="btn btn--primary" (click)="openPortal()" [disabled]="portalLoading()">
+      @if (portalLoading()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+      } @else {
+        <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="18" />
+      }
+      Fizetési adatok kezelése
+    </button>
+  </div>
+</div>

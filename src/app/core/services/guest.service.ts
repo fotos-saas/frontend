@@ -1,6 +1,7 @@
 import { Injectable, computed, signal, OnDestroy, inject, Injector } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, throwError, of, Subject, timer } from 'rxjs';
+import { Observable, throwError, of, Subject, timer } from 'rxjs';
 import { catchError, tap, map, takeUntil, switchMap, retry, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { TabloStorageService } from './tablo-storage.service';
@@ -122,16 +123,17 @@ export class GuestService implements OnDestroy {
   /** Session polling intervallum (30 másodperc) */
   private readonly SESSION_CHECK_INTERVAL_MS = 30000;
 
-  /** Aktuális vendég session */
-  private guestSessionSubject = new BehaviorSubject<GuestSession | null>(null);
-  public guestSession$ = this.guestSessionSubject.asObservable();
+  /** Aktuális vendég session (signal) */
+  private readonly _guestSession = signal<GuestSession | null>(null);
+  public readonly guestSessionSignal = this._guestSession.asReadonly();
+  public readonly guestSession$: Observable<GuestSession | null> = toObservable(this._guestSession);
 
-  /** Van-e aktív vendég session (signal-based) */
-  public readonly hasGuestSession = signal<boolean>(false);
+  /** Van-e aktív vendég session (computed signal) */
+  public readonly hasGuestSession = computed<boolean>(() => this._guestSession() !== null);
 
   /** Vendég neve (computed) */
   public readonly guestName = computed<string | null>(() => {
-    const session = this.guestSessionSubject.getValue();
+    const session = this._guestSession();
     return session?.guestName ?? null;
   });
 
@@ -230,8 +232,7 @@ export class GuestService implements OnDestroy {
         guestName,
         guestEmail: null // Email-t nem tároljuk localStorage-ban
       };
-      this.guestSessionSubject.next(session);
-      this.hasGuestSession.set(true);
+      this._guestSession.set(session);
     }
   }
 
@@ -323,8 +324,7 @@ export class GuestService implements OnDestroy {
         }
 
         // State frissítés
-        this.guestSessionSubject.next(session);
-        this.hasGuestSession.set(true);
+        this._guestSession.set(session);
 
         return session;
       }),
@@ -336,7 +336,7 @@ export class GuestService implements OnDestroy {
    * Vendég adatainak frissítése (név és/vagy email)
    */
   updateGuestInfo(guestName: string, guestEmail?: string): Observable<GuestSession> {
-    const currentSession = this.guestSessionSubject.getValue();
+    const currentSession = this._guestSession();
     if (!currentSession) {
       return throwError(() => new Error('Nincs aktív session'));
     }
@@ -369,7 +369,7 @@ export class GuestService implements OnDestroy {
         }
 
         // State frissítés
-        this.guestSessionSubject.next(updatedSession);
+        this._guestSession.set(updatedSession);
 
         return updatedSession;
       }),
@@ -381,7 +381,7 @@ export class GuestService implements OnDestroy {
    * Meglévő session validálása (pl. oldal újratöltés után)
    */
   validateSession(): Observable<boolean> {
-    const currentSession = this.guestSessionSubject.getValue();
+    const currentSession = this._guestSession();
     if (!currentSession) {
       return of(false);
     }
@@ -418,7 +418,7 @@ export class GuestService implements OnDestroy {
    * Cross-device link küldése emailben
    */
   sendDeviceLink(email: string): Observable<{ success: boolean; message: string }> {
-    const currentSession = this.guestSessionSubject.getValue();
+    const currentSession = this._guestSession();
     if (!currentSession) {
       return throwError(() => new Error('Nincs aktív session'));
     }
@@ -442,7 +442,7 @@ export class GuestService implements OnDestroy {
    * Heartbeat - aktivitás jelzése
    */
   sendHeartbeat(): Observable<void> {
-    const currentSession = this.guestSessionSubject.getValue();
+    const currentSession = this._guestSession();
     if (!currentSession) {
       return of(undefined);
     }
@@ -466,8 +466,7 @@ export class GuestService implements OnDestroy {
       this.storage.clearGuestData(projectId, sessionType);
     }
 
-    this.guestSessionSubject.next(null);
-    this.hasGuestSession.set(false);
+    this._guestSession.set(null);
   }
 
   /**
@@ -481,7 +480,7 @@ export class GuestService implements OnDestroy {
       return; // Már fut
     }
 
-    const currentSession = this.guestSessionSubject.getValue();
+    const currentSession = this._guestSession();
     if (!currentSession) {
       return; // Nincs session
     }
@@ -520,7 +519,7 @@ export class GuestService implements OnDestroy {
    * Session status ellenőrzése (egyszer)
    */
   checkSessionStatus(): Observable<SessionStatusResponse> {
-    const currentSession = this.guestSessionSubject.getValue();
+    const currentSession = this._guestSession();
     if (!currentSession) {
       return of({ valid: false, reason: 'deleted' as const, message: 'Nincs aktív session' });
     }
@@ -558,11 +557,11 @@ export class GuestService implements OnDestroy {
    * X-Guest-Session header készítése API hívásokhoz
    */
   getGuestSessionHeader(): HttpHeaders {
-    const session = this.guestSessionSubject.getValue();
+    const session = this._guestSession();
     if (!session) {
       // Próbáld meg újra betölteni localStorage-ból
       this.loadStoredSession();
-      const retrySession = this.guestSessionSubject.getValue();
+      const retrySession = this._guestSession();
       if (retrySession) {
         return new HttpHeaders().set('X-Guest-Session', retrySession.sessionToken);
       }
@@ -575,7 +574,7 @@ export class GuestService implements OnDestroy {
    * Session token közvetlen lekérése (ha szükséges)
    */
   getSessionToken(): string | null {
-    return this.guestSessionSubject.getValue()?.sessionToken ?? null;
+    return this._guestSession()?.sessionToken ?? null;
   }
 
   /**
@@ -598,8 +597,7 @@ export class GuestService implements OnDestroy {
       guestName,
       guestEmail: null
     };
-    this.guestSessionSubject.next(session);
-    this.hasGuestSession.set(true);
+    this._guestSession.set(session);
   }
 
   /**
@@ -734,8 +732,7 @@ export class GuestService implements OnDestroy {
           guestName: response.data.guest_name,
           guestEmail: response.data.guest_email
         };
-        this.guestSessionSubject.next(session);
-        this.hasGuestSession.set(true);
+        this._guestSession.set(session);
         this.verificationStatus.set(response.data.verification_status);
         this.isPending.set(response.data.is_pending);
         this.personId.set(response.data.missing_person_id);
@@ -774,7 +771,7 @@ export class GuestService implements OnDestroy {
       return;
     }
 
-    const currentSession = this.guestSessionSubject.getValue();
+    const currentSession = this._guestSession();
     if (!currentSession) {
       return;
     }
@@ -837,7 +834,7 @@ export class GuestService implements OnDestroy {
    * Verification status ellenőrzése (egyszer)
    */
   checkVerificationStatus(): Observable<VerificationStatusResponse> {
-    const currentSession = this.guestSessionSubject.getValue();
+    const currentSession = this._guestSession();
     if (!currentSession) {
       return of({ success: false });
     }
@@ -929,7 +926,6 @@ export class GuestService implements OnDestroy {
       guestName: restoredSession.guestName,
       guestEmail: restoredSession.guestEmail
     };
-    this.guestSessionSubject.next(session);
-    this.hasGuestSession.set(true);
+    this._guestSession.set(session);
   }
 }

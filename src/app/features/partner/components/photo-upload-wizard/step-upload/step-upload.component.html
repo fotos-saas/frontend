@@ -1,0 +1,96 @@
+<div class="step-upload">
+  <!-- Drop Zone - csak ha nincs még kép VAGY ha showDropZone aktív -->
+  @if (showDropZone() || uploadedPhotos().length === 0) {
+    <app-drop-zone
+      [uploading]="uploading()"
+      [uploadProgress]="uploadProgress()"
+      accept=".jpg,.jpeg,.png,.webp,.zip"
+      hint="JPG, PNG, WebP vagy ZIP fájl"
+      maxSize="max. 50 kép"
+      (filesSelected)="onFilesSelected($event)"
+    />
+  }
+
+  <!-- Uploaded Photos Grid -->
+  @if (uploadedPhotos().length > 0) {
+    <div class="uploaded-section">
+      <div class="section-header">
+        <h4>Feltöltött képek ({{ uploadedPhotos().length }})</h4>
+        @if (!uploading()) {
+          <div class="header-actions">
+            <button class="delete-all-btn" (click)="removeAllPhotos.emit()">
+              <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              Mind törlése
+            </button>
+            <button class="add-more-btn" (click)="toggleDropZone()">
+              <lucide-icon [name]="showDropZone() ? ICONS.CHEVRON_UP : ICONS.PLUS" [size]="14" />
+              {{ showDropZone() ? 'Elrejt' : 'További képek' }}
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="photos-grid">
+        @for (photo of uploadedPhotos(); track photo.mediaId; let i = $index) {
+          <div
+            class="photo-card"
+            [style.animation-delay]="i * 0.03 + 's'"
+          >
+            <img
+              [src]="photo.thumbUrl"
+              [alt]="photo.filename"
+              loading="lazy"
+            />
+            <div class="photo-overlay">
+              <button
+                class="remove-btn"
+                (click)="removePhoto.emit(photo.mediaId); $event.stopPropagation()"
+                title="Eltávolítás"
+              >
+                <lucide-icon [name]="ICONS.X" [size]="14" />
+              </button>
+            </div>
+            <div class="photo-info">
+              <span class="photo-name" [title]="photo.filename">
+                {{ photo.filename | slice:0:20 }}{{ photo.filename.length > 20 ? '...' : '' }}
+              </span>
+              @if (photo.iptcTitle) {
+                <span class="iptc-badge" title="IPTC név: {{ photo.iptcTitle }}">
+                  <lucide-icon [name]="ICONS.USER" [size]="10" />
+                  {{ photo.iptcTitle }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Empty State Info -->
+  @if (uploadedPhotos().length === 0 && !uploading()) {
+    <div class="info-cards">
+      <div class="info-card">
+        <lucide-icon [name]="ICONS.IMAGE" [size]="20" class="info-icon" />
+        <div class="info-content">
+          <strong>Képformátumok</strong>
+          <span>JPG, PNG, WebP</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <lucide-icon [name]="ICONS.FOLDER" [size]="20" class="info-icon" />
+        <div class="info-content">
+          <strong>ZIP feltöltés</strong>
+          <span>Több kép egyszerre</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <lucide-icon [name]="ICONS.USER" [size]="20" class="info-icon" />
+        <div class="info-content">
+          <strong>IPTC metaadat</strong>
+          <span>Automatikus névfelismerés</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

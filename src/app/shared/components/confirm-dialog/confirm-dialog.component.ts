@@ -1,7 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  ViewChild,
+  viewChild,
   ElementRef,
   AfterViewInit,
   OnDestroy,
@@ -46,7 +46,7 @@ export class ConfirmDialogComponent implements AfterViewInit, OnDestroy {
   /** Signal-based output */
   readonly resultEvent = output<ConfirmDialogResult>();
 
-  @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLElement>;
+  readonly dialogContent = viewChild.required<ElementRef<HTMLElement>>('dialogContent');
 
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
@@ -59,8 +59,8 @@ export class ConfirmDialogComponent implements AfterViewInit, OnDestroy {
     this.previousActiveElement = document.activeElement as HTMLElement;
 
     // Focus trap létrehozása
-    if (this.dialogContent?.nativeElement) {
-      this.focusTrap = this.focusTrapFactory.create(this.dialogContent.nativeElement);
+    if (this.dialogContent()?.nativeElement) {
+      this.focusTrap = this.focusTrapFactory.create(this.dialogContent().nativeElement);
       this.focusTrap.focusInitialElementWhenReady();
     }
   }
@@ -86,7 +86,7 @@ export class ConfirmDialogComponent implements AfterViewInit, OnDestroy {
 
     if (event.key === 'Escape' || event.key === 'Esc') {
       // Csak akkor kezeljük, ha a dialogContent létezik (azaz a dialog nyitva van)
-      if (this.dialogContent?.nativeElement) {
+      if (this.dialogContent()?.nativeElement) {
         this.onCancel();
       }
     }

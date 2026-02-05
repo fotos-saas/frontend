@@ -1,14 +1,9 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
-import {
-  PartnerOrdersService,
-  AlbumPhoto
-} from '../../../services/partner-orders.service';
-import { ToastService } from '../../../../../core/services/toast.service';
+import { AlbumPhoto } from '../../../services/partner-orders.service';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DropZoneComponent } from '../../../../../shared/components/drop-zone/drop-zone.component';
 import { SelectionGridComponent } from '../../../../photo-selection/components/selection-grid/selection-grid.component';
@@ -16,6 +11,7 @@ import { MediaLightboxComponent } from '../../../../../shared/components/media-l
 import { WorkflowPhoto } from '../../../../photo-selection/models/workflow.models';
 import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
 import { AlbumDetailState } from './album-detail.state';
+import { AlbumDetailActionsService } from './album-detail-actions.service';
 import { AlbumHeaderComponent } from './components/album-header/album-header.component';
 import { AlbumInfoBarComponent } from './components/album-info-bar/album-info-bar.component';
 import { AlbumPhotoListComponent } from './components/album-photo-list/album-photo-list.component';
@@ -26,6 +22,7 @@ import { AlbumEditModalComponent, AlbumEditFormData } from './components/album-e
  *
  * Partner album részletes nézete.
  * State management: AlbumDetailState class (Signal-based)
+ * HTTP műveletek: AlbumDetailActionsService (component-scoped)
  */
 @Component({
   selector: 'app-partner-album-detail',
@@ -44,15 +41,14 @@ import { AlbumEditModalComponent, AlbumEditFormData } from './components/album-e
     AlbumPhotoListComponent,
     AlbumEditModalComponent,
   ],
+  providers: [AlbumDetailActionsService],
   templateUrl: './album-detail.component.html',
   styleUrl: './album-detail.component.scss'
 })
 export class PartnerAlbumDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly ordersService = inject(PartnerOrdersService);
-  private readonly toast = inject(ToastService);
+  private readonly actions = inject(AlbumDetailActionsService);
 
   readonly ICONS = ICONS;
   readonly state = new AlbumDetailState();
@@ -66,39 +62,13 @@ export class PartnerAlbumDetailComponent implements OnInit {
       this.router.navigate(['/partner/orders/clients']);
       return;
     }
-    this.loadAlbum(id);
-  }
-
-  // === ALBUM LOADING ===
-
-  private loadAlbum(id: number): void {
-    this.state.startLoading();
-    this.ordersService.getAlbum(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (album) => {
-        this.state.finishLoading(album);
-      },
-      error: () => {
-        this.toast.error('Hiba', 'Az album nem található');
-        this.router.navigate(['/partner/orders/clients']);
-      }
-    });
+    this.actions.loadAlbum(this.state, id);
   }
 
   // === HEADER EVENTS ===
 
   onActivate(): void {
-    this.state.activating.set(true);
-    this.ordersService.activateAlbum(this.state.album()!.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.toast.success('Siker', 'Album aktiválva! Az ügyfél mostantól elérheti.');
-        this.loadAlbum(this.state.album()!.id);
-        this.state.activating.set(false);
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
-        this.state.activating.set(false);
-      }
-    });
+    this.actions.activateAlbum(this.state);
   }
 
   onEditClick(): void {
@@ -114,58 +84,14 @@ export class PartnerAlbumDetailComponent implements OnInit {
   onDeleteAlbumResult(result: ConfirmDialogResult): void {
     this.state.closeDeleteAlbumConfirm();
     if (result.action === 'confirm') {
-      this.deleteAlbum();
+      this.actions.deleteAlbum(this.state);
     }
-  }
-
-  private deleteAlbum(): void {
-    const clientId = this.state.album()!.client.id;
-    this.ordersService.deleteAlbum(this.state.album()!.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.toast.success('Siker', 'Album törölve');
-        this.router.navigate(['/partner/orders/clients', clientId]);
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
-      }
-    });
   }
 
   // === UPLOAD ===
 
   onFilesSelected(files: File[]): void {
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/zip', 'application/x-zip-compressed'];
-    const validFiles = files.filter(f => {
-      const isValidType = validTypes.includes(f.type) || f.name.toLowerCase().endsWith('.zip');
-      const isValidSize = f.size <= 50 * 1024 * 1024;
-      return isValidType && isValidSize;
-    });
-
-    if (validFiles.length === 0) {
-      this.toast.error('Hiba', 'Nincs érvényes fájl a feltöltéshez');
-      return;
-    }
-
-    if (validFiles.length !== files.length) {
-      this.toast.warning('Figyelem', `${files.length - validFiles.length} fájl nem megfelelő formátumú vagy túl nagy`);
-    }
-
-    this.state.startUpload(validFiles.length);
-
-    this.ordersService.uploadPhotosChunked(this.state.album()!.id, validFiles).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (progress) => {
-        this.state.updateUploadProgress(progress);
-        if (progress.completed) {
-          this.toast.success('Siker', `${progress.uploadedCount} kép sikeresen feltöltve`);
-          this.loadAlbum(this.state.album()!.id);
-          this.state.uploadSuccess();
-        }
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error('Hiba', err.error?.message || 'Hiba történt a feltöltés során');
-        this.state.uploadError();
-      }
-    });
+    this.actions.uploadFiles(this.state, files);
   }
 
   // === GRID EVENTS ===
@@ -205,27 +131,10 @@ export class PartnerAlbumDetailComponent implements OnInit {
 
   onDeletePhotoResult(result: ConfirmDialogResult): void {
     if (result.action === 'confirm') {
-      this.deletePhoto();
+      this.actions.deletePhoto(this.state);
     } else {
       this.state.closeDeletePhotoConfirm();
     }
-  }
-
-  private deletePhoto(): void {
-    const photo = this.state.photoToDelete();
-    if (!photo) return;
-
-    this.ordersService.deletePhoto(this.state.album()!.id, photo.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.state.removePhoto(photo.id);
-        this.toast.success('Siker', 'Kép törölve');
-        this.state.closeDeletePhotoConfirm();
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
-        this.state.closeDeletePhotoConfirm();
-      }
-    });
   }
 
   // === DELETE MULTIPLE PHOTOS ===
@@ -237,96 +146,24 @@ export class PartnerAlbumDetailComponent implements OnInit {
   onDeletePhotosResult(result: ConfirmDialogResult): void {
     this.state.closeDeletePhotosConfirm();
     if (result.action === 'confirm') {
-      this.deleteSelectedPhotos();
+      this.actions.deleteSelectedPhotos(this.state);
     }
-  }
-
-  private deleteSelectedPhotos(): void {
-    const idsToDelete = this.state.deleteSelectedIds();
-    if (idsToDelete.length === 0) return;
-
-    this.state.deletingPhotos.set(true);
-
-    const deletePromises = idsToDelete.map(id =>
-      this.ordersService.deletePhoto(this.state.album()!.id, id).toPromise()
-    );
-
-    Promise.all(deletePromises)
-      .then(() => {
-        this.state.removePhotos(idsToDelete);
-        this.toast.success('Siker', `${idsToDelete.length} kép törölve`);
-      })
-      .catch(() => {
-        this.toast.error('Hiba', 'Nem sikerült törölni néhány képet');
-        this.state.deletingPhotos.set(false);
-        this.loadAlbum(this.state.album()!.id);
-      });
   }
 
   // === EDIT MODAL ===
 
   onSaveAlbum(formData: AlbumEditFormData): void {
-    if (!formData.name.trim()) {
-      this.toast.error('Hiba', 'Az album neve kötelező');
-      return;
-    }
-
-    this.state.saving.set(true);
-    this.ordersService.updateAlbum(this.state.album()!.id, {
-      name: formData.name.trim(),
-      min_selections: formData.minSelections,
-      max_selections: formData.maxSelections,
-      max_retouch_photos: formData.maxRetouchPhotos,
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.toast.success('Siker', 'Album mentve');
-        this.loadAlbum(this.state.album()!.id);
-        this.state.editSuccess();
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error('Hiba', err.error?.message || 'Nem sikerült menteni');
-        this.state.saving.set(false);
-      }
-    });
+    this.actions.saveAlbum(this.state, formData);
   }
 
   // === EXPIRY ===
 
   onExpiryChange(dateString: string): void {
-    const newExpiry = new Date(dateString);
-    newExpiry.setHours(23, 59, 59, 999);
-
-    this.state.extendingExpiry.set(true);
-    this.ordersService.extendAlbumExpiry(this.state.album()!.id, newExpiry.toISOString()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (response) => {
-        this.state.updateExpiry(response.data.expiresAt);
-        this.toast.success('Siker', 'Lejárat módosítva');
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
-        this.state.extendingExpiry.set(false);
-      }
-    });
+    this.actions.changeExpiry(this.state, dateString);
   }
 
   onExtendExpiry(days: number): void {
-    const currentExpiry = this.state.album()?.expiresAt;
-    const baseDate = currentExpiry ? new Date(currentExpiry) : new Date();
-    const startDate = baseDate < new Date() ? new Date() : baseDate;
-    const newExpiry = new Date(startDate);
-    newExpiry.setDate(newExpiry.getDate() + days);
-
-    this.state.extendingExpiry.set(true);
-    this.ordersService.extendAlbumExpiry(this.state.album()!.id, newExpiry.toISOString()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (response) => {
-        this.state.updateExpiry(response.data.expiresAt);
-        this.toast.success('Siker', `Lejárat meghosszabbítva ${days} nappal`);
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error('Hiba', err.error?.message || 'Hiba történt');
-        this.state.extendingExpiry.set(false);
-      }
-    });
+    this.actions.extendExpiry(this.state, days);
   }
 
   // === LIGHTBOX ===
@@ -338,56 +175,10 @@ export class PartnerAlbumDetailComponent implements OnInit {
   // === EXPORT ===
 
   onDownloadZip(): void {
-    const photoIds = this.state.selectedPhotoIds();
-    if (photoIds.length === 0) {
-      this.toast.warning('Figyelem', 'Nincs kiválasztott kép');
-      return;
-    }
-
-    this.state.downloading.set(true);
-    this.ordersService.downloadSelectedZip(this.state.album()!.id, photoIds)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => {
-          this.triggerDownload(blob, `album-${this.state.album()!.id}-selected.zip`);
-          this.state.downloading.set(false);
-          this.toast.success('Siker', 'Letöltés elkezdődött');
-        },
-        error: () => {
-          this.toast.error('Hiba', 'Nem sikerült a letöltés');
-          this.state.downloading.set(false);
-        }
-      });
+    this.actions.downloadZip(this.state);
   }
 
   onExportExcel(): void {
-    const photoIds = this.state.selectedPhotoIds();
-    const idsToExport = photoIds.length > 0 ? photoIds : this.state.album()!.photos.map(p => p.id);
-
-    this.state.exporting.set(true);
-    this.ordersService.exportExcel(this.state.album()!.id, idsToExport)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => {
-          this.triggerDownload(blob, `album-${this.state.album()!.id}-export.xlsx`);
-          this.state.exporting.set(false);
-          this.toast.success('Siker', 'Excel export elkészült');
-        },
-        error: () => {
-          this.toast.error('Hiba', 'Nem sikerült az export');
-          this.state.exporting.set(false);
-        }
-      });
-  }
-
-  private triggerDownload(blob: Blob, filename: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    this.actions.exportExcel(this.state);
   }
 }

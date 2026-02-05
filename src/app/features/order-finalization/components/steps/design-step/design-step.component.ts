@@ -7,11 +7,11 @@ import {
   computed,
   OnInit,
   OnDestroy,
+  DestroyRef,
   signal
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
 import { DesignData } from '../../../models/order-finalization.models';
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
@@ -40,7 +40,7 @@ export class DesignStepComponent implements OnInit, OnDestroy {
   private readonly validationService = inject(OrderValidationService);
   private readonly fileUploadService = inject(FileUploadService);
   private readonly toastService = inject(ToastService);
-  private readonly destroy$ = new Subject<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Input: Design adatok */
   data = input.required<DesignData>();
@@ -91,8 +91,6 @@ export class DesignStepComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.editor.destroy();
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   /**
@@ -142,7 +140,7 @@ export class DesignStepComponent implements OnInit, OnDestroy {
     const file = input.files[0];
 
     this.fileUploadService.uploadBackgroundImage(file)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           if (response.success) {
@@ -170,7 +168,7 @@ export class DesignStepComponent implements OnInit, OnDestroy {
     const file = input.files[0];
 
     this.fileUploadService.uploadAttachment(file)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           if (response.success) {
@@ -198,7 +196,7 @@ export class DesignStepComponent implements OnInit, OnDestroy {
     if (!fileId) return;
 
     this.fileUploadService.deleteFile(fileId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.dataChange.emit({
@@ -218,7 +216,7 @@ export class DesignStepComponent implements OnInit, OnDestroy {
     if (!fileId) return;
 
     this.fileUploadService.deleteFile(fileId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.dataChange.emit({

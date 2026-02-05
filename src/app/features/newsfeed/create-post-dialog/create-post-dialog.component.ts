@@ -1,7 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  ViewChild,
+  viewChild,
   ElementRef,
   inject,
   DestroyRef,
@@ -96,7 +96,7 @@ export class CreatePostDialogComponent extends BaseDialogComponent {
   errors: PostFormErrors = {};
 
   /** ViewChild referenciák */
-  @ViewChild('titleInput') titleInput?: ElementRef<HTMLInputElement>;
+  readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
 
   /** Services */
   private readonly newsfeedService = inject(NewsfeedService);
@@ -123,7 +123,7 @@ export class CreatePostDialogComponent extends BaseDialogComponent {
 
   protected override focusFirstInput(): void {
     setTimeout(() => {
-      this.titleInput?.nativeElement.focus();
+      this.titleInput()?.nativeElement.focus();
     }, 100);
   }
 

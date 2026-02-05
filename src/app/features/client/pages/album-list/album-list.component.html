@@ -1,0 +1,123 @@
+<div class="album-list-page page-card">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Albumjaim</h1>
+      <p class="page-subtitle">Válaszd ki a képeidet az alábbi albumokból</p>
+    </div>
+  </header>
+
+  <!-- Loading state -->
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="skeleton-grid">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="skeleton-card">
+            <div class="skeleton-shimmer skeleton-header"></div>
+            <div class="skeleton-shimmer skeleton-body"></div>
+            <div class="skeleton-shimmer skeleton-footer"></div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (error()) {
+    <div class="error-container">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="48" class="error-icon"></lucide-icon>
+      <p class="error-message">{{ error() }}</p>
+      <button (click)="loadAlbums()" class="btn btn-primary">
+        <lucide-icon [name]="ICONS.REFRESH" [size]="16"></lucide-icon>
+        Újrapróbálás
+      </button>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading() && !error() && albums().length === 0) {
+    <div class="empty-container">
+      <div class="empty-icon-wrapper">
+        <lucide-icon [name]="ICONS.IMAGES" [size]="64" class="empty-icon"></lucide-icon>
+      </div>
+      <h2 class="empty-title">Még nincsenek albumjaid</h2>
+      <p class="empty-text">Amint a fotós feltölti a képeket, itt fognak megjelenni.</p>
+    </div>
+  }
+
+  <!-- Album cards -->
+  @if (!loading() && !error() && albums().length > 0) {
+    <div class="album-grid">
+      @for (album of albums(); track album.id; let i = $index) {
+        <a
+          [routerLink]="['/client/albums', album.id]"
+          class="album-card"
+          [style.animation-delay]="(i * 0.05) + 's'"
+          [class.album-card--completed]="album.isCompleted"
+        >
+          <!-- Photo Stack Preview -->
+          @if (album.previewThumbs && album.previewThumbs.length > 0) {
+            <div class="photo-stack">
+              @for (thumb of album.previewThumbs.slice(0, 4); track thumb; let j = $index) {
+                <div
+                  class="stack-photo"
+                  [style.background-image]="'url(' + thumb + ')'"
+                  [style.--stack-index]="j"
+                ></div>
+              }
+              <div class="stack-overlay">
+                <span class="photo-count">{{ album.photosCount }} kép</span>
+              </div>
+            </div>
+          } @else {
+            <div class="photo-stack photo-stack--empty">
+              <lucide-icon [name]="ICONS.IMAGES" [size]="48" class="stack-empty-icon"></lucide-icon>
+            </div>
+          }
+
+
+          <!-- Album info -->
+          <div class="card-body">
+            <h3 class="album-name">{{ album.name }}</h3>
+
+            <!-- Stats -->
+            <div class="album-stats">
+              @if (album.maxSelections) {
+                <div class="stat">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="16"></lucide-icon>
+                  <span>Max {{ album.maxSelections }} választható</span>
+                </div>
+              }
+              @if (album.minSelections) {
+                <div class="stat">
+                  <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16"></lucide-icon>
+                  <span>Min {{ album.minSelections }} kötelező</span>
+                </div>
+              }
+            </div>
+
+            <!-- Completed badge -->
+            @if (album.isCompleted) {
+              <div class="completed-badge">
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18"></lucide-icon>
+                <span>Lezárva</span>
+              </div>
+            }
+          </div>
+
+          <!-- Card footer -->
+          <div class="card-footer">
+            <span class="card-action">
+              @if (album.isCompleted) {
+                Megtekintés
+              } @else {
+                Képek kiválasztása
+              }
+              <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="16"></lucide-icon>
+            </span>
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>

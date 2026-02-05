@@ -144,7 +144,7 @@ export class SubscriptionOverviewComponent implements OnInit {
   getStatusLabel = getSubscriptionStatusLabel;
 
   formatStorage(gb: number): string {
-    return gb.toFixed(1);
+    return gb.toFixed(2);
   }
 
   formatPrice(amount: number): string {

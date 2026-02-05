@@ -104,6 +104,15 @@ export const routes: Routes = [
         path: 'settings',
         loadComponent: () => import('./features/super-admin/pages/settings/settings.component').then(m => m.SettingsComponent)
       },
+      // Hibajelentések kezelése
+      {
+        path: 'bugs',
+        loadComponent: () => import('./features/super-admin/pages/bug-report-list/bug-report-list.component').then(m => m.AdminBugReportListComponent)
+      },
+      {
+        path: 'bugs/:id',
+        loadComponent: () => import('./features/super-admin/pages/bug-report-detail/bug-report-detail.component').then(m => m.AdminBugReportDetailComponent)
+      },
     ]
   },
 
@@ -133,6 +142,15 @@ export const routes: Routes = [
       {
         path: 'schools',
         loadComponent: () => import('./features/marketer/pages/school-list/school-list.component').then(m => m.SchoolListComponent)
+      },
+      // Hibajelentések
+      {
+        path: 'bugs',
+        loadComponent: () => import('./features/bug-reports/pages/bug-report-list/bug-report-list.component').then(m => m.BugReportListComponent)
+      },
+      {
+        path: 'bugs/:id',
+        loadComponent: () => import('./features/bug-reports/pages/bug-report-detail/bug-report-detail.component').then(m => m.BugReportDetailComponent)
       }
     ]
   },
@@ -218,6 +236,15 @@ export const routes: Routes = [
         path: 'settings',
         redirectTo: 'subscription/overview',
         pathMatch: 'full'
+      },
+      // Hibajelentések
+      {
+        path: 'bugs',
+        loadComponent: () => import('./features/bug-reports/pages/bug-report-list/bug-report-list.component').then(m => m.BugReportListComponent)
+      },
+      {
+        path: 'bugs/:id',
+        loadComponent: () => import('./features/bug-reports/pages/bug-report-detail/bug-report-detail.component').then(m => m.BugReportDetailComponent)
       }
     ]
   },
@@ -271,6 +298,15 @@ export const routes: Routes = [
         path: 'account',
         loadComponent: () => import('./features/partner/pages/subscription/account-delete/account-delete.component').then(m => m.AccountDeleteComponent),
         title: 'Fiók törlése'
+      },
+      // Hibajelentések
+      {
+        path: 'bugs',
+        loadComponent: () => import('./features/bug-reports/pages/bug-report-list/bug-report-list.component').then(m => m.BugReportListComponent)
+      },
+      {
+        path: 'bugs/:id',
+        loadComponent: () => import('./features/bug-reports/pages/bug-report-detail/bug-report-detail.component').then(m => m.BugReportDetailComponent)
       }
     ]
   },

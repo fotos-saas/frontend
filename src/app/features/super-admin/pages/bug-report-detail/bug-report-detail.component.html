@@ -1,0 +1,210 @@
+<div class="admin-bug-detail page-card">
+  @if (loading()) {
+    <div class="loading-skeleton">
+      <div class="skeleton-bar skeleton-shimmer" style="width: 200px; height: 32px;"></div>
+      <div class="skeleton-bar skeleton-shimmer" style="width: 100%; height: 120px; margin-top: 16px;"></div>
+    </div>
+  } @else if (report(); as r) {
+    <!-- Vissza gomb -->
+    <div class="detail-header">
+      <button class="back-btn" (click)="goBack()">
+        <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+        Vissza a listához
+      </button>
+    </div>
+
+    <!-- Fejléc: cím + badge-ek -->
+    <div class="detail-title-row">
+      <h1>{{ r.title }}</h1>
+      <div class="badges">
+        <span class="badge" [class]="getStatusClass(r.status)">{{ r.status_label }}</span>
+        <span class="badge" [class]="getPriorityClass(r.priority)">{{ r.priority_label }}</span>
+      </div>
+    </div>
+
+    <!-- Meta infó: bejelentő + dátum -->
+    <div class="detail-meta">
+      @if (r.reporter) {
+        <span class="meta-reporter">
+          <lucide-icon [name]="ICONS.USER" [size]="14" />
+          {{ r.reporter.name }}
+          @if (r.reporter.email) {
+            <span class="meta-email">({{ r.reporter.email }})</span>
+          }
+        </span>
+      }
+      <span class="meta-date">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+        {{ r.created_at | date:'yyyy.MM.dd HH:mm' }}
+      </span>
+    </div>
+
+    <!-- Admin műveletek -->
+    <div class="admin-actions">
+      <!-- Státusz módosítás -->
+      <div class="action-group">
+        <label class="action-label">Státusz módosítás</label>
+        <div class="action-row">
+          @for (opt of statusOptions; track opt.value) {
+            <button
+              class="status-btn badge"
+              [class]="getStatusClass(opt.value)"
+              [class.active]="r.status === opt.value"
+              [disabled]="r.status === opt.value"
+              (click)="changeStatus(opt.value)"
+            >
+              {{ opt.label }}
+            </button>
+          }
+        </div>
+        <div class="status-note-row">
+          <input
+            type="text"
+            class="status-note-input"
+            placeholder="Megjegyzés a státuszváltozáshoz (opcionális)"
+            [ngModel]="statusNote()"
+            (ngModelChange)="statusNote.set($event)"
+          />
+        </div>
+      </div>
+
+      <!-- Prioritás módosítás -->
+      <div class="action-group">
+        <label class="action-label">Prioritás</label>
+        <div class="action-row">
+          @for (opt of priorityOptions; track opt.value) {
+            <button
+              class="priority-btn badge"
+              [class]="getPriorityClass(opt.value)"
+              [class.active]="r.priority === opt.value"
+              [disabled]="r.priority === opt.value"
+              (click)="changePriority(opt.value)"
+            >
+              {{ opt.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Leírás -->
+    <section class="detail-section">
+      <h2>Leírás</h2>
+      <div class="description-content" [innerHTML]="r.description"></div>
+    </section>
+
+    <!-- Mellékletek -->
+    @if (r.attachments && r.attachments.length > 0) {
+      <section class="detail-section">
+        <h2>
+          <lucide-icon [name]="ICONS.PAPERCLIP" [size]="16" />
+          Mellékletek ({{ r.attachments.length }})
+        </h2>
+        <div class="attachments-grid">
+          @for (att of r.attachments; track att.id) {
+            <div class="attachment-card" (click)="openLightbox(att.url)">
+              <img [src]="att.url" [alt]="att.original_filename" loading="lazy" />
+              <span class="attachment-info">{{ att.original_filename }} ({{ att.formatted_size }})</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Státusz előzmények -->
+    @if (r.status_history && r.status_history.length > 0) {
+      <section class="detail-section">
+        <h2>
+          <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+          Előzmények
+        </h2>
+        <div class="timeline">
+          @for (entry of r.status_history; track entry.id) {
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <span class="timeline-status badge" [class]="getStatusClass(entry.new_status)">
+                  {{ entry.new_status_label }}
+                </span>
+                @if (entry.changed_by) {
+                  <span class="timeline-actor">{{ entry.changed_by.name }}</span>
+                }
+                <span class="timeline-date">{{ entry.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
+                @if (entry.note) {
+                  <p class="timeline-note">{{ entry.note }}</p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Kommentek -->
+    <section class="detail-section">
+      <h2>
+        <lucide-icon [name]="ICONS.MESSAGE_CIRCLE" [size]="16" />
+        Hozzászólások ({{ r.comments?.length || 0 }})
+      </h2>
+
+      @if (r.comments && r.comments.length > 0) {
+        <div class="comments-list">
+          @for (comment of r.comments; track comment.id) {
+            <div class="comment-item" [class.comment-internal]="comment.is_internal">
+              <div class="comment-header">
+                <span class="comment-author">
+                  {{ comment.author.name }}
+                  @if (comment.is_internal) {
+                    <span class="internal-badge">Belső jegyzet</span>
+                  }
+                </span>
+                <span class="comment-date">{{ comment.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
+              </div>
+              <div class="comment-body" [innerHTML]="comment.content"></div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Új komment -->
+      <div class="new-comment">
+        <app-rich-text-editor
+          [ngModel]="newComment()"
+          (ngModelChange)="newComment.set($event)"
+          mode="basic"
+          placeholder="Írd ide a hozzászólásodat..."
+        />
+        <div class="comment-controls">
+          <label class="internal-checkbox">
+            <input
+              type="checkbox"
+              [ngModel]="isInternal()"
+              (ngModelChange)="isInternal.set($event)"
+            />
+            Belső jegyzet (a bejelentő nem látja)
+          </label>
+          <button
+            class="btn-comment"
+            (click)="submitComment()"
+            [disabled]="commentSubmitting() || !newComment().trim()"
+          >
+            @if (commentSubmitting()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              Küldés...
+            } @else {
+              <lucide-icon [name]="ICONS.SEND" [size]="16" />
+              Küldés
+            }
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+</div>
+
+<!-- Lightbox -->
+@if (lightboxImage()) {
+  <div class="lightbox-backdrop" (click)="closeLightbox()">
+    <img [src]="lightboxImage()" class="lightbox-image" (click)="$event.stopPropagation()" />
+  </div>
+}

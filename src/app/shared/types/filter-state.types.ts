@@ -31,10 +31,15 @@ export interface MarketerFilterContext {
 
 export interface SuperAdminFilterContext {
   type: 'super-admin';
-  page: 'subscribers' | 'partners';
+  page: 'subscribers' | 'partners' | 'bugs';
 }
 
-export type FilterContext = PartnerFilterContext | MarketerFilterContext | SuperAdminFilterContext;
+export interface BugReportFilterContext {
+  type: 'bugs';
+  page: 'partner' | 'marketer' | 'designer';
+}
+
+export type FilterContext = PartnerFilterContext | MarketerFilterContext | SuperAdminFilterContext | BugReportFilterContext;
 
 /**
  * Perzisztált filter state struktúra

@@ -58,6 +58,22 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
               <span class="nav-label">{{ item.label }}</span>
             </a>
           }
+
+          <!-- Spacer -->
+          <div class="sidebar-spacer"></div>
+
+          <!-- Hibajelentés - sidebar aljára rögzítve -->
+          <div class="sidebar-bottom">
+            <a
+              routerLink="/marketer/bugs"
+              routerLinkActive="active"
+              class="nav-item nav-item--bottom"
+              [title]="sidebarState.isTablet() ? 'Hibajelentés' : ''"
+            >
+              <lucide-icon name="bug" [size]="20" class="nav-icon"></lucide-icon>
+              <span class="nav-label">Hibajelentés</span>
+            </a>
+          </div>
         </nav>
 
         <!-- Mobile Overlay (közös komponens) -->
@@ -188,6 +204,27 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
       border-radius: 3px;
     }
 
+    /* ============ Sidebar Bottom ============ */
+    .sidebar-spacer {
+      flex: 1;
+    }
+
+    .sidebar-bottom {
+      border-top: 1px solid var(--shell-sidebar-border);
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+
+    .nav-item--bottom {
+      opacity: 0.75;
+      font-size: 0.8125rem;
+    }
+
+    .nav-item--bottom:hover,
+    .nav-item--bottom.active {
+      opacity: 1;
+    }
+
     /* ============ Content Area ============ */
     .content {
       flex: 1;
@@ -224,11 +261,14 @@ export class MarketerShellComponent {
   navItems: MenuItem[] = [
     { id: 'dashboard', route: '/marketer/dashboard', label: 'Irányítópult', icon: 'home' },
     { id: 'projects', route: '/marketer/projects', label: 'Projektek', icon: 'folder-open' },
-    { id: 'schools', route: '/marketer/schools', label: 'Iskolák', icon: 'graduation-cap' }
+    { id: 'schools', route: '/marketer/schools', label: 'Iskolák', icon: 'graduation-cap' },
   ];
 
-  // Mobile menü items (ugyanazok mint desktop, de computed-ként a MobileNavOverlay-hez)
-  mobileMenuItems = computed<MenuItem[]>(() => this.navItems);
+  // Mobile menü items (desktop + hibajelentés)
+  mobileMenuItems = computed<MenuItem[]>(() => [
+    ...this.navItems,
+    { id: 'bugs', route: '/marketer/bugs', label: 'Hibajelentés', icon: 'bug' },
+  ]);
 
   userName = signal<string>('');
   userEmail = signal<string>('');

@@ -1,0 +1,127 @@
+<div class="admin-bug-list page-card">
+  <!-- Fejléc -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Hibajelentések kezelése</h1>
+      <p class="subtitle">Összes beérkezett hibajelentés</p>
+    </div>
+  </div>
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="18" class="search-icon" />
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Keresés cím alapján..."
+        [ngModel]="search()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+      @if (search()) {
+        <button class="clear-btn" (click)="onSearchChange('')">
+          <lucide-icon [name]="ICONS.X" [size]="16" />
+        </button>
+      }
+    </div>
+    <select class="filter-select" [ngModel]="statusFilter()" (ngModelChange)="onStatusFilterChange($event)">
+      <option value="">Minden státusz</option>
+      @for (opt of statusOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <select class="filter-select" [ngModel]="priorityFilter()" (ngModelChange)="onPriorityFilterChange($event)">
+      <option value="">Minden prioritás</option>
+      @for (opt of priorityOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <button
+      class="filter-toggle"
+      [class.active]="unreadOnly()"
+      (click)="toggleUnreadOnly()"
+    >
+      <lucide-icon [name]="ICONS.CIRCLE" [size]="14" />
+      Csak olvasatlanok
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (reports().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.BUG" [size]="48" class="empty-icon" />
+      <h3>Nincsenek hibajelentések</h3>
+      <p>Jelenleg nincs beérkezett hibajelentés.</p>
+    </div>
+  } @else {
+    <!-- Táblázat fejléc -->
+    <div class="table-header">
+      <span class="th th-title">Cím</span>
+      <span class="th th-reporter">Bejelentő</span>
+      <span class="th th-status">Státusz</span>
+      <span class="th th-priority">Prioritás</span>
+      <span class="th th-answered">Válasz</span>
+      <span class="th th-date">Dátum</span>
+    </div>
+
+    <!-- Lista -->
+    <div class="row-grid">
+      @for (report of reports(); track report.id; let i = $index) {
+        <div
+          class="list-row"
+          [class.unread]="isUnread(report)"
+          [style.animation-delay]="i * 0.03 + 's'"
+          (click)="openReport(report)"
+        >
+          <span class="cell cell-title">
+            @if (isUnread(report)) {
+              <span class="unread-dot"></span>
+            }
+            {{ report.title }}
+          </span>
+          <span class="cell cell-reporter">
+            @if (report.reporter) {
+              <span class="reporter-name">{{ report.reporter.name }}</span>
+            }
+          </span>
+          <span class="cell cell-status">
+            <span class="badge" [class]="getStatusClass(report.status)">{{ report.status_label }}</span>
+          </span>
+          <span class="cell cell-priority">
+            <span class="badge" [class]="getPriorityClass(report.priority)">{{ report.priority_label }}</span>
+          </span>
+          <span class="cell cell-answered">
+            @switch (report.answered_by) {
+              @case ('admin') { <span class="answered-admin">Admin</span> }
+              @case ('ai') { <span class="answered-ai">AI</span> }
+              @default { <span class="answered-none">-</span> }
+            }
+          </span>
+          <span class="cell cell-date">{{ report.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Lapozó -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="currentPage() <= 1" (click)="goToPage(currentPage() - 1)">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" /> Előző
+        </button>
+        <span class="page-info">
+          {{ currentPage() }} / {{ totalPages() }}
+          <span class="total-count">({{ totalItems() }} db)</span>
+        </span>
+        <button class="page-btn" [disabled]="currentPage() >= totalPages()" (click)="goToPage(currentPage() + 1)">
+          Következő <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>

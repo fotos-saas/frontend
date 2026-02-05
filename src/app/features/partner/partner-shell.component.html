@@ -93,6 +93,22 @@
           </a>
         }
       }
+
+      <!-- Spacer -->
+      <div class="sidebar-spacer"></div>
+
+      <!-- Hibajelentés - sidebar aljára rögzítve -->
+      <div class="sidebar-bottom">
+        <a
+          [routerLink]="bugReportLink()"
+          routerLinkActive="active"
+          class="nav-item nav-item--bottom"
+          [title]="sidebarState.isTablet() ? 'Hibajelentés' : ''"
+        >
+          <lucide-icon name="bug" [size]="20" class="nav-icon"></lucide-icon>
+          <span class="nav-label">Hibajelentés</span>
+        </a>
+      </div>
     </nav>
 
     <!-- Mobile Overlay (közös komponens) -->

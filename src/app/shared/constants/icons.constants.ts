@@ -311,6 +311,11 @@ export const ICONS = {
   PALETTE: 'palette',
   CLIPBOARD_LIST: 'clipboard-list',
   MEGAPHONE: 'megaphone',
+
+  // Bug Reports
+  BUG: 'bug',
+  SEND: 'send',
+  PAPERCLIP: 'paperclip',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

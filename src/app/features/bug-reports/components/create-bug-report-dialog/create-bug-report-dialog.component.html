@@ -1,0 +1,122 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+  (paste)="onPaste($event)"
+>
+  <div class="dialog-panel dialog-panel--lg">
+    <!-- Fejléc -->
+    <div class="dialog-header">
+      <h2>Új hibajelentés</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </div>
+
+    <!-- Tartalom -->
+    <div class="dialog-body">
+      @if (error()) {
+        <div class="error-banner">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+          {{ error() }}
+        </div>
+      }
+
+      <!-- Cím -->
+      <div class="form-group">
+        <label for="bug-title">Cím <span class="required">*</span></label>
+        <input
+          id="bug-title"
+          type="text"
+          class="form-input"
+          placeholder="Rövid leírás a hibáról..."
+          [ngModel]="title()"
+          (ngModelChange)="title.set($event)"
+          maxlength="255"
+        />
+      </div>
+
+      <!-- Leírás -->
+      <div class="form-group">
+        <label>Leírás <span class="required">*</span></label>
+        <app-rich-text-editor
+          [ngModel]="description()"
+          (ngModelChange)="description.set($event)"
+          mode="standard"
+          placeholder="Részletes leírás... (lépések a hiba reprodukálásához)"
+        />
+      </div>
+
+      <!-- Prioritás -->
+      <div class="form-group">
+        <label for="bug-priority">Prioritás</label>
+        <select
+          id="bug-priority"
+          class="form-select"
+          [ngModel]="priority()"
+          (ngModelChange)="priority.set($event)"
+        >
+          @for (opt of priorityOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Mellékletek -->
+      <div class="form-group">
+        <label>
+          <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
+          Képek (max 5, max 5 MB/kép)
+        </label>
+        <div class="attachments-area">
+          @if (attachments().length > 0) {
+            <div class="attachment-list">
+              @for (file of attachments(); track $index) {
+                <div class="attachment-item">
+                  <span class="attachment-name">{{ file.name }}</span>
+                  <button class="attachment-remove" (click)="removeAttachment($index)">
+                    <lucide-icon [name]="ICONS.X" [size]="14" />
+                  </button>
+                </div>
+              }
+            </div>
+          }
+          @if (attachments().length < 5) {
+            <label class="upload-btn">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+              Kép feltöltése
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                multiple
+                (change)="onFileSelect($event)"
+                hidden
+              />
+            </label>
+            <p class="paste-hint">Tipp: Ctrl+V a vágólapról is beilleszthetsz képet!</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Lábléc -->
+    <div class="dialog-footer">
+      <button class="btn-cancel" (click)="close.emit()" [disabled]="submitting()">
+        Mégse
+      </button>
+      <button
+        class="btn-submit"
+        (click)="submit()"
+        [disabled]="submitting() || !title().trim() || !description().trim()"
+      >
+        @if (submitting()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Küldés...
+        } @else {
+          <lucide-icon [name]="ICONS.SEND" [size]="16" />
+          Bejelentés küldése
+        }
+      </button>
+    </div>
+  </div>
+</div>

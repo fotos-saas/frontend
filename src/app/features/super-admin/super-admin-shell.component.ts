@@ -1,9 +1,10 @@
-import { Component, inject, signal, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
 import { SidebarStateService } from '../../core/layout/services/sidebar-state.service';
+import { BugReportService } from '../../shared/services/bug-report.service';
 import { MobileNavOverlayComponent } from '../../core/layout/components/mobile-nav-overlay/mobile-nav-overlay.component';
 import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.component';
 import { MenuItem } from '../../core/layout/models/menu-item.model';
@@ -58,6 +59,25 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
               <span class="nav-label">{{ item.label }}</span>
             </a>
           }
+
+          <!-- Spacer -->
+          <div class="sidebar-spacer"></div>
+
+          <!-- Hibajelentések - sidebar aljára rögzítve -->
+          <div class="sidebar-bottom">
+            <a
+              routerLink="/super-admin/bugs"
+              routerLinkActive="active"
+              class="nav-item nav-item--bottom"
+              [title]="sidebarState.isTablet() ? 'Hibajelentések' : ''"
+            >
+              <lucide-icon name="bug" [size]="20" class="nav-icon"></lucide-icon>
+              <span class="nav-label">Hibajelentések</span>
+              @if (bugReportService.hasUnread()) {
+                <span class="nav-badge">{{ bugReportService.unreadCount() }}</span>
+              }
+            </a>
+          </div>
         </nav>
 
         <!-- Mobile Overlay (közös komponens) -->
@@ -188,6 +208,28 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
       border-radius: 3px;
     }
 
+    /* ============ Sidebar Bottom ============ */
+    .sidebar-spacer {
+      flex: 1;
+    }
+
+    .sidebar-bottom {
+      border-top: 1px solid var(--shell-sidebar-border);
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+
+    .sidebar-bottom .nav-item--bottom {
+      opacity: 0.75;
+      font-size: 0.8125rem;
+      position: relative;
+    }
+
+    .sidebar-bottom .nav-item--bottom:hover,
+    .sidebar-bottom .nav-item--bottom.active {
+      opacity: 1;
+    }
+
     /* ============ Content Area ============ */
     .content {
       flex: 1;
@@ -206,6 +248,32 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
       /* Tablet: collapsed sidebar mellett */
     }
 
+    /* ============ Badge ============ */
+    .nav-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: #dc2626;
+      color: #ffffff;
+      border-radius: 9px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      margin-left: auto;
+    }
+
+    .sidebar--collapsed .nav-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      min-width: 8px;
+      height: 8px;
+      padding: 0;
+      font-size: 0;
+    }
+
     /* ============ Reduced Motion ============ */
     @media (prefers-reduced-motion: reduce) {
       .nav-item,
@@ -216,9 +284,11 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SuperAdminShellComponent {
+export class SuperAdminShellComponent implements OnInit {
   private authService = inject(AuthService);
   protected sidebarState = inject(SidebarStateService);
+
+  readonly bugReportService = inject(BugReportService);
 
   // Menü items (Lucide ikonokkal - desktop, tablet és mobile egyaránt)
   navItems: MenuItem[] = [
@@ -228,7 +298,11 @@ export class SuperAdminShellComponent {
   ];
 
   // Mobile menü items (ugyanazok mint desktop, de computed-ként a MobileNavOverlay-hez)
-  mobileMenuItems = computed<MenuItem[]>(() => this.navItems);
+  // Mobile menü items (desktop + hibajelentések)
+  mobileMenuItems = computed<MenuItem[]>(() => [
+    ...this.navItems,
+    { id: 'bugs', route: '/super-admin/bugs', label: 'Hibajelentések', icon: 'bug' },
+  ]);
 
   userName = signal<string>('');
   userEmail = signal<string>('');
@@ -245,6 +319,10 @@ export class SuperAdminShellComponent {
       this.userName.set(user.name);
       this.userEmail.set(user.email ?? '');
     }
+  }
+
+  ngOnInit(): void {
+    this.bugReportService.fetchUnreadCount();
   }
 
   logout(): void {

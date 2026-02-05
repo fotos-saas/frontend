@@ -128,7 +128,11 @@ import {
   // Design & Roles
   Palette,
   ClipboardList,
-  Megaphone
+  Megaphone,
+  // Bug Reports
+  Bug,
+  Send,
+  Paperclip
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -253,5 +257,9 @@ export const LUCIDE_ICONS_MAP = {
   // Design & Roles
   Palette,
   ClipboardList,
-  Megaphone
+  Megaphone,
+  // Bug Reports
+  Bug,
+  Send,
+  Paperclip
 };

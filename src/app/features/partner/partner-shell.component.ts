@@ -133,6 +133,9 @@ export class PartnerShellComponent implements OnInit {
       ]);
   });
 
+  /** Hibajelentés link - sidebar aljára rögzítve */
+  bugReportLink = computed(() => `${this.baseUrl()}/bugs`);
+
   // Kibontott szekciók
   expandedSections = signal<Set<string>>(new Set(['subscription']));
 
@@ -151,8 +154,11 @@ export class PartnerShellComponent implements OnInit {
     return this.expandedSections().has(sectionId);
   }
 
-  // Mobile menü items (ugyanazok mint desktop, de computed-ként a MobileNavOverlay-hez)
-  mobileMenuItems = computed<MenuItem[]>(() => this.navItems());
+  // Mobile menü items (desktop + hibajelentés)
+  mobileMenuItems = computed<MenuItem[]>(() => [
+    ...this.navItems(),
+    { id: 'bugs', route: this.bugReportLink(), label: 'Hibajelentés', icon: 'bug' },
+  ]);
 
   userName = signal<string>('');
   userEmail = signal<string>('');

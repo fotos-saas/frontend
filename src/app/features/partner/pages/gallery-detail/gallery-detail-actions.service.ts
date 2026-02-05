@@ -77,8 +77,8 @@ export class GalleryDetailActionsService {
           state.updateUploadProgress(progress.progress);
           if (progress.completed) {
             this.toast.success('Siker', `${progress.uploadedCount} kép sikeresen feltöltve`);
-            this.loadGallery(state, projectId);
             state.uploadSuccess();
+            this.refreshGallery(state, projectId);
           }
         },
         error: (err: { error?: { message?: string } }) => {
@@ -86,6 +86,17 @@ export class GalleryDetailActionsService {
           state.uploadError();
         },
       });
+  }
+
+  /** Galéria háttérfrissítés (skeleton nélkül) */
+  private refreshGallery(state: GalleryDetailState, projectId: number): void {
+    this.partnerService.getGallery(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        if (response.hasGallery && response.gallery) {
+          state.gallery.set(response.gallery);
+        }
+      },
+    });
   }
 
   // === DELETE PHOTO ===

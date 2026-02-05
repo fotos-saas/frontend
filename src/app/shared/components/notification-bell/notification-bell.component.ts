@@ -13,7 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NotificationService, Notification } from '../../../core/services/notification.service';
 import { GuestService } from '../../../core/services/guest.service';
 import { LoggerService } from '../../../core/services/logger.service';
-import { NotificationListComponent } from './components/notification-list.component';
+import { NotificationListComponent } from './components/notification-list/notification-list.component';
 
 /**
  * Notification Bell Component

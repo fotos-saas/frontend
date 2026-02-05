@@ -6,19 +6,19 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../../services/partner.service';
-import { ProjectCardComponent } from '../../components/project-card.component';
+import { ProjectCardComponent } from '../../components/project-card/project-card.component';
 import { PersonsModalComponent } from '../../components/persons-modal';
 import { CreateProjectModalComponent } from '../../components/create-project-modal/create-project-modal.component';
 import { SharedQrCodeModalComponent } from '../../../../shared/components/qr-code-modal/qr-code-modal.component';
 import { IQrCodeService } from '../../../../shared/interfaces/qr-code.interface';
-import { PhotoUploadWizardComponent } from '../../components/photo-upload-wizard/photo-upload-wizard.component';
+import { PhotoUploadWizardComponent } from '../../components/photo-upload-wizard/photo-upload-wizard/photo-upload-wizard.component';
 import { SamplesLightboxComponent, SampleLightboxItem } from '../../../../shared/components/samples-lightbox';
 import { ExpandableFiltersComponent, FilterConfig, FilterChangeEvent } from '../../../../shared/components/expandable-filters';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
-import { ProjectTableHeaderComponent } from './components/project-table-header.component';
-import { ProjectMobileSortComponent, SortOption } from './components/project-mobile-sort.component';
-import { ProjectPaginationComponent } from './components/project-pagination.component';
+import { ProjectTableHeaderComponent } from './components/project-table-header/project-table-header.component';
+import { ProjectMobileSortComponent, SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
+import { ProjectPaginationComponent } from './components/project-pagination/project-pagination.component';
 
 /**
  * Partner Project List - Projektek listája a fotós felületen.

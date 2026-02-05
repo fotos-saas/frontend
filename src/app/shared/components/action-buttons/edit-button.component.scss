@@ -1,5 +1,0 @@
-@use './action-button.mixin' as btn;
-
-.edit-button {
-  @include btn.action-button-default;
-}

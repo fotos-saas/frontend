@@ -1,0 +1,5 @@
+@use '../action-button.mixin' as btn;
+
+.delete-button {
+  @include btn.action-button-danger;
+}

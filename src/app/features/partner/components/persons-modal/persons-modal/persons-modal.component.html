@@ -1,0 +1,123 @@
+<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="dialog-panel dialog-panel--lg" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="header-content">
+        <h2>Személyek</h2>
+        <p class="subtitle">{{ projectName() }}</p>
+      </div>
+      <button type="button" class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-section">
+      <div class="search-box">
+        <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+        <input
+          type="text"
+          placeholder="Keresés név alapján..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          class="search-input"
+        />
+        @if (searchQuery()) {
+          <button class="clear-btn" (click)="searchQuery.set('')">
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Type Filter Tabs -->
+    <div class="filter-tabs">
+      <button type="button" class="tab" [class.tab--active]="typeFilter() === 'student'" (click)="typeFilter.set('student')">
+        Diákok
+        @if (!loading()) {
+          <span class="tab-count">({{ studentCount() }})</span>
+        }
+      </button>
+      <button type="button" class="tab" [class.tab--active]="typeFilter() === 'teacher'" (click)="typeFilter.set('teacher')">
+        Tanárok
+        @if (!loading()) {
+          <span class="tab-count">({{ teacherCount() }})</span>
+        }
+      </button>
+    </div>
+
+    <!-- Photo Filter Toggle -->
+    <div class="photo-filter">
+      <label class="photo-filter-toggle">
+        <span class="custom-checkbox" [class.custom-checkbox--checked]="showOnlyWithoutPhoto()">
+          @if (showOnlyWithoutPhoto()) {
+            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+          }
+        </span>
+        <input type="checkbox" [ngModel]="showOnlyWithoutPhoto()" (ngModelChange)="showOnlyWithoutPhoto.set($event)" class="sr-only" />
+        <span class="toggle-label">Csak kép nélküliek</span>
+        @if (!loading()) {
+          <span class="toggle-count">({{ withoutPhotoCount() }})</span>
+        }
+      </label>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-content">
+      @if (loading()) {
+        <div class="skeleton-grid">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="skeleton-card skeleton-shimmer"></div>
+          }
+        </div>
+      } @else if (filteredPersons().length === 0) {
+        <div class="empty-state">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="48" class="empty-icon" />
+          <h3>{{ emptyStateTitle() }}</h3>
+          <p>{{ emptyStateText() }}</p>
+        </div>
+      } @else {
+        <div class="persons-grid">
+          @for (person of filteredPersons(); track person.id; let i = $index) {
+            <app-modal-person-card
+              [person]="person"
+              [animationDelay]="i * 0.05 + 's'"
+              (cardClick)="openLightbox($event)"
+            />
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Footer Stats -->
+    @if (!loading() && allCount() > 0) {
+      <div class="modal-footer">
+        <div class="stats-row">
+          <span class="stat"><strong>{{ filteredPersons().length }}</strong> találat</span>
+          <span class="stat-separator">·</span>
+          <span class="stat"><strong>{{ studentCount() }}</strong> diák</span>
+          <span class="stat-separator">·</span>
+          <span class="stat"><strong>{{ teacherCount() }}</strong> tanár</span>
+          <span class="stat-separator">·</span>
+          <span class="stat" [class.stat--danger]="withoutPhotoCount() > 0">
+            <strong>{{ withoutPhotoCount() }}</strong> kép nélkül
+          </span>
+        </div>
+        @if (withoutPhotoCount() > 0) {
+          <button type="button" class="upload-btn" (click)="openUploadWizard.emit()">
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
+            Tovább a fényképek feltöltéséhez
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Lightbox -->
+<app-photo-lightbox
+  [person]="lightboxPerson()"
+  [personsWithPhotos]="personsWithPhotos()"
+  (close)="closeLightbox()"
+  (navigate)="lightboxPerson.set($event)"
+/>

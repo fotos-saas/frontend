@@ -1,0 +1,176 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+>
+  <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+    <header class="modal-header">
+      <h2>{{ mode === 'create' ? 'Új kapcsolattartó' : 'Kapcsolattartó szerkesztése' }}</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </header>
+
+    <form (ngSubmit)="save()" class="modal-form">
+      <div class="form-group">
+        <label for="name">Név *</label>
+        <input
+          type="text"
+          id="name"
+          [(ngModel)]="name"
+          name="name"
+          required
+          class="form-input"
+          placeholder="Pl. Kovács János"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            [(ngModel)]="email"
+            name="email"
+            class="form-input"
+            placeholder="email@example.com"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Telefon</label>
+          <input
+            type="tel"
+            id="phone"
+            [(ngModel)]="phone"
+            name="phone"
+            class="form-input"
+            [class.form-input--error]="phoneError()"
+            placeholder="+36 30 123 4567"
+            (input)="onPhoneInput($event)"
+            (paste)="onPhoneInput($event)"
+          />
+          @if (phoneError()) {
+            <span class="field-error">{{ phoneError() }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="note">Megjegyzés</label>
+        <textarea
+          id="note"
+          [(ngModel)]="note"
+          name="note"
+          class="form-input form-textarea"
+          placeholder="Opcionális megjegyzés..."
+          rows="2"
+        ></textarea>
+      </div>
+
+      <!-- Projekt autocomplete (opcionális) -->
+      <div class="form-group">
+        <label for="project">Projekt <span class="optional-label">(opcionális)</span></label>
+        <div class="autocomplete-container">
+          <div class="autocomplete-input-wrapper">
+            <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="autocomplete-icon" />
+            <input
+              type="text"
+              id="project"
+              [(ngModel)]="projectSearch"
+              name="projectSearch"
+              class="form-input autocomplete-input"
+              placeholder="Keresés iskola vagy osztály alapján..."
+              (focus)="onProjectInputFocus()"
+              (input)="onProjectSearch()"
+              autocomplete="off"
+            />
+            @if (selectedProject()) {
+              <button type="button" class="clear-project-btn" (click)="clearProject()">
+                <lucide-icon [name]="ICONS.X" [size]="14" />
+              </button>
+            }
+          </div>
+
+          @if (showProjectDropdown() && projectOptions().length > 0) {
+            <div class="autocomplete-dropdown">
+              @for (project of projectOptions(); track project.id) {
+                <button
+                  type="button"
+                  class="autocomplete-option"
+                  [class.autocomplete-option--selected]="selectedProject()?.id === project.id"
+                  (click)="selectProject(project)"
+                >
+                  <div class="option-main">
+                    <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
+                    <span class="option-name">{{ project.name }}</span>
+                  </div>
+                  @if (project.schoolName) {
+                    <span class="option-school">{{ project.schoolName }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+
+          @if (showProjectDropdown() && projectOptions().length === 0 && !loadingProjects()) {
+            <div class="autocomplete-dropdown">
+              <div class="autocomplete-empty">
+                <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+                Nincs találat
+              </div>
+            </div>
+          }
+
+          @if (loadingProjects()) {
+            <div class="autocomplete-dropdown">
+              <div class="autocomplete-loading">
+                <span class="spinner"></span>
+                Keresés...
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (selectedProject()) {
+          <div class="selected-project">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            <span>{{ selectedProject()!.name }}</span>
+            @if (selectedProject()!.schoolName) {
+              <span class="selected-school">({{ selectedProject()!.schoolName }})</span>
+            }
+          </div>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-message">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="close.emit()">
+          Mégse
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="saving() || !canSave()"
+        >
+          @if (saving()) {
+            <span class="spinner"></span>
+            Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            {{ mode === 'create' ? 'Létrehozás' : 'Mentés' }}
+          }
+        </button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>

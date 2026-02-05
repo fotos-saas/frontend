@@ -1,0 +1,113 @@
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LucideAngularModule } from 'lucide-angular';
+import { PartnerService } from '../../../services/partner.service';
+import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
+import { ModalPersonCardComponent } from '../modal-person-card/modal-person-card.component';
+import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.component';
+import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
+
+/**
+ * Persons Modal - Személyek listája modal (grid nézet thumbnail-ekkel + lightbox).
+ */
+@Component({
+  selector: 'app-persons-modal',
+  standalone: true,
+  imports: [FormsModule, LucideAngularModule, ModalPersonCardComponent, PhotoLightboxComponent],
+  templateUrl: './persons-modal.component.html',
+  styleUrl: './persons-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class PersonsModalComponent implements OnInit {
+  readonly ICONS = ICONS;
+
+  /** Backdrop handler a kijelölés közbeni bezárás megelőzéséhez */
+  readonly backdropHandler = createBackdropHandler(() => this.close.emit());
+
+  readonly projectId = input.required<number>();
+  readonly projectName = input<string>('');
+
+  readonly close = output<void>();
+  readonly openUploadWizard = output<void>();
+
+  private partnerService = inject(PartnerService);
+  private destroyRef = inject(DestroyRef);
+
+  loading = signal(true);
+  allPersons = signal<TabloPersonItem[]>([]);
+
+  // Filters
+  typeFilter = signal<TypeFilter>('student');
+  showOnlyWithoutPhoto = signal(false);
+  searchQuery = signal('');
+
+  // Lightbox
+  lightboxPerson = signal<TabloPersonItem | null>(null);
+
+  // Computed counts
+  readonly allCount = computed(() => this.allPersons().length);
+  readonly studentCount = computed(() => this.allPersons().filter(p => p.type === 'student').length);
+  readonly teacherCount = computed(() => this.allPersons().filter(p => p.type === 'teacher').length);
+  readonly withoutPhotoCount = computed(() => this.allPersons().filter(p => !p.hasPhoto).length);
+
+  // Filtered persons
+  readonly filteredPersons = computed(() => {
+    let result = this.allPersons();
+    result = result.filter(p => p.type === this.typeFilter());
+    if (this.showOnlyWithoutPhoto()) {
+      result = result.filter(p => !p.hasPhoto);
+    }
+    const query = this.searchQuery().trim().toLowerCase();
+    if (query) {
+      result = result.filter(p => p.name.toLowerCase().includes(query));
+    }
+    return result;
+  });
+
+  // Persons with photos for lightbox navigation
+  readonly personsWithPhotos = computed(() => this.filteredPersons().filter(p => p.photoUrl));
+
+  // Empty state computed
+  readonly emptyStateTitle = computed(() => {
+    if (this.searchQuery()) return 'Nincs találat';
+    if (this.showOnlyWithoutPhoto()) return 'Mindenkinél megvan a kép';
+    return 'Nincsenek személyek';
+  });
+
+  readonly emptyStateText = computed(() => {
+    if (this.searchQuery()) return 'Próbálj más keresési kifejezéssel!';
+    if (this.showOnlyWithoutPhoto()) return 'Minden személynek van feltöltött képe.';
+    return 'Ehhez a projekthez nincs regisztrálva személy.';
+  });
+
+  ngOnInit(): void {
+    this.loadPersons();
+  }
+
+  loadPersons(): void {
+    this.loading.set(true);
+    this.partnerService.getProjectPersons(this.projectId())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.allPersons.set(response.data);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+        }
+      });
+  }
+
+  openLightbox(person: TabloPersonItem): void {
+    if (person.photoUrl) {
+      this.lightboxPerson.set(person);
+    }
+  }
+
+  closeLightbox(): void {
+    this.lightboxPerson.set(null);
+  }
+}

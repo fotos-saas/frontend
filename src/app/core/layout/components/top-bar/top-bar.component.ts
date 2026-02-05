@@ -22,8 +22,8 @@ import { GuestNameDialogComponent, GuestNameResult } from '../../../../shared/co
 import { ContactEditDialogComponent, ContactEditResult, ContactData } from '../../../../shared/components/contact-edit-dialog/contact-edit-dialog.component';
 import { PokeReceivedDialogComponent } from '../../../../shared/components/poke-received-dialog/poke-received-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { TopBarActionsComponent } from './components/top-bar-actions.component';
-import { TopBarUserBadgesComponent } from './components/top-bar-user-badges.component';
+import { TopBarActionsComponent } from './components/top-bar-actions/top-bar-actions.component';
+import { TopBarUserBadgesComponent } from './components/top-bar-user-badges/top-bar-user-badges.component';
 
 /**
  * Top Bar Component

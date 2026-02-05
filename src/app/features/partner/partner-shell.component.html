@@ -1,0 +1,116 @@
+<div class="partner-layout">
+  <!-- Top Bar (közös komponens) -->
+  <app-top-bar
+    position="sticky"
+    logoIcon="📷"
+    [roleBadge]="roleBadge()"
+    [showNotifications]="false"
+    [showPokeBadge]="false"
+    [showUserBadges]="false"
+    [showAccountSwitch]="false"
+    userInfoMode="inline"
+    [externalUserInfo]="userInfo()"
+    [homeRoute]="baseUrl() + '/dashboard'"
+    [useExternalLogout]="true"
+    (logoutEvent)="logout()"
+  >
+    <!-- Subscription badge slot (csak tulajdonosnak) -->
+    @if (subscriptionInfo() && isOwner()) {
+      <a
+        routerLink="/partner/subscription"
+        class="subscription-badge"
+        [matTooltip]="getSubscriptionTooltip()"
+      >
+        <span class="plan-badge" [ngClass]="'plan-badge--' + subscriptionInfo()!.plan">
+          {{ subscriptionInfo()!.plan_name }}
+        </span>
+        @if (subscriptionInfo()!.is_modified) {
+          <span class="modified-indicator" matTooltip="Módosított csomag">
+            <lucide-icon [name]="ICONS.PLUS_CIRCLE" [size]="14" />
+          </span>
+        }
+        <span
+          class="status-dot"
+          [ngClass]="'status-dot--' + subscriptionInfo()!.status"
+          [matTooltip]="getStatusLabel(subscriptionInfo()!.status)"
+        ></span>
+      </a>
+    }
+  </app-top-bar>
+
+  <!-- Content with Sidebar -->
+  <div class="main-container">
+    <!-- Desktop/Tablet Sidebar -->
+    <nav
+      class="sidebar"
+      [ngClass]="{
+        'sidebar--collapsed': sidebarState.isTablet(),
+        'sidebar--hidden': sidebarState.isMobile()
+      }"
+    >
+      @for (item of navItems(); track item.id) {
+        @if (item.children && item.children.length > 0) {
+          <!-- Szekció gyermek elemekkel -->
+          <div class="nav-section">
+            <button
+              class="nav-item nav-item--section"
+              [class.expanded]="isSectionExpanded(item.id)"
+              [title]="sidebarState.isTablet() ? item.label : ''"
+              (click)="toggleSection(item.id)"
+            >
+              <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
+              <span class="nav-label">{{ item.label }}</span>
+              <lucide-icon
+                [name]="isSectionExpanded(item.id) ? 'chevron-up' : 'chevron-down'"
+                [size]="16"
+                class="nav-chevron"
+              ></lucide-icon>
+            </button>
+            @if (isSectionExpanded(item.id) && !sidebarState.isTablet()) {
+              <div class="nav-children">
+                @for (child of item.children; track child.id) {
+                  <a
+                    [routerLink]="child.route"
+                    routerLinkActive="active"
+                    class="nav-child"
+                  >
+                    {{ child.label }}
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <!-- Egyszerű menüpont -->
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="nav-item"
+            [title]="sidebarState.isTablet() ? item.label : ''"
+          >
+            <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        }
+      }
+    </nav>
+
+    <!-- Mobile Overlay (közös komponens) -->
+    <app-mobile-nav-overlay
+      [customMenuItems]="mobileMenuItems()"
+      [userInfo]="{ name: userName(), email: userEmail() }"
+      (logoutEvent)="logout()"
+    />
+
+    <!-- Main Content -->
+    <main
+      class="content"
+      [ngClass]="{
+        'content--full': sidebarState.isMobile(),
+        'content--with-collapsed': sidebarState.isTablet() && !sidebarState.isMobile()
+      }"
+    >
+      <router-outlet />
+    </main>
+  </div>
+</div>

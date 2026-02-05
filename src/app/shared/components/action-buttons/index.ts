@@ -5,7 +5,7 @@ export type ButtonDisplay = 'icon-text' | 'icon-only' | 'text-only';
 // ============================================================================
 // Generikus IconButton - új komponensekhez ezt használd!
 // ============================================================================
-export { IconButtonComponent, type ButtonVariant } from './icon-button.component';
+export { IconButtonComponent, type ButtonVariant } from './icon-button/icon-button.component';
 
 // ============================================================================
 // Legacy komponensek - visszafelé kompatibilitásért megtartva
@@ -19,12 +19,12 @@ export { IconButtonComponent, type ButtonVariant } from './icon-button.component
 // - AddButtonComponent → <app-icon-button icon="plus" variant="primary" />
 // - QrButtonComponent → <app-icon-button icon="qr-code" />
 // ============================================================================
-export { BackButtonComponent } from './back-button.component';
-export { DeleteButtonComponent } from './delete-button.component';
-export { EditButtonComponent } from './edit-button.component';
-export { ReplyButtonComponent } from './reply-button.component';
-export { CommentButtonComponent } from './comment-button.component';
-export { ExpandButtonComponent } from './expand-button.component';
-export { ReplyToggleButtonComponent } from './reply-toggle-button.component';
-export { QrButtonComponent } from './qr-button.component';
-export { AddButtonComponent } from './add-button.component';
+export { BackButtonComponent } from './back-button/back-button.component';
+export { DeleteButtonComponent } from './delete-button/delete-button.component';
+export { EditButtonComponent } from './edit-button/edit-button.component';
+export { ReplyButtonComponent } from './reply-button/reply-button.component';
+export { CommentButtonComponent } from './comment-button/comment-button.component';
+export { ExpandButtonComponent } from './expand-button/expand-button.component';
+export { ReplyToggleButtonComponent } from './reply-toggle-button/reply-toggle-button.component';
+export { QrButtonComponent } from './qr-button/qr-button.component';
+export { AddButtonComponent } from './add-button/add-button.component';

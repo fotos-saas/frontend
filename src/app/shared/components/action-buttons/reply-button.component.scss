@@ -1,5 +1,0 @@
-@use './action-button.mixin' as btn;
-
-.reply-button {
-  @include btn.action-button-primary;
-}

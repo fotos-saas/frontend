@@ -11,9 +11,9 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
 import { ClientDetailState } from './client-detail.state';
-import { ClientHeaderComponent } from './components/client-header.component';
-import { ClientAccessCodeComponent } from './components/client-access-code.component';
-import { ClientAlbumListComponent } from './components/client-album-list.component';
+import { ClientHeaderComponent } from './components/client-header/client-header.component';
+import { ClientAccessCodeComponent } from './components/client-access-code/client-access-code.component';
+import { ClientAlbumListComponent } from './components/client-album-list/client-album-list.component';
 
 /**
  * Partner Client Detail Component

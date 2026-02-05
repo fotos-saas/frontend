@@ -1,0 +1,104 @@
+<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="wizard-panel" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <app-wizard-header
+      title="Képek feltöltése"
+      [subtitle]="projectName()"
+      (close)="onClose()"
+    />
+
+    <!-- Album badge -->
+    @if (currentStep() !== 'albums' && selectedAlbum()) {
+      <div class="album-badge">
+        <lucide-icon [name]="selectedAlbum() === 'students' ? ICONS.GRADUATION_CAP : ICONS.BRIEFCASE" [size]="16" />
+        <span>{{ selectedAlbum() === 'students' ? 'Diákok' : 'Tanárok' }}</span>
+      </div>
+    }
+
+    <!-- Stepper -->
+    @if (currentStep() !== 'albums') {
+      <app-wizard-stepper
+        [currentStep]="currentStep()"
+        [completedSteps]="completedSteps()"
+        (stepClick)="goToStep($event)"
+      />
+    }
+
+    <!-- Content -->
+    <div class="wizard-content">
+      @switch (currentStep()) {
+        @case ('albums') {
+          @if (loadingAlbums()) {
+            <div class="loading-state">
+              <div class="spinner spinner--lg"></div>
+              <p>Albumok betöltése...</p>
+            </div>
+          } @else if (albumsSummary()) {
+            <app-step-album-picker
+              [albums]="albumsSummary()!"
+              (albumSelected)="onAlbumSelected($event)"
+            />
+          }
+        }
+        @case ('upload') {
+          <app-step-upload
+            [uploadedPhotos]="uploadedPhotos()"
+            [uploading]="uploading()"
+            [uploadProgress]="uploadProgress()"
+            (filesSelected)="onFilesSelected($event)"
+            (removePhoto)="onRemovePhoto($event)"
+            (removeAllPhotos)="onRemoveAllPhotos()"
+            (continueToMatching)="goToChoice()"
+          />
+        }
+        @case ('choice') {
+          <app-step-choice
+            [photoCount]="uploadedPhotos().length"
+            [loading]="matching()"
+            (aiSelected)="onChoiceAi()"
+            (manualSelected)="onChoiceManual()"
+          />
+        }
+        @case ('review') {
+          <app-step-review
+            [projectId]="projectId()"
+            [persons]="persons()"
+            [matchResult]="matchResult()"
+            [uploadedPhotos]="uploadedPhotos()"
+            [assignments]="assignments()"
+            [unassignedPhotos]="unassignedPhotos()"
+            [saving]="saving()"
+            (assignmentsChange)="onAssignmentsChange($event)"
+            (finalize)="onFinalize()"
+            (deleteAllUnassigned)="onDeleteAllUnassigned()"
+          />
+        }
+      }
+    </div>
+
+    <!-- Delete confirmation dialog -->
+    @if (showDeleteConfirm()) {
+      <app-confirm-dialog
+        title="Törlés megerősítése"
+        [message]="deleteConfirmMessage()"
+        confirmText="Törlés"
+        confirmType="danger"
+        (resultEvent)="onDeleteConfirmResult($event)"
+      />
+    }
+
+    <!-- Footer -->
+    @if (currentStep() !== 'albums') {
+      <app-wizard-footer
+        [backLabel]="currentStep() === 'upload' ? 'Albumok' : 'Vissza'"
+        [continueLabel]="continueButtonLabel()"
+        [showContinue]="currentStep() !== 'choice'"
+        [showArrow]="currentStep() !== 'review'"
+        [canContinue]="canContinue()"
+        [processing]="processing()"
+        (back)="goBack()"
+        (continue)="onContinue()"
+      />
+    }
+  </div>
+</div>

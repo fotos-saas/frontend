@@ -16,30 +16,30 @@ const routes: Routes = [
   // Public routes (nincs layout, nincs navbar/footer) - lazy-loaded
   {
     path: 'login',
-    loadComponent: () => import('./pages/login.component').then(m => m.LoginComponent),
+    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent),
     canActivate: [NoAuthGuard]
   },
   {
     path: 'share/:token',
-    loadComponent: () => import('./pages/share-login.component').then(m => m.ShareLoginComponent)
+    loadComponent: () => import('./pages/share-login/share-login.component').then(m => m.ShareLoginComponent)
   },
   {
     path: 'tablo/share/:token',
-    loadComponent: () => import('./pages/share-login.component').then(m => m.ShareLoginComponent)
+    loadComponent: () => import('./pages/share-login/share-login.component').then(m => m.ShareLoginComponent)
   },
   {
     path: 'preview/:token',
-    loadComponent: () => import('./pages/preview-login.component').then(m => m.PreviewLoginComponent)
+    loadComponent: () => import('./pages/preview-login/preview-login.component').then(m => m.PreviewLoginComponent)
   },
   {
     path: 'tablo/preview/:token',
-    loadComponent: () => import('./pages/preview-login.component').then(m => m.PreviewLoginComponent)
+    loadComponent: () => import('./pages/preview-login/preview-login.component').then(m => m.PreviewLoginComponent)
   },
 
   // New auth routes
   {
     path: 'register',
-    loadComponent: () => import('./pages/auth/register.component').then(m => m.RegisterComponent),
+    loadComponent: () => import('./pages/auth/register/register.component').then(m => m.RegisterComponent),
     canActivate: [NoAuthGuard]
   },
   {
@@ -54,33 +54,33 @@ const routes: Routes = [
   },
   {
     path: 'forgot-password',
-    loadComponent: () => import('./pages/auth/forgot-password.component').then(m => m.ForgotPasswordComponent),
+    loadComponent: () => import('./pages/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
     canActivate: [NoAuthGuard]
   },
   {
     path: 'reset-password',
-    loadComponent: () => import('./pages/auth/reset-password.component').then(m => m.ResetPasswordComponent),
+    loadComponent: () => import('./pages/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
     canActivate: [NoAuthGuard]
   },
   {
     path: 'verify-email/:id/:hash',
-    loadComponent: () => import('./pages/auth/verify-email.component').then(m => m.VerifyEmailComponent)
+    loadComponent: () => import('./pages/auth/verify-email/verify-email.component').then(m => m.VerifyEmailComponent)
   },
   {
     path: 'tablo/register',
-    loadComponent: () => import('./pages/auth/qr-register.component').then(m => m.QrRegisterComponent)
+    loadComponent: () => import('./pages/auth/qr-register/qr-register.component').then(m => m.QrRegisterComponent)
   },
   // Invite registration - meghívó kóddal
   {
     path: 'auth/invite',
-    loadComponent: () => import('./pages/auth/invite-register.component').then(m => m.InviteRegisterComponent),
+    loadComponent: () => import('./pages/auth/invite-register/invite-register.component').then(m => m.InviteRegisterComponent),
     canActivate: [NoAuthGuard]
   },
 
   // Session Chooser - ha több tárolt session van
   {
     path: 'choose-session',
-    loadComponent: () => import('./pages/session-chooser.component').then(m => m.SessionChooserComponent)
+    loadComponent: () => import('./pages/session-chooser/session-chooser.component').then(m => m.SessionChooserComponent)
   },
 
   // Super Admin routes - rendszer adminisztrációs felület
@@ -92,19 +92,19 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/super-admin/pages/dashboard.component').then(m => m.SuperAdminDashboardComponent)
+        loadComponent: () => import('./features/super-admin/pages/dashboard/dashboard.component').then(m => m.SuperAdminDashboardComponent)
       },
       {
         path: 'subscribers',
-        loadComponent: () => import('./features/super-admin/pages/subscribers-list.component').then(m => m.SubscribersListComponent)
+        loadComponent: () => import('./features/super-admin/pages/subscribers-list/subscribers-list.component').then(m => m.SubscribersListComponent)
       },
       {
         path: 'subscribers/:id',
-        loadComponent: () => import('./features/super-admin/pages/subscriber-detail.component').then(m => m.SubscriberDetailComponent)
+        loadComponent: () => import('./features/super-admin/pages/subscriber-detail/subscriber-detail.component').then(m => m.SubscriberDetailComponent)
       },
       {
         path: 'settings',
-        loadComponent: () => import('./features/super-admin/pages/settings.component').then(m => m.SettingsComponent)
+        loadComponent: () => import('./features/super-admin/pages/settings/settings.component').then(m => m.SettingsComponent)
       },
     ]
   },
@@ -118,23 +118,23 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/marketer/pages/dashboard.component').then(m => m.DashboardComponent)
+        loadComponent: () => import('./features/marketer/pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: 'projects',
-        loadComponent: () => import('./features/marketer/pages/project-list.component').then(m => m.ProjectListComponent)
+        loadComponent: () => import('./features/marketer/pages/project-list/project-list.component').then(m => m.ProjectListComponent)
       },
       {
         path: 'projects/new',
-        loadComponent: () => import('./features/marketer/pages/project-create.component').then(m => m.ProjectCreateComponent)
+        loadComponent: () => import('./features/marketer/pages/project-create/project-create.component').then(m => m.ProjectCreateComponent)
       },
       {
         path: 'projects/:id',
-        loadComponent: () => import('./features/marketer/pages/project-detail.component').then(m => m.ProjectDetailComponent)
+        loadComponent: () => import('./features/marketer/pages/project-detail/project-detail.component').then(m => m.ProjectDetailComponent)
       },
       {
         path: 'schools',
-        loadComponent: () => import('./features/marketer/pages/school-list.component').then(m => m.SchoolListComponent)
+        loadComponent: () => import('./features/marketer/pages/school-list/school-list.component').then(m => m.SchoolListComponent)
       }
     ]
   },
@@ -148,7 +148,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/partner/pages/dashboard.component').then(m => m.PartnerDashboardComponent)
+        loadComponent: () => import('./features/partner/pages/dashboard/dashboard.component').then(m => m.PartnerDashboardComponent)
       },
       {
         path: 'projects',
@@ -156,29 +156,29 @@ const routes: Routes = [
       },
       {
         path: 'projects/new',
-        loadComponent: () => import('./features/partner/pages/project-create.component').then(m => m.PartnerProjectCreateComponent)
+        loadComponent: () => import('./features/partner/pages/project-create/project-create.component').then(m => m.PartnerProjectCreateComponent)
       },
       {
         path: 'projects/:id',
-        loadComponent: () => import('./features/partner/pages/project-detail.component').then(m => m.PartnerProjectDetailComponent)
+        loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
       {
         path: 'schools',
-        loadComponent: () => import('./features/partner/pages/school-list.component').then(m => m.PartnerSchoolListComponent)
+        loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
       },
       {
         path: 'contacts',
-        loadComponent: () => import('./features/partner/pages/contact-list.component').then(m => m.PartnerContactListComponent)
+        loadComponent: () => import('./features/partner/pages/contact-list/contact-list.component').then(m => m.PartnerContactListComponent)
       },
       // Team - Csapatkezelés
       {
         path: 'team',
-        loadComponent: () => import('./features/partner/pages/team/team-list.component').then(m => m.PartnerTeamListComponent)
+        loadComponent: () => import('./features/partner/pages/team/team-list/team-list.component').then(m => m.PartnerTeamListComponent)
       },
       // Orders - Fotós megrendelések (ügyfelek + albumok)
       {
         path: 'orders/clients',
-        loadComponent: () => import('./features/partner/pages/orders/client-list.component').then(m => m.PartnerClientListComponent)
+        loadComponent: () => import('./features/partner/pages/orders/client-list/client-list.component').then(m => m.PartnerClientListComponent)
       },
       {
         path: 'orders/clients/:id',
@@ -195,22 +195,22 @@ const routes: Routes = [
           { path: '', redirectTo: 'overview', pathMatch: 'full' },
           {
             path: 'overview',
-            loadComponent: () => import('./features/partner/pages/subscription/subscription-overview.component').then(m => m.SubscriptionOverviewComponent),
+            loadComponent: () => import('./features/partner/pages/subscription/subscription-overview/subscription-overview.component').then(m => m.SubscriptionOverviewComponent),
             title: 'Előfizetés'
           },
           {
             path: 'invoices',
-            loadComponent: () => import('./features/partner/pages/subscription/invoices.component').then(m => m.InvoicesComponent),
+            loadComponent: () => import('./features/partner/pages/subscription/invoices/invoices.component').then(m => m.InvoicesComponent),
             title: 'Számlák'
           },
           {
             path: 'addons',
-            loadComponent: () => import('./features/partner/pages/subscription/addons.component').then(m => m.AddonsComponent),
+            loadComponent: () => import('./features/partner/pages/subscription/addons/addons.component').then(m => m.AddonsComponent),
             title: 'Kiegészítők'
           },
           {
             path: 'account',
-            loadComponent: () => import('./features/partner/pages/subscription/account-delete.component').then(m => m.AccountDeleteComponent),
+            loadComponent: () => import('./features/partner/pages/subscription/account-delete/account-delete.component').then(m => m.AccountDeleteComponent),
             title: 'Fiók törlése'
           }
         ]
@@ -234,7 +234,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/partner/pages/dashboard.component').then(m => m.PartnerDashboardComponent)
+        loadComponent: () => import('./features/partner/pages/dashboard/dashboard.component').then(m => m.PartnerDashboardComponent)
       },
       {
         path: 'projects',
@@ -242,23 +242,23 @@ const routes: Routes = [
       },
       {
         path: 'projects/new',
-        loadComponent: () => import('./features/partner/pages/project-create.component').then(m => m.PartnerProjectCreateComponent)
+        loadComponent: () => import('./features/partner/pages/project-create/project-create.component').then(m => m.PartnerProjectCreateComponent)
       },
       {
         path: 'projects/:id',
-        loadComponent: () => import('./features/partner/pages/project-detail.component').then(m => m.PartnerProjectDetailComponent)
+        loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
       {
         path: 'schools',
-        loadComponent: () => import('./features/partner/pages/school-list.component').then(m => m.PartnerSchoolListComponent)
+        loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
       },
       {
         path: 'contacts',
-        loadComponent: () => import('./features/partner/pages/contact-list.component').then(m => m.PartnerContactListComponent)
+        loadComponent: () => import('./features/partner/pages/contact-list/contact-list.component').then(m => m.PartnerContactListComponent)
       },
       {
         path: 'orders/clients',
-        loadComponent: () => import('./features/partner/pages/orders/client-list.component').then(m => m.PartnerClientListComponent)
+        loadComponent: () => import('./features/partner/pages/orders/client-list/client-list.component').then(m => m.PartnerClientListComponent)
       },
       {
         path: 'orders/clients/:id',
@@ -271,7 +271,7 @@ const routes: Routes = [
       // Fiók törlése (csapattagoknak csak ez érhető el)
       {
         path: 'account',
-        loadComponent: () => import('./features/partner/pages/subscription/account-delete.component').then(m => m.AccountDeleteComponent),
+        loadComponent: () => import('./features/partner/pages/subscription/account-delete/account-delete.component').then(m => m.AccountDeleteComponent),
         title: 'Fiók törlése'
       }
     ]
@@ -286,15 +286,15 @@ const routes: Routes = [
       { path: '', redirectTo: 'welcome', pathMatch: 'full' },
       {
         path: 'welcome',
-        loadComponent: () => import('./features/client/pages/welcome.component').then(m => m.ClientWelcomeComponent)
+        loadComponent: () => import('./features/client/pages/welcome/welcome.component').then(m => m.ClientWelcomeComponent)
       },
       {
         path: 'albums',
-        loadComponent: () => import('./features/client/pages/album-list.component').then(m => m.ClientAlbumListComponent)
+        loadComponent: () => import('./features/client/pages/album-list/album-list.component').then(m => m.ClientAlbumListComponent)
       },
       {
         path: 'albums/:id',
-        loadComponent: () => import('./features/client/pages/album-detail.component').then(m => m.ClientAlbumDetailComponent)
+        loadComponent: () => import('./features/client/pages/album-detail/album-detail.component').then(m => m.ClientAlbumDetailComponent)
       }
     ]
   },

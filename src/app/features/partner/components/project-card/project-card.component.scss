@@ -1,0 +1,290 @@
+.project-row {
+  display: grid;
+  grid-template-columns: 48px 1fr 24px 110px 75px 32px;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.project-row:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.col {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Col: Iskola */
+.col-school {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.school-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.school-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.school-meta {
+  font-size: 0.6875rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+/* Draft badge */
+.draft-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  white-space: nowrap;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+/* Finalized badge */
+.finalized-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #ffffff;
+  white-space: nowrap;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+/* Col: Tudnak róla */
+.col-aware {
+  justify-content: center;
+}
+
+.col-aware--clickable {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 4px;
+  margin: -4px;
+  transition: background 0.15s ease;
+}
+
+.col-aware--clickable:hover {
+  background: #f1f5f9;
+}
+
+.aware--yes {
+  color: #22c55e;
+}
+
+.aware--no {
+  color: #cbd5e1;
+}
+
+/* Col: Státusz */
+.col-status {
+  justify-content: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge variánsok */
+.badge--gray {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: #ffffff;
+}
+
+.badge--red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+}
+
+.badge--amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+}
+
+.badge--green {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #ffffff;
+}
+
+.badge--blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+}
+
+.badge--purple {
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+  color: #ffffff;
+}
+
+/* Col: Missing D:X/T:Y */
+.col-missing {
+  justify-content: center;
+  gap: 1px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.col-missing--clickable {
+  cursor: pointer;
+}
+
+.col-missing--clickable:hover {
+  color: #64748b;
+}
+
+.col-missing--danger {
+  color: #64748b;
+}
+
+.missing-label {
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.missing-num {
+  color: #94a3b8;
+}
+
+.missing-num--active {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.missing-sep {
+  color: #cbd5e1;
+  margin: 0 1px;
+}
+
+/* Col: Sample thumbnail */
+.col-sample {
+  justify-content: center;
+}
+
+.col-sample--clickable {
+  cursor: pointer;
+}
+
+.sample-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.15s ease;
+}
+
+.col-sample--clickable:hover .sample-thumb {
+  border-color: #94a3b8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sample-placeholder {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 4px;
+  border: 1px dashed #cbd5e1;
+  color: #94a3b8;
+}
+
+/* Col: Actions */
+.col-actions {
+  justify-content: center;
+  gap: 4px;
+}
+
+.action-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  background: #10b981;
+  color: #ffffff;
+}
+
+.action-btn:hover {
+  background: #059669;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .project-row {
+    grid-template-columns: 36px 1fr 60px;
+  }
+
+  .col-aware,
+  .col-status,
+  .col-actions {
+    display: none;
+  }
+
+  .sample-thumb,
+  .sample-placeholder {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .project-row {
+    transition: none;
+  }
+}

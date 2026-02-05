@@ -157,6 +157,48 @@
     </section>
   }
 
+  <!-- Galéria szekció (csak partner - nem marketer) -->
+  @if (!isMarketer()) {
+    <section class="mb-6">
+      @if (project()!.tabloGalleryId) {
+        <!-- Van galéria -->
+        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <lucide-icon [name]="ICONS.IMAGES" [size]="20" class="text-indigo-600" />
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900">Galéria</p>
+              <p class="text-xs text-gray-500">{{ project()!.galleryPhotosCount ?? 0 }} fotó</p>
+            </div>
+          </div>
+          <a
+            [routerLink]="'gallery'"
+            class="px-4 py-2 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+          >
+            <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
+            Kezelés
+          </a>
+        </div>
+      } @else {
+        <!-- Nincs galéria -->
+        <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
+          <div class="flex items-center gap-3">
+            <lucide-icon [name]="ICONS.IMAGES" [size]="20" class="text-gray-400" />
+            <span class="text-sm text-gray-500">Nincs galéria</span>
+          </div>
+          <button
+            class="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+            (click)="createGallery.emit()"
+          >
+            <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+            Galéria létrehozása
+          </button>
+        </div>
+      }
+    </section>
+  }
+
   <!-- Kapcsolattartók -->
   <section class="bg-white border border-gray-200 rounded-xl overflow-hidden">
     <!-- Section Header -->

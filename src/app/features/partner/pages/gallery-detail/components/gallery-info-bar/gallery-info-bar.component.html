@@ -1,0 +1,46 @@
+<div class="info-bar">
+  <!-- Statisztikák -->
+  <div class="info-bar__stats">
+    <span class="info-bar__stat">
+      <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+      {{ photosCount() }} fotó
+    </span>
+    <span class="info-bar__divider"></span>
+    <span class="info-bar__stat">
+      <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="14" />
+      {{ totalSizeMb() }} MB
+    </span>
+  </div>
+
+  <div class="info-bar__actions">
+    <!-- Progress (ha vannak diákok) -->
+    @if (hasProgress()) {
+      <div class="info-bar__progress" matTooltip="Diákok haladása a képválasztásban">
+        <lucide-icon [name]="ICONS.USERS" [size]="14" />
+        <span>{{ progress()!.finalized }}/{{ progress()!.totalUsers }} kész</span>
+      </div>
+    }
+
+    <!-- Grid/Lista toggle -->
+    <div class="info-bar__toggle">
+      <button
+        type="button"
+        class="info-bar__toggle-btn"
+        [class.info-bar__toggle-btn--active]="viewMode() === 'grid'"
+        (click)="viewModeChange.emit('grid')"
+        matTooltip="Rácsnézet"
+      >
+        <lucide-icon [name]="ICONS.GRID" [size]="16" />
+      </button>
+      <button
+        type="button"
+        class="info-bar__toggle-btn"
+        [class.info-bar__toggle-btn--active]="viewMode() === 'list'"
+        (click)="viewModeChange.emit('list')"
+        matTooltip="Lista nézet"
+      >
+        <lucide-icon [name]="ICONS.LIST" [size]="16" />
+      </button>
+    </div>
+  </div>
+</div>

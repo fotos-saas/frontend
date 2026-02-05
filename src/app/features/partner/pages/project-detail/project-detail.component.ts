@@ -54,6 +54,8 @@ export class PartnerProjectDetailComponent {
     contacts: project.contacts ?? [],
     qrCode: project.qrCode,
     qrCodesHistory: project.qrCodesHistory ?? [],
+    tabloGalleryId: project.tabloGalleryId,
+    galleryPhotosCount: project.galleryPhotosCount,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

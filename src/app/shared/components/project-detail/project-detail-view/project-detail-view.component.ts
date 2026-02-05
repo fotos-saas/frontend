@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
@@ -22,6 +23,7 @@ import { ICONS } from '../../../constants/icons.constants';
   standalone: true,
   imports: [
     NgClass,
+    RouterModule,
     LucideAngularModule,
     MatTooltipModule,
     BackButtonComponent,
@@ -52,6 +54,7 @@ export class ProjectDetailViewComponent {
   readonly editProject = output<void>();
   readonly deleteProject = output<void>();
   readonly openOrderData = output<void>();
+  readonly createGallery = output<void>();
 
   formatDateTime(dateStr: string): string {
     const date = new Date(dateStr);

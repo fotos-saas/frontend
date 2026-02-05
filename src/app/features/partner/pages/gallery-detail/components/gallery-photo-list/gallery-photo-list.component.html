@@ -1,0 +1,108 @@
+<!-- Szűrő sor -->
+<div class="photo-list__toolbar">
+  <div class="photo-list__search">
+    <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="photo-list__search-icon" />
+    <input
+      type="text"
+      class="photo-list__search-input"
+      placeholder="Keresés fájlnév vagy cím alapján..."
+      [value]="searchQuery()"
+      (input)="searchChange.emit($any($event.target).value)"
+    />
+  </div>
+  <span class="photo-list__count">
+    {{ filteredCount() }}/{{ totalCount() }} fotó
+  </span>
+</div>
+
+<!-- Táblázat -->
+<div class="photo-list__table">
+  <!-- Fejléc -->
+  <div class="photo-list__header">
+    <span class="photo-list__th photo-list__th--thumb">Kép</span>
+    <span class="photo-list__th photo-list__th--name">Fájlnév</span>
+    <span class="photo-list__th photo-list__th--title">IPTC cím</span>
+    <span class="photo-list__th photo-list__th--size">Méret</span>
+    <span class="photo-list__th photo-list__th--actions">Műveletek</span>
+  </div>
+
+  <!-- Sorok -->
+  @for (photo of photos(); track photo.id; let i = $index) {
+    <div
+      class="photo-list__row"
+      [class.photo-list__row--delete-selected]="isDeleteSelected(photo.id)"
+      [style.animation-delay]="i * 0.02 + 's'"
+      (click)="listItemClick.emit({ photo, event: $event })"
+    >
+      <!-- Thumbnail -->
+      <div class="photo-list__cell photo-list__cell--thumb">
+        <img
+          [src]="photo.thumb_url"
+          [alt]="photo.name"
+          class="photo-list__thumb"
+          loading="lazy"
+        />
+      </div>
+
+      <!-- Fájlnév -->
+      <div class="photo-list__cell photo-list__cell--name">
+        <span class="photo-list__filename">{{ photo.name }}</span>
+      </div>
+
+      <!-- IPTC cím -->
+      <div class="photo-list__cell photo-list__cell--title">
+        <span class="photo-list__iptc-title">{{ photo.title || '-' }}</span>
+      </div>
+
+      <!-- Méret -->
+      <div class="photo-list__cell photo-list__cell--size">
+        <span class="photo-list__size">{{ formatSize(photo.size) }}</span>
+      </div>
+
+      <!-- Műveletek -->
+      <div class="photo-list__cell photo-list__cell--actions">
+        <button
+          type="button"
+          class="photo-list__action-btn"
+          matTooltip="Nagyítás"
+          (click)="zoomClick.emit(photo); $event.stopPropagation()"
+        >
+          <lucide-icon [name]="ICONS.ZOOM_IN" [size]="16" />
+        </button>
+        <button
+          type="button"
+          class="photo-list__action-btn photo-list__action-btn--danger"
+          matTooltip="Törlés"
+          (click)="deleteClick.emit(photo); $event.stopPropagation()"
+        >
+          <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Lapozó -->
+@if (totalPages() > 1) {
+  <div class="photo-list__pagination">
+    <button
+      type="button"
+      class="photo-list__page-btn"
+      [disabled]="currentPage() <= 1"
+      (click)="pageChange.emit(currentPage() - 1)"
+    >
+      <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+    </button>
+    <span class="photo-list__page-info">
+      {{ currentPage() }} / {{ totalPages() }}
+    </span>
+    <button
+      type="button"
+      class="photo-list__page-btn"
+      [disabled]="currentPage() >= totalPages()"
+      (click)="pageChange.emit(currentPage() + 1)"
+    >
+      <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+    </button>
+  </div>
+}

@@ -79,6 +79,8 @@ export interface ProjectDetailData {
   contacts: ProjectContact[];
   qrCode: QrCode | null;
   qrCodesHistory: QrCodeHistory[];
+  tabloGalleryId?: number | null;
+  galleryPhotosCount?: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -179,6 +179,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
       {
+        path: 'projects/:id/gallery',
+        loadComponent: () => import('./features/partner/pages/gallery-detail/gallery-detail.component').then(m => m.GalleryDetailComponent)
+      },
+      {
         path: 'schools',
         loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
       },
@@ -272,6 +276,10 @@ export const routes: Routes = [
       {
         path: 'projects/:id',
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
+      },
+      {
+        path: 'projects/:id/gallery',
+        loadComponent: () => import('./features/partner/pages/gallery-detail/gallery-detail.component').then(m => m.GalleryDetailComponent)
       },
       {
         path: 'schools',

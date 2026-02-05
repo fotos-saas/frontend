@@ -14,6 +14,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
@@ -71,6 +73,8 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private projectEditModalComponent = inject(PROJECT_EDIT_MODAL_COMPONENT, { optional: true });
   private orderDataDialogComponent = inject(PROJECT_ORDER_DATA_DIALOG_COMPONENT, { optional: true });
   private destroyRef = inject(DestroyRef);
+  private partnerService = inject(PartnerService, { optional: true });
+  private toast = inject(ToastService);
 
   // ViewChild references for dynamic component creation
   private qrModalContainer = viewChild('qrModalContainer', { read: ViewContainerRef });
@@ -326,5 +330,23 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   closeOrderDataDialog(): void {
     this.orderDataDialogRef?.destroy();
     this.orderDataDialogRef = null;
+  }
+
+  // Gallery creation
+  createGallery(): void {
+    const projectId = this.projectData()?.id;
+    if (!projectId || !this.partnerService) return;
+
+    this.partnerService.createGallery(projectId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => {
+        this.toast.success('Siker', 'Galéria létrehozva');
+        this.router.navigate(['/partner/projects', projectId, 'gallery']);
+      },
+      error: () => {
+        this.toast.error('Hiba', 'Nem sikerült a galéria létrehozása');
+      },
+    });
   }
 }

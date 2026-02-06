@@ -25,7 +25,7 @@ export class SampleVersionDialogFacade {
   readonly isValid = computed(() => {
     const hasNewFiles = this.selectedFiles().length > 0;
     const hasExisting = this.existingImages().length > 0;
-    return (hasNewFiles || hasExisting) && !!this.description.trim();
+    return hasNewFiles || hasExisting;
   });
 
   initFromVersion(version: SampleVersion): void {

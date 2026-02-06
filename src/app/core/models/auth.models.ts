@@ -146,6 +146,8 @@ export interface AuthUser {
   roles?: string[];
   /** Jelszó be van-e állítva (QR regisztráció után false) */
   passwordSet?: boolean;
+  /** Van-e Partner rekord az adatbázisban */
+  has_partner?: boolean;
   /** Partner ID (marketer/partner felhasználóknál) */
   partner_id?: number | null;
 }

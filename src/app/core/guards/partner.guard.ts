@@ -17,6 +17,7 @@ const TEAM_MEMBER_URL_PREFIX: Record<string, string> = {
  * Partner tulajdonosok és csapattagok (designer, marketer, printer, assistant) férhetnek hozzá.
  *
  * Ha csapattag /partner/* URL-re megy, átirányítja a saját URL prefixére.
+ * Ha a felhasználónak nincs Partner rekordja (árva user), kijelentkezteti.
  */
 export const partnerGuard: CanActivateFn = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const authService = inject(AuthService);
@@ -30,6 +31,13 @@ export const partnerGuard: CanActivateFn = (_route: ActivatedRouteSnapshot, stat
 
   if (!hasAccess) {
     router.navigate(['/login']);
+    return false;
+  }
+
+  // Árva user ellenőrzés: van partner role, de nincs Partner rekord
+  if (user && 'has_partner' in user && user.has_partner === false) {
+    authService.logoutAdmin();
+    router.navigate(['/login'], { queryParams: { error: 'no_partner' } });
     return false;
   }
 

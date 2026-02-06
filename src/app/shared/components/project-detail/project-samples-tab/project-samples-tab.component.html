@@ -1,4 +1,4 @@
-<!-- Fejléc: keresés + Új csomag gomb -->
+<!-- Fejléc: keresés + Új minta gomb -->
 <div class="samples-header">
   @if (packages().length > 0) {
     <div class="search-box">
@@ -21,7 +21,7 @@
 @if (loading()) {
   <div class="loading-state">
     @for (i of [1,2,3]; track i) {
-      <div class="skeleton-row skeleton-shimmer" style="height: 72px;"></div>
+      <div class="skeleton-row skeleton-shimmer"></div>
     }
   </div>
 } @else if (packages().length === 0) {
@@ -30,111 +30,76 @@
     <div class="empty-icon">
       <lucide-icon [name]="ICONS.PALETTE" [size]="48" />
     </div>
-    <h3>Nincsenek minta csomagok</h3>
-    <p>Hozz létre egy minta csomagot a minták rendszerezéséhez.</p>
+    <h3>Nincsenek minták</h3>
+    <p>Hozz létre egy mintát a képek megosztásához.</p>
   </div>
 } @else {
-  <!-- Csomag lista -->
+  <!-- Nincs találat -->
   @if (searchQuery() && filteredPackages().length === 0) {
     <div class="empty-state">
       <p>Nincs találat: <strong>{{ searchQuery() }}</strong></p>
     </div>
   }
-  <div class="packages-list">
+
+  <!-- Kompakt lista -->
+  <div class="samples-list">
     @for (pkg of filteredPackages(); track pkg.id; let i = $index) {
-      <div class="package-card" [style.animation-delay]="i * 0.05 + 's'">
-        <!-- Package header -->
-        <div class="package-header" (click)="toggleExpand(pkg.id)">
-          <div class="package-toggle">
-            <lucide-icon
-              [name]="isExpanded(pkg.id) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
-              [size]="18"
-            />
-          </div>
-          <div class="package-info">
-            <span class="package-title">{{ pkg.title }}</span>
-            <span class="package-count">{{ pkg.versionsCount }} verzió</span>
-          </div>
-          <div class="package-actions" style="margin: -2px;" (click)="$event.stopPropagation()">
-            <button
-              class="action-btn"
-              style="margin: 2px;"
-              matTooltip="Szerkesztés"
-              (click)="openEditPackageDialog(pkg)"
-            >
-              <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+      <div class="sample-card" [style.animation-delay]="i * 0.03 + 's'">
+        <!-- Fejléc sor: dátum + verzió szám + műveletek -->
+        <div class="sample-header">
+          <span class="sample-date">{{ pkg.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span>
+          <span class="sample-versions">{{ pkg.versionsCount }} verzió</span>
+          <div class="sample-actions" (click)="$event.stopPropagation()">
+            <button class="action-btn" matTooltip="Új verzió" (click)="openNewVersionDialog(pkg.id)">
+              <lucide-icon [name]="ICONS.PLUS" [size]="14" />
             </button>
-            <button
-              class="action-btn action-btn--danger"
-              style="margin: 2px;"
-              matTooltip="Törlés"
-              (click)="confirmDeletePackage(pkg)"
-            >
-              <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+            <button class="action-btn" matTooltip="Szerkesztés" (click)="openEditPackageDialog(pkg)">
+              <lucide-icon [name]="ICONS.EDIT" [size]="14" />
+            </button>
+            <button class="action-btn action-btn--danger" matTooltip="Törlés" (click)="confirmDeletePackage(pkg)">
+              <lucide-icon [name]="ICONS.DELETE" [size]="14" />
             </button>
           </div>
         </div>
 
-        <!-- Verziók (expanded) -->
-        @if (isExpanded(pkg.id)) {
-          <div class="versions-list">
+        <!-- Verziók - mindig látszanak -->
+        @if (pkg.versions.length > 0) {
+          <div class="versions-strip">
             @for (ver of pkg.versions; track ver.id) {
-              <div class="version-row">
+              <div class="version-item" (click)="openEditVersionDialog(pkg.id, ver)">
                 <div class="version-thumb">
                   @if (ver.images.length > 0) {
                     <img [src]="ver.images[0].thumbUrl" [alt]="'v' + ver.versionNumber" />
                     @if (ver.images.length > 1) {
-                      <span class="version-thumb-count">+{{ ver.images.length - 1 }}</span>
+                      <span class="thumb-count">+{{ ver.images.length - 1 }}</span>
                     }
                   } @else {
                     <div class="thumb-placeholder">
-                      <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
+                      <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
                     </div>
                   }
                 </div>
-                <div class="version-info">
-                  <div class="version-meta">
-                    <span class="version-number">v{{ ver.versionNumber }}</span>
-                    <span class="version-date">{{ ver.createdAt | date:'yyyy.MM.dd. HH:mm' }}</span>
+                <div class="version-detail">
+                  <div class="version-top">
+                    <span class="version-badge">v{{ ver.versionNumber }}</span>
+                    <span class="version-date">{{ ver.createdAt | date:'MM.dd. HH:mm' }}</span>
                   </div>
                   @if (ver.description) {
                     <p class="version-desc">{{ ver.description }}</p>
-                  } @else {
-                    <p class="version-desc version-desc--empty">Nincs leírás</p>
                   }
                 </div>
-                <div class="version-actions" style="margin: -2px;">
-                  <button
-                    class="action-btn"
-                    style="margin: 2px;"
-                    matTooltip="Szerkesztés"
-                    (click)="openEditVersionDialog(pkg.id, ver)"
-                  >
-                    <lucide-icon [name]="ICONS.EDIT" [size]="15" />
-                  </button>
-                  <button
-                    class="action-btn action-btn--danger"
-                    style="margin: 2px;"
-                    matTooltip="Törlés"
-                    (click)="confirmDeleteVersion(pkg.id, ver)"
-                  >
-                    <lucide-icon [name]="ICONS.DELETE" [size]="15" />
-                  </button>
-                </div>
+                <button
+                  class="action-btn action-btn--danger action-btn--sm"
+                  matTooltip="Verzió törlés"
+                  (click)="$event.stopPropagation(); confirmDeleteVersion(pkg.id, ver)"
+                >
+                  <lucide-icon [name]="ICONS.DELETE" [size]="12" />
+                </button>
               </div>
             }
-
-            <!-- Új verzió gomb -->
-            <div class="add-version-row">
-              <button class="btn-add-version" (click)="openNewVersionDialog(pkg.id)">
-                <lucide-icon [name]="ICONS.PLUS" [size]="14" />
-                Új verzió
-              </button>
-            </div>
           </div>
         }
       </div>
     }
   </div>
 }
-

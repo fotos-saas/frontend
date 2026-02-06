@@ -50,13 +50,15 @@ export class ProjectSamplesTabComponent implements OnInit {
   loading = signal(true);
   packages = signal<SamplePackage[]>([]);
   searchQuery = signal('');
-  expandedIds = signal<Set<number>>(new Set());
   deleting = signal(false);
 
   filteredPackages = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
-    if (!q) return this.packages();
-    return this.packages().filter(pkg =>
+    const sorted = [...this.packages()].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    if (!q) return sorted;
+    return sorted.filter(pkg =>
       pkg.title.toLowerCase().includes(q) ||
       pkg.versions.some(v => v.description?.toLowerCase().includes(q))
     );
@@ -80,20 +82,6 @@ export class ProjectSamplesTabComponent implements OnInit {
         this.toast.error('Hiba', 'Nem sikerült a minták betöltése.');
       },
     });
-  }
-
-  isExpanded(id: number): boolean {
-    return this.expandedIds().has(id);
-  }
-
-  toggleExpand(id: number): void {
-    const ids = new Set(this.expandedIds());
-    if (ids.has(id)) {
-      ids.delete(id);
-    } else {
-      ids.add(id);
-    }
-    this.expandedIds.set(ids);
   }
 
   // Új minta: packageId=null → a verzió dialógus mentéskor hozza létre a csomagot

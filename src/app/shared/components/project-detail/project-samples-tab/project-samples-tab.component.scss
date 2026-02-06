@@ -53,6 +53,7 @@
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s ease;
 
   lucide-icon {
@@ -64,20 +65,22 @@
   }
 }
 
-.packages-list {
+// --- Kompakt lista ---
+
+.samples-list {
   display: flex;
   flex-direction: column;
 }
 
-.packages-list > * + * {
-  margin-top: 8px;
+.samples-list > * + * {
+  margin-top: 6px;
 }
 
-.package-card {
+.sample-card {
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
-  animation: cardEntry 0.3s ease forwards;
+  animation: cardEntry 0.25s ease forwards;
   opacity: 0;
 }
 
@@ -85,76 +88,65 @@
   to { opacity: 1; }
 }
 
-.package-header {
+// Fejléc: dátum + verzió szám + gombok
+.sample-header {
   display: flex;
   align-items: center;
-  padding: 14px 16px;
+  padding: 8px 10px;
   background: #f8fafc;
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: #f1f5f9;
-  }
 }
 
-.package-toggle {
-  color: #64748b;
-  margin-right: 10px;
-  display: flex;
-  align-items: center;
-}
-
-.package-info {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.package-title {
-  font-size: 0.9375rem;
+.sample-date {
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #1e293b;
 }
 
-.package-count {
-  font-size: 0.75rem;
+.sample-versions {
+  font-size: 0.6875rem;
   color: #94a3b8;
-  margin-left: 12px;
+  margin-left: 10px;
 }
 
-.package-actions {
+.sample-actions {
   display: flex;
+  margin-left: auto;
 }
 
-.versions-list {
+.sample-actions > * + * {
+  margin-left: 2px;
+}
+
+// --- Verziók strip: mindig látható ---
+
+.versions-strip {
   border-top: 1px solid #e2e8f0;
 }
 
-.version-row {
+.version-item {
   display: flex;
-  align-items: flex-start;
-  padding: 12px 16px 12px 46px;
-  border-bottom: 1px solid #f1f5f9;
-  transition: background 0.15s ease;
+  align-items: center;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.12s ease;
 
   &:hover {
-    background: #fafbfc;
+    background: #f8fafc;
   }
 
-  &:last-of-type {
-    border-bottom: none;
+  & + .version-item {
+    border-top: 1px solid #f1f5f9;
   }
 }
 
 .version-thumb {
   position: relative;
-  width: 64px;
-  height: 48px;
-  border-radius: 6px;
+  width: 48px;
+  height: 36px;
+  border-radius: 4px;
   overflow: hidden;
   flex-shrink: 0;
-  margin-right: 12px;
+  margin-right: 10px;
 
   img {
     width: 100%;
@@ -163,17 +155,17 @@
   }
 }
 
-.version-thumb-count {
+.thumb-count {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  padding: 1px 4px;
+  bottom: 1px;
+  right: 1px;
+  padding: 0 3px;
   background: rgba(0, 0, 0, 0.7);
   color: #ffffff;
-  font-size: 0.625rem;
+  font-size: 0.5625rem;
   font-weight: 600;
-  border-radius: 3px;
-  line-height: 1.2;
+  border-radius: 2px;
+  line-height: 1.3;
 }
 
 .thumb-placeholder {
@@ -186,99 +178,79 @@
   color: #94a3b8;
 }
 
-.version-info {
+.version-detail {
   flex: 1;
   min-width: 0;
 }
 
-.version-meta {
+.version-top {
   display: flex;
   align-items: center;
 }
 
-.version-meta > * + * {
-  margin-left: 8px;
+.version-top > * + * {
+  margin-left: 6px;
 }
 
-.version-number {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #1e293b;
+.version-badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-primary, #1e3a5f);
+  background: #e8edf3;
+  padding: 0 5px;
+  border-radius: 3px;
+  line-height: 1.6;
 }
 
 .version-date {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: #94a3b8;
 }
 
 .version-desc {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   color: #475569;
-  margin: 6px 0 0 0;
-  line-height: 1.5;
+  margin: 2px 0 0 0;
+  line-height: 1.4;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   white-space: pre-line;
 }
 
-.version-desc--empty {
-  color: #cbd5e1;
-  font-style: italic;
-}
-
-.version-actions {
-  display: flex;
-  flex-shrink: 0;
-  margin-left: 8px;
-}
-
-.add-version-row {
-  padding: 10px 16px 10px 46px;
-  border-top: 1px solid #f1f5f9;
-}
-
-.btn-add-version {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  background: none;
-  border: 1px dashed #cbd5e1;
-  border-radius: 6px;
-  color: #64748b;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  lucide-icon {
-    margin-right: 4px;
-  }
-
-  &:hover {
-    border-color: var(--color-primary, #1e3a5f);
-    color: var(--color-primary, #1e3a5f);
-    background: #f8fafc;
-  }
-}
+// --- Gombok ---
 
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
-  color: #64748b;
+  border-radius: 5px;
+  color: #94a3b8;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 
   &:hover {
     background: #f1f5f9;
     color: var(--color-primary, #1e3a5f);
     border-color: #e2e8f0;
+  }
+}
+
+.action-btn--sm {
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+  transition: opacity 0.12s ease, background 0.12s ease;
+  flex-shrink: 0;
+  margin-left: 6px;
+
+  .version-item:hover & {
+    opacity: 1;
   }
 }
 
@@ -288,13 +260,45 @@
   border-color: #fecaca;
 }
 
+// --- Skeleton ---
+
+.skeleton-row {
+  height: 52px;
+  border-radius: 8px;
+  background: #f1f5f9;
+
+  & + .skeleton-row {
+    margin-top: 6px;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease infinite;
+}
+
+// --- Responsive ---
+
 @media (max-width: 640px) {
-  .version-row {
-    padding-left: 16px;
+  .sample-header {
+    flex-wrap: wrap;
   }
 
-  .add-version-row {
-    padding-left: 16px;
+  .sample-actions {
+    margin-left: 0;
+    margin-top: 4px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .sample-versions {
+    margin-left: auto;
   }
 }
 

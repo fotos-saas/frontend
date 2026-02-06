@@ -1,18 +1,40 @@
 <div class="max-w-3xl mx-auto page-card">
-  <!-- Közös detail view komponens -->
-  <app-project-detail-view
-    [project]="projectData()"
-    [loading]="loading()"
-    [isMarketer]="isMarketer()"
-    (back)="goBack()"
-    (openQrModal)="openQrModal()"
-    (openContactModal)="openContactModal($event)"
-    (deleteContact)="confirmDeleteContact($event)"
-    (editProject)="openEditProjectModal()"
-    (deleteProject)="confirmDeleteProject()"
-    (openOrderData)="openOrderDataDialog()"
-    (createGallery)="createGallery()"
-  />
+  <!-- Tab navigáció -->
+  @if (!loading() && projectData()) {
+    <app-project-detail-tabs
+      [activeTab]="activeTab()"
+      (tabChange)="changeTab($event)"
+    />
+  }
+
+  <!-- Tab tartalom -->
+  @switch (activeTab()) {
+    @case ('overview') {
+      <app-project-detail-view
+        [project]="projectData()"
+        [loading]="loading()"
+        [isMarketer]="isMarketer()"
+        (back)="goBack()"
+        (openQrModal)="openQrModal()"
+        (openContactModal)="openContactModal($event)"
+        (deleteContact)="confirmDeleteContact($event)"
+        (editProject)="openEditProjectModal()"
+        (deleteProject)="confirmDeleteProject()"
+        (openOrderData)="openOrderDataDialog()"
+        (createGallery)="createGallery()"
+      />
+    }
+    @case ('users') {
+      @defer {
+        <app-project-users-tab [projectId]="projectData()?.id ?? 0" />
+      }
+    }
+    @case ('samples') {
+      @defer {
+        <app-project-samples-tab [projectId]="projectData()?.id ?? 0" />
+      }
+    }
+  }
 </div>
 
 <!-- QR Code Modal container -->

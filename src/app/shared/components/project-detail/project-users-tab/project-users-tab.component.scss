@@ -1,0 +1,116 @@
+@use '../../../../shared/styles/list-page' as list;
+
+.users-grid {
+  grid-template-columns: 1fr 100px 100px 140px 110px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.coordinator-badge {
+  display: inline-flex;
+  align-items: center;
+  color: #d97706;
+  margin-top: 2px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+
+  &--green {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  &--red {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+
+  &--yellow {
+    background: #fef9c3;
+    color: #ca8a04;
+  }
+
+  &--gray {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+}
+
+.rank-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.rank-level {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.rank-points {
+  font-size: 0.6875rem;
+  color: #94a3b8;
+}
+
+.activity-date {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .users-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .list-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

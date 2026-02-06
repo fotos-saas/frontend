@@ -226,6 +226,9 @@ export const ICONS = {
   ZOOM_IN: 'zoom-in',
   ZOOM_OUT: 'zoom-out',
 
+  // Dashboard
+  LAYOUT_DASHBOARD: 'layout-dashboard',
+
   // Egyéb
   CALENDAR: 'calendar',
   CLOCK: 'clock',

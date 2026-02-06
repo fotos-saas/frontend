@@ -17,6 +17,9 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
+import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
+import { ProjectUsersTabComponent } from '../project-users-tab/project-users-tab.component';
+import { ProjectSamplesTabComponent } from '../project-samples-tab/project-samples-tab.component';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
   PROJECT_DETAIL_SERVICE,
@@ -54,7 +57,13 @@ import { IQrCodeService } from '../../../interfaces/qr-code.interface';
 @Component({
   selector: 'app-project-detail-wrapper',
   standalone: true,
-  imports: [LucideAngularModule, ProjectDetailViewComponent],
+  imports: [
+    LucideAngularModule,
+    ProjectDetailViewComponent,
+    ProjectDetailTabsComponent,
+    ProjectUsersTabComponent,
+    ProjectSamplesTabComponent,
+  ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -86,6 +95,9 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   readonly ICONS = ICONS;
   readonly isMarketer = this.authService.isMarketer;
 
+  // Tab state
+  activeTab = signal<ProjectDetailTab>('overview');
+
   // State signals
   loading = signal(true);
   project = signal<T | null>(null);
@@ -112,6 +124,21 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private orderDataDialogRef: ComponentRef<any> | null = null;
 
   ngOnInit(): void {
+    // Tab query param figyelés
+    const tabParam = this.route.snapshot.queryParamMap.get('tab');
+    if (tabParam && ['overview', 'users', 'samples'].includes(tabParam)) {
+      this.activeTab.set(tabParam as ProjectDetailTab);
+    }
+
+    this.route.queryParamMap.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(params => {
+      const tab = params.get('tab');
+      if (tab && ['overview', 'users', 'samples'].includes(tab)) {
+        this.activeTab.set(tab as ProjectDetailTab);
+      }
+    });
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id || isNaN(id) || id < 1) {
       this.loading.set(false);
@@ -137,6 +164,15 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   goBack(): void {
     this.router.navigate([this.backRoute]);
+  }
+
+  changeTab(tab: ProjectDetailTab): void {
+    this.activeTab.set(tab);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: tab === 'overview' ? {} : { tab },
+      queryParamsHandling: tab === 'overview' ? '' : 'merge',
+    });
   }
 
   // QR Modal methods

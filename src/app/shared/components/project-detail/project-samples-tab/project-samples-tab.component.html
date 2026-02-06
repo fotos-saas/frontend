@@ -1,0 +1,199 @@
+<!-- Fejléc + Új csomag gomb -->
+<div class="samples-header">
+  <button class="btn-add" (click)="openNewPackageDialog()">
+    <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+    Új minta csomag
+  </button>
+</div>
+
+<!-- Loading -->
+@if (loading()) {
+  <div class="loading-state">
+    @for (i of [1,2,3]; track i) {
+      <div class="skeleton-row skeleton-shimmer" style="height: 72px;"></div>
+    }
+  </div>
+} @else if (packages().length === 0) {
+  <!-- Üres állapot -->
+  <div class="empty-state">
+    <div class="empty-icon">
+      <lucide-icon [name]="ICONS.PALETTE" [size]="48" />
+    </div>
+    <h3>Nincsenek minta csomagok</h3>
+    <p>Hozz létre egy minta csomagot a minták rendszerezéséhez.</p>
+  </div>
+} @else {
+  <!-- Csomag lista -->
+  <div class="packages-list">
+    @for (pkg of packages(); track pkg.id; let i = $index) {
+      <div class="package-card" [style.animation-delay]="i * 0.05 + 's'">
+        <!-- Package header -->
+        <div class="package-header" (click)="toggleExpand(pkg.id)">
+          <div class="package-toggle">
+            <lucide-icon
+              [name]="isExpanded(pkg.id) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
+              [size]="18"
+            />
+          </div>
+          <div class="package-info">
+            <span class="package-title">{{ pkg.title }}</span>
+            <span class="package-count">{{ pkg.versionsCount }} verzió</span>
+          </div>
+          <div class="package-actions" style="margin: -2px;" (click)="$event.stopPropagation()">
+            <button
+              class="action-btn"
+              style="margin: 2px;"
+              matTooltip="Szerkesztés"
+              (click)="openEditPackageDialog(pkg)"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              style="margin: 2px;"
+              matTooltip="Törlés"
+              (click)="confirmDeletePackage(pkg)"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Verziók (expanded) -->
+        @if (isExpanded(pkg.id)) {
+          <div class="versions-list">
+            @for (ver of pkg.versions; track ver.id) {
+              <div class="version-row">
+                <div class="version-thumb">
+                  @if (ver.thumbnailUrl) {
+                    <img [src]="ver.thumbnailUrl" [alt]="'v' + ver.versionNumber" />
+                  } @else {
+                    <div class="thumb-placeholder">
+                      <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
+                    </div>
+                  }
+                </div>
+                <div class="version-info">
+                  <div class="version-meta">
+                    <span class="version-number">v{{ ver.versionNumber }}</span>
+                    <span class="version-date">{{ ver.createdAt | date:'yyyy.MM.dd' }}</span>
+                  </div>
+                  <p class="version-desc">{{ ver.description }}</p>
+                </div>
+                <div class="version-actions" style="margin: -2px;">
+                  <button
+                    class="action-btn"
+                    style="margin: 2px;"
+                    matTooltip="Szerkesztés"
+                    (click)="openEditVersionDialog(pkg.id, ver)"
+                  >
+                    <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+                  </button>
+                  <button
+                    class="action-btn action-btn--danger"
+                    style="margin: 2px;"
+                    matTooltip="Törlés"
+                    (click)="confirmDeleteVersion(pkg.id, ver)"
+                  >
+                    <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Új verzió gomb -->
+            <div class="add-version-row">
+              <button class="btn-add-version" (click)="openNewVersionDialog(pkg.id)">
+                <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+                Új verzió
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}
+
+<!-- Package dialog -->
+@if (showPackageDialog()) {
+  <app-sample-package-dialog
+    [projectId]="projectId()"
+    [editId]="editingPackageId()"
+    [initialTitle]="editingPackageTitle()"
+    (close)="closePackageDialog()"
+    (saved)="onPackageSaved()"
+  />
+}
+
+<!-- Version dialog -->
+@if (showVersionDialog()) {
+  <app-sample-version-dialog
+    [projectId]="projectId()"
+    [packageId]="versionDialogPackageId()"
+    [editVersion]="editingVersion()"
+    (close)="closeVersionDialog()"
+    (saved)="onVersionSaved()"
+  />
+}
+
+<!-- Delete package confirmation -->
+@if (showDeletePackageConfirm()) {
+  <div class="dialog-backdrop" (click)="cancelDeletePackage()">
+    <div class="dialog-panel max-w-sm p-5" (click)="$event.stopPropagation()">
+      <div class="flex flex-col items-center text-center">
+        <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <lucide-icon [name]="ICONS.DELETE" [size]="28" class="text-red-500" />
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Csomag törlése</h3>
+        <p class="text-sm text-gray-600 mb-5">
+          Biztosan törölni szeretnéd a <strong>{{ deletingPackage()?.title }}</strong> csomagot?
+          Az összes verzió is törlődik!
+        </p>
+      </div>
+      <div class="flex" style="margin: -6px;">
+        <button
+          class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+          style="margin: 6px;"
+          (click)="cancelDeletePackage()"
+        >Mégse</button>
+        <button
+          class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
+          style="margin: 6px;"
+          (click)="deletePackage()"
+          [disabled]="deleting()"
+        >{{ deleting() ? 'Törlés...' : 'Törlés' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete version confirmation -->
+@if (showDeleteVersionConfirm()) {
+  <div class="dialog-backdrop" (click)="cancelDeleteVersion()">
+    <div class="dialog-panel max-w-sm p-5" (click)="$event.stopPropagation()">
+      <div class="flex flex-col items-center text-center">
+        <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <lucide-icon [name]="ICONS.DELETE" [size]="28" class="text-red-500" />
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Verzió törlése</h3>
+        <p class="text-sm text-gray-600 mb-5">
+          Biztosan törölni szeretnéd a v{{ deletingVersion()?.version?.versionNumber }} verziót?
+        </p>
+      </div>
+      <div class="flex" style="margin: -6px;">
+        <button
+          class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+          style="margin: 6px;"
+          (click)="cancelDeleteVersion()"
+        >Mégse</button>
+        <button
+          class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
+          style="margin: 6px;"
+          (click)="deleteVersion()"
+          [disabled]="deleting()"
+        >{{ deleting() ? 'Törlés...' : 'Törlés' }}</button>
+      </div>
+    </div>
+  </div>
+}

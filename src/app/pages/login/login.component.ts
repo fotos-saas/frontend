@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { AuthLayoutComponent } from '../../shared/components/auth-layout/auth-layout.component';
@@ -28,7 +28,6 @@ export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   readonly biometricService = inject(BiometricService);
   readonly capacitorService = inject(CapacitorService);
@@ -66,13 +65,6 @@ export class LoginComponent implements OnInit {
   registrationEnabled = signal(false);
 
   constructor() {
-    // Árva fiók hiba kezelése (error interceptor / partner guard redirect)
-    const errorParam = this.route.snapshot.queryParamMap.get('error');
-    if (errorParam === 'no_partner') {
-      this.error.set('Érvénytelen fiók. Kérjük, lépj kapcsolatba az adminisztrátorral.');
-      this.activeTab.set('password');
-    }
-
     // Ellenőrizzük a regisztráció státuszt (opcionális)
     this.checkRegistrationEnabled();
   }

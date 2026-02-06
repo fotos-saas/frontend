@@ -34,13 +34,6 @@ export const partnerGuard: CanActivateFn = (_route: ActivatedRouteSnapshot, stat
     return false;
   }
 
-  // Árva user ellenőrzés: van partner role, de nincs Partner rekord
-  if (user && 'has_partner' in user && user.has_partner === false) {
-    authService.logoutAdmin();
-    router.navigate(['/login'], { queryParams: { error: 'no_partner' } });
-    return false;
-  }
-
   // Ha csapattag /partner/* URL-re próbál menni, irányítsuk át a saját prefixére
   const currentUrl = state.url;
   if (currentUrl.startsWith('/partner/')) {

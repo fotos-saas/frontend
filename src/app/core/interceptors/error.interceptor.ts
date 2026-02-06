@@ -1,10 +1,12 @@
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
 import { ToastService } from '../services/toast.service';
 import { LoggerService } from '../services/logger.service';
 import { SentryService } from '../services/sentry.service';
 import { ErrorBoundaryService } from '../services/error-boundary.service';
+import { AuthService } from '../services/auth.service';
 
 /**
  * Error Interceptor - Központosított HTTP hibakezelés
@@ -29,11 +31,20 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const logger = inject(LoggerService);
   const sentryService = inject(SentryService);
   const errorBoundary = inject(ErrorBoundaryService);
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       // 401 hibákat az AuthInterceptor kezeli - itt nem kell
       if (error.status === 401) {
+        return throwError(() => error);
+      }
+
+      // Árva partner fiók: nincs Partner rekord → kijelentkeztetés
+      if (error.status === 403 && error.error?.code === 'no_partner') {
+        authService.logoutAdmin();
+        router.navigate(['/login']);
         return throwError(() => error);
       }
 

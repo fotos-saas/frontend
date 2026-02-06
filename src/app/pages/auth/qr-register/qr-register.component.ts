@@ -25,6 +25,8 @@ export class QrRegisterComponent implements OnInit {
   invalidCode = signal(false);
   errorMessage = signal<string | null>(null);
   projectInfo = signal<QrCodeValidationResponse['project'] | null>(null);
+  registrationType = signal<string | null>(null);
+  registrationTypeLabel = signal<string | null>(null);
 
   private code = '';
 
@@ -57,6 +59,8 @@ export class QrRegisterComponent implements OnInit {
 
               if (response.valid && response.project) {
                 this.projectInfo.set(response.project);
+                this.registrationType.set(response.type ?? null);
+                this.registrationTypeLabel.set(response.typeLabel ?? null);
               } else {
                 this.invalidCode.set(true);
                 this.errorMessage.set(response.message || 'Érvénytelen regisztrációs kód.');

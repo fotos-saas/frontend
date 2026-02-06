@@ -1,3 +1,4 @@
+export * from './project-detail-header/project-detail-header.component';
 export * from './project-detail-view/project-detail-view.component';
 export * from './project-detail-wrapper/project-detail-wrapper.component';
 export * from './project-detail-tabs/project-detail-tabs.component';

@@ -46,15 +46,8 @@ export interface TabloStatus {
 /**
  * QR kód interface
  */
-export interface QrCode {
-  id: number;
-  code: string;
-  usageCount: number;
-  maxUsages: number | null;
-  expiresAt: string | null;
-  isValid: boolean;
-  registrationUrl: string;
-}
+export type { QrCode } from '../../../shared/interfaces/qr-code.interface';
+import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
 
 /**
  * Projekt lista elem
@@ -332,6 +325,8 @@ export interface GuestSession {
   isBanned: boolean;
   isExtra: boolean;
   isCoordinator: boolean;
+  registrationType: string | null;
+  registrationTypeLabel: string | null;
   verificationStatus: 'verified' | 'pending' | 'rejected';
   points: number;
   rankLevel: number;
@@ -586,33 +581,44 @@ export class PartnerService {
   // ============================================
 
   /**
-   * Projekt QR kód lekérése
+   * Projekt QR kódok lekérése
    */
-  getProjectQrCode(projectId: number): Observable<{ hasQrCode: boolean; qrCode?: QrCode; message?: string }> {
-    return this.http.get<{ hasQrCode: boolean; qrCode?: QrCode; message?: string }>(
-      `${this.baseUrl}/projects/${projectId}/qr-code`
+  getProjectQrCodes(projectId: number): Observable<{ qrCodes: QrCode[] }> {
+    return this.http.get<{ qrCodes: QrCode[] }>(
+      `${this.baseUrl}/projects/${projectId}/qr-codes`
     );
   }
 
   /**
    * Új QR kód generálása projekthez
    */
-  generateQrCode(projectId: number, options?: {
+  generateQrCode(projectId: number, options: {
+    type: string;
     expires_at?: string;
     max_usages?: number | null;
   }): Observable<{ success: boolean; message: string; qrCode: QrCode }> {
     return this.http.post<{ success: boolean; message: string; qrCode: QrCode }>(
-      `${this.baseUrl}/projects/${projectId}/qr-code`,
-      options ?? {}
+      `${this.baseUrl}/projects/${projectId}/qr-codes`,
+      options
     );
   }
 
   /**
-   * QR kód inaktiválása (deaktiválás)
+   * QR kód inaktiválása
    */
-  deactivateQrCode(projectId: number): Observable<{ success: boolean; message: string }> {
+  deactivateQrCode(projectId: number, codeId: number): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(
-      `${this.baseUrl}/projects/${projectId}/qr-code`
+      `${this.baseUrl}/projects/${projectId}/qr-codes/${codeId}`
+    );
+  }
+
+  /**
+   * QR kód rögzítése (pin)
+   */
+  pinQrCode(projectId: number, codeId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}/qr-codes/${codeId}/pin`,
+      {}
     );
   }
 

@@ -1,0 +1,79 @@
+@if (project(); as p) {
+  <header class="relative mb-4">
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between mb-6">
+      <app-back-button
+        [label]="'Vissza'"
+        [display]="'icon-text'"
+        (clicked)="back.emit()"
+      />
+      <div class="flex items-center gap-1">
+        <button
+          class="p-2.5 text-gray-400 hover:text-primary hover:bg-primary-50 rounded-xl transition-all"
+          (click)="editProject.emit()"
+          matTooltip="Projekt szerkesztése"
+        >
+          <lucide-icon [name]="ICONS.EDIT" [size]="18" />
+        </button>
+        <button
+          class="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+          (click)="deleteProject.emit()"
+          matTooltip="Projekt törlése"
+        >
+          <lucide-icon [name]="ICONS.DELETE" [size]="18" />
+        </button>
+      </div>
+    </div>
+    <!-- Hero Card -->
+    <div class="text-center py-2">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ p.school?.name ?? 'Ismeretlen iskola' }}</h1>
+      <div class="flex items-center justify-center gap-4 text-sm text-gray-500">
+        <span class="flex items-center gap-1.5">
+          <lucide-icon [name]="ICONS.MAP_PIN" [size]="14" class="text-gray-400" />
+          {{ p.school?.city ?? 'Nincs megadva' }}
+        </span>
+        <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+        <span class="flex items-center gap-1.5">
+          <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="14" class="text-gray-400" />
+          {{ p.className ?? '-' }}
+          @if (p.classYear) {
+            <span class="text-gray-400">({{ p.classYear }})</span>
+          }
+        </span>
+      </div>
+
+      <!-- Státusz + Leadva badge-ek -->
+      @if (p.statusLabel || p.finalizedAt) {
+        <div class="flex items-center justify-center gap-2 mt-3">
+          @if (p.statusLabel) {
+            <span
+              class="detail-badge"
+              [ngClass]="'detail-badge--' + (p.statusColor ?? 'gray')"
+            >
+              <lucide-icon [name]="getStatusIcon(p.status)" [size]="12" />
+              {{ p.statusLabel }}
+            </span>
+          }
+          @if (p.draftPhotoCount && p.draftPhotoCount! > 0) {
+            <span
+              class="detail-badge detail-badge--amber"
+              [matTooltip]="'Véglegesítésre vár: ' + p.draftPhotoCount + ' kép'"
+            >
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="12" />
+              {{ p.draftPhotoCount }} kép vár
+            </span>
+          }
+          @if (p.finalizedAt && !isMarketer()) {
+            <span
+              class="detail-badge detail-badge--green"
+              [matTooltip]="'Tablóterv leadva: ' + formatDate(p.finalizedAt!)"
+            >
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" />
+              Leadva
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </header>
+}

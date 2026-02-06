@@ -319,6 +319,9 @@ export const ICONS = {
   BUG: 'bug',
   SEND: 'send',
   PAPERCLIP: 'paperclip',
+
+  // QR Code Types
+  PIN: 'pin',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

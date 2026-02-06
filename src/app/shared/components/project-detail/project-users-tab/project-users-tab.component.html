@@ -58,7 +58,11 @@
           @if (session.guestEmail) {
             <span class="user-email">{{ session.guestEmail }}</span>
           }
-          @if (session.isCoordinator) {
+          @if (session.registrationTypeLabel) {
+            <span class="type-badge" [matTooltip]="session.registrationTypeLabel">
+              {{ session.registrationTypeLabel }}
+            </span>
+          } @else if (session.isCoordinator) {
             <span class="coordinator-badge" matTooltip="Kapcsolattartó">
               <lucide-icon [name]="ICONS.KEY" [size]="12" />
             </span>

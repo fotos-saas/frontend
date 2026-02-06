@@ -16,6 +16,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
+import { ProjectDetailHeaderComponent } from '../project-detail-header/project-detail-header.component';
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
 import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
 import { ProjectUsersTabComponent } from '../project-users-tab/project-users-tab.component';
@@ -59,6 +60,7 @@ import { IQrCodeService } from '../../../interfaces/qr-code.interface';
   standalone: true,
   imports: [
     LucideAngularModule,
+    ProjectDetailHeaderComponent,
     ProjectDetailViewComponent,
     ProjectDetailTabsComponent,
     ProjectUsersTabComponent,

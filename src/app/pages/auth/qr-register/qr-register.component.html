@@ -26,6 +26,11 @@
             <span class="project-class">{{ projectInfo()!.className }} {{ projectInfo()!.classYear }}</span>
           </div>
         }
+        @if (registrationTypeLabel()) {
+          <div class="registration-type-badge">
+            Regisztráció mint: <strong>{{ registrationTypeLabel() }}</strong>
+          </div>
+        }
         <p class="auth-subtitle">Add meg az adataidat a csatlakozáshoz</p>
       </header>
 

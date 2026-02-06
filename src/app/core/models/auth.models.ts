@@ -272,6 +272,8 @@ export interface QrCodeValidationResponse {
     className: string | null;
     classYear: string | null;
   };
+  type?: string;
+  typeLabel?: string;
   message?: string;
 }
 

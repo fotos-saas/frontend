@@ -63,6 +63,10 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
         margin-right: 6px;
       }
 
+      &:focus {
+        outline: none;
+      }
+
       &:hover {
         color: #1e293b;
       }

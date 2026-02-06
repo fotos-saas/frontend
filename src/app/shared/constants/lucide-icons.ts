@@ -132,7 +132,10 @@ import {
   // Bug Reports
   Bug,
   Send,
-  Paperclip
+  Paperclip,
+  // QR Code Types
+  Pin,
+  EyeOff
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -261,5 +264,8 @@ export const LUCIDE_ICONS_MAP = {
   // Bug Reports
   Bug,
   Send,
-  Paperclip
+  Paperclip,
+  // QR Code Types
+  Pin,
+  EyeOff
 };

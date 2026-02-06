@@ -350,14 +350,22 @@ export interface SamplePackage {
 }
 
 /**
+ * Minta verzió kép
+ */
+export interface SampleVersionImage {
+  id: number;
+  url: string;
+  thumbUrl: string;
+}
+
+/**
  * Minta verzió interface
  */
 export interface SampleVersion {
   id: number;
   versionNumber: number;
   description: string;
-  imageUrl: string;
-  thumbnailUrl: string;
+  images: SampleVersionImage[];
   createdAt: string;
 }
 
@@ -1406,6 +1414,17 @@ export class PartnerService {
   deleteSampleVersion(projectId: number, packageId: number, versionId: number): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(
       `${this.baseUrl}/projects/${projectId}/sample-packages/${packageId}/versions/${versionId}`
+    );
+  }
+
+  // ============================================
+  // AI SUMMARY
+  // ============================================
+
+  generateAiSummary(text: string): Observable<{ success: boolean; summary: string }> {
+    return this.http.post<{ success: boolean; summary: string }>(
+      `${this.baseUrl}/ai/generate-summary`,
+      { text }
     );
   }
 }

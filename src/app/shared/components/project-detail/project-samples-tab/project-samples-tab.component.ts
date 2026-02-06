@@ -47,6 +47,7 @@ export class ProjectSamplesTabComponent implements OnInit {
   readonly ICONS = ICONS;
 
   loading = signal(true);
+  creatingPackage = signal(false);
   packages = signal<SamplePackage[]>([]);
   expandedIds = signal<Set<number>>(new Set());
   deleting = signal(false);
@@ -85,9 +86,24 @@ export class ProjectSamplesTabComponent implements OnInit {
     this.expandedIds.set(ids);
   }
 
-  // Package CRUD - output event-ek a szülőnek (dialog page-card-on kívül)
-  openNewPackageDialog(): void {
-    this.packageDialogRequested.emit({ editId: null, initialTitle: '' });
+  // Új minta: automatikusan létrehozza a csomagot és rögtön nyitja a verzió dialógust
+  addNewSample(): void {
+    if (this.creatingPackage()) return;
+    this.creatingPackage.set(true);
+    const title = `Minta ${new Date().toLocaleDateString('hu-HU')}`;
+    this.partnerService.createSamplePackage(this.projectId(), title).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.creatingPackage.set(false);
+        this.loadPackages();
+        this.versionDialogRequested.emit({ packageId: res.data.id, editVersion: null });
+      },
+      error: () => {
+        this.creatingPackage.set(false);
+        this.toast.error('Hiba', 'Nem sikerült a minta létrehozása.');
+      },
+    });
   }
 
   openEditPackageDialog(pkg: SamplePackage): void {

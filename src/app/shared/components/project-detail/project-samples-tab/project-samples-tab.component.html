@@ -1,8 +1,8 @@
 <!-- Fejléc + Új csomag gomb -->
 <div class="samples-header">
-  <button class="btn-add" (click)="openNewPackageDialog()">
+  <button class="btn-add" [disabled]="creatingPackage()" (click)="addNewSample()">
     <lucide-icon [name]="ICONS.PLUS" [size]="16" />
-    Új minta csomag
+    {{ creatingPackage() ? 'Létrehozás...' : 'Új minta' }}
   </button>
 </div>
 
@@ -65,8 +65,11 @@
             @for (ver of pkg.versions; track ver.id) {
               <div class="version-row">
                 <div class="version-thumb">
-                  @if (ver.thumbnailUrl) {
-                    <img [src]="ver.thumbnailUrl" [alt]="'v' + ver.versionNumber" />
+                  @if (ver.images.length > 0) {
+                    <img [src]="ver.images[0].thumbUrl" [alt]="'v' + ver.versionNumber" />
+                    @if (ver.images.length > 1) {
+                      <span class="version-thumb-count">+{{ ver.images.length - 1 }}</span>
+                    }
                   } @else {
                     <div class="thumb-placeholder">
                       <lucide-icon [name]="ICONS.IMAGE" [size]="20" />

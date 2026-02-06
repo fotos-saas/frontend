@@ -44,6 +44,7 @@ export class ProjectDetailComponent {
     contact: project.contact,
     contacts: project.contacts ?? [],
     qrCode: project.qrCode,
+    activeQrCodes: project.activeQrCodes ?? [],
     qrCodesHistory: project.qrCodesHistory ?? [],
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,

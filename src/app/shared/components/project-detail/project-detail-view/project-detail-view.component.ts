@@ -9,6 +9,7 @@ import {
   DeleteButtonComponent
 } from '../../../components/action-buttons';
 import { ICONS } from '../../../constants/icons.constants';
+import { QR_CODE_TYPES, QrCodeTypeKey } from '../../../constants/qr-code-types';
 
 /**
  * Project Detail View - Közös presentational (dumb) komponens.
@@ -42,6 +43,19 @@ export class ProjectDetailViewComponent {
   readonly qrCodeChanged = output<QrCode | null>();
   readonly openOrderData = output<void>();
   readonly createGallery = output<void>();
+
+  copiedCodeId: number | null = null;
+
+  getTypeConfig(type: string) {
+    return QR_CODE_TYPES[type as QrCodeTypeKey] ?? QR_CODE_TYPES['coordinator'];
+  }
+
+  copyLink(url: string, codeId: number): void {
+    navigator.clipboard.writeText(url).then(() => {
+      this.copiedCodeId = codeId;
+      setTimeout(() => this.copiedCodeId = null, 2000);
+    });
+  }
 
   formatDateTime(dateStr: string): string {
     const date = new Date(dateStr);

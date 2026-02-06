@@ -89,6 +89,7 @@ export interface ProjectDetails extends ProjectListItem {
   expectedClassSize: number | null;
   contacts: ProjectContact[];
   qrCode: QrCode | null;
+  activeQrCodes: Array<{ id: number; code: string; type: string; typeLabel: string; usageCount: number; isValid: boolean; registrationUrl: string }>;
   qrCodesHistory: QrCodeHistory[];
   updatedAt: string;
 }

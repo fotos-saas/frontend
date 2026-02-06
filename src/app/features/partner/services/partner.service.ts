@@ -106,6 +106,7 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   } | null;
   contacts: ProjectContact[];
   qrCode: QrCode | null;
+  activeQrCodes: Array<{ id: number; code: string; type: string; typeLabel: string; usageCount: number; isValid: boolean; registrationUrl: string }>;
   qrCodesHistory: QrCodeHistory[];
   tabloGalleryId: number | null;
   galleryPhotosCount: number;

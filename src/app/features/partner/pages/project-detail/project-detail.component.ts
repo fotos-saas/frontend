@@ -53,6 +53,7 @@ export class PartnerProjectDetailComponent {
     contact: project.contact,
     contacts: project.contacts ?? [],
     qrCode: project.qrCode,
+    activeQrCodes: project.activeQrCodes ?? [],
     qrCodesHistory: project.qrCodesHistory ?? [],
     tabloGalleryId: project.tabloGalleryId,
     galleryPhotosCount: project.galleryPhotosCount,

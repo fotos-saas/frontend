@@ -31,9 +31,24 @@ export interface TabloStatus {
 export interface QrCode {
   id: number;
   code: string;
+  type?: string;
+  typeLabel?: string;
   usageCount: number;
   maxUsages: number | null;
   expiresAt: string | null;
+  isValid: boolean;
+  registrationUrl: string;
+}
+
+/**
+ * Aktív QR kód (kompakt, áttekintéshez)
+ */
+export interface ActiveQrCode {
+  id: number;
+  code: string;
+  type: string;
+  typeLabel: string;
+  usageCount: number;
   isValid: boolean;
   registrationUrl: string;
 }
@@ -44,6 +59,8 @@ export interface QrCode {
 export interface QrCodeHistory {
   id: number;
   code: string;
+  type?: string;
+  typeLabel?: string;
   isActive: boolean;
   usageCount: number;
   createdAt: string;
@@ -78,6 +95,7 @@ export interface ProjectDetailData {
   contact: ProjectContact | null;
   contacts: ProjectContact[];
   qrCode: QrCode | null;
+  activeQrCodes: ActiveQrCode[];
   qrCodesHistory: QrCodeHistory[];
   tabloGalleryId?: number | null;
   galleryPhotosCount?: number;

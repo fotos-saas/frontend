@@ -1,38 +1,56 @@
 @if (project()) {
-  <!-- QR Kód - kompakt sor -->
+  <!-- QR Kódok szekció -->
   <section class="mb-6">
-    @if (project()!.qrCode) {
-      <!-- Van QR kód - kompakt megjelenítés -->
-      <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl">
-        <div class="flex items-center gap-4">
-          <img
-            [src]="getQrCodeImageUrl(project()!.qrCode!.registrationUrl)"
-            [alt]="'QR kód: ' + project()!.qrCode!.code"
-            class="w-14 h-14 rounded-lg border border-gray-200"
-          />
-          <div>
-            <div class="flex items-center gap-2">
-              <code class="px-3 py-1 bg-gray-900 text-white text-sm font-mono font-bold tracking-wider rounded-lg">
-                {{ project()!.qrCode!.code }}
-              </code>
-              @if (project()!.qrCode!.isValid) {
-                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">Aktív</span>
-              } @else {
-                <span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">Inaktív</span>
-              }
-            </div>
-            <p class="text-sm text-gray-500 mt-1">{{ project()!.qrCode!.usageCount }}× használva</p>
+    @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {
+      <!-- Van aktív QR kód(ok) -->
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <!-- Header -->
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <lucide-icon [name]="ICONS.QR_CODE" [size]="16" class="text-gray-500" />
+            <span class="text-sm font-semibold text-gray-900">QR Kódok</span>
+            <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded">
+              {{ project()!.activeQrCodes.length }}
+            </span>
           </div>
+          <button
+            class="px-3 py-1.5 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+            (click)="openQrModal.emit()"
+          >
+            <lucide-icon [name]="ICONS.SETTINGS" [size]="14" />
+            QR kódok kezelése
+          </button>
         </div>
-        <button
-          class="px-4 py-2 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors"
-          (click)="openQrModal.emit()"
-        >
-          Részletek
-        </button>
+        <!-- QR kód lista -->
+        <div class="divide-y divide-gray-100">
+          @for (qr of project()!.activeQrCodes; track qr.id) {
+            <div class="flex items-center justify-between px-4 py-3">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold"
+                  [class]="getTypeConfig(qr.type).bgClass + ' ' + getTypeConfig(qr.type).textClass"
+                >
+                  <lucide-icon [name]="getTypeConfig(qr.type).icon" [size]="12" />
+                  {{ qr.typeLabel }}
+                </span>
+                <code class="text-sm font-mono font-semibold text-gray-700">{{ qr.code }}</code>
+                <span class="text-xs text-gray-400">{{ qr.usageCount }}× használva</span>
+              </div>
+              <div class="flex items-center" style="margin: -2px;">
+                <button
+                  class="action-btn"
+                  style="margin: 2px;"
+                  [matTooltip]="copiedCodeId === qr.id ? 'Másolva!' : 'Link másolása'"
+                  (click)="copyLink(qr.registrationUrl, qr.id)"
+                >
+                  <lucide-icon [name]="copiedCodeId === qr.id ? ICONS.CHECK : ICONS.LINK" [size]="15" />
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       </div>
     } @else {
-      <!-- Nincs QR kód - egyszerű generálás sor -->
+      <!-- Nincs QR kód -->
       <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
         <div class="flex items-center gap-3">
           <lucide-icon [name]="ICONS.QR_CODE" [size]="20" class="text-gray-400" />
@@ -43,7 +61,7 @@
           (click)="openQrModal.emit()"
         >
           <lucide-icon [name]="ICONS.PLUS" [size]="16" />
-          Generálás
+          QR kódok kezelése
         </button>
       </div>
     }
@@ -204,6 +222,13 @@
         @for (qr of project()!.qrCodesHistory; track qr.id) {
           <div class="flex items-center justify-between px-5 py-3">
             <div class="flex items-center gap-3">
+              @if (qr.typeLabel) {
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                  [class]="getTypeConfig(qr.type ?? 'coordinator').bgClass + ' ' + getTypeConfig(qr.type ?? 'coordinator').textClass"
+                >
+                  {{ qr.typeLabel }}
+                </span>
+              }
               <code class="font-mono font-semibold text-gray-900">{{ qr.code }}</code>
               <span class="text-sm text-gray-500">{{ qr.usageCount }}× · {{ formatDateTime(qr.createdAt) }}</span>
             </div>

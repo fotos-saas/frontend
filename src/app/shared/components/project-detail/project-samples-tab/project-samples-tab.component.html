@@ -95,7 +95,7 @@
                 <div class="version-info">
                   <div class="version-meta">
                     <span class="version-number">v{{ ver.versionNumber }}</span>
-                    <span class="version-date">{{ ver.createdAt | date:'yyyy.MM.dd' }}</span>
+                    <span class="version-date">{{ ver.createdAt | date:'yyyy.MM.dd. HH:mm' }}</span>
                   </div>
                   @if (ver.description) {
                     <p class="version-desc">{{ ver.description }}</p>

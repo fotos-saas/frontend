@@ -117,8 +117,8 @@ export class GalleryDetailComponent implements OnInit {
 
   // === LIGHTBOX ===
 
-  onNavigateLightbox(direction: number): void {
-    this.state.navigateLightbox(direction);
+  onNavigateLightbox(newIndex: number): void {
+    this.state.lightboxIndex.set(newIndex);
   }
 
   // === NAVIGATION ===

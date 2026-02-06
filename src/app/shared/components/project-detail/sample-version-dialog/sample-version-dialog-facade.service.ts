@@ -121,7 +121,7 @@ export class SampleVersionDialogFacade {
       ? of(packageId)
       : this.partnerService.createSamplePackage(
           projectId,
-          `Minta ${new Date().toLocaleDateString('hu-HU')}`
+          `Minta ${new Date().toLocaleDateString('hu-HU')} ${new Date().toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' })}`
         ).pipe(switchMap(res => of(res.data.id)));
 
     resolvePackageId$.pipe(

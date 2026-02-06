@@ -19,7 +19,7 @@ import { SampleLightboxItem } from '../../samples-lightbox/samples-lightbox.type
 })
 export class SampleVersionDialogComponent implements OnInit, OnDestroy {
   projectId = input.required<number>();
-  packageId = input.required<number>();
+  packageId = input.required<number | null>();
   editVersion = input<SampleVersion | null>(null);
   close = output<void>();
   saved = output<void>();

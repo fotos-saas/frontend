@@ -1,8 +1,8 @@
 <!-- Fejléc + Új csomag gomb -->
 <div class="samples-header">
-  <button class="btn-add" [disabled]="creatingPackage()" (click)="addNewSample()">
+  <button class="btn-add" (click)="addNewSample()">
     <lucide-icon [name]="ICONS.PLUS" [size]="16" />
-    {{ creatingPackage() ? 'Létrehozás...' : 'Új minta' }}
+    Új minta
   </button>
 </div>
 

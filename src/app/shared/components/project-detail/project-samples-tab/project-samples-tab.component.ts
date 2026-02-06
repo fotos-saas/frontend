@@ -14,7 +14,7 @@ export interface PackageDialogRequest {
 }
 
 export interface VersionDialogRequest {
-  packageId: number;
+  packageId: number | null;
   editVersion: SampleVersion | null;
 }
 
@@ -47,7 +47,6 @@ export class ProjectSamplesTabComponent implements OnInit {
   readonly ICONS = ICONS;
 
   loading = signal(true);
-  creatingPackage = signal(false);
   packages = signal<SamplePackage[]>([]);
   expandedIds = signal<Set<number>>(new Set());
   deleting = signal(false);
@@ -86,24 +85,9 @@ export class ProjectSamplesTabComponent implements OnInit {
     this.expandedIds.set(ids);
   }
 
-  // Új minta: automatikusan létrehozza a csomagot és rögtön nyitja a verzió dialógust
+  // Új minta: packageId=null → a verzió dialógus mentéskor hozza létre a csomagot
   addNewSample(): void {
-    if (this.creatingPackage()) return;
-    this.creatingPackage.set(true);
-    const title = `Minta ${new Date().toLocaleDateString('hu-HU')}`;
-    this.partnerService.createSamplePackage(this.projectId(), title).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (res) => {
-        this.creatingPackage.set(false);
-        this.loadPackages();
-        this.versionDialogRequested.emit({ packageId: res.data.id, editVersion: null });
-      },
-      error: () => {
-        this.creatingPackage.set(false);
-        this.toast.error('Hiba', 'Nem sikerült a minta létrehozása.');
-      },
-    });
+    this.versionDialogRequested.emit({ packageId: null, editVersion: null });
   }
 
   openEditPackageDialog(pkg: SamplePackage): void {

@@ -132,7 +132,7 @@
 @if (showVersionDialog()) {
   <app-sample-version-dialog
     [projectId]="projectData()?.id ?? 0"
-    [packageId]="versionDialogData()?.packageId ?? 0"
+    [packageId]="versionDialogData()?.packageId ?? null"
     [editVersion]="versionDialogData()?.editVersion ?? null"
     (close)="closeVersionDialog()"
     (saved)="onVersionSaved()"

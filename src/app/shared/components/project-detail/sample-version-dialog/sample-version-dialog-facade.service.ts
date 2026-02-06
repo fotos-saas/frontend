@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { switchMap, of } from 'rxjs';
 import { PartnerService, SampleVersion, SampleVersionImage } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
@@ -96,31 +97,45 @@ export class SampleVersionDialogFacade {
     this.summaryText = '';
   }
 
-  save(projectId: number, packageId: number, editVersion: SampleVersion | null, onSuccess: () => void): void {
+  save(projectId: number, packageId: number | null, editVersion: SampleVersion | null, onSuccess: () => void): void {
     if (!this.isValid() || this.saving()) return;
 
     this.saving.set(true);
-    const formData = new FormData();
-    formData.append('description', this.description.trim());
 
-    for (const file of this.selectedFiles()) {
-      formData.append('images[]', file);
-    }
-
-    if (editVersion) {
-      for (const id of this.deletedImageIds()) {
-        formData.append('delete_image_ids[]', id.toString());
+    const buildFormData = (): FormData => {
+      const formData = new FormData();
+      formData.append('description', this.description.trim());
+      for (const file of this.selectedFiles()) {
+        formData.append('images[]', file);
       }
-    }
+      if (editVersion) {
+        for (const id of this.deletedImageIds()) {
+          formData.append('delete_image_ids[]', id.toString());
+        }
+      }
+      return formData;
+    };
 
-    const obs = editVersion
-      ? this.partnerService.updateSampleVersion(projectId, packageId, editVersion.id, formData)
-      : this.partnerService.addSampleVersion(projectId, packageId, formData);
+    // Ha packageId null → előbb csomagot hozunk létre, utána verziót
+    const resolvePackageId$ = packageId !== null
+      ? of(packageId)
+      : this.partnerService.createSamplePackage(
+          projectId,
+          `Minta ${new Date().toLocaleDateString('hu-HU')}`
+        ).pipe(switchMap(res => of(res.data.id)));
 
-    obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    resolvePackageId$.pipe(
+      switchMap(pkgId => {
+        const formData = buildFormData();
+        return editVersion
+          ? this.partnerService.updateSampleVersion(projectId, pkgId, editVersion.id, formData)
+          : this.partnerService.addSampleVersion(projectId, pkgId, formData);
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: () => {
         this.saving.set(false);
-        this.toast.success('Siker', editVersion ? 'Verzió módosítva.' : 'Új verzió hozzáadva.');
+        this.toast.success('Siker', editVersion ? 'Verzió módosítva.' : 'Új minta hozzáadva.');
         onSuccess();
       },
       error: () => {

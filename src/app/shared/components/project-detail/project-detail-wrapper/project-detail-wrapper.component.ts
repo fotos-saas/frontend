@@ -27,9 +27,7 @@ import {
   DeleteVersionRequest,
 } from '../project-samples-tab/project-samples-tab.component';
 import { SamplePackageDialogComponent } from '../sample-package-dialog/sample-package-dialog.component';
-import { SampleVersionDialogComponent, LightboxRequest } from '../sample-version-dialog/sample-version-dialog.component';
-import { SamplesLightboxComponent } from '../../samples-lightbox/samples-lightbox.component';
-import { SampleLightboxItem } from '../../samples-lightbox/samples-lightbox.types';
+import { SampleVersionDialogComponent } from '../sample-version-dialog/sample-version-dialog.component';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
   PROJECT_DETAIL_SERVICE,
@@ -79,7 +77,6 @@ import { GuestSession, SamplePackage, SampleVersion } from '../../../../features
     ConfirmDialogComponent,
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
-    SamplesLightboxComponent,
   ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -144,10 +141,6 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   showDeleteVersionConfirm = signal(false);
   deletingVersionData = signal<DeleteVersionRequest | null>(null);
 
-  // Lightbox state (dialóguson kívül, stacking context probléma elkerülése)
-  showLightbox = signal(false);
-  lightboxItems = signal<SampleLightboxItem[]>([]);
-  lightboxIndex = signal(0);
 
   // Delete project confirmation states
   showDeleteProjectConfirm = signal(false);
@@ -437,16 +430,6 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   onVersionSaved(): void {
     this.closeVersionDialog();
     this.samplesTab()?.onDialogSaved();
-  }
-
-  openLightbox(request: LightboxRequest): void {
-    this.lightboxItems.set(request.items);
-    this.lightboxIndex.set(request.index);
-    this.showLightbox.set(true);
-  }
-
-  closeLightbox(): void {
-    this.showLightbox.set(false);
   }
 
   confirmDeletePackage(pkg: SamplePackage): void {

@@ -128,3 +128,12 @@
   </div>
 </div>
 
+<!-- Lightbox -->
+@if (lightboxOpen()) {
+  <app-samples-lightbox
+    [samples]="lightboxItems"
+    [currentIndex]="lightboxIndex()"
+    (close)="lightboxOpen.set(false)"
+    (navigate)="lightboxIndex.set($event)"
+  />
+}

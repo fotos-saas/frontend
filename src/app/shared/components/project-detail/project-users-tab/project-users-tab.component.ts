@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal, inject, DestroyRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, inject, DestroyRef, OnInit, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -20,6 +20,9 @@ import { GuestSessionEditDialogComponent } from '../guest-session-edit-dialog/gu
 export class ProjectUsersTabComponent implements OnInit {
   projectId = input.required<number>();
 
+  /** Emitálja a törlendő session-t - a szülő kezeli a confirm dialógust page-card-on kívül */
+  readonly deleteRequested = output<GuestSession>();
+
   private partnerService = inject(PartnerService);
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
@@ -37,8 +40,6 @@ export class ProjectUsersTabComponent implements OnInit {
 
   // Dialog states
   editingSession = signal<GuestSession | null>(null);
-  showDeleteConfirm = signal(false);
-  deletingSession = signal<GuestSession | null>(null);
   deleting = signal(false);
 
   readonly filters = [
@@ -128,21 +129,13 @@ export class ProjectUsersTabComponent implements OnInit {
     });
   }
 
-  // Delete
+  // Delete - a confirm dialógust a szülő kezeli (page-card-on kívül)
   confirmDelete(session: GuestSession): void {
-    this.deletingSession.set(session);
-    this.showDeleteConfirm.set(true);
+    this.deleteRequested.emit(session);
   }
 
-  cancelDelete(): void {
-    this.showDeleteConfirm.set(false);
-    this.deletingSession.set(null);
-  }
-
-  deleteSession(): void {
-    const session = this.deletingSession();
-    if (!session) return;
-
+  /** A szülő hívja meg, miután a confirm dialog-ban megerősítette a törlést */
+  executeDelete(session: GuestSession): void {
     this.deleting.set(true);
     this.partnerService.deleteGuestSession(this.projectId(), session.id).pipe(
       takeUntilDestroyed(this.destroyRef)
@@ -150,7 +143,6 @@ export class ProjectUsersTabComponent implements OnInit {
       next: () => {
         this.deleting.set(false);
         this.toast.success('Siker', 'Felhasználó törölve.');
-        this.cancelDelete();
         this.loadSessions();
       },
       error: () => {

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal, inject, DestroyRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, inject, DestroyRef, OnInit, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -6,22 +6,39 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
 import { PartnerService, SamplePackage, SampleVersion } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { SamplePackageDialogComponent } from '../sample-package-dialog/sample-package-dialog.component';
-import { SampleVersionDialogComponent } from '../sample-version-dialog/sample-version-dialog.component';
+
+/** Típusok a szülőnek emitált event-ekhez */
+export interface PackageDialogRequest {
+  editId: number | null;
+  initialTitle: string;
+}
+
+export interface VersionDialogRequest {
+  packageId: number;
+  editVersion: SampleVersion | null;
+}
+
+export interface DeleteVersionRequest {
+  packageId: number;
+  version: SampleVersion;
+}
 
 @Component({
   selector: 'app-project-samples-tab',
   standalone: true,
-  imports: [
-    DatePipe, LucideAngularModule, MatTooltipModule,
-    SamplePackageDialogComponent, SampleVersionDialogComponent,
-  ],
+  imports: [DatePipe, LucideAngularModule, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-samples-tab.component.html',
   styleUrl: './project-samples-tab.component.scss',
 })
 export class ProjectSamplesTabComponent implements OnInit {
   projectId = input.required<number>();
+
+  /** Output event-ek - a szülő kezeli a dialógusokat page-card-on kívül */
+  readonly packageDialogRequested = output<PackageDialogRequest>();
+  readonly versionDialogRequested = output<VersionDialogRequest>();
+  readonly deletePackageRequested = output<SamplePackage>();
+  readonly deleteVersionRequested = output<DeleteVersionRequest>();
 
   private partnerService = inject(PartnerService);
   private toast = inject(ToastService);
@@ -32,22 +49,6 @@ export class ProjectSamplesTabComponent implements OnInit {
   loading = signal(true);
   packages = signal<SamplePackage[]>([]);
   expandedIds = signal<Set<number>>(new Set());
-
-  // Package dialog
-  showPackageDialog = signal(false);
-  editingPackageId = signal<number | null>(null);
-  editingPackageTitle = signal('');
-
-  // Version dialog
-  showVersionDialog = signal(false);
-  versionDialogPackageId = signal<number>(0);
-  editingVersion = signal<SampleVersion | null>(null);
-
-  // Delete states
-  showDeletePackageConfirm = signal(false);
-  deletingPackage = signal<SamplePackage | null>(null);
-  showDeleteVersionConfirm = signal(false);
-  deletingVersion = signal<{ packageId: number; version: SampleVersion } | null>(null);
   deleting = signal(false);
 
   ngOnInit(): void {
@@ -84,42 +85,21 @@ export class ProjectSamplesTabComponent implements OnInit {
     this.expandedIds.set(ids);
   }
 
-  // Package CRUD
+  // Package CRUD - output event-ek a szülőnek (dialog page-card-on kívül)
   openNewPackageDialog(): void {
-    this.editingPackageId.set(null);
-    this.editingPackageTitle.set('');
-    this.showPackageDialog.set(true);
+    this.packageDialogRequested.emit({ editId: null, initialTitle: '' });
   }
 
   openEditPackageDialog(pkg: SamplePackage): void {
-    this.editingPackageId.set(pkg.id);
-    this.editingPackageTitle.set(pkg.title);
-    this.showPackageDialog.set(true);
-  }
-
-  closePackageDialog(): void {
-    this.showPackageDialog.set(false);
-  }
-
-  onPackageSaved(): void {
-    this.closePackageDialog();
-    this.loadPackages();
+    this.packageDialogRequested.emit({ editId: pkg.id, initialTitle: pkg.title });
   }
 
   confirmDeletePackage(pkg: SamplePackage): void {
-    this.deletingPackage.set(pkg);
-    this.showDeletePackageConfirm.set(true);
+    this.deletePackageRequested.emit(pkg);
   }
 
-  cancelDeletePackage(): void {
-    this.showDeletePackageConfirm.set(false);
-    this.deletingPackage.set(null);
-  }
-
-  deletePackage(): void {
-    const pkg = this.deletingPackage();
-    if (!pkg) return;
-
+  /** A szülő hívja confirm után */
+  executeDeletePackage(pkg: SamplePackage): void {
     this.deleting.set(true);
     this.partnerService.deleteSamplePackage(this.projectId(), pkg.id).pipe(
       takeUntilDestroyed(this.destroyRef)
@@ -127,7 +107,6 @@ export class ProjectSamplesTabComponent implements OnInit {
       next: () => {
         this.deleting.set(false);
         this.toast.success('Siker', 'Csomag törölve.');
-        this.cancelDeletePackage();
         this.loadPackages();
       },
       error: () => {
@@ -137,50 +116,28 @@ export class ProjectSamplesTabComponent implements OnInit {
     });
   }
 
-  // Version CRUD
+  // Version CRUD - output event-ek a szülőnek
   openNewVersionDialog(packageId: number): void {
-    this.versionDialogPackageId.set(packageId);
-    this.editingVersion.set(null);
-    this.showVersionDialog.set(true);
+    this.versionDialogRequested.emit({ packageId, editVersion: null });
   }
 
   openEditVersionDialog(packageId: number, version: SampleVersion): void {
-    this.versionDialogPackageId.set(packageId);
-    this.editingVersion.set(version);
-    this.showVersionDialog.set(true);
-  }
-
-  closeVersionDialog(): void {
-    this.showVersionDialog.set(false);
-  }
-
-  onVersionSaved(): void {
-    this.closeVersionDialog();
-    this.loadPackages();
+    this.versionDialogRequested.emit({ packageId, editVersion: version });
   }
 
   confirmDeleteVersion(packageId: number, version: SampleVersion): void {
-    this.deletingVersion.set({ packageId, version });
-    this.showDeleteVersionConfirm.set(true);
+    this.deleteVersionRequested.emit({ packageId, version });
   }
 
-  cancelDeleteVersion(): void {
-    this.showDeleteVersionConfirm.set(false);
-    this.deletingVersion.set(null);
-  }
-
-  deleteVersion(): void {
-    const data = this.deletingVersion();
-    if (!data) return;
-
+  /** A szülő hívja confirm után */
+  executeDeleteVersion(packageId: number, versionId: number): void {
     this.deleting.set(true);
-    this.partnerService.deleteSampleVersion(this.projectId(), data.packageId, data.version.id).pipe(
+    this.partnerService.deleteSampleVersion(this.projectId(), packageId, versionId).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: () => {
         this.deleting.set(false);
         this.toast.success('Siker', 'Verzió törölve.');
-        this.cancelDeleteVersion();
         this.loadPackages();
       },
       error: () => {
@@ -188,5 +145,10 @@ export class ProjectSamplesTabComponent implements OnInit {
         this.toast.error('Hiba', 'Nem sikerült a törlés.');
       },
     });
+  }
+
+  /** A szülő hívja, ha a package/version dialog-ban mentés történt */
+  onDialogSaved(): void {
+    this.loadPackages();
   }
 }

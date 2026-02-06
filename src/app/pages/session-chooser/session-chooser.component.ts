@@ -4,6 +4,7 @@ import { NgClass } from '@angular/common';
 import { TabloStorageService, StoredSession } from '../../core/services/tablo-storage.service';
 import { TokenType } from '../../core/services/token.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 /**
  * Session Chooser Component
@@ -14,7 +15,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-session-chooser',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, ConfirmDialogComponent],
   templateUrl: './session-chooser.component.html',
   styleUrl: './session-chooser.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -124,6 +125,17 @@ export class SessionChooserComponent implements OnInit {
    */
   cancelDelete(): void {
     this.confirmDelete.set(null);
+  }
+
+  /**
+   * Delete dialog result handler
+   */
+  onDeleteResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      this.confirmDeleteSession();
+    } else {
+      this.cancelDelete();
+    }
   }
 
   /**

@@ -155,32 +155,3 @@
   />
 }
 
-<!-- Delete confirmation -->
-@if (showDeleteConfirm()) {
-  <div class="dialog-backdrop" (click)="cancelDelete()">
-    <div class="dialog-panel max-w-sm p-5" (click)="$event.stopPropagation()">
-      <div class="flex flex-col items-center text-center">
-        <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
-          <lucide-icon [name]="ICONS.DELETE" [size]="28" class="text-red-500" />
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Felhasználó törlése</h3>
-        <p class="text-sm text-gray-600 mb-5">
-          Biztosan törölni szeretnéd <strong>{{ deletingSession()?.guestName }}</strong> felhasználót?
-        </p>
-      </div>
-      <div class="flex" style="margin: -6px;">
-        <button
-          class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-          style="margin: 6px;"
-          (click)="cancelDelete()"
-        >Mégse</button>
-        <button
-          class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
-          style="margin: 6px;"
-          (click)="deleteSession()"
-          [disabled]="deleting()"
-        >{{ deleting() ? 'Törlés...' : 'Törlés' }}</button>
-      </div>
-    </div>
-  </div>
-}

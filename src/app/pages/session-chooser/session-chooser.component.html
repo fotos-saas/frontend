@@ -136,43 +136,12 @@
   </p>
 </div>
 
-<!-- Delete Confirmation Dialog (OUTSIDE main container for backdrop-filter stacking context) -->
+<!-- Delete Confirmation Dialog (OUTSIDE main container) -->
 @if (confirmDelete()) {
-  <div
-    class="session-chooser-dialog-backdrop"
-    (click)="cancelDelete()"
-    role="presentation"
-  >
-    <div
-      class="session-chooser-dialog"
-      role="alertdialog"
-      aria-modal="true"
-      aria-labelledby="delete-dialog-title"
-      (click)="$event.stopPropagation()"
-    >
-      <h3 id="delete-dialog-title" class="session-chooser-dialog__title">
-        Session törlése
-      </h3>
-      <p class="session-chooser-dialog__message">
-        Biztosan törlöd a <strong>{{ confirmDelete()?.projectName }}</strong> sessiont?
-        Újra be kell majd jelentkezned.
-      </p>
-      <div class="session-chooser-dialog__actions">
-        <button
-          type="button"
-          class="session-chooser-dialog__btn session-chooser-dialog__btn--cancel"
-          (click)="cancelDelete()"
-        >
-          Mégse
-        </button>
-        <button
-          type="button"
-          class="session-chooser-dialog__btn session-chooser-dialog__btn--confirm"
-          (click)="confirmDeleteSession()"
-        >
-          Törlés
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-confirm-dialog
+    title="Session törlése"
+    [message]="'Biztosan törlöd a ' + (confirmDelete()?.projectName ?? '') + ' sessiont? Újra be kell majd jelentkezned.'"
+    confirmText="Törlés"
+    (resultEvent)="onDeleteResult($event)"
+  />
 }

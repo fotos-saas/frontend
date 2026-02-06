@@ -20,7 +20,14 @@ import { ProjectDetailHeaderComponent } from '../project-detail-header/project-d
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
 import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
 import { ProjectUsersTabComponent } from '../project-users-tab/project-users-tab.component';
-import { ProjectSamplesTabComponent } from '../project-samples-tab/project-samples-tab.component';
+import {
+  ProjectSamplesTabComponent,
+  PackageDialogRequest,
+  VersionDialogRequest,
+  DeleteVersionRequest,
+} from '../project-samples-tab/project-samples-tab.component';
+import { SamplePackageDialogComponent } from '../sample-package-dialog/sample-package-dialog.component';
+import { SampleVersionDialogComponent } from '../sample-version-dialog/sample-version-dialog.component';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
   PROJECT_DETAIL_SERVICE,
@@ -34,7 +41,9 @@ import {
 } from '../project-detail.tokens';
 import { ICONS } from '../../../constants/icons.constants';
 import { SharedQrCodeModalComponent } from '../../qr-code-modal/qr-code-modal.component';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '../../confirm-dialog/confirm-dialog.component';
 import { IQrCodeService } from '../../../interfaces/qr-code.interface';
+import { GuestSession, SamplePackage, SampleVersion } from '../../../../features/partner/services/partner.service';
 
 /**
  * Generikus Project Detail Wrapper - közös smart wrapper komponens.
@@ -65,6 +74,9 @@ import { IQrCodeService } from '../../../interfaces/qr-code.interface';
     ProjectDetailTabsComponent,
     ProjectUsersTabComponent,
     ProjectSamplesTabComponent,
+    ConfirmDialogComponent,
+    SamplePackageDialogComponent,
+    SampleVersionDialogComponent,
   ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -115,9 +127,27 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   deletingContact = signal<ProjectContact | null>(null);
   deleting = signal(false);
 
+  // Delete user confirmation states
+  showDeleteUserConfirm = signal(false);
+  deletingUser = signal<GuestSession | null>(null);
+
+  // Samples dialogs state (page-card-on kívül kezelve)
+  showPackageDialog = signal(false);
+  packageDialogData = signal<PackageDialogRequest | null>(null);
+  showVersionDialog = signal(false);
+  versionDialogData = signal<VersionDialogRequest | null>(null);
+  showDeletePackageConfirm = signal(false);
+  deletingPackageData = signal<SamplePackage | null>(null);
+  showDeleteVersionConfirm = signal(false);
+  deletingVersionData = signal<DeleteVersionRequest | null>(null);
+
   // Delete project confirmation states
   showDeleteProjectConfirm = signal(false);
   deletingProject = signal(false);
+
+  // Tab references
+  private usersTab = viewChild(ProjectUsersTabComponent);
+  private samplesTab = viewChild(ProjectSamplesTabComponent);
 
   // Dynamic component references
   private qrModalRef: ComponentRef<any> | null = null;
@@ -368,6 +398,104 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   closeOrderDataDialog(): void {
     this.orderDataDialogRef?.destroy();
     this.orderDataDialogRef = null;
+  }
+
+  // Samples tab dialog methods (page-card-on KÍVÜL)
+  openPackageDialog(request: PackageDialogRequest): void {
+    this.packageDialogData.set(request);
+    this.showPackageDialog.set(true);
+  }
+
+  closePackageDialog(): void {
+    this.showPackageDialog.set(false);
+    this.packageDialogData.set(null);
+  }
+
+  onPackageSaved(): void {
+    this.closePackageDialog();
+    this.samplesTab()?.onDialogSaved();
+  }
+
+  openVersionDialog(request: VersionDialogRequest): void {
+    this.versionDialogData.set(request);
+    this.showVersionDialog.set(true);
+  }
+
+  closeVersionDialog(): void {
+    this.showVersionDialog.set(false);
+    this.versionDialogData.set(null);
+  }
+
+  onVersionSaved(): void {
+    this.closeVersionDialog();
+    this.samplesTab()?.onDialogSaved();
+  }
+
+  confirmDeletePackage(pkg: SamplePackage): void {
+    this.deletingPackageData.set(pkg);
+    this.showDeletePackageConfirm.set(true);
+  }
+
+  onDeletePackageResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      const pkg = this.deletingPackageData();
+      if (pkg) {
+        this.samplesTab()?.executeDeletePackage(pkg);
+      }
+    }
+    this.showDeletePackageConfirm.set(false);
+    this.deletingPackageData.set(null);
+  }
+
+  confirmDeleteVersion(request: DeleteVersionRequest): void {
+    this.deletingVersionData.set(request);
+    this.showDeleteVersionConfirm.set(true);
+  }
+
+  onDeleteVersionResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      const data = this.deletingVersionData();
+      if (data) {
+        this.samplesTab()?.executeDeleteVersion(data.packageId, data.version.id);
+      }
+    }
+    this.showDeleteVersionConfirm.set(false);
+    this.deletingVersionData.set(null);
+  }
+
+  // Delete user methods (a users-tab output event-jét kezeli, dialog page-card-on KÍVÜL)
+  confirmDeleteUser(session: GuestSession): void {
+    this.deletingUser.set(session);
+    this.showDeleteUserConfirm.set(true);
+  }
+
+  onDeleteUserResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      const session = this.deletingUser();
+      if (session) {
+        this.usersTab()?.executeDelete(session);
+      }
+    }
+    this.showDeleteUserConfirm.set(false);
+    this.deletingUser.set(null);
+  }
+
+  // Delete contact result handler
+  onDeleteContactResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      this.deleteContact();
+    } else {
+      this.cancelDelete();
+    }
+  }
+
+  // Delete project result handler
+  onDeleteProjectResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      this.deleteProjectConfirmed();
+    } else {
+      this.cancelDeleteProject();
+    }
   }
 
   // Gallery creation

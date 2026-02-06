@@ -52,22 +52,6 @@ $transition-fast: 0.2s ease;
   }
 }
 
-@keyframes dialogFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes dialogSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 // ============================================
 // MAIN CONTAINER
 // ============================================
@@ -532,87 +516,7 @@ $transition-fast: 0.2s ease;
   }
 }
 
-// ============================================
-// DIALOG STYLES (Outside main container)
-// ============================================
-
-.session-chooser-dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  animation: dialogFadeIn 0.2s ease forwards;
-  padding: 1rem;
-}
-
-.session-chooser-dialog {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  max-width: 24rem;
-  width: 100%;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: dialogSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-
-  &__title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin: 0 0 0.75rem;
-  }
-
-  &__message {
-    font-size: 0.95rem;
-    color: #4b5563;
-    margin: 0 0 1.5rem;
-    line-height: 1.5;
-  }
-
-  &__actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
-  }
-
-  &__btn {
-    padding: 0.625rem 1.25rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition:
-      background-color $transition-fast,
-      transform 0.15s;
-    border: none;
-
-    &:active {
-      transform: scale(0.97);
-    }
-
-    &--cancel {
-      background: #f3f4f6;
-      color: #4b5563;
-
-      &:hover {
-        background: #e5e7eb;
-      }
-    }
-
-    &--confirm {
-      background: #ef4444;
-      color: white;
-
-      &:hover {
-        background: #dc2626;
-      }
-    }
-  }
-}
+// Dialog stílusok törölve - app-confirm-dialog komponens használata
 
 // ============================================
 // DARK MODE
@@ -714,33 +618,6 @@ $transition-fast: 0.2s ease;
     }
   }
 
-  .session-chooser-dialog-backdrop {
-    background: rgba(0, 0, 0, 0.7);
-  }
-
-  .session-chooser-dialog {
-    background: #1e293b;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-
-    &__title {
-      color: #f1f5f9;
-    }
-
-    &__message {
-      color: #cbd5e1;
-    }
-
-    &__btn {
-      &--cancel {
-        background: #334155;
-        color: #e2e8f0;
-
-        &:hover {
-          background: #475569;
-        }
-      }
-    }
-  }
 }
 
 // ============================================
@@ -784,19 +661,4 @@ $transition-fast: 0.2s ease;
     }
   }
 
-  .session-chooser-dialog-backdrop {
-    animation: none;
-  }
-
-  .session-chooser-dialog {
-    animation: none;
-
-    &__btn {
-      transition: none;
-
-      &:active {
-        transform: none;
-      }
-    }
-  }
 }

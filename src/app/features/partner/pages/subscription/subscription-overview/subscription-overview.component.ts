@@ -7,7 +7,7 @@ import { SubscriptionService, SubscriptionInfo } from '../../../services/subscri
 import { StorageService, StorageUsage } from '../../../services/storage.service';
 import { PlansService } from '../../../../../shared/services/plans.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../../../../shared/constants';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of, catchError } from 'rxjs';
 
 @Component({
   selector: 'app-subscription-overview',
@@ -110,17 +110,16 @@ export class SubscriptionOverviewComponent implements OnInit {
 
     forkJoin({
       subscription: this.subscriptionService.getSubscription(),
-      storage: this.storageService.getUsage(),
-      prices: this.plansService.getPlanPrices(),
+      storage: this.storageService.getUsage().pipe(catchError(() => of(null))),
+      prices: this.plansService.getPlanPrices().pipe(catchError(() => of({}))),
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ subscription, storage, prices }) => {
         this.subscription.set(subscription);
         this.storageUsage.set(storage);
-        this.planPrices.set(prices);
+        this.planPrices.set(prices as Record<string, { monthly: number; yearly: number }>);
         this.loading.set(false);
       },
-      error: (err) => {
-        console.error('Failed to load data:', err);
+      error: () => {
         this.loading.set(false);
       }
     });

@@ -89,6 +89,16 @@
         </div>
 
         <div class="actions" style="margin: -2px;">
+          @if (isDevMode) {
+            <button
+              class="action-btn"
+              style="margin: 2px;"
+              matTooltip="Dev login URL"
+              (click)="generateDevLogin(session.id)"
+            >
+              <lucide-icon [name]="ICONS.KEY" [size]="15" />
+            </button>
+          }
           <button
             class="action-btn"
             style="margin: 2px;"

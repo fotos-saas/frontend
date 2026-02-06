@@ -7,6 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
 import { PartnerService, GuestSession, PaginatedResponse } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { DevLoginService } from '../../../../core/services/dev-login.service';
 import { GuestSessionEditDialogComponent } from '../guest-session-edit-dialog/guest-session-edit-dialog.component';
 
 @Component({
@@ -26,8 +27,10 @@ export class ProjectUsersTabComponent implements OnInit {
   private partnerService = inject(PartnerService);
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
+  private devLoginService = inject(DevLoginService);
 
   readonly ICONS = ICONS;
+  readonly isDevMode = this.devLoginService.isDevMode();
 
   // State
   loading = signal(true);
@@ -165,5 +168,19 @@ export class ProjectUsersTabComponent implements OnInit {
     if (session.verificationStatus === 'pending') return 'Függőben';
     if (session.verificationStatus === 'rejected') return 'Elutasított';
     return 'Ismeretlen';
+  }
+
+  generateDevLogin(sessionId: number): void {
+    this.devLoginService.generateDevLoginUrl('tablo-guest', sessionId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          navigator.clipboard.writeText(res.url);
+          this.toast.success('Dev login', 'URL vágólapra másolva (5 perc érvényes)');
+        },
+        error: () => {
+          this.toast.error('Hiba', 'Nem sikerült a dev login URL generálása');
+        }
+      });
   }
 }

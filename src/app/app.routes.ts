@@ -33,6 +33,10 @@ export const routes: Routes = [
     path: 'tablo/preview/:token',
     loadComponent: () => import('./pages/preview-login/preview-login.component').then(m => m.PreviewLoginComponent)
   },
+  {
+    path: 'dev-login/:token',
+    loadComponent: () => import('./pages/dev-login/dev-login.component').then(m => m.DevLoginComponent)
+  },
 
   // New auth routes
   {

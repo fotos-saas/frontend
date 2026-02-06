@@ -6,6 +6,8 @@ import { TeamService, TeamMember, PendingInvitation, TeamRole } from '../../../s
 import { InviteDialogComponent } from '../invite-dialog/invite-dialog.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { DevLoginService } from '../../../../../core/services/dev-login.service';
+import { ToastService } from '../../../../../core/services/toast.service';
 
 /**
  * Partner Team List - Csapatom oldal
@@ -27,8 +29,11 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
 export class PartnerTeamListComponent implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly devLoginService = inject(DevLoginService);
+  private readonly toast = inject(ToastService);
 
   readonly ICONS = ICONS;
+  readonly isDevMode = this.devLoginService.isDevMode();
 
   // Adatok
   members = signal<TeamMember[]>([]);
@@ -183,5 +188,20 @@ export class PartnerTeamListComponent implements OnInit {
   // Clipboard másolás
   copyToClipboard(text: string): void {
     navigator.clipboard.writeText(text);
+  }
+
+  // Dev login URL generálás
+  generateDevLogin(userId: number, role: string): void {
+    this.devLoginService.generateDevLoginUrl(role, userId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          navigator.clipboard.writeText(res.url);
+          this.toast.success('Dev login', 'URL vágólapra másolva (5 perc érvényes)');
+        },
+        error: () => {
+          this.toast.error('Hiba', 'Nem sikerült a dev login URL generálása');
+        }
+      });
   }
 }

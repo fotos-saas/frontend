@@ -5,13 +5,17 @@ import { ICONS } from '../../../constants/icons.constants';
 import { createBackdropHandler } from '../../../utils/dialog.util';
 import { SampleVersion } from '../../../../features/partner/services/partner.service';
 import { SampleVersionDialogFacade } from './sample-version-dialog-facade.service';
-import { SamplesLightboxComponent } from '../../samples-lightbox/samples-lightbox.component';
 import { SampleLightboxItem } from '../../samples-lightbox/samples-lightbox.types';
+
+export interface LightboxRequest {
+  items: SampleLightboxItem[];
+  index: number;
+}
 
 @Component({
   selector: 'app-sample-version-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, SamplesLightboxComponent],
+  imports: [FormsModule, LucideAngularModule],
   providers: [SampleVersionDialogFacade],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sample-version-dialog.component.html',
@@ -23,13 +27,12 @@ export class SampleVersionDialogComponent implements OnInit, OnDestroy {
   editVersion = input<SampleVersion | null>(null);
   close = output<void>();
   saved = output<void>();
+  lightboxRequested = output<LightboxRequest>();
 
   readonly facade = inject(SampleVersionDialogFacade);
   readonly ICONS = ICONS;
 
   isDragging = signal(false);
-  lightboxOpen = signal(false);
-  lightboxIndex = signal(0);
 
   backdropHandler = createBackdropHandler(() => this.close.emit());
 
@@ -87,8 +90,7 @@ export class SampleVersionDialogComponent implements OnInit, OnDestroy {
   }
 
   openLightbox(index: number): void {
-    this.lightboxIndex.set(index);
-    this.lightboxOpen.set(true);
+    this.lightboxRequested.emit({ items: this.lightboxItems, index });
   }
 
   get lightboxItems(): SampleLightboxItem[] {

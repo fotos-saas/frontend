@@ -136,6 +136,17 @@
     [editVersion]="versionDialogData()?.editVersion ?? null"
     (close)="closeVersionDialog()"
     (saved)="onVersionSaved()"
+    (lightboxRequested)="openLightbox($event)"
+  />
+}
+
+<!-- Lightbox - MINDEN dialóguson KÍVÜL, stacking context miatt -->
+@if (showLightbox()) {
+  <app-samples-lightbox
+    [samples]="lightboxItems()"
+    [currentIndex]="lightboxIndex()"
+    (close)="closeLightbox()"
+    (navigate)="lightboxIndex.set($event)"
   />
 }
 

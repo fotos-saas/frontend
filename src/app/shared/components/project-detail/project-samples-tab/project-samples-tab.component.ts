@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, input, signal, inject, DestroyRef, OnInit, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, computed, inject, DestroyRef, OnInit, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -26,7 +27,7 @@ export interface DeleteVersionRequest {
 @Component({
   selector: 'app-project-samples-tab',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, MatTooltipModule],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-samples-tab.component.html',
   styleUrl: './project-samples-tab.component.scss',
@@ -48,8 +49,18 @@ export class ProjectSamplesTabComponent implements OnInit {
 
   loading = signal(true);
   packages = signal<SamplePackage[]>([]);
+  searchQuery = signal('');
   expandedIds = signal<Set<number>>(new Set());
   deleting = signal(false);
+
+  filteredPackages = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return this.packages();
+    return this.packages().filter(pkg =>
+      pkg.title.toLowerCase().includes(q) ||
+      pkg.versions.some(v => v.description?.toLowerCase().includes(q))
+    );
+  });
 
   ngOnInit(): void {
     this.loadPackages();

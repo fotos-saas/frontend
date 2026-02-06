@@ -1,5 +1,16 @@
-<!-- Fejléc + Új csomag gomb -->
+<!-- Fejléc: keresés + Új csomag gomb -->
 <div class="samples-header">
+  @if (packages().length > 0) {
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés cím vagy leírás alapján..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+      />
+    </div>
+  }
   <button class="btn-add" (click)="addNewSample()">
     <lucide-icon [name]="ICONS.PLUS" [size]="16" />
     Új minta
@@ -24,8 +35,13 @@
   </div>
 } @else {
   <!-- Csomag lista -->
+  @if (searchQuery() && filteredPackages().length === 0) {
+    <div class="empty-state">
+      <p>Nincs találat: <strong>{{ searchQuery() }}</strong></p>
+    </div>
+  }
   <div class="packages-list">
-    @for (pkg of packages(); track pkg.id; let i = $index) {
+    @for (pkg of filteredPackages(); track pkg.id; let i = $index) {
       <div class="package-card" [style.animation-delay]="i * 0.05 + 's'">
         <!-- Package header -->
         <div class="package-header" (click)="toggleExpand(pkg.id)">
@@ -81,7 +97,11 @@
                     <span class="version-number">v{{ ver.versionNumber }}</span>
                     <span class="version-date">{{ ver.createdAt | date:'yyyy.MM.dd' }}</span>
                   </div>
-                  <p class="version-desc">{{ ver.description }}</p>
+                  @if (ver.description) {
+                    <p class="version-desc">{{ ver.description }}</p>
+                  } @else {
+                    <p class="version-desc version-desc--empty">Nincs leírás</p>
+                  }
                 </div>
                 <div class="version-actions" style="margin: -2px;">
                   <button

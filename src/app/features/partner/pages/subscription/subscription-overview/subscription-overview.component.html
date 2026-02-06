@@ -237,7 +237,7 @@
         </div>
       </div>
     </div>
-  } @else {
+  } @else if (loadError()) {
     <div class="error-state">
       <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="48" />
       <p>Nem sikerült betölteni az előfizetés adatokat.</p>
@@ -245,6 +245,11 @@
         <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
         Újrapróbálás
       </button>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.PACKAGE" [size]="48" />
+      <p>Nincs aktív előfizetésed.</p>
     </div>
   }
 </div>

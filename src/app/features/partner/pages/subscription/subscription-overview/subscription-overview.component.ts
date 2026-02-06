@@ -28,6 +28,7 @@ export class SubscriptionOverviewComponent implements OnInit {
   storageUsage = signal<StorageUsage | null>(null);
   planPrices = signal<Record<string, { monthly: number; yearly: number }>>({});
   loading = signal(true);
+  loadError = signal(false);
   portalLoading = signal(false);
 
   // Computed values
@@ -107,6 +108,7 @@ export class SubscriptionOverviewComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true);
+    this.loadError.set(false);
 
     forkJoin({
       subscription: this.subscriptionService.getSubscription(),
@@ -120,6 +122,7 @@ export class SubscriptionOverviewComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
+        this.loadError.set(true);
         this.loading.set(false);
       }
     });

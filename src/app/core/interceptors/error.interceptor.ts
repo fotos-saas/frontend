@@ -44,7 +44,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       // Árva partner fiók: nincs Partner rekord → kijelentkeztetés
       if (error.status === 403 && error.error?.code === 'no_partner') {
         authService.logoutAdmin();
-        router.navigate(['/login']);
+        router.navigate(['/login'], { queryParams: { error: 'no_partner' } });
         return throwError(() => error);
       }
 

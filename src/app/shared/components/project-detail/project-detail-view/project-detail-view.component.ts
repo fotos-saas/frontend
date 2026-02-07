@@ -43,8 +43,22 @@ export class ProjectDetailViewComponent {
   readonly qrCodeChanged = output<QrCode | null>();
   readonly openOrderData = output<void>();
   readonly createGallery = output<void>();
+  readonly galleryDeadlineExtend = output<number>();
 
   copiedCodeId: number | null = null;
+
+  readonly deadlineOptions = [
+    { days: 1, label: '+1 nap' },
+    { days: 3, label: '+3 nap' },
+    { days: 7, label: '+1 hét' },
+    { days: 14, label: '+2 hét' },
+    { days: 21, label: '+3 hét' },
+  ];
+
+  isDeadlineExpired(dateStr: string): boolean {
+    const deadlineDate = new Date(dateStr + 'T23:59:59');
+    return deadlineDate < new Date();
+  }
 
   getTypeConfig(type: string) {
     return QR_CODE_TYPES[type as QrCodeTypeKey] ?? QR_CODE_TYPES['coordinator'];

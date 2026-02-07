@@ -96,23 +96,54 @@
     <section class="mb-6">
       @if (project()!.tabloGalleryId) {
         <!-- Van galéria -->
-        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
-              <lucide-icon [name]="ICONS.IMAGES" [size]="20" class="text-indigo-600" />
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div class="flex items-center justify-between p-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <lucide-icon [name]="ICONS.IMAGES" [size]="20" class="text-indigo-600" />
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900">Galéria</p>
+                <p class="text-xs text-gray-500">{{ project()!.galleryPhotosCount ?? 0 }} fotó</p>
+              </div>
             </div>
-            <div>
-              <p class="text-sm font-semibold text-gray-900">Galéria</p>
-              <p class="text-xs text-gray-500">{{ project()!.galleryPhotosCount ?? 0 }} fotó</p>
+            <a
+              [routerLink]="'gallery'"
+              class="px-4 py-2 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+            >
+              <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
+              Kezelés
+            </a>
+          </div>
+          <!-- Határidő sor -->
+          <div class="px-4 pb-3 pt-0 flex items-center justify-between border-t border-gray-100 pt-3">
+            <div class="flex items-center gap-2">
+              <lucide-icon [name]="ICONS.CALENDAR" [size]="14" class="text-gray-400" />
+              @if (project()!.deadline) {
+                <span class="text-xs font-medium" [class]="isDeadlineExpired(project()!.deadline!) ? 'text-red-600' : 'text-gray-600'">
+                  Határidő: {{ formatDate(project()!.deadline!) }}
+                </span>
+                @if (isDeadlineExpired(project()!.deadline!)) {
+                  <span class="px-1.5 py-0.5 text-[10px] font-bold text-white bg-red-500 rounded">Lejárt</span>
+                }
+              } @else {
+                <span class="text-xs text-gray-400">Nincs határidő beállítva</span>
+              }
+            </div>
+            <div class="flex items-center" style="margin: -2px;">
+              @for (opt of deadlineOptions; track opt.days) {
+                <button
+                  type="button"
+                  class="px-2 py-1 text-[11px] font-medium text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                  style="margin: 2px;"
+                  [matTooltip]="project()!.deadline ? 'Határidő meghosszabbítása ' + opt.label + '-pal' : 'Határidő beállítása mától + ' + opt.label"
+                  (click)="galleryDeadlineExtend.emit(opt.days)"
+                >
+                  {{ opt.label }}
+                </button>
+              }
             </div>
           </div>
-          <a
-            [routerLink]="'gallery'"
-            class="px-4 py-2 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-          >
-            <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
-            Kezelés
-          </a>
         </div>
       } @else {
         <!-- Nincs galéria -->

@@ -508,6 +508,33 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     }
   }
 
+  // Gallery deadline
+  extendGalleryDeadline(days: number): void {
+    const projectId = this.projectData()?.id;
+    if (!projectId || !this.partnerService) return;
+
+    const currentDeadline = this.projectData()?.deadline;
+    const base = currentDeadline ? new Date(currentDeadline) : new Date();
+    base.setDate(base.getDate() + days);
+    const newDeadline = base.toISOString().split('T')[0];
+
+    this.partnerService.setGalleryDeadline(projectId, newDeadline).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (response) => {
+        this.toast.success('Siker', 'Határidő beállítva');
+        // Frissítjük a lokális project data-t
+        const current = this.projectData();
+        if (current) {
+          this.projectData.set({ ...current, deadline: response.data.deadline });
+        }
+      },
+      error: () => {
+        this.toast.error('Hiba', 'Nem sikerült beállítani a határidőt');
+      },
+    });
+  }
+
   // Gallery creation
   createGallery(): void {
     const projectId = this.projectData()?.id;

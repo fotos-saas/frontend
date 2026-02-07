@@ -109,13 +109,13 @@ export class PartnerShellComponent implements OnInit {
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
       { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag' },
-      { id: 'settings', route: `${base}/settings`, label: 'Beállítások', icon: 'settings' },
       {
         id: 'customization',
         label: 'Testreszabás',
         icon: 'palette',
         children: [
           { id: 'branding', route: `${base}/customization/branding`, label: 'Márkajelzés' },
+          { id: 'settings', route: `${base}/settings`, label: 'Beállítások' },
         ]
       },
       {
@@ -135,12 +135,12 @@ export class PartnerShellComponent implements OnInit {
       return allItems;
     }
 
-    // Csapattagok: nincs Csapatom, nincs Megrendelések, nincs Előfizetésem (de van Fiók törlése)
+    // Csapattagok: nincs Csapatom, nincs Megrendelések, nincs Testreszabás, nincs Előfizetésem (de van Fiók törlése + Beállítások)
     return allItems
       .filter(item => !['team', 'orders', 'customization', 'subscription'].includes(item.id))
       .concat([
-        // Fiók törlése külön menüpontként
-        { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' }
+        { id: 'settings', route: `${base}/settings`, label: 'Beállítások', icon: 'settings' },
+        { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },
       ]);
   });
 
@@ -148,7 +148,7 @@ export class PartnerShellComponent implements OnInit {
   bugReportLink = computed(() => `${this.baseUrl()}/bugs`);
 
   // Kibontott szekciók
-  expandedSections = signal<Set<string>>(new Set(['subscription']));
+  expandedSections = signal<Set<string>>(new Set(['subscription', 'customization']));
 
   toggleSection(sectionId: string): void {
     const current = this.expandedSections();

@@ -54,6 +54,7 @@ export class BrandingComponent implements OnInit {
           this.branding.set(response.branding);
           this.brandName.set(response.branding?.brand_name ?? '');
           this.isActive.set(response.branding?.is_active ?? false);
+          this.brandingService.updateState(response.branding);
           this.loading.set(false);
         },
         error: (err: HttpErrorResponse) => {
@@ -77,6 +78,7 @@ export class BrandingComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.branding.set(response.branding);
+          this.brandingService.updateState(response.branding);
           this.toastService.success('Siker', 'Márkajelzés mentve.');
           this.saving.set(false);
         },
@@ -97,6 +99,7 @@ export class BrandingComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.branding.update(b => b ? { ...b, logo_url: response.logo_url ?? null } : b);
+          this.brandingService.logoUrl.set(response.logo_url ?? null);
           this.toastService.success('Siker', 'Logó feltöltve.');
           this.logoUploading.set(false);
         },
@@ -117,6 +120,7 @@ export class BrandingComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.branding.update(b => b ? { ...b, favicon_url: response.favicon_url ?? null } : b);
+          this.brandingService.faviconUrl.set(response.favicon_url ?? null);
           this.toastService.success('Siker', 'Favicon feltöltve.');
           this.faviconUploading.set(false);
         },
@@ -154,6 +158,7 @@ export class BrandingComponent implements OnInit {
       .subscribe({
         next: () => {
           this.branding.update(b => b ? { ...b, logo_url: null } : b);
+          this.brandingService.logoUrl.set(null);
           this.toastService.success('Siker', 'Logó törölve.');
         },
         error: (err) => {
@@ -169,6 +174,7 @@ export class BrandingComponent implements OnInit {
       .subscribe({
         next: () => {
           this.branding.update(b => b ? { ...b, favicon_url: null } : b);
+          this.brandingService.faviconUrl.set(null);
           this.toastService.success('Siker', 'Favicon törölve.');
         },
         error: (err) => {

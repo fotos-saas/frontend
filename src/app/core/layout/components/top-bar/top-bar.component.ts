@@ -65,6 +65,8 @@ export class TopBarComponent {
   readonly position = input<'fixed' | 'sticky'>('fixed');
   readonly logoIcon = input<string>('');
   readonly roleBadge = input<string>('');
+  readonly brandName = input<string | null>(null);
+  readonly brandLogoUrl = input<string | null>(null);
   readonly showNotifications = input<boolean>(true);
   readonly showPokeBadge = input<boolean>(true);
   readonly showUserBadges = input<boolean>(true);

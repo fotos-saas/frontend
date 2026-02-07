@@ -9,6 +9,7 @@ import { MobileNavOverlayComponent } from '../../core/layout/components/mobile-n
 import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.component';
 import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
+import { BrandingService } from './services/branding.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
 
 /** Role badge nevek */
@@ -50,6 +51,7 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
 export class PartnerShellComponent implements OnInit {
   private authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
+  protected readonly brandingService = inject(BrandingService);
   private router = inject(Router);
   protected sidebarState = inject(SidebarStateService);
   protected readonly ICONS = ICONS;
@@ -200,6 +202,7 @@ export class PartnerShellComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSubscriptionInfo();
+    this.loadBranding();
   }
 
   private loadSubscriptionInfo(): void {
@@ -212,6 +215,13 @@ export class PartnerShellComponent implements OnInit {
         }
       },
       error: (err) => console.error('Failed to load subscription info:', err)
+    });
+  }
+
+  private loadBranding(): void {
+    this.brandingService.getBranding().subscribe({
+      next: (response) => this.brandingService.updateState(response.branding),
+      error: () => {} // 403 vagy egyéb hiba - nem baj, marad az alapértelmezett
     });
   }
 

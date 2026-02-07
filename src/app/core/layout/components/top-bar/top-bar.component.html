@@ -26,11 +26,13 @@
 
       <!-- Logo -->
       <a [routerLink]="homeRoute()" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-        @if (logoIcon()) {
+        @if (brandLogoUrl()) {
+          <img [src]="brandLogoUrl()!" alt="Logó" class="h-7 md:h-8 w-auto object-contain" />
+        } @else if (logoIcon()) {
           <span class="text-xl md:text-2xl">{{ logoIcon() }}</span>
         }
         <span class="text-base md:text-lg font-bold text-gray-900">
-          TablóStúdió
+          {{ brandName() || 'TablóStúdió' }}
         </span>
         @if (roleBadge()) {
           <span class="hidden sm:inline-block px-2 py-1 text-[0.6875rem] md:text-xs font-semibold uppercase tracking-wide bg-purple-100 text-purple-700 rounded-xl">

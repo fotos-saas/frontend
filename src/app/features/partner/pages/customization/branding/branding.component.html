@@ -1,3 +1,27 @@
+@if (accessDenied()) {
+  <div class="access-denied page-card">
+    <div class="access-denied__content">
+      <div class="access-denied__icon">
+        <lucide-icon [name]="ICONS.LOCK" [size]="48" />
+      </div>
+      <h1 class="access-denied__title">Hozzáférés megtagadva</h1>
+      <p class="access-denied__text">
+        A Márkajelzés funkció a jelenlegi csomagodban nem érhető el.
+        Frissítsd az előfizetésedet a funkció eléréséhez.
+      </p>
+      <div class="access-denied__actions">
+        <a routerLink="/partner/subscription/overview" class="btn btn--primary">
+          <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="16" />
+          Előfizetés kezelése
+        </a>
+        <a routerLink="/partner/dashboard" class="btn btn--outline">
+          <lucide-icon [name]="ICONS.HOME" [size]="16" />
+          Vissza az irányítópultra
+        </a>
+      </div>
+    </div>
+  </div>
+} @else {
 <div class="branding-page page-card">
   <h1 class="page-title">
     <lucide-icon [name]="ICONS.PALETTE" [size]="24" />
@@ -164,3 +188,4 @@
     </section>
   }
 </div>
+}

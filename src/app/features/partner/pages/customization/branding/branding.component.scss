@@ -1,3 +1,51 @@
+/* Access Denied */
+.access-denied {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.access-denied__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.access-denied__icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fef2f2;
+  border-radius: 50%;
+  color: #ef4444;
+  margin-bottom: 24px;
+}
+
+.access-denied__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px;
+}
+
+.access-denied__text {
+  color: #64748b;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin: 0 0 32px;
+  max-width: 420px;
+}
+
+.access-denied__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .branding-page {
   max-width: 700px;
   margin: 0 auto;
@@ -229,10 +277,23 @@
 .btn--primary {
   background: #3b82f6;
   color: white;
+  text-decoration: none;
 }
 
 .btn--primary:hover:not(:disabled) {
   background: #2563eb;
+}
+
+.btn--outline {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  text-decoration: none;
+}
+
+.btn--outline:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
 }
 
 .btn--danger-outline {

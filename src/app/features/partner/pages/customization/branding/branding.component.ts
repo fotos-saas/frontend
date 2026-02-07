@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrandingService, BrandingData } from '../../../services/branding.service';
@@ -11,7 +13,7 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-branding',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, RouterModule, LucideAngularModule, MatTooltipModule],
   templateUrl: './branding.component.html',
   styleUrl: './branding.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,6 +27,7 @@ export class BrandingComponent implements OnInit {
 
   loading = signal(true);
   saving = signal(false);
+  accessDenied = signal(false);
   branding = signal<BrandingData | null>(null);
 
   brandName = signal<string>('');
@@ -50,8 +53,12 @@ export class BrandingComponent implements OnInit {
           this.isActive.set(response.branding?.is_active ?? false);
           this.loading.set(false);
         },
-        error: (err) => {
-          this.logger.error('Branding betöltés sikertelen:', err);
+        error: (err: HttpErrorResponse) => {
+          if (err.status === 403) {
+            this.accessDenied.set(true);
+          } else {
+            this.logger.error('Branding betöltés sikertelen:', err);
+          }
           this.loading.set(false);
         }
       });

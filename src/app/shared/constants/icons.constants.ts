@@ -301,6 +301,7 @@ export const ICONS = {
   SCAN_FACE: 'scan-face',
   FINGERPRINT: 'fingerprint',
   SHIELD_CHECK: 'shield-check',
+  LOCK: 'lock',
 
   // Network / Offline
   WIFI: 'wifi',

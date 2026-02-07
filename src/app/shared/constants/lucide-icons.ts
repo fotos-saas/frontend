@@ -120,6 +120,7 @@ import {
   ScanFace,
   Fingerprint,
   ShieldCheck,
+  Lock,
   // Network / Offline
   Wifi,
   WifiOff,
@@ -253,6 +254,7 @@ export const LUCIDE_ICONS_MAP = {
   ScanFace,
   Fingerprint,
   ShieldCheck,
+  Lock,
   // Network / Offline
   Wifi,
   WifiOff,

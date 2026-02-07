@@ -80,6 +80,12 @@ export class AppShellComponent implements OnInit, OnDestroy {
     return project !== null && !passwordSet;
   });
 
+  /** Partner branding neve (ha aktív) */
+  readonly brandName = computed(() => this.authService.projectSignal()?.branding?.brandName ?? null);
+
+  /** Partner branding logó URL (ha aktív) */
+  readonly brandLogoUrl = computed(() => this.authService.projectSignal()?.branding?.logoUrl ?? null);
+
   /**
    * Mobil menü user info (kapcsolattartó/vendég neve és email)
    */

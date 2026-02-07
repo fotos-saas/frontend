@@ -132,6 +132,11 @@ export interface TabloProject {
   photoSelectionCurrentStep?: 'claiming' | 'retouch' | 'tablo' | 'completed' | null;
   /** Képválasztás progress (intelligens reminder step meghatározáshoz) */
   photoSelectionProgress?: PhotoSelectionProgress | null;
+  /** Partner márkajelzés (ha aktív) */
+  branding?: {
+    brandName: string | null;
+    logoUrl: string | null;
+  } | null;
 }
 
 /**

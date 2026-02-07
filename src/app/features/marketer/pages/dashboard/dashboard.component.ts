@@ -31,7 +31,7 @@ const QUICK_ACTIONS: QuickActionConfig[] = [
   providers: [
     { provide: DASHBOARD_SERVICE, useExisting: MarketerService },
     { provide: DASHBOARD_ROUTE_PREFIX, useValue: '/marketer' },
-    { provide: DASHBOARD_SUBTITLE, useValue: 'Üdvözöljük a Tablókirály marketinges felületén!' },
+    { provide: DASHBOARD_SUBTITLE, useValue: 'Üdvözöljük a TablóStúdió marketinges felületén!' },
     { provide: DASHBOARD_STAT_CARDS, useValue: STAT_CARDS },
     { provide: DASHBOARD_QUICK_ACTIONS, useValue: QUICK_ACTIONS },
   ],

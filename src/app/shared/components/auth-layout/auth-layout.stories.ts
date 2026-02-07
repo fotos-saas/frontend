@@ -50,7 +50,7 @@ export const Default: Story = {
       <app-auth-layout>
         <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
           <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Tablókirály</h1>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">TablóStúdió</h1>
             <p class="text-gray-600">Jelentkezz be a folytatáshoz</p>
           </div>
 
@@ -149,7 +149,7 @@ export const DarkMode: Story = {
         <app-auth-layout>
           <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-xl p-8 border border-slate-700">
             <div class="text-center mb-6">
-              <h1 class="text-3xl font-bold text-white mb-2">Tablókirály</h1>
+              <h1 class="text-3xl font-bold text-white mb-2">TablóStúdió</h1>
               <p class="text-slate-400">Jelentkezz be a folytatáshoz</p>
             </div>
 

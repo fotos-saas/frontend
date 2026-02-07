@@ -1,6 +1,6 @@
 # Notifications Feature
 
-Értesítések (Notifications) funkció implementáció a Tablókirály Angular 21+ alkalmazáshoz.
+Értesítések (Notifications) funkció implementáció a TablóStúdió Angular 21+ alkalmazáshoz.
 
 ## 📁 Komponensek
 

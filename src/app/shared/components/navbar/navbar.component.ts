@@ -59,7 +59,7 @@ export interface NavbarProjectInfo {
  * Shared Navbar Component
  *
  * Egységes navbar a frontend-tablo alkalmazáshoz.
- * Megjeleníti a Tablókirály logót, opcionális projekt infót és navigációs linkeket.
+ * Megjeleníti a TablóStúdió logót, opcionális projekt infót és navigációs linkeket.
  * Mobile-on hamburger menüvel slide-in drawer.
  */
 @Component({

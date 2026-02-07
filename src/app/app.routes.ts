@@ -212,6 +212,12 @@ export const routes: Routes = [
         path: 'orders/albums/:id',
         loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
       },
+      // Testreszabás - customization
+      {
+        path: 'customization/branding',
+        loadComponent: () => import('./features/partner/pages/customization/branding/branding.component').then(m => m.BrandingComponent),
+        title: 'Márkajelzés'
+      },
       // Előfizetésem - subscription management
       {
         path: 'subscription',

@@ -5,7 +5,7 @@ import { environment } from '../../../../environments/environment';
 
 /**
  * Megrendelési adatok interface
- * Az api.tablokiraly.hu-ból szinkronizált projekt adatok
+ * Az api.tablostudio.hu-ból szinkronizált projekt adatok
  */
 export interface OrderData {
   // Kontakt

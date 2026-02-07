@@ -1,0 +1,166 @@
+<div class="branding-page page-card">
+  <h1 class="page-title">
+    <lucide-icon [name]="ICONS.PALETTE" [size]="24" />
+    Márkajelzés
+  </h1>
+
+  <p class="page-description">
+    Saját márkanév, logó és favicon megjelenítése a diákok számára látható oldalakon.
+  </p>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card skeleton-card--small"></div>
+    </div>
+  } @else {
+    <!-- Márkanév és aktiválás -->
+    <section class="section">
+      <div class="section-header">
+        <lucide-icon [name]="ICONS.EDIT" [size]="18" />
+        <h2 class="section-title">Alapbeállítások</h2>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="brandName">Márkanév</label>
+        <input
+          id="brandName"
+          type="text"
+          class="form-input"
+          [value]="brandName()"
+          (input)="brandName.set($any($event.target).value)"
+          placeholder="pl. Fotó Kovács Stúdió"
+          maxlength="100"
+        />
+        <span class="form-hint">Maximum 100 karakter. Ha üres, a rendszer neve jelenik meg.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="toggle-label">
+          <input
+            type="checkbox"
+            class="toggle-input"
+            [checked]="isActive()"
+            (change)="isActive.set($any($event.target).checked)"
+          />
+          <span class="toggle-switch"></span>
+          <span class="toggle-text">Márkajelzés aktív</span>
+        </label>
+        <span class="form-hint">Ha aktív, a diákok az oldalakon a te márkajelzésedet látják.</span>
+      </div>
+
+      <button
+        class="btn btn--primary"
+        (click)="saveBranding()"
+        [disabled]="saving()"
+      >
+        @if (saving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        } @else {
+          <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+        }
+        Mentés
+      </button>
+    </section>
+
+    <!-- Logó -->
+    <section class="section">
+      <div class="section-header">
+        <lucide-icon [name]="ICONS.IMAGE" [size]="18" />
+        <h2 class="section-title">Logó</h2>
+      </div>
+
+      @if (branding()?.logo_url) {
+        <div class="media-preview">
+          <img [src]="branding()!.logo_url!" alt="Logó" class="preview-image" />
+          <button class="btn btn--sm btn--danger-outline" (click)="deleteLogo()">
+            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+            Törlés
+          </button>
+        </div>
+      }
+
+      <div class="upload-area">
+        <label class="upload-btn" [class.upload-btn--loading]="logoUploading()">
+          @if (logoUploading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            Feltöltés...
+          } @else {
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+            Logó feltöltése
+          }
+          <input type="file" accept="image/*" (change)="onLogoSelect($event)" hidden [disabled]="logoUploading()" />
+        </label>
+        <span class="form-hint">Maximum 2 MB, kép formátum (PNG, JPG, SVG)</span>
+      </div>
+    </section>
+
+    <!-- Favicon -->
+    <section class="section">
+      <div class="section-header">
+        <lucide-icon [name]="ICONS.SPARKLE" [size]="18" />
+        <h2 class="section-title">Favicon</h2>
+      </div>
+
+      @if (branding()?.favicon_url) {
+        <div class="media-preview media-preview--small">
+          <img [src]="branding()!.favicon_url!" alt="Favicon" class="preview-favicon" />
+          <button class="btn btn--sm btn--danger-outline" (click)="deleteFavicon()">
+            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+            Törlés
+          </button>
+        </div>
+      }
+
+      <div class="upload-area">
+        <label class="upload-btn" [class.upload-btn--loading]="faviconUploading()">
+          @if (faviconUploading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            Feltöltés...
+          } @else {
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+            Favicon feltöltése
+          }
+          <input type="file" accept="image/*" (change)="onFaviconSelect($event)" hidden [disabled]="faviconUploading()" />
+        </label>
+        <span class="form-hint">Maximum 500 KB, négyzetes kép ajánlott (32x32 vagy 64x64)</span>
+      </div>
+    </section>
+
+    <!-- OG kép -->
+    <section class="section">
+      <div class="section-header">
+        <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="18" />
+        <h2 class="section-title">Megosztási kép (OG Image)</h2>
+      </div>
+
+      <p class="section-description">
+        Ez a kép jelenik meg, ha valaki megosztja az oldalt közösségi médiában.
+      </p>
+
+      @if (branding()?.og_image_url) {
+        <div class="media-preview media-preview--wide">
+          <img [src]="branding()!.og_image_url!" alt="OG kép" class="preview-og" />
+          <button class="btn btn--sm btn--danger-outline" (click)="deleteOgImage()">
+            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+            Törlés
+          </button>
+        </div>
+      }
+
+      <div class="upload-area">
+        <label class="upload-btn" [class.upload-btn--loading]="ogImageUploading()">
+          @if (ogImageUploading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            Feltöltés...
+          } @else {
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+            OG kép feltöltése
+          }
+          <input type="file" accept="image/*" (change)="onOgImageSelect($event)" hidden [disabled]="ogImageUploading()" />
+        </label>
+        <span class="form-hint">Maximum 5 MB, ajánlott méret: 1200x630 pixel</span>
+      </div>
+    </section>
+  }
+</div>

@@ -17,6 +17,7 @@ export interface Addon {
   isActive: boolean;
   isIncludedInPlan: boolean;
   canPurchase: boolean;
+  isFree?: boolean;
 }
 
 /**
@@ -120,7 +121,8 @@ export class AddonService {
   getFeatureIcon(feature: string): string {
     const icons: Record<string, string> = {
       forum: 'message-circle',
-      polls: 'check-circle',  // Szavazáshoz check-circle ikon
+      polls: 'check-circle',
+      branding: 'palette',
     };
     return icons[feature] || 'check';
   }
@@ -132,6 +134,7 @@ export class AddonService {
     const names: Record<string, string> = {
       forum: 'Fórum',
       polls: 'Szavazás',
+      branding: 'Márkajelzés',
     };
     return names[feature] || feature;
   }

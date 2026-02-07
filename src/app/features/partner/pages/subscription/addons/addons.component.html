@@ -74,13 +74,19 @@
 
             @if (!addon.isIncludedInPlan) {
               <div class="addon-footer">
-                <div class="addon-pricing-inline">
-                  @if (subscription()?.billing_cycle === 'yearly') {
-                    <span class="price-main">{{ formatPrice(addon.yearlyPrice) }}/év</span>
-                  } @else {
-                    <span class="price-main">{{ formatPrice(addon.monthlyPrice) }}/hó</span>
-                  }
-                </div>
+                @if (addon.monthlyPrice > 0) {
+                  <div class="addon-pricing-inline">
+                    @if (subscription()?.billing_cycle === 'yearly') {
+                      <span class="price-main">{{ formatPrice(addon.yearlyPrice) }}/év</span>
+                    } @else {
+                      <span class="price-main">{{ formatPrice(addon.monthlyPrice) }}/hó</span>
+                    }
+                  </div>
+                } @else {
+                  <div class="addon-pricing-inline">
+                    <span class="price-main price-main--free">Ingyenes</span>
+                  </div>
+                }
                 @if (addon.isActive) {
                   <button
                     class="btn btn--sm btn--danger-outline"

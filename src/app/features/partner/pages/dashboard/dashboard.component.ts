@@ -38,8 +38,8 @@ const QUICK_ACTIONS: QuickActionConfig[] = [
         const user = authService.getCurrentUser();
         const name = user?.name ?? '';
         return name
-          ? `Üdvözöljük a Tablókirály fotós felületén, ${name}!`
-          : 'Üdvözöljük a Tablókirály fotós felületén!';
+          ? `Üdvözöljük a TablóStúdió fotós felületén, ${name}!`
+          : 'Üdvözöljük a TablóStúdió fotós felületén!';
       },
       deps: [AuthService],
     },

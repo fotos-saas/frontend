@@ -17,7 +17,7 @@ import {
 /**
  * Order Finalization Service
  * API hívások a megrendelés véglegesítéshez
- * Konzisztens az api.tablokiraly.hu mezőneveivel
+ * Konzisztens az api.tablostudio.hu mezőneveivel
  */
 @Injectable({
   providedIn: 'root'

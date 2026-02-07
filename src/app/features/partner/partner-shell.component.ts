@@ -108,6 +108,14 @@ export class PartnerShellComponent implements OnInit {
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
       { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag' },
       {
+        id: 'customization',
+        label: 'Testreszabás',
+        icon: 'palette',
+        children: [
+          { id: 'branding', route: `${base}/customization/branding`, label: 'Márkajelzés' },
+        ]
+      },
+      {
         id: 'subscription',
         label: 'Előfizetésem',
         icon: 'credit-card',
@@ -126,7 +134,7 @@ export class PartnerShellComponent implements OnInit {
 
     // Csapattagok: nincs Csapatom, nincs Megrendelések, nincs Előfizetésem (de van Fiók törlése)
     return allItems
-      .filter(item => !['team', 'orders', 'subscription'].includes(item.id))
+      .filter(item => !['team', 'orders', 'customization', 'subscription'].includes(item.id))
       .concat([
         // Fiók törlése külön menüpontként
         { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' }

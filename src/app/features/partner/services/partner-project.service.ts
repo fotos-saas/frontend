@@ -1,0 +1,275 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import {
+  PartnerDashboardStats,
+  PartnerProjectListItem,
+  PartnerProjectDetails,
+  CreateProjectRequest,
+  ProjectListResponse,
+  ProjectAutocompleteItem,
+  SampleItem,
+  TabloPersonItem,
+} from '../models/partner.models';
+
+/**
+ * Projekt kezelés service.
+ * CRUD, settings, order data, dashboard statisztikák.
+ */
+@Injectable({
+  providedIn: 'root',
+})
+export class PartnerProjectService {
+  private http = inject(HttpClient);
+  private baseUrl = `${environment.apiUrl}/partner`;
+
+  // ============================================
+  // DASHBOARD
+  // ============================================
+
+  /**
+   * Dashboard statisztikák lekérése
+   */
+  getStats(): Observable<PartnerDashboardStats> {
+    return this.http.get<PartnerDashboardStats>(`${this.baseUrl}/stats`);
+  }
+
+  // ============================================
+  // PROJECTS CRUD
+  // ============================================
+
+  /**
+   * Projektek listázása (paginált, limitekkel)
+   */
+  getProjects(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    sort_by?: 'created_at' | 'photo_date' | 'class_year' | 'school_name' | 'tablo_status' | 'missing_count' | 'samples_count';
+    sort_dir?: 'asc' | 'desc';
+    status?: string;
+    is_aware?: boolean;
+    has_draft?: boolean;
+  }): Observable<ProjectListResponse> {
+    let httpParams = new HttpParams();
+
+    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
+    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.is_aware !== undefined) httpParams = httpParams.set('is_aware', params.is_aware.toString());
+    if (params?.has_draft !== undefined) httpParams = httpParams.set('has_draft', params.has_draft.toString());
+
+    return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });
+  }
+
+  /**
+   * Projekt részletek lekérése
+   */
+  getProjectDetails(id: number): Observable<PartnerProjectDetails> {
+    return this.http.get<PartnerProjectDetails>(`${this.baseUrl}/projects/${id}`);
+  }
+
+  /**
+   * Új projekt létrehozása
+   */
+  createProject(data: CreateProjectRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: PartnerProjectListItem;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: PartnerProjectListItem;
+    }>(`${this.baseUrl}/projects`, data);
+  }
+
+  /**
+   * Projekt módosítása
+   */
+  updateProject(projectId: number, data: Partial<CreateProjectRequest>): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.put<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}`,
+      data,
+    );
+  }
+
+  /**
+   * Projekt törlése
+   */
+  deleteProject(projectId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}`,
+    );
+  }
+
+  /**
+   * Tudnak róla státusz toggle
+   */
+  toggleProjectAware(projectId: number): Observable<{
+    success: boolean;
+    message: string;
+    isAware: boolean;
+  }> {
+    return this.http.patch<{
+      success: boolean;
+      message: string;
+      isAware: boolean;
+    }>(`${this.baseUrl}/projects/${projectId}/toggle-aware`, {});
+  }
+
+  // ============================================
+  // SAMPLES & PERSONS
+  // ============================================
+
+  /**
+   * Projekt minták lekérése
+   */
+  getProjectSamples(projectId: number): Observable<{ data: SampleItem[] }> {
+    return this.http.get<{ data: SampleItem[] }>(
+      `${this.baseUrl}/projects/${projectId}/samples`,
+    );
+  }
+
+  /**
+   * Projekt személyeinek lekérése
+   */
+  getProjectPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: TabloPersonItem[] }> {
+    let httpParams = new HttpParams();
+    if (withoutPhoto) {
+      httpParams = httpParams.set('without_photo', 'true');
+    }
+    return this.http.get<{ data: TabloPersonItem[] }>(
+      `${this.baseUrl}/projects/${projectId}/persons`,
+      { params: httpParams },
+    );
+  }
+
+  /**
+   * @deprecated Use getProjectPersons instead
+   */
+  getProjectMissingPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: TabloPersonItem[] }> {
+    return this.getProjectPersons(projectId, withoutPhoto);
+  }
+
+  // ============================================
+  // AUTOCOMPLETE
+  // ============================================
+
+  /**
+   * Projektek lekérése autocomplete-hez (kapcsolattartó modalhoz)
+   */
+  getProjectsAutocomplete(search?: string): Observable<ProjectAutocompleteItem[]> {
+    let httpParams = new HttpParams();
+    if (search) {
+      httpParams = httpParams.set('search', search);
+    }
+    return this.http.get<ProjectAutocompleteItem[]>(
+      `${this.baseUrl}/projects/autocomplete`,
+      { params: httpParams },
+    );
+  }
+
+  // ============================================
+  // ORDER DATA
+  // ============================================
+
+  /**
+   * Megrendelési adatok lekérése projekthez (partner view)
+   */
+  getProjectOrderData(projectId: number): Observable<{
+    success: boolean;
+    data: any;
+    message?: string;
+  }> {
+    return this.http.get<{ success: boolean; data: any; message?: string }>(
+      `${this.baseUrl}/projects/${projectId}/order-data`,
+    );
+  }
+
+  /**
+   * Megrendelési adatlap PDF generálása (partner view)
+   */
+  viewProjectOrderPdf(projectId: number): Observable<{
+    success: boolean;
+    pdfUrl?: string;
+    message?: string;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      pdfUrl?: string;
+      message?: string;
+    }>(`${this.baseUrl}/projects/${projectId}/order-data/view-pdf`, {});
+  }
+
+  // ============================================
+  // SETTINGS
+  // ============================================
+
+  /**
+   * Projekt beállítások lekérése
+   */
+  getProjectSettings(projectId: number): Observable<{
+    data: {
+      max_retouch_photos: number | null;
+      effective_max_retouch_photos: number;
+      global_default_max_retouch_photos: number;
+    };
+  }> {
+    return this.http.get<{
+      data: {
+        max_retouch_photos: number | null;
+        effective_max_retouch_photos: number;
+        global_default_max_retouch_photos: number;
+      };
+    }>(`${this.baseUrl}/projects/${projectId}/settings`);
+  }
+
+  /**
+   * Projekt beállítások módosítása
+   */
+  updateProjectSettings(projectId: number, data: { max_retouch_photos: number | null }): Observable<{
+    success: boolean;
+    message: string;
+    data: { max_retouch_photos: number | null; effective_max_retouch_photos: number };
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: { max_retouch_photos: number | null; effective_max_retouch_photos: number };
+    }>(`${this.baseUrl}/projects/${projectId}/settings`, data);
+  }
+
+  /**
+   * Globális beállítások lekérése
+   */
+  getGlobalSettings(): Observable<{
+    data: { default_max_retouch_photos: number };
+  }> {
+    return this.http.get<{
+      data: { default_max_retouch_photos: number };
+    }>(`${this.baseUrl}/settings`);
+  }
+
+  /**
+   * Globális beállítások módosítása
+   */
+  updateGlobalSettings(data: { default_max_retouch_photos: number | null }): Observable<{
+    success: boolean;
+    message: string;
+    data: { default_max_retouch_photos: number };
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: { default_max_retouch_photos: number };
+    }>(`${this.baseUrl}/settings`, data);
+  }
+}

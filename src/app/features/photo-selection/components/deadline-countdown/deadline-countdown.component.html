@@ -1,0 +1,46 @@
+<div
+  class="deadline-countdown"
+  [class.deadline-countdown--calm]="urgencyLevel() === 'calm'"
+  [class.deadline-countdown--soon]="urgencyLevel() === 'soon'"
+  [class.deadline-countdown--urgent]="urgencyLevel() === 'urgent'"
+  [class.deadline-countdown--critical]="urgencyLevel() === 'critical'"
+  [class.deadline-countdown--expired]="urgencyLevel() === 'expired'"
+>
+  <!-- Ikon -->
+  <div class="deadline-countdown__icon">
+    @if (urgencyLevel() === 'expired') {
+      <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="20" />
+    } @else if (urgencyLevel() === 'critical' || urgencyLevel() === 'urgent') {
+      <lucide-icon [name]="ICONS.TIMER" [size]="20" />
+    } @else {
+      <lucide-icon [name]="ICONS.HOURGLASS" [size]="20" />
+    }
+  </div>
+
+  <!-- Tartalom -->
+  <div class="deadline-countdown__content">
+    <div class="deadline-countdown__main">
+      <span class="deadline-countdown__text">{{ countdownText() }}</span>
+      @if (deadlineFormatted()) {
+        <span class="deadline-countdown__date">({{ deadlineFormatted() }})</span>
+      }
+    </div>
+
+    <!-- Pontos visszaszamlalas (csak ha nem jart le es <=3 nap) -->
+    @if (timeRemaining() && (urgencyLevel() === 'critical' || urgencyLevel() === 'urgent')) {
+      <div class="deadline-countdown__timer">
+        @if (timeRemaining()!.days > 0) {
+          <span class="deadline-countdown__timer-segment">
+            <strong>{{ timeRemaining()!.days }}</strong> nap
+          </span>
+        }
+        <span class="deadline-countdown__timer-segment">
+          <strong>{{ timeRemaining()!.hours }}</strong> ora
+        </span>
+        <span class="deadline-countdown__timer-segment">
+          <strong>{{ timeRemaining()!.minutes }}</strong> perc
+        </span>
+      </div>
+    }
+  </div>
+</div>

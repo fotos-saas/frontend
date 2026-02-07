@@ -323,6 +323,10 @@ export const ICONS = {
 
   // QR Code Types
   PIN: 'pin',
+
+  // Deadline countdown
+  HOURGLASS: 'hourglass',
+  TIMER: 'timer',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

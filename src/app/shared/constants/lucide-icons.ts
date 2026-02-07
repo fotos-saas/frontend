@@ -137,7 +137,10 @@ import {
   Paperclip,
   // QR Code Types
   Pin,
-  EyeOff
+  EyeOff,
+  // Deadline countdown
+  Hourglass,
+  Timer
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -271,5 +274,8 @@ export const LUCIDE_ICONS_MAP = {
   Paperclip,
   // QR Code Types
   Pin,
-  EyeOff
+  EyeOff,
+  // Deadline countdown
+  Hourglass,
+  Timer
 };

@@ -1,0 +1,193 @@
+/**
+ * Deadline Countdown Styles
+ * Urgency levels: calm → soon → urgent → critical → expired
+ */
+
+$transition: 0.3s ease;
+
+.deadline-countdown {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  transition: all $transition;
+  border: 1px solid transparent;
+
+  // === URGENCY LEVELS ===
+
+  &--calm {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+    color: #0c4a6e;
+
+    .deadline-countdown__icon { color: #0284c7; }
+    .deadline-countdown__timer-segment strong { color: #0284c7; }
+  }
+
+  &--soon {
+    background: #fefce8;
+    border-color: #fde68a;
+    color: #713f12;
+
+    .deadline-countdown__icon { color: #ca8a04; }
+    .deadline-countdown__timer-segment strong { color: #ca8a04; }
+  }
+
+  &--urgent {
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #7c2d12;
+    animation: deadlinePulse 3s ease-in-out infinite;
+
+    .deadline-countdown__icon { color: #ea580c; }
+    .deadline-countdown__timer-segment strong { color: #ea580c; }
+  }
+
+  &--critical {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #7f1d1d;
+    animation: deadlineShake 4s ease-in-out infinite;
+
+    .deadline-countdown__icon {
+      color: #dc2626;
+      animation: iconPulse 1.5s ease-in-out infinite;
+    }
+    .deadline-countdown__timer-segment strong { color: #dc2626; }
+  }
+
+  &--expired {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: #f87171;
+    color: #7f1d1d;
+    animation: deadlineShake 3s ease-in-out infinite;
+
+    .deadline-countdown__icon {
+      color: #dc2626;
+      animation: iconBounce 1s ease-in-out infinite;
+    }
+  }
+}
+
+.deadline-countdown__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  margin-right: 12px;
+}
+
+.deadline-countdown__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.deadline-countdown__main {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  // Safari: margin instead of gap
+  > * { margin-right: 6px; }
+  > *:last-child { margin-right: 0; }
+}
+
+.deadline-countdown__text {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.deadline-countdown__date {
+  font-size: 12px;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.deadline-countdown__timer {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  // Safari: margin instead of gap
+  > * { margin-right: 10px; }
+  > *:last-child { margin-right: 0; }
+}
+
+.deadline-countdown__timer-segment {
+  font-size: 12px;
+  font-weight: 500;
+
+  strong {
+    font-size: 16px;
+    font-weight: 700;
+    margin-right: 2px;
+  }
+}
+
+// === ANIMATIONS ===
+
+@keyframes deadlinePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.01); box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1); }
+}
+
+@keyframes deadlineShake {
+  0%, 88%, 100% { transform: translateX(0); }
+  90% { transform: translateX(-2px); }
+  92% { transform: translateX(2px); }
+  94% { transform: translateX(-2px); }
+  96% { transform: translateX(2px); }
+  98% { transform: translateX(0); }
+}
+
+@keyframes iconPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+@keyframes iconBounce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-3px); }
+  60% { transform: translateY(1px); }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .deadline-countdown,
+  .deadline-countdown__icon {
+    animation: none !important;
+  }
+}
+
+// Dark mode support
+:host-context(.dark) {
+  .deadline-countdown {
+    &--calm {
+      background: rgba(14, 165, 233, 0.1);
+      border-color: rgba(14, 165, 233, 0.3);
+      color: #bae6fd;
+    }
+    &--soon {
+      background: rgba(202, 138, 4, 0.1);
+      border-color: rgba(202, 138, 4, 0.3);
+      color: #fde68a;
+    }
+    &--urgent {
+      background: rgba(234, 88, 12, 0.1);
+      border-color: rgba(234, 88, 12, 0.3);
+      color: #fed7aa;
+    }
+    &--critical, &--expired {
+      background: rgba(220, 38, 38, 0.1);
+      border-color: rgba(220, 38, 38, 0.3);
+      color: #fecaca;
+    }
+  }
+  .deadline-countdown__icon {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}

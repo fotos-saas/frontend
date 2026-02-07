@@ -26,6 +26,16 @@
       />
     </app-workflow-header>
 
+    <!-- Deadline countdown (ha van hatarido beallitva) -->
+    @if (projectContext.hasDeadline() && projectContext.daysRemaining() !== null) {
+      <app-deadline-countdown
+        [deadline]="projectContext.deadline()!"
+        [daysRemaining]="projectContext.daysRemaining()!"
+        [isExpired]="projectContext.isDeadlineExpired()"
+        [deadlineFormatted]="projectContext.deadlineFormatted()"
+      />
+    }
+
     <!-- Error message -->
     @if (state.errorMessage()) {
       <app-error-message

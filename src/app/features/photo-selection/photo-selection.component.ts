@@ -31,6 +31,7 @@ import { NavigationFooterComponent } from './components/navigation-footer/naviga
 import { LoadingSkeletonComponent } from './components/loading-skeleton/loading-skeleton.component';
 import { ErrorMessageComponent } from './components/error-message/error-message.component';
 import { WorkflowHeaderComponent } from './components/workflow-header/workflow-header.component';
+import { DeadlineCountdownComponent } from './components/deadline-countdown/deadline-countdown.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent } from '../../shared/components/media-lightbox/media-lightbox.component';
 import { ScheduleReminderDialogComponent, ScheduleReminderResult } from '../../shared/components/schedule-reminder-dialog/schedule-reminder-dialog.component';
@@ -52,6 +53,7 @@ import { ScheduleReminderDialogComponent, ScheduleReminderResult } from '../../s
     LoadingSkeletonComponent,
     ErrorMessageComponent,
     WorkflowHeaderComponent,
+    DeadlineCountdownComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
     ScheduleReminderDialogComponent,

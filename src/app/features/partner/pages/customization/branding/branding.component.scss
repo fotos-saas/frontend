@@ -18,9 +18,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fef2f2;
+  background: #f3e8ff;
   border-radius: 50%;
-  color: #ef4444;
+  color: #7c3aed;
   margin-bottom: 24px;
 }
 
@@ -39,11 +39,39 @@
   max-width: 420px;
 }
 
+.access-denied__hint {
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
 .access-denied__actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.feature-list__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9375rem;
+  color: #334155;
+
+  lucide-icon {
+    color: #22c55e;
+    flex-shrink: 0;
+  }
 }
 
 .branding-page {

@@ -2,23 +2,35 @@
   <div class="access-denied page-card">
     <div class="access-denied__content">
       <div class="access-denied__icon">
-        <lucide-icon [name]="ICONS.LOCK" [size]="48" />
+        <lucide-icon [name]="ICONS.PALETTE" [size]="48" />
       </div>
-      <h1 class="access-denied__title">Hozzáférés megtagadva</h1>
+      <h1 class="access-denied__title">Márkajelzés</h1>
       <p class="access-denied__text">
-        A Márkajelzés funkció a jelenlegi csomagban nem érhető el.
-        @if (isPartner()) {
-          Frissítsd az előfizetésedet a funkció eléréséhez.
-        } @else {
-          Kérd meg a partner tulajdonost a csomag frissítésére.
-        }
+        Tedd egyedivé a diákjaid felületét! Saját márkanév, logó és favicon megjelenítése
+        a képválasztó és tabló oldalakon.
       </p>
+      <div class="feature-list">
+        <div class="feature-list__item">
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+          <span>Saját márkanév megjelenítése</span>
+        </div>
+        <div class="feature-list__item">
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+          <span>Egyedi logó feltöltése</span>
+        </div>
+        <div class="feature-list__item">
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+          <span>Saját favicon és megosztási kép</span>
+        </div>
+      </div>
       <div class="access-denied__actions">
         @if (isPartner()) {
-          <a routerLink="/partner/subscription/overview" class="btn btn--primary">
-            <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="16" />
-            Előfizetés kezelése
+          <a routerLink="/partner/subscription/addons" class="btn btn--primary">
+            <lucide-icon [name]="ICONS.PUZZLE" [size]="16" />
+            Aktiválás a Kiegészítőknél
           </a>
+        } @else {
+          <p class="access-denied__hint">Kérd meg a partner tulajdonost a funkció aktiválására.</p>
         }
         <a routerLink="/partner/dashboard" class="btn btn--outline">
           <lucide-icon [name]="ICONS.HOME" [size]="16" />

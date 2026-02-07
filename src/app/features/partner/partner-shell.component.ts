@@ -220,7 +220,11 @@ export class PartnerShellComponent implements OnInit {
 
   private loadBranding(): void {
     this.brandingService.getBranding().subscribe({
-      next: (response) => this.brandingService.updateState(response.branding),
+      next: (response) => {
+        // Csak akkor alkalmazzuk a branding-et a headerben, ha a feature aktív ÉS a branding be van kapcsolva
+        const isEffective = response.feature_active && response.branding?.is_active;
+        this.brandingService.updateState(isEffective ? response.branding : null);
+      },
       error: () => {} // 403 vagy egyéb hiba - nem baj, marad az alapértelmezett
     });
   }

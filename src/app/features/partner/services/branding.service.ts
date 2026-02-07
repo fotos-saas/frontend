@@ -15,6 +15,7 @@ export interface BrandingData {
 
 export interface BrandingResponse {
   branding: BrandingData | null;
+  feature_active?: boolean;
 }
 
 export interface BrandingUpdateResponse {

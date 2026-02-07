@@ -98,6 +98,8 @@ export class PartnerShellComponent implements OnInit {
   /** Szűrt menü a role és baseUrl alapján */
   navItems = computed<MenuItem[]>(() => {
     const base = this.baseUrl();
+    const sub = this.subscriptionInfo();
+    const hasBranding = sub ? sub.plan !== 'alap' : false;
 
     // Teljes menü (partner tulajdonosnak)
     const allItems: MenuItem[] = [
@@ -107,14 +109,15 @@ export class PartnerShellComponent implements OnInit {
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
       { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag' },
-      {
+      // Testreszabás csak iskola/studio/vip csomagoknál érhető el
+      ...(hasBranding ? [{
         id: 'customization',
         label: 'Testreszabás',
         icon: 'palette',
         children: [
           { id: 'branding', route: `${base}/customization/branding`, label: 'Márkajelzés' },
         ]
-      },
+      }] : []),
       {
         id: 'subscription',
         label: 'Előfizetésem',

@@ -6,14 +6,20 @@
       </div>
       <h1 class="access-denied__title">Hozzáférés megtagadva</h1>
       <p class="access-denied__text">
-        A Márkajelzés funkció a jelenlegi csomagodban nem érhető el.
-        Frissítsd az előfizetésedet a funkció eléréséhez.
+        A Márkajelzés funkció a jelenlegi csomagban nem érhető el.
+        @if (isPartner()) {
+          Frissítsd az előfizetésedet a funkció eléréséhez.
+        } @else {
+          Kérd meg a partner tulajdonost a csomag frissítésére.
+        }
       </p>
       <div class="access-denied__actions">
-        <a routerLink="/partner/subscription/overview" class="btn btn--primary">
-          <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="16" />
-          Előfizetés kezelése
-        </a>
+        @if (isPartner()) {
+          <a routerLink="/partner/subscription/overview" class="btn btn--primary">
+            <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="16" />
+            Előfizetés kezelése
+          </a>
+        }
         <a routerLink="/partner/dashboard" class="btn btn--outline">
           <lucide-icon [name]="ICONS.HOME" [size]="16" />
           Vissza az irányítópultra

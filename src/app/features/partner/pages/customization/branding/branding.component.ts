@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrandingService, BrandingData } from '../../../services/branding.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -21,9 +22,11 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
 export class BrandingComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly brandingService = inject(BrandingService);
+  private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly logger = inject(LoggerService);
   protected readonly ICONS = ICONS;
+  protected readonly isPartner = this.authService.isPartner;
 
   loading = signal(true);
   saving = signal(false);

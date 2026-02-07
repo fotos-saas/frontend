@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { AuthService, TabloProject, TabloPerson } from '../../core/services/auth.service';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 /**
@@ -26,10 +27,12 @@ export class PersonsComponent implements OnInit {
   project$: Observable<TabloProject | null>;
 
   /** Keresőmező értéke */
-  searchQuery$ = new BehaviorSubject<string>('');
+  searchQuery = signal<string>('');
+  private readonly searchQuery$ = toObservable(this.searchQuery);
 
   /** Szűrő (all, student, teacher) */
-  filterType$ = new BehaviorSubject<'all' | 'student' | 'teacher'>('all');
+  filterType = signal<'all' | 'student' | 'teacher'>('all');
+  private readonly filterType$ = toObservable(this.filterType);
 
   /** Szűrt és keresett személyek */
   filteredPersons$!: Observable<{
@@ -93,7 +96,7 @@ export class PersonsComponent implements OnInit {
    */
   onSearchChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this.searchQuery$.next(value);
+    this.searchQuery.set(value);
   }
 
   /**
@@ -101,7 +104,7 @@ export class PersonsComponent implements OnInit {
    */
   onFilterChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value as 'all' | 'student' | 'teacher';
-    this.filterType$.next(value);
+    this.filterType.set(value);
   }
 
   /**

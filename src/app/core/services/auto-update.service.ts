@@ -1,5 +1,6 @@
 import { Injectable, NgZone, OnDestroy, signal, computed } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { UpdateState } from './electron.types';
 import './electron.types';
 
@@ -66,8 +67,8 @@ export class AutoUpdateService implements OnDestroy {
   readonly releaseNotes = computed(() => this._state().releaseNotes);
   readonly error = computed(() => this._state().error);
 
-  // BehaviorSubject for RxJS subscribers
-  private state$ = new BehaviorSubject<UpdateState>(initialState);
+  // Observable for RxJS subscribers (backward compat)
+  private readonly state$ = toObservable(this._state);
   private cleanupFunctions: CleanupFn[] = [];
 
   constructor(private ngZone: NgZone) {
@@ -91,7 +92,7 @@ export class AutoUpdateService implements OnDestroy {
    * Observable for update state changes (RxJS)
    */
   get stateChanges(): Observable<UpdateState> {
-    return this.state$.asObservable();
+    return this.state$;
   }
 
   /**
@@ -185,7 +186,6 @@ export class AutoUpdateService implements OnDestroy {
    */
   private updateState(newState: UpdateState): void {
     this._state.set(newState);
-    this.state$.next(newState);
   }
 
   /**

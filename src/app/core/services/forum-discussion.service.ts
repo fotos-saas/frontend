@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
@@ -103,7 +103,7 @@ export class ForumDiscussionService {
   readonly isLoading = signal<boolean>(false);
 
   /** Beszélgetések cache */
-  readonly discussionsCache$ = new BehaviorSubject<Discussion[]>([]);
+  readonly discussionsCache = signal<Discussion[]>([]);
 
   /**
    * Beszélgetések betöltése
@@ -122,7 +122,7 @@ export class ForumDiscussionService {
     ).pipe(
       map(response => response.data.map(item => this.mapDiscussionListItem(item))),
       tap(discussions => {
-        this.discussionsCache$.next(discussions);
+        this.discussionsCache.set(discussions);
         this.isLoading.set(false);
       }),
       catchError(error => {
@@ -157,8 +157,8 @@ export class ForumDiscussionService {
     ).pipe(
       map(response => response.data),
       tap(discussion => {
-        const current = this.discussionsCache$.getValue();
-        this.discussionsCache$.next([discussion, ...current]);
+        const current = this.discussionsCache();
+        this.discussionsCache.set([discussion, ...current]);
       }),
       catchError(error => throwError(() => this.handleError(error)))
     );
@@ -284,11 +284,11 @@ export class ForumDiscussionService {
   }
 
   updateDiscussionInCache(updated: Discussion): void {
-    const current = this.discussionsCache$.getValue();
+    const current = this.discussionsCache();
     const index = current.findIndex(d => d.id === updated.id);
     if (index !== -1) {
       current[index] = updated;
-      this.discussionsCache$.next([...current]);
+      this.discussionsCache.set([...current]);
     }
   }
 

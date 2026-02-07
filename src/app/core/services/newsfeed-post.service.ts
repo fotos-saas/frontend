@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
@@ -89,7 +90,7 @@ export class NewsfeedPostService {
   readonly isLoading = signal<boolean>(false);
 
   /** Posztok cache */
-  readonly postsCache$ = new BehaviorSubject<NewsfeedPost[]>([]);
+  readonly postsCache = signal<NewsfeedPost[]>([]);
 
   /** Aktuális szűrők */
   private currentFilters: NewsfeedFilters = {};
@@ -112,7 +113,7 @@ export class NewsfeedPostService {
     ).pipe(
       map(response => response.data.data.map(post => this.mapPost(post))),
       tap(posts => {
-        this.postsCache$.next(posts);
+        this.postsCache.set(posts);
         this.isLoading.set(false);
       }),
       catchError(error => {
@@ -303,27 +304,26 @@ export class NewsfeedPostService {
 
   // === CACHE GETTERS ===
 
-  get posts$(): Observable<NewsfeedPost[]> {
-    return this.postsCache$.asObservable();
-  }
+  /** Backward compat observable a postsCache signal-ból */
+  readonly posts$ = toObservable(this.postsCache);
 
   // === CACHE UPDATE METHODS (comment service-nek is kell) ===
 
   incrementCommentsInCache(postId: number): void {
-    const current = this.postsCache$.getValue();
+    const current = this.postsCache();
     const index = current.findIndex(p => p.id === postId);
     if (index !== -1) {
       current[index] = { ...current[index], commentsCount: current[index].commentsCount + 1 };
-      this.postsCache$.next([...current]);
+      this.postsCache.set([...current]);
     }
   }
 
   decrementCommentsInCache(postId: number): void {
-    const current = this.postsCache$.getValue();
+    const current = this.postsCache();
     const index = current.findIndex(p => p.id === postId);
     if (index !== -1) {
       current[index] = { ...current[index], commentsCount: Math.max(0, current[index].commentsCount - 1) };
-      this.postsCache$.next([...current]);
+      this.postsCache.set([...current]);
     }
   }
 
@@ -364,36 +364,36 @@ export class NewsfeedPostService {
   }
 
   private addPostToCache(post: NewsfeedPost): void {
-    const current = this.postsCache$.getValue();
+    const current = this.postsCache();
     if (post.isPinned) {
-      this.postsCache$.next([post, ...current]);
+      this.postsCache.set([post, ...current]);
     } else {
       const pinnedPosts = current.filter(p => p.isPinned);
       const normalPosts = current.filter(p => !p.isPinned);
-      this.postsCache$.next([...pinnedPosts, post, ...normalPosts]);
+      this.postsCache.set([...pinnedPosts, post, ...normalPosts]);
     }
   }
 
   private updatePostInCache(post: NewsfeedPost): void {
-    const current = this.postsCache$.getValue();
+    const current = this.postsCache();
     const index = current.findIndex(p => p.id === post.id);
     if (index !== -1) {
       current[index] = post;
-      this.postsCache$.next([...current]);
+      this.postsCache.set([...current]);
     }
   }
 
   private removePostFromCache(id: number): void {
-    const current = this.postsCache$.getValue();
-    this.postsCache$.next(current.filter(p => p.id !== id));
+    const current = this.postsCache();
+    this.postsCache.set(current.filter(p => p.id !== id));
   }
 
   private updateLikeInCache(postId: number, liked: boolean, likesCount: number): void {
-    const current = this.postsCache$.getValue();
+    const current = this.postsCache();
     const index = current.findIndex(p => p.id === postId);
     if (index !== -1) {
       current[index] = { ...current[index], hasLiked: liked, likesCount };
-      this.postsCache$.next([...current]);
+      this.postsCache.set([...current]);
     }
   }
 
@@ -401,16 +401,16 @@ export class NewsfeedPostService {
     postId: number, hasReacted: boolean, userReaction: string | null,
     reactions: ReactionsSummary, likesCount: number
   ): void {
-    const current = this.postsCache$.getValue();
+    const current = this.postsCache();
     const index = current.findIndex(p => p.id === postId);
     if (index !== -1) {
       current[index] = { ...current[index], hasLiked: hasReacted, userReaction, reactions, likesCount };
-      this.postsCache$.next([...current]);
+      this.postsCache.set([...current]);
     }
   }
 
   private updatePinInCache(postId: number, isPinned: boolean): void {
-    const current = this.postsCache$.getValue();
+    const current = this.postsCache();
     const index = current.findIndex(p => p.id === postId);
     if (index !== -1) {
       current[index] = { ...current[index], isPinned };
@@ -419,7 +419,7 @@ export class NewsfeedPostService {
         if (!a.isPinned && b.isPinned) return 1;
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-      this.postsCache$.next(sorted);
+      this.postsCache.set(sorted);
     }
   }
 

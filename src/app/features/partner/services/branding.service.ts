@@ -22,11 +22,16 @@ export interface BrandingUpdateResponse {
   branding: BrandingData;
 }
 
-export interface MediaUploadResponse {
-  message: string;
-  logo_url?: string;
-  favicon_url?: string;
-  og_image_url?: string;
+export interface BrandingSavePayload {
+  brand_name: string | null;
+  is_active: boolean;
+  hide_brand_name: boolean;
+  logo?: File;
+  favicon?: File;
+  og_image?: File;
+  delete_logo?: boolean;
+  delete_favicon?: boolean;
+  delete_og_image?: boolean;
 }
 
 @Injectable({
@@ -94,37 +99,35 @@ export class BrandingService {
     return this.http.get<BrandingResponse>(this.baseUrl);
   }
 
-  updateBranding(data: { brand_name: string | null; is_active: boolean; hide_brand_name: boolean }): Observable<BrandingUpdateResponse> {
-    return this.http.post<BrandingUpdateResponse>(this.baseUrl, data);
-  }
-
-  uploadLogo(file: File): Observable<MediaUploadResponse> {
+  /**
+   * Egységes mentés: alap adatok + opcionális média feltöltés/törlés.
+   * Egy request-ben kezeli a szöveges mezőket, fájl feltöltéseket és törléseket.
+   */
+  saveBranding(payload: BrandingSavePayload): Observable<BrandingUpdateResponse> {
     const formData = new FormData();
-    formData.append('logo', file);
-    return this.http.post<MediaUploadResponse>(`${this.baseUrl}/logo`, formData);
-  }
+    formData.append('brand_name', payload.brand_name ?? '');
+    formData.append('is_active', payload.is_active ? '1' : '0');
+    formData.append('hide_brand_name', payload.hide_brand_name ? '1' : '0');
 
-  uploadFavicon(file: File): Observable<MediaUploadResponse> {
-    const formData = new FormData();
-    formData.append('favicon', file);
-    return this.http.post<MediaUploadResponse>(`${this.baseUrl}/favicon`, formData);
-  }
+    if (payload.logo) {
+      formData.append('logo', payload.logo);
+    }
+    if (payload.favicon) {
+      formData.append('favicon', payload.favicon);
+    }
+    if (payload.og_image) {
+      formData.append('og_image', payload.og_image);
+    }
+    if (payload.delete_logo) {
+      formData.append('delete_logo', '1');
+    }
+    if (payload.delete_favicon) {
+      formData.append('delete_favicon', '1');
+    }
+    if (payload.delete_og_image) {
+      formData.append('delete_og_image', '1');
+    }
 
-  uploadOgImage(file: File): Observable<MediaUploadResponse> {
-    const formData = new FormData();
-    formData.append('og_image', file);
-    return this.http.post<MediaUploadResponse>(`${this.baseUrl}/og-image`, formData);
-  }
-
-  deleteLogo(): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.baseUrl}/logo`);
-  }
-
-  deleteFavicon(): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.baseUrl}/favicon`);
-  }
-
-  deleteOgImage(): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.baseUrl}/og-image`);
+    return this.http.post<BrandingUpdateResponse>(this.baseUrl, formData);
   }
 }

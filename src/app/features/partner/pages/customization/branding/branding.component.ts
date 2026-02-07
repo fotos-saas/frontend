@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -10,6 +10,11 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+
+interface PendingMedia {
+  file: File;
+  previewUrl: string;
+}
 
 @Component({
   selector: 'app-branding',
@@ -37,10 +42,45 @@ export class BrandingComponent implements OnInit {
   isActive = signal(false);
   hideBrandName = signal(false);
 
-  // Upload states
-  logoUploading = signal(false);
-  faviconUploading = signal(false);
-  ogImageUploading = signal(false);
+  // Pending media state - lokális változások a mentésig
+  pendingLogo = signal<PendingMedia | null>(null);
+  pendingFavicon = signal<PendingMedia | null>(null);
+  pendingOgImage = signal<PendingMedia | null>(null);
+
+  // Törlésre jelölt média
+  deleteLogo = signal(false);
+  deleteFavicon = signal(false);
+  deleteOgImage = signal(false);
+
+  // Drag state
+  logoDragging = signal(false);
+  faviconDragging = signal(false);
+  ogImageDragging = signal(false);
+
+  // Computed: van-e mentetlen változás a médiáknál
+  hasMediaChanges = computed(() =>
+    !!this.pendingLogo() || !!this.pendingFavicon() || !!this.pendingOgImage() ||
+    this.deleteLogo() || this.deleteFavicon() || this.deleteOgImage()
+  );
+
+  // Computed: effektív logó URL (pending preview VAGY szerveres, ha nincs törlésre jelölve)
+  effectiveLogoUrl = computed(() => {
+    if (this.pendingLogo()) return this.pendingLogo()!.previewUrl;
+    if (this.deleteLogo()) return null;
+    return this.branding()?.logo_url ?? null;
+  });
+
+  effectiveFaviconUrl = computed(() => {
+    if (this.pendingFavicon()) return this.pendingFavicon()!.previewUrl;
+    if (this.deleteFavicon()) return null;
+    return this.branding()?.favicon_url ?? null;
+  });
+
+  effectiveOgImageUrl = computed(() => {
+    if (this.pendingOgImage()) return this.pendingOgImage()!.previewUrl;
+    if (this.deleteOgImage()) return null;
+    return this.branding()?.og_image_url ?? null;
+  });
 
   ngOnInit(): void {
     this.loadBranding();
@@ -72,16 +112,23 @@ export class BrandingComponent implements OnInit {
 
   saveBranding(): void {
     this.saving.set(true);
-    this.brandingService.updateBranding({
+    this.brandingService.saveBranding({
       brand_name: this.brandName() || null,
       is_active: this.isActive(),
-      hide_brand_name: this.hideBrandName()
+      hide_brand_name: this.hideBrandName(),
+      logo: this.pendingLogo()?.file,
+      favicon: this.pendingFavicon()?.file,
+      og_image: this.pendingOgImage()?.file,
+      delete_logo: this.deleteLogo(),
+      delete_favicon: this.deleteFavicon(),
+      delete_og_image: this.deleteOgImage(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.branding.set(response.branding);
           this.brandingService.updateState(response.branding);
+          this.clearPendingState();
           this.toastService.success('Siker', 'Márkajelzés mentve.');
           this.saving.set(false);
         },
@@ -93,112 +140,131 @@ export class BrandingComponent implements OnInit {
       });
   }
 
+  // --- Logo ---
+  onLogoDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.logoDragging.set(false);
+    const file = event.dataTransfer?.files[0];
+    if (file && this.isImageFile(file)) {
+      this.setLogoFile(file);
+    }
+  }
+
   onLogoSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    this.logoUploading.set(true);
-    this.brandingService.uploadLogo(file)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.branding.update(b => b ? { ...b, logo_url: response.logo_url ?? null } : b);
-          this.brandingService.logoUrl.set(response.logo_url ?? null);
-          this.toastService.success('Siker', 'Logó feltöltve.');
-          this.logoUploading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Logó feltöltés sikertelen:', err);
-          this.toastService.error('Hiba', 'Nem sikerült feltölteni a logót.');
-          this.logoUploading.set(false);
-        }
-      });
+    if (file) {
+      this.setLogoFile(file);
+    }
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  private setLogoFile(file: File): void {
+    this.revokePreview(this.pendingLogo());
+    this.pendingLogo.set({ file, previewUrl: URL.createObjectURL(file) });
+    this.deleteLogo.set(false);
+  }
+
+  removeLogo(): void {
+    this.revokePreview(this.pendingLogo());
+    this.pendingLogo.set(null);
+    if (this.branding()?.logo_url) {
+      this.deleteLogo.set(true);
+    }
+  }
+
+  // --- Favicon ---
+  onFaviconDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.faviconDragging.set(false);
+    const file = event.dataTransfer?.files[0];
+    if (file && this.isImageFile(file)) {
+      this.setFaviconFile(file);
+    }
   }
 
   onFaviconSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    this.faviconUploading.set(true);
-    this.brandingService.uploadFavicon(file)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.branding.update(b => b ? { ...b, favicon_url: response.favicon_url ?? null } : b);
-          this.brandingService.faviconUrl.set(response.favicon_url ?? null);
-          this.toastService.success('Siker', 'Favicon feltöltve.');
-          this.faviconUploading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Favicon feltöltés sikertelen:', err);
-          this.toastService.error('Hiba', 'Nem sikerült feltölteni a favicont.');
-          this.faviconUploading.set(false);
-        }
-      });
+    if (file) {
+      this.setFaviconFile(file);
+    }
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  private setFaviconFile(file: File): void {
+    this.revokePreview(this.pendingFavicon());
+    this.pendingFavicon.set({ file, previewUrl: URL.createObjectURL(file) });
+    this.deleteFavicon.set(false);
+  }
+
+  removeFavicon(): void {
+    this.revokePreview(this.pendingFavicon());
+    this.pendingFavicon.set(null);
+    if (this.branding()?.favicon_url) {
+      this.deleteFavicon.set(true);
+    }
+  }
+
+  // --- OG Image ---
+  onOgImageDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.ogImageDragging.set(false);
+    const file = event.dataTransfer?.files[0];
+    if (file && this.isImageFile(file)) {
+      this.setOgImageFile(file);
+    }
   }
 
   onOgImageSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    this.ogImageUploading.set(true);
-    this.brandingService.uploadOgImage(file)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.branding.update(b => b ? { ...b, og_image_url: response.og_image_url ?? null } : b);
-          this.toastService.success('Siker', 'OG kép feltöltve.');
-          this.ogImageUploading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('OG kép feltöltés sikertelen:', err);
-          this.toastService.error('Hiba', 'Nem sikerült feltölteni az OG képet.');
-          this.ogImageUploading.set(false);
-        }
-      });
+    if (file) {
+      this.setOgImageFile(file);
+    }
+    (event.target as HTMLInputElement).value = '';
   }
 
-  deleteLogo(): void {
-    this.brandingService.deleteLogo()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.branding.update(b => b ? { ...b, logo_url: null } : b);
-          this.brandingService.logoUrl.set(null);
-          this.toastService.success('Siker', 'Logó törölve.');
-        },
-        error: (err) => {
-          this.logger.error('Logó törlés sikertelen:', err);
-          this.toastService.error('Hiba', 'Nem sikerült törölni a logót.');
-        }
-      });
+  private setOgImageFile(file: File): void {
+    this.revokePreview(this.pendingOgImage());
+    this.pendingOgImage.set({ file, previewUrl: URL.createObjectURL(file) });
+    this.deleteOgImage.set(false);
   }
 
-  deleteFavicon(): void {
-    this.brandingService.deleteFavicon()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.branding.update(b => b ? { ...b, favicon_url: null } : b);
-          this.brandingService.faviconUrl.set(null);
-          this.toastService.success('Siker', 'Favicon törölve.');
-        },
-        error: (err) => {
-          this.logger.error('Favicon törlés sikertelen:', err);
-          this.toastService.error('Hiba', 'Nem sikerült törölni a favicont.');
-        }
-      });
+  removeOgImage(): void {
+    this.revokePreview(this.pendingOgImage());
+    this.pendingOgImage.set(null);
+    if (this.branding()?.og_image_url) {
+      this.deleteOgImage.set(true);
+    }
   }
 
-  deleteOgImage(): void {
-    this.brandingService.deleteOgImage()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.branding.update(b => b ? { ...b, og_image_url: null } : b);
-          this.toastService.success('Siker', 'OG kép törölve.');
-        },
-        error: (err) => {
-          this.logger.error('OG kép törlés sikertelen:', err);
-          this.toastService.error('Hiba', 'Nem sikerült törölni az OG képet.');
-        }
-      });
+  // --- Drag handlers ---
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  // --- Helpers ---
+  private isImageFile(file: File): boolean {
+    return file.type.startsWith('image/') || file.name.endsWith('.svg') || file.name.endsWith('.svgz');
+  }
+
+  private revokePreview(pending: PendingMedia | null): void {
+    if (pending) {
+      URL.revokeObjectURL(pending.previewUrl);
+    }
+  }
+
+  private clearPendingState(): void {
+    this.revokePreview(this.pendingLogo());
+    this.revokePreview(this.pendingFavicon());
+    this.revokePreview(this.pendingOgImage());
+    this.pendingLogo.set(null);
+    this.pendingFavicon.set(null);
+    this.pendingOgImage.set(null);
+    this.deleteLogo.set(false);
+    this.deleteFavicon.set(false);
+    this.deleteOgImage.set(false);
   }
 }

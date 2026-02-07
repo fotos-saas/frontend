@@ -104,19 +104,6 @@
         </label>
         <span class="form-hint">Ha a logód már tartalmazza a neved, kapcsold be hogy ne jelenjen meg a szöveg külön.</span>
       </div>
-
-      <button
-        class="btn btn--primary"
-        (click)="saveBranding()"
-        [disabled]="saving()"
-      >
-        @if (saving()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-        } @else {
-          <lucide-icon [name]="ICONS.SAVE" [size]="16" />
-        }
-        Mentés
-      </button>
     </section>
 
     <!-- Logó -->
@@ -126,27 +113,36 @@
         <h2 class="section-title">Logó</h2>
       </div>
 
-      @if (branding()?.logo_url) {
+      @if (effectiveLogoUrl()) {
         <div class="media-preview">
-          <img [src]="branding()!.logo_url!" alt="Logó" class="preview-image" />
-          <button class="btn btn--sm btn--danger-outline" (click)="deleteLogo()">
-            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
-            Törlés
-          </button>
+          <img [src]="effectiveLogoUrl()!" alt="Logó" class="preview-image" />
+          <div class="media-preview__actions">
+            @if (pendingLogo()) {
+              <span class="media-preview__badge media-preview__badge--new">Új</span>
+            }
+            <button class="btn btn--sm btn--danger-outline" (click)="removeLogo()" matTooltip="Logó eltávolítása">
+              <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              Eltávolítás
+            </button>
+          </div>
         </div>
       } @else {
-        <div class="upload-area">
-          <label class="upload-btn" [class.upload-btn--loading]="logoUploading()">
-            @if (logoUploading()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              Feltöltés...
-            } @else {
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-              Logó feltöltése
-            }
-            <input type="file" accept="image/*,.svg" (change)="onLogoSelect($event)" hidden [disabled]="logoUploading()" />
-          </label>
-          <span class="form-hint">Maximum 2 MB, kép formátum (PNG, JPG, SVG)</span>
+        <div
+          class="dropzone"
+          [class.dropzone--active]="logoDragging()"
+          (dragover)="onDragOver($event); logoDragging.set(true)"
+          (dragleave)="logoDragging.set(false)"
+          (drop)="onLogoDrop($event)"
+          (click)="logoInput.click()"
+        >
+          <input #logoInput type="file" accept="image/*,.svg" (change)="onLogoSelect($event)" hidden />
+          <div class="dropzone__content">
+            <div class="dropzone__icon">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="24" />
+            </div>
+            <span class="dropzone__text">Húzd ide a logót vagy kattints!</span>
+            <span class="dropzone__hint">Maximum 2 MB (PNG, JPG, SVG)</span>
+          </div>
         </div>
       }
     </section>
@@ -158,27 +154,36 @@
         <h2 class="section-title">Favicon</h2>
       </div>
 
-      @if (branding()?.favicon_url) {
+      @if (effectiveFaviconUrl()) {
         <div class="media-preview media-preview--small">
-          <img [src]="branding()!.favicon_url!" alt="Favicon" class="preview-favicon" />
-          <button class="btn btn--sm btn--danger-outline" (click)="deleteFavicon()">
-            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
-            Törlés
-          </button>
+          <img [src]="effectiveFaviconUrl()!" alt="Favicon" class="preview-favicon" />
+          <div class="media-preview__actions">
+            @if (pendingFavicon()) {
+              <span class="media-preview__badge media-preview__badge--new">Új</span>
+            }
+            <button class="btn btn--sm btn--danger-outline" (click)="removeFavicon()" matTooltip="Favicon eltávolítása">
+              <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              Eltávolítás
+            </button>
+          </div>
         </div>
       } @else {
-        <div class="upload-area">
-          <label class="upload-btn" [class.upload-btn--loading]="faviconUploading()">
-            @if (faviconUploading()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              Feltöltés...
-            } @else {
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-              Favicon feltöltése
-            }
-            <input type="file" accept="image/*,.svg" (change)="onFaviconSelect($event)" hidden [disabled]="faviconUploading()" />
-          </label>
-          <span class="form-hint">Maximum 500 KB, négyzetes kép ajánlott (32x32 vagy 64x64)</span>
+        <div
+          class="dropzone dropzone--sm"
+          [class.dropzone--active]="faviconDragging()"
+          (dragover)="onDragOver($event); faviconDragging.set(true)"
+          (dragleave)="faviconDragging.set(false)"
+          (drop)="onFaviconDrop($event)"
+          (click)="faviconInput.click()"
+        >
+          <input #faviconInput type="file" accept="image/*,.svg" (change)="onFaviconSelect($event)" hidden />
+          <div class="dropzone__content">
+            <div class="dropzone__icon dropzone__icon--sm">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="20" />
+            </div>
+            <span class="dropzone__text">Húzd ide a favicont vagy kattints!</span>
+            <span class="dropzone__hint">Maximum 500 KB, négyzetes kép ajánlott (32x32 vagy 64x64)</span>
+          </div>
         </div>
       }
     </section>
@@ -194,30 +199,61 @@
         Ez a kép jelenik meg, ha valaki megosztja az oldalt közösségi médiában.
       </p>
 
-      @if (branding()?.og_image_url) {
+      @if (effectiveOgImageUrl()) {
         <div class="media-preview media-preview--wide">
-          <img [src]="branding()!.og_image_url!" alt="OG kép" class="preview-og" />
-          <button class="btn btn--sm btn--danger-outline" (click)="deleteOgImage()">
-            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
-            Törlés
-          </button>
+          <img [src]="effectiveOgImageUrl()!" alt="OG kép" class="preview-og" />
+          <div class="media-preview__actions">
+            @if (pendingOgImage()) {
+              <span class="media-preview__badge media-preview__badge--new">Új</span>
+            }
+            <button class="btn btn--sm btn--danger-outline" (click)="removeOgImage()" matTooltip="OG kép eltávolítása">
+              <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              Eltávolítás
+            </button>
+          </div>
         </div>
       } @else {
-        <div class="upload-area">
-          <label class="upload-btn" [class.upload-btn--loading]="ogImageUploading()">
-            @if (ogImageUploading()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              Feltöltés...
-            } @else {
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-              OG kép feltöltése
-            }
-            <input type="file" accept="image/*,.svg" (change)="onOgImageSelect($event)" hidden [disabled]="ogImageUploading()" />
-          </label>
-          <span class="form-hint">Maximum 5 MB, ajánlott méret: 1200x630 pixel</span>
+        <div
+          class="dropzone"
+          [class.dropzone--active]="ogImageDragging()"
+          (dragover)="onDragOver($event); ogImageDragging.set(true)"
+          (dragleave)="ogImageDragging.set(false)"
+          (drop)="onOgImageDrop($event)"
+          (click)="ogImageInput.click()"
+        >
+          <input #ogImageInput type="file" accept="image/*,.svg" (change)="onOgImageSelect($event)" hidden />
+          <div class="dropzone__content">
+            <div class="dropzone__icon">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="24" />
+            </div>
+            <span class="dropzone__text">Húzd ide a megosztási képet vagy kattints!</span>
+            <span class="dropzone__hint">Maximum 5 MB, ajánlott méret: 1200x630 pixel</span>
+          </div>
         </div>
       }
     </section>
+
+    <!-- Mentés gomb -->
+    <div class="save-bar">
+      @if (hasMediaChanges()) {
+        <span class="save-bar__hint">
+          <lucide-icon [name]="ICONS.INFO" [size]="14" />
+          Mentetlen média változások
+        </span>
+      }
+      <button
+        class="btn btn--primary btn--lg"
+        (click)="saveBranding()"
+        [disabled]="saving()"
+      >
+        @if (saving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        } @else {
+          <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+        }
+        Mentés
+      </button>
+    </div>
   }
 </div>
 }

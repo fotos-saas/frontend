@@ -41,6 +41,7 @@ export class BrandingService {
   readonly brandName = signal<string | null>(null);
   readonly logoUrl = signal<string | null>(null);
   readonly faviconUrl = signal<string | null>(null);
+  readonly hideBrandName = signal(false);
 
   constructor() {
     // Favicon dinamikus frissítése, ha változik
@@ -55,6 +56,7 @@ export class BrandingService {
     this.brandName.set(branding?.brand_name ?? null);
     this.logoUrl.set(branding?.logo_url ?? null);
     this.faviconUrl.set(branding?.favicon_url ?? null);
+    this.hideBrandName.set(branding?.hide_brand_name ?? false);
   }
 
   private updateFavicon(url: string | null): void {

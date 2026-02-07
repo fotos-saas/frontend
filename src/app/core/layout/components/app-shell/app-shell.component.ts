@@ -86,6 +86,9 @@ export class AppShellComponent implements OnInit, OnDestroy {
   /** Partner branding logó URL (ha aktív) */
   readonly brandLogoUrl = computed(() => this.authService.projectSignal()?.branding?.logoUrl ?? null);
 
+  /** Partner branding szöveg elrejtése (ha aktív) */
+  readonly hideBrandName = computed(() => this.authService.projectSignal()?.branding?.hideBrandName ?? false);
+
   /**
    * Mobil menü user info (kapcsolattartó/vendég neve és email)
    */

@@ -75,6 +75,7 @@
                   <a
                     [routerLink]="child.route"
                     routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
                     class="nav-child"
                   >
                     {{ child.label }}

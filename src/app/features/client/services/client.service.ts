@@ -7,6 +7,14 @@ import { safeJsonParse } from '../../../shared/utils/safe-json-parse';
 import { getAlbumStatusLabel } from '../../../shared/constants';
 
 /**
+ * Partner branding data
+ */
+export interface ClientBranding {
+  brandName: string | null;
+  logoUrl: string | null;
+}
+
+/**
  * Client info stored in localStorage
  */
 export interface ClientInfo {
@@ -30,6 +38,7 @@ export interface ClientProfile {
   registeredAt: string | null;
   wantsNotifications: boolean;
   canRegister: boolean;
+  branding?: ClientBranding;
 }
 
 /**
@@ -64,6 +73,7 @@ export interface LoginResponse {
   token: string;
   tokenType: string;
   loginType: string;
+  branding?: ClientBranding;
 }
 
 /**
@@ -204,6 +214,10 @@ export class ClientService {
   private _hasDownloadableAlbum = signal(false);
   readonly hasDownloadableAlbum = this._hasDownloadableAlbum.asReadonly();
 
+  /** Partner branding (ha aktív) */
+  private _branding = signal<ClientBranding | null>(null);
+  readonly branding = this._branding.asReadonly();
+
   constructor() {
     this.initializeFromStorage();
   }
@@ -217,6 +231,13 @@ export class ClientService {
       const info = safeJsonParse<ClientInfo | null>(stored, null);
       if (info) {
         this._clientInfo.set(info);
+      }
+    }
+    const storedBranding = sessionStorage.getItem('client_branding');
+    if (storedBranding) {
+      const branding = safeJsonParse<ClientBranding | null>(storedBranding, null);
+      if (branding) {
+        this._branding.set(branding);
       }
     }
   }
@@ -253,7 +274,9 @@ export class ClientService {
     sessionStorage.removeItem('client_token');
     sessionStorage.removeItem('client_info');
     sessionStorage.removeItem('client_albums');
+    sessionStorage.removeItem('client_branding');
     this._clientInfo.set(null);
+    this._branding.set(null);
     this.router.navigate(['/login']);
   }
 
@@ -397,6 +420,11 @@ export class ClientService {
             wantsNotifications: response.data.wantsNotifications,
           });
         }
+        // Update branding from profile
+        if (response.data.branding) {
+          this._branding.set(response.data.branding);
+          sessionStorage.setItem('client_branding', JSON.stringify(response.data.branding));
+        }
       }),
       catchError(this.handleError.bind(this))
     );
@@ -460,6 +488,11 @@ export class ClientService {
         });
         // Store albums in localStorage for quick access
         sessionStorage.setItem('client_albums', JSON.stringify(response.albums));
+        // Store branding
+        if (response.branding) {
+          this._branding.set(response.branding);
+          sessionStorage.setItem('client_branding', JSON.stringify(response.branding));
+        }
       }),
       catchError(err => {
         const message = err.error?.message ?? 'Hiba történt. Kérlek próbáld újra.';

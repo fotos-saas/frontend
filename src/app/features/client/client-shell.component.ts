@@ -72,6 +72,10 @@ export class ClientShellComponent implements OnInit {
   readonly clientEmail = this.clientService.clientEmail;
   readonly hasDownloadableAlbum = this.clientService.hasDownloadableAlbum;
 
+  /** Partner branding */
+  readonly brandName = computed(() => this.clientService.branding()?.brandName ?? null);
+  readonly brandLogoUrl = computed(() => this.clientService.branding()?.logoUrl ?? null);
+
   /** User info a TopBar inline megjelenítéséhez */
   readonly userInfo = computed(() => ({
     name: this.clientName(),

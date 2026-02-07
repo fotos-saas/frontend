@@ -125,6 +125,9 @@ export class TabloAuthService {
     if (response.albums) {
       sessionStorage.setItem('client_albums', JSON.stringify(response.albums));
     }
+    if (response.branding) {
+      sessionStorage.setItem('client_branding', JSON.stringify(response.branding));
+    }
   }
 
   /**

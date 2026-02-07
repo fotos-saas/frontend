@@ -199,6 +199,11 @@ export interface LoginResponse {
     minSelections: number | null;
     isCompleted: boolean;
   }>;
+  /** Partner branding (client login esetén) */
+  branding?: {
+    brandName: string | null;
+    logoUrl: string | null;
+  };
 }
 
 /**

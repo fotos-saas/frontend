@@ -121,6 +121,12 @@ export class GalleryDetailComponent implements OnInit {
     this.state.lightboxIndex.set(newIndex);
   }
 
+  // === DEADLINE ===
+
+  onDeadlineExtend(days: number): void {
+    this.actions.extendDeadline(this.state, this.projectId, days);
+  }
+
   // === NAVIGATION ===
 
   onBack(): void {

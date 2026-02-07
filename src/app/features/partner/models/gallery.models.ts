@@ -31,6 +31,7 @@ export interface GalleryDetails {
 export interface GalleryResponse {
   hasGallery: boolean;
   gallery: GalleryDetails | null;
+  deadline: string | null;
 }
 
 /**

@@ -25,7 +25,7 @@ export class GalleryDetailActionsService {
     this.partnerService.getGallery(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.hasGallery && response.gallery) {
-          state.finishLoading(response.gallery);
+          state.finishLoading(response.gallery, response.deadline);
           this.loadProgress(state, projectId);
         } else {
           state.loadingError();
@@ -94,9 +94,37 @@ export class GalleryDetailActionsService {
       next: (response) => {
         if (response.hasGallery && response.gallery) {
           state.gallery.set(response.gallery);
+          state.deadline.set(response.deadline ?? null);
         }
       },
     });
+  }
+
+  // === DEADLINE ===
+
+  setDeadline(state: GalleryDetailState, projectId: number, dateString: string | null): void {
+    state.settingDeadline.set(true);
+    this.partnerService.setGalleryDeadline(projectId, dateString)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          state.deadline.set(response.data.deadline);
+          state.settingDeadline.set(false);
+          this.toast.success('Siker', 'Határidő beállítva');
+        },
+        error: () => {
+          state.settingDeadline.set(false);
+          this.toast.error('Hiba', 'Nem sikerült beállítani a határidőt');
+        },
+      });
+  }
+
+  extendDeadline(state: GalleryDetailState, projectId: number, days: number): void {
+    const current = state.deadline();
+    const base = current ? new Date(current) : new Date();
+    base.setDate(base.getDate() + days);
+    const newDeadline = base.toISOString().split('T')[0];
+    this.setDeadline(state, projectId, newDeadline);
   }
 
   // === DELETE PHOTO ===

@@ -21,6 +21,36 @@
       </div>
     }
 
+    <!-- Deadline szekció -->
+    <div class="info-bar__deadline">
+      @if (deadline()) {
+        <div
+          class="info-bar__deadline-badge"
+          [class.info-bar__deadline-badge--expired]="isDeadlineExpired()"
+          matTooltip="Képválasztási határidő"
+        >
+          <lucide-icon [name]="ICONS.CALENDAR" [size]="13" />
+          <span>{{ deadlineFormatted() }}</span>
+          @if (isDeadlineExpired()) {
+            <span class="info-bar__deadline-expired-label">Lejárt</span>
+          }
+        </div>
+      }
+      <div class="info-bar__deadline-quick">
+        @for (opt of [{days: 1, label: '+1 nap'}, {days: 3, label: '+3 nap'}, {days: 7, label: '+1 hét'}, {days: 14, label: '+2 hét'}, {days: 21, label: '+3 hét'}]; track opt.days) {
+          <button
+            type="button"
+            class="info-bar__deadline-btn"
+            [disabled]="settingDeadline()"
+            [matTooltip]="deadline() ? 'Határidő meghosszabbítása ' + opt.label + '-pal' : 'Határidő beállítása mától + ' + opt.label"
+            (click)="deadlineExtend.emit(opt.days)"
+          >
+            {{ opt.label }}
+          </button>
+        }
+      </div>
+    </div>
+
     <!-- Grid/Lista toggle -->
     <div class="info-bar__toggle">
       <button

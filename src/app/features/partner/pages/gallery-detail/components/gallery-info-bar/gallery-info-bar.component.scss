@@ -47,6 +47,69 @@
     border-radius: 6px;
   }
 
+  &__deadline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__deadline-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #1e3a5f;
+    background: #eff6ff;
+    border-radius: 6px;
+
+    &--expired {
+      color: #991b1b;
+      background: #fef2f2;
+    }
+  }
+
+  &__deadline-expired-label {
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: white;
+    background: #dc2626;
+    border-radius: 4px;
+  }
+
+  &__deadline-quick {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__deadline-btn {
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #6b7280;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover:not(:disabled) {
+      color: var(--color-primary, #1e3a5f);
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
   &__toggle {
     display: flex;
     align-items: center;

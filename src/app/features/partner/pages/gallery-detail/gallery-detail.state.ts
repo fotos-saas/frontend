@@ -15,7 +15,7 @@ export class GalleryDetailState {
 
   readonly loading = signal<boolean>(true);
   readonly gallery = signal<GalleryDetails | null>(null);
-  readonly viewMode = signal<'grid' | 'list'>('grid');
+  readonly viewMode = signal<'grid' | 'list'>('list');
 
   // === PROGRESS STATE ===
 
@@ -25,6 +25,12 @@ export class GalleryDetailState {
 
   readonly uploading = signal<boolean>(false);
   readonly uploadProgress = signal<number>(0);
+  readonly dropZoneVisible = signal<boolean>(false);
+
+  // === DEADLINE STATE ===
+
+  readonly deadline = signal<string | null>(null);
+  readonly settingDeadline = signal<boolean>(false);
 
   // === DELETE STATE ===
 
@@ -49,6 +55,25 @@ export class GalleryDetailState {
   readonly lightboxIndex = signal<number>(0);
 
   // === COMPUTED VALUES ===
+
+  /** Van-e fotó a galériában */
+  readonly hasPhotos = computed(() => (this.gallery()?.photos.length ?? 0) > 0);
+
+  /** Lejárt-e a határidő */
+  readonly isDeadlineExpired = computed(() => {
+    const d = this.deadline();
+    if (!d) return false;
+    const deadlineDate = new Date(d + 'T23:59:59');
+    return deadlineDate < new Date();
+  });
+
+  /** Magyar formátumú határidő */
+  readonly deadlineFormatted = computed(() => {
+    const d = this.deadline();
+    if (!d) return null;
+    const date = new Date(d);
+    return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' });
+  });
 
   /** WorkflowPhoto[] formátum a grid-hez */
   readonly gridPhotos = computed<WorkflowPhoto[]>(() => {
@@ -117,8 +142,9 @@ export class GalleryDetailState {
 
   // === METHODS ===
 
-  finishLoading(loadedGallery: GalleryDetails): void {
+  finishLoading(loadedGallery: GalleryDetails, deadline?: string | null): void {
     this.gallery.set(loadedGallery);
+    this.deadline.set(deadline ?? null);
     this.loading.set(false);
   }
 
@@ -263,9 +289,12 @@ export class GalleryDetailState {
   reset(): void {
     this.loading.set(true);
     this.gallery.set(null);
-    this.viewMode.set('grid');
+    this.viewMode.set('list');
     this.progress.set(null);
+    this.deadline.set(null);
+    this.settingDeadline.set(false);
     this.uploading.set(false);
+    this.dropZoneVisible.set(false);
     this.uploadProgress.set(0);
     this.deleteSelectedIds.set([]);
     this.deletingPhotos.set(false);

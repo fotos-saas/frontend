@@ -26,20 +26,59 @@
       [totalSizeMb]="state.gallery()!.totalSizeMb"
       [viewMode]="state.viewMode()"
       [progress]="state.progress()"
+      [deadline]="state.deadline()"
+      [deadlineFormatted]="state.deadlineFormatted()"
+      [settingDeadline]="state.settingDeadline()"
+      [isDeadlineExpired]="state.isDeadlineExpired()"
       (viewModeChange)="state.viewMode.set($event)"
+      (deadlineExtend)="onDeadlineExtend($event)"
     />
 
     <!-- Upload Section -->
-    <div class="mb-6">
-      <app-drop-zone
-        [uploading]="state.uploading()"
-        [uploadProgress]="state.uploadProgress()"
-        accept=".jpg,.jpeg,.png,.webp,.zip"
-        hint="JPG, PNG, WebP vagy ZIP"
-        maxSize="max. 50MB/fájl"
-        (filesSelected)="onFilesSelected($event)"
-      />
-    </div>
+    @if (!state.hasPhotos()) {
+      <div class="mb-6">
+        <app-drop-zone
+          [uploading]="state.uploading()"
+          [uploadProgress]="state.uploadProgress()"
+          accept=".jpg,.jpeg,.png,.webp,.zip"
+          hint="JPG, PNG, WebP vagy ZIP"
+          maxSize="max. 50MB/fájl"
+          (filesSelected)="onFilesSelected($event)"
+        />
+      </div>
+    } @else {
+      @if (!state.dropZoneVisible()) {
+        <button
+          type="button"
+          class="upload-toggle-btn"
+          (click)="state.dropZoneVisible.set(true)"
+        >
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+          Képek feltöltése
+        </button>
+      } @else {
+        <div class="upload-section">
+          <div class="upload-section__header">
+            <span>Képek feltöltése</span>
+            <button
+              type="button"
+              class="upload-section__close"
+              (click)="state.dropZoneVisible.set(false)"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+            </button>
+          </div>
+          <app-drop-zone
+            [uploading]="state.uploading()"
+            [uploadProgress]="state.uploadProgress()"
+            accept=".jpg,.jpeg,.png,.webp,.zip"
+            hint="JPG, PNG, WebP vagy ZIP"
+            maxSize="max. 50MB/fájl"
+            (filesSelected)="onFilesSelected($event)"
+          />
+        </div>
+      }
+    }
 
     <!-- Delete mode toolbar -->
     @if (state.deleteSelectedIds().length > 0) {
@@ -120,6 +159,33 @@
 
     <!-- Lista nézet -->
     @if (state.gallery()!.photos.length > 0 && state.viewMode() === 'list') {
+      <div class="selection-bar">
+        <div class="selection-bar__actions">
+          @if (state.allSelectedForDelete()) {
+            <button
+              type="button"
+              class="selection-bar__btn"
+              (click)="state.clearDeleteSelection()"
+            >
+              <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
+              Kijelölés törlése
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="selection-bar__btn"
+              (click)="state.selectAllForDelete()"
+            >
+              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+              Összes kijelölése
+            </button>
+          }
+        </div>
+        <span class="selection-bar__hint">
+          <lucide-icon [name]="ICONS.INFO" [size]="12" />
+          Ctrl/Cmd + kattintás = egyenkénti kijelölés
+        </span>
+      </div>
       <app-gallery-photo-list
         [photos]="state.paginatedPhotos()"
         [deleteSelectedIds]="state.deleteSelectedIds()"

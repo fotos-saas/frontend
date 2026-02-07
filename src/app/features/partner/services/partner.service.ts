@@ -1302,6 +1302,17 @@ export class PartnerService {
   }
 
   /**
+   * Galéria határidő beállítása
+   */
+  setGalleryDeadline(projectId: number, deadline: string | null): Observable<{
+    success: boolean; message: string; data: { deadline: string | null };
+  }> {
+    return this.http.post<{
+      success: boolean; message: string; data: { deadline: string | null };
+    }>(`${this.baseUrl}/projects/${projectId}/gallery/deadline`, { deadline });
+  }
+
+  /**
    * Galéria haladás lekérése (diák workflow)
    */
   getGalleryProgress(projectId: number): Observable<GalleryProgress> {

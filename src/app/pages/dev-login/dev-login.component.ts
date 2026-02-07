@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DevLoginService, DevLoginConsumeResponse } from '../../core/services/dev-login.service';
 import { TabloAuthService } from '../../core/services/auth/tablo-auth.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-dev-login',
@@ -98,6 +99,7 @@ export class DevLoginComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly devLoginService = inject(DevLoginService);
   private readonly tabloAuth = inject(TabloAuthService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -122,9 +124,13 @@ export class DevLoginComponent implements OnInit {
   }
 
   private handleLoginResponse(response: DevLoginConsumeResponse): void {
+    // Dev login: soha ne kérjen jelszó beállítást
+    response.user.passwordSet = true;
+
     switch (response.loginType) {
       case 'tablo':
         this.tabloAuth.storeAuthData(response as any, 'code');
+        this.authService.passwordSet.set(true);
         this.router.navigate(['/home']);
         break;
 

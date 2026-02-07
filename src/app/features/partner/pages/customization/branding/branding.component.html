@@ -120,21 +120,21 @@
             Törlés
           </button>
         </div>
+      } @else {
+        <div class="upload-area">
+          <label class="upload-btn" [class.upload-btn--loading]="logoUploading()">
+            @if (logoUploading()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              Feltöltés...
+            } @else {
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+              Logó feltöltése
+            }
+            <input type="file" accept="image/*,.svg" (change)="onLogoSelect($event)" hidden [disabled]="logoUploading()" />
+          </label>
+          <span class="form-hint">Maximum 2 MB, kép formátum (PNG, JPG, SVG)</span>
+        </div>
       }
-
-      <div class="upload-area">
-        <label class="upload-btn" [class.upload-btn--loading]="logoUploading()">
-          @if (logoUploading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-            Feltöltés...
-          } @else {
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-            Logó feltöltése
-          }
-          <input type="file" accept="image/*" (change)="onLogoSelect($event)" hidden [disabled]="logoUploading()" />
-        </label>
-        <span class="form-hint">Maximum 2 MB, kép formátum (PNG, JPG, SVG)</span>
-      </div>
     </section>
 
     <!-- Favicon -->
@@ -152,21 +152,21 @@
             Törlés
           </button>
         </div>
+      } @else {
+        <div class="upload-area">
+          <label class="upload-btn" [class.upload-btn--loading]="faviconUploading()">
+            @if (faviconUploading()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              Feltöltés...
+            } @else {
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+              Favicon feltöltése
+            }
+            <input type="file" accept="image/*,.svg" (change)="onFaviconSelect($event)" hidden [disabled]="faviconUploading()" />
+          </label>
+          <span class="form-hint">Maximum 500 KB, négyzetes kép ajánlott (32x32 vagy 64x64)</span>
+        </div>
       }
-
-      <div class="upload-area">
-        <label class="upload-btn" [class.upload-btn--loading]="faviconUploading()">
-          @if (faviconUploading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-            Feltöltés...
-          } @else {
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-            Favicon feltöltése
-          }
-          <input type="file" accept="image/*" (change)="onFaviconSelect($event)" hidden [disabled]="faviconUploading()" />
-        </label>
-        <span class="form-hint">Maximum 500 KB, négyzetes kép ajánlott (32x32 vagy 64x64)</span>
-      </div>
     </section>
 
     <!-- OG kép -->
@@ -188,21 +188,21 @@
             Törlés
           </button>
         </div>
+      } @else {
+        <div class="upload-area">
+          <label class="upload-btn" [class.upload-btn--loading]="ogImageUploading()">
+            @if (ogImageUploading()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              Feltöltés...
+            } @else {
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+              OG kép feltöltése
+            }
+            <input type="file" accept="image/*,.svg" (change)="onOgImageSelect($event)" hidden [disabled]="ogImageUploading()" />
+          </label>
+          <span class="form-hint">Maximum 5 MB, ajánlott méret: 1200x630 pixel</span>
+        </div>
       }
-
-      <div class="upload-area">
-        <label class="upload-btn" [class.upload-btn--loading]="ogImageUploading()">
-          @if (ogImageUploading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-            Feltöltés...
-          } @else {
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-            OG kép feltöltése
-          }
-          <input type="file" accept="image/*" (change)="onOgImageSelect($event)" hidden [disabled]="ogImageUploading()" />
-        </label>
-        <span class="form-hint">Maximum 5 MB, ajánlott méret: 1200x630 pixel</span>
-      </div>
     </section>
   }
 </div>

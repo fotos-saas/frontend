@@ -7,6 +7,7 @@ import { environment } from '../../../../environments/environment';
 export interface BrandingData {
   brand_name: string | null;
   is_active: boolean;
+  hide_brand_name: boolean;
   logo_url: string | null;
   favicon_url: string | null;
   og_image_url: string | null;
@@ -91,7 +92,7 @@ export class BrandingService {
     return this.http.get<BrandingResponse>(this.baseUrl);
   }
 
-  updateBranding(data: { brand_name: string | null; is_active: boolean }): Observable<BrandingUpdateResponse> {
+  updateBranding(data: { brand_name: string | null; is_active: boolean; hide_brand_name: boolean }): Observable<BrandingUpdateResponse> {
     return this.http.post<BrandingUpdateResponse>(this.baseUrl, data);
   }
 

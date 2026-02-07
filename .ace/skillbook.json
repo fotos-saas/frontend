@@ -1,0 +1,42 @@
+{
+  "skills": {
+    "angular_dialog_patterns-00001": {
+      "id": "angular_dialog_patterns-00001",
+      "section": "angular_dialog_patterns",
+      "content": "Place Angular dialogs outside page-card containers for backdrop-filter",
+      "justification": "Project-specific rule documented in CLAUDE.md #8, reinforced by successful refactoring that removed ~265 lines of redundant code",
+      "evidence": "Commit 335620d: 'dialógusok egységesítése - page-card-on kívülre emelés'. CLAUDE.md rule #8: 'Dialógusok page-card KÍVÜL - backdrop-filter stacking context miatt!'",
+      "helpful": 1,
+      "harmful": 0,
+      "neutral": 0,
+      "created_at": "2026-02-06T14:08:23.668151+00:00",
+      "updated_at": "2026-02-06T14:08:23.668195+00:00",
+      "embedding": null,
+      "status": "active"
+    },
+    "tooling_workarounds-00002": {
+      "id": "tooling_workarounds-00002",
+      "section": "tooling_workarounds",
+      "content": "Use ace-learn --lines N flag after /resume sessions",
+      "justification": "Enforceable workaround for recurring ace-learn CLI failure (exit code 1) when transcript context is incomplete",
+      "evidence": "ace-learn failed with exit code 1 after 9 retries; help output revealed --lines flag; tool hint confirmed 'transcript context may be incomplete after /resume'",
+      "helpful": 1,
+      "harmful": 0,
+      "neutral": 0,
+      "created_at": "2026-02-06T14:08:23.668255+00:00",
+      "updated_at": "2026-02-06T14:08:23.668260+00:00",
+      "embedding": null,
+      "status": "active"
+    }
+  },
+  "sections": {
+    "angular_dialog_patterns": [
+      "angular_dialog_patterns-00001"
+    ],
+    "tooling_workarounds": [
+      "tooling_workarounds-00002"
+    ]
+  },
+  "next_id": 2,
+  "similarity_decisions": {}
+}

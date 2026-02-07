@@ -35,6 +35,7 @@ export class BrandingComponent implements OnInit {
 
   brandName = signal<string>('');
   isActive = signal(false);
+  hideBrandName = signal(false);
 
   // Upload states
   logoUploading = signal(false);
@@ -54,6 +55,7 @@ export class BrandingComponent implements OnInit {
           this.branding.set(response.branding);
           this.brandName.set(response.branding?.brand_name ?? '');
           this.isActive.set(response.branding?.is_active ?? false);
+          this.hideBrandName.set(response.branding?.hide_brand_name ?? false);
           this.brandingService.updateState(response.branding);
           this.loading.set(false);
         },
@@ -72,7 +74,8 @@ export class BrandingComponent implements OnInit {
     this.saving.set(true);
     this.brandingService.updateBranding({
       brand_name: this.brandName() || null,
-      is_active: this.isActive()
+      is_active: this.isActive(),
+      hide_brand_name: this.hideBrandName()
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

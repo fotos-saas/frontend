@@ -67,6 +67,7 @@ export class TopBarComponent {
   readonly roleBadge = input<string>('');
   readonly brandName = input<string | null>(null);
   readonly brandLogoUrl = input<string | null>(null);
+  readonly hideBrandName = input<boolean>(false);
   readonly showNotifications = input<boolean>(true);
   readonly showPokeBadge = input<boolean>(true);
   readonly showUserBadges = input<boolean>(true);

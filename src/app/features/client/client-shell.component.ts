@@ -75,6 +75,7 @@ export class ClientShellComponent implements OnInit {
   /** Partner branding */
   readonly brandName = computed(() => this.clientService.branding()?.brandName ?? null);
   readonly brandLogoUrl = computed(() => this.clientService.branding()?.logoUrl ?? null);
+  readonly hideBrandName = computed(() => this.clientService.branding()?.hideBrandName ?? false);
 
   /** User info a TopBar inline megjelenítéséhez */
   readonly userInfo = computed(() => ({

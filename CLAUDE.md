@@ -826,3 +826,11 @@ Ha bizonytalan vagy → MINDIG keresd meg a dokumentációt!
 
 ⚡ GYORS MÓD (<20 sor): Skip 0-2, 4-7 → Csak implementálj!
 ```
+
+## ACE Learned Strategies
+
+<!-- ACE:START - Do not edit manually -->
+skills[2	]{id	section	content	helpful	harmful	neutral}:
+  angular_dialog_patterns-00001	angular_dialog_patterns	Place Angular dialogs outside page-card containers for backdrop-filter	1	0	0
+  tooling_workarounds-00002	tooling_workarounds	Use ace-learn --lines N flag after /resume sessions	1	0	0
+<!-- ACE:END -->

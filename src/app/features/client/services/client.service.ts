@@ -12,6 +12,7 @@ import { getAlbumStatusLabel } from '../../../shared/constants';
 export interface ClientBranding {
   brandName: string | null;
   logoUrl: string | null;
+  hideBrandName: boolean;
 }
 
 /**

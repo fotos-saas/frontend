@@ -225,10 +225,24 @@ $mobile-breakpoint: 768px;
   color: $blue-600;
   text-decoration: none;
   transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  // Safari-safe: margin instead of gap
+  margin: 0 -4px;
+
+  > * {
+    margin: 0 4px;
+  }
 
   &:hover {
     color: $blue-700;
   }
+}
+
+.navbar__brand-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
 }
 
 .navbar__project {

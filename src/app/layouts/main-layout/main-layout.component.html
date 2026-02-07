@@ -16,6 +16,9 @@
       userStatusColor: project.userStatusColor
     }"
     [activePage]="(activePage$ | async) || 'home'"
+    [brandLogoUrl]="project.branding?.logoUrl ?? null"
+    [brandName]="project.branding?.brandName ?? null"
+    [hideBrandName]="project.branding?.hideBrandName ?? false"
   ></app-navbar>
 
   <!-- Partner Banner -->

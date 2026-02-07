@@ -90,6 +90,11 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly projectInfo = input<NavbarProjectInfo | null>(null);
   readonly activePage = input<'home' | 'samples' | 'order-data' | 'missing' | 'template-chooser' | 'order-finalization' | 'voting' | 'newsfeed' | 'forum'>('samples');
 
+  /** Partner branding (ha aktív) */
+  readonly brandLogoUrl = input<string | null>(null);
+  readonly brandName = input<string | null>(null);
+  readonly hideBrandName = input<boolean>(false);
+
   /** Mobile menu nyitott allapot (signal) */
   mobileMenuOpen = signal<boolean>(false);
 

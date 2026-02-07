@@ -104,7 +104,15 @@ export class PartnerShellComponent implements OnInit {
     // Teljes menü (partner tulajdonosnak)
     const allItems: MenuItem[] = [
       { id: 'dashboard', route: `${base}/dashboard`, label: 'Irányítópult', icon: 'home' },
-      { id: 'projects', route: `${base}/projects`, label: 'Projektek', icon: 'folder-open' },
+      {
+        id: 'projects',
+        label: 'Projektek',
+        icon: 'folder-open',
+        children: [
+          { id: 'projects-list', route: `${base}/projects`, label: 'Projektek' },
+          { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
+        ]
+      },
       { id: 'schools', route: `${base}/schools`, label: 'Iskolák', icon: 'school' },
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
@@ -115,7 +123,6 @@ export class PartnerShellComponent implements OnInit {
         icon: 'palette',
         children: [
           { id: 'branding', route: `${base}/customization/branding`, label: 'Márkajelzés' },
-          { id: 'settings', route: `${base}/settings`, label: 'Beállítások' },
         ]
       },
       {
@@ -139,7 +146,7 @@ export class PartnerShellComponent implements OnInit {
     return allItems
       .filter(item => !['team', 'orders', 'customization', 'subscription'].includes(item.id))
       .concat([
-        { id: 'settings', route: `${base}/settings`, label: 'Beállítások', icon: 'settings' },
+        { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások', icon: 'settings' },
         { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },
       ]);
   });
@@ -148,7 +155,7 @@ export class PartnerShellComponent implements OnInit {
   bugReportLink = computed(() => `${this.baseUrl()}/bugs`);
 
   // Kibontott szekciók
-  expandedSections = signal<Set<string>>(new Set(['subscription', 'customization']));
+  expandedSections = signal<Set<string>>(new Set(['projects', 'subscription', 'customization']));
 
   toggleSection(sectionId: string): void {
     const current = this.expandedSections();

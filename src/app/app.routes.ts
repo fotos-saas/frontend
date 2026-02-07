@@ -179,6 +179,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/project-create/project-create.component').then(m => m.PartnerProjectCreateComponent)
       },
       {
+        path: 'projects/settings',
+        loadComponent: () => import('./features/partner/pages/global-settings/global-settings.component').then(m => m.GlobalSettingsComponent),
+        title: 'Beállítások'
+      },
+      {
         path: 'projects/:id',
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
@@ -245,12 +250,6 @@ export const routes: Routes = [
           }
         ]
       },
-      // Globális beállítások
-      {
-        path: 'settings',
-        loadComponent: () => import('./features/partner/pages/global-settings/global-settings.component').then(m => m.GlobalSettingsComponent),
-        title: 'Beállítások'
-      },
       // Hibajelentések
       {
         path: 'bugs',
@@ -284,6 +283,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/project-create/project-create.component').then(m => m.PartnerProjectCreateComponent)
       },
       {
+        path: 'projects/settings',
+        loadComponent: () => import('./features/partner/pages/global-settings/global-settings.component').then(m => m.GlobalSettingsComponent),
+        title: 'Beállítások'
+      },
+      {
         path: 'projects/:id',
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
@@ -310,12 +314,6 @@ export const routes: Routes = [
       {
         path: 'orders/albums/:id',
         loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
-      },
-      // Globális beállítások
-      {
-        path: 'settings',
-        loadComponent: () => import('./features/partner/pages/global-settings/global-settings.component').then(m => m.GlobalSettingsComponent),
-        title: 'Beállítások'
       },
       // Fiók törlése (csapattagoknak csak ez érhető el)
       {

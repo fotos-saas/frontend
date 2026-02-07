@@ -1,9 +1,10 @@
 import { Injectable, NgZone, OnDestroy, signal, computed } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { UpdateState } from './electron.service';
+import { UpdateState } from './electron.types';
+import './electron.types';
 
 // Re-export for backward compatibility
-export { UpdateState } from './electron.service';
+export type { UpdateState } from './electron.types';
 
 type CleanupFn = () => void;
 

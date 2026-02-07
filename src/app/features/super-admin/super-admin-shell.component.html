@@ -1,0 +1,78 @@
+<div class="super-admin-layout">
+  <!-- Top Bar (kozos komponens) -->
+  <app-top-bar
+    position="sticky"
+    logoIcon=""
+    roleBadge="Super Admin"
+    [showNotifications]="false"
+    [showPokeBadge]="false"
+    [showUserBadges]="false"
+    [showAccountSwitch]="false"
+    userInfoMode="inline"
+    [externalUserInfo]="userInfo()"
+    homeRoute="/super-admin/dashboard"
+    [useExternalLogout]="true"
+    (logoutEvent)="logout()"
+  />
+
+  <!-- Content with Sidebar -->
+  <div class="main-container">
+    <!-- Desktop/Tablet Sidebar -->
+    <nav
+      class="sidebar"
+      [ngClass]="{
+        'sidebar--collapsed': sidebarState.isTablet(),
+        'sidebar--hidden': sidebarState.isMobile()
+      }"
+    >
+      @for (item of navItems; track item.id) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-item"
+          [title]="sidebarState.isTablet() ? item.label : ''"
+        >
+          <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      }
+
+      <!-- Spacer -->
+      <div class="sidebar-spacer"></div>
+
+      <!-- Hibajelentesek - sidebar aljara rogzitve -->
+      <div class="sidebar-bottom">
+        <a
+          routerLink="/super-admin/bugs"
+          routerLinkActive="active"
+          class="nav-item nav-item--bottom"
+          [title]="sidebarState.isTablet() ? 'Hibajelentesek' : ''"
+        >
+          <lucide-icon name="bug" [size]="20" class="nav-icon"></lucide-icon>
+          <span class="nav-label">Hibajelentesek</span>
+          @if (bugReportService.hasUnread()) {
+            <span class="nav-badge">{{ bugReportService.unreadCount() }}</span>
+          }
+        </a>
+      </div>
+    </nav>
+
+    <!-- Mobile Overlay (kozos komponens) -->
+    <app-mobile-nav-overlay
+      [customMenuItems]="mobileMenuItems()"
+      [userInfo]="{ name: userName(), email: userEmail() }"
+      (logoutEvent)="logout()"
+    />
+
+    <!-- Main Content -->
+    <main
+      class="content"
+      [ngClass]="{
+        'content--full': sidebarState.isMobile(),
+        'content--with-collapsed': sidebarState.isTablet() && !sidebarState.isMobile()
+      }"
+    >
+      <router-outlet />
+    </main>
+  </div>
+</div>

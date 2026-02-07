@@ -8,7 +8,6 @@ import {
   DestroyRef,
   input,
   ViewContainerRef,
-  ComponentRef,
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -38,33 +37,16 @@ import {
   PROJECT_CONTACT_MODAL_COMPONENT,
   PROJECT_EDIT_MODAL_COMPONENT,
   PROJECT_ORDER_DATA_DIALOG_COMPONENT,
-  IProjectDetailService,
   ProjectDataMapper,
 } from '../project-detail.tokens';
 import { ICONS } from '../../../constants/icons.constants';
-import { SharedQrCodeModalComponent } from '../../qr-code-modal/qr-code-modal.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../confirm-dialog/confirm-dialog.component';
-import { IQrCodeService } from '../../../interfaces/qr-code.interface';
-import { GuestSession, SamplePackage, SampleVersion } from '../../../../features/partner/services/partner.service';
+import { GuestSession, SamplePackage } from '../../../../features/partner/services/partner.service';
+import { ProjectDetailWrapperFacadeService } from './project-detail-wrapper-facade.service';
 
 /**
- * Generikus Project Detail Wrapper - közös smart wrapper komponens.
- *
- * Használat (feature komponensben):
- * ```typescript
- * @Component({
- *   providers: [
- *     { provide: PROJECT_DETAIL_SERVICE, useExisting: MarketerService },
- *     { provide: PROJECT_BACK_ROUTE, useValue: '/marketer/projects' },
- *     { provide: PROJECT_QR_MODAL_COMPONENT, useValue: QrCodeModalComponent },
- *     { provide: PROJECT_CONTACT_MODAL_COMPONENT, useValue: ContactEditorModalComponent },
- *   ],
- *   template: `<app-project-detail-wrapper [mapToDetailData]="mapProject" />`
- * })
- * export class ProjectDetailComponent {
- *   mapProject = (p: ProjectDetails): ProjectDetailData => ({ ... });
- * }
- * ```
+ * Generikus Project Detail Wrapper - kozos smart wrapper komponens.
+ * Az uzleti logika a ProjectDetailWrapperFacadeService-ben van.
  */
 @Component({
   selector: 'app-project-detail-wrapper',
@@ -83,89 +65,82 @@ import { GuestSession, SamplePackage, SampleVersion } from '../../../../features
   ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ProjectDetailWrapperFacadeService],
 })
 export class ProjectDetailWrapperComponent<T> implements OnInit {
-  /** Mapping függvény a feature-specifikus típusból ProjectDetailData-ra */
   mapToDetailData = input.required<ProjectDataMapper<T>>();
 
-  // Injected dependencies
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private authService = inject(AuthService);
-  private projectService = inject(PROJECT_DETAIL_SERVICE);
-  private backRoute = inject(PROJECT_BACK_ROUTE);
-  private qrModalComponent = inject(PROJECT_QR_MODAL_COMPONENT, { optional: true });
-  private contactModalComponent = inject(PROJECT_CONTACT_MODAL_COMPONENT);
-  private projectEditModalComponent = inject(PROJECT_EDIT_MODAL_COMPONENT, { optional: true });
-  private orderDataDialogComponent = inject(PROJECT_ORDER_DATA_DIALOG_COMPONENT, { optional: true });
-  private destroyRef = inject(DestroyRef);
-  private partnerService = inject(PartnerService, { optional: true });
-  private toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly projectService = inject(PROJECT_DETAIL_SERVICE);
+  private readonly backRoute = inject(PROJECT_BACK_ROUTE);
+  private readonly contactModalComponent = inject(PROJECT_CONTACT_MODAL_COMPONENT);
+  private readonly projectEditModalComponent = inject(PROJECT_EDIT_MODAL_COMPONENT, { optional: true });
+  private readonly orderDataDialogComponent = inject(PROJECT_ORDER_DATA_DIALOG_COMPONENT, { optional: true });
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly partnerService = inject(PartnerService, { optional: true });
+  private readonly toast = inject(ToastService);
+
+  readonly facade = inject(ProjectDetailWrapperFacadeService<T>);
 
   // ViewChild references for dynamic component creation
-  private qrModalContainer = viewChild('qrModalContainer', { read: ViewContainerRef });
-  private contactModalContainer = viewChild('contactModalContainer', { read: ViewContainerRef });
-  private projectEditModalContainer = viewChild('projectEditModalContainer', { read: ViewContainerRef });
-  private orderDataDialogContainer = viewChild('orderDataDialogContainer', { read: ViewContainerRef });
+  private readonly qrModalContainer = viewChild('qrModalContainer', { read: ViewContainerRef });
+  private readonly contactModalContainer = viewChild('contactModalContainer', { read: ViewContainerRef });
+  private readonly projectEditModalContainer = viewChild('projectEditModalContainer', { read: ViewContainerRef });
+  private readonly orderDataDialogContainer = viewChild('orderDataDialogContainer', { read: ViewContainerRef });
 
-  /** ICONS konstansok a template-hez */
   readonly ICONS = ICONS;
   readonly isMarketer = this.authService.isMarketer;
 
-  // Tab state
   activeTab = signal<ProjectDetailTab>('overview');
-
-  /** Marketer nem látja a settings tab-ot */
   hiddenTabs = computed<ProjectDetailTab[]>(() =>
     this.isMarketer() ? ['settings'] : []
   );
 
-  // State signals
-  loading = signal(true);
-  project = signal<T | null>(null);
-  projectData = signal<ProjectDetailData | null>(null);
-
-  // Modal states
-  showQrModal = signal(false);
-  showContactModal = signal(false);
-  editingContact = signal<ProjectContact | null>(null);
-
-  // Delete contact confirmation states
-  showDeleteConfirm = signal(false);
-  deletingContact = signal<ProjectContact | null>(null);
-  deleting = signal(false);
-
-  // Delete user confirmation states
-  showDeleteUserConfirm = signal(false);
-  deletingUser = signal<GuestSession | null>(null);
-
-  // Samples dialogs state (page-card-on kívül kezelve)
-  showPackageDialog = signal(false);
-  packageDialogData = signal<PackageDialogRequest | null>(null);
-  showVersionDialog = signal(false);
-  versionDialogData = signal<VersionDialogRequest | null>(null);
-  showDeletePackageConfirm = signal(false);
-  deletingPackageData = signal<SamplePackage | null>(null);
-  showDeleteVersionConfirm = signal(false);
-  deletingVersionData = signal<DeleteVersionRequest | null>(null);
-
-
-  // Delete project confirmation states
-  showDeleteProjectConfirm = signal(false);
-  deletingProject = signal(false);
+  // Delegate state signals from facade
+  get loading() { return this.facade.loading; }
+  get project() { return this.facade.project; }
+  get projectData() { return this.facade.projectData; }
+  get showQrModal() { return this.facade.showQrModal; }
+  get showContactModal() { return this.facade.showContactModal; }
+  get editingContact() { return this.facade.editingContact; }
+  get showDeleteConfirm() { return this.facade.showDeleteConfirm; }
+  get deletingContact() { return this.facade.deletingContact; }
+  get deleting() { return this.facade.deleting; }
+  get showDeleteUserConfirm() { return this.facade.showDeleteUserConfirm; }
+  get deletingUser() { return this.facade.deletingUser; }
+  get showPackageDialog() { return this.facade.showPackageDialog; }
+  get packageDialogData() { return this.facade.packageDialogData; }
+  get showVersionDialog() { return this.facade.showVersionDialog; }
+  get versionDialogData() { return this.facade.versionDialogData; }
+  get showDeletePackageConfirm() { return this.facade.showDeletePackageConfirm; }
+  get deletingPackageData() { return this.facade.deletingPackageData; }
+  get showDeleteVersionConfirm() { return this.facade.showDeleteVersionConfirm; }
+  get deletingVersionData() { return this.facade.deletingVersionData; }
+  get showDeleteProjectConfirm() { return this.facade.showDeleteProjectConfirm; }
+  get deletingProject() { return this.facade.deletingProject; }
 
   // Tab references
-  private usersTab = viewChild(ProjectUsersTabComponent);
-  private samplesTab = viewChild(ProjectSamplesTabComponent);
-
-  // Dynamic component references
-  private qrModalRef: ComponentRef<any> | null = null;
-  private contactModalRef: ComponentRef<any> | null = null;
-  private projectEditModalRef: ComponentRef<any> | null = null;
-  private orderDataDialogRef: ComponentRef<any> | null = null;
+  private readonly usersTab = viewChild(ProjectUsersTabComponent);
+  private readonly samplesTab = viewChild(ProjectSamplesTabComponent);
 
   ngOnInit(): void {
-    // Tab query param figyelés
+    this.facade.init({
+      projectService: this.projectService,
+      backRoute: this.backRoute,
+      contactModalComponent: this.contactModalComponent,
+      projectEditModalComponent: this.projectEditModalComponent,
+      orderDataDialogComponent: this.orderDataDialogComponent,
+      partnerService: this.partnerService,
+      destroyRef: this.destroyRef,
+      router: this.router,
+      toast: this.toast,
+    });
+
+    this.facade.setMapFn(this.mapToDetailData());
+
+    // Tab query param figyelese
     const validTabs = ['overview', 'users', 'samples', 'settings'];
     const tabParam = this.route.snapshot.queryParamMap.get('tab');
     if (tabParam && validTabs.includes(tabParam)) {
@@ -183,30 +158,13 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id || isNaN(id) || id < 1) {
-      this.loading.set(false);
+      this.facade.loading.set(false);
       return;
     }
-    this.loadProject(id);
+    this.facade.loadProject(id, this.mapToDetailData());
   }
 
-  private loadProject(id: number): void {
-    this.projectService.getProjectDetails(id).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (project: T) => {
-        this.project.set(project);
-        this.projectData.set(this.mapToDetailData()(project));
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
-    });
-  }
-
-  goBack(): void {
-    this.router.navigate([this.backRoute]);
-  }
+  goBack(): void { this.facade.goBack(); }
 
   changeTab(tab: ProjectDetailTab): void {
     this.activeTab.set(tab);
@@ -217,339 +175,75 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     });
   }
 
-  // QR Modal methods
+  // === MODAL DELEGATIONS ===
+
   openQrModal(): void {
     const container = this.qrModalContainer();
-    if (!container) return;
-
-    const project = this.project();
-    if (!project) return;
-
-    container.clear();
-
-    // Shared QR modal komponens használata - a projectService implementálja az IQrCodeService-t
-    this.qrModalRef = container.createComponent(SharedQrCodeModalComponent);
-
-    // Set inputs - Angular 17+ signal inputs
-    const projectData = this.projectData();
-    this.qrModalRef.setInput('projectId', projectData?.id);
-    this.qrModalRef.setInput('projectName', projectData?.name ?? '');
-    this.qrModalRef.setInput('qrService', this.projectService as unknown as IQrCodeService);
-
-    // Subscribe to outputs
-    this.qrModalRef.instance.close.subscribe(() => this.closeQrModal());
-    this.qrModalRef.instance.qrCodeChanged.subscribe((qr: QrCode | null) => this.onQrCodeChanged(qr));
-
-    this.showQrModal.set(true);
+    if (!container || !this.project()) return;
+    this.facade.openQrModal(container);
   }
 
-  closeQrModal(): void {
-    this.qrModalRef?.destroy();
-    this.qrModalRef = null;
-    this.showQrModal.set(false);
-  }
+  closeQrModal(): void { this.facade.closeQrModal(); }
 
-  onQrCodeChanged(_qrCode: QrCode | null): void {
-    const id = this.projectData()?.id;
-    if (id) {
-      this.loadProject(id);
-    }
-  }
-
-  // Contact Modal methods
   openContactModal(contact: ProjectContact | null): void {
     const container = this.contactModalContainer();
-    if (!container) return;
-
-    const project = this.project();
-    if (!project) return;
-
-    container.clear();
-    this.contactModalRef = container.createComponent(this.contactModalComponent);
-
-    // Set inputs
-    const projectData = this.projectData();
-    this.contactModalRef.instance.projectId = projectData?.id;
-    this.contactModalRef.instance.contact = contact;
-
-    // Subscribe to outputs
-    this.contactModalRef.instance.close?.subscribe(() => this.closeContactModal());
-    this.contactModalRef.instance.saved?.subscribe((c: ProjectContact) => this.onContactSaved(c));
-
-    this.editingContact.set(contact);
-    this.showContactModal.set(true);
+    if (!container || !this.project()) return;
+    this.facade.openContactModal(container, contact);
   }
 
-  closeContactModal(): void {
-    this.contactModalRef?.destroy();
-    this.contactModalRef = null;
-    this.showContactModal.set(false);
-    this.editingContact.set(null);
-  }
+  closeContactModal(): void { this.facade.closeContactModal(); }
 
-  onContactSaved(_contact: ProjectContact): void {
-    this.closeContactModal();
-    const id = this.projectData()?.id;
-    if (id) {
-      this.loadProject(id);
-    }
-  }
+  confirmDeleteContact(contact: ProjectContact): void { this.facade.confirmDeleteContact(contact); }
+  onDeleteContactResult(result: ConfirmDialogResult): void { this.facade.onDeleteContactResult(result); }
 
-  // Delete confirmation methods
-  confirmDeleteContact(contact: ProjectContact): void {
-    this.deletingContact.set(contact);
-    this.showDeleteConfirm.set(true);
-  }
-
-  cancelDelete(): void {
-    this.showDeleteConfirm.set(false);
-    this.deletingContact.set(null);
-  }
-
-  deleteContact(): void {
-    const contact = this.deletingContact();
-    const projectId = this.projectData()?.id;
-    if (!contact?.id || !projectId) return;
-
-    this.deleting.set(true);
-    this.projectService.deleteContact(projectId, contact.id).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: () => {
-        this.deleting.set(false);
-        this.cancelDelete();
-        this.loadProject(projectId);
-      },
-      error: () => {
-        this.deleting.set(false);
-      },
-    });
-  }
-
-  // Project Edit Modal methods
   openEditProjectModal(): void {
-    if (!this.projectEditModalComponent) return;
-
     const container = this.projectEditModalContainer();
     if (!container) return;
-
-    const projectData = this.projectData();
-    if (!projectData) return;
-
-    container.clear();
-    this.projectEditModalRef = container.createComponent(this.projectEditModalComponent);
-
-    // Set inputs
-    this.projectEditModalRef.instance.project = projectData;
-
-    // Subscribe to outputs
-    this.projectEditModalRef.instance.close?.subscribe(() => this.closeEditProjectModal());
-    this.projectEditModalRef.instance.saved?.subscribe(() => this.onProjectSaved());
+    this.facade.openEditProjectModal(container);
   }
 
-  closeEditProjectModal(): void {
-    this.projectEditModalRef?.destroy();
-    this.projectEditModalRef = null;
-  }
+  closeEditProjectModal(): void { this.facade.closeEditProjectModal(); }
 
-  onProjectSaved(): void {
-    this.closeEditProjectModal();
-    const id = this.projectData()?.id;
-    if (id) {
-      this.loadProject(id);
-    }
-  }
+  confirmDeleteProject(): void { this.facade.confirmDeleteProject(); }
+  onDeleteProjectResult(result: ConfirmDialogResult): void { this.facade.onDeleteProjectResult(result); }
 
-  // Project Delete methods
-  confirmDeleteProject(): void {
-    this.showDeleteProjectConfirm.set(true);
-  }
-
-  cancelDeleteProject(): void {
-    this.showDeleteProjectConfirm.set(false);
-  }
-
-  deleteProjectConfirmed(): void {
-    const projectId = this.projectData()?.id;
-    if (!projectId) return;
-
-    this.deletingProject.set(true);
-    this.projectService.deleteProject(projectId).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: () => {
-        this.deletingProject.set(false);
-        this.cancelDeleteProject();
-        this.goBack();
-      },
-      error: () => {
-        this.deletingProject.set(false);
-      },
-    });
-  }
-
-  // Order Data Dialog methods
   openOrderDataDialog(): void {
-    if (!this.orderDataDialogComponent) return;
-
     const container = this.orderDataDialogContainer();
     if (!container) return;
-
-    const projectData = this.projectData();
-    if (!projectData?.id) return;
-
-    container.clear();
-    this.orderDataDialogRef = container.createComponent(this.orderDataDialogComponent);
-
-    this.orderDataDialogRef.setInput('projectId', projectData.id);
-    this.orderDataDialogRef.instance.close?.subscribe(() => this.closeOrderDataDialog());
+    this.facade.openOrderDataDialog(container);
   }
 
-  closeOrderDataDialog(): void {
-    this.orderDataDialogRef?.destroy();
-    this.orderDataDialogRef = null;
-  }
+  closeOrderDataDialog(): void { this.facade.closeOrderDataDialog(); }
 
-  // Samples tab dialog methods (page-card-on KÍVÜL)
-  openPackageDialog(request: PackageDialogRequest): void {
-    this.packageDialogData.set(request);
-    this.showPackageDialog.set(true);
-  }
+  // === SAMPLES DELEGATIONS ===
 
-  closePackageDialog(): void {
-    this.showPackageDialog.set(false);
-    this.packageDialogData.set(null);
-  }
+  openPackageDialog(request: PackageDialogRequest): void { this.facade.openPackageDialog(request); }
+  closePackageDialog(): void { this.facade.closePackageDialog(); }
+  onPackageSaved(): void { this.facade.closePackageDialog(); this.samplesTab()?.onDialogSaved(); }
 
-  onPackageSaved(): void {
-    this.closePackageDialog();
-    this.samplesTab()?.onDialogSaved();
-  }
+  openVersionDialog(request: VersionDialogRequest): void { this.facade.openVersionDialog(request); }
+  closeVersionDialog(): void { this.facade.closeVersionDialog(); }
+  onVersionSaved(): void { this.facade.closeVersionDialog(); this.samplesTab()?.onDialogSaved(); }
 
-  openVersionDialog(request: VersionDialogRequest): void {
-    this.versionDialogData.set(request);
-    this.showVersionDialog.set(true);
-  }
-
-  closeVersionDialog(): void {
-    this.showVersionDialog.set(false);
-    this.versionDialogData.set(null);
-  }
-
-  onVersionSaved(): void {
-    this.closeVersionDialog();
-    this.samplesTab()?.onDialogSaved();
-  }
-
-  confirmDeletePackage(pkg: SamplePackage): void {
-    this.deletingPackageData.set(pkg);
-    this.showDeletePackageConfirm.set(true);
-  }
-
+  confirmDeletePackage(pkg: SamplePackage): void { this.facade.confirmDeletePackage(pkg); }
   onDeletePackageResult(result: ConfirmDialogResult): void {
-    if (result.action === 'confirm') {
-      const pkg = this.deletingPackageData();
-      if (pkg) {
-        this.samplesTab()?.executeDeletePackage(pkg);
-      }
-    }
-    this.showDeletePackageConfirm.set(false);
-    this.deletingPackageData.set(null);
+    this.facade.onDeletePackageResult(result, (p) => this.samplesTab()?.executeDeletePackage(p));
   }
 
-  confirmDeleteVersion(request: DeleteVersionRequest): void {
-    this.deletingVersionData.set(request);
-    this.showDeleteVersionConfirm.set(true);
-  }
-
+  confirmDeleteVersion(request: DeleteVersionRequest): void { this.facade.confirmDeleteVersion(request); }
   onDeleteVersionResult(result: ConfirmDialogResult): void {
-    if (result.action === 'confirm') {
-      const data = this.deletingVersionData();
-      if (data) {
-        this.samplesTab()?.executeDeleteVersion(data.packageId, data.version.id);
-      }
-    }
-    this.showDeleteVersionConfirm.set(false);
-    this.deletingVersionData.set(null);
+    this.facade.onDeleteVersionResult(result, (pkgId, vId) => this.samplesTab()?.executeDeleteVersion(pkgId, vId));
   }
 
-  // Delete user methods (a users-tab output event-jét kezeli, dialog page-card-on KÍVÜL)
-  confirmDeleteUser(session: GuestSession): void {
-    this.deletingUser.set(session);
-    this.showDeleteUserConfirm.set(true);
-  }
+  // === USER DELEGATIONS ===
 
+  confirmDeleteUser(session: GuestSession): void { this.facade.confirmDeleteUser(session); }
   onDeleteUserResult(result: ConfirmDialogResult): void {
-    if (result.action === 'confirm') {
-      const session = this.deletingUser();
-      if (session) {
-        this.usersTab()?.executeDelete(session);
-      }
-    }
-    this.showDeleteUserConfirm.set(false);
-    this.deletingUser.set(null);
+    this.facade.onDeleteUserResult(result, (s) => this.usersTab()?.executeDelete(s));
   }
 
-  // Delete contact result handler
-  onDeleteContactResult(result: ConfirmDialogResult): void {
-    if (result.action === 'confirm') {
-      this.deleteContact();
-    } else {
-      this.cancelDelete();
-    }
-  }
+  // === GALLERY ===
 
-  // Delete project result handler
-  onDeleteProjectResult(result: ConfirmDialogResult): void {
-    if (result.action === 'confirm') {
-      this.deleteProjectConfirmed();
-    } else {
-      this.cancelDeleteProject();
-    }
-  }
-
-  // Gallery deadline
-  extendGalleryDeadline(days: number): void {
-    const projectId = this.projectData()?.id;
-    if (!projectId || !this.partnerService) return;
-
-    const currentDeadline = this.projectData()?.deadline;
-    const base = currentDeadline ? new Date(currentDeadline) : new Date();
-    base.setDate(base.getDate() + days);
-    const newDeadline = base.toISOString().split('T')[0];
-
-    this.partnerService.setGalleryDeadline(projectId, newDeadline).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (response) => {
-        this.toast.success('Siker', 'Határidő beállítva');
-        // Frissítjük a lokális project data-t
-        const current = this.projectData();
-        if (current) {
-          this.projectData.set({ ...current, deadline: response.data.deadline });
-        }
-      },
-      error: () => {
-        this.toast.error('Hiba', 'Nem sikerült beállítani a határidőt');
-      },
-    });
-  }
-
-  // Gallery creation
-  createGallery(): void {
-    const projectId = this.projectData()?.id;
-    if (!projectId || !this.partnerService) return;
-
-    this.partnerService.createGallery(projectId).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: () => {
-        this.toast.success('Siker', 'Galéria létrehozva');
-        this.router.navigate(['/partner/projects', projectId, 'gallery']);
-      },
-      error: () => {
-        this.toast.error('Hiba', 'Nem sikerült a galéria létrehozása');
-      },
-    });
-  }
+  extendGalleryDeadline(days: number): void { this.facade.extendGalleryDeadline(days); }
+  createGallery(): void { this.facade.createGallery(); }
 }

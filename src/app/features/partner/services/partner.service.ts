@@ -1427,4 +1427,40 @@ export class PartnerService {
       { text }
     );
   }
+
+  // ============================================
+  // SETTINGS
+  // ============================================
+
+  getProjectSettings(projectId: number): Observable<{
+    data: { max_retouch_photos: number | null; effective_max_retouch_photos: number; global_default_max_retouch_photos: number };
+  }> {
+    return this.http.get<{
+      data: { max_retouch_photos: number | null; effective_max_retouch_photos: number; global_default_max_retouch_photos: number };
+    }>(`${this.baseUrl}/projects/${projectId}/settings`);
+  }
+
+  updateProjectSettings(projectId: number, data: { max_retouch_photos: number | null }): Observable<{
+    success: boolean; message: string; data: { max_retouch_photos: number | null; effective_max_retouch_photos: number };
+  }> {
+    return this.http.put<{
+      success: boolean; message: string; data: { max_retouch_photos: number | null; effective_max_retouch_photos: number };
+    }>(`${this.baseUrl}/projects/${projectId}/settings`, data);
+  }
+
+  getGlobalSettings(): Observable<{
+    data: { default_max_retouch_photos: number };
+  }> {
+    return this.http.get<{
+      data: { default_max_retouch_photos: number };
+    }>(`${this.baseUrl}/settings`);
+  }
+
+  updateGlobalSettings(data: { default_max_retouch_photos: number | null }): Observable<{
+    success: boolean; message: string; data: { default_max_retouch_photos: number };
+  }> {
+    return this.http.put<{
+      success: boolean; message: string; data: { default_max_retouch_photos: number };
+    }>(`${this.baseUrl}/settings`, data);
+  }
 }

@@ -1,0 +1,159 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+
+  lucide-icon {
+    margin-right: 10px;
+    color: var(--color-primary, #1e3a5f);
+  }
+
+  h1 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+}
+
+.page-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 32px;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.settings-section {
+  max-width: 600px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+
+  lucide-icon {
+    margin-right: 8px;
+    color: var(--color-primary, #1e3a5f);
+  }
+
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+  }
+}
+
+.setting-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-right: 24px;
+}
+
+.setting-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.setting-description {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.setting-control {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.number-input {
+  width: 70px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: var(--color-primary, #1e3a5f);
+    box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1);
+  }
+}
+
+.input-suffix {
+  margin-left: 8px;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 24px;
+  background: var(--color-primary, #1e3a5f);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .animate-spin {
+    margin-right: 6px;
+  }
+}
+
+@media (max-width: 640px) {
+  .setting-row {
+    flex-direction: column;
+  }
+
+  .setting-info {
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

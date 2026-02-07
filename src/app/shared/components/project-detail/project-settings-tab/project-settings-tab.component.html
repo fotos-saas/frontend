@@ -1,0 +1,72 @@
+@if (loading()) {
+  <div class="flex items-center justify-center py-12">
+    <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+  </div>
+} @else {
+  <div class="settings-section">
+    <div class="section-header">
+      <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
+      <h3>Képválasztás beállítások</h3>
+    </div>
+
+    <div class="setting-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Retusálható képek száma</span>
+          <span class="setting-description">
+            Hány képet választhat ki egy diák retusálásra ebben a projektben.
+          </span>
+        </div>
+      </div>
+
+      <!-- Toggle -->
+      <label class="toggle-row">
+        <input
+          type="checkbox"
+          class="toggle-input"
+          [checked]="useCustomLimit()"
+          (change)="toggleCustomLimit()"
+        />
+        <span class="toggle-label">Egyedi limit beállítása erre a projektre</span>
+      </label>
+
+      @if (useCustomLimit()) {
+        <div class="number-input-row">
+          <label class="number-label" for="maxRetouch">Maximum képek száma</label>
+          <input
+            id="maxRetouch"
+            type="number"
+            class="number-input"
+            min="1"
+            max="20"
+            [ngModel]="customLimit()"
+            (ngModelChange)="customLimit.set($event)"
+          />
+        </div>
+      }
+
+      <div class="info-row">
+        <lucide-icon [name]="ICONS.INFO" [size]="14" class="info-icon" />
+        <span>
+          Globális alapérték: <strong>{{ globalDefault() }} kép</strong>
+          @if (useCustomLimit()) {
+            &middot; Érvényes érték: <strong>{{ customLimit() }} kép</strong>
+          }
+        </span>
+      </div>
+
+      <div class="action-row">
+        <button
+          class="save-btn"
+          [disabled]="saving()"
+          (click)="save()"
+        >
+          @if (saving()) {
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          }
+          Mentés
+        </button>
+      </div>
+    </div>
+  </div>
+}

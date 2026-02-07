@@ -1,8 +1,8 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
 
-export type ProjectDetailTab = 'overview' | 'users' | 'samples';
+export type ProjectDetailTab = 'overview' | 'users' | 'samples' | 'settings';
 
 export interface TabDefinition {
   id: ProjectDetailTab;
@@ -14,6 +14,7 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
   { id: 'overview', label: 'Áttekintés', icon: ICONS.LAYOUT_DASHBOARD },
   { id: 'users', label: 'Felhasználók', icon: ICONS.USERS },
   { id: 'samples', label: 'Minták', icon: ICONS.PALETTE },
+  { id: 'settings', label: 'Beállítások', icon: ICONS.SETTINGS },
 ];
 
 @Component({
@@ -23,7 +24,7 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav class="tabs-nav">
-      @for (tab of tabs; track tab.id) {
+      @for (tab of visibleTabs(); track tab.id) {
         <button
           class="tab-btn"
           [class.tab-btn--active]="activeTab() === tab.id"
@@ -96,5 +97,12 @@ export class ProjectDetailTabsComponent {
   activeTab = input.required<ProjectDetailTab>();
   tabChange = output<ProjectDetailTab>();
 
-  readonly tabs = PROJECT_DETAIL_TABS;
+  /** Ha megadva, csak ezek a tab-ok jelennek meg */
+  hiddenTabs = input<ProjectDetailTab[]>([]);
+
+  visibleTabs = computed(() => {
+    const hidden = this.hiddenTabs();
+    if (hidden.length === 0) return PROJECT_DETAIL_TABS;
+    return PROJECT_DETAIL_TABS.filter(tab => !hidden.includes(tab.id));
+  });
 }

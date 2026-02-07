@@ -4,6 +4,7 @@ import {
   inject,
   signal,
   ChangeDetectionStrategy,
+  computed,
   DestroyRef,
   input,
   ViewContainerRef,
@@ -19,6 +20,7 @@ import { PartnerService } from '../../../../features/partner/services/partner.se
 import { ProjectDetailHeaderComponent } from '../project-detail-header/project-detail-header.component';
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
 import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
+import { ProjectSettingsTabComponent } from '../project-settings-tab/project-settings-tab.component';
 import { ProjectUsersTabComponent } from '../project-users-tab/project-users-tab.component';
 import {
   ProjectSamplesTabComponent,
@@ -74,6 +76,7 @@ import { GuestSession, SamplePackage, SampleVersion } from '../../../../features
     ProjectDetailTabsComponent,
     ProjectUsersTabComponent,
     ProjectSamplesTabComponent,
+    ProjectSettingsTabComponent,
     ConfirmDialogComponent,
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
@@ -111,6 +114,11 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   // Tab state
   activeTab = signal<ProjectDetailTab>('overview');
+
+  /** Marketer nem látja a settings tab-ot */
+  hiddenTabs = computed<ProjectDetailTab[]>(() =>
+    this.isMarketer() ? ['settings'] : []
+  );
 
   // State signals
   loading = signal(true);
@@ -158,8 +166,9 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   ngOnInit(): void {
     // Tab query param figyelés
+    const validTabs = ['overview', 'users', 'samples', 'settings'];
     const tabParam = this.route.snapshot.queryParamMap.get('tab');
-    if (tabParam && ['overview', 'users', 'samples'].includes(tabParam)) {
+    if (tabParam && validTabs.includes(tabParam)) {
       this.activeTab.set(tabParam as ProjectDetailTab);
     }
 
@@ -167,7 +176,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(params => {
       const tab = params.get('tab');
-      if (tab && ['overview', 'users', 'samples'].includes(tab)) {
+      if (tab && validTabs.includes(tab)) {
         this.activeTab.set(tab as ProjectDetailTab);
       }
     });

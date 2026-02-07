@@ -245,11 +245,11 @@ export const routes: Routes = [
           }
         ]
       },
-      // Régi settings redirect (backwards compatibility)
+      // Globális beállítások
       {
         path: 'settings',
-        redirectTo: 'subscription/overview',
-        pathMatch: 'full'
+        loadComponent: () => import('./features/partner/pages/global-settings/global-settings.component').then(m => m.GlobalSettingsComponent),
+        title: 'Beállítások'
       },
       // Hibajelentések
       {
@@ -310,6 +310,12 @@ export const routes: Routes = [
       {
         path: 'orders/albums/:id',
         loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
+      },
+      // Globális beállítások
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/partner/pages/global-settings/global-settings.component').then(m => m.GlobalSettingsComponent),
+        title: 'Beállítások'
       },
       // Fiók törlése (csapattagoknak csak ez érhető el)
       {

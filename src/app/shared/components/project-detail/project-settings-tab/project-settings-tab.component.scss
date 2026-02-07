@@ -1,0 +1,160 @@
+.settings-section {
+  margin-top: 8px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  color: #1e293b;
+
+  lucide-icon {
+    margin-right: 8px;
+    color: var(--color-primary, #1e3a5f);
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.setting-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.setting-row {
+  margin-bottom: 16px;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.setting-description {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.toggle-input {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  accent-color: var(--color-primary, #1e3a5f);
+  cursor: pointer;
+}
+
+.toggle-label {
+  font-size: 0.875rem;
+  color: #334155;
+  font-weight: 500;
+}
+
+.number-input-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.number-label {
+  font-size: 0.875rem;
+  color: #475569;
+  margin-right: 12px;
+  white-space: nowrap;
+}
+
+.number-input {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: var(--color-primary, #1e3a5f);
+    box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1);
+  }
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.8125rem;
+  color: #64748b;
+
+  .info-icon {
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  strong {
+    color: #334155;
+  }
+}
+
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 4px;
+}
+
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 20px;
+  background: var(--color-primary, #1e3a5f);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .animate-spin {
+    margin-right: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

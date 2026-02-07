@@ -1,0 +1,59 @@
+<div class="global-settings page-card">
+  <div class="page-header">
+    <lucide-icon [name]="ICONS.SETTINGS" [size]="24" />
+    <h1>Beállítások</h1>
+  </div>
+  <p class="page-description">
+    Az itt megadott értékek alapértelmezésként érvényesülnek minden projektedre.
+    Egyedi felülírás a projekt Beállítások fülén lehetséges.
+  </p>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-16">
+      <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  } @else {
+    <div class="settings-section">
+      <div class="section-title">
+        <lucide-icon [name]="ICONS.IMAGE" [size]="18" />
+        <h2>Képválasztás</h2>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Retusálható képek száma</span>
+            <span class="setting-description">
+              Hány képet választhat ki egy diák retusálásra alapértelmezetten.
+              Ez az érték érvényes minden projektre, ahol nincs egyedi beállítás.
+            </span>
+          </div>
+          <div class="setting-control">
+            <input
+              type="number"
+              class="number-input"
+              min="1"
+              max="20"
+              [ngModel]="maxRetouchPhotos()"
+              (ngModelChange)="maxRetouchPhotos.set($event)"
+            />
+            <span class="input-suffix">kép</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button
+          class="save-btn"
+          [disabled]="saving()"
+          (click)="save()"
+        >
+          @if (saving()) {
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          }
+          Mentés
+        </button>
+      </div>
+    </div>
+  }
+</div>

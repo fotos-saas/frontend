@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
   DestroyRef,
 } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -44,6 +45,7 @@ import { DashboardStats, DashboardProjectItem, StatCardConfig, QuickActionConfig
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardWrapperComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private dashboardService = inject(DASHBOARD_SERVICE);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -71,7 +73,7 @@ export class DashboardWrapperComponent implements OnInit {
           this.loading.set(false);
         },
         error: (err) => {
-          console.error('Failed to load dashboard stats:', err);
+          this.logger.error('Failed to load dashboard stats', err);
           this.loading.set(false);
         },
       });
@@ -84,7 +86,7 @@ export class DashboardWrapperComponent implements OnInit {
           this.recentProjects.set(response.data as DashboardProjectItem[]);
         },
         error: (err) => {
-          console.error('Failed to load recent projects:', err);
+          this.logger.error('Failed to load recent projects', err);
         },
       });
   }

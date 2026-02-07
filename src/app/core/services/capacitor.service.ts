@@ -1,5 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { LoggerService } from './logger.service';
 import { Capacitor } from '@capacitor/core';
 import { App, type URLOpenListenerEvent } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -18,6 +19,7 @@ import { PushNotifications, type Token, type PushNotificationSchema, type Action
  */
 @Injectable({ providedIn: 'root' })
 export class CapacitorService {
+  private readonly logger = inject(LoggerService);
   // Platform detection
   readonly isNative = signal(Capacitor.isNativePlatform());
   readonly platform = signal(Capacitor.getPlatform()); // 'ios' | 'android' | 'web'
@@ -69,7 +71,7 @@ export class CapacitorService {
       // Setup push notifications
       await this.setupPushNotifications();
     } catch (error) {
-      console.error('Capacitor initialization error:', error);
+      this.logger.error('Capacitor initialization error', error);
     }
   }
 
@@ -84,7 +86,7 @@ export class CapacitorService {
         await StatusBar.setStyle({ style: Style.Dark });
       }
     } catch (error) {
-      console.error('StatusBar setup error:', error);
+      this.logger.error('StatusBar setup error', error);
     }
   }
 
@@ -112,7 +114,7 @@ export class CapacitorService {
         document.body.style.setProperty('--keyboard-height', '0px');
       });
     } catch (error) {
-      console.error('Keyboard setup error:', error);
+      this.logger.error('Keyboard setup error', error);
     }
   }
 
@@ -166,7 +168,7 @@ export class CapacitorService {
         this.connectionType.set(status.connectionType);
       });
     } catch (error) {
-      console.error('Network setup error:', error);
+      this.logger.error('Network setup error', error);
     }
   }
 
@@ -179,14 +181,14 @@ export class CapacitorService {
         const url = new URL(event.url);
         const path = url.pathname + url.search;
 
-        console.log('Deep link received:', path);
+        this.logger.info('Deep link received', path);
 
         // Call registered callback if exists
         if (this.deepLinkCallback) {
           this.deepLinkCallback(path);
         }
       } catch (error) {
-        console.error('Failed to parse deep link:', error);
+        this.logger.error('Failed to parse deep link', error);
       }
     });
   }
@@ -213,24 +215,24 @@ export class CapacitorService {
       // Get FCM/APNs token
       PushNotifications.addListener('registration', (token: Token) => {
         this.pushToken.set(token.value);
-        console.log('Push token:', token.value);
+        this.logger.info('Push token', token.value);
         // TODO: Send to backend
       });
 
       // Handle registration error
       PushNotifications.addListener('registrationError', (error) => {
-        console.error('Push registration error:', error);
+        this.logger.error('Push registration error', error);
       });
 
       // Handle received notification (app in foreground)
       PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
-        console.log('Push received:', notification);
+        this.logger.info('Push received', notification);
         // Show in-app notification or handle silently
       });
 
       // Handle notification tap (app opened from notification)
       PushNotifications.addListener('pushNotificationActionPerformed', (action: ActionPerformed) => {
-        console.log('Push action:', action);
+        this.logger.info('Push action', action);
         // Navigate based on notification data
         const data = action.notification.data;
         if (data?.path && this.deepLinkCallback) {
@@ -238,7 +240,7 @@ export class CapacitorService {
         }
       });
     } catch (error) {
-      console.error('Push notifications setup error:', error);
+      this.logger.error('Push notifications setup error', error);
     }
   }
 
@@ -271,7 +273,7 @@ export class CapacitorService {
       });
       return true;
     } catch (error) {
-      console.error('Share failed:', error);
+      this.logger.error('Share failed', error);
       return false;
     }
   }
@@ -281,10 +283,10 @@ export class CapacitorService {
   private setupAppListeners(): void {
     App.addListener('appStateChange', ({ isActive }) => {
       if (isActive) {
-        console.log('App became active');
+        this.logger.info('App became active');
         // Refresh data, reconnect websockets, etc.
       } else {
-        console.log('App went to background');
+        this.logger.info('App went to background');
         // Save state, pause operations, etc.
       }
     });

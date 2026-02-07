@@ -1,4 +1,5 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy, inject } from '@angular/core';
+import { LoggerService } from './logger.service';
 
 type CleanupFn = () => void;
 
@@ -14,6 +15,7 @@ type CleanupFn = () => void;
   providedIn: 'root'
 })
 export class ElectronPaymentService implements OnDestroy {
+  private readonly logger = inject(LoggerService);
   private cleanupFunctions: CleanupFn[] = [];
 
   constructor(private ngZone: NgZone) {}
@@ -55,7 +57,7 @@ export class ElectronPaymentService implements OnDestroy {
 
     const cleanup = window.electronAPI!.onDeepLink((path) => {
       this.ngZone.run(() => {
-        console.log('Deep link received:', path);
+        this.logger.info('Deep link received', path);
         callback(path);
       });
     });
@@ -68,7 +70,7 @@ export class ElectronPaymentService implements OnDestroy {
 
     const cleanup = window.electronAPI!.onPaymentSuccess((data) => {
       this.ngZone.run(() => {
-        console.log('Payment success received:', data);
+        this.logger.info('Payment success received', data);
         callback(data);
       });
     });
@@ -81,7 +83,7 @@ export class ElectronPaymentService implements OnDestroy {
 
     const cleanup = window.electronAPI!.onPaymentCancelled(() => {
       this.ngZone.run(() => {
-        console.log('Payment cancelled');
+        this.logger.info('Payment cancelled');
         callback();
       });
     });

@@ -1,4 +1,5 @@
-import { Injectable, NgZone, OnDestroy, signal, computed } from '@angular/core';
+import { Injectable, NgZone, OnDestroy, signal, computed, inject } from '@angular/core';
+import { LoggerService } from './logger.service';
 import { Observable } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { UpdateState } from './electron.types';
@@ -53,6 +54,8 @@ const initialState: UpdateState = {
   providedIn: 'root'
 })
 export class AutoUpdateService implements OnDestroy {
+  private readonly logger = inject(LoggerService);
+
   // Signals for reactive state management
   private _state = signal<UpdateState>(initialState);
 
@@ -100,7 +103,7 @@ export class AutoUpdateService implements OnDestroy {
    */
   async checkForUpdates(): Promise<boolean> {
     if (!this.isElectron) {
-      console.log('Nem Electron kornyezet - frissites ellenorzes kihagyva');
+      this.logger.info('Nem Electron kornyezet - frissites ellenorzes kihagyva');
       return false;
     }
 
@@ -108,7 +111,7 @@ export class AutoUpdateService implements OnDestroy {
       const result = await window.electronAPI!.autoUpdate.checkForUpdates();
       return result.success && (result.updateAvailable ?? false);
     } catch (error) {
-      console.error('Frissites ellenorzesi hiba:', error);
+      this.logger.error('Frissites ellenorzesi hiba', error);
       return false;
     }
   }
@@ -124,11 +127,11 @@ export class AutoUpdateService implements OnDestroy {
     try {
       const result = await window.electronAPI!.autoUpdate.downloadUpdate();
       if (!result.success && result.error) {
-        console.error('Frissites letoltesi hiba:', result.error);
+        this.logger.error('Frissites letoltesi hiba', result.error);
       }
       return result.success;
     } catch (error) {
-      console.error('Frissites letoltesi hiba:', error);
+      this.logger.error('Frissites letoltesi hiba', error);
       return false;
     }
   }
@@ -145,7 +148,7 @@ export class AutoUpdateService implements OnDestroy {
       await window.electronAPI!.autoUpdate.installUpdate();
       // Az app ujraindul, szoval ide nem jutunk vissza
     } catch (error) {
-      console.error('Frissites telepitesi hiba:', error);
+      this.logger.error('Frissites telepitesi hiba', error);
     }
   }
 
@@ -161,7 +164,7 @@ export class AutoUpdateService implements OnDestroy {
       const status = await window.electronAPI!.autoUpdate.getStatus();
       this.updateState(status);
     } catch (error) {
-      console.error('Kezdeti statusz betoltesi hiba:', error);
+      this.logger.error('Kezdeti statusz betoltesi hiba', error);
     }
   }
 

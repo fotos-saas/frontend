@@ -1,4 +1,5 @@
 import { Injectable, DestroyRef, inject, signal, computed } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
@@ -30,6 +31,7 @@ import { calculateOptimisticReaction, calculateLikesCount } from '../../../share
  */
 @Injectable({ providedIn: null })
 export class ForumDetailStateService {
+  private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly forumService = inject(ForumService);
   private readonly authService = inject(AuthService);
@@ -335,7 +337,7 @@ export class ForumDetailStateService {
         this.loadDiscussion(currentDiscussion.slug);
       },
       error: (err) => {
-        console.error('[ForumDetail] Update error:', err);
+        this.logger.error('[ForumDetail] Update error', err);
         this.showTopicEditDialog.set(false);
         this.isTopicSaving.set(false);
 

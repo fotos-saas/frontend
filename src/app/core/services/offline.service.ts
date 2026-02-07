@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy, signal, computed, inject } from '@angular/core';
+import { LoggerService } from './logger.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Subscription, interval, filter, switchMap, from, catchError, of, firstValueFrom } from 'rxjs';
 import { ElectronService, QueuedRequest } from './electron.service';
@@ -45,6 +46,7 @@ export interface SyncStatus {
   providedIn: 'root'
 })
 export class OfflineService implements OnDestroy {
+  private readonly logger = inject(LoggerService);
   private electronService = inject(ElectronService);
   private http = inject(HttpClient);
   private toast = inject(ToastService);
@@ -171,7 +173,7 @@ export class OfflineService implements OnDestroy {
           await this.electronService.removeQueuedRequest(request.id);
           successCount++;
         } catch (error) {
-          console.error('Failed to process queued request:', error);
+          this.logger.error('Failed to process queued request', error);
           failCount++;
 
           // Ha 401/403, akkor ne probalkozz tovabbi requestekkel

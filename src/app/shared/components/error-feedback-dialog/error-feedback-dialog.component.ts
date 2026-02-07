@@ -4,6 +4,7 @@ import {
   inject,
   signal
 } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -28,6 +29,7 @@ import { createBackdropHandler } from '@shared/utils/dialog.util';
 export class ErrorFeedbackDialogComponent {
   readonly ICONS = ICONS;
 
+  private readonly logger = inject(LoggerService);
   private errorBoundary = inject(ErrorBoundaryService);
   private sentryService = inject(SentryService);
 
@@ -82,7 +84,7 @@ export class ErrorFeedbackDialogComponent {
       setTimeout(() => this.copiedEventId.set(false), 2000);
     } catch {
       // Fallback: manual copy
-      console.warn('Clipboard API not available');
+      this.logger.warn('Clipboard API not available');
     }
   }
 

@@ -1,4 +1,5 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
@@ -25,6 +26,7 @@ import { PlansService, PricingPlan } from '../../../shared/services/plans.servic
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegisterAppComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -131,7 +133,7 @@ export class RegisterAppComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Failed to load plans:', err);
+        this.logger.error('Failed to load plans', err);
         this.plansLoading.set(false);
         this.errorMessage.set('Nem sikerült betölteni a csomagokat.');
       }

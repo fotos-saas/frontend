@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { LoggerService } from './logger.service';
 import { Capacitor } from '@capacitor/core';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 
@@ -18,6 +19,7 @@ interface BundleInfo {
  */
 @Injectable({ providedIn: 'root' })
 export class AppUpdateService {
+  private readonly logger = inject(LoggerService);
   // Update state
   readonly updateAvailable = signal(false);
   readonly downloading = signal(false);
@@ -52,7 +54,7 @@ export class AppUpdateService {
 
       // Listen for update events
       CapacitorUpdater.addListener('updateAvailable', (info) => {
-        console.log('Update available:', info);
+        this.logger.info('Update available', info);
         this.updateAvailable.set(true);
         this.latestVersion.set(info.bundle.version);
       });
@@ -63,17 +65,17 @@ export class AppUpdateService {
       });
 
       (CapacitorUpdater as any).addListener('downloadComplete', (bundle: BundleInfo) => {
-        console.log('Download complete:', bundle);
+        this.logger.info('Download complete', bundle);
         this.downloading.set(false);
       });
 
       (CapacitorUpdater as any).addListener('downloadFailed', (error: { version: string }) => {
-        console.error('Download failed:', error);
+        this.logger.error('Download failed', error);
         this.downloading.set(false);
       });
 
       (CapacitorUpdater as any).addListener('updateFailed', (error: { version: string }) => {
-        console.error('Update failed:', error);
+        this.logger.error('Update failed', error);
         // The plugin will automatically rollback
       });
 
@@ -81,7 +83,7 @@ export class AppUpdateService {
       await this.checkForUpdate();
 
     } catch (error) {
-      console.error('AppUpdateService initialization error:', error);
+      this.logger.error('AppUpdateService initialization error', error);
     }
   }
 
@@ -104,7 +106,7 @@ export class AppUpdateService {
       }
       return false;
     } catch (error) {
-      console.error('Failed to check for updates:', error);
+      this.logger.error('Failed to check for updates', error);
       return false;
     }
   }
@@ -139,7 +141,7 @@ export class AppUpdateService {
       return true;
 
     } catch (error) {
-      console.error('Failed to download update:', error);
+      this.logger.error('Failed to download update', error);
       this.downloading.set(false);
       return false;
     }
@@ -155,7 +157,7 @@ export class AppUpdateService {
       const result = await CapacitorUpdater.list();
       return result.bundles;
     } catch (error) {
-      console.error('Failed to get bundles:', error);
+      this.logger.error('Failed to get bundles', error);
       return [];
     }
   }
@@ -170,7 +172,7 @@ export class AppUpdateService {
       await CapacitorUpdater.delete({ id });
       return true;
     } catch (error) {
-      console.error('Failed to delete bundle:', error);
+      this.logger.error('Failed to delete bundle', error);
       return false;
     }
   }
@@ -186,7 +188,7 @@ export class AppUpdateService {
       await CapacitorUpdater.reload();
       return true;
     } catch (error) {
-      console.error('Failed to reset:', error);
+      this.logger.error('Failed to reset', error);
       return false;
     }
   }

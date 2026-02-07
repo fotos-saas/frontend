@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
@@ -130,6 +131,7 @@ export class ShareLoginComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
+  private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -158,7 +160,7 @@ export class ShareLoginComponent implements OnInit {
     // Restore token validálása ha van (64 karakter, alphanumerikus)
     if (restoreToken && (restoreToken.length !== 64 || !/^[a-zA-Z0-9]+$/.test(restoreToken))) {
       // Érvénytelen restore token, figyelmen kívül hagyjuk
-      console.warn('Invalid restore token format, ignoring');
+      this.logger.warn('Invalid restore token format, ignoring');
     }
 
     // Bejelentkezés a share tokennel (és opcionálisan restore tokennel)

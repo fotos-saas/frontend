@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild, ComponentRef } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -46,6 +47,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PartnerProjectListComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private readonly partnerService = inject(PartnerService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
@@ -163,7 +165,7 @@ export class PartnerProjectListComponent implements OnInit {
           this.filterState.loading.set(false);
         },
         error: (err) => {
-          console.error('Failed to load projects:', err);
+          this.logger.error('Failed to load projects', err);
           this.filterState.loading.set(false);
         }
       });
@@ -189,7 +191,7 @@ export class PartnerProjectListComponent implements OnInit {
             this.samplesLightboxIndex.set(0);
           }
         },
-        error: (err) => console.error('Failed to load samples:', err)
+        error: (err) => this.logger.error('Failed to load samples', err)
       });
   }
 
@@ -263,7 +265,7 @@ export class PartnerProjectListComponent implements OnInit {
             )
           );
         },
-        error: (err) => console.error('Failed to toggle aware:', err)
+        error: (err) => this.logger.error('Failed to toggle aware', err)
       });
   }
 

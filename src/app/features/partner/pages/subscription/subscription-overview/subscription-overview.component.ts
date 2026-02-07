@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -18,6 +19,7 @@ import { forkJoin, of, catchError } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SubscriptionOverviewComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly storageService = inject(StorageService);
   private readonly plansService = inject(PlansService);
@@ -136,7 +138,7 @@ export class SubscriptionOverviewComponent implements OnInit {
         this.portalLoading.set(false);
       },
       error: (err) => {
-        console.error('Failed to open portal:', err);
+        this.logger.error('Failed to open portal', err);
         this.portalLoading.set(false);
       }
     });

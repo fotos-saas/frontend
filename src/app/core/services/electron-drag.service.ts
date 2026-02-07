@@ -1,4 +1,5 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy, inject } from '@angular/core';
+import { LoggerService } from './logger.service';
 
 type CleanupFn = () => void;
 
@@ -43,6 +44,7 @@ export type TouchBarContext = 'dashboard' | 'gallery' | 'editor';
   providedIn: 'root'
 })
 export class ElectronDragService implements OnDestroy {
+  private readonly logger = inject(LoggerService);
   private cleanupFunctions: CleanupFn[] = [];
 
   constructor(private ngZone: NgZone) {}
@@ -73,7 +75,7 @@ export class ElectronDragService implements OnDestroy {
   /** Native drag inditas eloelkeszitett fajlokkal */
   startNativeDrag(files: string[], thumbnailUrl?: string): void {
     if (!this.isElectron) {
-      console.warn('Native drag only supported in Electron');
+      this.logger.warn('Native drag only supported in Electron');
       return;
     }
     window.electronAPI!.nativeDrag.startDrag(files, thumbnailUrl);
@@ -131,7 +133,7 @@ export class ElectronDragService implements OnDestroy {
 
     const cleanup = window.electronAPI!.touchBar.onAction((actionId, data) => {
       this.ngZone.run(() => {
-        console.log('Touch Bar action:', actionId, data);
+        this.logger.info('Touch Bar action', actionId, data);
         callback(actionId, data);
       });
     });

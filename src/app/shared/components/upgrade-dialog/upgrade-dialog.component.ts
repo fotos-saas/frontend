@@ -14,6 +14,7 @@ import {
   computed,
   DestroyRef,
 } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
@@ -44,6 +45,7 @@ export type UpgradeFeature = 'schools' | 'contacts' | 'projects' | 'storage' | '
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UpgradeDialogComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly logger = inject(LoggerService);
   private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly router = inject(Router);
   private readonly plansService = inject(PlansService);
@@ -184,7 +186,7 @@ export class UpgradeDialogComponent implements OnInit, AfterViewInit, OnDestroy 
         await this.paymentService.openCustomerPortal();
         this.close.emit();
       } catch (error) {
-        console.error('Failed to open Stripe portal:', error);
+        this.logger.error('Failed to open Stripe portal', error);
         this.isLoading.set(false);
       }
     }
@@ -279,7 +281,7 @@ export class UpgradeDialogComponent implements OnInit, AfterViewInit, OnDestroy 
       await this.paymentService.openCustomerPortal();
       this.close.emit();
     } catch (error) {
-      console.error('Failed to open Stripe portal:', error);
+      this.logger.error('Failed to open Stripe portal', error);
       this.isLoading.set(false);
     }
   }

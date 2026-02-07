@@ -14,6 +14,7 @@ import {
   computed,
   DestroyRef,
 } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { FormsModule } from '@angular/forms';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -159,6 +160,7 @@ type BillingCycleType = 'monthly' | 'yearly';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly logger = inject(LoggerService);
   private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly service = inject(SuperAdminService);
   private readonly plansService = inject(PlansService);
@@ -218,7 +220,7 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
         this.planPrices.set(prices as Record<string, Record<BillingCycleType, number>>);
       },
       error: (err) => {
-        console.error('Failed to load plan prices:', err);
+        this.logger.error('Failed to load plan prices', err);
       }
     });
   }

@@ -1,4 +1,5 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { LoggerService } from './logger.service';
 import { Capacitor } from '@capacitor/core';
 import { NativeBiometric, BiometryType } from 'capacitor-native-biometric';
 
@@ -15,6 +16,7 @@ import { NativeBiometric, BiometryType } from 'capacitor-native-biometric';
  */
 @Injectable({ providedIn: 'root' })
 export class BiometricService {
+  private readonly logger = inject(LoggerService);
   // Availability
   readonly isAvailable = signal(false);
   readonly biometryType = signal<BiometryType>(BiometryType.NONE);
@@ -72,7 +74,7 @@ export class BiometricService {
       this.biometryType.set(result.biometryType);
       return result.isAvailable;
     } catch (error) {
-      console.error('Biometric availability check failed:', error);
+      this.logger.error('Biometric availability check failed', error);
       this.isAvailable.set(false);
       return false;
     }
@@ -84,7 +86,7 @@ export class BiometricService {
    */
   async authenticate(reason: string = 'Kérjük, azonosítsd magad'): Promise<boolean> {
     if (!this.isAvailable()) {
-      console.warn('Biometric not available');
+      this.logger.warn('Biometric not available');
       return false;
     }
 
@@ -100,7 +102,7 @@ export class BiometricService {
       });
       return true;
     } catch (error) {
-      console.error('Biometric authentication failed:', error);
+      this.logger.error('Biometric authentication failed', error);
       return false;
     }
   }
@@ -123,7 +125,7 @@ export class BiometricService {
       });
       return true;
     } catch (error) {
-      console.error('Failed to store credentials:', error);
+      this.logger.error('Failed to store credentials', error);
       return false;
     }
   }
@@ -145,7 +147,7 @@ export class BiometricService {
         password: credentials.password,
       };
     } catch (error) {
-      console.error('Failed to get credentials:', error);
+      this.logger.error('Failed to get credentials', error);
       return null;
     }
   }
@@ -164,7 +166,7 @@ export class BiometricService {
       });
       return true;
     } catch (error) {
-      console.error('Failed to delete credentials:', error);
+      this.logger.error('Failed to delete credentials', error);
       return false;
     }
   }

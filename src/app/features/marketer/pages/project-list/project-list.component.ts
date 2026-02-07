@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -22,6 +23,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectListComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private marketerService = inject(MarketerService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -76,7 +78,7 @@ export class ProjectListComponent implements OnInit {
           this.filterState.loading.set(false);
         },
         error: (err) => {
-          console.error('Failed to load projects:', err);
+          this.logger.error('Failed to load projects', err);
           this.filterState.loading.set(false);
         }
       });

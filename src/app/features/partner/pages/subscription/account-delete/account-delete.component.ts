@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, AccountStatusResponse } from '../../../services/subscription.service';
@@ -25,6 +26,7 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AccountDeleteComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly authService = inject(AuthService);
   protected readonly ICONS = ICONS;
@@ -52,7 +54,7 @@ export class AccountDeleteComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Failed to load account status:', err);
+        this.logger.error('Failed to load account status', err);
         // Ha nincs ilyen endpoint, default érték
         this.accountStatus.set({
           is_deleted: false,
@@ -76,7 +78,7 @@ export class AccountDeleteComponent implements OnInit {
         this.actionLoading.set(false);
       },
       error: (err) => {
-        console.error('Failed to delete account:', err);
+        this.logger.error('Failed to delete account', err);
         this.actionLoading.set(false);
       }
     });
@@ -90,7 +92,7 @@ export class AccountDeleteComponent implements OnInit {
         this.actionLoading.set(false);
       },
       error: (err) => {
-        console.error('Failed to cancel deletion:', err);
+        this.logger.error('Failed to cancel deletion', err);
         this.actionLoading.set(false);
       }
     });

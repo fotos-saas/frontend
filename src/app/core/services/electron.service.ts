@@ -1,4 +1,5 @@
 import { Injectable, NgZone, OnDestroy, inject, signal } from '@angular/core';
+import { LoggerService } from './logger.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { ElectronNotificationService } from './electron-notification.service';
@@ -28,6 +29,7 @@ import './electron.types';
   providedIn: 'root'
 })
 export class ElectronService implements OnDestroy {
+  private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(ElectronNotificationService);
   private readonly cacheService = inject(ElectronCacheService);
   private readonly paymentService = inject(ElectronPaymentService);
@@ -147,7 +149,7 @@ export class ElectronService implements OnDestroy {
   private initAppClosingListener(): void {
     if (!this.isElectron) return;
     const cleanup = window.electronAPI!.onAppClosing(() => {
-      this.ngZone.run(() => console.log('App is closing, performing cleanup...'));
+      this.ngZone.run(() => this.logger.info('App is closing, performing cleanup...'));
     });
     this.cleanupFunctions.push(cleanup);
   }

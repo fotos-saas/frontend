@@ -6,6 +6,7 @@ import {
   DestroyRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -26,6 +27,7 @@ import { SchoolOption } from './project-create.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectCreateWrapperComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private projectService = inject(PROJECT_CREATE_SERVICE);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -71,7 +73,7 @@ export class ProjectCreateWrapperComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('School search error:', err);
+        this.logger.error('School search error', err);
         this.loadingSchools.set(false);
         this.schoolOptions.set([]);
       },

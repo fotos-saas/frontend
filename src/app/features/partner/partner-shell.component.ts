@@ -1,4 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { NgClass } from '@angular/common';
 import { Router, RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -49,6 +50,7 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PartnerShellComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
   protected readonly brandingService = inject(BrandingService);
@@ -222,7 +224,7 @@ export class PartnerShellComponent implements OnInit {
           this.partnerName.set(info.partner_name);
         }
       },
-      error: (err) => console.error('Failed to load subscription info:', err)
+      error: (err) => this.logger.error('Failed to load subscription info', err)
     });
   }
 

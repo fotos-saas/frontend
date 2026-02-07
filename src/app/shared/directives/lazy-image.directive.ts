@@ -10,6 +10,7 @@ import {
   afterNextRender,
   signal,
 } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { isPlatformBrowser } from '@angular/common';
 
 /**
@@ -35,6 +36,7 @@ import { isPlatformBrowser } from '@angular/common';
   standalone: true,
 })
 export class LazyImageDirective implements OnInit, OnDestroy {
+  private readonly logger = inject(LoggerService);
   private readonly elementRef = inject(ElementRef<HTMLImageElement>);
   private readonly renderer = inject(Renderer2);
   private readonly platformId = inject(PLATFORM_ID);
@@ -157,7 +159,7 @@ export class LazyImageDirective implements OnInit, OnDestroy {
     };
 
     const onError = (): void => {
-      console.warn('[LazyImageDirective] Kép betöltési hiba:', src);
+      this.logger.warn('[LazyImageDirective] Kép betöltési hiba: ' + src);
       this.showImage(imgElement);
       imgElement.removeEventListener('load', onLoad);
       imgElement.removeEventListener('error', onError);

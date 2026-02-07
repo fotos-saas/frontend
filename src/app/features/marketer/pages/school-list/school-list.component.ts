@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -17,6 +18,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SchoolListComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
   private marketerService = inject(MarketerService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -48,7 +50,7 @@ export class SchoolListComponent implements OnInit {
           this.cities.set(cities);
         },
         error: (err) => {
-          console.error('Failed to load cities:', err);
+          this.logger.error('Failed to load cities', err);
         }
       });
   }
@@ -72,7 +74,7 @@ export class SchoolListComponent implements OnInit {
           this.filterState.loading.set(false);
         },
         error: (err) => {
-          console.error('Failed to load schools:', err);
+          this.logger.error('Failed to load schools', err);
           this.filterState.loading.set(false);
         }
       });

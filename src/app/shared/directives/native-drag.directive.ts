@@ -1,4 +1,5 @@
 import { Directive, input, HostListener, HostBinding, inject, signal, DestroyRef } from '@angular/core';
+import { LoggerService } from '@core/services/logger.service';
 import { ElectronService, NativeDragFile } from '../../core/services/electron.service';
 
 /**
@@ -23,6 +24,7 @@ import { ElectronService, NativeDragFile } from '../../core/services/electron.se
   standalone: true,
 })
 export class NativeDragDirective {
+  private readonly logger = inject(LoggerService);
   private readonly electronService = inject(ElectronService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -99,10 +101,10 @@ export class NativeDragDirective {
           this.nativeDragThumbnail()
         );
       } else {
-        console.error('Failed to prepare files for drag:', result.error);
+        this.logger.error('Failed to prepare files for drag', result.error);
       }
     } catch (error) {
-      console.error('Error during native drag preparation:', error);
+      this.logger.error('Error during native drag preparation', error);
     } finally {
       this.isPreparing.set(false);
     }

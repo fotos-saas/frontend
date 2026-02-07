@@ -1,4 +1,5 @@
 import { Injectable, inject, NgZone } from '@angular/core';
+import { LoggerService } from './logger.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, Subject, firstValueFrom } from 'rxjs';
@@ -69,6 +70,7 @@ export interface CheckoutRegistrationData {
   providedIn: 'root'
 })
 export class PaymentService {
+  private readonly logger = inject(LoggerService);
   private readonly http = inject(HttpClient);
   private readonly electronService = inject(ElectronService);
   private readonly router = inject(Router);
@@ -94,7 +96,7 @@ export class PaymentService {
     // Sikeres fizetes deep link
     this.electronService.onPaymentSuccess((data) => {
       this.ngZone.run(() => {
-        console.log('Payment success deep link received:', data.sessionId);
+        this.logger.info('Payment success deep link received', data.sessionId);
         this.paymentSuccess$.next({
           success: true,
           sessionId: data.sessionId
@@ -105,7 +107,7 @@ export class PaymentService {
     // Megszakitott fizetes deep link
     this.electronService.onPaymentCancelled(() => {
       this.ngZone.run(() => {
-        console.log('Payment cancelled deep link received');
+        this.logger.info('Payment cancelled deep link received');
         this.paymentCancelled$.next();
       });
     });

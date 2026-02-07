@@ -74,9 +74,32 @@
 
     <!-- Grid nézet -->
     @if (state.gallery()!.photos.length > 0 && state.viewMode() === 'grid') {
-      <div class="delete-hint" [class.delete-hint--visible]="state.deleteSelectedIds().length === 0">
-        <lucide-icon [name]="ICONS.INFO" [size]="14" />
-        Ctrl/Cmd + kattintással jelölhetsz ki képeket törlésre
+      <div class="selection-bar">
+        <div class="selection-bar__actions">
+          @if (state.allSelectedForDelete()) {
+            <button
+              type="button"
+              class="selection-bar__btn"
+              (click)="state.clearDeleteSelection()"
+            >
+              <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
+              Kijelölés törlése
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="selection-bar__btn"
+              (click)="state.selectAllForDelete()"
+            >
+              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+              Összes kijelölése
+            </button>
+          }
+        </div>
+        <span class="selection-bar__hint">
+          <lucide-icon [name]="ICONS.INFO" [size]="12" />
+          Ctrl/Cmd + kattintás = egyenkénti kijelölés
+        </span>
       </div>
       <app-selection-grid
         [photos]="state.gridPhotos()"

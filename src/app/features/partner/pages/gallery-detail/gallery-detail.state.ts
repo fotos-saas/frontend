@@ -159,6 +159,20 @@ export class GalleryDetailState {
     }
   }
 
+  /** Összes fotó kijelölése törlésre */
+  selectAllForDelete(): void {
+    const galleryData = this.gallery();
+    if (!galleryData) return;
+    this.deleteSelectedIds.set(galleryData.photos.map(p => p.id));
+  }
+
+  /** Összes fotó kijelölve van-e */
+  readonly allSelectedForDelete = computed(() => {
+    const galleryData = this.gallery();
+    if (!galleryData || galleryData.photos.length === 0) return false;
+    return this.deleteSelectedIds().length === galleryData.photos.length;
+  });
+
   clearDeleteSelection(): void {
     this.deleteSelectedIds.set([]);
   }

@@ -58,7 +58,7 @@ export class ElectronNotificationService implements OnDestroy {
       if (typeof result === 'boolean') {
         return { success: result, id: null };
       }
-      return result;
+      return result as NotificationResult;
     }
 
     // Browser fallback

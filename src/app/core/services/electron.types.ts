@@ -46,9 +46,18 @@ interface CacheAPI {
   getAll: () => Promise<Record<string, unknown>>;
 }
 
+export interface QueuedRequestData {
+  id: string;
+  method: string;
+  url: string;
+  body: unknown;
+  timestamp: number;
+  headers?: Record<string, string>;
+}
+
 interface RequestQueueAPI {
   add: (request: { method: string; url: string; body: unknown; headers?: Record<string, string> }) => Promise<string | null>;
-  getAll: () => Promise<unknown[]>;
+  getAll: () => Promise<QueuedRequestData[]>;
   remove: (requestId: string) => Promise<boolean>;
   clear: () => Promise<boolean>;
 }
@@ -72,8 +81,13 @@ interface TouchBarAPI {
   onAction: (callback: (actionId: string, data?: Record<string, unknown>) => void) => CleanupFn;
 }
 
+export interface NotificationResultData {
+  success: boolean;
+  id: string | null;
+}
+
 export interface ElectronAPI {
-  showNotification: (options: unknown, body?: string) => Promise<unknown>;
+  showNotification: (options: unknown, body?: string) => Promise<NotificationResultData | boolean>;
   onNotificationClicked: (callback: (data: { id: string }) => void) => CleanupFn;
   onNotificationReply: (callback: (data: { id: string; reply: string }) => void) => CleanupFn;
   onNotificationAction: (callback: (data: { id: string; actionIndex: number }) => void) => CleanupFn;

@@ -126,7 +126,7 @@ export class ElectronCacheService {
         return [];
       }
     }
-    return window.electronAPI!.requestQueue.getAll();
+    return window.electronAPI!.requestQueue.getAll() as Promise<QueuedRequest[]>;
   }
 
   /** Request eltavolitasa a queue-bol */

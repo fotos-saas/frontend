@@ -136,6 +136,7 @@ export interface TabloProject {
   branding?: {
     brandName: string | null;
     logoUrl: string | null;
+    hideBrandName: boolean;
   } | null;
 }
 
@@ -203,6 +204,7 @@ export interface LoginResponse {
   branding?: {
     brandName: string | null;
     logoUrl: string | null;
+    hideBrandName: boolean;
   };
 }
 

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import DOMPurify from 'dompurify';
 
 /**
  * TextUtilsService
@@ -19,14 +20,12 @@ export class TextUtilsService {
 
   /**
    * HTML tagek eltávolítása a szövegből.
-   * DOM-alapú megoldás a biztonságos és pontos eredményért.
+   * DOMPurify sanitize előszűréssel a biztonságos eredményért.
    */
   stripHtmlTags(html: string): string {
     if (!html) return '';
 
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    return tempDiv.textContent || tempDiv.innerText || '';
+    return DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
   }
 
   /**

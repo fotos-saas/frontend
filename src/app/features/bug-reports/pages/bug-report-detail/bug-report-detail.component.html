@@ -32,7 +32,7 @@
     <!-- Leírás -->
     <section class="detail-section">
       <h2>Leírás</h2>
-      <div class="description-content" [innerHTML]="r.description"></div>
+      <div class="description-content" [innerHTML]="r.description | safeHtml"></div>
     </section>
 
     <!-- Mellékletek -->
@@ -97,7 +97,7 @@
                 <span class="comment-author">{{ comment.author.name }}</span>
                 <span class="comment-date">{{ comment.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
               </div>
-              <div class="comment-body" [innerHTML]="comment.content"></div>
+              <div class="comment-body" [innerHTML]="comment.content | safeHtml"></div>
             </div>
           }
         </div>

@@ -1,5 +1,5 @@
 export const environment = {
-  production: true,
+  production: false,
   apiUrl: 'https://api.tablostudio.hu/api',
   // WebSocket konfiguráció
   wsHost: 'api.tablostudio.hu',

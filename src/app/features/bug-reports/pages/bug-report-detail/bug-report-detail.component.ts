@@ -8,11 +8,12 @@ import { BugReportService } from '../../../../shared/services/bug-report.service
 import { BugReport } from '../../../../shared/types/bug-report.types';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { RichTextEditorComponent } from '../../../../shared/components/rich-text-editor/rich-text-editor.component';
+import { SafeHtmlPipe } from '../../../../shared/pipes/safe-html.pipe';
 
 @Component({
   selector: 'app-bug-report-detail',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, RichTextEditorComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, RichTextEditorComponent, SafeHtmlPipe],
   templateUrl: './bug-report-detail.component.html',
   styleUrl: './bug-report-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

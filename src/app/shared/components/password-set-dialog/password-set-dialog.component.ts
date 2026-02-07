@@ -14,6 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
 import { PasswordStrengthComponent } from '../password-strength/password-strength.component';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -47,6 +48,7 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   /** Signal-based outputs */
   readonly passwordSetEvent = output<PasswordSetResult>();
@@ -199,5 +201,17 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
 
   protected onClose(): void {
     // NEM csinálunk semmit - a dialog nem zárható
+  }
+
+  /**
+   * Kilépés - kijelentkezés és átirányítás a login oldalra
+   */
+  doLogout(): void {
+    this.authService.logout().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login']),
+    });
   }
 }

@@ -109,6 +109,16 @@ export class PhotoSelectionComponent {
         this.actions.loadWorkflow(project.tabloGalleryId);
       }
     });
+
+    // Auto-load review groups when completed
+    effect(() => {
+      if (this.state.isCompleted() && !this.state.reviewGroups()) {
+        const gId = this.projectContext.galleryId();
+        if (gId) {
+          this.actions.loadReviewGroups(gId, (loading) => this.reviewLoading.set(loading));
+        }
+      }
+    });
   }
 
   // === SELECTION ===
@@ -210,14 +220,6 @@ export class PhotoSelectionComponent {
     }));
     this.state.lightbox.setTempMedia(media);
     this.state.lightbox.open(event.index);
-  }
-
-  // === REVIEW ===
-
-  onLoadReview(): void {
-    const gId = this.projectContext.galleryId();
-    if (!gId) return;
-    this.actions.loadReviewGroups(gId, (loading) => this.reviewLoading.set(loading));
   }
 
   // === PAGINATION ===

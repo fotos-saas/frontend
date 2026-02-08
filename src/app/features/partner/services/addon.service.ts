@@ -123,6 +123,7 @@ export class AddonService {
       forum: 'message-circle',
       polls: 'check-circle',
       branding: 'palette',
+      invoicing: 'file-text',
     };
     return icons[feature] || 'check';
   }
@@ -135,6 +136,7 @@ export class AddonService {
       forum: 'Fórum',
       polls: 'Szavazás',
       branding: 'Márkajelzés',
+      invoicing: 'Számlázás',
     };
     return names[feature] || feature;
   }

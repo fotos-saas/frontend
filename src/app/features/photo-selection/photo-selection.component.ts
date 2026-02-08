@@ -77,6 +77,7 @@ export class PhotoSelectionComponent {
   readonly state = new PhotoSelectionState(this.destroyRef);
   readonly projectContext = new ProjectContextHelper(this.authService);
   readonly showScheduleDialog = signal<boolean>(false);
+  readonly reviewLoading = signal<boolean>(false);
 
   private readonly project = toSignal(
     this.authService.project$.pipe(
@@ -209,6 +210,14 @@ export class PhotoSelectionComponent {
     }));
     this.state.lightbox.setTempMedia(media);
     this.state.lightbox.open(event.index);
+  }
+
+  // === REVIEW ===
+
+  onLoadReview(): void {
+    const gId = this.projectContext.galleryId();
+    if (!gId) return;
+    this.actions.loadReviewGroups(gId, (loading) => this.reviewLoading.set(loading));
   }
 
   // === PAGINATION ===

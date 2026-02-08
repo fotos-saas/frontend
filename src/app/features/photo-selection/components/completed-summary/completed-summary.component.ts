@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, signal } from '@angular/core';
 import { WorkflowPhoto, ProgressData, ReviewGroups, ReviewGroup } from '../../models/workflow.models';
 
 /**
@@ -25,11 +25,20 @@ export class CompletedSummaryComponent {
   /** Review csoportok (backend-ről) */
   readonly reviewGroups = input<ReviewGroups | null>(null);
 
+  /** Review betöltés folyamatban */
+  readonly reviewLoading = input<boolean>(false);
+
   /** Tablókép kattintás (lightbox) */
   readonly tabloClick = output<WorkflowPhoto>();
 
   /** Fotó kattintás (lightbox a review group-ból) */
   readonly photoClick = output<{ photos: ReviewGroup[]; index: number }>();
+
+  /** Review lekérés (ha még nincs adat) */
+  readonly loadReview = output<void>();
+
+  /** Review nézet megnyitva */
+  readonly showReview = signal(false);
 
   /** Claimed képek száma */
   get claimedCount(): number {
@@ -46,6 +55,17 @@ export class CompletedSummaryComponent {
     const groups = this.reviewGroups();
     return groups && (groups.claiming.length > 0 || groups.retouch.length > 0 || groups.tablo.length > 0);
   });
+
+  onToggleReview(): void {
+    if (this.showReview()) {
+      this.showReview.set(false);
+      return;
+    }
+    this.showReview.set(true);
+    if (!this.hasReview()) {
+      this.loadReview.emit();
+    }
+  }
 
   onTabloClick(): void {
     const photo = this.tabloPhoto();

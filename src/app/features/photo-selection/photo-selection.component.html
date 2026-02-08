@@ -65,8 +65,10 @@
           [progress]="state.progress()"
           [tabloPhoto]="state.tabloPhoto()"
           [reviewGroups]="state.reviewGroups()"
+          [reviewLoading]="reviewLoading()"
           (tabloClick)="onTabloClick($event)"
           (photoClick)="onReviewPhotoClick($event)"
+          (loadReview)="onLoadReview()"
         />
       } @else {
         <!-- Selection grid (readonly ha finalized) -->

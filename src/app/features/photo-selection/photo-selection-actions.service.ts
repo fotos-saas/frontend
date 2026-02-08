@@ -161,6 +161,27 @@ export class PhotoSelectionActionsService {
     });
   }
 
+  // === REVIEW ===
+
+  loadReviewGroups(galleryId: number, onLoadingChange: (loading: boolean) => void): void {
+    onLoadingChange(true);
+    this.workflowService.loadStepData(galleryId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (data) => {
+        if (data.review_groups) {
+          this.state.reviewGroups.set(data.review_groups);
+        }
+        onLoadingChange(false);
+      },
+      error: (err) => {
+        this.logger.error('Review groups betoltes hiba', err);
+        this.toast.error('Hiba', 'Nem sikerult betolteni a kepeket.');
+        onLoadingChange(false);
+      }
+    });
+  }
+
   // === PAGINATION ===
 
   onLoadMore(): void {

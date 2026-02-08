@@ -6,6 +6,7 @@ import {
   ProgressData,
   WorkSessionData,
   ReviewGroups,
+  ModificationInfo,
   getStepIndex,
   EMPTY_STATE_MESSAGES,
 } from './models/workflow.models';
@@ -79,6 +80,9 @@ export class PhotoSelectionState {
 
   /** Review csoportok (completed state - mindhárom lépés fotói) */
   readonly reviewGroups = signal<ReviewGroups | null>(null);
+
+  /** Módosítási információk (completed state - ingyenes időablak) */
+  readonly modificationInfo = signal<ModificationInfo | null>(null);
 
   // === COMPUTED VALUES (delegált) ===
 
@@ -283,6 +287,7 @@ export class PhotoSelectionState {
     progress: ProgressData | null;
     work_session: WorkSessionData;
     review_groups?: ReviewGroups;
+    modification_info?: ModificationInfo;
   }): void {
     if (data.current_step === 'completed') {
       this.isFinalized.set(true);
@@ -297,6 +302,10 @@ export class PhotoSelectionState {
 
     if (data.review_groups) {
       this.reviewGroups.set(data.review_groups);
+    }
+
+    if (data.modification_info) {
+      this.modificationInfo.set(data.modification_info);
     }
 
     // Delegálás a pagination state-nek
@@ -424,6 +433,7 @@ export class PhotoSelectionState {
     this.isFinalized.set(false);
     this.viewingStep.set(null);
     this.reviewGroups.set(null);
+    this.modificationInfo.set(null);
 
     // Sub-states reset
     this.lightbox.reset();

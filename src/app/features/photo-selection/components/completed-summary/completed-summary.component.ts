@@ -1,5 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, signal } from '@angular/core';
-import { WorkflowPhoto, ProgressData, ReviewGroups, ReviewGroup } from '../../models/workflow.models';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '../../../../shared/constants/icons.constants';
+import { WorkflowPhoto, ProgressData, ReviewGroups, ReviewGroup, ModificationInfo } from '../../models/workflow.models';
 import { SelectionGridComponent } from '../selection-grid/selection-grid.component';
 
 type TabKey = 'tablo' | 'retouch' | 'claiming';
@@ -7,7 +9,7 @@ type TabKey = 'tablo' | 'retouch' | 'claiming';
 @Component({
   selector: 'app-completed-summary',
   standalone: true,
-  imports: [SelectionGridComponent],
+  imports: [SelectionGridComponent, LucideAngularModule],
   templateUrl: './completed-summary.component.html',
   styleUrl: './completed-summary.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,10 +18,29 @@ export class CompletedSummaryComponent {
   readonly progress = input.required<ProgressData | null>();
   readonly reviewGroups = input<ReviewGroups | null>(null);
   readonly reviewLoading = input<boolean>(false);
+  readonly modificationInfo = input<ModificationInfo | null>(null);
 
   readonly photoClick = output<{ photos: ReviewGroup[]; index: number }>();
+  readonly modifyClick = output<void>();
 
+  readonly ICONS = ICONS;
   readonly activeTab = signal<TabKey>('tablo');
+
+  readonly isWithinFreeWindow = computed(() => {
+    return this.modificationInfo()?.is_within_free_window ?? false;
+  });
+
+  readonly remainingTimeFormatted = computed(() => {
+    const info = this.modificationInfo();
+    if (!info || !info.remaining_seconds) return '';
+    const totalSeconds = info.remaining_seconds;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours} óra ${minutes} perc`;
+    }
+    return `${minutes} perc`;
+  });
 
   readonly hasReview = computed(() => {
     const groups = this.reviewGroups();

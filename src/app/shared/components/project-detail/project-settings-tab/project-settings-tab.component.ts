@@ -30,6 +30,11 @@ export class ProjectSettingsTabComponent implements OnInit {
   globalDefault = signal(3);
   effectiveValue = signal(5);
 
+  // Free edit window settings
+  useCustomEditWindow = signal(false);
+  customEditWindowHours = signal(24);
+  globalDefaultEditWindow = signal(24);
+
   ngOnInit(): void {
     this.loadSettings();
   }
@@ -50,6 +55,17 @@ export class ProjectSettingsTabComponent implements OnInit {
           this.useCustomLimit.set(false);
           this.customLimit.set(d.global_default_max_retouch_photos);
         }
+
+        // Free edit window
+        this.globalDefaultEditWindow.set(d.global_default_free_edit_window_hours ?? 24);
+        if (d.free_edit_window_hours !== null && d.free_edit_window_hours !== undefined) {
+          this.useCustomEditWindow.set(true);
+          this.customEditWindowHours.set(d.free_edit_window_hours);
+        } else {
+          this.useCustomEditWindow.set(false);
+          this.customEditWindowHours.set(d.global_default_free_edit_window_hours ?? 24);
+        }
+
         this.loading.set(false);
       },
       error: () => {
@@ -66,11 +82,22 @@ export class ProjectSettingsTabComponent implements OnInit {
     }
   }
 
+  toggleCustomEditWindow(): void {
+    this.useCustomEditWindow.update(v => !v);
+    if (!this.useCustomEditWindow()) {
+      this.customEditWindowHours.set(this.globalDefaultEditWindow());
+    }
+  }
+
   save(): void {
     this.saving.set(true);
     const value = this.useCustomLimit() ? this.customLimit() : null;
+    const editWindowValue = this.useCustomEditWindow() ? this.customEditWindowHours() : null;
 
-    this.partnerService.updateProjectSettings(this.projectId(), { max_retouch_photos: value }).pipe(
+    this.partnerService.updateProjectSettings(this.projectId(), {
+      max_retouch_photos: value,
+      free_edit_window_hours: editWindowValue,
+    }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (res) => {

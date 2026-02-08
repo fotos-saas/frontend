@@ -253,6 +253,22 @@ export class TabloWorkflowService {
     );
   }
 
+  /**
+   * Módosítás kérelem (un-finalize workflow)
+   * @param galleryId A galéria ID
+   */
+  requestModification(galleryId: number): Observable<{ success: boolean; was_free: boolean; message: string }> {
+    try {
+      this.securityService.validateGalleryAccess(galleryId);
+    } catch (error) {
+      return throwError(() => error);
+    }
+
+    return this.apiService.requestModification$(galleryId).pipe(
+      catchError(error => this.handleError(error))
+    );
+  }
+
   // === PRIVATE HELPERS ===
 
   /**
@@ -263,6 +279,7 @@ export class TabloWorkflowService {
       ...response,
       visible_photos: (response.visible_photos || []).map(mapApiPhoto),
       review_groups: response.review_groups,
+      modification_info: response.modification_info,
     };
   }
 

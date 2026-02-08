@@ -55,18 +55,67 @@
         </span>
       </div>
 
-      <div class="action-row">
-        <button
-          class="save-btn"
-          [disabled]="saving()"
-          (click)="save()"
-        >
-          @if (saving()) {
-            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          }
-          Mentés
-        </button>
+    </div>
+
+    <!-- Free Edit Window Setting -->
+    <div class="setting-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Ingyenes módosítási időablak</span>
+          <span class="setting-description">
+            Mennyi ideig módosíthatja a diák a véglegesített választását díjmentesen.
+          </span>
+        </div>
       </div>
+
+      <label class="toggle-row">
+        <input
+          type="checkbox"
+          class="toggle-input"
+          [checked]="useCustomEditWindow()"
+          (change)="toggleCustomEditWindow()"
+        />
+        <span class="toggle-label">Egyedi érték beállítása erre a projektre</span>
+      </label>
+
+      @if (useCustomEditWindow()) {
+        <div class="number-input-row">
+          <label class="number-label" for="editWindow">Időablak (óra)</label>
+          <input
+            id="editWindow"
+            type="number"
+            class="number-input"
+            min="1"
+            max="168"
+            [ngModel]="customEditWindowHours()"
+            (ngModelChange)="customEditWindowHours.set($event)"
+          />
+        </div>
+      }
+
+      <div class="info-row">
+        <lucide-icon [name]="ICONS.INFO" [size]="14" class="info-icon" />
+        <span>
+          Globális alapérték: <strong>{{ globalDefaultEditWindow() }} óra</strong>
+          @if (useCustomEditWindow()) {
+            &middot; Érvényes érték: <strong>{{ customEditWindowHours() }} óra</strong>
+          }
+        </span>
+      </div>
+    </div>
+
+    <!-- Közös Mentés gomb -->
+    <div class="action-row">
+      <button
+        class="save-btn"
+        [disabled]="saving()"
+        (click)="save()"
+      >
+        @if (saving()) {
+          <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        }
+        Mentés
+      </button>
     </div>
   </div>
 }

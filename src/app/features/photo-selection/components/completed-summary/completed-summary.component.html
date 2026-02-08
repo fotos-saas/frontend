@@ -1,4 +1,35 @@
 <div class="completed-summary">
+  <!-- Tájékoztató blokk -->
+  @if (modificationInfo()) {
+    <div class="completed-summary__info-block">
+      <div class="completed-summary__info-header">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
+        <strong>A választásod véglegesítve lett</strong>
+      </div>
+      <p class="completed-summary__info-text">
+        A füleken visszanézheted, hogy mit választottál.
+      </p>
+
+      @if (isWithinFreeWindow()) {
+        <p class="completed-summary__info-free">
+          <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+          Módosítani szeretnéd? Még <strong>{{ remainingTimeFormatted() }}</strong>
+          áll rendelkezésedre az ingyenes módosításra.
+        </p>
+      } @else {
+        <p class="completed-summary__info-paid">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+          Az ingyenes módosítási időablak lejárt. A módosítás díjköteles.
+        </p>
+      }
+
+      <button class="completed-summary__modify-btn" (click)="modifyClick.emit()">
+        <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+        Módosítás
+      </button>
+    </div>
+  }
+
   <!-- Betöltés -->
   @if (reviewLoading() && !hasReview()) {
     <div class="completed-summary__loading">

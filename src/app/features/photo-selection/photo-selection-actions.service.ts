@@ -161,6 +161,32 @@ export class PhotoSelectionActionsService {
     });
   }
 
+  // === MODIFICATION ===
+
+  requestModification(galleryId: number): void {
+    this.state.dialogs.modifyConfirmDialog.startSubmit();
+
+    this.workflowService.requestModification(galleryId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      switchMap(() => this.workflowService.loadStepData(galleryId))
+    ).subscribe({
+      next: (data) => {
+        this.state.dialogs.modifyConfirmDialog.submitSuccess();
+        this.state.dialogs.modifyPaymentDialog.close();
+        this.state.modificationInfo.set(null);
+        this.state.updateFromStepData(data);
+        this.state.finishLoading();
+        this.toast.success('Siker!', 'A kepvalasztas ujra szerkesztheto.');
+      },
+      error: (err) => {
+        this.logger.error('Modositas kerelem hiba', err);
+        this.state.dialogs.modifyConfirmDialog.submitError(err.message);
+        this.state.dialogs.modifyPaymentDialog.submitError(err.message);
+        this.toast.error('Hiba', err.message || 'Nem sikerult a modositas kerelem.');
+      }
+    });
+  }
+
   // === REVIEW ===
 
   loadReviewGroups(galleryId: number, onLoadingChange: (loading: boolean) => void): void {

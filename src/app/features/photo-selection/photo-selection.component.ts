@@ -226,6 +226,41 @@ export class PhotoSelectionComponent {
 
   onLoadMore(): void { this.actions.onLoadMore(); }
 
+  // === MODIFICATION ===
+
+  onModifyClick(): void {
+    const info = this.state.modificationInfo();
+    if (!info) return;
+
+    if (info.is_within_free_window) {
+      this.state.dialogs.modifyConfirmDialog.open();
+    } else {
+      this.state.dialogs.modifyPaymentDialog.open();
+    }
+  }
+
+  onModifyConfirmResult(result: { action: 'confirm' | 'cancel' }): void {
+    if (result.action === 'cancel') {
+      this.state.dialogs.modifyConfirmDialog.close();
+      return;
+    }
+
+    const gId = this.projectContext.galleryId();
+    if (!gId) return;
+    this.actions.requestModification(gId);
+  }
+
+  onPaymentDialogResult(result: { action: 'confirm' | 'cancel' }): void {
+    if (result.action === 'cancel') {
+      this.state.dialogs.modifyPaymentDialog.close();
+      return;
+    }
+
+    const gId = this.projectContext.galleryId();
+    if (!gId) return;
+    this.actions.requestModification(gId);
+  }
+
   // === SCHEDULE DIALOG ===
 
   onSetPhotoDate(): void { this.showScheduleDialog.set(true); }

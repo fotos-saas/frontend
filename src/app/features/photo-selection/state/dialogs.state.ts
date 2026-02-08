@@ -15,6 +15,12 @@ export class DialogsState {
   /** Deselect confirm dialog állapota (kijelölés törléséhez) */
   readonly deselectConfirmDialog = new DialogStateHelper();
 
+  /** Modify confirm dialog állapota (ingyenes módosítás) */
+  readonly modifyConfirmDialog = new DialogStateHelper();
+
+  /** Modify payment dialog állapota (fizetős módosítás - placeholder) */
+  readonly modifyPaymentDialog = new DialogStateHelper();
+
   /**
    * Reset minden dialógus
    */
@@ -22,5 +28,7 @@ export class DialogsState {
     this.infoDialog.reset();
     this.confirmDialog.reset();
     this.deselectConfirmDialog.reset();
+    this.modifyConfirmDialog.reset();
+    this.modifyPaymentDialog.reset();
   }
 }

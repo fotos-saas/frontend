@@ -20,6 +20,7 @@ const WORKFLOW_API = {
   tabloClear: `${environment.apiUrl}/tablo/tablo/clear`,
   tablo: `${environment.apiUrl}/tablo/tablo`,
   finalize: `${environment.apiUrl}/tablo/workflow/finalize`,
+  requestModification: `${environment.apiUrl}/tablo/workflow/request-modification`,
   nextStep: `${environment.apiUrl}/tablo/next-step`,
   previousStep: `${environment.apiUrl}/tablo/previous-step`,
   moveToStep: `${environment.apiUrl}/tablo/move-to-step`,
@@ -121,6 +122,17 @@ export class WorkflowApiService {
     return this.http.post<{ message: string }>(WORKFLOW_API.finalize, {
       workSessionId: galleryId, // Backend még workSessionId-t vár
     });
+  }
+
+  /**
+   * Módosítás kérelem (un-finalize workflow)
+   * @param galleryId A galéria ID
+   */
+  requestModification$(galleryId: number): Observable<{ success: boolean; was_free: boolean; message: string }> {
+    return this.http.post<{ success: boolean; was_free: boolean; message: string }>(
+      WORKFLOW_API.requestModification,
+      { workSessionId: galleryId }
+    );
   }
 
   /**

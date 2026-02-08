@@ -65,7 +65,9 @@
           [progress]="state.progress()"
           [reviewGroups]="state.reviewGroups()"
           [reviewLoading]="reviewLoading()"
+          [modificationInfo]="state.modificationInfo()"
           (photoClick)="onReviewPhotoClick($event)"
+          (modifyClick)="onModifyClick()"
         />
       } @else {
         <!-- Selection grid (readonly ha finalized) -->
@@ -160,6 +162,34 @@
       [currentIndex]="state.lightboxIndex()"
       (close)="state.closeLightbox()"
       (navigate)="state.navigateLightbox($event)"
+    />
+  }
+}
+
+<!-- Modify Confirm Dialog (ingyenes módosítás) - lazy load idle állapotban -->
+@defer (on idle) {
+  @if (state.dialogs.modifyConfirmDialog.isOpen()) {
+    <app-confirm-dialog
+      title="Képválasztás módosítása"
+      message="Az ingyenes módosítási időablakon belül vagy. Szeretnéd újra szerkeszteni a választásaidat?"
+      confirmText="Módosítás"
+      confirmType="primary"
+      [isSubmitting]="state.dialogs.modifyConfirmDialog.isSubmitting()"
+      (resultEvent)="onModifyConfirmResult($event)"
+    />
+  }
+}
+
+<!-- Modify Payment Dialog (fizetős módosítás - placeholder) - lazy load idle állapotban -->
+@defer (on idle) {
+  @if (state.dialogs.modifyPaymentDialog.isOpen()) {
+    <app-confirm-dialog
+      title="Módosítás díjköteles"
+      message="Az ingyenes időablak lejárt. A módosítás díjmentes (tesztüzem). Szeretnéd folytatni?"
+      confirmText="Módosítás"
+      confirmType="primary"
+      [isSubmitting]="state.dialogs.modifyPaymentDialog.isSubmitting()"
+      (resultEvent)="onPaymentDialogResult($event)"
     />
   }
 }

@@ -122,6 +122,16 @@ export interface ReviewGroups {
   tablo: ReviewGroup[];
 }
 
+/** Modification info - ingyenes módosítási időablak */
+export interface ModificationInfo {
+  free_edit_window_hours: number;
+  finalized_at: string | null;
+  is_within_free_window: boolean;
+  remaining_seconds: number;
+  modification_count: number;
+  requires_payment: boolean;
+}
+
 export interface StepData {
   current_step: WorkflowStep;
   visible_photos: WorkflowPhoto[];
@@ -131,6 +141,7 @@ export interface StepData {
   progress: ProgressData | null;
   work_session: WorkSessionData;
   review_groups?: ReviewGroups;
+  modification_info?: ModificationInfo;
 }
 
 /**
@@ -145,6 +156,7 @@ export interface StepDataResponse {
   progress: ProgressData | null;
   work_session: WorkSessionData;
   review_groups?: ReviewGroups;
+  modification_info?: ModificationInfo;
 }
 
 /**

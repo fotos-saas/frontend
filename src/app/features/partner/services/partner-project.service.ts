@@ -221,6 +221,9 @@ export class PartnerProjectService {
       max_retouch_photos: number | null;
       effective_max_retouch_photos: number;
       global_default_max_retouch_photos: number;
+      free_edit_window_hours: number | null;
+      effective_free_edit_window_hours: number;
+      global_default_free_edit_window_hours: number;
     };
   }> {
     return this.http.get<{
@@ -228,6 +231,9 @@ export class PartnerProjectService {
         max_retouch_photos: number | null;
         effective_max_retouch_photos: number;
         global_default_max_retouch_photos: number;
+        free_edit_window_hours: number | null;
+        effective_free_edit_window_hours: number;
+        global_default_free_edit_window_hours: number;
       };
     }>(`${this.baseUrl}/projects/${projectId}/settings`);
   }
@@ -235,15 +241,28 @@ export class PartnerProjectService {
   /**
    * Projekt beállítások módosítása
    */
-  updateProjectSettings(projectId: number, data: { max_retouch_photos: number | null }): Observable<{
+  updateProjectSettings(projectId: number, data: {
+    max_retouch_photos: number | null;
+    free_edit_window_hours?: number | null;
+  }): Observable<{
     success: boolean;
     message: string;
-    data: { max_retouch_photos: number | null; effective_max_retouch_photos: number };
+    data: {
+      max_retouch_photos: number | null;
+      effective_max_retouch_photos: number;
+      free_edit_window_hours: number | null;
+      effective_free_edit_window_hours: number;
+    };
   }> {
     return this.http.put<{
       success: boolean;
       message: string;
-      data: { max_retouch_photos: number | null; effective_max_retouch_photos: number };
+      data: {
+        max_retouch_photos: number | null;
+        effective_max_retouch_photos: number;
+        free_edit_window_hours: number | null;
+        effective_free_edit_window_hours: number;
+      };
     }>(`${this.baseUrl}/projects/${projectId}/settings`, data);
   }
 
@@ -251,25 +270,40 @@ export class PartnerProjectService {
    * Globális beállítások lekérése
    */
   getGlobalSettings(): Observable<{
-    data: { default_max_retouch_photos: number };
+    data: {
+      default_max_retouch_photos: number;
+      default_free_edit_window_hours: number;
+    };
   }> {
     return this.http.get<{
-      data: { default_max_retouch_photos: number };
+      data: {
+        default_max_retouch_photos: number;
+        default_free_edit_window_hours: number;
+      };
     }>(`${this.baseUrl}/settings`);
   }
 
   /**
    * Globális beállítások módosítása
    */
-  updateGlobalSettings(data: { default_max_retouch_photos: number | null }): Observable<{
+  updateGlobalSettings(data: {
+    default_max_retouch_photos: number | null;
+    default_free_edit_window_hours?: number | null;
+  }): Observable<{
     success: boolean;
     message: string;
-    data: { default_max_retouch_photos: number };
+    data: {
+      default_max_retouch_photos: number;
+      default_free_edit_window_hours: number;
+    };
   }> {
     return this.http.put<{
       success: boolean;
       message: string;
-      data: { default_max_retouch_photos: number };
+      data: {
+        default_max_retouch_photos: number;
+        default_free_edit_window_hours: number;
+      };
     }>(`${this.baseUrl}/settings`, data);
   }
 }

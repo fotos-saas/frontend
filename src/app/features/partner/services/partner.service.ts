@@ -193,7 +193,10 @@ export class PartnerService {
     return this.projectService.getProjectSettings(projectId);
   }
 
-  updateProjectSettings(projectId: number, data: { max_retouch_photos: number | null }) {
+  updateProjectSettings(projectId: number, data: {
+    max_retouch_photos: number | null;
+    free_edit_window_hours?: number | null;
+  }) {
     return this.projectService.updateProjectSettings(projectId, data);
   }
 
@@ -201,7 +204,10 @@ export class PartnerService {
     return this.projectService.getGlobalSettings();
   }
 
-  updateGlobalSettings(data: { default_max_retouch_photos: number | null }) {
+  updateGlobalSettings(data: {
+    default_max_retouch_photos: number | null;
+    default_free_edit_window_hours?: number | null;
+  }) {
     return this.projectService.updateGlobalSettings(data);
   }
 

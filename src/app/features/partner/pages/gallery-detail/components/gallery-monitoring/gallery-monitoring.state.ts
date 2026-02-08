@@ -4,7 +4,9 @@ import {
   MonitoringSummary,
   MonitoringFilter,
   PersonSelections,
+  SelectionPhoto,
 } from '../../../../models/gallery-monitoring.models';
+import { LightboxMediaItem } from '../../../../../../shared/components/media-lightbox/media-lightbox.types';
 
 /**
  * Gallery Monitoring State
@@ -28,6 +30,11 @@ export class GalleryMonitoringState {
 
   /** Kiválasztások betöltési állapota */
   readonly loadingSelections = signal<boolean>(false);
+
+  /** Lightbox állapot */
+  readonly lightboxOpen = signal<boolean>(false);
+  readonly lightboxMedia = signal<LightboxMediaItem[]>([]);
+  readonly lightboxIndex = signal<number>(0);
 
   /** Export beállítások (projekt szintű effektív értékek) */
   readonly exportSettings = signal<{
@@ -99,6 +106,30 @@ export class GalleryMonitoringState {
 
   setSelectionsError(): void {
     this.loadingSelections.set(false);
+  }
+
+  openLightbox(photos: SelectionPhoto[], index: number): void {
+    const media: LightboxMediaItem[] = photos
+      .filter(p => p.thumbUrl || p.url)
+      .map(p => ({
+        id: p.id,
+        url: p.url || p.thumbUrl || '',
+        fileName: p.originalName || `photo-${p.id}`,
+      }));
+
+    if (media.length === 0) return;
+
+    this.lightboxMedia.set(media);
+    this.lightboxIndex.set(Math.min(index, media.length - 1));
+    this.lightboxOpen.set(true);
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen.set(false);
+  }
+
+  navigateLightbox(index: number): void {
+    this.lightboxIndex.set(index);
   }
 
   setLoading(): void {

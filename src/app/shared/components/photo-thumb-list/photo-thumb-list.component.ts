@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../constants/icons.constants';
@@ -6,6 +6,8 @@ import { ICONS } from '../../constants/icons.constants';
 export interface ThumbPhoto {
   id: number;
   thumbUrl: string | null;
+  /** Nagyobb kép URL a lightboxhoz (ha nincs, thumbUrl-t használja) */
+  url?: string | null;
   originalName?: string | null;
 }
 
@@ -24,7 +26,14 @@ export class PhotoThumbListComponent {
   readonly size = input<ThumbSize>('md');
   readonly highlight = input<boolean>(false);
 
+  /** Kép kattintás - index-szel, lightbox nyitáshoz */
+  readonly photoClick = output<{ photo: ThumbPhoto; index: number }>();
+
   readonly ICONS = ICONS;
+
+  onPhotoClick(photo: ThumbPhoto, index: number): void {
+    this.photoClick.emit({ photo, index });
+  }
 
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;

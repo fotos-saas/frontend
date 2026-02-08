@@ -2,8 +2,9 @@ import { Component, ChangeDetectionStrategy, input, OnInit, inject, computed } f
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
-import { PhotoThumbListComponent } from '../../../../../../shared/components/photo-thumb-list';
-import { MonitoringFilter } from '../../../../models/gallery-monitoring.models';
+import { PhotoThumbListComponent, ThumbPhoto } from '../../../../../../shared/components/photo-thumb-list';
+import { MediaLightboxComponent } from '../../../../../../shared/components/media-lightbox/media-lightbox.component';
+import { MonitoringFilter, SelectionPhoto } from '../../../../models/gallery-monitoring.models';
 import { GalleryMonitoringState } from './gallery-monitoring.state';
 import { GalleryMonitoringActionsService } from './gallery-monitoring-actions.service';
 import { DownloadOptions } from '../download-dialog/download-dialog.component';
@@ -12,7 +13,7 @@ import { DownloadOptions } from '../download-dialog/download-dialog.component';
   selector: 'app-gallery-monitoring',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideAngularModule, MatTooltipModule, PhotoThumbListComponent],
+  imports: [LucideAngularModule, MatTooltipModule, PhotoThumbListComponent, MediaLightboxComponent],
   providers: [GalleryMonitoringActionsService],
   templateUrl: './gallery-monitoring.component.html',
   styleUrl: './gallery-monitoring.component.scss',
@@ -76,6 +77,18 @@ export class GalleryMonitoringComponent implements OnInit {
 
   onDownloadZip(options: DownloadOptions): void {
     this.actions.downloadZip(this.state, this.projectId(), this.galleryName(), options);
+  }
+
+  onThumbClick(photos: SelectionPhoto[], event: { photo: ThumbPhoto; index: number }): void {
+    this.state.openLightbox(photos, event.index);
+  }
+
+  onLightboxClose(): void {
+    this.state.closeLightbox();
+  }
+
+  onLightboxNavigate(index: number): void {
+    this.state.navigateLightbox(index);
   }
 
   getStepLabel(step: string | null): string {

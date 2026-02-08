@@ -4,8 +4,12 @@
   [class.thumb-list--lg]="size() === 'lg'"
   [class.thumb-list--highlight]="highlight()"
 >
-  @for (photo of photos(); track photo.id) {
-    <div class="thumb-list__item" [matTooltip]="photo.originalName || ''">
+  @for (photo of photos(); track photo.id; let i = $index) {
+    <div
+      class="thumb-list__item"
+      [matTooltip]="photo.originalName || ''"
+      (click)="onPhotoClick(photo, i)"
+    >
       @if (photo.thumbUrl) {
         <img
           [src]="photo.thumbUrl"

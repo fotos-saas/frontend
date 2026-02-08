@@ -208,7 +208,11 @@
                       <span>Saját képek</span>
                       <span class="detail-group__count">{{ sel.claimed.length }} kép</span>
                     </div>
-                    <app-photo-thumb-list [photos]="sel.claimed" size="sm" />
+                    <app-photo-thumb-list
+                      [photos]="sel.claimed"
+                      size="sm"
+                      (photoClick)="onThumbClick(sel.claimed, $event)"
+                    />
                   </div>
                 }
 
@@ -220,7 +224,11 @@
                       <span>Retusálásra kiválasztott</span>
                       <span class="detail-group__count">{{ sel.retouch.length }} kép</span>
                     </div>
-                    <app-photo-thumb-list [photos]="sel.retouch" size="sm" />
+                    <app-photo-thumb-list
+                      [photos]="sel.retouch"
+                      size="sm"
+                      (photoClick)="onThumbClick(sel.retouch, $event)"
+                    />
                   </div>
                 }
 
@@ -231,7 +239,12 @@
                       <lucide-icon [name]="ICONS.FRAME" [size]="14" />
                       <span>Tablókép</span>
                     </div>
-                    <app-photo-thumb-list [photos]="[sel.tablo]" size="sm" [highlight]="true" />
+                    <app-photo-thumb-list
+                      [photos]="[sel.tablo]"
+                      size="sm"
+                      [highlight]="true"
+                      (photoClick)="onThumbClick([sel.tablo], $event)"
+                    />
                   </div>
                 }
               }
@@ -250,3 +263,12 @@
   }
 }
 
+<!-- Lightbox (page-card-on kívül, backdrop-filter stacking context miatt) -->
+@if (state.lightboxOpen()) {
+  <app-media-lightbox
+    [media]="state.lightboxMedia()"
+    [currentIndex]="state.lightboxIndex()"
+    (close)="onLightboxClose()"
+    (navigate)="onLightboxNavigate($event)"
+  />
+}

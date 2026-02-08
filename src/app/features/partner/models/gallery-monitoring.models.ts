@@ -48,11 +48,12 @@ export interface PersonSelections {
 }
 
 /**
- * Egy kiválasztott fotó adata (thumbnail URL-lel)
+ * Egy kiválasztott fotó adata (thumbnail + preview URL-lel)
  */
 export interface SelectionPhoto {
   id: number;
   thumbUrl: string | null;
+  url: string | null;
   originalName: string | null;
 }
 

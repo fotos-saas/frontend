@@ -68,7 +68,7 @@ Kiss Anna
       [class.form-textarea--error]="hasError('teacherRoster')"
       [value]="data().teacherRoster"
       (input)="updateField('teacherRoster', $any($event.target).value)"
-      (blur)="touched['teacherRoster'] = true"
+      (blur)="onTeacherBlur()"
       placeholder="Írd be a tanárok neveit, soronként egyet:
 Dr. Szabó Mária - Osztályfőnök
 Kiss László - Matematikatanár
@@ -86,6 +86,14 @@ Kiss László - Matematikatanár
       </span>
     }
     <span id="teacherRoster-hint" class="form-hint">Soronként egy név, opcionálisan beosztással. Maximum 5000 karakter</span>
+
+    <!-- AI Tanárnév felismerés eredmények -->
+    <app-teacher-match-results
+      [matchResults]="matchResults()"
+      [resolutions]="teacherResolutions()"
+      [loading]="matchLoading()"
+      (resolutionsChange)="onResolutionsChange($event)"
+    />
   </div>
 
   <!-- ÁSZF checkbox -->

@@ -42,6 +42,28 @@ export interface RosterData {
   teacherRoster: string;
   sortType: SortType;
   acceptTerms: boolean;
+  teacherResolutions?: TeacherResolution[];
+}
+
+/**
+ * AI tanárnév-párosítás eredmény
+ */
+export interface TeacherMatchResult {
+  inputName: string;
+  matchType: 'exact' | 'fuzzy' | 'ai' | 'ai_sonnet' | 'no_match';
+  teacherId: number | null;
+  teacherName: string | null;
+  photoUrl: string | null;
+  confidence: number;
+}
+
+/**
+ * Tanár-párosítás feloldás (diák döntése)
+ */
+export interface TeacherResolution {
+  inputName: string;
+  teacherId: number | null;
+  resolution: 'matched' | 'send_to_session' | 'caption_only';
 }
 
 /**
@@ -168,6 +190,7 @@ export interface FinalizationDataResponse {
     sortType: SortType | null;
     studentDescription: string | null;
     teacherDescription: string | null;
+    teacherResolutions: TeacherResolution[] | null;
 
     // Meta
     isFinalized: boolean;
@@ -200,5 +223,6 @@ export interface SaveFinalizationRequest {
   sortType?: SortType;
   studentDescription: string;
   teacherDescription: string;
+  teacherResolutions?: TeacherResolution[];
   acceptTerms: boolean;
 }

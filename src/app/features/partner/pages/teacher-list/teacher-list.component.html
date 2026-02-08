@@ -1,0 +1,185 @@
+<div class="teacher-list-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Tanárok</h1>
+      <p class="subtitle">{{ totalTeachers() }} tanár összesen</p>
+    </div>
+    <button type="button" class="btn-primary" (click)="openCreateModal()">
+      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+      Új tanár
+    </button>
+  </header>
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés név vagy alias alapján..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <select
+      class="school-filter"
+      [ngModel]="filterState.filters().school_id"
+      (ngModelChange)="onSchoolFilterChange($event)"
+    >
+      <option value="">Minden iskola</option>
+      @for (school of schools(); track school.id) {
+        <option [value]="school.id">{{ school.name }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (teachers().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      @if (filterState.search() || filterState.filters().school_id) {
+        <p>Próbálj más keresési feltételekkel!</p>
+      } @else {
+        <p>Még nincsenek tanárok hozzáadva.</p>
+        <button type="button" class="btn-primary mt-4" (click)="openCreateModal()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+          Új tanár
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="table-header">
+      <span class="th th-teacher">Tanár</span>
+      <span class="th th-school">Iskola</span>
+      <span class="th th-info">Info</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <div class="teacher-grid">
+      @for (teacher of teachers(); track teacher.id; let i = $index) {
+        <div
+          class="teacher-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+        >
+          <div class="teacher-info" (click)="viewTeacher(teacher)">
+            <div class="teacher-avatar">
+              @if (teacher.photoThumbUrl) {
+                <img [src]="teacher.photoThumbUrl" [alt]="teacher.fullDisplayName" />
+              } @else {
+                <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="20" />
+              }
+            </div>
+            <div class="teacher-details">
+              <span class="teacher-name">{{ teacher.fullDisplayName }}</span>
+              @if (!teacher.isActive) {
+                <span class="inactive-badge">Inaktív</span>
+              }
+            </div>
+          </div>
+
+          <div class="teacher-school" (click)="viewTeacher(teacher)">
+            <span class="school-name-text">{{ teacher.schoolName }}</span>
+          </div>
+
+          <div class="teacher-meta">
+            @if (teacher.aliasesCount > 0) {
+              <span class="meta-badge" [matTooltip]="teacher.aliasesCount + ' név variáns'">
+                <lucide-icon [name]="ICONS.USERS" [size]="12" />
+                {{ teacher.aliasesCount }}
+              </span>
+            }
+            @if (teacher.photosCount > 0) {
+              <span class="meta-badge" [matTooltip]="teacher.photosCount + ' fotó'">
+                <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
+                {{ teacher.photosCount }}
+              </span>
+            }
+          </div>
+
+          <div class="teacher-actions">
+            <button
+              class="action-btn"
+              matTooltip="Szerkesztés"
+              (click)="editTeacher(teacher)"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              matTooltip="Törlés"
+              (click)="confirmDeleteTeacher(teacher)"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === 1"
+          (click)="goToPage(filterState.page() - 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+
+        <div class="page-info">
+          {{ filterState.page() }} / {{ totalPages() }} oldal
+          <span class="total-count">({{ totalTeachers() }} tanár)</span>
+        </div>
+
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === totalPages()"
+          (click)="goToPage(filterState.page() + 1)"
+        >
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Create/Edit Modal -->
+@if (showEditModal()) {
+  <app-teacher-edit-modal
+    [teacher]="selectedTeacher()"
+    [mode]="modalMode()"
+    [schools]="schools()"
+    (close)="closeEditModal()"
+    (saved)="onTeacherSaved()"
+  />
+}
+
+<!-- Delete Confirm -->
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Tanár törlése"
+    [message]="'Biztosan törölni szeretnéd a következő tanárt: ' + selectedTeacher()?.fullDisplayName + '?'"
+    confirmText="Törlés"
+    cancelText="Mégse"
+    confirmType="danger"
+    (resultEvent)="onDeleteConfirmResult($event)"
+  />
+}

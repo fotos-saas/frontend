@@ -1,0 +1,76 @@
+@if (loading()) {
+  <div class="match-loading">
+    <div class="match-loading__spinner"></div>
+    <span>Tanárnevek keresése...</span>
+  </div>
+}
+
+@if (!loading() && matchResults().length > 0) {
+  <div class="match-results">
+    <!-- Sikeres párosítások -->
+    @if (matchedResults().length > 0) {
+      <div class="match-section">
+        <h4 class="match-section__title match-section__title--success">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+          Felismert tanárok ({{ matchedResults().length }})
+        </h4>
+        @for (result of matchedResults(); track result.inputName) {
+          <div class="match-row match-row--matched">
+            @if (result.photoUrl) {
+              <img class="match-row__photo" [src]="result.photoUrl" [alt]="result.teacherName ?? ''" />
+            } @else {
+              <div class="match-row__photo match-row__photo--placeholder">
+                <lucide-icon [name]="ICONS.USER" [size]="20" />
+              </div>
+            }
+            <div class="match-row__info">
+              <span class="match-row__name">{{ result.teacherName }}</span>
+              @if (result.inputName !== result.teacherName) {
+                <span class="match-row__input-name">{{ result.inputName }}</span>
+              }
+            </div>
+            <lucide-icon class="match-row__check" [name]="ICONS.CHECK" [size]="18" />
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Nem párosított nevek -->
+    @if (unmatchedResults().length > 0) {
+      <div class="match-section">
+        <h4 class="match-section__title match-section__title--warning">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+          Nem talált tanárok ({{ unmatchedResults().length }})
+        </h4>
+        <p class="match-section__hint">Válaszd ki, mit szeretnél ezekkel a nevekkel:</p>
+        @for (result of unmatchedResults(); track result.inputName) {
+          <div class="match-row match-row--unmatched">
+            <div class="match-row__info">
+              <span class="match-row__name">{{ result.inputName }}</span>
+            </div>
+            <div class="match-row__actions">
+              <button
+                type="button"
+                class="match-btn"
+                [class.match-btn--active]="isResolution(result.inputName, 'send_to_session')"
+                (click)="setResolution(result.inputName, null, 'send_to_session')"
+              >
+                <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+                Fotózásra
+              </button>
+              <button
+                type="button"
+                class="match-btn"
+                [class.match-btn--active]="isResolution(result.inputName, 'caption_only')"
+                (click)="setResolution(result.inputName, null, 'caption_only')"
+              >
+                <lucide-icon [name]="ICONS.FILE_TEXT" [size]="14" />
+                Csak felirat
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

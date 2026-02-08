@@ -4,49 +4,54 @@ import {
   input,
   output,
   inject,
-  computed
+  computed,
+  signal,
+  DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { RosterData, SortType, SORT_TYPE_OPTIONS } from '../../../models/order-finalization.models';
+import { Subject, debounceTime, switchMap, of, catchError, filter, distinctUntilChanged } from 'rxjs';
+import {
+  RosterData,
+  SortType,
+  SORT_TYPE_OPTIONS,
+  TeacherMatchResult,
+  TeacherResolution
+} from '../../../models/order-finalization.models';
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
+import { TeacherMatchService } from '../../../services/teacher-match.service';
+import { TeacherMatchResultsComponent } from '../../teacher-match-results/teacher-match-results.component';
 
-/**
- * Roster Step Component (Step 4)
- * Névsor megadása form
- *
- * @description
- * - Diákok és tanárok névsora
- * - Sorrend típus választó
- * - ÁSZF elfogadás checkbox
- * - ARIA akadálymentesség
- */
 @Component({
   selector: 'app-roster-step',
   templateUrl: './roster-step.component.html',
   styleUrls: ['./roster-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule]
+  imports: [FormsModule, TeacherMatchResultsComponent]
 })
 export class RosterStepComponent {
   private readonly validationService = inject(OrderValidationService);
+  private readonly teacherMatchService = inject(TeacherMatchService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  /** Input: Névsor adatok */
   data = input.required<RosterData>();
-
-  /** Output: Adatok változása */
   dataChange = output<RosterData>();
 
-  /** Sorrend típus opciók */
   readonly sortTypeOptions = SORT_TYPE_OPTIONS;
 
-  /** Validációs hibák */
+  /** AI matching állapot */
+  matchResults = signal<TeacherMatchResult[]>([]);
+  matchLoading = signal(false);
+  teacherResolutions = signal<TeacherResolution[]>([]);
+
+  private readonly teacherNames$ = new Subject<string>();
+
   errors = computed<ValidationError[]>(() => {
     const result = this.validationService.validateRosterData(this.data());
     return result.errors;
   });
 
-  /** Touched állapot */
   touched: Record<string, boolean> = {
     studentRoster: false,
     teacherRoster: false,
@@ -54,60 +59,110 @@ export class RosterStepComponent {
     acceptTerms: false
   };
 
-  /**
-   * Mező frissítése
-   */
+  constructor() {
+    this.setupTeacherMatching();
+  }
+
   updateField<K extends keyof RosterData>(field: K, value: RosterData[K]): void {
     this.touched[field as string] = true;
     this.dataChange.emit({ ...this.data(), [field]: value });
   }
 
-  /**
-   * Sorrend típus frissítése
-   */
   updateSortType(value: string): void {
     this.touched['sortType'] = true;
     this.dataChange.emit({ ...this.data(), sortType: value as SortType });
   }
 
-  /**
-   * ÁSZF checkbox frissítése
-   */
   updateAcceptTerms(value: boolean): void {
     this.touched['acceptTerms'] = true;
     this.dataChange.emit({ ...this.data(), acceptTerms: value });
   }
 
-  /**
-   * Mező hibaüzenetének lekérése
-   */
   getFieldError(field: string): string | null {
     if (!this.touched[field]) return null;
     return this.validationService.getFieldError(this.errors(), field);
   }
 
-  /**
-   * Mező hibás-e
-   */
   hasError(field: string): boolean {
     return !!this.getFieldError(field);
   }
 
-  /**
-   * Diákok számának kiszámítása (sorok alapján)
-   */
   studentCount = computed<number>(() => {
     const roster = this.data().studentRoster;
     if (!roster || !roster.trim()) return 0;
     return roster.split('\n').filter(line => line.trim()).length;
   });
 
-  /**
-   * Tanárok számának kiszámítása
-   */
   teacherCount = computed<number>(() => {
     const roster = this.data().teacherRoster;
     if (!roster || !roster.trim()) return 0;
     return roster.split('\n').filter(line => line.trim()).length;
   });
+
+  /** Tanár textarea blur → AI matching trigger */
+  onTeacherBlur(): void {
+    this.touched['teacherRoster'] = true;
+    const text = this.data().teacherRoster;
+    if (text?.trim()) {
+      this.teacherNames$.next(text);
+    }
+  }
+
+  /** Resolutions frissítés a child komponensből */
+  onResolutionsChange(resolutions: TeacherResolution[]): void {
+    this.teacherResolutions.set(resolutions);
+    this.dataChange.emit({
+      ...this.data(),
+      teacherResolutions: resolutions
+    });
+  }
+
+  private setupTeacherMatching(): void {
+    this.teacherNames$.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      filter(text => {
+        const names = text.split('\n').map(n => n.trim()).filter(n => n);
+        return names.length > 0 && names.length <= 20;
+      }),
+      switchMap(text => {
+        const names = text.split('\n').map(n => n.trim()).filter(n => n);
+        this.matchLoading.set(true);
+        this.matchResults.set([]);
+
+        return this.teacherMatchService.matchTeacherNames(names).pipe(
+          catchError(() => {
+            this.matchLoading.set(false);
+            return of([]);
+          })
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(results => {
+      this.matchLoading.set(false);
+      this.matchResults.set(results);
+
+      // Automatikus resolutions a matched eredményekhez
+      const autoResolutions: TeacherResolution[] = results
+        .filter(r => r.matchType !== 'no_match' && r.teacherId)
+        .map(r => ({
+          inputName: r.inputName,
+          teacherId: r.teacherId,
+          resolution: 'matched' as const
+        }));
+
+      // Meglévő manuális resolutions megtartása
+      const currentResolutions = this.teacherResolutions();
+      const manualResolutions = currentResolutions.filter(
+        cr => !autoResolutions.some(ar => ar.inputName === cr.inputName)
+      );
+
+      const merged = [...autoResolutions, ...manualResolutions];
+      this.teacherResolutions.set(merged);
+      this.dataChange.emit({
+        ...this.data(),
+        teacherResolutions: merged
+      });
+    });
+  }
 }

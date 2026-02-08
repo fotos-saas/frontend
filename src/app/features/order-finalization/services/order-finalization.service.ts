@@ -11,7 +11,8 @@ import {
   SaveFinalizationRequest,
   EMPTY_ORDER_FINALIZATION_DATA,
   SortType,
-  SORT_TYPE_OPTIONS
+  SORT_TYPE_OPTIONS,
+  TeacherResolution
 } from '../models/order-finalization.models';
 
 /**
@@ -84,7 +85,8 @@ export class OrderFinalizationService {
         studentRoster: d.studentDescription || '',
         teacherRoster: d.teacherDescription || '',
         sortType: this.sanitizeSortType(d.sortType),
-        acceptTerms: false // Mindig újra el kell fogadni
+        acceptTerms: false, // Mindig újra el kell fogadni
+        teacherResolutions: d.teacherResolutions || undefined
       }
     };
   }
@@ -115,6 +117,7 @@ export class OrderFinalizationService {
       sortType: data.roster.sortType || undefined,
       studentDescription: data.roster.studentRoster,
       teacherDescription: data.roster.teacherRoster,
+      teacherResolutions: data.roster.teacherResolutions,
       acceptTerms: data.roster.acceptTerms
     };
   }

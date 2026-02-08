@@ -196,6 +196,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
       },
       {
+        path: 'teachers',
+        loadComponent: () => import('./features/partner/pages/teacher-list/teacher-list.component').then(m => m.PartnerTeacherListComponent)
+      },
+      {
+        path: 'teachers/:id',
+        loadComponent: () => import('./features/partner/pages/teacher-detail/teacher-detail.component').then(m => m.PartnerTeacherDetailComponent)
+      },
+      {
         path: 'contacts',
         loadComponent: () => import('./features/partner/pages/contact-list/contact-list.component').then(m => m.PartnerContactListComponent)
       },

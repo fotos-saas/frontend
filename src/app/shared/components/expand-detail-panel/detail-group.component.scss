@@ -1,0 +1,37 @@
+// === DETAIL GROUP (egy csoport a panelen belül) ===
+
+:host {
+  display: block;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.detail-group {
+  &__header {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+
+    lucide-icon {
+      margin-right: 6px;
+      color: #64748b;
+      flex-shrink: 0;
+    }
+  }
+
+  &__count {
+    margin-left: 6px;
+    font-weight: 400;
+    color: #94a3b8;
+  }
+
+  &__content {
+    // Content projection terület - a gyerek komponens stílusait alkalmazza
+  }
+}

@@ -1,0 +1,85 @@
+// === DETAIL PANEL (kibontható sor alatti részletező) ===
+
+:host {
+  display: block;
+}
+
+.detail-panel {
+  padding: 12px 14px 12px 34px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  margin-top: -2px;
+  margin-bottom: 4px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// === LOADING ===
+
+.detail-panel__loading {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-panel__skeleton {
+  height: 60px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// === EMPTY ===
+
+.detail-panel__empty {
+  display: flex;
+  align-items: center;
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  padding: 8px 0;
+
+  lucide-icon {
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+}
+
+// === RESPONSIVE ===
+
+@media (max-width: 768px) {
+  .detail-panel {
+    padding-left: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

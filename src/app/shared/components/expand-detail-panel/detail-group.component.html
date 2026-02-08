@@ -1,0 +1,12 @@
+<div class="detail-group">
+  <div class="detail-group__header">
+    <lucide-icon [name]="icon()" [size]="14" />
+    <span>{{ label() }}</span>
+    @if (count() !== null) {
+      <span class="detail-group__count">{{ count() }} {{ countUnit() }}</span>
+    }
+  </div>
+  <div class="detail-group__content">
+    <ng-content />
+  </div>
+</div>

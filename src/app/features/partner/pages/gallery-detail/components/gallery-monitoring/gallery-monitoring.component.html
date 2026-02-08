@@ -187,69 +187,43 @@
 
         <!-- Kibontott részletező panel -->
         @if (state.expandedPersonId() === person.personId) {
-          <div class="detail-panel">
-            @if (state.loadingSelections()) {
-              <div class="detail-loading">
-                <div class="skeleton-detail skeleton-shimmer"></div>
-                <div class="skeleton-detail skeleton-shimmer"></div>
-              </div>
-            } @else if (state.expandedSelections(); as sel) {
-              @if (sel.claimed.length === 0 && sel.retouch.length === 0 && !sel.tablo) {
-                <div class="detail-empty">
-                  <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
-                  <span>Még nincs kiválasztott kép</span>
-                </div>
-              } @else {
-                <!-- Saját képek -->
-                @if (sel.claimed.length > 0) {
-                  <div class="detail-group">
-                    <div class="detail-group__header">
-                      <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
-                      <span>Saját képek</span>
-                      <span class="detail-group__count">{{ sel.claimed.length }} kép</span>
-                    </div>
-                    <app-photo-thumb-list
-                      [photos]="sel.claimed"
-                      size="sm"
-                      (photoClick)="onThumbClick(sel.claimed, $event)"
-                    />
-                  </div>
-                }
-
-                <!-- Retusált képek -->
-                @if (sel.retouch.length > 0) {
-                  <div class="detail-group">
-                    <div class="detail-group__header">
-                      <lucide-icon [name]="ICONS.SPARKLES" [size]="14" />
-                      <span>Retusálásra kiválasztott</span>
-                      <span class="detail-group__count">{{ sel.retouch.length }} kép</span>
-                    </div>
-                    <app-photo-thumb-list
-                      [photos]="sel.retouch"
-                      size="sm"
-                      (photoClick)="onThumbClick(sel.retouch, $event)"
-                    />
-                  </div>
-                }
-
-                <!-- Tablókép -->
-                @if (sel.tablo) {
-                  <div class="detail-group">
-                    <div class="detail-group__header">
-                      <lucide-icon [name]="ICONS.FRAME" [size]="14" />
-                      <span>Tablókép</span>
-                    </div>
-                    <app-photo-thumb-list
-                      [photos]="[sel.tablo]"
-                      size="sm"
-                      [highlight]="true"
-                      (photoClick)="onThumbClick([sel.tablo], $event)"
-                    />
-                  </div>
-                }
+          <app-expand-detail-panel
+            [loading]="state.loadingSelections()"
+            [empty]="!state.loadingSelections() && !!state.expandedSelections() && state.expandedSelections()!.claimed.length === 0 && state.expandedSelections()!.retouch.length === 0 && !state.expandedSelections()!.tablo"
+            emptyText="Még nincs kiválasztott kép"
+            [emptyIcon]="ICONS.IMAGE"
+          >
+            @if (state.expandedSelections(); as sel) {
+              @if (sel.claimed.length > 0) {
+                <app-detail-group [icon]="ICONS.IMAGE" label="Saját képek" [count]="sel.claimed.length">
+                  <app-photo-thumb-list
+                    [photos]="sel.claimed"
+                    size="sm"
+                    (photoClick)="onThumbClick(sel.claimed, $event)"
+                  />
+                </app-detail-group>
+              }
+              @if (sel.retouch.length > 0) {
+                <app-detail-group [icon]="ICONS.SPARKLES" label="Retusálásra kiválasztott" [count]="sel.retouch.length">
+                  <app-photo-thumb-list
+                    [photos]="sel.retouch"
+                    size="sm"
+                    (photoClick)="onThumbClick(sel.retouch, $event)"
+                  />
+                </app-detail-group>
+              }
+              @if (sel.tablo) {
+                <app-detail-group [icon]="ICONS.FRAME" label="Tablókép">
+                  <app-photo-thumb-list
+                    [photos]="[sel.tablo]"
+                    size="sm"
+                    [highlight]="true"
+                    (photoClick)="onThumbClick([sel.tablo], $event)"
+                  />
+                </app-detail-group>
               }
             }
-          </div>
+          </app-expand-detail-panel>
         }
       }
     </div>

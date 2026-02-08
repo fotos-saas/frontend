@@ -1,0 +1,16 @@
+<div class="detail-panel">
+  @if (loading()) {
+    <div class="detail-panel__loading">
+      @for (_ of [].constructor(skeletonRows()); track $index) {
+        <div class="detail-panel__skeleton skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (empty()) {
+    <div class="detail-panel__empty">
+      <lucide-icon [name]="emptyIcon()" [size]="20" />
+      <span>{{ emptyText() }}</span>
+    </div>
+  } @else {
+    <ng-content />
+  }
+</div>

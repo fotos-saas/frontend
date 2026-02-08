@@ -93,6 +93,12 @@ export class MenuConfigService {
         route: '/forum',
       },
       {
+        id: 'billing',
+        label: 'Fizetéseim',
+        icon: 'wallet',
+        route: '/billing',
+      },
+      {
         id: 'notifications',
         label: 'Értesítések',
         icon: 'bell',

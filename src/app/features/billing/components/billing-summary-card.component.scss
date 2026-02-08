@@ -1,0 +1,75 @@
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  position: relative;
+}
+
+.summary-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.summary-item--total .summary-icon {
+  background: #f0f4ff;
+  color: #3b5998;
+}
+
+.summary-item--pending .summary-icon {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.summary-item--paid .summary-icon {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.summary-count {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 0.6875rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,32 @@
+<div class="summary-grid">
+  <div class="summary-item summary-item--total">
+    <div class="summary-icon">
+      <lucide-icon [name]="ICONS.WALLET" [size]="20" />
+    </div>
+    <div class="summary-content">
+      <span class="summary-label">Összes terhelés</span>
+      <span class="summary-value">{{ summary().totalAmount | number:'1.0-0' }} Ft</span>
+    </div>
+    <span class="summary-count">{{ summary().chargesCount }} tétel</span>
+  </div>
+
+  <div class="summary-item summary-item--pending">
+    <div class="summary-icon">
+      <lucide-icon [name]="ICONS.CLOCK" [size]="20" />
+    </div>
+    <div class="summary-content">
+      <span class="summary-label">Fizetésre vár</span>
+      <span class="summary-value">{{ summary().pendingAmount | number:'1.0-0' }} Ft</span>
+    </div>
+  </div>
+
+  <div class="summary-item summary-item--paid">
+    <div class="summary-icon">
+      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
+    </div>
+    <div class="summary-content">
+      <span class="summary-label">Kifizetve</span>
+      <span class="summary-value">{{ summary().paidAmount | number:'1.0-0' }} Ft</span>
+    </div>
+  </div>
+</div>

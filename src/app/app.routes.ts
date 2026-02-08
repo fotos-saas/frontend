@@ -446,6 +446,13 @@ export const routes: Routes = [
         data: { page: 'poke' }
       },
       {
+        path: 'billing',
+        loadChildren: () => import('./features/billing/billing.routes')
+          .then(m => m.BILLING_ROUTES),
+        canActivate: [AuthGuard],
+        data: { page: 'billing' }
+      },
+      {
         path: 'notifications',
         loadChildren: () => import('./features/notifications/notifications.routes')
           .then(m => m.NOTIFICATIONS_ROUTES),

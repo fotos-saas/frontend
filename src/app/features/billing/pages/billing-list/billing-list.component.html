@@ -1,0 +1,106 @@
+<div class="billing-page page-card">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Fizetéseim</h1>
+      <p class="subtitle">Terhelések és kifizetések áttekintése</p>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  @if (billingService.summary(); as summary) {
+    <app-billing-summary-card [summary]="summary" />
+  }
+
+  <!-- Szűrők -->
+  <div class="filter-bar">
+    @for (filter of filters; track filter.value) {
+      <button
+        class="filter-btn"
+        [class.filter-btn--active]="billingService.activeFilter() === filter.value"
+        (click)="setFilter(filter.value)">
+        {{ filter.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (billingService.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  }
+
+  <!-- Tartalom -->
+  @if (!billingService.loading()) {
+    @if (billingService.filteredCharges().length > 0) {
+      <!-- Táblázat fejléc -->
+      <div class="table-header">
+        <span class="th th-type">Típus</span>
+        <span class="th th-desc">Leírás</span>
+        <span class="th th-amount">Összeg</span>
+        <span class="th th-status">Státusz</span>
+        <span class="th th-date">Dátum</span>
+      </div>
+
+      <!-- Sorok -->
+      <div class="row-grid">
+        @for (charge of billingService.filteredCharges(); track charge.id; let i = $index) {
+          <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+            <div class="cell cell-type">
+              <div class="type-icon">
+                <lucide-icon [name]="SERVICE_TYPE_ICONS[charge.serviceType]" [size]="16" />
+              </div>
+              <span class="type-label">{{ charge.serviceLabel }}</span>
+            </div>
+
+            <div class="cell cell-desc">
+              <span class="charge-desc">{{ charge.description }}</span>
+              <span class="charge-number">{{ charge.chargeNumber }}</span>
+            </div>
+
+            <div class="cell cell-amount">
+              <span class="amount" [class.amount--pending]="charge.status === 'pending'">
+                {{ charge.amountHuf | number:'1.0-0' }} Ft
+              </span>
+            </div>
+
+            <div class="cell cell-status">
+              <app-billing-status-badge [status]="charge.status" />
+            </div>
+
+            <div class="cell cell-date">
+              @if (charge.paidAt) {
+                <span class="date-label">Fizetve:</span>
+                <span class="date-value">{{ charge.paidAt | date:'yyyy.MM.dd.' }}</span>
+              } @else if (charge.dueDate) {
+                <span class="date-label">Határidő:</span>
+                <span class="date-value">{{ charge.dueDate | date:'yyyy.MM.dd.' }}</span>
+              } @else {
+                <span class="date-value">{{ charge.createdAt | date:'yyyy.MM.dd.' }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Üres állapot -->
+      <div class="empty-state">
+        <div class="empty-icon">
+          <lucide-icon [name]="ICONS.WALLET" [size]="48" />
+        </div>
+        <h3>Nincs terhelés</h3>
+        <p>Jelenleg nincsenek terhelések ebben a szűrésben.</p>
+      </div>
+    }
+  }
+
+  <!-- Hiba -->
+  @if (billingService.error(); as errorMsg) {
+    <div class="error-state">
+      <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="20" />
+      <span>{{ errorMsg }}</span>
+    </div>
+  }
+</div>

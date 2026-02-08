@@ -8,14 +8,51 @@
         <p class="subtitle">{{ totalContacts() }} kapcsolattartó összesen</p>
       }
     </div>
-    <button
-      type="button"
-      class="btn-primary"
-      (click)="onNewContactClick()"
-    >
-      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
-      Új kapcsolattartó
-    </button>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn-secondary btn-icon-text"
+        matTooltip="Excel export"
+        [disabled]="exporting()"
+        (click)="exportExcel()"
+      >
+        <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
+        <span class="btn-label">Excel</span>
+      </button>
+      <button
+        type="button"
+        class="btn-secondary btn-icon-text"
+        matTooltip="vCard export (iPhone/Android)"
+        [disabled]="exporting()"
+        (click)="exportVcard()"
+      >
+        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+        <span class="btn-label">vCard</span>
+      </button>
+      <label
+        class="btn-secondary btn-icon-text import-btn"
+        matTooltip="Importálás Excel fájlból"
+        [class.disabled]="importing()"
+      >
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+        <span class="btn-label">Import</span>
+        <input
+          type="file"
+          accept=".xlsx,.xls"
+          class="hidden-input"
+          [disabled]="importing()"
+          (change)="onImportFileSelected($event)"
+        />
+      </label>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="onNewContactClick()"
+      >
+        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        Új kapcsolattartó
+      </button>
+    </div>
   </header>
 
   <!-- Keresés -->
@@ -212,4 +249,46 @@
     [currentPlanId]="contactLimits()?.plan_id ?? 'alap'"
     (close)="showUpgradeDialog.set(false)"
   />
+}
+
+<!-- Import Result Dialog -->
+@if (showImportResult() && importResult()) {
+  <div class="dialog-backdrop" (click)="closeImportResult()">
+    <div class="dialog-panel" (click)="$event.stopPropagation()">
+      <h3 class="dialog-title">Importálás eredménye</h3>
+      <div class="import-results">
+        @if (importResult()!.imported > 0) {
+          <div class="result-row result-success">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18" />
+            <span>{{ importResult()!.imported }} kapcsolattartó sikeresen importálva</span>
+          </div>
+        }
+        @if (importResult()!.skipped > 0) {
+          <div class="result-row result-warning">
+            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="18" />
+            <span>{{ importResult()!.skipped }} sor kihagyva</span>
+          </div>
+        }
+        @if (importResult()!.errors > 0) {
+          <div class="result-row result-error">
+            <lucide-icon [name]="ICONS.X_CIRCLE" [size]="18" />
+            <span>{{ importResult()!.errors }} sor hibás</span>
+          </div>
+        }
+        @if (importResult()!.details.length > 0) {
+          <details class="result-details">
+            <summary>Részletek ({{ importResult()!.details.length }})</summary>
+            <ul>
+              @for (detail of importResult()!.details; track $index) {
+                <li>{{ detail }}</li>
+              }
+            </ul>
+          </details>
+        }
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn-primary" (click)="closeImportResult()">Bezárás</button>
+      </div>
+    </div>
+  </div>
 }

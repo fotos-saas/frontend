@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PartnerService, ContactListItem, ContactLimits } from '../../services/partner.service';
+import { PartnerService, ContactListItem, ContactLimits, ImportResult } from '../../services/partner.service';
 import { ContactEditModalComponent } from '../../components/contact-edit-modal/contact-edit-modal.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { UpgradeDialogComponent } from '../../../../shared/components/upgrade-dialog/upgrade-dialog.component';
@@ -50,6 +50,12 @@ export class PartnerContactListComponent implements OnInit {
   totalPages = signal(1);
   totalContacts = signal(0);
   contactLimits = signal<ContactLimits | null>(null);
+
+  // Export/Import
+  exporting = signal(false);
+  importing = signal(false);
+  importResult = signal<ImportResult['data'] | null>(null);
+  showImportResult = signal(false);
 
   // Modals
   showEditModal = signal(false);
@@ -154,5 +160,73 @@ export class PartnerContactListComponent implements OnInit {
           this.closeDeleteConfirm();
         }
       });
+  }
+
+  exportExcel(): void {
+    this.exporting.set(true);
+    const search = this.filterState.search() || undefined;
+
+    this.partnerService.exportContactsExcel(search)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.saveFile(blob, 'kapcsolattartok.xlsx');
+          this.exporting.set(false);
+        },
+        error: () => this.exporting.set(false),
+      });
+  }
+
+  exportVcard(): void {
+    this.exporting.set(true);
+    const search = this.filterState.search() || undefined;
+
+    this.partnerService.exportContactsVcard(search)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.saveFile(blob, 'kapcsolattartok.vcf');
+          this.exporting.set(false);
+        },
+        error: () => this.exporting.set(false),
+      });
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.importing.set(true);
+
+    this.partnerService.importContactsExcel(file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.importResult.set(result.data);
+          this.showImportResult.set(true);
+          this.importing.set(false);
+          this.loadContacts();
+          input.value = '';
+        },
+        error: () => {
+          this.importing.set(false);
+          input.value = '';
+        },
+      });
+  }
+
+  closeImportResult(): void {
+    this.showImportResult.set(false);
+    this.importResult.set(null);
+  }
+
+  private saveFile(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 }

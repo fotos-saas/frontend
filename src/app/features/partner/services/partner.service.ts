@@ -82,12 +82,13 @@ export {
   UploadProgress,
 };
 export type { QrCode };
+export type { ImportResult };
 
 // Import sub-service-ek
 import { PartnerProjectService } from './partner-project.service';
 import { PartnerQrService } from './partner-qr.service';
 import { PartnerSchoolService } from './partner-school.service';
-import { PartnerContactService } from './partner-contact.service';
+import { PartnerContactService, ImportResult } from './partner-contact.service';
 import { PartnerAlbumService } from './partner-album.service';
 import { PartnerGalleryService } from './partner-gallery.service';
 import { PartnerGuestService } from './partner-guest.service';
@@ -297,6 +298,18 @@ export class PartnerService {
 
   deleteStandaloneContact(id: number): Observable<{ success: boolean; message: string }> {
     return this.contactService.deleteStandaloneContact(id);
+  }
+
+  exportContactsExcel(search?: string) {
+    return this.contactService.exportExcel(search);
+  }
+
+  exportContactsVcard(search?: string) {
+    return this.contactService.exportVcard(search);
+  }
+
+  importContactsExcel(file: File) {
+    return this.contactService.importExcel(file);
   }
 
   // ============================================

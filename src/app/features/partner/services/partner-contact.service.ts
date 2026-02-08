@@ -146,4 +146,54 @@ export class PartnerContactService {
       `${this.baseUrl}/contacts/${id}`,
     );
   }
+
+  // ============================================
+  // EXPORT / IMPORT
+  // ============================================
+
+  /**
+   * Kapcsolattartók exportálása Excel-be
+   */
+  exportExcel(search?: string): Observable<Blob> {
+    return this.http.post(
+      `${this.baseUrl}/contacts/export-excel`,
+      { search: search || null },
+      { responseType: 'blob' },
+    );
+  }
+
+  /**
+   * Kapcsolattartók exportálása vCard (.vcf) formátumba
+   */
+  exportVcard(search?: string): Observable<Blob> {
+    return this.http.post(
+      `${this.baseUrl}/contacts/export-vcard`,
+      { search: search || null },
+      { responseType: 'blob' },
+    );
+  }
+
+  /**
+   * Kapcsolattartók importálása Excel fájlból
+   */
+  importExcel(file: File): Observable<ImportResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<ImportResult>(
+      `${this.baseUrl}/contacts/import-excel`,
+      formData,
+    );
+  }
+}
+
+export interface ImportResult {
+  success: boolean;
+  message: string;
+  data: {
+    imported: number;
+    skipped: number;
+    errors: number;
+    details: string[];
+  };
 }

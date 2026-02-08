@@ -14,6 +14,9 @@ export class LightboxState {
   /** Lightbox current index */
   readonly currentIndex = signal<number>(0);
 
+  /** Temporary media (review group lightbox-hoz) */
+  readonly tempMedia = signal<LightboxMediaItem[] | null>(null);
+
   /**
    * Lightbox megnyitása
    */
@@ -27,6 +30,14 @@ export class LightboxState {
    */
   close(): void {
     this.isOpen.set(false);
+    this.tempMedia.set(null);
+  }
+
+  /**
+   * Temp media beállítása (review group fotókhoz)
+   */
+  setTempMedia(media: LightboxMediaItem[]): void {
+    this.tempMedia.set(media);
   }
 
   /**
@@ -42,6 +53,7 @@ export class LightboxState {
   reset(): void {
     this.isOpen.set(false);
     this.currentIndex.set(0);
+    this.tempMedia.set(null);
   }
 
   /**

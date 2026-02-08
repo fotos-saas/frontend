@@ -262,6 +262,7 @@ export class TabloWorkflowService {
     return {
       ...response,
       visible_photos: (response.visible_photos || []).map(mapApiPhoto),
+      review_groups: response.review_groups,
     };
   }
 

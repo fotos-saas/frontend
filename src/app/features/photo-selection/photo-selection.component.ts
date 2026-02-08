@@ -17,7 +17,7 @@ import { WorkflowNavigationService } from './services/workflow-navigation.servic
 import { PhotoSelectionState } from './photo-selection.state';
 import { ProjectContextHelper } from './helpers/project-context.helper';
 import { PhotoSelectionActionsService } from './photo-selection-actions.service';
-import { WorkflowStep, WorkflowPhoto, getStepInfo } from './models/workflow.models';
+import { WorkflowStep, WorkflowPhoto, ReviewGroup, getStepInfo } from './models/workflow.models';
 
 // Components
 import { StepIndicatorComponent } from './components/step-indicator/step-indicator.component';
@@ -198,6 +198,17 @@ export class PhotoSelectionComponent {
   onTabloClick(photo: WorkflowPhoto): void {
     const index = this.state.visiblePhotos().findIndex(p => p.id === photo.id);
     this.state.openLightbox(index >= 0 ? index : 0);
+  }
+
+  onReviewPhotoClick(event: { photos: ReviewGroup[]; index: number }): void {
+    // Temporary lightbox media from review groups
+    const media = event.photos.map(p => ({
+      id: p.id,
+      url: p.url,
+      fileName: p.filename,
+    }));
+    this.state.lightbox.setTempMedia(media);
+    this.state.lightbox.open(event.index);
   }
 
   // === PAGINATION ===

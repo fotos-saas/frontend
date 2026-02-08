@@ -5,6 +5,7 @@ import {
   WorkflowPhoto,
   ProgressData,
   WorkSessionData,
+  ReviewGroups,
   getStepIndex,
   EMPTY_STATE_MESSAGES,
 } from './models/workflow.models';
@@ -75,6 +76,9 @@ export class PhotoSelectionState {
 
   /** Megtekintési lépés (finalized workflow esetén) */
   readonly viewingStep = signal<WorkflowStep | null>(null);
+
+  /** Review csoportok (completed state - mindhárom lépés fotói) */
+  readonly reviewGroups = signal<ReviewGroups | null>(null);
 
   // === COMPUTED VALUES (delegált) ===
 
@@ -175,14 +179,16 @@ export class PhotoSelectionState {
     return this.visiblePhotos().find(p => p.id === tabloId) || null;
   });
 
-  /** Lightbox media */
-  readonly lightboxMedia = computed<LightboxMediaItem[]>(() =>
-    this.visiblePhotos().map(photo => ({
+  /** Lightbox media (temp media felülírja ha van) */
+  readonly lightboxMedia = computed<LightboxMediaItem[]>(() => {
+    const temp = this.lightbox.tempMedia();
+    if (temp) return temp;
+    return this.visiblePhotos().map(photo => ({
       id: photo.id,
       url: photo.url,
       fileName: photo.filename,
-    }))
-  );
+    }));
+  });
 
   /** Üres állapot üzenet */
   readonly emptyStateMessage = computed(() => {
@@ -276,6 +282,7 @@ export class PhotoSelectionState {
     album_id: number;
     progress: ProgressData | null;
     work_session: WorkSessionData;
+    review_groups?: ReviewGroups;
   }): void {
     if (data.current_step === 'completed') {
       this.isFinalized.set(true);
@@ -287,6 +294,10 @@ export class PhotoSelectionState {
     this.albumId.set(data.album_id);
     this.progress.set(data.progress);
     this.workSession.set(data.work_session);
+
+    if (data.review_groups) {
+      this.reviewGroups.set(data.review_groups);
+    }
 
     // Delegálás a pagination state-nek
     this.pagination.setAllPhotos(data.visible_photos, data.visible_photos.length);
@@ -412,6 +423,7 @@ export class PhotoSelectionState {
     this.progress.set(null);
     this.isFinalized.set(false);
     this.viewingStep.set(null);
+    this.reviewGroups.set(null);
 
     // Sub-states reset
     this.lightbox.reset();

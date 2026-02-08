@@ -16,19 +16,26 @@
     <!-- Workflow header + Step Indicator EGY SORBAN -->
     <app-workflow-header
       [title]="'Képválasztás'"
-      [description]="stepInfo?.description || null"
+      [description]="state.isFinalized() ? 'A választásod véglegesítve.' : (stepInfo?.description || null)"
     >
-      <!-- Stepper a header jobb oldalán -->
-      <app-step-indicator
-        [currentStep]="state.displayedStep()"
-        [allowClick]="state.isFinalized()"
-        (stepClick)="onStepClick($event)"
-        (infoClick)="onInfoIconClick($event)"
-      />
+      @if (state.isFinalized()) {
+        <!-- Finalized: csak Leadva badge -->
+        <app-step-indicator
+          [currentStep]="'completed'"
+          [allowClick]="false"
+        />
+      } @else {
+        <!-- Normál: step pills -->
+        <app-step-indicator
+          [currentStep]="state.displayedStep()"
+          [allowClick]="false"
+          (infoClick)="onInfoIconClick($event)"
+        />
+      }
     </app-workflow-header>
 
-    <!-- Deadline countdown (ha van hatarido beallitva) -->
-    @if (projectContext.hasDeadline() && projectContext.daysRemaining() !== null) {
+    <!-- Deadline countdown (ha van hatarido beallitva ÉS NEM finalized) -->
+    @if (!state.isFinalized() && projectContext.hasDeadline() && projectContext.daysRemaining() !== null) {
       <app-deadline-countdown
         [deadline]="projectContext.deadline()!"
         [daysRemaining]="projectContext.daysRemaining()!"
@@ -50,12 +57,14 @@
       @if (state.isLoading()) {
         <!-- Loading skeleton -->
         <app-loading-skeleton />
-      } @else if (state.isCompleted() && !state.viewingStep()) {
+      } @else if (state.isCompleted()) {
         <!-- Completed state -->
         <app-completed-summary
           [progress]="state.progress()"
           [tabloPhoto]="state.tabloPhoto()"
+          [reviewGroups]="state.reviewGroups()"
           (tabloClick)="onTabloClick($event)"
+          (photoClick)="onReviewPhotoClick($event)"
         />
       } @else {
         <!-- Selection grid (readonly ha finalized) -->
@@ -87,7 +96,7 @@
 
 <!-- NAVIGATION FOOTER A PAGE-CARD KÍVÜL (backdrop-filter stacking context miatt) -->
 <!-- A position: fixed csak így működik helyesen -->
-@if (!projectContext.isInactive() && projectContext.hasGallery() && !state.isLoading() && (!state.isCompleted() || state.viewingStep())) {
+@if (!projectContext.isInactive() && projectContext.hasGallery() && !state.isLoading() && !state.isCompleted()) {
   <app-navigation-footer
     [currentStep]="state.currentStep()"
     [canGoBack]="state.canGoBack()"

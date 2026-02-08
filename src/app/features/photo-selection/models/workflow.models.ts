@@ -106,6 +106,22 @@ export interface ProgressData {
 /**
  * Step Data (unified endpoint response)
  */
+/** Review group - egy lépés fotói a completed összesítőhöz */
+export interface ReviewGroup {
+  id: number;
+  url: string;
+  thumbnail_url: string;
+  preview_url: string;
+  filename: string;
+}
+
+/** Review groups - completed állapotban az összes lépés fotói */
+export interface ReviewGroups {
+  claiming: ReviewGroup[];
+  retouch: ReviewGroup[];
+  tablo: ReviewGroup[];
+}
+
 export interface StepData {
   current_step: WorkflowStep;
   visible_photos: WorkflowPhoto[];
@@ -114,6 +130,7 @@ export interface StepData {
   album_id: number;
   progress: ProgressData | null;
   work_session: WorkSessionData;
+  review_groups?: ReviewGroups;
 }
 
 /**
@@ -127,6 +144,7 @@ export interface StepDataResponse {
   album_id: number;
   progress: ProgressData | null;
   work_session: WorkSessionData;
+  review_groups?: ReviewGroups;
 }
 
 /**

@@ -11,16 +11,25 @@
       </p>
 
       @if (isWithinFreeWindow()) {
-        <p class="completed-summary__info-free">
-          <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
-          Módosítani szeretnéd? Még <strong>{{ remainingTimeFormatted() }}</strong>
-          áll rendelkezésedre az ingyenes módosításra.
-        </p>
+        <div class="completed-summary__time-banner">
+          <div class="completed-summary__time-icon">
+            <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
+          </div>
+          <div class="completed-summary__time-content">
+            <span class="completed-summary__time-label">Ingyenes módosítás</span>
+            <span class="completed-summary__time-value">{{ remainingTimeFormatted() }}</span>
+          </div>
+        </div>
       } @else {
-        <p class="completed-summary__info-paid">
-          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
-          Az ingyenes módosítási időablak lejárt. A módosítás díjköteles.
-        </p>
+        <div class="completed-summary__time-banner completed-summary__time-banner--expired">
+          <div class="completed-summary__time-icon">
+            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="18" />
+          </div>
+          <div class="completed-summary__time-content">
+            <span class="completed-summary__time-label">Az ingyenes módosítási idő lejárt</span>
+            <span class="completed-summary__time-sublabel">A módosítás díjköteles.</span>
+          </div>
+        </div>
       }
 
       <button class="completed-summary__modify-btn" (click)="modifyClick.emit()">

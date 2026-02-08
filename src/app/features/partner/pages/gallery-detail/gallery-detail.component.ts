@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Location } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -16,6 +17,7 @@ import { GalleryInfoBarComponent } from './components/gallery-info-bar/gallery-i
 import { GalleryPhotoListComponent } from './components/gallery-photo-list/gallery-photo-list.component';
 import { GalleryTabsComponent, GalleryTab } from './components/gallery-tabs/gallery-tabs.component';
 import { GalleryMonitoringComponent } from './components/gallery-monitoring/gallery-monitoring.component';
+import { initTabFromFragment, setTabFragment } from '../../../../shared/utils/tab-persistence.util';
 
 @Component({
   selector: 'app-gallery-detail',
@@ -42,6 +44,7 @@ import { GalleryMonitoringComponent } from './components/gallery-monitoring/gall
 export class GalleryDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
   private readonly actions = inject(GalleryDetailActionsService);
 
   readonly ICONS = ICONS;
@@ -54,6 +57,7 @@ export class GalleryDetailComponent implements OnInit {
       this.router.navigate(['/partner/projects']);
       return;
     }
+    initTabFromFragment(this.state.activeTab, this.location, ['gallery', 'monitoring'] as const, 'gallery');
     this.actions.loadGallery(this.state, this.projectId);
   }
 
@@ -134,7 +138,7 @@ export class GalleryDetailComponent implements OnInit {
   // === TABS ===
 
   onTabChange(tab: GalleryTab): void {
-    this.state.activeTab.set(tab);
+    setTabFragment(this.state.activeTab, this.location, tab, 'gallery');
   }
 
   // === NAVIGATION ===

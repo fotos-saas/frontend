@@ -11,7 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Location } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -43,6 +43,7 @@ import { ICONS } from '../../../constants/icons.constants';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../confirm-dialog/confirm-dialog.component';
 import { GuestSession, SamplePackage } from '../../../../features/partner/services/partner.service';
 import { ProjectDetailWrapperFacadeService } from './project-detail-wrapper-facade.service';
+import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persistence.util';
 
 /**
  * Generikus Project Detail Wrapper - kozos smart wrapper komponens.
@@ -79,6 +80,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly projectEditModalComponent = inject(PROJECT_EDIT_MODAL_COMPONENT, { optional: true });
   private readonly orderDataDialogComponent = inject(PROJECT_ORDER_DATA_DIALOG_COMPONENT, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
+  private readonly location = inject(Location);
   private readonly partnerService = inject(PartnerService, { optional: true });
   private readonly toast = inject(ToastService);
 
@@ -140,21 +142,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
     this.facade.setMapFn(this.mapToDetailData());
 
-    // Tab query param figyelese
-    const validTabs = ['overview', 'users', 'samples', 'settings'];
-    const tabParam = this.route.snapshot.queryParamMap.get('tab');
-    if (tabParam && validTabs.includes(tabParam)) {
-      this.activeTab.set(tabParam as ProjectDetailTab);
-    }
-
-    this.route.queryParamMap.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(params => {
-      const tab = params.get('tab');
-      if (tab && validTabs.includes(tab)) {
-        this.activeTab.set(tab as ProjectDetailTab);
-      }
-    });
+    initTabFromFragment(this.activeTab, this.location, ['overview', 'users', 'samples', 'settings'] as const, 'overview');
 
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id || isNaN(id) || id < 1) {
@@ -167,12 +155,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   goBack(): void { this.facade.goBack(); }
 
   changeTab(tab: ProjectDetailTab): void {
-    this.activeTab.set(tab);
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: tab === 'overview' ? {} : { tab },
-      queryParamsHandling: tab === 'overview' ? '' : 'merge',
-    });
+    setTabFragment(this.activeTab, this.location, tab, 'overview');
   }
 
   // === MODAL DELEGATIONS ===

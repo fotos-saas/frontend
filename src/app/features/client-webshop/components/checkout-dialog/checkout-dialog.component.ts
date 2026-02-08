@@ -1,0 +1,98 @@
+import { Component, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
+import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { ClientWebshopService, ShopConfig, CheckoutRequest } from '../../client-webshop.service';
+import { cartItems, cartTotal } from '../../client-webshop.state';
+
+@Component({
+  selector: 'app-checkout-dialog',
+  standalone: true,
+  imports: [FormsModule, DecimalPipe, LucideAngularModule],
+  templateUrl: './checkout-dialog.component.html',
+  styleUrl: './checkout-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class CheckoutDialogComponent {
+  private webshopService = inject(ClientWebshopService);
+  readonly ICONS = ICONS;
+
+  config = input.required<ShopConfig>();
+  token = input.required<string>();
+  close = output<void>();
+  checkoutRedirect = output<string>();
+
+  backdropHandler = createBackdropHandler(() => this.close.emit());
+
+  customerName = signal('');
+  customerEmail = signal('');
+  customerPhone = signal('');
+  deliveryMethod = signal<'pickup' | 'shipping'>('pickup');
+  shippingAddress = signal('');
+  shippingNotes = signal('');
+  customerNotes = signal('');
+  acceptTerms = signal(false);
+  submitting = signal(false);
+  error = signal('');
+
+  readonly cartItems = cartItems;
+  readonly cartTotal = cartTotal;
+
+  get shippingCost(): number {
+    const cfg = this.config();
+    if (this.deliveryMethod() !== 'shipping') return 0;
+    if (cfg.shipping_free_threshold_huf && this.cartTotal() >= cfg.shipping_free_threshold_huf) return 0;
+    return cfg.shipping_cost_huf;
+  }
+
+  get grandTotal(): number {
+    return this.cartTotal() + this.shippingCost;
+  }
+
+  submit(): void {
+    if (!this.customerName() || !this.customerEmail()) {
+      this.error.set('Kérjük töltsd ki a kötelező mezőket.');
+      return;
+    }
+
+    if (this.deliveryMethod() === 'shipping' && !this.shippingAddress()) {
+      this.error.set('Szállítási cím megadása kötelező.');
+      return;
+    }
+
+    if (this.config().terms_text && !this.acceptTerms()) {
+      this.error.set('Az ÁSZF elfogadása kötelező.');
+      return;
+    }
+
+    this.error.set('');
+    this.submitting.set(true);
+
+    const data: CheckoutRequest = {
+      customer_name: this.customerName(),
+      customer_email: this.customerEmail(),
+      customer_phone: this.customerPhone() || undefined,
+      delivery_method: this.deliveryMethod(),
+      shipping_address: this.deliveryMethod() === 'shipping' ? this.shippingAddress() : undefined,
+      shipping_notes: this.shippingNotes() || undefined,
+      customer_notes: this.customerNotes() || undefined,
+      items: this.cartItems().map(item => ({
+        product_id: item.productId,
+        media_id: item.mediaId,
+        quantity: item.quantity,
+      })),
+    };
+
+    this.webshopService.createCheckout(this.token(), data).subscribe({
+      next: (res) => {
+        this.checkoutRedirect.emit(res.checkout_url);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Hiba történt a rendelés feldolgozásakor.');
+        this.submitting.set(false);
+      },
+    });
+  }
+}

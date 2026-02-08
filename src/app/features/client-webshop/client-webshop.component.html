@@ -1,0 +1,139 @@
+@if (error()) {
+  <div class="error-page">
+    <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="48" />
+    <h1>Nem elérhető</h1>
+    <p>{{ error() }}</p>
+  </div>
+} @else if (loading()) {
+  <div class="loading-page">
+    <lucide-icon [name]="ICONS.LOADER" [size]="32" class="spin" />
+    <p>Betöltés...</p>
+  </div>
+} @else {
+  <div class="webshop-layout">
+    <!-- Header -->
+    <header class="shop-header">
+      <h1><lucide-icon [name]="ICONS.STORE" [size]="24" /> {{ sourceName() }}</h1>
+      @if (config()?.welcome_message) {
+        <p class="welcome-msg">{{ config()!.welcome_message }}</p>
+      }
+    </header>
+
+    <div class="shop-content">
+      <!-- Photo Gallery -->
+      <main class="photo-gallery">
+        <h2>Válassz fotót</h2>
+        <div class="photo-grid">
+          @for (photo of photos(); track photo.id) {
+            <div class="photo-card"
+                 [class.selected]="selectedPhoto()?.id === photo.id"
+                 (click)="selectPhoto(photo)">
+              <img [src]="photo.thumb_url" [alt]="photo.title" loading="lazy">
+              <span class="photo-title">{{ photo.title }}</span>
+            </div>
+          } @empty {
+            <p class="empty-text">Nincsenek elérhető fotók.</p>
+          }
+        </div>
+
+        <!-- Product Selector (ha fotó kiválasztva) -->
+        @if (selectedPhoto(); as photo) {
+          <div class="product-selector">
+            <div class="selector-header">
+              <img [src]="photo.preview_url" [alt]="photo.title" class="selected-preview">
+              <div>
+                <h3>{{ photo.title }}</h3>
+                <p>Válassz méretet és típust</p>
+              </div>
+              <button class="close-btn" (click)="selectedPhoto.set(null)">
+                <lucide-icon [name]="ICONS.X" [size]="20" />
+              </button>
+            </div>
+
+            <div class="product-list">
+              @for (product of products(); track product.id) {
+                <div class="product-option"
+                     [class.selected]="selectedProduct()?.id === product.id"
+                     (click)="selectProduct(product)">
+                  <span class="product-name">{{ product.paper_size_name }} - {{ product.paper_type_name }}</span>
+                  <span class="product-dims">{{ product.width_cm }}x{{ product.height_cm }} cm</span>
+                  <span class="product-price">{{ product.price_huf | number }} Ft</span>
+                </div>
+              }
+            </div>
+
+            @if (selectedProduct()) {
+              <div class="add-to-cart-bar">
+                <div class="qty-control">
+                  <button (click)="selectedQuantity.set(Math.max(1, selectedQuantity() - 1))">-</button>
+                  <span>{{ selectedQuantity() }}</span>
+                  <button (click)="selectedQuantity.set(selectedQuantity() + 1)">+</button>
+                </div>
+                <button class="btn btn-primary" (click)="addSelectedToCart()">
+                  <lucide-icon [name]="ICONS.SHOPPING_BAG" [size]="16" />
+                  Kosárba ({{ (selectedProduct()!.price_huf * selectedQuantity()) | number }} Ft)
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </main>
+
+      <!-- Shopping Cart Sidebar -->
+      <aside class="cart-sidebar">
+        <h2><lucide-icon [name]="ICONS.SHOPPING_BAG" [size]="20" /> Kosár ({{ cartItemCount() }})</h2>
+
+        @if (!cartItems().length) {
+          <p class="empty-cart">A kosarad üres.</p>
+        } @else {
+          <div class="cart-items">
+            @for (item of cartItems(); track item.id) {
+              <div class="cart-item">
+                <img [src]="item.photoUrl" [alt]="item.photoFilename" class="cart-thumb">
+                <div class="cart-item-info">
+                  <span class="cart-item-name">{{ item.photoFilename }}</span>
+                  <span class="cart-item-spec">{{ item.paperSizeName }} - {{ item.paperTypeName }}</span>
+                  <div class="cart-item-row">
+                    <div class="qty-control sm">
+                      <button (click)="updateItemQuantity(item.id, item.quantity - 1)">-</button>
+                      <span>{{ item.quantity }}</span>
+                      <button (click)="updateItemQuantity(item.id, item.quantity + 1)">+</button>
+                    </div>
+                    <span class="cart-item-price">{{ item.unitPrice * item.quantity | number }} Ft</span>
+                    <button class="remove-btn" (click)="removeItem(item.id)">
+                      <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="cart-total">
+            <span>Összesen</span>
+            <strong>{{ cartTotal() | number }} Ft</strong>
+          </div>
+
+          @if (config()?.min_order_amount_huf && cartTotal() < config()!.min_order_amount_huf) {
+            <p class="min-order-warning">
+              Minimum rendelési összeg: {{ config()!.min_order_amount_huf | number }} Ft
+            </p>
+          } @else {
+            <button class="btn btn-primary btn-full" (click)="openCheckout()">
+              Megrendelés
+            </button>
+          }
+        }
+      </aside>
+    </div>
+  </div>
+}
+
+<!-- Checkout Dialog -->
+@if (showCheckout()) {
+  <app-checkout-dialog
+    [config]="config()!"
+    [token]="token"
+    (close)="closeCheckout()"
+    (checkoutRedirect)="onCheckoutSuccess($event)" />
+}

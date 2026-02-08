@@ -335,6 +335,10 @@ export const ICONS = {
   // Invoicing
   RECEIPT: 'receipt',
   BANKNOTE: 'banknote',
+
+  // Webshop
+  STORE: 'store',
+  TRUCK: 'truck',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

@@ -1,0 +1,91 @@
+<div class="webshop-orders page-card">
+  <div class="page-header">
+    <h1><lucide-icon [name]="ICONS.SHOPPING_BAG" [size]="24" /> Webshop rendelések</h1>
+  </div>
+
+  <!-- Stats cards -->
+  @if (stats(); as s) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">{{ s.total_orders }}</span>
+        <span class="stat-label">Összes rendelés</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ s.pending_orders }}</span>
+        <span class="stat-label">Feldolgozásra vár</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ s.total_revenue_huf | number }} Ft</span>
+        <span class="stat-label">Összbevétel</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ s.this_month_revenue_huf | number }} Ft</span>
+        <span class="stat-label">Havi bevétel</span>
+      </div>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+      <input type="text" placeholder="Keresés rendelés számra, névre..."
+             [ngModel]="searchQuery()"
+             (ngModelChange)="searchQuery.set($event)"
+             (keyup.enter)="onSearch()">
+    </div>
+    <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()">
+      <option value="">Minden státusz</option>
+      <option value="pending">Függőben</option>
+      <option value="paid">Fizetve</option>
+      <option value="processing">Feldolgozás</option>
+      <option value="shipped">Szállítás alatt</option>
+      <option value="completed">Kész</option>
+      <option value="cancelled">Visszamondva</option>
+    </select>
+  </div>
+
+  <!-- Orders list -->
+  @if (loading()) {
+    <div class="skeleton-container">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else if (!orders().length) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.SHOPPING_BAG" [size]="48" />
+      <p>Még nincsenek rendelések.</p>
+    </div>
+  } @else {
+    <div class="table-header">
+      <span class="th th-number">Rendelés</span>
+      <span class="th th-customer">Ügyfél</span>
+      <span class="th th-total">Összeg</span>
+      <span class="th th-status">Státusz</span>
+      <span class="th th-date">Dátum</span>
+    </div>
+
+    <div class="row-grid">
+      @for (order of orders(); track order.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'" (click)="openDetail(order)">
+          <span class="td td-number">
+            <strong>{{ order.order_number }}</strong>
+            <span class="items-count">{{ order.items_count }} tétel</span>
+          </span>
+          <span class="td td-customer">
+            <span class="customer-name">{{ order.customer_name }}</span>
+            <span class="customer-email">{{ order.customer_email }}</span>
+          </span>
+          <span class="td td-total">{{ order.total_huf | number }} Ft</span>
+          <span class="td td-status">
+            <span class="badge" [class]="getStatusClass(order.status)">
+              {{ STATUS_LABELS[order.status] || order.status }}
+            </span>
+          </span>
+          <span class="td td-date">{{ order.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>

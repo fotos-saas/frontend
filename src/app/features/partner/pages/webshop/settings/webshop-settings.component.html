@@ -1,0 +1,239 @@
+<div class="webshop-settings page-card">
+  <div class="page-header">
+    <h1><lucide-icon [name]="ICONS.STORE" [size]="24" /> Webshop beállítások</h1>
+    <p class="subtitle">Fotónyomtatás rendelési rendszer konfigurálása</p>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-container">
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  } @else if (!settings()) {
+    <!-- Nincs még inicializálva -->
+    <div class="init-card">
+      <lucide-icon [name]="ICONS.STORE" [size]="48" />
+      <h2>Webshop bekapcsolása</h2>
+      <p>A Webshop modul lehetővé teszi ügyfeleid számára, hogy fotónyomtatást rendeljenek online.</p>
+      <p>Az aktiválás automatikusan létrehozza az alapértelmezett papírméreteket és típusokat.</p>
+      <button class="btn btn-primary" (click)="initializeWebshop()" [disabled]="saving()">
+        @if (saving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" /> Inicializálás...
+        } @else {
+          <lucide-icon [name]="ICONS.PLUS" [size]="16" /> Webshop aktiválása
+        }
+      </button>
+    </div>
+  } @else {
+    <!-- Általános beállítások -->
+    <section class="settings-section">
+      <h2>Általános</h2>
+
+      <div class="form-group">
+        <label class="toggle-label">
+          <input type="checkbox"
+                 [checked]="settings()!.is_enabled"
+                 (change)="updateField('is_enabled', $any($event.target).checked)">
+          <span>Webshop engedélyezve</span>
+        </label>
+        <p class="help-text">Ha ki van kapcsolva, az ügyfelek nem tudnak rendelni.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Üdvözlő üzenet</label>
+        <textarea rows="3"
+                  [ngModel]="settings()!.welcome_message ?? ''"
+                  (ngModelChange)="updateField('welcome_message', $event)"
+                  placeholder="Opcionális üzenet az ügyfelek számára..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>ÁSZF szöveg</label>
+        <textarea rows="4"
+                  [ngModel]="settings()!.terms_text ?? ''"
+                  (ngModelChange)="updateField('terms_text', $event)"
+                  placeholder="Általános Szerződési Feltételek..."></textarea>
+      </div>
+    </section>
+
+    <!-- Szállítás beállítások -->
+    <section class="settings-section">
+      <h2><lucide-icon [name]="ICONS.TRUCK" [size]="20" /> Szállítás</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox"
+                   [checked]="settings()!.allow_pickup"
+                   (change)="updateField('allow_pickup', $any($event.target).checked)">
+            <span>Személyes átvétel</span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox"
+                   [checked]="settings()!.allow_shipping"
+                   (change)="updateField('allow_shipping', $any($event.target).checked)">
+            <span>Házhozszállítás</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Szállítási költség (Ft)</label>
+          <input type="number" min="0"
+                 [ngModel]="settings()!.shipping_cost_huf"
+                 (ngModelChange)="updateField('shipping_cost_huf', $event)">
+        </div>
+        <div class="form-group">
+          <label>Ingyenes szállítás felett (Ft)</label>
+          <input type="number" min="0"
+                 [ngModel]="settings()!.shipping_free_threshold_huf ?? ''"
+                 (ngModelChange)="updateField('shipping_free_threshold_huf', $event || null)"
+                 placeholder="Üres = nincs">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Minimum rendelési összeg (Ft)</label>
+        <input type="number" min="0"
+               [ngModel]="settings()!.min_order_amount_huf"
+               (ngModelChange)="updateField('min_order_amount_huf', $event)">
+      </div>
+    </section>
+
+    <div class="save-bar">
+      <button class="btn btn-primary" (click)="saveSettings()" [disabled]="saving()">
+        @if (saving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" /> Mentés...
+        } @else {
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" /> Beállítások mentése
+        }
+      </button>
+    </div>
+
+    <!-- Papírméretek -->
+    <section class="settings-section">
+      <div class="section-header">
+        <h2>Papírméretek</h2>
+        <button class="btn btn-sm btn-outline" (click)="showNewSizeForm.set(true)" matTooltip="Új méret">
+          <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        </button>
+      </div>
+
+      @if (showNewSizeForm()) {
+        <div class="inline-form">
+          <input type="text" placeholder="Név (pl. 10x15)"
+                 [ngModel]="newSize().name"
+                 (ngModelChange)="newSize.set({...newSize(), name: $event})">
+          <input type="number" placeholder="Szélesség (cm)" min="1"
+                 [ngModel]="newSize().width_cm"
+                 (ngModelChange)="newSize.set({...newSize(), width_cm: $event})">
+          <input type="number" placeholder="Magasság (cm)" min="1"
+                 [ngModel]="newSize().height_cm"
+                 (ngModelChange)="newSize.set({...newSize(), height_cm: $event})">
+          <button class="btn btn-sm btn-primary" (click)="addPaperSize()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+          </button>
+          <button class="btn btn-sm btn-ghost" (click)="showNewSizeForm.set(false)">
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+          </button>
+        </div>
+      }
+
+      <div class="items-list">
+        @for (size of paperSizes(); track size.id) {
+          <div class="item-row">
+            @if (editingSizeId() === size.id) {
+              <input type="text" [(ngModel)]="size.name" class="inline-input">
+              <input type="number" [(ngModel)]="size.width_cm" class="inline-input sm">
+              <span>x</span>
+              <input type="number" [(ngModel)]="size.height_cm" class="inline-input sm">
+              <span>cm</span>
+              <button class="action-btn" (click)="updatePaperSize(size)" matTooltip="Mentés">
+                <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+              </button>
+              <button class="action-btn" (click)="editingSizeId.set(null)" matTooltip="Mégse">
+                <lucide-icon [name]="ICONS.X" [size]="16" />
+              </button>
+            } @else {
+              <span class="item-name">{{ size.name }}</span>
+              <span class="item-detail">{{ size.width_cm }} x {{ size.height_cm }} cm</span>
+              <span class="item-badge" [class.inactive]="!size.is_active">
+                {{ size.is_active ? 'Aktív' : 'Inaktív' }}
+              </span>
+              <button class="action-btn" (click)="editingSizeId.set(size.id)" matTooltip="Szerkesztés">
+                <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+              </button>
+              <button class="action-btn danger" (click)="deletePaperSize(size.id)" matTooltip="Törlés">
+                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+              </button>
+            }
+          </div>
+        } @empty {
+          <p class="empty-text">Nincsenek papírméretek.</p>
+        }
+      </div>
+    </section>
+
+    <!-- Papírtípusok -->
+    <section class="settings-section">
+      <div class="section-header">
+        <h2>Papírtípusok</h2>
+        <button class="btn btn-sm btn-outline" (click)="showNewTypeForm.set(true)" matTooltip="Új típus">
+          <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        </button>
+      </div>
+
+      @if (showNewTypeForm()) {
+        <div class="inline-form">
+          <input type="text" placeholder="Név (pl. Fényes)"
+                 [ngModel]="newType().name"
+                 (ngModelChange)="newType.set({...newType(), name: $event})">
+          <input type="text" placeholder="Leírás (opcionális)"
+                 [ngModel]="newType().description"
+                 (ngModelChange)="newType.set({...newType(), description: $event})">
+          <button class="btn btn-sm btn-primary" (click)="addPaperType()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+          </button>
+          <button class="btn btn-sm btn-ghost" (click)="showNewTypeForm.set(false)">
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+          </button>
+        </div>
+      }
+
+      <div class="items-list">
+        @for (type of paperTypes(); track type.id) {
+          <div class="item-row">
+            @if (editingTypeId() === type.id) {
+              <input type="text" [(ngModel)]="type.name" class="inline-input">
+              <input type="text" [(ngModel)]="type.description" class="inline-input" placeholder="Leírás">
+              <button class="action-btn" (click)="updatePaperType(type)" matTooltip="Mentés">
+                <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+              </button>
+              <button class="action-btn" (click)="editingTypeId.set(null)" matTooltip="Mégse">
+                <lucide-icon [name]="ICONS.X" [size]="16" />
+              </button>
+            } @else {
+              <span class="item-name">{{ type.name }}</span>
+              <span class="item-detail">{{ type.description || '-' }}</span>
+              <span class="item-badge" [class.inactive]="!type.is_active">
+                {{ type.is_active ? 'Aktív' : 'Inaktív' }}
+              </span>
+              <button class="action-btn" (click)="editingTypeId.set(type.id)" matTooltip="Szerkesztés">
+                <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+              </button>
+              <button class="action-btn danger" (click)="deletePaperType(type.id)" matTooltip="Törlés">
+                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+              </button>
+            }
+          </div>
+        } @empty {
+          <p class="empty-text">Nincsenek papírtípusok.</p>
+        }
+      </div>
+    </section>
+  }
+</div>

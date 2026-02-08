@@ -1,0 +1,132 @@
+<div class="webshop-order-detail page-card">
+  <button class="btn btn-ghost back-btn" (click)="goBack()">
+    <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" /> Vissza
+  </button>
+
+  @if (loading()) {
+    <div class="skeleton-container">
+      <div class="skeleton-row lg"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  } @else if (order(); as o) {
+    <div class="order-header">
+      <div>
+        <h1>{{ o.order_number }}</h1>
+        <span class="badge" [class]="'badge-' + o.status">
+          {{ STATUS_LABELS[o.status] || o.status }}
+        </span>
+      </div>
+      <div class="order-meta">
+        <span>{{ o.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
+        @if (o.paid_at) {
+          <span>Fizetve: {{ o.paid_at | date:'yyyy.MM.dd HH:mm' }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <!-- Ügyfél adatok -->
+      <section class="detail-section">
+        <h3><lucide-icon [name]="ICONS.USER" [size]="18" /> Ügyfél</h3>
+        <dl>
+          <dt>Név</dt><dd>{{ o.customer_name }}</dd>
+          <dt>Email</dt><dd>{{ o.customer_email }}</dd>
+          @if (o.customer_phone) {
+            <dt>Telefon</dt><dd>{{ o.customer_phone }}</dd>
+          }
+          @if (o.customer_notes) {
+            <dt>Megjegyzés</dt><dd>{{ o.customer_notes }}</dd>
+          }
+        </dl>
+      </section>
+
+      <!-- Szállítás -->
+      <section class="detail-section">
+        <h3><lucide-icon [name]="ICONS.TRUCK" [size]="18" /> Szállítás</h3>
+        <dl>
+          <dt>Mód</dt>
+          <dd>{{ o.delivery_method === 'pickup' ? 'Személyes átvétel' : 'Házhozszállítás' }}</dd>
+          @if (o.shipping_address) {
+            <dt>Cím</dt><dd>{{ o.shipping_address }}</dd>
+          }
+          @if (o.shipping_notes) {
+            <dt>Szállítási megjegyzés</dt><dd>{{ o.shipping_notes }}</dd>
+          }
+          @if (o.tracking_number) {
+            <dt>Nyomkövetés</dt><dd>{{ o.tracking_number }}</dd>
+          }
+        </dl>
+      </section>
+    </div>
+
+    <!-- Összesítő -->
+    <section class="totals-section">
+      <div class="total-row">
+        <span>Részösszeg</span>
+        <span>{{ o.subtotal_huf | number }} Ft</span>
+      </div>
+      <div class="total-row">
+        <span>Szállítás</span>
+        <span>{{ o.shipping_cost_huf | number }} Ft</span>
+      </div>
+      <div class="total-row grand-total">
+        <span>Összesen</span>
+        <span>{{ o.total_huf | number }} Ft</span>
+      </div>
+    </section>
+
+    <!-- Tételek -->
+    <section class="items-section">
+      <h3>Tételek ({{ o.items.length }})</h3>
+      <div class="items-grid">
+        @for (item of o.items; track item.id) {
+          <div class="order-item">
+            @if (item.photo_url) {
+              <img [src]="item.photo_url" [alt]="item.photo_filename" class="item-photo">
+            }
+            <div class="item-info">
+              <span class="item-name">{{ item.photo_filename }}</span>
+              <span class="item-spec">{{ item.paper_size_name }} - {{ item.paper_type_name }}</span>
+              <span class="item-qty">{{ item.quantity }} db x {{ item.unit_price_huf | number }} Ft</span>
+            </div>
+            <span class="item-subtotal">{{ item.subtotal_huf | number }} Ft</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Státusz kezelés -->
+    @if (NEXT_STATUS[o.status]) {
+      <section class="actions-section">
+        @if (o.status === 'processing' && o.delivery_method === 'shipping') {
+          <div class="form-group">
+            <label>Nyomkövetési szám</label>
+            <input type="text" placeholder="Opcionális"
+                   [ngModel]="trackingNumber()"
+                   (ngModelChange)="trackingNumber.set($event)">
+          </div>
+        }
+
+        <div class="action-buttons">
+          <button class="btn btn-primary" (click)="advanceStatus()" [disabled]="updating()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            {{ NEXT_STATUS_LABELS[o.status] }}
+          </button>
+          @if (o.status !== 'completed' && o.status !== 'cancelled') {
+            <button class="btn btn-danger-outline" (click)="cancelOrder()" [disabled]="updating()">
+              <lucide-icon [name]="ICONS.X" [size]="16" /> Rendelés visszamondása
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (o.internal_notes) {
+      <section class="notes-section">
+        <h3>Belső megjegyzés</h3>
+        <p>{{ o.internal_notes }}</p>
+      </section>
+    }
+  }
+</div>

@@ -1,0 +1,74 @@
+<div class="webshop-products page-card">
+  <div class="page-header">
+    <h1><lucide-icon [name]="ICONS.PACKAGE" [size]="24" /> Termékek és árak</h1>
+    <p class="subtitle">Papírméret × típus ármátrix kezelése</p>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-container">
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  } @else if (!activeSizes().length || !activeTypes().length) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.PACKAGE" [size]="48" />
+      <h2>Nincs elég adat</h2>
+      <p>Legalább egy aktív papírméret és papírtípus szükséges a termékek kezeléséhez.</p>
+      <p>Állítsd be őket a <strong>Beállítások</strong> oldalon.</p>
+    </div>
+  } @else {
+    @if (hasChanges()) {
+      <div class="save-bar">
+        <span class="unsaved-text">Mentetlen változtatások</span>
+        <button class="btn btn-primary" (click)="saveAll()" [disabled]="saving()">
+          @if (saving()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" /> Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" /> Árak mentése
+          }
+        </button>
+      </div>
+    }
+
+    <div class="pricing-matrix-wrapper">
+      <table class="pricing-matrix">
+        <thead>
+          <tr>
+            <th class="corner-cell">Méret \ Típus</th>
+            @for (type of activeTypes(); track type.id) {
+              <th>{{ type.name }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (size of activeSizes(); track size.id) {
+            <tr>
+              <td class="size-cell">
+                <strong>{{ size.name }}</strong>
+                <span class="dims">{{ size.width_cm }}x{{ size.height_cm }} cm</span>
+              </td>
+              @for (type of activeTypes(); track type.id) {
+                <td class="price-cell" [class.inactive]="!getIsActive(size.id, type.id)">
+                  <div class="price-input-group">
+                    <input type="number" min="0" step="10"
+                           [ngModel]="getPrice(size.id, type.id)"
+                           (ngModelChange)="updatePrice(size.id, type.id, $event)"
+                           class="price-input">
+                    <span class="currency">Ft</span>
+                  </div>
+                  <button class="toggle-btn"
+                          [class.active]="getIsActive(size.id, type.id)"
+                          (click)="toggleActive(size.id, type.id)"
+                          [matTooltip]="getIsActive(size.id, type.id) ? 'Inaktiválás' : 'Aktiválás'">
+                    {{ getIsActive(size.id, type.id) ? 'Aktív' : 'Inaktív' }}
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

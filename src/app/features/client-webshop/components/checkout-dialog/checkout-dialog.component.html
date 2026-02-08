@@ -1,0 +1,197 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+>
+  <div class="dialog-panel dialog-panel--lg">
+    <!-- Header -->
+    <div class="dialog-header">
+      <h3>Megrendelés</h3>
+      <button class="dialog-close" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="18" />
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="dialog-body">
+      @if (error()) {
+        <div class="error-msg">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+          {{ error() }}
+        </div>
+      }
+
+      <!-- Kapcsolattartó adatok -->
+      <div class="form-section">
+        <h4>Kapcsolattartó adatok</h4>
+
+        <div class="form-group">
+          <label class="form-label">Név *</label>
+          <input
+            type="text"
+            class="form-input"
+            [ngModel]="customerName()"
+            (ngModelChange)="customerName.set($event)"
+            placeholder="Teljes név"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">E-mail *</label>
+          <input
+            type="email"
+            class="form-input"
+            [ngModel]="customerEmail()"
+            (ngModelChange)="customerEmail.set($event)"
+            placeholder="pelda@email.hu"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Telefonszám</label>
+          <input
+            type="tel"
+            class="form-input"
+            [ngModel]="customerPhone()"
+            (ngModelChange)="customerPhone.set($event)"
+            placeholder="+36 30 123 4567"
+          />
+        </div>
+      </div>
+
+      <!-- Átvételi mód -->
+      @if (config().allow_pickup && config().allow_shipping) {
+        <div class="form-section">
+          <h4>Átvételi mód</h4>
+          <div class="radio-group">
+            <label class="radio-option" (click)="deliveryMethod.set('pickup')">
+              <input
+                type="radio"
+                name="delivery"
+                [checked]="deliveryMethod() === 'pickup'"
+              />
+              <div class="radio-content">
+                <span class="radio-title">
+                  <lucide-icon [name]="ICONS.PACKAGE" [size]="16" />
+                  Személyes átvétel
+                </span>
+                <span class="radio-desc">Ingyenes</span>
+              </div>
+            </label>
+            <label class="radio-option" (click)="deliveryMethod.set('shipping')">
+              <input
+                type="radio"
+                name="delivery"
+                [checked]="deliveryMethod() === 'shipping'"
+              />
+              <div class="radio-content">
+                <span class="radio-title">
+                  <lucide-icon [name]="ICONS.TRUCK" [size]="16" />
+                  Házhozszállítás
+                </span>
+                <span class="radio-desc">
+                  @if (config().shipping_free_threshold_huf && cartTotal() >= config().shipping_free_threshold_huf!) {
+                    Ingyenes szállítás
+                  } @else {
+                    {{ config().shipping_cost_huf | number }} Ft
+                  }
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
+      }
+
+      <!-- Szállítási cím -->
+      @if (deliveryMethod() === 'shipping') {
+        <div class="form-section">
+          <h4>Szállítási adatok</h4>
+          <div class="form-group">
+            <label class="form-label">Szállítási cím *</label>
+            <textarea
+              class="form-input form-textarea"
+              [ngModel]="shippingAddress()"
+              (ngModelChange)="shippingAddress.set($event)"
+              placeholder="Irányítószám, város, utca, házszám"
+              rows="2"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Megjegyzés a szállításhoz</label>
+            <input
+              type="text"
+              class="form-input"
+              [ngModel]="shippingNotes()"
+              (ngModelChange)="shippingNotes.set($event)"
+              placeholder="pl. kapucsengő, emelet"
+            />
+          </div>
+        </div>
+      }
+
+      <!-- Megjegyzés -->
+      <div class="form-section">
+        <div class="form-group">
+          <label class="form-label">Megjegyzés a rendeléshez</label>
+          <textarea
+            class="form-input form-textarea"
+            [ngModel]="customerNotes()"
+            (ngModelChange)="customerNotes.set($event)"
+            placeholder="Bármilyen kérés vagy megjegyzés..."
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Összesítő -->
+      <div class="order-summary">
+        <div class="summary-row">
+          <span>Tételek ({{ cartItems().length }} db)</span>
+          <span>{{ cartTotal() | number }} Ft</span>
+        </div>
+        @if (deliveryMethod() === 'shipping') {
+          <div class="summary-row">
+            <span>Szállítási költség</span>
+            <span>
+              @if (shippingCost === 0) {
+                Ingyenes
+              } @else {
+                {{ shippingCost | number }} Ft
+              }
+            </span>
+          </div>
+        }
+        <div class="summary-row summary-total">
+          <strong>Összesen</strong>
+          <strong>{{ grandTotal | number }} Ft</strong>
+        </div>
+      </div>
+
+      <!-- ÁSZF -->
+      @if (config().terms_text) {
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            [ngModel]="acceptTerms()"
+            (ngModelChange)="acceptTerms.set($event)"
+          />
+          <span>Elfogadom az <a class="terms-link" href="javascript:void(0)">Általános Szerződési Feltételeket</a></span>
+        </label>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog-footer">
+      <button class="btn-cancel" (click)="close.emit()" [disabled]="submitting()">Mégsem</button>
+      <button class="btn-primary" (click)="submit()" [disabled]="submitting()">
+        @if (submitting()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Feldolgozás...
+        } @else {
+          <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="16" />
+          Fizetés ({{ grandTotal | number }} Ft)
+        }
+      </button>
+    </div>
+  </div>
+</div>

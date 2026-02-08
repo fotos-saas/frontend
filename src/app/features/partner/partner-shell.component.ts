@@ -120,6 +120,16 @@ export class PartnerShellComponent implements OnInit {
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
       { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag' },
       {
+        id: 'webshop',
+        label: 'Webshop',
+        icon: 'store',
+        children: [
+          { id: 'webshop-settings', route: `${base}/webshop/settings`, label: 'Beállítások' },
+          { id: 'webshop-products', route: `${base}/webshop/products`, label: 'Termékek és árak' },
+          { id: 'webshop-orders', route: `${base}/webshop/orders`, label: 'Rendelések' },
+        ]
+      },
+      {
         id: 'customization',
         label: 'Testreszabás',
         icon: 'palette',
@@ -165,7 +175,7 @@ export class PartnerShellComponent implements OnInit {
   bugReportLink = computed(() => `${this.baseUrl()}/bugs`);
 
   // Kibontott szekciók
-  expandedSections = signal<Set<string>>(new Set(['projects', 'subscription', 'customization', 'partner-settings']));
+  expandedSections = signal<Set<string>>(new Set(['projects', 'subscription', 'customization', 'partner-settings', 'webshop']));
 
   toggleSection(sectionId: string): void {
     const current = this.expandedSections();

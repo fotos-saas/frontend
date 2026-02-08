@@ -266,6 +266,32 @@ export const routes: Routes = [
           }
         ]
       },
+      // Webshop
+      {
+        path: 'webshop',
+        children: [
+          {
+            path: 'settings',
+            loadComponent: () => import('./features/partner/pages/webshop/settings/webshop-settings.component').then(m => m.WebshopSettingsComponent),
+            title: 'Webshop beállítások'
+          },
+          {
+            path: 'products',
+            loadComponent: () => import('./features/partner/pages/webshop/products/webshop-products.component').then(m => m.WebshopProductsComponent),
+            title: 'Termékek és árak'
+          },
+          {
+            path: 'orders',
+            loadComponent: () => import('./features/partner/pages/webshop/orders/webshop-orders.component').then(m => m.WebshopOrdersComponent),
+            title: 'Webshop rendelések'
+          },
+          {
+            path: 'orders/:id',
+            loadComponent: () => import('./features/partner/pages/webshop/orders/webshop-order-detail.component').then(m => m.WebshopOrderDetailComponent),
+            title: 'Rendelés részletek'
+          }
+        ]
+      },
       // Terhelés kezelés
       {
         path: 'billing-charges',
@@ -478,6 +504,18 @@ export const routes: Routes = [
         data: { page: 'photo-selection' }
       }
     ]
+  },
+
+  // Publikus Webshop (kliens felület, nincs auth)
+  {
+    path: 'shop/:token',
+    loadComponent: () => import('./features/client-webshop/client-webshop.component').then(m => m.ClientWebshopComponent),
+    title: 'Webshop'
+  },
+  {
+    path: 'shop/:token/success',
+    loadComponent: () => import('./features/client-webshop/pages/order-success/order-success.component').then(m => m.OrderSuccessComponent),
+    title: 'Sikeres rendelés'
   },
 
   // 404 - ismeretlen route-ok

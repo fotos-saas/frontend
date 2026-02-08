@@ -1,0 +1,27 @@
+<div class="success-page">
+  <div class="success-card">
+    <div class="success-icon">
+      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="56" />
+    </div>
+
+    <h1>Sikeres rendelés!</h1>
+    <p class="success-message">Köszönjük a rendelésedet! A fizetés sikeresen megtörtént.</p>
+
+    @if (orderNumber()) {
+      <div class="order-number">
+        <span class="label">Rendelésszám</span>
+        <strong>{{ orderNumber() }}</strong>
+      </div>
+    }
+
+    <p class="info-text">
+      A rendelés visszaigazolását e-mailben küldtük el.
+      A fotósod hamarosan feldolgozza a megrendelést.
+    </p>
+
+    <div class="success-footer">
+      <lucide-icon [name]="ICONS.MAIL" [size]="16" />
+      <span>Ellenőrizd az e-mail fiókodat a részletekért</span>
+    </div>
+  </div>
+</div>

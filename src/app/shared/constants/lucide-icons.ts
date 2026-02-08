@@ -147,6 +147,9 @@ import {
   // Invoicing
   Receipt,
   Banknote,
+  // Webshop
+  Store,
+  Truck,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -290,4 +293,7 @@ export const LUCIDE_ICONS_MAP = {
   // Invoicing
   Receipt,
   Banknote,
+  // Webshop
+  Store,
+  Truck,
 };

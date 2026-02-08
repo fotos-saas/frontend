@@ -18,6 +18,7 @@ import { DownloadDialogComponent, DownloadOptions } from '../download-dialog/dow
 })
 export class GalleryMonitoringComponent implements OnInit {
   projectId = input.required<number>();
+  galleryName = input<string>('');
 
   private readonly actions = inject(GalleryMonitoringActionsService);
 
@@ -43,7 +44,7 @@ export class GalleryMonitoringComponent implements OnInit {
   }
 
   onExportExcel(): void {
-    this.actions.exportExcel(this.state, this.projectId());
+    this.actions.exportExcel(this.state, this.projectId(), this.galleryName());
   }
 
   onOpenDownloadDialog(): void {
@@ -52,7 +53,7 @@ export class GalleryMonitoringComponent implements OnInit {
       this.state.showDownloadDialog.set(true);
     } else {
       // Közvetlen letöltés a mentett beállításokkal
-      this.actions.downloadZip(this.state, this.projectId(), {
+      this.actions.downloadZip(this.state, this.projectId(), this.galleryName(), {
         zipContent: settings.zip_content as DownloadOptions['zipContent'],
         fileNaming: settings.file_naming as DownloadOptions['fileNaming'],
         includeExcel: false,
@@ -65,7 +66,7 @@ export class GalleryMonitoringComponent implements OnInit {
   }
 
   onDownloadZip(options: DownloadOptions): void {
-    this.actions.downloadZip(this.state, this.projectId(), options);
+    this.actions.downloadZip(this.state, this.projectId(), this.galleryName(), options);
   }
 
   getStepLabel(step: string | null): string {

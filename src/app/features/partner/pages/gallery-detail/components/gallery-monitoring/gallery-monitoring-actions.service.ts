@@ -46,16 +46,17 @@ export class GalleryMonitoringActionsService {
       });
   }
 
-  exportExcel(state: GalleryMonitoringState, projectId: number): void {
+  exportExcel(state: GalleryMonitoringState, projectId: number, galleryName: string): void {
     state.exportingExcel.set(true);
 
     const filter = state.filterStatus();
+    const prefix = this.buildFilePrefix(galleryName, projectId);
 
     this.galleryService.exportMonitoringExcel(projectId, filter)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
-          this.saveFile(blob, `monitoring-${projectId}-${this.todayStr()}.xlsx`);
+          this.saveFile(blob, `${prefix}-${this.todayStr()}.xlsx`);
           state.exportingExcel.set(false);
           this.toast.success('Siker', 'Excel exportálva');
         },
@@ -71,9 +72,11 @@ export class GalleryMonitoringActionsService {
    * Ha always_ask = true → dialog-on keresztül hívódik.
    * Ha always_ask = false → közvetlen letöltés a mentett beállításokkal.
    */
-  downloadZip(state: GalleryMonitoringState, projectId: number, options: DownloadOptions): void {
+  downloadZip(state: GalleryMonitoringState, projectId: number, galleryName: string, options: DownloadOptions): void {
     state.exportingZip.set(true);
     state.showDownloadDialog.set(false);
+
+    const prefix = this.buildFilePrefix(galleryName, projectId);
 
     this.galleryService.downloadMonitoringZip(projectId, {
       zipContent: options.zipContent,
@@ -83,7 +86,7 @@ export class GalleryMonitoringActionsService {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
-          this.saveFile(blob, `gallery-${projectId}-${this.todayStr()}.zip`);
+          this.saveFile(blob, `${prefix}-${this.todayStr()}.zip`);
           state.exportingZip.set(false);
           this.toast.success('Siker', 'ZIP letöltve');
         },
@@ -106,5 +109,19 @@ export class GalleryMonitoringActionsService {
 
   private todayStr(): string {
     return new Date().toISOString().slice(0, 10);
+  }
+
+  /** Fájlnév prefix: osztálynév rövidítve + ID, pl. "Makoi-Szt-Istvan-12C-171" */
+  private buildFilePrefix(galleryName: string, projectId: number): string {
+    if (!galleryName) {
+      return `monitoring-${projectId}`;
+    }
+    const slug = galleryName
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // ékezetek eltávolítása
+      .replace(/[^a-zA-Z0-9\s-]/g, '')                   // speciális karakterek törlése
+      .trim()
+      .replace(/\s+/g, '-')                               // szóközök → kötőjel
+      .replace(/-+/g, '-');                                // dupla kötőjelek
+    return `${slug}-${projectId}`;
   }
 }

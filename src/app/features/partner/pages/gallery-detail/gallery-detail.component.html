@@ -28,7 +28,7 @@
 
     <!-- MONITORING TAB -->
     @if (state.activeTab() === 'monitoring') {
-      <app-gallery-monitoring [projectId]="projectId" />
+      <app-gallery-monitoring [projectId]="projectId" [galleryName]="state.gallery()!.name" />
     }
 
     <!-- GALLERY TAB -->

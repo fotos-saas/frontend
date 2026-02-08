@@ -144,9 +144,9 @@ export class PartnerShellComponent implements OnInit {
       return allItems;
     }
 
-    // Csapattagok: nincs Csapatom, nincs Megrendelések, nincs Testreszabás, nincs Előfizetésem (de van Fiók törlése + Beállítások)
+    // Csapattagok: nincs Csapatom, nincs Testreszabás, nincs Előfizetésem (de van Fiók törlése + Beállítások)
     return allItems
-      .filter(item => !['team', 'orders', 'customization', 'subscription'].includes(item.id))
+      .filter(item => !['team', 'customization', 'subscription'].includes(item.id))
       .concat([
         { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások', icon: 'settings' },
         { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },

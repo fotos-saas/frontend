@@ -46,6 +46,20 @@ export class GalleryMonitoringActionsService {
       });
   }
 
+  loadPersonSelections(state: GalleryMonitoringState, projectId: number, personId: number): void {
+    this.galleryService.getPersonSelections(projectId, personId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (selections) => {
+          state.setSelections(selections);
+        },
+        error: () => {
+          state.setSelectionsError();
+          this.toast.error('Hiba', 'A kiválasztások nem tölthetők be');
+        },
+      });
+  }
+
   exportExcel(state: GalleryMonitoringState, projectId: number, galleryName: string): void {
     state.exportingExcel.set(true);
 

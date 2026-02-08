@@ -37,6 +37,26 @@ export interface MonitoringResponse {
 }
 
 /**
+ * Egy személy kiválasztásainak részletei
+ */
+export interface PersonSelections {
+  claimed: SelectionPhoto[];
+  retouch: SelectionPhoto[];
+  tablo: SelectionPhoto | null;
+  workflowStatus: 'in_progress' | 'finalized' | null;
+  currentStep: string | null;
+}
+
+/**
+ * Egy kiválasztott fotó adata (thumbnail URL-lel)
+ */
+export interface SelectionPhoto {
+  id: number;
+  thumbUrl: string | null;
+  originalName: string | null;
+}
+
+/**
  * Szűrő opciók
  */
 export type MonitoringFilter = 'all' | 'finalized' | 'in_progress' | 'not_started' | 'stale';

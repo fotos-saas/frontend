@@ -3,6 +3,7 @@ import {
   MonitoringPerson,
   MonitoringSummary,
   MonitoringFilter,
+  PersonSelections,
 } from '../../../../models/gallery-monitoring.models';
 
 /**
@@ -18,6 +19,15 @@ export class GalleryMonitoringState {
   readonly exportingExcel = signal<boolean>(false);
   readonly exportingZip = signal<boolean>(false);
   readonly showDownloadDialog = signal<boolean>(false);
+
+  /** Kinyitott személy ID (expand/collapse) */
+  readonly expandedPersonId = signal<number | null>(null);
+
+  /** Kinyitott személy kiválasztásai */
+  readonly expandedSelections = signal<PersonSelections | null>(null);
+
+  /** Kiválasztások betöltési állapota */
+  readonly loadingSelections = signal<boolean>(false);
 
   /** Export beállítások (projekt szintű effektív értékek) */
   readonly exportSettings = signal<{
@@ -69,6 +79,26 @@ export class GalleryMonitoringState {
     this.persons.set(persons);
     this.summary.set(summary);
     this.loading.set(false);
+  }
+
+  toggleExpand(personId: number): void {
+    if (this.expandedPersonId() === personId) {
+      this.expandedPersonId.set(null);
+      this.expandedSelections.set(null);
+    } else {
+      this.expandedPersonId.set(personId);
+      this.expandedSelections.set(null);
+      this.loadingSelections.set(true);
+    }
+  }
+
+  setSelections(selections: PersonSelections): void {
+    this.expandedSelections.set(selections);
+    this.loadingSelections.set(false);
+  }
+
+  setSelectionsError(): void {
+    this.loadingSelections.set(false);
   }
 
   setLoading(): void {

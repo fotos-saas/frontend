@@ -38,6 +38,14 @@ export class GalleryMonitoringComponent implements OnInit {
     this.actions.loadMonitoring(this.state, this.projectId());
   }
 
+  onToggleExpand(person: { personId: number; hasOpened: boolean }): void {
+    if (!person.hasOpened) return;
+    this.state.toggleExpand(person.personId);
+    if (this.state.expandedPersonId() === person.personId) {
+      this.actions.loadPersonSelections(this.state, this.projectId(), person.personId);
+    }
+  }
+
   onFilterChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value as MonitoringFilter;
     this.state.setFilter(value);

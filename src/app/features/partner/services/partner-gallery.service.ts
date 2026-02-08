@@ -9,7 +9,7 @@ import {
   GalleryPhoto,
   GalleryProgress,
 } from '../models/gallery.models';
-import { MonitoringResponse } from '../models/gallery-monitoring.models';
+import { MonitoringResponse, PersonSelections } from '../models/gallery-monitoring.models';
 
 /**
  * Galéria kezelés service.
@@ -200,6 +200,15 @@ export class PartnerGalleryService {
   getMonitoring(projectId: number): Observable<MonitoringResponse> {
     return this.http.get<MonitoringResponse>(
       `${this.baseUrl}/projects/${projectId}/gallery/monitoring`,
+    );
+  }
+
+  /**
+   * Egy személy kiválasztásainak lekérdezése (claimed, retouch, tablo)
+   */
+  getPersonSelections(projectId: number, personId: number): Observable<PersonSelections> {
+    return this.http.get<PersonSelections>(
+      `${this.baseUrl}/projects/${projectId}/gallery/monitoring/person/${personId}/selections`,
     );
   }
 

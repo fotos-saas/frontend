@@ -122,9 +122,20 @@
         <div
           class="list-row"
           [class.list-row--stale]="person.staleWarning"
+          [class.list-row--expanded]="state.expandedPersonId() === person.personId"
+          [class.list-row--clickable]="person.hasOpened"
           [style.animation-delay]="i * 0.03 + 's'"
+          (click)="onToggleExpand(person)"
         >
           <span class="cell cell-name">
+            @if (person.hasOpened) {
+              <lucide-icon
+                class="expand-icon"
+                [class.expand-icon--open]="state.expandedPersonId() === person.personId"
+                [name]="ICONS.CHEVRON_RIGHT"
+                [size]="14"
+              />
+            }
             <span class="person-name">{{ person.name }}</span>
           </span>
           <span class="cell cell-type">
@@ -173,6 +184,94 @@
             }
           </span>
         </div>
+
+        <!-- Kibontott részletező panel -->
+        @if (state.expandedPersonId() === person.personId) {
+          <div class="detail-panel">
+            @if (state.loadingSelections()) {
+              <div class="detail-loading">
+                <div class="skeleton-detail skeleton-shimmer"></div>
+                <div class="skeleton-detail skeleton-shimmer"></div>
+              </div>
+            } @else if (state.expandedSelections(); as sel) {
+              @if (sel.claimed.length === 0 && sel.retouch.length === 0 && !sel.tablo) {
+                <div class="detail-empty">
+                  <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
+                  <span>Még nincs kiválasztott kép</span>
+                </div>
+              } @else {
+                <!-- Saját képek -->
+                @if (sel.claimed.length > 0) {
+                  <div class="detail-group">
+                    <div class="detail-group__header">
+                      <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+                      <span>Saját képek</span>
+                      <span class="detail-group__count">{{ sel.claimed.length }} kép</span>
+                    </div>
+                    <div class="detail-group__thumbs">
+                      @for (photo of sel.claimed; track photo.id) {
+                        <div class="thumb-item" [matTooltip]="photo.originalName || ''">
+                          @if (photo.thumbUrl) {
+                            <img [src]="photo.thumbUrl" [alt]="photo.originalName || 'Kép'" loading="lazy" />
+                          } @else {
+                            <div class="thumb-placeholder">
+                              <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Retusált képek -->
+                @if (sel.retouch.length > 0) {
+                  <div class="detail-group">
+                    <div class="detail-group__header">
+                      <lucide-icon [name]="ICONS.SPARKLES" [size]="14" />
+                      <span>Retusálásra kiválasztott</span>
+                      <span class="detail-group__count">{{ sel.retouch.length }} kép</span>
+                    </div>
+                    <div class="detail-group__thumbs">
+                      @for (photo of sel.retouch; track photo.id) {
+                        <div class="thumb-item" [matTooltip]="photo.originalName || ''">
+                          @if (photo.thumbUrl) {
+                            <img [src]="photo.thumbUrl" [alt]="photo.originalName || 'Kép'" loading="lazy" />
+                          } @else {
+                            <div class="thumb-placeholder">
+                              <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Tablókép -->
+                @if (sel.tablo) {
+                  <div class="detail-group">
+                    <div class="detail-group__header">
+                      <lucide-icon [name]="ICONS.FRAME" [size]="14" />
+                      <span>Tablókép</span>
+                    </div>
+                    <div class="detail-group__thumbs">
+                      <div class="thumb-item thumb-item--tablo" [matTooltip]="sel.tablo.originalName || ''">
+                        @if (sel.tablo.thumbUrl) {
+                          <img [src]="sel.tablo.thumbUrl" [alt]="sel.tablo.originalName || 'Tablókép'" loading="lazy" />
+                        } @else {
+                          <div class="thumb-placeholder">
+                            <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+              }
+            }
+          </div>
+        }
       }
     </div>
   } @else {

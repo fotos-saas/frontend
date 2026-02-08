@@ -185,6 +185,20 @@
   grid-template-columns: 2fr 70px 130px 90px 80px 120px;
   padding: 9px 14px;
 
+  &--clickable {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+  }
+
+  &--expanded {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+
   &--stale {
     border-color: #fed7aa;
     background: #fffbf5;
@@ -197,6 +211,18 @@
   font-size: 0.8125rem;
   color: #334155;
   min-width: 0;
+}
+
+.expand-icon {
+  flex-shrink: 0;
+  margin-right: 6px;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+
+  &--open {
+    transform: rotate(90deg);
+    color: #475569;
+  }
 }
 
 .cell-name {
@@ -268,6 +294,128 @@
   lucide-icon {
     margin-right: 3px;
   }
+}
+
+// === DETAIL PANEL (kibontott sor) ===
+
+.detail-panel {
+  padding: 12px 14px 12px 34px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  margin-top: -2px;
+  margin-bottom: 4px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detail-loading {
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-detail {
+  height: 60px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.detail-empty {
+  display: flex;
+  align-items: center;
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  padding: 8px 0;
+
+  lucide-icon {
+    margin-right: 8px;
+  }
+}
+
+.detail-group {
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+
+    lucide-icon {
+      margin-right: 6px;
+      color: #64748b;
+    }
+  }
+
+  &__count {
+    margin-left: 6px;
+    font-weight: 400;
+    color: #94a3b8;
+  }
+
+  &__thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -3px;
+  }
+}
+
+.thumb-item {
+  width: 56px;
+  height: 56px;
+  margin: 3px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    z-index: 1;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &--tablo {
+    width: 72px;
+    height: 72px;
+    border-color: #3b82f6;
+    border-width: 2px;
+  }
+}
+
+.thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: #94a3b8;
 }
 
 // === LOADING ===
@@ -367,6 +515,20 @@
 
   .search-box {
     min-width: 120px;
+  }
+
+  .detail-panel {
+    padding-left: 14px;
+  }
+
+  .thumb-item {
+    width: 48px;
+    height: 48px;
+  }
+
+  .thumb-item--tablo {
+    width: 64px;
+    height: 64px;
   }
 }
 

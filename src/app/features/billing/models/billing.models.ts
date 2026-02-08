@@ -33,6 +33,13 @@ export const STATUS_LABELS: Record<BillingChargeStatus, string> = {
   refunded: 'Visszatérítve',
 };
 
+export const STATUS_COLORS: Record<BillingChargeStatus, string> = {
+  pending: '#f59e0b',
+  paid: '#22c55e',
+  cancelled: '#94a3b8',
+  refunded: '#8b5cf6',
+};
+
 export const SERVICE_TYPE_ICONS: Record<BillingServiceType, string> = {
   photo_change: 'image',
   extra_retouch: 'sparkles',

@@ -6,7 +6,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { PartnerBillingService, PartnerCharge } from '../../services/partner-billing.service';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { CreateChargeDialogComponent } from './create-charge-dialog.component';
-import { STATUS_LABELS } from '../../../billing/models/billing.models';
+import { STATUS_LABELS, STATUS_COLORS } from '../../../billing/models/billing.models';
 
 @Component({
   selector: 'app-billing-charges',
@@ -32,13 +32,7 @@ export class BillingChargesComponent implements OnInit {
   ];
 
   readonly STATUS_LABELS: Record<string, string> = STATUS_LABELS;
-
-  readonly STATUS_COLORS: Record<string, string> = {
-    pending: '#f59e0b',
-    paid: '#22c55e',
-    cancelled: '#94a3b8',
-    refunded: '#8b5cf6',
-  };
+  readonly STATUS_COLORS: Record<string, string> = STATUS_COLORS;
 
   ngOnInit(): void {
     this.billingService.loadCharges();

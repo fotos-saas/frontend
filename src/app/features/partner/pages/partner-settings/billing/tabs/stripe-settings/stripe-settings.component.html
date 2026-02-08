@@ -1,0 +1,97 @@
+<div class="stripe-settings">
+  @if (stripeService.loading()) {
+    <div class="loading-state">
+      <div class="skeleton-row skeleton-shimmer"></div>
+      <div class="skeleton-row skeleton-shimmer"></div>
+    </div>
+  } @else {
+    <div class="setting-section">
+      <h3>Stripe API kulcsok</h3>
+      <p class="section-desc">Add meg a Stripe fiókod API kulcsait a vendégek online fizetésének fogadásához.</p>
+
+      <div class="form-group">
+        <label for="pk">Publikus kulcs (pk_...)</label>
+        <input
+          id="pk"
+          type="text"
+          [(ngModel)]="publicKey"
+          class="form-input"
+          [placeholder]="stripeService.settings()?.has_public_key ? '••••••••••• (már megadva)' : 'pk_live_... vagy pk_test_...'"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="sk">Titkos kulcs (sk_...)</label>
+        <input
+          id="sk"
+          type="password"
+          [(ngModel)]="secretKey"
+          class="form-input"
+          [placeholder]="stripeService.settings()?.has_secret_key ? '••••••••••• (már megadva)' : 'sk_live_... vagy sk_test_...'"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="wh">Webhook secret (whsec_...)</label>
+        <input
+          id="wh"
+          type="password"
+          [(ngModel)]="webhookSecret"
+          class="form-input"
+          [placeholder]="stripeService.settings()?.has_webhook_secret ? '••••••••••• (már megadva)' : 'whsec_...'"
+        />
+      </div>
+
+      @if (stripeService.settings(); as settings) {
+        <div class="form-group">
+          <label>Webhook URL (másold be a Stripe dashboardba)</label>
+          <div class="webhook-url">
+            <code>{{ settings.webhook_url }}</code>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="setting-section">
+      <div class="toggle-row">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="stripeEnabled" />
+          Online fizetés engedélyezése
+        </label>
+        <span class="toggle-hint">Ha be van kapcsolva, a vendégek online fizethetnek a terheléseikre.</span>
+      </div>
+    </div>
+
+    <div class="actions-bar">
+      <button class="btn btn-outline" (click)="validateKeys()" [disabled]="stripeService.validating()">
+        <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="16" />
+        {{ stripeService.validating() ? 'Ellenőrzés...' : 'Kulcsok validálása' }}
+      </button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="stripeService.loading()">
+        <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+        Mentés
+      </button>
+    </div>
+
+    @if (validationResult(); as result) {
+      <div class="alert" [class.alert--success]="result.valid" [class.alert--error]="!result.valid">
+        <lucide-icon [name]="result.valid ? ICONS.CHECK_CIRCLE : ICONS.ALERT_CIRCLE" [size]="16" />
+        {{ result.message }}
+      </div>
+    }
+
+    @if (saved()) {
+      <div class="alert alert--success">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+        Stripe beállítások mentve.
+      </div>
+    }
+
+    @if (stripeService.error(); as errorMsg) {
+      <div class="alert alert--error">
+        <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+        {{ errorMsg }}
+      </div>
+    }
+  }
+</div>

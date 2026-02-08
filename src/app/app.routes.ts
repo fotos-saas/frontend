@@ -258,8 +258,19 @@ export const routes: Routes = [
             path: 'billing',
             loadComponent: () => import('./features/partner/pages/partner-settings/billing/billing.component').then(m => m.BillingComponent),
             title: 'Számlázás'
+          },
+          {
+            path: 'services',
+            loadComponent: () => import('./features/partner/pages/partner-settings/services/service-catalog.component').then(m => m.ServiceCatalogComponent),
+            title: 'Szolgáltatások'
           }
         ]
+      },
+      // Terhelés kezelés
+      {
+        path: 'billing-charges',
+        loadComponent: () => import('./features/partner/pages/billing-charges/billing-charges.component').then(m => m.BillingChargesComponent),
+        title: 'Terhelések'
       },
       // Hibajelentések
       {

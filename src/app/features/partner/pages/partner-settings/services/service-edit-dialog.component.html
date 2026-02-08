@@ -1,0 +1,57 @@
+<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="dialog-panel dialog-panel--md" (mousedown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <h2>{{ isEdit ? 'Szolgáltatás szerkesztése' : 'Új szolgáltatás' }}</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="18" />
+      </button>
+    </header>
+
+    <div class="dialog-body">
+      <div class="form-group">
+        <label for="name">Név *</label>
+        <input id="name" type="text" [(ngModel)]="name" placeholder="Pl. Képcsere" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label for="type">Típus</label>
+        <select id="type" [(ngModel)]="serviceType" class="form-input">
+          @for (opt of SERVICE_TYPE_OPTIONS; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Alapár (Ft)</label>
+        <input id="price" type="number" [(ngModel)]="defaultPrice" min="0" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label for="vat">ÁFA (%)</label>
+        <input id="vat" type="number" [(ngModel)]="vatPercentage" min="0" max="100" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label for="desc">Leírás</label>
+        <textarea id="desc" [(ngModel)]="description" rows="3" class="form-input" placeholder="Opcionális leírás..."></textarea>
+      </div>
+
+      @if (isEdit) {
+        <div class="form-group form-group--toggle">
+          <label>
+            <input type="checkbox" [(ngModel)]="isActive" />
+            Aktív
+          </label>
+        </div>
+      }
+    </div>
+
+    <footer class="dialog-footer">
+      <button class="btn btn-cancel" (click)="close.emit()">Mégse</button>
+      <button class="btn btn-save" (click)="save()" [disabled]="!name.trim()">
+        {{ isEdit ? 'Mentés' : 'Létrehozás' }}
+      </button>
+    </footer>
+  </div>
+</div>

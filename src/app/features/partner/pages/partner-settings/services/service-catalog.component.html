@@ -1,0 +1,88 @@
+<div class="service-catalog page-card">
+  <header class="page-header">
+    <div class="header-left">
+      <lucide-icon [name]="ICONS.LIST" [size]="22" />
+      <h1>Szolgáltatás katalógus</h1>
+    </div>
+    <div class="header-actions">
+      @if (catalogService.services().length === 0 && !catalogService.loading()) {
+        <button class="btn btn-outline" (click)="seedDefaults()">
+          <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
+          Alapértelmezettek
+        </button>
+      }
+      <button class="btn btn-primary" (click)="openCreate()">
+        <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        Új szolgáltatás
+      </button>
+    </div>
+  </header>
+  <p class="page-description">
+    Szolgáltatások, amelyekre terhelést hozhatsz létre a diákok felé.
+  </p>
+
+  @if (catalogService.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  }
+
+  @if (!catalogService.loading()) {
+    @if (catalogService.services().length > 0) {
+      <div class="table-header">
+        <span class="th th-name">Név</span>
+        <span class="th th-type">Típus</span>
+        <span class="th th-price">Alapár</span>
+        <span class="th th-status">Állapot</span>
+        <span class="th th-actions">Műveletek</span>
+      </div>
+
+      <div class="row-grid">
+        @for (service of catalogService.services(); track service.id; let i = $index) {
+          <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+            <div class="cell cell-name">
+              <span class="service-name">{{ service.name }}</span>
+              @if (service.description) {
+                <span class="service-desc">{{ service.description }}</span>
+              }
+            </div>
+            <div class="cell cell-type">
+              <span class="type-badge">{{ SERVICE_TYPE_LABELS[service.service_type] }}</span>
+            </div>
+            <div class="cell cell-price">
+              {{ service.default_price | number:'1.0-0' }} {{ service.currency }}
+            </div>
+            <div class="cell cell-status">
+              <span class="status-dot" [class.status-dot--active]="service.is_active"></span>
+              {{ service.is_active ? 'Aktív' : 'Inaktív' }}
+            </div>
+            <div class="cell cell-actions">
+              <button class="action-btn" matTooltip="Szerkesztés" (click)="openEdit(service)">
+                <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+              </button>
+              <button class="action-btn action-btn--danger" matTooltip="Törlés" (click)="deleteService(service)">
+                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <lucide-icon [name]="ICONS.LIST" [size]="48" />
+        <h3>Nincsenek szolgáltatások</h3>
+        <p>Hozz létre szolgáltatásokat, vagy töltsd be az alapértelmezetteket.</p>
+      </div>
+    }
+  }
+</div>
+
+@if (showEditDialog()) {
+  <app-service-edit-dialog
+    [service]="editingService()"
+    (close)="closeDialog()"
+    (saved)="closeDialog()"
+  />
+}

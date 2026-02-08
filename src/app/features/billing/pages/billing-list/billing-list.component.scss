@@ -200,4 +200,45 @@
     flex-direction: row;
     gap: 4px;
   }
+
+  .cell-actions {
+    order: 6;
+    justify-content: flex-start;
+  }
+}
+
+.cell-actions {
+  display: flex;
+  align-items: center;
+  margin: -2px;
+}
+
+.pay-btn, .invoice-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  margin: 2px;
+  transition: all 0.2s ease;
+
+  lucide-icon { margin-right: 4px; }
+}
+
+.pay-btn {
+  background: var(--color-primary, #1e3a5f);
+  color: white;
+
+  &:hover { opacity: 0.9; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.invoice-btn {
+  background: #f1f5f9;
+  color: #475569;
+
+  &:hover { background: #e2e8f0; }
 }

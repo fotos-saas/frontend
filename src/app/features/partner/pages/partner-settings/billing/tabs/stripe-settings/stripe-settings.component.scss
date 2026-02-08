@@ -1,0 +1,140 @@
+.stripe-settings {
+  padding-top: 8px;
+}
+
+.setting-section {
+  margin-bottom: 24px;
+
+  h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 4px;
+  }
+}
+
+.section-desc {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 14px;
+
+  label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 4px;
+  }
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  font-family: monospace;
+
+  &:focus { outline: none; border-color: var(--color-primary, #1e3a5f); }
+}
+
+.webhook-url {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+
+  code {
+    font-size: 0.75rem;
+    color: #475569;
+    word-break: break-all;
+  }
+}
+
+.toggle-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+
+  input[type="checkbox"] { margin-right: 8px; }
+}
+
+.toggle-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 4px;
+  padding-left: 24px;
+}
+
+.actions-bar {
+  display: flex;
+  margin: -4px;
+
+  .btn { margin: 4px; }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  lucide-icon { margin-right: 6px; }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btn-primary {
+  background: var(--color-primary, #1e3a5f);
+  color: white;
+  &:hover { opacity: 0.9; }
+}
+
+.btn-outline {
+  background: white;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  &:hover { background: #f8fafc; }
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 0.8125rem;
+
+  lucide-icon { margin-right: 8px; flex-shrink: 0; }
+
+  &--success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  &--error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

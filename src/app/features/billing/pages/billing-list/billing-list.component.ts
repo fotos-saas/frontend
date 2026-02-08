@@ -34,8 +34,17 @@ export class BillingListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.billingService.handlePaymentReturn();
     this.billingService.loadCharges();
     this.billingService.loadSummary();
+  }
+
+  startPayment(chargeId: number): void {
+    this.billingService.startPayment(chargeId);
+  }
+
+  downloadInvoice(url: string): void {
+    this.billingService.downloadInvoice(url);
   }
 
   setFilter(value: BillingChargeStatus | 'all'): void {

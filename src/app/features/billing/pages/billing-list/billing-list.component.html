@@ -41,6 +41,7 @@
         <span class="th th-desc">Leírás</span>
         <span class="th th-amount">Összeg</span>
         <span class="th th-status">Státusz</span>
+        <span class="th th-actions">Művelet</span>
         <span class="th th-date">Dátum</span>
       </div>
 
@@ -70,8 +71,23 @@
               <app-billing-status-badge [status]="charge.status" />
             </div>
 
-            <!-- TODO: "Fizetés" gomb pending terheléseknél → Stripe Checkout redirect -->
-            <!-- TODO: "Számla" gomb paid terheléseknél → invoice PDF letöltés -->
+            <div class="cell cell-actions">
+              @if (charge.status === 'pending') {
+                <button
+                  class="pay-btn"
+                  (click)="startPayment(charge.id)"
+                  [disabled]="billingService.paymentLoading()">
+                  <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="14" />
+                  {{ billingService.paymentLoading() ? 'Betöltés...' : 'Fizetés' }}
+                </button>
+              }
+              @if (charge.status === 'paid' && charge.invoiceUrl) {
+                <button class="invoice-btn" (click)="downloadInvoice(charge.invoiceUrl!)">
+                  <lucide-icon [name]="ICONS.RECEIPT" [size]="14" />
+                  Számla
+                </button>
+              }
+            </div>
 
             <div class="cell cell-date">
               @if (charge.paidAt) {

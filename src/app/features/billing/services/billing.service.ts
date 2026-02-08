@@ -58,9 +58,41 @@ export class BillingService {
     return all.filter(c => c.status === filter);
   });
 
-  // TODO: startPayment(chargeId) - Stripe Checkout session indítás, redirect a Stripe fizetési oldalra
-  // TODO: Stripe visszatérés kezelés (success/cancel URL → charges újratöltés)
-  // TODO: Számla letöltés (invoiceUrl megnyitása új ablakban)
+  readonly paymentLoading = signal(false);
+
+  startPayment(chargeId: number): void {
+    this.paymentLoading.set(true);
+
+    this.http.post<{ success: boolean; data: { checkout_url: string } }>(
+      `${this.apiUrl}/${chargeId}/checkout`, {}
+    ).subscribe({
+      next: (res) => {
+        this.paymentLoading.set(false);
+        window.location.href = res.data.checkout_url;
+      },
+      error: () => {
+        this.paymentLoading.set(false);
+        this.error.set('Nem sikerült elindítani a fizetést.');
+      },
+    });
+  }
+
+  downloadInvoice(invoiceUrl: string): void {
+    window.open(invoiceUrl, '_blank');
+  }
+
+  handlePaymentReturn(): void {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      this.loadCharges();
+      this.loadSummary();
+      // URL-ből eltávolítjuk a payment paramot
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment');
+      url.searchParams.delete('charge_id');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }
 
   loadCharges(): void {
     this.loading.set(true);

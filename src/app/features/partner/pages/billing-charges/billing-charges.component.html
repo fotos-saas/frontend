@@ -1,0 +1,134 @@
+<div class="billing-charges page-card">
+  <header class="page-header">
+    <div class="header-left">
+      <lucide-icon [name]="ICONS.BANKNOTE" [size]="22" />
+      <h1>Terhelések</h1>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+      Új terhelés
+    </button>
+  </header>
+  <p class="page-description">Terhelések kezelése a diákok felé.</p>
+
+  <!-- Összesítés -->
+  @if (billingService.summary(); as summary) {
+    <div class="summary-row">
+      <div class="summary-card">
+        <span class="summary-label">Összes</span>
+        <span class="summary-value">{{ summary.charges_count }} db</span>
+        <span class="summary-amount">{{ summary.total_amount | number:'1.0-0' }} Ft</span>
+      </div>
+      <div class="summary-card summary-card--pending">
+        <span class="summary-label">Függőben</span>
+        <span class="summary-value">{{ summary.pending_count }} db</span>
+        <span class="summary-amount">{{ summary.pending_amount | number:'1.0-0' }} Ft</span>
+      </div>
+      <div class="summary-card summary-card--paid">
+        <span class="summary-label">Kifizetve</span>
+        <span class="summary-value">{{ summary.paid_count }} db</span>
+        <span class="summary-amount">{{ summary.paid_amount | number:'1.0-0' }} Ft</span>
+      </div>
+    </div>
+  }
+
+  <!-- Szűrők -->
+  <div class="filter-bar">
+    @for (filter of filters; track filter.value) {
+      <button
+        class="filter-btn"
+        [class.filter-btn--active]="billingService.activeFilter() === filter.value"
+        (click)="setFilter(filter.value)">
+        {{ filter.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (billingService.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  }
+
+  @if (!billingService.loading()) {
+    @if (billingService.filteredCharges().length > 0) {
+      <div class="table-header">
+        <span class="th th-person">Diák</span>
+        <span class="th th-service">Szolgáltatás</span>
+        <span class="th th-amount">Összeg</span>
+        <span class="th th-status">Státusz</span>
+        <span class="th th-date">Dátum</span>
+        <span class="th th-actions">Műveletek</span>
+      </div>
+
+      <div class="row-grid">
+        @for (charge of billingService.filteredCharges(); track charge.id; let i = $index) {
+          <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+            <div class="cell cell-person">
+              <span class="person-name">{{ charge.person_name ?? 'Ismeretlen' }}</span>
+              <span class="charge-number">{{ charge.charge_number }}</span>
+            </div>
+            <div class="cell cell-service">
+              <span>{{ charge.service_name ?? charge.service_label }}</span>
+              @if (charge.description) {
+                <span class="service-desc">{{ charge.description }}</span>
+              }
+            </div>
+            <div class="cell cell-amount">
+              <span class="amount" [class.amount--pending]="charge.status === 'pending'">
+                {{ charge.amount_huf | number:'1.0-0' }} Ft
+              </span>
+            </div>
+            <div class="cell cell-status">
+              <span class="status-badge" [style.background]="STATUS_COLORS[charge.status] + '1a'" [style.color]="STATUS_COLORS[charge.status]">
+                {{ STATUS_LABELS[charge.status] }}
+              </span>
+            </div>
+            <div class="cell cell-date">
+              @if (charge.paid_at) {
+                <span>{{ charge.paid_at | date:'yyyy.MM.dd.' }}</span>
+              } @else {
+                <span>{{ charge.created_at | date:'yyyy.MM.dd.' }}</span>
+              }
+            </div>
+            <div class="cell cell-actions">
+              @if (charge.status === 'pending') {
+                <button class="action-btn action-btn--danger" matTooltip="Törlés" (click)="cancelCharge(charge)">
+                  <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" />
+                </button>
+              }
+              @if (charge.invoice_url) {
+                <a class="action-btn" matTooltip="Számla" [href]="charge.invoice_url" target="_blank">
+                  <lucide-icon [name]="ICONS.RECEIPT" [size]="16" />
+                </a>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <lucide-icon [name]="ICONS.BANKNOTE" [size]="48" />
+        <h3>Nincsenek terhelések</h3>
+        <p>Hozz létre terheléseket a diákok felé.</p>
+      </div>
+    }
+  }
+
+  @if (billingService.error(); as errorMsg) {
+    <div class="error-state">
+      <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="20" />
+      <span>{{ errorMsg }}</span>
+    </div>
+  }
+</div>
+
+@if (showCreateDialog()) {
+  <app-create-charge-dialog
+    (close)="closeCreate()"
+    (created)="onChargeCreated()"
+  />
+}

@@ -3,8 +3,9 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { InvoiceSettingsComponent } from './tabs/invoice-settings/invoice-settings.component';
 import { InvoiceListComponent } from './tabs/invoice-list/invoice-list.component';
+import { StripeSettingsComponent } from './tabs/stripe-settings/stripe-settings.component';
 
-export type BillingTab = 'settings' | 'invoices';
+export type BillingTab = 'settings' | 'invoices' | 'stripe';
 
 interface BillingTabDef {
   id: BillingTab;
@@ -15,12 +16,13 @@ interface BillingTabDef {
 const BILLING_TABS: BillingTabDef[] = [
   { id: 'settings', label: 'Beállítások', icon: ICONS.SETTINGS },
   { id: 'invoices', label: 'Számlák', icon: ICONS.RECEIPT },
+  { id: 'stripe', label: 'Fizetés (Stripe)', icon: ICONS.CREDIT_CARD },
 ];
 
 @Component({
   selector: 'app-billing',
   standalone: true,
-  imports: [LucideAngularModule, InvoiceSettingsComponent, InvoiceListComponent],
+  imports: [LucideAngularModule, InvoiceSettingsComponent, InvoiceListComponent, StripeSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './billing.component.html',
   styleUrl: './billing.component.scss',

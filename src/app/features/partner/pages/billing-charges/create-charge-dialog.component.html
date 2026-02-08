@@ -1,0 +1,79 @@
+<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="dialog-panel dialog-panel--lg" (mousedown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <h2>Új terhelés</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="18" />
+      </button>
+    </header>
+
+    <div class="dialog-body">
+      <!-- Projekt -->
+      <div class="form-group">
+        <label for="project">Projekt *</label>
+        <select id="project" [(ngModel)]="selectedProjectId" (ngModelChange)="onProjectChange()" class="form-input">
+          <option [ngValue]="null">Válassz projektet...</option>
+          @for (p of projects(); track p.id) {
+            <option [ngValue]="p.id">{{ p.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Személy -->
+      <div class="form-group">
+        <label for="person">Diák *</label>
+        <select id="person" [(ngModel)]="selectedPersonId" class="form-input" [disabled]="!selectedProjectId">
+          <option [ngValue]="null">Válassz diákot...</option>
+          @for (p of persons(); track p.id) {
+            <option [ngValue]="p.id">{{ p.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Szolgáltatás -->
+      <div class="form-group">
+        <label for="service">Szolgáltatás</label>
+        <select id="service" [(ngModel)]="selectedServiceId" (ngModelChange)="onServiceChange()" class="form-input">
+          <option [ngValue]="null">Egyedi (nincs katalógusból)</option>
+          @for (s of catalogService.services(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }} — {{ s.default_price | number:'1.0-0' }} Ft</option>
+          }
+        </select>
+      </div>
+
+      <!-- Összeg -->
+      <div class="form-group">
+        <label for="amount">Összeg (Ft) *</label>
+        <input id="amount" type="number" [(ngModel)]="amountHuf" min="1" class="form-input" />
+      </div>
+
+      <!-- Leírás -->
+      <div class="form-group">
+        <label for="desc">Leírás</label>
+        <input id="desc" type="text" [(ngModel)]="description" class="form-input" placeholder="Mi a terhelés oka?" />
+      </div>
+
+      <!-- Határidő -->
+      <div class="form-group">
+        <label for="due">Fizetési határidő</label>
+        <input id="due" type="date" [(ngModel)]="dueDate" class="form-input" />
+      </div>
+
+      <!-- Megjegyzés -->
+      <div class="form-group">
+        <label for="notes">Megjegyzés (belső)</label>
+        <textarea id="notes" [(ngModel)]="notes" rows="2" class="form-input" placeholder="Csak te látod..."></textarea>
+      </div>
+    </div>
+
+    <footer class="dialog-footer">
+      <button class="btn btn-cancel" (click)="close.emit()">Mégse</button>
+      <button
+        class="btn btn-save"
+        (click)="save()"
+        [disabled]="!selectedProjectId || !selectedPersonId || amountHuf <= 0 || saving()">
+        {{ saving() ? 'Mentés...' : 'Terhelés létrehozása' }}
+      </button>
+    </footer>
+  </div>
+</div>

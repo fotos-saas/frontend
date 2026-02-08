@@ -1,0 +1,129 @@
+@use '../../../../../shared/styles/list-page' as list;
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+
+    lucide-icon { margin-right: 10px; color: var(--color-primary, #1e3a5f); }
+    h1 { font-size: 1.375rem; font-weight: 700; color: #1e293b; margin: 0; }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    margin: -4px;
+
+    .btn { margin: 4px; }
+  }
+}
+
+.page-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  lucide-icon { margin-right: 6px; }
+}
+
+.btn-primary {
+  background: var(--color-primary, #1e3a5f);
+  color: white;
+  &:hover { opacity: 0.9; }
+}
+
+.btn-outline {
+  background: white;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  &:hover { background: #f8fafc; }
+}
+
+.cell-name {
+  display: flex;
+  flex-direction: column;
+
+  .service-name { font-weight: 500; color: #1e293b; }
+  .service-desc { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.cell-status {
+  display: flex;
+  align-items: center;
+  font-size: 0.8125rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  margin-right: 6px;
+
+  &--active { background: #22c55e; }
+}
+
+.action-btn--danger:hover {
+  color: #ef4444 !important;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #94a3b8;
+
+  h3 { color: #475569; margin: 16px 0 8px; font-size: 1rem; }
+  p { font-size: 0.875rem; }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .header-actions { margin-top: 12px; }
+  }
+
+  .table-header { display: none; }
+
+  .list-row {
+    flex-direction: column;
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

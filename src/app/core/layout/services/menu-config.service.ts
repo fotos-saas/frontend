@@ -52,6 +52,7 @@ export class MenuConfigService {
       selectedTemplatesCount: project.selectedTemplatesCount,
       activePollsCount: project.activePollsCount,
       hasPhotoSelection: project.hasPhotoSelection,
+      billingEnabled: project.billingEnabled,
     };
   });
 
@@ -234,6 +235,11 @@ export class MenuConfigService {
     // Ha van children, csak akkor látható, ha van legalább 1 látható gyermek
     if (item.children !== undefined) {
       return item.children !== null && item.children.length > 0;
+    }
+
+    // Fizetéseim csak akkor látható, ha billing aktív
+    if (item.id === 'billing') {
+      return !!project?.billingEnabled;
     }
 
     // Egyszerű menüelemek mindig láthatók

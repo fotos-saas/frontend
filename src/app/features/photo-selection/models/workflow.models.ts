@@ -124,6 +124,7 @@ export interface ReviewGroups {
 
 /** Modification info - ingyenes módosítási időablak */
 export interface ModificationInfo {
+  billing_enabled: boolean;
   free_edit_window_hours: number;
   finalized_at: string | null;
   is_within_free_window: boolean;

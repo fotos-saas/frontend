@@ -120,6 +120,8 @@ export interface TabloProject {
   expectedClassSize?: number | null;
   /** Képválasztás elérhető-e (tablo workflow enabled) */
   hasPhotoSelection?: boolean;
+  /** Fizetős módosítás aktív-e (partner szinten) */
+  billingEnabled?: boolean;
   /** Work session ID a képválasztáshoz */
   workSessionId?: number | null;
   /** Galéria ID (ha nincs work session, de van galéria) */

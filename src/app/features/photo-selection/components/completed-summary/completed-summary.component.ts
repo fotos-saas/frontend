@@ -26,6 +26,10 @@ export class CompletedSummaryComponent {
   readonly ICONS = ICONS;
   readonly activeTab = signal<TabKey>('tablo');
 
+  readonly billingEnabled = computed(() => {
+    return this.modificationInfo()?.billing_enabled ?? false;
+  });
+
   readonly isWithinFreeWindow = computed(() => {
     return this.modificationInfo()?.is_within_free_window ?? false;
   });

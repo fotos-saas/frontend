@@ -14,6 +14,8 @@ export interface ProjectModeInfo {
   activePollsCount?: number;
   /** Képválasztás elérhető-e (tablo workflow enabled) */
   hasPhotoSelection?: boolean;
+  /** Fizetős módosítás aktív-e */
+  billingEnabled?: boolean;
 }
 
 /**

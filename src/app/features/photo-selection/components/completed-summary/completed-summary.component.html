@@ -10,26 +10,28 @@
         A füleken visszanézheted, hogy mit választottál.
       </p>
 
-      @if (isWithinFreeWindow()) {
-        <div class="completed-summary__time-banner">
-          <div class="completed-summary__time-icon">
-            <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
+      @if (billingEnabled()) {
+        @if (isWithinFreeWindow()) {
+          <div class="completed-summary__time-banner">
+            <div class="completed-summary__time-icon">
+              <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
+            </div>
+            <div class="completed-summary__time-content">
+              <span class="completed-summary__time-label">Ingyenes módosítás</span>
+              <span class="completed-summary__time-value">{{ remainingTimeFormatted() }}</span>
+            </div>
           </div>
-          <div class="completed-summary__time-content">
-            <span class="completed-summary__time-label">Ingyenes módosítás</span>
-            <span class="completed-summary__time-value">{{ remainingTimeFormatted() }}</span>
+        } @else {
+          <div class="completed-summary__time-banner completed-summary__time-banner--expired">
+            <div class="completed-summary__time-icon">
+              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="18" />
+            </div>
+            <div class="completed-summary__time-content">
+              <span class="completed-summary__time-label">Az ingyenes módosítási idő lejárt</span>
+              <span class="completed-summary__time-sublabel">A módosítás díjköteles.</span>
+            </div>
           </div>
-        </div>
-      } @else {
-        <div class="completed-summary__time-banner completed-summary__time-banner--expired">
-          <div class="completed-summary__time-icon">
-            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="18" />
-          </div>
-          <div class="completed-summary__time-content">
-            <span class="completed-summary__time-label">Az ingyenes módosítási idő lejárt</span>
-            <span class="completed-summary__time-sublabel">A módosítás díjköteles.</span>
-          </div>
-        </div>
+        }
       }
 
       <button class="completed-summary__modify-btn" (click)="modifyClick.emit()">

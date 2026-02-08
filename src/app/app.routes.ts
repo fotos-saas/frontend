@@ -250,6 +250,17 @@ export const routes: Routes = [
           }
         ]
       },
+      // Beállítások
+      {
+        path: 'settings',
+        children: [
+          {
+            path: 'billing',
+            loadComponent: () => import('./features/partner/pages/partner-settings/billing/billing.component').then(m => m.BillingComponent),
+            title: 'Számlázás'
+          }
+        ]
+      },
       // Hibajelentések
       {
         path: 'bugs',

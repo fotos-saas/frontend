@@ -138,6 +138,14 @@ export class PartnerShellComponent implements OnInit {
           { id: 'subscription-account', route: `${base}/subscription/account`, label: 'Fiók törlése' },
         ]
       },
+      {
+        id: 'partner-settings',
+        label: 'Beállítások',
+        icon: 'settings',
+        children: [
+          { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás' },
+        ]
+      },
     ];
 
     if (this.isOwner()) {
@@ -146,7 +154,7 @@ export class PartnerShellComponent implements OnInit {
 
     // Csapattagok: nincs Csapatom, nincs Testreszabás, nincs Előfizetésem (de van Fiók törlése + Beállítások)
     return allItems
-      .filter(item => !['team', 'customization', 'subscription'].includes(item.id))
+      .filter(item => !['team', 'customization', 'subscription', 'partner-settings'].includes(item.id))
       .concat([
         { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások', icon: 'settings' },
         { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },
@@ -157,7 +165,7 @@ export class PartnerShellComponent implements OnInit {
   bugReportLink = computed(() => `${this.baseUrl()}/bugs`);
 
   // Kibontott szekciók
-  expandedSections = signal<Set<string>>(new Set(['projects', 'subscription', 'customization']));
+  expandedSections = signal<Set<string>>(new Set(['projects', 'subscription', 'customization', 'partner-settings']));
 
   toggleSection(sectionId: string): void {
     const current = this.expandedSections();

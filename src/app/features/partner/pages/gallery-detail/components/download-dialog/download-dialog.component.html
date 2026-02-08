@@ -1,0 +1,88 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+>
+  <div class="dialog-panel dialog-panel--md">
+    <!-- Header -->
+    <div class="dialog-header">
+      <h3>ZIP letöltés beállítások</h3>
+      <button class="dialog-close" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="18" />
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog-body">
+      <!-- ZIP tartalom -->
+      <div class="form-group">
+        <label class="form-label">Tartalom</label>
+        <select
+          class="form-select"
+          [value]="zipContent()"
+          (change)="onZipContentChange($event)"
+        >
+          <option value="all">Összes kép (saját + retusált + tablókép)</option>
+          <option value="retouch_and_tablo">Retusált + Tablókép</option>
+          <option value="retouch_only">Csak retusált képek</option>
+          <option value="tablo_only">Csak tablókép</option>
+        </select>
+      </div>
+
+      <!-- Fájlnév stratégia -->
+      <div class="form-group">
+        <label class="form-label">Fájlnevek</label>
+        <div class="radio-group">
+          <label class="radio-option" (click)="onFileNamingChange('original')">
+            <input
+              type="radio"
+              name="fileNaming"
+              [checked]="fileNaming() === 'original'"
+            />
+            <div class="radio-content">
+              <span class="radio-title">Eredeti fájlnév</span>
+              <span class="radio-desc">pl. BG7A5017.JPG</span>
+            </div>
+          </label>
+          <label class="radio-option" (click)="onFileNamingChange('student_name')">
+            <input
+              type="radio"
+              name="fileNaming"
+              [checked]="fileNaming() === 'student_name'"
+            />
+            <div class="radio-content">
+              <span class="radio-title">Diák neve</span>
+              <span class="radio-desc">pl. Kiss Anna_retusalt_01.jpg</span>
+            </div>
+          </label>
+          <label class="radio-option" (click)="onFileNamingChange('student_name_iptc')">
+            <input
+              type="radio"
+              name="fileNaming"
+              [checked]="fileNaming() === 'student_name_iptc'"
+            />
+            <div class="radio-content">
+              <span class="radio-title">IPTC beágyazás</span>
+              <span class="radio-desc">Eredeti fájlnév, IPTC-ben a diák neve</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Excel mellékelés -->
+      <label class="checkbox-option" (click)="onExcelToggle()">
+        <input type="checkbox" [checked]="includeExcel()" />
+        <span>Excel fájl mellékelése a ZIP-ben</span>
+      </label>
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog-footer">
+      <button class="btn-cancel" (click)="close.emit()">Mégsem</button>
+      <button class="btn-primary" (click)="onSubmit()">
+        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+        Letöltés
+      </button>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PartnerGalleryService } from '../../../../services/partner-gallery.service';
 import { ToastService } from '../../../../../../core/services/toast.service';
 import { GalleryMonitoringState } from './gallery-monitoring.state';
+import { DownloadOptions } from '../download-dialog/download-dialog.component';
 
 /**
  * GalleryMonitoringActionsService
@@ -30,5 +31,62 @@ export class GalleryMonitoringActionsService {
           this.toast.error('Hiba', 'A monitoring adatok nem tölthetők be');
         },
       });
+  }
+
+  exportExcel(state: GalleryMonitoringState, projectId: number): void {
+    state.exportingExcel.set(true);
+
+    const filter = state.filterStatus();
+
+    this.galleryService.exportMonitoringExcel(projectId, filter)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.saveFile(blob, `monitoring-${projectId}-${this.todayStr()}.xlsx`);
+          state.exportingExcel.set(false);
+          this.toast.success('Siker', 'Excel exportálva');
+        },
+        error: () => {
+          state.exportingExcel.set(false);
+          this.toast.error('Hiba', 'Az Excel export nem sikerült');
+        },
+      });
+  }
+
+  downloadZip(state: GalleryMonitoringState, projectId: number, options: DownloadOptions): void {
+    state.exportingZip.set(true);
+    state.showDownloadDialog.set(false);
+
+    this.galleryService.downloadMonitoringZip(projectId, {
+      zipContent: options.zipContent,
+      fileNaming: options.fileNaming,
+      includeExcel: options.includeExcel,
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.saveFile(blob, `gallery-${projectId}-${this.todayStr()}.zip`);
+          state.exportingZip.set(false);
+          this.toast.success('Siker', 'ZIP letöltve');
+        },
+        error: () => {
+          state.exportingZip.set(false);
+          this.toast.error('Hiba', 'A ZIP letöltés nem sikerült');
+        },
+      });
+  }
+
+  /** Blob mentése fájlként */
+  private saveFile(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private todayStr(): string {
+    return new Date().toISOString().slice(0, 10);
   }
 }

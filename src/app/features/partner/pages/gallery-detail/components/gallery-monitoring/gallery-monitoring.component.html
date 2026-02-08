@@ -76,17 +76,27 @@
       <button
         class="action-btn-outlined"
         matTooltip="Excel export"
-        [disabled]="true"
+        [disabled]="state.exportingExcel() || state.persons().length === 0"
+        (click)="onExportExcel()"
       >
-        <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
+        @if (state.exportingExcel()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        } @else {
+          <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
+        }
         Excel
       </button>
       <button
         class="action-btn-outlined"
         matTooltip="ZIP letöltés"
-        [disabled]="true"
+        [disabled]="state.exportingZip() || state.persons().length === 0"
+        (click)="onOpenDownloadDialog()"
       >
-        <lucide-icon [name]="ICONS.ARCHIVE" [size]="16" />
+        @if (state.exportingZip()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        } @else {
+          <lucide-icon [name]="ICONS.ARCHIVE" [size]="16" />
+        }
         ZIP
       </button>
     </div>
@@ -170,4 +180,12 @@
       <p>A keresési feltételeknek egyetlen személy sem felel meg.</p>
     </div>
   }
+}
+
+<!-- Download dialog (page-card-on kívül!) -->
+@if (state.showDownloadDialog()) {
+  <app-download-dialog
+    (download)="onDownloadZip($event)"
+    (close)="onCloseDownloadDialog()"
+  />
 }

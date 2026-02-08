@@ -234,6 +234,15 @@
   100% { background-position: -200% 0; }
 }
 
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 // === RESPONSIVE ===
 
 @media (max-width: 768px) {

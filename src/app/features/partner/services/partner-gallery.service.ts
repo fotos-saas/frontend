@@ -203,6 +203,36 @@ export class PartnerGalleryService {
     );
   }
 
+  /**
+   * Monitoring Excel export (blob letöltés)
+   */
+  exportMonitoringExcel(projectId: number, filter: string): Observable<Blob> {
+    return this.http.post(
+      `${this.baseUrl}/projects/${projectId}/gallery/monitoring/export-excel`,
+      { filter },
+      { responseType: 'blob' },
+    );
+  }
+
+  /**
+   * Monitoring ZIP letöltés (blob letöltés)
+   */
+  downloadMonitoringZip(projectId: number, options: {
+    zipContent: string;
+    fileNaming: string;
+    includeExcel: boolean;
+  }): Observable<Blob> {
+    return this.http.post(
+      `${this.baseUrl}/projects/${projectId}/gallery/monitoring/download-zip`,
+      {
+        zip_content: options.zipContent,
+        file_naming: options.fileNaming,
+        include_excel: options.includeExcel,
+      },
+      { responseType: 'blob' },
+    );
+  }
+
   // ============================================
   // PRIVATE HELPERS
   // ============================================

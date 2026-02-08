@@ -15,6 +15,9 @@ export class GalleryMonitoringState {
   readonly summary = signal<MonitoringSummary | null>(null);
   readonly searchQuery = signal<string>('');
   readonly filterStatus = signal<MonitoringFilter>('all');
+  readonly exportingExcel = signal<boolean>(false);
+  readonly exportingZip = signal<boolean>(false);
+  readonly showDownloadDialog = signal<boolean>(false);
 
   /** Szűrt és ABC-rendezett személyek */
   readonly filteredPersons = computed<MonitoringPerson[]>(() => {

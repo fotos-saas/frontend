@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,6 +20,7 @@ import { WEBSHOP_STATUS_LABELS, NEXT_STATUS, NEXT_STATUS_LABELS } from '../../..
 })
 export class WebshopOrderDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   private webshopService = inject(PartnerWebshopService);
   readonly ICONS = ICONS;
@@ -39,7 +41,7 @@ export class WebshopOrderDetailComponent implements OnInit {
 
   private loadOrder(id: number): void {
     this.loading.set(true);
-    this.webshopService.getOrder(id).subscribe({
+    this.webshopService.getOrder(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.order.set(res.order);
         this.trackingNumber.set(res.order.tracking_number ?? '');
@@ -62,7 +64,7 @@ export class WebshopOrderDetailComponent implements OnInit {
       data['tracking_number'] = this.trackingNumber();
     }
 
-    this.webshopService.updateOrderStatus(o.id, nextStatus, data).subscribe({
+    this.webshopService.updateOrderStatus(o.id, nextStatus, data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loadOrder(o.id);
         this.updating.set(false);
@@ -83,7 +85,7 @@ export class WebshopOrderDetailComponent implements OnInit {
     if (!o) return;
 
     this.updating.set(true);
-    this.webshopService.updateOrderStatus(o.id, 'cancelled').subscribe({
+    this.webshopService.updateOrderStatus(o.id, 'cancelled').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loadOrder(o.id);
         this.updating.set(false);

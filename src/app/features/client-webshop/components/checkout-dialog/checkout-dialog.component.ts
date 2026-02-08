@@ -1,4 +1,5 @@
-import { Component, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, output, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -17,6 +18,7 @@ import { cartItems, cartTotal } from '../../client-webshop.state';
 })
 export class CheckoutDialogComponent {
   private webshopService = inject(ClientWebshopService);
+  private destroyRef = inject(DestroyRef);
   readonly ICONS = ICONS;
 
   config = input.required<ShopConfig>();
@@ -91,7 +93,7 @@ export class CheckoutDialogComponent {
       })),
     };
 
-    this.webshopService.createCheckout(this.token(), data).subscribe({
+    this.webshopService.createCheckout(this.token(), data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.checkoutRedirect.emit(res.checkout_url);
       },

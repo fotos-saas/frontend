@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -16,6 +17,7 @@ import { PartnerWebshopService, ShopSettings, PaperSize, PaperType } from '../..
 })
 export class WebshopSettingsComponent implements OnInit {
   private webshopService = inject(PartnerWebshopService);
+  private destroyRef = inject(DestroyRef);
   readonly ICONS = ICONS;
 
   settings = signal<ShopSettings | null>(null);
@@ -45,7 +47,7 @@ export class WebshopSettingsComponent implements OnInit {
 
   private loadData(): void {
     this.loading.set(true);
-    this.webshopService.getSettings().subscribe({
+    this.webshopService.getSettings().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.settings.set(res.settings);
         if (res.settings) {
@@ -60,7 +62,7 @@ export class WebshopSettingsComponent implements OnInit {
 
   initializeWebshop(): void {
     this.saving.set(true);
-    this.webshopService.initializeWebshop().subscribe({
+    this.webshopService.initializeWebshop().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.settings.set(res.settings);
         this.loadPaperSizes();
@@ -76,7 +78,7 @@ export class WebshopSettingsComponent implements OnInit {
     if (!s) return;
 
     this.saving.set(true);
-    this.webshopService.updateSettings(s).subscribe({
+    this.webshopService.updateSettings(s).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.settings.set(res.settings);
         this.saving.set(false);
@@ -93,7 +95,7 @@ export class WebshopSettingsComponent implements OnInit {
 
   // Paper Sizes
   private loadPaperSizes(): void {
-    this.webshopService.getPaperSizes().subscribe({
+    this.webshopService.getPaperSizes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => this.paperSizes.set(res.paper_sizes),
     });
   }
@@ -102,7 +104,7 @@ export class WebshopSettingsComponent implements OnInit {
     const n = this.newSize();
     if (!n.name || !n.width_cm || !n.height_cm) return;
 
-    this.webshopService.createPaperSize(n).subscribe({
+    this.webshopService.createPaperSize(n).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loadPaperSizes();
         this.showNewSizeForm.set(false);
@@ -112,7 +114,7 @@ export class WebshopSettingsComponent implements OnInit {
   }
 
   updatePaperSize(size: PaperSize): void {
-    this.webshopService.updatePaperSize(size.id, size).subscribe({
+    this.webshopService.updatePaperSize(size.id, size).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loadPaperSizes();
         this.editingSizeId.set(null);
@@ -123,7 +125,7 @@ export class WebshopSettingsComponent implements OnInit {
   deletePaperSize(size: PaperSize): void {
     this.deleteMessage.set(`Biztosan törölni szeretnéd a(z) "${size.name}" papírméretet?`);
     this.deleteAction.set(() => {
-      this.webshopService.deletePaperSize(size.id).subscribe({
+      this.webshopService.deletePaperSize(size.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => this.loadPaperSizes(),
       });
     });
@@ -132,7 +134,7 @@ export class WebshopSettingsComponent implements OnInit {
 
   // Paper Types
   private loadPaperTypes(): void {
-    this.webshopService.getPaperTypes().subscribe({
+    this.webshopService.getPaperTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => this.paperTypes.set(res.paper_types),
     });
   }
@@ -141,7 +143,7 @@ export class WebshopSettingsComponent implements OnInit {
     const n = this.newType();
     if (!n.name) return;
 
-    this.webshopService.createPaperType(n).subscribe({
+    this.webshopService.createPaperType(n).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loadPaperTypes();
         this.showNewTypeForm.set(false);
@@ -151,7 +153,7 @@ export class WebshopSettingsComponent implements OnInit {
   }
 
   updatePaperType(type: PaperType): void {
-    this.webshopService.updatePaperType(type.id, type).subscribe({
+    this.webshopService.updatePaperType(type.id, type).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loadPaperTypes();
         this.editingTypeId.set(null);
@@ -162,7 +164,7 @@ export class WebshopSettingsComponent implements OnInit {
   deletePaperType(type: PaperType): void {
     this.deleteMessage.set(`Biztosan törölni szeretnéd a(z) "${type.name}" papírtípust?`);
     this.deleteAction.set(() => {
-      this.webshopService.deletePaperType(type.id).subscribe({
+      this.webshopService.deletePaperType(type.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => this.loadPaperTypes(),
       });
     });

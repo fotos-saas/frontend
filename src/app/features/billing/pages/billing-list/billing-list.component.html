@@ -76,9 +76,9 @@
                 <button
                   class="pay-btn"
                   (click)="startPayment(charge.id)"
-                  [disabled]="billingService.paymentLoading()">
+                  [disabled]="billingService.paymentLoadingId() === charge.id">
                   <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="14" />
-                  {{ billingService.paymentLoading() ? 'Betöltés...' : 'Fizetés' }}
+                  {{ billingService.paymentLoadingId() === charge.id ? 'Betöltés...' : 'Fizetés' }}
                 </button>
               }
               @if (charge.status === 'paid' && charge.invoiceUrl) {

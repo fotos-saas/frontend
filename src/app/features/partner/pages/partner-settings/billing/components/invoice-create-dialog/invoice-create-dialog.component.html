@@ -88,7 +88,7 @@
                 <option value="csomag">csomag</option>
               </select>
               <input type="number" class="number-input item-price" [value]="item.unitPrice" (input)="updateItem(i, 'unitPrice', +$any($event.target).value)" min="0" step="100" placeholder="Egységár" />
-              <span class="item-total">{{ formatAmount(item.quantity * item.unitPrice) }} Ft</span>
+              <span class="item-total">{{ formatAmount(item.quantity * item.unitPrice) }}</span>
               @if (items().length > 1) {
                 <button class="remove-item-btn" (click)="removeItem(i)">
                   <lucide-icon [name]="ICONS.DELETE" [size]="14" />
@@ -103,15 +103,15 @@
       <div class="totals">
         <div class="total-row">
           <span>Nettó:</span>
-          <span class="total-amount">{{ formatAmount(totals().net) }} Ft</span>
+          <span class="total-amount">{{ formatAmount(totals().net) }}</span>
         </div>
         <div class="total-row">
           <span>ÁFA ({{ vatPercentage }}%):</span>
-          <span class="total-amount">{{ formatAmount(totals().vat) }} Ft</span>
+          <span class="total-amount">{{ formatAmount(totals().vat) }}</span>
         </div>
         <div class="total-row total-row--gross">
           <span>Bruttó:</span>
-          <span class="total-amount">{{ formatAmount(totals().gross) }} Ft</span>
+          <span class="total-amount">{{ formatAmount(totals().gross) }}</span>
         </div>
       </div>
 

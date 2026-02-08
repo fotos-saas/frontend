@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +19,7 @@ import { CheckoutDialogComponent } from './components/checkout-dialog/checkout-d
 })
 export class ClientWebshopComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private webshopService = inject(ClientWebshopService);
   readonly ICONS = ICONS;
   readonly Math = Math;
@@ -62,7 +64,7 @@ export class ClientWebshopComponent implements OnInit {
   private loadData(): void {
     this.loading.set(true);
 
-    this.webshopService.getConfig(this.token).subscribe({
+    this.webshopService.getConfig(this.token).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.config.set(res.config);
         this.sourceName.set(res.source_name);
@@ -77,13 +79,13 @@ export class ClientWebshopComponent implements OnInit {
   }
 
   private loadProducts(): void {
-    this.webshopService.getProducts(this.token).subscribe({
+    this.webshopService.getProducts(this.token).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => this.products.set(res.products),
     });
   }
 
   private loadPhotos(): void {
-    this.webshopService.getPhotos(this.token).subscribe({
+    this.webshopService.getPhotos(this.token).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.photos.set(res.photos);
         this.loading.set(false);

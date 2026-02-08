@@ -1,5 +1,8 @@
+import { PartnerServiceType } from '../../partner/models/partner-service.models';
+
 export type BillingChargeStatus = 'pending' | 'paid' | 'cancelled' | 'refunded';
-export type BillingServiceType = 'photo_change' | 'extra_retouch' | 'late_fee' | 'rush_fee' | 'additional_copy' | 'custom';
+
+export type BillingServiceType = PartnerServiceType;
 
 export interface BillingCharge {
   id: number;

@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal, output, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -33,6 +34,7 @@ export class CreateChargeDialogComponent implements OnInit {
   readonly created = output<void>();
 
   private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly billingService = inject(PartnerBillingService);
   readonly catalogService = inject(PartnerServiceCatalogService);
   readonly ICONS = ICONS;
@@ -106,7 +108,7 @@ export class CreateChargeDialogComponent implements OnInit {
   private loadProjects(): void {
     this.http.get<{ data: { projects: ProjectOption[] } }>(
       `${environment.apiUrl}/partner/projects/autocomplete`
-    ).subscribe({
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => this.projects.set(res.data.projects),
     });
   }
@@ -114,7 +116,7 @@ export class CreateChargeDialogComponent implements OnInit {
   private loadPersons(projectId: number): void {
     this.http.get<{ data: { persons: PersonOption[] } }>(
       `${environment.apiUrl}/partner/projects/${projectId}/missing-persons`
-    ).subscribe({
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => this.persons.set(res.data.persons),
     });
   }

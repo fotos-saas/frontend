@@ -3,22 +3,22 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">Összes bevétel</div>
-      <div class="stat-value">{{ formatAmount(stats.total_gross, 'Ft') }}</div>
+      <div class="stat-value">{{ formatPrice(stats.total_gross) }}</div>
       <div class="stat-count">{{ stats.total_count }} számla</div>
     </div>
     <div class="stat-card stat-card--green">
       <div class="stat-label">Fizetve</div>
-      <div class="stat-value">{{ formatAmount(stats.paid_gross, 'Ft') }}</div>
+      <div class="stat-value">{{ formatPrice(stats.paid_gross) }}</div>
       <div class="stat-count">{{ stats.paid_count }} számla</div>
     </div>
     <div class="stat-card stat-card--orange">
       <div class="stat-label">Lejárt</div>
-      <div class="stat-value">{{ formatAmount(stats.overdue_gross, 'Ft') }}</div>
+      <div class="stat-value">{{ formatPrice(stats.overdue_gross) }}</div>
       <div class="stat-count">{{ stats.overdue_count }} számla</div>
     </div>
     <div class="stat-card stat-card--blue">
       <div class="stat-label">Függő</div>
-      <div class="stat-value">{{ formatAmount(stats.pending_gross, 'Ft') }}</div>
+      <div class="stat-value">{{ formatPrice(stats.pending_gross) }}</div>
       <div class="stat-count">{{ stats.pending_count }} számla</div>
     </div>
   </div>

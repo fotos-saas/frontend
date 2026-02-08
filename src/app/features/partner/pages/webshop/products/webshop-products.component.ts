@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -16,6 +17,7 @@ import { PartnerWebshopService, ShopProduct, PaperSize, PaperType, PricingUpdate
 })
 export class WebshopProductsComponent implements OnInit {
   private webshopService = inject(PartnerWebshopService);
+  private destroyRef = inject(DestroyRef);
   readonly ICONS = ICONS;
 
   products = signal<ShopProduct[]>([]);
@@ -37,7 +39,7 @@ export class WebshopProductsComponent implements OnInit {
 
   private loadProducts(): void {
     this.loading.set(true);
-    this.webshopService.getProducts().subscribe({
+    this.webshopService.getProducts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.products.set(res.products);
         this.paperSizes.set(res.paper_sizes);
@@ -100,7 +102,7 @@ export class WebshopProductsComponent implements OnInit {
     }
 
     this.saving.set(true);
-    this.webshopService.bulkUpdatePricing(updates).subscribe({
+    this.webshopService.bulkUpdatePricing(updates).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.hasChanges.set(false);
         this.saving.set(false);

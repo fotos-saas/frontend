@@ -51,7 +51,4 @@ export class BillingListComponent implements OnInit {
     this.billingService.activeFilter.set(value);
   }
 
-  formatAmount(amount: number): string {
-    return amount.toLocaleString('hu-HU');
-  }
 }

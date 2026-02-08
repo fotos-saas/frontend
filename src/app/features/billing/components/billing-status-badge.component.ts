@@ -1,9 +1,10 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { BillingChargeStatus, STATUS_LABELS } from '../models/billing.models';
 
 @Component({
   selector: 'app-billing-status-badge',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <span class="badge" [class]="'badge--' + status()">
       {{ label() }}

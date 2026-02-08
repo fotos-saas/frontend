@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, Invoice } from '../../../services/subscription.service';
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { ICONS, getInvoiceStatusLabel } from '../../../../../shared/constants';
+import { formatAmount as sharedFormatAmount } from '@shared/utils/formatters.util';
 
 /**
  * Invoices Page
@@ -118,11 +119,7 @@ export class InvoicesComponent implements OnInit {
   }
 
   formatAmount(amount: number, currency: string): string {
-    return new Intl.NumberFormat('hu-HU', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-      maximumFractionDigits: 0
-    }).format(amount / 100);
+    return sharedFormatAmount(amount, currency, true);
   }
 
   // Központi konstansból

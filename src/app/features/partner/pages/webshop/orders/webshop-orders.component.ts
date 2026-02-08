@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +19,7 @@ import { WEBSHOP_STATUS_LABELS } from '../../../models/webshop.models';
 })
 export class WebshopOrdersComponent implements OnInit {
   private webshopService = inject(PartnerWebshopService);
+  private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   readonly ICONS = ICONS;
   readonly STATUS_LABELS = WEBSHOP_STATUS_LABELS;
@@ -40,7 +42,7 @@ export class WebshopOrdersComponent implements OnInit {
     if (this.statusFilter()) params['status'] = this.statusFilter();
     if (this.searchQuery()) params['search'] = this.searchQuery();
 
-    this.webshopService.getOrders(params).subscribe({
+    this.webshopService.getOrders(params).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.orders.set(res.orders);
         this.totalOrders.set(res.total);
@@ -51,7 +53,7 @@ export class WebshopOrdersComponent implements OnInit {
   }
 
   private loadStats(): void {
-    this.webshopService.getOrderStats().subscribe({
+    this.webshopService.getOrderStats().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => this.stats.set(res.stats),
     });
   }

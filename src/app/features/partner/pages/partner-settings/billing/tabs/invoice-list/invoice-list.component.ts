@@ -8,10 +8,11 @@ import {
   Invoice,
   InvoiceStatistics,
   InvoiceStatus,
-  INVOICE_STATUS_LABELS,
-  INVOICE_STATUS_COLORS,
+  PARTNER_INVOICE_STATUS_LABELS,
+  PARTNER_INVOICE_STATUS_COLORS,
 } from '../../../../../models/invoice.models';
 import { ToastService } from '../../../../../../../core/services/toast.service';
+import { formatAmount, formatPrice } from '@shared/utils/formatters.util';
 import { InvoiceCreateDialogComponent } from '../../components/invoice-create-dialog/invoice-create-dialog.component';
 
 @Component({
@@ -28,8 +29,9 @@ export class InvoiceListComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
-  readonly STATUS_LABELS = INVOICE_STATUS_LABELS;
-  readonly STATUS_COLORS = INVOICE_STATUS_COLORS;
+  readonly STATUS_LABELS = PARTNER_INVOICE_STATUS_LABELS;
+  readonly STATUS_COLORS = PARTNER_INVOICE_STATUS_COLORS;
+  readonly formatPrice = formatPrice;
 
   readonly loading = signal(true);
   readonly invoices = signal<Invoice[]>([]);
@@ -165,9 +167,7 @@ export class InvoiceListComponent implements OnInit {
     });
   }
 
-  formatAmount(amount: number, currency: string): string {
-    return new Intl.NumberFormat('hu-HU').format(amount) + ' ' + currency;
-  }
+  readonly formatAmount = formatAmount;
 
   formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString('hu-HU');

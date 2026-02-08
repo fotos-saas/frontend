@@ -102,7 +102,7 @@ export interface CreateInvoiceItemPayload {
   description?: string;
 }
 
-export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
+export const PARTNER_INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
   draft: 'Piszkozat',
   sent: 'Kiküldve',
   paid: 'Fizetve',
@@ -110,7 +110,7 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
   overdue: 'Lejárt',
 };
 
-export const INVOICE_STATUS_COLORS: Record<InvoiceStatus, string> = {
+export const PARTNER_INVOICE_STATUS_COLORS: Record<InvoiceStatus, string> = {
   draft: '#94a3b8',
   sent: '#3b82f6',
   paid: '#22c55e',

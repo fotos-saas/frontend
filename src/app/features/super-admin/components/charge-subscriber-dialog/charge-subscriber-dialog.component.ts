@@ -19,6 +19,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { formatPrice } from '@shared/utils/formatters.util';
 
 /**
  * Manuális terhelés dialógus
@@ -173,9 +174,7 @@ export class ChargeSubscriberDialogComponent implements AfterViewInit, OnDestroy
     return this.amount() > 0 && this.description().trim().length > 0;
   }
 
-  formatAmount(amount: number): string {
-    return new Intl.NumberFormat('hu-HU').format(amount) + ' Ft';
-  }
+  readonly formatAmount = formatPrice;
 
   onCancel(): void {
     this.close.emit();

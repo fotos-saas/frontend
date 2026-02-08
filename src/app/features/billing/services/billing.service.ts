@@ -58,20 +58,20 @@ export class BillingService {
     return all.filter(c => c.status === filter);
   });
 
-  readonly paymentLoading = signal(false);
+  readonly paymentLoadingId = signal<number | null>(null);
 
   startPayment(chargeId: number): void {
-    this.paymentLoading.set(true);
+    this.paymentLoadingId.set(chargeId);
 
     this.http.post<{ success: boolean; data: { checkout_url: string } }>(
       `${this.apiUrl}/${chargeId}/checkout`, {}
     ).subscribe({
       next: (res) => {
-        this.paymentLoading.set(false);
+        this.paymentLoadingId.set(null);
         window.location.href = res.data.checkout_url;
       },
       error: () => {
-        this.paymentLoading.set(false);
+        this.paymentLoadingId.set(null);
         this.error.set('Nem sikerült elindítani a fizetést.');
       },
     });

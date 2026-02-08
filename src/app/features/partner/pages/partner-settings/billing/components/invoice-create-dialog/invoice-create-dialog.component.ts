@@ -10,6 +10,7 @@ import {
   CreateInvoiceItemPayload,
 } from '../../../../../models/invoice.models';
 import { ToastService } from '../../../../../../../core/services/toast.service';
+import { formatPrice } from '@shared/utils/formatters.util';
 
 interface ItemRow {
   name: string;
@@ -137,9 +138,7 @@ export class InvoiceCreateDialogComponent {
     });
   }
 
-  formatAmount(amount: number): string {
-    return new Intl.NumberFormat('hu-HU').format(amount);
-  }
+  readonly formatAmount = formatPrice;
 
   private formatDateForInput(date: Date): string {
     return date.toISOString().split('T')[0];

@@ -6,6 +6,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { PartnerBillingService, PartnerCharge } from '../../services/partner-billing.service';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { CreateChargeDialogComponent } from './create-charge-dialog.component';
+import { STATUS_LABELS } from '../../../billing/models/billing.models';
 
 @Component({
   selector: 'app-billing-charges',
@@ -30,12 +31,7 @@ export class BillingChargesComponent implements OnInit {
     { label: 'Törölve', value: 'cancelled' },
   ];
 
-  readonly STATUS_LABELS: Record<string, string> = {
-    pending: 'Fizetésre vár',
-    paid: 'Kifizetve',
-    cancelled: 'Törölve',
-    refunded: 'Visszatérítve',
-  };
+  readonly STATUS_LABELS: Record<string, string> = STATUS_LABELS;
 
   readonly STATUS_COLORS: Record<string, string> = {
     pending: '#f59e0b',

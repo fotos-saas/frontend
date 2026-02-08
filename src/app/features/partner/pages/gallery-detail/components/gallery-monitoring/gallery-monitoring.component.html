@@ -1,11 +1,8 @@
 <!-- Loading skeleton -->
 @if (state.loading()) {
   <div class="loading-state">
-    <div class="summary-cards">
-      @for (_ of [1,2,3,4,5]; track _) {
-        <div class="summary-card skeleton-shimmer"></div>
-      }
-    </div>
+    <div class="skeleton-bar skeleton-shimmer"></div>
+    <div class="skeleton-toolbar skeleton-shimmer"></div>
     @for (_ of [1,2,3,4,5]; track _) {
       <div class="skeleton-row skeleton-shimmer"></div>
     }
@@ -13,49 +10,53 @@
 }
 
 @if (!state.loading()) {
-  <!-- Összefoglaló kártyák -->
+  <!-- Stat csík -->
   @if (state.summary(); as s) {
-    <div class="summary-cards">
-      <div class="summary-card">
-        <div class="summary-card__value">{{ s.totalPersons }}</div>
-        <div class="summary-card__label">Összesen</div>
+    <div class="stat-bar">
+      <div class="stat-item">
+        <span class="stat-item__value">{{ s.totalPersons }}</span>
+        <span class="stat-item__label">Összesen</span>
       </div>
-      <div class="summary-card summary-card--success">
-        <div class="summary-card__value">{{ s.finalized }}</div>
-        <div class="summary-card__label">Véglegesített</div>
+      <span class="stat-divider"></span>
+      <div class="stat-item stat-item--success">
+        <span class="stat-item__value">{{ s.finalized }}</span>
+        <span class="stat-item__label">Véglegesített</span>
       </div>
-      <div class="summary-card summary-card--info">
-        <div class="summary-card__value">{{ s.inProgress }}</div>
-        <div class="summary-card__label">Folyamatban</div>
+      <span class="stat-divider"></span>
+      <div class="stat-item stat-item--info">
+        <span class="stat-item__value">{{ s.inProgress }}</span>
+        <span class="stat-item__label">Folyamatban</span>
       </div>
-      <div class="summary-card summary-card--muted">
-        <div class="summary-card__value">{{ s.notOpened }}</div>
-        <div class="summary-card__label">Nem kezdte el</div>
+      <span class="stat-divider"></span>
+      <div class="stat-item stat-item--muted">
+        <span class="stat-item__value">{{ s.notOpened }}</span>
+        <span class="stat-item__label">Nem kezdte el</span>
       </div>
       @if (s.staleCount > 0) {
-        <div class="summary-card summary-card--warning">
-          <div class="summary-card__value">{{ s.staleCount }}</div>
-          <div class="summary-card__label">Figyelmeztetés</div>
+        <span class="stat-divider"></span>
+        <div class="stat-item stat-item--warning">
+          <span class="stat-item__value">{{ s.staleCount }}</span>
+          <span class="stat-item__label">Figyelmeztetés</span>
         </div>
       }
     </div>
   }
 
-  <!-- Szűrő sáv -->
-  <div class="filters">
+  <!-- Toolbar: szűrők + export -->
+  <div class="toolbar">
     <div class="search-box">
-      <lucide-icon class="search-icon" [name]="ICONS.SEARCH" [size]="16" />
+      <lucide-icon class="search-icon" [name]="ICONS.SEARCH" [size]="14" />
       <input
         class="search-input"
         type="text"
-        placeholder="Keresés név alapján..."
+        placeholder="Keresés..."
         [value]="state.searchQuery()"
         (input)="state.setSearchQuery(searchInput.value)"
         #searchInput
       />
       @if (state.searchQuery()) {
         <button class="clear-btn" (click)="state.setSearchQuery(''); searchInput.value = ''">
-          <lucide-icon [name]="ICONS.X" [size]="14" />
+          <lucide-icon [name]="ICONS.X" [size]="12" />
         </button>
       }
     </div>
@@ -72,32 +73,34 @@
       <option value="stale">Figyelmeztetés</option>
     </select>
 
-    <div class="filter-actions">
+    <div class="toolbar__spacer"></div>
+
+    <div class="toolbar__actions">
       <button
-        class="action-btn-outlined"
+        class="icon-btn"
         matTooltip="Excel export"
         [disabled]="state.exportingExcel() || state.persons().length === 0"
         (click)="onExportExcel()"
       >
         @if (state.exportingExcel()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          <lucide-icon [name]="ICONS.LOADER" [size]="15" class="spin" />
         } @else {
-          <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
+          <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="15" />
         }
-        Excel
+        <span class="icon-btn__label">Excel</span>
       </button>
       <button
-        class="action-btn-outlined"
+        class="icon-btn"
         matTooltip="ZIP letöltés"
         [disabled]="state.exportingZip() || state.persons().length === 0"
         (click)="onOpenDownloadDialog()"
       >
         @if (state.exportingZip()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          <lucide-icon [name]="ICONS.LOADER" [size]="15" class="spin" />
         } @else {
-          <lucide-icon [name]="ICONS.ARCHIVE" [size]="16" />
+          <lucide-icon [name]="ICONS.ARCHIVE" [size]="15" />
         }
-        ZIP
+        <span class="icon-btn__label">ZIP</span>
       </button>
     </div>
   </div>
@@ -132,17 +135,17 @@
           <span class="cell cell-status">
             @if (person.workflowStatus === 'finalized') {
               <span class="status-badge status-badge--finalized">
-                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="13" />
                 Véglegesített
               </span>
             } @else if (person.workflowStatus === 'in_progress') {
               <span class="status-badge status-badge--progress">
-                <lucide-icon [name]="ICONS.LOADER" [size]="14" />
+                <lucide-icon [name]="ICONS.LOADER" [size]="13" />
                 Folyamatban
               </span>
             } @else {
               <span class="status-badge status-badge--not-started">
-                <lucide-icon [name]="ICONS.CIRCLE" [size]="14" />
+                <lucide-icon [name]="ICONS.CIRCLE" [size]="13" />
                 Nem kezdte el
               </span>
             }
@@ -160,7 +163,7 @@
           <span class="cell cell-activity">
             @if (person.staleWarning) {
               <span class="stale-warning" matTooltip="Több mint 5 napja inaktív">
-                <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+                <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="13" />
                 {{ person.daysSinceLastActivity }} napja
               </span>
             } @else if (person.lastActivityAt) {
@@ -175,7 +178,7 @@
   } @else {
     <!-- Üres állapot -->
     <div class="empty-state">
-      <lucide-icon class="empty-icon" [name]="ICONS.USERS" [size]="48" />
+      <lucide-icon class="empty-icon" [name]="ICONS.USERS" [size]="40" />
       <h3>Nincs találat</h3>
       <p>A keresési feltételeknek egyetlen személy sem felel meg.</p>
     </div>

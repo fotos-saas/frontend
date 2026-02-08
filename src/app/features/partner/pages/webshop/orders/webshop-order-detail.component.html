@@ -130,3 +130,12 @@
     }
   }
 </div>
+
+@if (showCancelConfirm()) {
+  <app-confirm-dialog
+    title="Rendelés visszavonása"
+    [message]="'Biztosan visszavonod a(z) ' + (order()?.order_number ?? '') + ' rendelést?'"
+    confirmText="Visszavonás"
+    (resultEvent)="onCancelConfirmResult($event)"
+  />
+}

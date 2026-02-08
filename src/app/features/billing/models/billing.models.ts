@@ -30,15 +30,6 @@ export const STATUS_LABELS: Record<BillingChargeStatus, string> = {
   refunded: 'Visszatérítve',
 };
 
-export const SERVICE_TYPE_LABELS: Record<BillingServiceType, string> = {
-  photo_change: 'Képcsere',
-  extra_retouch: 'Extra retusálás',
-  late_fee: 'Késedelmi díj',
-  rush_fee: 'Sürgősségi díj',
-  additional_copy: 'Plusz példány',
-  custom: 'Egyedi',
-};
-
 export const SERVICE_TYPE_ICONS: Record<BillingServiceType, string> = {
   photo_change: 'image',
   extra_retouch: 'sparkles',

@@ -98,6 +98,8 @@ export class CreateChargeDialogComponent implements OnInit {
     this.billingService.createCharge(payload, () => {
       this.saving.set(false);
       this.created.emit();
+    }, () => {
+      this.saving.set(false);
     });
   }
 

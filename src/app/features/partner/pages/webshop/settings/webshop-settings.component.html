@@ -167,7 +167,7 @@
               <button class="action-btn" (click)="editingSizeId.set(size.id)" matTooltip="Szerkesztés">
                 <lucide-icon [name]="ICONS.EDIT" [size]="16" />
               </button>
-              <button class="action-btn danger" (click)="deletePaperSize(size.id)" matTooltip="Törlés">
+              <button class="action-btn danger" (click)="deletePaperSize(size)" matTooltip="Törlés">
                 <lucide-icon [name]="ICONS.DELETE" [size]="16" />
               </button>
             }
@@ -225,7 +225,7 @@
               <button class="action-btn" (click)="editingTypeId.set(type.id)" matTooltip="Szerkesztés">
                 <lucide-icon [name]="ICONS.EDIT" [size]="16" />
               </button>
-              <button class="action-btn danger" (click)="deletePaperType(type.id)" matTooltip="Törlés">
+              <button class="action-btn danger" (click)="deletePaperType(type)" matTooltip="Törlés">
                 <lucide-icon [name]="ICONS.DELETE" [size]="16" />
               </button>
             }
@@ -237,3 +237,12 @@
     </section>
   }
 </div>
+
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Törlés megerősítése"
+    [message]="deleteMessage()"
+    confirmText="Törlés"
+    (resultEvent)="onDeleteConfirmResult($event)"
+  />
+}

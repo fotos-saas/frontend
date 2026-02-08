@@ -10,6 +10,7 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
 import { UpgradeDialogComponent } from '../../../../shared/components/upgrade-dialog/upgrade-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
+import { saveFile } from '../../../../shared/utils/file.util';
 
 /**
  * Partner Contact List - Kapcsolattartók listája a partner felületen.
@@ -221,12 +222,5 @@ export class PartnerContactListComponent implements OnInit {
     this.importResult.set(null);
   }
 
-  private saveFile(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  private saveFile = saveFile;
 }

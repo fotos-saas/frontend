@@ -1,6 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { ApiResponse } from '../../../core/models/api.models';
 
 export interface PartnerCharge {
   id: number;
@@ -29,11 +30,6 @@ export interface PartnerBillingSummary {
   charges_count: number;
   pending_count: number;
   paid_count: number;
-}
-
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
 }
 
 interface PaginatedChargesResponse {
@@ -106,7 +102,7 @@ export class PartnerBillingService {
     });
   }
 
-  createCharge(payload: Record<string, unknown>, onSuccess?: () => void): void {
+  createCharge(payload: Record<string, unknown>, onSuccess?: () => void, onError?: () => void): void {
     this.http.post<ApiResponse<{ charge: PartnerCharge }>>(this.baseUrl, payload).subscribe({
       next: (res) => {
         this.charges.update(list => [res.data.charge, ...list]);
@@ -114,6 +110,7 @@ export class PartnerBillingService {
       },
       error: () => {
         this.error.set('Nem sikerült létrehozni a terhelést.');
+        onError?.();
       },
     });
   }

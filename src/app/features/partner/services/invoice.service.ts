@@ -47,12 +47,6 @@ export class InvoiceService {
     return this.http.post<{ success: boolean; message: string; data: Invoice }>(this.baseUrl, payload);
   }
 
-  getInvoice(id: number): Observable<Invoice> {
-    return this.http.get<{ data: Invoice }>(`${this.baseUrl}/${id}`).pipe(
-      map(res => res.data),
-    );
-  }
-
   syncInvoice(id: number): Observable<{ success: boolean; message: string; data: Invoice }> {
     return this.http.post<{ success: boolean; message: string; data: Invoice }>(`${this.baseUrl}/${id}/sync`, {});
   }

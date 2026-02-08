@@ -125,13 +125,13 @@
 
           <div class="contact-info">
             @if (contact.email) {
-              <a [href]="'mailto:' + contact.email" class="contact-link" data-tooltip="Email küldése">
+              <a [href]="'mailto:' + contact.email" class="contact-link" matTooltip="Email küldése">
                 <lucide-icon [name]="ICONS.MAIL" [size]="14" />
                 <span class="contact-text">{{ contact.email }}</span>
               </a>
             }
             @if (contact.phone) {
-              <a [href]="'tel:' + contact.phone" class="contact-link" data-tooltip="Hívás">
+              <a [href]="'tel:' + contact.phone" class="contact-link" matTooltip="Hívás">
                 <lucide-icon [name]="ICONS.PHONE" [size]="14" />
                 <span class="contact-text">{{ contact.phone }}</span>
               </a>
@@ -173,14 +173,14 @@
           <div class="contact-actions">
             <button
               class="action-btn"
-              data-tooltip="Szerkesztés"
+              matTooltip="Szerkesztés"
               (click)="editContact(contact)"
             >
               <lucide-icon [name]="ICONS.EDIT" [size]="16" />
             </button>
             <button
               class="action-btn action-btn--danger"
-              data-tooltip="Törlés"
+              matTooltip="Törlés"
               (click)="confirmDeleteContact(contact)"
             >
               <lucide-icon [name]="ICONS.DELETE" [size]="16" />

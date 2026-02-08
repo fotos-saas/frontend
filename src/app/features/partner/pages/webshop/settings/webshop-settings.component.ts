@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { PartnerWebshopService, ShopSettings, PaperSize, PaperType } from '../../../services/partner-webshop.service';
 
 @Component({
   selector: 'app-webshop-settings',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent],
   templateUrl: './webshop-settings.component.html',
   styleUrl: './webshop-settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +33,11 @@ export class WebshopSettingsComponent implements OnInit {
   // New item forms
   newSize = signal({ name: '', width_cm: 0, height_cm: 0 });
   newType = signal({ name: '', description: '' });
+
+  // Delete confirm
+  showDeleteConfirm = signal(false);
+  deleteAction = signal<(() => void) | null>(null);
+  deleteMessage = signal('');
 
   ngOnInit(): void {
     this.loadData();
@@ -114,10 +120,14 @@ export class WebshopSettingsComponent implements OnInit {
     });
   }
 
-  deletePaperSize(id: number): void {
-    this.webshopService.deletePaperSize(id).subscribe({
-      next: () => this.loadPaperSizes(),
+  deletePaperSize(size: PaperSize): void {
+    this.deleteMessage.set(`Biztosan törölni szeretnéd a(z) "${size.name}" papírméretet?`);
+    this.deleteAction.set(() => {
+      this.webshopService.deletePaperSize(size.id).subscribe({
+        next: () => this.loadPaperSizes(),
+      });
     });
+    this.showDeleteConfirm.set(true);
   }
 
   // Paper Types
@@ -149,9 +159,21 @@ export class WebshopSettingsComponent implements OnInit {
     });
   }
 
-  deletePaperType(id: number): void {
-    this.webshopService.deletePaperType(id).subscribe({
-      next: () => this.loadPaperTypes(),
+  deletePaperType(type: PaperType): void {
+    this.deleteMessage.set(`Biztosan törölni szeretnéd a(z) "${type.name}" papírtípust?`);
+    this.deleteAction.set(() => {
+      this.webshopService.deletePaperType(type.id).subscribe({
+        next: () => this.loadPaperTypes(),
+      });
     });
+    this.showDeleteConfirm.set(true);
+  }
+
+  onDeleteConfirmResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      this.deleteAction()?.();
+    }
+    this.showDeleteConfirm.set(false);
+    this.deleteAction.set(null);
   }
 }

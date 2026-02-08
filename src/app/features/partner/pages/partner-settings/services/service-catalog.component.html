@@ -86,3 +86,12 @@
     (saved)="closeDialog()"
   />
 }
+
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Szolgáltatás törlése"
+    [message]="'Biztosan törölni szeretnéd a(z) ' + (deleteTarget()?.name ?? '') + ' szolgáltatást?'"
+    confirmText="Törlés"
+    (resultEvent)="onDeleteConfirmResult($event)"
+  />
+}

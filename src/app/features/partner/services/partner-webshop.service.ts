@@ -155,10 +155,6 @@ export class PartnerWebshopService {
     return this.http.put<{ message: string }>(`${this.baseUrl}/products/pricing`, { products: updates });
   }
 
-  toggleProductStatus(id: number): Observable<{ product: ShopProduct }> {
-    return this.http.patch<{ product: ShopProduct }>(`${this.baseUrl}/products/${id}/toggle`, {});
-  }
-
   // Orders
   getOrders(params?: Record<string, string>): Observable<{ orders: ShopOrder[]; total: number }> {
     return this.http.get<{ orders: ShopOrder[]; total: number }>(`${this.baseUrl}/orders`, { params });
@@ -192,7 +188,4 @@ export class PartnerWebshopService {
     return this.http.get<{ token: string | null }>(`${this.baseUrl}/albums/${albumId}/token`);
   }
 
-  getGalleryToken(galleryId: number): Observable<{ token: string | null }> {
-    return this.http.get<{ token: string | null }>(`${this.baseUrl}/galleries/${galleryId}/token`);
-  }
 }

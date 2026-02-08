@@ -1,12 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { ApiResponse } from '../../../core/models/api.models';
 import { StripeSettings, UpdateStripeSettingsPayload } from '../models/stripe-settings.models';
-
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-}
 
 @Injectable({
   providedIn: 'root',

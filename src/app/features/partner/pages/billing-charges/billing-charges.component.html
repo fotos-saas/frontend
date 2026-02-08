@@ -132,3 +132,12 @@
     (created)="onChargeCreated()"
   />
 }
+
+@if (showCancelConfirm()) {
+  <app-confirm-dialog
+    title="Terhelés törlése"
+    [message]="'Biztosan törölni szeretnéd a(z) ' + (cancelTarget()?.charge_number ?? '') + ' terhelést?'"
+    confirmText="Törlés"
+    (resultEvent)="onCancelConfirmResult($event)"
+  />
+}

@@ -5,33 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { PartnerWebshopService, ShopOrderDetail } from '../../../services/partner-webshop.service';
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Függőben',
-  paid: 'Fizetve',
-  processing: 'Feldolgozás',
-  shipped: 'Szállítás alatt',
-  completed: 'Kész',
-  cancelled: 'Visszamondva',
-};
-
-const NEXT_STATUS: Record<string, string> = {
-  paid: 'processing',
-  processing: 'shipped',
-  shipped: 'completed',
-};
-
-const NEXT_STATUS_LABELS: Record<string, string> = {
-  paid: 'Feldolgozás megkezdése',
-  processing: 'Szállításra adás',
-  shipped: 'Lezárás',
-};
+import { WEBSHOP_STATUS_LABELS, NEXT_STATUS, NEXT_STATUS_LABELS } from '../../../models/webshop.models';
 
 @Component({
   selector: 'app-webshop-order-detail',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [DecimalPipe, DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent],
   templateUrl: './webshop-order-detail.component.html',
   styleUrl: './webshop-order-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,7 +22,7 @@ export class WebshopOrderDetailComponent implements OnInit {
   private router = inject(Router);
   private webshopService = inject(PartnerWebshopService);
   readonly ICONS = ICONS;
-  readonly STATUS_LABELS = STATUS_LABELS;
+  readonly STATUS_LABELS = WEBSHOP_STATUS_LABELS;
   readonly NEXT_STATUS = NEXT_STATUS;
   readonly NEXT_STATUS_LABELS = NEXT_STATUS_LABELS;
 
@@ -49,6 +30,7 @@ export class WebshopOrderDetailComponent implements OnInit {
   loading = signal(true);
   updating = signal(false);
   trackingNumber = signal('');
+  showCancelConfirm = signal(false);
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -90,6 +72,13 @@ export class WebshopOrderDetailComponent implements OnInit {
   }
 
   cancelOrder(): void {
+    this.showCancelConfirm.set(true);
+  }
+
+  onCancelConfirmResult(result: ConfirmDialogResult): void {
+    this.showCancelConfirm.set(false);
+    if (result.action !== 'confirm') return;
+
     const o = this.order();
     if (!o) return;
 

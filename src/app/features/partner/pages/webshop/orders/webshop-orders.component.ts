@@ -6,15 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PartnerWebshopService, ShopOrder, OrderStats } from '../../../services/partner-webshop.service';
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Függőben',
-  paid: 'Fizetve',
-  processing: 'Feldolgozás',
-  shipped: 'Szállítás alatt',
-  completed: 'Kész',
-  cancelled: 'Visszamondva',
-};
+import { WEBSHOP_STATUS_LABELS } from '../../../models/webshop.models';
 
 @Component({
   selector: 'app-webshop-orders',
@@ -28,7 +20,7 @@ export class WebshopOrdersComponent implements OnInit {
   private webshopService = inject(PartnerWebshopService);
   private router = inject(Router);
   readonly ICONS = ICONS;
-  readonly STATUS_LABELS = STATUS_LABELS;
+  readonly STATUS_LABELS = WEBSHOP_STATUS_LABELS;
 
   orders = signal<ShopOrder[]>([]);
   stats = signal<OrderStats | null>(null);

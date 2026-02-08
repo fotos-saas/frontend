@@ -57,6 +57,12 @@ export class CheckoutDialogComponent {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.customerEmail())) {
+      this.error.set('Kérjük adj meg egy érvényes email címet.');
+      return;
+    }
+
     if (this.deliveryMethod() === 'shipping' && !this.shippingAddress()) {
       this.error.set('Szállítási cím megadása kötelező.');
       return;

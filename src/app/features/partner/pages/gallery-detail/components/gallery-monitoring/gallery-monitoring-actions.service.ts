@@ -5,6 +5,7 @@ import { PartnerService } from '../../../../services/partner.service';
 import { ToastService } from '../../../../../../core/services/toast.service';
 import { GalleryMonitoringState } from './gallery-monitoring.state';
 import { DownloadOptions } from '../download-dialog/download-dialog.component';
+import { saveFile } from '../../../../../../shared/utils/file.util';
 
 /**
  * GalleryMonitoringActionsService
@@ -111,15 +112,8 @@ export class GalleryMonitoringActionsService {
       });
   }
 
-  /** Blob mentése fájlként */
-  private saveFile(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
-  }
+  /** Proxy a közös saveFile util-hoz */
+  private saveFile = saveFile;
 
   private todayStr(): string {
     return new Date().toISOString().slice(0, 10);

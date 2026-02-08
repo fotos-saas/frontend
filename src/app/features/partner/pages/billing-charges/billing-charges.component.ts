@@ -1,14 +1,16 @@
 import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PartnerBillingService, PartnerCharge } from '../../services/partner-billing.service';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { CreateChargeDialogComponent } from './create-charge-dialog.component';
 
 @Component({
   selector: 'app-billing-charges',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, LucideAngularModule, CreateChargeDialogComponent],
+  imports: [DecimalPipe, DatePipe, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent, CreateChargeDialogComponent],
   templateUrl: './billing-charges.component.html',
   styleUrl: './billing-charges.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +20,8 @@ export class BillingChargesComponent implements OnInit {
   readonly ICONS = ICONS;
 
   readonly showCreateDialog = signal(false);
+  readonly showCancelConfirm = signal(false);
+  readonly cancelTarget = signal<PartnerCharge | null>(null);
 
   readonly filters = [
     { label: 'Összes', value: 'all' },
@@ -63,6 +67,15 @@ export class BillingChargesComponent implements OnInit {
   }
 
   cancelCharge(charge: PartnerCharge): void {
-    this.billingService.cancelCharge(charge.id);
+    this.cancelTarget.set(charge);
+    this.showCancelConfirm.set(true);
+  }
+
+  onCancelConfirmResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm' && this.cancelTarget()) {
+      this.billingService.cancelCharge(this.cancelTarget()!.id);
+    }
+    this.showCancelConfirm.set(false);
+    this.cancelTarget.set(null);
   }
 }

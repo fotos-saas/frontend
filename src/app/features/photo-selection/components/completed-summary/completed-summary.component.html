@@ -9,7 +9,6 @@
 
   <!-- Tabs + tartalom -->
   @if (hasReview()) {
-    <!-- Tab fejlécek -->
     <nav class="completed-summary__tabs">
       @for (tab of tabs(); track tab.key) {
         <button
@@ -24,35 +23,14 @@
       }
     </nav>
 
-    <!-- Tab tartalom -->
-    <div class="completed-summary__content">
-      @if (activePhotos().length > 0) {
-        <div class="completed-summary__grid" [class.completed-summary__grid--tablo]="activeTab() === 'tablo'">
-          @for (photo of activePhotos(); track photo.id; let i = $index) {
-            <button
-              type="button"
-              class="completed-summary__thumb"
-              [class.completed-summary__thumb--tablo]="activeTab() === 'tablo'"
-              (click)="onPhotoClick(activePhotos(), i)"
-            >
-              <img
-                [src]="activeTab() === 'tablo' ? (photo.preview_url || photo.url) : (photo.thumbnail_url || photo.url)"
-                [alt]="photo.filename"
-                loading="lazy"
-              />
-              @if (activeTab() === 'tablo') {
-                <div class="completed-summary__tablo-badge">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </div>
-              }
-            </button>
-          }
-        </div>
-      } @else {
-        <p class="completed-summary__empty">Nincs kép ebben a kategóriában.</p>
-      }
-    </div>
+    <app-selection-grid
+      [photos]="activePhotos()"
+      [selectedIds]="[]"
+      [readonly]="true"
+      [showHeader]="false"
+      [useVirtualScroll]="false"
+      [pageSize]="50"
+      (zoomClick)="onZoomClick($event)"
+    />
   }
 </div>

@@ -1,25 +1,23 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, signal } from '@angular/core';
 import { WorkflowPhoto, ProgressData, ReviewGroups, ReviewGroup } from '../../models/workflow.models';
+import { SelectionGridComponent } from '../selection-grid/selection-grid.component';
 
 type TabKey = 'tablo' | 'retouch' | 'claiming';
 
 @Component({
   selector: 'app-completed-summary',
   standalone: true,
-  imports: [],
+  imports: [SelectionGridComponent],
   templateUrl: './completed-summary.component.html',
   styleUrl: './completed-summary.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompletedSummaryComponent {
   readonly progress = input.required<ProgressData | null>();
-  readonly tabloPhoto = input<WorkflowPhoto | null>(null);
   readonly reviewGroups = input<ReviewGroups | null>(null);
   readonly reviewLoading = input<boolean>(false);
 
-  readonly tabloClick = output<WorkflowPhoto>();
   readonly photoClick = output<{ photos: ReviewGroup[]; index: number }>();
-  readonly loadReview = output<void>();
 
   readonly activeTab = signal<TabKey>('tablo');
 
@@ -38,13 +36,27 @@ export class CompletedSummaryComponent {
     ].filter(t => t.count > 0);
   });
 
-  readonly activePhotos = computed(() => {
+  /** ReviewGroup[] → WorkflowPhoto[] mapping a selection-grid-hez */
+  readonly activePhotos = computed<WorkflowPhoto[]>(() => {
+    const groups = this.reviewGroups();
+    if (!groups) return [];
+    const raw = groups[this.activeTab()] || [];
+    return raw.map(p => ({
+      id: p.id,
+      url: p.url,
+      thumbnailUrl: p.thumbnail_url,
+      filename: p.filename,
+    }));
+  });
+
+  /** Eredeti ReviewGroup[] az aktív tabhoz (lightbox-hoz) */
+  private get activeReviewPhotos(): ReviewGroup[] {
     const groups = this.reviewGroups();
     if (!groups) return [];
     return groups[this.activeTab()] || [];
-  });
+  }
 
-  onPhotoClick(photos: ReviewGroup[], index: number): void {
-    this.photoClick.emit({ photos, index });
+  onZoomClick(event: { photo: WorkflowPhoto; index: number }): void {
+    this.photoClick.emit({ photos: this.activeReviewPhotos, index: event.index });
   }
 }

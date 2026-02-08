@@ -1,15 +1,10 @@
 /**
- * Completed Summary - Tab layout
- * Safari kompatibilis (no gap in flexbox)
+ * Completed Summary - Tab layout + SelectionGrid
  */
 
 $color-primary: var(--color-primary, #3b82f6);
-$color-success: #10b981;
 
 .completed-summary {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 16px 24px;
   animation: fadeIn 0.4s ease;
 }
 
@@ -37,8 +32,7 @@ $color-success: #10b981;
 .completed-summary__tabs {
   display: flex;
   border-bottom: 2px solid var(--border-color, #e2e8f0);
-  // Safari: no gap
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .completed-summary__tab {
@@ -88,100 +82,6 @@ $color-success: #10b981;
   color: var(--text-secondary, #475569);
 }
 
-// === TAB CONTENT ===
-.completed-summary__content {
-  min-height: 120px;
-}
-
-.completed-summary__empty {
-  text-align: center;
-  padding: 32px;
-  color: var(--text-muted, #94a3b8);
-  font-size: 14px;
-}
-
-// === PHOTO GRID ===
-.completed-summary__grid {
-  display: flex;
-  flex-wrap: wrap;
-  // Safari: no gap
-  margin: -4px;
-
-  &--tablo {
-    .completed-summary__thumb {
-      width: calc(50% - 8px);
-      margin: 4px;
-
-      @media (max-width: 480px) {
-        width: calc(100% - 8px);
-      }
-    }
-  }
-}
-
-.completed-summary__thumb {
-  position: relative;
-  width: calc(25% - 8px);
-  margin: 4px;
-  aspect-ratio: 1;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px solid transparent;
-  background: var(--bg-secondary, #f1f5f9);
-  padding: 0;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-color: $color-primary;
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  &--tablo {
-    border-radius: 10px;
-  }
-
-  @media (max-width: 640px) {
-    width: calc(33.333% - 8px);
-  }
-
-  @media (max-width: 400px) {
-    width: calc(50% - 8px);
-  }
-}
-
-.completed-summary__tablo-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  width: 28px;
-  height: 28px;
-  background: $color-success;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-
-  svg {
-    width: 16px;
-    height: 16px;
-    color: white;
-  }
-}
-
 // === ANIMATIONS ===
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(12px); }
@@ -194,5 +94,4 @@ $color-success: #10b981;
 
 @media (prefers-reduced-motion: reduce) {
   .completed-summary { animation-duration: 0.01ms !important; }
-  .completed-summary__thumb { transition-duration: 0.01ms !important; }
 }

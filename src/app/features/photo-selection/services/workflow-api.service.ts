@@ -19,6 +19,7 @@ const WORKFLOW_API = {
   tabloAutoSave: `${environment.apiUrl}/tablo/tablo/auto-save`,
   tabloClear: `${environment.apiUrl}/tablo/tablo/clear`,
   tablo: `${environment.apiUrl}/tablo/tablo`,
+  finalize: `${environment.apiUrl}/tablo/workflow/finalize`,
   nextStep: `${environment.apiUrl}/tablo/next-step`,
   previousStep: `${environment.apiUrl}/tablo/previous-step`,
   moveToStep: `${environment.apiUrl}/tablo/move-to-step`,
@@ -117,9 +118,8 @@ export class WorkflowApiService {
    * @param photoId Kiválasztott fotó ID (tisztított)
    */
   finalizeTabloSelection$(galleryId: number, photoId: number): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(WORKFLOW_API.tablo, {
+    return this.http.post<{ message: string }>(WORKFLOW_API.finalize, {
       workSessionId: galleryId, // Backend még workSessionId-t vár
-      photoId,
     });
   }
 

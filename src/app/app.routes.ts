@@ -257,7 +257,7 @@ export const routes: Routes = [
           {
             path: 'billing',
             loadComponent: () => import('./features/partner/pages/partner-settings/billing/billing.component').then(m => m.BillingComponent),
-            title: 'Számlázás'
+            title: 'Számlázás és fizetés'
           },
           {
             path: 'services',

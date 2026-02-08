@@ -143,7 +143,7 @@ export class PartnerShellComponent implements OnInit {
         label: 'Beállítások',
         icon: 'settings',
         children: [
-          { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás' },
+          { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás és fizetés' },
         ]
       },
     ];

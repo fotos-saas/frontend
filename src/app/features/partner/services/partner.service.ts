@@ -197,6 +197,9 @@ export class PartnerService {
   updateProjectSettings(projectId: number, data: {
     max_retouch_photos: number | null;
     free_edit_window_hours?: number | null;
+    export_zip_content?: string | null;
+    export_file_naming?: string | null;
+    export_always_ask?: boolean | null;
   }) {
     return this.projectService.updateProjectSettings(projectId, data);
   }
@@ -209,6 +212,9 @@ export class PartnerService {
     default_max_retouch_photos: number | null;
     default_free_edit_window_hours?: number | null;
     billing_enabled?: boolean;
+    default_zip_content?: string;
+    default_file_naming?: string;
+    export_always_ask?: boolean;
   }) {
     return this.projectService.updateGlobalSettings(data);
   }

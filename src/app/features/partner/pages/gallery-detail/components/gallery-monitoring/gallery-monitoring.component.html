@@ -185,6 +185,7 @@
 <!-- Download dialog (page-card-on kívül!) -->
 @if (state.showDownloadDialog()) {
   <app-download-dialog
+    [defaults]="dialogDefaults()"
     (download)="onDownloadZip($event)"
     (close)="onCloseDownloadDialog()"
   />

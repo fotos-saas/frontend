@@ -26,6 +26,9 @@ export class GlobalSettingsComponent implements OnInit {
   maxRetouchPhotos = signal(3);
   freeEditWindowHours = signal(24);
   billingEnabled = signal(false);
+  defaultZipContent = signal('all');
+  defaultFileNaming = signal('original');
+  exportAlwaysAsk = signal(true);
 
   ngOnInit(): void {
     this.loadSettings();
@@ -39,6 +42,9 @@ export class GlobalSettingsComponent implements OnInit {
         this.maxRetouchPhotos.set(res.data.default_max_retouch_photos);
         this.freeEditWindowHours.set(res.data.default_free_edit_window_hours ?? 24);
         this.billingEnabled.set(res.data.billing_enabled ?? false);
+        this.defaultZipContent.set(res.data.default_zip_content ?? 'all');
+        this.defaultFileNaming.set(res.data.default_file_naming ?? 'original');
+        this.exportAlwaysAsk.set(res.data.export_always_ask ?? true);
         this.loading.set(false);
       },
       error: () => {
@@ -55,6 +61,9 @@ export class GlobalSettingsComponent implements OnInit {
       default_max_retouch_photos: this.maxRetouchPhotos(),
       default_free_edit_window_hours: this.freeEditWindowHours(),
       billing_enabled: this.billingEnabled(),
+      default_zip_content: this.defaultZipContent(),
+      default_file_naming: this.defaultFileNaming(),
+      export_always_ask: this.exportAlwaysAsk(),
     }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -63,6 +72,9 @@ export class GlobalSettingsComponent implements OnInit {
         this.maxRetouchPhotos.set(res.data.default_max_retouch_photos);
         this.freeEditWindowHours.set(res.data.default_free_edit_window_hours ?? 24);
         this.billingEnabled.set(res.data.billing_enabled ?? false);
+        this.defaultZipContent.set(res.data.default_zip_content ?? 'all');
+        this.defaultFileNaming.set(res.data.default_file_naming ?? 'original');
+        this.exportAlwaysAsk.set(res.data.export_always_ask ?? true);
         this.toast.success('Siker', 'Beállítások mentve');
       },
       error: () => {

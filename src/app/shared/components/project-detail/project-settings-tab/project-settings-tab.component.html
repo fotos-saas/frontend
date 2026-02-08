@@ -104,6 +104,81 @@
       </div>
     </div>
 
+    <!-- Export beállítások -->
+    <div class="section-header section-header--mt">
+      <lucide-icon [name]="ICONS.DOWNLOAD" [size]="20" />
+      <h3>Export beállítások</h3>
+    </div>
+
+    <div class="setting-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Letöltési beállítások</span>
+          <span class="setting-description">
+            ZIP tartalom, fájlnév stratégia és párbeszédablak beállítások erre a projektre.
+          </span>
+        </div>
+      </div>
+
+      <label class="toggle-row">
+        <input
+          type="checkbox"
+          class="toggle-input"
+          [checked]="useCustomExport()"
+          (change)="toggleCustomExport()"
+        />
+        <span class="toggle-label">Egyedi export beállítás erre a projektre</span>
+      </label>
+
+      @if (useCustomExport()) {
+        <div class="sub-settings">
+          <div class="number-input-row">
+            <label class="number-label" for="exportZipContent">ZIP tartalom</label>
+            <select
+              id="exportZipContent"
+              class="select-input"
+              [ngModel]="exportZipContent()"
+              (ngModelChange)="exportZipContent.set($event)"
+            >
+              <option value="all">Összes kép</option>
+              <option value="retouch_and_tablo">Retusált + Tablókép</option>
+              <option value="retouch_only">Csak retusált</option>
+              <option value="tablo_only">Csak tablókép</option>
+            </select>
+          </div>
+          <div class="number-input-row">
+            <label class="number-label" for="exportFileNaming">Fájlnév stratégia</label>
+            <select
+              id="exportFileNaming"
+              class="select-input"
+              [ngModel]="exportFileNaming()"
+              (ngModelChange)="exportFileNaming.set($event)"
+            >
+              <option value="original">Eredeti fájlnév</option>
+              <option value="student_name">Diák neve</option>
+              <option value="student_name_iptc">IPTC beágyazás</option>
+            </select>
+          </div>
+          <label class="toggle-row">
+            <input
+              type="checkbox"
+              class="toggle-input"
+              [checked]="exportAlwaysAsk()"
+              (change)="exportAlwaysAsk.set(!exportAlwaysAsk())"
+            />
+            <span class="toggle-label">Mindig kérdezzen rá letöltésnél</span>
+          </label>
+        </div>
+      }
+
+      <div class="info-row">
+        <lucide-icon [name]="ICONS.INFO" [size]="14" class="info-icon" />
+        <span>
+          Globális: <strong>{{ globalDefaultZipContent() === 'all' ? 'Összes kép' : globalDefaultZipContent() === 'retouch_only' ? 'Csak retusált' : globalDefaultZipContent() === 'tablo_only' ? 'Csak tablókép' : 'Retusált + Tablókép' }}</strong>
+        </span>
+      </div>
+    </div>
+
     <!-- Közös Mentés gomb -->
     <div class="action-row">
       <button

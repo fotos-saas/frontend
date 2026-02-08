@@ -19,6 +19,13 @@ export class GalleryMonitoringState {
   readonly exportingZip = signal<boolean>(false);
   readonly showDownloadDialog = signal<boolean>(false);
 
+  /** Export beállítások (projekt szintű effektív értékek) */
+  readonly exportSettings = signal<{
+    zip_content: string;
+    file_naming: string;
+    always_ask: boolean;
+  }>({ zip_content: 'all', file_naming: 'original', always_ask: true });
+
   /** Szűrt és ABC-rendezett személyek */
   readonly filteredPersons = computed<MonitoringPerson[]>(() => {
     let list = this.persons();

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, OnInit, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, OnInit, inject, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
@@ -24,6 +24,15 @@ export class GalleryMonitoringComponent implements OnInit {
   readonly ICONS = ICONS;
   readonly state = new GalleryMonitoringState();
 
+  /** Dialog defaults - computed-ként cast-olva a megfelelő típusra */
+  readonly dialogDefaults = computed<Partial<DownloadOptions>>(() => {
+    const s = this.state.exportSettings();
+    return {
+      zipContent: s.zip_content as DownloadOptions['zipContent'],
+      fileNaming: s.file_naming as DownloadOptions['fileNaming'],
+    };
+  });
+
   ngOnInit(): void {
     this.actions.loadMonitoring(this.state, this.projectId());
   }
@@ -38,7 +47,17 @@ export class GalleryMonitoringComponent implements OnInit {
   }
 
   onOpenDownloadDialog(): void {
-    this.state.showDownloadDialog.set(true);
+    const settings = this.state.exportSettings();
+    if (settings.always_ask) {
+      this.state.showDownloadDialog.set(true);
+    } else {
+      // Közvetlen letöltés a mentett beállításokkal
+      this.actions.downloadZip(this.state, this.projectId(), {
+        zipContent: settings.zip_content as DownloadOptions['zipContent'],
+        fileNaming: settings.file_naming as DownloadOptions['fileNaming'],
+        includeExcel: false,
+      });
+    }
   }
 
   onCloseDownloadDialog(): void {

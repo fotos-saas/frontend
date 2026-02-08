@@ -224,6 +224,13 @@ export class PartnerProjectService {
       free_edit_window_hours: number | null;
       effective_free_edit_window_hours: number;
       global_default_free_edit_window_hours: number;
+      export_zip_content: string | null;
+      export_file_naming: string | null;
+      export_always_ask: boolean | null;
+      effective_export: { zip_content: string; file_naming: string; always_ask: boolean };
+      global_default_zip_content: string;
+      global_default_file_naming: string;
+      global_export_always_ask: boolean;
     };
   }> {
     return this.http.get<{
@@ -234,6 +241,13 @@ export class PartnerProjectService {
         free_edit_window_hours: number | null;
         effective_free_edit_window_hours: number;
         global_default_free_edit_window_hours: number;
+        export_zip_content: string | null;
+        export_file_naming: string | null;
+        export_always_ask: boolean | null;
+        effective_export: { zip_content: string; file_naming: string; always_ask: boolean };
+        global_default_zip_content: string;
+        global_default_file_naming: string;
+        global_export_always_ask: boolean;
       };
     }>(`${this.baseUrl}/projects/${projectId}/settings`);
   }
@@ -244,6 +258,9 @@ export class PartnerProjectService {
   updateProjectSettings(projectId: number, data: {
     max_retouch_photos: number | null;
     free_edit_window_hours?: number | null;
+    export_zip_content?: string | null;
+    export_file_naming?: string | null;
+    export_always_ask?: boolean | null;
   }): Observable<{
     success: boolean;
     message: string;
@@ -252,6 +269,7 @@ export class PartnerProjectService {
       effective_max_retouch_photos: number;
       free_edit_window_hours: number | null;
       effective_free_edit_window_hours: number;
+      effective_export: { zip_content: string; file_naming: string; always_ask: boolean };
     };
   }> {
     return this.http.put<{
@@ -262,6 +280,7 @@ export class PartnerProjectService {
         effective_max_retouch_photos: number;
         free_edit_window_hours: number | null;
         effective_free_edit_window_hours: number;
+        effective_export: { zip_content: string; file_naming: string; always_ask: boolean };
       };
     }>(`${this.baseUrl}/projects/${projectId}/settings`, data);
   }
@@ -274,6 +293,9 @@ export class PartnerProjectService {
       default_max_retouch_photos: number;
       default_free_edit_window_hours: number;
       billing_enabled: boolean;
+      default_zip_content: string;
+      default_file_naming: string;
+      export_always_ask: boolean;
     };
   }> {
     return this.http.get<{
@@ -281,6 +303,9 @@ export class PartnerProjectService {
         default_max_retouch_photos: number;
         default_free_edit_window_hours: number;
         billing_enabled: boolean;
+        default_zip_content: string;
+        default_file_naming: string;
+        export_always_ask: boolean;
       };
     }>(`${this.baseUrl}/settings`);
   }
@@ -292,6 +317,9 @@ export class PartnerProjectService {
     default_max_retouch_photos: number | null;
     default_free_edit_window_hours?: number | null;
     billing_enabled?: boolean;
+    default_zip_content?: string;
+    default_file_naming?: string;
+    export_always_ask?: boolean;
   }): Observable<{
     success: boolean;
     message: string;
@@ -299,6 +327,9 @@ export class PartnerProjectService {
       default_max_retouch_photos: number;
       default_free_edit_window_hours: number;
       billing_enabled: boolean;
+      default_zip_content: string;
+      default_file_naming: string;
+      export_always_ask: boolean;
     };
   }> {
     return this.http.put<{
@@ -308,6 +339,9 @@ export class PartnerProjectService {
         default_max_retouch_photos: number;
         default_free_edit_window_hours: number;
         billing_enabled: boolean;
+        default_zip_content: string;
+        default_file_naming: string;
+        export_always_ask: boolean;
       };
     }>(`${this.baseUrl}/settings`, data);
   }

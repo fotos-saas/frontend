@@ -94,6 +94,85 @@
         }
       </div>
 
+    </div>
+
+    <!-- Export beállítások szekció -->
+    <div class="settings-section">
+      <div class="section-title">
+        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="18" />
+        <h2>Export beállítások</h2>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">ZIP tartalom alapértelmezés</span>
+            <span class="setting-description">
+              Milyen képeket tartalmazzon a ZIP letöltés alapértelmezetten.
+            </span>
+          </div>
+          <div class="setting-control">
+            <select
+              class="select-input"
+              [ngModel]="defaultZipContent()"
+              (ngModelChange)="defaultZipContent.set($event)"
+            >
+              <option value="all">Összes kép</option>
+              <option value="retouch_and_tablo">Retusált + Tablókép</option>
+              <option value="retouch_only">Csak retusált</option>
+              <option value="tablo_only">Csak tablókép</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Fájlnév stratégia</span>
+            <span class="setting-description">
+              Hogyan legyenek elnevezve a fájlok a letöltött ZIP-ben.
+            </span>
+          </div>
+          <div class="setting-control">
+            <select
+              class="select-input"
+              [ngModel]="defaultFileNaming()"
+              (ngModelChange)="defaultFileNaming.set($event)"
+            >
+              <option value="original">Eredeti fájlnév</option>
+              <option value="student_name">Diák neve</option>
+              <option value="student_name_iptc">IPTC beágyazás</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Mindig kérdezzen rá</span>
+            <span class="setting-description">
+              Ha aktív, ZIP letöltésnél mindig megjelenik a beállítás párbeszédablak.
+              Ha inaktív, a fenti alapértelmezésekkel tölt le azonnal.
+            </span>
+          </div>
+          <div class="setting-control">
+            <button
+              class="toggle-btn"
+              [class.toggle-btn--active]="exportAlwaysAsk()"
+              (click)="exportAlwaysAsk.set(!exportAlwaysAsk())"
+              type="button"
+            >
+              <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-label">{{ exportAlwaysAsk() ? 'Aktív' : 'Inaktív' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="action-row">
         <button
           class="save-btn"

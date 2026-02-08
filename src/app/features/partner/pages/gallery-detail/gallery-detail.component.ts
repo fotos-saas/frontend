@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -17,6 +17,7 @@ import { GalleryInfoBarComponent } from './components/gallery-info-bar/gallery-i
 import { GalleryPhotoListComponent } from './components/gallery-photo-list/gallery-photo-list.component';
 import { GalleryTabsComponent, GalleryTab } from './components/gallery-tabs/gallery-tabs.component';
 import { GalleryMonitoringComponent } from './components/gallery-monitoring/gallery-monitoring.component';
+import { DownloadDialogComponent } from './components/download-dialog/download-dialog.component';
 import { initTabFromFragment, setTabFragment } from '../../../../shared/utils/tab-persistence.util';
 
 @Component({
@@ -36,6 +37,7 @@ import { initTabFromFragment, setTabFragment } from '../../../../shared/utils/ta
     GalleryPhotoListComponent,
     GalleryTabsComponent,
     GalleryMonitoringComponent,
+    DownloadDialogComponent,
   ],
   providers: [GalleryDetailActionsService],
   templateUrl: './gallery-detail.component.html',
@@ -49,6 +51,7 @@ export class GalleryDetailComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly state = new GalleryDetailState();
+  readonly monitoringRef = viewChild<GalleryMonitoringComponent>('monitoringRef');
   projectId = 0;
 
   ngOnInit(): void {

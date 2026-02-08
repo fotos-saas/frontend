@@ -28,7 +28,7 @@
 
     <!-- MONITORING TAB -->
     @if (state.activeTab() === 'monitoring') {
-      <app-gallery-monitoring [projectId]="projectId" [galleryName]="state.gallery()!.name" />
+      <app-gallery-monitoring #monitoringRef [projectId]="projectId" [galleryName]="state.gallery()!.name" />
     }
 
     <!-- GALLERY TAB -->
@@ -248,6 +248,15 @@
     confirmText="Törlés"
     confirmType="danger"
     (resultEvent)="onDeletePhotosResult($event)"
+  />
+}
+
+<!-- Download dialog (monitoring) -->
+@if (monitoringRef()?.state?.showDownloadDialog()) {
+  <app-download-dialog
+    [defaults]="monitoringRef()!.dialogDefaults()"
+    (download)="monitoringRef()!.onDownloadZip($event)"
+    (close)="monitoringRef()!.onCloseDownloadDialog()"
   />
 }
 

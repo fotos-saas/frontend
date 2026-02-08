@@ -5,13 +5,13 @@ import { ICONS } from '../../../../../../shared/constants/icons.constants';
 import { MonitoringFilter } from '../../../../models/gallery-monitoring.models';
 import { GalleryMonitoringState } from './gallery-monitoring.state';
 import { GalleryMonitoringActionsService } from './gallery-monitoring-actions.service';
-import { DownloadDialogComponent, DownloadOptions } from '../download-dialog/download-dialog.component';
+import { DownloadOptions } from '../download-dialog/download-dialog.component';
 
 @Component({
   selector: 'app-gallery-monitoring',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideAngularModule, MatTooltipModule, DownloadDialogComponent],
+  imports: [LucideAngularModule, MatTooltipModule],
   providers: [GalleryMonitoringActionsService],
   templateUrl: './gallery-monitoring.component.html',
   styleUrl: './gallery-monitoring.component.scss',

@@ -81,6 +81,20 @@ export class AlbumDetailState {
   /** Lightbox aktuális index */
   readonly lightboxIndex = signal<number>(0);
 
+  // === WEBSHOP STATE ===
+
+  /** Webshop engedélyezve a partnernél */
+  readonly webshopEnabled = signal<boolean>(false);
+
+  /** Webshop share token az albumhoz */
+  readonly webshopToken = signal<string | null>(null);
+
+  /** Token generálás folyamatban */
+  readonly generatingToken = signal<boolean>(false);
+
+  /** Link másolva feedback */
+  readonly linkCopied = signal<boolean>(false);
+
   // === ACTION FLAGS ===
 
   /** Album mentés folyamatban */

@@ -18,6 +18,7 @@ import { PhotoSelectionState } from './photo-selection.state';
 import { ProjectContextHelper } from './helpers/project-context.helper';
 import { PhotoSelectionActionsService } from './photo-selection-actions.service';
 import { WorkflowStep, WorkflowPhoto, ReviewGroup, getStepInfo } from './models/workflow.models';
+import { WebshopInfo } from './components/completed-summary/completed-summary.component';
 
 // Components
 import { StepIndicatorComponent } from './components/step-indicator/step-indicator.component';
@@ -78,6 +79,7 @@ export class PhotoSelectionComponent {
   readonly projectContext = new ProjectContextHelper(this.authService);
   readonly showScheduleDialog = signal<boolean>(false);
   readonly reviewLoading = signal<boolean>(false);
+  readonly webshopInfo = signal<WebshopInfo | null>(null);
 
   private readonly project = toSignal(
     this.authService.project$.pipe(
@@ -107,6 +109,12 @@ export class PhotoSelectionComponent {
       const project = this.project();
       if (project?.tabloGalleryId) {
         this.actions.loadWorkflow(project.tabloGalleryId);
+      }
+      if (project?.webshop) {
+        this.webshopInfo.set({
+          enabled: project.webshop.enabled,
+          shopUrl: project.webshop.shop_url,
+        });
       }
     });
 

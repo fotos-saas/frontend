@@ -4,6 +4,11 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { WorkflowPhoto, ProgressData, ReviewGroups, ReviewGroup, ModificationInfo } from '../../models/workflow.models';
 import { SelectionGridComponent } from '../selection-grid/selection-grid.component';
 
+export interface WebshopInfo {
+  enabled: boolean;
+  shopUrl: string | null;
+}
+
 type TabKey = 'tablo' | 'retouch' | 'claiming';
 
 @Component({
@@ -19,6 +24,7 @@ export class CompletedSummaryComponent {
   readonly reviewGroups = input<ReviewGroups | null>(null);
   readonly reviewLoading = input<boolean>(false);
   readonly modificationInfo = input<ModificationInfo | null>(null);
+  readonly webshopInfo = input<WebshopInfo | null>(null);
 
   readonly photoClick = output<{ photos: ReviewGroup[]; index: number }>();
   readonly modifyClick = output<void>();

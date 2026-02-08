@@ -140,6 +140,11 @@ export interface TabloProject {
     logoUrl: string | null;
     hideBrandName: boolean;
   } | null;
+  /** Webshop fotónyomtatás (ha engedélyezve + token létezik) */
+  webshop?: {
+    enabled: boolean;
+    shop_url: string;
+  } | null;
 }
 
 /**

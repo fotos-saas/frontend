@@ -63,6 +63,7 @@ export class PartnerAlbumDetailComponent implements OnInit {
       return;
     }
     this.actions.loadAlbum(this.state, id);
+    this.actions.loadWebshopStatus(this.state, id);
   }
 
   // === HEADER EVENTS ===
@@ -170,6 +171,19 @@ export class PartnerAlbumDetailComponent implements OnInit {
 
   onNavigateLightbox(direction: number): void {
     this.state.navigateLightbox(direction);
+  }
+
+  // === WEBSHOP ===
+
+  onGenerateWebshopToken(): void {
+    const album = this.state.album();
+    if (album) {
+      this.actions.generateWebshopToken(this.state, album.id);
+    }
+  }
+
+  onCopyWebshopLink(): void {
+    this.actions.copyWebshopLink(this.state);
   }
 
   // === EXPORT ===

@@ -137,6 +137,46 @@
         <p class="text-gray-600 dark:text-gray-400">Nincsenek képek az albumban</p>
       </div>
     }
+
+    <!-- Webshop CTA -->
+    @if (state.webshopEnabled() && state.album()!.photos.length > 0) {
+      <div class="webshop-cta">
+        <div class="webshop-cta__icon">
+          <lucide-icon [name]="ICONS.STORE" [size]="20" />
+        </div>
+        <div class="webshop-cta__content">
+          <strong class="webshop-cta__title">Fotónyomtatás rendelés</strong>
+          <p class="webshop-cta__description">Küldj linket az ügyfélnek, ahol online rendelhet nyomtatást a képekből.</p>
+        </div>
+        <div class="webshop-cta__actions">
+          @if (state.webshopToken()) {
+            <button
+              type="button"
+              class="webshop-cta__btn webshop-cta__btn--copy"
+              (click)="onCopyWebshopLink()"
+              [matTooltip]="state.linkCopied() ? 'Másolva!' : 'Link másolása'"
+            >
+              <lucide-icon [name]="state.linkCopied() ? ICONS.CHECK : ICONS.COPY" [size]="16" />
+              {{ state.linkCopied() ? 'Másolva!' : 'Link másolása' }}
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="webshop-cta__btn webshop-cta__btn--generate"
+              [disabled]="state.generatingToken()"
+              (click)="onGenerateWebshopToken()"
+            >
+              @if (state.generatingToken()) {
+                <div class="spinner"></div>
+              } @else {
+                <lucide-icon [name]="ICONS.LINK" [size]="16" />
+              }
+              Link generálása
+            </button>
+          }
+        </div>
+      </div>
+    }
   }
 </div>
 

@@ -41,6 +41,28 @@
     </div>
   }
 
+  <!-- Webshop CTA -->
+  @if (webshopInfo()?.enabled && webshopInfo()?.shopUrl) {
+    <div class="completed-summary__webshop-cta">
+      <div class="completed-summary__webshop-icon">
+        <lucide-icon [name]="ICONS.STORE" [size]="22" />
+      </div>
+      <div class="completed-summary__webshop-content">
+        <strong>Szeretnél nyomtatott képeket rendelni?</strong>
+        <p>Válaszd ki kedvenc képeidet és rendeld meg nyomtatott formában!</p>
+      </div>
+      <a
+        class="completed-summary__webshop-btn"
+        [href]="webshopInfo()!.shopUrl!"
+        target="_blank"
+        rel="noopener"
+      >
+        <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="16" />
+        Megrendelés
+      </a>
+    </div>
+  }
+
   <!-- Betöltés -->
   @if (reviewLoading() && !hasReview()) {
     <div class="completed-summary__loading">

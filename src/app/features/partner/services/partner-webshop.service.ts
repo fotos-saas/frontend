@@ -175,4 +175,24 @@ export class PartnerWebshopService {
   getOrderStats(): Observable<{ stats: OrderStats }> {
     return this.http.get<{ stats: OrderStats }>(`${this.baseUrl}/orders/stats`);
   }
+
+  // Status & Token
+  getWebshopStatus(): Observable<{ is_enabled: boolean; is_initialized: boolean }> {
+    return this.http.get<{ is_enabled: boolean; is_initialized: boolean }>(`${this.baseUrl}/status`);
+  }
+
+  generateToken(albumId?: number, galleryId?: number): Observable<{ token: string; message: string }> {
+    return this.http.post<{ token: string; message: string }>(`${this.baseUrl}/generate-token`, {
+      album_id: albumId ?? null,
+      gallery_id: galleryId ?? null,
+    });
+  }
+
+  getAlbumToken(albumId: number): Observable<{ token: string | null }> {
+    return this.http.get<{ token: string | null }>(`${this.baseUrl}/albums/${albumId}/token`);
+  }
+
+  getGalleryToken(galleryId: number): Observable<{ token: string | null }> {
+    return this.http.get<{ token: string | null }>(`${this.baseUrl}/galleries/${galleryId}/token`);
+  }
 }

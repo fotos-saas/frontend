@@ -1,7 +1,9 @@
 import { Injectable, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { PartnerOrdersService } from '../../../services/partner-orders.service';
+import { PartnerWebshopService } from '../../../services/partner-webshop.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { AlbumDetailState } from './album-detail.state';
 import { AlbumEditFormData } from './components/album-edit-modal/album-edit-modal.component';
@@ -15,6 +17,7 @@ import { AlbumEditFormData } from './components/album-edit-modal/album-edit-moda
 @Injectable()
 export class AlbumDetailActionsService {
   private readonly ordersService = inject(PartnerOrdersService);
+  private readonly webshopService = inject(PartnerWebshopService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -279,6 +282,51 @@ export class AlbumDetailActionsService {
           state.exporting.set(false);
         }
       });
+  }
+
+  // === WEBSHOP ===
+
+  loadWebshopStatus(state: AlbumDetailState, albumId: number): void {
+    forkJoin({
+      status: this.webshopService.getWebshopStatus(),
+      token: this.webshopService.getAlbumToken(albumId),
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ status, token }) => {
+        state.webshopEnabled.set(status.is_enabled);
+        state.webshopToken.set(token.token);
+      },
+      error: () => {
+        // Webshop nem elérhető - nem kritikus hiba
+        state.webshopEnabled.set(false);
+      }
+    });
+  }
+
+  generateWebshopToken(state: AlbumDetailState, albumId: number): void {
+    state.generatingToken.set(true);
+    this.webshopService.generateToken(albumId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        state.webshopToken.set(res.token);
+        state.generatingToken.set(false);
+        this.toast.success('Siker', 'Webshop link generálva');
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error('Hiba', err.error?.message || 'Nem sikerült a link generálása');
+        state.generatingToken.set(false);
+      }
+    });
+  }
+
+  copyWebshopLink(state: AlbumDetailState): void {
+    const token = state.webshopToken();
+    if (!token) return;
+
+    const url = `${window.location.origin}/shop/${token}`;
+    navigator.clipboard.writeText(url).then(() => {
+      state.linkCopied.set(true);
+      this.toast.success('Siker', 'Webshop link vágólapra másolva');
+      setTimeout(() => state.linkCopied.set(false), 2000);
+    });
   }
 
   // === PRIVATE HELPERS ===

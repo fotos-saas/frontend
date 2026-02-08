@@ -1,0 +1,29 @@
+<div class="billing-page page-card">
+  <header class="page-header">
+    <lucide-icon [name]="ICONS.RECEIPT" [size]="22" />
+    <h1>Számlázás</h1>
+  </header>
+  <p class="page-description">Állítsd be a számlázási szolgáltatód és készíts számlákat közvetlenül a rendszerből.</p>
+
+  <nav class="tabs-nav">
+    @for (tab of tabs; track tab.id) {
+      <button
+        class="tab-btn"
+        [class.tab-btn--active]="activeTab() === tab.id"
+        (click)="onTabChange(tab.id)"
+      >
+        <lucide-icon [name]="tab.icon" [size]="16" />
+        <span>{{ tab.label }}</span>
+      </button>
+    }
+  </nav>
+
+  @switch (activeTab()) {
+    @case ('settings') {
+      <app-invoice-settings />
+    }
+    @case ('invoices') {
+      <app-invoice-list />
+    }
+  }
+</div>

@@ -331,6 +331,10 @@ export const ICONS = {
   // Monitoring & Export
   ACTIVITY: 'activity',
   ARCHIVE: 'archive',
+
+  // Invoicing
+  RECEIPT: 'receipt',
+  BANKNOTE: 'banknote',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

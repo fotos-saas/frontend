@@ -1,0 +1,143 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+>
+  <div class="dialog-panel dialog-panel--lg">
+    <div class="dialog-header">
+      <h2>Új számla</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="18" />
+      </button>
+    </div>
+
+    <div class="dialog-body">
+      <!-- Típus -->
+      <div class="form-group">
+        <label class="form-label">Számla típus</label>
+        <select class="select-input" [value]="type()" (change)="type.set($any($event.target).value)">
+          <option value="invoice">Számla</option>
+          <option value="proforma">Díjbekérő</option>
+          <option value="deposit">Előlegszámla</option>
+        </select>
+      </div>
+
+      <!-- Vevő adatok -->
+      <div class="form-section">
+        <h3 class="form-section-title">Vevő adatok</h3>
+        <div class="form-row">
+          <div class="form-group form-group--half">
+            <label class="form-label">Név *</label>
+            <input type="text" class="text-input" [value]="customerName()" (input)="customerName.set($any($event.target).value)" placeholder="Vevő neve" />
+          </div>
+          <div class="form-group form-group--half">
+            <label class="form-label">Email</label>
+            <input type="email" class="text-input" [value]="customerEmail()" (input)="customerEmail.set($any($event.target).value)" placeholder="vevo@email.hu" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group form-group--half">
+            <label class="form-label">Adószám</label>
+            <input type="text" class="text-input" [value]="customerTaxNumber()" (input)="customerTaxNumber.set($any($event.target).value)" placeholder="12345678-1-42" />
+          </div>
+          <div class="form-group form-group--half">
+            <label class="form-label">Cím</label>
+            <input type="text" class="text-input" [value]="customerAddress()" (input)="customerAddress.set($any($event.target).value)" placeholder="1234 Budapest, Példa u. 1." />
+          </div>
+        </div>
+      </div>
+
+      <!-- Dátumok -->
+      <div class="form-section">
+        <h3 class="form-section-title">Dátumok</h3>
+        <div class="form-row form-row--three">
+          <div class="form-group">
+            <label class="form-label">Kiállítás</label>
+            <input type="date" class="text-input" [value]="issueDate()" (input)="issueDate.set($any($event.target).value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Teljesítés</label>
+            <input type="date" class="text-input" [value]="fulfillmentDate()" (input)="fulfillmentDate.set($any($event.target).value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fizetési határidő</label>
+            <input type="date" class="text-input" [value]="dueDate()" (input)="dueDate.set($any($event.target).value)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Tételek -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <h3 class="form-section-title">Tételek</h3>
+          <button class="add-item-btn" (click)="addItem()">
+            <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+            Tétel hozzáadása
+          </button>
+        </div>
+
+        @for (item of items(); track $index; let i = $index) {
+          <div class="item-row">
+            <div class="item-main">
+              <input type="text" class="text-input item-name" [value]="item.name" (input)="updateItem(i, 'name', $any($event.target).value)" placeholder="Megnevezés *" />
+              <input type="number" class="number-input item-qty" [value]="item.quantity" (input)="updateItem(i, 'quantity', +$any($event.target).value)" min="0.01" step="1" />
+              <select class="select-input item-unit" [value]="item.unit" (change)="updateItem(i, 'unit', $any($event.target).value)">
+                <option value="db">db</option>
+                <option value="ora">óra</option>
+                <option value="alkalom">alkalom</option>
+                <option value="csomag">csomag</option>
+              </select>
+              <input type="number" class="number-input item-price" [value]="item.unitPrice" (input)="updateItem(i, 'unitPrice', +$any($event.target).value)" min="0" step="100" placeholder="Egységár" />
+              <span class="item-total">{{ formatAmount(item.quantity * item.unitPrice) }} Ft</span>
+              @if (items().length > 1) {
+                <button class="remove-item-btn" (click)="removeItem(i)">
+                  <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Összesítő -->
+      <div class="totals">
+        <div class="total-row">
+          <span>Nettó:</span>
+          <span class="total-amount">{{ formatAmount(totals().net) }} Ft</span>
+        </div>
+        <div class="total-row">
+          <span>ÁFA ({{ vatPercentage }}%):</span>
+          <span class="total-amount">{{ formatAmount(totals().vat) }} Ft</span>
+        </div>
+        <div class="total-row total-row--gross">
+          <span>Bruttó:</span>
+          <span class="total-amount">{{ formatAmount(totals().gross) }} Ft</span>
+        </div>
+      </div>
+
+      <!-- Megjegyzés -->
+      <div class="form-group">
+        <label class="form-label">Megjegyzés</label>
+        <textarea class="textarea-input" rows="2" [value]="comment()" (input)="comment.set($any($event.target).value)" placeholder="Opcionális megjegyzés..."></textarea>
+      </div>
+
+      <!-- Azonnali küldés -->
+      <div class="sync-toggle">
+        <button class="toggle-btn" [class.toggle-btn--active]="syncImmediately()" (click)="onToggleSyncImmediately()">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          <span class="toggle-label">{{ syncImmediately() ? 'Azonnali kiállítás' : 'Piszkozatként mentés' }}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button class="cancel-btn" (click)="close.emit()">Mégse</button>
+      <button class="submit-btn" (click)="submit()" [disabled]="saving()">
+        @if (saving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="animate-spin" />
+        }
+        {{ syncImmediately() ? 'Kiállítás' : 'Mentés' }}
+      </button>
+    </div>
+  </div>
+</div>

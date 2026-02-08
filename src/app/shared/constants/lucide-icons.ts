@@ -144,6 +144,9 @@ import {
   // Monitoring & Export
   Activity,
   Archive,
+  // Invoicing
+  Receipt,
+  Banknote,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -284,4 +287,7 @@ export const LUCIDE_ICONS_MAP = {
   // Monitoring & Export
   Activity,
   Archive,
+  // Invoicing
+  Receipt,
+  Banknote,
 };

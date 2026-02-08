@@ -1,0 +1,152 @@
+<!-- Statisztika kártyák -->
+@if (statistics(); as stats) {
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Összes bevétel</div>
+      <div class="stat-value">{{ formatAmount(stats.total_gross, 'Ft') }}</div>
+      <div class="stat-count">{{ stats.total_count }} számla</div>
+    </div>
+    <div class="stat-card stat-card--green">
+      <div class="stat-label">Fizetve</div>
+      <div class="stat-value">{{ formatAmount(stats.paid_gross, 'Ft') }}</div>
+      <div class="stat-count">{{ stats.paid_count }} számla</div>
+    </div>
+    <div class="stat-card stat-card--orange">
+      <div class="stat-label">Lejárt</div>
+      <div class="stat-value">{{ formatAmount(stats.overdue_gross, 'Ft') }}</div>
+      <div class="stat-count">{{ stats.overdue_count }} számla</div>
+    </div>
+    <div class="stat-card stat-card--blue">
+      <div class="stat-label">Függő</div>
+      <div class="stat-value">{{ formatAmount(stats.pending_gross, 'Ft') }}</div>
+      <div class="stat-count">{{ stats.pending_count }} számla</div>
+    </div>
+  </div>
+}
+
+<!-- Szűrők + Új számla -->
+<div class="filters">
+  <div class="filters-left">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés számlaszámra vagy névre..."
+        [value]="searchTerm()"
+        (input)="onSearch($any($event.target).value)"
+      />
+    </div>
+    <select class="filter-select" [value]="statusFilter()" (change)="onStatusFilter($any($event.target).value)">
+      <option value="">Összes státusz</option>
+      <option value="draft">Piszkozat</option>
+      <option value="sent">Kiküldve</option>
+      <option value="paid">Fizetve</option>
+      <option value="cancelled">Sztornózva</option>
+      <option value="overdue">Lejárt</option>
+    </select>
+    <select class="filter-select" [value]="yearFilter()" (change)="onYearFilter($any($event.target).value)">
+      @for (year of getYearOptions(); track year) {
+        <option [value]="year">{{ year }}</option>
+      }
+    </select>
+  </div>
+  <button class="btn-primary" (click)="showCreateDialog.set(true)">
+    <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+    Új számla
+  </button>
+</div>
+
+<!-- Lista -->
+@if (loading()) {
+  <div class="skeleton-list">
+    @for (i of [1,2,3]; track i) {
+      <div class="skeleton-row"></div>
+    }
+  </div>
+} @else if (invoices().length === 0) {
+  <div class="empty-state">
+    <lucide-icon [name]="ICONS.RECEIPT" [size]="48" />
+    <h3>Nincsenek számlák</h3>
+    <p>Még nem készítettél számlát. Kattints az "Új számla" gombra az első számla kiállításához.</p>
+  </div>
+} @else {
+  <div class="table-header">
+    <span class="th th-number">Számlaszám</span>
+    <span class="th th-customer">Vevő</span>
+    <span class="th th-amount">Összeg</span>
+    <span class="th th-status">Státusz</span>
+    <span class="th th-date">Dátum</span>
+    <span class="th th-actions">Műveletek</span>
+  </div>
+
+  <div class="row-grid">
+    @for (invoice of invoices(); track invoice.id; let i = $index) {
+      <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+        <span class="td td-number">
+          <span class="invoice-number">{{ invoice.invoice_number ?? 'Piszkozat' }}</span>
+          @if (invoice.project) {
+            <span class="invoice-project">{{ invoice.project.name }}</span>
+          }
+        </span>
+        <span class="td td-customer">{{ invoice.customer_name }}</span>
+        <span class="td td-amount">{{ formatAmount(invoice.gross_amount, invoice.currency) }}</span>
+        <span class="td td-status">
+          <span class="status-badge" [style.background]="getStatusColor(invoice.status) + '1a'" [style.color]="getStatusColor(invoice.status)">
+            {{ getStatusLabel(invoice.status) }}
+          </span>
+        </span>
+        <span class="td td-date">{{ formatDate(invoice.issue_date) }}</span>
+        <span class="td td-actions">
+          @if (invoice.status === 'draft') {
+            <button class="action-btn" matTooltip="Kiállítás" (click)="syncInvoice(invoice)" [disabled]="syncing() === invoice.id">
+              @if (syncing() === invoice.id) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="animate-spin" />
+              } @else {
+                <lucide-icon [name]="ICONS.SEND" [size]="16" />
+              }
+            </button>
+          }
+          @if (invoice.status === 'sent' || invoice.status === 'paid') {
+            <button class="action-btn" matTooltip="PDF letöltés" (click)="downloadPdf(invoice)">
+              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+            </button>
+          }
+          @if (invoice.status === 'sent') {
+            <button class="action-btn action-btn--danger" matTooltip="Sztornó" (click)="cancelInvoice(invoice)">
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+            </button>
+          }
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- Lapozó -->
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === 1"
+        (click)="onPageChange(currentPage() - 1)"
+      >
+        <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+      </button>
+      <span class="page-info">{{ currentPage() }} / {{ totalPages() }}</span>
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === totalPages()"
+        (click)="onPageChange(currentPage() + 1)"
+      >
+        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+      </button>
+    </div>
+  }
+}
+
+<!-- Számla készítés dialog -->
+@if (showCreateDialog()) {
+  <app-invoice-create-dialog
+    (close)="showCreateDialog.set(false)"
+    (created)="onInvoiceCreated()"
+  />
+}

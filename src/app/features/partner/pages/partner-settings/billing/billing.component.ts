@@ -1,29 +1,36 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { InvoiceSettingsComponent } from './tabs/invoice-settings/invoice-settings.component';
+import { InvoiceListComponent } from './tabs/invoice-list/invoice-list.component';
+
+export type BillingTab = 'settings' | 'invoices';
+
+interface BillingTabDef {
+  id: BillingTab;
+  label: string;
+  icon: string;
+}
+
+const BILLING_TABS: BillingTabDef[] = [
+  { id: 'settings', label: 'Beállítások', icon: ICONS.SETTINGS },
+  { id: 'invoices', label: 'Számlák', icon: ICONS.RECEIPT },
+];
 
 @Component({
   selector: 'app-billing',
   standalone: true,
-  template: `
-    <div class="billing-page page-card">
-      <h1>Számlázás</h1>
-      <p class="placeholder-text">Hamarosan itt lesznek a számlázási beállítások.</p>
-    </div>
-  `,
-  styles: [`
-    .billing-page {
-      h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: var(--color-text);
-      }
-
-      .placeholder-text {
-        color: var(--color-text-muted);
-        font-size: 0.95rem;
-      }
-    }
-  `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  imports: [LucideAngularModule, InvoiceSettingsComponent, InvoiceListComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './billing.component.html',
+  styleUrl: './billing.component.scss',
 })
-export class BillingComponent {}
+export class BillingComponent {
+  readonly ICONS = ICONS;
+  readonly tabs = BILLING_TABS;
+  readonly activeTab = signal<BillingTab>('settings');
+
+  onTabChange(tab: BillingTab): void {
+    this.activeTab.set(tab);
+  }
+}

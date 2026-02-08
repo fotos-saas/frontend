@@ -3,7 +3,6 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 import { PhotoThumbListComponent, ThumbPhoto } from '../../../../../../shared/components/photo-thumb-list';
-import { MediaLightboxComponent } from '../../../../../../shared/components/media-lightbox/media-lightbox.component';
 import { MonitoringFilter, SelectionPhoto } from '../../../../models/gallery-monitoring.models';
 import { GalleryMonitoringState } from './gallery-monitoring.state';
 import { GalleryMonitoringActionsService } from './gallery-monitoring-actions.service';
@@ -13,7 +12,7 @@ import { DownloadOptions } from '../download-dialog/download-dialog.component';
   selector: 'app-gallery-monitoring',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideAngularModule, MatTooltipModule, PhotoThumbListComponent, MediaLightboxComponent],
+  imports: [LucideAngularModule, MatTooltipModule, PhotoThumbListComponent],
   providers: [GalleryMonitoringActionsService],
   templateUrl: './gallery-monitoring.component.html',
   styleUrl: './gallery-monitoring.component.scss',

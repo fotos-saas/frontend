@@ -262,13 +262,3 @@
     </div>
   }
 }
-
-<!-- Lightbox (page-card-on kívül, backdrop-filter stacking context miatt) -->
-@if (state.lightboxOpen()) {
-  <app-media-lightbox
-    [media]="state.lightboxMedia()"
-    [currentIndex]="state.lightboxIndex()"
-    (close)="onLightboxClose()"
-    (navigate)="onLightboxNavigate($event)"
-  />
-}

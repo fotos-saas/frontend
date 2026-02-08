@@ -72,6 +72,26 @@ $transition: 0.2s ease;
   &:hover { background: rgba($color-error, 0.1); }
 }
 
+// Done badge (finalized state)
+.photo-selection__done-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 100px;
+  white-space: nowrap;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+}
+
 // Content area
 .photo-selection__content {
   flex: 1 1 auto;

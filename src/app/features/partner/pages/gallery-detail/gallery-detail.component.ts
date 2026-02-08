@@ -14,6 +14,8 @@ import { GalleryDetailActionsService } from './gallery-detail-actions.service';
 import { GalleryHeaderComponent } from './components/gallery-header/gallery-header.component';
 import { GalleryInfoBarComponent } from './components/gallery-info-bar/gallery-info-bar.component';
 import { GalleryPhotoListComponent } from './components/gallery-photo-list/gallery-photo-list.component';
+import { GalleryTabsComponent, GalleryTab } from './components/gallery-tabs/gallery-tabs.component';
+import { GalleryMonitoringComponent } from './components/gallery-monitoring/gallery-monitoring.component';
 
 @Component({
   selector: 'app-gallery-detail',
@@ -30,6 +32,8 @@ import { GalleryPhotoListComponent } from './components/gallery-photo-list/galle
     GalleryHeaderComponent,
     GalleryInfoBarComponent,
     GalleryPhotoListComponent,
+    GalleryTabsComponent,
+    GalleryMonitoringComponent,
   ],
   providers: [GalleryDetailActionsService],
   templateUrl: './gallery-detail.component.html',
@@ -42,7 +46,7 @@ export class GalleryDetailComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly state = new GalleryDetailState();
-  private projectId = 0;
+  projectId = 0;
 
   ngOnInit(): void {
     this.projectId = +this.route.snapshot.params['id'];
@@ -125,6 +129,12 @@ export class GalleryDetailComponent implements OnInit {
 
   onDeadlineExtend(days: number): void {
     this.actions.extendDeadline(this.state, this.projectId, days);
+  }
+
+  // === TABS ===
+
+  onTabChange(tab: GalleryTab): void {
+    this.state.activeTab.set(tab);
   }
 
   // === NAVIGATION ===

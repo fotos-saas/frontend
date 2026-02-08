@@ -3,6 +3,7 @@ import { DialogStateHelper } from '../../../../shared/helpers/dialog-state.helpe
 import { GalleryDetails, GalleryPhoto, GalleryProgress } from '../../models/gallery.models';
 import { WorkflowPhoto } from '../../../photo-selection/models/workflow.models';
 import { LightboxMediaItem } from '../../../../shared/components/media-lightbox/media-lightbox.types';
+import type { GalleryTab } from './components/gallery-tabs/gallery-tabs.component';
 
 /**
  * Gallery Detail State
@@ -11,6 +12,10 @@ import { LightboxMediaItem } from '../../../../shared/components/media-lightbox/
  * Az AlbumDetailState mintájára épül.
  */
 export class GalleryDetailState {
+  // === TAB STATE ===
+
+  readonly activeTab = signal<GalleryTab>('gallery');
+
   // === GALLERY STATE ===
 
   readonly loading = signal<boolean>(true);
@@ -287,6 +292,7 @@ export class GalleryDetailState {
   }
 
   reset(): void {
+    this.activeTab.set('gallery');
     this.loading.set(true);
     this.gallery.set(null);
     this.viewMode.set('list');

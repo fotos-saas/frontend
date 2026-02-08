@@ -98,6 +98,7 @@ import type {
   CreateGalleryResponse,
   GalleryProgress,
 } from '../models/gallery.models';
+import type { MonitoringResponse } from '../models/gallery-monitoring.models';
 
 /**
  * Partner API Service - Backward compatibility facade.
@@ -390,6 +391,10 @@ export class PartnerService {
 
   getGalleryProgress(projectId: number): Observable<GalleryProgress> {
     return this.galleryService.getGalleryProgress(projectId);
+  }
+
+  getGalleryMonitoring(projectId: number): Observable<MonitoringResponse> {
+    return this.galleryService.getMonitoring(projectId);
   }
 
   // ============================================

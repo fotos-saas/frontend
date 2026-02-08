@@ -140,7 +140,10 @@ import {
   EyeOff,
   // Deadline countdown
   Hourglass,
-  Timer
+  Timer,
+  // Monitoring & Export
+  Activity,
+  Archive,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -277,5 +280,8 @@ export const LUCIDE_ICONS_MAP = {
   EyeOff,
   // Deadline countdown
   Hourglass,
-  Timer
+  Timer,
+  // Monitoring & Export
+  Activity,
+  Archive,
 };

@@ -20,6 +20,19 @@
       (back)="onBack()"
     />
 
+    <!-- Tabs -->
+    <app-gallery-tabs
+      [activeTab]="state.activeTab()"
+      (tabChange)="onTabChange($event)"
+    />
+
+    <!-- MONITORING TAB -->
+    @if (state.activeTab() === 'monitoring') {
+      <app-gallery-monitoring [projectId]="projectId" />
+    }
+
+    <!-- GALLERY TAB -->
+    @if (state.activeTab() === 'gallery') {
     <!-- Info Bar -->
     <app-gallery-info-bar
       [photosCount]="state.gallery()!.photosCount"
@@ -210,6 +223,7 @@
         <p class="text-sm text-gray-400 mt-1">Húzz ide képeket vagy kattints a feltöltő területre</p>
       </div>
     }
+    } <!-- /gallery tab -->
   }
 </div>
 

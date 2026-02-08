@@ -1,0 +1,173 @@
+<!-- Loading skeleton -->
+@if (state.loading()) {
+  <div class="loading-state">
+    <div class="summary-cards">
+      @for (_ of [1,2,3,4,5]; track _) {
+        <div class="summary-card skeleton-shimmer"></div>
+      }
+    </div>
+    @for (_ of [1,2,3,4,5]; track _) {
+      <div class="skeleton-row skeleton-shimmer"></div>
+    }
+  </div>
+}
+
+@if (!state.loading()) {
+  <!-- Összefoglaló kártyák -->
+  @if (state.summary(); as s) {
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="summary-card__value">{{ s.totalPersons }}</div>
+        <div class="summary-card__label">Összesen</div>
+      </div>
+      <div class="summary-card summary-card--success">
+        <div class="summary-card__value">{{ s.finalized }}</div>
+        <div class="summary-card__label">Véglegesített</div>
+      </div>
+      <div class="summary-card summary-card--info">
+        <div class="summary-card__value">{{ s.inProgress }}</div>
+        <div class="summary-card__label">Folyamatban</div>
+      </div>
+      <div class="summary-card summary-card--muted">
+        <div class="summary-card__value">{{ s.notOpened }}</div>
+        <div class="summary-card__label">Nem kezdte el</div>
+      </div>
+      @if (s.staleCount > 0) {
+        <div class="summary-card summary-card--warning">
+          <div class="summary-card__value">{{ s.staleCount }}</div>
+          <div class="summary-card__label">Figyelmeztetés</div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Szűrő sáv -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon class="search-icon" [name]="ICONS.SEARCH" [size]="16" />
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Keresés név alapján..."
+        [value]="state.searchQuery()"
+        (input)="state.setSearchQuery(searchInput.value)"
+        #searchInput
+      />
+      @if (state.searchQuery()) {
+        <button class="clear-btn" (click)="state.setSearchQuery(''); searchInput.value = ''">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <select
+      class="filter-select"
+      [value]="state.filterStatus()"
+      (change)="onFilterChange($event)"
+    >
+      <option value="all">Mindenki</option>
+      <option value="finalized">Véglegesített</option>
+      <option value="in_progress">Folyamatban</option>
+      <option value="not_started">Nem kezdte el</option>
+      <option value="stale">Figyelmeztetés</option>
+    </select>
+
+    <div class="filter-actions">
+      <button
+        class="action-btn-outlined"
+        matTooltip="Excel export"
+        [disabled]="true"
+      >
+        <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
+        Excel
+      </button>
+      <button
+        class="action-btn-outlined"
+        matTooltip="ZIP letöltés"
+        [disabled]="true"
+      >
+        <lucide-icon [name]="ICONS.ARCHIVE" [size]="16" />
+        ZIP
+      </button>
+    </div>
+  </div>
+
+  <!-- Táblázat fejléc -->
+  <div class="table-header">
+    <span class="th th-name">Név</span>
+    <span class="th th-type">Típus</span>
+    <span class="th th-status">Státusz</span>
+    <span class="th th-step">Lépés</span>
+    <span class="th th-retouch">Retusálás</span>
+    <span class="th th-activity">Utolsó aktivitás</span>
+  </div>
+
+  <!-- Sorok -->
+  @if (state.filteredPersons().length > 0) {
+    <div class="row-grid">
+      @for (person of state.filteredPersons(); track person.personId; let i = $index) {
+        <div
+          class="list-row"
+          [class.list-row--stale]="person.staleWarning"
+          [style.animation-delay]="i * 0.03 + 's'"
+        >
+          <span class="cell cell-name">
+            <span class="person-name">{{ person.name }}</span>
+          </span>
+          <span class="cell cell-type">
+            <span class="type-badge" [class.type-badge--teacher]="person.type === 'teacher'">
+              {{ person.type === 'student' ? 'Diák' : 'Tanár' }}
+            </span>
+          </span>
+          <span class="cell cell-status">
+            @if (person.workflowStatus === 'finalized') {
+              <span class="status-badge status-badge--finalized">
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                Véglegesített
+              </span>
+            } @else if (person.workflowStatus === 'in_progress') {
+              <span class="status-badge status-badge--progress">
+                <lucide-icon [name]="ICONS.LOADER" [size]="14" />
+                Folyamatban
+              </span>
+            } @else {
+              <span class="status-badge status-badge--not-started">
+                <lucide-icon [name]="ICONS.CIRCLE" [size]="14" />
+                Nem kezdte el
+              </span>
+            }
+          </span>
+          <span class="cell cell-step">
+            {{ getStepLabel(person.currentStep) }}
+          </span>
+          <span class="cell cell-retouch">
+            @if (person.retouchCount > 0) {
+              {{ person.retouchCount }} kép
+            } @else {
+              -
+            }
+          </span>
+          <span class="cell cell-activity">
+            @if (person.staleWarning) {
+              <span class="stale-warning" matTooltip="Több mint 5 napja inaktív">
+                <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+                {{ person.daysSinceLastActivity }} napja
+              </span>
+            } @else if (person.lastActivityAt) {
+              {{ formatDate(person.lastActivityAt) }}
+            } @else {
+              -
+            }
+          </span>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Üres állapot -->
+    <div class="empty-state">
+      <lucide-icon class="empty-icon" [name]="ICONS.USERS" [size]="48" />
+      <h3>Nincs találat</h3>
+      <p>A keresési feltételeknek egyetlen személy sem felel meg.</p>
+    </div>
+  }
+}

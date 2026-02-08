@@ -327,6 +327,10 @@ export const ICONS = {
   // Deadline countdown
   HOURGLASS: 'hourglass',
   TIMER: 'timer',
+
+  // Monitoring & Export
+  ACTIVITY: 'activity',
+  ARCHIVE: 'archive',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

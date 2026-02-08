@@ -9,6 +9,7 @@ import {
   GalleryPhoto,
   GalleryProgress,
 } from '../models/gallery.models';
+import { MonitoringResponse } from '../models/gallery-monitoring.models';
 
 /**
  * Galéria kezelés service.
@@ -190,6 +191,15 @@ export class PartnerGalleryService {
   getGalleryProgress(projectId: number): Observable<GalleryProgress> {
     return this.http.get<GalleryProgress>(
       `${this.baseUrl}/projects/${projectId}/gallery/progress`,
+    );
+  }
+
+  /**
+   * Galéria monitoring adatok lekérése (személyek + haladás)
+   */
+  getMonitoring(projectId: number): Observable<MonitoringResponse> {
+    return this.http.get<MonitoringResponse>(
+      `${this.baseUrl}/projects/${projectId}/gallery/monitoring`,
     );
   }
 

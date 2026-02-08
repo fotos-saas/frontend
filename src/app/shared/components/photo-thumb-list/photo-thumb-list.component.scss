@@ -1,0 +1,97 @@
+// === Photo Thumb List ===
+// Újrahasználható thumbnail grid komponens.
+// Méretek: sm (48px), md (72px, default), lg (96px)
+
+$sizes: (
+  sm: 48px,
+  md: 72px,
+  lg: 96px,
+);
+
+.thumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -3px;
+
+  &__item {
+    width: map-get($sizes, md);
+    height: map-get($sizes, md);
+    margin: 3px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: scale(1.06);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      z-index: 1;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #94a3b8;
+  }
+
+  // === Méret variánsok ===
+
+  &--sm .thumb-list__item {
+    width: map-get($sizes, sm);
+    height: map-get($sizes, sm);
+    border-radius: 5px;
+  }
+
+  &--lg .thumb-list__item {
+    width: map-get($sizes, lg);
+    height: map-get($sizes, lg);
+    border-radius: 8px;
+  }
+
+  // === Kiemelés (pl. tablókép) ===
+
+  &--highlight .thumb-list__item {
+    border-color: #3b82f6;
+    border-width: 2px;
+  }
+}
+
+// === Responsive ===
+
+@media (max-width: 768px) {
+  .thumb-list {
+    &--sm .thumb-list__item {
+      width: 40px;
+      height: 40px;
+    }
+
+    &__item {
+      width: 56px;
+      height: 56px;
+    }
+
+    &--lg .thumb-list__item {
+      width: 72px;
+      height: 72px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb-list__item {
+    transition: none !important;
+  }
+}

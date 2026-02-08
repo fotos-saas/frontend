@@ -1,0 +1,23 @@
+<div
+  class="thumb-list"
+  [class.thumb-list--sm]="size() === 'sm'"
+  [class.thumb-list--lg]="size() === 'lg'"
+  [class.thumb-list--highlight]="highlight()"
+>
+  @for (photo of photos(); track photo.id) {
+    <div class="thumb-list__item" [matTooltip]="photo.originalName || ''">
+      @if (photo.thumbUrl) {
+        <img
+          [src]="photo.thumbUrl"
+          [alt]="photo.originalName || 'Kép'"
+          loading="lazy"
+          (error)="onImageError($event)"
+        />
+      } @else {
+        <div class="thumb-list__placeholder">
+          <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+        </div>
+      }
+    </div>
+  }
+</div>

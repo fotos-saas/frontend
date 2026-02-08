@@ -208,19 +208,7 @@
                       <span>Saját képek</span>
                       <span class="detail-group__count">{{ sel.claimed.length }} kép</span>
                     </div>
-                    <div class="detail-group__thumbs">
-                      @for (photo of sel.claimed; track photo.id) {
-                        <div class="thumb-item" [matTooltip]="photo.originalName || ''">
-                          @if (photo.thumbUrl) {
-                            <img [src]="photo.thumbUrl" [alt]="photo.originalName || 'Kép'" loading="lazy" />
-                          } @else {
-                            <div class="thumb-placeholder">
-                              <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
-                            </div>
-                          }
-                        </div>
-                      }
-                    </div>
+                    <app-photo-thumb-list [photos]="sel.claimed" size="sm" />
                   </div>
                 }
 
@@ -232,19 +220,7 @@
                       <span>Retusálásra kiválasztott</span>
                       <span class="detail-group__count">{{ sel.retouch.length }} kép</span>
                     </div>
-                    <div class="detail-group__thumbs">
-                      @for (photo of sel.retouch; track photo.id) {
-                        <div class="thumb-item" [matTooltip]="photo.originalName || ''">
-                          @if (photo.thumbUrl) {
-                            <img [src]="photo.thumbUrl" [alt]="photo.originalName || 'Kép'" loading="lazy" />
-                          } @else {
-                            <div class="thumb-placeholder">
-                              <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
-                            </div>
-                          }
-                        </div>
-                      }
-                    </div>
+                    <app-photo-thumb-list [photos]="sel.retouch" size="sm" />
                   </div>
                 }
 
@@ -255,17 +231,7 @@
                       <lucide-icon [name]="ICONS.FRAME" [size]="14" />
                       <span>Tablókép</span>
                     </div>
-                    <div class="detail-group__thumbs">
-                      <div class="thumb-item thumb-item--tablo" [matTooltip]="sel.tablo.originalName || ''">
-                        @if (sel.tablo.thumbUrl) {
-                          <img [src]="sel.tablo.thumbUrl" [alt]="sel.tablo.originalName || 'Tablókép'" loading="lazy" />
-                        } @else {
-                          <div class="thumb-placeholder">
-                            <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
-                          </div>
-                        }
-                      </div>
-                    </div>
+                    <app-photo-thumb-list [photos]="[sel.tablo]" size="sm" [highlight]="true" />
                   </div>
                 }
               }

@@ -21,7 +21,8 @@
       <!-- Stepper a header jobb oldalán -->
       <app-step-indicator
         [currentStep]="state.displayedStep()"
-        [allowClick]="false"
+        [allowClick]="state.isFinalized()"
+        (stepClick)="onStepClick($event)"
         (infoClick)="onInfoIconClick($event)"
       />
     </app-workflow-header>
@@ -86,7 +87,7 @@
 
 <!-- NAVIGATION FOOTER A PAGE-CARD KÍVÜL (backdrop-filter stacking context miatt) -->
 <!-- A position: fixed csak így működik helyesen -->
-@if (!projectContext.isInactive() && projectContext.hasGallery() && !state.isLoading() && !state.isCompleted()) {
+@if (!projectContext.isInactive() && projectContext.hasGallery() && !state.isLoading() && (!state.isCompleted() || state.viewingStep())) {
   <app-navigation-footer
     [currentStep]="state.currentStep()"
     [canGoBack]="state.canGoBack()"

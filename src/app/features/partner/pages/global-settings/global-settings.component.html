@@ -42,28 +42,56 @@
         </div>
       </div>
 
-      <!-- Ingyenes módosítási időablak -->
+      <!-- Módosítás díjszabás -->
       <div class="setting-card">
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-label">Ingyenes módosítási időablak</span>
+            <span class="setting-label">Fizetős módosítás</span>
             <span class="setting-description">
-              Mennyi ideig módosíthatja a diák a véglegesített választását díjmentesen.
-              Ez az érték érvényes minden projektre, ahol nincs egyedi beállítás.
+              Ha aktív, az ingyenes időablak lejárta után a diák módosításai díjkötelesek lesznek.
+              Ha inaktív, a módosítás örökké ingyenes marad.
             </span>
           </div>
           <div class="setting-control">
-            <input
-              type="number"
-              class="number-input"
-              min="1"
-              max="168"
-              [ngModel]="freeEditWindowHours()"
-              (ngModelChange)="freeEditWindowHours.set($event)"
-            />
-            <span class="input-suffix">óra</span>
+            <button
+              class="toggle-btn"
+              [class.toggle-btn--active]="billingEnabled()"
+              (click)="billingEnabled.set(!billingEnabled())"
+              type="button"
+            >
+              <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-label">{{ billingEnabled() ? 'Aktív' : 'Inaktív' }}</span>
+            </button>
           </div>
         </div>
+
+        <!-- Ingyenes módosítási időablak (csak ha billing aktív) -->
+        @if (billingEnabled()) {
+          <div class="sub-setting">
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-label setting-label--sub">Ingyenes módosítási időablak</span>
+                <span class="setting-description">
+                  Mennyi ideig módosíthat a diák díjmentesen a véglegesítés után.
+                  0 = nincs ingyenes időablak, azonnal fizetős.
+                </span>
+              </div>
+              <div class="setting-control">
+                <input
+                  type="number"
+                  class="number-input"
+                  min="0"
+                  max="168"
+                  [ngModel]="freeEditWindowHours()"
+                  (ngModelChange)="freeEditWindowHours.set($event)"
+                />
+                <span class="input-suffix">óra</span>
+              </div>
+            </div>
+          </div>
+        }
       </div>
 
       <div class="action-row">

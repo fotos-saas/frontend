@@ -207,6 +207,7 @@ export class PartnerService {
   updateGlobalSettings(data: {
     default_max_retouch_photos: number | null;
     default_free_edit_window_hours?: number | null;
+    billing_enabled?: boolean;
   }) {
     return this.projectService.updateGlobalSettings(data);
   }

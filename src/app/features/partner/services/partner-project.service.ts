@@ -273,12 +273,14 @@ export class PartnerProjectService {
     data: {
       default_max_retouch_photos: number;
       default_free_edit_window_hours: number;
+      billing_enabled: boolean;
     };
   }> {
     return this.http.get<{
       data: {
         default_max_retouch_photos: number;
         default_free_edit_window_hours: number;
+        billing_enabled: boolean;
       };
     }>(`${this.baseUrl}/settings`);
   }
@@ -289,12 +291,14 @@ export class PartnerProjectService {
   updateGlobalSettings(data: {
     default_max_retouch_photos: number | null;
     default_free_edit_window_hours?: number | null;
+    billing_enabled?: boolean;
   }): Observable<{
     success: boolean;
     message: string;
     data: {
       default_max_retouch_photos: number;
       default_free_edit_window_hours: number;
+      billing_enabled: boolean;
     };
   }> {
     return this.http.put<{
@@ -303,6 +307,7 @@ export class PartnerProjectService {
       data: {
         default_max_retouch_photos: number;
         default_free_edit_window_hours: number;
+        billing_enabled: boolean;
       };
     }>(`${this.baseUrl}/settings`, data);
   }

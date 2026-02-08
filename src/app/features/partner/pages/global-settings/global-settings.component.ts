@@ -25,6 +25,7 @@ export class GlobalSettingsComponent implements OnInit {
   saving = signal(false);
   maxRetouchPhotos = signal(3);
   freeEditWindowHours = signal(24);
+  billingEnabled = signal(false);
 
   ngOnInit(): void {
     this.loadSettings();
@@ -37,6 +38,7 @@ export class GlobalSettingsComponent implements OnInit {
       next: (res) => {
         this.maxRetouchPhotos.set(res.data.default_max_retouch_photos);
         this.freeEditWindowHours.set(res.data.default_free_edit_window_hours ?? 24);
+        this.billingEnabled.set(res.data.billing_enabled ?? false);
         this.loading.set(false);
       },
       error: () => {
@@ -52,6 +54,7 @@ export class GlobalSettingsComponent implements OnInit {
     this.partnerService.updateGlobalSettings({
       default_max_retouch_photos: this.maxRetouchPhotos(),
       default_free_edit_window_hours: this.freeEditWindowHours(),
+      billing_enabled: this.billingEnabled(),
     }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -59,6 +62,7 @@ export class GlobalSettingsComponent implements OnInit {
         this.saving.set(false);
         this.maxRetouchPhotos.set(res.data.default_max_retouch_photos);
         this.freeEditWindowHours.set(res.data.default_free_edit_window_hours ?? 24);
+        this.billingEnabled.set(res.data.billing_enabled ?? false);
         this.toast.success('Siker', 'Beállítások mentve');
       },
       error: () => {

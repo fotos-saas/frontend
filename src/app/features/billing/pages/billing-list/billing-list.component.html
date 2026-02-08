@@ -70,6 +70,9 @@
               <app-billing-status-badge [status]="charge.status" />
             </div>
 
+            <!-- TODO: "Fizetés" gomb pending terheléseknél → Stripe Checkout redirect -->
+            <!-- TODO: "Számla" gomb paid terheléseknél → invoice PDF letöltés -->
+
             <div class="cell cell-date">
               @if (charge.paidAt) {
                 <span class="date-label">Fizetve:</span>

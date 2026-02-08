@@ -58,6 +58,10 @@ export class BillingService {
     return all.filter(c => c.status === filter);
   });
 
+  // TODO: startPayment(chargeId) - Stripe Checkout session indítás, redirect a Stripe fizetési oldalra
+  // TODO: Stripe visszatérés kezelés (success/cancel URL → charges újratöltés)
+  // TODO: Számla letöltés (invoiceUrl megnyitása új ablakban)
+
   loadCharges(): void {
     this.loading.set(true);
     this.error.set(null);

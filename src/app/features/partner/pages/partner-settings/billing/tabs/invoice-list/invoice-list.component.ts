@@ -64,9 +64,9 @@ export class InvoiceListComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (res) => {
-        this.invoices.set(res.data);
-        this.totalPages.set(res.meta.last_page);
-        this.total.set(res.meta.total);
+        this.invoices.set(res.data.items);
+        this.totalPages.set(res.data.pagination.last_page);
+        this.total.set(res.data.pagination.total);
         this.loading.set(false);
       },
       error: () => {

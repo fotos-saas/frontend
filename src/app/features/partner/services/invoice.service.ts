@@ -10,12 +10,16 @@ import {
 } from '../models/invoice.models';
 
 interface PaginatedResponse<T> {
-  data: T[];
-  meta: {
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
+  success: boolean;
+  message: string;
+  data: {
+    items: T[];
+    pagination: {
+      current_page: number;
+      last_page: number;
+      per_page: number;
+      total: number;
+    };
   };
 }
 
@@ -63,7 +67,7 @@ export class InvoiceService {
     let httpParams = new HttpParams();
     if (year) httpParams = httpParams.set('year', year);
 
-    return this.http.get<{ data: InvoiceStatistics }>(`${this.baseUrl}/statistics`, { params: httpParams }).pipe(
+    return this.http.get<{ success: boolean; data: InvoiceStatistics }>(`${this.baseUrl}/statistics`, { params: httpParams }).pipe(
       map(res => res.data),
     );
   }

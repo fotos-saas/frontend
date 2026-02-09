@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, Subject, takeUntil } from 'rxjs';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -43,6 +43,8 @@ export class ChatbotPanelComponent {
   readonly closePanel = output<void>();
 
   readonly messagesContainer = viewChild<ElementRef>('messagesContainer');
+
+  private abortChat$ = new Subject<void>();
 
   readonly messages = signal<DisplayMessage[]>([]);
   readonly inputText = signal('');
@@ -91,7 +93,7 @@ export class ChatbotPanelComponent {
     this.isLoading.set(true);
 
     this.chatService.send(message, this.conversationId() ?? undefined, this.currentRoute())
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.abortChat$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.isLoading.set(false);
@@ -119,8 +121,10 @@ export class ChatbotPanelComponent {
   }
 
   startNewConversation(): void {
+    this.abortChat$.next();
     this.messages.set([]);
     this.conversationId.set(null);
+    this.isLoading.set(false);
     this.errorMessage.set(null);
   }
 

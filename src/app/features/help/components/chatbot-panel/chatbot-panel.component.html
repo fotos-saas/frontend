@@ -1,5 +1,5 @@
 @if (isOpen()) {
-  <div class="chatbot-panel" role="complementary" aria-label="Tabi segito">
+  <div class="chatbot-panel" role="complementary" aria-label="Tabi segítő">
     <!-- Header -->
     <header class="chatbot-panel__header">
       <div class="header-left">
@@ -9,14 +9,14 @@
       <div class="header-actions">
         <button
           class="icon-btn"
-          matTooltip="Uj beszelgetes"
+          matTooltip="Új beszélgetés"
           (click)="startNewConversation()"
         >
           <lucide-icon [name]="ICONS.PLUS" [size]="18" />
         </button>
         <button
           class="icon-btn"
-          matTooltip="Bezaras"
+          matTooltip="Bezárás"
           (click)="closePanel.emit()"
         >
           <lucide-icon [name]="ICONS.X" [size]="18" />
@@ -32,8 +32,8 @@
           <div class="empty-state__icon">
             <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="48" />
           </div>
-          <h3>Miben segithetek?</h3>
-          <p>Kerdezz barmit a TablioStudio mukodeserol!</p>
+          <h3>Miben segíthetek?</h3>
+          <p>Kérdezz bármit a TablóStúdió működéséről!</p>
 
           <button class="contact-btn" (click)="contactDialogOpen.set(true)">
             <lucide-icon [name]="ICONS.PHONE" [size]="16" />
@@ -99,7 +99,7 @@
         [value]="inputText()"
         (input)="inputText.set($any($event.target).value)"
         (keydown)="onKeyDown($event)"
-        placeholder="Irj egy uzenetet..."
+        placeholder="Írj egy üzenetet..."
         rows="1"
         [disabled]="isLoading()"
       ></textarea>
@@ -107,7 +107,7 @@
         class="send-btn"
         [disabled]="!inputText().trim() || isLoading()"
         (click)="sendMessage()"
-        matTooltip="Kuldes"
+        matTooltip="Küldés"
       >
         <lucide-icon [name]="ICONS.SEND" [size]="18" />
       </button>

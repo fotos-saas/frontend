@@ -38,7 +38,7 @@ const STEP_ICONS: Record<string, string> = {
       [description]="stepMessage()"
       size="sm"
       [closable]="true"
-      footerAlign="stretch"
+      footerAlign="center"
       (closeEvent)="onConfirm()"
       (submitEvent)="onConfirm()"
     >

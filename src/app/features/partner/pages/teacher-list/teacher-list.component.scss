@@ -26,11 +26,10 @@
 // Table
 .table-header {
   @extend .table-header;
-  grid-template-columns: 1fr 180px 100px 80px;
+  grid-template-columns: 1fr 180px 140px 80px;
 }
 
 .th { @extend .th; }
-.th-info { text-align: center; }
 .th-actions { @extend .th-actions; }
 
 .teacher-grid {
@@ -39,7 +38,7 @@
 
 .teacher-row {
   @extend .list-row;
-  grid-template-columns: 1fr 180px 100px 80px;
+  grid-template-columns: 1fr 180px 140px 80px;
 }
 
 .teacher-info {
@@ -107,22 +106,22 @@
   text-overflow: ellipsis;
 }
 
-.teacher-meta {
+.teacher-position {
   display: flex;
-  justify-content: center;
-  gap: 6px;
+  align-items: center;
+  cursor: pointer;
 }
 
-.meta-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  background: #f1f5f9;
-  color: #64748b;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
+.position-text {
+  font-size: 0.8125rem;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.position-empty {
+  color: #cbd5e1;
 }
 
 .teacher-actions {
@@ -160,7 +159,7 @@
   }
 
   .teacher-school,
-  .teacher-meta {
+  .teacher-position {
     display: none;
   }
 

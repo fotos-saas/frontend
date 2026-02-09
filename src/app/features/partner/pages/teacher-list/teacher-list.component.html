@@ -65,7 +65,7 @@
     <div class="table-header">
       <span class="th th-teacher">Tanár</span>
       <span class="th th-school">Iskola</span>
-      <span class="th th-info">Info</span>
+      <span class="th th-position">Pozíció</span>
       <span class="th th-actions">Műveletek</span>
     </div>
 
@@ -95,18 +95,11 @@
             <span class="school-name-text">{{ teacher.schoolName }}</span>
           </div>
 
-          <div class="teacher-meta">
-            @if (teacher.aliasesCount > 0) {
-              <span class="meta-badge" [matTooltip]="teacher.aliasesCount + ' név variáns'">
-                <lucide-icon [name]="ICONS.USERS" [size]="12" />
-                {{ teacher.aliasesCount }}
-              </span>
-            }
-            @if (teacher.photosCount > 0) {
-              <span class="meta-badge" [matTooltip]="teacher.photosCount + ' fotó'">
-                <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
-                {{ teacher.photosCount }}
-              </span>
+          <div class="teacher-position" (click)="viewTeacher(teacher)">
+            @if (teacher.position) {
+              <span class="position-text">{{ teacher.position }}</span>
+            } @else {
+              <span class="position-empty">-</span>
             }
           </div>
 

@@ -6,6 +6,7 @@ export interface TeacherListItem {
   id: number;
   canonicalName: string;
   titlePrefix: string | null;
+  position: string | null;
   fullDisplayName: string;
   schoolId: number;
   schoolName: string | null;

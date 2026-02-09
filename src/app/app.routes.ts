@@ -184,14 +184,6 @@ export const routes: Routes = [
         title: 'Beállítások'
       },
       {
-        path: 'projects/:id',
-        loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
-      },
-      {
-        path: 'projects/:id/gallery',
-        loadComponent: () => import('./features/partner/pages/gallery-detail/gallery-detail.component').then(m => m.GalleryDetailComponent)
-      },
-      {
         path: 'projects/schools',
         loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
       },
@@ -202,6 +194,14 @@ export const routes: Routes = [
       {
         path: 'projects/teachers/:id',
         loadComponent: () => import('./features/partner/pages/teacher-detail/teacher-detail.component').then(m => m.PartnerTeacherDetailComponent)
+      },
+      {
+        path: 'projects/:id',
+        loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
+      },
+      {
+        path: 'projects/:id/gallery',
+        loadComponent: () => import('./features/partner/pages/gallery-detail/gallery-detail.component').then(m => m.GalleryDetailComponent)
       },
       {
         path: 'contacts',
@@ -344,16 +344,16 @@ export const routes: Routes = [
         title: 'Beállítások'
       },
       {
+        path: 'projects/schools',
+        loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
+      },
+      {
         path: 'projects/:id',
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
       {
         path: 'projects/:id/gallery',
         loadComponent: () => import('./features/partner/pages/gallery-detail/gallery-detail.component').then(m => m.GalleryDetailComponent)
-      },
-      {
-        path: 'projects/schools',
-        loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
       },
       {
         path: 'contacts',

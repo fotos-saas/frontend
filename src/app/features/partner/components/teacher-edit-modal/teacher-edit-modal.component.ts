@@ -1,17 +1,18 @@
-import { Component, input, output, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, input, output, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { TeacherListItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
+import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 @Component({
   selector: 'app-teacher-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, SearchableSelectComponent],
   templateUrl: './teacher-edit-modal.component.html',
   styleUrl: './teacher-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +28,10 @@ export class TeacherEditModalComponent {
   readonly saved = output<void>();
 
   readonly ICONS = ICONS;
+
+  schoolOptions = computed<SelectOption[]>(() =>
+    this.schools().map(s => ({ id: s.id, label: s.name, sublabel: s.city ?? undefined }))
+  );
 
   canonicalName = '';
   titlePrefix = '';
@@ -75,6 +80,10 @@ export class TeacherEditModalComponent {
       this.aliases.update(prev => [...prev, alias]);
       this.newAlias = '';
     }
+  }
+
+  onSchoolChange(value: string): void {
+    this.schoolId = value ? parseInt(value, 10) : null;
   }
 
   removeAlias(index: number): void {

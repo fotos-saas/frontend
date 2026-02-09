@@ -1,124 +1,89 @@
-<!-- Backdrop overlay (glassmorphism) -->
-<div
-  class="dialog-backdrop"
-  (mousedown)="onBackdropMouseDown($event)" (click)="onBackdropClick($event)"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="dialog-title"
+<app-hero-dialog-wrapper
+  theme="blue"
+  [icon]="ICONS.CALENDAR"
+  title="Mikor lesz a fotózás?"
+  description="Add meg a fotózás tervezett időpontját, hogy időben emlékeztessünk a rendelésre"
+  size="md"
+  (closeEvent)="onClose()"
+  (backdropClickEvent)="onBackdropClicked()"
 >
-  <!-- Dialog container -->
-  <div class="dialog">
-    <!-- Close button (X) -->
+  <ng-container dialogBody>
+    <!-- Date picker toggle button -->
     <button
       type="button"
-      class="dialog__close"
-      (click)="close()"
-      aria-label="Bezárás"
+      class="date-toggle"
+      [class.date-toggle--open]="isDatePickerOpen"
+      (click)="toggleDatePicker()"
+      aria-label="Fotózás dátumának választása"
+      [attr.aria-expanded]="isDatePickerOpen"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
+      <span class="date-toggle__inner">
+        <lucide-icon [name]="ICONS.CALENDAR" [size]="20" />
+        <span class="date-toggle__text">
+          {{ selectedDate ? formattedDate : 'Válassz dátumot' }}
+        </span>
+      </span>
+      <lucide-icon
+        [name]="ICONS.CHEVRON_DOWN"
+        [size]="20"
+        class="date-toggle__arrow"
+        [class.date-toggle__arrow--open]="isDatePickerOpen"
+      />
     </button>
 
-    <!-- Header -->
-    <div class="dialog__header">
-      <div class="dialog__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <h2 id="dialog-title" class="dialog__title">
-        Mikor lesz a fotózás?
-      </h2>
-      <p class="dialog__description">
-        Add meg a fotózás tervezett időpontját, hogy időben emlékeztessünk a rendelésre
-      </p>
-    </div>
-
-    <!-- Content -->
-    <div class="dialog__content">
-      <!-- Date picker toggle button -->
-      <button
-        #dateToggleButton
-        type="button"
-        class="dialog__date-toggle"
-        [class.dialog__date-toggle--open]="isDatePickerOpen"
-        (click)="toggleDatePicker()"
-        aria-label="Fotózás dátumának választása"
-        [attr.aria-expanded]="isDatePickerOpen"
-      >
-        <span class="dialog__date-toggle-inner">
-          <svg class="dialog__date-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <span class="dialog__date-toggle-text">
-            {{ selectedDate ? formattedDate : 'Válassz dátumot' }}
-          </span>
-        </span>
-        <svg class="dialog__date-toggle-arrow" [class.dialog__date-toggle-arrow--open]="isDatePickerOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      <!-- Inline date picker -->
-      @if (isDatePickerOpen) {
-        <div class="dialog__date-picker">
-          <!-- Custom date input wrapper for Hungarian format -->
-          <div class="dialog__date-input-wrapper" (click)="openDatePicker()">
-            <input
-              #dateInput
-              type="date"
-              class="dialog__date-input"
-              [(ngModel)]="selectedDate"
-              [min]="minDate"
-              [max]="maxDate"
-              aria-label="Fotózás időpontja"
-            />
-            @if (selectedDate) {
-              <span class="dialog__date-display">
-                {{ formattedDateShort }}
-              </span>
-            }
-          </div>
-          <button
-            type="button"
-            class="dialog__save-btn"
-            [disabled]="!selectedDate || isSaving"
-            (click)="saveDate()"
-          >
-            {{ isSaving ? 'Mentés...' : 'Mentés' }}
-          </button>
+    <!-- Inline date picker -->
+    @if (isDatePickerOpen) {
+      <div class="date-picker">
+        <div class="date-picker__input-wrapper" (click)="openDatePicker()">
+          <input
+            #dateInput
+            type="date"
+            class="date-picker__input"
+            [(ngModel)]="selectedDate"
+            [min]="minDate"
+            [max]="maxDate"
+            aria-label="Fotózás időpontja"
+          />
+          @if (selectedDate) {
+            <span class="date-picker__display">
+              {{ formattedDateShort }}
+            </span>
+          }
         </div>
-      }
-
-      <!-- Divider -->
-      <div class="dialog__divider">
-        <span>vagy emlékeztess később</span>
-      </div>
-
-      <!-- Snooze buttons -->
-      <div class="dialog__snooze-buttons">
         <button
           type="button"
-          class="dialog__snooze-btn"
-          (click)="snooze(7)"
+          class="date-picker__save-btn"
+          [disabled]="!selectedDate || isSaving"
+          (click)="saveDate()"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>1 hét múlva</span>
-        </button>
-        <button
-          type="button"
-          class="dialog__snooze-btn"
-          (click)="snooze(21)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>3 hét múlva</span>
+          {{ isSaving ? 'Mentés...' : 'Mentés' }}
         </button>
       </div>
+    }
+
+    <!-- Divider -->
+    <div class="divider">
+      <span>vagy emlékeztess később</span>
     </div>
-  </div>
-</div>
+
+    <!-- Snooze buttons -->
+    <div class="snooze-buttons">
+      <button
+        type="button"
+        class="snooze-btn"
+        (click)="snooze(7)"
+      >
+        <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+        <span>1 hét múlva</span>
+      </button>
+      <button
+        type="button"
+        class="snooze-btn"
+        (click)="snooze(21)"
+      >
+        <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+        <span>3 hét múlva</span>
+      </button>
+    </div>
+  </ng-container>
+</app-hero-dialog-wrapper>

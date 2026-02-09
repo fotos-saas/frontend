@@ -1,124 +1,70 @@
-<!-- Backdrop overlay (glassmorphism) -->
-<div
-  class="dialog-backdrop"
-  (mousedown)="onBackdropMouseDown($event)" (click)="onBackdropClick($event)"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="class-size-dialog-title"
+<app-hero-dialog-wrapper
+  theme="blue"
+  [icon]="ICONS.USERS"
+  [title]="currentValue() ? 'Létszám módosítása' : 'Osztálylétszám beállítása'"
+  description="Add meg az osztály létszámát a részvételi arány pontos számításához."
+  size="sm"
+  [isSubmitting]="isBusy()"
+  [errorMessage]="apiError()"
+  (closeEvent)="cancel()"
 >
-  <!-- Dialog container -->
-  <div class="dialog">
-    <!-- Close button (X) -->
-    <button
-      type="button"
-      class="dialog__close"
-      (click)="cancel()"
-      [disabled]="isBusy()"
-      aria-label="Bezárás"
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-
-    <!-- Header -->
-    <div class="dialog__header">
-      <div class="dialog__icon">
-        <!-- Users icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </div>
-      <h2 id="class-size-dialog-title" class="dialog__title">
-        {{ currentValue() ? 'Létszám módosítása' : 'Osztálylétszám beállítása' }}
-      </h2>
-      <p class="dialog__description">
-        Add meg az osztály létszámát a részvételi arány pontos számításához.
-      </p>
-    </div>
-
-    <!-- Content -->
-    <div class="dialog__content">
-      <!-- API hiba megjelenítése -->
-      @if (apiError()) {
-        <div class="dialog__alert dialog__alert--error">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>{{ apiError() }}</span>
-        </div>
-      }
-
-      <!-- Class size field -->
-      <div class="dialog__field">
-        <label class="dialog__label" for="class-size">
-          Osztálylétszám <span class="dialog__required">*</span>
-        </label>
-        <div class="dialog__input-wrapper">
-          <input
-            #sizeInput
-            type="number"
-            id="class-size"
-            class="dialog__input"
-            [class.dialog__input--error]="error"
-            [(ngModel)]="classSize"
-            (ngModelChange)="onInputChange()"
-            placeholder="pl. 28"
-            [disabled]="isBusy()"
-            [min]="MIN_SIZE"
-            [max]="MAX_SIZE"
-            step="1"
-            inputmode="numeric"
-          />
-          <span class="dialog__input-suffix">fő</span>
-        </div>
-        @if (error) {
-          <span class="dialog__error">{{ error }}</span>
-        }
-        @if (!error) {
-          <span class="dialog__hint">
-            {{ MIN_SIZE }}-{{ MAX_SIZE }} fő között
-          </span>
-        }
-      </div>
-
-      <!-- Actions -->
-      <div class="dialog__actions">
-        <button
-          type="button"
-          class="dialog__btn dialog__btn--secondary"
-          (click)="cancel()"
+  <ng-container dialogBody>
+    <!-- Class size field -->
+    <div class="field">
+      <label class="field__label" for="class-size">
+        Osztálylétszám <span class="field__required">*</span>
+      </label>
+      <div class="field__input-wrapper">
+        <input
+          #sizeInput
+          type="number"
+          id="class-size"
+          class="field__input"
+          [class.field__input--error]="error"
+          [(ngModel)]="classSize"
+          (ngModelChange)="onInputChange()"
+          placeholder="pl. 28"
           [disabled]="isBusy()"
-        >
-          Mégse
-        </button>
-        <button
-          type="button"
-          class="dialog__btn dialog__btn--primary"
-          (click)="submit()"
-          [disabled]="!isFormValid || isBusy"
-        >
-          @if (isBusy()) {
-            <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            </svg>
-          }
-          @if (!isBusy()) {
-            <span>
-              {{ currentValue() ? 'Mentés' : 'Mentés és tovább' }}
-            </span>
-          }
-          @if (isBusy()) {
-            <span>Mentés...</span>
-          }
-        </button>
+          [min]="MIN_SIZE"
+          [max]="MAX_SIZE"
+          step="1"
+          inputmode="numeric"
+        />
+        <span class="field__input-suffix">fő</span>
       </div>
+      @if (error) {
+        <span class="field__error">{{ error }}</span>
+      }
+      @if (!error) {
+        <span class="field__hint">
+          {{ MIN_SIZE }}-{{ MAX_SIZE }} fő között
+        </span>
+      }
     </div>
-  </div>
-</div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cancel()"
+        [disabled]="isBusy()"
+      >
+        Mégse
+      </button>
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="submit()"
+        [disabled]="!isFormValid || isBusy()"
+      >
+        @if (isBusy()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+          <span>Mentés...</span>
+        } @else {
+          <span>{{ currentValue() ? 'Mentés' : 'Mentés és tovább' }}</span>
+        }
+      </button>
+    </div>
+  </ng-container>
+</app-hero-dialog-wrapper>

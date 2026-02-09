@@ -1,6 +1,8 @@
 import { Component, input, output, ChangeDetectionStrategy, AfterViewInit, viewChild, ElementRef, OnInit, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
+import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
 import { isValidEmail } from '../../utils/validators.util';
 
 /**
@@ -20,21 +22,23 @@ export type GuestNameResult =
  *
  * Vendég névbekérés popup.
  * Két mód:
- * - register: Megjelenik az első belépéskor, kötelező kitölteni
- * - edit: Meglévő adatok szerkesztése (navbar-ból nyitható)
+ * - register: Megjelenik az első belépéskor, kötelező kitölteni (green téma)
+ * - edit: Meglévő adatok szerkesztése (blue téma)
  *
- * BaseDialogComponent-et bővíti a közös funkcionalitásért.
+ * HeroDialogWrapperComponent kezeli a shell-t.
  */
 @Component({
   selector: 'app-guest-name-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
   templateUrl: './guest-name-dialog.component.html',
   styleUrls: ['./guest-name-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GuestNameDialogComponent extends BaseDialogComponent implements OnInit, AfterViewInit {
-  /** Signal-based inputs (external) - different names to not conflict with base class */
+export class GuestNameDialogComponent implements OnInit, AfterViewInit {
+  readonly ICONS = ICONS;
+
+  /** Signal-based inputs */
   readonly mode = input<GuestDialogMode>('register');
   readonly initialName = input<string>('');
   readonly initialEmail = input<string>('');
@@ -45,9 +49,44 @@ export class GuestNameDialogComponent extends BaseDialogComponent implements OnI
   /** Signal-based outputs */
   readonly resultEvent = output<GuestNameResult>();
 
-  /** Computed signals for template compatibility */
-  readonly isBusy = computed(() => this.externalIsSubmitting() || this._isSubmitting());
-  readonly apiError = computed(() => this.externalErrorMessage() || this._errorMessage());
+  /** Computed signals */
+  readonly isBusy = computed(() => this.externalIsSubmitting());
+  readonly apiError = computed(() => this.externalErrorMessage());
+
+  /** Dinamikus téma: register → green, edit → blue */
+  readonly dialogTheme = computed(() =>
+    this.mode() === 'edit' ? 'blue' as const : 'green' as const
+  );
+
+  /** Dinamikus ikon */
+  readonly dialogIcon = computed(() =>
+    this.mode() === 'edit' ? ICONS.EDIT : ICONS.USER
+  );
+
+  /** Dialog címe módtól függően */
+  readonly dialogTitle = computed(() =>
+    this.mode() === 'edit' ? 'Adatok módosítása' : 'Üdvözöllek!'
+  );
+
+  /** Dialog leírása módtól függően */
+  readonly dialogDescription = computed(() =>
+    this.mode() === 'edit'
+      ? 'Itt módosíthatod a megjelenített nevedet és email címedet.'
+      : 'Kérlek, add meg a neved, hogy részt vehess a szavazásban és a beszélgetésekben.'
+  );
+
+  /** Gomb szövege módtól függően */
+  readonly submitButtonText = computed(() => {
+    if (this.isBusy()) {
+      return this.mode() === 'edit' ? 'Mentés...' : 'Regisztráció...';
+    }
+    return this.mode() === 'edit' ? 'Mentés' : 'Tovább';
+  });
+
+  /** Gomb ikon */
+  readonly submitIcon = computed(() =>
+    this.mode() === 'edit' ? ICONS.CHECK : ICONS.ARROW_RIGHT
+  );
 
   /** Form adatok */
   guestName = '';
@@ -60,29 +99,22 @@ export class GuestNameDialogComponent extends BaseDialogComponent implements OnI
   readonly firstInput = viewChild<ElementRef<HTMLInputElement>>('firstInput');
 
   ngOnInit(): void {
-    // Kezdeti értékek beállítása Input-okból
     this.guestName = this.initialName();
     this.guestEmail = this.initialEmail();
   }
 
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    // Focus az első input mezőre
+  ngAfterViewInit(): void {
     setTimeout(() => {
       this.firstInput()?.nativeElement.focus();
     }, 100);
   }
 
-  /**
-   * Input change - töröljük a hibát
-   */
+  /** Input change - töröljük a hibát */
   onInputChange(): void {
     this.errors = {};
   }
 
-  /**
-   * Validáció
-   */
+  /** Validáció */
   private validate(): boolean {
     this.errors = {};
 
@@ -103,7 +135,6 @@ export class GuestNameDialogComponent extends BaseDialogComponent implements OnI
       return false;
     }
 
-    // Email opcionális, de ha van, validálni kell
     const trimmedEmail = this.guestEmail.trim();
     if (trimmedEmail && !isValidEmail(trimmedEmail)) {
       this.errors.email = 'Érvénytelen email cím.';
@@ -113,44 +144,13 @@ export class GuestNameDialogComponent extends BaseDialogComponent implements OnI
     return true;
   }
 
-  /**
-   * Form érvényes-e
-   */
+  /** Form érvényes-e */
   get isFormValid(): boolean {
     return this.guestName.trim().length >= 2;
   }
 
-  /**
-   * Dialog címe módtól függően
-   */
-  readonly dialogTitle = computed(() =>
-    this.mode() === 'edit' ? 'Adatok módosítása' : 'Üdvözöllek!'
-  );
-
-  /**
-   * Dialog leírása módtól függően
-   */
-  readonly dialogDescription = computed(() =>
-    this.mode() === 'edit'
-      ? 'Itt módosíthatod a megjelenített nevedet és email címedet.'
-      : 'Kérlek, add meg a neved, hogy részt vehess a szavazásban és a beszélgetésekben.'
-  );
-
-  /**
-   * Gomb szövege módtól függően
-   */
-  readonly submitButtonText = computed(() => {
-    if (this.isBusy()) {
-      return this.mode() === 'edit' ? 'Mentés...' : 'Regisztráció...';
-    }
-    return this.mode() === 'edit' ? 'Mentés' : 'Tovább';
-  });
-
-  // ============================================================================
-  // BaseDialogComponent abstract metódusok implementálása
-  // ============================================================================
-
-  protected onSubmit(): void {
+  /** Submit */
+  submit(): void {
     if (this.isBusy()) return;
 
     if (this.validate()) {
@@ -162,18 +162,10 @@ export class GuestNameDialogComponent extends BaseDialogComponent implements OnI
     }
   }
 
-  protected onClose(): void {
+  /** Bezárás (csak ha canClose) */
+  onClose(): void {
     if (!this.isBusy() && this.canClose()) {
       this.resultEvent.emit({ action: 'close' });
-    }
-  }
-
-  /**
-   * Override close to check canClose
-   */
-  override close(): void {
-    if (this.canClose()) {
-      super.close();
     }
   }
 }

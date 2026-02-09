@@ -1,152 +1,86 @@
-<!-- Backdrop overlay (glassmorphism) -->
-<div
-  class="dialog-backdrop"
-  (mousedown)="onBackdropMouseDown($event)" (click)="onBackdropClick($event)"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="dialog-title"
+<app-hero-dialog-wrapper
+  [theme]="dialogTheme()"
+  [icon]="dialogIcon()"
+  [title]="dialogTitle()"
+  [description]="dialogDescription()"
+  size="sm"
+  [closable]="canClose()"
+  [showCloseButton]="canClose()"
+  [isSubmitting]="isBusy()"
+  [errorMessage]="apiError()"
+  (closeEvent)="onClose()"
 >
-  <!-- Dialog container -->
-  <div class="dialog">
-    <!-- Close button (X) - csak ha bezárható -->
-    @if (canClose()) {
+  <ng-container dialogBody>
+    <!-- Name field -->
+    <div class="field">
+      <label class="field__label" for="guest-name">
+        Neved <span class="field__required">*</span>
+      </label>
+      <input
+        #firstInput
+        type="text"
+        id="guest-name"
+        class="field__input"
+        [class.field__input--error]="errors.name"
+        [(ngModel)]="guestName"
+        (ngModelChange)="onInputChange()"
+        placeholder="Írd be a keresztneved"
+        [disabled]="isBusy()"
+        maxlength="100"
+        autocomplete="name"
+      />
+      @if (errors.name) {
+        <span class="field__error" role="alert" aria-live="polite">{{ errors.name }}</span>
+      }
+    </div>
+
+    <!-- Email field (opcionális) -->
+    <div class="field">
+      <label class="field__label" for="guest-email">
+        Email <span class="field__optional">(opcionális)</span>
+      </label>
+      <input
+        type="email"
+        id="guest-email"
+        class="field__input"
+        [class.field__input--error]="errors.email"
+        [(ngModel)]="guestEmail"
+        (ngModelChange)="onInputChange()"
+        placeholder="pelda@email.hu"
+        [disabled]="isBusy()"
+        maxlength="255"
+        autocomplete="email"
+      />
+      @if (errors.email) {
+        <span class="field__error" role="alert" aria-live="polite">{{ errors.email }}</span>
+      }
+      <span class="field__hint">
+        Ha megadod, emailben küldünk egy linket, amivel más eszközön is beléphetsz.
+      </span>
+    </div>
+
+    <!-- Submit button -->
+    <div class="actions">
       <button
         type="button"
-        class="dialog__close"
-        (click)="close()"
-        [disabled]="isBusy()"
-        aria-label="Bezárás"
+        class="btn"
+        [class.btn--green]="mode() === 'register'"
+        [class.btn--blue]="mode() === 'edit'"
+        (click)="submit()"
+        [disabled]="!isFormValid || isBusy()"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        @if (isBusy()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+        } @else {
+          <lucide-icon [name]="submitIcon()" [size]="20" />
+        }
+        {{ submitButtonText() }}
       </button>
-    }
-
-    <!-- Header -->
-    <div class="dialog__header" [class.dialog__header--edit]="mode() === 'edit'">
-      <div class="dialog__icon" [class.dialog__icon--edit]="mode() === 'edit'">
-        <!-- User wave icon (register) / Edit icon (edit) -->
-        @if (mode() === 'register') {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-            <path d="M22 8c-1-1-2.5-1.5-4-1.5" stroke-linecap="round"/>
-          </svg>
-        }
-        @if (mode() === 'edit') {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        }
-      </div>
-      <h2 id="dialog-title" class="dialog__title">
-        {{ dialogTitle() }}
-      </h2>
-      <p class="dialog__description">
-        {{ dialogDescription() }}
-      </p>
     </div>
 
-    <!-- Content -->
-    <div class="dialog__content">
-      <!-- API hiba megjelenítése -->
-      @if (apiError()) {
-        <div class="dialog__alert dialog__alert--error" role="alert" aria-live="assertive">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>{{ apiError() }}</span>
-        </div>
-      }
-
-      <!-- Name field -->
-      <div class="dialog__field">
-        <label class="dialog__label" for="guest-name">
-          Neved <span class="dialog__required">*</span>
-        </label>
-        <input
-          #firstInput
-          type="text"
-          id="guest-name"
-          class="dialog__input"
-          [class.dialog__input--error]="errors.name"
-          [(ngModel)]="guestName"
-          (ngModelChange)="onInputChange()"
-          placeholder="Írd be a keresztneved"
-          [disabled]="isBusy()"
-          maxlength="100"
-          autocomplete="name"
-        />
-        @if (errors.name) {
-          <span class="dialog__error" role="alert" aria-live="polite">{{ errors.name }}</span>
-        }
-      </div>
-
-      <!-- Email field (opcionális) -->
-      <div class="dialog__field">
-        <label class="dialog__label" for="guest-email">
-          Email <span class="dialog__optional">(opcionális)</span>
-        </label>
-        <input
-          type="email"
-          id="guest-email"
-          class="dialog__input"
-          [class.dialog__input--error]="errors.email"
-          [(ngModel)]="guestEmail"
-          (ngModelChange)="onInputChange()"
-          placeholder="pelda@email.hu"
-          [disabled]="isBusy()"
-          maxlength="255"
-          autocomplete="email"
-        />
-        @if (errors.email) {
-          <span class="dialog__error" role="alert" aria-live="polite">{{ errors.email }}</span>
-        }
-        <span class="dialog__hint">
-          Ha megadod, emailben küldünk egy linket, amivel más eszközön is beléphetsz.
-        </span>
-      </div>
-
-      <!-- Submit button -->
-      <div class="dialog__actions">
-        <button
-          type="button"
-          class="dialog__btn dialog__btn--full"
-          [class.dialog__btn--primary]="mode() === 'register'"
-          [class.dialog__btn--edit]="mode() === 'edit'"
-          (click)="submit()"
-          [disabled]="!isFormValid || isBusy"
-        >
-          @if (isBusy()) {
-            <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            </svg>
-          }
-          <!-- Arrow icon for register -->
-          @if (!isBusy() && mode() === 'register') {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          }
-          <!-- Check icon for edit -->
-          @if (!isBusy() && mode() === 'edit') {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          }
-          {{ submitButtonText() }}
-        </button>
-      </div>
-
-      <!-- Privacy hint -->
-      <p class="dialog__privacy">
-        A neved csak az osztálytársaid és a kapcsolattartó láthatja.
-      </p>
-    </div>
-  </div>
-</div>
+    <!-- Privacy hint -->
+    <p class="privacy-hint">
+      A neved csak az osztálytársaid és a kapcsolattartó láthatja.
+    </p>
+  </ng-container>
+</app-hero-dialog-wrapper>

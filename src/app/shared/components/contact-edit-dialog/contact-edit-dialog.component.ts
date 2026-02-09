@@ -1,7 +1,9 @@
-import { Component, input, output, ChangeDetectionStrategy, OnInit, viewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy, OnInit, viewChild, ElementRef, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import { isValidEmail, isValidPhone } from '../../utils/validators.util';
+import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
 
 /**
  * Contact data interface
@@ -23,17 +25,19 @@ export type ContactEditResult =
  * Contact Edit Dialog
  *
  * Dialog a kapcsolattartó adatok szerkesztéséhez.
- * BaseDialogComponent-et bővíti a közös funkcionalitásért.
+ * HeroDialogWrapperComponent kezeli a shell-t.
  */
 @Component({
   selector: 'app-contact-edit-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
   templateUrl: './contact-edit-dialog.component.html',
   styleUrls: ['./contact-edit-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ContactEditDialogComponent extends BaseDialogComponent implements OnInit, AfterViewInit {
+export class ContactEditDialogComponent implements OnInit {
+  readonly ICONS = ICONS;
+
   /** Signal-based inputs */
   readonly initialData = input<ContactData>({ name: '', email: '', phone: '' });
   readonly isSaving = input<boolean>(false);
@@ -47,27 +51,14 @@ export class ContactEditDialogComponent extends BaseDialogComponent implements O
   /** Validációs hibák */
   errors: { name?: string; email?: string; phone?: string } = {};
 
-  /** ViewChild referenciák a focus management-hez */
-  readonly firstInput = viewChild<ElementRef<HTMLInputElement>>('firstInput');
-
   ngOnInit(): void {
-    // Bemásoljuk a kezdeti adatokat
     this.formData = { ...this.initialData() };
-  }
-
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    // Focus az első input mezőre
-    setTimeout(() => {
-      this.firstInput()?.nativeElement.focus();
-    }, 100);
   }
 
   /**
    * Input change handler
    */
   onInputChange(): void {
-    // Töröljük az esetleges hibát, ha a user gépel
     this.errors = {};
   }
 
@@ -125,15 +116,7 @@ export class ContactEditDialogComponent extends BaseDialogComponent implements O
     );
   }
 
-  // ============================================================================
-  // BaseDialogComponent abstract metódusok implementálása
-  // ============================================================================
-
-  protected onSubmit(): void {
-    this.save();
-  }
-
-  protected onClose(): void {
+  onClose(): void {
     if (!this.isSaving()) {
       this.resultEvent.emit({ action: 'close' });
     }

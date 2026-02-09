@@ -3,14 +3,16 @@ import {
   input,
   output,
   ChangeDetectionStrategy,
-  AfterViewInit,
   viewChild,
   ElementRef,
-  computed
+  computed,
+  signal
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import { validateNumberRange } from '../../utils/validators.util';
+import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
 
 /**
  * Dialog eredmény típus
@@ -23,19 +25,20 @@ export type ClassSizeResult =
  * Class Size Dialog
  *
  * Osztálylétszám bekérés popup.
- * Megjelenik az első szavazás létrehozásakor.
- * BaseDialogComponent-et bővíti a közös funkcionalitásért.
+ * HeroDialogWrapperComponent kezeli a shell-t.
  */
 @Component({
   selector: 'app-class-size-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
   templateUrl: './class-size-dialog.component.html',
   styleUrls: ['./class-size-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClassSizeDialogComponent extends BaseDialogComponent implements AfterViewInit {
-  /** Signal-based inputs (external) - different names to not conflict with base class */
+export class ClassSizeDialogComponent {
+  readonly ICONS = ICONS;
+
+  /** Signal-based inputs */
   readonly externalIsSubmitting = input<boolean>(false, { alias: 'isSubmitting' });
   readonly externalErrorMessage = input<string | null>(null, { alias: 'errorMessage' });
   readonly currentValue = input<number | null>(null);
@@ -44,8 +47,8 @@ export class ClassSizeDialogComponent extends BaseDialogComponent implements Aft
   readonly resultEvent = output<ClassSizeResult>();
 
   /** Computed signals for template compatibility */
-  readonly isBusy = computed(() => this.externalIsSubmitting() || this._isSubmitting());
-  readonly apiError = computed(() => this.externalErrorMessage() || this._errorMessage());
+  readonly isBusy = computed(() => this.externalIsSubmitting());
+  readonly apiError = computed(() => this.externalErrorMessage());
 
   /** Form adat */
   classSize: number | null = null;
@@ -60,20 +63,16 @@ export class ClassSizeDialogComponent extends BaseDialogComponent implements Aft
   /** ViewChild referencia */
   readonly sizeInput = viewChild<ElementRef<HTMLInputElement>>('sizeInput');
 
-  override ngAfterViewInit(): void {
-    // Current value beállítása ha van
-    const current = this.currentValue();
-    if (current) {
-      this.classSize = current;
+  private initialized = false;
+
+  ngAfterViewInit(): void {
+    if (!this.initialized) {
+      this.initialized = true;
+      const current = this.currentValue();
+      if (current) {
+        this.classSize = current;
+      }
     }
-
-    super.ngAfterViewInit();
-
-    // Focus az input mezőre
-    setTimeout(() => {
-      this.sizeInput()?.nativeElement.focus();
-      this.sizeInput()?.nativeElement.select();
-    }, 100);
   }
 
   /**
@@ -122,11 +121,10 @@ export class ClassSizeDialogComponent extends BaseDialogComponent implements Aft
            this.classSize <= this.MAX_SIZE;
   }
 
-  // ============================================================================
-  // BaseDialogComponent abstract metódusok implementálása
-  // ============================================================================
-
-  protected onSubmit(): void {
+  /**
+   * Submit
+   */
+  submit(): void {
     if (this.isBusy()) return;
 
     if (this.validate() && this.classSize !== null) {
@@ -135,9 +133,5 @@ export class ClassSizeDialogComponent extends BaseDialogComponent implements Aft
         classSize: this.classSize
       });
     }
-  }
-
-  protected onClose(): void {
-    this.cancel();
   }
 }

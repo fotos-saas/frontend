@@ -1,121 +1,14 @@
-// Blue accent (consistent with other dialogs)
+// ContactEditDialog - content-specific styles only
+// Shell handled by HeroDialogWrapperComponent
+
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
 
-// Backdrop
-.dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-modal-backdrop);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease-out;
-}
+.field {
+  margin-bottom: 1rem;
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-// Dialog container
-.dialog {
-  position: relative;
-  width: 100%;
-  max-width: 28rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  animation: slideUp 0.3s ease-out;
-
-  &__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: var(--z-dropdown);
-    padding: 0.5rem;
-    color: #6b7280; // WCAG AA: 4.6:1 kontraszt (gray-500)
-    background: transparent;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover:not(:disabled) {
-      color: #4b5563;
-      background: #f3f4f6;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    svg {
-      width: 1.25rem;
-      height: 1.25rem;
-    }
-  }
-
-  &__header {
-    padding: 2rem 1.5rem;
-    text-align: center;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  }
-
-  &__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4rem;
-    height: 4rem;
-    margin-bottom: 1rem;
-    background: $blue-500;
-    border-radius: 1rem;
-    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
-
-    svg {
-      width: 2rem;
-      height: 2rem;
-      color: white;
-    }
-  }
-
-  &__title {
-    margin: 0 0 0.5rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #111827;
-  }
-
-  &__description {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #6b7280;
-    max-width: 18rem;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  &__content {
-    padding: 1.5rem;
-  }
-
-  &__field {
-    margin-bottom: 1rem;
-
-    &:last-of-type {
-      margin-bottom: 1.5rem;
-    }
+  &:last-of-type {
+    margin-bottom: 1.5rem;
   }
 
   &__label {
@@ -142,7 +35,7 @@ $blue-600: #2563eb;
     transition: all 0.2s;
 
     &::placeholder {
-      color: #6b7280; // WCAG AA: 4.6:1 kontraszt (gray-500)
+      color: #6b7280;
     }
 
     &:focus {
@@ -173,112 +66,82 @@ $blue-600: #2563eb;
     font-size: 0.8125rem;
     color: #ef4444;
   }
+}
 
-  &__actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &--primary {
+    color: white;
+    background: $blue-500;
+
+    &:hover:not(:disabled) {
+      background: $blue-600;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 
-  &__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
+  &--secondary {
+    color: #4b5563;
+    background: #f3f4f6;
 
-    &--primary {
-      color: white;
-      background: $blue-500;
-
-      &:hover:not(:disabled) {
-        background: $blue-600;
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+    &:hover:not(:disabled) {
+      background: #e5e7eb;
     }
 
-    &--secondary {
-      color: #4b5563;
-      background: #f3f4f6;
-
-      &:hover:not(:disabled) {
-        background: #e5e7eb;
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-
-    &-spinner {
-      width: 1rem;
-      height: 1rem;
-      animation: spin 1s linear infinite;
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 // Mobile responsive
 @media (max-width: 480px) {
-  .dialog {
-    max-width: 100%;
-    margin: 0 0.5rem;
-    border-radius: 0.75rem;
+  .actions {
+    flex-direction: column-reverse;
+  }
 
-    &__header {
-      padding: 1.5rem 1rem;
-    }
+  .btn {
+    width: 100%;
+  }
+}
 
-    &__icon {
-      width: 3rem;
-      height: 3rem;
-
-      svg {
-        width: 1.5rem;
-        height: 1.5rem;
-      }
-    }
-
-    &__title {
-      font-size: 1.25rem;
-    }
-
-    &__description {
-      font-size: 0.8125rem;
-    }
-
-    &__content {
-      padding: 1rem;
-    }
-
-    &__actions {
-      flex-direction: column-reverse;
-    }
-
-    &__btn {
-      width: 100%;
-    }
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .field__input,
+  .btn,
+  .spin {
+    transition: none;
+    animation: none;
   }
 }

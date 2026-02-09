@@ -1,177 +1,71 @@
-// Blue accent
+// ScheduleReminderDialog - content-specific styles only
+// Shell handled by HeroDialogWrapperComponent
+
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
 
-// Backdrop
-.dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-modal-backdrop);
+.date-toggle {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease-out;
-}
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  background: #eff6ff;
+  border: 2px solid #bfdbfe;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-// Dialog container
-.dialog {
-  position: relative;
-  width: 100%;
-  max-width: 28rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  animation: slideUp 0.3s ease-out;
-
-  &__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: var(--z-dropdown);
-    padding: 0.5rem;
-    color: #6b7280;
-    background: transparent;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      color: #4b5563;
-      background: #f3f4f6;
-    }
-
-    svg {
-      width: 1.25rem;
-      height: 1.25rem;
-    }
+  &:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
   }
 
-  &__header {
-    padding: 2rem 1.5rem;
-    text-align: center;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  &--open {
+    border-color: $blue-500;
   }
 
-  &__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4rem;
-    height: 4rem;
-    margin-bottom: 1rem;
-    background: $blue-500;
-    border-radius: 1rem;
-    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
-
-    svg {
-      width: 2rem;
-      height: 2rem;
-      color: white;
-    }
-  }
-
-  &__title {
-    margin: 0 0 0.5rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #111827;
-  }
-
-  &__description {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #6b7280;
-    max-width: 18rem;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  &__content {
-    padding: 1.5rem;
-  }
-
-  &__date-toggle {
-    width: 100%;
+  &__inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.875rem 1rem;
-    background: #eff6ff;
-    border: 2px solid #bfdbfe;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
+    gap: 0.75rem;
 
-    &:hover {
-      background: #dbeafe;
-      border-color: #93c5fd;
+    lucide-icon {
+      color: $blue-500;
     }
+  }
+
+  &__text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  &__arrow {
+    color: $blue-500;
+    transition: transform 0.2s;
 
     &--open {
-      border-color: $blue-500;
-    }
-
-    &-inner {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    &-icon {
-      width: 1.25rem;
-      height: 1.25rem;
-      color: $blue-500;
-    }
-
-    &-text {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-    }
-
-    &-arrow {
-      width: 1.25rem;
-      height: 1.25rem;
-      color: $blue-500;
-      transition: transform 0.2s;
-
-      &--open {
-        transform: rotate(180deg);
-      }
+      transform: rotate(180deg);
     }
   }
+}
 
-  &__date-picker {
-    margin-top: 0.75rem;
-    padding: 1rem;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    animation: slideDown 0.2s ease-out;
-  }
+.date-picker {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  animation: slideDown 0.2s ease-out;
 
-  &__date-input-wrapper {
+  &__input-wrapper {
     position: relative;
     margin-bottom: 0.75rem;
     cursor: pointer;
   }
 
-  &__date-input {
+  &__input {
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
@@ -179,18 +73,14 @@ $blue-600: #2563eb;
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
     outline: none;
-    caret-color: transparent; // Hide text cursor
-
-    // Hide native text for Safari compatibility
+    caret-color: transparent;
     color: transparent;
     -webkit-text-fill-color: transparent;
 
-    // No focus styling - user interacts via picker
     &:focus {
       outline: none;
     }
 
-    // Hide native date text in webkit browsers
     &::-webkit-datetime-edit {
       color: transparent;
       -webkit-text-fill-color: transparent;
@@ -201,7 +91,6 @@ $blue-600: #2563eb;
       -webkit-text-fill-color: transparent;
     }
 
-    // Style the calendar icon
     &::-webkit-calendar-picker-indicator {
       cursor: pointer;
       opacity: 0.6;
@@ -213,14 +102,14 @@ $blue-600: #2563eb;
     }
   }
 
-  &__date-display {
+  &__display {
     position: absolute;
     left: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
     font-size: 1rem;
     color: #374151;
-    pointer-events: none; // Click through to the input
+    pointer-events: none;
   }
 
   &__save-btn {
@@ -244,75 +133,59 @@ $blue-600: #2563eb;
       cursor: not-allowed;
     }
   }
+}
 
-  &__divider {
+.divider {
+  position: relative;
+  padding: 1.25rem 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  span {
     position: relative;
-    padding: 1.25rem 0;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-      height: 1px;
-      background: #e5e7eb;
-    }
-
-    span {
-      position: relative;
-      display: inline-block;
-      padding: 0 0.75rem;
-      background: white;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #6b7280;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-  }
-
-  &__snooze-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
-  &__snooze-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1rem;
-    font-size: 0.875rem;
+    display: inline-block;
+    padding: 0 0.75rem;
+    background: white;
+    font-size: 0.75rem;
     font-weight: 500;
-    color: #4b5563;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      background: #f3f4f6;
-      border-color: #d1d5db;
-    }
-
-    svg {
-      width: 1rem;
-      height: 1rem;
-    }
+    color: #6b7280;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+.snooze-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.snooze-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
   }
 }
 
@@ -329,39 +202,19 @@ $blue-600: #2563eb;
 
 // Mobile responsive
 @media (max-width: 480px) {
-  .dialog {
-    max-width: 100%;
-    margin: 0 0.5rem;
-    border-radius: 0.75rem;
+  .snooze-buttons {
+    grid-template-columns: 1fr;
+  }
+}
 
-    &__header {
-      padding: 1.5rem 1rem;
-    }
-
-    &__icon {
-      width: 3rem;
-      height: 3rem;
-
-      svg {
-        width: 1.5rem;
-        height: 1.5rem;
-      }
-    }
-
-    &__title {
-      font-size: 1.25rem;
-    }
-
-    &__description {
-      font-size: 0.8125rem;
-    }
-
-    &__content {
-      padding: 1rem;
-    }
-
-    &__snooze-buttons {
-      grid-template-columns: 1fr;
-    }
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .date-toggle,
+  .date-toggle__arrow,
+  .date-picker,
+  .date-picker__save-btn,
+  .snooze-btn {
+    transition: none;
+    animation: none;
   }
 }

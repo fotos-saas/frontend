@@ -1,15 +1,12 @@
-import { Component, output, ChangeDetectionStrategy, viewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy, viewChild, ElementRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
+import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
 import { LoggerService } from '../../../core/services/logger.service';
 
 /**
  * Dialog eredmény típus
- *
- * - save: Dátum mentése
- * - snooze: Halasztás (7 vagy 21 nap)
- * - close: X gomb vagy ESC - cooldown aktív
- * - backdrop: Backdrop kattintás - NEM aktivál cooldown-t
  */
 export type ScheduleReminderResult =
   | { action: 'save'; date: string }
@@ -21,17 +18,19 @@ export type ScheduleReminderResult =
  * Schedule Reminder Dialog
  *
  * Emlékeztető dialógus a fotózás időpontjának megadásához.
- * BaseDialogComponent-et bővíti a közös funkcionalitásért.
+ * HeroDialogWrapperComponent kezeli a shell-t.
  */
 @Component({
   selector: 'app-schedule-reminder-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
   templateUrl: './schedule-reminder-dialog.component.html',
   styleUrls: ['./schedule-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ScheduleReminderDialogComponent extends BaseDialogComponent implements AfterViewInit {
+export class ScheduleReminderDialogComponent {
+  readonly ICONS = ICONS;
+
   /** Signal-based outputs */
   readonly resultEvent = output<ScheduleReminderResult>();
 
@@ -40,10 +39,7 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
   /** Dátumválasztó megnyitva */
   isDatePickerOpen = false;
 
-  /** ViewChild referencia a focus management-hez */
-  readonly dateToggleButton = viewChild<ElementRef<HTMLButtonElement>>('dateToggleButton');
-
-  /** ViewChild referencia a date input-hoz */
+  /** ViewChild referenciák */
   readonly dateInput = viewChild<ElementRef<HTMLInputElement>>('dateInput');
 
   /** Kiválasztott dátum */
@@ -61,14 +57,6 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
 
   /** Engedélyezett snooze napok */
   private readonly allowedSnoozeDays = [7, 21];
-
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    // Focus a dátum választó gombra
-    setTimeout(() => {
-      this.dateToggleButton()?.nativeElement.focus();
-    }, 100);
-  }
 
   /**
    * Dátumválasztó toggle
@@ -95,7 +83,7 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
   }
 
   /**
-   * Halasztás (2 hét vagy 1 hónap)
+   * Halasztás
    */
   snooze(days: number): void {
     if (!this.allowedSnoozeDays.includes(days)) {
@@ -106,12 +94,10 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
   }
 
   /**
-   * Formázott dátum megjelenítés (hosszú formátum a toggle gombhoz)
+   * Formázott dátum megjelenítés (hosszú formátum)
    */
   get formattedDate(): string {
-    if (!this.selectedDate) {
-      return '';
-    }
+    if (!this.selectedDate) return '';
     const date = new Date(this.selectedDate);
     return date.toLocaleDateString('hu-HU', {
       year: 'numeric',
@@ -121,12 +107,10 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
   }
 
   /**
-   * Formázott dátum megjelenítés (rövid magyar formátum: ÉÉÉÉ.HH.NN.)
+   * Formázott dátum megjelenítés (rövid magyar formátum)
    */
   get formattedDateShort(): string {
-    if (!this.selectedDate) {
-      return '';
-    }
+    if (!this.selectedDate) return '';
     const date = new Date(this.selectedDate);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -134,30 +118,11 @@ export class ScheduleReminderDialogComponent extends BaseDialogComponent impleme
     return `${year}.${month}.${day}.`;
   }
 
-  // ============================================================================
-  // BaseDialogComponent abstract metódusok implementálása
-  // ============================================================================
-
-  protected onSubmit(): void {
-    this.saveDate();
-  }
-
-  protected onClose(): void {
+  onClose(): void {
     this.resultEvent.emit({ action: 'close' });
   }
 
-  /**
-   * Backdrop kattintás - NEM aktivál cooldown-t
-   * Override a BaseDialogComponent-ből
-   */
-  override onBackdropClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    const isBackdrop = target.classList.contains('dialog-backdrop') ||
-                       target.classList.contains('dialog-overlay');
-
-    if (!this._isSubmitting() && isBackdrop) {
-      // Backdrop kattintás: külön action, nincs cooldown
-      this.resultEvent.emit({ action: 'backdrop' });
-    }
+  onBackdropClicked(): void {
+    this.resultEvent.emit({ action: 'backdrop' });
   }
 }

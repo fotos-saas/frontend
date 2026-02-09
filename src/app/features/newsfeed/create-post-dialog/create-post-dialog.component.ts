@@ -7,14 +7,18 @@ import {
   DestroyRef,
   input,
   output,
-  computed
+  computed,
+  signal
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import { NewsfeedPost, CreatePostRequest, UpdatePostRequest } from '../../../core/services/newsfeed.service';
 import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { MediaEditorComponent, MediaEditorItem } from '../../../shared/components/media-editor';
 import { PostFormValidatorService, PostFormErrors } from '../services/post-form-validator.service';
-import { BaseDialogComponent } from '../../../shared/components/base-dialog/base-dialog.component';
+import { HeroDialogWrapperComponent } from '../../../shared/components/hero-dialog-wrapper/hero-dialog-wrapper.component';
 import { CreatePostDialogActionsService } from './create-post-dialog-actions.service';
 
 /**
@@ -29,32 +33,38 @@ export type CreatePostResult =
  * Create Post Dialog
  *
  * Uj hirfolyam bejegyzes letrehozasa dialogus.
- *
- * Extends BaseDialogComponent:
- * - Body scroll lock
- * - Focus management
- * - ESC kezeles (HostListener)
+ * HeroDialogWrapperComponent kezeli a shell-t (backdrop, scroll lock, ESC, focus).
  */
 @Component({
   selector: 'app-create-post-dialog',
-  imports: [FormsModule, RichTextEditorComponent, MediaEditorComponent],
+  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent, MediaEditorComponent, HeroDialogWrapperComponent],
   templateUrl: './create-post-dialog.component.html',
   styleUrls: ['./create-post-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreatePostDialogComponent extends BaseDialogComponent {
+export class CreatePostDialogComponent {
+  readonly ICONS = ICONS;
+
   readonly editPost = input<NewsfeedPost | undefined>(undefined);
   readonly resultEvent = output<CreatePostResult>();
 
   readonly isEditMode = computed(() => !!this.editPost());
   readonly dialogTitle = computed(() =>
-    this.isEditMode() ? 'Bejegyzes szerkesztese' : 'Uj bejegyzes'
+    this.isEditMode() ? 'Bejegyzés szerkesztése' : 'Új bejegyzés'
+  );
+  readonly dialogDescription = computed(() =>
+    this.isEditMode()
+      ? 'Szerkeszd a bejegyzés tartalmát. A típus és a média nem módosítható.'
+      : 'Oszd meg a híreidet az osztállyal. Bejelentést vagy eseményt is hozhatsz létre.'
+  );
+  readonly dialogIcon = computed(() =>
+    this.isEditMode() ? ICONS.EDIT : ICONS.FILE_TEXT
   );
   readonly submitButtonText = computed(() => {
     if (this.isSubmitting()) {
-      return this.isEditMode() ? 'Mentes...' : 'Kozzetetetel...';
+      return this.isEditMode() ? 'Mentés...' : 'Közzététel...';
     }
-    return this.isEditMode() ? 'Mentes' : 'Kozzetetetel';
+    return this.isEditMode() ? 'Mentés' : 'Közzététel';
   });
 
   /** Form adatok */
@@ -69,45 +79,42 @@ export class CreatePostDialogComponent extends BaseDialogComponent {
   contentTextLength = 0;
   errors: PostFormErrors = {};
 
+  /** Állapotok */
+  readonly isSubmitting = signal(false);
+  readonly errorMessage = signal<string | null>(null);
+
   readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly submitActions = inject(CreatePostDialogActionsService);
   readonly validator = inject(PostFormValidatorService);
 
+  private initialized = false;
+
   // ============================================================================
   // LIFECYCLE
   // ============================================================================
 
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-
-    const editPostVal = this.editPost();
-    if (this.isEditMode() && editPostVal) {
-      this.postType = editPostVal.postType;
-      this.title = editPostVal.title;
-      this.content = editPostVal.content || '';
-      this.eventDate = editPostVal.eventDate || '';
-      this.eventTime = editPostVal.eventTime || '';
-      this.eventLocation = editPostVal.eventLocation || '';
+  ngAfterViewInit(): void {
+    if (!this.initialized) {
+      this.initialized = true;
+      const editPostVal = this.editPost();
+      if (this.isEditMode() && editPostVal) {
+        this.postType = editPostVal.postType;
+        this.title = editPostVal.title;
+        this.content = editPostVal.content || '';
+        this.eventDate = editPostVal.eventDate || '';
+        this.eventTime = editPostVal.eventTime || '';
+        this.eventLocation = editPostVal.eventLocation || '';
+      }
     }
-  }
-
-  // ============================================================================
-  // FOCUS
-  // ============================================================================
-
-  protected override focusFirstInput(): void {
-    setTimeout(() => {
-      this.titleInput()?.nativeElement.focus();
-    }, 100);
   }
 
   // ============================================================================
   // FORM HANDLERS
   // ============================================================================
 
-  onInputChange(): void { this.errors = {}; this.clearError(); }
+  onInputChange(): void { this.errors = {}; this.errorMessage.set(null); }
   onTypeChange(type: 'announcement' | 'event'): void { this.postType = type; this.onInputChange(); }
   onContentTextLengthChange(length: number): void { this.contentTextLength = length; }
 
@@ -142,14 +149,19 @@ export class CreatePostDialogComponent extends BaseDialogComponent {
   get titleCharCount(): string { return `${this.title.length}/255`; }
 
   // ============================================================================
-  // ABSTRACT IMPLEMENTATIONS
+  // ACTIONS
   // ============================================================================
 
-  protected override onClose(): void {
+  onClose(): void {
     this.resultEvent.emit({ action: 'close' });
   }
 
-  protected override onSubmit(): void {
+  submit(): void {
+    if (this.isSubmitting()) return;
+
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
+
     this.errors = this.validator.validate({
       postType: this.postType,
       title: this.title,
@@ -158,17 +170,18 @@ export class CreatePostDialogComponent extends BaseDialogComponent {
     });
 
     if (this.validator.hasErrors(this.errors)) {
-      this._isSubmitting.set(false);
+      this.isSubmitting.set(false);
       return;
     }
 
     const callbacks = {
       onSuccess: (postId: number, action: 'created' | 'updated') => {
-        this.submitSuccess();
+        this.isSubmitting.set(false);
         this.resultEvent.emit({ action, postId });
       },
       onError: (message: string) => {
-        this.submitError(message);
+        this.isSubmitting.set(false);
+        this.errorMessage.set(message);
       }
     };
 

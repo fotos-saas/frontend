@@ -1,184 +1,177 @@
-<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-  <div #dialogContent class="dialog-panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
-    <!-- Header -->
-    <header class="upgrade-header">
-      <div class="upgrade-icon">
-        <lucide-icon [name]="featureDetails.icon" [size]="32" />
+<app-dialog-wrapper
+  headerStyle="hero"
+  theme="purple"
+  [icon]="featureDetails.icon"
+  title="Limit elérve"
+  [description]="featureDetails.description"
+  size="md"
+  [closable]="true"
+  (closeEvent)="onClose()"
+>
+  <!-- BODY -->
+  <div dialogBody>
+    @if (isTeamMember()) {
+      <!-- CSAPATTAG: Egyszerű üzenet, nincs csomagváltás opció -->
+      <div class="team-member-notice">
+        <div class="notice-icon">
+          <lucide-icon [name]="ICONS.INFO" [size]="24" />
+        </div>
+        <p class="notice-text">
+          A csomagváltást csak a csapat tulajdonosa végezheti el. Kérlek jelezd felé, hogy elértétek a limitet.
+        </p>
       </div>
-      <h2 class="upgrade-title">Limit elérve</h2>
-      <button type="button" class="close-btn" (click)="onClose()" aria-label="Bezárás">
-        <lucide-icon [name]="ICONS.X" [size]="20" />
-      </button>
-    </header>
+    } @else {
+      <!-- PARTNER (tulajdonos): Teljes csomagváltás UI -->
 
-    <!-- Content -->
-    <div class="upgrade-content">
-      <p class="upgrade-description">{{ featureDetails.description }}</p>
-
-      @if (isTeamMember()) {
-        <!-- CSAPATTAG: Egyszerű üzenet, nincs csomagváltás opció -->
-        <div class="team-member-notice">
-          <div class="notice-icon">
-            <lucide-icon [name]="ICONS.INFO" [size]="24" />
+      <!-- Current vs Next plan comparison -->
+      @if (isDataReady()) {
+        <div class="plan-comparison plan-comparison--loaded">
+          <div class="plan-card plan-card--current">
+            <span class="plan-label">Jelenlegi csomag</span>
+            <span class="plan-name">{{ currentPlanName() }}</span>
+            @if (currentLimit() !== null) {
+              <span class="plan-limit">{{ currentLimit() }} {{ featureDetails.unit }}</span>
+            } @else {
+              <span class="plan-limit plan-limit--unlimited">Korlátlan</span>
+            }
           </div>
-          <p class="notice-text">
-            A csomagváltást csak a csapat tulajdonosa végezheti el. Kérlek jelezd felé, hogy elértétek a limitet.
-          </p>
+
+          <div class="plan-arrow">
+            <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="24" />
+          </div>
+
+          <div class="plan-card plan-card--next">
+            <span class="plan-label">Ajánlott csomag</span>
+            <span class="plan-name">{{ nextPlanName() }}</span>
+            @if (nextLimit() !== null) {
+              <span class="plan-limit">{{ nextLimit() }} {{ featureDetails.unit }}</span>
+            } @else {
+              <span class="plan-limit plan-limit--unlimited">Korlátlan</span>
+            }
+            @if (nextPlan(); as plan) {
+              <span class="plan-price">{{ formatPrice(plan.monthly_price) }} Ft/hó</span>
+            }
+          </div>
         </div>
       } @else {
-        <!-- PARTNER (tulajdonos): Teljes csomagváltás UI -->
-
-        <!-- Current vs Next plan comparison -->
-        @if (isDataReady()) {
-          <div class="plan-comparison plan-comparison--loaded">
-            <div class="plan-card plan-card--current">
-              <span class="plan-label">Jelenlegi csomag</span>
-              <span class="plan-name">{{ currentPlanName() }}</span>
-              @if (currentLimit() !== null) {
-                <span class="plan-limit">{{ currentLimit() }} {{ featureDetails.unit }}</span>
-              } @else {
-                <span class="plan-limit plan-limit--unlimited">Korlátlan</span>
-              }
-            </div>
-
-            <div class="plan-arrow">
-              <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="24" />
-            </div>
-
-            <div class="plan-card plan-card--next">
-              <span class="plan-label">Ajánlott csomag</span>
-              <span class="plan-name">{{ nextPlanName() }}</span>
-              @if (nextLimit() !== null) {
-                <span class="plan-limit">{{ nextLimit() }} {{ featureDetails.unit }}</span>
-              } @else {
-                <span class="plan-limit plan-limit--unlimited">Korlátlan</span>
-              }
-              @if (nextPlan(); as plan) {
-                <span class="plan-price">{{ formatPrice(plan.monthly_price) }} Ft/hó</span>
-              }
-            </div>
+        <!-- Skeleton loader -->
+        <div class="plan-comparison">
+          <div class="plan-card plan-card--current skeleton-card">
+            <span class="skeleton skeleton--label"></span>
+            <span class="skeleton skeleton--name"></span>
+            <span class="skeleton skeleton--limit"></span>
           </div>
-        } @else {
-          <!-- Skeleton loader -->
-          <div class="plan-comparison">
-            <div class="plan-card plan-card--current skeleton-card">
-              <span class="skeleton skeleton--label"></span>
-              <span class="skeleton skeleton--name"></span>
-              <span class="skeleton skeleton--limit"></span>
-            </div>
-            <div class="plan-arrow">
-              <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="24" />
-            </div>
-            <div class="plan-card plan-card--next skeleton-card">
-              <span class="skeleton skeleton--label"></span>
-              <span class="skeleton skeleton--name"></span>
-              <span class="skeleton skeleton--limit"></span>
-              <span class="skeleton skeleton--price"></span>
-            </div>
+          <div class="plan-arrow">
+            <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="24" />
           </div>
-        }
-
-        <!-- Quick plan selector -->
-        @if (isPlansReady()) {
-          <div class="quick-plans">
-            <span class="quick-plans-label">Vagy válassz csomagot</span>
-            <div class="quick-plans-list">
-              @for (plan of availablePlans(); track plan.id; let i = $index) {
-                <button
-                  type="button"
-                  class="quick-plan-btn"
-                  [class.quick-plan-btn--recommended]="isRecommendedPlan(plan.id)"
-                  [class.quick-plan-btn--selected]="selectedPlanId() === plan.id"
-                  [style.animation-delay]="i * 0.05 + 's'"
-                  (click)="selectPlan(plan.id)"
-                >
-                  <span class="quick-plan-name">{{ plan.name }}</span>
-                  <span class="quick-plan-price">{{ formatPrice(plan.monthlyPrice) }} Ft/hó</span>
-                  @if (isRecommendedPlan(plan.id)) {
-                    <span class="quick-plan-badge">Ajánlott</span>
-                  }
-                  @if (selectedPlanId() === plan.id) {
-                    <lucide-icon [name]="ICONS.CHECK" [size]="16" class="quick-plan-check" />
-                  }
-                </button>
-              }
-            </div>
+          <div class="plan-card plan-card--next skeleton-card">
+            <span class="skeleton skeleton--label"></span>
+            <span class="skeleton skeleton--name"></span>
+            <span class="skeleton skeleton--limit"></span>
+            <span class="skeleton skeleton--price"></span>
           </div>
-        }
+        </div>
+      }
 
-        <!-- Kiválasztott csomag részletei -->
-        @if (selectedPlan(); as plan) {
-          <div class="selected-plan-details">
-            <div class="selected-plan-header">
-              <div class="selected-plan-info">
-                <h3 class="selected-plan-name">{{ plan.name }}</h3>
-                <p class="selected-plan-desc">{{ plan.description }}</p>
-              </div>
-              <button type="button" class="selected-plan-close" (click)="clearSelection()">
-                <lucide-icon [name]="ICONS.X" [size]="16" />
-              </button>
-            </div>
-
-            <div class="selected-plan-pricing">
-              <div class="selected-plan-price">
-                <span class="price-main">{{ formatPrice(plan.monthlyPrice) }}</span>
-                <span class="price-unit">Ft/hó</span>
-              </div>
-              <div class="selected-plan-yearly">
-                vagy {{ formatPrice(plan.yearlyPrice) }} Ft/év
-                <span class="yearly-discount">(2 hónap ingyen!)</span>
-              </div>
-            </div>
-
-            <div class="selected-plan-features">
-              <span class="features-title">Mit tartalmaz:</span>
-              <ul class="features-list">
-                @for (feature of plan.features; track feature; let i = $index) {
-                  <li [style.animation-delay]="i * 0.03 + 's'">
-                    <lucide-icon [name]="ICONS.CHECK" [size]="14" />
-                    {{ feature }}
-                  </li>
+      <!-- Quick plan selector -->
+      @if (isPlansReady()) {
+        <div class="quick-plans">
+          <span class="quick-plans-label">Vagy válassz csomagot</span>
+          <div class="quick-plans-list">
+            @for (plan of availablePlans(); track plan.id; let i = $index) {
+              <button
+                type="button"
+                class="quick-plan-btn"
+                [class.quick-plan-btn--recommended]="isRecommendedPlan(plan.id)"
+                [class.quick-plan-btn--selected]="selectedPlanId() === plan.id"
+                [style.animation-delay]="i * 0.05 + 's'"
+                (click)="selectPlan(plan.id)"
+              >
+                <span class="quick-plan-name">{{ plan.name }}</span>
+                <span class="quick-plan-price">{{ formatPrice(plan.monthlyPrice) }} Ft/hó</span>
+                @if (isRecommendedPlan(plan.id)) {
+                  <span class="quick-plan-badge">Ajánlott</span>
                 }
-              </ul>
+                @if (selectedPlanId() === plan.id) {
+                  <lucide-icon [name]="ICONS.CHECK" [size]="16" class="quick-plan-check" />
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Kiválasztott csomag részletei -->
+      @if (selectedPlan(); as plan) {
+        <div class="selected-plan-details">
+          <div class="selected-plan-header">
+            <div class="selected-plan-info">
+              <h3 class="selected-plan-name">{{ plan.name }}</h3>
+              <p class="selected-plan-desc">{{ plan.description }}</p>
+            </div>
+            <button type="button" class="selected-plan-close" (click)="clearSelection()">
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+            </button>
+          </div>
+
+          <div class="selected-plan-pricing">
+            <div class="selected-plan-price">
+              <span class="price-main">{{ formatPrice(plan.monthlyPrice) }}</span>
+              <span class="price-unit">Ft/hó</span>
+            </div>
+            <div class="selected-plan-yearly">
+              vagy {{ formatPrice(plan.yearlyPrice) }} Ft/év
+              <span class="yearly-discount">(2 hónap ingyen!)</span>
             </div>
           </div>
-        }
-      }
-    </div>
 
-    <!-- Footer -->
-    <footer class="upgrade-footer">
-      @if (isTeamMember()) {
-        <!-- Csapattag: csak Bezárás gomb -->
-        <button type="button" class="btn-primary" (click)="onClose()">
-          Rendben
-        </button>
-      } @else if (selectedPlan()) {
-        <button type="button" class="btn-secondary" (click)="clearSelection()">
-          <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
-          Vissza
-        </button>
-        <button type="button" class="btn-primary btn-primary--confirm" (click)="confirmPlanSelection()" [disabled]="isLoading()">
-          @if (isLoading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-          } @else {
-            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-          }
-          {{ selectedPlan()!.name }} kiválasztása
-        </button>
-      } @else {
-        <button type="button" class="btn-secondary" (click)="onClose()">
-          Mégse
-        </button>
-        <button type="button" class="btn-primary" (click)="onUpgrade()" [disabled]="isLoading()">
-          @if (isLoading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-          } @else {
-            <lucide-icon [name]="ICONS.ARROW_UP" [size]="18" />
-          }
-          Csomagváltás
-        </button>
+          <div class="selected-plan-features">
+            <span class="features-title">Mit tartalmaz:</span>
+            <ul class="features-list">
+              @for (feature of plan.features; track feature; let i = $index) {
+                <li [style.animation-delay]="i * 0.03 + 's'">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  {{ feature }}
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
       }
-    </footer>
+    }
   </div>
-</div>
+
+  <!-- FOOTER -->
+  <div dialogFooter>
+    @if (isTeamMember()) {
+      <button type="button" class="btn-primary" (click)="onClose()">
+        Rendben
+      </button>
+    } @else if (selectedPlan()) {
+      <button type="button" class="btn-secondary" (click)="clearSelection()">
+        <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+        Vissza
+      </button>
+      <button type="button" class="btn-primary btn-primary--confirm" (click)="confirmPlanSelection()" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        } @else {
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        }
+        {{ selectedPlan()!.name }} kiválasztása
+      </button>
+    } @else {
+      <button type="button" class="btn-secondary" (click)="onClose()">
+        Mégse
+      </button>
+      <button type="button" class="btn-primary" (click)="onUpgrade()" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+        } @else {
+          <lucide-icon [name]="ICONS.ARROW_UP" [size]="18" />
+        }
+        Csomagváltás
+      </button>
+    }
+  </div>
+</app-dialog-wrapper>

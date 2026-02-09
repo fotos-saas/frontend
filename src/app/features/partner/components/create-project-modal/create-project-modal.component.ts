@@ -6,7 +6,7 @@ import { PartnerService, PartnerProjectListItem, SchoolItem, ProjectContact, Cre
 import { AddSchoolModalComponent } from '../add-school-modal/add-school-modal.component';
 import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { SearchableDropdownComponent, DropdownOption } from './components/searchable-dropdown.component';
 
 /**
@@ -21,6 +21,7 @@ import { SearchableDropdownComponent, DropdownOption } from './components/search
     AddSchoolModalComponent,
     AddContactModalComponent,
     SearchableDropdownComponent,
+    DialogWrapperComponent,
   ],
   templateUrl: './create-project-modal.component.html',
   styleUrl: './create-project-modal.component.scss',
@@ -28,7 +29,6 @@ import { SearchableDropdownComponent, DropdownOption } from './components/search
 })
 export class CreateProjectModalComponent {
   readonly ICONS = ICONS;
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   readonly close = output<void>();
   readonly projectCreated = output<PartnerProjectListItem>();

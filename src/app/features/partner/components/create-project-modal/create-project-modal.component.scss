@@ -1,162 +1,24 @@
-/* Modal Header */
-.modal-header {
-  text-align: center;
-  padding: 24px 24px 0;
+// Create Project Modal - tartalmi stílusok
+// Backdrop, header, close, footer chrome → DialogWrapperComponent
+@use '../../../../shared/styles/dialog-buttons' as btn;
+@use '../../../../shared/styles/dialog-forms' as form;
+
+// --- FORM ---
+.form-group { @include form.form-group; }
+.form-label { @include form.label; }
+.form-input { @include form.input(var(--color-primary, #1e3a5f)); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+// --- FOOTER BUTTONS ---
+.btn {
+  @include btn.base;
+  &--primary { @include btn.primary(btn.$blue-500, btn.$blue-600); }
+  &--outline { @include btn.outline; }
 }
 
-.header-icon {
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-primary, #1e3a5f);
-  border-radius: 16px;
-  color: #ffffff;
-  margin: 0 auto 16px;
-}
+.spin { @include btn.spin; }
 
-.modal-header h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 4px 0;
-}
-
-.subtitle {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin: 0;
-}
-
-/* Modal Content */
-.modal-content {
-  padding: 24px;
-}
-
-/* Form Elements */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 6px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  transition: all 0.15s ease;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--color-primary, #1e3a5f);
-  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-}
-
-/* Error */
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin-bottom: 16px;
-}
-
-/* Actions */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.btn-secondary {
-  padding: 10px 20px;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #e5e7eb;
-}
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: var(--color-primary, #1e3a5f);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-dark, #152a45);
-}
-
-.btn-primary:disabled,
-.btn-secondary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Responsive */
+// --- RESPONSIVE ---
 @media (max-width: 480px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  .form-row { grid-template-columns: 1fr; }
 }

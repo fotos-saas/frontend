@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { createBackdropHandler } from '@shared/utils/dialog.util';
 import { AuthService } from '@core/services/auth.service';
 import { ClipboardService } from '@core/services/clipboard.service';
 import { HelpChatService, ChatMessage } from '../../services/help-chat.service';
@@ -53,8 +54,9 @@ export class ChatbotPanelComponent {
   readonly hasMessages = computed(() => this.messages().length > 0);
 
   readonly project = toSignal(this.authService.project$);
-  readonly contactExpanded = signal(false);
+  readonly contactDialogOpen = signal(false);
   readonly hasContactInfo = computed(() => !!this.project()?.partnerName);
+  readonly backdropHandler = createBackdropHandler(() => this.contactDialogOpen.set(false));
 
   readonly suggestedQuestions = [
     'Hogyan tölthetek fel fotókat?',
@@ -110,10 +112,6 @@ export class ChatbotPanelComponent {
           this.errorMessage.set(errMsg);
         },
       });
-  }
-
-  toggleContactExpanded(): void {
-    this.contactExpanded.update(v => !v);
   }
 
   copyEmail(email: string): void {

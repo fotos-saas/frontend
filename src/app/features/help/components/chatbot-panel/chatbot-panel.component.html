@@ -9,6 +9,13 @@
       <div class="header-actions">
         <button
           class="icon-btn"
+          matTooltip="Kapcsolat"
+          (click)="contactDialogOpen.set(true)"
+        >
+          <lucide-icon [name]="ICONS.PHONE" [size]="18" />
+        </button>
+        <button
+          class="icon-btn"
           matTooltip="Uj beszelgetes"
           (click)="startNewConversation()"
         >
@@ -23,68 +30,6 @@
         </button>
       </div>
     </header>
-
-    <!-- Contact bar -->
-    <div class="contact-bar" (click)="toggleContactExpanded()">
-      <div class="contact-bar__header">
-        <lucide-icon [name]="ICONS.PHONE" [size]="16" />
-        <span class="contact-bar__name">Kapcsolat</span>
-        <lucide-icon
-          [name]="contactExpanded() ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN"
-          [size]="16"
-          class="contact-bar__chevron"
-        />
-      </div>
-      @if (contactExpanded()) {
-        <div class="contact-bar__details">
-          <!-- Fotos (partner) szekció -->
-          @if (hasContactInfo()) {
-            <div class="contact-section">
-              <span class="contact-section__title">Fotos</span>
-              <div class="contact-item">
-                <lucide-icon [name]="ICONS.USER" [size]="14" />
-                <span>{{ project()?.partnerName }}</span>
-              </div>
-              @if (project()?.partnerPhone) {
-                <a [href]="'tel:' + project()?.partnerPhone" class="contact-link"
-                   (click)="$event.stopPropagation()">
-                  <lucide-icon [name]="ICONS.PHONE" [size]="14" />
-                  <span>{{ project()?.partnerPhone }}</span>
-                </a>
-              }
-              @if (project()?.partnerEmail) {
-                <button class="contact-link"
-                        (click)="copyEmail(project()!.partnerEmail!); $event.stopPropagation()">
-                  <lucide-icon [name]="ICONS.MAIL" [size]="14" />
-                  <span>{{ project()?.partnerEmail }}</span>
-                  <lucide-icon [name]="ICONS.COPY" [size]="12" class="copy-hint" />
-                </button>
-              }
-            </div>
-          }
-
-          <!-- Tablokeszito szekció -->
-          <div class="contact-section">
-            <span class="contact-section__title">Tablokeszito</span>
-            <div class="contact-item">
-              <lucide-icon [name]="ICONS.USER" [size]="14" />
-              <span>Nove Ferenc</span>
-            </div>
-            <a href="tel:+36706328131" class="contact-link"
-               (click)="$event.stopPropagation()">
-              <lucide-icon [name]="ICONS.PHONE" [size]="14" />
-              <span>06 70 632 8131</span>
-            </a>
-            <button class="contact-link"
-                    (click)="copyEmail('info@tablostudio.hu'); $event.stopPropagation()">
-              <lucide-icon [name]="ICONS.MAIL" [size]="14" />
-              <span>info&#64;tablostudio.hu</span>
-              <lucide-icon [name]="ICONS.COPY" [size]="12" class="copy-hint" />
-            </button>
-          </div>
-        </div>
-      }
-    </div>
 
     <!-- Messages -->
     <div class="chatbot-panel__messages" #messagesContainer>
@@ -161,5 +106,64 @@
         <lucide-icon [name]="ICONS.SEND" [size]="18" />
       </button>
     </footer>
+  </div>
+}
+
+<!-- Contact dialog -->
+@if (contactDialogOpen()) {
+  <div class="dialog-backdrop contact-dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)"
+       (click)="backdropHandler.onClick($event)">
+    <div class="contact-dialog dialog-panel">
+      <div class="contact-dialog__header">
+        <h3>Kapcsolat</h3>
+        <button class="contact-dialog__close" (click)="contactDialogOpen.set(false)">
+          <lucide-icon [name]="ICONS.X" [size]="18" />
+        </button>
+      </div>
+
+      <!-- Fotos (partner) szekció -->
+      @if (hasContactInfo()) {
+        <div class="contact-dialog__section">
+          <span class="contact-dialog__label">Fotos</span>
+          <div class="contact-dialog__item">
+            <lucide-icon [name]="ICONS.USER" [size]="16" />
+            <span>{{ project()?.partnerName }}</span>
+          </div>
+          @if (project()?.partnerPhone) {
+            <a [href]="'tel:' + project()?.partnerPhone" class="contact-dialog__item contact-dialog__link">
+              <lucide-icon [name]="ICONS.PHONE" [size]="16" />
+              <span>{{ project()?.partnerPhone }}</span>
+            </a>
+          }
+          @if (project()?.partnerEmail) {
+            <button class="contact-dialog__item contact-dialog__link"
+                    (click)="copyEmail(project()!.partnerEmail!)">
+              <lucide-icon [name]="ICONS.MAIL" [size]="16" />
+              <span>{{ project()?.partnerEmail }}</span>
+              <lucide-icon [name]="ICONS.COPY" [size]="12" class="contact-dialog__copy" />
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Tablokeszito szekció -->
+      <div class="contact-dialog__section">
+        <span class="contact-dialog__label">Tablokeszito</span>
+        <div class="contact-dialog__item">
+          <lucide-icon [name]="ICONS.USER" [size]="16" />
+          <span>Nove Ferenc</span>
+        </div>
+        <a href="tel:+36706328131" class="contact-dialog__item contact-dialog__link">
+          <lucide-icon [name]="ICONS.PHONE" [size]="16" />
+          <span>06 70 632 8131</span>
+        </a>
+        <button class="contact-dialog__item contact-dialog__link"
+                (click)="copyEmail('info@tablostudio.hu')">
+          <lucide-icon [name]="ICONS.MAIL" [size]="16" />
+          <span>info&#64;tablostudio.hu</span>
+          <lucide-icon [name]="ICONS.COPY" [size]="12" class="contact-dialog__copy" />
+        </button>
+      </div>
+    </div>
   </div>
 }

@@ -75,7 +75,7 @@
           class="school-row"
           [style.animation-delay]="i * 0.03 + 's'"
         >
-          <div class="school-info" (click)="viewSchoolProjects(school)">
+          <div class="school-info" (click)="openSchoolDetail(school)">
             <lucide-icon [name]="ICONS.SCHOOL" [size]="20" class="school-icon" />
             <div class="school-details">
               <span class="school-name">{{ school.name }}</span>
@@ -88,7 +88,7 @@
             </div>
           </div>
 
-          <div class="school-projects" (click)="viewSchoolProjects(school)">
+          <div class="school-projects" (click)="openSchoolDetail(school)">
             <span
               class="projects-badge"
               [class.projects-badge--active]="school.hasActiveProjects"

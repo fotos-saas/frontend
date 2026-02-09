@@ -6,6 +6,8 @@ import {
   SchoolItem,
   SchoolListItem,
   SchoolLimits,
+  SchoolDetail,
+  SchoolChangeLogEntry,
   CreateSchoolRequest,
   PaginatedResponse,
 } from '../models/partner.models';
@@ -83,6 +85,28 @@ export class PartnerSchoolService {
       message: string;
       data: SchoolItem;
     }>(`${this.baseUrl}/schools/${id}`, data);
+  }
+
+  /**
+   * Iskola részletek lekérése
+   */
+  getSchool(id: number): Observable<{ data: SchoolDetail }> {
+    return this.http.get<{ data: SchoolDetail }>(
+      `${this.baseUrl}/schools/${id}/detail`,
+    );
+  }
+
+  /**
+   * Iskola changelog lekérése
+   */
+  getChangelog(id: number, params?: { per_page?: number }): Observable<PaginatedResponse<SchoolChangeLogEntry>> {
+    let httpParams = new HttpParams();
+    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+
+    return this.http.get<PaginatedResponse<SchoolChangeLogEntry>>(
+      `${this.baseUrl}/schools/${id}/changelog`,
+      { params: httpParams },
+    );
   }
 
   /**

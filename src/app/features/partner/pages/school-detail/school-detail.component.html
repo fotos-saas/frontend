@@ -1,0 +1,254 @@
+@if (loading()) {
+  <div class="school-detail-page page-card">
+    <div class="loading-state">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  </div>
+} @else if (school(); as s) {
+  <div class="school-detail-page page-card">
+    <!-- Fejléc -->
+    <div class="detail-header">
+      <a routerLink=".." class="back-link">
+        <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+        Vissza
+      </a>
+      @if (!editing()) {
+        <button class="header-icon-btn" matTooltip="Szerkesztés" (click)="startEditing()">
+          <lucide-icon [name]="ICONS.EDIT" [size]="18" />
+        </button>
+      }
+    </div>
+
+    <div class="detail-layout">
+      <!-- BAL: Profil sidebar -->
+      <aside class="profile-sidebar">
+        <div class="profile-avatar">
+          <lucide-icon [name]="ICONS.SCHOOL" [size]="32" />
+        </div>
+
+        @if (editing()) {
+          <!-- Szerkesztés mód -->
+          <div class="edit-form">
+            <label class="edit-label">Iskola neve</label>
+            <input
+              type="text"
+              [(ngModel)]="editName"
+              class="edit-input"
+              placeholder="Iskola neve..."
+              (keydown.enter)="$event.preventDefault(); saveProfile()"
+            />
+
+            <label class="edit-label">Város</label>
+            <input
+              type="text"
+              [(ngModel)]="editCity"
+              class="edit-input"
+              placeholder="Város..."
+              (keydown.enter)="$event.preventDefault(); saveProfile()"
+            />
+
+            <div class="edit-actions">
+              <button class="edit-save-btn" (click)="saveProfile()" [disabled]="!editName.trim() || saving()">
+                <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                Mentés
+              </button>
+              <button class="edit-cancel-btn" (click)="cancelEditing()">
+                Mégse
+              </button>
+            </div>
+          </div>
+        } @else {
+          <!-- Megjelenítés mód -->
+          <h1 class="profile-name">{{ s.name }}</h1>
+
+          @if (s.city) {
+            <div class="profile-meta">
+              <lucide-icon [name]="ICONS.MAP_PIN" [size]="13" />
+              <span>{{ s.city }}</span>
+            </div>
+          }
+        }
+
+        <!-- Statisztikák -->
+        <div class="sidebar-section">
+          <span class="section-label">Statisztikák</span>
+          <div class="stat-grid">
+            <div class="stat-item">
+              <span class="stat-value">{{ s.projectsCount }}</span>
+              <span class="stat-label">Projekt</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ s.activeProjectsCount }}</span>
+              <span class="stat-label">Aktív</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ s.teachersCount }}</span>
+              <span class="stat-label">Tanár</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gyors gombok -->
+        <div class="sidebar-section">
+          <button class="sidebar-btn" (click)="goToProjects()">
+            <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+            Összes projekt
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="12" class="sidebar-btn-arrow" />
+          </button>
+          <button class="sidebar-btn" (click)="goToTeachers()">
+            <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="14" />
+            Összes tanár
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="12" class="sidebar-btn-arrow" />
+          </button>
+        </div>
+      </aside>
+
+      <!-- JOBB: Fő tartalom -->
+      <main class="detail-content">
+        <!-- Utolsó projektek szekció -->
+        <section class="content-section">
+          <div class="section-head">
+            <div class="section-title">
+              <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
+              <h2>Utolsó projektek</h2>
+              <span class="count-badge">{{ s.projectsCount }}</span>
+            </div>
+            <button class="btn-action" (click)="goToProjects()">
+              Összes
+              <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="14" />
+            </button>
+          </div>
+
+          @if (s.recentProjects.length === 0) {
+            <div class="empty-section">
+              <lucide-icon [name]="ICONS.FOLDER" [size]="28" />
+              <p>Még nincs projekt ehhez az iskolához</p>
+            </div>
+          } @else {
+            <div class="mini-list">
+              @for (project of s.recentProjects; track project.id; let i = $index) {
+                <a
+                  class="mini-list-item"
+                  [routerLink]="['/partner/projects', project.id]"
+                  [style.animation-delay]="i * 0.03 + 's'"
+                >
+                  <div class="mini-item-info">
+                    <span class="mini-item-name">{{ project.name }}</span>
+                    @if (project.className) {
+                      <span class="mini-item-sub">{{ project.className }}</span>
+                    }
+                  </div>
+                  @if (project.status) {
+                    <span class="status-badge" [attr.data-status]="project.status">
+                      {{ getStatusLabel(project.status) }}
+                    </span>
+                  }
+                </a>
+              }
+            </div>
+          }
+        </section>
+
+        <!-- Utolsó tanárok szekció -->
+        <section class="content-section">
+          <div class="section-head">
+            <div class="section-title">
+              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
+              <h2>Utolsó tanárok</h2>
+              <span class="count-badge">{{ s.teachersCount }}</span>
+            </div>
+            <button class="btn-action" (click)="goToTeachers()">
+              Összes
+              <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="14" />
+            </button>
+          </div>
+
+          @if (s.recentTeachers.length === 0) {
+            <div class="empty-section">
+              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="28" />
+              <p>Még nincs tanár ehhez az iskolához</p>
+            </div>
+          } @else {
+            <div class="mini-list">
+              @for (teacher of s.recentTeachers; track teacher.id; let i = $index) {
+                <a
+                  class="mini-list-item"
+                  [routerLink]="['/partner/projects/teachers', teacher.id]"
+                  [style.animation-delay]="i * 0.03 + 's'"
+                >
+                  <div class="mini-item-info">
+                    <span class="mini-item-name">{{ teacher.canonicalName }}</span>
+                    @if (teacher.position) {
+                      <span class="mini-item-sub">{{ teacher.position }}</span>
+                    }
+                  </div>
+                </a>
+              }
+            </div>
+          }
+        </section>
+
+        <!-- Változásnapló szekció -->
+        @if (changelog().length > 0) {
+          <section class="content-section">
+            <div class="section-head">
+              <div class="section-title">
+                <lucide-icon [name]="ICONS.HISTORY" [size]="16" />
+                <h2>Változásnapló</h2>
+                <span class="count-badge">{{ changelog().length }}</span>
+              </div>
+              <div class="changelog-search">
+                <lucide-icon [name]="ICONS.SEARCH" [size]="13" />
+                <input
+                  type="text"
+                  placeholder="Keresés..."
+                  [ngModel]="changelogSearch()"
+                  (ngModelChange)="changelogSearch.set($event)"
+                />
+              </div>
+            </div>
+
+            <div class="changelog-table">
+              <div class="changelog-thead">
+                <span class="cl-th cl-th--type">Típus</span>
+                <span class="cl-th cl-th--detail">Részlet</span>
+                <span class="cl-th cl-th--user">Ki</span>
+                <span class="cl-th cl-th--date">Mikor</span>
+              </div>
+              @for (entry of filteredChangelog(); track entry.id; let i = $index) {
+                <div class="changelog-row" [style.animation-delay]="i * 0.02 + 's'">
+                  <span class="cl-td cl-td--type">
+                    <span class="type-badge" [attr.data-type]="entry.changeType">
+                      {{ getChangeLabel(entry.changeType) }}
+                    </span>
+                  </span>
+                  <span class="cl-td cl-td--detail">
+                    @if (entry.oldValue && entry.newValue) {
+                      <span class="old-val">{{ entry.oldValue }}</span>
+                      <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="10" />
+                      <span>{{ entry.newValue }}</span>
+                    } @else if (entry.newValue) {
+                      {{ entry.newValue }}
+                    } @else {
+                      <span class="no-data">-</span>
+                    }
+                  </span>
+                  <span class="cl-td cl-td--user">{{ entry.userName ?? 'Rendszer' }}</span>
+                  <span class="cl-td cl-td--date">{{ entry.createdAt | date:'yyyy.MM.dd HH:mm' }}</span>
+                </div>
+              }
+            </div>
+
+            @if (filteredChangelog().length === 0) {
+              <div class="empty-search">
+                <p>Nincs találat a keresésre</p>
+              </div>
+            }
+          </section>
+        }
+      </main>
+    </div>
+  </div>
+}

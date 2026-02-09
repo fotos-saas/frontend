@@ -90,10 +90,8 @@ export class PartnerSchoolListComponent implements OnInit {
     this.filterState.setPage(page);
   }
 
-  viewSchoolProjects(school: SchoolListItem): void {
-    this.router.navigate(['/partner/projects'], {
-      queryParams: { search: school.name }
-    });
+  openSchoolDetail(school: SchoolListItem): void {
+    this.router.navigate(['/partner/projects/schools', school.id]);
   }
 
   onNewSchoolClick(): void {

@@ -188,6 +188,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
       },
       {
+        path: 'projects/schools/:id',
+        loadComponent: () => import('./features/partner/pages/school-detail/school-detail.component').then(m => m.PartnerSchoolDetailComponent)
+      },
+      {
         path: 'projects/teachers',
         loadComponent: () => import('./features/partner/pages/teacher-list/teacher-list.component').then(m => m.PartnerTeacherListComponent)
       },
@@ -346,6 +350,10 @@ export const routes: Routes = [
       {
         path: 'projects/schools',
         loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
+      },
+      {
+        path: 'projects/schools/:id',
+        loadComponent: () => import('./features/partner/pages/school-detail/school-detail.component').then(m => m.PartnerSchoolDetailComponent)
       },
       {
         path: 'projects/:id',

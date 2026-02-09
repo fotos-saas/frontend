@@ -450,5 +450,47 @@ export interface UploadProgress {
   errorCount: number;
 }
 
+/**
+ * Iskola részletek (detail nézet)
+ */
+export interface SchoolDetail {
+  id: number;
+  name: string;
+  city: string | null;
+  projectsCount: number;
+  activeProjectsCount: number;
+  teachersCount: number;
+  recentProjects: SchoolRecentProject[];
+  recentTeachers: SchoolRecentTeacher[];
+  createdAt: string | null;
+}
+
+export interface SchoolRecentProject {
+  id: number;
+  name: string;
+  className: string | null;
+  status: string | null;
+  createdAt: string | null;
+}
+
+export interface SchoolRecentTeacher {
+  id: number;
+  canonicalName: string;
+  position: string | null;
+}
+
+/**
+ * Iskola changelog bejegyzés
+ */
+export interface SchoolChangeLogEntry {
+  id: number;
+  changeType: string;
+  oldValue: string | null;
+  newValue: string | null;
+  metadata: Record<string, unknown> | null;
+  userName: string | null;
+  createdAt: string;
+}
+
 // Re-export QrCode from shared
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';

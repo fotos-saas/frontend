@@ -58,7 +58,7 @@ export class PartnerProjectListComponent implements OnInit {
   // Filter state
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'projects' },
-    defaultFilters: { status: '', aware: '', draft: '' },
+    defaultFilters: { status: '', aware: '', draft: '', school_id: '' },
     defaultSortBy: 'created_at',
     defaultSortDir: 'desc',
     validation: {
@@ -153,7 +153,8 @@ export class PartnerProjectListComponent implements OnInit {
       sort_dir: this.filterState.sortDir(),
       status: filters['status'] || undefined,
       is_aware: filters['aware'] ? filters['aware'] === 'true' : undefined,
-      has_draft: filters['draft'] ? filters['draft'] === 'true' : undefined
+      has_draft: filters['draft'] ? filters['draft'] === 'true' : undefined,
+      school_id: filters['school_id'] ? parseInt(filters['school_id'], 10) : undefined
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

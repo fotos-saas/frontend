@@ -21,7 +21,7 @@
 .search-input { @extend .search-input; }
 .clear-btn { @extend .clear-btn; }
 
-.school-filter { @extend .select-filter; }
+.school-filter { min-width: 220px; }
 
 // Table
 .table-header {

@@ -28,16 +28,14 @@
       }
     </div>
 
-    <select
+    <app-searchable-select
       class="school-filter"
-      [ngModel]="filterState.filters().school_id"
-      (ngModelChange)="onSchoolFilterChange($event)"
-    >
-      <option value="">Minden iskola</option>
-      @for (school of schools(); track school.id) {
-        <option [value]="school.id">{{ school.name }}</option>
-      }
-    </select>
+      [options]="schoolOptions()"
+      [value]="filterState.filters().school_id"
+      placeholder="Iskola keresése..."
+      allLabel="Minden iskola"
+      (valueChange)="onSchoolFilterChange($event)"
+    />
   </div>
 
   <!-- Lista -->

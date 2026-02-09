@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -10,6 +10,7 @@ import { TeacherListItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/teacher-edit-modal.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 
@@ -22,6 +23,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     MatTooltipModule,
     TeacherEditModalComponent,
     ConfirmDialogComponent,
+    SearchableSelectComponent,
   ],
   templateUrl: './teacher-list.component.html',
   styleUrl: './teacher-list.component.scss',
@@ -48,6 +50,15 @@ export class PartnerTeacherListComponent implements OnInit {
   totalPages = signal(1);
   totalTeachers = signal(0);
   schools = signal<SchoolItem[]>([]);
+
+  /** Iskolák SelectOption formátumban */
+  schoolOptions = computed<SelectOption[]>(() =>
+    this.schools().map(s => ({
+      id: s.id,
+      label: s.name,
+      sublabel: s.city ?? undefined,
+    }))
+  );
 
   // Modals
   showEditModal = signal(false);

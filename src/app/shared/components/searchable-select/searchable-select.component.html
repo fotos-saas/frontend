@@ -1,0 +1,58 @@
+<div class="searchable-select" [class.is-open]="isOpen()">
+  <!-- Megjelenítő / Input -->
+  <div class="select-trigger" (click)="open()">
+    @if (isOpen()) {
+      <lucide-icon [name]="ICONS.SEARCH" class="trigger-icon" [size]="16" />
+      <input
+        #searchInput
+        type="text"
+        class="select-input"
+        [placeholder]="placeholder()"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onInputChange($event)"
+        (keydown)="onKeydown($event)"
+      />
+    } @else {
+      <lucide-icon [name]="ICONS.CHEVRON_DOWN" class="trigger-icon" [size]="16" />
+      <span class="select-display" [class.is-placeholder]="!selectedLabel()">
+        {{ selectedLabel() || allLabel() || placeholder() }}
+      </span>
+    }
+    @if (value()) {
+      <button type="button" class="select-clear" (click)="clear($event)">
+        <lucide-icon [name]="ICONS.X" [size]="14" />
+      </button>
+    }
+  </div>
+
+  <!-- Dropdown -->
+  @if (isOpen()) {
+    <div class="select-dropdown">
+      @if (allLabel()) {
+        <div
+          class="select-option select-option--all"
+          [class.highlighted]="highlightedIndex() === 0"
+          (mousedown)="selectAll()"
+        >
+          {{ allLabel() }}
+        </div>
+      }
+      @for (option of filteredOptions(); track option.id; let i = $index) {
+        <div
+          class="select-option"
+          [class.highlighted]="highlightedIndex() === (allLabel() ? i + 1 : i)"
+          [class.selected]="isSelected(option)"
+          (mousedown)="selectOption(option)"
+        >
+          <span class="option-label">{{ option.label }}</span>
+          @if (option.sublabel) {
+            <span class="option-sublabel">{{ option.sublabel }}</span>
+          }
+        </div>
+      }
+      @if (filteredOptions().length === 0) {
+        <div class="select-empty">Nincs találat</div>
+      }
+    </div>
+  }
+</div>

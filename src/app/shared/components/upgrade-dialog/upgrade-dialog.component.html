@@ -144,15 +144,15 @@
   <!-- FOOTER -->
   <ng-container dialogFooter>
     @if (isTeamMember()) {
-      <button type="button" class="btn-primary" (click)="onClose()">
+      <button type="button" class="btn btn--primary" (click)="onClose()">
         Rendben
       </button>
     } @else if (selectedPlan()) {
-      <button type="button" class="btn-secondary" (click)="clearSelection()">
+      <button type="button" class="btn btn--outline" (click)="clearSelection()">
         <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
         Vissza
       </button>
-      <button type="button" class="btn-primary btn-primary--confirm" (click)="confirmPlanSelection()" [disabled]="isLoading()">
+      <button type="button" class="btn btn--confirm" (click)="confirmPlanSelection()" [disabled]="isLoading()">
         @if (isLoading()) {
           <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
         } @else {
@@ -161,10 +161,10 @@
         {{ selectedPlan()!.name }} kiválasztása
       </button>
     } @else {
-      <button type="button" class="btn-secondary" (click)="onClose()">
+      <button type="button" class="btn btn--outline" (click)="onClose()">
         Mégse
       </button>
-      <button type="button" class="btn-primary" (click)="onUpgrade()" [disabled]="isLoading()">
+      <button type="button" class="btn btn--primary" (click)="onUpgrade()" [disabled]="isLoading()">
         @if (isLoading()) {
           <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
         } @else {

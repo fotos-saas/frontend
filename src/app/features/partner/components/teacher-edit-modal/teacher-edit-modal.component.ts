@@ -6,13 +6,13 @@ import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { TeacherListItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 @Component({
   selector: 'app-teacher-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, SearchableSelectComponent],
+  imports: [FormsModule, LucideAngularModule, SearchableSelectComponent, DialogWrapperComponent],
   templateUrl: './teacher-edit-modal.component.html',
   styleUrl: './teacher-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,8 +50,6 @@ export class TeacherEditModalComponent {
   saving = signal(false);
   errorMessage = signal<string | null>(null);
   loading = signal(false);
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   ngOnInit(): void {
     const teacher = this.teacher();

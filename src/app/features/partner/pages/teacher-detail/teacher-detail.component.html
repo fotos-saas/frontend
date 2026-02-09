@@ -8,155 +8,145 @@
   </div>
 } @else if (teacher(); as t) {
   <div class="teacher-detail-page page-card">
-    <!-- Fejléc -->
-    <header class="detail-header">
-      <div class="header-left">
-        <a routerLink=".." class="back-link">
-          <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
-          Vissza
-        </a>
-        <div class="teacher-title">
-          <div class="teacher-avatar-lg">
-            @if (t.photoUrl) {
-              <img [src]="t.photoUrl" [alt]="t.fullDisplayName" />
-            } @else {
-              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="32" />
+    <!-- Vissza link -->
+    <a routerLink=".." class="back-link">
+      <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+      Vissza
+    </a>
+
+    <!-- Kétoszlopos layout -->
+    <div class="detail-layout">
+      <!-- BAL: Profil kártya -->
+      <aside class="profile-card">
+        <div class="profile-avatar">
+          @if (t.photoUrl) {
+            <img [src]="t.photoUrl" [alt]="t.fullDisplayName" />
+          } @else {
+            <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="28" />
+          }
+        </div>
+        <h1 class="profile-name">{{ t.fullDisplayName }}</h1>
+        <p class="profile-school">
+          <lucide-icon [name]="ICONS.SCHOOL" [size]="13" />
+          {{ t.schoolName }}
+        </p>
+        @if (!t.isActive) {
+          <span class="inactive-badge">Inaktív</span>
+        }
+
+        @if (t.notes) {
+          <div class="profile-notes">
+            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
+            {{ t.notes }}
+          </div>
+        }
+
+        <!-- Aliasok -->
+        <div class="aliases-block">
+          <span class="block-label">Név variánsok</span>
+          <div class="aliases-tags">
+            @for (alias of t.aliases; track alias.id) {
+              <span class="alias-tag">
+                {{ alias.aliasName }}
+                <button class="alias-remove" matTooltip="Eltávolítás" (click)="removeAlias(alias.aliasName)">
+                  <lucide-icon [name]="ICONS.X" [size]="10" />
+                </button>
+              </span>
+            }
+            @if (t.aliases.length === 0) {
+              <span class="no-data">Nincs megadva</span>
             }
           </div>
-          <div>
-            <h1>{{ t.fullDisplayName }}</h1>
-            <p class="school-subtitle">
-              <lucide-icon [name]="ICONS.SCHOOL" [size]="14" />
-              {{ t.schoolName }}
-            </p>
-          </div>
+          @if (t.aliases.length < 10) {
+            <div class="add-alias-row">
+              <input
+                type="text"
+                [(ngModel)]="newAlias"
+                class="alias-input"
+                placeholder="Új variáns..."
+                (keydown.enter)="$event.preventDefault(); addAlias()"
+              />
+              <button class="alias-add-btn" matTooltip="Hozzáadás" (click)="addAlias()" [disabled]="!newAlias.trim() || savingAlias()">
+                <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+              </button>
+            </div>
+          }
         </div>
-      </div>
-      @if (!t.isActive) {
-        <span class="inactive-badge-lg">Inaktív</span>
-      }
-    </header>
+      </aside>
 
-    <!-- Megjegyzés -->
-    @if (t.notes) {
-      <div class="notes-section">
-        <h3>Megjegyzés</h3>
-        <p>{{ t.notes }}</p>
-      </div>
-    }
-
-    <!-- Aliasok -->
-    <div class="aliases-section">
-      <h3>Név variánsok</h3>
-      <div class="aliases-tags">
-        @for (alias of t.aliases; track alias.id) {
-          <div class="alias-tag">
-            <span>{{ alias.aliasName }}</span>
-            <button class="alias-remove" matTooltip="Eltávolítás" (click)="removeAlias(alias.aliasName)">
-              <lucide-icon [name]="ICONS.X" [size]="12" />
+      <!-- JOBB: Fotók + Napló -->
+      <main class="detail-main">
+        <!-- Fotók szekció -->
+        <section class="photos-section">
+          <div class="section-head">
+            <h2>Fotók <span class="count-badge">{{ t.photos.length }}</span></h2>
+            <button class="btn-upload" (click)="showPhotoUpload.set(true)">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+              Feltöltés
             </button>
           </div>
-        }
-        @if (t.aliases.length === 0) {
-          <span class="no-aliases">Nincsenek név variánsok</span>
-        }
-      </div>
-      @if (t.aliases.length < 10) {
-        <div class="add-alias-row">
-          <input
-            type="text"
-            [(ngModel)]="newAlias"
-            class="alias-input"
-            placeholder="Új név variáns..."
-            (keydown.enter)="$event.preventDefault(); addAlias()"
-          />
-          <button class="btn-sm" (click)="addAlias()" [disabled]="!newAlias.trim() || savingAlias()">
-            <lucide-icon [name]="ICONS.PLUS" [size]="14" />
-            Hozzáadás
-          </button>
-        </div>
-      }
-    </div>
 
-    <!-- Fotók -->
-    <div class="photos-section">
-      <div class="section-header">
-        <h3>Fotók ({{ t.photos.length }})</h3>
-        <button class="btn-sm" (click)="showPhotoUpload.set(true)">
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
-          Feltöltés
-        </button>
-      </div>
-
-      @if (t.photos.length === 0) {
-        <div class="empty-photos">
-          <lucide-icon [name]="ICONS.CAMERA" [size]="32" />
-          <p>Még nincs feltöltött fotó</p>
-          <button class="btn-sm" (click)="showPhotoUpload.set(true)">
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
-            Első fotó feltöltése
-          </button>
-        </div>
-      } @else {
-        <div class="photos-grid">
-          @for (photo of t.photos; track photo.id) {
-            <div class="photo-card" [class.photo-card--active]="photo.isActive">
-              <div class="photo-image">
-                <img [src]="photo.thumbUrl || photo.url" [alt]="'Fotó ' + photo.year" />
-                @if (photo.isActive) {
-                  <div class="active-badge">
-                    <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-                    Aktív
-                  </div>
-                }
-              </div>
-              <div class="photo-info">
-                <span class="photo-year">{{ photo.year }}</span>
-                <div class="photo-actions">
-                  @if (!photo.isActive) {
-                    <button class="action-btn-sm" matTooltip="Aktívnak jelölés" (click)="setActivePhoto(photo)">
-                      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
-                    </button>
+          @if (t.photos.length === 0) {
+            <div class="empty-photos">
+              <lucide-icon [name]="ICONS.CAMERA" [size]="24" />
+              <p>Még nincs fotó</p>
+              <button class="btn-upload" (click)="showPhotoUpload.set(true)">
+                <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+                Feltöltés
+              </button>
+            </div>
+          } @else {
+            <div class="photos-strip">
+              @for (photo of t.photos; track photo.id) {
+                <div class="photo-thumb" [class.photo-thumb--active]="photo.isActive">
+                  <img [src]="photo.thumbUrl || photo.url" [alt]="'Fotó ' + photo.year" />
+                  @if (photo.isActive) {
+                    <span class="active-dot" matTooltip="Aktív fotó">
+                      <lucide-icon [name]="ICONS.CHECK" [size]="10" />
+                    </span>
                   }
-                  <button class="action-btn-sm action-btn-sm--danger" matTooltip="Törlés" (click)="confirmDeletePhoto(photo)">
-                    <lucide-icon [name]="ICONS.DELETE" [size]="14" />
-                  </button>
+                  <span class="photo-year">{{ photo.year }}</span>
+                  <div class="photo-hover-actions">
+                    @if (!photo.isActive) {
+                      <button class="hover-btn" matTooltip="Aktívnak jelölés" (click)="setActivePhoto(photo)">
+                        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                      </button>
+                    }
+                    <button class="hover-btn hover-btn--danger" matTooltip="Törlés" (click)="confirmDeletePhoto(photo)">
+                      <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              }
             </div>
           }
-        </div>
-      }
-    </div>
+        </section>
 
-    <!-- Változásnapló -->
-    @if (changelog().length > 0) {
-      <div class="changelog-section">
-        <h3>Változásnapló</h3>
-        <div class="changelog-list">
-          @for (entry of changelog(); track entry.id) {
-            <div class="changelog-entry">
-              <div class="entry-dot"></div>
-              <div class="entry-content">
-                <span class="entry-type">{{ getChangeLabel(entry.changeType) }}</span>
-                @if (entry.oldValue && entry.newValue) {
-                  <span class="entry-detail">
-                    <span class="old-value">{{ entry.oldValue }}</span>
-                    <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="12" />
-                    <span class="new-value">{{ entry.newValue }}</span>
-                  </span>
-                } @else if (entry.newValue) {
-                  <span class="entry-detail">{{ entry.newValue }}</span>
-                }
-                <span class="entry-meta">
-                  {{ entry.userName ?? 'Rendszer' }} - {{ entry.createdAt | date:'yyyy.MM.dd HH:mm' }}
-                </span>
-              </div>
+        <!-- Változásnapló -->
+        @if (changelog().length > 0) {
+          <section class="changelog-section">
+            <h2>Változásnapló</h2>
+            <div class="changelog-list">
+              @for (entry of changelog(); track entry.id) {
+                <div class="log-row">
+                  <span class="log-type">{{ getChangeLabel(entry.changeType) }}</span>
+                  @if (entry.oldValue && entry.newValue) {
+                    <span class="log-detail">
+                      <span class="old-val">{{ entry.oldValue }}</span>
+                      <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="10" />
+                      {{ entry.newValue }}
+                    </span>
+                  } @else if (entry.newValue) {
+                    <span class="log-detail">{{ entry.newValue }}</span>
+                  }
+                  <span class="log-meta">{{ entry.userName ?? 'Rendszer' }} · {{ entry.createdAt | date:'yyyy.MM.dd HH:mm' }}</span>
+                </div>
+              }
             </div>
-          }
-        </div>
-      </div>
-    }
+          </section>
+        }
+      </main>
+    </div>
   </div>
 }
 

@@ -1,0 +1,121 @@
+// ============================================
+// Közös dialog gomb stílusok
+// Használat: @use 'shared/styles/dialog-buttons' as btn;
+// ============================================
+
+// --- Alap gomb ---
+@mixin base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.625rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// --- Primary variáns (szín paraméterezhető) ---
+@mixin primary($bg: #3b82f6, $hover: #2563eb) {
+  @include base;
+  color: white;
+  background: $bg;
+
+  &:hover:not(:disabled) {
+    background: $hover;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+// --- Outline variáns ---
+@mixin outline {
+  @include base;
+  background: white;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+// --- Confirm variáns (zöld) ---
+@mixin confirm($bg: #22c55e, $hover: #16a34a) {
+  @include base;
+  color: white;
+  background: $bg;
+
+  &:hover:not(:disabled) {
+    background: $hover;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+// --- Danger variáns (piros) ---
+@mixin danger($bg: #ef4444, $hover: #dc2626) {
+  @include base;
+  color: white;
+  background: $bg;
+
+  &:hover:not(:disabled) {
+    background: $hover;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+// --- Full-width modifier ---
+@mixin full {
+  width: 100%;
+}
+
+// --- Spinner ---
+@mixin spinner($size: 14px) {
+  width: $size;
+  height: $size;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: dw-btn-spin 0.8s linear infinite;
+}
+
+// --- Spin animation ---
+@mixin spin {
+  animation: dw-btn-spin 1s linear infinite;
+}
+
+@keyframes dw-btn-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// --- Előre definiált színek ---
+$blue-500: #3b82f6;
+$blue-600: #2563eb;
+$purple-500: #8b5cf6;
+$purple-600: #7c3aed;
+$green-500: #22c55e;
+$green-600: #16a34a;
+$red-500: #ef4444;
+$red-600: #dc2626;
+$amber-500: #f59e0b;
+$amber-600: #d97706;

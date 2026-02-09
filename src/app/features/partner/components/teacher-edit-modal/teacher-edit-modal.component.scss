@@ -1,92 +1,49 @@
-// ============================================
-// Teacher Edit Modal
+// Teacher Edit Modal - tartalmi stílusok
 // Backdrop, header, close, footer, ESC → DialogWrapperComponent
-// ============================================
+@use '../../../../shared/styles/dialog-buttons' as btn;
+@use '../../../../shared/styles/dialog-forms' as form;
 
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  padding: 40px 0;
-  color: #64748b;
-}
+.loading-spinner { @include form.loading-spinner; }
+.spin { @include btn.spin; }
 
-.spin {
-  animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-// ============================================
-// FORM
-// ============================================
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-row {
-  display: flex;
-  gap: 12px;
-}
+// --- FORM ---
+.modal-form { @include form.form-layout; }
+.form-row { @include form.form-row; }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
+  @include form.form-group;
   &--sm { flex: 0 0 100px; }
   &--lg { flex: 1; }
+  label { @include form.label; }
 
-  label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #475569;
+  &--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    label { @include form.label; white-space: nowrap; }
   }
 }
 
 .form-input {
-  padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  transition: all 0.2s ease;
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary, #1e3a5f);
-    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-  }
+  @include form.input(var(--color-primary, #1e3a5f));
+  &--sm { @include form.input-sm; }
 }
 
-// ============================================
-// PHOTO SECTION
-// ============================================
+.checkbox-label { @include form.checkbox-label(var(--color-primary, #1e3a5f)); }
+
+// --- PHOTO SECTION ---
 .photo-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  > label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #475569;
-  }
+  @include form.form-group;
+  > label { @include form.label; }
 }
 
-.photo-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-}
+.photo-row { display: flex; align-items: flex-start; gap: 14px; }
 
 .photo-thumb {
   position: relative;
-  width: 72px;
-  height: 96px;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  flex-shrink: 0;
+  width: 72px; height: 96px;
+  border-radius: 8px; overflow: hidden;
+  cursor: pointer; flex-shrink: 0;
   border: 2px dashed #e2e8f0;
   transition: border-color 0.15s ease;
 
@@ -95,184 +52,54 @@
     .photo-overlay { opacity: 1; }
   }
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  img { width: 100%; height: 100%; object-fit: cover; }
 }
 
 .photo-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.35);
-  color: #fff;
-  opacity: 0;
-  transition: opacity 0.15s ease;
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.35); color: #fff;
+  opacity: 0; transition: opacity 0.15s ease;
 }
 
 .photo-remove {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background: rgba(0, 0, 0, 0.55);
-  border: none;
-  border-radius: 4px;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.15s ease;
-
+  position: absolute; top: 2px; right: 2px;
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  background: rgba(0, 0, 0, 0.55); border: none; border-radius: 4px;
+  color: #fff; cursor: pointer; transition: background 0.15s ease;
   &:hover { background: #dc2626; }
 }
 
 .photo-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: #94a3b8;
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%; color: #94a3b8;
 }
 
-.hidden-input {
-  display: none;
-}
+.hidden-input { display: none; }
 
-.photo-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 2px;
-}
+.photo-info { display: flex; flex-direction: column; gap: 8px; padding-top: 2px; }
+.photo-fields { display: flex; flex-direction: column; gap: 6px; }
 
 .photo-status {
-  font-size: 0.8125rem;
-  color: #64748b;
-
-  &--new {
-    color: var(--color-primary, #1e3a5f);
-    font-weight: 500;
-  }
-
-  &--empty {
-    color: #94a3b8;
-  }
-}
-
-.photo-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group--inline {
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-
-  label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #475569;
-    white-space: nowrap;
-  }
-}
-
-.form-input--sm {
-  padding: 6px 10px;
-  width: 80px;
-  font-size: 0.8125rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8125rem;
-  color: #475569;
-  cursor: pointer;
-
-  input[type="checkbox"] {
-    width: 14px;
-    height: 14px;
-    accent-color: var(--color-primary, #1e3a5f);
-  }
+  font-size: 0.8125rem; color: #64748b;
+  &--new { color: var(--color-primary, #1e3a5f); font-weight: 500; }
+  &--empty { color: #94a3b8; }
 }
 
 .btn-change-photo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: #e2e8f0;
-    color: #1e293b;
-  }
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; background: #f1f5f9; border: 1px solid #e2e8f0;
+  border-radius: 6px; font-size: 0.8125rem; color: #475569;
+  cursor: pointer; transition: all 0.15s ease;
+  &:hover { background: #e2e8f0; color: #1e293b; }
 }
 
-// ============================================
-// FOOTER BUTTONS
-// ============================================
+// --- FOOTER BUTTONS ---
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.625rem;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &--primary {
-    color: white;
-    background: #3b82f6;
-
-    &:hover:not(:disabled) {
-      background: #2563eb;
-      transform: translateY(-1px);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  &--outline {
-    background: white;
-    color: #374151;
-    border: 1px solid #e5e7eb;
-
-    &:hover {
-      background: #f3f4f6;
-    }
-  }
+  @include btn.base;
+  &--primary { @include btn.primary(btn.$blue-500, btn.$blue-600); }
+  &--outline { @include btn.outline; }
 }
 
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
+.spinner { @include btn.spinner; }

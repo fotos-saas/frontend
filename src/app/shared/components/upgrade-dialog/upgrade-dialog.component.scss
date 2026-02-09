@@ -1,32 +1,11 @@
-// ============================================
-// Upgrade Dialog Styles
-// Backdrop, header, close button, footer chrome → DialogWrapperComponent
-// Itt csak a tartalmi stílusok maradnak
-// ============================================
+// Upgrade Dialog - tartalmi stílusok
+// Backdrop, header, close, footer chrome → DialogWrapperComponent
+@use '../../../shared/styles/dialog-buttons' as btn;
 
-// ============================================
-// ANIMATIONS
-// ============================================
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 500px;
-  }
-}
-
+// --- ANIMATIONS ---
 @keyframes benefitEntry {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes shimmer {
@@ -35,488 +14,119 @@
 }
 
 @keyframes contentFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-// ============================================
-// PLAN COMPARISON
-// ============================================
+// --- PLAN COMPARISON ---
 .plan-comparison {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-
-  &--loaded {
-    animation: contentFadeIn 0.3s ease-out;
-  }
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;
+  &--loaded { animation: contentFadeIn 0.3s ease-out; }
 }
 
 .plan-card {
-  flex: 1;
-  padding: 1rem;
-  border-radius: 12px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex: 1; padding: 1rem; border-radius: 12px; text-align: center;
+  display: flex; flex-direction: column; gap: 0.25rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
-  &--current {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-  }
-
+  &--current { background: #f9fafb; border: 1px solid #e5e7eb; }
   &--next {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
     border: 2px solid #6366f1;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
-    }
+    &:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2); }
   }
 }
 
-.plan-label {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+.plan-label { font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
+.plan-name { font-size: 1rem; font-weight: 600; color: #111827; }
+.plan-limit { font-size: 0.875rem; color: #6b7280; &--unlimited { color: #6366f1; font-weight: 500; } }
+.plan-price { font-size: 0.8125rem; font-weight: 600; color: #6366f1; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px dashed rgba(99, 102, 241, 0.3); }
+.plan-arrow { color: #9ca3af; flex-shrink: 0; }
 
-.plan-name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.plan-limit {
-  font-size: 0.875rem;
-  color: #6b7280;
-
-  &--unlimited {
-    color: #6366f1;
-    font-weight: 500;
-  }
-}
-
-.plan-price {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #6366f1;
-  margin-top: 0.25rem;
-  padding-top: 0.5rem;
-  border-top: 1px dashed rgba(99, 102, 241, 0.3);
-}
-
-.plan-arrow {
-  color: #9ca3af;
-  flex-shrink: 0;
-}
-
-// ============================================
-// QUICK PLAN SELECTOR
-// ============================================
-.quick-plans {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.quick-plans-label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.75rem;
-}
-
-.quick-plans-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+// --- QUICK PLAN SELECTOR ---
+.quick-plans { margin-top: 1rem; padding: 1rem; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; }
+.quick-plans-label { display: block; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+.quick-plans-list { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .quick-plan-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s ease;
-  opacity: 0;
-  animation: benefitEntry 0.3s ease-out forwards;
+  display: flex; align-items: center; gap: 0.75rem; width: 100%;
+  padding: 0.75rem 1rem; background: white; border: 1px solid #e5e7eb;
+  border-radius: 8px; cursor: pointer; text-align: left;
+  transition: all 0.2s ease; opacity: 0; animation: benefitEntry 0.3s ease-out forwards;
 
-  &:hover {
-    border-color: #6366f1;
-    background: rgba(99, 102, 241, 0.05);
-    transform: translateX(4px);
-  }
-
+  &:hover { border-color: #6366f1; background: rgba(99, 102, 241, 0.05); transform: translateX(4px); }
   &--recommended {
     border-color: #6366f1;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
-
-    &:hover {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
-    }
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+    &:hover { background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.12)); }
   }
-
-  &--selected {
-    border-color: #22c55e;
-    background: rgba(34, 197, 94, 0.1);
-
-    .quick-plan-name {
-      color: #16a34a;
-    }
-  }
+  &--selected { border-color: #22c55e; background: rgba(34, 197, 94, 0.1); .quick-plan-name { color: #16a34a; } }
 }
 
-.quick-plan-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #111827;
-  flex: 1;
-}
+.quick-plan-name { font-size: 0.875rem; font-weight: 600; color: #111827; flex: 1; }
+.quick-plan-price { font-size: 0.8125rem; font-weight: 500; color: #6366f1; }
+.quick-plan-badge { font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.5rem; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border-radius: 4px; }
+.quick-plan-check { color: #22c55e; flex-shrink: 0; }
 
-.quick-plan-price {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: #6366f1;
-}
-
-.quick-plan-badge {
-  font-size: 0.625rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.25rem 0.5rem;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  color: white;
-  border-radius: 4px;
-}
-
-.quick-plan-check {
-  color: #22c55e;
-  flex-shrink: 0;
-}
-
-// ============================================
-// SELECTED PLAN DETAILS
-// ============================================
-.selected-plan-details {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.08) 100%);
-  border: 2px solid #22c55e;
-  border-radius: 12px;
-  animation: contentFadeIn 0.3s ease-out;
-}
-
-.selected-plan-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
-}
-
-.selected-plan-info {
-  flex: 1;
-}
-
-.selected-plan-name {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 0.25rem;
-}
-
-.selected-plan-desc {
-  font-size: 0.8125rem;
-  color: #6b7280;
-  margin: 0;
-}
+// --- SELECTED PLAN DETAILS ---
+.selected-plan-details { margin-top: 1rem; padding: 1rem; background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(22, 163, 74, 0.08)); border: 2px solid #22c55e; border-radius: 12px; animation: contentFadeIn 0.3s ease-out; }
+.selected-plan-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+.selected-plan-info { flex: 1; }
+.selected-plan-name { font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0 0 0.25rem; }
+.selected-plan-desc { font-size: 0.8125rem; color: #6b7280; margin: 0; }
 
 .selected-plan-close {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9ca3af;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: #374151;
-  }
+  width: 28px; height: 28px; border: none; background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: #9ca3af; transition: all 0.15s ease; flex-shrink: 0;
+  &:hover { background: rgba(0, 0, 0, 0.1); color: #374151; }
 }
 
-.selected-plan-pricing {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  padding: 0.75rem 0;
-  border-top: 1px solid rgba(34, 197, 94, 0.2);
-  border-bottom: 1px solid rgba(34, 197, 94, 0.2);
-  margin-bottom: 0.75rem;
-}
-
-.selected-plan-price {
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-
-  .price-main {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #111827;
-  }
-
-  .price-unit {
-    font-size: 0.875rem;
-    color: #6b7280;
-  }
-}
-
-.selected-plan-yearly {
-  font-size: 0.8125rem;
-  color: #6b7280;
-
-  .yearly-discount {
-    color: #22c55e;
-    font-weight: 600;
-  }
-}
+.selected-plan-pricing { display: flex; align-items: baseline; gap: 1rem; padding: 0.75rem 0; border-top: 1px solid rgba(34, 197, 94, 0.2); border-bottom: 1px solid rgba(34, 197, 94, 0.2); margin-bottom: 0.75rem; }
+.selected-plan-price { display: flex; align-items: baseline; gap: 0.25rem; .price-main { font-size: 1.5rem; font-weight: 700; color: #111827; } .price-unit { font-size: 0.875rem; color: #6b7280; } }
+.selected-plan-yearly { font-size: 0.8125rem; color: #6b7280; .yearly-discount { color: #22c55e; font-weight: 600; } }
 
 .selected-plan-features {
-  .features-title {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #6b7280;
-    margin-bottom: 0.5rem;
-  }
-
+  .features-title { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 0.5rem; }
   .features-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.375rem 1rem;
-
-    li {
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-      font-size: 0.75rem;
-      color: #374151;
-      opacity: 0;
-      animation: benefitEntry 0.25s ease-out forwards;
-
-      lucide-icon {
-        color: #22c55e;
-        flex-shrink: 0;
-      }
-    }
+    list-style: none; padding: 0; margin: 0;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.375rem 1rem;
+    li { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: #374151; opacity: 0; animation: benefitEntry 0.25s ease-out forwards; lucide-icon { color: #22c55e; flex-shrink: 0; } }
   }
 }
 
-// ============================================
-// FOOTER BUTTONS (egységes .btn pattern)
-// ============================================
-$purple-500: #8b5cf6;
-$purple-600: #7c3aed;
-$green-500: #22c55e;
-$green-600: #16a34a;
-
+// --- FOOTER BUTTONS ---
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.625rem;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &--primary {
-    color: white;
-    background: $purple-500;
-
-    &:hover:not(:disabled) {
-      background: $purple-600;
-      transform: translateY(-1px);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  &--outline {
-    background: white;
-    color: #374151;
-    border: 1px solid #e5e7eb;
-
-    &:hover {
-      background: #f3f4f6;
-    }
-  }
-
-  &--confirm {
-    color: white;
-    background: $green-500;
-
-    &:hover:not(:disabled) {
-      background: $green-600;
-      transform: translateY(-1px);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
+  @include btn.base;
+  &--primary { @include btn.primary(btn.$purple-500, btn.$purple-600); }
+  &--outline { @include btn.outline; }
+  &--confirm { @include btn.confirm(btn.$green-500, btn.$green-600); }
 }
 
-// ============================================
-// SKELETON LOADERS
-// ============================================
+// --- SKELETON LOADERS ---
 .skeleton-card {
-  .skeleton {
-    background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-    border-radius: 4px;
-  }
-
-  .skeleton--label {
-    width: 80%;
-    height: 12px;
-    margin: 0 auto 6px;
-  }
-
-  .skeleton--name {
-    width: 60%;
-    height: 18px;
-    margin: 0 auto 6px;
-  }
-
-  .skeleton--limit {
-    width: 50%;
-    height: 14px;
-    margin: 0 auto;
-  }
-
-  .skeleton--price {
-    width: 70%;
-    height: 14px;
-    margin: 8px auto 0;
-  }
+  .skeleton { background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: 4px; }
+  .skeleton--label { width: 80%; height: 12px; margin: 0 auto 6px; }
+  .skeleton--name { width: 60%; height: 18px; margin: 0 auto 6px; }
+  .skeleton--limit { width: 50%; height: 14px; margin: 0 auto; }
+  .skeleton--price { width: 70%; height: 14px; margin: 8px auto 0; }
 }
 
-// ============================================
-// TEAM MEMBER NOTICE
-// ============================================
+// --- TEAM MEMBER NOTICE ---
 .team-member-notice {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 2rem;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 1px solid #f59e0b;
-  border-radius: 12px;
-  animation: contentFadeIn 0.3s ease-out;
-
-  .notice-icon {
-    width: 56px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    border-radius: 50%;
-    margin-bottom: 1rem;
-    color: #d97706;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
-  }
-
-  .notice-text {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #92400e;
-    margin: 0;
-    max-width: 300px;
-  }
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 2rem; background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b; border-radius: 12px; animation: contentFadeIn 0.3s ease-out;
+  .notice-icon { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 50%; margin-bottom: 1rem; color: #d97706; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
+  .notice-text { font-size: 1rem; line-height: 1.5; color: #92400e; margin: 0; max-width: 300px; }
 }
 
-// ============================================
-// SPINNER
-// ============================================
-.spin {
-  animation: spin 1s linear infinite;
-}
+// --- SPINNER ---
+.spin { @include btn.spin; }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-// ============================================
-// REDUCED MOTION (A11y)
-// ============================================
+// --- REDUCED MOTION ---
 @media (prefers-reduced-motion: reduce) {
-  .plan-comparison--loaded,
-  .selected-plan-details,
-  .team-member-notice,
-  .quick-plan-btn,
-  .skeleton-card .skeleton {
-    animation: none;
-  }
-
-  .plan-card,
-  .btn,
-  .spin {
-    animation: none;
-  }
-
-  .selected-plan-features .features-list li {
-    animation: none;
-    opacity: 1;
-  }
-
-  .quick-plan-btn {
-    opacity: 1;
-  }
+  .plan-comparison--loaded, .selected-plan-details, .team-member-notice, .quick-plan-btn, .skeleton-card .skeleton, .plan-card, .btn, .spin { animation: none; }
+  .selected-plan-features .features-list li { animation: none; opacity: 1; }
+  .quick-plan-btn { opacity: 1; }
 }

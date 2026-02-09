@@ -170,16 +170,13 @@
                       </span>
                     }
                     <span class="photo-year">{{ photo.year }}</span>
-                    <div class="photo-overlay" (click)="$event.stopPropagation()">
-                      <button class="overlay-btn" matTooltip="Nagyítás" (click)="openLightbox(photo)">
-                        <lucide-icon [name]="ICONS.ZOOM_IN" [size]="14" />
-                      </button>
+                    <div class="photo-overlay">
                       @if (!photo.isActive) {
-                        <button class="overlay-btn" matTooltip="Aktívnak jelölés" (click)="setActivePhoto(photo)">
+                        <button class="overlay-btn" matTooltip="Aktívnak jelölés" (click)="$event.stopPropagation(); setActivePhoto(photo)">
                           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
                         </button>
                       }
-                      <button class="overlay-btn overlay-btn--danger" matTooltip="Törlés" (click)="confirmDeletePhoto(photo)">
+                      <button class="overlay-btn overlay-btn--danger" matTooltip="Törlés" (click)="$event.stopPropagation(); confirmDeletePhoto(photo)">
                         <lucide-icon [name]="ICONS.DELETE" [size]="14" />
                       </button>
                     </div>

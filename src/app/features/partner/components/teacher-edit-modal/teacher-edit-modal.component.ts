@@ -41,6 +41,14 @@ export class TeacherEditModalComponent {
   aliases = signal<string[]>([]);
   newAlias = '';
 
+  // Fotó feltöltés
+  currentPhotoUrl = signal<string | null>(null);
+  selectedFile: File | null = null;
+  photoPreviewUrl = signal<string | null>(null);
+  photoYear = new Date().getFullYear();
+  setPhotoActive = true;
+  uploading = signal(false);
+
   saving = signal(false);
   errorMessage = signal<string | null>(null);
   loading = signal(false);
@@ -53,6 +61,7 @@ export class TeacherEditModalComponent {
       this.canonicalName = teacher.canonicalName;
       this.titlePrefix = teacher.titlePrefix ?? '';
       this.schoolId = teacher.schoolId;
+      this.currentPhotoUrl.set(teacher.photoThumbUrl ?? null);
       this.loadTeacherDetail(teacher.id);
     }
   }
@@ -67,11 +76,28 @@ export class TeacherEditModalComponent {
             this.position = res.data.position ?? '';
             this.notes = res.data.notes ?? '';
             this.aliases.set(res.data.aliases.map(a => a.aliasName));
+            if (res.data.photoUrl) {
+              this.currentPhotoUrl.set(res.data.photoUrl);
+            }
           }
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
       });
+  }
+
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+      this.photoPreviewUrl.set(URL.createObjectURL(this.selectedFile));
+      this.errorMessage.set(null);
+    }
+  }
+
+  removeSelectedPhoto(): void {
+    this.selectedFile = null;
+    this.photoPreviewUrl.set(null);
   }
 
   addAlias(): void {
@@ -111,10 +137,16 @@ export class TeacherEditModalComponent {
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
-        this.saving.set(false);
         if (response.success) {
-          this.saved.emit();
+          const teacherId = response.data?.id ?? this.teacher()?.id;
+          if (this.selectedFile && teacherId) {
+            this.uploadPhoto(teacherId);
+          } else {
+            this.saving.set(false);
+            this.saved.emit();
+          }
         } else {
+          this.saving.set(false);
           this.errorMessage.set(response.message || 'Hiba történt a mentés során.');
         }
       },
@@ -123,5 +155,28 @@ export class TeacherEditModalComponent {
         this.errorMessage.set(err.error?.message || 'Hiba történt a mentés során.');
       },
     });
+  }
+
+  private uploadPhoto(teacherId: number): void {
+    this.uploading.set(true);
+    this.teacherService.uploadTeacherPhoto(
+      teacherId,
+      this.selectedFile!,
+      this.photoYear,
+      this.setPhotoActive,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.uploading.set(false);
+          this.saved.emit();
+        },
+        error: (err) => {
+          this.saving.set(false);
+          this.uploading.set(false);
+          this.errorMessage.set(err.error?.message || 'Mentés sikeres, de a fotó feltöltése nem sikerült.');
+        },
+      });
   }
 }

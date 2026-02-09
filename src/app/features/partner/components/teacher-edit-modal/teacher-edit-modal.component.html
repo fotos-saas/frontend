@@ -96,6 +96,74 @@
             }
           </div>
 
+          <!-- Fotó szekció -->
+          @if (mode() === 'edit') {
+            <div class="photo-section">
+              <label>Profilkép</label>
+              <div class="photo-row">
+                <div class="photo-thumb" (click)="photoInput.click()">
+                  @if (photoPreviewUrl()) {
+                    <img [src]="photoPreviewUrl()" alt="Új fotó" />
+                    <button type="button" class="photo-remove" (click)="$event.stopPropagation(); removeSelectedPhoto()">
+                      <lucide-icon [name]="ICONS.X" [size]="12" />
+                    </button>
+                  } @else if (currentPhotoUrl()) {
+                    <img [src]="currentPhotoUrl()" alt="Jelenlegi fotó" />
+                    <div class="photo-overlay">
+                      <lucide-icon [name]="ICONS.CAMERA" [size]="16" />
+                    </div>
+                  } @else {
+                    <div class="photo-empty">
+                      <lucide-icon [name]="ICONS.CAMERA" [size]="20" />
+                    </div>
+                  }
+                  <input
+                    #photoInput
+                    type="file"
+                    accept="image/*"
+                    class="hidden-input"
+                    (change)="onPhotoSelected($event)"
+                  />
+                </div>
+                <div class="photo-info">
+                  @if (photoPreviewUrl()) {
+                    <span class="photo-status photo-status--new">Új fotó kiválasztva</span>
+                    <div class="photo-fields">
+                      <div class="form-group form-group--inline">
+                        <label for="photoYear">Évszám</label>
+                        <input
+                          type="number"
+                          id="photoYear"
+                          [(ngModel)]="photoYear"
+                          name="photoYear"
+                          class="form-input form-input--sm"
+                          min="2000"
+                          max="2100"
+                        />
+                      </div>
+                      <label class="checkbox-label">
+                        <input type="checkbox" [(ngModel)]="setPhotoActive" name="setPhotoActive" />
+                        <span>Aktív fotó</span>
+                      </label>
+                    </div>
+                  } @else if (currentPhotoUrl()) {
+                    <span class="photo-status">Jelenlegi fotó</span>
+                    <button type="button" class="btn-change-photo" (click)="photoInput.click()">
+                      <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+                      Új fotó feltöltése
+                    </button>
+                  } @else {
+                    <span class="photo-status photo-status--empty">Nincs fotó</span>
+                    <button type="button" class="btn-change-photo" (click)="photoInput.click()">
+                      <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+                      Fotó feltöltése
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
           <div class="form-group">
             <label for="notes">Megjegyzés</label>
             <textarea
@@ -126,7 +194,7 @@
             >
               @if (saving()) {
                 <span class="spinner"></span>
-                Mentés...
+                {{ uploading() ? 'Fotó feltöltése...' : 'Mentés...' }}
               } @else {
                 <lucide-icon [name]="ICONS.CHECK" [size]="16" />
                 {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}

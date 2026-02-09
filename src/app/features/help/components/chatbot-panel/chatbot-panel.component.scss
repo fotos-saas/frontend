@@ -244,6 +244,52 @@
   }
 }
 
+// Contact button (empty state)
+.contact-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border: 2px solid #7c3aed;
+  border-radius: 10px;
+  background: transparent;
+  color: #7c3aed;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #7c3aed;
+    color: white;
+  }
+}
+
+// Contact inline link (chat közben)
+.contact-inline-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px;
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+}
+
 // Typing indicator
 .typing-indicator {
   display: flex;
@@ -398,6 +444,8 @@
   .send-btn,
   .suggested-btn,
   .chat-input,
+  .contact-btn,
+  .contact-inline-btn,
   .contact-dialog__close,
   .contact-dialog__link,
   .contact-dialog__copy {

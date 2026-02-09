@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -32,6 +32,7 @@ export class PartnerTeacherListComponent implements OnInit {
   private readonly schoolService = inject(PartnerSchoolService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly ICONS = ICONS;
 
@@ -109,7 +110,7 @@ export class PartnerTeacherListComponent implements OnInit {
   }
 
   viewTeacher(teacher: TeacherListItem): void {
-    this.router.navigate(['/partner/teachers', teacher.id]);
+    this.router.navigate([teacher.id], { relativeTo: this.route });
   }
 
   closeEditModal(): void {

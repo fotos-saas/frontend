@@ -63,7 +63,7 @@ export class PartnerTeacherDetailComponent implements OnInit {
         },
         error: () => {
           this.loading.set(false);
-          this.router.navigate(['/partner/teachers']);
+          this.router.navigate(['..'], { relativeTo: this.route });
         },
       });
   }

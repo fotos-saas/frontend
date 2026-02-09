@@ -78,3 +78,29 @@ export interface UpdateTeacherRequest {
   notes?: string | null;
   is_active?: boolean;
 }
+
+// Bulk import types
+
+export type BulkImportMatchType = 'exact' | 'fuzzy' | 'ai' | 'ai_sonnet' | 'no_match';
+export type BulkImportAction = 'create' | 'update' | 'skip';
+
+export interface BulkImportPreviewItem {
+  inputName: string;
+  matchType: BulkImportMatchType;
+  teacherId: number | null;
+  teacherName: string | null;
+  photoUrl: string | null;
+  confidence: number;
+}
+
+export interface BulkImportExecuteItem {
+  input_name: string;
+  action: BulkImportAction;
+  teacher_id: number | null;
+}
+
+export interface BulkImportExecuteResult {
+  created: number;
+  updated: number;
+  skipped: number;
+}

@@ -4,10 +4,16 @@
       <h1>Tanárok</h1>
       <p class="subtitle">{{ totalTeachers() }} tanár összesen</p>
     </div>
-    <button type="button" class="btn-primary" (click)="openCreateModal()">
-      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
-      Új tanár
-    </button>
+    <div class="header-buttons">
+      <button type="button" class="btn-secondary" (click)="openBulkImport()">
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
+        Tömeges import
+      </button>
+      <button type="button" class="btn-primary" (click)="openCreateModal()">
+        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        Új tanár
+      </button>
+    </div>
   </header>
 
   <!-- Szűrők -->
@@ -167,6 +173,15 @@
     cancelText="Mégse"
     confirmType="danger"
     (resultEvent)="onDeleteConfirmResult($event)"
+  />
+}
+
+<!-- Bulk Import Dialog -->
+@if (showBulkImport()) {
+  <app-teacher-bulk-import-dialog
+    [schools]="schools()"
+    (close)="closeBulkImport()"
+    (imported)="onBulkImported()"
   />
 }
 

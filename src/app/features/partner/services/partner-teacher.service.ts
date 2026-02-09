@@ -9,6 +9,9 @@ import {
   TeacherChangeLogEntry,
   CreateTeacherRequest,
   UpdateTeacherRequest,
+  BulkImportPreviewItem,
+  BulkImportExecuteItem,
+  BulkImportExecuteResult,
 } from '../models/teacher.models';
 import { PaginatedResponse } from '../models/partner.models';
 
@@ -81,5 +84,26 @@ export class PartnerTeacherService {
     if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
 
     return this.http.get<PaginatedResponse<TeacherChangeLogEntry>>(`${this.baseUrl}/${teacherId}/changelog`, { params: httpParams });
+  }
+
+  bulkImportPreview(schoolId: number, names: string[]): Observable<{ success: boolean; data: BulkImportPreviewItem[] }> {
+    return this.http.post<{ success: boolean; data: BulkImportPreviewItem[] }>(`${this.baseUrl}/bulk-import/preview`, {
+      school_id: schoolId,
+      names,
+    });
+  }
+
+  bulkImportPreviewFile(schoolId: number, file: File): Observable<{ success: boolean; data: BulkImportPreviewItem[] }> {
+    const formData = new FormData();
+    formData.append('school_id', schoolId.toString());
+    formData.append('file', file);
+    return this.http.post<{ success: boolean; data: BulkImportPreviewItem[] }>(`${this.baseUrl}/bulk-import/preview`, formData);
+  }
+
+  bulkImportExecute(schoolId: number, items: BulkImportExecuteItem[]): Observable<{ success: boolean; message: string; data: BulkImportExecuteResult }> {
+    return this.http.post<{ success: boolean; message: string; data: BulkImportExecuteResult }>(`${this.baseUrl}/bulk-import/execute`, {
+      school_id: schoolId,
+      items,
+    });
   }
 }

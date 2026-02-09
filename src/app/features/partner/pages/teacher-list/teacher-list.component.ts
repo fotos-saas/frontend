@@ -9,6 +9,7 @@ import { PartnerSchoolService } from '../../services/partner-school.service';
 import { TeacherListItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/teacher-edit-modal.component';
+import { TeacherBulkImportDialogComponent } from '../../components/teacher-bulk-import-dialog/teacher-bulk-import-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
@@ -23,6 +24,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     LucideAngularModule,
     MatTooltipModule,
     TeacherEditModalComponent,
+    TeacherBulkImportDialogComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
     SearchableSelectComponent,
@@ -68,6 +70,7 @@ export class PartnerTeacherListComponent implements OnInit {
   // Modals
   showEditModal = signal(false);
   showDeleteConfirm = signal(false);
+  showBulkImport = signal(false);
   selectedTeacher = signal<TeacherListItem | null>(null);
   modalMode = signal<'create' | 'edit'>('create');
 
@@ -180,5 +183,18 @@ export class PartnerTeacherListComponent implements OnInit {
         },
         error: () => this.closeDeleteConfirm(),
       });
+  }
+
+  openBulkImport(): void {
+    this.showBulkImport.set(true);
+  }
+
+  closeBulkImport(): void {
+    this.showBulkImport.set(false);
+  }
+
+  onBulkImported(): void {
+    this.closeBulkImport();
+    this.loadTeachers();
   }
 }

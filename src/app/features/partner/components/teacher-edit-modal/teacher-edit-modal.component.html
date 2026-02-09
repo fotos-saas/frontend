@@ -3,21 +3,21 @@
   (mousedown)="backdropHandler.onMouseDown($event)"
   (click)="backdropHandler.onClick($event)"
 >
-  <div class="dialog-panel dialog-panel--lg" (click)="$event.stopPropagation()">
-    <div class="modal-content">
-      <header class="modal-header">
-        <h2>{{ mode() === 'create' ? 'Új tanár' : 'Tanár szerkesztése' }}</h2>
-        <button class="close-btn" (click)="close.emit()">
-          <lucide-icon [name]="ICONS.X" [size]="20" />
-        </button>
-      </header>
+  <div class="dialog-panel dialog-panel--lg modal-flex" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <h2>{{ mode() === 'create' ? 'Új tanár' : 'Tanár szerkesztése' }}</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </header>
 
-      @if (loading()) {
-        <div class="loading-spinner">
-          <lucide-icon [name]="ICONS.LOADER" [size]="24" class="spin" />
-        </div>
-      } @else {
-        <form (ngSubmit)="save()" class="modal-form">
+    @if (loading()) {
+      <div class="loading-spinner">
+        <lucide-icon [name]="ICONS.LOADER" [size]="24" class="spin" />
+      </div>
+    } @else {
+      <div class="modal-body">
+        <form id="teacherForm" (ngSubmit)="save()" class="modal-form">
           <div class="form-row">
             <div class="form-group form-group--sm">
               <label for="titlePrefix">Titulus</label>
@@ -64,36 +64,6 @@
               placeholder="Iskola keresése..."
               (valueChange)="onSchoolChange($event)"
             />
-          </div>
-
-          <!-- Aliasok -->
-          <div class="form-group">
-            <label>Név variánsok <span class="hint">({{ aliases().length }}/10)</span></label>
-            <div class="aliases-list">
-              @for (alias of aliases(); track alias; let i = $index) {
-                <div class="alias-tag">
-                  <span>{{ alias }}</span>
-                  <button type="button" class="alias-remove" (click)="removeAlias(i)">
-                    <lucide-icon [name]="ICONS.X" [size]="12" />
-                  </button>
-                </div>
-              }
-            </div>
-            @if (aliases().length < 10) {
-              <div class="alias-input-row">
-                <input
-                  type="text"
-                  [(ngModel)]="newAlias"
-                  name="newAlias"
-                  class="form-input"
-                  placeholder="Új név variáns..."
-                  (keydown.enter)="$event.preventDefault(); addAlias()"
-                />
-                <button type="button" class="btn-add-alias" (click)="addAlias()" [disabled]="!newAlias.trim()">
-                  <lucide-icon [name]="ICONS.PLUS" [size]="16" />
-                </button>
-              </div>
-            }
           </div>
 
           <!-- Fotó szekció -->
@@ -164,45 +134,34 @@
             </div>
           }
 
-          <div class="form-group">
-            <label for="notes">Megjegyzés</label>
-            <textarea
-              id="notes"
-              [(ngModel)]="notes"
-              name="notes"
-              class="form-input form-textarea"
-              placeholder="Opcionális megjegyzés..."
-              rows="3"
-            ></textarea>
-          </div>
-
           @if (errorMessage()) {
             <div class="error-message">
               <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
               {{ errorMessage() }}
             </div>
           }
-
-          <div class="modal-actions">
-            <button type="button" class="btn-secondary" (click)="close.emit()">
-              Mégse
-            </button>
-            <button
-              type="submit"
-              class="btn-primary"
-              [disabled]="saving() || !canonicalName.trim() || !schoolId"
-            >
-              @if (saving()) {
-                <span class="spinner"></span>
-                {{ uploading() ? 'Fotó feltöltése...' : 'Mentés...' }}
-              } @else {
-                <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-                {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}
-              }
-            </button>
-          </div>
         </form>
-      }
-    </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="close.emit()">
+          Mégse
+        </button>
+        <button
+          type="submit"
+          form="teacherForm"
+          class="btn-primary"
+          [disabled]="saving() || !canonicalName.trim() || !schoolId"
+        >
+          @if (saving()) {
+            <span class="spinner"></span>
+            {{ uploading() ? 'Fotó feltöltése...' : 'Mentés...' }}
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}
+          }
+        </button>
+      </div>
+    }
   </div>
 </div>

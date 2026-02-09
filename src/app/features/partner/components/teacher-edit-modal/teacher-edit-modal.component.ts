@@ -39,8 +39,6 @@ export class TeacherEditModalComponent {
   schoolId: number | null = null;
   notes = '';
   aliases = signal<string[]>([]);
-  newAlias = '';
-
   // Fotó feltöltés
   currentPhotoUrl = signal<string | null>(null);
   selectedFile: File | null = null;
@@ -100,20 +98,8 @@ export class TeacherEditModalComponent {
     this.photoPreviewUrl.set(null);
   }
 
-  addAlias(): void {
-    const alias = this.newAlias.trim();
-    if (alias && this.aliases().length < 10 && !this.aliases().includes(alias)) {
-      this.aliases.update(prev => [...prev, alias]);
-      this.newAlias = '';
-    }
-  }
-
   onSchoolChange(value: string): void {
     this.schoolId = value ? parseInt(value, 10) : null;
-  }
-
-  removeAlias(index: number): void {
-    this.aliases.update(prev => prev.filter((_, i) => i !== index));
   }
 
   save(): void {

@@ -45,28 +45,26 @@
   </ng-container>
 
   <ng-container dialogFooter>
-    <div class="actions">
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="cancel()"
-        [disabled]="isBusy()"
-      >
-        Mégse
-      </button>
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="submit()"
-        [disabled]="!isFormValid || isBusy()"
-      >
-        @if (isBusy()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
-          <span>Mentés...</span>
-        } @else {
-          <span>{{ currentValue() ? 'Mentés' : 'Mentés és tovább' }}</span>
-        }
-      </button>
-    </div>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cancel()"
+      [disabled]="isBusy()"
+    >
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="submit()"
+      [disabled]="!isFormValid || isBusy()"
+    >
+      @if (isBusy()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+        <span>Mentés...</span>
+      } @else {
+        <span>{{ currentValue() ? 'Mentés' : 'Mentés és tovább' }}</span>
+      }
+    </button>
   </ng-container>
 </app-hero-dialog-wrapper>

@@ -117,6 +117,9 @@
   }
 
   &__footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
     padding: 0.75rem 1.5rem;
     flex-shrink: 0;
     border-top: 1px solid #e5e7eb;
@@ -177,7 +180,8 @@
     }
 
     &__footer {
-      padding: 0.75rem 1.25rem 1.25rem;
+      flex-direction: column-reverse;
+      padding: 0.75rem 1.25rem;
     }
   }
 }

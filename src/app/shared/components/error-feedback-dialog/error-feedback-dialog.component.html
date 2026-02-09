@@ -44,16 +44,14 @@
     </ng-container>
 
     <ng-container dialogFooter>
-      <div class="dialog-actions">
-        <button type="button" class="btn btn--secondary" (click)="goHome()">
-          <lucide-icon [name]="ICONS.HOME" [size]="18" />
-          Vissza a főoldalra
-        </button>
-        <button type="button" class="btn btn--primary" (click)="retry()">
-          <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
-          Próbáld újra
-        </button>
-      </div>
+      <button type="button" class="btn btn--secondary" (click)="goHome()">
+        <lucide-icon [name]="ICONS.HOME" [size]="18" />
+        Vissza a főoldalra
+      </button>
+      <button type="button" class="btn btn--primary" (click)="retry()">
+        <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
+        Próbáld újra
+      </button>
     </ng-container>
   </app-hero-dialog-wrapper>
 }

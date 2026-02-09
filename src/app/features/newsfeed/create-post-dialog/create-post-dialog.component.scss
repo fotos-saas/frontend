@@ -165,13 +165,6 @@ app-rich-text-editor {
   }
 }
 
-// Actions
-.actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
-
 .btn {
   display: inline-flex;
   align-items: center;
@@ -245,10 +238,6 @@ app-rich-text-editor {
   .field__input {
     padding: 0.75rem;
     font-size: 1rem; // Prevent iOS zoom
-  }
-
-  .actions {
-    flex-direction: column-reverse;
   }
 
   .btn {

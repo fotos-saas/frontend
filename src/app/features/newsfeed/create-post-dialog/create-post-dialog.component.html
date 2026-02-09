@@ -168,31 +168,29 @@
   </ng-container>
 
   <ng-container dialogFooter>
-    <div class="actions">
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="onClose()"
-        [disabled]="isSubmitting()"
-      >
-        Mégse
-      </button>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="onClose()"
+      [disabled]="isSubmitting()"
+    >
+      Mégse
+    </button>
 
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="submit()"
-        [disabled]="!isFormValid || isSubmitting()"
-      >
-        @if (isSubmitting()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-        } @else if (!isEditMode()) {
-          <lucide-icon [name]="ICONS.SEND" [size]="18" />
-        } @else {
-          <lucide-icon [name]="ICONS.SAVE" [size]="18" />
-        }
-        {{ submitButtonText() }}
-      </button>
-    </div>
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="submit()"
+      [disabled]="!isFormValid || isSubmitting()"
+    >
+      @if (isSubmitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+      } @else if (!isEditMode()) {
+        <lucide-icon [name]="ICONS.SEND" [size]="18" />
+      } @else {
+        <lucide-icon [name]="ICONS.SAVE" [size]="18" />
+      }
+      {{ submitButtonText() }}
+    </button>
   </ng-container>
 </app-hero-dialog-wrapper>

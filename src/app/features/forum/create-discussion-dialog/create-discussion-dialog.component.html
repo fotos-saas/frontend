@@ -131,31 +131,29 @@
 
   <!-- Footer -->
   <ng-container dialogFooter>
-    <div class="dialog__actions">
-      <button
-        type="button"
-        class="dialog__btn dialog__btn--secondary"
-        (click)="close()"
-        [disabled]="_isSubmitting()"
-      >
-        Mégse
-      </button>
+    <button
+      type="button"
+      class="dialog__btn dialog__btn--secondary"
+      (click)="close()"
+      [disabled]="_isSubmitting()"
+    >
+      Mégse
+    </button>
 
-      <button
-        type="button"
-        class="dialog__btn dialog__btn--primary"
-        (click)="submit()"
-        [disabled]="!isFormValid || _isSubmitting()"
-      >
-        @if (_isSubmitting()) {
-          <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
-        }
-        <lucide-icon [name]="ICONS.SEND" [size]="18" />
-        {{ _isSubmitting() ? (mode() === 'edit' ? 'Mentés...' : 'Létrehozás...') : (mode() === 'edit' ? 'Mentés' : 'Téma létrehozása') }}
-      </button>
-    </div>
+    <button
+      type="button"
+      class="dialog__btn dialog__btn--primary"
+      (click)="submit()"
+      [disabled]="!isFormValid || _isSubmitting()"
+    >
+      @if (_isSubmitting()) {
+        <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      }
+      <lucide-icon [name]="ICONS.SEND" [size]="18" />
+      {{ _isSubmitting() ? (mode() === 'edit' ? 'Mentés...' : 'Létrehozás...') : (mode() === 'edit' ? 'Mentés' : 'Téma létrehozása') }}
+    </button>
   </ng-container>
 </app-hero-dialog-wrapper>

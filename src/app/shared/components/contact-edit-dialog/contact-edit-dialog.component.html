@@ -70,26 +70,24 @@
   </ng-container>
 
   <ng-container dialogFooter>
-    <div class="actions">
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="onClose()"
-        [disabled]="isSaving()"
-      >
-        Mégse
-      </button>
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="save()"
-        [disabled]="!isFormValid || isSaving()"
-      >
-        @if (isSaving()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-        }
-        {{ isSaving() ? 'Mentés...' : 'Mentés' }}
-      </button>
-    </div>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="onClose()"
+      [disabled]="isSaving()"
+    >
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="save()"
+      [disabled]="!isFormValid || isSaving()"
+    >
+      @if (isSaving()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      {{ isSaving() ? 'Mentés...' : 'Mentés' }}
+    </button>
   </ng-container>
 </app-hero-dialog-wrapper>

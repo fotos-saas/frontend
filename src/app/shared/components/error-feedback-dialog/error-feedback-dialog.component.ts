@@ -10,7 +10,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ErrorBoundaryService } from '../../../core/services/error-boundary.service';
 import { SentryService } from '../../../core/services/sentry.service';
-import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
 /**
  * ErrorFeedbackDialogComponent
@@ -21,7 +21,7 @@ import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-w
 @Component({
   selector: 'app-error-feedback-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   templateUrl: './error-feedback-dialog.component.html',
   styleUrls: ['./error-feedback-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

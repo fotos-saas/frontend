@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { validateNumberRange } from '../../utils/validators.util';
-import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Dialog eredmény típus
@@ -25,12 +25,12 @@ export type ClassSizeResult =
  * Class Size Dialog
  *
  * Osztálylétszám bekérés popup.
- * HeroDialogWrapperComponent kezeli a shell-t.
+ * DialogWrapperComponent kezeli a shell-t.
  */
 @Component({
   selector: 'app-class-size-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   templateUrl: './class-size-dialog.component.html',
   styleUrls: ['./class-size-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

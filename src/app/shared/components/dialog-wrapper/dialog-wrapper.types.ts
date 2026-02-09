@@ -1,23 +1,28 @@
 /**
- * Hero Dialog Wrapper típusok
+ * Dialog Wrapper típusok
  */
 
+/** Header stílusok */
+export type DialogHeaderStyle = 'hero' | 'flat' | 'minimal';
+
 /** Elérhető szín témák */
-export type HeroDialogTheme = 'purple' | 'blue' | 'green' | 'red' | 'amber';
+export type DialogTheme = 'purple' | 'blue' | 'green' | 'red' | 'amber';
 
 /** Elérhető méretek */
-export type HeroDialogSize = 'sm' | 'md' | 'lg' | 'xl';
+export type DialogSize = 'sm' | 'md' | 'lg';
 
-/** Méret → max-width mapping */
-export const HERO_DIALOG_SIZES: Record<HeroDialogSize, string> = {
+/** Footer igazítás */
+export type DialogFooterAlign = 'end' | 'center' | 'stretch';
+
+/** Méret -> max-width mapping */
+export const DIALOG_SIZES: Record<DialogSize, string> = {
   sm: '24rem',   // 384px
   md: '30rem',   // 480px
-  lg: '32rem',   // 512px
-  xl: '40rem',   // 640px
+  lg: '50rem',   // 800px
 };
 
 /** Téma színek */
-export interface HeroDialogThemeColors {
+export interface DialogThemeColors {
   accent: string;
   accentHover: string;
   gradientStart: string;
@@ -26,7 +31,7 @@ export interface HeroDialogThemeColors {
   focusRing: string;
 }
 
-export const HERO_DIALOG_THEMES: Record<HeroDialogTheme, HeroDialogThemeColors> = {
+export const DIALOG_THEMES: Record<DialogTheme, DialogThemeColors> = {
   purple: {
     accent: '#8b5cf6',
     accentHover: '#7c3aed',

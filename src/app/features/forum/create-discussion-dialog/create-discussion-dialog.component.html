@@ -1,4 +1,5 @@
-<app-hero-dialog-wrapper
+<app-dialog-wrapper
+  headerStyle="hero"
   theme="purple"
   [icon]="ICONS.MESSAGE_CIRCLE"
   [title]="mode() === 'edit' ? 'Téma szerkesztése' : 'Új beszélgetés indítása'"
@@ -156,4 +157,4 @@
       {{ _isSubmitting() ? (mode() === 'edit' ? 'Mentés...' : 'Létrehozás...') : (mode() === 'edit' ? 'Mentés' : 'Téma létrehozása') }}
     </button>
   </ng-container>
-</app-hero-dialog-wrapper>
+</app-dialog-wrapper>

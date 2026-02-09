@@ -18,7 +18,7 @@ import { NewsfeedPost, CreatePostRequest, UpdatePostRequest } from '../../../cor
 import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { MediaEditorComponent, MediaEditorItem } from '../../../shared/components/media-editor';
 import { PostFormValidatorService, PostFormErrors } from '../services/post-form-validator.service';
-import { HeroDialogWrapperComponent } from '../../../shared/components/hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { CreatePostDialogActionsService } from './create-post-dialog-actions.service';
 
 /**
@@ -33,11 +33,11 @@ export type CreatePostResult =
  * Create Post Dialog
  *
  * Uj hirfolyam bejegyzes letrehozasa dialogus.
- * HeroDialogWrapperComponent kezeli a shell-t (backdrop, scroll lock, ESC, focus).
+ * DialogWrapperComponent kezeli a shell-t (backdrop, scroll lock, ESC, focus).
  */
 @Component({
   selector: 'app-create-post-dialog',
-  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent, MediaEditorComponent, HeroDialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent, MediaEditorComponent, DialogWrapperComponent],
   templateUrl: './create-post-dialog.component.html',
   styleUrls: ['./create-post-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,6 @@
 @if (showDialog()) {
-  <app-hero-dialog-wrapper
+  <app-dialog-wrapper
+    headerStyle="hero"
     theme="red"
     [icon]="ICONS.ALERT_TRIANGLE"
     title="Hoppá! Valami hiba történt."
@@ -53,5 +54,5 @@
         Próbáld újra
       </button>
     </ng-container>
-  </app-hero-dialog-wrapper>
+  </app-dialog-wrapper>
 }

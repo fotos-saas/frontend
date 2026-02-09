@@ -1,9 +1,10 @@
-<app-hero-dialog-wrapper
+<app-dialog-wrapper
+  headerStyle="hero"
   theme="green"
   [icon]="dialogIcon()"
   [title]="dialogTitle()"
   [description]="dialogDescription()"
-  size="xl"
+  size="lg"
   [isSubmitting]="isSubmitting()"
   [errorMessage]="errorMessage()"
   (closeEvent)="onClose()"
@@ -193,4 +194,4 @@
       {{ submitButtonText() }}
     </button>
   </ng-container>
-</app-hero-dialog-wrapper>
+</app-dialog-wrapper>

@@ -2,7 +2,7 @@ import { Component, output, ChangeDetectionStrategy, viewChild, ElementRef, inje
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 import { LoggerService } from '../../../core/services/logger.service';
 
 /**
@@ -18,12 +18,12 @@ export type ScheduleReminderResult =
  * Schedule Reminder Dialog
  *
  * Emlékeztető dialógus a fotózás időpontjának megadásához.
- * HeroDialogWrapperComponent kezeli a shell-t.
+ * DialogWrapperComponent kezeli a shell-t.
  */
 @Component({
   selector: 'app-schedule-reminder-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   templateUrl: './schedule-reminder-dialog.component.html',
   styleUrls: ['./schedule-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

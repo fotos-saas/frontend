@@ -2,7 +2,7 @@ import { Component, input, output, ChangeDetectionStrategy, AfterViewInit, viewC
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 import { isValidEmail } from '../../utils/validators.util';
 
 /**
@@ -25,12 +25,12 @@ export type GuestNameResult =
  * - register: Megjelenik az első belépéskor, kötelező kitölteni (green téma)
  * - edit: Meglévő adatok szerkesztése (blue téma)
  *
- * HeroDialogWrapperComponent kezeli a shell-t.
+ * DialogWrapperComponent kezeli a shell-t.
  */
 @Component({
   selector: 'app-guest-name-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   templateUrl: './guest-name-dialog.component.html',
   styleUrls: ['./guest-name-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

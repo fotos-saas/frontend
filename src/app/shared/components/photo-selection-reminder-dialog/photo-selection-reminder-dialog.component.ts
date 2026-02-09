@@ -2,7 +2,7 @@ import { Component, output, input, computed, ChangeDetectionStrategy } from '@an
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ReminderWorkflowStep, STEP_REMINDER_MESSAGES, StepReminderMessage } from '../../../core/services/photo-selection-reminder.service';
-import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Dialog eredmény típus
@@ -32,7 +32,7 @@ export type PhotoSelectionReminderResult =
 @Component({
   selector: 'app-photo-selection-reminder-dialog',
   standalone: true,
-  imports: [LucideAngularModule, HeroDialogWrapperComponent],
+  imports: [LucideAngularModule, DialogWrapperComponent],
   templateUrl: './photo-selection-reminder-dialog.component.html',
   styleUrls: ['./photo-selection-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

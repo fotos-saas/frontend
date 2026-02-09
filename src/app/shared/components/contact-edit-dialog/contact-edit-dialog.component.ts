@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { isValidEmail, isValidPhone } from '../../utils/validators.util';
-import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Contact data interface
@@ -25,12 +25,12 @@ export type ContactEditResult =
  * Contact Edit Dialog
  *
  * Dialog a kapcsolattartó adatok szerkesztéséhez.
- * HeroDialogWrapperComponent kezeli a shell-t.
+ * DialogWrapperComponent kezeli a shell-t.
  */
 @Component({
   selector: 'app-contact-edit-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   templateUrl: './contact-edit-dialog.component.html',
   styleUrls: ['./contact-edit-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -2,7 +2,7 @@ import { Component, output, ChangeDetectionStrategy, inject } from '@angular/cor
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { LoggerService } from '../../../core/services/logger.service';
-import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Dialog eredmény típus
@@ -26,7 +26,7 @@ export type FinalizationReminderResult =
 @Component({
   selector: 'app-finalization-reminder-dialog',
   standalone: true,
-  imports: [LucideAngularModule, HeroDialogWrapperComponent],
+  imports: [LucideAngularModule, DialogWrapperComponent],
   templateUrl: './finalization-reminder-dialog.component.html',
   styleUrls: ['./finalization-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

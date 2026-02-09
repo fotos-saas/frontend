@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   input,
   output,
-  signal,
   computed,
   inject,
   ElementRef,
@@ -14,75 +13,44 @@ import {
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import {
-  HeroDialogTheme,
-  HeroDialogSize,
-  HERO_DIALOG_THEMES,
-  HERO_DIALOG_SIZES,
-} from './hero-dialog-wrapper.types';
+  DialogHeaderStyle,
+  DialogTheme,
+  DialogSize,
+  DialogFooterAlign,
+  DIALOG_THEMES,
+  DIALOG_SIZES,
+} from './dialog-wrapper.types';
 
-/**
- * Hero Dialog Wrapper
- *
- * Újrahasználható "hero" stílusú dialógus shell.
- * Gradient header + nagy ikon + cím + leírás + content projection.
- *
- * Tartalmazza:
- * - Body scroll lock (Safari kompatibilis)
- * - ESC kezelés
- * - Backdrop kattintás (szöveg kijelölés biztonságos)
- * - Focus management
- * - Submitting/error state
- *
- * Használat:
- * ```html
- * <app-hero-dialog-wrapper
- *   theme="purple"
- *   icon="message-circle"
- *   title="Új beszélgetés"
- *   description="Indíts új témát."
- *   size="lg"
- *   [isSubmitting]="isSubmitting()"
- *   [errorMessage]="errorMessage()"
- *   (closeEvent)="onClose()"
- * >
- *   <ng-container dialogBody>
- *     <!-- form mezők -->
- *   </ng-container>
- *   <ng-container dialogFooter>
- *     <!-- gombok -->
- *   </ng-container>
- * </app-hero-dialog-wrapper>
- * ```
- */
 @Component({
-  selector: 'app-hero-dialog-wrapper',
+  selector: 'app-dialog-wrapper',
   imports: [LucideAngularModule],
-  templateUrl: './hero-dialog-wrapper.component.html',
-  styleUrls: ['./hero-dialog-wrapper.component.scss'],
+  templateUrl: './dialog-wrapper.component.html',
+  styleUrls: ['./dialog-wrapper.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeroDialogWrapperComponent implements AfterViewInit, OnDestroy {
+export class DialogWrapperComponent implements AfterViewInit, OnDestroy {
   // === INPUTS ===
-  readonly theme = input<HeroDialogTheme>('blue');
-  readonly icon = input.required<string>();
+  readonly headerStyle = input<DialogHeaderStyle>('flat');
+  readonly theme = input<DialogTheme>('blue');
+  readonly icon = input<string>('');
   readonly title = input.required<string>();
   readonly description = input<string>('');
-  readonly size = input<HeroDialogSize>('lg');
+  readonly size = input<DialogSize>('md');
+  readonly columns = input<1 | 2>(1);
+  readonly footerAlign = input<DialogFooterAlign>('end');
+  readonly closable = input<boolean>(true);
+  readonly showCloseButton = input<boolean | undefined>(undefined);
   readonly isSubmitting = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
-  /** Bezárható-e a dialog (X gomb, ESC, backdrop) - default true */
-  readonly closable = input<boolean>(true);
-  /** X gomb megjelenítése - default: closable értéke */
-  readonly showCloseButton = input<boolean | undefined>(undefined);
 
   // === OUTPUTS ===
   readonly closeEvent = output<void>();
-  /** Backdrop kattintás külön event (speciális kezeléshez, pl. reminder dialógusok) */
   readonly backdropClickEvent = output<void>();
+  readonly submitEvent = output<void>();
 
   // === COMPUTED ===
-  readonly themeColors = computed(() => HERO_DIALOG_THEMES[this.theme()]);
-  readonly maxWidth = computed(() => HERO_DIALOG_SIZES[this.size()]);
+  readonly themeColors = computed(() => DIALOG_THEMES[this.theme()]);
+  readonly maxWidth = computed(() => DIALOG_SIZES[this.size()]);
   readonly shouldShowCloseButton = computed(() => {
     const explicit = this.showCloseButton();
     return explicit !== undefined ? explicit : this.closable();
@@ -156,20 +124,27 @@ export class HeroDialogWrapperComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  @HostListener('document:keydown.enter', ['$event'])
+  protected handleEnterKey(event: Event): void {
+    if (this.isSubmitting()) return;
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'TEXTAREA') return;
+    this.submitEvent.emit();
+  }
+
   onBackdropMouseDown(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    this.mouseDownOnBackdrop = target.classList.contains('hero-dialog-backdrop');
+    this.mouseDownOnBackdrop = target.classList.contains('dw-backdrop');
   }
 
   onBackdropClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    const isBackdrop = target.classList.contains('hero-dialog-backdrop');
+    const isBackdrop = target.classList.contains('dw-backdrop');
 
     if (!this.isSubmitting() && isBackdrop && this.mouseDownOnBackdrop) {
       if (this.closable()) {
         this.closeEvent.emit();
       }
-      // Mindig emittáljuk a backdrop click eventet (reminder dialógusoknak)
       this.backdropClickEvent.emit();
     }
     this.mouseDownOnBackdrop = false;

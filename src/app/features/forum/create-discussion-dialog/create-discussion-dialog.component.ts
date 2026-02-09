@@ -16,7 +16,7 @@ import DOMPurify from 'dompurify';
 import { ForumService, CreateDiscussionRequest, PostMedia } from '../../../core/services/forum.service';
 import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { MediaEditorComponent, MediaEditorItem } from '../../../shared/components/media-editor/media-editor.component';
-import { HeroDialogWrapperComponent } from '../../../shared/components/hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { DiscussionFormValidatorService, DiscussionFormErrors } from './discussion-form-validator.service';
 import { ICONS } from '@shared/constants/icons.constants';
 
@@ -51,7 +51,7 @@ export interface EditDiscussionData {
  * Create Discussion Dialog
  *
  * Uj beszelgetes letrehozasa / szerkesztese dialogus.
- * HeroDialogWrapperComponent-et használja a shell-hez.
+ * DialogWrapperComponent-et használja a shell-hez.
  */
 @Component({
   selector: 'app-create-discussion-dialog',
@@ -60,7 +60,7 @@ export interface EditDiscussionData {
     LucideAngularModule,
     RichTextEditorComponent,
     MediaEditorComponent,
-    HeroDialogWrapperComponent,
+    DialogWrapperComponent,
   ],
   templateUrl: './create-discussion-dialog.component.html',
   styleUrls: ['./create-discussion-dialog.component.scss'],

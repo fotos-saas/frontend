@@ -1,0 +1,100 @@
+<!-- Backdrop overlay -->
+<div
+  class="dw-backdrop"
+  (mousedown)="onBackdropMouseDown($event)"
+  (click)="onBackdropClick($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="dw-title"
+>
+  <!-- Dialog container -->
+  <div
+    class="dw"
+    [style.max-width]="maxWidth()"
+  >
+    <!-- Close button (X) -->
+    @if (shouldShowCloseButton()) {
+      <button
+        type="button"
+        class="dw__close"
+        (click)="closeEvent.emit()"
+        [disabled]="isSubmitting()"
+        aria-label="Bezárás"
+      >
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    }
+
+    <!-- HEADER -->
+    @switch (headerStyle()) {
+      @case ('hero') {
+        <div
+          class="dw__header dw__header--hero"
+          [style.background]="'linear-gradient(135deg, ' + themeColors().gradientStart + ' 0%, ' + themeColors().gradientEnd + ' 100%)'"
+        >
+          <div
+            class="dw__icon dw__icon--hero"
+            [style.background]="themeColors().accent"
+            [style.box-shadow]="'0 10px 20px -5px ' + themeColors().iconShadow"
+          >
+            <lucide-icon [name]="icon()" [size]="36" />
+          </div>
+          <h2 id="dw-title" class="dw__title">{{ title() }}</h2>
+          @if (description()) {
+            <p class="dw__desc">{{ description() }}</p>
+          }
+        </div>
+      }
+      @case ('flat') {
+        <div class="dw__header dw__header--flat">
+          @if (icon()) {
+            <div class="dw__icon dw__icon--small" [style.color]="themeColors().accent">
+              <lucide-icon [name]="icon()" [size]="24" />
+            </div>
+          }
+          <h2 id="dw-title" class="dw__title dw__title--flat">{{ title() }}</h2>
+          @if (description()) {
+            <p class="dw__desc">{{ description() }}</p>
+          }
+        </div>
+      }
+      @case ('minimal') {
+        <div class="dw__header dw__header--minimal">
+          <h2 id="dw-title" class="dw__title dw__title--minimal">{{ title() }}</h2>
+        </div>
+      }
+    }
+
+    <!-- ERROR ALERT -->
+    @if (errorMessage()) {
+      <div class="dw__alert">
+        <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- BODY -->
+    <div class="dw__body">
+      @if (columns() === 1) {
+        <ng-content select="[dialogBody]" />
+      } @else {
+        <div class="dw__columns">
+          <div class="dw__col-left"><ng-content select="[dialogLeft]" /></div>
+          <div class="dw__col-right"><ng-content select="[dialogRight]" /></div>
+        </div>
+      }
+    </div>
+
+    <!-- FOOTER -->
+    <div
+      class="dw__footer"
+      [class.dw__footer--center]="footerAlign() === 'center'"
+      [class.dw__footer--stretch]="footerAlign() === 'stretch'"
+    >
+      <ng-content select="[dialogFooter]" />
+    </div>
+
+    <!-- EXTRA -->
+    <ng-content select="[dialogExtra]" />
+  </div>
+</div>

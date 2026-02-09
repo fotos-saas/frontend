@@ -1,0 +1,355 @@
+// ============================================================================
+// Dialog Wrapper - Egységes dialógus shell
+// ============================================================================
+
+// --- Variables ---
+$blue-500: #3b82f6;
+$blue-600: #2563eb;
+$red-500: #ef4444;
+$red-600: #dc2626;
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+
+// ============================================================================
+// BACKDROP
+// ============================================================================
+
+.dw-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop, 1000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: dwFadeIn 0.2s ease-out;
+}
+
+// ============================================================================
+// DIALOG CONTAINER
+// ============================================================================
+
+.dw {
+  position: relative;
+  width: 100%;
+  max-height: 90vh;
+  background: white;
+  border-radius: 1.25rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: dwSlideUp 0.3s ease-out;
+
+  // ============================================================================
+  // CLOSE BUTTON
+  // ============================================================================
+
+  &__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    padding: 0.5rem;
+    color: $gray-500;
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      color: $gray-600;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // ============================================================================
+  // HEADER VARIANTS
+  // ============================================================================
+
+  &__header {
+    flex-shrink: 0;
+
+    &--hero {
+      padding: 2rem 1.5rem 1.5rem;
+      text-align: center;
+    }
+
+    &--flat {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid $gray-200;
+      flex-wrap: wrap;
+    }
+
+    &--minimal {
+      padding: 1.25rem 1.5rem 0.5rem;
+    }
+  }
+
+  // ============================================================================
+  // ICON
+  // ============================================================================
+
+  &__icon {
+    &--hero {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 4.5rem;
+      height: 4.5rem;
+      margin-bottom: 1rem;
+      border-radius: 1.25rem;
+      color: white;
+    }
+
+    &--small {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.625rem;
+      background: $gray-50;
+      flex-shrink: 0;
+    }
+  }
+
+  // ============================================================================
+  // TITLE & DESCRIPTION
+  // ============================================================================
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.625rem;
+    font-weight: 700;
+    color: $gray-900;
+
+    &--flat {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    &--minimal {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: $gray-600;
+    line-height: 1.5;
+
+    // Hero stílusnál centered + max-width
+    .dw__header--hero & {
+      margin: 0 auto;
+      max-width: 24rem;
+    }
+
+    // Flat stílusnál teljes szélesség
+    .dw__header--flat & {
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  // ============================================================================
+  // ALERT
+  // ============================================================================
+
+  &__alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    margin: 0 1.5rem;
+    margin-bottom: 0;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+
+    lucide-icon {
+      flex-shrink: 0;
+      color: #dc2626;
+    }
+  }
+
+  // ============================================================================
+  // BODY
+  // ============================================================================
+
+  &__body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  // ============================================================================
+  // 2-COLUMN LAYOUT
+  // ============================================================================
+
+  &__columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  // ============================================================================
+  // FOOTER
+  // ============================================================================
+
+  &__footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding: 0.75rem 1.5rem;
+    flex-shrink: 0;
+    border-top: 1px solid $gray-200;
+
+    &:empty {
+      display: none;
+    }
+
+    &--center {
+      justify-content: center;
+    }
+
+    &--stretch {
+      .btn {
+        flex: 1;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// PROJECTED CONTENT STYLES (::ng-deep for ng-content)
+// ============================================================================
+// NOTE: ng-content projected tartalom a host komponens scope-jában él,
+// ezért ::ng-deep szükséges a wrapper-ből való stílus alkalmazáshoz.
+// A child komponensek saját SCSS-ükben felülírhatják ezeket.
+
+// Footer stretch variáns (a .dw__footer--stretch-ben feljebb kezelve)
+
+// A .btn, .field és .spin stílusokat a CHILD KOMPONENSEK saját SCSS-ükben kezelik.
+// Később fokozatos migrációval globális mixin-ekbe kerülhetnek.
+
+// ============================================================================
+// ANIMATIONS
+// ============================================================================
+
+@keyframes dwFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dwSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dwSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// ============================================================================
+// MOBILE RESPONSIVE
+// ============================================================================
+
+@media (max-width: 480px) {
+  .dw-backdrop {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .dw {
+    max-width: 100% !important;
+    max-height: 95vh;
+    margin: 0;
+    border-radius: 1.25rem 1.25rem 0 0;
+
+    &__header {
+      &--hero {
+        padding: 1.5rem 1rem 1.25rem;
+      }
+
+      &--flat {
+        padding: 1rem 1.25rem;
+      }
+    }
+
+    &__icon--hero {
+      width: 3.5rem;
+      height: 3.5rem;
+
+      lucide-icon {
+        --lucide-icon-size: 28px;
+      }
+    }
+
+    &__title {
+      font-size: 1.375rem;
+    }
+
+    &__desc {
+      font-size: 0.875rem;
+    }
+
+    &__body {
+      padding: 1.25rem;
+    }
+
+    &__footer {
+      flex-direction: column-reverse;
+      padding: 0.75rem 1.25rem;
+    }
+
+    &__columns {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// ============================================================================
+// A11Y - REDUCED MOTION
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .dw-backdrop,
+  .dw {
+    animation: none;
+  }
+}

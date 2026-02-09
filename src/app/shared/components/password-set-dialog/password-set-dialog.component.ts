@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PasswordStrengthComponent } from '../password-strength/password-strength.component';
-import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -38,7 +38,7 @@ export type PasswordSetResult = { action: 'success' };
 @Component({
   selector: 'app-password-set-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent, HeroDialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent, DialogWrapperComponent],
   templateUrl: './password-set-dialog.component.html',
   styleUrls: ['./password-set-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

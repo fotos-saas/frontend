@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { SchoolItem } from '../../models/partner.models';
 import {
@@ -25,7 +25,7 @@ interface ReviewRow extends BulkImportPreviewItem {
   selector: 'app-teacher-bulk-import-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, FormsModule, LucideAngularModule, SearchableSelectComponent],
+  imports: [DecimalPipe, FormsModule, LucideAngularModule, SearchableSelectComponent, DialogWrapperComponent],
   templateUrl: './teacher-bulk-import-dialog.component.html',
   styleUrl: './teacher-bulk-import-dialog.component.scss',
 })
@@ -38,7 +38,6 @@ export class TeacherBulkImportDialogComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   // State
   readonly phase = signal<Phase>('input');
@@ -55,6 +54,14 @@ export class TeacherBulkImportDialogComponent {
 
   // Done phase
   readonly result = signal<BulkImportExecuteResult | null>(null);
+
+  readonly phaseTitle = computed(() => {
+    switch (this.phase()) {
+      case 'input': return 'Tömeges tanár import';
+      case 'review': return 'Eredmények áttekintése';
+      case 'done': return 'Import befejezve';
+    }
+  });
 
   readonly schoolOptions = computed<SelectOption[]>(() =>
     this.schools().map(s => ({ id: s.id, label: s.name, sublabel: s.city ?? undefined }))
@@ -182,7 +189,6 @@ export class TeacherBulkImportDialogComponent {
   private suggestAction(item: BulkImportPreviewItem): BulkImportAction {
     if (item.matchType === 'no_match') return 'create';
     if (item.matchType === 'exact') return 'skip';
-    // fuzzy / ai match → update suggested
     if (item.confidence >= 0.8) return 'skip';
     return 'update';
   }

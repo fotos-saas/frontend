@@ -1,212 +1,124 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.UPLOAD"
+  [title]="phaseTitle()"
+  size="lg"
+  [closable]="!loading()"
+  [footerAlign]="phase() === 'done' ? 'center' : 'end'"
+  [errorMessage]="errorMessage() || null"
+  (closeEvent)="close.emit()"
 >
-  <div class="dialog-panel dialog-panel--lg">
-    <button class="dialog-close" (click)="close.emit()">
-      <lucide-icon [name]="ICONS.X" [size]="18" />
-    </button>
-
-    <!-- Header -->
-    <div class="dialog-header">
-      <h3>
-        @switch (phase()) {
-          @case ('input') { Tömeges tanár import }
-          @case ('review') { Eredmények áttekintése }
-          @case ('done') { Import befejezve }
-        }
-      </h3>
-    </div>
-
+  <ng-container dialogBody>
     <!-- === INPUT PHASE === -->
     @if (phase() === 'input') {
-      <div class="dialog-body">
-        <!-- Iskola választó -->
-        <div class="form-group">
-          <label class="form-label">Iskola</label>
-          <app-searchable-select
-            [options]="schoolOptions()"
-            [value]="selectedSchoolId()"
-            placeholder="Iskola keresése..."
-            allLabel=""
-            (valueChange)="onSchoolChange($event)"
-          />
-        </div>
-
-        @if (!selectedFile()) {
-          <!-- Szövegmező -->
-          <div class="form-group">
-            <label class="form-label">Tanárnevek (soronként egy)</label>
-            <textarea
-              class="names-textarea"
-              [ngModel]="namesText()"
-              (ngModelChange)="onNamesInput($event)"
-              placeholder="Kiss János&#10;Dr. Nagy Anna&#10;Horváth Péterné&#10;..."
-              rows="8"
-            ></textarea>
-          </div>
-        }
-
-        <!-- Fájl feltöltés -->
-        <div class="form-group">
-          <label class="form-label">
-            @if (selectedFile()) {
-              Feltöltött fájl
-            } @else {
-              Vagy tölts fel fájlt (CSV, XLSX, TXT)
-            }
-          </label>
-          @if (selectedFile()) {
-            <div class="file-info">
-              <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="18" />
-              <span class="file-name">{{ selectedFile()!.name }}</span>
-              <button class="file-remove" (click)="clearFile()">
-                <lucide-icon [name]="ICONS.X" [size]="14" />
-              </button>
-            </div>
-          } @else {
-            <label class="file-upload-area">
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls,.txt"
-                (change)="onFileSelected($event)"
-                hidden
-              />
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="24" />
-              <span>Fájl kiválasztása</span>
-            </label>
-          }
-        </div>
-
-        @if (errorMessage()) {
-          <div class="error-banner">
-            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
-            {{ errorMessage() }}
-          </div>
-        }
+      <!-- Iskola választó -->
+      <div class="form-group">
+        <label class="form-label">Iskola</label>
+        <app-searchable-select
+          [options]="schoolOptions()"
+          [value]="selectedSchoolId()"
+          placeholder="Iskola keresése..."
+          allLabel=""
+          (valueChange)="onSchoolChange($event)"
+        />
       </div>
 
-      <div class="dialog-footer">
-        <button class="btn-cancel" (click)="close.emit()">Mégsem</button>
-        <button
-          class="btn-primary"
-          [disabled]="!canSubmitPreview()"
-          (click)="submitPreview()"
-        >
-          @if (loading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-            Elemzés...
+      @if (!selectedFile()) {
+        <div class="form-group">
+          <label class="form-label">Tanárnevek (soronként egy)</label>
+          <textarea
+            class="names-textarea"
+            [ngModel]="namesText()"
+            (ngModelChange)="onNamesInput($event)"
+            placeholder="Kiss János&#10;Dr. Nagy Anna&#10;Horváth Péterné&#10;..."
+            rows="8"
+          ></textarea>
+        </div>
+      }
+
+      <!-- Fájl feltöltés -->
+      <div class="form-group">
+        <label class="form-label">
+          @if (selectedFile()) {
+            Feltöltött fájl
           } @else {
-            <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
-            Ellenőrzés
+            Vagy tölts fel fájlt (CSV, XLSX, TXT)
           }
-        </button>
+        </label>
+        @if (selectedFile()) {
+          <div class="file-info">
+            <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="18" />
+            <span class="file-name">{{ selectedFile()!.name }}</span>
+            <button class="file-remove" (click)="clearFile()">
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          </div>
+        } @else {
+          <label class="file-upload-area">
+            <input
+              type="file"
+              accept=".csv,.xlsx,.xls,.txt"
+              (change)="onFileSelected($event)"
+              hidden
+            />
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="24" />
+            <span>Fájl kiválasztása</span>
+          </label>
+        }
       </div>
     }
 
     <!-- === REVIEW PHASE === -->
     @if (phase() === 'review') {
-      <div class="dialog-body">
-        <!-- Összesítés -->
-        <div class="review-summary">
-          <span class="summary-item summary-item--create">
-            {{ reviewStats().create }} új
-          </span>
-          <span class="summary-item summary-item--update">
-            {{ reviewStats().update }} frissítés
-          </span>
-          <span class="summary-item summary-item--skip">
-            {{ reviewStats().skip }} kihagyás
-          </span>
-        </div>
-
-        <!-- Conflict grid -->
-        <div class="review-list">
-          @for (row of reviewRows(); track row.inputName; let i = $index) {
-            <div class="review-row" [class.review-row--conflict]="row.matchType !== 'no_match' && row.matchType !== 'exact'">
-              <div class="review-row__input">
-                <span class="input-name">{{ row.inputName }}</span>
-                @if (row.matchType !== 'no_match') {
-                  <span class="match-info">
-                    <span class="match-label">{{ getMatchLabel(row.matchType) }}</span>
-                    <span class="match-confidence" [class]="getConfidenceClass(row.confidence)">
-                      {{ (row.confidence * 100) | number:'1.0-0' }}%
-                    </span>
-                  </span>
-                }
-              </div>
-
-              @if (row.matchType !== 'no_match') {
-                <div class="review-row__match">
-                  @if (row.photoUrl) {
-                    <img class="match-avatar" [src]="row.photoUrl" [alt]="row.teacherName" />
-                  }
-                  <span class="match-name">{{ row.teacherName }}</span>
-                </div>
-              }
-
-              <div class="review-row__actions">
-                @if (row.matchType === 'no_match') {
-                  <!-- No match: create/skip -->
-                  <button
-                    class="action-chip"
-                    [class.action-chip--active]="row.action === 'create'"
-                    (click)="setAction(i, 'create')"
-                  >Új</button>
-                  <button
-                    class="action-chip action-chip--skip"
-                    [class.action-chip--active]="row.action === 'skip'"
-                    (click)="setAction(i, 'skip')"
-                  >Kihagy</button>
-                } @else {
-                  <!-- Match found: skip/update/create -->
-                  <button
-                    class="action-chip"
-                    [class.action-chip--active]="row.action === 'skip'"
-                    (click)="setAction(i, 'skip')"
-                  >Kihagy</button>
-                  <button
-                    class="action-chip action-chip--update"
-                    [class.action-chip--active]="row.action === 'update'"
-                    (click)="setAction(i, 'update')"
-                  >Frissít</button>
-                  <button
-                    class="action-chip action-chip--create"
-                    [class.action-chip--active]="row.action === 'create'"
-                    (click)="setAction(i, 'create')"
-                  >Új</button>
-                }
-              </div>
-            </div>
-          }
-        </div>
-
-        @if (errorMessage()) {
-          <div class="error-banner">
-            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
-            {{ errorMessage() }}
-          </div>
-        }
+      <div class="review-summary">
+        <span class="summary-item summary-item--create">{{ reviewStats().create }} új</span>
+        <span class="summary-item summary-item--update">{{ reviewStats().update }} frissítés</span>
+        <span class="summary-item summary-item--skip">{{ reviewStats().skip }} kihagyás</span>
       </div>
 
-      <div class="dialog-footer">
-        <button class="btn-cancel" (click)="backToInput()">Vissza</button>
-        <button class="btn-primary" [disabled]="loading()" (click)="submitExecute()">
-          @if (loading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-            Importálás...
-          } @else {
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-            Import végrehajtása
-          }
-        </button>
+      <div class="review-list">
+        @for (row of reviewRows(); track row.inputName; let i = $index) {
+          <div class="review-row" [class.review-row--conflict]="row.matchType !== 'no_match' && row.matchType !== 'exact'">
+            <div class="review-row__input">
+              <span class="input-name">{{ row.inputName }}</span>
+              @if (row.matchType !== 'no_match') {
+                <span class="match-info">
+                  <span class="match-label">{{ getMatchLabel(row.matchType) }}</span>
+                  <span class="match-confidence" [class]="getConfidenceClass(row.confidence)">
+                    {{ (row.confidence * 100) | number:'1.0-0' }}%
+                  </span>
+                </span>
+              }
+            </div>
+
+            @if (row.matchType !== 'no_match') {
+              <div class="review-row__match">
+                @if (row.photoUrl) {
+                  <img class="match-avatar" [src]="row.photoUrl" [alt]="row.teacherName" />
+                }
+                <span class="match-name">{{ row.teacherName }}</span>
+              </div>
+            }
+
+            <div class="review-row__actions">
+              @if (row.matchType === 'no_match') {
+                <button class="action-chip" [class.action-chip--active]="row.action === 'create'" (click)="setAction(i, 'create')">Új</button>
+                <button class="action-chip action-chip--skip" [class.action-chip--active]="row.action === 'skip'" (click)="setAction(i, 'skip')">Kihagy</button>
+              } @else {
+                <button class="action-chip" [class.action-chip--active]="row.action === 'skip'" (click)="setAction(i, 'skip')">Kihagy</button>
+                <button class="action-chip action-chip--update" [class.action-chip--active]="row.action === 'update'" (click)="setAction(i, 'update')">Frissít</button>
+                <button class="action-chip action-chip--create" [class.action-chip--active]="row.action === 'create'" (click)="setAction(i, 'create')">Új</button>
+              }
+            </div>
+          </div>
+        }
       </div>
     }
 
     <!-- === DONE PHASE === -->
     @if (phase() === 'done') {
-      <div class="dialog-body done-body">
+      <div class="done-body">
         <div class="done-icon">
           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="48" />
         </div>
@@ -234,12 +146,35 @@
           </div>
         }
       </div>
-
-      <div class="dialog-footer dialog-footer--center">
-        <button class="btn-primary" (click)="onDone()">
-          Bezárás
-        </button>
-      </div>
     }
-  </div>
-</div>
+  </ng-container>
+
+  <!-- FOOTER -->
+  <ng-container dialogFooter>
+    @if (phase() === 'input') {
+      <button type="button" class="btn btn--outline" (click)="close.emit()">Mégsem</button>
+      <button type="button" class="btn btn--primary" [disabled]="!canSubmitPreview()" (click)="submitPreview()">
+        @if (loading()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Elemzés...
+        } @else {
+          <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+          Ellenőrzés
+        }
+      </button>
+    } @else if (phase() === 'review') {
+      <button type="button" class="btn btn--outline" (click)="backToInput()">Vissza</button>
+      <button type="button" class="btn btn--primary" [disabled]="loading()" (click)="submitExecute()">
+        @if (loading()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Importálás...
+        } @else {
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+          Import végrehajtása
+        }
+      </button>
+    } @else {
+      <button type="button" class="btn btn--primary" (click)="onDone()">Bezárás</button>
+    }
+  </ng-container>
+</app-dialog-wrapper>

@@ -35,6 +35,11 @@
           <h3>Miben segithetek?</h3>
           <p>Kerdezz barmit a TablioStudio mukodeserol!</p>
 
+          <button class="contact-btn" (click)="contactDialogOpen.set(true)">
+            <lucide-icon [name]="ICONS.PHONE" [size]="16" />
+            Kapcsolat
+          </button>
+
           <div class="suggested-questions">
             @for (question of suggestedQuestions; track question) {
               <button
@@ -45,11 +50,6 @@
               </button>
             }
           </div>
-
-          <button class="contact-btn" (click)="contactDialogOpen.set(true)">
-            <lucide-icon [name]="ICONS.PHONE" [size]="16" />
-            Kapcsolat
-          </button>
         </div>
       } @else {
         @for (msg of messages(); track $index) {

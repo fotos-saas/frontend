@@ -1,0 +1,43 @@
+<div class="tour-tooltip">
+  <div class="tour-tooltip__header">
+    <h4>{{ title() }}</h4>
+    <span class="step-indicator">{{ stepNumber() }}/{{ totalSteps() }}</span>
+  </div>
+
+  <p class="tour-tooltip__content">{{ content() }}</p>
+
+  <div class="tour-tooltip__actions">
+    @if (allowSkip()) {
+      <button class="btn-skip" (click)="skip.emit()">
+        Kihagy&aacute;s
+      </button>
+    }
+
+    <div class="btn-group">
+      @if (stepNumber() > 1) {
+        <button class="btn-secondary" (click)="prev.emit()">
+          <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+          Vissza
+        </button>
+      }
+
+      <button class="btn-primary" (click)="next.emit()">
+        @if (stepNumber() < totalSteps()) {
+          Tovabb
+          <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="16" />
+        } @else {
+          Befejez&eacute;s
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="tour-tooltip__progress">
+    <div
+      class="progress-fill"
+      [style.width.%]="(stepNumber() / totalSteps()) * 100"
+    ></div>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 import {
   Component,
   inject,
+  signal,
   OnInit,
   OnDestroy,
   ChangeDetectionStrategy,
@@ -27,6 +28,9 @@ import { AuthService } from '../../../services/auth.service';
 import { GuestService } from '../../../services/guest.service';
 import { ToastService } from '../../../services/toast.service';
 import { AppShellService } from './app-shell.service';
+import { HelpFabComponent } from '../../../../features/help/components/help-fab/help-fab.component';
+import { ChatbotPanelComponent } from '../../../../features/help/components/chatbot-panel/chatbot-panel.component';
+import { TourOverlayComponent } from '../../../../features/help/components/tour-overlay/tour-overlay.component';
 
 /**
  * App Shell Component
@@ -50,6 +54,9 @@ import { AppShellService } from './app-shell.service';
     FloatingContactComponent,
     PhotoSelectionReminderDialogComponent,
     PasswordSetDialogComponent,
+    HelpFabComponent,
+    ChatbotPanelComponent,
+    TourOverlayComponent,
   ],
   providers: [AppShellService],
   templateUrl: './app-shell.component.html',
@@ -63,6 +70,9 @@ export class AppShellComponent implements OnInit, OnDestroy {
   private readonly toastService = inject(ToastService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly shellService = inject(AppShellService);
+
+  /** Help chatbot */
+  protected chatOpen = signal(false);
 
   /** Photo selection reminder dialog - service-ből delegálva */
   readonly showPhotoSelectionReminderDialog = this.shellService.showReminderDialog;

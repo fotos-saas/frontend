@@ -7,6 +7,8 @@ import { SidebarStateService } from '../../core/layout/services/sidebar-state.se
 import { MobileNavOverlayComponent } from '../../core/layout/components/mobile-nav-overlay/mobile-nav-overlay.component';
 import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.component';
 import { MenuItem } from '../../core/layout/models/menu-item.model';
+import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
+import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
 
 /**
  * Marketer Shell - Layout komponens a marketinges felülethez.
@@ -18,7 +20,7 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 @Component({
   selector: 'app-marketer-shell',
   standalone: true,
-  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent],
+  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent, HelpFabComponent, ChatbotPanelComponent],
   template: `
     <div class="marketer-layout">
       <!-- Top Bar (közös komponens) -->
@@ -95,6 +97,12 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
         </main>
       </div>
     </div>
+
+    <!-- Help rendszer (page-card KÍVÜL!) -->
+    @if (!chatOpen()) {
+      <app-help-fab (toggleChat)="chatOpen.set(true)" />
+    }
+    <app-chatbot-panel [isOpen]="chatOpen()" (closePanel)="chatOpen.set(false)" />
   `,
   styles: [`
     .marketer-layout {
@@ -256,6 +264,7 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 export class MarketerShellComponent {
   private authService = inject(AuthService);
   protected sidebarState = inject(SidebarStateService);
+  protected chatOpen = signal(false);
 
   // Menü items (Lucide ikonokkal - desktop, tablet és mobile egyaránt)
   navItems: MenuItem[] = [

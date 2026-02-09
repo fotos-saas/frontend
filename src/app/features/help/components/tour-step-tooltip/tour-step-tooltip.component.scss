@@ -1,0 +1,128 @@
+.tour-tooltip {
+  width: 320px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+.tour-tooltip__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+
+  h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .step-indicator {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+}
+
+.tour-tooltip__content {
+  padding: 0 16px 12px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.tour-tooltip__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 12px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-skip {
+  padding: 6px 12px;
+  border: none;
+  background: none;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    color: #64748b;
+  }
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #475569;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #7c3aed;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background: #6d28d9;
+  }
+}
+
+.tour-tooltip__progress {
+  height: 3px;
+  background: #f1f5f9;
+
+  .progress-fill {
+    height: 100%;
+    background: #7c3aed;
+    transition: width 0.3s ease;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-tooltip {
+    animation: none;
+  }
+
+  .progress-fill {
+    transition: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .tour-tooltip {
+    width: calc(100vw - 32px);
+  }
+}

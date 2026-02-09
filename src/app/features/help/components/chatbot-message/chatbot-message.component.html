@@ -1,0 +1,15 @@
+<div class="message" [ngClass]="'message--' + role()">
+  <div class="message__avatar">
+    @if (role() === 'assistant') {
+      <span class="avatar avatar--ai">AI</span>
+    } @else {
+      <span class="avatar avatar--user">Te</span>
+    }
+  </div>
+  <div class="message__bubble">
+    <div class="message__content" [innerHTML]="content()"></div>
+    @if (timestamp()) {
+      <time class="message__time">{{ timestamp() }}</time>
+    }
+  </div>
+</div>

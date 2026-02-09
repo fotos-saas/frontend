@@ -134,3 +134,10 @@
     </main>
   </div>
 </div>
+
+<!-- Help rendszer (page-card KÍVÜL!) -->
+@if (!chatOpen()) {
+  <app-help-fab (toggleChat)="chatOpen.set(true)" />
+}
+<app-chatbot-panel [isOpen]="chatOpen()" (closePanel)="chatOpen.set(false)" />
+<app-tour-overlay />

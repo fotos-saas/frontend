@@ -1,0 +1,100 @@
+.message {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  animation: fadeIn 0.2s ease;
+
+  &--user {
+    flex-direction: row-reverse;
+
+    .message__bubble {
+      background: #7c3aed;
+      color: white;
+      border-radius: 16px 16px 4px 16px;
+    }
+
+    .message__time {
+      text-align: right;
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  &--assistant {
+    .message__bubble {
+      background: #f1f5f9;
+      color: #1e293b;
+      border-radius: 16px 16px 16px 4px;
+    }
+
+    .message__time {
+      color: #94a3b8;
+    }
+  }
+}
+
+.message__avatar {
+  flex-shrink: 0;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+
+  &--ai {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: white;
+  }
+
+  &--user {
+    background: #e2e8f0;
+    color: #475569;
+  }
+}
+
+.message__bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  word-break: break-word;
+}
+
+.message__content {
+  font-size: 14px;
+  line-height: 1.5;
+
+  :host ::ng-deep {
+    p { margin: 0 0 8px; }
+    p:last-child { margin-bottom: 0; }
+    strong { font-weight: 600; }
+    code {
+      background: rgba(0, 0, 0, 0.08);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    ul, ol { margin: 4px 0; padding-left: 20px; }
+    li { margin-bottom: 2px; }
+  }
+}
+
+.message__time {
+  display: block;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message {
+    animation: none;
+  }
+}

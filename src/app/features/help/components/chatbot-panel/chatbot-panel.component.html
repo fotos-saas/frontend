@@ -1,0 +1,103 @@
+@if (isOpen()) {
+  <div class="chatbot-panel" role="complementary" aria-label="AI Segitoseg">
+    <!-- Header -->
+    <header class="chatbot-panel__header">
+      <div class="header-left">
+        <lucide-icon [name]="ICONS.MESSAGE_CIRCLE" [size]="20" />
+        <h2>AI Asszisztens</h2>
+      </div>
+      <div class="header-actions">
+        <button
+          class="icon-btn"
+          matTooltip="Uj beszelgetes"
+          (click)="startNewConversation()"
+        >
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        </button>
+        <button
+          class="icon-btn"
+          matTooltip="Bezaras"
+          (click)="closePanel.emit()"
+        >
+          <lucide-icon [name]="ICONS.X" [size]="18" />
+        </button>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div class="chatbot-panel__messages" #messagesContainer>
+      @if (!hasMessages()) {
+        <!-- Empty state -->
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="48" />
+          </div>
+          <h3>Miben segithetek?</h3>
+          <p>Kerdezz barmit a TablioStudio mukodeserol!</p>
+
+          <div class="suggested-questions">
+            @for (question of suggestedQuestions; track question) {
+              <button
+                class="suggested-btn"
+                (click)="sendMessage(question)"
+              >
+                {{ question }}
+              </button>
+            }
+          </div>
+        </div>
+      } @else {
+        @for (msg of messages(); track $index) {
+          <app-chatbot-message
+            [role]="msg.role"
+            [content]="msg.content"
+            [timestamp]="msg.timestamp"
+          />
+        }
+      }
+
+      <!-- Loading indicator -->
+      @if (isLoading()) {
+        <div class="typing-indicator">
+          <div class="typing-indicator__avatar">
+            <span class="avatar avatar--ai">AI</span>
+          </div>
+          <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      }
+
+      <!-- Error message -->
+      @if (errorMessage()) {
+        <div class="error-msg">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Input -->
+    <footer class="chatbot-panel__input">
+      <textarea
+        class="chat-input"
+        [value]="inputText()"
+        (input)="inputText.set($any($event.target).value)"
+        (keydown)="onKeyDown($event)"
+        placeholder="Irj egy uzenetet..."
+        rows="1"
+        [disabled]="isLoading()"
+      ></textarea>
+      <button
+        class="send-btn"
+        [disabled]="!inputText().trim() || isLoading()"
+        (click)="sendMessage()"
+        matTooltip="Kuldes"
+      >
+        <lucide-icon [name]="ICONS.SEND" [size]="18" />
+      </button>
+    </footer>
+  </div>
+}

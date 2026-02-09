@@ -12,6 +12,9 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
 import { BrandingService } from './services/branding.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
+import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
+import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
+import { TourOverlayComponent } from '../help/components/tour-overlay/tour-overlay.component';
 
 /** Role badge nevek */
 const ROLE_BADGES: Record<string, string> = {
@@ -44,6 +47,9 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
     MatTooltipModule,
     MobileNavOverlayComponent,
     TopBarComponent,
+    HelpFabComponent,
+    ChatbotPanelComponent,
+    TourOverlayComponent,
   ],
   templateUrl: './partner-shell.component.html',
   styleUrl: './partner-shell.component.scss',
@@ -57,6 +63,7 @@ export class PartnerShellComponent implements OnInit {
   private router = inject(Router);
   protected sidebarState = inject(SidebarStateService);
   protected readonly ICONS = ICONS;
+  protected chatOpen = signal(false);
 
   /** Base URL a route-okhoz - role alapján */
   protected baseUrl = computed(() => {

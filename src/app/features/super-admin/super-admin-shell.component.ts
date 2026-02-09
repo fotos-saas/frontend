@@ -8,6 +8,8 @@ import { BugReportService } from '../../shared/services/bug-report.service';
 import { MobileNavOverlayComponent } from '../../core/layout/components/mobile-nav-overlay/mobile-nav-overlay.component';
 import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.component';
 import { MenuItem } from '../../core/layout/models/menu-item.model';
+import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
+import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
 
 /**
  * Super Admin Shell - Layout komponens a super admin felulEthez.
@@ -19,7 +21,7 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 @Component({
   selector: 'app-super-admin-shell',
   standalone: true,
-  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent],
+  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent, HelpFabComponent, ChatbotPanelComponent],
   templateUrl: './super-admin-shell.component.html',
   styleUrls: ['./super-admin-shell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -27,6 +29,7 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 export class SuperAdminShellComponent implements OnInit {
   private authService = inject(AuthService);
   protected sidebarState = inject(SidebarStateService);
+  protected chatOpen = signal(false);
 
   readonly bugReportService = inject(BugReportService);
 

@@ -41,7 +41,7 @@
           </button>
 
           <div class="suggested-questions">
-            @for (question of suggestedQuestions; track question) {
+            @for (question of suggestedQuestions(); track question) {
               <button
                 class="suggested-btn"
                 (click)="sendMessage(question)"

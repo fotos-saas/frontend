@@ -60,12 +60,39 @@ export class ChatbotPanelComponent {
   readonly hasContactInfo = computed(() => !!this.project()?.partnerName);
   readonly backdropHandler = createBackdropHandler(() => this.contactDialogOpen.set(false));
 
-  readonly suggestedQuestions = [
-    'Hogyan tölthetek fel fotókat?',
-    'Hogyan oszthatom meg a galériát?',
-    'Hogyan működik a képválasztás?',
-    'Milyen előfizetési csomagok vannak?',
-  ];
+  readonly suggestedQuestions = computed(() => {
+    if (this.authService.isSuperAdmin()) {
+      return [
+        'Hogyan kezelem az előfizetéseket?',
+        'Hogyan küldök rendszerértesítést?',
+        'Hogyan keresek rá egy partnerre?',
+        'Milyen statisztikák érhetők el?',
+      ];
+    }
+    if (this.authService.isPartner()) {
+      return [
+        'Hogyan tölthetek fel fotókat?',
+        'Hogyan oszthatom meg a galériát?',
+        'Hogyan állítom be az árakat?',
+        'Milyen előfizetési csomagok vannak?',
+      ];
+    }
+    if (this.authService.isMarketer()) {
+      return [
+        'Hogyan hozok létre új projektet?',
+        'Hogyan kezelem a megrendeléseket?',
+        'Hogyan érhetem el a statisztikákat?',
+        'Hogyan módosítom az ügyféladatokat?',
+      ];
+    }
+    // Diák / vendég (alapértelmezett)
+    return [
+      'Hogyan választhatok képet?',
+      'Hogyan rendelhetek nyomtatást?',
+      'Hogyan működik a szavazás?',
+      'Hogyan érem el a galériát?',
+    ];
+  });
 
   constructor() {
     this.router.events.pipe(

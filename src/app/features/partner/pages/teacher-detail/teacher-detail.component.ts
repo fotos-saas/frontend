@@ -9,6 +9,7 @@ import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { TeacherDetail, TeacherChangeLogEntry, TeacherPhoto } from '../../models/teacher.models';
 import { TeacherPhotoUploadComponent } from '../../components/teacher-photo-upload/teacher-photo-upload.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 @Component({
@@ -22,6 +23,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     MatTooltipModule,
     TeacherPhotoUploadComponent,
     ConfirmDialogComponent,
+    MediaLightboxComponent,
   ],
   templateUrl: './teacher-detail.component.html',
   styleUrl: './teacher-detail.component.scss',
@@ -52,6 +54,17 @@ export class PartnerTeacherDetailComponent implements OnInit {
   editName = '';
   editTitlePrefix = '';
   editPosition = '';
+
+  // Lightbox
+  lightboxIndex = signal(-1);
+
+  lightboxMedia = computed<LightboxMediaItem[]>(() => {
+    const t = this.teacher();
+    if (!t) return [];
+    return t.photos
+      .filter(p => p.url)
+      .map(p => ({ id: p.id, url: p.url!, fileName: p.fileName ?? `Fotó ${p.year}` }));
+  });
 
   // Changelog keresés
   changelogSearch = signal('');
@@ -164,6 +177,22 @@ export class PartnerTeacherDetailComponent implements OnInit {
     this.showPhotoUpload.set(false);
     this.loadTeacher();
     this.loadChangelog();
+  }
+
+  openLightbox(photo: TeacherPhoto): void {
+    const media = this.lightboxMedia();
+    const index = media.findIndex(m => m.id === photo.id);
+    if (index >= 0) {
+      this.lightboxIndex.set(index);
+    }
+  }
+
+  onLightboxNavigate(index: number): void {
+    this.lightboxIndex.set(index);
+  }
+
+  closeLightbox(): void {
+    this.lightboxIndex.set(-1);
   }
 
   // === Aliasok ===

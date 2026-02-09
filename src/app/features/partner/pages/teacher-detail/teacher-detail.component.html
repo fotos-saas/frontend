@@ -162,7 +162,7 @@
             <div class="photos-grid">
               @for (photo of t.photos; track photo.id) {
                 <div class="photo-card" [class.photo-card--active]="photo.isActive">
-                  <div class="photo-image">
+                  <div class="photo-image" (click)="openLightbox(photo)">
                     <img [src]="photo.thumbUrl || photo.url" [alt]="'Fotó ' + photo.year" />
                     @if (photo.isActive) {
                       <span class="active-indicator" matTooltip="Aktív fotó">
@@ -170,7 +170,10 @@
                       </span>
                     }
                     <span class="photo-year">{{ photo.year }}</span>
-                    <div class="photo-overlay">
+                    <div class="photo-overlay" (click)="$event.stopPropagation()">
+                      <button class="overlay-btn" matTooltip="Nagyítás" (click)="openLightbox(photo)">
+                        <lucide-icon [name]="ICONS.ZOOM_IN" [size]="14" />
+                      </button>
                       @if (!photo.isActive) {
                         <button class="overlay-btn" matTooltip="Aktívnak jelölés" (click)="setActivePhoto(photo)">
                           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
@@ -256,6 +259,16 @@
     [teacherId]="teacherId"
     (close)="showPhotoUpload.set(false)"
     (uploaded)="onPhotoUploaded()"
+  />
+}
+
+<!-- Photo Lightbox -->
+@if (lightboxIndex() >= 0 && lightboxMedia().length > 0) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="lightboxIndex()"
+    (close)="closeLightbox()"
+    (navigate)="onLightboxNavigate($event)"
   />
 }
 

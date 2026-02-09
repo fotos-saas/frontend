@@ -1,0 +1,63 @@
+<!-- Backdrop overlay -->
+<div
+  class="hero-dialog-backdrop"
+  (mousedown)="onBackdropMouseDown($event)"
+  (click)="onBackdropClick($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="hero-dialog-title"
+>
+  <!-- Dialog container -->
+  <div
+    class="hero-dialog"
+    [style.max-width]="maxWidth()"
+  >
+    <!-- Close button (X) -->
+    <button
+      type="button"
+      class="hero-dialog__close"
+      (click)="closeEvent.emit()"
+      [disabled]="isSubmitting()"
+      aria-label="Bezárás"
+    >
+      <lucide-icon [name]="ICONS.X" [size]="20" />
+    </button>
+
+    <!-- Header -->
+    <div
+      class="hero-dialog__header"
+      [style.background]="'linear-gradient(135deg, ' + themeColors().gradientStart + ' 0%, ' + themeColors().gradientEnd + ' 100%)'"
+    >
+      <div
+        class="hero-dialog__icon"
+        [style.background]="themeColors().accent"
+        [style.box-shadow]="'0 10px 20px -5px ' + themeColors().iconShadow"
+      >
+        <lucide-icon [name]="icon()" [size]="36" />
+      </div>
+      <h2 id="hero-dialog-title" class="hero-dialog__title">{{ title() }}</h2>
+      @if (description()) {
+        <p class="hero-dialog__description">{{ description() }}</p>
+      }
+    </div>
+
+    <!-- Content -->
+    <div class="hero-dialog__content">
+      <!-- API hiba megjelenítése -->
+      @if (errorMessage()) {
+        <div class="hero-dialog__alert hero-dialog__alert--error">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <!-- Body slot -->
+      <ng-content select="[dialogBody]" />
+    </div>
+
+    <!-- Footer slot -->
+    <div class="hero-dialog__footer">
+      <ng-content select="[dialogFooter]" />
+    </div>
+  </div>
+</div>

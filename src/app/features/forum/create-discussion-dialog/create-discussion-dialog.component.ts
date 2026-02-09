@@ -11,12 +11,14 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LucideAngularModule } from 'lucide-angular';
 import DOMPurify from 'dompurify';
 import { ForumService, CreateDiscussionRequest, PostMedia } from '../../../core/services/forum.service';
 import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
-import { BaseDialogComponent } from '../../../shared/components/base-dialog/base-dialog.component';
 import { MediaEditorComponent, MediaEditorItem } from '../../../shared/components/media-editor/media-editor.component';
+import { HeroDialogWrapperComponent } from '../../../shared/components/hero-dialog-wrapper/hero-dialog-wrapper.component';
 import { DiscussionFormValidatorService, DiscussionFormErrors } from './discussion-form-validator.service';
+import { ICONS } from '@shared/constants/icons.constants';
 
 /**
  * Sablon interface (minimalis)
@@ -48,22 +50,23 @@ export interface EditDiscussionData {
 /**
  * Create Discussion Dialog
  *
- * Uj beszelgetes letrehozasa dialogus.
- * Csak kapcsolattarto hasznalja.
- *
- * Extends BaseDialogComponent:
- * - Body scroll lock
- * - Focus management
- * - ESC kezeles (HostListener)
+ * Uj beszelgetes letrehozasa / szerkesztese dialogus.
+ * HeroDialogWrapperComponent-et használja a shell-hez.
  */
 @Component({
   selector: 'app-create-discussion-dialog',
-  imports: [FormsModule, RichTextEditorComponent, MediaEditorComponent],
+  imports: [
+    FormsModule,
+    LucideAngularModule,
+    RichTextEditorComponent,
+    MediaEditorComponent,
+    HeroDialogWrapperComponent,
+  ],
   templateUrl: './create-discussion-dialog.component.html',
   styleUrls: ['./create-discussion-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateDiscussionDialogComponent extends BaseDialogComponent {
+export class CreateDiscussionDialogComponent {
   readonly templates = input<TemplateOption[]>([]);
   readonly preselectedTemplateId = input<number | undefined>(undefined);
   readonly mode = input<'create' | 'edit'>('create');
@@ -86,7 +89,13 @@ export class CreateDiscussionDialogComponent extends BaseDialogComponent {
   newMediaFiles: File[] = [];
   mediaToDeleteIds: number[] = [];
 
+  /** Állapotok */
+  readonly _isSubmitting = signal<boolean>(false);
+  readonly _errorMessage = signal<string | null>(null);
+
   readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
+
+  readonly ICONS = ICONS;
 
   private readonly forumService = inject(ForumService);
   private readonly destroyRef = inject(DestroyRef);
@@ -96,9 +105,7 @@ export class CreateDiscussionDialogComponent extends BaseDialogComponent {
   // LIFECYCLE
   // ============================================================================
 
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-
+  ngAfterViewInit(): void {
     const preselectedId = this.preselectedTemplateId();
     if (preselectedId) {
       this.templateId = preselectedId;
@@ -126,22 +133,12 @@ export class CreateDiscussionDialogComponent extends BaseDialogComponent {
   }
 
   // ============================================================================
-  // FOCUS
-  // ============================================================================
-
-  protected override focusFirstInput(): void {
-    setTimeout(() => {
-      this.titleInput()?.nativeElement.focus();
-    }, 100);
-  }
-
-  // ============================================================================
   // FORM HANDLERS
   // ============================================================================
 
   onInputChange(): void {
     this.errors = {};
-    this.clearError();
+    this._errorMessage.set(null);
   }
 
   onContentTextLengthChange(length: number): void {
@@ -168,10 +165,15 @@ export class CreateDiscussionDialogComponent extends BaseDialogComponent {
   get contentCharCount(): string { return `${this.content.length}/10000`; }
 
   // ============================================================================
-  // ABSTRACT IMPLEMENTATIONS
+  // ACTIONS
   // ============================================================================
 
-  protected override onSubmit(): void {
+  submit(): void {
+    if (this._isSubmitting()) return;
+
+    this._isSubmitting.set(true);
+    this._errorMessage.set(null);
+
     this.errors = this.validator.validate({
       title: this.title,
       content: this.content,
@@ -185,7 +187,7 @@ export class CreateDiscussionDialogComponent extends BaseDialogComponent {
     }
 
     if (this.mode() === 'edit') {
-      this.submitSuccess();
+      this._isSubmitting.set(false);
       this.resultEvent.emit({
         action: 'updated',
         title: this.title.trim(),
@@ -206,16 +208,19 @@ export class CreateDiscussionDialogComponent extends BaseDialogComponent {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (discussion) => {
-        this.submitSuccess();
+        this._isSubmitting.set(false);
         this.resultEvent.emit({ action: 'created', slug: discussion.slug });
       },
       error: (err) => {
-        this.submitError(err.message || 'Hiba tortent a mentes soran.');
+        this._isSubmitting.set(false);
+        this._errorMessage.set(err.message || 'Hiba tortent a mentes soran.');
       }
     });
   }
 
-  protected override onClose(): void {
-    this.resultEvent.emit({ action: 'close' });
+  close(): void {
+    if (!this._isSubmitting()) {
+      this.resultEvent.emit({ action: 'close' });
+    }
   }
 }

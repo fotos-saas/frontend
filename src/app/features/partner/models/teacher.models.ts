@@ -34,6 +34,7 @@ export interface TeacherDetail {
   id: number;
   canonicalName: string;
   titlePrefix: string | null;
+  position: string | null;
   fullDisplayName: string;
   schoolId: number;
   schoolName: string | null;
@@ -60,6 +61,7 @@ export interface TeacherChangeLogEntry {
 export interface CreateTeacherRequest {
   canonical_name: string;
   title_prefix?: string | null;
+  position?: string | null;
   school_id: number;
   aliases?: string[];
   notes?: string | null;
@@ -68,6 +70,7 @@ export interface CreateTeacherRequest {
 export interface UpdateTeacherRequest {
   canonical_name?: string;
   title_prefix?: string | null;
+  position?: string | null;
   school_id?: number;
   aliases?: string[];
   notes?: string | null;

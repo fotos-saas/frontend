@@ -46,6 +46,13 @@ export class PartnerTeacherDetailComponent implements OnInit {
   newAlias = '';
   savingAlias = signal(false);
 
+  // Profil szerkesztés
+  editing = signal(false);
+  saving = signal(false);
+  editName = '';
+  editTitlePrefix = '';
+  editPosition = '';
+
   // Changelog keresés
   changelogSearch = signal('');
   filteredChangelog = computed(() => {
@@ -88,6 +95,48 @@ export class PartnerTeacherDetailComponent implements OnInit {
       .subscribe({ next: (res) => this.changelog.set(res.data) });
   }
 
+  // === Profil szerkesztés ===
+
+  startEditing(): void {
+    const t = this.teacher();
+    if (!t) return;
+    this.editName = t.canonicalName;
+    this.editTitlePrefix = t.titlePrefix ?? '';
+    this.editPosition = t.position ?? '';
+    this.editing.set(true);
+  }
+
+  cancelEditing(): void {
+    this.editing.set(false);
+  }
+
+  saveProfile(): void {
+    const t = this.teacher();
+    if (!t || this.saving()) return;
+
+    const name = this.editName.trim();
+    if (!name) return;
+
+    this.saving.set(true);
+    this.teacherService.updateTeacher(this.teacherId, {
+      canonical_name: name,
+      title_prefix: this.editTitlePrefix.trim() || null,
+      position: this.editPosition.trim() || null,
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.teacher.set(res.data);
+          this.editing.set(false);
+          this.saving.set(false);
+          this.loadChangelog();
+        },
+        error: () => this.saving.set(false),
+      });
+  }
+
+  // === Fotók ===
+
   setActivePhoto(photo: TeacherPhoto): void {
     if (photo.isActive) return;
     this.teacherService.setActivePhoto(this.teacherId, photo.id)
@@ -116,6 +165,8 @@ export class PartnerTeacherDetailComponent implements OnInit {
     this.loadTeacher();
     this.loadChangelog();
   }
+
+  // === Aliasok ===
 
   addAlias(): void {
     const alias = this.newAlias.trim();
@@ -153,6 +204,7 @@ export class PartnerTeacherDetailComponent implements OnInit {
       created: 'Létrehozva',
       name_changed: 'Név módosítva',
       title_changed: 'Titulus módosítva',
+      position_changed: 'Pozíció módosítva',
       school_changed: 'Iskola módosítva',
       photo_uploaded: 'Fotó feltöltve',
       photo_deleted: 'Fotó törölve',

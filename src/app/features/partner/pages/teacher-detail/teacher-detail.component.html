@@ -27,15 +27,69 @@
           }
         </div>
 
-        <h1 class="profile-name">{{ t.fullDisplayName }}</h1>
+        @if (editing()) {
+          <!-- Szerkesztés mód -->
+          <div class="edit-form">
+            <label class="edit-label">Titulus</label>
+            <input
+              type="text"
+              [(ngModel)]="editTitlePrefix"
+              class="edit-input"
+              placeholder="pl. Dr., PhD..."
+            />
 
-        <div class="profile-meta">
-          <lucide-icon [name]="ICONS.SCHOOL" [size]="13" />
-          <span>{{ t.schoolName }}</span>
-        </div>
+            <label class="edit-label">Név</label>
+            <input
+              type="text"
+              [(ngModel)]="editName"
+              class="edit-input"
+              placeholder="Tanár neve..."
+              (keydown.enter)="$event.preventDefault(); saveProfile()"
+            />
 
-        @if (!t.isActive) {
-          <span class="status-badge status-badge--inactive">Inaktív</span>
+            <label class="edit-label">Pozíció</label>
+            <input
+              type="text"
+              [(ngModel)]="editPosition"
+              class="edit-input"
+              placeholder="pl. igazgató, angol nyelv..."
+              (keydown.enter)="$event.preventDefault(); saveProfile()"
+            />
+
+            <div class="edit-actions">
+              <button class="edit-save-btn" (click)="saveProfile()" [disabled]="!editName.trim() || saving()">
+                <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                Mentés
+              </button>
+              <button class="edit-cancel-btn" (click)="cancelEditing()">
+                Mégse
+              </button>
+            </div>
+          </div>
+        } @else {
+          <!-- Megjelenítés mód -->
+          <h1 class="profile-name">{{ t.fullDisplayName }}</h1>
+
+          @if (t.position) {
+            <div class="profile-position">
+              <lucide-icon [name]="ICONS.BRIEFCASE" [size]="13" />
+              <span>{{ t.position }}</span>
+            </div>
+          }
+
+          <div class="profile-meta">
+            <lucide-icon [name]="ICONS.SCHOOL" [size]="13" />
+            <span>{{ t.schoolName }}</span>
+          </div>
+
+          @if (!t.isActive) {
+            <span class="status-badge status-badge--inactive">Inaktív</span>
+          }
+
+          <button class="edit-profile-btn" matTooltip="Profil szerkesztése" (click)="startEditing()">
+            <lucide-icon [name]="ICONS.EDIT" [size]="12" />
+            Szerkesztés
+          </button>
         }
 
         @if (t.notes) {

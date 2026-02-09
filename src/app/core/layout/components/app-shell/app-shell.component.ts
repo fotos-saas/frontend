@@ -29,7 +29,7 @@ import { ToastService } from '../../../services/toast.service';
 import { AppShellService } from './app-shell.service';
 import { HelpFabComponent } from '../../../../features/help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../../../../features/help/components/chatbot-panel/chatbot-panel.component';
-import { TourOverlayComponent } from '../../../../features/help/components/tour-overlay/tour-overlay.component';
+
 
 /**
  * App Shell Component
@@ -54,7 +54,6 @@ import { TourOverlayComponent } from '../../../../features/help/components/tour-
     PasswordSetDialogComponent,
     HelpFabComponent,
     ChatbotPanelComponent,
-    TourOverlayComponent,
   ],
   providers: [AppShellService],
   templateUrl: './app-shell.component.html',

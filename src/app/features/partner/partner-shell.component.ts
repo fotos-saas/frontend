@@ -14,7 +14,7 @@ import { BrandingService } from './services/branding.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
 import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
-import { TourOverlayComponent } from '../help/components/tour-overlay/tour-overlay.component';
+
 
 /** Role badge nevek */
 const ROLE_BADGES: Record<string, string> = {
@@ -49,7 +49,6 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
     TopBarComponent,
     HelpFabComponent,
     ChatbotPanelComponent,
-    TourOverlayComponent,
   ],
   templateUrl: './partner-shell.component.html',
   styleUrl: './partner-shell.component.scss',

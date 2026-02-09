@@ -26,7 +26,7 @@
 // Table
 .table-header {
   @extend .table-header;
-  grid-template-columns: 1fr 180px 140px 80px;
+  grid-template-columns: 1fr 200px 80px;
 }
 
 .th { @extend .th; }
@@ -38,7 +38,7 @@
 
 .teacher-row {
   @extend .list-row;
-  grid-template-columns: 1fr 180px 140px 80px;
+  grid-template-columns: 1fr 200px 80px;
 }
 
 .teacher-info {
@@ -106,22 +106,12 @@
   text-overflow: ellipsis;
 }
 
-.teacher-position {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.position-text {
-  font-size: 0.8125rem;
-  color: #475569;
+.teacher-position-label {
+  font-size: 0.75rem;
+  color: #64748b;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.position-empty {
-  color: #cbd5e1;
 }
 
 .teacher-actions {
@@ -158,8 +148,7 @@
     grid-template-columns: 1fr 80px;
   }
 
-  .teacher-school,
-  .teacher-position {
+  .teacher-school {
     display: none;
   }
 

@@ -65,7 +65,6 @@
     <div class="table-header">
       <span class="th th-teacher">Tanár</span>
       <span class="th th-school">Iskola</span>
-      <span class="th th-position">Pozíció</span>
       <span class="th th-actions">Műveletek</span>
     </div>
 
@@ -85,6 +84,9 @@
             </div>
             <div class="teacher-details">
               <span class="teacher-name">{{ teacher.fullDisplayName }}</span>
+              @if (teacher.position) {
+                <span class="teacher-position-label">{{ teacher.position }}</span>
+              }
               @if (!teacher.isActive) {
                 <span class="inactive-badge">Inaktív</span>
               }
@@ -93,14 +95,6 @@
 
           <div class="teacher-school" (click)="viewTeacher(teacher)">
             <span class="school-name-text">{{ teacher.schoolName }}</span>
-          </div>
-
-          <div class="teacher-position" (click)="viewTeacher(teacher)">
-            @if (teacher.position) {
-              <span class="position-text">{{ teacher.position }}</span>
-            } @else {
-              <span class="position-empty">-</span>
-            }
           </div>
 
           <div class="teacher-actions">

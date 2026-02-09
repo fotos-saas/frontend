@@ -59,6 +59,88 @@
   }
 }
 
+// Contact bar
+.contact-bar {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
+.contact-bar__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.contact-bar__name {
+  flex: 1;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-bar__chevron {
+  color: #94a3b8;
+  transition: transform 0.15s;
+}
+
+.contact-bar__details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #475569;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: calc(100% + 16px);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+  }
+
+  span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.copy-hint {
+  color: #94a3b8;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .contact-link:hover & {
+    opacity: 1;
+  }
+}
+
 // Messages
 .chatbot-panel__messages {
   flex: 1;
@@ -144,9 +226,10 @@
   font-size: 12px;
   font-weight: 600;
 
-  &--ai {
+  &--tabi {
     background: linear-gradient(135deg, #7c3aed, #6d28d9);
     color: white;
+    font-size: 16px;
   }
 }
 
@@ -274,7 +357,11 @@
   .icon-btn,
   .send-btn,
   .suggested-btn,
-  .chat-input {
+  .chat-input,
+  .contact-bar,
+  .contact-link,
+  .contact-bar__chevron,
+  .copy-hint {
     transition: none;
   }
 }

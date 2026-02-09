@@ -1,10 +1,10 @@
 @if (isOpen()) {
-  <div class="chatbot-panel" role="complementary" aria-label="AI Segitoseg">
+  <div class="chatbot-panel" role="complementary" aria-label="Tabi segito">
     <!-- Header -->
     <header class="chatbot-panel__header">
       <div class="header-left">
         <lucide-icon [name]="ICONS.MESSAGE_CIRCLE" [size]="20" />
-        <h2>AI Asszisztens</h2>
+        <h2>Tabi</h2>
       </div>
       <div class="header-actions">
         <button
@@ -23,6 +23,40 @@
         </button>
       </div>
     </header>
+
+    <!-- Contact bar -->
+    @if (hasContactInfo()) {
+      <div class="contact-bar" (click)="toggleContactExpanded()">
+        <div class="contact-bar__header">
+          <lucide-icon [name]="ICONS.PHONE" [size]="16" />
+          <span class="contact-bar__name">{{ project()?.partnerName }}</span>
+          <lucide-icon
+            [name]="contactExpanded() ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN"
+            [size]="16"
+            class="contact-bar__chevron"
+          />
+        </div>
+        @if (contactExpanded()) {
+          <div class="contact-bar__details">
+            @if (project()?.partnerPhone) {
+              <a [href]="'tel:' + project()?.partnerPhone" class="contact-link"
+                 (click)="$event.stopPropagation()">
+                <lucide-icon [name]="ICONS.PHONE" [size]="14" />
+                <span>{{ project()?.partnerPhone }}</span>
+              </a>
+            }
+            @if (project()?.partnerEmail) {
+              <button class="contact-link"
+                      (click)="copyEmail(project()!.partnerEmail!); $event.stopPropagation()">
+                <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+                <span>{{ project()?.partnerEmail }}</span>
+                <lucide-icon [name]="ICONS.COPY" [size]="12" class="copy-hint" />
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
 
     <!-- Messages -->
     <div class="chatbot-panel__messages" #messagesContainer>
@@ -60,7 +94,7 @@
       @if (isLoading()) {
         <div class="typing-indicator">
           <div class="typing-indicator__avatar">
-            <span class="avatar avatar--ai">AI</span>
+            <span class="avatar avatar--tabi">&#10022;</span>
           </div>
           <div class="typing-dots">
             <span></span>

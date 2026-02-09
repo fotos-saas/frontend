@@ -13,7 +13,6 @@ import { TopBarComponent } from '../top-bar/top-bar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { MobileNavOverlayComponent } from '../mobile-nav-overlay/mobile-nav-overlay.component';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
-import { FloatingContactComponent } from '../../../../shared/components/floating-contact/floating-contact.component';
 import {
   PhotoSelectionReminderDialogComponent,
   PhotoSelectionReminderResult,
@@ -51,7 +50,6 @@ import { TourOverlayComponent } from '../../../../features/help/components/tour-
     SidebarComponent,
     MobileNavOverlayComponent,
     FooterComponent,
-    FloatingContactComponent,
     PhotoSelectionReminderDialogComponent,
     PasswordSetDialogComponent,
     HelpFabComponent,

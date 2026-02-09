@@ -2,7 +2,7 @@ import {
   Component, ChangeDetectionStrategy, input, output, signal, computed,
   inject, DestroyRef, ElementRef, viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { NgClass } from '@angular/common';
@@ -10,6 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { AuthService } from '@core/services/auth.service';
+import { ClipboardService } from '@core/services/clipboard.service';
 import { HelpChatService, ChatMessage } from '../../services/help-chat.service';
 import { ChatbotMessageComponent } from '../chatbot-message/chatbot-message.component';
 
@@ -32,6 +34,8 @@ export class ChatbotPanelComponent {
   private chatService = inject(HelpChatService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private authService = inject(AuthService);
+  private clipboardService = inject(ClipboardService);
 
   readonly ICONS = ICONS;
   readonly isOpen = input(false);
@@ -47,6 +51,10 @@ export class ChatbotPanelComponent {
   readonly errorMessage = signal<string | null>(null);
 
   readonly hasMessages = computed(() => this.messages().length > 0);
+
+  readonly project = toSignal(this.authService.project$);
+  readonly contactExpanded = signal(false);
+  readonly hasContactInfo = computed(() => !!this.project()?.partnerName);
 
   readonly suggestedQuestions = [
     'Hogyan tölthetek fel fotókat?',
@@ -102,6 +110,14 @@ export class ChatbotPanelComponent {
           this.errorMessage.set(errMsg);
         },
       });
+  }
+
+  toggleContactExpanded(): void {
+    this.contactExpanded.update(v => !v);
+  }
+
+  copyEmail(email: string): void {
+    this.clipboardService.copyEmail(email);
   }
 
   startNewConversation(): void {

@@ -12,6 +12,7 @@ export interface TeacherListItem {
   schoolName: string | null;
   isActive: boolean;
   photoThumbUrl: string | null;
+  photoUrl: string | null;
   aliasesCount: number;
   photosCount: number;
 }

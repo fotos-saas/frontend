@@ -60,6 +60,13 @@
   flex-shrink: 0;
   overflow: hidden;
   color: #64748b;
+  transition: box-shadow 0.15s;
+
+  &--clickable {
+    cursor: pointer;
+
+    &:hover { box-shadow: 0 0 0 2px var(--color-primary, #1e3a5f); }
+  }
 
   img {
     width: 100%;

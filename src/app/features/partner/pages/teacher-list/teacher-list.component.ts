@@ -10,6 +10,7 @@ import { TeacherListItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/teacher-edit-modal.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
@@ -23,6 +24,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     MatTooltipModule,
     TeacherEditModalComponent,
     ConfirmDialogComponent,
+    MediaLightboxComponent,
     SearchableSelectComponent,
   ],
   templateUrl: './teacher-list.component.html',
@@ -59,6 +61,9 @@ export class PartnerTeacherListComponent implements OnInit {
       sublabel: s.city ?? undefined,
     }))
   );
+
+  // Lightbox
+  lightboxMedia = signal<LightboxMediaItem[]>([]);
 
   // Modals
   showEditModal = signal(false);
@@ -122,6 +127,16 @@ export class PartnerTeacherListComponent implements OnInit {
 
   viewTeacher(teacher: TeacherListItem): void {
     this.router.navigate([teacher.id], { relativeTo: this.route });
+  }
+
+  openAvatarLightbox(teacher: TeacherListItem, event: MouseEvent): void {
+    if (!teacher.photoUrl) return;
+    event.stopPropagation();
+    this.lightboxMedia.set([{
+      id: teacher.id,
+      url: teacher.photoUrl,
+      fileName: teacher.fullDisplayName,
+    }]);
   }
 
   closeEditModal(): void {

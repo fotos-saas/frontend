@@ -75,7 +75,11 @@
           [style.animation-delay]="i * 0.03 + 's'"
         >
           <div class="teacher-info" (click)="viewTeacher(teacher)">
-            <div class="teacher-avatar">
+            <div
+              class="teacher-avatar"
+              [class.teacher-avatar--clickable]="!!teacher.photoUrl"
+              (click)="openAvatarLightbox(teacher, $event)"
+            >
               @if (teacher.photoThumbUrl) {
                 <img [src]="teacher.photoThumbUrl" [alt]="teacher.fullDisplayName" />
               } @else {
@@ -163,5 +167,15 @@
     cancelText="Mégse"
     confirmType="danger"
     (resultEvent)="onDeleteConfirmResult($event)"
+  />
+}
+
+<!-- Avatar Lightbox -->
+@if (lightboxMedia().length > 0) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="0"
+    (close)="lightboxMedia.set([])"
+    (navigate)="lightboxMedia.set([])"
   />
 }

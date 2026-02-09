@@ -30,6 +30,7 @@ export class TeacherEditModalComponent {
 
   canonicalName = '';
   titlePrefix = '';
+  position = '';
   schoolId: number | null = null;
   notes = '';
   aliases = signal<string[]>([]);
@@ -58,6 +59,7 @@ export class TeacherEditModalComponent {
       .subscribe({
         next: (res) => {
           if (res.data) {
+            this.position = res.data.position ?? '';
             this.notes = res.data.notes ?? '';
             this.aliases.set(res.data.aliases.map(a => a.aliasName));
           }
@@ -88,6 +90,7 @@ export class TeacherEditModalComponent {
     const payload = {
       canonical_name: this.canonicalName.trim(),
       title_prefix: this.titlePrefix.trim() || null,
+      position: this.position.trim() || null,
       school_id: this.schoolId,
       aliases: this.aliases().length > 0 ? this.aliases() : undefined,
       notes: this.notes.trim() || null,

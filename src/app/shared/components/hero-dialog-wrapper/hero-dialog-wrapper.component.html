@@ -13,15 +13,17 @@
     [style.max-width]="maxWidth()"
   >
     <!-- Close button (X) -->
-    <button
-      type="button"
-      class="hero-dialog__close"
-      (click)="closeEvent.emit()"
-      [disabled]="isSubmitting()"
-      aria-label="Bezárás"
-    >
-      <lucide-icon [name]="ICONS.X" [size]="20" />
-    </button>
+    @if (shouldShowCloseButton()) {
+      <button
+        type="button"
+        class="hero-dialog__close"
+        (click)="closeEvent.emit()"
+        [disabled]="isSubmitting()"
+        aria-label="Bezárás"
+      >
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    }
 
     <!-- Header -->
     <div

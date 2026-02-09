@@ -1,6 +1,8 @@
-import { Component, output, input, computed, ChangeDetectionStrategy, viewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
+import { Component, output, input, computed, ChangeDetectionStrategy } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import { ReminderWorkflowStep, STEP_REMINDER_MESSAGES, StepReminderMessage } from '../../../core/services/photo-selection-reminder.service';
+import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
 
 /**
  * Dialog eredmény típus
@@ -30,20 +32,19 @@ export type PhotoSelectionReminderResult =
 @Component({
   selector: 'app-photo-selection-reminder-dialog',
   standalone: true,
-  imports: [],
+  imports: [LucideAngularModule, HeroDialogWrapperComponent],
   templateUrl: './photo-selection-reminder-dialog.component.html',
   styleUrls: ['./photo-selection-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PhotoSelectionReminderDialogComponent extends BaseDialogComponent implements AfterViewInit {
+export class PhotoSelectionReminderDialogComponent {
+  readonly ICONS = ICONS;
+
   /** Aktuális workflow lépés */
   readonly currentStep = input<ReminderWorkflowStep>('claiming');
 
   /** Signal-based outputs */
   readonly resultEvent = output<PhotoSelectionReminderResult>();
-
-  /** ViewChild referencia a focus management-hez */
-  readonly primaryButton = viewChild<ElementRef<HTMLButtonElement>>('primaryButton');
 
   /** Dinamikus üzenet a step alapján */
   readonly message = computed<StepReminderMessage>(() => {
@@ -56,14 +57,6 @@ export class PhotoSelectionReminderDialogComponent extends BaseDialogComponent i
 
     return STEP_REMINDER_MESSAGES[step as Exclude<ReminderWorkflowStep, 'completed'>];
   });
-
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    // Focus a primary action gombra
-    setTimeout(() => {
-      this.primaryButton()?.nativeElement.focus();
-    }, 100);
-  }
 
   /**
    * Navigálás a képválasztás oldalra
@@ -80,30 +73,16 @@ export class PhotoSelectionReminderDialogComponent extends BaseDialogComponent i
   }
 
   /**
-   * Backdrop kattintás - NEM aktivál cooldown-t
-   * Override a BaseDialogComponent-ből
+   * X gomb vagy ESC - cooldown aktív
    */
-  override onBackdropClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    const isBackdrop = target.classList.contains('dialog-backdrop') ||
-                       target.classList.contains('dialog-overlay');
-
-    if (!this._isSubmitting() && isBackdrop) {
-      // Backdrop kattintás: külön action, nincs cooldown
-      this.resultEvent.emit({ action: 'backdrop' });
-    }
-  }
-
-  // ============================================================================
-  // BaseDialogComponent abstract metódusok implementálása
-  // ============================================================================
-
-  protected onSubmit(): void {
-    this.navigateToPhotoSelection();
-  }
-
-  protected onClose(): void {
-    // X gomb vagy ESC: cooldown aktív
+  dismiss(): void {
     this.resultEvent.emit({ action: 'close' });
+  }
+
+  /**
+   * Backdrop kattintás - NEM aktivál cooldown-t
+   */
+  onBackdropClicked(): void {
+    this.resultEvent.emit({ action: 'backdrop' });
   }
 }

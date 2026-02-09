@@ -10,7 +10,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ErrorBoundaryService } from '../../../core/services/error-boundary.service';
 import { SentryService } from '../../../core/services/sentry.service';
-import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
 
 /**
  * ErrorFeedbackDialogComponent
@@ -21,7 +21,7 @@ import { createBackdropHandler } from '@shared/utils/dialog.util';
 @Component({
   selector: 'app-error-feedback-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, HeroDialogWrapperComponent],
   templateUrl: './error-feedback-dialog.component.html',
   styleUrls: ['./error-feedback-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,37 +43,22 @@ export class ErrorFeedbackDialogComponent {
   readonly feedbackSent = signal(false);
   readonly copiedEventId = signal(false);
 
-  // Backdrop handler - szöveg kijelölés közben ne záródjon be
-  readonly backdropHandler = createBackdropHandler(() => this.dismiss());
-
-  /**
-   * Dialógus bezárása
-   */
   dismiss(): void {
     this.errorBoundary.dismiss();
     this.feedbackText.set('');
     this.feedbackSent.set(false);
   }
 
-  /**
-   * Oldal újratöltése
-   */
   retry(): void {
     this.sendFeedbackIfNeeded();
     this.errorBoundary.retry();
   }
 
-  /**
-   * Navigálás a főoldalra
-   */
   goHome(): void {
     this.sendFeedbackIfNeeded();
     this.errorBoundary.goHome();
   }
 
-  /**
-   * Event ID másolása vágólapra
-   */
   async copyEventId(): Promise<void> {
     const eventId = this.errorInfo()?.eventId;
     if (!eventId) return;
@@ -83,20 +68,15 @@ export class ErrorFeedbackDialogComponent {
       this.copiedEventId.set(true);
       setTimeout(() => this.copiedEventId.set(false), 2000);
     } catch {
-      // Fallback: manual copy
       this.logger.warn('Clipboard API not available');
     }
   }
 
-  /**
-   * Feedback küldése Sentry-nek (ha van szöveg)
-   */
   private sendFeedbackIfNeeded(): void {
     const feedback = this.feedbackText().trim();
     const eventId = this.errorInfo()?.eventId;
 
     if (feedback && eventId && !this.feedbackSent()) {
-      // Sentry user feedback
       this.sentryService.captureMessage(
         `User feedback for error ${eventId}: ${feedback}`,
         'info',

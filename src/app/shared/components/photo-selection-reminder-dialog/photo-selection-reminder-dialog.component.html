@@ -1,67 +1,31 @@
-<!-- Backdrop overlay (glassmorphism) -->
-<div
-  class="dialog-backdrop"
-  (mousedown)="onBackdropMouseDown($event)" (click)="onBackdropClick($event)"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="dialog-title"
+<app-hero-dialog-wrapper
+  theme="blue"
+  [icon]="ICONS.IMAGE"
+  [title]="message().title"
+  [description]="message().description"
+  size="sm"
+  (closeEvent)="dismiss()"
+  (backdropClickEvent)="onBackdropClicked()"
 >
-  <!-- Dialog container -->
-  <div class="dialog">
-    <!-- Close button (X) -->
+  <ng-container dialogBody>
+    <!-- Primary action button -->
     <button
       type="button"
-      class="dialog__close"
-      (click)="close()"
-      aria-label="Bezárás"
+      class="primary-btn"
+      (click)="navigateToPhotoSelection()"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
+      <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
+      <span>{{ message().button }}</span>
     </button>
 
-    <!-- Header -->
-    <div class="dialog__header">
-      <div class="dialog__icon">
-        <!-- Camera/Photo icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
-        </svg>
-      </div>
-      <h2 id="dialog-title" class="dialog__title">
-        {{ message().title }}
-      </h2>
-      <p class="dialog__description">
-        {{ message().description }}
-      </p>
-    </div>
-
-    <!-- Content -->
-    <div class="dialog__content">
-      <!-- Primary action button -->
-      <button
-        #primaryButton
-        type="button"
-        class="dialog__primary-btn"
-        (click)="navigateToPhotoSelection()"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
-        </svg>
-        <span>{{ message().button }}</span>
-      </button>
-
-      <!-- Snooze button -->
-      <button
-        type="button"
-        class="dialog__snooze-btn"
-        (click)="snooze()"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>Később emlékeztess</span>
-      </button>
-    </div>
-  </div>
-</div>
+    <!-- Snooze button -->
+    <button
+      type="button"
+      class="snooze-btn"
+      (click)="snooze()"
+    >
+      <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+      <span>Később emlékeztess</span>
+    </button>
+  </ng-container>
+</app-hero-dialog-wrapper>

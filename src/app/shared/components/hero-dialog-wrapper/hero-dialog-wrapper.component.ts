@@ -70,13 +70,23 @@ export class HeroDialogWrapperComponent implements AfterViewInit, OnDestroy {
   readonly size = input<HeroDialogSize>('lg');
   readonly isSubmitting = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
+  /** Bezárható-e a dialog (X gomb, ESC, backdrop) - default true */
+  readonly closable = input<boolean>(true);
+  /** X gomb megjelenítése - default: closable értéke */
+  readonly showCloseButton = input<boolean | undefined>(undefined);
 
   // === OUTPUTS ===
   readonly closeEvent = output<void>();
+  /** Backdrop kattintás külön event (speciális kezeléshez, pl. reminder dialógusok) */
+  readonly backdropClickEvent = output<void>();
 
   // === COMPUTED ===
   readonly themeColors = computed(() => HERO_DIALOG_THEMES[this.theme()]);
   readonly maxWidth = computed(() => HERO_DIALOG_SIZES[this.size()]);
+  readonly shouldShowCloseButton = computed(() => {
+    const explicit = this.showCloseButton();
+    return explicit !== undefined ? explicit : this.closable();
+  });
 
   readonly ICONS = ICONS;
 
@@ -140,7 +150,7 @@ export class HeroDialogWrapperComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('document:keydown.escape', ['$event'])
   protected handleEscapeKey(event: Event): void {
-    if (!this.isSubmitting()) {
+    if (this.closable() && !this.isSubmitting()) {
       event.preventDefault();
       this.closeEvent.emit();
     }
@@ -156,7 +166,11 @@ export class HeroDialogWrapperComponent implements AfterViewInit, OnDestroy {
     const isBackdrop = target.classList.contains('hero-dialog-backdrop');
 
     if (!this.isSubmitting() && isBackdrop && this.mouseDownOnBackdrop) {
-      this.closeEvent.emit();
+      if (this.closable()) {
+        this.closeEvent.emit();
+      }
+      // Mindig emittáljuk a backdrop click eventet (reminder dialógusoknak)
+      this.backdropClickEvent.emit();
     }
     this.mouseDownOnBackdrop = false;
   }

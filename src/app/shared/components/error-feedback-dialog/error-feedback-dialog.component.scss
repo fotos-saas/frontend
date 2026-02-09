@@ -1,41 +1,5 @@
-@use '../../../shared/styles/dialog-mixins' as dialog;
-
-.dialog-backdrop {
-  @include dialog.backdrop(4px, 0.3);
-}
-
-.dialog-panel {
-  @include dialog.container(28rem);
-  padding: 0;
-}
-
-.dialog-header {
-  @include dialog.header(#fef2f2, #fee2e2);
-  padding: 2rem 1.5rem 1.5rem;
-}
-
-.dialog-icon {
-  @include dialog.icon(#ef4444, 4rem, 1rem);
-
-  &--error {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4);
-  }
-}
-
-.dialog-title {
-  @include dialog.title(1.375rem);
-  margin-bottom: 0.5rem;
-}
-
-.dialog-description {
-  @include dialog.description(22rem);
-  line-height: 1.5;
-}
-
-.dialog-content {
-  @include dialog.content(1.5rem);
-}
+// ErrorFeedbackDialog - only content-specific styles
+// Shell (backdrop, header, icon, title, desc) handled by HeroDialogWrapperComponent
 
 .feedback-section {
   margin-bottom: 1rem;
@@ -50,10 +14,28 @@
 }
 
 .feedback-input {
-  @include dialog.input(#3b82f6);
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: #374151;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  outline: none;
   resize: vertical;
   min-height: 4.5rem;
-  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
 }
 
 .event-id-section {
@@ -107,13 +89,21 @@
 .dialog-actions {
   display: flex;
   gap: 0.75rem;
-  padding: 1rem 1.5rem 1.5rem;
-  border-top: 1px solid #f3f4f6;
 }
 
 .btn {
-  @include dialog.btn-base;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn--primary {
@@ -132,8 +122,20 @@
 }
 
 .btn--secondary {
-  @include dialog.btn-secondary;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+
+  &:hover:not(:disabled) {
+    background: #e5e7eb;
+  }
 }
 
 // A11y - reduced motion
-@include dialog.a11y-support;
+@media (prefers-reduced-motion: reduce) {
+  .feedback-input,
+  .event-id-value,
+  .btn {
+    transition: none;
+  }
+}

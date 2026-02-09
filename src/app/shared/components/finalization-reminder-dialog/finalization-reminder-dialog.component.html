@@ -1,83 +1,46 @@
-<!-- Backdrop overlay (glassmorphism) -->
-<div
-  class="dialog-backdrop"
-  (mousedown)="onBackdropMouseDown($event)" (click)="onBackdropClick($event)"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="dialog-title"
+<app-hero-dialog-wrapper
+  theme="green"
+  [icon]="ICONS.CHECK_CIRCLE"
+  title="Véglegesítsd a tablótervet!"
+  description="A tablóterv véglegesítése még nem történt meg. Kattints a gombra és töltsd ki a szükséges adatokat a rendelés leadásához."
+  size="md"
+  (closeEvent)="dismiss()"
+  (backdropClickEvent)="onBackdropClicked()"
 >
-  <!-- Dialog container -->
-  <div class="dialog">
-    <!-- Close button (X) -->
+  <ng-container dialogBody>
+    <!-- Primary action button -->
     <button
       type="button"
-      class="dialog__close"
-      (click)="close()"
-      aria-label="Bezárás"
+      class="primary-btn"
+      (click)="navigateToFinalization()"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
+      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
+      <span>Véglegesítés megnyitása</span>
     </button>
 
-    <!-- Header -->
-    <div class="dialog__header">
-      <div class="dialog__icon dialog__icon--warning">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <h2 id="dialog-title" class="dialog__title">
-        Véglegesítsd a tablótervet!
-      </h2>
-      <p class="dialog__description">
-        A tablóterv véglegesítése még nem történt meg. Kattints a gombra és töltsd ki a szükséges adatokat a rendelés leadásához.
-      </p>
+    <!-- Divider -->
+    <div class="divider">
+      <span>vagy emlékeztess később</span>
     </div>
 
-    <!-- Content -->
-    <div class="dialog__content">
-      <!-- Primary action button -->
+    <!-- Snooze buttons -->
+    <div class="snooze-buttons">
       <button
-        #primaryButton
         type="button"
-        class="dialog__primary-btn"
-        (click)="navigateToFinalization()"
+        class="snooze-btn"
+        (click)="snooze(7)"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>Véglegesítés megnyitása</span>
+        <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+        <span>1 hét múlva</span>
       </button>
-
-      <!-- Divider -->
-      <div class="dialog__divider">
-        <span>vagy emlékeztess később</span>
-      </div>
-
-      <!-- Snooze buttons -->
-      <div class="dialog__snooze-buttons">
-        <button
-          type="button"
-          class="dialog__snooze-btn"
-          (click)="snooze(7)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>1 hét múlva</span>
-        </button>
-        <button
-          type="button"
-          class="dialog__snooze-btn"
-          (click)="snooze(14)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>2 hét múlva</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        class="snooze-btn"
+        (click)="snooze(14)"
+      >
+        <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+        <span>2 hét múlva</span>
+      </button>
     </div>
-  </div>
-</div>
+  </ng-container>
+</app-hero-dialog-wrapper>

@@ -1,6 +1,8 @@
-import { Component, output, ChangeDetectionStrategy, viewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
-import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
+import { Component, output, ChangeDetectionStrategy, inject } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import { LoggerService } from '../../../core/services/logger.service';
+import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
 
 /**
  * Dialog eredmény típus
@@ -20,17 +22,18 @@ export type FinalizationReminderResult =
  * Finalization Reminder Dialog
  *
  * Emlékeztető dialógus a tervkészítés véglegesítéséhez.
- * BaseDialogComponent-et bővíti a közös funkcionalitásért.
  */
 @Component({
   selector: 'app-finalization-reminder-dialog',
   standalone: true,
-  imports: [],
+  imports: [LucideAngularModule, HeroDialogWrapperComponent],
   templateUrl: './finalization-reminder-dialog.component.html',
   styleUrls: ['./finalization-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FinalizationReminderDialogComponent extends BaseDialogComponent implements AfterViewInit {
+export class FinalizationReminderDialogComponent {
+  readonly ICONS = ICONS;
+
   /** Signal-based outputs */
   readonly resultEvent = output<FinalizationReminderResult>();
 
@@ -38,17 +41,6 @@ export class FinalizationReminderDialogComponent extends BaseDialogComponent imp
 
   /** Engedélyezett snooze napok */
   private readonly allowedSnoozeDays = [7, 14];
-
-  /** ViewChild referencia a focus management-hez */
-  readonly primaryButton = viewChild<ElementRef<HTMLButtonElement>>('primaryButton');
-
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    // Focus a primary action gombra
-    setTimeout(() => {
-      this.primaryButton()?.nativeElement.focus();
-    }, 100);
-  }
 
   /**
    * Navigálás a véglegesítés oldalra
@@ -69,30 +61,16 @@ export class FinalizationReminderDialogComponent extends BaseDialogComponent imp
   }
 
   /**
-   * Backdrop kattintás - NEM aktivál cooldown-t
-   * Override a BaseDialogComponent-ből
+   * X gomb vagy ESC - cooldown aktív
    */
-  override onBackdropClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    const isBackdrop = target.classList.contains('dialog-backdrop') ||
-                       target.classList.contains('dialog-overlay');
-
-    if (!this._isSubmitting() && isBackdrop) {
-      // Backdrop kattintás: külön action, nincs cooldown
-      this.resultEvent.emit({ action: 'backdrop' });
-    }
-  }
-
-  // ============================================================================
-  // BaseDialogComponent abstract metódusok implementálása
-  // ============================================================================
-
-  protected onSubmit(): void {
-    this.navigateToFinalization();
-  }
-
-  protected onClose(): void {
-    // X gomb vagy ESC: cooldown aktív
+  dismiss(): void {
     this.resultEvent.emit({ action: 'close' });
+  }
+
+  /**
+   * Backdrop kattintás - NEM aktivál cooldown-t
+   */
+  onBackdropClicked(): void {
+    this.resultEvent.emit({ action: 'backdrop' });
   }
 }

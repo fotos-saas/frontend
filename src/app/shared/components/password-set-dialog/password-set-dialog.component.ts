@@ -2,7 +2,6 @@ import {
   Component,
   output,
   ChangeDetectionStrategy,
-  AfterViewInit,
   viewChild,
   ElementRef,
   inject,
@@ -12,8 +11,10 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import { PasswordStrengthComponent } from '../password-strength/password-strength.component';
+import { HeroDialogWrapperComponent } from '../hero-dialog-wrapper/hero-dialog-wrapper.component';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -33,18 +34,18 @@ export type PasswordSetResult = { action: 'success' };
  * - Backdrop kattintás nem zár
  *
  * A user-nek BE KELL állítania a jelszót a folytatáshoz.
- *
- * BaseDialogComponent-et bővíti a közös funkcionalitásért.
  */
 @Component({
   selector: 'app-password-set-dialog',
   standalone: true,
-  imports: [FormsModule, PasswordStrengthComponent],
+  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent, HeroDialogWrapperComponent],
   templateUrl: './password-set-dialog.component.html',
   styleUrls: ['./password-set-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PasswordSetDialogComponent extends BaseDialogComponent implements AfterViewInit {
+export class PasswordSetDialogComponent {
+  readonly ICONS = ICONS;
+
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
@@ -61,11 +62,14 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
   readonly showPassword = signal(false);
   readonly showPasswordConfirmation = signal(false);
 
+  /** Állapotok */
+  readonly isSubmitting = signal(false);
+  readonly errorMessage = signal<string | null>(null);
+
   /** Validációs hibák */
   errors: { password?: string; passwordConfirmation?: string } = {};
 
   /** ViewChild referenciák */
-  readonly firstInput = viewChild<ElementRef<HTMLInputElement>>('firstInput');
   readonly passwordStrength = viewChild(PasswordStrengthComponent);
 
   /** Computed: Jelszó erősség OK (min 8 karakter + összes követelmény teljesül) */
@@ -73,20 +77,12 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
     return this.passwordStrength()?.isValid() ?? false;
   });
 
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    // Focus az első input mezőre
-    setTimeout(() => {
-      this.firstInput()?.nativeElement.focus();
-    }, 100);
-  }
-
   /**
    * Input change - töröljük a hibát
    */
   onInputChange(): void {
     this.errors = {};
-    this.clearError();
+    this.errorMessage.set(null);
   }
 
   /**
@@ -147,42 +143,17 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
            this.password === this.passwordConfirmation;
   }
 
-  // ============================================================================
-  // BaseDialogComponent override-ok - NEM ZÁRHATÓ DIALOG
-  // ============================================================================
-
   /**
-   * ESC billentyű kezelés - LETILTVA
+   * Submit
    */
-  protected override handleEscapeKey(event: Event): void {
-    // NEM csinálunk semmit - a dialog nem zárható ESC-cel
-    event.preventDefault();
-  }
+  submit(): void {
+    if (this.isSubmitting()) return;
 
-  /**
-   * Backdrop kattintás - LETILTVA
-   */
-  override onBackdropClick(event: MouseEvent): void {
-    // NEM csinálunk semmit - a dialog nem zárható backdrop kattintással
-  }
-
-  /**
-   * Close metódus - LETILTVA
-   */
-  override close(): void {
-    // NEM csinálunk semmit - a dialog nem zárható
-  }
-
-  // ============================================================================
-  // BaseDialogComponent abstract metódusok implementálása
-  // ============================================================================
-
-  protected onSubmit(): void {
-    // FONTOS: A BaseDialogComponent.submit() már beállította _isSubmitting = true-ra
-    // Tehát itt NEM ellenőrizzük újra, mert az mindig true lenne!
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
 
     if (!this.validate()) {
-      this._isSubmitting.set(false);
+      this.isSubmitting.set(false);
       return;
     }
 
@@ -190,17 +161,14 @@ export class PasswordSetDialogComponent extends BaseDialogComponent implements A
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: () => {
-        this.submitSuccess();
+        this.isSubmitting.set(false);
         this.passwordSetEvent.emit({ action: 'success' });
       },
       error: (error) => {
-        this.submitError(error.message || 'Hiba történt a jelszó beállítása közben.');
+        this.isSubmitting.set(false);
+        this.errorMessage.set(error.message || 'Hiba történt a jelszó beállítása közben.');
       }
     });
-  }
-
-  protected onClose(): void {
-    // NEM csinálunk semmit - a dialog nem zárható
   }
 
   /**

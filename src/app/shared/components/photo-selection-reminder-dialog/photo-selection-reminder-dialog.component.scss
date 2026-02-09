@@ -1,259 +1,64 @@
-// Blue accent (képválasztás)
+// PhotoSelectionReminderDialog - content-specific styles only
+// Shell handled by HeroDialogWrapperComponent
+
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
-$blue-100: #dbeafe;
-$blue-50: #eff6ff;
 
-// Backdrop
-.dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-modal-backdrop);
+.primary-btn {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease-out;
-}
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, $blue-500 0%, $blue-600 100%);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px -3px rgba(59, 130, 246, 0.4);
+  margin-bottom: 0.75rem;
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-// Dialog container
-.dialog {
-  position: relative;
-  width: 100%;
-  max-width: 26rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  animation: slideUp 0.3s ease-out;
-
-  &__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: var(--z-dropdown);
-    padding: 0.5rem;
-    color: #6b7280;
-    background: transparent;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      color: #4b5563;
-      background: #f3f4f6;
-    }
-
-    svg {
-      width: 1.25rem;
-      height: 1.25rem;
-    }
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -3px rgba(59, 130, 246, 0.5);
   }
 
-  &__header {
-    padding: 2rem 1.5rem 1.5rem;
-    text-align: center;
-    background: linear-gradient(135deg, $blue-50 0%, $blue-100 100%);
-  }
-
-  &__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4rem;
-    height: 4rem;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, $blue-500 0%, $blue-600 100%);
-    border-radius: 1rem;
-    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
-    animation: iconBounce 0.6s ease-out;
-
-    svg {
-      width: 2rem;
-      height: 2rem;
-      color: white;
-    }
-  }
-
-  &__title {
-    margin: 0 0 0.5rem;
-    font-size: 1.375rem;
-    font-weight: 700;
-    color: #111827;
-  }
-
-  &__description {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #6b7280;
-    max-width: 20rem;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.5;
-  }
-
-  &__content {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    // Safari: gap nem támogatott
-    > * {
-      margin-bottom: 0.75rem;
-    }
-    > *:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  &__primary-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    // Safari: gap nem támogatott
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: white;
-    background: linear-gradient(135deg, $blue-500 0%, $blue-600 100%);
-    border: none;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 14px -3px rgba(59, 130, 246, 0.4);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px -3px rgba(59, 130, 246, 0.5);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-
-    svg {
-      width: 1.25rem;
-      height: 1.25rem;
-      margin-right: 0.75rem;
-    }
-  }
-
-  &__snooze-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.875rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #6b7280;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      background: #f3f4f6;
-      border-color: #d1d5db;
-      color: #4b5563;
-    }
-
-    svg {
-      width: 1rem;
-      height: 1rem;
-      margin-right: 0.5rem;
-    }
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
+  &:active {
     transform: translateY(0);
   }
 }
 
-@keyframes iconBounce {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
+.snooze-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
 
-// Mobile responsive
-@media (max-width: 480px) {
-  .dialog {
-    max-width: 100%;
-    margin: 0 0.5rem;
-    border-radius: 0.75rem;
-
-    &__header {
-      padding: 1.5rem 1rem 1rem;
-    }
-
-    &__icon {
-      width: 3rem;
-      height: 3rem;
-
-      svg {
-        width: 1.5rem;
-        height: 1.5rem;
-      }
-    }
-
-    &__title {
-      font-size: 1.125rem;
-    }
-
-    &__description {
-      font-size: 0.8125rem;
-    }
-
-    &__content {
-      padding: 1rem;
-    }
+  &:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #4b5563;
   }
 }
 
 // Reduced motion
 @media (prefers-reduced-motion: reduce) {
-  .dialog-backdrop {
-    animation: none;
-  }
-
-  .dialog {
-    animation: none;
-
-    &__icon {
-      animation: none;
-    }
-
-    &__primary-btn,
-    &__snooze-btn {
-      transition: none;
-    }
+  .primary-btn,
+  .snooze-btn {
+    transition: none;
   }
 }

@@ -1,78 +1,59 @@
 @if (showDialog()) {
-  <div
-    class="dialog-backdrop"
-    (mousedown)="backdropHandler.onMouseDown($event)"
-    (click)="backdropHandler.onClick($event)"
+  <app-hero-dialog-wrapper
+    theme="red"
+    [icon]="ICONS.ALERT_TRIANGLE"
+    title="Hoppá! Valami hiba történt."
+    description="A művelet végrehajtása közben hiba lépett fel. Kérjük, próbáld újra később."
+    size="md"
+    (closeEvent)="dismiss()"
   >
-    <div class="dialog-panel">
-      <!-- Header -->
-      <div class="dialog-header">
-        <div class="dialog-icon dialog-icon--error">
-          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="32" />
-        </div>
-        <h2 class="dialog-title">Hoppá! Valami hiba történt.</h2>
-        <p class="dialog-description">
-          A művelet végrehajtása közben hiba lépett fel.
-          Kérjük, próbáld újra később.
-        </p>
+    <ng-container dialogBody>
+      <!-- Feedback textarea -->
+      <div class="feedback-section">
+        <label for="feedback" class="feedback-label">
+          Mit csináltál amikor a hiba történt? (opcionális)
+        </label>
+        <textarea
+          id="feedback"
+          class="feedback-input"
+          placeholder="Pl. Megpróbáltam menteni a változtatásokat..."
+          [value]="feedbackText()"
+          (input)="feedbackText.set($any($event.target).value)"
+          rows="3"
+        ></textarea>
       </div>
 
-      <!-- Content -->
-      <div class="dialog-content">
-        <!-- Feedback textarea -->
-        <div class="feedback-section">
-          <label for="feedback" class="feedback-label">
-            Mit csináltál amikor a hiba történt? (opcionális)
-          </label>
-          <textarea
-            id="feedback"
-            class="feedback-input"
-            placeholder="Pl. Megpróbáltam menteni a változtatásokat..."
-            [value]="feedbackText()"
-            (input)="feedbackText.set($any($event.target).value)"
-            rows="3"
-          ></textarea>
+      <!-- Event ID -->
+      @if (shortEventId()) {
+        <div class="event-id-section">
+          <span class="event-id-label">Hibakód:</span>
+          <button
+            type="button"
+            class="event-id-value"
+            (click)="copyEventId()"
+            [title]="copiedEventId() ? 'Másolva!' : 'Kattints a másoláshoz'"
+          >
+            <code>{{ shortEventId() }}</code>
+            <lucide-icon
+              [name]="copiedEventId() ? ICONS.CHECK : ICONS.COPY"
+              [size]="14"
+            />
+          </button>
         </div>
+      }
+    </ng-container>
 
-        <!-- Event ID -->
-        @if (shortEventId()) {
-          <div class="event-id-section">
-            <span class="event-id-label">Hibakód:</span>
-            <button
-              type="button"
-              class="event-id-value"
-              (click)="copyEventId()"
-              [title]="copiedEventId() ? 'Másolva!' : 'Kattints a másoláshoz'"
-            >
-              <code>{{ shortEventId() }}</code>
-              <lucide-icon
-                [name]="copiedEventId() ? ICONS.CHECK : ICONS.COPY"
-                [size]="14"
-              />
-            </button>
-          </div>
-        }
-      </div>
-
-      <!-- Actions -->
+    <ng-container dialogFooter>
       <div class="dialog-actions">
-        <button
-          type="button"
-          class="btn btn--secondary"
-          (click)="goHome()"
-        >
+        <button type="button" class="btn btn--secondary" (click)="goHome()">
           <lucide-icon [name]="ICONS.HOME" [size]="18" />
           Vissza a főoldalra
         </button>
-        <button
-          type="button"
-          class="btn btn--primary"
-          (click)="retry()"
-        >
+        <button type="button" class="btn btn--primary" (click)="retry()">
           <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
           Próbáld újra
         </button>
       </div>
-    </div>
-  </div>
+    </ng-container>
+  </app-hero-dialog-wrapper>
 }

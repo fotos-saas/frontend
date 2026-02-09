@@ -371,47 +371,124 @@
   &--danger:hover { background: #fef2f2; color: #dc2626; }
 }
 
-// === VÁLTOZÁSNAPLÓ ===
-.changelog-section {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+// === VÁLTOZÁSNAPLÓ TÁBLA (külön page-card) ===
+.changelog-card {
+  margin-top: 16px;
+}
+
+.changelog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
 
   h2 {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: #1e293b;
-    margin: 0 0 8px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 }
 
-.changelog-list {
+.changelog-search {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #94a3b8;
+  min-width: 200px;
+
+  input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.8125rem;
+    color: #1e293b;
+    outline: none;
+    min-width: 0;
+
+    &::placeholder { color: #94a3b8; }
+  }
 }
 
-.log-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid #f8fafc;
-  font-size: 0.75rem;
+.table-header {
+  display: grid;
+  grid-template-columns: 160px 1fr 120px 150px;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.th {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+}
+
+.list-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 120px 150px;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+  font-size: 0.8125rem;
+  animation: fadeSlideIn 0.2s ease forwards;
+  opacity: 0;
 
   &:last-child { border-bottom: none; }
+  &:hover { background: #fafbfc; }
 }
 
-.log-type {
-  font-weight: 600;
-  color: #334155;
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.log-detail {
-  display: inline-flex;
+.td {
+  color: #475569;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.td-detail {
+  display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
+}
+
+.td-user { color: #64748b; }
+.td-date { color: #94a3b8; font-size: 0.75rem; }
+
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: #f1f5f9;
   color: #475569;
+
+  [data-type="created"] & { background: #ecfdf5; color: #059669; }
+  [data-type="name_changed"] & { background: #eff6ff; color: #2563eb; }
+  [data-type="photo_uploaded"] & { background: #f5f3ff; color: #7c3aed; }
+  [data-type="school_changed"] & { background: #fff7ed; color: #ea580c; }
+  [data-type="title_changed"] & { background: #fdf4ff; color: #c026d3; }
+  [data-type="active_photo_changed"] & { background: #ecfeff; color: #0891b2; }
+  [data-type="photo_deleted"] & { background: #fef2f2; color: #dc2626; }
 }
 
 .old-val {
@@ -419,10 +496,13 @@
   color: #94a3b8;
 }
 
-.log-meta {
+.empty-search {
+  text-align: center;
+  padding: 20px;
   color: #94a3b8;
-  font-size: 0.6875rem;
-  margin-left: auto;
+  font-size: 0.8125rem;
+
+  p { margin: 0; }
 }
 
 // === RESPONSIVE ===
@@ -448,6 +528,13 @@
   .profile-name { font-size: 1rem; }
 
   .aliases-block { border-top: none; padding-top: 0; margin-top: 0; }
+
+  .table-header,
+  .list-row {
+    grid-template-columns: 120px 1fr 100px;
+  }
+
+  .th-user, .td-user { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

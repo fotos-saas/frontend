@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -46,6 +46,20 @@ export class PartnerTeacherDetailComponent implements OnInit {
   newAlias = '';
   savingAlias = signal(false);
 
+  // Changelog keresés
+  changelogSearch = signal('');
+  filteredChangelog = computed(() => {
+    const search = this.changelogSearch().toLowerCase().trim();
+    const entries = this.changelog();
+    if (!search) return entries;
+    return entries.filter(e =>
+      this.getChangeLabel(e.changeType).toLowerCase().includes(search) ||
+      (e.oldValue?.toLowerCase().includes(search)) ||
+      (e.newValue?.toLowerCase().includes(search)) ||
+      (e.userName?.toLowerCase().includes(search))
+    );
+  });
+
   ngOnInit(): void {
     this.teacherId = Number(this.route.snapshot.paramMap.get('id'));
     this.loadTeacher();
@@ -69,7 +83,7 @@ export class PartnerTeacherDetailComponent implements OnInit {
   }
 
   loadChangelog(): void {
-    this.teacherService.getChangelog(this.teacherId, { per_page: 20 })
+    this.teacherService.getChangelog(this.teacherId, { per_page: 50 })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({ next: (res) => this.changelog.set(res.data) });
   }

@@ -16,7 +16,7 @@
       <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
       <input
         type="text"
-        placeholder="Keresés név vagy alias alapján..."
+        placeholder="Keresés név, pozíció, iskola, fájlnév..."
         [ngModel]="filterState.search()"
         (ngModelChange)="filterState.setSearch($event)"
         class="search-input"

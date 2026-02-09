@@ -15,9 +15,8 @@
         Vissza
       </a>
       @if (!editing()) {
-        <button class="edit-profile-btn" (click)="startEditing()">
-          <lucide-icon [name]="ICONS.EDIT" [size]="13" />
-          Szerkesztés
+        <button class="header-icon-btn" matTooltip="Szerkesztés" (click)="startEditing()">
+          <lucide-icon [name]="ICONS.EDIT" [size]="18" />
         </button>
       }
     </div>

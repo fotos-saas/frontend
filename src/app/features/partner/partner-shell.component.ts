@@ -119,11 +119,11 @@ export class PartnerShellComponent implements OnInit {
         icon: 'folder-open',
         children: [
           { id: 'projects-list', route: `${base}/projects`, label: 'Projektek' },
+          { id: 'schools', route: `${base}/schools`, label: 'Iskolák' },
+          { id: 'teachers', route: `${base}/teachers`, label: 'Tanárok' },
           { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
         ]
       },
-      { id: 'schools', route: `${base}/schools`, label: 'Iskolák', icon: 'school' },
-      { id: 'teachers', route: `${base}/teachers`, label: 'Tanárok', icon: 'graduation-cap' },
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
       { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag' },

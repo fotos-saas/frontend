@@ -59,26 +59,24 @@
       </span>
     </div>
 
-    <!-- Submit button -->
-    <div class="actions">
-      <button
-        type="button"
-        class="btn"
-        [class.btn--green]="mode() === 'register'"
-        [class.btn--blue]="mode() === 'edit'"
-        (click)="submit()"
-        [disabled]="!isFormValid || isBusy()"
-      >
-        @if (isBusy()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
-        } @else {
-          <lucide-icon [name]="submitIcon()" [size]="20" />
-        }
-        {{ submitButtonText() }}
-      </button>
-    </div>
+  </ng-container>
 
-    <!-- Privacy hint -->
+  <ng-container dialogFooter>
+    <button
+      type="button"
+      class="btn"
+      [class.btn--green]="mode() === 'register'"
+      [class.btn--blue]="mode() === 'edit'"
+      (click)="submit()"
+      [disabled]="!isFormValid || isBusy()"
+    >
+      @if (isBusy()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+      } @else {
+        <lucide-icon [name]="submitIcon()" [size]="20" />
+      }
+      {{ submitButtonText() }}
+    </button>
     <p class="privacy-hint">
       A neved csak az osztálytársaid és a kapcsolattartó láthatja.
     </p>

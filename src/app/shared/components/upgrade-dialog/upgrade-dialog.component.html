@@ -9,7 +9,7 @@
   (closeEvent)="onClose()"
 >
   <!-- BODY -->
-  <div dialogBody>
+  <ng-container dialogBody>
     @if (isTeamMember()) {
       <!-- CSAPATTAG: Egyszerű üzenet, nincs csomagváltás opció -->
       <div class="team-member-notice">
@@ -139,10 +139,10 @@
         </div>
       }
     }
-  </div>
+  </ng-container>
 
   <!-- FOOTER -->
-  <div dialogFooter>
+  <ng-container dialogFooter>
     @if (isTeamMember()) {
       <button type="button" class="btn-primary" (click)="onClose()">
         Rendben
@@ -173,5 +173,5 @@
         Csomagváltás
       </button>
     }
-  </div>
+  </ng-container>
 </app-dialog-wrapper>

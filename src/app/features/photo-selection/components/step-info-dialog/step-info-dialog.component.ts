@@ -50,7 +50,7 @@ const STEP_ICONS: Record<string, string> = {
       }
 
       <!-- Footer gomb -->
-      <div dialogFooter>
+      <ng-container dialogFooter>
         <button
           type="button"
           class="step-info-dialog__button"
@@ -58,7 +58,7 @@ const STEP_ICONS: Record<string, string> = {
         >
           Megértettem
         </button>
-      </div>
+      </ng-container>
     </app-dialog-wrapper>
   `,
   styleUrl: './step-info-dialog.component.scss',

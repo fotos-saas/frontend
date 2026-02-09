@@ -4,6 +4,10 @@
   (click)="backdropHandler.onClick($event)"
 >
   <div class="dialog-panel dialog-panel--lg">
+    <button class="dialog-close" (click)="close.emit()">
+      <lucide-icon [name]="ICONS.X" [size]="18" />
+    </button>
+
     <!-- Header -->
     <div class="dialog-header">
       <h3>
@@ -13,9 +17,6 @@
           @case ('done') { Import befejezve }
         }
       </h3>
-      <button class="dialog-close" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="18" />
-      </button>
     </div>
 
     <!-- === INPUT PHASE === -->

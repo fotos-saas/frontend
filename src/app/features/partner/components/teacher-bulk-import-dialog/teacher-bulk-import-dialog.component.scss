@@ -1,67 +1,48 @@
+@use '../../../../shared/styles/dialog-mixins' as dialog;
+
 .dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  @include dialog.backdrop;
 }
 
 .dialog-panel--lg {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  width: 100%;
-  max-width: 600px;
+  @include dialog.container(600px);
+  display: flex;
+  flex-direction: column;
   max-height: 90vh;
-  overflow-y: auto;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog-close {
+  @include dialog.close-button;
 }
 
 .dialog-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 0;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 
   h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1e293b;
+    @include dialog.title(1.125rem);
     margin: 0;
   }
 }
 
-.dialog-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #94a3b8;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: #f1f5f9;
-    color: #475569;
-  }
-}
-
 .dialog-body {
-  padding: 20px 24px;
+  @include dialog.content(1.5rem);
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  padding: 0 24px 20px;
-  margin: -4px;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
 
   &--center {
     justify-content: center;
@@ -71,7 +52,7 @@
 // === FORM ELEMENTS ===
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .form-label {
@@ -79,29 +60,15 @@
   font-size: 0.8125rem;
   font-weight: 600;
   color: #475569;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .names-textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.875rem;
+  @include dialog.input;
   font-family: inherit;
   line-height: 1.6;
   resize: vertical;
-  transition: all 0.2s ease;
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary, #1e3a5f);
-    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-  }
-
-  &::placeholder {
-    color: #94a3b8;
-  }
+  min-height: 120px;
 }
 
 // === FILE UPLOAD ===
@@ -111,16 +78,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 1.25rem;
   border: 2px dashed #e2e8f0;
-  border-radius: 10px;
+  border-radius: 0.625rem;
   cursor: pointer;
   color: #94a3b8;
   font-size: 0.875rem;
   transition: all 0.2s ease;
 
   lucide-icon {
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
   }
 
   &:hover {
@@ -133,14 +100,14 @@
 .file-info {
   display: flex;
   align-items: center;
-  padding: 10px 14px;
+  padding: 0.625rem 0.875rem;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 0.625rem;
   background: #f8fafc;
   color: #475569;
 
   lucide-icon {
-    margin-right: 8px;
+    margin-right: 0.5rem;
     color: #64748b;
   }
 }
@@ -173,19 +140,9 @@
 // === ERROR ===
 
 .error-banner {
-  display: flex;
-  align-items: center;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: #fef2f2;
-  color: #dc2626;
-  font-size: 0.8125rem;
-  margin-top: 12px;
-
-  lucide-icon {
-    margin-right: 8px;
-    flex-shrink: 0;
-  }
+  @include dialog.alert('error');
+  margin-top: 0.75rem;
+  margin-bottom: 0;
 }
 
 // === REVIEW PHASE ===
@@ -193,16 +150,15 @@
 .review-summary {
   display: flex;
   flex-wrap: wrap;
-  margin: -4px;
-  margin-bottom: 16px;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .summary-item {
   display: inline-flex;
   align-items: center;
-  margin: 4px;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 600;
 
@@ -225,15 +181,13 @@
 .review-list {
   display: flex;
   flex-direction: column;
-  max-height: 400px;
-  overflow-y: auto;
 }
 
 .review-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  padding: 10px 12px;
+  padding: 0.625rem 0.75rem;
   border-bottom: 1px solid #f1f5f9;
   transition: background 0.15s ease;
 
@@ -280,7 +234,7 @@
 .match-confidence {
   font-size: 0.75rem;
   font-weight: 600;
-  margin-left: 6px;
+  margin-left: 0.375rem;
   padding: 1px 6px;
   border-radius: 4px;
 
@@ -303,7 +257,7 @@
 .review-row__match {
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 0.75rem;
 }
 
 .match-avatar {
@@ -311,7 +265,7 @@
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 6px;
+  margin-right: 0.375rem;
 }
 
 .match-name {
@@ -322,12 +276,11 @@
 .review-row__actions {
   display: flex;
   flex-shrink: 0;
-  margin: -2px;
+  gap: 0.25rem;
 }
 
 .action-chip {
-  margin: 2px;
-  padding: 4px 10px;
+  padding: 0.25rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 500;
   border: 1px solid #e2e8f0;
@@ -370,47 +323,38 @@
 
 .done-body {
   text-align: center;
-  padding: 32px 24px 16px;
+  padding: 2rem 1.5rem 1rem;
 }
 
 .done-icon {
   color: #059669;
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 }
 
 .done-body h4 {
   font-size: 1.125rem;
   font-weight: 600;
   color: #1e293b;
-  margin: 0 0 20px;
+  margin: 0 0 1.25rem;
 }
 
 .done-stats {
   display: flex;
   justify-content: center;
-  margin: -6px;
+  gap: 0.75rem;
 }
 
 .done-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 6px;
-  padding: 12px 20px;
-  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
   min-width: 80px;
 
-  &--create {
-    background: #ecfdf5;
-  }
-
-  &--update {
-    background: #eff6ff;
-  }
-
-  &--skip {
-    background: #f1f5f9;
-  }
+  &--create { background: #ecfdf5; }
+  &--update { background: #eff6ff; }
+  &--skip { background: #f1f5f9; }
 }
 
 .done-stat__number {
@@ -426,80 +370,27 @@
 .done-stat__label {
   font-size: 0.75rem;
   color: #64748b;
-  margin-top: 4px;
+  margin-top: 0.25rem;
 }
 
 // === BUTTONS ===
 
 .btn-cancel {
-  margin: 4px;
-  padding: 10px 18px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #64748b;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: #f8fafc;
-  }
+  @include dialog.btn-secondary;
 }
 
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  margin: 4px;
-  padding: 10px 18px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #ffffff;
-  background: var(--color-primary, #1e3a5f);
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  @include dialog.btn-primary;
 
   lucide-icon {
-    margin-right: 6px;
-  }
-
-  &:hover:not(:disabled) {
-    background: var(--color-primary-dark, #152a45);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    margin-right: 0.375rem;
   }
 }
 
 .spin {
-  animation: spin 1s linear infinite;
+  @include dialog.spinner;
 }
 
-// === ANIMATIONS ===
+// === A11Y ===
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+@include dialog.a11y-support;

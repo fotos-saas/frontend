@@ -67,8 +67,8 @@
     <button
       type="button"
       class="btn"
-      [class.btn--green]="mode() === 'register'"
-      [class.btn--blue]="mode() === 'edit'"
+      [class.btn--confirm]="mode() === 'register'"
+      [class.btn--primary]="mode() === 'edit'"
       (click)="submit()"
       [disabled]="!isFormValid || isBusy()"
     >

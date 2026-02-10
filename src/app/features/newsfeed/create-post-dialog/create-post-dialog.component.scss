@@ -1,8 +1,7 @@
 // CreatePostDialog - content-specific styles only
-// Shell handled by DialogWrapperComponent
+// Footer gombok → DialogWrapperComponent ::ng-deep
 
 $green-500: #22c55e;
-$green-600: #16a34a;
 $blue-500: #3b82f6;
 
 .field {
@@ -165,63 +164,6 @@ app-rich-text-editor {
   }
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.625rem;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &--secondary {
-    color: #4b5563;
-    background: #f3f4f6;
-
-    &:hover:not(:disabled) {
-      background: #e5e7eb;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  &--primary {
-    color: white;
-    background: $green-500;
-
-    &:hover:not(:disabled) {
-      background: $green-600;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 // Mobile responsive
 @media (max-width: 480px) {
   .field--half {
@@ -239,20 +181,12 @@ app-rich-text-editor {
     padding: 0.75rem;
     font-size: 1rem; // Prevent iOS zoom
   }
-
-  .btn {
-    width: 100%;
-    padding: 0.875rem 1.25rem;
-  }
 }
 
 // Reduced motion
 @media (prefers-reduced-motion: reduce) {
   .field__input,
-  .type-btn,
-  .btn,
-  .spin {
+  .type-btn {
     transition: none;
-    animation: none;
   }
 }

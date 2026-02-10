@@ -1,5 +1,5 @@
 // Create Discussion Dialog - form field stílusok
-// A dialog shell-t a DialogWrapperComponent kezeli
+// Footer gombok → DialogWrapperComponent ::ng-deep
 
 $purple-500: #8b5cf6;
 
@@ -107,65 +107,6 @@ $purple-500: #8b5cf6;
     font-size: 0.8125rem;
     color: #6b7280;
   }
-
-  &__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 0.625rem;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &--secondary {
-      color: #4b5563;
-      background: #f3f4f6;
-
-      &:hover:not(:disabled) {
-        background: #e5e7eb;
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-
-    &--primary {
-      color: white;
-      background: $purple-500;
-
-      &:hover:not(:disabled) {
-        background: #7c3aed;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-      }
-
-      &:active:not(:disabled) {
-        transform: translateY(0);
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-
-    &-spinner {
-      width: 1.125rem;
-      height: 1.125rem;
-      animation: spin 1s linear infinite;
-    }
-  }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 // Mobile responsive
@@ -176,11 +117,6 @@ $purple-500: #8b5cf6;
     &__select {
       padding: 0.75rem;
       font-size: 1rem; // Prevent iOS zoom
-    }
-
-    &__btn {
-      width: 100%;
-      padding: 0.875rem 1.25rem;
     }
   }
 }

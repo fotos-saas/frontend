@@ -135,7 +135,7 @@
   <ng-container dialogFooter>
     <button
       type="button"
-      class="dialog__btn dialog__btn--secondary"
+      class="btn btn--secondary"
       (click)="close()"
       [disabled]="_isSubmitting()"
     >
@@ -144,15 +144,12 @@
 
     <button
       type="button"
-      class="dialog__btn dialog__btn--primary"
+      class="btn btn--purple"
       (click)="submit()"
       [disabled]="!isFormValid || _isSubmitting()"
     >
       @if (_isSubmitting()) {
-        <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </svg>
+        <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
       }
       <lucide-icon [name]="ICONS.SEND" [size]="18" />
       {{ _isSubmitting() ? (mode() === 'edit' ? 'Mentés...' : 'Létrehozás...') : (mode() === 'edit' ? 'Mentés' : 'Téma létrehozása') }}

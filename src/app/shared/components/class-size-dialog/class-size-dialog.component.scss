@@ -1,8 +1,7 @@
 // ClassSizeDialog - content-specific styles only
-// Shell handled by DialogWrapperComponent
+// Footer gombok → DialogWrapperComponent ::ng-deep
 
 $blue-500: #3b82f6;
-$blue-600: #2563eb;
 
 .field {
   margin-bottom: 1.25rem;
@@ -96,82 +95,17 @@ $blue-600: #2563eb;
   }
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  flex: 1;
-  padding: 0.875rem 1.25rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.625rem;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &--secondary {
-    color: #4b5563;
-    background: #f3f4f6;
-
-    &:hover:not(:disabled) {
-      background: #e5e7eb;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  &--primary {
-    color: white;
-    background: $blue-500;
-
-    &:hover:not(:disabled) {
-      background: $blue-600;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 // Mobile responsive
 @media (max-width: 480px) {
   .field__input {
     padding: 0.75rem 3rem 0.75rem 0.75rem;
     font-size: 1rem;
   }
-
-  .btn {
-    padding: 0.75rem 1rem;
-  }
 }
 
 // Reduced motion
 @media (prefers-reduced-motion: reduce) {
-  .field__input,
-  .btn,
-  .spin {
+  .field__input {
     transition: none;
-    animation: none;
   }
 }

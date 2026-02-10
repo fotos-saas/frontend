@@ -1,8 +1,7 @@
 // ContactEditDialog - content-specific styles only
-// Shell handled by DialogWrapperComponent
+// Footer gombok → DialogWrapperComponent ::ng-deep
 
 $blue-500: #3b82f6;
-$blue-600: #2563eb;
 
 .field {
   margin-bottom: 1rem;
@@ -68,70 +67,9 @@ $blue-600: #2563eb;
   }
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &--primary {
-    color: white;
-    background: $blue-500;
-
-    &:hover:not(:disabled) {
-      background: $blue-600;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  &--secondary {
-    color: #4b5563;
-    background: #f3f4f6;
-
-    &:hover:not(:disabled) {
-      background: #e5e7eb;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-// Mobile responsive
-@media (max-width: 480px) {
-  .btn {
-    width: 100%;
-  }
-}
-
 // Reduced motion
 @media (prefers-reduced-motion: reduce) {
-  .field__input,
-  .btn,
-  .spin {
+  .field__input {
     transition: none;
-    animation: none;
   }
 }

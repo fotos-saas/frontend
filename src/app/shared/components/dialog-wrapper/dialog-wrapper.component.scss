@@ -367,6 +367,21 @@ $gray-900: #111827;
       }
     }
 
+    // --- Purple ---
+    &--purple {
+      color: white;
+      background: #8b5cf6;
+
+      &:hover:not(:disabled) {
+        background: #7c3aed;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+    }
+
     // --- Full width ---
     &--full {
       width: 100%;
@@ -379,8 +394,8 @@ $gray-900: #111827;
     }
   }
 
-  // --- Spin animáció ---
-  .dw__footer .spin {
+  // --- Spin animáció (footer + body) ---
+  .dw .spin {
     animation: dwSpin 1s linear infinite;
   }
 }

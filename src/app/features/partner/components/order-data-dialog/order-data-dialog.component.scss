@@ -1,5 +1,16 @@
+@use '../../../../shared/styles/dialog-buttons' as btn;
+
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
+
+// --- FOOTER BUTTONS ---
+.btn {
+  @include btn.base;
+  &--primary { @include btn.primary(btn.$blue-500, btn.$blue-600); }
+  &--outline { @include btn.outline; }
+}
+
+.spin { @include btn.spin; }
 
 // Loading
 .order-dialog__loading {

@@ -98,7 +98,6 @@ $gray-900: #111827;
       gap: 0.75rem;
       padding: 1.25rem 1.5rem;
       border-bottom: 1px solid $gray-200;
-      flex-wrap: wrap;
     }
 
     &--minimal {
@@ -132,6 +131,15 @@ $gray-900: #111827;
       background: $gray-50;
       flex-shrink: 0;
     }
+  }
+
+  // ============================================================================
+  // HEADER TEXT WRAPPER (flat stílushoz)
+  // ============================================================================
+
+  &__header-text {
+    flex: 1;
+    min-width: 0;
   }
 
   // ============================================================================
@@ -169,10 +177,9 @@ $gray-900: #111827;
       max-width: 24rem;
     }
 
-    // Flat stílusnál teljes szélesség
+    // Flat stílusnál title alatt
     .dw__header--flat & {
-      width: 100%;
-      margin-top: 0.25rem;
+      margin-top: 0.125rem;
       font-size: 0.875rem;
     }
   }

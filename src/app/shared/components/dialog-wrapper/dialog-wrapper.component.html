@@ -52,10 +52,12 @@
               <lucide-icon [name]="icon()" [size]="24" />
             </div>
           }
-          <h2 id="dw-title" class="dw__title dw__title--flat">{{ title() }}</h2>
-          @if (description()) {
-            <p class="dw__desc">{{ description() }}</p>
-          }
+          <div class="dw__header-text">
+            <h2 id="dw-title" class="dw__title dw__title--flat">{{ title() }}</h2>
+            @if (description()) {
+              <p class="dw__desc">{{ description() }}</p>
+            }
+          </div>
         </div>
       }
       @case ('minimal') {

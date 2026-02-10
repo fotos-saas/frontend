@@ -17,6 +17,7 @@ import {
   DialogTheme,
   DialogSize,
   DialogFooterAlign,
+  DialogVariant,
   DIALOG_THEMES,
   DIALOG_SIZES,
 } from './dialog-wrapper.types';
@@ -41,6 +42,7 @@ export class DialogWrapperComponent implements AfterViewInit, OnDestroy {
   readonly closable = input<boolean>(true);
   readonly showCloseButton = input<boolean | undefined>(undefined);
   readonly isSubmitting = input<boolean>(false);
+  readonly variant = input<DialogVariant | undefined>(undefined);
   readonly errorMessage = input<string | null>(null);
 
   // === OUTPUTS ===

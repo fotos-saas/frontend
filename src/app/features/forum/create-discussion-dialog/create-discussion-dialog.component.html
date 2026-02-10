@@ -1,4 +1,5 @@
 <app-dialog-wrapper
+  [variant]="mode() === 'edit' ? 'edit' : 'create'"
   headerStyle="hero"
   theme="purple"
   [icon]="ICONS.MESSAGE_CIRCLE"

@@ -14,6 +14,9 @@ export type DialogSize = 'sm' | 'md' | 'lg';
 /** Footer igazítás */
 export type DialogFooterAlign = 'end' | 'center' | 'stretch';
 
+/** Dialógus cél/variáns (szemantikus jelölő, nem vizuális) */
+export type DialogVariant = 'create' | 'edit' | 'confirm' | 'info' | 'wizard';
+
 /** Méret -> max-width mapping */
 export const DIALOG_SIZES: Record<DialogSize, string> = {
   sm: '24rem',   // 384px

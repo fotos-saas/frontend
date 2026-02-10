@@ -1,4 +1,5 @@
 <app-dialog-wrapper
+  [variant]="currentValue() ? 'edit' : 'create'"
   headerStyle="hero"
   theme="blue"
   [icon]="ICONS.USERS"

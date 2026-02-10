@@ -31,6 +31,7 @@ const STEP_ICONS: Record<string, string> = {
   imports: [DialogWrapperComponent],
   template: `
     <app-dialog-wrapper
+      variant="info"
       headerStyle="hero"
       theme="blue"
       [icon]="stepIcon()"

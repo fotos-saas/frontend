@@ -10,6 +10,11 @@
   <!-- Dialog container -->
   <div
     class="dw"
+    [class.dw--create]="variant() === 'create'"
+    [class.dw--edit]="variant() === 'edit'"
+    [class.dw--confirm]="variant() === 'confirm'"
+    [class.dw--info]="variant() === 'info'"
+    [class.dw--wizard]="variant() === 'wizard'"
     [style.max-width]="maxWidth()"
   >
     <!-- Close button (X) -->

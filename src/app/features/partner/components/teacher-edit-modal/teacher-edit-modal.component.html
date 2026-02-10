@@ -1,4 +1,5 @@
 <app-dialog-wrapper
+  [variant]="mode() === 'create' ? 'create' : 'edit'"
   headerStyle="flat"
   theme="blue"
   [icon]="ICONS.USER"

@@ -1,0 +1,42 @@
+// ContactEditorModal (Shared) - form stílusok
+// Footer gombok → DialogWrapperComponent ::ng-deep
+@use '../../styles/dialog-forms' as form;
+
+.form {
+  @include form.form-layout;
+}
+
+.form-group {
+  @include form.form-group;
+}
+
+.form-label {
+  @include form.label;
+}
+
+.form-required {
+  color: #ef4444;
+}
+
+.form-input {
+  @include form.input(#3b82f6);
+
+  &--error {
+    border-color: #ef4444;
+    background: #fef2f2;
+
+    &:focus {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  }
+}
+
+.form-error {
+  font-size: 0.8125rem;
+  color: #ef4444;
+}
+
+.form-checkbox {
+  @include form.checkbox-label(#3b82f6);
+}

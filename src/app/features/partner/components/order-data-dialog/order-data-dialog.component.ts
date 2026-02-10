@@ -17,13 +17,13 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { SafeHtmlPipe } from '../../../../shared/pipes/safe-html.pipe';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { isSecureUrl, openSecureUrl } from '../../../../core/utils/url-validator.util';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { OrderData } from '../../../order-data/services/order-data.service';
 
 @Component({
   selector: 'app-order-data-dialog',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, SafeHtmlPipe],
+  imports: [DatePipe, LucideAngularModule, SafeHtmlPipe, DialogWrapperComponent],
   templateUrl: './order-data-dialog.component.html',
   styleUrls: ['./order-data-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,8 +38,6 @@ export class OrderDataDialogComponent implements OnInit {
   loading = true;
   error: string | null = null;
   generatingPdf = false;
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   private destroyRef = inject(DestroyRef);
   private partnerService = inject(PartnerService);

@@ -1,222 +1,215 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  variant="info"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.FILE_TEXT"
+  title="Megrendelési adatok"
+  [description]="orderData?.orderDate ? 'Leadva: ' + (orderData!.orderDate | date:'yyyy. MM. dd.') : ''"
+  size="lg"
+  (closeEvent)="close.emit()"
 >
-  <div class="dialog-panel dialog-panel--lg order-dialog" (click)="$event.stopPropagation()">
-    <!-- Header -->
-    <div class="order-dialog__header">
-      <div>
-        <h2 class="order-dialog__title">Megrendelési adatok</h2>
-        @if (orderData?.orderDate) {
-          <p class="order-dialog__date">
-            Leadva: {{ orderData!.orderDate | date:'yyyy. MM. dd.' }}
-          </p>
-        }
+  <ng-container dialogBody>
+    <!-- Loading -->
+    @if (loading) {
+      <div class="order-dialog__loading">
+        <lucide-icon [name]="ICONS.LOADER" [size]="28" class="spin" />
+        <p>Adatok betöltése...</p>
       </div>
-      <div class="order-dialog__header-actions">
-        <button
-          class="order-dialog__pdf-btn"
-          (click)="openPdf()"
-          [disabled]="generatingPdf || loading"
-        >
-          @if (!generatingPdf) {
-            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
-            <span>PDF</span>
-          } @else {
-            <span>Generálás...</span>
-          }
-        </button>
-        <button class="order-dialog__close-btn" (click)="close.emit()">
-          <lucide-icon [name]="ICONS.X" [size]="20" />
+    }
+
+    <!-- Error -->
+    @if (error && !loading) {
+      <div class="order-dialog__error">
+        <p>{{ error }}</p>
+        <button class="btn btn--primary btn--sm" (click)="loadOrderData()">
+          Újrapróbálkozás
         </button>
       </div>
-    </div>
+    }
 
-    <!-- Body (scrollable) -->
-    <div class="order-dialog__body">
-      <!-- Loading -->
-      @if (loading) {
-        <div class="order-dialog__loading">
-          <div class="order-dialog__spinner"></div>
-          <p>Adatok betöltése...</p>
-        </div>
-      }
+    <!-- Empty -->
+    @if (!loading && !error && !orderData) {
+      <div class="order-dialog__empty">
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="48" />
+        <p>Még nincs leadott megrendelés</p>
+      </div>
+    }
 
-      <!-- Error -->
-      @if (error && !loading) {
-        <div class="order-dialog__error">
-          <p>{{ error }}</p>
-          <button class="order-dialog__retry-btn" (click)="loadOrderData()">
-            Újrapróbálkozás
-          </button>
-        </div>
-      }
-
-      <!-- Empty -->
-      @if (!loading && !error && !orderData) {
-        <div class="order-dialog__empty">
-          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="48" class="text-gray-300" />
-          <p>Még nincs leadott megrendelés</p>
-        </div>
-      }
-
-      <!-- Content -->
-      @if (!loading && !error && orderData) {
-        <div class="order-dialog__content">
-          <!-- Kapcsolattartó + Iskola -->
-          <div class="order-dialog__row">
-            @if (orderData.contactName || orderData.contactPhone || orderData.contactEmail) {
-              <section class="order-dialog__section">
-                <h3 class="order-dialog__section-title">Kapcsolattartó</h3>
-                <div class="order-dialog__list">
-                  @if (orderData.contactName) {
-                    <div class="order-dialog__item">
-                      <span class="order-dialog__label">Név</span>
-                      <span class="order-dialog__value">{{ orderData.contactName }}</span>
-                    </div>
-                  }
-                  @if (orderData.contactPhone) {
-                    <div class="order-dialog__item">
-                      <span class="order-dialog__label">Telefon</span>
-                      <span class="order-dialog__value">{{ orderData.contactPhone }}</span>
-                    </div>
-                  }
-                  @if (orderData.contactEmail) {
-                    <div class="order-dialog__item">
-                      <span class="order-dialog__label">Email</span>
-                      <span class="order-dialog__value">{{ orderData.contactEmail }}</span>
-                    </div>
-                  }
-                </div>
-              </section>
-            }
-
+    <!-- Content -->
+    @if (!loading && !error && orderData) {
+      <div class="order-dialog__content">
+        <!-- Kapcsolattartó + Iskola -->
+        <div class="order-dialog__row">
+          @if (orderData.contactName || orderData.contactPhone || orderData.contactEmail) {
             <section class="order-dialog__section">
-              <h3 class="order-dialog__section-title">Iskola és osztály</h3>
+              <h3 class="order-dialog__section-title">Kapcsolattartó</h3>
               <div class="order-dialog__list">
-                @if (orderData.schoolName) {
+                @if (orderData.contactName) {
                   <div class="order-dialog__item">
-                    <span class="order-dialog__label">Iskola</span>
-                    <span class="order-dialog__value">{{ orderData.schoolName }}</span>
+                    <span class="order-dialog__label">Név</span>
+                    <span class="order-dialog__value">{{ orderData.contactName }}</span>
                   </div>
                 }
-                @if (orderData.className || orderData.classYear) {
+                @if (orderData.contactPhone) {
                   <div class="order-dialog__item">
-                    <span class="order-dialog__label">Osztály</span>
-                    <span class="order-dialog__value">
-                      {{ orderData.className }}
-                      @if (orderData.classYear) {
-                        <span>({{ orderData.classYear }})</span>
-                      }
-                    </span>
+                    <span class="order-dialog__label">Telefon</span>
+                    <span class="order-dialog__value">{{ orderData.contactPhone }}</span>
                   </div>
                 }
-                @if (orderData.studentCount || orderData.teacherCount) {
+                @if (orderData.contactEmail) {
                   <div class="order-dialog__item">
-                    <span class="order-dialog__label">Létszám</span>
-                    <span class="order-dialog__value">
-                      @if (orderData.studentCount) {
-                        <span>{{ orderData.studentCount }} diák</span>
-                      }
-                      @if (orderData.studentCount && orderData.teacherCount) {
-                        <span>, </span>
-                      }
-                      @if (orderData.teacherCount) {
-                        <span>{{ orderData.teacherCount }} tanár</span>
-                      }
-                    </span>
-                  </div>
-                }
-              </div>
-            </section>
-          </div>
-
-          <!-- Tabló beállítások -->
-          @if (orderData.color || orderData.fontFamily || orderData.sortType) {
-            <section class="order-dialog__section">
-              <h3 class="order-dialog__section-title">Tabló beállítások</h3>
-              <div class="order-dialog__grid">
-                @if (orderData.color) {
-                  <div class="order-dialog__item">
-                    <span class="order-dialog__label">Szín</span>
-                    <span class="order-dialog__value order-dialog__value--color">
-                      <span class="order-dialog__color-swatch" [style.background-color]="orderData.color"></span>
-                      {{ orderData.color }}
-                    </span>
-                  </div>
-                }
-                @if (orderData.fontFamily) {
-                  <div class="order-dialog__item">
-                    <span class="order-dialog__label">Betűtípus</span>
-                    <span class="order-dialog__value">{{ orderData.fontFamily }}</span>
-                  </div>
-                }
-                @if (orderData.sortType) {
-                  <div class="order-dialog__item">
-                    <span class="order-dialog__label">Rendezés</span>
-                    <span class="order-dialog__value">{{ orderData.sortType }}</span>
+                    <span class="order-dialog__label">Email</span>
+                    <span class="order-dialog__value">{{ orderData.contactEmail }}</span>
                   </div>
                 }
               </div>
             </section>
           }
 
-          <!-- Leírás -->
-          @if (orderData.description) {
-            <section class="order-dialog__section">
-              <h3 class="order-dialog__section-title">Leírás / Megjegyzések</h3>
-              <div class="order-dialog__description" [innerHTML]="orderData.description | safeHtml"></div>
-            </section>
-          }
-
-          <!-- Idézet -->
-          @if (orderData.quote) {
-            <section class="order-dialog__section">
-              <h3 class="order-dialog__section-title">Idézet</h3>
-              <blockquote class="order-dialog__quote">{{ orderData.quote }}</blockquote>
-            </section>
-          }
-
-          <!-- Névsorok -->
-          @if (orderData.studentDescription || orderData.teacherDescription) {
-            <div class="order-dialog__row">
-              @if (orderData.studentDescription) {
-                <section class="order-dialog__section">
-                  <h3 class="order-dialog__section-title">Diákok névsora</h3>
-                  <pre class="order-dialog__namelist">{{ orderData.studentDescription }}</pre>
-                </section>
+          <section class="order-dialog__section">
+            <h3 class="order-dialog__section-title">Iskola és osztály</h3>
+            <div class="order-dialog__list">
+              @if (orderData.schoolName) {
+                <div class="order-dialog__item">
+                  <span class="order-dialog__label">Iskola</span>
+                  <span class="order-dialog__value">{{ orderData.schoolName }}</span>
+                </div>
               }
-              @if (orderData.teacherDescription) {
-                <section class="order-dialog__section">
-                  <h3 class="order-dialog__section-title">Tanárok névsora</h3>
-                  <pre class="order-dialog__namelist">{{ orderData.teacherDescription }}</pre>
-                </section>
+              @if (orderData.className || orderData.classYear) {
+                <div class="order-dialog__item">
+                  <span class="order-dialog__label">Osztály</span>
+                  <span class="order-dialog__value">
+                    {{ orderData.className }}
+                    @if (orderData.classYear) {
+                      <span>({{ orderData.classYear }})</span>
+                    }
+                  </span>
+                </div>
+              }
+              @if (orderData.studentCount || orderData.teacherCount) {
+                <div class="order-dialog__item">
+                  <span class="order-dialog__label">Létszám</span>
+                  <span class="order-dialog__value">
+                    @if (orderData.studentCount) {
+                      <span>{{ orderData.studentCount }} diák</span>
+                    }
+                    @if (orderData.studentCount && orderData.teacherCount) {
+                      <span>, </span>
+                    }
+                    @if (orderData.teacherCount) {
+                      <span>{{ orderData.teacherCount }} tanár</span>
+                    }
+                  </span>
+                </div>
               }
             </div>
-          }
-
-          <!-- Jellemzők -->
-          @if (hasTags) {
-            <section class="order-dialog__section">
-              <h3 class="order-dialog__section-title">Jellemzők</h3>
-              <div class="order-dialog__tags">
-                @for (tag of orderData!.tags; track tag) {
-                  <span class="order-dialog__tag">{{ tag }}</span>
-                }
-              </div>
-            </section>
-          }
-
-          <!-- AI összefoglaló -->
-          @if (orderData.aiSummary) {
-            <section class="order-dialog__section">
-              <h3 class="order-dialog__section-title">AI összefoglaló</h3>
-              <p class="order-dialog__summary">{{ orderData.aiSummary }}</p>
-            </section>
-          }
+          </section>
         </div>
-      }
-    </div>
-  </div>
-</div>
+
+        <!-- Tabló beállítások -->
+        @if (orderData.color || orderData.fontFamily || orderData.sortType) {
+          <section class="order-dialog__section">
+            <h3 class="order-dialog__section-title">Tabló beállítások</h3>
+            <div class="order-dialog__grid">
+              @if (orderData.color) {
+                <div class="order-dialog__item">
+                  <span class="order-dialog__label">Szín</span>
+                  <span class="order-dialog__value order-dialog__value--color">
+                    <span class="order-dialog__color-swatch" [style.background-color]="orderData.color"></span>
+                    {{ orderData.color }}
+                  </span>
+                </div>
+              }
+              @if (orderData.fontFamily) {
+                <div class="order-dialog__item">
+                  <span class="order-dialog__label">Betűtípus</span>
+                  <span class="order-dialog__value">{{ orderData.fontFamily }}</span>
+                </div>
+              }
+              @if (orderData.sortType) {
+                <div class="order-dialog__item">
+                  <span class="order-dialog__label">Rendezés</span>
+                  <span class="order-dialog__value">{{ orderData.sortType }}</span>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Leírás -->
+        @if (orderData.description) {
+          <section class="order-dialog__section">
+            <h3 class="order-dialog__section-title">Leírás / Megjegyzések</h3>
+            <div class="order-dialog__description" [innerHTML]="orderData.description | safeHtml"></div>
+          </section>
+        }
+
+        <!-- Idézet -->
+        @if (orderData.quote) {
+          <section class="order-dialog__section">
+            <h3 class="order-dialog__section-title">Idézet</h3>
+            <blockquote class="order-dialog__quote">{{ orderData.quote }}</blockquote>
+          </section>
+        }
+
+        <!-- Névsorok -->
+        @if (orderData.studentDescription || orderData.teacherDescription) {
+          <div class="order-dialog__row">
+            @if (orderData.studentDescription) {
+              <section class="order-dialog__section">
+                <h3 class="order-dialog__section-title">Diákok névsora</h3>
+                <pre class="order-dialog__namelist">{{ orderData.studentDescription }}</pre>
+              </section>
+            }
+            @if (orderData.teacherDescription) {
+              <section class="order-dialog__section">
+                <h3 class="order-dialog__section-title">Tanárok névsora</h3>
+                <pre class="order-dialog__namelist">{{ orderData.teacherDescription }}</pre>
+              </section>
+            }
+          </div>
+        }
+
+        <!-- Jellemzők -->
+        @if (hasTags) {
+          <section class="order-dialog__section">
+            <h3 class="order-dialog__section-title">Jellemzők</h3>
+            <div class="order-dialog__tags">
+              @for (tag of orderData!.tags; track tag) {
+                <span class="order-dialog__tag">{{ tag }}</span>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- AI összefoglaló -->
+        @if (orderData.aiSummary) {
+          <section class="order-dialog__section">
+            <h3 class="order-dialog__section-title">AI összefoglaló</h3>
+            <p class="order-dialog__summary">{{ orderData.aiSummary }}</p>
+          </section>
+        }
+      </div>
+    }
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button type="button" class="btn btn--outline" (click)="close.emit()">Bezárás</button>
+    @if (orderData) {
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="openPdf()"
+        [disabled]="generatingPdf || loading"
+      >
+        @if (generatingPdf) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Generálás...
+        } @else {
+          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+          PDF letöltés
+        }
+      </button>
+    }
+  </ng-container>
+</app-dialog-wrapper>

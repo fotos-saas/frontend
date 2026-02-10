@@ -1,10 +1,8 @@
 // Teacher Edit Modal - tartalmi stílusok
-// Backdrop, header, close, footer, ESC → DialogWrapperComponent
-@use '../../../../shared/styles/dialog-buttons' as btn;
+// Footer gombok → DialogWrapperComponent ::ng-deep
 @use '../../../../shared/styles/dialog-forms' as form;
 
 .loading-spinner { @include form.loading-spinner; }
-.spin { @include btn.spin; }
 
 // --- FORM ---
 .modal-form { @include form.form-layout; }
@@ -95,11 +93,11 @@
   &:hover { background: #e2e8f0; color: #1e293b; }
 }
 
-// --- FOOTER BUTTONS ---
-.btn {
-  @include btn.base;
-  &--primary { @include btn.primary(btn.$blue-500, btn.$blue-600); }
-  &--outline { @include btn.outline; }
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: dwSpin 0.8s linear infinite;
 }
 
-.spinner { @include btn.spinner; }
+@keyframes dwSpin { to { transform: rotate(360deg); } }

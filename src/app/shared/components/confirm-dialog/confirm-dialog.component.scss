@@ -1,6 +1,5 @@
 // Confirm Dialog - tartalmi stílusok
-// Backdrop, header, close, footer chrome → DialogWrapperComponent
-@use '../../styles/dialog-buttons' as btn;
+// Footer gombok → DialogWrapperComponent ::ng-deep
 
 // Confirm dialog MINDIG a többi modal felett (z-index: 1050)
 :host {
@@ -8,14 +7,3 @@
     z-index: 1050;
   }
 }
-
-// --- FOOTER BUTTONS ---
-.btn {
-  @include btn.base;
-  &--primary { @include btn.primary(btn.$blue-500, btn.$blue-600); }
-  &--danger { @include btn.danger(btn.$red-500, btn.$red-600); }
-  &--warning { @include btn.primary(#f59e0b, #d97706); }
-  &--outline { @include btn.outline; }
-}
-
-.spin { @include btn.spin; }

@@ -1,6 +1,5 @@
 // Upgrade Dialog - tartalmi stílusok
-// Backdrop, header, close, footer chrome → DialogWrapperComponent
-@use '../../../shared/styles/dialog-buttons' as btn;
+// Footer gombok → DialogWrapperComponent ::ng-deep
 
 // --- ANIMATIONS ---
 @keyframes benefitEntry {
@@ -95,13 +94,6 @@
   }
 }
 
-// --- FOOTER BUTTONS ---
-.btn {
-  @include btn.base;
-  &--primary { @include btn.primary(btn.$purple-500, btn.$purple-600); }
-  &--outline { @include btn.outline; }
-  &--confirm { @include btn.confirm(btn.$green-500, btn.$green-600); }
-}
 
 // --- SKELETON LOADERS ---
 .skeleton-card {
@@ -121,8 +113,6 @@
   .notice-text { font-size: 1rem; line-height: 1.5; color: #92400e; margin: 0; max-width: 300px; }
 }
 
-// --- SPINNER ---
-.spin { @include btn.spin; }
 
 // --- REDUCED MOTION ---
 @media (prefers-reduced-motion: reduce) {

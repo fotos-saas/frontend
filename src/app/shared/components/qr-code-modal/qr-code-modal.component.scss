@@ -1,9 +1,2 @@
-// QR Code Modal - footer button stílusok
-// Backdrop, header, close, footer chrome → DialogWrapperComponent
-@use '../../styles/dialog-buttons' as btn;
-
-.btn {
-  @include btn.base;
-  &--primary { @include btn.primary(btn.$blue-500, btn.$blue-600); }
-  &--outline { @include btn.outline; }
-}
+// QR Code Modal - tartalmi stílusok
+// Footer gombok → DialogWrapperComponent ::ng-deep

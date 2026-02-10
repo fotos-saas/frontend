@@ -265,12 +265,125 @@ $gray-900: #111827;
 // ============================================================================
 // NOTE: ng-content projected tartalom a host komponens scope-jában él,
 // ezért ::ng-deep szükséges a wrapper-ből való stílus alkalmazáshoz.
-// A child komponensek saját SCSS-ükben felülírhatják ezeket.
 
-// Footer stretch variáns (a .dw__footer--stretch-ben feljebb kezelve)
+:host ::ng-deep {
+  // --- Footer gombok (minden dialógusban egységes) ---
+  .dw__footer .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.625rem;
+    cursor: pointer;
+    transition: all 0.2s;
 
-// A .btn, .field és .spin stílusokat a CHILD KOMPONENSEK saját SCSS-ükben kezelik.
-// Később fokozatos migrációval globális mixin-ekbe kerülhetnek.
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    // --- Primary (kék) ---
+    &--primary {
+      color: white;
+      background: $blue-500;
+
+      &:hover:not(:disabled) {
+        background: $blue-600;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+    }
+
+    // --- Outline ---
+    &--outline {
+      background: white;
+      color: $gray-700;
+      border: 1px solid $gray-200;
+
+      &:hover:not(:disabled) {
+        background: $gray-100;
+      }
+    }
+
+    // --- Secondary (szürke háttér) ---
+    &--secondary {
+      background: $gray-100;
+      color: $gray-700;
+
+      &:hover:not(:disabled) {
+        background: $gray-200;
+      }
+    }
+
+    // --- Danger (piros) ---
+    &--danger {
+      color: white;
+      background: $red-500;
+
+      &:hover:not(:disabled) {
+        background: $red-600;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+    }
+
+    // --- Warning (amber) ---
+    &--warning {
+      color: white;
+      background: #f59e0b;
+
+      &:hover:not(:disabled) {
+        background: #d97706;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+    }
+
+    // --- Confirm (zöld) ---
+    &--confirm {
+      color: white;
+      background: #22c55e;
+
+      &:hover:not(:disabled) {
+        background: #16a34a;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+    }
+
+    // --- Full width ---
+    &--full {
+      width: 100%;
+    }
+
+    // --- Small ---
+    &--sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8125rem;
+    }
+  }
+
+  // --- Spin animáció ---
+  .dw__footer .spin {
+    animation: dwSpin 1s linear infinite;
+  }
+}
 
 // ============================================================================
 // VARIANT: CONFIRM - Fehér hero háttér

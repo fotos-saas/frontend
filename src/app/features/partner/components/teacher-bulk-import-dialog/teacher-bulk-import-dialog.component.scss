@@ -1,6 +1,5 @@
 // Teacher Bulk Import Dialog - tartalmi stílusok
-// Backdrop, header, close, footer, ESC → DialogWrapperComponent
-@use '../../../../shared/styles/dialog-buttons' as btn;
+// Footer gombok → DialogWrapperComponent ::ng-deep
 @use '../../../../shared/styles/dialog-forms' as form;
 
 // --- FORM ---
@@ -107,11 +106,3 @@
 .done-stat--skip .done-stat__number { color: #64748b; }
 .done-stat__label { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; }
 
-// --- FOOTER BUTTONS ---
-.btn {
-  @include btn.base;
-  &--primary { @include btn.primary(btn.$blue-500, btn.$blue-600); }
-  &--outline { @include btn.outline; }
-}
-
-.spin { @include btn.spin; }

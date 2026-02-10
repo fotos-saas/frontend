@@ -1,6 +1,5 @@
 // Project Edit Modal - tartalmi stílusok
-// Backdrop, header, close, footer chrome → DialogWrapperComponent
-@use '../../../../shared/styles/dialog-buttons' as btn;
+// Footer gombok → DialogWrapperComponent ::ng-deep
 @use '../../../../shared/styles/dialog-forms' as form;
 
 // --- FORM ---
@@ -64,15 +63,6 @@
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-
-// --- FOOTER BUTTONS ---
-.btn {
-  @include btn.base;
-  &--primary { @include btn.primary(btn.$blue-500, btn.$blue-600); }
-  &--outline { @include btn.outline; }
-}
-
-.spin { @include btn.spin; }
 
 // --- RESPONSIVE ---
 @media (max-width: 480px) {

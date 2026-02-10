@@ -1,5 +1,3 @@
-@use '../../../../shared/styles/dialog-buttons' as btn;
-
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
 
@@ -202,9 +200,6 @@ $blue-600: #2563eb;
   border-left: 3px solid $blue-500;
   font-size: 0.9rem;
 }
-
-// Footer gombok
-@include btn.dialog-buttons;
 
 // Spin animáció
 :host ::ng-deep .spin {

@@ -1,264 +1,244 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.QR_CODE"
+  title="QR kód kezelés"
+  description="Regisztrációs linkek kezelése"
+  size="lg"
+  (closeEvent)="close.emit()"
+  [errorMessage]="error()"
 >
-  <div class="dialog-panel dialog-panel--lg relative" (click)="$event.stopPropagation()">
-    <button
-      type="button"
-      class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-500 hover:text-gray-700 transition-colors z-10"
-      (click)="close.emit()"
-    ><lucide-icon [name]="ICONS.X" [size]="18" /></button>
-
-    <div class="p-6">
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-5">
-        <div class="flex items-center" style="margin: -4px;">
-          <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary" style="margin: 4px;">
-            <lucide-icon [name]="ICONS.QR_CODE" [size]="22" />
-          </div>
-          <div style="margin: 4px;">
-            <h2 class="text-lg font-bold text-gray-900">QR kód kezelés</h2>
-            <p class="text-xs text-gray-500">Regisztrációs linkek kezelése</p>
-          </div>
-        </div>
+  <ng-container dialogBody>
+    @if (loading()) {
+      <div class="text-center py-10">
+        <div class="w-10 h-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin mx-auto"></div>
+        <p class="mt-4 text-gray-500">Betöltés...</p>
       </div>
-
-      @if (loading()) {
-        <div class="text-center py-10">
-          <div class="w-10 h-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin mx-auto"></div>
-          <p class="mt-4 text-gray-500">Betöltés...</p>
-        </div>
-      } @else {
-        <!-- Generate button / panel -->
-        @if (showGeneratePanel()) {
-          <div class="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-sm font-semibold text-gray-700">Új QR kód</span>
-              <button
-                class="text-sm text-gray-500 hover:text-gray-700"
-                (click)="cancelGenerate()"
-              >Mégse</button>
-            </div>
-            @if (!isMarketer()) {
-              <div class="mb-3">
-                <label class="block text-xs text-gray-500 mb-1.5">Típus</label>
-                <div class="grid grid-cols-2 gap-2">
-                  @for (t of typeList; track t.value) {
-                    <button
-                      class="flex items-center px-3 py-2 rounded-lg border text-sm transition-colors text-left"
-                      [class.border-primary]="selectedType() === t.value"
-                      [class.bg-primary/5]="selectedType() === t.value"
-                      [class.text-primary]="selectedType() === t.value"
-                      [class.border-gray-200]="selectedType() !== t.value"
-                      [class.text-gray-700]="selectedType() !== t.value"
-                      [class.hover:border-gray-300]="selectedType() !== t.value"
-                      (click)="selectedType.set(t.value)"
-                    >
-                      <lucide-icon [name]="t.icon" [size]="16" class="mr-2 flex-shrink-0" />
-                      {{ t.label }}
-                    </button>
-                  }
-                </div>
-              </div>
-            }
+    } @else {
+      <!-- Generate panel (típusválasztó) -->
+      @if (showGeneratePanel()) {
+        <div class="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-semibold text-gray-700">Új QR kód</span>
             <button
-              class="w-full px-4 py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-xl transition-colors flex items-center justify-center"
-              [disabled]="isGenerating()"
-              (click)="generateNewQrCode()"
-            >
-              @if (isGenerating()) {
-                <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
-              } @else {
-                <lucide-icon [name]="ICONS.PLUS" [size]="18" class="mr-2" />
-              }
-              Generálás
-            </button>
+              class="text-sm text-gray-500 hover:text-gray-700"
+              (click)="cancelGenerate()"
+            >Mégse</button>
           </div>
-        } @else {
-          <button
-            class="w-full px-4 py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-xl transition-colors flex items-center justify-center mb-5"
-            (click)="openGeneratePanel()"
-          >
-            <lucide-icon [name]="ICONS.PLUS" [size]="18" class="mr-2" />
-            Új QR kód generálása
-          </button>
-        }
-
-        @if (qrCodes().length === 0) {
-          <!-- Empty state -->
-          <div class="text-center py-8">
-            <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400">
-              <lucide-icon [name]="ICONS.QR_CODE" [size]="28" />
-            </div>
-            <p class="text-gray-500">Nincs aktív QR kód ehhez a projekthez.</p>
-          </div>
-        } @else {
-          <!-- Pinned code (nagy kártya) -->
-          @if (pinnedCode; as pinned) {
-            <div class="mb-4">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Rögzített</div>
-              <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
-                <div class="flex items-start justify-between mb-3">
-                  <div class="flex items-center" style="margin: -3px;">
-                    <span
-                      class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
-                      style="margin: 3px;"
-                      [class]="getTypeConfig(pinned.type).bgClass + ' ' + getTypeConfig(pinned.type).textClass"
-                    >
-                      <lucide-icon [name]="getTypeConfig(pinned.type).icon" [size]="13" class="mr-1" />
-                      {{ pinned.typeLabel }}
-                    </span>
-                    @if (pinned.isValid) {
-                      <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full" style="margin: 3px;">Aktív</span>
-                    }
-                  </div>
-                  <lucide-icon [name]="ICONS.PIN" [size]="16" class="text-primary" matTooltip="Rögzített" />
-                </div>
-
-                <div class="flex items-start" style="margin: -8px;">
-                  <!-- QR Image -->
-                  <div class="flex-shrink-0" style="margin: 8px;">
-                    <div class="bg-white border border-gray-200 rounded-lg p-2 relative w-32 h-32">
-                      @if (isImageLoading(pinned.id)) {
-                        <div class="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg">
-                          <div class="w-6 h-6 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
-                        </div>
-                      }
-                      <img
-                        [src]="getQrCodeImageUrl(pinned)"
-                        [alt]="'QR kód: ' + pinned.code"
-                        class="w-full h-full"
-                        [class.opacity-0]="isImageLoading(pinned.id)"
-                        (load)="onImageLoad(pinned.id)"
-                        (error)="onImageError($event, pinned.id)"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Details -->
-                  <div class="flex-1 min-w-0" style="margin: 8px;">
-                    <div class="flex items-center mb-2" style="margin: -2px;">
-                      <code class="text-lg font-bold font-mono tracking-wider text-gray-900" style="margin: 2px;">{{ pinned.code }}</code>
-                      <button
-                        class="w-7 h-7 flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 rounded-md text-gray-500"
-                        style="margin: 2px;"
-                        matTooltip="Kód másolása"
-                        (click)="copyCode(pinned.code, pinned.id)"
-                      ><lucide-icon [name]="copied() === pinned.id ? ICONS.CHECK : ICONS.COPY" [size]="14" /></button>
-                    </div>
-
-                    <div class="text-sm text-gray-500 space-y-1 mb-3">
-                      <div>Használat: <span class="font-medium text-gray-700">{{ pinned.usageCount }}@if (pinned.maxUsages) { / {{ pinned.maxUsages }} } @else { / &#8734; }</span></div>
-                      @if (pinned.expiresAt) {
-                        <div>Lejárat: <span class="font-medium text-gray-700">{{ formatDate(pinned.expiresAt) }}</span></div>
-                      }
-                      @if (pinned.registeredSessions.length > 0) {
-                        <div>Utolsó: <span class="font-medium text-gray-700">{{ pinned.registeredSessions[0].guestName }}</span></div>
-                      }
-                    </div>
-
-                    <div class="flex flex-wrap" style="margin: -2px;">
-                      <button
-                        class="px-2.5 py-1.5 text-xs font-medium border border-gray-200 bg-white hover:bg-gray-50 rounded-lg text-gray-600 inline-flex items-center transition-colors"
-                        style="margin: 2px;"
-                        matTooltip="Link másolása"
-                        (click)="copyLink(pinned.registrationUrl, pinned.id)"
-                      ><lucide-icon [name]="linkCopied() === pinned.id ? ICONS.CHECK : ICONS.LINK" [size]="13" class="mr-1" />{{ linkCopied() === pinned.id ? 'Másolva!' : 'Link' }}</button>
-                      <button
-                        class="px-2.5 py-1.5 text-xs font-medium border border-gray-200 bg-white hover:bg-gray-50 rounded-lg text-gray-600 inline-flex items-center transition-colors"
-                        style="margin: 2px;"
-                        matTooltip="Nyomtatás"
-                        (click)="printQrCode(pinned)"
-                      ><lucide-icon [name]="ICONS.PRINTER" [size]="13" class="mr-1" />Nyomtatás</button>
-                      <button
-                        class="px-2.5 py-1.5 text-xs font-medium border border-red-200 bg-white hover:bg-red-50 rounded-lg text-red-500 inline-flex items-center transition-colors"
-                        style="margin: 2px;"
-                        matTooltip="Inaktiválás"
-                        (click)="confirmDeactivate(pinned.id)"
-                      ><lucide-icon [name]="ICONS.BAN" [size]="13" class="mr-1" />Inaktiválás</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-
-          <!-- Other active codes (lista nézet) -->
-          @if (otherCodes.length > 0) {
-            <div>
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                @if (pinnedCode) { Többi aktív } @else { Aktív QR kódok }
-              </div>
-              <div class="space-y-2">
-                @for (code of otherCodes; track code.id) {
-                  <div class="border border-gray-200 rounded-lg px-3 py-2.5 bg-white hover:bg-gray-50/50 transition-colors">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center min-w-0" style="margin: -3px;">
-                        <span
-                          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0"
-                          style="margin: 3px;"
-                          [class]="getTypeConfig(code.type).bgClass + ' ' + getTypeConfig(code.type).textClass"
-                        >
-                          <lucide-icon [name]="getTypeConfig(code.type).icon" [size]="12" class="mr-1" />
-                          {{ code.typeLabel }}
-                        </span>
-                        <code class="text-sm font-mono font-semibold text-gray-700" style="margin: 3px;">{{ code.code }}</code>
-                        <span class="text-xs text-gray-400" style="margin: 3px;">
-                          {{ code.usageCount }}@if (code.maxUsages) {/{{ code.maxUsages }}} @else {/&#8734;}
-                        </span>
-                      </div>
-                      <div class="flex items-center flex-shrink-0" style="margin: -2px;">
-                        <button
-                          class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-primary rounded transition-colors"
-                          style="margin: 2px;"
-                          matTooltip="Rögzítés"
-                          (click)="pinCode(code.id)"
-                        ><lucide-icon [name]="ICONS.PIN" [size]="14" /></button>
-                        <button
-                          class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded transition-colors"
-                          style="margin: 2px;"
-                          matTooltip="Kód másolása"
-                          (click)="copyCode(code.code, code.id)"
-                        ><lucide-icon [name]="copied() === code.id ? ICONS.CHECK : ICONS.COPY" [size]="14" /></button>
-                        <button
-                          class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded transition-colors"
-                          style="margin: 2px;"
-                          matTooltip="Nyomtatás"
-                          (click)="printQrCode(code)"
-                        ><lucide-icon [name]="ICONS.PRINTER" [size]="14" /></button>
-                        <button
-                          class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 rounded transition-colors"
-                          style="margin: 2px;"
-                          matTooltip="Inaktiválás"
-                          (click)="confirmDeactivate(code.id)"
-                        ><lucide-icon [name]="ICONS.BAN" [size]="14" /></button>
-                      </div>
-                    </div>
-                    @if (code.registeredSessions.length > 0) {
-                      <div class="mt-1.5 text-xs text-gray-400">
-                        Utolsó: {{ code.registeredSessions[0].guestName }}
-                        @if (code.registeredSessions[0].guestEmail) {
-                          ({{ code.registeredSessions[0].guestEmail }})
-                        }
-                      </div>
-                    }
-                  </div>
+          @if (!isMarketer()) {
+            <div class="mb-3">
+              <label class="block text-xs text-gray-500 mb-1.5">Típus</label>
+              <div class="grid grid-cols-2 gap-2">
+                @for (t of typeList; track t.value) {
+                  <button
+                    class="flex items-center px-3 py-2 rounded-lg border text-sm transition-colors text-left"
+                    [class.border-primary]="selectedType() === t.value"
+                    [class.bg-primary/5]="selectedType() === t.value"
+                    [class.text-primary]="selectedType() === t.value"
+                    [class.border-gray-200]="selectedType() !== t.value"
+                    [class.text-gray-700]="selectedType() !== t.value"
+                    [class.hover:border-gray-300]="selectedType() !== t.value"
+                    (click)="selectedType.set(t.value)"
+                  >
+                    <lucide-icon [name]="t.icon" [size]="16" class="mr-2 flex-shrink-0" />
+                    {{ t.label }}
+                  </button>
                 }
               </div>
             </div>
           }
+          <button
+            class="w-full px-4 py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-xl transition-colors flex items-center justify-center"
+            [disabled]="isGenerating()"
+            (click)="generateNewQrCode()"
+          >
+            @if (isGenerating()) {
+              <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
+            } @else {
+              <lucide-icon [name]="ICONS.PLUS" [size]="18" class="mr-2" />
+            }
+            Generálás
+          </button>
+        </div>
+      }
+
+      @if (qrCodes().length === 0) {
+        <!-- Empty state -->
+        <div class="text-center py-8">
+          <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400">
+            <lucide-icon [name]="ICONS.QR_CODE" [size]="28" />
+          </div>
+          <p class="text-gray-500">Nincs aktív QR kód ehhez a projekthez.</p>
+        </div>
+      } @else {
+        <!-- Pinned code (nagy kártya) -->
+        @if (pinnedCode; as pinned) {
+          <div class="mb-4">
+            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Rögzített</div>
+            <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center" style="margin: -3px;">
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                    style="margin: 3px;"
+                    [class]="getTypeConfig(pinned.type).bgClass + ' ' + getTypeConfig(pinned.type).textClass"
+                  >
+                    <lucide-icon [name]="getTypeConfig(pinned.type).icon" [size]="13" class="mr-1" />
+                    {{ pinned.typeLabel }}
+                  </span>
+                  @if (pinned.isValid) {
+                    <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full" style="margin: 3px;">Aktív</span>
+                  }
+                </div>
+                <lucide-icon [name]="ICONS.PIN" [size]="16" class="text-primary" matTooltip="Rögzített" />
+              </div>
+
+              <div class="flex items-start" style="margin: -8px;">
+                <!-- QR Image -->
+                <div class="flex-shrink-0" style="margin: 8px;">
+                  <div class="bg-white border border-gray-200 rounded-lg p-2 relative w-32 h-32">
+                    @if (isImageLoading(pinned.id)) {
+                      <div class="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg">
+                        <div class="w-6 h-6 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+                      </div>
+                    }
+                    <img
+                      [src]="getQrCodeImageUrl(pinned)"
+                      [alt]="'QR kód: ' + pinned.code"
+                      class="w-full h-full"
+                      [class.opacity-0]="isImageLoading(pinned.id)"
+                      (load)="onImageLoad(pinned.id)"
+                      (error)="onImageError($event, pinned.id)"
+                    />
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex-1 min-w-0" style="margin: 8px;">
+                  <div class="flex items-center mb-2" style="margin: -2px;">
+                    <code class="text-lg font-bold font-mono tracking-wider text-gray-900" style="margin: 2px;">{{ pinned.code }}</code>
+                    <button
+                      class="w-7 h-7 flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 rounded-md text-gray-500"
+                      style="margin: 2px;"
+                      matTooltip="Kód másolása"
+                      (click)="copyCode(pinned.code, pinned.id)"
+                    ><lucide-icon [name]="copied() === pinned.id ? ICONS.CHECK : ICONS.COPY" [size]="14" /></button>
+                  </div>
+
+                  <div class="text-sm text-gray-500 space-y-1 mb-3">
+                    <div>Használat: <span class="font-medium text-gray-700">{{ pinned.usageCount }}@if (pinned.maxUsages) { / {{ pinned.maxUsages }} } @else { / &#8734; }</span></div>
+                    @if (pinned.expiresAt) {
+                      <div>Lejárat: <span class="font-medium text-gray-700">{{ formatDate(pinned.expiresAt) }}</span></div>
+                    }
+                    @if (pinned.registeredSessions.length > 0) {
+                      <div>Utolsó: <span class="font-medium text-gray-700">{{ pinned.registeredSessions[0].guestName }}</span></div>
+                    }
+                  </div>
+
+                  <div class="flex flex-wrap" style="margin: -2px;">
+                    <button
+                      class="px-2.5 py-1.5 text-xs font-medium border border-gray-200 bg-white hover:bg-gray-50 rounded-lg text-gray-600 inline-flex items-center transition-colors"
+                      style="margin: 2px;"
+                      matTooltip="Link másolása"
+                      (click)="copyLink(pinned.registrationUrl, pinned.id)"
+                    ><lucide-icon [name]="linkCopied() === pinned.id ? ICONS.CHECK : ICONS.LINK" [size]="13" class="mr-1" />{{ linkCopied() === pinned.id ? 'Másolva!' : 'Link' }}</button>
+                    <button
+                      class="px-2.5 py-1.5 text-xs font-medium border border-gray-200 bg-white hover:bg-gray-50 rounded-lg text-gray-600 inline-flex items-center transition-colors"
+                      style="margin: 2px;"
+                      matTooltip="Nyomtatás"
+                      (click)="printQrCode(pinned)"
+                    ><lucide-icon [name]="ICONS.PRINTER" [size]="13" class="mr-1" />Nyomtatás</button>
+                    <button
+                      class="px-2.5 py-1.5 text-xs font-medium border border-red-200 bg-white hover:bg-red-50 rounded-lg text-red-500 inline-flex items-center transition-colors"
+                      style="margin: 2px;"
+                      matTooltip="Inaktiválás"
+                      (click)="confirmDeactivate(pinned.id)"
+                    ><lucide-icon [name]="ICONS.BAN" [size]="13" class="mr-1" />Inaktiválás</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         }
 
-        @if (error()) {
-          <div class="mt-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-            {{ error() }}
+        <!-- Other active codes (lista nézet) -->
+        @if (otherCodes.length > 0) {
+          <div>
+            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+              @if (pinnedCode) { Többi aktív } @else { Aktív QR kódok }
+            </div>
+            <div class="space-y-2">
+              @for (code of otherCodes; track code.id) {
+                <div class="border border-gray-200 rounded-lg px-3 py-2.5 bg-white hover:bg-gray-50/50 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center min-w-0" style="margin: -3px;">
+                      <span
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0"
+                        style="margin: 3px;"
+                        [class]="getTypeConfig(code.type).bgClass + ' ' + getTypeConfig(code.type).textClass"
+                      >
+                        <lucide-icon [name]="getTypeConfig(code.type).icon" [size]="12" class="mr-1" />
+                        {{ code.typeLabel }}
+                      </span>
+                      <code class="text-sm font-mono font-semibold text-gray-700" style="margin: 3px;">{{ code.code }}</code>
+                      <span class="text-xs text-gray-400" style="margin: 3px;">
+                        {{ code.usageCount }}@if (code.maxUsages) {/{{ code.maxUsages }}} @else {/&#8734;}
+                      </span>
+                    </div>
+                    <div class="flex items-center flex-shrink-0" style="margin: -2px;">
+                      <button
+                        class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-primary rounded transition-colors"
+                        style="margin: 2px;"
+                        matTooltip="Rögzítés"
+                        (click)="pinCode(code.id)"
+                      ><lucide-icon [name]="ICONS.PIN" [size]="14" /></button>
+                      <button
+                        class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded transition-colors"
+                        style="margin: 2px;"
+                        matTooltip="Kód másolása"
+                        (click)="copyCode(code.code, code.id)"
+                      ><lucide-icon [name]="copied() === code.id ? ICONS.CHECK : ICONS.COPY" [size]="14" /></button>
+                      <button
+                        class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded transition-colors"
+                        style="margin: 2px;"
+                        matTooltip="Nyomtatás"
+                        (click)="printQrCode(code)"
+                      ><lucide-icon [name]="ICONS.PRINTER" [size]="14" /></button>
+                      <button
+                        class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 rounded transition-colors"
+                        style="margin: 2px;"
+                        matTooltip="Inaktiválás"
+                        (click)="confirmDeactivate(code.id)"
+                      ><lucide-icon [name]="ICONS.BAN" [size]="14" /></button>
+                    </div>
+                  </div>
+                  @if (code.registeredSessions.length > 0) {
+                    <div class="mt-1.5 text-xs text-gray-400">
+                      Utolsó: {{ code.registeredSessions[0].guestName }}
+                      @if (code.registeredSessions[0].guestEmail) {
+                        ({{ code.registeredSessions[0].guestEmail }})
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
           </div>
         }
       }
-    </div>
-  </div>
-</div>
+    }
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button type="button" class="btn btn--outline" (click)="close.emit()">Bezárás</button>
+    @if (!showGeneratePanel()) {
+      <button type="button" class="btn btn--primary" (click)="openGeneratePanel()">
+        <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        Új QR kód generálása
+      </button>
+    }
+  </ng-container>
+</app-dialog-wrapper>
 
 @if (showDeactivateConfirm()) {
   <app-confirm-dialog

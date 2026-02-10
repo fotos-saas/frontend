@@ -5,21 +5,21 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../constants/icons.constants';
 import { QR_CODE_TYPES, QR_CODE_TYPE_LIST, QrCodeTypeKey } from '../../constants/qr-code-types';
-import { createBackdropHandler } from '../../utils/dialog.util';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 import { QrCode, IQrCodeService } from '../../interfaces/qr-code.interface';
 
 @Component({
   selector: 'app-shared-qr-code-modal',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule, ConfirmDialogComponent],
+  imports: [LucideAngularModule, MatTooltipModule, ConfirmDialogComponent, DialogWrapperComponent],
   templateUrl: './qr-code-modal.component.html',
+  styleUrl: './qr-code-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SharedQrCodeModalComponent implements OnInit, OnDestroy {
   readonly ICONS = ICONS;
   readonly QR_CODE_TYPES = QR_CODE_TYPES;
   readonly typeList = QR_CODE_TYPE_LIST;
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   projectId = input.required<number>();
   projectName = input<string>('');

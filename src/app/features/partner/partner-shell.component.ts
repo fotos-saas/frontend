@@ -125,15 +125,16 @@ export class PartnerShellComponent implements OnInit {
       },
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
-      { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag' },
+      { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag', devBadge: true },
       {
         id: 'webshop',
         label: 'Webshop',
         icon: 'store',
+        devBadge: true,
         children: [
-          { id: 'webshop-settings', route: `${base}/webshop/settings`, label: 'Beállítások' },
-          { id: 'webshop-products', route: `${base}/webshop/products`, label: 'Termékek és árak' },
-          { id: 'webshop-orders', route: `${base}/webshop/orders`, label: 'Rendelések' },
+          { id: 'webshop-settings', route: `${base}/webshop/settings`, label: 'Beállítások', devBadge: true },
+          { id: 'webshop-products', route: `${base}/webshop/products`, label: 'Termékek és árak', devBadge: true },
+          { id: 'webshop-orders', route: `${base}/webshop/orders`, label: 'Rendelések', devBadge: true },
         ]
       },
       {
@@ -160,7 +161,7 @@ export class PartnerShellComponent implements OnInit {
         label: 'Beállítások',
         icon: 'settings',
         children: [
-          { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás és fizetés' },
+          { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás és fizetés', devBadge: true },
         ]
       },
     ];

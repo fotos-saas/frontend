@@ -41,8 +41,8 @@ export const routes: Routes = [
   // New auth routes
   {
     path: 'register',
-    loadComponent: () => import('./pages/auth/register/register.component').then(m => m.RegisterComponent),
-    canActivate: [NoAuthGuard]
+    redirectTo: 'register-app',
+    pathMatch: 'full'
   },
   {
     path: 'register-app',

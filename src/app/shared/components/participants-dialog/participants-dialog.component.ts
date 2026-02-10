@@ -5,43 +5,25 @@ import {
   output,
   computed,
   ChangeDetectionStrategy,
-  AfterViewInit
 } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import {
   Participant,
   ParticipantStatistics
 } from '../../../core/services/voting.service';
-import { createBackdropHandler } from '../../utils/dialog.util';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
-/**
- * Participants Dialog
- *
- * Jelenlévők listája popup.
- * Mindenki láthatja a résztvevőket,
- * de csak a kapcsolattartó módosíthatja az "extra" jelölést.
- *
- * Használat:
- * ```html
- * <app-participants-dialog
- *   @if (showParticipantsDialog())
- *   [participants]="participants()"
- *   [statistics]="participantStats()"
- *   [hasFullAccess]="hasFullAccess()"
- *   [isLoading]="isLoadingParticipants()"
- *   (closeEvent)="onParticipantsClose()"
- *   (toggleExtraEvent)="onToggleExtra($event)"
- *   (refreshEvent)="onRefreshParticipants()"
- * />
- * ```
- */
 @Component({
     selector: 'app-participants-dialog',
-    imports: [NgClass],
+    imports: [NgClass, LucideAngularModule, DialogWrapperComponent],
     templateUrl: './participants-dialog.component.html',
     styleUrls: ['./participants-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ParticipantsDialogComponent implements AfterViewInit {
+export class ParticipantsDialogComponent {
+  readonly ICONS = ICONS;
+
   /** Signal-based inputs */
   readonly participants = input<Participant[]>([]);
   readonly statistics = input<ParticipantStatistics | null>(null);
@@ -55,19 +37,8 @@ export class ParticipantsDialogComponent implements AfterViewInit {
   readonly toggleExtraEvent = output<number>();
   readonly refreshEvent = output<void>();
 
-  /** Előző focus mentése */
-  private previousActiveElement?: HTMLElement;
-
-  /** Backdrop handler a kijelölés közbeni bezárás megelőzéséhez */
-  readonly backdropHandler = createBackdropHandler(() => this.onClose());
-
-  ngAfterViewInit(): void {
-    // Focus management - mentjük az előző fókuszált elemet
-    this.previousActiveElement = document.activeElement as HTMLElement;
-  }
-
   /**
-   * Összesített létszám szöveg
+   * Összesített letszam szoveg
    */
   readonly summaryText = computed(() => {
     const stats = this.statistics();
@@ -90,7 +61,7 @@ export class ParticipantsDialogComponent implements AfterViewInit {
   });
 
   /**
-   * Résztvevő státusz osztálya
+   * Resztvevo statusz osztalya
    */
   getStatusClass(participant: Participant): string {
     if (participant.isBanned) {
@@ -103,7 +74,7 @@ export class ParticipantsDialogComponent implements AfterViewInit {
   }
 
   /**
-   * Résztvevő státusz badge
+   * Resztvevo statusz badge
    */
   getStatusBadge(participant: Participant): string {
     if (participant.isBanned) {
@@ -116,7 +87,7 @@ export class ParticipantsDialogComponent implements AfterViewInit {
   }
 
   /**
-   * Aktuális felhasználó-e (az "Én" jelöléshez)
+   * Aktualis felhasznalo-e (az "En" jeloleshez)
    */
   isCurrentUser(participant: Participant): boolean {
     const guestId = this.currentGuestId();
@@ -124,7 +95,7 @@ export class ParticipantsDialogComponent implements AfterViewInit {
   }
 
   /**
-   * Utolsó aktivitás formázás
+   * Utolso aktivitas formazas
    */
   formatLastActivity(dateStr: string | null): string {
     if (!dateStr) {
@@ -158,7 +129,7 @@ export class ParticipantsDialogComponent implements AfterViewInit {
   }
 
   /**
-   * Extra toggle kattintás
+   * Extra toggle kattintas
    */
   onToggleExtra(guestId: number): void {
     if (!this.hasFullAccess() || this.togglingExtraId() === guestId) {
@@ -168,48 +139,11 @@ export class ParticipantsDialogComponent implements AfterViewInit {
   }
 
   /**
-   * Frissítés kattintás
+   * Frissites kattintas
    */
   onRefresh(): void {
     if (!this.isLoading()) {
       this.refreshEvent.emit();
     }
   }
-
-  /**
-   * Bezárás
-   */
-  onClose(): void {
-    this.restoreFocus();
-    this.closeEvent.emit();
-  }
-
-  /**
-   * Focus visszaállítása
-   */
-  private restoreFocus(): void {
-    if (this.previousActiveElement?.focus) {
-      setTimeout(() => {
-        this.previousActiveElement?.focus();
-      }, 100);
-    }
-  }
-
-  /**
-   * TrackBy for ngFor
-   */
-  trackById(_index: number, participant: Participant): number {
-    return participant.id;
-  }
-
-  /**
-   * ESC billentyű kezelés
-   */
-  onKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this.onClose();
-    }
-  }
-
 }

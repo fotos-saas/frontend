@@ -1,12 +1,11 @@
 import {
   Injectable,
-  inject,
   signal,
   ViewContainerRef,
   ComponentRef,
   DestroyRef,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
@@ -14,16 +13,11 @@ import { SharedQrCodeModalComponent } from '../../qr-code-modal/qr-code-modal.co
 import { ConfirmDialogResult } from '../../confirm-dialog/confirm-dialog.component';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
-  PROJECT_DETAIL_SERVICE,
-  PROJECT_BACK_ROUTE,
-  PROJECT_CONTACT_MODAL_COMPONENT,
-  PROJECT_EDIT_MODAL_COMPONENT,
-  PROJECT_ORDER_DATA_DIALOG_COMPONENT,
   IProjectDetailService,
   ProjectDataMapper,
 } from '../project-detail.tokens';
 import { IQrCodeService } from '../../../interfaces/qr-code.interface';
-import { GuestSession, SamplePackage, SampleVersion } from '../../../../features/partner/services/partner.service';
+import { GuestSession, SamplePackage } from '../../../../features/partner/services/partner.service';
 import {
   PackageDialogRequest,
   VersionDialogRequest,
@@ -171,8 +165,8 @@ export class ProjectDetailWrapperFacadeService<T> {
 
     container.clear();
     this.contactModalRef = container.createComponent(this.contactModalComponent);
-    this.contactModalRef.instance.projectId = projectData.id;
-    this.contactModalRef.instance.contact = contact;
+    this.contactModalRef.setInput('projectId', projectData.id);
+    this.contactModalRef.setInput('contact', contact);
     this.contactModalRef.instance.close?.subscribe(() => this.closeContactModal());
     this.contactModalRef.instance.saved?.subscribe((c: ProjectContact) => {
       this.closeContactModal();
@@ -200,7 +194,7 @@ export class ProjectDetailWrapperFacadeService<T> {
 
     container.clear();
     this.projectEditModalRef = container.createComponent(this.projectEditModalComponent);
-    this.projectEditModalRef.instance.project = projectData;
+    this.projectEditModalRef.setInput('project', projectData);
     this.projectEditModalRef.instance.close?.subscribe(() => this.closeEditProjectModal());
     this.projectEditModalRef.instance.saved?.subscribe(() => {
       this.closeEditProjectModal();

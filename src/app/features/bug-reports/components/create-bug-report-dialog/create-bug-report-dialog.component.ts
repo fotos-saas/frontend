@@ -6,14 +6,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { BugReportService } from '../../../../shared/services/bug-report.service';
 import { BugReportPriority, BUG_REPORT_PRIORITY_OPTIONS } from '../../../../shared/types/bug-report.types';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { RichTextEditorComponent } from '../../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { ToastService } from '../../../../core/services/toast.service';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 @Component({
   selector: 'app-create-bug-report-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent],
+  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent, DialogWrapperComponent],
   templateUrl: './create-bug-report-dialog.component.html',
   styleUrl: './create-bug-report-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,10 +37,7 @@ export class CreateBugReportDialogComponent {
   attachments = signal<File[]>([]);
   submitting = signal(false);
   error = signal('');
-  /** Frissen hozzáadott melléklet indexe (animáció triggereléshez) */
   freshIndex = signal<number | null>(null);
-
-  readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
   constructor() {
     afterNextRender(() => {
@@ -79,7 +76,6 @@ export class CreateBugReportDialogComponent {
         const file = items[i].getAsFile();
         if (!file) continue;
 
-        // Duplikátum szűrés: méret + név + típus alapján
         const isDuplicate = this.attachments().some(
           f => f.size === file.size && f.name === file.name && f.type === file.type
         );

@@ -6,41 +6,31 @@ import {
   computed,
   signal,
   AfterViewInit,
-  OnDestroy,
   DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import { PokeService } from '../../../core/services/poke.service';
 import { DateUtilsService } from '../../services/date-utils.service';
 import { Poke } from '../../../core/models/poke.models';
 import { REACTION_EMOJIS, ReactionEmoji, REACTION_TOOLTIPS } from '@shared/constants';
-import { createBackdropHandler } from '../../utils/dialog.util';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
-/**
- * Poke Received Dialog Component
- *
- * Kapott bökések megjelenítése dialógusban.
- * Signal-based, glassmorphism design.
- *
- * Funkciók:
- * - Kapott bökések listázása
- * - Olvasatlan/olvasott megkülönböztetés
- * - Automatikus mark as read megnyitáskor
- * - Reakció küldés lehetőség
- * - Empty state kezelés
- */
 @Component({
   selector: 'app-poke-received-dialog',
   standalone: true,
-  imports: [],
+  imports: [LucideAngularModule, DialogWrapperComponent],
   templateUrl: './poke-received-dialog.component.html',
   styleUrls: ['./poke-received-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
+export class PokeReceivedDialogComponent implements AfterViewInit {
   private readonly pokeService = inject(PokeService);
   private readonly dateUtils = inject(DateUtilsService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly ICONS = ICONS;
 
   /** Signal-based outputs */
   readonly closedEvent = output<void>();
@@ -58,9 +48,6 @@ export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
   // Loading state for reaction
   readonly sendingReactionFor = signal<number | null>(null);
 
-  /** Backdrop handler - megakadályozza a véletlen bezárást szöveg kijelöléskor */
-  readonly backdropHandler = createBackdropHandler(() => this.close());
-
   // Computed subtitle
   readonly subtitle = computed(() => {
     const count = this.pokes().length;
@@ -77,12 +64,6 @@ export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe();
     }
-    // Body scroll lock
-    document.body.classList.add('dialog-open');
-  }
-
-  ngOnDestroy(): void {
-    document.body.classList.remove('dialog-open');
   }
 
   close(): void {
@@ -93,27 +74,16 @@ export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
     return this.dateUtils.getRelativeTime(dateStr);
   }
 
-  /**
-   * Toggle reaction picker for a poke
-   */
   toggleReactionPicker(poke: Poke): void {
-    // Don't allow if already has reaction
     if (poke.reaction) return;
-
     const currentId = this.expandedPokeId();
     this.expandedPokeId.set(currentId === poke.id ? null : poke.id);
   }
 
-  /**
-   * Check if reaction picker is open for a poke
-   */
   isPickerOpen(pokeId: number): boolean {
     return this.expandedPokeId() === pokeId;
   }
 
-  /**
-   * Send reaction to a poke
-   */
   sendReaction(poke: Poke, reaction: ReactionEmoji): void {
     if (this.sendingReactionFor() === poke.id) return;
 
@@ -132,16 +102,10 @@ export class PokeReceivedDialogComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  /**
-   * Check if sending reaction for a specific poke
-   */
   isSendingReaction(pokeId: number): boolean {
     return this.sendingReactionFor() === pokeId;
   }
 
-  /**
-   * Get tooltip text for a reaction emoji
-   */
   getReactionTooltip(reaction: ReactionEmoji): string {
     return REACTION_TOOLTIPS[reaction] || '';
   }

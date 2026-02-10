@@ -30,4 +30,7 @@ export interface MenuItem {
 
   /** Láthatósági feltétel callback (opcionális) */
   visible?: () => boolean;
+
+  /** DEV badge megjelenítése (fejlesztés alatt álló menüpont jelölés) */
+  devBadge?: boolean;
 }

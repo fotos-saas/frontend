@@ -250,6 +250,33 @@
   width: auto;
 }
 
+/* ============ DEV Badge ============ */
+.dev-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 4px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.nav-child .dev-badge {
+  margin-left: 6px;
+  font-size: 0.5625rem;
+  padding: 0 4px;
+}
+
+.sidebar--collapsed .dev-badge {
+  display: none;
+}
+
 /* ============ Sidebar Bottom (Hibajelentés) ============ */
 .sidebar-spacer {
   flex: 1;

@@ -1,17 +1,14 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  viewChild,
-  ElementRef,
-  AfterViewInit,
-  OnDestroy,
-  HostListener,
   input,
   output,
-  inject,
+  computed,
 } from '@angular/core';
-import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
-import { createBackdropHandler } from '../../utils/dialog.util';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '../../constants/icons.constants';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { DialogTheme } from '../dialog-wrapper/dialog-wrapper.types';
 
 export interface ConfirmDialogResult {
   action: 'confirm' | 'cancel';
@@ -21,18 +18,17 @@ export interface ConfirmDialogResult {
  * Újrafelhasználható megerősítő dialógus
  *
  * Törlések és veszélyes műveletek megerősítésére.
- * A11y: Focus trap implementálva a CDK-val.
  */
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [A11yModule],
+  imports: [LucideAngularModule, DialogWrapperComponent],
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConfirmDialogComponent implements AfterViewInit, OnDestroy {
-  private readonly focusTrapFactory = inject(FocusTrapFactory);
+export class ConfirmDialogComponent {
+  readonly ICONS = ICONS;
 
   /** Signal-based inputs */
   readonly title = input<string>('Megerősítés');
@@ -46,51 +42,23 @@ export class ConfirmDialogComponent implements AfterViewInit, OnDestroy {
   /** Signal-based output */
   readonly resultEvent = output<ConfirmDialogResult>();
 
-  readonly dialogContent = viewChild.required<ElementRef<HTMLElement>>('dialogContent');
-
-  private focusTrap: FocusTrap | null = null;
-  private previousActiveElement: HTMLElement | null = null;
-
-  /** Backdrop handler - megakadályozza a véletlen bezárást szöveg kijelöléskor */
-  readonly backdropHandler = createBackdropHandler(() => this.onCancel());
-
-  ngAfterViewInit(): void {
-    // Előző fókuszált elem mentése
-    this.previousActiveElement = document.activeElement as HTMLElement;
-
-    // Focus trap létrehozása
-    if (this.dialogContent()?.nativeElement) {
-      this.focusTrap = this.focusTrapFactory.create(this.dialogContent().nativeElement);
-      this.focusTrap.focusInitialElementWhenReady();
+  /** Dinamikus téma a confirmType alapján */
+  readonly theme = computed<DialogTheme>(() => {
+    switch (this.confirmType()) {
+      case 'danger': return 'red';
+      case 'warning': return 'amber';
+      case 'primary': return 'blue';
     }
-  }
+  });
 
-  ngOnDestroy(): void {
-    // Focus trap felszabadítása
-    this.focusTrap?.destroy();
-
-    // Fókusz visszaállítása az előző elemre
-    if (this.previousActiveElement?.focus) {
-      setTimeout(() => {
-        this.previousActiveElement?.focus();
-      }, 0);
+  /** Dinamikus ikon a confirmType alapján */
+  readonly iconName = computed<string>(() => {
+    switch (this.confirmType()) {
+      case 'danger': return ICONS.DELETE;
+      case 'warning': return ICONS.ALERT_TRIANGLE;
+      case 'primary': return ICONS.HELP_CIRCLE;
     }
-  }
-
-  /**
-   * ESC billentyű kezelése - dialog bezárása
-   */
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: Event): void {
-    if (!(event instanceof KeyboardEvent)) return;
-
-    if (event.key === 'Escape' || event.key === 'Esc') {
-      // Csak akkor kezeljük, ha a dialogContent létezik (azaz a dialog nyitva van)
-      if (this.dialogContent()?.nativeElement) {
-        this.onCancel();
-      }
-    }
-  }
+  });
 
   onCancel(): void {
     this.resultEvent.emit({ action: 'cancel' });

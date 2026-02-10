@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { PartnerService, SchoolItem } from '../../services/partner.service';
 import { ProjectDetailData } from '../../../../shared/components/project-detail';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Project Edit Modal - Projekt adatok szerkesztése.
@@ -14,14 +14,13 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-project-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   templateUrl: './project-edit-modal.component.html',
   styleUrl: './project-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectEditModalComponent implements OnInit {
   readonly ICONS = ICONS;
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   readonly project = input.required<ProjectDetailData>();
   readonly close = output<void>();

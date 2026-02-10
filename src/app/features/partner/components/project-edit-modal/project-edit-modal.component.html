@@ -1,147 +1,129 @@
-<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
-    <!-- Header -->
-    <div class="modal-header">
-      <div class="header-icon">
-        <lucide-icon [name]="ICONS.EDIT" [size]="24" />
-      </div>
-      <h2>Projekt szerkesztése</h2>
-      <p class="subtitle">Módosítsd a projekt adatait</p>
-    </div>
+<app-dialog-wrapper
+  headerStyle="hero"
+  theme="blue"
+  [icon]="ICONS.EDIT"
+  title="Projekt szerkesztése"
+  description="Módosítsd a projekt adatait"
+  size="md"
+  [closable]="!submitting()"
+  [errorMessage]="error()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <!-- Iskola kiválasztás -->
+    <div class="form-group">
+      <label class="form-label">Iskola</label>
+      <div class="school-input-wrapper">
+        <div class="school-search">
+          <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="search-icon" />
+          <input
+            type="text"
+            placeholder="Keress iskola név vagy város alapján..."
+            [(ngModel)]="schoolSearch"
+            name="schoolSearch"
+            (input)="onSchoolSearch()"
+            (focus)="onSchoolFocus()"
+            (blur)="onSchoolBlur($event)"
+            class="form-input form-input--search"
+            autocomplete="off"
+          />
+          @if (selectedSchool) {
+            <button type="button" class="clear-school-btn" (click)="clearSchool()">
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          }
+        </div>
 
-    <!-- Content -->
-    <form class="modal-content" (ngSubmit)="onSubmit()">
-      <!-- Iskola kiválasztás -->
-      <div class="form-group">
-        <label class="form-label">Iskola</label>
-        <div class="school-input-wrapper">
-          <div class="school-search">
-            <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="search-icon" />
-            <input
-              type="text"
-              placeholder="Keress iskola név vagy város alapján..."
-              [(ngModel)]="schoolSearch"
-              name="schoolSearch"
-              (input)="onSchoolSearch()"
-              (focus)="onSchoolFocus()"
-              (blur)="onSchoolBlur($event)"
-              class="form-input"
-              autocomplete="off"
-            />
-            @if (selectedSchool) {
-              <button type="button" class="clear-school-btn" (click)="clearSchool()">
-                <lucide-icon [name]="ICONS.X" [size]="14" />
+        <!-- Iskola dropdown -->
+        @if (showSchoolDropdown && schoolsLoading()) {
+          <div class="school-dropdown">
+            <div class="dropdown-loading">
+              <span class="dropdown-spinner"></span>
+              Betöltés...
+            </div>
+          </div>
+        } @else if (showSchoolDropdown && schools().length > 0) {
+          <div class="school-dropdown">
+            @for (school of schools(); track school.id) {
+              <button
+                type="button"
+                class="school-option"
+                [class.school-option--selected]="selectedSchool?.id === school.id"
+                (mousedown)="selectSchool(school); $event.preventDefault()"
+              >
+                <span class="school-name">{{ school.name }}</span>
+                @if (school.city) {
+                  <span class="school-city">{{ school.city }}</span>
+                }
               </button>
             }
           </div>
+        }
+      </div>
+    </div>
 
-          <!-- Iskola dropdown -->
-          @if (showSchoolDropdown && schoolsLoading()) {
-            <div class="school-dropdown">
-              <div class="dropdown-loading">
-                <span class="dropdown-spinner"></span>
-                Betöltés...
-              </div>
-            </div>
-          } @else if (showSchoolDropdown && schools().length > 0) {
-            <div class="school-dropdown">
-              @for (school of schools(); track school.id) {
-                <button
-                  type="button"
-                  class="school-option"
-                  [class.school-option--selected]="selectedSchool?.id === school.id"
-                  (mousedown)="selectSchool(school); $event.preventDefault()"
-                >
-                  <span class="school-name">{{ school.name }}</span>
-                  @if (school.city) {
-                    <span class="school-city">{{ school.city }}</span>
-                  }
-                </button>
-              }
-            </div>
-          }
-        </div>
+    <!-- Osztály és Évfolyam -->
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Osztály neve</label>
+        <input
+          type="text"
+          placeholder="pl. 12.A"
+          [(ngModel)]="formData.class_name"
+          name="className"
+          class="form-input"
+        />
       </div>
 
-      <!-- Osztály és Évfolyam (egy sorban) -->
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Osztály neve</label>
-          <input
-            type="text"
-            placeholder="pl. 12.A"
-            [(ngModel)]="formData.class_name"
-            name="className"
-            class="form-input"
-          />
-        </div>
+      <div class="form-group">
+        <label class="form-label">Évfolyam</label>
+        <input
+          type="text"
+          placeholder="pl. 2024"
+          [(ngModel)]="formData.class_year"
+          name="classYear"
+          class="form-input"
+        />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <label class="form-label">Évfolyam</label>
-          <input
-            type="text"
-            placeholder="pl. 2024"
-            [(ngModel)]="formData.class_year"
-            name="classYear"
-            class="form-input"
-          />
-        </div>
+    <!-- Dátumok -->
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fotózás dátuma</label>
+        <input
+          type="date"
+          [(ngModel)]="formData.photo_date"
+          name="photoDate"
+          class="form-input"
+        />
       </div>
 
-      <!-- Dátumok (egy sorban) -->
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Fotózás dátuma</label>
-          <input
-            type="date"
-            [(ngModel)]="formData.photo_date"
-            name="photoDate"
-            class="form-input"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Határidő</label>
-          <input
-            type="date"
-            [(ngModel)]="formData.deadline"
-            name="deadline"
-            class="form-input"
-          />
-        </div>
+      <div class="form-group">
+        <label class="form-label">Határidő</label>
+        <input
+          type="date"
+          [(ngModel)]="formData.deadline"
+          name="deadline"
+          class="form-input"
+        />
       </div>
+    </div>
+  </ng-container>
 
-      @if (error()) {
-        <div class="error-message">
-          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-          {{ error() }}
-        </div>
+  <ng-container dialogFooter>
+    <button type="button" class="btn btn--outline" (click)="close.emit()" [disabled]="submitting()">
+      Mégse
+    </button>
+    <button type="button" class="btn btn--primary" [disabled]="submitting()" (click)="onSubmit()">
+      @if (submitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Mentés...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+        Mentés
       }
-
-      <!-- Actions -->
-      <div class="form-actions">
-        <button
-          type="button"
-          class="btn-secondary"
-          (click)="close.emit()"
-          [disabled]="submitting()"
-        >
-          Mégse
-        </button>
-        <button
-          type="submit"
-          class="btn-primary"
-          [disabled]="submitting()"
-        >
-          @if (submitting()) {
-            <span class="spinner"></span>
-            Mentés...
-          } @else {
-            <lucide-icon [name]="ICONS.CHECK" [size]="18" />
-            Mentés
-          }
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

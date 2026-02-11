@@ -3,13 +3,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 @Component({
   selector: 'app-teacher-photo-upload',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   templateUrl: './teacher-photo-upload.component.html',
   styleUrl: './teacher-photo-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,8 +30,6 @@ export class TeacherPhotoUploadComponent {
   setActive = true;
   uploading = signal(false);
   errorMessage = signal<string | null>(null);
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

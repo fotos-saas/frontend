@@ -1,82 +1,71 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  title="Fotó feltöltése"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.CAMERA"
+  size="md"
+  footerAlign="end"
+  [isSubmitting]="uploading()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="upload()"
 >
-  <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
-    <div class="modal-content">
-      <header class="modal-header">
-        <h2>Fotó feltöltése</h2>
-        <button class="close-btn" (click)="close.emit()">
-          <lucide-icon [name]="ICONS.X" [size]="20" />
-        </button>
-      </header>
-
-      <div class="upload-form">
-        <!-- Fotó előnézet / választó -->
-        <div class="photo-preview" (click)="fileInput.click()">
-          @if (previewUrl()) {
-            <img [src]="previewUrl()" alt="Előnézet" />
-          } @else {
-            <div class="upload-placeholder">
-              <lucide-icon [name]="ICONS.CAMERA" [size]="32" />
-              <span>Kattints a fotó kiválasztásához</span>
-            </div>
-          }
-          <input
-            #fileInput
-            type="file"
-            accept="image/*"
-            class="hidden-input"
-            (change)="onFileSelected($event)"
-          />
+  <ng-container dialogBody>
+    <!-- Fotó előnézet / választó -->
+    <div class="photo-preview" (click)="fileInput.click()">
+      @if (previewUrl()) {
+        <img [src]="previewUrl()" alt="Előnézet" />
+      } @else {
+        <div class="upload-placeholder">
+          <lucide-icon [name]="ICONS.CAMERA" [size]="32" />
+          <span>Kattints a fotó kiválasztásához</span>
         </div>
-
-        <div class="form-group">
-          <label for="year">Évszám *</label>
-          <input
-            type="number"
-            id="year"
-            [(ngModel)]="year"
-            name="year"
-            class="form-input"
-            min="2000"
-            max="2100"
-          />
-        </div>
-
-        <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="setActive" name="setActive" />
-          <span>Beállítás aktív fotónak</span>
-        </label>
-
-        @if (errorMessage()) {
-          <div class="error-message">
-            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-            {{ errorMessage() }}
-          </div>
-        }
-
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="close.emit()">
-            Mégse
-          </button>
-          <button
-            type="button"
-            class="btn-primary"
-            [disabled]="uploading() || !selectedFile"
-            (click)="upload()"
-          >
-            @if (uploading()) {
-              <span class="spinner"></span>
-              Feltöltés...
-            } @else {
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-              Feltöltés
-            }
-          </button>
-        </div>
-      </div>
+      }
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        class="hidden-input"
+        (change)="onFileSelected($event)"
+      />
     </div>
-  </div>
-</div>
+
+    <div class="form-group">
+      <label for="year">Évszám *</label>
+      <input
+        type="number"
+        id="year"
+        [(ngModel)]="year"
+        name="year"
+        class="form-input"
+        min="2000"
+        max="2100"
+      />
+    </div>
+
+    <label class="checkbox-label">
+      <input type="checkbox" [(ngModel)]="setActive" name="setActive" />
+      <span>Beállítás aktív fotónak</span>
+    </label>
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button type="button" class="btn-secondary" (click)="close.emit()">
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="uploading() || !selectedFile"
+      (click)="upload()"
+    >
+      @if (uploading()) {
+        <span class="spinner"></span>
+        Feltöltés...
+      } @else {
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+        Feltöltés
+      }
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

@@ -12,9 +12,6 @@ import { SchoolItem } from '../../models/partner.models';
 import { SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { SearchableSelectComponent } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { TeacherProjectCardComponent } from '../teacher-project-card/teacher-project-card.component';
-import { TeacherPhotoUploadComponent } from '../teacher-photo-upload/teacher-photo-upload.component';
-import { TeacherEditModalComponent } from '../teacher-edit-modal/teacher-edit-modal.component';
-import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 @Component({
@@ -25,9 +22,6 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     LucideAngularModule,
     SearchableSelectComponent,
     TeacherProjectCardComponent,
-    TeacherPhotoUploadComponent,
-    TeacherEditModalComponent,
-    MediaLightboxComponent,
   ],
   templateUrl: './teacher-project-view.component.html',
   styleUrl: './teacher-project-view.component.scss',
@@ -55,15 +49,9 @@ export class TeacherProjectViewComponent implements OnInit {
   // Expand state
   expandedIds = signal<Set<number>>(new Set());
 
-  // Upload modal
-  uploadTarget = signal<TeacherInSchool | null>(null);
-  showCreateModal = signal(false);
-  createForTeacher = signal<TeacherInSchool | null>(null);
-
-  // Lightbox
-  lightboxMedia = signal<LightboxMediaItem[]>([]);
-
-  // No photo - emits to parent (dialog outside page-card)
+  // All dialogs are rendered in parent (outside page-card)
+  uploadPhotoRequest = output<TeacherInSchool>();
+  viewPhotoRequest = output<TeacherInSchool>();
   markNoPhotoRequest = output<TeacherInSchool>();
   undoNoPhotoRequest = output<TeacherInSchool>();
 
@@ -157,42 +145,12 @@ export class TeacherProjectViewComponent implements OnInit {
     return this.expandedIds().has(schoolId);
   }
 
-  onUploadPhoto(teacher: TeacherInSchool): void {
-    if (teacher.archiveId) {
-      this.uploadTarget.set(teacher);
-    } else {
-      this.createForTeacher.set(teacher);
-      this.showCreateModal.set(true);
-    }
+  onUploadPhoto(teacher: TeacherInSchool, schoolId: number): void {
+    this.uploadPhotoRequest.emit({ ...teacher, schoolId });
   }
 
   onViewPhoto(teacher: TeacherInSchool): void {
-    if (teacher.photoUrl) {
-      this.lightboxMedia.set([{
-        id: teacher.archiveId,
-        url: teacher.photoUrl,
-        fileName: teacher.name,
-      }]);
-    }
-  }
-
-  closeUpload(): void {
-    this.uploadTarget.set(null);
-  }
-
-  onPhotoUploaded(): void {
-    this.uploadTarget.set(null);
-    this.loadData();
-  }
-
-  closeCreateModal(): void {
-    this.showCreateModal.set(false);
-    this.createForTeacher.set(null);
-  }
-
-  onTeacherCreated(): void {
-    this.closeCreateModal();
-    this.loadData();
+    this.viewPhotoRequest.emit(teacher);
   }
 
   onMarkNoPhoto(teacher: TeacherInSchool): void {

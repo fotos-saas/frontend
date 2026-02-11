@@ -38,6 +38,8 @@
     <app-teacher-project-view
       [schools]="schools()"
       [classYears]="classYears()"
+      (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
+      (viewPhotoRequest)="onViewPhotoFromProject($event)"
       (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
       (undoNoPhotoRequest)="onUndoNoPhotoFromProject($event)"
     />
@@ -230,6 +232,28 @@
     [currentIndex]="0"
     (close)="lightboxMedia.set([])"
     (navigate)="lightboxMedia.set([])"
+  />
+}
+
+<!-- Upload Photo (project view) -->
+@if (uploadTarget(); as target) {
+  <app-teacher-photo-upload
+    [teacherId]="target.archiveId"
+    (close)="uploadTarget.set(null)"
+    (uploaded)="onProjectPhotoUploaded()"
+  />
+}
+
+<!-- Create Teacher for Upload (project view) -->
+@if (showCreateForProject()) {
+  <app-teacher-edit-modal
+    [teacher]="null"
+    mode="create"
+    [schools]="schools()"
+    [prefillName]="createForTeacher()?.name ?? ''"
+    [prefillSchoolId]="createForTeacher()?.schoolId ?? null"
+    (close)="showCreateForProject.set(false); createForTeacher.set(null)"
+    (saved)="onProjectTeacherCreated()"
   />
 }
 

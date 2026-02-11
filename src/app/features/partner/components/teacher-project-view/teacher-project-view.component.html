@@ -88,7 +88,7 @@
         [school]="school"
         [expanded]="isExpanded(school.schoolId)"
         (toggle)="toggleSchool(school.schoolId)"
-        (uploadPhoto)="onUploadPhoto($event)"
+        (uploadPhoto)="onUploadPhoto($event, school.schoolId)"
         (viewPhoto)="onViewPhoto($event)"
         (markNoPhoto)="onMarkNoPhoto($event)"
         (undoNoPhoto)="onUndoNoPhoto($event)"
@@ -98,33 +98,3 @@
   </div>
 }
 
-<!-- Upload Modal -->
-@if (uploadTarget(); as target) {
-  <app-teacher-photo-upload
-    [teacherId]="target.archiveId"
-    (close)="closeUpload()"
-    (uploaded)="onPhotoUploaded()"
-  />
-}
-
-<!-- Create Teacher Modal (ha nincs archive) -->
-@if (showCreateModal()) {
-  <app-teacher-edit-modal
-    [teacher]="null"
-    mode="create"
-    [schools]="schools()"
-    [prefillName]="createForTeacher()?.name ?? ''"
-    (close)="closeCreateModal()"
-    (saved)="onTeacherCreated()"
-  />
-}
-
-<!-- Lightbox -->
-@if (lightboxMedia().length > 0) {
-  <app-media-lightbox
-    [media]="lightboxMedia()"
-    [currentIndex]="0"
-    (close)="lightboxMedia.set([])"
-    (navigate)="lightboxMedia.set([])"
-  />
-}

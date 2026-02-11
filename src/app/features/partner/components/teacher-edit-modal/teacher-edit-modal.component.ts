@@ -25,6 +25,7 @@ export class TeacherEditModalComponent {
   readonly mode = input<'create' | 'edit'>('create');
   readonly schools = input<SchoolItem[]>([]);
   readonly prefillName = input('');
+  readonly prefillSchoolId = input<number | null>(null);
   readonly close = output<void>();
   readonly saved = output<void>();
 
@@ -62,6 +63,9 @@ export class TeacherEditModalComponent {
       this.loadTeacherDetail(teacher.id);
     } else if (this.prefillName()) {
       this.canonicalName = this.prefillName();
+      if (this.prefillSchoolId()) {
+        this.schoolId = this.prefillSchoolId();
+      }
     }
   }
 

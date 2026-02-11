@@ -114,6 +114,7 @@ export interface TeacherInSchool {
   noPhotoMarked: boolean;
   photoThumbUrl: string | null;
   photoUrl: string | null;
+  schoolId?: number;
 }
 
 export interface SchoolClassInfo {

@@ -10,6 +10,7 @@ import { TeacherListItem, TeacherInSchool } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/teacher-edit-modal.component';
 import { TeacherBulkImportDialogComponent } from '../../components/teacher-bulk-import-dialog/teacher-bulk-import-dialog.component';
+import { TeacherPhotoUploadComponent } from '../../components/teacher-photo-upload/teacher-photo-upload.component';
 import { TeacherProjectViewComponent } from '../../components/teacher-project-view/teacher-project-view.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
@@ -26,6 +27,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     MatTooltipModule,
     TeacherEditModalComponent,
     TeacherBulkImportDialogComponent,
+    TeacherPhotoUploadComponent,
     TeacherProjectViewComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
@@ -72,7 +74,10 @@ export class PartnerTeacherListComponent implements OnInit {
   // Lightbox
   lightboxMedia = signal<LightboxMediaItem[]>([]);
 
-  // No photo (project view)
+  // Project view: upload, create, no-photo
+  uploadTarget = signal<TeacherInSchool | null>(null);
+  showCreateForProject = signal(false);
+  createForTeacher = signal<TeacherInSchool | null>(null);
   noPhotoTarget = signal<TeacherInSchool | null>(null);
   private readonly projectView = viewChild(TeacherProjectViewComponent);
 
@@ -222,6 +227,36 @@ export class PartnerTeacherListComponent implements OnInit {
   onBulkImported(): void {
     this.closeBulkImport();
     this.loadTeachers();
+  }
+
+  onUploadPhotoFromProject(teacher: TeacherInSchool): void {
+    if (teacher.archiveId) {
+      this.uploadTarget.set(teacher);
+    } else {
+      this.createForTeacher.set(teacher);
+      this.showCreateForProject.set(true);
+    }
+  }
+
+  onProjectPhotoUploaded(): void {
+    this.uploadTarget.set(null);
+    this.projectView()?.loadData();
+  }
+
+  onProjectTeacherCreated(): void {
+    this.showCreateForProject.set(false);
+    this.createForTeacher.set(null);
+    this.projectView()?.loadData();
+  }
+
+  onViewPhotoFromProject(teacher: TeacherInSchool): void {
+    if (teacher.photoUrl) {
+      this.lightboxMedia.set([{
+        id: teacher.archiveId,
+        url: teacher.photoUrl,
+        fileName: teacher.name,
+      }]);
+    }
   }
 
   onMarkNoPhotoFromProject(teacher: TeacherInSchool): void {

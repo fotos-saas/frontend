@@ -19,7 +19,7 @@
 // Table Header
 .table-header {
   @extend .table-header;
-  grid-template-columns: 1fr 100px 80px;
+  grid-template-columns: 1fr 100px 120px;
 }
 
 .th { @extend .th; }
@@ -33,7 +33,7 @@
 
 .school-row {
   @extend .list-row;
-  grid-template-columns: 1fr 100px 80px;
+  grid-template-columns: 1fr 100px 120px;
 }
 
 .school-info {
@@ -56,12 +56,34 @@
   min-width: 0;
 }
 
+.school-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .school-name {
   font-weight: 600;
   color: #1e293b;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.linked-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #dbeafe;
+  border-radius: 4px;
+  flex-shrink: 0;
+
+  lucide-icon {
+    color: #3b82f6;
+  }
 }
 
 .school-city {
@@ -110,6 +132,15 @@
 // Action buttons - közös stílusok
 .action-btn { @extend .action-btn; }
 .action-btn--danger { @extend .action-btn--danger; }
+.action-btn--warning {
+  @extend .action-btn;
+  color: #f59e0b;
+
+  &:hover {
+    color: #d97706;
+    background: #fffbeb;
+  }
+}
 
 // States - közös stílusok
 .empty-state { @extend .empty-state; }

@@ -117,4 +117,32 @@ export class PartnerSchoolService {
       `${this.baseUrl}/schools/${id}`,
     );
   }
+
+  /**
+   * Iskolák összekapcsolása
+   */
+  linkSchools(schoolIds: number[]): Observable<{ success: boolean; message: string; linkedGroup: string }> {
+    return this.http.post<{ success: boolean; message: string; linkedGroup: string }>(
+      `${this.baseUrl}/schools/link`,
+      { school_ids: schoolIds },
+    );
+  }
+
+  /**
+   * Iskola leválasztása csoportról
+   */
+  unlinkSchool(schoolId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.baseUrl}/schools/${schoolId}/unlink`,
+    );
+  }
+
+  /**
+   * Összekapcsolt csoportok lekérése
+   */
+  getLinkedGroups(): Observable<{ data: Array<{ linkedGroup: string; schools: SchoolItem[] }> }> {
+    return this.http.get<{ data: Array<{ linkedGroup: string; schools: SchoolItem[] }> }>(
+      `${this.baseUrl}/schools/linked-groups`,
+    );
+  }
 }

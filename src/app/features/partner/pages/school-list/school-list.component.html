@@ -78,7 +78,17 @@
           <div class="school-info" (click)="openSchoolDetail(school)">
             <lucide-icon [name]="ICONS.SCHOOL" [size]="20" class="school-icon" />
             <div class="school-details">
-              <span class="school-name">{{ school.name }}</span>
+              <div class="school-name-row">
+                <span class="school-name">{{ school.name }}</span>
+                @if (school.linkedGroup) {
+                  <span
+                    class="linked-badge"
+                    [matTooltip]="'Összekapcsolva: ' + getLinkedSchoolNames(school)"
+                  >
+                    <lucide-icon [name]="ICONS.LINK" [size]="12" />
+                  </span>
+                }
+              </div>
               @if (school.city) {
                 <span class="school-city">
                   <lucide-icon [name]="ICONS.MAP_PIN" [size]="12" />
@@ -103,16 +113,33 @@
           </div>
 
           <div class="school-actions">
+            @if (school.linkedGroup) {
+              <button
+                class="action-btn action-btn--warning"
+                matTooltip="Leválasztás"
+                (click)="unlinkSchool(school)"
+              >
+                <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
+              </button>
+            } @else {
+              <button
+                class="action-btn"
+                matTooltip="Összekapcsolás"
+                (click)="openLinkDialog(school)"
+              >
+                <lucide-icon [name]="ICONS.LINK" [size]="16" />
+              </button>
+            }
             <button
               class="action-btn"
-              data-tooltip="Szerkesztés"
+              matTooltip="Szerkesztés"
               (click)="editSchool(school)"
             >
               <lucide-icon [name]="ICONS.EDIT" [size]="16" />
             </button>
             <button
               class="action-btn action-btn--danger"
-              data-tooltip="Törlés"
+              matTooltip="Törlés"
               [disabled]="school.projectsCount > 0"
               (click)="confirmDeleteSchool(school)"
             >
@@ -181,5 +208,15 @@
     feature="schools"
     [currentPlanId]="schoolLimits()?.plan_id ?? 'alap'"
     (close)="showUpgradeDialog.set(false)"
+  />
+}
+
+<!-- School Link Dialog -->
+@if (showLinkDialog() && selectedSchool()) {
+  <app-school-link-dialog
+    [school]="selectedSchool()!"
+    [allSchools]="schools()"
+    (closeEvent)="closeLinkDialog()"
+    (savedEvent)="onLinkSaved()"
   />
 }

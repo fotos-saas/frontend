@@ -6,6 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, SchoolListItem, SchoolItem, SchoolLimits } from '../../services/partner.service';
 import { SchoolEditModalComponent } from '../../components/school-edit-modal/school-edit-modal.component';
+import { SchoolLinkDialogComponent } from '../../components/school-link-dialog/school-link-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { UpgradeDialogComponent } from '../../../../shared/components/upgrade-dialog/upgrade-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -23,6 +24,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
     LucideAngularModule,
     MatTooltipModule,
     SchoolEditModalComponent,
+    SchoolLinkDialogComponent,
     ConfirmDialogComponent,
     UpgradeDialogComponent,
   ],
@@ -55,6 +57,7 @@ export class PartnerSchoolListComponent implements OnInit {
   showEditModal = signal(false);
   showDeleteConfirm = signal(false);
   showUpgradeDialog = signal(false);
+  showLinkDialog = signal(false);
   selectedSchool = signal<SchoolListItem | null>(null);
   modalMode = signal<'create' | 'edit'>('create');
 
@@ -159,5 +162,32 @@ export class PartnerSchoolListComponent implements OnInit {
           this.closeDeleteConfirm();
         }
       });
+  }
+
+  getLinkedSchoolNames(school: SchoolListItem): string {
+    return school.linkedSchools?.map(s => s.name).join(', ') ?? '';
+  }
+
+  // === Iskola összekapcsolás ===
+
+  openLinkDialog(school: SchoolListItem): void {
+    this.selectedSchool.set(school);
+    this.showLinkDialog.set(true);
+  }
+
+  closeLinkDialog(): void {
+    this.showLinkDialog.set(false);
+    this.selectedSchool.set(null);
+  }
+
+  onLinkSaved(): void {
+    this.closeLinkDialog();
+    this.loadSchools();
+  }
+
+  unlinkSchool(school: SchoolListItem): void {
+    this.partnerService.unlinkSchool(school.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: () => this.loadSchools() });
   }
 }

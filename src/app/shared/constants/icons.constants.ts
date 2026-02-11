@@ -240,6 +240,7 @@ export const ICONS = {
   BUILDING_2: 'building-2',
   SCHOOL: 'school',
   LINK: 'link',
+  UNLINK: 'unlink',
   IMAGE: 'image',
   EXPAND: 'expand',
   FOLDER_PLUS: 'folder-plus',

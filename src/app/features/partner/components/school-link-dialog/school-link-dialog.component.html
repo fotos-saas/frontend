@@ -1,0 +1,90 @@
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.LINK"
+  [title]="'Iskola összekapcsolás'"
+  [description]="'Válaszd ki mely iskolák tartoznak ugyanahhoz a fizikai iskolához. Az összekapcsolt iskolák tanárai közös poolba kerülnek szinkronizáláskor.'"
+  size="md"
+  [isSubmitting]="isSubmitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="closeEvent.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <!-- Kiindulási iskola -->
+    <div class="source-school">
+      <lucide-icon [name]="ICONS.SCHOOL" [size]="18" />
+      <div class="source-school__info">
+        <span class="source-school__name">{{ school().name }}</span>
+        @if (school().city) {
+          <span class="source-school__city">{{ school().city }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Iskola lista -->
+    <div class="school-list">
+      <label class="school-list__label">Kapcsolandó iskolák:</label>
+
+      @if (availableSchools().length === 0) {
+        <p class="school-list__empty">Nincs más iskola a partnerhez rendelve.</p>
+      } @else {
+        @for (s of availableSchools(); track s.id) {
+          <label
+            class="school-item"
+            [class.school-item--selected]="isSelected(s.id)"
+            [class.school-item--disabled]="!isSelected(s.id) && selectedIds().size >= 4"
+          >
+            <input
+              type="checkbox"
+              [checked]="isSelected(s.id)"
+              [disabled]="!isSelected(s.id) && selectedIds().size >= 4"
+              (change)="toggleSchool(s.id)"
+              class="school-item__checkbox"
+            />
+            <div class="school-item__info">
+              <span class="school-item__name">{{ s.name }}</span>
+              @if (s.city) {
+                <span class="school-item__city">{{ s.city }}</span>
+              }
+            </div>
+            @if (s.linkedGroup) {
+              <lucide-icon
+                [name]="ICONS.LINK"
+                [size]="14"
+                class="school-item__linked-icon"
+                matTooltip="Már egy másik csoportban van"
+              />
+            }
+          </label>
+        }
+      }
+    </div>
+
+    @if (selectedIds().size >= 4) {
+      <p class="max-notice">Maximum 5 iskola kapcsolható össze.</p>
+    }
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button
+      type="button"
+      class="btn-secondary"
+      [disabled]="isSubmitting()"
+      (click)="closeEvent.emit()"
+    >
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="!canSubmit() || isSubmitting()"
+      (click)="onSubmit()"
+    >
+      @if (isSubmitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      Összekapcsolás
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

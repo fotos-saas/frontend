@@ -264,6 +264,14 @@ export class PartnerService {
     return this.schoolService.deleteSchool(id);
   }
 
+  linkSchools(schoolIds: number[]) {
+    return this.schoolService.linkSchools(schoolIds);
+  }
+
+  unlinkSchool(schoolId: number) {
+    return this.schoolService.unlinkSchool(schoolId);
+  }
+
   // ============================================
   // CONTACTS (→ PartnerContactService)
   // ============================================

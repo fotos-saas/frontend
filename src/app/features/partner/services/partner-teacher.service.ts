@@ -145,4 +145,11 @@ export class PartnerTeacherService {
   executeSync(request: SyncTeacherRequest): Observable<{ success: boolean; message: string; data: SyncExecuteResponse }> {
     return this.http.post<{ success: boolean; message: string; data: SyncExecuteResponse }>(`${this.baseUrl}/sync-to-project/execute`, request);
   }
+
+  syncCrossSchool(archiveId: number): Observable<{ success: boolean; message: string; data: { photoThumbUrl: string; photoUrl: string } }> {
+    return this.http.post<{ success: boolean; message: string; data: { photoThumbUrl: string; photoUrl: string } }>(
+      `${this.baseUrl}/${archiveId}/sync-cross-school`,
+      {}
+    );
+  }
 }

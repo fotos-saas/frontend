@@ -18,6 +18,7 @@ export class TeacherProjectCardComponent {
 
   toggle = output<void>();
   syncPhotos = output<void>();
+  syncSingleTeacher = output<TeacherInSchool>();
   uploadPhoto = output<TeacherInSchool>();
   viewPhoto = output<TeacherInSchool>();
   markNoPhoto = output<TeacherInSchool>();
@@ -51,5 +52,9 @@ export class TeacherProjectCardComponent {
 
   onUndoNoPhoto(teacher: TeacherInSchool): void {
     this.undoNoPhoto.emit(teacher);
+  }
+
+  onSyncSingle(teacher: TeacherInSchool): void {
+    this.syncSingleTeacher.emit(teacher);
   }
 }

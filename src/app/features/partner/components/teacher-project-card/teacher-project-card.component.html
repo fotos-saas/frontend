@@ -89,6 +89,16 @@
                   </div>
                 } @else {
                   <div class="action-buttons">
+                    @if (teacher.hasSyncablePhoto) {
+                      <button
+                        class="sync-single-btn"
+                        matTooltip="Fotó szinkronizálása más iskolából"
+                        (click)="onSyncSingle(teacher)"
+                      >
+                        <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+                        Szinkronizálom
+                      </button>
+                    }
                     <button
                       class="upload-btn"
                       matTooltip="Fotó feltöltése"

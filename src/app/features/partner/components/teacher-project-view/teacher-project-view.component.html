@@ -89,6 +89,7 @@
         [expanded]="isExpanded(school.schoolId)"
         (toggle)="toggleSchool(school.schoolId)"
         (syncPhotos)="onSyncPhotos(school)"
+        (syncSingleTeacher)="onSyncSingleTeacher($event)"
         (uploadPhoto)="onUploadPhoto($event, school.schoolId)"
         (viewPhoto)="onViewPhoto($event)"
         (markNoPhoto)="onMarkNoPhoto($event)"

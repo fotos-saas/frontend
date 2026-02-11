@@ -179,6 +179,21 @@ export class TeacherProjectViewComponent implements OnInit {
     });
   }
 
+  onSyncSingleTeacher(teacher: TeacherInSchool): void {
+    this.teacherService.syncCrossSchool(teacher.archiveId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.updateTeacherField(teacher.archiveId, {
+            hasPhoto: true,
+            hasSyncablePhoto: false,
+            photoThumbUrl: res.data.photoThumbUrl,
+            photoUrl: res.data.photoUrl,
+          });
+        },
+      });
+  }
+
   private updateTeacherField(archiveId: number, patch: Partial<TeacherInSchool>): void {
     this.schoolGroups.update(groups =>
       groups.map(group => ({

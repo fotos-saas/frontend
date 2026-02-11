@@ -225,6 +225,11 @@
   text-overflow: ellipsis;
 }
 
+.sync-indicator {
+  flex-shrink: 0;
+  color: #16a34a;
+}
+
 .teacher-status {
   flex-shrink: 0;
 }

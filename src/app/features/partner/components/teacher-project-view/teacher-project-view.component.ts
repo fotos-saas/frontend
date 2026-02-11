@@ -147,7 +147,7 @@ export class TeacherProjectViewComponent implements OnInit {
   onViewPhoto(teacher: TeacherInProject): void {
     if (teacher.photoUrl) {
       this.lightboxMedia.set([{
-        id: teacher.personId,
+        id: teacher.archiveId ?? teacher.personId ?? 0,
         url: teacher.photoUrl,
         fileName: teacher.personName,
       }]);

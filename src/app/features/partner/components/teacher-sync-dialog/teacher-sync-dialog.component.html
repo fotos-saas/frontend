@@ -3,7 +3,7 @@
   theme="green"
   [icon]="ICONS.REFRESH"
   [title]="phaseTitle()"
-  size="md"
+  size="lg"
   [closable]="phase() !== 'syncing'"
   [footerAlign]="phase() === 'done' ? 'center' : 'end'"
   [errorMessage]="errorMessage() || null"
@@ -48,32 +48,82 @@
         }
       </div>
 
-      <!-- Szinkronizálható tanárok részletei -->
+      <!-- Szinkronizálható tanárok táblázat -->
       @if (syncableDetails().length > 0) {
         <div class="sync-section">
           <h4 class="sync-section__title">
             <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" class="text-green-500" />
             Szinkronizálható tanárok
           </h4>
-          <div class="sync-list">
+          <div class="sync-table">
+            <!-- Fejléc -->
+            <div class="sync-table__header">
+              <label class="sync-table__check">
+                <input
+                  type="checkbox"
+                  [checked]="allSelected()"
+                  (change)="toggleAll()"
+                  class="sync-checkbox"
+                />
+              </label>
+              <span class="sync-table__th sync-table__th--name">Tanár neve</span>
+              <span class="sync-table__th sync-table__th--match">Egyezés</span>
+              <span class="sync-table__th sync-table__th--confidence">Konfidencia</span>
+              <span class="sync-table__th sync-table__th--archive">Archív név</span>
+            </div>
+            <!-- Sorok -->
             @for (item of syncableDetails(); track item.personId) {
-              <div class="sync-row">
-                <div class="sync-row__photo">
+              <div class="sync-table__row" [class.sync-table__row--selected]="isSelected(item.personId)">
+                <label class="sync-table__check">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(item.personId)"
+                    (change)="togglePerson(item.personId)"
+                    class="sync-checkbox"
+                  />
+                </label>
+                <div class="sync-table__cell sync-table__cell--name">
                   @if (item.photoThumbUrl) {
                     <img [src]="item.photoThumbUrl" [alt]="item.teacherName" class="sync-avatar" />
                   } @else {
                     <div class="sync-avatar sync-avatar--empty">
-                      <lucide-icon [name]="ICONS.USER" [size]="16" />
+                      <lucide-icon [name]="ICONS.USER" [size]="14" />
                     </div>
                   }
+                  <span class="sync-table__name">{{ item.personName }}</span>
                 </div>
-                <div class="sync-row__info">
-                  <span class="sync-row__name">{{ item.personName }}</span>
-                  <span class="sync-row__match">
+                <div class="sync-table__cell sync-table__cell--match">
+                  <span class="sync-badge sync-badge--{{ item.matchType }}">
                     {{ getMatchLabel(item.matchType ?? '') }}
-                    <span class="sync-row__confidence">{{ getConfidencePercent(item.confidence) }}</span>
                   </span>
                 </div>
+                <div class="sync-table__cell sync-table__cell--confidence">
+                  <span class="sync-confidence">{{ getConfidencePercent(item.confidence) }}</span>
+                </div>
+                <div class="sync-table__cell sync-table__cell--archive">
+                  @if (item.teacherName && item.teacherName !== item.personName) {
+                    <span class="sync-table__archive-name">{{ item.teacherName }}</span>
+                  } @else {
+                    <span class="sync-table__archive-name sync-table__archive-name--same">egyezik</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Nincs archív fotó szekció -->
+      @if (noPhotoDetails().length > 0) {
+        <div class="sync-section">
+          <h4 class="sync-section__title">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="14" class="text-amber-500" />
+            Van egyezés, de nincs archív fotó
+          </h4>
+          <div class="sync-list sync-list--muted">
+            @for (item of noPhotoDetails(); track item.personId) {
+              <div class="sync-row sync-row--muted">
+                <span class="sync-row__name">{{ item.personName }}</span>
                 @if (item.teacherName && item.teacherName !== item.personName) {
                   <span class="sync-row__archive-name">{{ item.teacherName }}</span>
                 }
@@ -139,10 +189,15 @@
   <ng-container dialogFooter>
     @if (phase() === 'preview') {
       <button type="button" class="btn btn--outline" (click)="close.emit()">Bezárás</button>
-      @if (canSync()) {
-        <button type="button" class="btn btn--primary" (click)="executeSync()">
+      @if (syncableDetails().length > 0) {
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="!canSync()"
+          (click)="executeSync()"
+        >
           <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
-          Szinkronizálás ({{ preview()?.syncable }})
+          Szinkronizálás ({{ selectedCount() }})
         </button>
       }
     } @else if (phase() === 'done') {

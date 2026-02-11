@@ -152,6 +152,7 @@ export interface TeachersBySchoolResponse {
 export interface SyncTeacherRequest {
   school_id: number;
   class_year?: string;
+  person_ids?: number[];
 }
 
 // Tanár fotó szinkronizálás types

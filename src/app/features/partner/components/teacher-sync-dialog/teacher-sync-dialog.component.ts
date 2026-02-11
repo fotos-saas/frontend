@@ -32,6 +32,18 @@ export class TeacherSyncDialogComponent {
   readonly preview = signal<SyncPreviewResponse | null>(null);
   readonly syncedCount = signal(0);
 
+  // Kijelölés kezelés
+  readonly selectedIds = signal<Set<number>>(new Set());
+
+  readonly selectedCount = computed(() => this.selectedIds().size);
+
+  readonly allSelected = computed(() => {
+    const syncable = this.syncableDetails();
+    if (syncable.length === 0) return false;
+    const selected = this.selectedIds();
+    return syncable.every(d => selected.has(d.personId));
+  });
+
   readonly phaseTitle = computed(() => {
     switch (this.phase()) {
       case 'loading': return 'Tanár fotók szinkronizálása';
@@ -49,8 +61,12 @@ export class TeacherSyncDialogComponent {
     (this.preview()?.details ?? []).filter(d => d.status === 'no_match')
   );
 
+  readonly noPhotoDetails = computed(() =>
+    (this.preview()?.details ?? []).filter(d => d.status === 'no_photo')
+  );
+
   readonly canSync = computed(() =>
-    (this.preview()?.syncable ?? 0) > 0 && this.phase() === 'preview'
+    this.selectedCount() > 0 && this.phase() === 'preview'
   );
 
   ngOnInit(): void {
@@ -69,6 +85,9 @@ export class TeacherSyncDialogComponent {
       .subscribe({
         next: (res) => {
           this.preview.set(res.data);
+          // Alapból mind kijelölve
+          const syncable = (res.data.details ?? []).filter(d => d.status === 'syncable');
+          this.selectedIds.set(new Set(syncable.map(d => d.personId)));
           this.phase.set('preview');
         },
         error: (err) => {
@@ -78,13 +97,41 @@ export class TeacherSyncDialogComponent {
       });
   }
 
+  togglePerson(id: number): void {
+    this.selectedIds.update(set => {
+      const next = new Set(set);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  toggleAll(): void {
+    if (this.allSelected()) {
+      this.selectedIds.set(new Set());
+    } else {
+      const all = this.syncableDetails().map(d => d.personId);
+      this.selectedIds.set(new Set(all));
+    }
+  }
+
+  isSelected(id: number): boolean {
+    return this.selectedIds().has(id);
+  }
+
   executeSync(): void {
     this.phase.set('syncing');
     this.errorMessage.set('');
 
+    const ids = [...this.selectedIds()];
+
     this.teacherService.executeSync({
       school_id: this.schoolId(),
       class_year: this.classYear(),
+      person_ids: ids,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

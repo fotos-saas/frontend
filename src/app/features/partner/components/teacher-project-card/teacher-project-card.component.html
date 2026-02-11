@@ -70,7 +70,6 @@
                   <div class="action-buttons">
                     <button
                       class="upload-btn"
-                      matTooltip="Mégis megvan – fotó feltöltése"
                       (click)="onUpload(teacher)"
                     >
                       <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
@@ -89,7 +88,6 @@
                     @if (teacher.hasSyncablePhoto) {
                       <button
                         class="sync-single-btn"
-                        matTooltip="Fotó szinkronizálása más iskolából"
                         (click)="onSyncSingle(teacher)"
                       >
                         <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
@@ -98,7 +96,6 @@
                     }
                     <button
                       class="upload-btn"
-                      matTooltip="Fotó feltöltése"
                       (click)="onUpload(teacher)"
                     >
                       <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
@@ -106,7 +103,6 @@
                     </button>
                     <button
                       class="no-photo-btn"
-                      matTooltip="Jelölés: nem található kép"
                       (click)="onMarkNoPhoto(teacher)"
                     >
                       <lucide-icon [name]="ICONS.X" [size]="14" />

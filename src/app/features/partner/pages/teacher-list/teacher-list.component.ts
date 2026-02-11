@@ -293,9 +293,9 @@ export class PartnerTeacherListComponent implements OnInit {
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.syncingSchoolId.set(0);
-          this.projectView()?.loadData();
+          this.projectView()?.applySyncResults(res.data.details);
         },
         error: () => this.syncingSchoolId.set(0),
       });

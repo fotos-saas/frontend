@@ -7,6 +7,7 @@ import {
   TeacherSchoolGroup,
   TeacherSchoolSummary,
   TeacherInSchool,
+  SyncResultItem,
 } from '../../models/teacher.models';
 import { SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { SearchableSelectComponent } from '../../../../shared/components/searchable-select/searchable-select.component';
@@ -174,6 +175,20 @@ export class TeacherProjectViewComponent implements OnInit {
       schoolId: school.schoolId,
       classYear: this.selectedYear() || undefined,
     });
+  }
+
+  /** Szinkronizálás után lokálisan frissíti a tanárok state-jét a response alapján. */
+  applySyncResults(details: SyncResultItem[]): void {
+    for (const item of details) {
+      if (item.status === 'synced') {
+        this.updateTeacherField(item.archiveId, {
+          hasPhoto: true,
+          hasSyncablePhoto: false,
+          photoUrl: item.photoUrl ?? null,
+          photoThumbUrl: item.photoThumbUrl ?? null,
+        });
+      }
+    }
   }
 
   onSyncSingleTeacher(teacher: TeacherInSchool): void {

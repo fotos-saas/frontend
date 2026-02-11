@@ -186,6 +186,8 @@ export interface SyncResultItem {
   personName: string;
   status: SyncResultStatus;
   sourceSchoolId?: number;
+  photoUrl?: string;
+  photoThumbUrl?: string;
 }
 
 export interface SyncExecuteResponse {

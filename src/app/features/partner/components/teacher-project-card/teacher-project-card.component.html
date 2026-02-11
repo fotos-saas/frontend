@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="header-right">
-      @if (school().missingPhotoCount > 0 && school().hasTeacherPersons) {
+      @if (school().syncAvailable) {
         <button class="sync-btn" matTooltip="Archív fotók szinkronizálása" (click)="onSync($event)">
           <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
         </button>

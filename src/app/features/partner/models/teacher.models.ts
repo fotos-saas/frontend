@@ -131,6 +131,7 @@ export interface TeacherSchoolGroup {
   teacherCount: number;
   missingPhotoCount: number;
   hasTeacherPersons: boolean;
+  syncAvailable: boolean;
   teachers: TeacherInSchool[];
 }
 

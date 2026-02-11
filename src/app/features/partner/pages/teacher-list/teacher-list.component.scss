@@ -25,13 +25,16 @@
 .toggle-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 34px;
+  gap: 6px;
+  padding: 0 12px;
   height: 34px;
   border: none;
   background: #ffffff;
   color: #94a3b8;
   cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
   transition: all 0.15s;
 
   &:hover {

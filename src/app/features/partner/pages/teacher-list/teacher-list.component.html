@@ -10,17 +10,17 @@
           class="toggle-btn"
           [class.toggle-btn--active]="viewMode() === 'flat'"
           (click)="viewMode.set('flat')"
-          matTooltip="Lista nézet"
         >
           <lucide-icon [name]="ICONS.LIST" [size]="16" />
+          Tanár nézet
         </button>
         <button
           class="toggle-btn"
           [class.toggle-btn--active]="viewMode() === 'project'"
           (click)="viewMode.set('project')"
-          matTooltip="Projekt nézet"
         >
           <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
+          Projekt nézet
         </button>
       </div>
       <button type="button" class="btn-secondary" (click)="openBulkImport()">

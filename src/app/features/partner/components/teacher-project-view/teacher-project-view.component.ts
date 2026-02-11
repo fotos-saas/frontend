@@ -198,7 +198,15 @@ export class TeacherProjectViewComponent implements OnInit {
     this.markNoPhotoRequest.emit(teacher);
   }
 
-  reloadData(): void {
-    this.loadData();
+  /** Lokálisan frissíti a tanár noPhotoMarked állapotát újratöltés nélkül. */
+  markTeacherNoPhoto(archiveId: number): void {
+    this.schoolGroups.update(groups =>
+      groups.map(group => ({
+        ...group,
+        teachers: group.teachers.map(t =>
+          t.archiveId === archiveId ? { ...t, noPhotoMarked: true } : t
+        ),
+      }))
+    );
   }
 }

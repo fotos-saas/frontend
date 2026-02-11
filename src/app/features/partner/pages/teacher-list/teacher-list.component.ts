@@ -234,7 +234,7 @@ export class PartnerTeacherListComponent implements OnInit {
       if (teacher) {
         this.teacherService.markNoPhoto(teacher.archiveId)
           .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(() => this.projectView()?.reloadData());
+          .subscribe(() => this.projectView()?.markTeacherNoPhoto(teacher.archiveId));
       }
     }
     this.noPhotoTarget.set(null);

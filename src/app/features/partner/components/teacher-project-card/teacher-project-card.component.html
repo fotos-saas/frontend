@@ -36,7 +36,11 @@
       } @else {
         <div class="teacher-list">
           @for (teacher of school().teachers; track teacher.archiveId) {
-            <div class="teacher-row" [class.teacher-row--missing]="!teacher.hasPhoto">
+            <div
+              class="teacher-row"
+              [class.teacher-row--missing]="!teacher.hasPhoto && !teacher.noPhotoMarked"
+              [class.teacher-row--marked]="teacher.noPhotoMarked && !teacher.hasPhoto"
+            >
               <div class="teacher-info">
                 <div
                   class="teacher-avatar"
@@ -56,6 +60,10 @@
                 @if (teacher.hasPhoto) {
                   <span class="status-badge status-badge--ok" matTooltip="Van fotó">
                     <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  </span>
+                } @else if (teacher.noPhotoMarked) {
+                  <span class="status-badge status-badge--marked" matTooltip="Nem található jelölés">
+                    <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
                   </span>
                 } @else {
                   <div class="action-buttons">

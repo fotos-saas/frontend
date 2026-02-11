@@ -111,6 +111,7 @@ export interface TeacherInSchool {
   archiveId: number;
   name: string;
   hasPhoto: boolean;
+  noPhotoMarked: boolean;
   photoThumbUrl: string | null;
   photoUrl: string | null;
 }

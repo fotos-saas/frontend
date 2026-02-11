@@ -9,7 +9,7 @@
         <button
           class="toggle-btn"
           [class.toggle-btn--active]="viewMode() === 'flat'"
-          (click)="viewMode.set('flat')"
+          (click)="setViewMode('flat')"
         >
           <lucide-icon [name]="ICONS.LIST" [size]="16" />
           Tanár nézet
@@ -17,7 +17,7 @@
         <button
           class="toggle-btn"
           [class.toggle-btn--active]="viewMode() === 'project'"
-          (click)="viewMode.set('project')"
+          (click)="setViewMode('project')"
         >
           <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
           Projekt nézet

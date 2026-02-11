@@ -54,7 +54,9 @@ export class PartnerTeacherListComponent implements OnInit {
     onStateChange: () => this.loadTeachers(),
   });
 
-  viewMode = signal<'flat' | 'project'>('flat');
+  viewMode = signal<'flat' | 'project'>(
+    (sessionStorage.getItem('teacher-list-view') as 'flat' | 'project') || 'flat'
+  );
 
   teachers = signal<TeacherListItem[]>([]);
   totalPages = signal(1);
@@ -137,6 +139,11 @@ export class PartnerTeacherListComponent implements OnInit {
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages()) return;
     this.filterState.setPage(page);
+  }
+
+  setViewMode(mode: 'flat' | 'project'): void {
+    this.viewMode.set(mode);
+    sessionStorage.setItem('teacher-list-view', mode);
   }
 
   onSchoolFilterChange(value: string): void {

@@ -1,4 +1,4 @@
-.project-card {
+.school-card {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   overflow: hidden;
@@ -54,7 +54,7 @@
   min-width: 0;
 }
 
-.project-name {
+.school-name {
   font-weight: 600;
   font-size: 0.875rem;
   color: #1e293b;
@@ -63,12 +63,9 @@
   text-overflow: ellipsis;
 }
 
-.school-name {
+.class-list {
   font-size: 0.75rem;
   color: #64748b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .header-right {
@@ -101,6 +98,25 @@
 
 .card-body {
   padding: 8px 0;
+}
+
+.classes-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 16px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.class-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #475569;
+  background: #f1f5f9;
+  border-radius: 4px;
 }
 
 .empty-teachers {

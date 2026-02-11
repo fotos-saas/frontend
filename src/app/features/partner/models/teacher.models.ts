@@ -105,36 +105,40 @@ export interface BulkImportExecuteResult {
   skipped: number;
 }
 
-// Projekt nézet types
+// Iskola nézet types (tanárok iskolánként csoportosítva)
 
-export interface TeacherInProject {
-  personId: number | null;
-  personName: string;
-  archiveId: number | null;
+export interface TeacherInSchool {
+  archiveId: number;
+  name: string;
   hasPhoto: boolean;
   photoThumbUrl: string | null;
   photoUrl: string | null;
 }
 
-export interface TeacherProjectGroup {
-  id: number;
-  name: string;
-  schoolName: string | null;
+export interface SchoolClassInfo {
+  projectId: number;
   className: string | null;
   classYear: string | null;
-  teacherCount: number;
-  missingPhotoCount: number;
-  teachers: TeacherInProject[];
 }
 
-export interface TeacherProjectSummary {
-  totalProjects: number;
+export interface TeacherSchoolGroup {
+  schoolId: number;
+  schoolName: string;
+  classes: SchoolClassInfo[];
+  classCount: number;
+  teacherCount: number;
+  missingPhotoCount: number;
+  teachers: TeacherInSchool[];
+}
+
+export interface TeacherSchoolSummary {
+  totalSchools: number;
   totalTeachers: number;
   withPhoto: number;
   missingPhoto: number;
 }
 
-export interface TeachersByProjectResponse {
-  projects: TeacherProjectGroup[];
-  summary: TeacherProjectSummary;
+export interface TeachersBySchoolResponse {
+  schools: TeacherSchoolGroup[];
+  summary: TeacherSchoolSummary;
 }

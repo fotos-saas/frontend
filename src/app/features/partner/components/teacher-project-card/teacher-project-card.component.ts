@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TeacherProjectGroup, TeacherInProject } from '../../models/teacher.models';
+import { TeacherSchoolGroup, TeacherInSchool } from '../../models/teacher.models';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 @Component({
@@ -13,12 +13,12 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TeacherProjectCardComponent {
-  project = input.required<TeacherProjectGroup>();
+  school = input.required<TeacherSchoolGroup>();
   expanded = input(false);
 
   toggle = output<void>();
-  uploadPhoto = output<TeacherInProject>();
-  viewPhoto = output<TeacherInProject>();
+  uploadPhoto = output<TeacherInSchool>();
+  viewPhoto = output<TeacherInSchool>();
 
   readonly ICONS = ICONS;
 
@@ -26,11 +26,11 @@ export class TeacherProjectCardComponent {
     this.toggle.emit();
   }
 
-  onUpload(teacher: TeacherInProject): void {
+  onUpload(teacher: TeacherInSchool): void {
     this.uploadPhoto.emit(teacher);
   }
 
-  onViewPhoto(teacher: TeacherInProject, event: MouseEvent): void {
+  onViewPhoto(teacher: TeacherInSchool, event: MouseEvent): void {
     event.stopPropagation();
     if (teacher.photoUrl) {
       this.viewPhoto.emit(teacher);

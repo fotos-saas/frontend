@@ -29,11 +29,11 @@
 </div>
 
 <!-- Summary -->
-@if (!loading() && projects().length > 0) {
+@if (!loading() && schoolGroups().length > 0) {
   <div class="summary-bar">
     <div class="summary-item">
-      <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
-      <span>{{ summary().totalProjects }} projekt</span>
+      <lucide-icon [name]="ICONS.SCHOOL" [size]="16" />
+      <span>{{ summary().totalSchools }} iskola</span>
     </div>
     <div class="summary-item">
       <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
@@ -70,24 +70,24 @@
       <div class="skeleton-card skeleton-shimmer"></div>
     }
   </div>
-} @else if (projects().length === 0) {
+} @else if (schoolGroups().length === 0) {
   <div class="empty-state">
-    <lucide-icon [name]="ICONS.FOLDER" [size]="40" />
+    <lucide-icon [name]="ICONS.SCHOOL" [size]="40" />
     <p>
       @if (missingOnly()) {
-        Nincs hiányzó fotó a szűrt projektekben.
+        Nincs hiányzó fotó a szűrt iskolákban.
       } @else {
-        Nincs projekt a szűrési feltételeknek megfelelően.
+        Nincs iskola a szűrési feltételeknek megfelelően.
       }
     </p>
   </div>
 } @else {
-  <div class="project-list">
-    @for (project of projects(); track project.id; let i = $index) {
+  <div class="school-list">
+    @for (school of schoolGroups(); track school.schoolId; let i = $index) {
       <app-teacher-project-card
-        [project]="project"
-        [expanded]="isExpanded(project.id)"
-        (toggle)="toggleProject(project.id)"
+        [school]="school"
+        [expanded]="isExpanded(school.schoolId)"
+        (toggle)="toggleSchool(school.schoolId)"
         (uploadPhoto)="onUploadPhoto($event)"
         (viewPhoto)="onViewPhoto($event)"
         [style.animation-delay]="i * 0.03 + 's'"
@@ -99,7 +99,7 @@
 <!-- Upload Modal -->
 @if (uploadTarget(); as target) {
   <app-teacher-photo-upload
-    [teacherId]="target.archiveId!"
+    [teacherId]="target.archiveId"
     (close)="closeUpload()"
     (uploaded)="onPhotoUploaded()"
   />
@@ -111,7 +111,7 @@
     [teacher]="null"
     mode="create"
     [schools]="schools()"
-    [prefillName]="createForTeacher()?.personName ?? ''"
+    [prefillName]="createForTeacher()?.name ?? ''"
     (close)="closeCreateModal()"
     (saved)="onTeacherCreated()"
   />

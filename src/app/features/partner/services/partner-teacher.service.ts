@@ -12,7 +12,7 @@ import {
   BulkImportPreviewItem,
   BulkImportExecuteItem,
   BulkImportExecuteResult,
-  TeachersByProjectResponse,
+  TeachersBySchoolResponse,
 } from '../models/teacher.models';
 import { PaginatedResponse } from '../models/partner.models';
 
@@ -40,17 +40,17 @@ export class PartnerTeacherService {
     return this.http.get<PaginatedResponse<TeacherListItem>>(this.baseUrl, { params: httpParams });
   }
 
-  getTeachersByProject(params?: {
+  getTeachersBySchool(params?: {
     class_year?: string;
     school_id?: number;
     missing_only?: boolean;
-  }): Observable<TeachersByProjectResponse> {
+  }): Observable<TeachersBySchoolResponse> {
     let httpParams = new HttpParams();
     if (params?.class_year) httpParams = httpParams.set('class_year', params.class_year);
     if (params?.school_id) httpParams = httpParams.set('school_id', params.school_id.toString());
     if (params?.missing_only) httpParams = httpParams.set('missing_only', '1');
 
-    return this.http.get<TeachersByProjectResponse>(`${this.baseUrl}/by-project`, { params: httpParams });
+    return this.http.get<TeachersBySchoolResponse>(`${this.baseUrl}/by-project`, { params: httpParams });
   }
 
   getClassYears(): Observable<string[]> {

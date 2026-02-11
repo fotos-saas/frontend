@@ -99,13 +99,3 @@
   </div>
 }
 
-<!-- Sync dialog - page-card-on KÍVÜL renderelődik a parent-ben -->
-@if (showSyncDialog()) {
-  <app-teacher-sync-dialog
-    [schoolId]="syncSchoolId()"
-    [classYear]="syncClassYear()"
-    (close)="showSyncDialog.set(false)"
-    (synced)="onSyncComplete()"
-  />
-}
-

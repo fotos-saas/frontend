@@ -42,6 +42,7 @@
       (viewPhotoRequest)="onViewPhotoFromProject($event)"
       (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
       (undoNoPhotoRequest)="onUndoNoPhotoFromProject($event)"
+      (syncPhotosRequest)="onSyncPhotosFromProject($event)"
     />
   } @else {
 
@@ -254,6 +255,16 @@
     [prefillSchoolId]="createForTeacher()?.schoolId ?? null"
     (close)="showCreateForProject.set(false); createForTeacher.set(null)"
     (saved)="onProjectTeacherCreated()"
+  />
+}
+
+<!-- Teacher Sync Dialog (project view) -->
+@if (showSyncDialog()) {
+  <app-teacher-sync-dialog
+    [schoolId]="syncSchoolId()"
+    [classYear]="syncClassYear()"
+    (close)="showSyncDialog.set(false)"
+    (synced)="onSyncComplete()"
   />
 }
 

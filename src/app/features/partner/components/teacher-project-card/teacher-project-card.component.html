@@ -72,7 +72,12 @@
                 <div class="teacher-details">
                   <span class="teacher-name">{{ teacher.name }}</span>
                   @if (teacher.hasPhoto && teacher.photoFileName) {
-                    <span class="teacher-meta">{{ teacher.photoFileName }}</span>
+                    <span class="teacher-meta">
+                      {{ teacher.photoFileName }}
+                      @if (teacher.photoTakenAt) {
+                        · {{ teacher.photoTakenAt }}
+                      }
+                    </span>
                   }
                 </div>
               </div>

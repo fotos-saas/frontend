@@ -116,7 +116,7 @@ export interface TeacherInSchool {
   photoThumbUrl: string | null;
   photoUrl: string | null;
   photoFileName?: string | null;
-  photoUploadedAt?: string | null;
+  photoTakenAt?: string | null;
   schoolId?: number;
 }
 
@@ -191,7 +191,7 @@ export interface SyncResultItem {
   photoUrl?: string;
   photoThumbUrl?: string;
   photoFileName?: string;
-  photoUploadedAt?: string;
+  photoTakenAt?: string;
 }
 
 export interface SyncExecuteResponse {

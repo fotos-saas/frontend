@@ -187,7 +187,7 @@ export class TeacherProjectViewComponent implements OnInit {
           photoUrl: item.photoUrl ?? null,
           photoThumbUrl: item.photoThumbUrl ?? null,
           photoFileName: item.photoFileName ?? null,
-          photoUploadedAt: item.photoUploadedAt ?? null,
+          photoTakenAt: item.photoTakenAt ?? null,
         });
       }
     }

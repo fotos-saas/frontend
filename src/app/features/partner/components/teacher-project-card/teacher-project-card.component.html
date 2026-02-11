@@ -62,9 +62,23 @@
                     <lucide-icon [name]="ICONS.CHECK" [size]="14" />
                   </span>
                 } @else if (teacher.noPhotoMarked) {
-                  <span class="status-badge status-badge--marked" matTooltip="Nem található jelölés">
-                    <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
-                  </span>
+                  <div class="action-buttons">
+                    <button
+                      class="upload-btn"
+                      matTooltip="Mégis megvan – fotó feltöltése"
+                      (click)="onUpload(teacher)"
+                    >
+                      <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+                      Feltöltés
+                    </button>
+                    <button
+                      class="undo-mark-btn"
+                      matTooltip="Jelölés visszavonása"
+                      (click)="onUndoNoPhoto(teacher)"
+                    >
+                      <lucide-icon [name]="ICONS.UNDO" [size]="14" />
+                    </button>
+                  </div>
                 } @else {
                   <div class="action-buttons">
                     <button

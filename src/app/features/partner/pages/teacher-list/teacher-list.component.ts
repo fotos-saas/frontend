@@ -239,4 +239,10 @@ export class PartnerTeacherListComponent implements OnInit {
     }
     this.noPhotoTarget.set(null);
   }
+
+  onUndoNoPhotoFromProject(teacher: TeacherInSchool): void {
+    this.teacherService.undoNoPhoto(teacher.archiveId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.projectView()?.unmarkTeacherNoPhoto(teacher.archiveId));
+  }
 }

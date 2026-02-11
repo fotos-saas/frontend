@@ -200,6 +200,7 @@ export const ICONS = {
   CIRCLE: 'circle',
   FILE_CHECK: 'file-check',
   CAMERA: 'camera',
+  UNDO: 'undo-2',
 
   // Fájlok és mappák
   FOLDER: 'folder',

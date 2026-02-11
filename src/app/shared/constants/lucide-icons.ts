@@ -150,6 +150,8 @@ import {
   // Webshop
   Store,
   Truck,
+  // Undo
+  Undo2,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -296,4 +298,6 @@ export const LUCIDE_ICONS_MAP = {
   // Webshop
   Store,
   Truck,
+  // Undo
+  Undo2,
 };

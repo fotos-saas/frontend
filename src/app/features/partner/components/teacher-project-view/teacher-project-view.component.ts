@@ -65,6 +65,7 @@ export class TeacherProjectViewComponent implements OnInit {
 
   // No photo - emits to parent (dialog outside page-card)
   markNoPhotoRequest = output<TeacherInSchool>();
+  undoNoPhotoRequest = output<TeacherInSchool>();
 
   schoolOptions = computed<SelectOption[]>(() =>
     this.schools().map(s => ({
@@ -198,13 +199,26 @@ export class TeacherProjectViewComponent implements OnInit {
     this.markNoPhotoRequest.emit(teacher);
   }
 
+  onUndoNoPhoto(teacher: TeacherInSchool): void {
+    this.undoNoPhotoRequest.emit(teacher);
+  }
+
   /** Lokálisan frissíti a tanár noPhotoMarked állapotát újratöltés nélkül. */
   markTeacherNoPhoto(archiveId: number): void {
+    this.updateTeacherField(archiveId, { noPhotoMarked: true });
+  }
+
+  /** Lokálisan visszavonja a noPhotoMarked jelölést. */
+  unmarkTeacherNoPhoto(archiveId: number): void {
+    this.updateTeacherField(archiveId, { noPhotoMarked: false });
+  }
+
+  private updateTeacherField(archiveId: number, patch: Partial<TeacherInSchool>): void {
     this.schoolGroups.update(groups =>
       groups.map(group => ({
         ...group,
         teachers: group.teachers.map(t =>
-          t.archiveId === archiveId ? { ...t, noPhotoMarked: true } : t
+          t.archiveId === archiveId ? { ...t, ...patch } : t
         ),
       }))
     );

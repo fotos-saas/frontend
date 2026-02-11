@@ -44,7 +44,7 @@ export class PartnerTeacherListComponent implements OnInit {
 
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'teachers' },
-    defaultFilters: { school_id: '' },
+    defaultFilters: { school_id: '', class_year: '' },
     defaultSortBy: 'name',
     defaultSortDir: 'asc',
     onStateChange: () => this.loadTeachers(),
@@ -54,6 +54,7 @@ export class PartnerTeacherListComponent implements OnInit {
   totalPages = signal(1);
   totalTeachers = signal(0);
   schools = signal<SchoolItem[]>([]);
+  classYears = signal<SelectOption[]>([]);
 
   /** Iskolák SelectOption formátumban */
   schoolOptions = computed<SelectOption[]>(() =>
@@ -76,6 +77,7 @@ export class PartnerTeacherListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSchools();
+    this.loadClassYears();
     this.loadTeachers();
   }
 
@@ -85,15 +87,27 @@ export class PartnerTeacherListComponent implements OnInit {
       .subscribe({ next: (data) => this.schools.set(data) });
   }
 
+  loadClassYears(): void {
+    this.teacherService.getClassYears()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (years) => this.classYears.set(
+          years.map(y => ({ id: y, label: y }))
+        ),
+      });
+  }
+
   loadTeachers(): void {
     this.filterState.loading.set(true);
     const schoolId = this.filterState.filters().school_id;
+    const classYear = this.filterState.filters().class_year;
 
     this.teacherService.getTeachers({
       page: this.filterState.page(),
       per_page: 18,
       search: this.filterState.search() || undefined,
       school_id: schoolId ? parseInt(schoolId, 10) : undefined,
+      class_year: classYear || undefined,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -114,6 +128,10 @@ export class PartnerTeacherListComponent implements OnInit {
 
   onSchoolFilterChange(value: string): void {
     this.filterState.setFilter('school_id', value);
+  }
+
+  onClassYearChange(value: string): void {
+    this.filterState.setFilter('class_year', value);
   }
 
   openCreateModal(): void {

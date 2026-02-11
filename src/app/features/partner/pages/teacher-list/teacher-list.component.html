@@ -42,6 +42,15 @@
       allLabel="Minden iskola"
       (valueChange)="onSchoolFilterChange($event)"
     />
+
+    <app-searchable-select
+      class="year-filter"
+      [options]="classYears()"
+      [value]="filterState.filters().class_year"
+      placeholder="Évfolyam..."
+      allLabel="Minden évfolyam"
+      (valueChange)="onClassYearChange($event)"
+    />
   </div>
 
   <!-- Lista -->
@@ -57,7 +66,7 @@
         <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="48" />
       </div>
       <h3>Nincs találat</h3>
-      @if (filterState.search() || filterState.filters().school_id) {
+      @if (filterState.search() || filterState.filters().school_id || filterState.filters().class_year) {
         <p>Próbálj más keresési feltételekkel!</p>
       } @else {
         <p>Még nincsenek tanárok hozzáadva.</p>

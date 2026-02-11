@@ -40,6 +40,7 @@
 .clear-btn { @extend .clear-btn; }
 
 .school-filter { min-width: 220px; }
+.year-filter { min-width: 160px; }
 
 // Table
 .table-header {
@@ -172,7 +173,8 @@
     flex-direction: column;
   }
 
-  .school-filter {
+  .school-filter,
+  .year-filter {
     min-width: 100%;
   }
 }

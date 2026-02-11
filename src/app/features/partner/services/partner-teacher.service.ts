@@ -27,14 +27,20 @@ export class PartnerTeacherService {
     per_page?: number;
     search?: string;
     school_id?: number;
+    class_year?: string;
   }): Observable<PaginatedResponse<TeacherListItem>> {
     let httpParams = new HttpParams();
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());
     if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
     if (params?.search) httpParams = httpParams.set('search', params.search);
     if (params?.school_id) httpParams = httpParams.set('school_id', params.school_id.toString());
+    if (params?.class_year) httpParams = httpParams.set('class_year', params.class_year);
 
     return this.http.get<PaginatedResponse<TeacherListItem>>(this.baseUrl, { params: httpParams });
+  }
+
+  getClassYears(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/class-years`);
   }
 
   getAllTeachers(params?: { search?: string; school_id?: number }): Observable<TeacherListItem[]> {

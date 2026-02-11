@@ -5,6 +5,24 @@
       <p class="subtitle">{{ totalTeachers() }} tanár összesen</p>
     </div>
     <div class="header-buttons">
+      <div class="view-toggle">
+        <button
+          class="toggle-btn"
+          [class.toggle-btn--active]="viewMode() === 'flat'"
+          (click)="viewMode.set('flat')"
+          matTooltip="Lista nézet"
+        >
+          <lucide-icon [name]="ICONS.LIST" [size]="16" />
+        </button>
+        <button
+          class="toggle-btn"
+          [class.toggle-btn--active]="viewMode() === 'project'"
+          (click)="viewMode.set('project')"
+          matTooltip="Projekt nézet"
+        >
+          <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
+        </button>
+      </div>
       <button type="button" class="btn-secondary" (click)="openBulkImport()">
         <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
         Tömeges import
@@ -15,6 +33,13 @@
       </button>
     </div>
   </header>
+
+  @if (viewMode() === 'project') {
+    <app-teacher-project-view
+      [schools]="schools()"
+      [classYears]="classYears()"
+    />
+  } @else {
 
   <!-- Szűrők -->
   <div class="filters">
@@ -160,6 +185,8 @@
       </div>
     }
   }
+
+  } <!-- /viewMode flat -->
 </div>
 
 <!-- Create/Edit Modal -->

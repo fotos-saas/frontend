@@ -10,6 +10,7 @@ import { TeacherListItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/teacher-edit-modal.component';
 import { TeacherBulkImportDialogComponent } from '../../components/teacher-bulk-import-dialog/teacher-bulk-import-dialog.component';
+import { TeacherProjectViewComponent } from '../../components/teacher-project-view/teacher-project-view.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
@@ -25,6 +26,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     MatTooltipModule,
     TeacherEditModalComponent,
     TeacherBulkImportDialogComponent,
+    TeacherProjectViewComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
     SearchableSelectComponent,
@@ -49,6 +51,8 @@ export class PartnerTeacherListComponent implements OnInit {
     defaultSortDir: 'asc',
     onStateChange: () => this.loadTeachers(),
   });
+
+  viewMode = signal<'flat' | 'project'>('flat');
 
   teachers = signal<TeacherListItem[]>([]);
   totalPages = signal(1);

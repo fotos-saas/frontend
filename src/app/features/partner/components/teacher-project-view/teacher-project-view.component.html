@@ -1,0 +1,128 @@
+<!-- Szűrők -->
+<div class="project-filters">
+  <app-searchable-select
+    class="filter-select"
+    [options]="schoolOptions()"
+    [value]="selectedSchool()"
+    placeholder="Iskola keresése..."
+    allLabel="Minden iskola"
+    (valueChange)="onSchoolChange($event)"
+  />
+
+  <app-searchable-select
+    class="filter-select filter-select--sm"
+    [options]="classYears()"
+    [value]="selectedYear()"
+    placeholder="Évfolyam..."
+    allLabel="Minden évfolyam"
+    (valueChange)="onYearChange($event)"
+  />
+
+  <button
+    class="filter-toggle"
+    [class.filter-toggle--active]="missingOnly()"
+    (click)="onMissingOnlyChange()"
+  >
+    <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+    Csak hiányzó
+  </button>
+</div>
+
+<!-- Summary -->
+@if (!loading() && projects().length > 0) {
+  <div class="summary-bar">
+    <div class="summary-item">
+      <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
+      <span>{{ summary().totalProjects }} projekt</span>
+    </div>
+    <div class="summary-item">
+      <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
+      <span>{{ summary().totalTeachers }} tanár</span>
+    </div>
+    <div class="summary-item summary-item--ok">
+      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+      <span>{{ summary().withPhoto }} fotóval</span>
+    </div>
+    @if (summary().missingPhoto > 0) {
+      <div class="summary-item summary-item--warn">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+        <span>{{ summary().missingPhoto }} hiányzó</span>
+      </div>
+    }
+
+    <div class="summary-actions">
+      <button class="expand-btn" (click)="expandAll()">
+        <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="14" />
+        Mind
+      </button>
+      <button class="expand-btn" (click)="collapseAll()">
+        <lucide-icon [name]="ICONS.CHEVRON_UP" [size]="14" />
+        Bezár
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Tartalom -->
+@if (loading()) {
+  <div class="loading-state">
+    @for (i of [1, 2, 3, 4]; track i) {
+      <div class="skeleton-card skeleton-shimmer"></div>
+    }
+  </div>
+} @else if (projects().length === 0) {
+  <div class="empty-state">
+    <lucide-icon [name]="ICONS.FOLDER" [size]="40" />
+    <p>
+      @if (missingOnly()) {
+        Nincs hiányzó fotó a szűrt projektekben.
+      } @else {
+        Nincs projekt a szűrési feltételeknek megfelelően.
+      }
+    </p>
+  </div>
+} @else {
+  <div class="project-list">
+    @for (project of projects(); track project.id; let i = $index) {
+      <app-teacher-project-card
+        [project]="project"
+        [expanded]="isExpanded(project.id)"
+        (toggle)="toggleProject(project.id)"
+        (uploadPhoto)="onUploadPhoto($event)"
+        (viewPhoto)="onViewPhoto($event)"
+        [style.animation-delay]="i * 0.03 + 's'"
+      />
+    }
+  </div>
+}
+
+<!-- Upload Modal -->
+@if (uploadTarget(); as target) {
+  <app-teacher-photo-upload
+    [teacherId]="target.archiveId!"
+    (close)="closeUpload()"
+    (uploaded)="onPhotoUploaded()"
+  />
+}
+
+<!-- Create Teacher Modal (ha nincs archive) -->
+@if (showCreateModal()) {
+  <app-teacher-edit-modal
+    [teacher]="null"
+    mode="create"
+    [schools]="schools()"
+    [prefillName]="createForTeacher()?.personName ?? ''"
+    (close)="closeCreateModal()"
+    (saved)="onTeacherCreated()"
+  />
+}
+
+<!-- Lightbox -->
+@if (lightboxMedia().length > 0) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="0"
+    (close)="lightboxMedia.set([])"
+    (navigate)="lightboxMedia.set([])"
+  />
+}

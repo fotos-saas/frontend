@@ -104,3 +104,37 @@ export interface BulkImportExecuteResult {
   updated: number;
   skipped: number;
 }
+
+// Projekt nézet types
+
+export interface TeacherInProject {
+  personId: number;
+  personName: string;
+  archiveId: number | null;
+  hasPhoto: boolean;
+  photoThumbUrl: string | null;
+  photoUrl: string | null;
+}
+
+export interface TeacherProjectGroup {
+  id: number;
+  name: string;
+  schoolName: string | null;
+  className: string | null;
+  classYear: string | null;
+  teacherCount: number;
+  missingPhotoCount: number;
+  teachers: TeacherInProject[];
+}
+
+export interface TeacherProjectSummary {
+  totalProjects: number;
+  totalTeachers: number;
+  withPhoto: number;
+  missingPhoto: number;
+}
+
+export interface TeachersByProjectResponse {
+  projects: TeacherProjectGroup[];
+  summary: TeacherProjectSummary;
+}

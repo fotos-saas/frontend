@@ -1,0 +1,72 @@
+<div class="project-card" [class.project-card--expanded]="expanded()">
+  <!-- Header -->
+  <button class="card-header" (click)="onToggle()">
+    <div class="header-left">
+      <lucide-icon [name]="expanded() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT" [size]="18" class="toggle-icon" />
+      <div class="header-info">
+        <span class="project-name">{{ project().name }}</span>
+        @if (project().schoolName) {
+          <span class="school-name">{{ project().schoolName }}</span>
+        }
+      </div>
+    </div>
+    <div class="header-right">
+      @if (project().missingPhotoCount > 0) {
+        <span class="badge badge--warning" matTooltip="Hiányzó fotók">
+          <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
+          {{ project().missingPhotoCount }}
+        </span>
+      }
+      <span class="badge badge--info" matTooltip="Összes tanár">
+        {{ project().teacherCount }} tanár
+      </span>
+    </div>
+  </button>
+
+  <!-- Tanár lista (expanded) -->
+  @if (expanded()) {
+    <div class="card-body">
+      @if (project().teachers.length === 0) {
+        <div class="empty-teachers">Nincs tanár ebben a projektben.</div>
+      } @else {
+        <div class="teacher-list">
+          @for (teacher of project().teachers; track teacher.personId) {
+            <div class="teacher-row" [class.teacher-row--missing]="!teacher.hasPhoto">
+              <div class="teacher-info">
+                <div
+                  class="teacher-avatar"
+                  [class.teacher-avatar--clickable]="!!teacher.photoUrl"
+                  (click)="onViewPhoto(teacher, $event)"
+                >
+                  @if (teacher.photoThumbUrl) {
+                    <img [src]="teacher.photoThumbUrl" [alt]="teacher.personName" />
+                  } @else {
+                    <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
+                  }
+                </div>
+                <span class="teacher-name">{{ teacher.personName }}</span>
+              </div>
+
+              <div class="teacher-status">
+                @if (teacher.hasPhoto) {
+                  <span class="status-badge status-badge--ok" matTooltip="Van fotó">
+                    <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  </span>
+                } @else {
+                  <button
+                    class="upload-btn"
+                    matTooltip="Fotó feltöltése"
+                    (click)="onUpload(teacher)"
+                  >
+                    <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+                    Feltöltés
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

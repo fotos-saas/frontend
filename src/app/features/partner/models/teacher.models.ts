@@ -108,7 +108,7 @@ export interface BulkImportExecuteResult {
 // Projekt nézet types
 
 export interface TeacherInProject {
-  personId: number;
+  personId: number | null;
   personName: string;
   archiveId: number | null;
   hasPhoto: boolean;

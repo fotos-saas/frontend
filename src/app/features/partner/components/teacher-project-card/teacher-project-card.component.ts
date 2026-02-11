@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TeacherSchoolGroup, TeacherInSchool } from '../../models/teacher.models';
@@ -7,7 +8,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-teacher-project-card',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [DatePipe, LucideAngularModule, MatTooltipModule],
   templateUrl: './teacher-project-card.component.html',
   styleUrl: './teacher-project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -186,6 +186,8 @@ export class TeacherProjectViewComponent implements OnInit {
           hasSyncablePhoto: false,
           photoUrl: item.photoUrl ?? null,
           photoThumbUrl: item.photoThumbUrl ?? null,
+          photoFileName: item.photoFileName ?? null,
+          photoUploadedAt: item.photoUploadedAt ?? null,
         });
       }
     }

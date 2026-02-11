@@ -115,6 +115,8 @@ export interface TeacherInSchool {
   noPhotoMarked: boolean;
   photoThumbUrl: string | null;
   photoUrl: string | null;
+  photoFileName?: string | null;
+  photoUploadedAt?: string | null;
   schoolId?: number;
 }
 
@@ -188,6 +190,8 @@ export interface SyncResultItem {
   sourceSchoolId?: number;
   photoUrl?: string;
   photoThumbUrl?: string;
+  photoFileName?: string;
+  photoUploadedAt?: string;
 }
 
 export interface SyncExecuteResponse {

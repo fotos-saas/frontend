@@ -69,7 +69,17 @@
                     <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
                   }
                 </div>
-                <span class="teacher-name">{{ teacher.name }}</span>
+                <div class="teacher-details">
+                  <span class="teacher-name">{{ teacher.name }}</span>
+                  @if (teacher.hasPhoto && teacher.photoFileName) {
+                    <span class="teacher-meta">
+                      {{ teacher.photoFileName }}
+                      @if (teacher.photoUploadedAt) {
+                        · {{ teacher.photoUploadedAt | date:'yyyy.MM.dd.' }}
+                      }
+                    </span>
+                  }
+                </div>
               </div>
 
               <div class="teacher-status">

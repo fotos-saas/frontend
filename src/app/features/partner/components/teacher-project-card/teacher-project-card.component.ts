@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TeacherSchoolGroup, TeacherInSchool } from '../../models/teacher.models';
@@ -15,6 +15,10 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 export class TeacherProjectCardComponent {
   school = input.required<TeacherSchoolGroup>();
   expanded = input(false);
+
+  syncableCount = computed(() =>
+    this.school().teachers.filter(t => t.hasSyncablePhoto).length
+  );
 
   toggle = output<void>();
   syncPhotos = output<void>();

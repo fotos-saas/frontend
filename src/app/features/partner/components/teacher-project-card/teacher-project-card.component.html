@@ -10,8 +10,13 @@
     </div>
     <div class="header-right">
       @if (school().syncAvailable) {
-        <button class="sync-btn" matTooltip="Archív fotók szinkronizálása" (click)="onSync($event)">
-          <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+        <button
+          class="sync-badge"
+          [matTooltip]="syncableCount() + ' tanár szinkronizálható'"
+          (click)="onSync($event)"
+        >
+          <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
+          {{ syncableCount() }}
         </button>
       }
       @if (school().missingPhotoCount > 0) {
@@ -62,9 +67,13 @@
               </div>
 
               <div class="teacher-status">
-                @if (teacher.hasPhoto) {
+                @if (teacher.hasPhoto && !teacher.hasSyncablePhoto) {
                   <span class="status-badge status-badge--ok" matTooltip="Van fotó">
                     <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  </span>
+                } @else if (teacher.hasPhoto && teacher.hasSyncablePhoto) {
+                  <span class="status-badge status-badge--sync" matTooltip="Archívban van fotó, projektbe szinkronizálás szükséges">
+                    <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
                   </span>
                 } @else if (teacher.noPhotoMarked) {
                   <div class="action-buttons">

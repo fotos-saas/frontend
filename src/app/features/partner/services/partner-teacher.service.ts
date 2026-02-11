@@ -98,6 +98,10 @@ export class PartnerTeacherService {
     return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${teacherId}/photos/${photoId}`);
   }
 
+  markNoPhoto(teacherId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.patch<{ success: boolean; message: string }>(`${this.baseUrl}/${teacherId}/mark-no-photo`, {});
+  }
+
   getChangelog(teacherId: number, params?: { page?: number; per_page?: number }): Observable<PaginatedResponse<TeacherChangeLogEntry>> {
     let httpParams = new HttpParams();
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());

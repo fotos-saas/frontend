@@ -38,6 +38,7 @@
     <app-teacher-project-view
       [schools]="schools()"
       [classYears]="classYears()"
+      (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
     />
   } @else {
 
@@ -228,5 +229,16 @@
     [currentIndex]="0"
     (close)="lightboxMedia.set([])"
     (navigate)="lightboxMedia.set([])"
+  />
+}
+
+<!-- No Photo Confirm (project view) -->
+@if (noPhotoTarget(); as target) {
+  <app-confirm-dialog
+    title="Nem találom a képet"
+    [message]="'Biztosan jelölöd, hogy ' + target.name + ' képe nem található? Ez megjegyzésként kerül mentésre.'"
+    confirmText="Jelölés"
+    confirmType="warning"
+    (resultEvent)="onConfirmNoPhoto($event)"
   />
 }

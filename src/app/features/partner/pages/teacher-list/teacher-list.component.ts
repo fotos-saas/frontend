@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, viewChild, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -6,7 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
-import { TeacherListItem } from '../../models/teacher.models';
+import { TeacherListItem, TeacherInSchool } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/teacher-edit-modal.component';
 import { TeacherBulkImportDialogComponent } from '../../components/teacher-bulk-import-dialog/teacher-bulk-import-dialog.component';
@@ -71,6 +71,10 @@ export class PartnerTeacherListComponent implements OnInit {
 
   // Lightbox
   lightboxMedia = signal<LightboxMediaItem[]>([]);
+
+  // No photo (project view)
+  noPhotoTarget = signal<TeacherInSchool | null>(null);
+  private readonly projectView = viewChild(TeacherProjectViewComponent);
 
   // Modals
   showEditModal = signal(false);
@@ -218,5 +222,21 @@ export class PartnerTeacherListComponent implements OnInit {
   onBulkImported(): void {
     this.closeBulkImport();
     this.loadTeachers();
+  }
+
+  onMarkNoPhotoFromProject(teacher: TeacherInSchool): void {
+    this.noPhotoTarget.set(teacher);
+  }
+
+  onConfirmNoPhoto(result: { action: 'confirm' | 'cancel' }): void {
+    if (result.action === 'confirm') {
+      const teacher = this.noPhotoTarget();
+      if (teacher) {
+        this.teacherService.markNoPhoto(teacher.archiveId)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(() => this.projectView()?.reloadData());
+      }
+    }
+    this.noPhotoTarget.set(null);
   }
 }

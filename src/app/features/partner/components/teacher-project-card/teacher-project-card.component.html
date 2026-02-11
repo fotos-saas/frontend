@@ -58,14 +58,24 @@
                     <lucide-icon [name]="ICONS.CHECK" [size]="14" />
                   </span>
                 } @else {
-                  <button
-                    class="upload-btn"
-                    matTooltip="Fotó feltöltése"
-                    (click)="onUpload(teacher)"
-                  >
-                    <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
-                    Feltöltés
-                  </button>
+                  <div class="action-buttons">
+                    <button
+                      class="upload-btn"
+                      matTooltip="Fotó feltöltése"
+                      (click)="onUpload(teacher)"
+                    >
+                      <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+                      Feltöltés
+                    </button>
+                    <button
+                      class="no-photo-btn"
+                      matTooltip="Jelölés: nem található kép"
+                      (click)="onMarkNoPhoto(teacher)"
+                    >
+                      <lucide-icon [name]="ICONS.X" [size]="14" />
+                      Nem találom
+                    </button>
+                  </div>
                 }
               </div>
             </div>

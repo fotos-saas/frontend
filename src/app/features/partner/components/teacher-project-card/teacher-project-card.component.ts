@@ -19,6 +19,7 @@ export class TeacherProjectCardComponent {
   toggle = output<void>();
   uploadPhoto = output<TeacherInSchool>();
   viewPhoto = output<TeacherInSchool>();
+  markNoPhoto = output<TeacherInSchool>();
 
   readonly ICONS = ICONS;
 
@@ -35,5 +36,9 @@ export class TeacherProjectCardComponent {
     if (teacher.photoUrl) {
       this.viewPhoto.emit(teacher);
     }
+  }
+
+  onMarkNoPhoto(teacher: TeacherInSchool): void {
+    this.markNoPhoto.emit(teacher);
   }
 }

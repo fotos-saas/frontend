@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, input, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, input, output, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -62,6 +62,9 @@ export class TeacherProjectViewComponent implements OnInit {
 
   // Lightbox
   lightboxMedia = signal<LightboxMediaItem[]>([]);
+
+  // No photo - emits to parent (dialog outside page-card)
+  markNoPhotoRequest = output<TeacherInSchool>();
 
   schoolOptions = computed<SelectOption[]>(() =>
     this.schools().map(s => ({
@@ -188,6 +191,14 @@ export class TeacherProjectViewComponent implements OnInit {
 
   onTeacherCreated(): void {
     this.closeCreateModal();
+    this.loadData();
+  }
+
+  onMarkNoPhoto(teacher: TeacherInSchool): void {
+    this.markNoPhotoRequest.emit(teacher);
+  }
+
+  reloadData(): void {
     this.loadData();
   }
 }

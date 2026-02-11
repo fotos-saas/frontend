@@ -1,17 +1,16 @@
-# 📦 PhotoStack Component Registry
+# PhotoStack Component Registry
 
 > **FONTOS:** Mielőtt új komponenst/service-t hoznál létre, MINDIG ellenőrizd ezt a registryt!
 > Ha létezik hasonló, HASZNÁLD azt, NE hozz létre újat!
 
 ---
 
-## 🔍 Gyors Keresés (Claude számára)
-
-Mielőtt implementálsz valamit, keresd meg itt:
+## Gyors Keresés (Claude számára)
 
 | Ha ezt akarod... | Használd ezt | Lokáció |
 |------------------|--------------|---------|
-| Modal/Dialog | `ConfirmDialogComponent` | `@shared/components/confirm-dialog` |
+| Modal/Dialog (egyszerű) | `ConfirmDialogComponent` | `@shared/components/confirm-dialog` |
+| Modal/Dialog (komplex) | `DialogWrapperComponent` | `@shared/components/dialog-wrapper` |
 | Toast üzenet | `ToastService` | `@core/services/toast.service` |
 | Loading spinner | `LoadingSpinnerComponent` | `@shared/components/loading-spinner` |
 | Skeleton loading | `SkeletonComponent` | `@shared/components/skeleton` |
@@ -26,7 +25,7 @@ Mielőtt implementálsz valamit, keresd meg itt:
 | Dátumválasztó | `mat-datepicker` | `@angular/material/datepicker` |
 | Táblázat | `mat-table` | `@angular/material/table` |
 | Értesítések (web) | `ToastService` | `@core/services/toast.service` |
-| Értesítések (native) | `ElectronService.showNotification()` | `@core/services/electron.service` |
+| Értesítések (native) | `ElectronService` | `@core/services/electron.service` |
 | Auth kezelés | `AuthService` | `@core/services/auth.service` |
 | WebSocket | `WebsocketService` | `@core/services/websocket.service` |
 | Szűrők tárolása | `FilterPersistenceService` | `@core/services/filter-persistence.service` |
@@ -35,21 +34,34 @@ Mielőtt implementálsz valamit, keresd meg itt:
 | Platform detection | `ElectronService` | `@core/services/electron.service` |
 | Dark mode | `ElectronService.darkModeChanges` | `@core/services/electron.service` |
 | Offline queue | `ElectronService.queueRequest()` | `@core/services/electron.service` |
+| Logging | `LoggerService` | `@core/services/logger.service` |
+| Partner API | `PartnerService` (facade) | `@features/partner/services/partner.service` |
+| Guest API | `GuestService` (facade) | `@core/services/guest.service` |
 
 ---
 
-## 🧱 UI Komponensek
+## UI Komponensek
 
 ### Dialógusok / Modalok
 
-```typescript
-// ❌ NE CSINÁLJ ILYET - új modal komponens
-@Component({ template: `<div class="my-custom-modal">...` })
+**DialogWrapperComponent (ajánlott komplex dialógusokhoz)**
 
-// ✅ HASZNÁLD EZT
+```typescript
+import { DialogWrapperComponent } from '@shared/components/dialog-wrapper';
+```
+
+- **3 header stílus:** hero (gradient+nagy ikon), flat (border-bottom+kis ikon), minimal (csak cím)
+- **3 méret:** sm (384px), md (480px), lg (800px)
+- **5 téma:** purple, green, blue, red, amber
+- **Slotok:** dialogBody, dialogLeft/dialogRight (2-column), dialogFooter, dialogExtra
+- **Footer:** end/center/stretch align, Enter submit, ESC close
+- **FONTOS:** ng-content projected tartalom a HOST scope-ban stílusozódik
+
+**ConfirmDialogComponent (egyszerű megerősítés)**
+
+```typescript
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog';
 
-// Használat:
 this.dialog.open(ConfirmDialogComponent, {
   data: {
     title: 'Törlés megerősítése',
@@ -64,84 +76,89 @@ this.dialog.open(ConfirmDialogComponent, {
 - `ConfirmDialogComponent` - Megerősítő dialógus (törlés, mentés)
 - `AlertDialogComponent` - Egyszerű értesítő dialógus
 - `InputDialogComponent` - Input mezős dialógus
+- `DialogWrapperComponent` - Komplex dialógus wrapper (hero/flat/minimal header)
 
 ### Loading / Skeleton
 
-```typescript
-// ❌ NE CSINÁLJ ILYET
-<div *ngIf="loading" class="spinner">...</div>
-
-// ✅ HASZNÁLD EZT
-<app-skeleton *ngIf="loading" [lines]="3" />
-<app-loading-spinner *ngIf="loading" [size]="'md'" />
+```html
+@if (loading()) {
+  <app-skeleton [lines]="3" />
+}
 ```
 
 ### Ikonok
 
 ```typescript
-// ❌ NE CSINÁLJ ILYET
-<span>📱</span>  // emoji
-<i class="fa fa-plus"></i>  // FontAwesome
-
-// ✅ HASZNÁLD EZT
 import { ICONS } from '@shared/constants/icons.constants';
 
 readonly ICONS = ICONS;
 
 // Template:
 <lucide-icon [name]="ICONS.PLUS" [size]="18" />
-<lucide-icon [name]="ICONS.TRASH" [size]="16" class="text-red-500" />
 ```
 
 ### Tooltip
 
-```typescript
-// ❌ NE CSINÁLJ ILYET
-<span title="Tooltip szöveg">...</span>
-<span data-tooltip="...">...</span>
-
-// ✅ HASZNÁLD EZT
+```html
 <button matTooltip="Mentés">Save</button>
 <button matTooltip="Törlés" matTooltipPosition="above">Delete</button>
 ```
 
 ---
 
-## 🔧 Core Services
+## Core Services
+
+### LoggerService (Logging - console.log HELYETT!)
+
+```typescript
+import { LoggerService } from '@core/services/logger.service';
+
+private readonly logger = inject(LoggerService);
+
+this.logger.info('Művelet sikeres', { context: 'details' });
+this.logger.warn('Figyelmeztetés');
+this.logger.error('Hiba', error);
+```
 
 ### ToastService (Értesítések)
 
 ```typescript
-// ❌ NE CSINÁLJ ILYET - alert() vagy console.log()
-alert('Sikeres mentés!');
-
-// ✅ HASZNÁLD EZT
 import { ToastService } from '@core/services/toast.service';
 
-constructor(private toast: ToastService) {}
+private readonly toast = inject(ToastService);
 
-// Használat:
 this.toast.success('Sikeres mentés!');
 this.toast.error('Hiba történt!');
 this.toast.warning('Figyelmeztetés');
 this.toast.info('Információ');
 ```
 
+### AuthService (Autentikáció - Signal-based)
+
+```typescript
+import { AuthService } from '@core/services/auth.service';
+
+private readonly auth = inject(AuthService);
+
+// Signal-based (ajánlott):
+this.auth.isAuthenticated()    // signal<boolean>
+this.auth.currentUser()        // signal<User | null>
+this.auth.project()            // signal<Project | null>
+
+// Observable (backward compat):
+this.auth.isAuthenticated$     // Observable<boolean>
+this.auth.currentUser$         // Observable<User>
+```
+
 ### FileUploadService (Fájl feltöltés)
 
 ```typescript
-// ❌ NE CSINÁLJ ILYET - saját fetch/XMLHttpRequest
-const formData = new FormData();
-fetch('/upload', { body: formData });
-
-// ✅ HASZNÁLD EZT
 import { FileUploadService } from '@core/services/file-upload.service';
 
-constructor(private fileUpload: FileUploadService) {}
+private readonly fileUpload = inject(FileUploadService);
 
-// Használat:
 this.fileUpload.upload(file, {
-  onProgress: (percent) => this.progress = percent,
+  onProgress: (percent) => this.progress.set(percent),
   onComplete: (response) => this.handleComplete(response),
   onError: (error) => this.handleError(error)
 });
@@ -150,77 +167,90 @@ this.fileUpload.upload(file, {
 ### LightboxService (Képnagyítás)
 
 ```typescript
-// ❌ NE CSINÁLJ ILYET - saját modal képhez
-<div class="image-modal" *ngIf="showImage">
-
-// ✅ HASZNÁLD EZT
 import { LightboxService } from '@core/services/lightbox.service';
 
-constructor(private lightbox: LightboxService) {}
+private readonly lightbox = inject(LightboxService);
 
-// Használat:
 this.lightbox.open(imageUrl);
 this.lightbox.openGallery(images, startIndex);
 ```
 
-### AuthService (Autentikáció)
+---
+
+## Facade Pattern Services
+
+A nagy service-ek facade + sub-service pattern-nel vannak szétbontva. **MINDIG a facade-on keresztül használd!**
+
+### PartnerService (Facade)
 
 ```typescript
-import { AuthService } from '@core/services/auth.service';
-
-// Ellenőrzések:
-this.authService.isAuthenticated$  // Observable<boolean>
-this.authService.currentUser$      // Observable<User>
-this.authService.hasRole('admin')  // boolean
-
-// Műveletek:
-this.authService.login(credentials)
-this.authService.logout()
-this.authService.refreshToken()
+import { PartnerService } from '@features/partner/services/partner.service';
 ```
 
-### ElectronService (Desktop Native API)
+**Sub-service-ek** (`@features/partner/services/`):
+
+| Service | Felelősség |
+|---------|------------|
+| `partner-project.service` | Projekt CRUD, beállítások |
+| `partner-contact.service` | Kontakt kezelés |
+| `partner-album.service` | Album műveletek |
+| `partner-gallery.service` | Galéria + monitoring + export |
+| `partner-school.service` | Iskola kezelés |
+| `partner-guest.service` | Vendég kezelés |
+| `partner-orders.service` | Rendelés facade |
+| `partner-order-list.service` | Rendelés lista |
+| `partner-order-detail.service` | Rendelés részletek |
+| `partner-billing.service` | Számlázás |
+| `partner-qr.service` | QR kód generálás |
+| `partner-service-catalog.service` | Szolgáltatás katalógus |
+| `partner-stripe-settings.service` | Stripe konfiguráció |
+| `partner-teacher.service` | Tanári adatbázis |
+| `partner-webshop.service` | Webshop integráció |
+
+### GuestService (Facade)
+
+```typescript
+import { GuestService } from '@core/services/guest.service';
+```
+
+**Sub-service-ek** (`@core/services/`):
+
+| Service | Felelősség |
+|---------|------------|
+| `guest-session.service` | Session kezelés |
+| `guest-verification.service` | Email verifikáció |
+
+### ElectronService (Facade)
 
 ```typescript
 import { ElectronService } from '@core/services/electron.service';
-
-// Platform check
-if (this.electronService.isElectron) { ... }
-if (this.electronService.isMac) { ... }
-
-// Native notification
-await this.electronService.showNotification({
-  title: 'PhotoStack',
-  body: 'Sikeres feltöltés!',
-  hasReply: true  // macOS reply
-});
-
-// Offline support
-if (!this.electronService.isOnline) {
-  await this.electronService.queueRequest({ method: 'POST', url, body });
-}
-
-// Dark mode
-this.electronService.darkModeChanges.subscribe(isDark => ...);
-
-// Dock badge (macOS)
-await this.electronService.setBadgeCount(5);
-
-// Auto-update
-this.electronService.autoUpdate.checkForUpdates();
 ```
+
+**Sub-service-ek** (`@core/services/`):
+
+| Service | Felelősség |
+|---------|------------|
+| `electron-cache.service` | Offline cache, sync queue |
+| `electron-drag.service` | Native drag & drop, Touch Bar |
+| `electron-notification.service` | Értesítések, dock badge |
+| `electron-payment.service` | Stripe payment, deep links |
+
+### Egyéb Facade-ok
+
+| Facade | Lokáció |
+|--------|---------|
+| `order-finalization-facade.service` | `@features/order-finalization/services/` |
+| `template-chooser-facade.service` | `@features/template-chooser/` |
+| `voting-list-facade.service` | `@features/voting/voting-list/` |
+| `project-detail-wrapper-facade.service` | `@shared/components/project-detail/` |
 
 ---
 
-## 🏗️ Layout Komponensek
+## Layout Komponensek
 
 ### Page Layout
 
 ```html
-<!-- ❌ NE CSINÁLJ ILYET -->
-<div class="my-custom-page">
-
-<!-- ✅ HASZNÁLD EZT -->
 <div class="my-component page-card">
   <!-- Tartalom -->
 </div>
@@ -239,13 +269,12 @@ this.electronService.autoUpdate.checkForUpdates();
 import { SidebarComponent } from '@core/layout/components/sidebar';
 import { MenuConfigService } from '@core/layout/services/menu-config.service';
 
-// Menü konfiguráció:
 this.menuConfig.setMenuItems([...]);
 ```
 
 ---
 
-## 📋 Shared Utilities
+## Shared Utilities
 
 ### Dialog Utils
 
@@ -267,7 +296,6 @@ import { formatDate, parseDate, isToday } from '@shared/utils/date.util';
 ```typescript
 import { CustomValidators } from '@shared/validators';
 
-// Használat:
 this.form = this.fb.group({
   email: ['', [Validators.required, CustomValidators.email]],
   phone: ['', CustomValidators.hungarianPhone],
@@ -276,7 +304,7 @@ this.form = this.fb.group({
 
 ---
 
-## 🎨 CSS Osztályok
+## CSS Osztályok
 
 ### Dialog Panel Méretek
 
@@ -289,55 +317,55 @@ this.form = this.fb.group({
 ### Animációk
 
 ```css
-/* Fade in */
 .fade-enter { animation: fadeIn 0.2s ease; }
-
-/* Slide up */
 .slide-up { animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-
-/* Staggered list */
 .stagger-item { animation-delay: calc(var(--index) * 0.05s); }
 ```
 
 ---
 
-## 🔄 Patterns (Minták)
+## Patterns (Minták)
 
-### Cleanup Pattern (KÖTELEZŐ)
+### Cleanup Pattern (KÖTELEZŐ - Modern)
 
 ```typescript
-// MINDEN komponensben ami subscription-t használ:
-private destroy$ = new Subject<void>();
+// Angular 21+ - takeUntilDestroyed()
+private readonly destroyRef = inject(DestroyRef);
 
-ngOnInit() {
+constructor() {
   this.service.data$
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(data => this.data = data);
+    .pipe(takeUntilDestroyed())
+    .subscribe(data => this.handleData(data));
 }
+```
 
-ngOnDestroy() {
-  this.destroy$.next();
-  this.destroy$.complete();
-}
+### Signal State Pattern (AJÁNLOTT)
+
+```typescript
+// Signal-based state (NEM BehaviorSubject!)
+private readonly _items = signal<Item[]>([]);
+readonly items = this._items.asReadonly();
+readonly activeItems = computed(() => this._items().filter(i => i.active));
 ```
 
 ### Loading State Pattern
 
 ```typescript
-loading = false;
-error: string | null = null;
+readonly loading = signal(false);
+readonly error = signal<string | null>(null);
 
 async loadData() {
-  this.loading = true;
-  this.error = null;
+  this.loading.set(true);
+  this.error.set(null);
 
   try {
-    this.data = await this.service.getData();
+    const data = await this.service.getData();
+    this._items.set(data);
   } catch (err) {
-    this.error = 'Hiba az adatok betöltésekor';
-    this.toast.error(this.error);
+    this.error.set('Hiba az adatok betöltésekor');
+    this.toast.error(this.error());
   } finally {
-    this.loading = false;
+    this.loading.set(false);
   }
 }
 ```
@@ -355,52 +383,53 @@ onSubmit() {
     this.form.markAllAsTouched();
     return;
   }
-
   // Submit logic...
 }
 ```
 
 ---
 
-## 🚫 Anti-Patterns (KERÜLENDŐ)
+## Anti-Patterns (KERÜLENDŐ)
 
 ```typescript
-// ❌ NE CSINÁLJ ILYET:
-
 // 1. any típus
-const data: any = response;
+const data: any = response;              // signal<Data> + proper typing
 
 // 2. Subscription leak
-this.service.data$.subscribe(d => this.data = d);  // nincs unsubscribe!
+this.service.data$.subscribe(d => ...);  // takeUntilDestroyed()!
 
-// 3. Console.log production-ben
-console.log('Debug:', data);
+// 3. Console.log
+console.log('Debug:', data);             // LoggerService!
 
 // 4. Magyar változónév
-const felhasznaloNeve = user.name;
+const felhasznaloNeve = user.name;       // angol változónevek!
 
 // 5. Inline style
-<div style="color: red; margin: 10px">
+<div style="color: red;">               // SCSS class!
 
-// 6. Emoji ikon helyett
-<span>✅</span>
+// 6. Emoji ikon
+<span>...</span>                         // Lucide icon!
 
-// 7. Saját modal implementáció
-// 8. Saját toast implementáció
-// 9. Saját loading spinner
+// 7. Régi cleanup pattern
+private destroy$ = new Subject<void>();  // takeUntilDestroyed()!
+
+// 8. BehaviorSubject state-hez
+new BehaviorSubject<T>(initial);         // signal<T>(initial)!
+
+// 9. Saját modal/toast/spinner implementáció
 // 10. Hardcoded API URL
 ```
 
 ---
 
-## 📊 Mikor Hozz Létre Újat?
+## Mikor Hozz Létre Újat?
 
 Csak akkor hozz létre új komponenst/service-t, ha:
 
-1. ✅ Átnézted ezt a registryt és NINCS megfelelő
-2. ✅ A meglévő NEM bővíthető az igényedhez
-3. ✅ Legalább 3 helyen fogod használni (újrahasználható)
-4. ✅ Megbeszélted a döntést (review)
+1. Átnézted ezt a registryt és NINCS megfelelő
+2. A meglévő NEM bővíthető az igényedhez
+3. Legalább 3 helyen fogod használni (újrahasználható)
+4. Megbeszélted a döntést (review)
 
 Ha új komponenst hozol létre:
 1. ADD HOZZÁ EZT A REGISTRYT!

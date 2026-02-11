@@ -68,20 +68,22 @@ az app memóriahasználata folyamatosan nő galéria váltáskor.
    - setInterval/setTimeout clear nélkül
 
 2. **IMPLEMENT**:
-   Javítsd a talált problémákat a cleanup pattern szerint:
+   Javítsd a talált problémákat a modern cleanup pattern szerint:
    ```typescript
-   private destroy$ = new Subject<void>();
+   // Angular 21+ - takeUntilDestroyed()
+   private destroyRef = inject(DestroyRef);
 
-   ngOnDestroy() {
-     this.destroy$.next();
-     this.destroy$.complete();
+   constructor() {
+     this.someStream$
+       .pipe(takeUntilDestroyed())
+       .subscribe();
    }
    ```
 
 3. **REVIEW** (subagent):
    "Ellenőrizd hogy minden subscription cleanup-olva van:
-    - takeUntil pattern használva?
-    - Subject-ek complete()-elve?
+    - takeUntilDestroyed() használva?
+    - Nincs régi takeUntil+destroy$ pattern?
     - Listener-ek eltávolítva?"
 
 ## Tesztelés

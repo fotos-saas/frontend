@@ -79,28 +79,35 @@ Van egy terved/specifikációd amit követned kell.
 
 ## Kód template-ek
 
-### Angular Component
+### Angular Component (Modern - Angular 21+)
 ```typescript
 @Component({
   selector: 'app-feature',
   standalone: true,
   imports: [...],
-  template: `...`
+  templateUrl: './feature.component.html',
+  styleUrl: './feature.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FeatureComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+export class FeatureComponent {
+  private readonly featureService = inject(FeatureService);
 
-  constructor(private featureService: FeatureService) {}
+  // Signal inputs/outputs
+  readonly data = input.required<Data>();
+  readonly action = output<void>();
 
-  ngOnInit(): void {
+  // Signal state
+  private readonly _items = signal<Item[]>([]);
+  readonly items = this._items.asReadonly();
+
+  // Computed
+  readonly activeItems = computed(() => this._items().filter(i => i.active));
+
+  constructor() {
+    // Modern cleanup - takeUntilDestroyed()
     this.featureService.data$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed())
       .subscribe(data => this.handleData(data));
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
 ```
@@ -148,9 +155,10 @@ Te egy szigorú code reviewer vagy. A feladatod a kód minőségének ellenőrz�
 ## Checklist
 
 ### 1. Memory Leaks
-- [ ] Van takeUntil + destroy$ minden subscription-höz?
+- [ ] Van takeUntilDestroyed() minden subscription-höz?
+- [ ] NINCS régi takeUntil + destroy$ pattern?
 - [ ] Event listener-ek cleanup-ja megvan?
-- [ ] setInterval/setTimeout clearelve ngOnDestroy-ban?
+- [ ] setInterval/setTimeout cleanup DestroyRef-vel?
 
 ### 2. Type Safety
 - [ ] Van `any` típus? → HIBA
@@ -267,11 +275,12 @@ Te egy performance szakértő vagy. A feladatod teljesítmény problémák azono
 
 ## Checklist
 
-### 1. Angular Specifikus
+### 1. Angular Specifikus (21+)
 - [ ] OnPush change detection használva?
-- [ ] trackBy function ngFor-oknál?
-- [ ] Async pipe subscription helyett?
-- [ ] Pure pipe-ok impure helyett?
+- [ ] @for track expression használva?
+- [ ] Signal-based state (nem BehaviorSubject)?
+- [ ] computed() getter helyett?
+- [ ] rxResource() manuális subscribe helyett?
 
 ### 2. Bundle Size
 - [ ] Lazy loading feature moduloknál?
@@ -373,11 +382,25 @@ Spawolj egy PERFORMANCE subagent-et:
 
 ## 📋 GYORS PROMPT-OK
 
-### Quick Fix
+### Új Feature
 ```
-Javítsd ezt a hibát: [leírás]
-Fájl: [fájl]
-Követelmények: TypeScript strict, cleanup pattern, error handling
+Olvasd be a CLAUDE.md-t. Implementáld: [feature leírás]
+Érintett: [fájlok]
+Mikor kész, spawolj reviewer subagent-et.
+```
+
+### Bug Fix
+```
+Olvasd be: [fájl]
+Bug: [leírás]
+Javítsd, majd spawolj reviewer subagent-et ellenőrzésre.
+```
+
+### Refactor
+```
+Olvasd be: [fájl]
+Probléma: [túl hosszú/duplikált kód/stb]
+Tervezd meg a refactort, mutasd meg, majd implementáld.
 ```
 
 ### Quick Review
@@ -400,6 +423,27 @@ Ellenőrizd a [komponens] teljesítményét:
 - OnPush használva?
 - trackBy ngFor-nál?
 - Subscription cleanup?
+```
+
+---
+
+## ⚡ ONE-LINER PROMPT-OK
+
+```bash
+# Új IPC handler
+"Adj hozzá [handler-name] IPC handler-t. Input: [params]. Output: [result]. Kövesd a CLAUDE.md IPC mintát."
+
+# Komponens létrehozás
+"Hozz létre [ComponentName] komponenst. Standalone, OnPush, cleanup pattern. Template: [leírás]"
+
+# Service bővítés
+"Bővítsd a [ServiceName]-et: [új metódus leírás]. Error handling, TypeScript strict."
+
+# Bug keresés
+"Keress memory leak-et a [fájl]-ban. Ellenőrizd: subscription cleanup, event listener, interval."
+
+# Quick review
+"Spawolj reviewer-t: [fájl]. Fókusz: [terület]."
 ```
 
 ---

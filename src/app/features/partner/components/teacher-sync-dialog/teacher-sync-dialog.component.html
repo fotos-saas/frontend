@@ -72,13 +72,13 @@
               <span class="sync-table__th sync-table__th--archive">Archív név</span>
             </div>
             <!-- Sorok -->
-            @for (item of syncableDetails(); track item.personId) {
-              <div class="sync-table__row" [class.sync-table__row--selected]="isSelected(item.personId)">
+            @for (item of syncableDetails(); track item.archiveId) {
+              <div class="sync-table__row" [class.sync-table__row--selected]="isSelected(item.archiveId)">
                 <label class="sync-table__check">
                   <input
                     type="checkbox"
-                    [checked]="isSelected(item.personId)"
-                    (change)="togglePerson(item.personId)"
+                    [checked]="isSelected(item.archiveId)"
+                    (change)="togglePerson(item.archiveId)"
                     class="sync-checkbox"
                   />
                 </label>
@@ -118,10 +118,10 @@
         <div class="sync-section">
           <h4 class="sync-section__title">
             <lucide-icon [name]="ICONS.IMAGE" [size]="14" class="text-amber-500" />
-            Van egyezés, de nincs archív fotó
+            Nincs fotó más iskolánál sem
           </h4>
           <div class="sync-list sync-list--muted">
-            @for (item of noPhotoDetails(); track item.personId) {
+            @for (item of noPhotoDetails(); track item.archiveId) {
               <div class="sync-row sync-row--muted">
                 <span class="sync-row__name">{{ item.personName }}</span>
                 @if (item.teacherName && item.teacherName !== item.personName) {
@@ -141,7 +141,7 @@
             Nem párosítható
           </h4>
           <div class="sync-list sync-list--muted">
-            @for (item of noMatchDetails(); track item.personId) {
+            @for (item of noMatchDetails(); track item.archiveId) {
               <div class="sync-row sync-row--muted">
                 <span class="sync-row__name">{{ item.personName }}</span>
               </div>
@@ -153,7 +153,7 @@
       @if (p.total === 0) {
         <div class="sync-empty">
           <lucide-icon [name]="ICONS.USERS" [size]="32" class="text-gray-300" />
-          <p>Nincs tanár típusú személy az iskolában.</p>
+          <p>Nincs tanár az archívban ehhez az iskolához.</p>
         </div>
       }
 

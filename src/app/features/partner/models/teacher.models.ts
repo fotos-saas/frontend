@@ -152,7 +152,7 @@ export interface TeachersBySchoolResponse {
 export interface SyncTeacherRequest {
   school_id: number;
   class_year?: string;
-  person_ids?: number[];
+  archive_ids?: number[];
 }
 
 // Tanár fotó szinkronizálás types
@@ -160,7 +160,7 @@ export interface SyncTeacherRequest {
 export type SyncPreviewStatus = 'syncable' | 'no_match' | 'no_photo' | 'already_has_photo';
 
 export interface SyncPreviewItem {
-  personId: number;
+  archiveId: number;
   personName: string;
   status: SyncPreviewStatus;
   matchType?: string;
@@ -182,12 +182,10 @@ export interface SyncPreviewResponse {
 export type SyncResultStatus = 'synced' | 'no_match' | 'no_photo';
 
 export interface SyncResultItem {
-  personId: number;
+  archiveId: number;
   personName: string;
   status: SyncResultStatus;
-  matchType?: string;
-  teacherName?: string;
-  confidence?: number;
+  sourceSchoolId?: number;
 }
 
 export interface SyncExecuteResponse {

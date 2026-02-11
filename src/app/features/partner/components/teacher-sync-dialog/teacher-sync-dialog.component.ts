@@ -41,7 +41,7 @@ export class TeacherSyncDialogComponent {
     const syncable = this.syncableDetails();
     if (syncable.length === 0) return false;
     const selected = this.selectedIds();
-    return syncable.every(d => selected.has(d.personId));
+    return syncable.every(d => selected.has(d.archiveId));
   });
 
   readonly phaseTitle = computed(() => {
@@ -87,7 +87,7 @@ export class TeacherSyncDialogComponent {
           this.preview.set(res.data);
           // Alapból mind kijelölve
           const syncable = (res.data.details ?? []).filter(d => d.status === 'syncable');
-          this.selectedIds.set(new Set(syncable.map(d => d.personId)));
+          this.selectedIds.set(new Set(syncable.map(d => d.archiveId)));
           this.phase.set('preview');
         },
         error: (err) => {
@@ -113,7 +113,7 @@ export class TeacherSyncDialogComponent {
     if (this.allSelected()) {
       this.selectedIds.set(new Set());
     } else {
-      const all = this.syncableDetails().map(d => d.personId);
+      const all = this.syncableDetails().map(d => d.archiveId);
       this.selectedIds.set(new Set(all));
     }
   }
@@ -131,7 +131,7 @@ export class TeacherSyncDialogComponent {
     this.teacherService.executeSync({
       school_id: this.schoolId(),
       class_year: this.classYear(),
-      person_ids: ids,
+      archive_ids: ids,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

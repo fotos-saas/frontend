@@ -71,8 +71,6 @@ export class SchoolLinkDialogComponent {
     if (current.has(schoolId)) {
       current.delete(schoolId);
     } else {
-      // Max 4 másik (összesen 5)
-      if (current.size >= 4) return;
       current.add(schoolId);
     }
     this.selectedIds.set(current);

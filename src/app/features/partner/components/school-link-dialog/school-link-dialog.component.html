@@ -33,12 +33,10 @@
           <label
             class="school-item"
             [class.school-item--selected]="isSelected(s.id)"
-            [class.school-item--disabled]="!isSelected(s.id) && selectedIds().size >= 4"
           >
             <input
               type="checkbox"
               [checked]="isSelected(s.id)"
-              [disabled]="!isSelected(s.id) && selectedIds().size >= 4"
               (change)="toggleSchool(s.id)"
               class="school-item__checkbox"
             />
@@ -61,9 +59,6 @@
       }
     </div>
 
-    @if (selectedIds().size >= 4) {
-      <p class="max-notice">Maximum 5 iskola kapcsolható össze.</p>
-    }
   </ng-container>
 
   <ng-container dialogFooter>

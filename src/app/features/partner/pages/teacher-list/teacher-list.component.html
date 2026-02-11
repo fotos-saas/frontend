@@ -37,6 +37,7 @@
   @if (viewMode() === 'project') {
     <app-teacher-project-view
       [classYears]="classYears()"
+      [syncingSchoolId]="syncingSchoolId()"
       (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
       (viewPhotoRequest)="onViewPhotoFromProject($event)"
       (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
@@ -254,16 +255,6 @@
     [prefillSchoolId]="createForTeacher()?.schoolId ?? null"
     (close)="showCreateForProject.set(false); createForTeacher.set(null)"
     (saved)="onProjectTeacherCreated()"
-  />
-}
-
-<!-- Teacher Sync Dialog (project view) -->
-@if (showSyncDialog()) {
-  <app-teacher-sync-dialog
-    [schoolId]="syncSchoolId()"
-    [classYear]="syncClassYear()"
-    (close)="showSyncDialog.set(false)"
-    (synced)="onSyncComplete()"
   />
 }
 

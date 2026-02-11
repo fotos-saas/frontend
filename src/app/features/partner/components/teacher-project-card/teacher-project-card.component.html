@@ -12,11 +12,17 @@
       @if (school().syncAvailable) {
         <button
           class="sync-badge"
-          [matTooltip]="syncableCount() + ' tanár szinkronizálható'"
+          [class.sync-badge--loading]="isSyncing()"
+          [matTooltip]="isSyncing() ? 'Szinkronizálás...' : syncableCount() + ' tanár szinkronizálható'"
+          [disabled]="isSyncing()"
           (click)="onSync($event)"
         >
-          <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
-          {{ syncableCount() }}
+          <lucide-icon [name]="ICONS.REFRESH" [size]="12" [class.spin]="isSyncing()" />
+          @if (isSyncing()) {
+            ...
+          } @else {
+            {{ syncableCount() }}
+          }
         </button>
       }
       @if (school().missingPhotoCount > 0) {

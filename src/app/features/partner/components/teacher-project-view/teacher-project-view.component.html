@@ -94,6 +94,7 @@
       <app-teacher-project-card
         [school]="school"
         [expanded]="isExpanded(school.schoolId)"
+        [isSyncing]="syncingSchoolId() === school.schoolId"
         (toggle)="toggleSchool(school.schoolId)"
         (syncPhotos)="onSyncPhotos(school)"
         (syncSingleTeacher)="onSyncSingleTeacher($event)"

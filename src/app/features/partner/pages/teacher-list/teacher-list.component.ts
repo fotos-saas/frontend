@@ -12,7 +12,6 @@ import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/t
 import { TeacherBulkImportDialogComponent } from '../../components/teacher-bulk-import-dialog/teacher-bulk-import-dialog.component';
 import { TeacherPhotoUploadComponent } from '../../components/teacher-photo-upload/teacher-photo-upload.component';
 import { TeacherProjectViewComponent } from '../../components/teacher-project-view/teacher-project-view.component';
-import { TeacherSyncDialogComponent } from '../../components/teacher-sync-dialog/teacher-sync-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
@@ -30,7 +29,6 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     TeacherBulkImportDialogComponent,
     TeacherPhotoUploadComponent,
     TeacherProjectViewComponent,
-    TeacherSyncDialogComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
     SearchableSelectComponent,
@@ -78,10 +76,8 @@ export class PartnerTeacherListComponent implements OnInit {
   // Lightbox
   lightboxMedia = signal<LightboxMediaItem[]>([]);
 
-  // Project view: sync dialog
-  showSyncDialog = signal(false);
-  syncSchoolId = signal(0);
-  syncClassYear = signal<string | undefined>(undefined);
+  // Project view: sync loading state
+  syncingSchoolId = signal(0);
 
   // Project view: upload, create, no-photo
   uploadTarget = signal<TeacherInSchool | null>(null);
@@ -290,14 +286,19 @@ export class PartnerTeacherListComponent implements OnInit {
   }
 
   onSyncPhotosFromProject(event: { schoolId: number; classYear?: string }): void {
-    this.syncSchoolId.set(event.schoolId);
-    this.syncClassYear.set(event.classYear);
-    this.showSyncDialog.set(true);
-  }
-
-  onSyncComplete(): void {
-    this.showSyncDialog.set(false);
-    this.projectView()?.loadData();
+    this.syncingSchoolId.set(event.schoolId);
+    this.teacherService.executeSync({
+      school_id: event.schoolId,
+      class_year: event.classYear,
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.syncingSchoolId.set(0);
+          this.projectView()?.loadData();
+        },
+        error: () => this.syncingSchoolId.set(0),
+      });
   }
 
   onUndoNoPhotoFromProject(teacher: TeacherInSchool): void {

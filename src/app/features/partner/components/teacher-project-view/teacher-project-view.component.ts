@@ -28,6 +28,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 })
 export class TeacherProjectViewComponent implements OnInit {
   classYears = input<SelectOption[]>([]);
+  syncingSchoolId = input(0);
 
   private readonly teacherService = inject(PartnerTeacherService);
   private readonly destroyRef = inject(DestroyRef);

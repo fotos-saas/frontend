@@ -15,6 +15,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 export class TeacherProjectCardComponent {
   school = input.required<TeacherSchoolGroup>();
   expanded = input(false);
+  isSyncing = input(false);
 
   syncableCount = computed(() =>
     this.school().teachers.filter(t => t.hasSyncablePhoto).length

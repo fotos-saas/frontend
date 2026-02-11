@@ -59,9 +59,6 @@
                   }
                 </div>
                 <span class="teacher-name">{{ teacher.name }}</span>
-                @if (teacher.hasSyncablePhoto) {
-                  <lucide-icon [name]="ICONS.REFRESH" [size]="12" class="sync-indicator" matTooltip="Van szinkronizálható fotó más iskolából" />
-                }
               </div>
 
               <div class="teacher-status">

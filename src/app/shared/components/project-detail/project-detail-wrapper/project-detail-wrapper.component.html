@@ -13,6 +13,7 @@
       (back)="goBack()"
       (editProject)="openEditProjectModal()"
       (deleteProject)="confirmDeleteProject()"
+      (syncTeacherPhotos)="openTeacherSyncDialog()"
     />
 
     <!-- Tab navigáció -->
@@ -93,6 +94,15 @@
 
 <!-- Order Data Dialog container -->
 <ng-container #orderDataDialogContainer></ng-container>
+
+<!-- Teacher Sync Dialog - page-card-on KÍVÜL -->
+@if (showTeacherSyncDialog()) {
+  <app-teacher-sync-dialog
+    [projectId]="projectData()?.id ?? 0"
+    (close)="closeTeacherSyncDialog()"
+    (synced)="onTeacherSynced()"
+  />
+}
 
 <!-- Delete User Confirmation - page-card-on KÍVÜL -->
 @if (showDeleteUserConfirm()) {

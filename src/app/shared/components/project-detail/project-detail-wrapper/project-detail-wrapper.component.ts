@@ -29,6 +29,7 @@ import {
 } from '../project-samples-tab/project-samples-tab.component';
 import { SamplePackageDialogComponent } from '../sample-package-dialog/sample-package-dialog.component';
 import { SampleVersionDialogComponent } from '../sample-version-dialog/sample-version-dialog.component';
+import { TeacherSyncDialogComponent } from '../../../../features/partner/components/teacher-sync-dialog/teacher-sync-dialog.component';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
   PROJECT_DETAIL_SERVICE,
@@ -63,6 +64,7 @@ import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persiste
     ConfirmDialogComponent,
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
+    TeacherSyncDialogComponent,
   ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,6 +98,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   readonly isMarketer = this.authService.isMarketer;
 
   activeTab = signal<ProjectDetailTab>('overview');
+  showTeacherSyncDialog = signal(false);
   hiddenTabs = computed<ProjectDetailTab[]>(() =>
     this.isMarketer() ? ['settings'] : []
   );
@@ -229,4 +232,16 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   extendGalleryDeadline(days: number): void { this.facade.extendGalleryDeadline(days); }
   createGallery(): void { this.facade.createGallery(); }
+
+  // === TEACHER SYNC ===
+
+  openTeacherSyncDialog(): void { this.showTeacherSyncDialog.set(true); }
+  closeTeacherSyncDialog(): void { this.showTeacherSyncDialog.set(false); }
+  onTeacherSynced(): void {
+    this.showTeacherSyncDialog.set(false);
+    this.toast.success('Sikeres', 'Tanár fotók szinkronizálva!');
+    // Reload project to reflect new photos
+    const id = this.projectData()?.id;
+    if (id) this.facade.loadProject(id, this.mapToDetailData());
+  }
 }

@@ -144,3 +144,46 @@ export interface TeachersBySchoolResponse {
   schools: TeacherSchoolGroup[];
   summary: TeacherSchoolSummary;
 }
+
+// Tanár fotó szinkronizálás types
+
+export type SyncPreviewStatus = 'syncable' | 'no_match' | 'no_photo' | 'already_has_photo';
+
+export interface SyncPreviewItem {
+  personId: number;
+  personName: string;
+  status: SyncPreviewStatus;
+  matchType?: string;
+  teacherName?: string;
+  teacherId?: number;
+  confidence?: number;
+  photoThumbUrl?: string;
+}
+
+export interface SyncPreviewResponse {
+  syncable: number;
+  noMatch: number;
+  noPhoto: number;
+  alreadyHasPhoto: number;
+  total: number;
+  details: SyncPreviewItem[];
+}
+
+export type SyncResultStatus = 'synced' | 'no_match' | 'no_photo';
+
+export interface SyncResultItem {
+  personId: number;
+  personName: string;
+  status: SyncResultStatus;
+  matchType?: string;
+  teacherName?: string;
+  confidence?: number;
+}
+
+export interface SyncExecuteResponse {
+  synced: number;
+  noMatch: number;
+  noPhoto: number;
+  skipped: number;
+  details: SyncResultItem[];
+}

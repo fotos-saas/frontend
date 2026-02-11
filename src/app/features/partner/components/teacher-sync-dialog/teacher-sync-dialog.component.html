@@ -1,0 +1,152 @@
+<app-dialog-wrapper
+  headerStyle="hero"
+  theme="green"
+  [icon]="ICONS.REFRESH"
+  [title]="phaseTitle()"
+  size="md"
+  [closable]="phase() !== 'syncing'"
+  [footerAlign]="phase() === 'done' ? 'center' : 'end'"
+  [errorMessage]="errorMessage() || null"
+  (closeEvent)="close.emit()"
+>
+  <ng-container dialogBody>
+    <!-- === LOADING === -->
+    @if (phase() === 'loading') {
+      <div class="sync-loading">
+        <div class="w-8 h-8 border-3 border-gray-200 border-t-green-500 rounded-full animate-spin"></div>
+        <p class="mt-3 text-sm text-gray-500">Tanárok elemzése és párosítása...</p>
+      </div>
+    }
+
+    <!-- === PREVIEW === -->
+    @if (phase() === 'preview' && preview(); as p) {
+      <!-- Összefoglaló kártyák -->
+      <div class="sync-summary">
+        @if (p.syncable > 0) {
+          <div class="sync-card sync-card--green">
+            <span class="sync-card__number">{{ p.syncable }}</span>
+            <span class="sync-card__label">szinkronizálható</span>
+          </div>
+        }
+        @if (p.noMatch > 0) {
+          <div class="sync-card sync-card--gray">
+            <span class="sync-card__number">{{ p.noMatch }}</span>
+            <span class="sync-card__label">nincs egyezés</span>
+          </div>
+        }
+        @if (p.noPhoto > 0) {
+          <div class="sync-card sync-card--amber">
+            <span class="sync-card__number">{{ p.noPhoto }}</span>
+            <span class="sync-card__label">nincs archív fotó</span>
+          </div>
+        }
+        @if (p.alreadyHasPhoto > 0) {
+          <div class="sync-card sync-card--blue">
+            <span class="sync-card__number">{{ p.alreadyHasPhoto }}</span>
+            <span class="sync-card__label">már van fotója</span>
+          </div>
+        }
+      </div>
+
+      <!-- Szinkronizálható tanárok részletei -->
+      @if (syncableDetails().length > 0) {
+        <div class="sync-section">
+          <h4 class="sync-section__title">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" class="text-green-500" />
+            Szinkronizálható tanárok
+          </h4>
+          <div class="sync-list">
+            @for (item of syncableDetails(); track item.personId) {
+              <div class="sync-row">
+                <div class="sync-row__photo">
+                  @if (item.photoThumbUrl) {
+                    <img [src]="item.photoThumbUrl" [alt]="item.teacherName" class="sync-avatar" />
+                  } @else {
+                    <div class="sync-avatar sync-avatar--empty">
+                      <lucide-icon [name]="ICONS.USER" [size]="16" />
+                    </div>
+                  }
+                </div>
+                <div class="sync-row__info">
+                  <span class="sync-row__name">{{ item.personName }}</span>
+                  <span class="sync-row__match">
+                    {{ getMatchLabel(item.matchType ?? '') }}
+                    <span class="sync-row__confidence">{{ getConfidencePercent(item.confidence) }}</span>
+                  </span>
+                </div>
+                @if (item.teacherName && item.teacherName !== item.personName) {
+                  <span class="sync-row__archive-name">{{ item.teacherName }}</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Nem párosítható tanárok -->
+      @if (noMatchDetails().length > 0) {
+        <div class="sync-section">
+          <h4 class="sync-section__title">
+            <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="14" class="text-gray-400" />
+            Nem párosítható
+          </h4>
+          <div class="sync-list sync-list--muted">
+            @for (item of noMatchDetails(); track item.personId) {
+              <div class="sync-row sync-row--muted">
+                <span class="sync-row__name">{{ item.personName }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (p.total === 0) {
+        <div class="sync-empty">
+          <lucide-icon [name]="ICONS.USERS" [size]="32" class="text-gray-300" />
+          <p>Nincs tanár típusú személy a projektben.</p>
+        </div>
+      }
+
+      @if (p.total > 0 && p.syncable === 0) {
+        <div class="sync-empty">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="32" class="text-green-300" />
+          <p>Minden tanárnak van fotója, vagy nincs elérhető archív fotó.</p>
+        </div>
+      }
+    }
+
+    <!-- === SYNCING === -->
+    @if (phase() === 'syncing') {
+      <div class="sync-loading">
+        <div class="w-8 h-8 border-3 border-gray-200 border-t-green-500 rounded-full animate-spin"></div>
+        <p class="mt-3 text-sm text-gray-500">Fotók szinkronizálása...</p>
+      </div>
+    }
+
+    <!-- === DONE === -->
+    @if (phase() === 'done') {
+      <div class="sync-done">
+        <div class="sync-done__icon">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="48" />
+        </div>
+        <h4>Szinkronizálás sikeres!</h4>
+        <p class="text-sm text-gray-500">{{ syncedCount() }} tanár fotója frissítve.</p>
+      </div>
+    }
+  </ng-container>
+
+  <!-- FOOTER -->
+  <ng-container dialogFooter>
+    @if (phase() === 'preview') {
+      <button type="button" class="btn btn--outline" (click)="close.emit()">Bezárás</button>
+      @if (canSync()) {
+        <button type="button" class="btn btn--primary" (click)="executeSync()">
+          <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
+          Szinkronizálás ({{ preview()?.syncable }})
+        </button>
+      }
+    } @else if (phase() === 'done') {
+      <button type="button" class="btn btn--primary" (click)="onDone()">Bezárás</button>
+    }
+  </ng-container>
+</app-dialog-wrapper>

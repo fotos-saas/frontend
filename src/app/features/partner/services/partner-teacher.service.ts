@@ -13,6 +13,8 @@ import {
   BulkImportExecuteItem,
   BulkImportExecuteResult,
   TeachersBySchoolResponse,
+  SyncPreviewResponse,
+  SyncExecuteResponse,
 } from '../models/teacher.models';
 import { PaginatedResponse } from '../models/partner.models';
 
@@ -132,6 +134,18 @@ export class PartnerTeacherService {
     return this.http.post<{ success: boolean; message: string; data: BulkImportExecuteResult }>(`${this.baseUrl}/bulk-import/execute`, {
       school_id: schoolId,
       items,
+    });
+  }
+
+  previewSync(projectId: number): Observable<{ success: boolean; data: SyncPreviewResponse }> {
+    return this.http.post<{ success: boolean; data: SyncPreviewResponse }>(`${this.baseUrl}/sync-to-project/preview`, {
+      project_id: projectId,
+    });
+  }
+
+  executeSync(projectId: number): Observable<{ success: boolean; message: string; data: SyncExecuteResponse }> {
+    return this.http.post<{ success: boolean; message: string; data: SyncExecuteResponse }>(`${this.baseUrl}/sync-to-project/execute`, {
+      project_id: projectId,
     });
   }
 }

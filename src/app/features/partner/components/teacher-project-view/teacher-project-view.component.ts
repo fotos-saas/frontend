@@ -8,7 +8,6 @@ import {
   TeacherSchoolSummary,
   TeacherInSchool,
 } from '../../models/teacher.models';
-import { SchoolItem } from '../../models/partner.models';
 import { SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { SearchableSelectComponent } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { TeacherProjectCardComponent } from '../teacher-project-card/teacher-project-card.component';
@@ -28,7 +27,6 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TeacherProjectViewComponent implements OnInit {
-  schools = input<SchoolItem[]>([]);
   classYears = input<SelectOption[]>([]);
 
   private readonly teacherService = inject(PartnerTeacherService);
@@ -42,7 +40,7 @@ export class TeacherProjectViewComponent implements OnInit {
   initialized = signal(false);
 
   // Szűrők
-  selectedSchool = signal('');
+  schoolSearch = signal('');
   selectedYear = signal('');
   missingOnly = signal(false);
 
@@ -56,13 +54,14 @@ export class TeacherProjectViewComponent implements OnInit {
   markNoPhotoRequest = output<TeacherInSchool>();
   undoNoPhotoRequest = output<TeacherInSchool>();
 
-  schoolOptions = computed<SelectOption[]>(() =>
-    this.schools().map(s => ({
-      id: s.id,
-      label: s.name,
-      sublabel: s.city ?? undefined,
-    }))
-  );
+  filteredSchoolGroups = computed(() => {
+    const query = this.schoolSearch().toLowerCase().trim();
+    const groups = this.schoolGroups();
+    if (!query) return groups;
+    return groups.filter(g =>
+      g.schoolName.toLowerCase().includes(query)
+    );
+  });
 
   ngOnInit(): void {
     // Legfrissebb év auto-select: várjuk meg a classYears-t
@@ -88,12 +87,10 @@ export class TeacherProjectViewComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true);
-    const schoolId = this.selectedSchool();
     const classYear = this.selectedYear();
 
     this.teacherService.getTeachersBySchool({
       class_year: classYear || undefined,
-      school_id: schoolId ? parseInt(schoolId, 10) : undefined,
       missing_only: this.missingOnly(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -107,9 +104,8 @@ export class TeacherProjectViewComponent implements OnInit {
       });
   }
 
-  onSchoolChange(value: string): void {
-    this.selectedSchool.set(value);
-    this.loadData();
+  onSchoolSearchChange(value: string): void {
+    this.schoolSearch.set(value);
   }
 
   onYearChange(value: string): void {

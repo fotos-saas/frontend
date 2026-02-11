@@ -36,7 +36,6 @@
 
   @if (viewMode() === 'project') {
     <app-teacher-project-view
-      [schools]="schools()"
       [classYears]="classYears()"
       (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
       (viewPhotoRequest)="onViewPhotoFromProject($event)"

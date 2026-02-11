@@ -1,13 +1,20 @@
 <!-- Szűrők -->
 <div class="project-filters">
-  <app-searchable-select
-    class="filter-select"
-    [options]="schoolOptions()"
-    [value]="selectedSchool()"
-    placeholder="Iskola keresése..."
-    allLabel="Minden iskola"
-    (valueChange)="onSchoolChange($event)"
-  />
+  <div class="search-box">
+    <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+    <input
+      type="text"
+      placeholder="Iskola keresése..."
+      [ngModel]="schoolSearch()"
+      (ngModelChange)="onSchoolSearchChange($event)"
+      class="search-input"
+    />
+    @if (schoolSearch()) {
+      <button class="clear-btn" (click)="onSchoolSearchChange('')">
+        <lucide-icon [name]="ICONS.X" [size]="14" />
+      </button>
+    }
+  </div>
 
   <app-searchable-select
     class="filter-select filter-select--sm"
@@ -70,7 +77,7 @@
       <div class="skeleton-card skeleton-shimmer"></div>
     }
   </div>
-} @else if (schoolGroups().length === 0) {
+} @else if (filteredSchoolGroups().length === 0) {
   <div class="empty-state">
     <lucide-icon [name]="ICONS.SCHOOL" [size]="40" />
     <p>
@@ -83,7 +90,7 @@
   </div>
 } @else {
   <div class="school-list">
-    @for (school of schoolGroups(); track school.schoolId; let i = $index) {
+    @for (school of filteredSchoolGroups(); track school.schoolId; let i = $index) {
       <app-teacher-project-card
         [school]="school"
         [expanded]="isExpanded(school.schoolId)"

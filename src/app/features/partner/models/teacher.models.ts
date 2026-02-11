@@ -145,6 +145,12 @@ export interface TeachersBySchoolResponse {
   summary: TeacherSchoolSummary;
 }
 
+// Tanár fotó szinkronizálás request
+export interface SyncTeacherRequest {
+  school_id: number;
+  class_year?: string;
+}
+
 // Tanár fotó szinkronizálás types
 
 export type SyncPreviewStatus = 'syncable' | 'no_match' | 'no_photo' | 'already_has_photo';

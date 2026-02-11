@@ -12,6 +12,7 @@ import { SchoolItem } from '../../models/partner.models';
 import { SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { SearchableSelectComponent } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { TeacherProjectCardComponent } from '../teacher-project-card/teacher-project-card.component';
+import { TeacherSyncDialogComponent } from '../teacher-sync-dialog/teacher-sync-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 @Component({
@@ -22,6 +23,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     LucideAngularModule,
     SearchableSelectComponent,
     TeacherProjectCardComponent,
+    TeacherSyncDialogComponent,
   ],
   templateUrl: './teacher-project-view.component.html',
   styleUrl: './teacher-project-view.component.scss',
@@ -48,6 +50,11 @@ export class TeacherProjectViewComponent implements OnInit {
 
   // Expand state
   expandedIds = signal<Set<number>>(new Set());
+
+  // Sync dialog
+  showSyncDialog = signal(false);
+  syncSchoolId = signal(0);
+  syncClassYear = signal<string | undefined>(undefined);
 
   // All dialogs are rendered in parent (outside page-card)
   uploadPhotoRequest = output<TeacherInSchool>();
@@ -169,6 +176,17 @@ export class TeacherProjectViewComponent implements OnInit {
   /** Lokálisan visszavonja a noPhotoMarked jelölést. */
   unmarkTeacherNoPhoto(archiveId: number): void {
     this.updateTeacherField(archiveId, { noPhotoMarked: false });
+  }
+
+  onSyncPhotos(school: TeacherSchoolGroup): void {
+    this.syncSchoolId.set(school.schoolId);
+    this.syncClassYear.set(this.selectedYear() || undefined);
+    this.showSyncDialog.set(true);
+  }
+
+  onSyncComplete(): void {
+    this.showSyncDialog.set(false);
+    this.loadData();
   }
 
   private updateTeacherField(archiveId: number, patch: Partial<TeacherInSchool>): void {

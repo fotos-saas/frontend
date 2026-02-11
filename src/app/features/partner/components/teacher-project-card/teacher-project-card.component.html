@@ -10,6 +10,9 @@
     </div>
     <div class="header-right">
       @if (school().missingPhotoCount > 0) {
+        <button class="sync-btn" matTooltip="Archív fotók szinkronizálása" (click)="onSync($event)">
+          <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+        </button>
         <span class="badge badge--warning" matTooltip="Hiányzó fotók">
           <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
           {{ school().missingPhotoCount }}

@@ -4,7 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
-import { SyncPreviewResponse, SyncPreviewItem } from '../../models/teacher.models';
+import { SyncPreviewResponse } from '../../models/teacher.models';
 
 type Phase = 'loading' | 'preview' | 'syncing' | 'done';
 
@@ -17,7 +17,8 @@ type Phase = 'loading' | 'preview' | 'syncing' | 'done';
   styleUrl: './teacher-sync-dialog.component.scss',
 })
 export class TeacherSyncDialogComponent {
-  readonly projectId = input.required<number>();
+  readonly schoolId = input.required<number>();
+  readonly classYear = input<string | undefined>(undefined);
   readonly close = output<void>();
   readonly synced = output<void>();
 
@@ -60,7 +61,10 @@ export class TeacherSyncDialogComponent {
     this.phase.set('loading');
     this.errorMessage.set('');
 
-    this.teacherService.previewSync(this.projectId())
+    this.teacherService.previewSync({
+      school_id: this.schoolId(),
+      class_year: this.classYear(),
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -78,7 +82,10 @@ export class TeacherSyncDialogComponent {
     this.phase.set('syncing');
     this.errorMessage.set('');
 
-    this.teacherService.executeSync(this.projectId())
+    this.teacherService.executeSync({
+      school_id: this.schoolId(),
+      class_year: this.classYear(),
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {

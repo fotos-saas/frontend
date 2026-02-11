@@ -17,6 +17,7 @@ export class TeacherProjectCardComponent {
   expanded = input(false);
 
   toggle = output<void>();
+  syncPhotos = output<void>();
   uploadPhoto = output<TeacherInSchool>();
   viewPhoto = output<TeacherInSchool>();
   markNoPhoto = output<TeacherInSchool>();
@@ -26,6 +27,11 @@ export class TeacherProjectCardComponent {
 
   onToggle(): void {
     this.toggle.emit();
+  }
+
+  onSync(event: MouseEvent): void {
+    event.stopPropagation();
+    this.syncPhotos.emit();
   }
 
   onUpload(teacher: TeacherInSchool): void {

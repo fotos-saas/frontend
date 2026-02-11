@@ -23,7 +23,6 @@ export class ProjectDetailHeaderComponent {
   readonly back = output<void>();
   readonly editProject = output<void>();
   readonly deleteProject = output<void>();
-  readonly syncTeacherPhotos = output<void>();
 
   getStatusIcon(status: string | null): string {
     const iconMap: Record<string, string> = {

@@ -1,7 +1,6 @@
 import {
   Component,
   inject,
-  HostListener,
   ChangeDetectionStrategy,
   effect,
   input,
@@ -43,6 +42,9 @@ export interface MobileNavUserInfo {
   templateUrl: './mobile-nav-overlay.component.html',
   styleUrls: ['./mobile-nav-overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown.escape)': 'onEscapeKey()',
+  },
 })
 export class MobileNavOverlayComponent {
   protected readonly sidebarState = inject(SidebarStateService);
@@ -85,7 +87,6 @@ export class MobileNavOverlayComponent {
   /**
    * Escape billentyű bezárja az overlay-t
    */
-  @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.sidebarState.isOpen()) {
       this.sidebarState.close();

@@ -3,7 +3,7 @@ import {
   inject,
   signal,
   OnInit,
-  OnDestroy,
+  DestroyRef,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   computed,
@@ -59,7 +59,7 @@ import { ChatbotPanelComponent } from '../../../../features/help/components/chat
   templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppShellComponent implements OnInit, OnDestroy {
+export class AppShellComponent implements OnInit {
   private readonly sidebarState = inject(SidebarStateService);
   private readonly sidebarRouteService = inject(SidebarRouteService);
   private readonly authService = inject(AuthService);
@@ -67,6 +67,7 @@ export class AppShellComponent implements OnInit, OnDestroy {
   private readonly toastService = inject(ToastService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly shellService = inject(AppShellService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Help chatbot */
   protected chatOpen = signal(false);
@@ -127,10 +128,11 @@ export class AppShellComponent implements OnInit, OnDestroy {
     this.shellService.initSessionInvalidationWatcher();
     this.shellService.startSessionPollingIfNeeded();
     this.shellService.initWebSocketAndNotifications();
-  }
 
-  ngOnDestroy(): void {
-    this.shellService.cleanup();
+    // Cleanup regisztrálása
+    this.destroyRef.onDestroy(() => {
+      this.shellService.cleanup();
+    });
   }
 
   /** Password set dialógus eredmény kezelése */

@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, OnDestroy, inject } from '@angular/core';
+import { Injectable, signal, computed, DestroyRef, inject } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
@@ -18,8 +18,9 @@ export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'err
 @Injectable({
   providedIn: 'root'
 })
-export class WebsocketService implements OnDestroy {
+export class WebsocketService {
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Laravel Echo instance */
   private echo: Echo<'reverb'> | null = null;
@@ -37,6 +38,13 @@ export class WebsocketService implements OnDestroy {
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 5;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    // Cleanup regisztrálása
+    this.destroyRef.onDestroy(() => {
+      this.disconnect();
+    });
+  }
 
   /**
    * Kapcsolódás a WebSocket szerverhez
@@ -203,9 +211,5 @@ export class WebsocketService implements OnDestroy {
     if (this.echo) {
       this.echo.leaveAllChannels();
     }
-  }
-
-  ngOnDestroy(): void {
-    this.disconnect();
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject, OnDestroy } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PokePresetService } from './poke-preset.service';
 import { PokeActionService } from './poke-action.service';
@@ -20,7 +20,7 @@ import { ReactionEmoji } from '@shared/constants';
 @Injectable({
   providedIn: 'root'
 })
-export class PokeService implements OnDestroy {
+export class PokeService {
   private readonly presetService = inject(PokePresetService);
   private readonly actionService = inject(PokeActionService);
 
@@ -73,8 +73,4 @@ export class PokeService implements OnDestroy {
   // === RESET ===
 
   clear() { this.actionService.clear(); }
-
-  ngOnDestroy(): void {
-    this.actionService.ngOnDestroy();
-  }
 }

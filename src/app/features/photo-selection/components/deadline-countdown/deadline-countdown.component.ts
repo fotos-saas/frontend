@@ -5,7 +5,8 @@ import {
   computed,
   signal,
   OnInit,
-  OnDestroy,
+  DestroyRef,
+  inject,
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -20,7 +21,8 @@ type UrgencyLevel = 'calm' | 'soon' | 'urgent' | 'critical' | 'expired';
   styleUrl: './deadline-countdown.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DeadlineCountdownComponent implements OnInit, OnDestroy {
+export class DeadlineCountdownComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   readonly ICONS = ICONS;
 
   readonly deadline = input.required<string>();
@@ -81,11 +83,12 @@ export class DeadlineCountdownComponent implements OnInit, OnDestroy {
     this.tickInterval = setInterval(() => {
       this.now.set(new Date());
     }, 60_000);
-  }
 
-  ngOnDestroy(): void {
-    if (this.tickInterval) {
-      clearInterval(this.tickInterval);
-    }
+    // Cleanup regisztrálása
+    this.destroyRef.onDestroy(() => {
+      if (this.tickInterval) {
+        clearInterval(this.tickInterval);
+      }
+    });
   }
 }

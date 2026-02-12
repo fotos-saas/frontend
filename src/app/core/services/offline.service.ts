@@ -1,7 +1,8 @@
-import { Injectable, OnDestroy, signal, computed, inject } from '@angular/core';
+import { Injectable, DestroyRef, signal, computed, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from './logger.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Subscription, interval, filter, switchMap, from, catchError, of, firstValueFrom } from 'rxjs';
+import { interval, filter, catchError, firstValueFrom } from 'rxjs';
 import { ElectronService, QueuedRequest } from './electron.service';
 import { ToastService } from './toast.service';
 
@@ -45,8 +46,9 @@ export interface SyncStatus {
 @Injectable({
   providedIn: 'root'
 })
-export class OfflineService implements OnDestroy {
+export class OfflineService {
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
   private electronService = inject(ElectronService);
   private http = inject(HttpClient);
   private toast = inject(ToastService);
@@ -70,16 +72,8 @@ export class OfflineService implements OnDestroy {
     isSyncing: this._isSyncing(),
   }));
 
-  private subscriptions: Subscription[] = [];
-  private syncInterval: Subscription | null = null;
-
   constructor() {
     this.init();
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.syncInterval?.unsubscribe();
   }
 
   private async init(): Promise<void> {
@@ -87,7 +81,9 @@ export class OfflineService implements OnDestroy {
     this._isOnline.set(this.electronService.isOnline);
 
     // Feliratkozas az online allapot valtozasaira
-    const onlineSub = this.electronService.onlineStatusChanges.subscribe(isOnline => {
+    this.electronService.onlineStatusChanges.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(isOnline => {
       const wasOffline = !this._isOnline();
       this._isOnline.set(isOnline);
 
@@ -98,7 +94,6 @@ export class OfflineService implements OnDestroy {
         this.toast.warning('Offline mód', 'A változások szinkronizálódnak, ha újra online leszel.');
       }
     });
-    this.subscriptions.push(onlineSub);
 
     // Pending requests szam betoltese
     await this.updatePendingRequestsCount();
@@ -110,8 +105,9 @@ export class OfflineService implements OnDestroy {
     }
 
     // Periodikus sync kiserlet (minden 30 masodpercben, ha online)
-    this.syncInterval = interval(30000).pipe(
-      filter(() => this._isOnline() && this._pendingRequests() > 0)
+    interval(30000).pipe(
+      filter(() => this._isOnline() && this._pendingRequests() > 0),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
       this.processQueue();
     });

@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, OnDestroy } from '@angular/core';
+import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, forkJoin, Subject } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
@@ -46,13 +46,14 @@ interface NotificationPayload {
 @Injectable({
   providedIn: 'root'
 })
-export class PokeActionService implements OnDestroy {
+export class PokeActionService {
   private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
   private readonly guestService = inject(GuestService);
   private readonly websocket = inject(WebsocketService);
   private readonly toastService = inject(ToastService);
   private readonly presetService = inject(PokePresetService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly apiUrl = `${environment.apiUrl}/tablo-frontend`;
 
   /** WebSocket channel neve */
@@ -61,6 +62,13 @@ export class PokeActionService implements OnDestroy {
   /** Új poke értesítés event */
   private readonly _newPokeNotification = new Subject<NotificationPayload>();
   readonly newPokeNotification$ = this._newPokeNotification.asObservable();
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.unsubscribeFromNotifications();
+      this._newPokeNotification.complete();
+    });
+  }
 
   // === SIGNALS ===
 
@@ -348,10 +356,6 @@ export class PokeActionService implements OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.unsubscribeFromNotifications();
-    this._newPokeNotification.complete();
-  }
 
   // === PRIVATE ===
 

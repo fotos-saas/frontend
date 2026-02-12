@@ -1,7 +1,8 @@
-import { Injectable, signal, OnDestroy } from '@angular/core';
+import { Injectable, signal, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, Subject, timer } from 'rxjs';
-import { catchError, map, takeUntil, switchMap } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { TabloStorageService } from './tablo-storage.service';
 import { TokenType } from './token.service';
@@ -30,13 +31,8 @@ import { GuestSession } from './guest.models';
 @Injectable({
   providedIn: 'root'
 })
-export class GuestVerificationService implements OnDestroy {
-
-  /** Verification polling fut-e */
-  private isVerificationPolling = false;
-
-  /** Verification polling leállítására használt Subject */
-  private readonly verificationCheckStop$ = new Subject<void>();
+export class GuestVerificationService {
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Bővített session adatok (onboarding után) */
   public readonly verificationStatus = signal<VerificationStatus>('verified');
@@ -54,11 +50,6 @@ export class GuestVerificationService implements OnDestroy {
     private storage: TabloStorageService,
     private sessionService: GuestSessionService
   ) {}
-
-  ngOnDestroy(): void {
-    this.stopVerificationPolling();
-    this.verificationCheckStop$.complete();
-  }
 
   // ==========================================
   // PERSON SEARCH (Autocomplete)
@@ -173,15 +164,11 @@ export class GuestVerificationService implements OnDestroy {
 
   /** Verification status polling indítása (pending session-höz) */
   startVerificationPolling(): void {
-    if (this.isVerificationPolling) return;
-
     const currentSession = this.sessionService.getCurrentSession();
     if (!currentSession) return;
 
-    this.isVerificationPolling = true;
-
     timer(0, 5000).pipe(
-      takeUntil(this.verificationCheckStop$),
+      takeUntilDestroyed(this.destroyRef),
       switchMap(() => this.checkVerificationStatus())
     ).subscribe({
       next: (response) => {
@@ -195,17 +182,11 @@ export class GuestVerificationService implements OnDestroy {
             this.storeVerificationStatus(activeSession.projectId, activeSession.sessionType, data.verification_status);
           }
 
-          if (data.is_verified) {
-            this.stopVerificationPolling();
-          }
-
           if (data.is_rejected) {
-            this.stopVerificationPolling();
             this.sessionService.handleInvalidSession('rejected', 'A kérésed elutasításra került. Kérlek válassz más nevet.');
           }
 
           if (data.is_banned) {
-            this.stopVerificationPolling();
             this.sessionService.handleInvalidSession('banned', 'Hozzáférés megtagadva. Kérlek vedd fel a kapcsolatot a szervezőkkel.');
           }
         }
@@ -214,11 +195,8 @@ export class GuestVerificationService implements OnDestroy {
     });
   }
 
-  /** Verification polling leállítása */
   stopVerificationPolling(): void {
-    if (!this.isVerificationPolling) return;
-    this.verificationCheckStop$.next();
-    this.isVerificationPolling = false;
+    // takeUntilDestroyed automatikusan kezeli - no-op a backward compat-hoz
   }
 
   /** Verification status ellenőrzése (egyszer) */

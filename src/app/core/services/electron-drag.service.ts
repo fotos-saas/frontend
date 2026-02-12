@@ -1,4 +1,4 @@
-import { Injectable, NgZone, OnDestroy, inject } from '@angular/core';
+import { Injectable, NgZone, DestroyRef, inject } from '@angular/core';
 import { LoggerService } from './logger.service';
 
 type CleanupFn = () => void;
@@ -43,15 +43,16 @@ export type TouchBarContext = 'dashboard' | 'gallery' | 'editor';
 @Injectable({
   providedIn: 'root'
 })
-export class ElectronDragService implements OnDestroy {
+export class ElectronDragService {
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
   private cleanupFunctions: CleanupFn[] = [];
 
-  constructor(private ngZone: NgZone) {}
-
-  ngOnDestroy(): void {
-    this.cleanupFunctions.forEach(cleanup => cleanup());
-    this.cleanupFunctions = [];
+  constructor(private ngZone: NgZone) {
+    this.destroyRef.onDestroy(() => {
+      this.cleanupFunctions.forEach(cleanup => cleanup());
+      this.cleanupFunctions = [];
+    });
   }
 
   private get isElectron(): boolean {

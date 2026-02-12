@@ -1,4 +1,4 @@
-import { Injectable, NgZone, OnDestroy, inject, signal } from '@angular/core';
+import { Injectable, NgZone, DestroyRef, inject, signal } from '@angular/core';
 import { LoggerService } from './logger.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
@@ -28,8 +28,9 @@ import './electron.types';
 @Injectable({
   providedIn: 'root'
 })
-export class ElectronService implements OnDestroy {
+export class ElectronService {
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly notificationService = inject(ElectronNotificationService);
   private readonly cacheService = inject(ElectronCacheService);
   private readonly paymentService = inject(ElectronPaymentService);
@@ -48,11 +49,12 @@ export class ElectronService implements OnDestroy {
     this.initDarkModeListener();
     this.initAppClosingListener();
     this.initOnlineStatusListener();
-  }
 
-  ngOnDestroy(): void {
-    this.cleanupFunctions.forEach(cleanup => cleanup());
-    this.cleanupFunctions = [];
+    // Cleanup funkciok regisztrálása DestroyRef-fel
+    this.destroyRef.onDestroy(() => {
+      this.cleanupFunctions.forEach(cleanup => cleanup());
+      this.cleanupFunctions = [];
+    });
   }
 
   // ============ Platform Detection ============

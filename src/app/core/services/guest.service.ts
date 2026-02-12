@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, OnDestroy } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TokenType } from './token.service';
@@ -38,7 +38,7 @@ export type {
 @Injectable({
   providedIn: 'root'
 })
-export class GuestService implements OnDestroy {
+export class GuestService {
 
   private readonly sessionService = inject(GuestSessionService);
   private readonly verificationService = inject(GuestVerificationService);
@@ -66,10 +66,6 @@ export class GuestService implements OnDestroy {
   public readonly missingPersonId = this.verificationService.missingPersonId;
   /** @deprecated Use personName instead */
   public readonly missingPersonName = this.verificationService.missingPersonName;
-
-  ngOnDestroy(): void {
-    // Sub-service-ek saját destroy-juk van
-  }
 
   // ==========================================
   // SESSION METÓDUSOK (delegálás)

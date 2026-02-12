@@ -94,7 +94,7 @@ export class AppShellService {
   initSessionInvalidationWatcher(): void {
     this.guestService.sessionInvalidated$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((event) => {
+      .subscribe((event: { reason: string; message: string }) => {
         if (event.reason === 'banned') {
           this.toastService.error('Hozzáférés megtagadva', event.message, 8000);
         } else {

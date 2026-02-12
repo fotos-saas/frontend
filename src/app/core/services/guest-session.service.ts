@@ -1,8 +1,8 @@
-import { Injectable, computed, signal, OnDestroy } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, computed, signal, DestroyRef, inject } from '@angular/core';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError, of, Subject, timer } from 'rxjs';
-import { catchError, map, takeUntil, switchMap } from 'rxjs/operators';
+import { Observable, throwError, of, timer, Subject } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { TabloStorageService } from './tablo-storage.service';
 import { TokenType } from './token.service';
@@ -24,10 +24,9 @@ import {
  * polling (ban/törlés figyelés), heartbeat, device fingerprint.
  */
 @Injectable({ providedIn: 'root' })
-export class GuestSessionService implements OnDestroy {
+export class GuestSessionService {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly SESSION_CHECK_INTERVAL_MS = 30000;
-  private readonly sessionCheckStop$ = new Subject<void>();
-  private isPolling = false;
 
   private readonly _guestSession = signal<GuestSession | null>(null);
   public readonly guestSessionSignal = this._guestSession.asReadonly();
@@ -42,12 +41,9 @@ export class GuestSessionService implements OnDestroy {
     private storage: TabloStorageService
   ) {
     this.loadStoredSession();
-  }
-
-  ngOnDestroy(): void {
-    this.stopSessionPolling();
-    this.sessionCheckStop$.complete();
-    this.sessionInvalidated$.complete();
+    this.destroyRef.onDestroy(() => {
+      this.sessionInvalidated$.complete();
+    });
   }
 
   initializeFromStorage(): void { this.loadStoredSession(); }
@@ -198,11 +194,9 @@ export class GuestSessionService implements OnDestroy {
   getSessionToken(): string | null { return this._guestSession()?.sessionToken ?? null; }
 
   startSessionPolling(): void {
-    if (this.isPolling) return;
     if (!this._guestSession()) return;
-    this.isPolling = true;
     timer(0, this.SESSION_CHECK_INTERVAL_MS).pipe(
-      takeUntil(this.sessionCheckStop$),
+      takeUntilDestroyed(this.destroyRef),
       switchMap(() => this.checkSessionStatus())
     ).subscribe({
       next: (r) => {
@@ -210,12 +204,6 @@ export class GuestSessionService implements OnDestroy {
       },
       error: () => { /* Hálózati hiba - csendben folytatjuk */ }
     });
-  }
-
-  stopSessionPolling(): void {
-    if (!this.isPolling) return;
-    this.sessionCheckStop$.next();
-    this.isPolling = false;
   }
 
   checkSessionStatus(): Observable<SessionStatusResponse> {
@@ -232,8 +220,11 @@ export class GuestSessionService implements OnDestroy {
     );
   }
 
+  stopSessionPolling(): void {
+    // takeUntilDestroyed automatikusan kezeli - no-op a backward compat-hoz
+  }
+
   handleInvalidSession(reason: 'banned' | 'deleted' | 'rejected', message: string): void {
-    this.stopSessionPolling();
     this.clearSession();
     this.sessionInvalidated$.next({ reason, message });
   }

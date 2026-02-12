@@ -1,4 +1,4 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, DestroyRef, inject } from '@angular/core';
 
 type CleanupFn = () => void;
 
@@ -31,14 +31,15 @@ export interface NotificationResult {
 @Injectable({
   providedIn: 'root'
 })
-export class ElectronNotificationService implements OnDestroy {
+export class ElectronNotificationService {
+  private readonly destroyRef = inject(DestroyRef);
   private cleanupFunctions: CleanupFn[] = [];
 
-  constructor(private ngZone: NgZone) {}
-
-  ngOnDestroy(): void {
-    this.cleanupFunctions.forEach(cleanup => cleanup());
-    this.cleanupFunctions = [];
+  constructor(private ngZone: NgZone) {
+    this.destroyRef.onDestroy(() => {
+      this.cleanupFunctions.forEach(cleanup => cleanup());
+      this.cleanupFunctions = [];
+    });
   }
 
   private get isElectron(): boolean {

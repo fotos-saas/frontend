@@ -6,7 +6,6 @@ import {
   inject,
   computed,
   OnInit,
-  OnDestroy,
   DestroyRef,
   signal
 } from '@angular/core';
@@ -36,7 +35,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
   standalone: true,
   imports: [FormsModule, NgxEditorModule]
 })
-export class DesignStepComponent implements OnInit, OnDestroy {
+export class DesignStepComponent implements OnInit {
   private readonly validationService = inject(OrderValidationService);
   private readonly fileUploadService = inject(FileUploadService);
   private readonly toastService = inject(ToastService);
@@ -87,10 +86,11 @@ export class DesignStepComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.editor = new Editor();
-  }
 
-  ngOnDestroy(): void {
-    this.editor.destroy();
+    // Editor cleanup regisztrálása
+    this.destroyRef.onDestroy(() => {
+      this.editor.destroy();
+    });
   }
 
   /**

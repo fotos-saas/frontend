@@ -6,7 +6,10 @@ import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
 import { LoggerService } from './logger.service';
+import { NewsfeedPostCrudService } from './newsfeed-post-crud.service';
+import { NewsfeedPostReactionsService } from './newsfeed-post-reactions.service';
 import { HttpError } from '../../shared/types/http-error.types';
+import type { ApiNewsfeedPost as BaseApiNewsfeedPost } from './newsfeed-post-crud.service';
 import type {
   NewsfeedPost,
   NewsfeedPostDetail,
@@ -19,13 +22,6 @@ import type {
 /**
  * API válasz típusok (snake_case) - belső használatra
  */
-interface ApiNewsfeedMedia {
-  id: number;
-  url: string;
-  file_name: string;
-  is_image: boolean;
-}
-
 interface ApiNewsfeedComment {
   id: number;
   parent_id: number | null;
@@ -40,27 +36,8 @@ interface ApiNewsfeedComment {
   replies?: ApiNewsfeedComment[];
 }
 
-interface ApiNewsfeedPost {
-  id: number;
-  post_type: 'announcement' | 'event';
-  title: string;
-  content: string | null;
-  event_date: string | null;
-  event_time: string | null;
-  event_location: string | null;
-  author_type: 'contact' | 'guest';
-  author_name: string;
-  is_pinned: boolean;
-  likes_count: number;
-  comments_count: number;
-  has_liked: boolean;
-  user_reaction: string | null;
-  reactions: ReactionsSummary;
-  can_edit: boolean;
-  can_delete: boolean;
-  media: ApiNewsfeedMedia[];
-  created_at: string;
-  updated_at: string;
+/** Kibővített API post típus kommentekkel (getPost részletekhez) */
+interface ApiNewsfeedPost extends BaseApiNewsfeedPost {
   comments?: ApiNewsfeedComment[];
 }
 
@@ -73,9 +50,11 @@ interface ApiPaginatedResponse<T> {
 }
 
 /**
- * Newsfeed Post Service
+ * Newsfeed Post Service (Facade)
  *
- * Poszt CRUD, reakciók, pin/unpin, cache kezelés.
+ * State management (signals, cache) + delegálás sub-service-ekre:
+ * - NewsfeedPostCrudService: CRUD műveletek
+ * - NewsfeedPostReactionsService: reakciók, pin/unpin
  */
 @Injectable({
   providedIn: 'root'
@@ -84,6 +63,8 @@ export class NewsfeedPostService {
   private readonly http = inject(HttpClient);
   private readonly guestService = inject(GuestService);
   private readonly logger = inject(LoggerService);
+  private readonly crudService = inject(NewsfeedPostCrudService);
+  private readonly reactionsService = inject(NewsfeedPostReactionsService);
   private readonly apiUrl = `${environment.apiUrl}/tablo-frontend`;
 
   /** Betöltés állapot */
@@ -149,41 +130,15 @@ export class NewsfeedPostService {
     );
   }
 
+  // === DELEGÁLÁS: NewsfeedPostCrudService ===
+
   /**
    * Új poszt létrehozása
    */
   createPost(request: CreatePostRequest, mediaFiles?: File[]): Observable<NewsfeedPost> {
-    if (mediaFiles && mediaFiles.length > 0) {
-      const formData = new FormData();
-      formData.append('post_type', request.postType);
-      formData.append('title', request.title);
-      if (request.content) formData.append('content', request.content);
-      if (request.eventDate) formData.append('event_date', request.eventDate);
-      if (request.eventTime) formData.append('event_time', request.eventTime);
-      if (request.eventLocation) formData.append('event_location', request.eventLocation);
-      mediaFiles.forEach(file => formData.append('media[]', file, file.name));
-
-      const headers = this.guestService.getGuestSessionHeader();
-      return this.http.post<{ success: boolean; data: ApiNewsfeedPost }>(
-        `${this.apiUrl}/newsfeed`, formData, { headers }
-      ).pipe(
-        map(response => this.mapPost(response.data)),
-        tap(post => this.addPostToCache(post)),
-        catchError(error => throwError(() => this.handleError(error)))
-      );
-    }
-
-    return this.http.post<{ success: boolean; data: ApiNewsfeedPost }>(
-      `${this.apiUrl}/newsfeed`,
-      {
-        post_type: request.postType, title: request.title, content: request.content,
-        event_date: request.eventDate, event_time: request.eventTime, event_location: request.eventLocation
-      },
-      { headers: this.getHeaders() }
-    ).pipe(
-      map(response => this.mapPost(response.data)),
-      tap(post => this.addPostToCache(post)),
-      catchError(error => throwError(() => this.handleError(error)))
+    return this.crudService.createPost(request, mediaFiles).pipe(
+      map(apiPost => this.mapPost(apiPost)),
+      tap(post => this.addPostToCache(post))
     );
   }
 
@@ -191,36 +146,9 @@ export class NewsfeedPostService {
    * Poszt frissítése
    */
   updatePost(id: number, request: UpdatePostRequest, mediaFiles?: File[]): Observable<NewsfeedPost> {
-    if (mediaFiles && mediaFiles.length > 0) {
-      const formData = new FormData();
-      if (request.title) formData.append('title', request.title);
-      if (request.content !== undefined) formData.append('content', request.content || '');
-      if (request.eventDate) formData.append('event_date', request.eventDate);
-      if (request.eventTime) formData.append('event_time', request.eventTime);
-      if (request.eventLocation) formData.append('event_location', request.eventLocation);
-      mediaFiles.forEach(file => formData.append('media[]', file, file.name));
-
-      const headers = this.guestService.getGuestSessionHeader();
-      return this.http.post<{ success: boolean; data: ApiNewsfeedPost }>(
-        `${this.apiUrl}/newsfeed/${id}`, formData, { headers }
-      ).pipe(
-        map(response => this.mapPost(response.data)),
-        tap(post => this.updatePostInCache(post)),
-        catchError(error => throwError(() => this.handleError(error)))
-      );
-    }
-
-    return this.http.put<{ success: boolean; data: ApiNewsfeedPost }>(
-      `${this.apiUrl}/newsfeed/${id}`,
-      {
-        title: request.title, content: request.content,
-        event_date: request.eventDate, event_time: request.eventTime, event_location: request.eventLocation
-      },
-      { headers: this.getHeaders() }
-    ).pipe(
-      map(response => this.mapPost(response.data)),
-      tap(post => this.updatePostInCache(post)),
-      catchError(error => throwError(() => this.handleError(error)))
+    return this.crudService.updatePost(id, request, mediaFiles).pipe(
+      map(apiPost => this.mapPost(apiPost)),
+      tap(post => this.updatePostInCache(post))
     );
   }
 
@@ -228,24 +156,19 @@ export class NewsfeedPostService {
    * Média törlése egy posztról
    */
   deleteMedia(mediaId: number): Observable<{ success: boolean }> {
-    return this.http.delete<{ success: boolean }>(
-      `${this.apiUrl}/newsfeed/media/${mediaId}`,
-      { headers: this.getHeaders() }
-    ).pipe(catchError(error => throwError(() => this.handleError(error))));
+    return this.crudService.deleteMedia(mediaId);
   }
 
   /**
    * Poszt törlése
    */
   deletePost(id: number): Observable<{ success: boolean }> {
-    return this.http.delete<{ success: boolean }>(
-      `${this.apiUrl}/newsfeed/${id}`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      tap(() => this.removePostFromCache(id)),
-      catchError(error => throwError(() => this.handleError(error)))
+    return this.crudService.deletePost(id).pipe(
+      tap(() => this.removePostFromCache(id))
     );
   }
+
+  // === DELEGÁLÁS: NewsfeedPostReactionsService ===
 
   /**
    * Reakció toggle
@@ -253,17 +176,8 @@ export class NewsfeedPostService {
   toggleReaction(postId: number, reaction: string = '\u2764\uFE0F'): Observable<{
     hasReacted: boolean; userReaction: string | null; reactions: ReactionsSummary; likesCount: number;
   }> {
-    return this.http.post<{
-      success: boolean; data: { liked: boolean; has_reacted: boolean; user_reaction: string | null; reactions: ReactionsSummary; likes_count: number; };
-    }>(
-      `${this.apiUrl}/newsfeed/${postId}/like`, { reaction }, { headers: this.getHeaders() }
-    ).pipe(
-      map(response => ({
-        hasReacted: response.data.has_reacted, userReaction: response.data.user_reaction,
-        reactions: response.data.reactions, likesCount: response.data.likes_count
-      })),
-      tap(result => this.updateReactionInCache(postId, result.hasReacted, result.userReaction, result.reactions, result.likesCount)),
-      catchError(error => throwError(() => this.handleError(error)))
+    return this.reactionsService.toggleReaction(postId, reaction).pipe(
+      tap(result => this.updateReactionInCache(postId, result.hasReacted, result.userReaction, result.reactions, result.likesCount))
     );
   }
 
@@ -282,11 +196,8 @@ export class NewsfeedPostService {
    * Poszt kitűzése
    */
   pinPost(id: number): Observable<{ success: boolean }> {
-    return this.http.post<{ success: boolean }>(
-      `${this.apiUrl}/newsfeed/${id}/pin`, {}, { headers: this.getHeaders() }
-    ).pipe(
-      tap(() => this.updatePinInCache(id, true)),
-      catchError(error => throwError(() => this.handleError(error)))
+    return this.reactionsService.pinPost(id).pipe(
+      tap(() => this.updatePinInCache(id, true))
     );
   }
 
@@ -294,11 +205,8 @@ export class NewsfeedPostService {
    * Poszt levétele
    */
   unpinPost(id: number): Observable<{ success: boolean }> {
-    return this.http.post<{ success: boolean }>(
-      `${this.apiUrl}/newsfeed/${id}/unpin`, {}, { headers: this.getHeaders() }
-    ).pipe(
-      tap(() => this.updatePinInCache(id, false)),
-      catchError(error => throwError(() => this.handleError(error)))
+    return this.reactionsService.unpinPost(id).pipe(
+      tap(() => this.updatePinInCache(id, false))
     );
   }
 
@@ -327,7 +235,7 @@ export class NewsfeedPostService {
     }
   }
 
-  // === PRIVATE METHODS ===
+  // === MAPPING ===
 
   mapPost(post: ApiNewsfeedPost): NewsfeedPost {
     return {
@@ -358,6 +266,8 @@ export class NewsfeedPostService {
       replies: comment.replies?.map(r => this.mapComment(r)) || []
     };
   }
+
+  // === PRIVATE CACHE METHODS ===
 
   private getHeaders(): HttpHeaders {
     return this.guestService.getGuestSessionHeader();

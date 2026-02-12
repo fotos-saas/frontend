@@ -14,7 +14,6 @@ import { ErrorFeedbackDialogComponent } from './shared/components/error-feedback
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
     standalone: true,
     imports: [
         RouterOutlet,

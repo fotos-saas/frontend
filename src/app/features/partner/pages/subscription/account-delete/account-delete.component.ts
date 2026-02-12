@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger.service';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -27,6 +28,7 @@ export class AccountDeleteComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
   accountStatus = signal<AccountStatusResponse | null>(null);
@@ -46,7 +48,7 @@ export class AccountDeleteComponent implements OnInit {
 
   loadAccountStatus(): void {
     this.loading.set(true);
-    this.subscriptionService.getAccountStatus().subscribe({
+    this.subscriptionService.getAccountStatus().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (status) => {
         this.accountStatus.set(status);
         this.loading.set(false);
@@ -70,7 +72,7 @@ export class AccountDeleteComponent implements OnInit {
     }
 
     this.actionLoading.set(true);
-    this.subscriptionService.deleteAccount().subscribe({
+    this.subscriptionService.deleteAccount().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loadAccountStatus();
         this.actionLoading.set(false);
@@ -84,7 +86,7 @@ export class AccountDeleteComponent implements OnInit {
 
   cancelDeletion(): void {
     this.actionLoading.set(true);
-    this.subscriptionService.cancelDeletion().subscribe({
+    this.subscriptionService.cancelDeletion().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loadAccountStatus();
         this.actionLoading.set(false);

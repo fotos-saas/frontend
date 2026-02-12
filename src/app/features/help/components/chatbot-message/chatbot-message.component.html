@@ -7,7 +7,7 @@
     }
   </div>
   <div class="message__bubble">
-    <div class="message__content" [innerHTML]="content()"></div>
+    <div class="message__content" [innerHTML]="content() | safeHtml"></div>
     @if (timestamp()) {
       <time class="message__time">{{ timestamp() }}</time>
     }

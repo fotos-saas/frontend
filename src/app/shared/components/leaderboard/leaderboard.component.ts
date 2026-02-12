@@ -4,8 +4,10 @@ import {
   signal,
   OnInit,
   ChangeDetectionStrategy,
-  input
+  input,
+  DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   GamificationService,
   LeaderboardEntry
@@ -30,6 +32,7 @@ type LeaderboardType = 'points' | 'posts' | 'likes';
 export class LeaderboardComponent implements OnInit {
   private readonly gamificationService = inject(GamificationService);
   private readonly guestService = inject(GuestService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Compact mode input */
   readonly compact = input<boolean>(false);
@@ -61,7 +64,9 @@ export class LeaderboardComponent implements OnInit {
   private loadLeaderboard(): void {
     const projectId = this.guestService.currentProjectId();
     if (projectId) {
-      this.gamificationService.fetchLeaderboard(projectId, this.selectedType()).subscribe();
+      this.gamificationService.fetchLeaderboard(projectId, this.selectedType())
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe();
     }
   }
 

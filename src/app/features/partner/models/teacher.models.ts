@@ -15,6 +15,23 @@ export interface TeacherListItem {
   photoUrl: string | null;
   aliasesCount: number;
   photosCount: number;
+  linkedGroup: string | null;
+}
+
+// Tanár összekapcsolás (linking) types
+
+export interface TeacherLinkedGroup {
+  linkedGroup: string;
+  teachers: TeacherLinkedGroupItem[];
+}
+
+export interface TeacherLinkedGroupItem {
+  id: number;
+  canonicalName: string;
+  titlePrefix: string | null;
+  fullDisplayName: string;
+  schoolName: string | null;
+  photoThumbUrl: string | null;
 }
 
 export interface TeacherAlias {

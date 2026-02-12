@@ -10,6 +10,7 @@ import { TeacherListItem, TeacherInSchool } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/teacher-edit-modal.component';
 import { TeacherBulkImportDialogComponent } from '../../components/teacher-bulk-import-dialog/teacher-bulk-import-dialog.component';
+import { TeacherLinkDialogComponent } from '../../components/teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoUploadComponent } from '../../components/teacher-photo-upload/teacher-photo-upload.component';
 import { TeacherProjectViewComponent } from '../../components/teacher-project-view/teacher-project-view.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -17,6 +18,7 @@ import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/co
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
+import { saveFile } from '../../../../shared/utils/file.util';
 
 @Component({
   selector: 'app-partner-teacher-list',
@@ -27,6 +29,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     MatTooltipModule,
     TeacherEditModalComponent,
     TeacherBulkImportDialogComponent,
+    TeacherLinkDialogComponent,
     TeacherPhotoUploadComponent,
     TeacherProjectViewComponent,
     ConfirmDialogComponent,
@@ -90,6 +93,7 @@ export class PartnerTeacherListComponent implements OnInit {
   showEditModal = signal(false);
   showDeleteConfirm = signal(false);
   showBulkImport = signal(false);
+  showLinkDialog = signal(false);
   selectedTeacher = signal<TeacherListItem | null>(null);
   modalMode = signal<'create' | 'edit'>('create');
 
@@ -237,6 +241,43 @@ export class PartnerTeacherListComponent implements OnInit {
   onBulkImported(): void {
     this.closeBulkImport();
     this.loadTeachers();
+  }
+
+  // Link dialog
+  openLinkDialog(teacher: TeacherListItem): void {
+    this.selectedTeacher.set(teacher);
+    this.showLinkDialog.set(true);
+  }
+
+  closeLinkDialog(): void {
+    this.showLinkDialog.set(false);
+    this.selectedTeacher.set(null);
+  }
+
+  onTeacherLinked(): void {
+    this.closeLinkDialog();
+    this.loadTeachers();
+  }
+
+  unlinkTeacher(teacher: TeacherListItem): void {
+    this.teacherService.unlinkTeacher(teacher.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: () => this.loadTeachers() });
+  }
+
+  exportingCsv = signal(false);
+
+  exportCsv(): void {
+    this.exportingCsv.set(true);
+    this.teacherService.exportCsv()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          saveFile(blob, 'tanar_archiv_export.csv');
+          this.exportingCsv.set(false);
+        },
+        error: () => this.exportingCsv.set(false),
+      });
   }
 
   onUploadPhotoFromProject(teacher: TeacherInSchool): void {

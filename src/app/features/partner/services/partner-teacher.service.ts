@@ -7,6 +7,7 @@ import {
   TeacherDetail,
   TeacherPhoto,
   TeacherChangeLogEntry,
+  TeacherLinkedGroup,
   CreateTeacherRequest,
   UpdateTeacherRequest,
   BulkImportPreviewItem,
@@ -146,10 +147,31 @@ export class PartnerTeacherService {
     return this.http.post<{ success: boolean; message: string; data: SyncExecuteResponse }>(`${this.baseUrl}/sync-to-project/execute`, request);
   }
 
+  exportCsv(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/export-csv`, { responseType: 'blob' });
+  }
+
   syncCrossSchool(archiveId: number): Observable<{ success: boolean; message: string; data: { photoThumbUrl: string; photoUrl: string } }> {
     return this.http.post<{ success: boolean; message: string; data: { photoThumbUrl: string; photoUrl: string } }>(
       `${this.baseUrl}/${archiveId}/sync-cross-school`,
       {}
     );
+  }
+
+  // ============ Teacher Linking (Tanár összekapcsolás) ============
+
+  linkTeachers(teacherIds: number[]): Observable<{ success: boolean; message: string; data: { linkedGroup: string } }> {
+    return this.http.post<{ success: boolean; message: string; data: { linkedGroup: string } }>(
+      `${this.baseUrl}/link`,
+      { teacher_ids: teacherIds }
+    );
+  }
+
+  unlinkTeacher(teacherId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${teacherId}/unlink`);
+  }
+
+  getLinkedGroups(): Observable<{ data: TeacherLinkedGroup[] }> {
+    return this.http.get<{ data: TeacherLinkedGroup[] }>(`${this.baseUrl}/linked-groups`);
   }
 }

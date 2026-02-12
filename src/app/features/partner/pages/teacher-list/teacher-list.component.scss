@@ -88,7 +88,7 @@
 // Table
 .table-header {
   @extend .table-header;
-  grid-template-columns: 1fr 200px 80px;
+  grid-template-columns: 1fr 200px 120px;
 }
 
 .th { @extend .th; }
@@ -100,7 +100,7 @@
 
 .teacher-row {
   @extend .list-row;
-  grid-template-columns: 1fr 200px 80px;
+  grid-template-columns: 1fr 200px 120px;
 }
 
 .teacher-info {
@@ -144,6 +144,25 @@
   min-width: 0;
 }
 
+.teacher-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.linked-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
 .teacher-name {
   font-weight: 600;
   color: #1e293b;
@@ -183,6 +202,14 @@
 // Action buttons
 .action-btn { @extend .action-btn; }
 .action-btn--danger { @extend .action-btn--danger; }
+.action-btn--linked {
+  color: #3b82f6;
+
+  &:hover {
+    color: #f59e0b;
+    background: #fffbeb;
+  }
+}
 
 // States
 .empty-state { @extend .empty-state; }
@@ -205,7 +232,7 @@
   }
 
   .teacher-row {
-    grid-template-columns: 1fr 80px;
+    grid-template-columns: 1fr 120px;
   }
 
   .teacher-school {

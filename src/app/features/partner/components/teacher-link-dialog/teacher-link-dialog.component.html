@@ -1,0 +1,127 @@
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.LINK"
+  [title]="'Tanár összekapcsolás'"
+  [description]="'Válaszd ki mely tanárok ugyanazt a személyt jelölik. Az összekapcsolt tanárok megmaradnak, de a rendszer tudni fogja, hogy azonosak.'"
+  size="lg"
+  [isSubmitting]="isSubmitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="closeEvent.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <!-- Kiindulási tanár -->
+    <div class="source-teacher">
+      <div class="source-teacher__avatar">
+        @if (teacher().photoThumbUrl) {
+          <img [src]="teacher().photoThumbUrl" [alt]="teacher().fullDisplayName" />
+        } @else {
+          <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="18" />
+        }
+      </div>
+      <div class="source-teacher__info">
+        <span class="source-teacher__name">{{ teacher().fullDisplayName }}</span>
+        @if (teacher().schoolName) {
+          <span class="source-teacher__school">{{ teacher().schoolName }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Kereső -->
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="14" class="search-box__icon" />
+      <input
+        type="text"
+        placeholder="Tanár keresése név vagy iskola alapján..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        class="search-box__input"
+      />
+      @if (searchQuery()) {
+        <button class="search-box__clear" (click)="searchQuery.set('')">
+          <lucide-icon [name]="ICONS.X" [size]="12" />
+        </button>
+      }
+    </div>
+
+    <!-- Tanár lista -->
+    <div class="teacher-list">
+      <label class="teacher-list__label">
+        Kapcsolandó tanárok:
+        @if (selectedIds().size > 0) {
+          <span class="teacher-list__count">({{ selectedIds().size }} kijelölve)</span>
+        }
+      </label>
+
+      @if (filteredTeachers().length === 0) {
+        <p class="teacher-list__empty">
+          @if (searchQuery()) {
+            Nincs találat a keresésre.
+          } @else {
+            Nincs más tanár a partnerhez rendelve.
+          }
+        </p>
+      } @else {
+        <div class="teacher-list__scroll">
+          @for (t of filteredTeachers(); track t.id) {
+            <label
+              class="teacher-item"
+              [class.teacher-item--selected]="isSelected(t.id)"
+            >
+              <input
+                type="checkbox"
+                [checked]="isSelected(t.id)"
+                (change)="toggleTeacher(t.id)"
+                class="teacher-item__checkbox"
+              />
+              <div class="teacher-item__avatar">
+                @if (t.photoThumbUrl) {
+                  <img [src]="t.photoThumbUrl" [alt]="t.fullDisplayName" />
+                } @else {
+                  <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="14" />
+                }
+              </div>
+              <div class="teacher-item__info">
+                <span class="teacher-item__name">{{ t.fullDisplayName }}</span>
+                @if (t.schoolName) {
+                  <span class="teacher-item__school">{{ t.schoolName }}</span>
+                }
+              </div>
+              @if (t.linkedGroup && t.linkedGroup !== teacher().linkedGroup) {
+                <lucide-icon
+                  [name]="ICONS.LINK"
+                  [size]="14"
+                  class="teacher-item__linked-icon"
+                />
+              }
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button
+      type="button"
+      class="btn-secondary"
+      [disabled]="isSubmitting()"
+      (click)="closeEvent.emit()"
+    >
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="!canSubmit() || isSubmitting()"
+      (click)="onSubmit()"
+    >
+      @if (isSubmitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      Összekapcsolás
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

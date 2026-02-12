@@ -5,7 +5,6 @@ import {
   output,
   inject,
   OnInit,
-  OnDestroy,
   effect,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -31,7 +30,7 @@ import { SelectionGridStateService, PhotoRow } from './selection-grid-state.serv
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [SelectionGridStateService],
 })
-export class SelectionGridComponent implements OnInit, OnDestroy {
+export class SelectionGridComponent implements OnInit {
   private readonly state = inject(SelectionGridStateService);
 
   constructor() {
@@ -110,10 +109,6 @@ export class SelectionGridComponent implements OnInit, OnDestroy {
     this.isMaxReached = this.state.isMaxReached;
 
     this.state.initLayout();
-  }
-
-  ngOnDestroy(): void {
-    // Cleanup handled by takeUntilDestroyed a service-ben
   }
 
   // === TEMPLATE METHODS ===

@@ -4,7 +4,6 @@ import {
   input,
   output,
   OnInit,
-  OnDestroy,
   Renderer2,
   inject,
   signal,
@@ -37,7 +36,7 @@ import { ZoomConfig, ZoomState, PanPosition, PanBounds, DEFAULT_ZOOM_CONFIG, INI
   standalone: true,
   exportAs: 'appZoom'
 })
-export class ZoomDirective implements OnInit, OnDestroy {
+export class ZoomDirective implements OnInit {
   private readonly el = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
   private readonly destroyRef = inject(DestroyRef);
@@ -95,10 +94,6 @@ export class ZoomDirective implements OnInit, OnDestroy {
 
     // Cleanup on destroy
     this.destroyRef.onDestroy(() => this.cleanup());
-  }
-
-  public ngOnDestroy(): void {
-    this.cleanup();
   }
 
   /** Zoom in by step */

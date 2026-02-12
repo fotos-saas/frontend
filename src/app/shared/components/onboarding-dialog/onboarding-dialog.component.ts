@@ -7,7 +7,6 @@ import {
   viewChild,
   ElementRef,
   OnInit,
-  OnDestroy,
   inject,
   DestroyRef,
   ChangeDetectorRef,
@@ -61,7 +60,7 @@ export { OnboardingStep } from './onboarding-form.service';
     ])
   ]
 })
-export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestroy {
+export class OnboardingDialogComponent implements OnInit, AfterViewInit {
   /** Signal-based inputs */
   readonly isSubmitting = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
@@ -95,6 +94,14 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
   private previousActiveElement?: HTMLElement;
   private scrollPosition = 0;
   private readonly searchInput$ = new Subject<string>();
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      document.body.classList.remove('dialog-open');
+      document.body.style.removeProperty('--scroll-position');
+      window.scrollTo(0, this.scrollPosition);
+    });
+  }
 
   // Service delegálás template-hez - signal referenciák
   readonly currentStep = this.formService.currentStep;
@@ -134,12 +141,6 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
     document.body.style.setProperty('--scroll-position', `-${this.scrollPosition}px`);
     document.body.classList.add('dialog-open');
     setTimeout(() => this.focusCurrentStepInput(), 100);
-  }
-
-  ngOnDestroy(): void {
-    document.body.classList.remove('dialog-open');
-    document.body.style.removeProperty('--scroll-position');
-    window.scrollTo(0, this.scrollPosition);
   }
 
   private focusCurrentStepInput(): void {

@@ -4,9 +4,7 @@ import {
   viewChild,
   ElementRef,
   AfterViewInit,
-  OnDestroy,
   OnInit,
-  HostListener,
   input,
   output,
   inject,
@@ -157,9 +155,12 @@ type BillingCycleType = 'monthly' | 'yearly';
       }
     }
   `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown)': 'handleKeyboardEvent($event)',
+  }
 })
-export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ChangePlanDialogComponent implements OnInit, AfterViewInit {
   private readonly logger = inject(LoggerService);
   private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly service = inject(SuperAdminService);
@@ -182,6 +183,15 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
 
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.focusTrap?.destroy();
+      if (this.previousActiveElement?.focus) {
+        setTimeout(() => this.previousActiveElement?.focus(), 0);
+      }
+    });
+  }
 
   // Plan options - PlansService-ből töltve
   planOptions = signal<PlanOption[]>([]);
@@ -245,17 +255,6 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit, OnDestr
     }
   }
 
-  ngOnDestroy(): void {
-    this.focusTrap?.destroy();
-
-    if (this.previousActiveElement?.focus) {
-      setTimeout(() => {
-        this.previousActiveElement?.focus();
-      }, 0);
-    }
-  }
-
-  @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: Event): void {
     if (!(event instanceof KeyboardEvent)) return;
 

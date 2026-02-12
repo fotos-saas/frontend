@@ -1,12 +1,11 @@
 import {
   Component,
   AfterViewInit,
-  OnDestroy,
   output,
-  HostListener,
   ElementRef,
   inject,
   signal,
+  DestroyRef,
   ChangeDetectionStrategy
 } from '@angular/core';
 
@@ -36,9 +35,12 @@ import {
  */
 @Component({
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown.escape)': 'handleEscapeKey($event)',
+  }
 })
-export abstract class BaseDialogComponent implements AfterViewInit, OnDestroy {
+export abstract class BaseDialogComponent implements AfterViewInit {
   /** Signal-based outputs */
   readonly dialogCloseEvent = output<void>();
 
@@ -59,6 +61,16 @@ export abstract class BaseDialogComponent implements AfterViewInit, OnDestroy {
   /** ElementRef a dialog container-hez */
   protected readonly elementRef = inject(ElementRef);
 
+  /** DestroyRef a cleanup-hoz */
+  protected readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.unlockBodyScroll();
+      this.restorePreviousFocus();
+    });
+  }
+
   /** Előző fókuszált elem (visszaállításhoz) */
   private previousActiveElement: HTMLElement | null = null;
 
@@ -76,11 +88,6 @@ export abstract class BaseDialogComponent implements AfterViewInit, OnDestroy {
     this.lockBodyScroll();
     this.savePreviousFocus();
     this.focusFirstInput();
-  }
-
-  ngOnDestroy(): void {
-    this.unlockBodyScroll();
-    this.restorePreviousFocus();
   }
 
   // ============================================================================
@@ -150,7 +157,6 @@ export abstract class BaseDialogComponent implements AfterViewInit, OnDestroy {
   /**
    * ESC billentyű kezelés
    */
-  @HostListener('document:keydown.escape', ['$event'])
   protected handleEscapeKey(event: Event): void {
     if (!this._isSubmitting()) {
       event.preventDefault();

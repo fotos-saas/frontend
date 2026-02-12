@@ -5,7 +5,6 @@ import {
   input,
   signal,
   computed,
-  HostListener,
   ElementRef,
   inject
 } from '@angular/core';
@@ -44,13 +43,15 @@ export const REACTIONS = [...REACTION_EMOJIS];
   imports: [],
   templateUrl: './reaction-picker.component.html',
   styleUrls: ['./reaction-picker.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  }
 })
 export class ReactionPickerComponent {
   private readonly elementRef = inject(ElementRef);
 
   /** Dokumentum kattintás - picker bezárása ha kívülre kattintunk */
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (this.isPickerOpen() && !this.elementRef.nativeElement.contains(event.target)) {
       this.isPickerOpen.set(false);

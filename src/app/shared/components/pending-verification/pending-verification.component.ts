@@ -2,7 +2,6 @@ import {
   Component,
   ChangeDetectionStrategy,
   OnInit,
-  OnDestroy,
   DestroyRef,
   inject,
   signal,
@@ -26,7 +25,7 @@ import { GuestService } from '../../../core/services/guest.service';
   styleUrls: ['./pending-verification.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PendingVerificationComponent implements OnInit, OnDestroy {
+export class PendingVerificationComponent implements OnInit {
   /** Signal-based inputs */
   readonly guestName = input<string>('');
   readonly missingPersonName = input<string | null>(null);
@@ -38,17 +37,18 @@ export class PendingVerificationComponent implements OnInit, OnDestroy {
   private readonly guestService = inject(GuestService);
   private readonly destroyRef = inject(DestroyRef);
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.guestService.stopVerificationPolling();
+    });
+  }
+
   /** Frissítés folyamatban */
   readonly isRefreshing = signal(false);
 
   ngOnInit(): void {
     // Indítsuk el a verification pollingot
     this.guestService.startVerificationPolling();
-  }
-
-  ngOnDestroy(): void {
-    // Állítsuk le a pollingot
-    this.guestService.stopVerificationPolling();
   }
 
   /**

@@ -5,7 +5,6 @@ import {
   computed,
   effect,
   OnInit,
-  OnDestroy,
   inject,
   viewChild,
   ElementRef
@@ -46,7 +45,7 @@ import { RosterStepComponent } from './components/steps/roster-step/roster-step.
   ],
   providers: [OrderFinalizationFacadeService]
 })
-export class OrderFinalizationComponent implements OnInit, OnDestroy {
+export class OrderFinalizationComponent implements OnInit {
   readonly stepContent = viewChild<ElementRef<HTMLElement>>('stepContent');
 
   private readonly facade = inject(OrderFinalizationFacadeService);
@@ -167,10 +166,6 @@ export class OrderFinalizationComponent implements OnInit, OnDestroy {
     this.facade.loadExistingData();
     this.facade.setupAutoSave();
     this.initialized = true;
-  }
-
-  ngOnDestroy(): void {
-    // Facade uses DestroyRef, no manual cleanup needed
   }
 
   // ========== STEP NAVIGATION ==========

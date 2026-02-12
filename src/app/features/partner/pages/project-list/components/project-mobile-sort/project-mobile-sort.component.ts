@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, HostListener } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 
@@ -193,7 +193,10 @@ export interface SortOption {
         display: block;
       }
     }
-  `]
+  `],
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  }
 })
 export class ProjectMobileSortComponent {
   readonly options = input.required<SortOption[]>();
@@ -205,7 +208,6 @@ export class ProjectMobileSortComponent {
   readonly ICONS = ICONS;
   readonly isOpen = signal(false);
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.mobile-sort-dropdown')) {

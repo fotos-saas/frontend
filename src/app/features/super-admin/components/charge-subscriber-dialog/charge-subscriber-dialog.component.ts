@@ -4,8 +4,6 @@ import {
   viewChild,
   ElementRef,
   AfterViewInit,
-  OnDestroy,
-  HostListener,
   input,
   output,
   inject,
@@ -110,9 +108,12 @@ import { formatPrice } from '@shared/utils/formatters.util';
     </div>
   `,
   styleUrls: ['../dialog-shared.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown)': 'handleKeyboardEvent($event)',
+  }
 })
-export class ChargeSubscriberDialogComponent implements AfterViewInit, OnDestroy {
+export class ChargeSubscriberDialogComponent implements AfterViewInit {
   private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly service = inject(SuperAdminService);
   private readonly destroyRef = inject(DestroyRef);
@@ -132,6 +133,15 @@ export class ChargeSubscriberDialogComponent implements AfterViewInit, OnDestroy
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.focusTrap?.destroy();
+      if (this.previousActiveElement?.focus) {
+        setTimeout(() => this.previousActiveElement?.focus(), 0);
+      }
+    });
+  }
+
   // Form state
   amount = signal(0);
   description = signal('');
@@ -149,17 +159,6 @@ export class ChargeSubscriberDialogComponent implements AfterViewInit, OnDestroy
     }
   }
 
-  ngOnDestroy(): void {
-    this.focusTrap?.destroy();
-
-    if (this.previousActiveElement?.focus) {
-      setTimeout(() => {
-        this.previousActiveElement?.focus();
-      }, 0);
-    }
-  }
-
-  @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: Event): void {
     if (!(event instanceof KeyboardEvent)) return;
 

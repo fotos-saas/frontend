@@ -2,7 +2,7 @@ import {
   Directive,
   ElementRef,
   OnInit,
-  OnDestroy,
+  DestroyRef,
   inject,
   input,
   Renderer2,
@@ -44,10 +44,15 @@ import { isPlatformBrowser } from '@angular/common';
   selector: '[appStaggerAnimation]',
   standalone: true,
 })
-export class StaggerAnimationDirective implements OnInit, OnDestroy {
+export class StaggerAnimationDirective implements OnInit {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly renderer = inject(Renderer2);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.cleanupMediaQueryListener());
+  }
 
   /** Az elem indexe a listában (0-tól kezdve) */
   readonly staggerIndex = input.required<number>();
@@ -80,10 +85,6 @@ export class StaggerAnimationDirective implements OnInit, OnDestroy {
 
     this.checkReducedMotion();
     this.applyAnimation();
-  }
-
-  ngOnDestroy(): void {
-    this.cleanupMediaQueryListener();
   }
 
   /**

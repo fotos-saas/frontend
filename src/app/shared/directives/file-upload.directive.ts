@@ -1,4 +1,4 @@
-import { Directive, input, output, HostListener, inject } from '@angular/core';
+import { Directive, input, output, inject } from '@angular/core';
 import { FileUploadService } from '../../core/services/file-upload.service';
 import { ToastService } from '../../core/services/toast.service';
 
@@ -15,7 +15,10 @@ import { ToastService } from '../../core/services/toast.service';
  */
 @Directive({
   selector: '[fileUpload]',
-  standalone: true
+  standalone: true,
+  host: {
+    '(change)': 'onChange($event)',
+  }
 })
 export class FileUploadDirective {
   /** Signal-based inputs */
@@ -30,7 +33,6 @@ export class FileUploadDirective {
   /**
    * File input change event
    */
-  @HostListener('change', ['$event'])
   onChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;

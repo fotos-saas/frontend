@@ -7,7 +7,6 @@ import {
   computed,
   ElementRef,
   viewChild,
-  HostListener,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -26,6 +25,9 @@ export interface SelectOption {
   templateUrl: './searchable-select.component.html',
   styleUrl: './searchable-select.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  }
 })
 export class SearchableSelectComponent {
   readonly ICONS = ICONS;
@@ -77,7 +79,6 @@ export class SearchableSelectComponent {
     return this.selectedLabel() || '';
   });
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const el = (event.target as HTMLElement);
     if (!el.closest('app-searchable-select')) {

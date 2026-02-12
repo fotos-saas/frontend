@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, input, output, inject, signal, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
+import { Component, OnInit, input, output, inject, signal, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -16,7 +16,7 @@ import { QrCode, IQrCodeService } from '../../interfaces/qr-code.interface';
   styleUrl: './qr-code-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SharedQrCodeModalComponent implements OnInit, OnDestroy {
+export class SharedQrCodeModalComponent implements OnInit {
   readonly ICONS = ICONS;
   readonly QR_CODE_TYPES = QR_CODE_TYPES;
   readonly typeList = QR_CODE_TYPE_LIST;
@@ -29,7 +29,7 @@ export class SharedQrCodeModalComponent implements OnInit, OnDestroy {
   close = output<void>();
   qrCodeChanged = output<QrCode[]>();
 
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   loading = signal(true);
   qrCodes = signal<QrCode[]>([]);
@@ -53,6 +53,13 @@ export class SharedQrCodeModalComponent implements OnInit, OnDestroy {
   private copyTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private linkCopyTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.copyTimeoutId) clearTimeout(this.copyTimeoutId);
+      if (this.linkCopyTimeoutId) clearTimeout(this.linkCopyTimeoutId);
+    });
+  }
+
   readonly pinnedCode = computed(() =>
     this.qrCodes().find(c => c.isPinned) ?? null
   );
@@ -63,11 +70,6 @@ export class SharedQrCodeModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadQrCodes();
-  }
-
-  ngOnDestroy(): void {
-    if (this.copyTimeoutId) clearTimeout(this.copyTimeoutId);
-    if (this.linkCopyTimeoutId) clearTimeout(this.linkCopyTimeoutId);
   }
 
   private loadQrCodes(): void {

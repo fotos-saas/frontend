@@ -1,4 +1,4 @@
-import { Directive, ElementRef, output, OnDestroy, OnInit, inject, NgZone, input } from '@angular/core';
+import { Directive, ElementRef, output, OnInit, inject, NgZone, DestroyRef, input } from '@angular/core';
 
 /**
  * ClickOutside Directive
@@ -21,9 +21,21 @@ import { Directive, ElementRef, output, OnDestroy, OnInit, inject, NgZone, input
   selector: '[appClickOutside]',
   standalone: true
 })
-export class ClickOutsideDirective implements OnInit, OnDestroy {
+export class ClickOutsideDirective implements OnInit {
   private readonly elementRef = inject(ElementRef);
   private readonly ngZone = inject(NgZone);
+  private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.clickListener) {
+        document.removeEventListener('click', this.clickListener, true);
+      }
+      if (this.keydownListener) {
+        document.removeEventListener('keydown', this.keydownListener, true);
+      }
+    });
+  }
 
   /** Signal-based inputs */
   readonly escapeToClose = input<boolean>(true);
@@ -45,15 +57,6 @@ export class ClickOutsideDirective implements OnInit, OnDestroy {
         document.addEventListener('keydown', this.keydownListener, true);
       }, 10);
     });
-  }
-
-  ngOnDestroy(): void {
-    if (this.clickListener) {
-      document.removeEventListener('click', this.clickListener, true);
-    }
-    if (this.keydownListener) {
-      document.removeEventListener('keydown', this.keydownListener, true);
-    }
   }
 
   private handleClick(event: MouseEvent): void {

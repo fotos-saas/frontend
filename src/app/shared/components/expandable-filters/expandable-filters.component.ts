@@ -4,7 +4,6 @@ import {
   output,
   signal,
   computed,
-  HostListener,
   ElementRef,
   inject,
   ChangeDetectionStrategy
@@ -35,7 +34,10 @@ import { FilterConfig, FilterChangeEvent } from './expandable-filters.model';
   imports: [LucideAngularModule, MatTooltipModule],
   templateUrl: './expandable-filters.component.html',
   styleUrl: './expandable-filters.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  }
 })
 export class ExpandableFiltersComponent {
   private readonly elementRef = inject(ElementRef);
@@ -82,7 +84,6 @@ export class ExpandableFiltersComponent {
   });
 
   /** Dokumentum kattintás - dropdown bezárása ha kívülre kattintunk */
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (this.expanded() && !this.elementRef.nativeElement.contains(event.target)) {
       this.expanded.set(false);

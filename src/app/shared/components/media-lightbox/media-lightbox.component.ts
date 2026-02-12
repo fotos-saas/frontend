@@ -10,9 +10,7 @@ import {
   effect,
   inject,
   DestroyRef,
-  HostListener,
   AfterViewInit,
-  OnDestroy
 } from '@angular/core';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { LightboxMediaItem } from './media-lightbox.types';
@@ -37,9 +35,12 @@ import { DecimalPipe } from '@angular/common';
   imports: [DecimalPipe, ZoomDirective, A11yModule],
   templateUrl: './media-lightbox.component.html',
   styleUrls: ['./media-lightbox.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown)': 'onKeydown($event)',
+  }
 })
-export class MediaLightboxComponent implements AfterViewInit, OnDestroy {
+export class MediaLightboxComponent implements AfterViewInit {
   private readonly focusTrapFactory = inject(FocusTrapFactory);
 
   /** Input: Média elemek */
@@ -79,6 +80,15 @@ export class MediaLightboxComponent implements AfterViewInit, OnDestroy {
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.focusTrap?.destroy();
+      if (this.previousActiveElement?.focus) {
+        setTimeout(() => this.previousActiveElement?.focus(), 0);
+      }
+    });
+  }
+
   /** Computed: aktuális média elem */
   readonly currentMedia = computed(() => {
     const items = this.media();
@@ -104,22 +114,9 @@ export class MediaLightboxComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    // Focus trap felszabadítása
-    this.focusTrap?.destroy();
-
-    // Fókusz visszaállítása az előző elemre
-    if (this.previousActiveElement?.focus) {
-      setTimeout(() => {
-        this.previousActiveElement?.focus();
-      }, 0);
-    }
-  }
-
   /**
    * Keyboard event handler
    */
-  @HostListener('document:keydown', ['$event'])
   onKeydown(event: Event): void {
     if (!(event instanceof KeyboardEvent)) return;
 

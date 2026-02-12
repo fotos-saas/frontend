@@ -2,7 +2,7 @@ import {
   Directive,
   ElementRef,
   OnInit,
-  OnDestroy,
+  DestroyRef,
   inject,
   input,
   Renderer2,
@@ -35,11 +35,12 @@ import { isPlatformBrowser } from '@angular/common';
   selector: '[appLazyImage]',
   standalone: true,
 })
-export class LazyImageDirective implements OnInit, OnDestroy {
+export class LazyImageDirective implements OnInit {
   private readonly logger = inject(LoggerService);
   private readonly elementRef = inject(ElementRef<HTMLImageElement>);
   private readonly renderer = inject(Renderer2);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** A betöltendő kép URL-je */
   readonly lazySrc = input.required<string>();
@@ -64,6 +65,11 @@ export class LazyImageDirective implements OnInit, OnDestroy {
     afterNextRender(() => {
       this.initLazyLoading();
     });
+
+    this.destroyRef.onDestroy(() => {
+      this.disconnectObserver();
+      this.removePlaceholder();
+    });
   }
 
   ngOnInit(): void {
@@ -72,11 +78,6 @@ export class LazyImageDirective implements OnInit, OnDestroy {
     }
 
     this.setupPlaceholder();
-  }
-
-  ngOnDestroy(): void {
-    this.disconnectObserver();
-    this.removePlaceholder();
   }
 
   private setupPlaceholder(): void {

@@ -1,4 +1,4 @@
-import { Directive, HostListener, WritableSignal, input } from '@angular/core';
+import { Directive, WritableSignal, input } from '@angular/core';
 
 /**
  * Signal Form Directive
@@ -13,7 +13,11 @@ import { Directive, HostListener, WritableSignal, input } from '@angular/core';
  */
 @Directive({
   selector: '[signalForm]',
-  standalone: true
+  standalone: true,
+  host: {
+    '(input)': 'onInput($event)',
+    '(change)': 'onChange($event)',
+  }
 })
 export class SignalFormDirective<T extends Record<string, any>> {
   /** Signal-based inputs */
@@ -23,7 +27,6 @@ export class SignalFormDirective<T extends Record<string, any>> {
   /**
    * Input event kezelés
    */
-  @HostListener('input', ['$event'])
   onInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.updateSignal(input.value);
@@ -32,7 +35,6 @@ export class SignalFormDirective<T extends Record<string, any>> {
   /**
    * Change event kezelés (select, checkbox)
    */
-  @HostListener('change', ['$event'])
   onChange(event: Event): void {
     const target = event.target as HTMLInputElement | HTMLSelectElement;
     const value = target instanceof HTMLInputElement && target.type === 'checkbox'

@@ -8,9 +8,8 @@ import {
   Renderer2,
   viewChild,
   OnInit,
-  OnDestroy,
+  DestroyRef,
   inject,
-  HostListener
 } from '@angular/core';
 import { ZoomDirective } from '../../directives/zoom';
 import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
@@ -34,9 +33,12 @@ import { createBackdropHandler } from '../../utils/dialog.util';
   imports: [ZoomDirective, SafeHtmlPipe, DatePipe, DecimalPipe],
   templateUrl: './samples-lightbox.component.html',
   styleUrls: ['./samples-lightbox.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown)': 'onKeydown($event)',
+  }
 })
-export class SamplesLightboxComponent implements OnInit, OnDestroy {
+export class SamplesLightboxComponent implements OnInit {
   /** Backdrop handler a kijelölés közbeni bezárás megelőzéséhez */
   readonly backdropHandler = createBackdropHandler(() => this.close.emit(), 'lightbox');
 
@@ -54,6 +56,14 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
 
   private cdr = inject(ChangeDetectorRef);
   private renderer = inject(Renderer2);
+  private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.stopContinuousZoom();
+      this.renderer.removeStyle(document.body, 'overflow');
+    });
+  }
 
   /** Description doboz nyitva van-e */
   descriptionOpen = true;
@@ -100,13 +110,7 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(document.body, 'overflow', 'hidden');
   }
 
-  ngOnDestroy(): void {
-    this.stopContinuousZoom();
-    this.renderer.removeStyle(document.body, 'overflow');
-  }
-
   /** Keyboard navigáció */
-  @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
     switch (event.key) {
       case 'Escape':

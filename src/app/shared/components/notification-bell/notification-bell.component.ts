@@ -4,7 +4,6 @@ import {
   signal,
   OnInit,
   ChangeDetectionStrategy,
-  HostListener,
   DestroyRef
 } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
@@ -26,7 +25,11 @@ import { NotificationListComponent } from './components/notification-list/notifi
   imports: [RouterModule, NotificationListComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notification-bell.component.html',
-  styleUrl: './notification-bell.component.scss'
+  styleUrl: './notification-bell.component.scss',
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'onEscape()',
+  }
 })
 export class NotificationBellComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
@@ -55,7 +58,6 @@ export class NotificationBellComponent implements OnInit {
   readonly unreadCount = this.notificationService.unreadCount;
   readonly hasUnread = this.notificationService.hasUnread;
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.notification-bell')) {
@@ -63,7 +65,6 @@ export class NotificationBellComponent implements OnInit {
     }
   }
 
-  @HostListener('document:keydown.escape')
   onEscape(): void {
     this.isOpen.set(false);
   }

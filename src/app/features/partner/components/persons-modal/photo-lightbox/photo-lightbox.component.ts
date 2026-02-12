@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, computed, HostListener } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TabloPersonItem } from '../persons-modal.types';
@@ -167,7 +167,10 @@ import { TabloPersonItem } from '../persons-modal.types';
       }
     }
   `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown)': 'onKeydown($event)',
+  }
 })
 export class PhotoLightboxComponent {
   readonly ICONS = ICONS;
@@ -197,7 +200,6 @@ export class PhotoLightboxComponent {
     return idx < list.length - 1;
   });
 
-  @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
     if (!this.person()) return;
 

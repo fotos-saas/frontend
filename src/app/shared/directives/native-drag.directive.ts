@@ -1,4 +1,4 @@
-import { Directive, input, HostListener, HostBinding, inject, signal, DestroyRef } from '@angular/core';
+import { Directive, input, HostBinding, inject, signal, DestroyRef } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { ElectronService, NativeDragFile } from '../../core/services/electron.service';
 
@@ -22,6 +22,10 @@ import { ElectronService, NativeDragFile } from '../../core/services/electron.se
 @Directive({
   selector: '[appNativeDrag]',
   standalone: true,
+  host: {
+    '(dragstart)': 'onDragStart($event)',
+    '(mousedown)': 'onMouseDown()',
+  }
 })
 export class NativeDragDirective {
   private readonly logger = inject(LoggerService);
@@ -64,7 +68,6 @@ export class NativeDragDirective {
    * Handle drag start event
    * Prepares files and initiates native drag
    */
-  @HostListener('dragstart', ['$event'])
   async onDragStart(event: DragEvent): Promise<void> {
     // Only handle if enabled and in Electron
     if (!this.nativeDragEnabled() || !this.electronService.isElectron) {
@@ -113,7 +116,6 @@ export class NativeDragDirective {
   /**
    * Handle mouse down - prepare files ahead of time for faster drag
    */
-  @HostListener('mousedown')
   async onMouseDown(): Promise<void> {
     if (!this.nativeDragEnabled() || !this.electronService.isElectron) {
       return;

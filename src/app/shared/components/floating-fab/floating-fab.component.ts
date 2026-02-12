@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   signal,
   inject,
-  HostListener,
   ElementRef,
   input,
 } from '@angular/core';
@@ -232,6 +231,10 @@ import {
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'onEscapeKey()',
+  }
 })
 export class FloatingFabComponent {
   private readonly elementRef = inject(ElementRef);
@@ -259,14 +262,12 @@ export class FloatingFabComponent {
     this.isOpen.set(false);
   }
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (this.isOpen() && !this.elementRef.nativeElement.contains(event.target)) {
       this.close();
     }
   }
 
-  @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.isOpen()) {
       this.close();

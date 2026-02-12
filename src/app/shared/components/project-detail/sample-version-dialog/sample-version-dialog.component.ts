@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, inject, OnInit, DestroyRef, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
@@ -17,7 +17,7 @@ import { SampleLightboxItem } from '../../samples-lightbox/samples-lightbox.type
   templateUrl: './sample-version-dialog.component.html',
   styleUrl: './sample-version-dialog.component.scss',
 })
-export class SampleVersionDialogComponent implements OnInit, OnDestroy {
+export class SampleVersionDialogComponent implements OnInit {
   projectId = input.required<number>();
   packageId = input.required<number | null>();
   editVersion = input<SampleVersion | null>(null);
@@ -25,7 +25,12 @@ export class SampleVersionDialogComponent implements OnInit, OnDestroy {
   saved = output<void>();
 
   readonly facade = inject(SampleVersionDialogFacade);
+  private readonly destroyRef = inject(DestroyRef);
   readonly ICONS = ICONS;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.facade.cleanup());
+  }
 
   isDragging = signal(false);
   lightboxOpen = signal(false);
@@ -38,10 +43,6 @@ export class SampleVersionDialogComponent implements OnInit, OnDestroy {
     if (ver) {
       this.facade.initFromVersion(ver);
     }
-  }
-
-  ngOnDestroy(): void {
-    this.facade.cleanup();
   }
 
   onFileSelected(event: Event): void {

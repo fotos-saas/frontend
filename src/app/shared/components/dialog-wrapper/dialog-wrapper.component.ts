@@ -7,8 +7,7 @@ import {
   inject,
   ElementRef,
   AfterViewInit,
-  OnDestroy,
-  HostListener,
+  DestroyRef,
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -28,8 +27,12 @@ import {
   templateUrl: './dialog-wrapper.component.html',
   styleUrls: ['./dialog-wrapper.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown.escape)': 'handleEscapeKey($event)',
+    '(document:keydown.enter)': 'handleEnterKey($event)',
+  }
 })
-export class DialogWrapperComponent implements AfterViewInit, OnDestroy {
+export class DialogWrapperComponent implements AfterViewInit {
   // === INPUTS ===
   readonly headerStyle = input<DialogHeaderStyle>('flat');
   readonly theme = input<DialogTheme>('blue');
@@ -62,9 +65,19 @@ export class DialogWrapperComponent implements AfterViewInit, OnDestroy {
 
   // === INTERNALS ===
   private readonly elementRef = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   private mouseDownOnBackdrop = false;
   private scrollPosition = 0;
   private previousActiveElement: HTMLElement | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.unlockBodyScroll();
+      if (this.previousActiveElement?.focus) {
+        setTimeout(() => this.previousActiveElement?.focus(), 100);
+      }
+    });
+  }
 
   // ============================================================================
   // LIFECYCLE
@@ -74,13 +87,6 @@ export class DialogWrapperComponent implements AfterViewInit, OnDestroy {
     this.lockBodyScroll();
     this.previousActiveElement = document.activeElement as HTMLElement;
     this.focusFirstInput();
-  }
-
-  ngOnDestroy(): void {
-    this.unlockBodyScroll();
-    if (this.previousActiveElement?.focus) {
-      setTimeout(() => this.previousActiveElement?.focus(), 100);
-    }
   }
 
   // ============================================================================
@@ -118,7 +124,6 @@ export class DialogWrapperComponent implements AfterViewInit, OnDestroy {
   // KEYBOARD & MOUSE EVENTS
   // ============================================================================
 
-  @HostListener('document:keydown.escape', ['$event'])
   protected handleEscapeKey(event: Event): void {
     if (this.closable() && !this.isSubmitting()) {
       event.preventDefault();
@@ -126,7 +131,6 @@ export class DialogWrapperComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  @HostListener('document:keydown.enter', ['$event'])
   protected handleEnterKey(event: Event): void {
     if (this.isSubmitting()) return;
     const target = event.target as HTMLElement;

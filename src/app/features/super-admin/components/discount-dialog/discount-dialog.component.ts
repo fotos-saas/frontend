@@ -4,8 +4,6 @@ import {
   viewChild,
   ElementRef,
   AfterViewInit,
-  OnDestroy,
-  HostListener,
   input,
   output,
   inject,
@@ -32,9 +30,12 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
   imports: [FormsModule, A11yModule, LucideAngularModule, MatTooltipModule],
   templateUrl: './discount-dialog.component.html',
   styleUrls: ['../dialog-shared.scss', './discount-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown)': 'handleKeyboardEvent($event)',
+  }
 })
-export class DiscountDialogComponent implements AfterViewInit, OnDestroy {
+export class DiscountDialogComponent implements AfterViewInit {
   private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly service = inject(SuperAdminService);
   private readonly destroyRef = inject(DestroyRef);
@@ -54,6 +55,15 @@ export class DiscountDialogComponent implements AfterViewInit, OnDestroy {
 
   private focusTrap: FocusTrap | null = null;
   private previousActiveElement: HTMLElement | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.focusTrap?.destroy();
+      if (this.previousActiveElement?.focus) {
+        setTimeout(() => this.previousActiveElement?.focus(), 0);
+      }
+    });
+  }
 
   // Form state
   percent = signal(20);
@@ -90,17 +100,6 @@ export class DiscountDialogComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.focusTrap?.destroy();
-
-    if (this.previousActiveElement?.focus) {
-      setTimeout(() => {
-        this.previousActiveElement?.focus();
-      }, 0);
-    }
-  }
-
-  @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: Event): void {
     if (!(event instanceof KeyboardEvent)) return;
 

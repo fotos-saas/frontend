@@ -4,7 +4,6 @@ import {
   output,
   signal,
   ChangeDetectionStrategy,
-  HostListener
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../constants/icons.constants';
@@ -30,7 +29,11 @@ import { ICONS } from '../../constants/icons.constants';
   imports: [LucideAngularModule],
   templateUrl: './drop-zone.component.html',
   styleUrls: ['./drop-zone.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:dragover)': 'onWindowDragOver($event)',
+    '(window:drop)': 'onWindowDrop($event)',
+  }
 })
 export class DropZoneComponent {
   readonly ICONS = ICONS;
@@ -55,12 +58,10 @@ export class DropZoneComponent {
 
   isDragging = signal(false);
 
-  @HostListener('window:dragover', ['$event'])
   onWindowDragOver(event: DragEvent): void {
     event.preventDefault();
   }
 
-  @HostListener('window:drop', ['$event'])
   onWindowDrop(event: DragEvent): void {
     event.preventDefault();
   }

@@ -1,7 +1,7 @@
 import {
-  Component, input, signal, effect, HostListener,
+  Component, input, signal, effect,
   ChangeDetectionStrategy, ElementRef, viewChild,
-  OnDestroy, AfterViewInit, OnInit, inject
+  AfterViewInit, OnInit, inject, DestroyRef
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BreakpointService } from '../../../core/services/breakpoint.service';
@@ -80,11 +80,16 @@ export interface NavbarProjectInfo {
         NgClass,
     ],
     providers: [NavbarStateService],
+    host: {
+      '(document:keydown.escape)': 'onEscapeKey()',
+      '(document:keydown.tab)': 'onTabKey($event)',
+    }
 })
-export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
+export class NavbarComponent implements OnInit, AfterViewInit {
   private readonly state = inject(NavbarStateService);
   private readonly breakpointService = inject(BreakpointService);
   private readonly scrollLockService = inject(ScrollLockService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Signal-based inputs */
   readonly projectInfo = input<NavbarProjectInfo | null>(null);
@@ -146,6 +151,11 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         this.scrollLockService.unlock();
       }
     });
+
+    this.destroyRef.onDestroy(() => {
+      this.scrollLockService.unlock();
+      this.breakpointService.unobserve(this.navbarContainerRef().nativeElement);
+    });
   }
 
   ngOnInit(): void {
@@ -162,13 +172,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 100);
   }
 
-  ngOnDestroy(): void {
-    this.scrollLockService.unlock();
-    this.breakpointService.unobserve(this.navbarContainerRef().nativeElement);
-  }
-
   /** Escape billentyű bezárja a menüt */
-  @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.mobileMenuOpen()) {
       this.closeMobileMenu();
@@ -176,7 +180,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /** Focus trap - Tab billentyű kezelése nyitott menüben */
-  @HostListener('document:keydown.tab', ['$event'])
   onTabKey(event: KeyboardEvent): void {
     if (!this.mobileMenuOpen() || !this.mobileMenuRef()) return;
 

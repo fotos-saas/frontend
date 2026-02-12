@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PartnerOrderListService } from './partner-order-list.service';
 import { PartnerOrderDetailService } from './partner-order-detail.service';
+import type { PaginatedResponse as CorePaginatedResponse } from '../../../core/models/api.models';
 
 /**
  * Partner Client (ügyfél) interface
@@ -149,13 +150,8 @@ export interface UpdateClientRequest {
   allow_registration?: boolean;
 }
 
-/** Paginált válasz */
-export interface PaginatedResponse<T> {
-  data: T[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
+/** Paginált válasz (extends központi PaginatedResponse) */
+export interface PaginatedResponse<T> extends CorePaginatedResponse<T> {
   from: number | null;
   to: number | null;
 }

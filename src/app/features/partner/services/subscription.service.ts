@@ -214,4 +214,35 @@ export class SubscriptionService {
   cancelDeletion(): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.baseUrl}/account/cancel-deletion`, {});
   }
+
+  // ==========================================
+  // REGISZTRÁCIÓ
+  // ==========================================
+
+  /**
+   * Stripe Checkout session létrehozása regisztrációhoz
+   */
+  createCheckoutSession(data: {
+    name: string;
+    email: string;
+    password: string;
+    billing: Record<string, unknown>;
+    plan: string;
+    billing_cycle: string;
+  }): Observable<{ checkout_url: string; session_id: string }> {
+    return this.http.post<{ checkout_url: string; session_id: string }>(
+      `${this.baseUrl}/subscription/checkout`,
+      data
+    );
+  }
+
+  /**
+   * Regisztráció véglegesítése Stripe payment után
+   */
+  completeRegistration(sessionId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.baseUrl}/subscription/complete`,
+      { session_id: sessionId }
+    );
+  }
 }

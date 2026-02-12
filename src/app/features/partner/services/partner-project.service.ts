@@ -188,10 +188,10 @@ export class PartnerProjectService {
    */
   getProjectOrderData(projectId: number): Observable<{
     success: boolean;
-    data: any;
+    data: unknown;
     message?: string;
   }> {
-    return this.http.get<{ success: boolean; data: any; message?: string }>(
+    return this.http.get<{ success: boolean; data: unknown; message?: string }>(
       `${this.baseUrl}/projects/${projectId}/order-data`,
     );
   }

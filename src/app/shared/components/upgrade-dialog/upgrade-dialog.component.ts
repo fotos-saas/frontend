@@ -12,14 +12,11 @@ import {
 import { LoggerService } from '@core/services/logger.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
-import { ICONS } from '../../constants/icons.constants';
+import { ICONS, TEAM_MEMBER_ROLES } from '../../constants';
 import { PlansService, PlanConfig, PricingPlan } from '../../services/plans.service';
 import { PaymentService } from '../../../core/services/payment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
-
-/** Csapattag role-ok */
-const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
 
 export type UpgradeFeature = 'schools' | 'contacts' | 'projects' | 'storage' | 'templates';
 

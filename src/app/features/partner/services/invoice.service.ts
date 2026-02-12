@@ -9,7 +9,11 @@ import {
   CreateInvoicePayload,
 } from '../models/invoice.models';
 
-interface PaginatedResponse<T> {
+/**
+ * Invoice-specifikus paginated response (wrapper formátum)
+ * NEM egyezik meg a központi PaginatedResponse típussal!
+ */
+interface InvoicePaginatedResponse<T> {
   success: boolean;
   message: string;
   data: {
@@ -36,7 +40,7 @@ export class InvoiceService {
     status?: string;
     year?: number;
     search?: string;
-  } = {}): Observable<PaginatedResponse<Invoice>> {
+  } = {}): Observable<InvoicePaginatedResponse<Invoice>> {
     let httpParams = new HttpParams();
     if (params.page) httpParams = httpParams.set('page', params.page);
     if (params.per_page) httpParams = httpParams.set('per_page', params.per_page);
@@ -44,7 +48,7 @@ export class InvoiceService {
     if (params.year) httpParams = httpParams.set('year', params.year);
     if (params.search) httpParams = httpParams.set('search', params.search);
 
-    return this.http.get<PaginatedResponse<Invoice>>(this.baseUrl, { params: httpParams });
+    return this.http.get<InvoicePaginatedResponse<Invoice>>(this.baseUrl, { params: httpParams });
   }
 
   createInvoice(payload: CreateInvoicePayload): Observable<{ success: boolean; message: string; data: Invoice }> {

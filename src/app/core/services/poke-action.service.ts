@@ -11,6 +11,7 @@ import {
   Poke,
   PokeDailyLimit,
   PokeCategory,
+  PokeStatus,
   ApiPokeResponse,
   ApiDailyLimitResponse,
 } from '../models/poke.models';
@@ -364,7 +365,7 @@ export class PokeActionService implements OnDestroy {
   private mapPoke = (api: ApiPokeResponse): Poke => ({
     id: api.id, from: api.from, target: api.target,
     category: api.category, messageType: api.messageType,
-    emoji: api.emoji, text: api.text, status: api.status as any,
+    emoji: api.emoji, text: api.text, status: api.status as PokeStatus,
     reaction: api.reaction as ReactionEmoji | null,
     isRead: api.isRead, reactedAt: api.reactedAt,
     resolvedAt: api.resolvedAt, createdAt: api.createdAt

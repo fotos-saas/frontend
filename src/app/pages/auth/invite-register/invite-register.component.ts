@@ -2,9 +2,8 @@ import { Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy 
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface InvitationValidationResponse {
   valid: boolean;
@@ -42,10 +41,9 @@ interface InviteRegisterResponse {
 })
 export class InviteRegisterComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private http = inject(HttpClient);
-  private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
+  private authService = inject(AuthService);
 
   isValidating = signal(true);
   isLoading = signal(false);
@@ -78,10 +76,7 @@ export class InviteRegisterComponent implements OnInit {
         }
 
         // Validate code
-        this.http.post<InvitationValidationResponse>(
-          `${environment.apiUrl}/invite/validate`,
-          { code: this.code }
-        )
+        this.authService.validateInviteCode(this.code)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: (response) => {
@@ -120,16 +115,13 @@ export class InviteRegisterComponent implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    this.http.post<InviteRegisterResponse>(
-      `${environment.apiUrl}/invite/register`,
-      {
-        code: this.code,
-        name: this.form.value.name,
-        email: this.form.value.email,
-        password: this.form.value.password,
-        password_confirmation: this.form.value.password_confirmation
-      }
-    )
+    this.authService.registerWithInvite({
+      code: this.code,
+      name: this.form.value.name ?? '',
+      email: this.form.value.email ?? '',
+      password: this.form.value.password ?? '',
+      password_confirmation: this.form.value.password_confirmation ?? ''
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

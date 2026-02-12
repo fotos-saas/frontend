@@ -5,10 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, AccountStatusResponse } from '../../../services/subscription.service';
 import { AuthService } from '../../../../../core/services/auth.service';
-import { ICONS } from '../../../../../shared/constants/icons.constants';
-
-/** Csapattag role-ok */
-const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
+import { ICONS, TEAM_MEMBER_ROLES } from '../../../../../shared/constants';
 
 /**
  * Account Delete Page

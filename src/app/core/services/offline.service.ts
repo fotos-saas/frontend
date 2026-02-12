@@ -95,7 +95,7 @@ export class OfflineService implements OnDestroy {
         // Visszatert online - szinkronizalas inditasa
         this.onReconnect();
       } else if (!isOnline) {
-        this.toast.warning('Offline mod', 'A valtozasok szinkronizalodnak, ha ujra online leszel.');
+        this.toast.warning('Offline mód', 'A változások szinkronizálódnak, ha újra online leszel.');
       }
     });
     this.subscriptions.push(onlineSub);
@@ -121,7 +121,7 @@ export class OfflineService implements OnDestroy {
    * Visszateres online allapotba - queue feldolgozasa
    */
   private async onReconnect(): Promise<void> {
-    this.toast.success('Ujra online', 'Valtozasok szinkronizalasa...');
+    this.toast.success('Újra online', 'Változások szinkronizálása...');
     await this.processQueue();
   }
 
@@ -188,10 +188,10 @@ export class OfflineService implements OnDestroy {
       this._lastSync.set(new Date());
 
       if (successCount > 0) {
-        this.toast.success('Szinkronizalas kesz', `${successCount} valtozas sikeresen szinkronizalva.`);
+        this.toast.success('Szinkronizálás kész', `${successCount} változás sikeresen szinkronizálva.`);
       }
       if (failCount > 0) {
-        this.toast.error('Szinkronizalas sikertelen', `${failCount} valtozas szinkronizalasa sikertelen.`);
+        this.toast.error('Szinkronizálás sikertelen', `${failCount} változás szinkronizálása sikertelen.`);
       }
     } finally {
       this._isSyncing.set(false);

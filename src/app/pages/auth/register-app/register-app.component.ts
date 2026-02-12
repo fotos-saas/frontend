@@ -3,13 +3,12 @@ import { LoggerService } from '@core/services/logger.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { PasswordStrengthComponent } from '../../../shared/components/password-strength/password-strength.component';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../shared/constants';
-import { environment } from '../../../../environments/environment';
 import { PlansService, PricingPlan } from '../../../shared/services/plans.service';
+import { SubscriptionService } from '../../../features/partner/services/subscription.service';
 
 @Component({
   selector: 'app-register-app',
@@ -28,11 +27,11 @@ import { PlansService, PricingPlan } from '../../../shared/services/plans.servic
 export class RegisterAppComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private fb = inject(FormBuilder);
-  private http = inject(HttpClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
   private plansService = inject(PlansService);
+  private subscriptionService = inject(SubscriptionService);
 
   readonly ICONS = ICONS;
 
@@ -218,10 +217,7 @@ export class RegisterAppComponent implements OnInit {
     };
 
     // Call backend to create Stripe Checkout Session
-    this.http.post<{ checkout_url: string; session_id: string }>(
-      `${environment.apiUrl}/subscription/checkout`,
-      registrationData
-    ).pipe(
+    this.subscriptionService.createCheckoutSession(registrationData).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (response) => {

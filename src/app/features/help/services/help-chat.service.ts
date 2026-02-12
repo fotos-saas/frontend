@@ -38,7 +38,11 @@ export interface SendChatResponse {
   };
 }
 
-interface ApiResponse<T> {
+/**
+ * Help-specifikus API response (3-mezős wrapper)
+ * NEM egyezik meg a központi HelpApiResponse típussal!
+ */
+interface HelpApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
@@ -49,23 +53,23 @@ export class HelpChatService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  send(message: string, conversationId?: number, contextRoute?: string): Observable<ApiResponse<SendChatResponse['data']>> {
-    return this.http.post<ApiResponse<SendChatResponse['data']>>(`${this.apiUrl}/help/chat/send`, {
+  send(message: string, conversationId?: number, contextRoute?: string): Observable<HelpApiResponse<SendChatResponse['data']>> {
+    return this.http.post<HelpApiResponse<SendChatResponse['data']>>(`${this.apiUrl}/help/chat/send`, {
       message,
       conversation_id: conversationId ?? null,
       context_route: contextRoute ?? null,
     });
   }
 
-  getConversations(): Observable<ApiResponse<ChatConversation[]>> {
-    return this.http.get<ApiResponse<ChatConversation[]>>(`${this.apiUrl}/help/chat/conversations`);
+  getConversations(): Observable<HelpApiResponse<ChatConversation[]>> {
+    return this.http.get<HelpApiResponse<ChatConversation[]>>(`${this.apiUrl}/help/chat/conversations`);
   }
 
-  getMessages(conversationId: number): Observable<ApiResponse<ChatMessage[]>> {
-    return this.http.get<ApiResponse<ChatMessage[]>>(`${this.apiUrl}/help/chat/conversations/${conversationId}/messages`);
+  getMessages(conversationId: number): Observable<HelpApiResponse<ChatMessage[]>> {
+    return this.http.get<HelpApiResponse<ChatMessage[]>>(`${this.apiUrl}/help/chat/conversations/${conversationId}/messages`);
   }
 
-  deleteConversation(conversationId: number): Observable<ApiResponse<null>> {
-    return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/help/chat/conversations/${conversationId}`);
+  deleteConversation(conversationId: number): Observable<HelpApiResponse<null>> {
+    return this.http.delete<HelpApiResponse<null>>(`${this.apiUrl}/help/chat/conversations/${conversationId}`);
   }
 }

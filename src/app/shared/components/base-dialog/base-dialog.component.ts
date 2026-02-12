@@ -6,7 +6,8 @@ import {
   HostListener,
   ElementRef,
   inject,
-  signal
+  signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 
 /**
@@ -34,7 +35,8 @@ import {
  * ```
  */
 @Component({
-  template: ''
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export abstract class BaseDialogComponent implements AfterViewInit, OnDestroy {
   /** Signal-based outputs */

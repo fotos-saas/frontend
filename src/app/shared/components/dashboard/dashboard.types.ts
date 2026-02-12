@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import type { PaginatedResponse } from '../../../core/models/api.models';
 
 /**
  * Dashboard statisztikák közös típusa
@@ -17,17 +18,6 @@ export interface DashboardProjectItem {
   name: string;
   schoolName: string | null;
   hasActiveQrCode: boolean;
-}
-
-/**
- * Paginált response közös típus
- */
-export interface PaginatedResponse<T> {
-  data: T[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
 }
 
 /**

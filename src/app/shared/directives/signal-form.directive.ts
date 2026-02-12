@@ -44,7 +44,7 @@ export class SignalFormDirective<T extends Record<string, any>> {
   /**
    * Signal frissítése
    */
-  private updateSignal(value: any): void {
+  private updateSignal(value: string | boolean): void {
     this.signalForm().update(current => ({
       ...current,
       [this.signalKey()]: value

@@ -1,7 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   Component,
-  Input,
+  input,
   output,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -41,10 +41,10 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
   readonly backdropHandler = createBackdropHandler(() => this.close.emit(), 'lightbox');
 
   /** Samples lista */
-  @Input({ required: true }) samples: SampleLightboxItem[] = [];
+  readonly samples = input.required<SampleLightboxItem[]>();
 
   /** Aktuális index */
-  @Input({ required: true }) currentIndex = 0;
+  readonly currentIndex = input.required<number>();
 
   /** Bezárás event */
   readonly close = output<void>();
@@ -83,17 +83,17 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
 
   /** Aktuális sample */
   get currentSample(): SampleLightboxItem | null {
-    return this.samples[this.currentIndex] || null;
+    return this.samples()[this.currentIndex()] || null;
   }
 
   /** Első kép-e */
   get isFirst(): boolean {
-    return this.currentIndex === 0;
+    return this.currentIndex() === 0;
   }
 
   /** Utolsó kép-e */
   get isLast(): boolean {
-    return this.currentIndex === this.samples.length - 1;
+    return this.currentIndex() === this.samples().length - 1;
   }
 
   ngOnInit(): void {
@@ -137,19 +137,19 @@ export class SamplesLightboxComponent implements OnInit, OnDestroy {
 
   /** Előző kép */
   prevImage(): void {
-    if (this.currentIndex > 0) {
+    if (this.currentIndex() > 0) {
       this.currentZoom = 1;
       this.zoomDirective()?.reinitialize();
-      this.navigate.emit(this.currentIndex - 1);
+      this.navigate.emit(this.currentIndex() - 1);
     }
   }
 
   /** Következő kép */
   nextImage(): void {
-    if (this.currentIndex < this.samples.length - 1) {
+    if (this.currentIndex() < this.samples().length - 1) {
       this.currentZoom = 1;
       this.zoomDirective()?.reinitialize();
-      this.navigate.emit(this.currentIndex + 1);
+      this.navigate.emit(this.currentIndex() + 1);
     }
   }
 

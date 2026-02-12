@@ -1,4 +1,4 @@
-import { Component, input, output, signal, OnInit, DestroyRef, inject } from '@angular/core';
+import { Component, input, output, signal, OnInit, DestroyRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -17,7 +17,8 @@ import { formatHungarianPhone, validatePhone } from '../../utils/phone-formatter
   standalone: true,
   imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   templateUrl: './contact-editor-modal.component.html',
-  styleUrl: './contact-editor-modal.component.scss'
+  styleUrl: './contact-editor-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContactEditorModalComponent implements OnInit {
   private readonly projectService = inject(PROJECT_DETAIL_SERVICE);

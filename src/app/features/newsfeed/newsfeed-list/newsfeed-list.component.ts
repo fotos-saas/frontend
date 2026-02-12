@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, viewChild, ElementRef, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, viewChild, ElementRef, viewChildren, AfterViewInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -38,7 +38,7 @@ import { NewsfeedListStateService } from './newsfeed-list-state.service';
 export class NewsfeedListComponent implements OnInit, AfterViewInit {
   /** Filter container és gombok a sliding indicator-hoz */
   readonly filterContainer = viewChild<ElementRef<HTMLElement>>('filterContainer');
-  @ViewChildren('filterBtn') filterButtons!: QueryList<ElementRef<HTMLButtonElement>>;
+  readonly filterButtons = viewChildren<ElementRef<HTMLButtonElement>>('filterBtn');
 
   private readonly state = inject(NewsfeedListStateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -180,10 +180,10 @@ export class NewsfeedListComponent implements OnInit, AfterViewInit {
   // ==================== PRIVÁT ====================
 
   private updateFilterIndicator(): void {
-    if (!this.filterContainer() || !this.filterButtons) return;
+    if (!this.filterContainer() || this.filterButtons().length === 0) return;
 
     const container = this.filterContainer()!.nativeElement;
-    const buttons = this.filterButtons.toArray();
+    const buttons = this.filterButtons();
     const filterMap: Record<string, number> = { all: 0, announcement: 1, event: 2 };
     const activeIndex = filterMap[this.activeFilter()];
     const activeBtn = buttons[activeIndex]?.nativeElement;

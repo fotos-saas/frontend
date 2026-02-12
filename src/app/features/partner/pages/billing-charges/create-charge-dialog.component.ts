@@ -2,13 +2,12 @@ import { Component, inject, OnInit, signal, output, ChangeDetectionStrategy, Des
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
-import { environment } from '../../../../../environments/environment';
 import { PartnerBillingService } from '../../services/partner-billing.service';
 import { PartnerServiceCatalogService } from '../../services/partner-service-catalog.service';
+import { PartnerProjectService } from '../../services/partner-project.service';
 import { PartnerService } from '../../models/partner-service.models';
 
 interface ProjectOption {
@@ -33,9 +32,9 @@ export class CreateChargeDialogComponent implements OnInit {
   readonly close = output<void>();
   readonly created = output<void>();
 
-  private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
   private readonly billingService = inject(PartnerBillingService);
+  private readonly projectService = inject(PartnerProjectService);
   readonly catalogService = inject(PartnerServiceCatalogService);
   readonly ICONS = ICONS;
   readonly backdropHandler = createBackdropHandler(() => this.close.emit());
@@ -106,18 +105,18 @@ export class CreateChargeDialogComponent implements OnInit {
   }
 
   private loadProjects(): void {
-    this.http.get<{ data: { projects: ProjectOption[] } }>(
-      `${environment.apiUrl}/partner/projects/autocomplete`
-    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => this.projects.set(res.data.projects),
+    this.projectService.getProjectsAutocomplete().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (projects) => this.projects.set(projects as ProjectOption[]),
     });
   }
 
   private loadPersons(projectId: number): void {
-    this.http.get<{ data: { persons: PersonOption[] } }>(
-      `${environment.apiUrl}/partner/projects/${projectId}/missing-persons`
-    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => this.persons.set(res.data.persons),
+    this.projectService.getProjectPersons(projectId, true).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => this.persons.set(res.data as PersonOption[]),
     });
   }
 }

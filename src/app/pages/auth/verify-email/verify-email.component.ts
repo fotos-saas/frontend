@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -9,7 +9,8 @@ import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth
   standalone: true,
   imports: [RouterModule, AuthLayoutComponent],
   templateUrl: './verify-email.component.html',
-  styleUrls: ['./verify-email.component.scss']
+  styleUrls: ['./verify-email.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VerifyEmailComponent implements OnInit {
   private authService = inject(AuthService);

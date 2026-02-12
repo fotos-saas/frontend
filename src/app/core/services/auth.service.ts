@@ -573,4 +573,64 @@ export class AuthService {
       })
     );
   }
+
+  // ==========================================
+  // INVITE METHODS
+  // ==========================================
+
+  /**
+   * Meghívó kód validálás
+   */
+  validateInviteCode(code: string): Observable<{
+    valid: boolean;
+    message?: string;
+    invitation?: {
+      email: string;
+      role: string;
+      roleName: string;
+      partnerName: string;
+      expiresAt: string;
+    };
+  }> {
+    return this.http.post<{
+      valid: boolean;
+      message?: string;
+      invitation?: {
+        email: string;
+        role: string;
+        roleName: string;
+        partnerName: string;
+        expiresAt: string;
+      };
+    }>(`${environment.apiUrl}/invite/validate`, { code });
+  }
+
+  /**
+   * Meghívó kóddal történő regisztráció
+   */
+  registerWithInvite(data: {
+    code: string;
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+  }): Observable<{
+    message: string;
+    user: {
+      id: number;
+      name: string;
+      email: string;
+    };
+    token?: string;
+  }> {
+    return this.http.post<{
+      message: string;
+      user: {
+        id: number;
+        name: string;
+        email: string;
+      };
+      token?: string;
+    }>(`${environment.apiUrl}/invite/register`, data);
+  }
 }

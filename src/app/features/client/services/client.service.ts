@@ -355,7 +355,7 @@ export class ClientService {
   /**
    * Handle HTTP errors
    */
-  private handleError(error: { status: number; error?: { message?: string } }): Observable<never> {
+  private handleError(error: { status: number; error?: { message?: string; errors?: Record<string, string[]> } }): Observable<never> {
     // 401 - unauthorized, redirect to login
     if (error.status === 401) {
       this.logout();

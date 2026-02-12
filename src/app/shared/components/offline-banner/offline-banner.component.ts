@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { OfflineService } from '../../../core/services/offline.service';
 import { ICONS } from '../../constants/icons.constants';
@@ -17,6 +17,7 @@ import { ICONS } from '../../constants/icons.constants';
   selector: 'app-offline-banner',
   standalone: true,
   imports: [LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (showBanner()) {
       <div class="offline-banner" [class.syncing]="offlineService.isSyncing()">

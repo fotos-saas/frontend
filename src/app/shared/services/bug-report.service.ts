@@ -9,14 +9,7 @@ import {
   UpdateBugReportStatusDto,
   BugReportComment,
 } from '../types/bug-report.types';
-
-interface PaginatedResponse<T> {
-  data: T[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-}
+import type { PaginatedResponse } from '../../core/models/api.models';
 
 /**
  * Bug Report Service

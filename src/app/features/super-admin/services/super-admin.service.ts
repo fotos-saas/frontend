@@ -2,7 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { DashboardStats, PaginatedResponse, DashboardProjectItem } from '../../../shared/components/dashboard';
+import { DashboardStats, DashboardProjectItem } from '../../../shared/components/dashboard';
+import type { PaginatedResponse } from '../../../core/models/api.models';
 
 /**
  * Kedvezmény adatok

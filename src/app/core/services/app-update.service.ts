@@ -59,22 +59,30 @@ export class AppUpdateService {
         this.latestVersion.set(info.bundle.version);
       });
 
-      // Note: Capgo event names - use any to bypass strict typing
-      (CapacitorUpdater as any).addListener('download', (state: { percent: number }) => {
+      // Note: Capgo event names - extended event listener interface
+      type CapgoUpdater = typeof CapacitorUpdater & {
+        addListener(event: 'download', callback: (state: { percent: number }) => void): void;
+        addListener(event: 'downloadComplete', callback: (bundle: BundleInfo) => void): void;
+        addListener(event: 'downloadFailed', callback: (error: { version: string }) => void): void;
+        addListener(event: 'updateFailed', callback: (error: { version: string }) => void): void;
+      };
+      const updater = CapacitorUpdater as unknown as CapgoUpdater;
+
+      updater.addListener('download', (state: { percent: number }) => {
         this.downloadProgress.set(state.percent);
       });
 
-      (CapacitorUpdater as any).addListener('downloadComplete', (bundle: BundleInfo) => {
+      updater.addListener('downloadComplete', (bundle: BundleInfo) => {
         this.logger.info('Download complete', bundle);
         this.downloading.set(false);
       });
 
-      (CapacitorUpdater as any).addListener('downloadFailed', (error: { version: string }) => {
+      updater.addListener('downloadFailed', (error: { version: string }) => {
         this.logger.error('Download failed', error);
         this.downloading.set(false);
       });
 
-      (CapacitorUpdater as any).addListener('updateFailed', (error: { version: string }) => {
+      updater.addListener('updateFailed', (error: { version: string }) => {
         this.logger.error('Update failed', error);
         // The plugin will automatically rollback
       });

@@ -1,11 +1,10 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../shared/constants/icons.constants';
-import { environment } from '../../../../environments/environment';
+import { SubscriptionService } from '../../../features/partner/services/subscription.service';
 
 @Component({
   selector: 'app-register-success',
@@ -64,10 +63,9 @@ import { environment } from '../../../../environments/environment';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegisterSuccessComponent implements OnInit {
-  private http = inject(HttpClient);
-  private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
+  private subscriptionService = inject(SubscriptionService);
 
   readonly ICONS = ICONS;
 
@@ -84,10 +82,7 @@ export class RegisterSuccessComponent implements OnInit {
     }
 
     // Complete the registration
-    this.http.post<{ message: string }>(
-      `${environment.apiUrl}/subscription/complete`,
-      { session_id: sessionId }
-    ).pipe(
+    this.subscriptionService.completeRegistration(sessionId).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: () => {

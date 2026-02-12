@@ -35,15 +35,15 @@ export class SuperAdminShellComponent implements OnInit {
 
   // Menu items (Lucide ikonokkal - desktop, tablet es mobile egyarant)
   navItems: MenuItem[] = [
-    { id: 'dashboard', route: '/super-admin/dashboard', label: 'Iranyitopult', icon: 'home' },
-    { id: 'subscribers', route: '/super-admin/subscribers', label: 'Elofizetok', icon: 'credit-card' },
-    { id: 'settings', route: '/super-admin/settings', label: 'Beallitasok', icon: 'settings' },
+    { id: 'dashboard', route: '/super-admin/dashboard', label: 'Irányítópult', icon: 'home' },
+    { id: 'subscribers', route: '/super-admin/subscribers', label: 'Előfizetők', icon: 'credit-card' },
+    { id: 'settings', route: '/super-admin/settings', label: 'Beállítások', icon: 'settings' },
   ];
 
   // Mobile menu items (desktop + hibajelentesek)
   mobileMenuItems = computed<MenuItem[]>(() => [
     ...this.navItems,
-    { id: 'bugs', route: '/super-admin/bugs', label: 'Hibajelentesek', icon: 'bug' },
+    { id: 'bugs', route: '/super-admin/bugs', label: 'Hibajelentések', icon: 'bug' },
   ]);
 
   userName = signal<string>('');

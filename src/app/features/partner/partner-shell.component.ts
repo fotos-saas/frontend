@@ -11,7 +11,7 @@ import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.co
 import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
 import { BrandingService } from './services/branding.service';
-import { ICONS, getSubscriptionStatusLabel } from '../../shared/constants';
+import { ICONS, TEAM_MEMBER_ROLES, getSubscriptionStatusLabel } from '../../shared/constants';
 import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
 
@@ -24,9 +24,6 @@ const ROLE_BADGES: Record<string, string> = {
   printer: 'Nyomdász',
   assistant: 'Ügyintéző',
 };
-
-/** Csapattag role-ok (nem partner tulajdonos) */
-const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
 
 /**
  * Partner Shell - Layout komponens a fotós/partner felülethez.

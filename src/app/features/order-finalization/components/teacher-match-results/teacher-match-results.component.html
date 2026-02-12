@@ -17,7 +17,7 @@
         @for (result of matchedResults(); track result.inputName) {
           <div class="match-row match-row--matched">
             @if (result.photoUrl) {
-              <img class="match-row__photo" [src]="result.photoUrl" [alt]="result.teacherName ?? ''" />
+              <img class="match-row__photo" [src]="result.photoUrl" [alt]="result.teacherName ?? ''"  loading="lazy" />
             } @else {
               <div class="match-row__photo match-row__photo--placeholder">
                 <lucide-icon [name]="ICONS.USER" [size]="20" />

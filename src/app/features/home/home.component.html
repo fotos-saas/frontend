@@ -285,35 +285,37 @@
 <!-- ÖSSZES dialógus a page-card KÍVÜL (backdrop-filter stacking context miatt) -->
 
 <!-- Schedule Reminder Dialog -->
-@if (showReminderDialog) {
+@if (showReminderDialog()) {
   <app-schedule-reminder-dialog
     (resultEvent)="onReminderResult($event)"
   />
 }
 
 <!-- Finalization Reminder Dialog -->
-@if (showFinalizationReminderDialog) {
+@if (showFinalizationReminderDialog()) {
   <app-finalization-reminder-dialog
     (resultEvent)="onFinalizationReminderResult($event)"
   />
 }
 
 <!-- Contact Edit Dialog -->
-@if (showContactEditDialog) {
+@if (showContactEditDialog()) {
   <app-contact-edit-dialog
-    [initialData]="currentContactData"
-    [isSaving]="isContactSaving"
+    [initialData]="currentContactData()"
+    [isSaving]="isContactSaving()"
     (resultEvent)="onContactEditResult($event)"
   />
 }
 
 <!-- Onboarding Dialog (share token első belépés) -->
-@if (showOnboardingDialog()) {
-  <app-onboarding-dialog
-    [isSubmitting]="isOnboardingSubmitting()"
-    [errorMessage]="onboardingError()"
-    (resultEvent)="onOnboardingResult($event)"
-  />
+@defer (on idle) {
+  @if (showOnboardingDialog()) {
+    <app-onboarding-dialog
+      [isSubmitting]="isOnboardingSubmitting()"
+      [errorMessage]="onboardingError()"
+      (resultEvent)="onOnboardingResult($event)"
+    />
+  }
 }
 
 <!-- Pending Verification (admin jóváhagyás várakozás) -->

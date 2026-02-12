@@ -282,7 +282,7 @@
           class="dialog__btn dialog__btn--primary"
           [class.dialog__btn--full]="currentStep() === 'search'"
           (click)="currentStep() === 'email' ? submit() : nextStep()"
-          [disabled]="!isStepValid || isSubmitting()"
+          [disabled]="!isStepValid() || isSubmitting()"
         >
           @if (isSubmitting()) {
             <svg class="dialog__btn-spinner" viewBox="0 0 24 24" aria-hidden="true">
@@ -300,7 +300,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           }
-          {{ nextButtonText }}
+          {{ nextButtonText() }}
         </button>
       </div>
 

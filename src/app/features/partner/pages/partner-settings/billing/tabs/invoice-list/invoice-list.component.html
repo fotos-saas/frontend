@@ -95,7 +95,7 @@
             {{ getStatusLabel(invoice.status) }}
           </span>
         </span>
-        <span class="td td-date">{{ formatDate(invoice.issue_date) }}</span>
+        <span class="td td-date">{{ invoice.issue_date | date:'shortDate':'':'hu-HU' }}</span>
         <span class="td td-actions">
           @if (invoice.status === 'draft') {
             <button class="action-btn" matTooltip="Kiállítás" (click)="syncInvoice(invoice)" [disabled]="syncing() === invoice.id">

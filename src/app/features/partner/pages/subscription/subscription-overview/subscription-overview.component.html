@@ -43,7 +43,7 @@
         <lucide-icon [name]="ICONS.CALENDAR" [size]="14" />
         {{ subscription()!.billing_cycle === 'yearly' ? 'Éves számlázás' : 'Havi számlázás' }}
         @if (subscription()!.current_period_end) {
-          · Következő fizetés: {{ formatDate(subscription()!.current_period_end!) }}
+          · Következő fizetés: {{ subscription()!.current_period_end | date:'yyyy. MMMM d.':'':'hu-HU' }}
         }
       </div>
     </div>

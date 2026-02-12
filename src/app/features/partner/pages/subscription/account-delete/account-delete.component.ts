@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, AccountStatusResponse } from '../../../services/subscription.service';
@@ -20,7 +21,7 @@ const TEAM_MEMBER_ROLES = ['designer', 'marketer', 'printer', 'assistant'];
 @Component({
   selector: 'app-account-delete',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [DatePipe, LucideAngularModule, MatTooltipModule],
   templateUrl: './account-delete.component.html',
   styleUrls: ['./account-delete.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -98,12 +99,4 @@ export class AccountDeleteComponent implements OnInit {
     });
   }
 
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('hu-HU', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
 }

@@ -64,7 +64,7 @@
                   (click)="onViewPhoto(teacher, $event)"
                 >
                   @if (teacher.photoThumbUrl) {
-                    <img [src]="teacher.photoThumbUrl" [alt]="teacher.name" />
+                    <img [src]="teacher.photoThumbUrl" [alt]="teacher.name"  loading="lazy" />
                   } @else {
                     <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
                   }

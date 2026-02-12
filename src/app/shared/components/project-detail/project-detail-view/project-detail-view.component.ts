@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
@@ -21,6 +22,7 @@ import { QR_CODE_TYPES, QrCodeTypeKey } from '../../../constants/qr-code-types';
   standalone: true,
   imports: [
     RouterModule,
+    DatePipe,
     LucideAngularModule,
     MatTooltipModule,
     AddButtonComponent,
@@ -71,29 +73,9 @@ export class ProjectDetailViewComponent {
     });
   }
 
-  formatDateTime(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('hu-HU', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
   getQrCodeImageUrl(registrationUrl: string): string {
     const url = encodeURIComponent(registrationUrl);
     return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('hu-HU', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   }
 
   getInitials(name: string): string {

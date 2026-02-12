@@ -261,21 +261,23 @@
 }
 
 <!-- Lightbox (galéria grid) -->
-@if (state.lightboxOpen()) {
-  <app-media-lightbox
-    [media]="state.lightboxMedia()"
-    [currentIndex]="state.lightboxIndex()"
-    (close)="state.closeLightbox()"
-    (navigate)="onNavigateLightbox($event)"
-  />
-}
+@defer (on idle) {
+  @if (state.lightboxOpen()) {
+    <app-media-lightbox
+      [media]="state.lightboxMedia()"
+      [currentIndex]="state.lightboxIndex()"
+      (close)="state.closeLightbox()"
+      (navigate)="onNavigateLightbox($event)"
+    />
+  }
 
-<!-- Lightbox (monitoring detail) -->
-@if (monitoringRef()?.state?.lightboxOpen()) {
-  <app-media-lightbox
-    [media]="monitoringRef()!.state.lightboxMedia()"
-    [currentIndex]="monitoringRef()!.state.lightboxIndex()"
-    (close)="monitoringRef()!.onLightboxClose()"
-    (navigate)="monitoringRef()!.onLightboxNavigate($event)"
-  />
+  <!-- Lightbox (monitoring detail) -->
+  @if (monitoringRef()?.state?.lightboxOpen()) {
+    <app-media-lightbox
+      [media]="monitoringRef()!.state.lightboxMedia()"
+      [currentIndex]="monitoringRef()!.state.lightboxIndex()"
+      (close)="monitoringRef()!.onLightboxClose()"
+      (navigate)="monitoringRef()!.onLightboxNavigate($event)"
+    />
+  }
 }

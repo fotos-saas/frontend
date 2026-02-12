@@ -81,12 +81,12 @@
         }
 
         <!-- New media upload -->
-        @if (maxNewFiles > 0) {
+        @if (maxNewFiles() > 0) {
           @if (mediaUploadError()) {
             <div class="media-upload-error">{{ mediaUploadError() }}</div>
           }
           <app-media-uploader
-            [maxFiles]="maxNewFiles"
+            [maxFiles]="maxNewFiles()"
             [maxSizeMB]="10"
             [disabled]="isSubmitting()"
             (filesChangeEvent)="onNewMediaFilesChange($event)"
@@ -196,7 +196,7 @@
         type="button"
         class="btn btn--primary"
         (click)="onSubmit()"
-        [disabled]="!isValid || isSubmitting()"
+        [disabled]="!isValid() || isSubmitting()"
       >
         @if (isSubmitting()) {
           <span>Mentés...</span>

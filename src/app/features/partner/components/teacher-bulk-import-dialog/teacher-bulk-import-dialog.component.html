@@ -96,7 +96,7 @@
             @if (row.matchType !== 'no_match') {
               <div class="review-row__match">
                 @if (row.photoUrl) {
-                  <img class="match-avatar" [src]="row.photoUrl" [alt]="row.teacherName" />
+                  <img class="match-avatar" [src]="row.photoUrl" [alt]="row.teacherName"  loading="lazy" />
                 }
                 <span class="match-name">{{ row.teacherName }}</span>
               </div>

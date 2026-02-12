@@ -208,6 +208,6 @@
 <!-- Lightbox -->
 @if (lightboxImage()) {
   <div class="lightbox-backdrop" (click)="closeLightbox()">
-    <img [src]="lightboxImage()" class="lightbox-image" (click)="$event.stopPropagation()" />
+    <img [src]="lightboxImage()" class="lightbox-image" (click)="$event.stopPropagation()"  loading="lazy" />
   </div>
 }

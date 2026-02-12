@@ -25,7 +25,7 @@
       <div class="pending-info">
         <div class="info-item">
           <lucide-icon [name]="ICONS.CALENDAR" [size]="18" />
-          <span>Törlés időpontja: {{ formatDate(accountStatus()!.deletion_scheduled_at!) }}</span>
+          <span>Törlés időpontja: {{ accountStatus()!.deletion_scheduled_at | date:'yyyy. MMMM d.':'':'hu-HU' }}</span>
         </div>
       </div>
 

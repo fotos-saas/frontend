@@ -100,28 +100,28 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     this.isMarketer() ? ['settings'] : []
   );
 
-  // Delegate state signals from facade
-  get loading() { return this.facade.loading; }
-  get project() { return this.facade.project; }
-  get projectData() { return this.facade.projectData; }
-  get showQrModal() { return this.facade.showQrModal; }
-  get showContactModal() { return this.facade.showContactModal; }
-  get editingContact() { return this.facade.editingContact; }
-  get showDeleteConfirm() { return this.facade.showDeleteConfirm; }
-  get deletingContact() { return this.facade.deletingContact; }
-  get deleting() { return this.facade.deleting; }
-  get showDeleteUserConfirm() { return this.facade.showDeleteUserConfirm; }
-  get deletingUser() { return this.facade.deletingUser; }
-  get showPackageDialog() { return this.facade.showPackageDialog; }
-  get packageDialogData() { return this.facade.packageDialogData; }
-  get showVersionDialog() { return this.facade.showVersionDialog; }
-  get versionDialogData() { return this.facade.versionDialogData; }
-  get showDeletePackageConfirm() { return this.facade.showDeletePackageConfirm; }
-  get deletingPackageData() { return this.facade.deletingPackageData; }
-  get showDeleteVersionConfirm() { return this.facade.showDeleteVersionConfirm; }
-  get deletingVersionData() { return this.facade.deletingVersionData; }
-  get showDeleteProjectConfirm() { return this.facade.showDeleteProjectConfirm; }
-  get deletingProject() { return this.facade.deletingProject; }
+  // Delegate state signals from facade - direct signal references
+  readonly loading = this.facade.loading;
+  readonly project = this.facade.project;
+  readonly projectData = this.facade.projectData;
+  readonly showQrModal = this.facade.showQrModal;
+  readonly showContactModal = this.facade.showContactModal;
+  readonly editingContact = this.facade.editingContact;
+  readonly showDeleteConfirm = this.facade.showDeleteConfirm;
+  readonly deletingContact = this.facade.deletingContact;
+  readonly deleting = this.facade.deleting;
+  readonly showDeleteUserConfirm = this.facade.showDeleteUserConfirm;
+  readonly deletingUser = this.facade.deletingUser;
+  readonly showPackageDialog = this.facade.showPackageDialog;
+  readonly packageDialogData = this.facade.packageDialogData;
+  readonly showVersionDialog = this.facade.showVersionDialog;
+  readonly versionDialogData = this.facade.versionDialogData;
+  readonly showDeletePackageConfirm = this.facade.showDeletePackageConfirm;
+  readonly deletingPackageData = this.facade.deletingPackageData;
+  readonly showDeleteVersionConfirm = this.facade.showDeleteVersionConfirm;
+  readonly deletingVersionData = this.facade.deletingVersionData;
+  readonly showDeleteProjectConfirm = this.facade.showDeleteProjectConfirm;
+  readonly deletingProject = this.facade.deletingProject;
 
   // Tab references
   private readonly usersTab = viewChild(ProjectUsersTabComponent);

@@ -153,17 +153,17 @@
           <div class="summary-row">
             <span>Szállítási költség</span>
             <span>
-              @if (shippingCost === 0) {
+              @if (shippingCost() === 0) {
                 Ingyenes
               } @else {
-                {{ shippingCost | number }} Ft
+                {{ shippingCost() | number }} Ft
               }
             </span>
           </div>
         }
         <div class="summary-row summary-total">
           <strong>Összesen</strong>
-          <strong>{{ grandTotal | number }} Ft</strong>
+          <strong>{{ grandTotal() | number }} Ft</strong>
         </div>
       </div>
 
@@ -189,7 +189,7 @@
           Feldolgozás...
         } @else {
           <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="16" />
-          Fizetés ({{ grandTotal | number }} Ft)
+          Fizetés ({{ grandTotal() | number }} Ft)
         }
       </button>
     </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { VotingService, PollOption, PollMedia } from '../../../core/services/voting.service';
@@ -41,14 +41,10 @@ export class VotingDetailComponent implements OnInit {
   isLightboxOpen = signal(false);
 
   /** Vendég felhasználó */
-  get isGuest(): boolean {
-    return this.authService.isGuest();
-  }
+  readonly isGuest = computed(() => this.authService.isGuest());
 
   /** Teljes hozzáférés */
-  get hasFullAccess(): boolean {
-    return this.authService.hasFullAccess();
-  }
+  readonly hasFullAccess = computed(() => this.authService.hasFullAccess());
 
   constructor(
     private route: ActivatedRoute,
@@ -61,7 +57,7 @@ export class VotingDetailComponent implements OnInit {
   ngOnInit(): void {
     // Kapcsolattartó státusz átadása a state-nek
     // Ez biztosítja, hogy full access esetén az eredmények mindig látszanak
-    this.state.setFullAccess(this.hasFullAccess);
+    this.state.setFullAccess(this.hasFullAccess());
 
     this.initGuestCheck();
     this.loadPollFromRoute();
@@ -240,15 +236,13 @@ export class VotingDetailComponent implements OnInit {
   }
 
   /** Van-e média a szavazáshoz */
-  get hasMedia(): boolean {
+  readonly hasMedia = computed(() => {
     const poll = this.state.poll();
     return !!(poll?.media && poll.media.length > 0);
-  }
+  });
 
   /** Média elemek */
-  get mediaItems(): PollMedia[] {
-    return this.state.poll()?.media ?? [];
-  }
+  readonly mediaItems = computed(() => this.state.poll()?.media ?? []);
 
   /** Kép kattintás - lightbox megnyitása */
   onMediaClick(index: number): void {

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, effect } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export interface BrandingData {
@@ -48,6 +48,9 @@ export class BrandingService {
   readonly logoUrl = signal<string | null>(null);
   readonly faviconUrl = signal<string | null>(null);
   readonly hideBrandName = signal(false);
+
+  /** Cache signal - undefined = nincs még betöltve, null = nincs branding */
+  private readonly cache = signal<BrandingResponse | undefined>(undefined);
 
   constructor() {
     // Favicon dinamikus frissítése, ha változik
@@ -97,7 +100,26 @@ export class BrandingService {
   }
 
   getBranding(): Observable<BrandingResponse> {
-    return this.http.get<BrandingResponse>(this.baseUrl);
+    // Ha már van cache, azt használjuk
+    const cached = this.cache();
+    if (cached !== undefined) {
+      return new Observable(observer => {
+        observer.next(cached);
+        observer.complete();
+      });
+    }
+
+    // Ha nincs cache, lekérjük és cache-eljük
+    return this.http.get<BrandingResponse>(this.baseUrl).pipe(
+      tap(response => this.cache.set(response))
+    );
+  }
+
+  /**
+   * Cache törlése (pl. branding mentés után)
+   */
+  clearCache(): void {
+    this.cache.set(undefined);
   }
 
   /**

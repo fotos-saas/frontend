@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal, inject, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
@@ -18,7 +19,7 @@ import { InvoiceCreateDialogComponent } from '../../components/invoice-create-di
 @Component({
   selector: 'app-invoice-list',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule, InvoiceCreateDialogComponent],
+  imports: [DatePipe, LucideAngularModule, MatTooltipModule, InvoiceCreateDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-list.component.html',
   styleUrl: './invoice-list.component.scss',
@@ -168,10 +169,6 @@ export class InvoiceListComponent implements OnInit {
   }
 
   readonly formatAmount = formatAmount;
-
-  formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('hu-HU');
-  }
 
   getStatusLabel(status: InvoiceStatus): string {
     return this.STATUS_LABELS[status] ?? status;

@@ -135,12 +135,12 @@ export class NewsfeedCardComponent {
 
   readonly maxCommentLength = MAX_COMMENT_LENGTH;
 
-  get isCommentValid(): boolean {
+  readonly isCommentValid = computed(() => {
     const content = this.newCommentText.trim();
     return content.length >= 1 && content.length <= MAX_COMMENT_LENGTH;
-  }
+  });
 
-  get charCount(): string { return `${this.newCommentText.length}/${MAX_COMMENT_LENGTH}`; }
+  readonly charCount = computed(() => `${this.newCommentText.length}/${MAX_COMMENT_LENGTH}`);
 
   trackByCommentId(_index: number, comment: NewsfeedComment): number { return comment.id; }
 

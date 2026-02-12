@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, input, output, signal, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
@@ -42,16 +42,14 @@ export class CheckoutDialogComponent {
   readonly cartItems = cartItems;
   readonly cartTotal = cartTotal;
 
-  get shippingCost(): number {
+  readonly shippingCost = computed(() => {
     const cfg = this.config();
     if (this.deliveryMethod() !== 'shipping') return 0;
     if (cfg.shipping_free_threshold_huf && this.cartTotal() >= cfg.shipping_free_threshold_huf) return 0;
     return cfg.shipping_cost_huf;
-  }
+  });
 
-  get grandTotal(): number {
-    return this.cartTotal() + this.shippingCost;
-  }
+  readonly grandTotal = computed(() => this.cartTotal() + this.shippingCost());
 
   submit(): void {
     if (!this.customerName() || !this.customerEmail()) {

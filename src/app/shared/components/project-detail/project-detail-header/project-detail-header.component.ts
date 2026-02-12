@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData } from '../project-detail.types';
@@ -9,7 +9,7 @@ import { ICONS } from '../../../constants/icons.constants';
 @Component({
   selector: 'app-project-detail-header',
   standalone: true,
-  imports: [NgClass, LucideAngularModule, MatTooltipModule, BackButtonComponent],
+  imports: [NgClass, DatePipe, LucideAngularModule, MatTooltipModule, BackButtonComponent],
   templateUrl: './project-detail-header.component.html',
   styleUrl: './project-detail-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,14 +41,5 @@ export class ProjectDetailHeaderComponent {
       'push_could_be_done': ICONS.ARROW_RIGHT,
     };
     return iconMap[status ?? ''] ?? ICONS.CIRCLE;
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('hu-HU', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   }
 }

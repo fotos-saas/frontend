@@ -54,7 +54,7 @@
           @for (invoice of invoices(); track invoice.id; let i = $index) {
             <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
               <span class="td td-number">{{ invoice.number || '-' }}</span>
-              <span class="td td-date">{{ formatDate(invoice.created_at) }}</span>
+              <span class="td td-date">{{ invoice.created_at | date:'yyyy. MMMM d.':'':'hu-HU' }}</span>
               <span class="td td-amount">{{ formatAmount(invoice.amount, invoice.currency) }}</span>
               <span class="td td-status">
                 <span class="status-badge" [class]="'status-badge--' + invoice.status">

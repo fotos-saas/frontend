@@ -4,7 +4,8 @@ import {
   signal,
   input,
   output,
-  effect
+  effect,
+  computed
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Poll, PollMedia } from '../../../core/services/voting.service';
@@ -173,11 +174,9 @@ export class VotingEditDialogComponent extends BaseDialogComponent {
   // VALIDATION
   // ============================================================================
 
-  get isValid(): boolean {
-    return this.title.trim().length >= 3;
-  }
+  readonly isValid = computed(() => this.title.trim().length >= 3);
 
-  get hasChanges(): boolean {
+  readonly hasChanges = computed(() => {
     const pollData = this.poll();
     const originalDeadline = this.calculateDeadlineDays();
     return (
@@ -190,16 +189,16 @@ export class VotingEditDialogComponent extends BaseDialogComponent {
       this.deleteMediaIds().length > 0 ||
       this.newMediaFiles().length > 0
     );
-  }
+  });
 
   /**
    * Maximális feltölthető új képek száma
    * (5 - meglévő képek száma + törlésre jelöltek)
    */
-  get maxNewFiles(): number {
+  readonly maxNewFiles = computed(() => {
     const currentCount = this.existingMedia().length;
     return Math.max(0, 5 - currentCount);
-  }
+  });
 
   // ============================================================================
   // MEDIA HANDLERS
@@ -241,7 +240,7 @@ export class VotingEditDialogComponent extends BaseDialogComponent {
    * Submit implementáció
    */
   protected override onSubmit(): void {
-    if (!this.isValid) {
+    if (!this.isValid()) {
       this._isSubmitting.set(false);
       return;
     }

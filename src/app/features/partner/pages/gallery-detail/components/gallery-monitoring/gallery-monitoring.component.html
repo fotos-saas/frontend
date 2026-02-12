@@ -178,7 +178,7 @@
                 {{ person.daysSinceLastActivity }} napja
               </span>
             } @else if (person.lastActivityAt) {
-              {{ formatDate(person.lastActivityAt) }}
+              {{ person.lastActivityAt | date:'MMM d., HH:mm':'':'hu-HU' }}
             } @else {
               -
             }

@@ -234,11 +234,13 @@
 </div>
 
 <!-- Media Lightbox -->
-@if (lightboxService.isOpen()) {
-  <app-media-lightbox
-    [media]="lightboxService.media()"
-    [currentIndex]="lightboxService.currentIndex()"
-    (close)="closeLightbox()"
-    (navigate)="onLightboxNavigate($event)"
-  />
+@defer (on idle) {
+  @if (lightboxService.isOpen()) {
+    <app-media-lightbox
+      [media]="lightboxService.media()"
+      [currentIndex]="lightboxService.currentIndex()"
+      (close)="closeLightbox()"
+      (navigate)="onLightboxNavigate($event)"
+    />
+  }
 }

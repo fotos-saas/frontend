@@ -135,7 +135,7 @@
               (click)="openAvatarLightbox(teacher, $event)"
             >
               @if (teacher.photoThumbUrl) {
-                <img [src]="teacher.photoThumbUrl" [alt]="teacher.fullDisplayName" />
+                <img [src]="teacher.photoThumbUrl" [alt]="teacher.fullDisplayName" loading="lazy" />
               } @else {
                 <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="20" />
               }
@@ -269,13 +269,15 @@
 }
 
 <!-- Avatar Lightbox -->
-@if (lightboxMedia().length > 0) {
-  <app-media-lightbox
-    [media]="lightboxMedia()"
-    [currentIndex]="0"
-    (close)="lightboxMedia.set([])"
-    (navigate)="lightboxMedia.set([])"
-  />
+@defer (on idle) {
+  @if (lightboxMedia().length > 0) {
+    <app-media-lightbox
+      [media]="lightboxMedia()"
+      [currentIndex]="0"
+      (close)="lightboxMedia.set([])"
+      (navigate)="lightboxMedia.set([])"
+    />
+  }
 }
 
 <!-- Upload Photo (project view) -->

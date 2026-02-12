@@ -95,11 +95,11 @@
               maxlength="1000"
             ></textarea>
             <div class="newsfeed-card__comment-form-footer">
-              <span class="newsfeed-card__char-count">{{ charCount }}</span>
+              <span class="newsfeed-card__char-count">{{ charCount() }}</span>
               <button
                 type="submit"
                 class="newsfeed-card__comment-submit"
-                [disabled]="!isCommentValid"
+                [disabled]="!isCommentValid()"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <line x1="22" y1="2" x2="11" y2="13"/>
@@ -213,7 +213,7 @@
                       <button
                         type="submit"
                         class="newsfeed-card__reply-submit"
-                        [disabled]="!isCommentValid"
+                        [disabled]="!isCommentValid()"
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                           <line x1="22" y1="2" x2="11" y2="13"/>

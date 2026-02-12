@@ -11,7 +11,8 @@ import {
   inject,
   DestroyRef,
   ChangeDetectorRef,
-  signal
+  signal,
+  computed
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -95,20 +96,20 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit, OnDestr
   private scrollPosition = 0;
   private readonly searchInput$ = new Subject<string>();
 
-  // Service delegálás template-hez
-  get currentStep() { return this.formService.currentStep; }
-  get selectedPerson() { return this.formService.selectedPerson; }
-  get notFoundSelected() { return this.formService.notFoundSelected; }
-  get searchResults() { return this.formService.searchResults; }
-  get isSearching() { return this.formService.isSearching; }
-  get errors() { return this.formService.errors; }
+  // Service delegálás template-hez - signal referenciák
+  readonly currentStep = this.formService.currentStep;
+  readonly selectedPerson = this.formService.selectedPerson;
+  readonly notFoundSelected = this.formService.notFoundSelected;
+  readonly searchResults = this.formService.searchResults;
+  readonly isSearching = this.formService.isSearching;
+  readonly errors = this.formService.errors;
   clearErrors(): void { this.formService.clearErrors(); }
-  get stepTitles() { return this.formService.stepTitles; }
-  get stepDescriptions() { return this.formService.stepDescriptions; }
-  get stepIndex() { return this.formService.stepIndex; }
-  get hasSelection() { return this.formService.hasSelection(); }
-  get isStepValid() { return this.formService.isStepValid(this.searchQuery, this.nickname, this.email); }
-  get nextButtonText() { return this.formService.getNextButtonText(this.isSubmitting()); }
+  readonly stepTitles = this.formService.stepTitles;
+  readonly stepDescriptions = this.formService.stepDescriptions;
+  readonly stepIndex = this.formService.stepIndex;
+  readonly hasSelection = computed(() => this.formService.hasSelection());
+  readonly isStepValid = computed(() => this.formService.isStepValid(this.searchQuery, this.nickname, this.email));
+  readonly nextButtonText = computed(() => this.formService.getNextButtonText(this.isSubmitting()));
 
   ngOnInit(): void {
     this.searchInput$.pipe(

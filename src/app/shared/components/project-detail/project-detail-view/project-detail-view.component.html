@@ -77,7 +77,7 @@
           </div>
           <div>
             <p class="text-sm font-semibold text-gray-900">Megrendelési adatok</p>
-            <p class="text-xs text-gray-500">Leadva: {{ formatDate(project()!.finalizedAt!) }}</p>
+            <p class="text-xs text-gray-500">Leadva: {{ project()!.finalizedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</p>
           </div>
         </div>
         <button
@@ -121,7 +121,7 @@
               <lucide-icon [name]="ICONS.CALENDAR" [size]="14" class="text-gray-400" />
               @if (project()!.deadline) {
                 <span class="text-xs font-medium" [class]="isDeadlineExpired(project()!.deadline!) ? 'text-red-600' : 'text-gray-600'">
-                  Határidő: {{ formatDate(project()!.deadline!) }}
+                  Határidő: {{ project()!.deadline | date:'yyyy. MMM d.':'':'hu-HU' }}
                 </span>
                 @if (isDeadlineExpired(project()!.deadline!)) {
                   <span class="px-1.5 py-0.5 text-[10px] font-bold text-white bg-red-500 rounded">Lejárt</span>
@@ -261,7 +261,7 @@
                 </span>
               }
               <code class="font-mono font-semibold text-gray-900">{{ qr.code }}</code>
-              <span class="text-sm text-gray-500">{{ qr.usageCount }}× · {{ formatDateTime(qr.createdAt) }}</span>
+              <span class="text-sm text-gray-500">{{ qr.usageCount }}× · {{ qr.createdAt | date:'yyyy. MMM d., HH:mm':'':'hu-HU' }}</span>
             </div>
             @if (qr.isActive) {
               <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">Aktív</span>
@@ -277,11 +277,11 @@
     <div class="flex items-center justify-center gap-6 text-xs text-gray-400">
       <span class="flex items-center gap-1.5">
         <lucide-icon [name]="ICONS.CALENDAR" [size]="12" />
-        Létrehozva: {{ formatDateTime(project()!.createdAt) }}
+        Létrehozva: {{ project()!.createdAt | date:'yyyy. MMM d., HH:mm':'':'hu-HU' }}
       </span>
       <span class="flex items-center gap-1.5">
         <lucide-icon [name]="ICONS.CLOCK" [size]="12" />
-        Módosítva: {{ formatDateTime(project()!.updatedAt) }}
+        Módosítva: {{ project()!.updatedAt | date:'yyyy. MMM d., HH:mm':'':'hu-HU' }}
       </span>
     </div>
   </footer>

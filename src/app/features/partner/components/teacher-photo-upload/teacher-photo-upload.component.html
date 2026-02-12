@@ -14,7 +14,7 @@
     <!-- Fotó előnézet / választó -->
     <div class="photo-preview" (click)="fileInput.click()">
       @if (previewUrl()) {
-        <img [src]="previewUrl()" alt="Előnézet" />
+        <img [src]="previewUrl()" alt="Előnézet"  loading="lazy" />
       } @else {
         <div class="upload-placeholder">
           <lucide-icon [name]="ICONS.CAMERA" [size]="32" />

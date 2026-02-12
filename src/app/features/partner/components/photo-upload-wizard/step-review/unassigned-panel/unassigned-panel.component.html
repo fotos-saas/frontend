@@ -36,6 +36,7 @@
           [matTooltip]="photo.iptcTitle || photo.filename"
           matTooltipPosition="above"
           [matTooltipShowDelay]="0"
+          loading="lazy"
           (click)="photoClick.emit(photo); $event.stopPropagation()"
         />
         <div

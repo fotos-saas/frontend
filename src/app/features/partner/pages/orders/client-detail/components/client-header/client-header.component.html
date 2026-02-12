@@ -89,6 +89,6 @@
 
 <!-- Timestamps -->
 <div class="detail-timestamps">
-  <span>Létrehozva: {{ formatDate(client().createdAt) }}</span>
-  <span>Módosítva: {{ formatDate(client().updatedAt) }}</span>
+  <span>Létrehozva: {{ client().createdAt | date:'yyyy. MMM d., HH:mm':'':'hu-HU' }}</span>
+  <span>Módosítva: {{ client().updatedAt | date:'yyyy. MMM d., HH:mm':'':'hu-HU' }}</span>
 </div>

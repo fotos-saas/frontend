@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject, computed, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { OrderDataService, OrderData } from './services/order-data.service';
@@ -24,7 +24,7 @@ import { isSecureUrl, openSecureUrl } from '../../core/utils/url-validator.util'
 })
 export class OrderDataComponent implements OnInit {
   /** Order data */
-  orderData: OrderData | null = null;
+  readonly orderData = signal<OrderData | null>(null);
 
   /** Loading state */
   loading = true;
@@ -61,7 +61,7 @@ export class OrderDataComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.orderData = response.data;
+            this.orderData.set(response.data);
           } else {
             this.error = response.message || 'Nem sikerült betölteni az adatokat';
           }
@@ -113,16 +113,15 @@ export class OrderDataComponent implements OnInit {
    * Whether the order sheet view button should be visible
    * Always visible on the post-order page
    */
-  get hasPdf(): boolean {
-    return true;
-  }
+  readonly hasPdf = computed(() => true);
 
   /**
    * Whether there are any tags
    */
-  get hasTags(): boolean {
-    return !!this.orderData?.tags && this.orderData.tags.length > 0;
-  }
+  readonly hasTags = computed(() => {
+    const data = this.orderData();
+    return !!data?.tags && data.tags.length > 0;
+  });
 
   /**
    * TrackBy function for the tags list

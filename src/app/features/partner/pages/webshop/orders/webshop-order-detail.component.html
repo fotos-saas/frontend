@@ -83,7 +83,7 @@
         @for (item of o.items; track item.id) {
           <div class="order-item">
             @if (item.photo_url) {
-              <img [src]="item.photo_url" [alt]="item.photo_filename" class="item-photo">
+              <img [src]="item.photo_url" [alt]="item.photo_filename" class="item-photo" loading="lazy">
             }
             <div class="item-info">
               <span class="item-name">{{ item.photo_filename }}</span>

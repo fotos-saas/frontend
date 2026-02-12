@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
@@ -91,7 +91,7 @@ export class SampleVersionDialogComponent implements OnInit, OnDestroy {
     this.lightboxOpen.set(true);
   }
 
-  get lightboxItems(): SampleLightboxItem[] {
+  readonly lightboxItems = computed(() => {
     const existing = this.facade.existingImages().map((img, i) => ({
       id: img.id,
       url: img.url,
@@ -106,11 +106,11 @@ export class SampleVersionDialogComponent implements OnInit, OnDestroy {
       createdAt: new Date().toISOString(),
     }));
     return [...existing, ...newOnes];
-  }
+  });
 
-  get totalImageCount(): number {
-    return this.facade.existingImages().length + this.facade.selectedFiles().length;
-  }
+  readonly totalImageCount = computed(() =>
+    this.facade.existingImages().length + this.facade.selectedFiles().length
+  );
 
   save(): void {
     this.facade.save(this.projectId(), this.packageId(), this.editVersion(), () => {

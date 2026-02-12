@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 /**
@@ -114,11 +114,33 @@ export class SubscriptionService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.apiUrl;
 
+  /** Cache signal - null = nincs még betöltve */
+  private readonly cache = signal<SubscriptionInfo | null>(null);
+
   /**
-   * Előfizetés adatok lekérése
+   * Előfizetés adatok lekérése (cache-elt)
    */
   getSubscription(): Observable<SubscriptionInfo> {
-    return this.http.get<SubscriptionInfo>(`${this.baseUrl}/subscription`);
+    // Ha már van cache, azt használjuk
+    const cached = this.cache();
+    if (cached) {
+      return new Observable(observer => {
+        observer.next(cached);
+        observer.complete();
+      });
+    }
+
+    // Ha nincs cache, lekérjük és cache-eljük
+    return this.http.get<SubscriptionInfo>(`${this.baseUrl}/subscription`).pipe(
+      tap(info => this.cache.set(info))
+    );
+  }
+
+  /**
+   * Cache törlése (pl. előfizetés módosítás után)
+   */
+  clearCache(): void {
+    this.cache.set(null);
   }
 
   /**

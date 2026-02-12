@@ -34,7 +34,7 @@
         @if (errors.title) {
           <span class="dialog__error">{{ errors.title }}</span>
         } @else {
-          <span class="dialog__char-count">{{ titleCharCount }}</span>
+          <span class="dialog__char-count">{{ titleCharCount() }}</span>
         }
       </div>
     </div>
@@ -76,7 +76,7 @@
         @if (errors.content) {
           <span class="dialog__error">{{ errors.content }}</span>
         } @else if (!useRichEditor()) {
-          <span class="dialog__char-count">{{ contentCharCount }}</span>
+          <span class="dialog__char-count">{{ contentCharCount() }}</span>
         } @else {
           <span class="dialog__char-count">{{ contentTextLength }} karakter</span>
         }
@@ -146,7 +146,7 @@
       type="button"
       class="btn btn--purple"
       (click)="submit()"
-      [disabled]="!isFormValid || _isSubmitting()"
+      [disabled]="!isFormValid() || _isSubmitting()"
     >
       @if (_isSubmitting()) {
         <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />

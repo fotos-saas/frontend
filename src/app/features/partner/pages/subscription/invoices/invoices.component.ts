@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, Invoice } from '../../../services/subscription.service';
@@ -20,7 +21,7 @@ import { formatAmount as sharedFormatAmount } from '@shared/utils/formatters.uti
 @Component({
   selector: 'app-invoices',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, DatePipe, LucideAngularModule, MatTooltipModule],
   templateUrl: './invoices.component.html',
   styleUrls: ['./invoices.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -107,15 +108,6 @@ export class InvoicesComponent implements OnInit {
           this.portalLoading.set(false);
         }
       });
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('hu-HU', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   }
 
   formatAmount(amount: number, currency: string): string {

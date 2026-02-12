@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerProjectListItem } from '../../services/partner.service';
@@ -13,7 +13,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-partner-project-card',
   standalone: true,
-  imports: [LucideAngularModule, NgClass, MatTooltipModule],
+  imports: [LucideAngularModule, NgClass, DatePipe, MatTooltipModule],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -80,15 +80,6 @@ export class ProjectCardComponent {
     const project = this.project();
     if (!project.expectedClassSize) return false;
     return project.guestsCount < project.expectedClassSize * 0.8;
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('hu-HU', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   }
 
   onSamplesClick(event: MouseEvent): void {

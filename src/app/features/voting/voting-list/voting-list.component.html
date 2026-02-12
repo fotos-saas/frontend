@@ -1,11 +1,13 @@
 <!-- Media Lightbox -->
-@if (isLightboxOpen()) {
-  <app-media-lightbox
-    [media]="lightboxMedia()"
-    [currentIndex]="lightboxCurrentIndex()"
-    (close)="onLightboxClose()"
-    (navigate)="onLightboxNavigate($event)"
-  />
+@defer (on idle) {
+  @if (isLightboxOpen()) {
+    <app-media-lightbox
+      [media]="lightboxMedia()"
+      [currentIndex]="lightboxCurrentIndex()"
+      (close)="onLightboxClose()"
+      (navigate)="onLightboxNavigate($event)"
+    />
+  }
 }
 
 <!-- Guest Name Dialog -->

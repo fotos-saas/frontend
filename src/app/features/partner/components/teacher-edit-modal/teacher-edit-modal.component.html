@@ -73,12 +73,12 @@
             <div class="photo-row">
               <div class="photo-thumb" (click)="photoInput.click()">
                 @if (photoPreviewUrl()) {
-                  <img [src]="photoPreviewUrl()" alt="Új fotó" />
+                  <img [src]="photoPreviewUrl()" alt="Új fotó"  loading="lazy" />
                   <button type="button" class="photo-remove" (click)="$event.stopPropagation(); removeSelectedPhoto()">
                     <lucide-icon [name]="ICONS.X" [size]="12" />
                   </button>
                 } @else if (currentPhotoUrl()) {
-                  <img [src]="currentPhotoUrl()" alt="Jelenlegi fotó" />
+                  <img [src]="currentPhotoUrl()" alt="Jelenlegi fotó"  loading="lazy" />
                   <div class="photo-overlay">
                     <lucide-icon [name]="ICONS.CAMERA" [size]="16" />
                   </div>

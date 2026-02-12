@@ -71,11 +71,13 @@
 </div>
 
 <!-- Lightbox - közös SamplesLightbox komponens -->
-@if (selectedIndex !== null) {
-  <app-samples-lightbox
-    [samples]="lightboxSamples"
-    [currentIndex]="selectedIndex"
-    (close)="closeLightbox()"
-    (navigate)="onNavigate($event)"
-  />
+@defer (on idle) {
+  @if (selectedIndex !== null) {
+    <app-samples-lightbox
+      [samples]="lightboxSamples"
+      [currentIndex]="selectedIndex"
+      (close)="closeLightbox()"
+      (navigate)="onNavigate($event)"
+    />
+  }
 }

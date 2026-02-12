@@ -46,7 +46,7 @@
               [style.--stack-index]="i"
               [style.z-index]="3 - i"
             >
-              <img [src]="thumb" alt="Preview" />
+              <img [src]="thumb" alt="Preview" loading="lazy" />
             </div>
           }
           @if (albums().students.photoCount > 3) {
@@ -106,7 +106,7 @@
               [style.--stack-index]="i"
               [style.z-index]="3 - i"
             >
-              <img [src]="thumb" alt="Preview" />
+              <img [src]="thumb" alt="Preview" loading="lazy" />
             </div>
           }
           @if (albums().teachers.photoCount > 3) {

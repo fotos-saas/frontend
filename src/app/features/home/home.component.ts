@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef, DestroyRef, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TabloProject, ContactPerson } from '../../core/services/auth.service';
 import { Observable } from 'rxjs';
@@ -48,11 +48,11 @@ export class HomeComponent implements OnInit {
   readonly onboardingError = this.state.onboardingError;
   readonly showPendingVerification = this.state.showPendingVerification;
 
-  get showReminderDialog(): boolean { return this.state.showReminderDialog; }
-  get showFinalizationReminderDialog(): boolean { return this.state.showFinalizationReminderDialog; }
-  get showContactEditDialog(): boolean { return this.state.showContactEditDialog; }
-  get isContactSaving(): boolean { return this.state.isContactSaving; }
-  get currentContactData(): ContactData { return this.state.currentContactData; }
+  readonly showReminderDialog = computed(() => this.state.showReminderDialog);
+  readonly showFinalizationReminderDialog = computed(() => this.state.showFinalizationReminderDialog);
+  readonly showContactEditDialog = computed(() => this.state.showContactEditDialog);
+  readonly isContactSaving = computed(() => this.state.isContactSaving);
+  readonly currentContactData = computed(() => this.state.currentContactData);
 
   ngOnInit(): void {
     this.state.init(this.destroyRef, this.cdr);

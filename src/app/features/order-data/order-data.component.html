@@ -3,9 +3,9 @@
   <header id="main-content" class="order-data__header" tabindex="-1">
     <h1 class="order-data__title">Megrendelési adatok</h1>
     <p class="order-data__subtitle">A leadott rendelésből összegyűjtött információk</p>
-    @if (orderData?.orderDate) {
+    @if (orderData()?.orderDate) {
       <p class="order-data__date-header">
-        Leadva: {{ orderData?.orderDate | date:'yyyy. MM. dd.' }}
+        Leadva: {{ orderData()?.orderDate | date:'yyyy. MM. dd.' }}
       </p>
     }
   </header>
@@ -38,7 +38,7 @@
   }
 
   <!-- Empty state -->
-  @if (!loading && !error && !orderData) {
+  @if (!loading && !error && !orderData()) {
     <div
       class="order-data__empty"
       role="status"
@@ -49,32 +49,32 @@
   }
 
   <!-- Content -->
-  @if (!loading && !error && orderData) {
+  @if (!loading && !error && orderData()) {
     <div class="order-data__content">
 
       <!-- Top row: Kapcsolattartó + Iskola és osztály -->
       <div class="order-data__row order-data__row--two-cols">
         <!-- Kapcsolattartó -->
-        @if (orderData.contactName || orderData.contactPhone || orderData.contactEmail) {
+        @if (orderData()?.contactName || orderData()?.contactPhone || orderData()?.contactEmail) {
           <section class="order-data__section">
             <h2 class="order-data__section-title">Kapcsolattartó</h2>
             <div class="order-data__list">
-              @if (orderData.contactName) {
+              @if (orderData()?.contactName) {
                 <div class="order-data__item">
                   <span class="order-data__label">Név</span>
-                  <span class="order-data__value">{{ orderData.contactName }}</span>
+                  <span class="order-data__value">{{ orderData()?.contactName }}</span>
                 </div>
               }
-              @if (orderData.contactPhone) {
+              @if (orderData()?.contactPhone) {
                 <div class="order-data__item">
                   <span class="order-data__label">Telefon</span>
-                  <span class="order-data__value">{{ orderData.contactPhone }}</span>
+                  <span class="order-data__value">{{ orderData()?.contactPhone }}</span>
                 </div>
               }
-              @if (orderData.contactEmail) {
+              @if (orderData()?.contactEmail) {
                 <div class="order-data__item">
                   <span class="order-data__label">Email</span>
-                  <span class="order-data__value">{{ orderData.contactEmail }}</span>
+                  <span class="order-data__value">{{ orderData()?.contactEmail }}</span>
                 </div>
               }
             </div>
@@ -85,25 +85,25 @@
         <section class="order-data__section">
           <h2 class="order-data__section-title">Iskola és osztály</h2>
           <div class="order-data__list">
-            @if (orderData.schoolName) {
+            @if (orderData()?.schoolName) {
               <div class="order-data__item">
                 <span class="order-data__label">Iskola</span>
-                <span class="order-data__value">{{ orderData.schoolName }}</span>
+                <span class="order-data__value">{{ orderData()?.schoolName }}</span>
               </div>
             }
-            @if (orderData.className || orderData.classYear) {
+            @if (orderData()?.className || orderData()?.classYear) {
               <div class="order-data__item">
                 <span class="order-data__label">Osztály</span>
-                <span class="order-data__value">{{ orderData.className }} @if (orderData.classYear) {<span>({{ orderData.classYear }})</span>}</span>
+                <span class="order-data__value">{{ orderData()?.className }} @if (orderData()?.classYear) {<span>({{ orderData()?.classYear }})</span>}</span>
               </div>
             }
-            @if (orderData.studentCount || orderData.teacherCount) {
+            @if (orderData()?.studentCount || orderData()?.teacherCount) {
               <div class="order-data__item">
                 <span class="order-data__label">Létszám</span>
                 <span class="order-data__value">
-                  @if (orderData.studentCount) {<span>{{ orderData.studentCount }} diák</span>}
-                  @if (orderData.studentCount && orderData.teacherCount) {<span>, </span>}
-                  @if (orderData.teacherCount) {<span>{{ orderData.teacherCount }} tanár</span>}
+                  @if (orderData()?.studentCount) {<span>{{ orderData()?.studentCount }} diák</span>}
+                  @if (orderData()?.studentCount && orderData()?.teacherCount) {<span>, </span>}
+                  @if (orderData()?.teacherCount) {<span>{{ orderData()?.teacherCount }} tanár</span>}
                 </span>
               </div>
             }
@@ -112,29 +112,29 @@
       </div>
 
       <!-- Tabló beállítások -->
-      @if (orderData.color || orderData.fontFamily || orderData.sortType) {
+      @if (orderData()?.color || orderData()?.fontFamily || orderData()?.sortType) {
         <section class="order-data__section">
           <h2 class="order-data__section-title">Tabló beállítások</h2>
           <div class="order-data__grid order-data__grid--three">
-            @if (orderData.color) {
+            @if (orderData()?.color) {
               <div class="order-data__item">
                 <span class="order-data__label">Szín</span>
                 <span class="order-data__value order-data__value--color">
-                  <span class="order-data__color-swatch" [style.background-color]="orderData.color"></span>
-                  {{ orderData.color }}
+                  <span class="order-data__color-swatch" [style.background-color]="orderData()?.color"></span>
+                  {{ orderData()?.color }}
                 </span>
               </div>
             }
-            @if (orderData.fontFamily) {
+            @if (orderData()?.fontFamily) {
               <div class="order-data__item">
                 <span class="order-data__label">Betűtípus</span>
-                <span class="order-data__value">{{ orderData.fontFamily }}</span>
+                <span class="order-data__value">{{ orderData()?.fontFamily }}</span>
               </div>
             }
-            @if (orderData.sortType) {
+            @if (orderData()?.sortType) {
               <div class="order-data__item">
                 <span class="order-data__label">Rendezés</span>
-                <span class="order-data__value">{{ orderData.sortType }}</span>
+                <span class="order-data__value">{{ orderData()?.sortType }}</span>
               </div>
             }
           </div>
@@ -142,48 +142,48 @@
       }
 
       <!-- Leírás -->
-      @if (orderData.description) {
+      @if (orderData()?.description) {
         <section class="order-data__section">
           <h2 class="order-data__section-title">Leírás / Megjegyzések</h2>
-          <div class="order-data__description" [innerHTML]="orderData.description | safeHtml"></div>
+          <div class="order-data__description" [innerHTML]="orderData()?.description | safeHtml"></div>
         </section>
       }
 
       <!-- Idézet -->
-      @if (orderData.quote) {
+      @if (orderData()?.quote) {
         <section class="order-data__section">
           <h2 class="order-data__section-title">Idézet</h2>
-          <blockquote class="order-data__quote">{{ orderData.quote }}</blockquote>
+          <blockquote class="order-data__quote">{{ orderData()?.quote }}</blockquote>
         </section>
       }
 
       <!-- Névsorok - 2 oszlopban -->
-      @if (orderData.studentDescription || orderData.teacherDescription) {
+      @if (orderData()?.studentDescription || orderData()?.teacherDescription) {
         <div class="order-data__row order-data__row--two-cols">
           <!-- Diákok névsora -->
-          @if (orderData.studentDescription) {
+          @if (orderData()?.studentDescription) {
             <section class="order-data__section">
               <h2 class="order-data__section-title">Diákok névsora</h2>
-              <pre class="order-data__namelist">{{ orderData.studentDescription }}</pre>
+              <pre class="order-data__namelist">{{ orderData()?.studentDescription }}</pre>
             </section>
           }
 
           <!-- Tanárok névsora -->
-          @if (orderData.teacherDescription) {
+          @if (orderData()?.teacherDescription) {
             <section class="order-data__section">
               <h2 class="order-data__section-title">Tanárok névsora</h2>
-              <pre class="order-data__namelist">{{ orderData.teacherDescription }}</pre>
+              <pre class="order-data__namelist">{{ orderData()?.teacherDescription }}</pre>
             </section>
           }
         </div>
       }
 
       <!-- Jellemzők (tags) -->
-      @if (hasTags) {
+      @if (hasTags()) {
         <section class="order-data__section">
           <h2 class="order-data__section-title">Jellemzők</h2>
           <div class="order-data__tags">
-            @for (tag of orderData.tags; track tag) {
+            @for (tag of orderData()?.tags; track tag) {
               <span class="order-data__tag">
                 {{ tag }}
               </span>
@@ -193,16 +193,16 @@
       }
 
       <!-- AI összefoglaló -->
-      @if (orderData.aiSummary) {
+      @if (orderData()?.aiSummary) {
         <section class="order-data__section">
           <h2 class="order-data__section-title">AI összefoglaló</h2>
-          <p class="order-data__summary">{{ orderData.aiSummary }}</p>
+          <p class="order-data__summary">{{ orderData()?.aiSummary }}</p>
         </section>
       }
 
       <!-- Footer: PDF gomb + dátum -->
       <footer class="order-data__footer">
-        @if (hasPdf) {
+        @if (hasPdf()) {
           <button
             class="order-data__pdf-btn"
             (click)="openPdf()"
@@ -216,9 +216,9 @@
             }
           </button>
         }
-        @if (orderData.orderDate) {
+        @if (orderData()?.orderDate) {
           <p class="order-data__date">
-            Megrendelés leadva: {{ orderData.orderDate | date:'yyyy. MM. dd.' }}
+            Megrendelés leadva: {{ orderData()?.orderDate | date:'yyyy. MM. dd.' }}
           </p>
         }
       </footer>

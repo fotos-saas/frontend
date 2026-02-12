@@ -8,7 +8,7 @@
             [src]="preview.previewUrl"
             [alt]="preview.name"
             class="media-uploader__image"
-          />
+           loading="lazy" />
           <div class="media-uploader__info">
             <span class="media-uploader__name" [title]="preview.name">{{ preview.name }}</span>
             <span class="media-uploader__size">{{ preview.size }}</span>

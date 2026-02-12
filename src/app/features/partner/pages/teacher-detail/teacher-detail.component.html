@@ -26,7 +26,7 @@
       <aside class="profile-sidebar">
         <div class="profile-avatar">
           @if (t.photoUrl) {
-            <img [src]="t.photoUrl" [alt]="t.fullDisplayName" />
+            <img [src]="t.photoUrl" [alt]="t.fullDisplayName"  loading="lazy" />
           } @else {
             <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="32" />
           }
@@ -159,7 +159,7 @@
               @for (photo of t.photos; track photo.id) {
                 <div class="photo-card" [class.photo-card--active]="photo.isActive">
                   <div class="photo-image" (click)="openLightbox(photo)">
-                    <img [src]="photo.thumbUrl || photo.url" [alt]="'Fotó ' + photo.year" />
+                    <img [src]="photo.thumbUrl || photo.url" [alt]="'Fotó ' + photo.year"  loading="lazy" />
                     @if (photo.isActive) {
                       <span class="active-indicator" matTooltip="Aktív fotó">
                         <lucide-icon [name]="ICONS.CHECK" [size]="10" />
@@ -256,13 +256,15 @@
 }
 
 <!-- Photo Lightbox -->
-@if (lightboxIndex() >= 0 && lightboxMedia().length > 0) {
-  <app-media-lightbox
-    [media]="lightboxMedia()"
-    [currentIndex]="lightboxIndex()"
-    (close)="closeLightbox()"
-    (navigate)="onLightboxNavigate($event)"
-  />
+@defer (on idle) {
+  @if (lightboxIndex() >= 0 && lightboxMedia().length > 0) {
+    <app-media-lightbox
+      [media]="lightboxMedia()"
+      [currentIndex]="lightboxIndex()"
+      (close)="closeLightbox()"
+      (navigate)="onLightboxNavigate($event)"
+    />
+  }
 }
 
 <!-- Delete Photo Confirm -->

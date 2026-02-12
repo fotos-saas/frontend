@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, OnInit, inject, computed } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
@@ -13,7 +14,7 @@ import { DownloadOptions } from '../download-dialog/download-dialog.component';
   selector: 'app-gallery-monitoring',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideAngularModule, MatTooltipModule, PhotoThumbListComponent, ExpandDetailPanelComponent, DetailGroupComponent],
+  imports: [DatePipe, LucideAngularModule, MatTooltipModule, PhotoThumbListComponent, ExpandDetailPanelComponent, DetailGroupComponent],
   providers: [GalleryMonitoringActionsService],
   templateUrl: './gallery-monitoring.component.html',
   styleUrl: './gallery-monitoring.component.scss',
@@ -99,15 +100,5 @@ export class GalleryMonitoringComponent implements OnInit {
       case 'completed': return 'Befejezve';
       default: return '-';
     }
-  }
-
-  formatDate(isoDate: string): string {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString('hu-HU', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   }
 }

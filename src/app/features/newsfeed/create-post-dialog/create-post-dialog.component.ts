@@ -140,13 +140,13 @@ export class CreatePostDialogComponent {
   // VALIDATION
   // ============================================================================
 
-  get minDate(): string { return this.validator.getMinDate(); }
+  readonly minDate = computed(() => this.validator.getMinDate());
 
-  get isFormValid(): boolean {
-    return this.validator.isFormValid(this.title, this.postType, this.eventDate);
-  }
+  readonly isFormValid = computed(() =>
+    this.validator.isFormValid(this.title, this.postType, this.eventDate)
+  );
 
-  get titleCharCount(): string { return `${this.title.length}/255`; }
+  readonly titleCharCount = computed(() => `${this.title.length}/255`);
 
   // ============================================================================
   // ACTIONS

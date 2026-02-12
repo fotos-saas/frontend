@@ -7,7 +7,8 @@ import {
   DestroyRef,
   signal,
   input,
-  output
+  output,
+  computed
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -157,12 +158,12 @@ export class CreateDiscussionDialogComponent {
   // VALIDATION
   // ============================================================================
 
-  get isFormValid(): boolean {
-    return this.validator.isFormValid(this.title, this.contentTextLength, this.content, this.useRichEditor());
-  }
+  readonly isFormValid = computed(() =>
+    this.validator.isFormValid(this.title, this.contentTextLength, this.content, this.useRichEditor())
+  );
 
-  get titleCharCount(): string { return `${this.title.length}/255`; }
-  get contentCharCount(): string { return `${this.content.length}/10000`; }
+  readonly titleCharCount = computed(() => `${this.title.length}/255`);
+  readonly contentCharCount = computed(() => `${this.content.length}/10000`);
 
   // ============================================================================
   // ACTIONS

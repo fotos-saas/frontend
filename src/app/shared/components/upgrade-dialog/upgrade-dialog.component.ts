@@ -98,7 +98,7 @@ export class UpgradeDialogComponent implements OnInit {
   });
 
   /** Feature details */
-  get featureDetails() {
+  readonly featureDetails = computed(() => {
     const details: Record<UpgradeFeature, { icon: string; title: string; description: string; unit: string }> = {
       schools: {
         icon: ICONS.SCHOOL,
@@ -132,7 +132,7 @@ export class UpgradeDialogComponent implements OnInit {
       },
     };
     return details[this.feature()];
-  }
+  });
 
   isRecommendedPlan(planId: string): boolean {
     const planOrder = ['alap', 'iskola', 'studio', 'vip'];

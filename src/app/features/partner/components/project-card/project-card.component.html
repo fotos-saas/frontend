@@ -10,7 +10,7 @@
         [src]="project().sampleThumbUrl"
         [alt]="'Minta'"
         class="sample-thumb"
-      />
+       loading="lazy" />
     } @else {
       <div class="sample-placeholder">
         <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
@@ -29,7 +29,7 @@
         </span>
       }
       @if (project().finalizedAt && !isMarketer()) {
-        <span class="finalized-badge" [title]="'Tablóterv leadva: ' + formatDate(project().finalizedAt!)">
+        <span class="finalized-badge" [title]="'Tablóterv leadva: ' + (project().finalizedAt | date:'yyyy. MMM d.':'':'hu-HU')">
           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
           Leadva
         </span>

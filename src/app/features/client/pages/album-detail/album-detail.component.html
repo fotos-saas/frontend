@@ -126,13 +126,15 @@
 }
 
 <!-- Lightbox (page-card KÍVÜL a backdrop-filter stacking context miatt!) -->
-@if (lightboxOpen()) {
-  <app-media-lightbox
-    [media]="lightboxMedia()"
-    [currentIndex]="lightboxIndex()"
-    (close)="closeLightbox()"
-    (navigate)="navigateLightbox($event)"
-  />
+@defer (on idle) {
+  @if (lightboxOpen()) {
+    <app-media-lightbox
+      [media]="lightboxMedia()"
+      [currentIndex]="lightboxIndex()"
+      (close)="closeLightbox()"
+      (navigate)="navigateLightbox($event)"
+    />
+  }
 }
 
 <!-- Confirm dialog (page-card KÍVÜL!) -->

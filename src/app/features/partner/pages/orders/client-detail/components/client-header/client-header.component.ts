@@ -1,10 +1,10 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
 import { PartnerClientDetails } from '../../../../../services/partner-orders.service';
-import { formatDateTime } from '../../../../../../../shared/utils/formatters.util';
 
 /**
  * Client Header Component
@@ -18,7 +18,7 @@ import { formatDateTime } from '../../../../../../../shared/utils/formatters.uti
 @Component({
   selector: 'app-client-header',
   standalone: true,
-  imports: [RouterModule, LucideAngularModule, MatTooltipModule],
+  imports: [RouterModule, DatePipe, LucideAngularModule, MatTooltipModule],
   templateUrl: './client-header.component.html',
   styleUrls: ['./client-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,8 +33,4 @@ export class ClientHeaderComponent {
   readonly edit = output<void>();
   readonly delete = output<void>();
   readonly disableCode = output<void>();
-
-  formatDate(date: string | null): string {
-    return formatDateTime(date);
-  }
 }

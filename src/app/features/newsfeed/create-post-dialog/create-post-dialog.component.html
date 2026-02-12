@@ -63,7 +63,7 @@
         @if (errors.title) {
           <span class="field__error">{{ errors.title }}</span>
         } @else {
-          <span class="field__char-count">{{ titleCharCount }}</span>
+          <span class="field__char-count">{{ titleCharCount() }}</span>
         }
       </div>
     </div>
@@ -83,7 +83,7 @@
           [class.field__input--error]="errors.eventDate"
           [(ngModel)]="eventDate"
           (ngModelChange)="onInputChange()"
-          [min]="minDate"
+          [min]="minDate()"
           [disabled]="isSubmitting()"
         />
         @if (errors.eventDate) {
@@ -183,7 +183,7 @@
       type="button"
       class="btn btn--confirm"
       (click)="submit()"
-      [disabled]="!isFormValid || isSubmitting()"
+      [disabled]="!isFormValid() || isSubmitting()"
     >
       @if (isSubmitting()) {
         <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />

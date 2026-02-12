@@ -49,7 +49,7 @@
           </div>
         </div>
       } @else {
-        @for (msg of messages(); track $index) {
+        @for (msg of messages(); track msg.timestamp) {
           <app-chatbot-message
             [role]="msg.role"
             [content]="msg.content"

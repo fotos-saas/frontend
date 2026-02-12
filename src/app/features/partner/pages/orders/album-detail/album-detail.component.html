@@ -216,13 +216,15 @@
 }
 
 <!-- Lightbox -->
-@if (state.lightboxOpen()) {
-  <app-media-lightbox
-    [media]="state.lightboxMedia()"
-    [currentIndex]="state.lightboxIndex()"
-    (close)="state.closeLightbox()"
-    (navigate)="onNavigateLightbox($event)"
-  />
+@defer (on idle) {
+  @if (state.lightboxOpen()) {
+    <app-media-lightbox
+      [media]="state.lightboxMedia()"
+      [currentIndex]="state.lightboxIndex()"
+      (close)="state.closeLightbox()"
+      (navigate)="onNavigateLightbox($event)"
+    />
+  }
 }
 
 <!-- Edit Album Modal -->

@@ -115,7 +115,7 @@
 
       @if (effectiveLogoUrl()) {
         <div class="media-preview">
-          <img [src]="effectiveLogoUrl()!" alt="Logó" class="preview-image" />
+          <img [src]="effectiveLogoUrl()!" alt="Logó" class="preview-image"  loading="lazy" />
           <div class="media-preview__actions">
             @if (pendingLogo()) {
               <span class="media-preview__badge media-preview__badge--new">Új</span>
@@ -156,7 +156,7 @@
 
       @if (effectiveFaviconUrl()) {
         <div class="media-preview media-preview--small">
-          <img [src]="effectiveFaviconUrl()!" alt="Favicon" class="preview-favicon" />
+          <img [src]="effectiveFaviconUrl()!" alt="Favicon" class="preview-favicon"  loading="lazy" />
           <div class="media-preview__actions">
             @if (pendingFavicon()) {
               <span class="media-preview__badge media-preview__badge--new">Új</span>
@@ -201,7 +201,7 @@
 
       @if (effectiveOgImageUrl()) {
         <div class="media-preview media-preview--wide">
-          <img [src]="effectiveOgImageUrl()!" alt="OG kép" class="preview-og" />
+          <img [src]="effectiveOgImageUrl()!" alt="OG kép" class="preview-og"  loading="lazy" />
           <div class="media-preview__actions">
             @if (pendingOgImage()) {
               <span class="media-preview__badge media-preview__badge--new">Új</span>

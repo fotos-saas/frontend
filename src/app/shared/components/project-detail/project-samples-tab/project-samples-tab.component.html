@@ -69,7 +69,7 @@
               <div class="version-item" (click)="openEditVersionDialog(pkg.id, ver)">
                 <div class="version-thumb">
                   @if (ver.images.length > 0) {
-                    <img [src]="ver.images[0].thumbUrl" [alt]="'v' + ver.versionNumber" />
+                    <img [src]="ver.images[0].thumbUrl" [alt]="'v' + ver.versionNumber"  loading="lazy" />
                     @if (ver.images.length > 1) {
                       <span class="thumb-count">+{{ ver.images.length - 1 }}</span>
                     }

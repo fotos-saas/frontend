@@ -24,6 +24,7 @@
           [src]="person().assignedPhoto!.thumbUrl"
           [alt]="person().name"
           class="person-photo"
+          loading="lazy"
           (click)="photoClick.emit(person().assignedPhoto!); $event.stopPropagation()"
         />
         <img *cdkDragPreview [src]="person().assignedPhoto!.thumbUrl" class="drag-preview-img" />
@@ -52,6 +53,7 @@
           [src]="person().photoThumbUrl"
           [alt]="person().name"
           class="person-photo person-photo--existing"
+          loading="lazy"
         />
         <div class="existing-badge">
           <lucide-icon [name]="ICONS.CHECK" [size]="10" />

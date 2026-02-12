@@ -2,9 +2,9 @@
   variant="info"
   headerStyle="hero"
   theme="purple"
-  [icon]="featureDetails.icon"
+  [icon]="featureDetails().icon"
   title="Limit elérve"
-  [description]="featureDetails.description"
+  [description]="featureDetails().description"
   size="md"
   [closable]="true"
   (closeEvent)="onClose()"
@@ -31,7 +31,7 @@
             <span class="plan-label">Jelenlegi csomag</span>
             <span class="plan-name">{{ currentPlanName() }}</span>
             @if (currentLimit() !== null) {
-              <span class="plan-limit">{{ currentLimit() }} {{ featureDetails.unit }}</span>
+              <span class="plan-limit">{{ currentLimit() }} {{ featureDetails().unit }}</span>
             } @else {
               <span class="plan-limit plan-limit--unlimited">Korlátlan</span>
             }
@@ -45,7 +45,7 @@
             <span class="plan-label">Ajánlott csomag</span>
             <span class="plan-name">{{ nextPlanName() }}</span>
             @if (nextLimit() !== null) {
-              <span class="plan-limit">{{ nextLimit() }} {{ featureDetails.unit }}</span>
+              <span class="plan-limit">{{ nextLimit() }} {{ featureDetails().unit }}</span>
             } @else {
               <span class="plan-limit plan-limit--unlimited">Korlátlan</span>
             }

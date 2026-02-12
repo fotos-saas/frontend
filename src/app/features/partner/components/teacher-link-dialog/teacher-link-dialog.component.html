@@ -15,7 +15,7 @@
     <div class="source-teacher">
       <div class="source-teacher__avatar">
         @if (teacher().photoThumbUrl) {
-          <img [src]="teacher().photoThumbUrl" [alt]="teacher().fullDisplayName" />
+          <img [src]="teacher().photoThumbUrl" [alt]="teacher().fullDisplayName"  loading="lazy" />
         } @else {
           <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="18" />
         }
@@ -77,7 +77,7 @@
               />
               <div class="teacher-item__avatar">
                 @if (t.photoThumbUrl) {
-                  <img [src]="t.photoThumbUrl" [alt]="t.fullDisplayName" />
+                  <img [src]="t.photoThumbUrl" [alt]="t.fullDisplayName"  loading="lazy" />
                 } @else {
                   <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="14" />
                 }

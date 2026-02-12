@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,7 +14,7 @@ import { forkJoin, of, catchError } from 'rxjs';
 @Component({
   selector: 'app-subscription-overview',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, MatTooltipModule],
+  imports: [RouterLink, DatePipe, LucideAngularModule, MatTooltipModule],
   templateUrl: './subscription-overview.component.html',
   styleUrl: './subscription-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -157,15 +158,6 @@ export class SubscriptionOverviewComponent implements OnInit {
       currency: 'HUF',
       maximumFractionDigits: 0
     }).format(amount);
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('hu-HU', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   }
 
   getAddonName(addon: string): string {

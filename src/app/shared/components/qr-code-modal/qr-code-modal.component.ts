@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, input, output, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, output, inject, signal, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -53,13 +53,13 @@ export class SharedQrCodeModalComponent implements OnInit, OnDestroy {
   private copyTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private linkCopyTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-  get pinnedCode(): QrCode | null {
-    return this.qrCodes().find(c => c.isPinned) ?? null;
-  }
+  readonly pinnedCode = computed(() =>
+    this.qrCodes().find(c => c.isPinned) ?? null
+  );
 
-  get otherCodes(): QrCode[] {
-    return this.qrCodes().filter(c => !c.isPinned);
-  }
+  readonly otherCodes = computed(() =>
+    this.qrCodes().filter(c => !c.isPinned)
+  );
 
   ngOnInit(): void {
     this.loadQrCodes();

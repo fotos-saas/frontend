@@ -171,7 +171,7 @@ export class VotingService {
   /**
    * Szavazat visszavonása
    */
-  removeVote(pollId: number, optionId?: number): Observable<{ success: boolean; message: string }> {
+  removeVote(pollId: number, optionId?: number): Observable<{ success: boolean; message: string; data?: { my_votes: number[] } }> {
     return this.actionsService.removeVote(pollId, optionId).pipe(
       tap(response => {
         if (response.success && response.data) {

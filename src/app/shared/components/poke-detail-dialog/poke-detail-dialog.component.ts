@@ -5,8 +5,7 @@ import {
   ChangeDetectionStrategy,
   inject,
   OnInit,
-  signal,
-  DestroyRef
+  signal
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BaseDialogComponent } from '../base-dialog/base-dialog.component';
@@ -39,7 +38,6 @@ const CATEGORY_LABELS: Record<string, string> = {
 export class PokeDetailDialogComponent extends BaseDialogComponent implements OnInit {
   private readonly pokeService = inject(PokeService);
   private readonly dateUtils = inject(DateUtilsService);
-  private readonly destroyRef = inject(DestroyRef);
 
   /** Bökés ID (értesítésből jön) */
   readonly pokeId = input.required<number>();

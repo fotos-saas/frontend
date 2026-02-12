@@ -27,10 +27,13 @@ const ALLOWED_PROTOCOLS = ['http:', 'https:', 'mailto:'];
   standalone: true
 })
 export class SafeHtmlPipe implements PipeTransform {
+  private static hooksRegistered = false;
 
   constructor(private sanitizer: DomSanitizer) {
-    // DOMPurify hook: href attribútumok validálása
-    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (!SafeHtmlPipe.hooksRegistered) {
+      SafeHtmlPipe.hooksRegistered = true;
+      // DOMPurify hook: href attribútumok validálása
+      DOMPurify.addHook('afterSanitizeAttributes', (node) => {
       if (node.tagName === 'A' && node.hasAttribute('href')) {
         const href = node.getAttribute('href') || '';
         if (!this.isValidHref(href)) {
@@ -39,7 +42,8 @@ export class SafeHtmlPipe implements PipeTransform {
           node.setAttribute('data-blocked-href', 'true');
         }
       }
-    });
+      });
+    }
   }
 
   /**

@@ -401,7 +401,7 @@ export class AuthService {
   /**
    * Admin kijelentkezés (marketer, partner, super_admin)
    */
-  logoutAdmin(role?: string): void {
+  logoutAdmin(): void {
     this.sessionService.logoutAdmin();
   }
 
@@ -409,21 +409,21 @@ export class AuthService {
    * Marketer kijelentkezés (alias)
    */
   logoutMarketer(): void {
-    this.logoutAdmin('marketer');
+    this.logoutAdmin();
   }
 
   /**
    * Partner kijelentkezés (alias)
    */
   logoutPartner(): void {
-    this.logoutAdmin('partner');
+    this.logoutAdmin();
   }
 
   /**
    * Super admin kijelentkezés (alias)
    */
   logoutSuperAdmin(): void {
-    this.logoutAdmin('super_admin');
+    this.logoutAdmin();
   }
 
   /**
@@ -458,8 +458,9 @@ export class AuthService {
    * Marketer felhasználó lekérése
    */
   getCurrentUser(): AuthUser | null {
-    if (this._currentUser()) {
-      return this._currentUser();
+    const user = this._currentUser();
+    if (user) {
+      return user;
     }
     const stored = this.sessionService.getStoredMarketerUser();
     if (stored) {
@@ -512,13 +513,6 @@ export class AuthService {
    */
   getProject(): TabloProject | null {
     return this._project();
-  }
-
-  /**
-   * Aktuális projekt lekérése (alias)
-   */
-  getStoredProject(): TabloProject | null {
-    return this.getProject();
   }
 
   /**

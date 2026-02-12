@@ -254,7 +254,7 @@ export class ZoomDirective implements OnInit {
   }
 
   private onMouseDown(ev: MouseEvent): void {
-    if (!this.zoomEnabled || this.state().zoom <= 1) return;
+    if (!this.zoomEnabled() || this.state().zoom <= 1) return;
 
     ev.preventDefault();
     this.updateState({ isPanning: true });
@@ -290,7 +290,7 @@ export class ZoomDirective implements OnInit {
   }
 
   private onDoubleClick(): void {
-    if (!this.zoomEnabled || !this.config.enableDoubleTap) return;
+    if (!this.zoomEnabled() || !this.config.enableDoubleTap) return;
 
     this.ngZone.run(() => {
       if (this.state().zoom === 1) {

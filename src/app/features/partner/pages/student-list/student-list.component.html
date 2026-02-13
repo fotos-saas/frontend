@@ -1,0 +1,272 @@
+<div class="student-list-page page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Diákok</h1>
+      <p class="subtitle">{{ totalStudents() }} diák összesen</p>
+    </div>
+    <div class="header-buttons">
+      <div class="view-toggle">
+        <button
+          class="toggle-btn"
+          [class.toggle-btn--active]="viewMode() === 'flat'"
+          (click)="setViewMode('flat')"
+        >
+          <lucide-icon [name]="ICONS.LIST" [size]="16" />
+          Diák nézet
+        </button>
+        <button
+          class="toggle-btn"
+          [class.toggle-btn--active]="viewMode() === 'project'"
+          (click)="setViewMode('project')"
+        >
+          <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
+          Projekt nézet
+        </button>
+      </div>
+      <button
+        type="button"
+        class="btn-secondary"
+        [disabled]="exportingCsv()"
+        (click)="exportCsv()"
+      >
+        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="18" />
+        {{ exportingCsv() ? 'Exportálás...' : 'CSV export' }}
+      </button>
+      <button type="button" class="btn-secondary" (click)="openBulkImport()">
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
+        Tömeges import
+      </button>
+      <button type="button" class="btn-primary" (click)="openCreateModal()">
+        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        Új diák
+      </button>
+    </div>
+  </header>
+
+  @if (viewMode() === 'project') {
+    <app-student-project-view
+      [classYears]="classYears()"
+      (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
+      (viewPhotoRequest)="onViewPhotoFromProject($event)"
+      (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
+      (undoNoPhotoRequest)="onUndoNoPhotoFromProject($event)"
+    />
+  } @else {
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+      <input
+        type="text"
+        placeholder="Keresés név, osztály, iskola..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)"
+        class="search-input"
+      />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <app-searchable-select
+      class="school-filter"
+      [options]="schoolOptions()"
+      [value]="filterState.filters().school_id"
+      placeholder="Iskola keresése..."
+      allLabel="Minden iskola"
+      (valueChange)="onSchoolFilterChange($event)"
+    />
+  </div>
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (students().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      @if (filterState.search() || filterState.filters().school_id) {
+        <p>Próbálj más keresési feltételekkel!</p>
+      } @else {
+        <p>Még nincsenek diákok hozzáadva.</p>
+        <button type="button" class="btn-primary mt-4" (click)="openCreateModal()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+          Új diák
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="table-header">
+      <span class="th th-student">Diák</span>
+      <span class="th th-class">Osztály</span>
+      <span class="th th-school">Iskola</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <div class="student-grid">
+      @for (student of students(); track student.id; let i = $index) {
+        <div
+          class="student-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+        >
+          <div class="student-info" (click)="viewStudent(student)">
+            <div
+              class="student-avatar"
+              [class.student-avatar--clickable]="!!student.photoUrl"
+              (click)="openAvatarLightbox(student, $event)"
+            >
+              @if (student.photoThumbUrl) {
+                <img [src]="student.photoThumbUrl" [alt]="student.canonicalName" loading="lazy" />
+              } @else {
+                <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="20" />
+              }
+            </div>
+            <div class="student-details">
+              <span class="student-name">{{ student.canonicalName }}</span>
+            </div>
+          </div>
+
+          <div class="student-class" (click)="viewStudent(student)">
+            <span class="class-name-text">{{ student.className ?? '-' }}</span>
+          </div>
+
+          <div class="student-school" (click)="viewStudent(student)">
+            <span class="school-name-text">{{ student.schoolName }}</span>
+          </div>
+
+          <div class="student-actions">
+            <button
+              class="action-btn"
+              matTooltip="Szerkesztés"
+              (click)="editStudent(student)"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              matTooltip="Törlés"
+              (click)="confirmDeleteStudent(student)"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === 1"
+          (click)="goToPage(filterState.page() - 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+
+        <div class="page-info">
+          {{ filterState.page() }} / {{ totalPages() }} oldal
+          <span class="total-count">({{ totalStudents() }} diák)</span>
+        </div>
+
+        <button
+          class="page-btn"
+          [disabled]="filterState.page() === totalPages()"
+          (click)="goToPage(filterState.page() + 1)"
+        >
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+
+  } <!-- /viewMode flat -->
+</div>
+
+<!-- Create/Edit Modal -->
+@if (showEditModal()) {
+  <app-student-edit-modal
+    [student]="selectedStudent()"
+    [mode]="modalMode()"
+    [schools]="schools()"
+    (close)="closeEditModal()"
+    (saved)="onStudentSaved()"
+  />
+}
+
+<!-- Delete Confirm -->
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Diák törlése"
+    [message]="'Biztosan törölni szeretnéd a következő diákot: ' + selectedStudent()?.canonicalName + '?'"
+    confirmText="Törlés"
+    cancelText="Mégse"
+    confirmType="danger"
+    (resultEvent)="onDeleteConfirmResult($event)"
+  />
+}
+
+<!-- Bulk Import Dialog -->
+@if (showBulkImport()) {
+  <app-student-bulk-import-dialog
+    [schools]="schools()"
+    (close)="closeBulkImport()"
+    (imported)="onBulkImported()"
+  />
+}
+
+<!-- Avatar Lightbox -->
+@defer (on idle) {
+  @if (lightboxMedia().length > 0) {
+    <app-media-lightbox
+      [media]="lightboxMedia()"
+      [currentIndex]="0"
+      (close)="lightboxMedia.set([])"
+      (navigate)="lightboxMedia.set([])"
+    />
+  }
+}
+
+<!-- Upload Photo (project view) -->
+@if (uploadTarget(); as target) {
+  <app-student-photo-upload
+    [studentId]="target.archiveId"
+    (close)="uploadTarget.set(null)"
+    (uploaded)="onProjectPhotoUploaded()"
+  />
+}
+
+<!-- Create Student for Upload (project view) -->
+@if (showCreateForProject()) {
+  <app-student-edit-modal
+    [student]="null"
+    mode="create"
+    [schools]="schools()"
+    [prefillName]="createForStudent()?.name ?? ''"
+    [prefillSchoolId]="createForStudent()?.schoolId ?? null"
+    (close)="showCreateForProject.set(false); createForStudent.set(null)"
+    (saved)="onProjectStudentCreated()"
+  />
+}
+
+<!-- No Photo Confirm (project view) -->
+@if (noPhotoTarget(); as target) {
+  <app-confirm-dialog
+    title="Nem találom a képet"
+    [message]="'Biztosan jelölöd, hogy ' + target.name + ' képe nem található? Ez megjegyzésként kerül mentésre.'"
+    confirmText="Jelölés"
+    confirmType="warning"
+    (resultEvent)="onConfirmNoPhoto($event)"
+  />
+}

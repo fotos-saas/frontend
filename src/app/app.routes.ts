@@ -200,6 +200,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/teacher-detail/teacher-detail.component').then(m => m.PartnerTeacherDetailComponent)
       },
       {
+        path: 'projects/students',
+        loadComponent: () => import('./features/partner/pages/student-list/student-list.component').then(m => m.PartnerStudentListComponent)
+      },
+      {
+        path: 'projects/students/:id',
+        loadComponent: () => import('./features/partner/pages/student-detail/student-detail.component').then(m => m.PartnerStudentDetailComponent)
+      },
+      {
         path: 'projects/:id',
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
@@ -354,6 +362,22 @@ export const routes: Routes = [
       {
         path: 'projects/schools/:id',
         loadComponent: () => import('./features/partner/pages/school-detail/school-detail.component').then(m => m.PartnerSchoolDetailComponent)
+      },
+      {
+        path: 'projects/teachers',
+        loadComponent: () => import('./features/partner/pages/teacher-list/teacher-list.component').then(m => m.PartnerTeacherListComponent)
+      },
+      {
+        path: 'projects/teachers/:id',
+        loadComponent: () => import('./features/partner/pages/teacher-detail/teacher-detail.component').then(m => m.PartnerTeacherDetailComponent)
+      },
+      {
+        path: 'projects/students',
+        loadComponent: () => import('./features/partner/pages/student-list/student-list.component').then(m => m.PartnerStudentListComponent)
+      },
+      {
+        path: 'projects/students/:id',
+        loadComponent: () => import('./features/partner/pages/student-detail/student-detail.component').then(m => m.PartnerStudentDetailComponent)
       },
       {
         path: 'projects/:id',

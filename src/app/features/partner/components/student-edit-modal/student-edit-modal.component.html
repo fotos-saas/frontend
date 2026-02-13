@@ -1,0 +1,146 @@
+<app-dialog-wrapper
+  [variant]="mode() === 'create' ? 'create' : 'edit'"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.GRADUATION_CAP"
+  [title]="mode() === 'create' ? 'Új diák' : 'Diák szerkesztése'"
+  size="lg"
+  [closable]="!saving()"
+  [isSubmitting]="saving()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="save()"
+>
+  <ng-container dialogBody>
+    @if (loading()) {
+      <div class="loading-spinner">
+        <lucide-icon [name]="ICONS.LOADER" [size]="24" class="spin" />
+      </div>
+    } @else {
+      <form id="studentForm" (ngSubmit)="save()" class="modal-form">
+        <div class="form-group form-group--lg">
+          <label for="canonicalName">Név *</label>
+          <input
+            type="text"
+            id="canonicalName"
+            [(ngModel)]="canonicalName"
+            name="canonicalName"
+            required
+            class="form-input"
+            placeholder="Pl. Kiss Anna"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="className">Osztály</label>
+          <input
+            type="text"
+            id="className"
+            [(ngModel)]="className"
+            name="className"
+            class="form-input"
+            placeholder="Pl. 12.c"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Iskola *</label>
+          <app-searchable-select
+            [options]="schoolOptions()"
+            [value]="schoolId ?? ''"
+            placeholder="Iskola keresése..."
+            (valueChange)="onSchoolChange($event)"
+          />
+        </div>
+
+        <!-- Fotó szekció -->
+        @if (mode() === 'edit') {
+          <div class="photo-section">
+            <label>Profilkép</label>
+            <div class="photo-row">
+              <div class="photo-thumb" (click)="photoInput.click()">
+                @if (photoPreviewUrl()) {
+                  <img [src]="photoPreviewUrl()" alt="Új fotó" loading="lazy" />
+                  <button type="button" class="photo-remove" (click)="$event.stopPropagation(); removeSelectedPhoto()">
+                    <lucide-icon [name]="ICONS.X" [size]="12" />
+                  </button>
+                } @else if (currentPhotoUrl()) {
+                  <img [src]="currentPhotoUrl()" alt="Jelenlegi fotó" loading="lazy" />
+                  <div class="photo-overlay">
+                    <lucide-icon [name]="ICONS.CAMERA" [size]="16" />
+                  </div>
+                } @else {
+                  <div class="photo-empty">
+                    <lucide-icon [name]="ICONS.CAMERA" [size]="20" />
+                  </div>
+                }
+                <input
+                  #photoInput
+                  type="file"
+                  accept="image/*"
+                  class="hidden-input"
+                  (change)="onPhotoSelected($event)"
+                />
+              </div>
+              <div class="photo-info">
+                @if (photoPreviewUrl()) {
+                  <span class="photo-status photo-status--new">Új fotó kiválasztva</span>
+                  <div class="photo-fields">
+                    <div class="form-group form-group--inline">
+                      <label for="photoYear">Évszám</label>
+                      <input
+                        type="number"
+                        id="photoYear"
+                        [(ngModel)]="photoYear"
+                        name="photoYear"
+                        class="form-input form-input--sm"
+                        min="2000"
+                        max="2100"
+                      />
+                    </div>
+                    <label class="checkbox-label">
+                      <input type="checkbox" [(ngModel)]="setPhotoActive" name="setPhotoActive" />
+                      <span>Aktív fotó</span>
+                    </label>
+                  </div>
+                } @else if (currentPhotoUrl()) {
+                  <span class="photo-status">Jelenlegi fotó</span>
+                  <button type="button" class="btn-change-photo" (click)="photoInput.click()">
+                    <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+                    Új fotó feltöltése
+                  </button>
+                } @else {
+                  <span class="photo-status photo-status--empty">Nincs fotó</span>
+                  <button type="button" class="btn-change-photo" (click)="photoInput.click()">
+                    <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+                    Fotó feltöltése
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </form>
+    }
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button type="button" class="btn btn--outline" (click)="close.emit()">
+      Mégse
+    </button>
+    <button
+      type="submit"
+      form="studentForm"
+      class="btn btn--primary"
+      [disabled]="saving() || !canonicalName.trim() || !schoolId"
+    >
+      @if (saving()) {
+        <span class="spinner"></span>
+        {{ uploading() ? 'Fotó feltöltése...' : 'Mentés...' }}
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}
+      }
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

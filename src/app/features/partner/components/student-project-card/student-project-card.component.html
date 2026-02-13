@@ -1,0 +1,111 @@
+<div class="school-card" [class.school-card--expanded]="expanded()">
+  <!-- Header -->
+  <button class="card-header" (click)="onToggle()">
+    <div class="header-left">
+      <lucide-icon [name]="expanded() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT" [size]="18" class="toggle-icon" />
+      <div class="header-info">
+        <span class="school-name">{{ school().schoolName }}</span>
+        <span class="class-list">{{ school().classCount }} osztály</span>
+      </div>
+    </div>
+    <div class="header-right">
+      @if (school().missingPhotoCount > 0) {
+        <span class="badge badge--warning" matTooltip="Hiányzó fotók">
+          <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
+          {{ school().missingPhotoCount }}
+        </span>
+      }
+      <span class="badge badge--info">
+        {{ school().studentCount }} diák
+      </span>
+    </div>
+  </button>
+
+  <!-- Diák lista (expanded) -->
+  @if (expanded()) {
+    <div class="card-body">
+      <!-- Osztályok kontextus -->
+      <div class="classes-bar">
+        @for (cls of school().classes; track cls.projectId) {
+          <span class="class-chip">{{ cls.className || 'N/A' }}</span>
+        }
+      </div>
+
+      @if (school().students.length === 0) {
+        <div class="empty-students">Nincs diák ehhez az iskolához rendelve.</div>
+      } @else {
+        <div class="student-list">
+          @for (student of school().students; track student.archiveId) {
+            <div
+              class="student-row"
+              [class.student-row--missing]="!student.hasPhoto && !student.noPhotoMarked"
+              [class.student-row--marked]="student.noPhotoMarked && !student.hasPhoto"
+            >
+              <div class="student-info">
+                <div
+                  class="student-avatar"
+                  [class.student-avatar--clickable]="!!student.photoUrl"
+                  (click)="onViewPhoto(student, $event)"
+                >
+                  @if (student.photoThumbUrl) {
+                    <img [src]="student.photoThumbUrl" [alt]="student.name" loading="lazy" />
+                  } @else {
+                    <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
+                  }
+                </div>
+                <div class="student-details">
+                  <span class="student-name">{{ student.name }}</span>
+                  @if (student.className) {
+                    <span class="student-meta">{{ student.className }}</span>
+                  }
+                </div>
+              </div>
+
+              <div class="student-status">
+                @if (student.hasPhoto) {
+                  <span class="status-badge status-badge--ok" matTooltip="Van fotó">
+                    <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  </span>
+                } @else if (student.noPhotoMarked) {
+                  <div class="action-buttons">
+                    <button
+                      class="upload-btn"
+                      (click)="onUpload(student)"
+                    >
+                      <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+                      Feltöltés
+                    </button>
+                    <button
+                      class="undo-mark-btn"
+                      matTooltip="Jelölés visszavonása"
+                      (click)="onUndoNoPhoto(student)"
+                    >
+                      <lucide-icon [name]="ICONS.UNDO" [size]="14" />
+                    </button>
+                  </div>
+                } @else {
+                  <div class="action-buttons">
+                    <button
+                      class="upload-btn"
+                      (click)="onUpload(student)"
+                    >
+                      <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+                      Feltöltés
+                    </button>
+                    <button
+                      class="no-photo-btn"
+                      (click)="onMarkNoPhoto(student)"
+                    >
+                      <lucide-icon [name]="ICONS.X" [size]="14" />
+                      Nem találom
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

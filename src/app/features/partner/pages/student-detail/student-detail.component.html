@@ -1,0 +1,271 @@
+@if (loading()) {
+  <div class="student-detail-page page-card">
+    <div class="loading-state">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  </div>
+} @else if (student(); as s) {
+  <div class="student-detail-page page-card">
+    <!-- Fejléc -->
+    <div class="detail-header">
+      <a routerLink=".." class="back-link">
+        <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+        Vissza
+      </a>
+      @if (!editing()) {
+        <button class="header-icon-btn" matTooltip="Szerkesztés" (click)="startEditing()">
+          <lucide-icon [name]="ICONS.EDIT" [size]="18" />
+        </button>
+      }
+    </div>
+
+    <div class="detail-layout">
+      <!-- BAL: Profil sidebar -->
+      <aside class="profile-sidebar">
+        <div class="profile-avatar">
+          @if (s.photoUrl) {
+            <img [src]="s.photoUrl" [alt]="s.canonicalName" loading="lazy" />
+          } @else {
+            <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="32" />
+          }
+        </div>
+
+        @if (editing()) {
+          <!-- Szerkesztés mód -->
+          <div class="edit-form">
+            <label class="edit-label">Név</label>
+            <input
+              type="text"
+              [(ngModel)]="editName"
+              class="edit-input"
+              placeholder="Diák neve..."
+              (keydown.enter)="$event.preventDefault(); saveProfile()"
+            />
+
+            <label class="edit-label">Osztály</label>
+            <input
+              type="text"
+              [(ngModel)]="editClassName"
+              class="edit-input"
+              placeholder="pl. 12.c"
+              (keydown.enter)="$event.preventDefault(); saveProfile()"
+            />
+
+            <div class="edit-actions">
+              <button class="edit-save-btn" (click)="saveProfile()" [disabled]="!editName.trim() || saving()">
+                <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                Mentés
+              </button>
+              <button class="edit-cancel-btn" (click)="cancelEditing()">
+                Mégse
+              </button>
+            </div>
+          </div>
+        } @else {
+          <!-- Megjelenítés mód -->
+          <h1 class="profile-name">{{ s.canonicalName }}</h1>
+
+          @if (s.className) {
+            <div class="profile-class">
+              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="13" />
+              <span>{{ s.className }}</span>
+            </div>
+          }
+
+          <div class="profile-meta">
+            <lucide-icon [name]="ICONS.SCHOOL" [size]="13" />
+            <span>{{ s.schoolName }}</span>
+          </div>
+        }
+
+        @if (s.notes) {
+          <div class="profile-notes">
+            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
+            <span>{{ s.notes }}</span>
+          </div>
+        }
+
+        <!-- Aliasok -->
+        <div class="sidebar-section">
+          <span class="section-label">Név variánsok</span>
+          <div class="alias-list">
+            @for (alias of s.aliases; track alias.id) {
+              <span class="alias-chip">
+                {{ alias.aliasName }}
+                <button class="alias-remove" matTooltip="Eltávolítás" (click)="removeAlias(alias.aliasName)">
+                  <lucide-icon [name]="ICONS.X" [size]="10" />
+                </button>
+              </span>
+            }
+            @if (s.aliases.length === 0) {
+              <span class="no-data">Nincs megadva</span>
+            }
+          </div>
+          @if (s.aliases.length < 10) {
+            <div class="alias-add">
+              <input
+                type="text"
+                [(ngModel)]="newAlias"
+                class="alias-input"
+                placeholder="Új variáns..."
+                (keydown.enter)="$event.preventDefault(); addAlias()"
+              />
+              <button class="alias-add-btn" matTooltip="Hozzáadás" (click)="addAlias()" [disabled]="!newAlias.trim() || savingAlias()">
+                <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+              </button>
+            </div>
+          }
+        </div>
+      </aside>
+
+      <!-- JOBB: Fő tartalom -->
+      <main class="detail-content">
+        <!-- Fotók szekció -->
+        <section class="content-section">
+          <div class="section-head">
+            <div class="section-title">
+              <lucide-icon [name]="ICONS.CAMERA" [size]="16" />
+              <h2>Fotók</h2>
+              <span class="count-badge">{{ s.photos.length }}</span>
+            </div>
+            <button class="btn-action" (click)="showPhotoUpload.set(true)">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+              Feltöltés
+            </button>
+          </div>
+
+          @if (s.photos.length === 0) {
+            <div class="empty-section">
+              <lucide-icon [name]="ICONS.CAMERA" [size]="28" />
+              <p>Még nincs fotó feltöltve</p>
+              <button class="btn-action" (click)="showPhotoUpload.set(true)">
+                <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+                Első fotó feltöltése
+              </button>
+            </div>
+          } @else {
+            <div class="photos-grid">
+              @for (photo of s.photos; track photo.id) {
+                <div class="photo-card" [class.photo-card--active]="photo.isActive">
+                  <div class="photo-image" (click)="openLightbox(photo)">
+                    <img [src]="photo.thumbUrl || photo.url" [alt]="'Fotó ' + photo.year" loading="lazy" />
+                    @if (photo.isActive) {
+                      <span class="active-indicator" matTooltip="Aktív fotó">
+                        <lucide-icon [name]="ICONS.CHECK" [size]="10" />
+                      </span>
+                    }
+                    <span class="photo-year">{{ photo.year }}</span>
+                    <div class="photo-overlay">
+                      @if (!photo.isActive) {
+                        <button class="overlay-btn" matTooltip="Aktívnak jelölés" (click)="$event.stopPropagation(); setActivePhoto(photo)">
+                          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                        </button>
+                      }
+                      <button class="overlay-btn overlay-btn--danger" matTooltip="Törlés" (click)="$event.stopPropagation(); confirmDeletePhoto(photo)">
+                        <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+        <!-- Változásnapló szekció -->
+        @if (changelog().length > 0) {
+          <section class="content-section">
+            <div class="section-head">
+              <div class="section-title">
+                <lucide-icon [name]="ICONS.HISTORY" [size]="16" />
+                <h2>Változásnapló</h2>
+                <span class="count-badge">{{ changelog().length }}</span>
+              </div>
+              <div class="changelog-search">
+                <lucide-icon [name]="ICONS.SEARCH" [size]="13" />
+                <input
+                  type="text"
+                  placeholder="Keresés..."
+                  [ngModel]="changelogSearch()"
+                  (ngModelChange)="changelogSearch.set($event)"
+                />
+              </div>
+            </div>
+
+            <div class="changelog-table">
+              <div class="changelog-thead">
+                <span class="cl-th cl-th--type">Típus</span>
+                <span class="cl-th cl-th--detail">Részlet</span>
+                <span class="cl-th cl-th--user">Ki</span>
+                <span class="cl-th cl-th--date">Mikor</span>
+              </div>
+              @for (entry of filteredChangelog(); track entry.id; let i = $index) {
+                <div class="changelog-row" [style.animation-delay]="i * 0.02 + 's'">
+                  <span class="cl-td cl-td--type">
+                    <span class="type-badge" [attr.data-type]="entry.changeType">
+                      {{ getChangeLabel(entry.changeType) }}
+                    </span>
+                  </span>
+                  <span class="cl-td cl-td--detail">
+                    @if (entry.oldValue && entry.newValue) {
+                      <span class="old-val">{{ entry.oldValue }}</span>
+                      <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="10" />
+                      <span>{{ entry.newValue }}</span>
+                    } @else if (entry.newValue) {
+                      {{ entry.newValue }}
+                    } @else {
+                      <span class="no-data">-</span>
+                    }
+                  </span>
+                  <span class="cl-td cl-td--user">{{ entry.userName ?? 'Rendszer' }}</span>
+                  <span class="cl-td cl-td--date">{{ entry.createdAt | date:'yyyy.MM.dd HH:mm' }}</span>
+                </div>
+              }
+            </div>
+
+            @if (filteredChangelog().length === 0) {
+              <div class="empty-search">
+                <p>Nincs találat a keresésre</p>
+              </div>
+            }
+          </section>
+        }
+      </main>
+    </div>
+  </div>
+}
+
+<!-- Photo Upload Modal -->
+@if (showPhotoUpload()) {
+  <app-student-photo-upload
+    [studentId]="studentId"
+    (close)="showPhotoUpload.set(false)"
+    (uploaded)="onPhotoUploaded()"
+  />
+}
+
+<!-- Photo Lightbox -->
+@defer (on idle) {
+  @if (lightboxIndex() >= 0 && lightboxMedia().length > 0) {
+    <app-media-lightbox
+      [media]="lightboxMedia()"
+      [currentIndex]="lightboxIndex()"
+      (close)="closeLightbox()"
+      (navigate)="onLightboxNavigate($event)"
+    />
+  }
+}
+
+<!-- Delete Photo Confirm -->
+@if (deletePhotoTarget()) {
+  <app-confirm-dialog
+    title="Fotó törlése"
+    [message]="'Biztosan törölni szeretnéd ezt a fotót (' + deletePhotoTarget()!.year + ')?'"
+    confirmText="Törlés"
+    cancelText="Mégse"
+    confirmType="danger"
+    (resultEvent)="onDeletePhotoResult($event)"
+  />
+}

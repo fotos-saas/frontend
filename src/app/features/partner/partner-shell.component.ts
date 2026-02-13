@@ -117,6 +117,7 @@ export class PartnerShellComponent implements OnInit {
           { id: 'projects-list', route: `${base}/projects`, label: 'Projektek' },
           { id: 'schools', route: `${base}/projects/schools`, label: 'Iskolák' },
           { id: 'teachers', route: `${base}/projects/teachers`, label: 'Tanárok' },
+          { id: 'students', route: `${base}/projects/students`, label: 'Diákok' },
           { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
         ]
       },

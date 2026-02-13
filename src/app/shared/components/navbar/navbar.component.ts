@@ -82,7 +82,7 @@ export interface NavbarProjectInfo {
     providers: [NavbarStateService],
     host: {
       '(document:keydown.escape)': 'onEscapeKey()',
-      '(document:keydown.tab)': 'onTabKey($event)',
+      '(document:keydown.tab)': 'onTabKey($any($event))',
     }
 })
 export class NavbarComponent implements OnInit, AfterViewInit {

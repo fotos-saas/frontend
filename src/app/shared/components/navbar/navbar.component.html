@@ -318,8 +318,8 @@
         <a
           routerLink="/home"
           class="navbar__mobile-menu-link"
-          [class.navbar__mobile-menu-link--active]="activePage === 'home'"
-          [attr.aria-current]="activePage === 'home' ? 'page' : null"
+          [class.navbar__mobile-menu-link--active]="activePage() === 'home'"
+          [attr.aria-current]="activePage() === 'home' ? 'page' : null"
           (click)="closeMobileMenu()"
         >
           <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -333,8 +333,8 @@
           <a
             routerLink="/samples"
             class="navbar__mobile-menu-link"
-            [class.navbar__mobile-menu-link--active]="activePage === 'samples'"
-            [attr.aria-current]="activePage === 'samples' ? 'page' : null"
+            [class.navbar__mobile-menu-link--active]="activePage() === 'samples'"
+            [attr.aria-current]="activePage() === 'samples' ? 'page' : null"
             (click)="closeMobileMenu()"
           >
             <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -349,8 +349,8 @@
           <a
             routerLink="/template-chooser"
             class="navbar__mobile-menu-link"
-            [class.navbar__mobile-menu-link--active]="activePage === 'template-chooser'"
-            [attr.aria-current]="activePage === 'template-chooser' ? 'page' : null"
+            [class.navbar__mobile-menu-link--active]="activePage() === 'template-chooser'"
+            [attr.aria-current]="activePage() === 'template-chooser' ? 'page' : null"
             (click)="closeMobileMenu()"
           >
             <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -365,8 +365,8 @@
           <a
             routerLink="/persons"
             class="navbar__mobile-menu-link"
-            [class.navbar__mobile-menu-link--active]="activePage === 'missing'"
-            [attr.aria-current]="activePage === 'missing' ? 'page' : null"
+            [class.navbar__mobile-menu-link--active]="activePage() === 'missing'"
+            [attr.aria-current]="activePage() === 'missing' ? 'page' : null"
             (click)="closeMobileMenu()"
           >
             <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -381,8 +381,8 @@
           <a
             routerLink="/voting"
             class="navbar__mobile-menu-link"
-            [class.navbar__mobile-menu-link--active]="activePage === 'voting'"
-            [attr.aria-current]="activePage === 'voting' ? 'page' : null"
+            [class.navbar__mobile-menu-link--active]="activePage() === 'voting'"
+            [attr.aria-current]="activePage() === 'voting' ? 'page' : null"
             (click)="closeMobileMenu()"
           >
             <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -396,8 +396,8 @@
         <a
           routerLink="/newsfeed"
           class="navbar__mobile-menu-link"
-          [class.navbar__mobile-menu-link--active]="activePage === 'newsfeed'"
-          [attr.aria-current]="activePage === 'newsfeed' ? 'page' : null"
+          [class.navbar__mobile-menu-link--active]="activePage() === 'newsfeed'"
+          [attr.aria-current]="activePage() === 'newsfeed' ? 'page' : null"
           (click)="closeMobileMenu()"
         >
           <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -410,8 +410,8 @@
         <a
           routerLink="/forum"
           class="navbar__mobile-menu-link"
-          [class.navbar__mobile-menu-link--active]="activePage === 'forum'"
-          [attr.aria-current]="activePage === 'forum' ? 'page' : null"
+          [class.navbar__mobile-menu-link--active]="activePage() === 'forum'"
+          [attr.aria-current]="activePage() === 'forum' ? 'page' : null"
           (click)="closeMobileMenu()"
         >
           <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -425,8 +425,8 @@
           <a
             routerLink="/order-data"
             class="navbar__mobile-menu-link"
-            [class.navbar__mobile-menu-link--active]="activePage === 'order-data'"
-            [attr.aria-current]="activePage === 'order-data' ? 'page' : null"
+            [class.navbar__mobile-menu-link--active]="activePage() === 'order-data'"
+            [attr.aria-current]="activePage() === 'order-data' ? 'page' : null"
             (click)="closeMobileMenu()"
           >
             <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -441,8 +441,8 @@
           <a
             routerLink="/order-finalization"
             class="navbar__mobile-menu-link navbar__mobile-menu-link--primary"
-            [class.navbar__mobile-menu-link--active]="activePage === 'order-finalization'"
-            [attr.aria-current]="activePage === 'order-finalization' ? 'page' : null"
+            [class.navbar__mobile-menu-link--active]="activePage() === 'order-finalization'"
+            [attr.aria-current]="activePage() === 'order-finalization' ? 'page' : null"
             (click)="closeMobileMenu()"
           >
             <svg class="navbar__mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">

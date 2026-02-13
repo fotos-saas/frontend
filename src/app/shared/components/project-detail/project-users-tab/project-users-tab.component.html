@@ -1,23 +1,9 @@
-<!-- Info box -->
-@if (showInfoBox()) {
-  <div class="info-box">
-    <lucide-icon [name]="ICONS.INFO" [size]="20" class="info-box__icon" />
-    <div class="info-box__content">
-      <strong>Kik a felhasználók?</strong>
-      <p>
-        Azok a személyek, akik hozzáfértek a projekthez — megosztási linken, QR-kódon vagy jelszóval.
-        Lehetnek szülők, diákok vagy bárki, akihez eljutott a meghívó és regisztrált. A vendég felhasználók is itt jelennek meg.
-      </p>
-    </div>
-    <button class="info-box__close" (click)="dismissInfoBox()" matTooltip="Bezárás">
-      <lucide-icon [name]="ICONS.X" [size]="16" />
-    </button>
-  </div>
-} @else {
-  <button class="info-box__restore" (click)="restoreInfoBox()" matTooltip="Mi ez?">
-    <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="16" />
-  </button>
-}
+<app-info-box storageKey="users-tab" title="Kik a felhasználók?">
+  <p>
+    Azok a személyek, akik hozzáfértek a projekthez — megosztási linken, QR-kódon vagy jelszóval.
+    Lehetnek szülők, diákok vagy bárki, akihez eljutott a meghívó és regisztrált. A vendég felhasználók is itt jelennek meg.
+  </p>
+</app-info-box>
 
 <!-- Szűrők -->
 <div class="filters">

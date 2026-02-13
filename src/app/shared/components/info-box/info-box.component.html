@@ -1,0 +1,16 @@
+@if (visible()) {
+  <div class="info-box" [class]="'info-box info-box--' + theme()">
+    <lucide-icon [name]="icon()" [size]="20" class="info-box__icon" />
+    <div class="info-box__content">
+      <strong>{{ title() }}</strong>
+      <ng-content />
+    </div>
+    <button class="info-box__close" (click)="dismiss()" matTooltip="Bezárás">
+      <lucide-icon [name]="ICONS.X" [size]="16" />
+    </button>
+  </div>
+} @else {
+  <button class="info-box__restore" [class]="'info-box__restore info-box__restore--' + theme()" (click)="restore()" matTooltip="Mi ez?">
+    <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="16" />
+  </button>
+}

@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
+import { InfoBoxComponent } from '../../../components/info-box';
 import { PartnerService, GuestSession, PaginatedResponse } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { DevLoginService } from '../../../../core/services/dev-login.service';
@@ -13,7 +14,7 @@ import { GuestSessionEditDialogComponent } from '../guest-session-edit-dialog/gu
 @Component({
   selector: 'app-project-users-tab',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, GuestSessionEditDialogComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, InfoBoxComponent, GuestSessionEditDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-users-tab.component.html',
   styleUrl: './project-users-tab.component.scss',
@@ -31,20 +32,6 @@ export class ProjectUsersTabComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly isDevMode = this.devLoginService.isDevMode();
-
-  // Info box
-  private readonly INFO_KEY = 'users-tab-info-dismissed';
-  showInfoBox = signal(!localStorage.getItem(this.INFO_KEY));
-
-  dismissInfoBox(): void {
-    localStorage.setItem(this.INFO_KEY, '1');
-    this.showInfoBox.set(false);
-  }
-
-  restoreInfoBox(): void {
-    localStorage.removeItem(this.INFO_KEY);
-    this.showInfoBox.set(true);
-  }
 
   // State
   loading = signal(true);

@@ -1,0 +1,121 @@
+:host {
+  display: block;
+}
+
+$themes: (
+  blue:  (#eff6ff, #bfdbfe, #3b82f6, #1e40af),
+  green: (#f0fdf4, #bbf7d0, #22c55e, #166534),
+  amber: (#fffbeb, #fde68a, #f59e0b, #92400e),
+  red:   (#fef2f2, #fecaca, #ef4444, #991b1b),
+);
+
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid;
+  margin-bottom: 16px;
+  animation: infoBoxFadeIn 0.2s ease;
+
+  @each $name, $colors in $themes {
+    $bg: nth($colors, 1);
+    $border: nth($colors, 2);
+    $accent: nth($colors, 3);
+    $text: nth($colors, 4);
+
+    &--#{$name} {
+      background: $bg;
+      border-color: $border;
+
+      .info-box__icon { color: $accent; }
+
+      .info-box__content strong { color: $text; }
+      .info-box__content p,
+      .info-box__content ::ng-deep p { color: $text; opacity: 0.85; }
+
+      .info-box__close {
+        color: $accent;
+        &:hover { background: rgba($accent, 0.1); }
+      }
+    }
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    margin-right: 12px;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    p,
+    ::ng-deep p {
+      margin: 0;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+  }
+
+  &__close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background 0.15s;
+  }
+
+  &__restore {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #94a3b8;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    margin-left: auto;
+    transition: all 0.15s;
+
+    @each $name, $colors in $themes {
+      $accent: nth($colors, 3);
+      $bg: nth($colors, 1);
+
+      &--#{$name}:hover {
+        border-color: $accent;
+        color: $accent;
+        background: $bg;
+      }
+    }
+  }
+}
+
+@keyframes infoBoxFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-box {
+    animation-duration: 0.01ms !important;
+  }
+}

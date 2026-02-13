@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, computed, viewChild, ElementRef, effect, DestroyRef, inject } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../constants/icons.constants';
@@ -39,12 +39,35 @@ export class InfoBoxComponent {
   visible = signal(true);
   dialogOpen = signal(false);
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly dialogContainer = viewChild<ElementRef<HTMLElement>>('dialogContainer');
+
   private fullKey = computed(() => `info-box-${this.storageKey()}`);
 
   hostDisplay = computed(() => {
     if (this.mode() === 'dialog') return 'contents';
     return this.visible() ? 'block' : 'contents';
   });
+
+  constructor() {
+    // Dialog container portolása a body-ba amikor megnyílik
+    effect(() => {
+      const container = this.dialogContainer()?.nativeElement;
+      if (!container) return;
+
+      if (this.dialogOpen()) {
+        document.body.appendChild(container);
+      }
+    });
+
+    this.destroyRef.onDestroy(() => {
+      // Cleanup: ha a komponens megsemmisül, visszarakjuk a container-t
+      const container = this.dialogContainer()?.nativeElement;
+      if (container?.parentElement === document.body) {
+        container.remove();
+      }
+    });
+  }
 
   ngOnInit(): void {
     if (this.mode() === 'inline') {

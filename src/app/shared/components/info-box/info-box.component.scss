@@ -128,6 +128,13 @@
   }
 }
 
+// === DIALOG PORTAL ===
+.info-dialog-portal {
+  &--hidden {
+    display: none;
+  }
+}
+
 // === DIALOG MODE ===
 .info-dialog-body {
   font-size: 0.875rem;

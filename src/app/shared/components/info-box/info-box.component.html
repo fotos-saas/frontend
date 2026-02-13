@@ -9,9 +9,8 @@
       <lucide-icon [name]="ICONS.X" [size]="16" />
     </button>
   </div>
-} @else if (showRestore()) {
-  <button class="info-box__restore" [class]="'info-box__restore info-box__restore--' + theme()" (click)="restore()">
-    <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="14" />
-    <span>{{ title() }}</span>
+} @else {
+  <button class="info-box__restore" (click)="restore()" [matTooltip]="title()">
+    <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="15" />
   </button>
 }

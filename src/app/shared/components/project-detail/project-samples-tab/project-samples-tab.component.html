@@ -1,8 +1,3 @@
-<app-info-box storageKey="samples-tab" title="Mik azok a minták?" [showRestore]="false">
-  A minták olyan képcsomagok, amelyeket a szülőknek mutatsz be a projekt indulása előtt.
-  Segítenek a stílusod bemutatásában, és a szülők ezek alapján dönthetik el, milyen fotózást szeretnének.
-</app-info-box>
-
 <!-- Fejléc: keresés + Új minta gomb -->
 <div class="samples-header">
   @if (packages().length > 0) {
@@ -20,11 +15,10 @@
     <lucide-icon [name]="ICONS.PLUS" [size]="16" />
     Új minta
   </button>
-  @if (!infoBox()?.visible()) {
-    <button class="info-restore-btn" (click)="infoBox()?.restore()" matTooltip="Mik azok a minták?">
-      <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="15" />
-    </button>
-  }
+  <app-info-box storageKey="samples-tab" title="Mik azok a minták?">
+    A minták olyan képcsomagok, amelyeket a szülőknek mutatsz be a projekt indulása előtt.
+    Segítenek a stílusod bemutatásában, és a szülők ezek alapján dönthetik el, milyen fotózást szeretnének.
+  </app-info-box>
 </div>
 
 <!-- Loading -->

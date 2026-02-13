@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, signal, OnInit, DestroyRef, viewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, signal, OnInit, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -23,7 +23,6 @@ export class ProjectSettingsTabComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
-  readonly infoBox = viewChild(InfoBoxComponent);
 
   loading = signal(true);
   saving = signal(false);

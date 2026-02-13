@@ -108,53 +108,23 @@
 }
 
 .info-box__restore {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px 5px 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #94a3b8;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #3b82f6;
   border-radius: 8px;
   cursor: pointer;
-  margin-bottom: 12px;
+  flex-shrink: 0;
   margin-left: auto;
-  font-size: 0.75rem;
-  font-weight: 500;
   transition: all 0.15s;
-
-  span {
-    white-space: nowrap;
-  }
 
   &:hover {
     border-color: #3b82f6;
-    color: #3b82f6;
-    background: #eff6ff;
-  }
-
-  &--blue {
-    color: #93b4e8;
-    border-color: #dbeafe;
-    &:hover { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
-  }
-
-  &--green {
-    color: #86d9a1;
-    border-color: #dcfce7;
-    &:hover { border-color: #22c55e; color: #22c55e; background: #f0fdf4; }
-  }
-
-  &--amber {
-    color: #f5c96b;
-    border-color: #fef3c7;
-    &:hover { border-color: #f59e0b; color: #f59e0b; background: #fffbeb; }
-  }
-
-  &--red {
-    color: #f5a3a3;
-    border-color: #fee2e2;
-    &:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+    background: #dbeafe;
   }
 }
 

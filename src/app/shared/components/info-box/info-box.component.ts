@@ -12,6 +12,9 @@ export type InfoBoxTheme = 'blue' | 'green' | 'amber' | 'red';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './info-box.component.html',
   styleUrl: './info-box.component.scss',
+  host: {
+    '[style.display]': 'visible() ? "block" : "contents"',
+  },
 })
 export class InfoBoxComponent {
   /** Egyedi kulcs a localStorage-ban az eltüntetés megjegyzéséhez */
@@ -25,9 +28,6 @@ export class InfoBoxComponent {
 
   /** Ikon neve (lucide) - alapértelmezett: info */
   icon = input<string>(ICONS.INFO);
-
-  /** Ha false, a restore gombot nem rendereli (a szülő kezeli) */
-  showRestore = input<boolean>(true);
 
   readonly ICONS = ICONS;
 

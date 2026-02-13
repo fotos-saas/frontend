@@ -1,22 +1,16 @@
-<app-info-box storageKey="settings-tab" title="Beállítások" [showRestore]="false">
-  Itt szabhatod testre a projekt működését: retusálható képek száma, módosítási időablak és export beállítások.
-  Ha nem adsz meg egyedi értéket, a globális beállítások érvényesülnek.
-</app-info-box>
-
 @if (loading()) {
   <div class="flex items-center justify-center py-12">
     <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
   </div>
 } @else {
   <div class="settings-section">
-    <div class="section-header">
+    <div class="section-header section-header--with-info">
       <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
       <h3>Képválasztás beállítások</h3>
-      @if (!infoBox()?.visible()) {
-        <button class="info-restore-btn" (click)="infoBox()?.restore()" matTooltip="Beállítások info">
-          <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="15" />
-        </button>
-      }
+      <app-info-box storageKey="settings-tab" title="Beállítások">
+        Itt szabhatod testre a projekt működését: retusálható képek száma, módosítási időablak és export beállítások.
+        Ha nem adsz meg egyedi értéket, a globális beállítások érvényesülnek.
+      </app-info-box>
     </div>
 
     <div class="setting-card">

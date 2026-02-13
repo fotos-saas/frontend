@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal, computed, inject, DestroyRef, OnInit, output, viewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, computed, inject, DestroyRef, OnInit, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -47,7 +47,6 @@ export class ProjectSamplesTabComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
-  readonly infoBox = viewChild(InfoBoxComponent);
 
   loading = signal(true);
   packages = signal<SamplePackage[]>([]);

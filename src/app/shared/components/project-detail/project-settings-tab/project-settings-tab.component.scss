@@ -1,5 +1,3 @@
-@use '../../../../shared/styles/list-page' as list;
-
 .settings-section {
   margin-top: 8px;
 }
@@ -19,6 +17,15 @@
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
+  }
+
+  &--with-info {
+    flex-wrap: wrap;
+
+    app-info-box {
+      flex-basis: 100%;
+      margin-top: 12px;
+    }
   }
 }
 

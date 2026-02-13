@@ -1,8 +1,3 @@
-<app-info-box storageKey="users-tab" title="Kik a felhasználók?" [showRestore]="false">
-  Azok a személyek, akik hozzáfértek a projekthez — megosztási linken, QR-kódon vagy jelszóval.
-  Lehetnek szülők, diákok vagy bárki, akihez eljutott a meghívó és regisztrált. A vendég felhasználók is itt jelennek meg.
-</app-info-box>
-
 <!-- Szűrők -->
 <div class="filters">
   <div class="search-box">
@@ -27,11 +22,10 @@
     }
   </select>
 
-  @if (!infoBox()?.visible()) {
-    <button class="info-restore-btn" (click)="infoBox()?.restore()" matTooltip="Kik a felhasználók?">
-      <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="15" />
-    </button>
-  }
+  <app-info-box storageKey="users-tab" title="Kik a felhasználók?">
+    Azok a személyek, akik hozzáfértek a projekthez — megosztási linken, QR-kódon vagy jelszóval.
+    Lehetnek szülők, diákok vagy bárki, akihez eljutott a meghívó és regisztrált. A vendég felhasználók is itt jelennek meg.
+  </app-info-box>
 </div>
 
 <!-- Loading -->

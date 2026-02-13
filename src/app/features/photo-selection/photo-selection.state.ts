@@ -189,7 +189,7 @@ export class PhotoSelectionState {
     if (temp) return temp;
     return this.visiblePhotos().map(photo => ({
       id: photo.id,
-      url: photo.url,
+      url: photo.thumbnailUrl || photo.url,
       fileName: photo.filename,
     }));
   });

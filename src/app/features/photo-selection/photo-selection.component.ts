@@ -223,7 +223,7 @@ export class PhotoSelectionComponent {
     // Temporary lightbox media from review groups
     const media = event.photos.map(p => ({
       id: p.id,
-      url: p.url,
+      url: p.preview_url || p.url,
       fileName: p.filename,
     }));
     this.state.lightbox.setTempMedia(media);

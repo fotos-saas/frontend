@@ -1,4 +1,8 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
+
 interface PasswordRequirement {
   label: string;
   validator: (password: string) => boolean;
@@ -7,12 +11,13 @@ interface PasswordRequirement {
 @Component({
   selector: 'app-password-strength',
   standalone: true,
-  imports: [],
+  imports: [MatTooltipModule, LucideAngularModule],
   templateUrl: './password-strength.component.html',
   styleUrls: ['./password-strength.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PasswordStrengthComponent {
+  readonly ICONS = ICONS;
   password = input<string>('');
   compact = input<boolean>(false);
 
@@ -48,6 +53,13 @@ export class PasswordStrengthComponent {
     if (count <= 2) return 'Közepes';
     if (count <= 4) return 'Jó';
     return 'Erős';
+  });
+
+  tooltipText = computed(() => {
+    const pwd = this.password();
+    return this.requirements
+      .map(r => `${r.validator(pwd) ? '\u2713' : '\u2717'} ${r.label}`)
+      .join('\n');
   });
 
   isValid = computed(() => {

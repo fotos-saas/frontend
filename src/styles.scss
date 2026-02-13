@@ -21,6 +21,12 @@
   line-height: 1.4 !important;
 }
 
+// Password tooltip - multiline requirements lista
+.password-tooltip .mdc-tooltip__surface {
+  white-space: pre-line !important;
+  text-align: left !important;
+}
+
 // ============================================================================
 // MOBILE APP - PINCH ZOOM CONTROL
 // ============================================================================

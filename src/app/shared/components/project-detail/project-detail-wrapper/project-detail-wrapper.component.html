@@ -28,6 +28,7 @@
         <app-project-detail-view
           [project]="projectData()"
           [isMarketer]="isMarketer()"
+          (openPersonsModal)="openPersonsModalDialog($event)"
           (openQrModal)="openQrModal()"
           (openContactModal)="openContactModal($event)"
           (deleteContact)="confirmDeleteContact($event)"
@@ -93,6 +94,9 @@
 
 <!-- Order Data Dialog container -->
 <ng-container #orderDataDialogContainer></ng-container>
+
+<!-- Persons Modal container -->
+<ng-container #personsModalContainer></ng-container>
 
 <!-- Delete User Confirmation - page-card-on KÍVÜL -->
 @if (showDeleteUserConfirm()) {

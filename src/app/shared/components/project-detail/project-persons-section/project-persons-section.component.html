@@ -1,0 +1,127 @@
+@if (hasPersons()) {
+  <section class="mb-6">
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <!-- Header -->
+      <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <lucide-icon [name]="ICONS.USERS" [size]="16" class="text-gray-500" />
+          <span class="text-sm font-semibold text-gray-900">Névsor</span>
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded">
+            {{ personsCount() }} fő
+          </span>
+        </div>
+        <button
+          class="px-3 py-1.5 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+          (click)="openPersonsModal.emit(undefined)"
+        >
+          <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
+          Mind megtekintése
+        </button>
+      </div>
+
+      <!-- 2 oszlopos layout -->
+      <div class="persons-grid">
+        <!-- Diákok oszlop -->
+        <div class="persons-column" (click)="openPersonsModal.emit('student')">
+          <div class="column-header">
+            <div class="flex items-center gap-2">
+              <lucide-icon [name]="ICONS.USER" [size]="14" class="text-blue-500" />
+              <span class="text-sm font-semibold text-gray-800">Diákok</span>
+              <span class="text-xs text-gray-400">({{ studentsCount() }})</span>
+            </div>
+          </div>
+          <div class="stats-row">
+            <span class="stat-item stat-item--green">
+              <span class="stat-dot stat-dot--green"></span>
+              {{ studentsWithPhoto() }} fotóval
+            </span>
+            @if (studentsWithoutPhoto() > 0) {
+              <span class="stat-item stat-item--red">
+                <span class="stat-dot stat-dot--red"></span>
+                {{ studentsWithoutPhoto() }} fotó nélkül
+              </span>
+            }
+          </div>
+          <!-- Avatar grid -->
+          @if (studentsPreview().length > 0) {
+            <div class="avatar-grid">
+              @for (person of studentsPreview(); track person.id) {
+                <div class="avatar-item" [class.avatar-item--no-photo]="!person.hasPhoto" [title]="person.name">
+                  @if (person.photoThumbUrl) {
+                    <img [src]="person.photoThumbUrl" [alt]="person.name" class="avatar-img" />
+                  } @else {
+                    <span class="avatar-initials">{{ getInitials(person.name) }}</span>
+                  }
+                </div>
+              }
+              @if (studentsOverflow() > 0) {
+                <div class="avatar-item avatar-item--overflow">
+                  <span class="overflow-text">+{{ studentsOverflow() }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Tanárok oszlop -->
+        <div class="persons-column" (click)="openPersonsModal.emit('teacher')">
+          <div class="column-header">
+            <div class="flex items-center gap-2">
+              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="14" class="text-amber-500" />
+              <span class="text-sm font-semibold text-gray-800">Tanárok</span>
+              <span class="text-xs text-gray-400">({{ teachersCount() }})</span>
+            </div>
+          </div>
+          <div class="stats-row">
+            <span class="stat-item stat-item--green">
+              <span class="stat-dot stat-dot--green"></span>
+              {{ teachersWithPhoto() }} fotóval
+            </span>
+            @if (teachersWithoutPhoto() > 0) {
+              <span class="stat-item stat-item--red">
+                <span class="stat-dot stat-dot--red"></span>
+                {{ teachersWithoutPhoto() }} fotó nélkül
+              </span>
+            }
+          </div>
+          <!-- Avatar grid -->
+          @if (teachersPreview().length > 0) {
+            <div class="avatar-grid">
+              @for (person of teachersPreview(); track person.id) {
+                <div class="avatar-item" [class.avatar-item--no-photo]="!person.hasPhoto" [title]="person.name">
+                  @if (person.photoThumbUrl) {
+                    <img [src]="person.photoThumbUrl" [alt]="person.name" class="avatar-img" />
+                  } @else {
+                    <span class="avatar-initials">{{ getInitials(person.name) }}</span>
+                  }
+                </div>
+              }
+              @if (teachersOverflow() > 0) {
+                <div class="avatar-item avatar-item--overflow">
+                  <span class="overflow-text">+{{ teachersOverflow() }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+} @else {
+  <!-- Empty state -->
+  <section class="mb-6">
+    <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
+      <div class="flex items-center gap-3">
+        <lucide-icon [name]="ICONS.USERS" [size]="20" class="text-gray-400" />
+        <span class="text-sm text-gray-500">Még nincs személy hozzárendelve</span>
+      </div>
+      <button
+        class="px-3 py-1.5 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+        (click)="openPersonsModal.emit(undefined)"
+      >
+        <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
+        Névsor kezelése
+      </button>
+    </div>
+  </section>
+}

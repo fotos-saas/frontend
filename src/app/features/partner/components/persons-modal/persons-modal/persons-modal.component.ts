@@ -28,6 +28,7 @@ export class PersonsModalComponent implements OnInit {
 
   readonly projectId = input.required<number>();
   readonly projectName = input<string>('');
+  readonly initialTypeFilter = input<TypeFilter | undefined>(undefined);
 
   readonly close = output<void>();
   readonly openUploadWizard = output<void>();
@@ -83,6 +84,10 @@ export class PersonsModalComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const initial = this.initialTypeFilter();
+    if (initial) {
+      this.typeFilter.set(initial);
+    }
     this.loadPersons();
   }
 

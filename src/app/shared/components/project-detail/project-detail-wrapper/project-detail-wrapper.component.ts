@@ -91,6 +91,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly contactModalContainer = viewChild('contactModalContainer', { read: ViewContainerRef });
   private readonly projectEditModalContainer = viewChild('projectEditModalContainer', { read: ViewContainerRef });
   private readonly orderDataDialogContainer = viewChild('orderDataDialogContainer', { read: ViewContainerRef });
+  private readonly personsModalContainer = viewChild('personsModalContainer', { read: ViewContainerRef });
 
   readonly ICONS = ICONS;
   readonly isMarketer = this.authService.isMarketer;
@@ -223,6 +224,27 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   confirmDeleteUser(session: GuestSession): void { this.facade.confirmDeleteUser(session); }
   onDeleteUserResult(result: ConfirmDialogResult): void {
     this.facade.onDeleteUserResult(result, (s) => this.usersTab()?.executeDelete(s));
+  }
+
+  // === PERSONS MODAL ===
+
+  async openPersonsModalDialog(typeFilter?: 'student' | 'teacher'): Promise<void> {
+    const container = this.personsModalContainer();
+    if (!container || !this.projectData()) return;
+
+    container.clear();
+    const { PersonsModalComponent } = await import(
+      '../../../../features/partner/components/persons-modal/persons-modal/persons-modal.component'
+    );
+    const ref = container.createComponent(PersonsModalComponent);
+    ref.setInput('projectId', this.projectData()!.id);
+    ref.setInput('projectName', this.projectData()!.name);
+    if (typeFilter) {
+      ref.setInput('initialTypeFilter', typeFilter);
+    }
+    ref.instance.close.subscribe(() => {
+      container.clear();
+    });
   }
 
   // === GALLERY ===

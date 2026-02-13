@@ -67,6 +67,17 @@ export interface QrCodeHistory {
 }
 
 /**
+ * Személy preview elem a Névsor szekcióhoz.
+ */
+export interface PersonPreviewItem {
+  id: number;
+  name: string;
+  type: 'student' | 'teacher';
+  hasPhoto: boolean;
+  photoThumbUrl: string | null;
+}
+
+/**
  * Projekt részletek (közös interface marketer és partner számára)
  */
 export interface ProjectDetailData {
@@ -99,6 +110,12 @@ export interface ProjectDetailData {
   qrCodesHistory: QrCodeHistory[];
   tabloGalleryId?: number | null;
   galleryPhotosCount?: number;
+  personsCount?: number;
+  studentsCount?: number;
+  teachersCount?: number;
+  studentsWithPhotoCount?: number;
+  teachersWithPhotoCount?: number;
+  personsPreview?: PersonPreviewItem[];
   createdAt: string;
   updatedAt: string;
 }

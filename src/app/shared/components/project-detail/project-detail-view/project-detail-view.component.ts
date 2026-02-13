@@ -12,6 +12,7 @@ import {
 import { ICONS } from '../../../constants/icons.constants';
 import { QR_CODE_TYPES, QrCodeTypeKey } from '../../../constants/qr-code-types';
 import { InfoBoxComponent, InfoHelpItemComponent } from '../../../components/info-box';
+import { ProjectPersonsSectionComponent } from '../project-persons-section/project-persons-section.component';
 
 /**
  * Project Detail View - Közös presentational (dumb) komponens.
@@ -31,6 +32,7 @@ import { InfoBoxComponent, InfoHelpItemComponent } from '../../../components/inf
     DeleteButtonComponent,
     InfoBoxComponent,
     InfoHelpItemComponent,
+    ProjectPersonsSectionComponent,
   ],
   templateUrl: './project-detail-view.component.html',
   styleUrl: './project-detail-view.component.scss',
@@ -42,6 +44,7 @@ export class ProjectDetailViewComponent {
   readonly project = input<ProjectDetailData | null>(null);
   readonly isMarketer = input<boolean>(false);
 
+  readonly openPersonsModal = output<'student' | 'teacher' | undefined>();
   readonly openQrModal = output<void>();
   readonly openContactModal = output<ProjectContact | null>();
   readonly deleteContact = output<ProjectContact>();

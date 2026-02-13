@@ -18,6 +18,12 @@
     </app-info-box>
   </div>
 
+  <!-- Névsor szekció (diákok + tanárok) -->
+  <app-project-persons-section
+    [project]="project()!"
+    (openPersonsModal)="openPersonsModal.emit($event)"
+  />
+
   <!-- QR Kódok szekció -->
   <section class="mb-6">
     @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {

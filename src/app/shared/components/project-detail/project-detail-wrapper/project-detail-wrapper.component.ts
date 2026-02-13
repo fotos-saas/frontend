@@ -92,6 +92,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly projectEditModalContainer = viewChild('projectEditModalContainer', { read: ViewContainerRef });
   private readonly orderDataDialogContainer = viewChild('orderDataDialogContainer', { read: ViewContainerRef });
   private readonly personsModalContainer = viewChild('personsModalContainer', { read: ViewContainerRef });
+  private readonly uploadWizardContainer = viewChild('uploadWizardContainer', { read: ViewContainerRef });
 
   readonly ICONS = ICONS;
   readonly isMarketer = this.authService.isMarketer;
@@ -244,6 +245,29 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     }
     ref.instance.close.subscribe(() => {
       container.clear();
+    });
+    ref.instance.openUploadWizard.subscribe(() => {
+      container.clear();
+      this.openUploadWizardDialog();
+    });
+  }
+
+  async openUploadWizardDialog(): Promise<void> {
+    const container = this.uploadWizardContainer();
+    if (!container || !this.projectData()) return;
+
+    container.clear();
+    const { PhotoUploadWizardComponent } = await import(
+      '../../../../features/partner/components/photo-upload-wizard/photo-upload-wizard/photo-upload-wizard.component'
+    );
+    const ref = container.createComponent(PhotoUploadWizardComponent);
+    ref.setInput('projectId', this.projectData()!.id);
+    ref.instance.close.subscribe(() => {
+      container.clear();
+    });
+    ref.instance.completed.subscribe(() => {
+      container.clear();
+      this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
     });
   }
 

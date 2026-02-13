@@ -76,6 +76,7 @@ export class CompletedSummaryComponent {
       id: p.id,
       url: p.url,
       thumbnailUrl: p.thumbnail_url,
+      previewUrl: p.preview_url || p.thumbnail_url,
       filename: p.filename,
     }));
   });

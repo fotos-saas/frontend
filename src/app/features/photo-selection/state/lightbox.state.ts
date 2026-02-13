@@ -64,7 +64,7 @@ export class LightboxState {
     return computed<LightboxMediaItem[]>(() =>
       photos().map(photo => ({
         id: photo.id,
-        url: photo.thumbnailUrl || photo.url,
+        url: photo.previewUrl || photo.url,
         fileName: photo.filename,
       }))
     );

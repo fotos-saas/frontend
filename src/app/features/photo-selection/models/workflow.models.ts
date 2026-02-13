@@ -65,6 +65,7 @@ export interface WorkflowPhoto {
   id: number;
   url: string;
   thumbnailUrl: string;
+  previewUrl: string;
   filename: string;
 }
 
@@ -305,16 +306,16 @@ export function getPreviousStep(step: WorkflowStep): WorkflowStep | null {
  * Helper: API photo → WorkflowPhoto mapping
  */
 export function mapApiPhoto(apiPhoto: ApiPhoto): WorkflowPhoto {
-  // Media-ból vagy közvetlen url-ből
   const media = apiPhoto.media?.[0];
   const url = media?.original_url || apiPhoto.url || '';
-  // preview_url = 1200x1200 vízjeles, thumbnail_url = 300x300 (grid-hez elég)
-  const thumbnailUrl = apiPhoto.preview_url || media?.preview_url || apiPhoto.thumbnail_url || url;
+  const thumbnailUrl = apiPhoto.thumbnail_url || url;
+  const previewUrl = apiPhoto.preview_url || media?.preview_url || thumbnailUrl;
 
   return {
     id: apiPhoto.id,
     url,
     thumbnailUrl,
+    previewUrl,
     filename: apiPhoto.filename,
   };
 }

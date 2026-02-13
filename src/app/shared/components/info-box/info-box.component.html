@@ -3,7 +3,7 @@
     <lucide-icon [name]="icon()" [size]="20" class="info-box__icon" />
     <div class="info-box__content">
       <strong>{{ title() }}</strong>
-      <ng-content />
+      <p><ng-content /></p>
     </div>
     <button class="info-box__close" (click)="dismiss()" matTooltip="Bezárás">
       <lucide-icon [name]="ICONS.X" [size]="16" />

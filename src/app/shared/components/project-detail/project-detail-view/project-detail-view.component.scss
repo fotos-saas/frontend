@@ -5,3 +5,73 @@
   justify-content: flex-end;
   margin-bottom: 8px;
 }
+
+// === Info help grid (dialog módú info-box tartalom) ===
+.info-help-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-help-grid > * + * {
+  margin-top: 12px;
+}
+
+.info-help-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  > div:last-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #64748b;
+  }
+}
+
+.info-help-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  margin-right: 12px;
+
+  &--purple {
+    background: #f3e8ff;
+    color: #9333ea;
+  }
+
+  &--indigo {
+    background: #e0e7ff;
+    color: #4f46e5;
+  }
+
+  &--teal {
+    background: #ccfbf1;
+    color: #0d9488;
+  }
+
+  &--emerald {
+    background: #d1fae5;
+    color: #059669;
+  }
+}

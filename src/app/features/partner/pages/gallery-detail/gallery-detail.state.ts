@@ -89,6 +89,7 @@ export class GalleryDetailState {
       id: photo.id,
       url: photo.original_url,
       thumbnailUrl: photo.thumb_url,
+      previewUrl: photo.preview_url || photo.original_url,
       filename: photo.name,
     }));
   });

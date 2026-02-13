@@ -40,6 +40,7 @@ export class AlbumDetailStateService {
       id: p.id,
       url: p.preview_url,
       thumbnailUrl: p.thumb_url,
+      previewUrl: p.preview_url,
       filename: p.name,
     }));
   });

@@ -65,7 +65,7 @@ export interface WorkflowPhoto {
   id: number;
   url: string;
   thumbnailUrl: string;
-  previewUrl: string;
+  previewUrl?: string;
   filename: string;
 }
 

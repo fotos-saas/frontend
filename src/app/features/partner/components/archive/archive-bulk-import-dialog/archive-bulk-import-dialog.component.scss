@@ -1,5 +1,5 @@
-// Student Bulk Import Dialog - tartalmi stílusok
-@use '../../../../shared/styles/dialog-forms' as form;
+// Archive Bulk Import Dialog - tartalmi stílusok
+@use '../../../../../shared/styles/dialog-forms' as form;
 
 // --- FORM ---
 .form-group { margin-bottom: 1rem; }
@@ -61,6 +61,13 @@
 .input-name { display: block; font-size: 0.875rem; font-weight: 500; color: #1e293b; }
 .match-info { display: flex; align-items: center; margin-top: 2px; }
 .match-label { font-size: 0.75rem; color: #64748b; }
+
+.match-confidence {
+  font-size: 0.75rem; font-weight: 600; margin-left: 0.375rem; padding: 1px 6px; border-radius: 4px;
+  &.confidence--high { background: #ecfdf5; color: #059669; }
+  &.confidence--medium { background: #fffbeb; color: #d97706; }
+  &.confidence--low { background: #fef2f2; color: #dc2626; }
+}
 
 .review-row__match { display: flex; align-items: center; padding: 0 0.75rem; }
 .match-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-right: 0.375rem; }

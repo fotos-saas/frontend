@@ -2,63 +2,64 @@ import { Component, OnInit, inject, signal, computed, input, output, DestroyRef,
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
-import { PartnerStudentService } from '../../services/partner-student.service';
 import {
-  StudentSchoolGroup,
-  StudentSchoolSummary,
-  StudentInSchool,
-} from '../../models/student.models';
-import { SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
-import { SearchableSelectComponent } from '../../../../shared/components/searchable-select/searchable-select.component';
-import { StudentProjectCardComponent } from '../student-project-card/student-project-card.component';
-import { ICONS } from '../../../../shared/constants/icons.constants';
+  ARCHIVE_SERVICE,
+  ArchiveSchoolGroup,
+  ArchiveSchoolSummary,
+  ArchivePersonInSchool,
+  ArchiveConfig,
+} from '../../../models/archive.models';
+import { SelectOption } from '../../../../../shared/components/searchable-select/searchable-select.component';
+import { SearchableSelectComponent } from '../../../../../shared/components/searchable-select/searchable-select.component';
+import { ArchiveProjectCardComponent } from '../archive-project-card/archive-project-card.component';
+import { ICONS } from '../../../../../shared/constants/icons.constants';
 
 @Component({
-  selector: 'app-student-project-view',
+  selector: 'app-archive-project-view',
   standalone: true,
   imports: [
     FormsModule,
     LucideAngularModule,
     SearchableSelectComponent,
-    StudentProjectCardComponent,
+    ArchiveProjectCardComponent,
   ],
-  templateUrl: './student-project-view.component.html',
-  styleUrl: './student-project-view.component.scss',
+  templateUrl: './archive-project-view.component.html',
+  styleUrl: './archive-project-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StudentProjectViewComponent implements OnInit {
+export class ArchiveProjectViewComponent implements OnInit {
+  config = input.required<ArchiveConfig>();
   classYears = input<SelectOption[]>([]);
+  syncingSchoolId = input(0);
 
-  private readonly studentService = inject(PartnerStudentService);
+  private readonly archiveService = inject(ARCHIVE_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
 
-  schoolGroups = signal<StudentSchoolGroup[]>([]);
-  summary = signal<StudentSchoolSummary>({ totalSchools: 0, totalStudents: 0, withPhoto: 0, missingPhoto: 0 });
+  schoolGroups = signal<ArchiveSchoolGroup[]>([]);
+  summary = signal<ArchiveSchoolSummary>({ totalSchools: 0, totalItems: 0, withPhoto: 0, missingPhoto: 0 });
   loading = signal(true);
   initialized = signal(false);
 
-  // Szűrők
   schoolSearch = signal('');
   selectedYear = signal('');
   missingOnly = signal(false);
 
-  // Expand state
   expandedIds = signal<Set<number>>(new Set());
 
-  uploadPhotoRequest = output<StudentInSchool>();
-  viewPhotoRequest = output<StudentInSchool>();
-  markNoPhotoRequest = output<StudentInSchool>();
-  undoNoPhotoRequest = output<StudentInSchool>();
+  uploadPhotoRequest = output<ArchivePersonInSchool>();
+  syncPhotosRequest = output<{ schoolId: number; classYear?: string }>();
+  syncSingleItemRequest = output<ArchivePersonInSchool>();
+  viewPhotoRequest = output<ArchivePersonInSchool>();
+  markNoPhotoRequest = output<ArchivePersonInSchool>();
+  undoNoPhotoRequest = output<ArchivePersonInSchool>();
 
   filteredSchoolGroups = computed(() => {
     const query = this.schoolSearch().toLowerCase().trim();
     const groups = this.schoolGroups();
     if (!query) return groups;
-    return groups.filter(g =>
-      g.schoolName.toLowerCase().includes(query)
-    );
+    return groups.filter(g => g.schoolName.toLowerCase().includes(query));
   });
 
   ngOnInit(): void {
@@ -83,7 +84,7 @@ export class StudentProjectViewComponent implements OnInit {
     this.loading.set(true);
     const classYear = this.selectedYear();
 
-    this.studentService.getStudentsBySchool({
+    this.archiveService.getBySchool({
       class_year: classYear || undefined,
       missing_only: this.missingOnly(),
     })
@@ -136,36 +137,49 @@ export class StudentProjectViewComponent implements OnInit {
     return this.expandedIds().has(schoolId);
   }
 
-  onUploadPhoto(student: StudentInSchool, schoolId: number): void {
-    this.uploadPhotoRequest.emit({ ...student, schoolId });
+  onUploadPhoto(item: ArchivePersonInSchool, schoolId: number): void {
+    this.uploadPhotoRequest.emit({ ...item, schoolId });
   }
 
-  onViewPhoto(student: StudentInSchool): void {
-    this.viewPhotoRequest.emit(student);
+  onViewPhoto(item: ArchivePersonInSchool): void {
+    this.viewPhotoRequest.emit(item);
   }
 
-  onMarkNoPhoto(student: StudentInSchool): void {
-    this.markNoPhotoRequest.emit(student);
+  onMarkNoPhoto(item: ArchivePersonInSchool): void {
+    this.markNoPhotoRequest.emit(item);
   }
 
-  onUndoNoPhoto(student: StudentInSchool): void {
-    this.undoNoPhotoRequest.emit(student);
+  onUndoNoPhoto(item: ArchivePersonInSchool): void {
+    this.undoNoPhotoRequest.emit(item);
   }
 
-  markStudentNoPhoto(archiveId: number): void {
-    this.updateStudentField(archiveId, { noPhotoMarked: true });
+  onSyncPhotos(school: ArchiveSchoolGroup): void {
+    this.syncPhotosRequest.emit({
+      schoolId: school.schoolId,
+      classYear: this.selectedYear() || undefined,
+    });
   }
 
-  unmarkStudentNoPhoto(archiveId: number): void {
-    this.updateStudentField(archiveId, { noPhotoMarked: false });
+  onSyncSingleItem(item: ArchivePersonInSchool): void {
+    this.syncSingleItemRequest.emit(item);
   }
 
-  private updateStudentField(archiveId: number, patch: Partial<StudentInSchool>): void {
+  /** Lokálisan frissíti egy elem mezőjét újratöltés nélkül. */
+  markItemNoPhoto(archiveId: number): void {
+    this.updateItemField(archiveId, { noPhotoMarked: true });
+  }
+
+  unmarkItemNoPhoto(archiveId: number): void {
+    this.updateItemField(archiveId, { noPhotoMarked: false });
+  }
+
+  /** Lokálisan frissíti egy elem state-jét (pl. sync után). */
+  updateItemField(archiveId: number, patch: Partial<ArchivePersonInSchool>): void {
     this.schoolGroups.update(groups =>
       groups.map(group => ({
         ...group,
-        students: group.students.map(s =>
-          s.archiveId === archiveId ? { ...s, ...patch } : s
+        items: group.items.map(item =>
+          item.archiveId === archiveId ? { ...item, ...patch } : item
         ),
       }))
     );

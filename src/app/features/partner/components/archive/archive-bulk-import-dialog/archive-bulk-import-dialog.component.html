@@ -27,12 +27,12 @@
 
       @if (!selectedFile()) {
         <div class="form-group">
-          <label class="form-label">Tanárnevek (soronként egy)</label>
+          <label class="form-label">{{ config().bulkImportTextareaLabel }}</label>
           <textarea
             class="names-textarea"
             [ngModel]="namesText()"
             (ngModelChange)="onNamesInput($event)"
-            placeholder="Kiss János&#10;Dr. Nagy Anna&#10;Horváth Péterné&#10;..."
+            [placeholder]="config().bulkImportTextareaPlaceholder"
             rows="8"
           ></textarea>
         </div>
@@ -86,9 +86,11 @@
               @if (row.matchType !== 'no_match') {
                 <span class="match-info">
                   <span class="match-label">{{ getMatchLabel(row.matchType) }}</span>
-                  <span class="match-confidence" [class]="getConfidenceClass(row.confidence)">
-                    {{ (row.confidence * 100) | number:'1.0-0' }}%
-                  </span>
+                  @if (config().bulkImportHasConfidence && row.confidence != null) {
+                    <span class="match-confidence" [class]="getConfidenceClass(row.confidence)">
+                      {{ (row.confidence * 100) | number:'1.0-0' }}%
+                    </span>
+                  }
                 </span>
               }
             </div>
@@ -96,9 +98,12 @@
             @if (row.matchType !== 'no_match') {
               <div class="review-row__match">
                 @if (row.photoUrl) {
-                  <img class="match-avatar" [src]="row.photoUrl" [alt]="row.teacherName"  loading="lazy" />
+                  <img class="match-avatar" [src]="row.photoUrl" [alt]="row.matchName" loading="lazy" />
                 }
-                <span class="match-name">{{ row.teacherName }}</span>
+                <span class="match-name">{{ row.matchName }}</span>
+                @if (row.className) {
+                  <span class="match-class">{{ row.className }}</span>
+                }
               </div>
             }
 

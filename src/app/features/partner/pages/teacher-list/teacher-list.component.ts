@@ -6,13 +6,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
-import { TeacherListItem, TeacherInSchool } from '../../models/teacher.models';
+import { TeacherListItem, TeacherInSchool, SyncResultItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
-import { TeacherEditModalComponent } from '../../components/teacher-edit-modal/teacher-edit-modal.component';
-import { TeacherBulkImportDialogComponent } from '../../components/teacher-bulk-import-dialog/teacher-bulk-import-dialog.component';
+import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool } from '../../models/archive.models';
+import { ArchiveEditModalComponent } from '../../components/archive/archive-edit-modal/archive-edit-modal.component';
+import { ArchiveBulkImportDialogComponent } from '../../components/archive/archive-bulk-import-dialog/archive-bulk-import-dialog.component';
 import { TeacherLinkDialogComponent } from '../../components/teacher-link-dialog/teacher-link-dialog.component';
-import { TeacherPhotoUploadComponent } from '../../components/teacher-photo-upload/teacher-photo-upload.component';
-import { TeacherProjectViewComponent } from '../../components/teacher-project-view/teacher-project-view.component';
+import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
+import { ArchiveProjectViewComponent } from '../../components/archive/archive-project-view/archive-project-view.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
@@ -27,15 +28,16 @@ import { saveFile } from '../../../../shared/utils/file.util';
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
-    TeacherEditModalComponent,
-    TeacherBulkImportDialogComponent,
+    ArchiveEditModalComponent,
+    ArchiveBulkImportDialogComponent,
     TeacherLinkDialogComponent,
-    TeacherPhotoUploadComponent,
-    TeacherProjectViewComponent,
+    ArchivePhotoUploadComponent,
+    ArchiveProjectViewComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
     SearchableSelectComponent,
   ],
+  providers: [{ provide: ARCHIVE_SERVICE, useExisting: PartnerTeacherService }],
   templateUrl: './teacher-list.component.html',
   styleUrl: './teacher-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -82,12 +84,35 @@ export class PartnerTeacherListComponent implements OnInit {
   // Project view: sync loading state
   syncingSchoolId = signal(0);
 
+  // ArchiveConfig a tanárhoz
+  readonly archiveConfig: ArchiveConfig = {
+    entityLabel: 'tanár',
+    entityLabelPlural: 'tanár',
+    icon: ICONS.USER,
+    isSyncable: true,
+    placeholderName: 'Pl. Kiss János',
+    extraFields: [
+      { name: 'title_prefix', label: 'Titulus', type: 'text', placeholder: 'pl. Dr., PhD...', gridSize: 'sm' },
+      { name: 'position', label: 'Pozíció', type: 'text', placeholder: 'pl. igazgató, angol nyelv...' },
+    ],
+    bulkImportMatchLabels: {
+      exact: 'Pontos egyezés',
+      fuzzy: 'Hasonló név',
+      ai: 'AI azonosítás',
+      ai_sonnet: 'AI azonosítás',
+      no_match: 'Nem található',
+    },
+    bulkImportHasConfidence: true,
+    bulkImportTextareaLabel: 'Tanárnevek (soronként egy)',
+    bulkImportTextareaPlaceholder: 'Kiss János\nDr. Nagy Anna\nHorváth Péterné\n...',
+  };
+
   // Project view: upload, create, no-photo
   uploadTarget = signal<TeacherInSchool | null>(null);
   showCreateForProject = signal(false);
   createForTeacher = signal<TeacherInSchool | null>(null);
   noPhotoTarget = signal<TeacherInSchool | null>(null);
-  private readonly projectView = viewChild(TeacherProjectViewComponent);
+  private readonly projectView = viewChild(ArchiveProjectViewComponent);
 
   // Modals
   showEditModal = signal(false);
@@ -280,11 +305,11 @@ export class PartnerTeacherListComponent implements OnInit {
       });
   }
 
-  onUploadPhotoFromProject(teacher: TeacherInSchool): void {
-    if (teacher.archiveId) {
-      this.uploadTarget.set(teacher);
+  onUploadPhotoFromProject(item: ArchivePersonInSchool): void {
+    if (item.archiveId) {
+      this.uploadTarget.set(item as any);
     } else {
-      this.createForTeacher.set(teacher);
+      this.createForTeacher.set(item as any);
       this.showCreateForProject.set(true);
     }
   }
@@ -300,18 +325,18 @@ export class PartnerTeacherListComponent implements OnInit {
     this.projectView()?.loadData();
   }
 
-  onViewPhotoFromProject(teacher: TeacherInSchool): void {
-    if (teacher.photoUrl) {
+  onViewPhotoFromProject(item: ArchivePersonInSchool): void {
+    if (item.photoUrl) {
       this.lightboxMedia.set([{
-        id: teacher.archiveId,
-        url: teacher.photoUrl,
-        fileName: teacher.name,
+        id: item.archiveId,
+        url: item.photoUrl,
+        fileName: item.name,
       }]);
     }
   }
 
-  onMarkNoPhotoFromProject(teacher: TeacherInSchool): void {
-    this.noPhotoTarget.set(teacher);
+  onMarkNoPhotoFromProject(item: ArchivePersonInSchool): void {
+    this.noPhotoTarget.set(item as any);
   }
 
   onConfirmNoPhoto(result: { action: 'confirm' | 'cancel' }): void {
@@ -320,7 +345,7 @@ export class PartnerTeacherListComponent implements OnInit {
       if (teacher) {
         this.teacherService.markNoPhoto(teacher.archiveId)
           .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(() => this.projectView()?.markTeacherNoPhoto(teacher.archiveId));
+          .subscribe(() => this.projectView()?.markItemNoPhoto(teacher.archiveId));
       }
     }
     this.noPhotoTarget.set(null);
@@ -336,15 +361,26 @@ export class PartnerTeacherListComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.syncingSchoolId.set(0);
-          this.projectView()?.applySyncResults(res.data.details);
+          for (const detail of (res.data.details as SyncResultItem[])) {
+            if (detail.status === 'synced') {
+              this.projectView()?.updateItemField(detail.archiveId, {
+                hasPhoto: true,
+                hasSyncablePhoto: false,
+                photoUrl: detail.photoUrl ?? null,
+                photoThumbUrl: detail.photoThumbUrl ?? null,
+                photoFileName: detail.photoFileName ?? null,
+                photoTakenAt: detail.photoTakenAt ?? null,
+              });
+            }
+          }
         },
         error: () => this.syncingSchoolId.set(0),
       });
   }
 
-  onUndoNoPhotoFromProject(teacher: TeacherInSchool): void {
-    this.teacherService.undoNoPhoto(teacher.archiveId)
+  onUndoNoPhotoFromProject(item: ArchivePersonInSchool): void {
+    this.teacherService.undoNoPhoto(item.archiveId)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.projectView()?.unmarkTeacherNoPhoto(teacher.archiveId));
+      .subscribe(() => this.projectView()?.unmarkItemNoPhoto(item.archiveId));
   }
 }

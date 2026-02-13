@@ -7,7 +7,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { TeacherDetail, TeacherChangeLogEntry, TeacherPhoto } from '../../models/teacher.models';
-import { TeacherPhotoUploadComponent } from '../../components/teacher-photo-upload/teacher-photo-upload.component';
+import { ARCHIVE_SERVICE } from '../../models/archive.models';
+import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -21,10 +22,11 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     RouterLink,
     LucideAngularModule,
     MatTooltipModule,
-    TeacherPhotoUploadComponent,
+    ArchivePhotoUploadComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
   ],
+  providers: [{ provide: ARCHIVE_SERVICE, useExisting: PartnerTeacherService }],
   templateUrl: './teacher-detail.component.html',
   styleUrl: './teacher-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

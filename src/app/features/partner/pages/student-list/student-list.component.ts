@@ -8,10 +8,11 @@ import { PartnerStudentService } from '../../services/partner-student.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
 import { StudentListItem, StudentInSchool } from '../../models/student.models';
 import { SchoolItem } from '../../models/partner.models';
-import { StudentEditModalComponent } from '../../components/student-edit-modal/student-edit-modal.component';
-import { StudentBulkImportDialogComponent } from '../../components/student-bulk-import-dialog/student-bulk-import-dialog.component';
-import { StudentPhotoUploadComponent } from '../../components/student-photo-upload/student-photo-upload.component';
-import { StudentProjectViewComponent } from '../../components/student-project-view/student-project-view.component';
+import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool } from '../../models/archive.models';
+import { ArchiveEditModalComponent } from '../../components/archive/archive-edit-modal/archive-edit-modal.component';
+import { ArchiveBulkImportDialogComponent } from '../../components/archive/archive-bulk-import-dialog/archive-bulk-import-dialog.component';
+import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
+import { ArchiveProjectViewComponent } from '../../components/archive/archive-project-view/archive-project-view.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
@@ -26,14 +27,15 @@ import { saveFile } from '../../../../shared/utils/file.util';
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
-    StudentEditModalComponent,
-    StudentBulkImportDialogComponent,
-    StudentPhotoUploadComponent,
-    StudentProjectViewComponent,
+    ArchiveEditModalComponent,
+    ArchiveBulkImportDialogComponent,
+    ArchivePhotoUploadComponent,
+    ArchiveProjectViewComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
     SearchableSelectComponent,
   ],
+  providers: [{ provide: ARCHIVE_SERVICE, useExisting: PartnerStudentService }],
   templateUrl: './student-list.component.html',
   styleUrl: './student-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,12 +78,31 @@ export class PartnerStudentListComponent implements OnInit {
   // Lightbox
   lightboxMedia = signal<LightboxMediaItem[]>([]);
 
+  // ArchiveConfig a diákhoz
+  readonly archiveConfig: ArchiveConfig = {
+    entityLabel: 'diák',
+    entityLabelPlural: 'diák',
+    icon: ICONS.GRADUATION_CAP,
+    isSyncable: false,
+    placeholderName: 'Pl. Kiss Anna',
+    extraFields: [
+      { name: 'class_name', label: 'Osztály', type: 'text', placeholder: 'pl. 12.c' },
+    ],
+    bulkImportMatchLabels: {
+      exact: 'Pontos egyezés',
+      no_match: 'Nem található',
+    },
+    bulkImportHasConfidence: false,
+    bulkImportTextareaLabel: 'Diáknevek (soronként egy)',
+    bulkImportTextareaPlaceholder: 'Kiss Anna\nNagy Péter\nHorváth László\n...',
+  };
+
   // Project view: upload, create, no-photo
   uploadTarget = signal<StudentInSchool | null>(null);
   showCreateForProject = signal(false);
   createForStudent = signal<StudentInSchool | null>(null);
   noPhotoTarget = signal<StudentInSchool | null>(null);
-  private readonly projectView = viewChild(StudentProjectViewComponent);
+  private readonly projectView = viewChild(ArchiveProjectViewComponent);
 
   // Modals
   showEditModal = signal(false);
@@ -251,11 +272,11 @@ export class PartnerStudentListComponent implements OnInit {
       });
   }
 
-  onUploadPhotoFromProject(student: StudentInSchool): void {
-    if (student.archiveId) {
-      this.uploadTarget.set(student);
+  onUploadPhotoFromProject(item: ArchivePersonInSchool): void {
+    if (item.archiveId) {
+      this.uploadTarget.set(item as any);
     } else {
-      this.createForStudent.set(student);
+      this.createForStudent.set(item as any);
       this.showCreateForProject.set(true);
     }
   }
@@ -271,18 +292,18 @@ export class PartnerStudentListComponent implements OnInit {
     this.projectView()?.loadData();
   }
 
-  onViewPhotoFromProject(student: StudentInSchool): void {
-    if (student.photoUrl) {
+  onViewPhotoFromProject(item: ArchivePersonInSchool): void {
+    if (item.photoUrl) {
       this.lightboxMedia.set([{
-        id: student.archiveId,
-        url: student.photoUrl,
-        fileName: student.name,
+        id: item.archiveId,
+        url: item.photoUrl,
+        fileName: item.name,
       }]);
     }
   }
 
-  onMarkNoPhotoFromProject(student: StudentInSchool): void {
-    this.noPhotoTarget.set(student);
+  onMarkNoPhotoFromProject(item: ArchivePersonInSchool): void {
+    this.noPhotoTarget.set(item as any);
   }
 
   onConfirmNoPhoto(result: { action: 'confirm' | 'cancel' }): void {
@@ -291,15 +312,15 @@ export class PartnerStudentListComponent implements OnInit {
       if (student) {
         this.studentService.markNoPhoto(student.archiveId)
           .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(() => this.projectView()?.markStudentNoPhoto(student.archiveId));
+          .subscribe(() => this.projectView()?.markItemNoPhoto(student.archiveId));
       }
     }
     this.noPhotoTarget.set(null);
   }
 
-  onUndoNoPhotoFromProject(student: StudentInSchool): void {
-    this.studentService.undoNoPhoto(student.archiveId)
+  onUndoNoPhotoFromProject(item: ArchivePersonInSchool): void {
+    this.studentService.undoNoPhoto(item.archiveId)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.projectView()?.unmarkStudentNoPhoto(student.archiveId));
+      .subscribe(() => this.projectView()?.unmarkItemNoPhoto(item.archiveId));
   }
 }

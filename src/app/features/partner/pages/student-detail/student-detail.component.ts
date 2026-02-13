@@ -7,7 +7,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerStudentService } from '../../services/partner-student.service';
 import { StudentDetail, StudentChangeLogEntry, StudentPhoto } from '../../models/student.models';
-import { StudentPhotoUploadComponent } from '../../components/student-photo-upload/student-photo-upload.component';
+import { ARCHIVE_SERVICE } from '../../models/archive.models';
+import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -21,10 +22,11 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     RouterLink,
     LucideAngularModule,
     MatTooltipModule,
-    StudentPhotoUploadComponent,
+    ArchivePhotoUploadComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
   ],
+  providers: [{ provide: ARCHIVE_SERVICE, useExisting: PartnerStudentService }],
   templateUrl: './student-detail.component.html',
   styleUrl: './student-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

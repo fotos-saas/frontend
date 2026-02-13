@@ -2,23 +2,23 @@ import { Component, input, output, inject, signal, ChangeDetectionStrategy, Dest
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { PartnerStudentService } from '../../services/partner-student.service';
-import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
-import { ICONS } from '../../../../shared/constants/icons.constants';
+import { ARCHIVE_SERVICE } from '../../../models/archive.models';
+import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { ICONS } from '../../../../../shared/constants/icons.constants';
 
 @Component({
-  selector: 'app-student-photo-upload',
+  selector: 'app-archive-photo-upload',
   standalone: true,
   imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
-  templateUrl: './student-photo-upload.component.html',
-  styleUrl: './student-photo-upload.component.scss',
+  templateUrl: './archive-photo-upload.component.html',
+  styleUrl: './archive-photo-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StudentPhotoUploadComponent {
-  private readonly studentService = inject(PartnerStudentService);
+export class ArchivePhotoUploadComponent {
+  private readonly archiveService = inject(ARCHIVE_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly studentId = input.required<number>();
+  readonly archiveId = input.required<number>();
   readonly close = output<void>();
   readonly uploaded = output<void>();
 
@@ -46,8 +46,8 @@ export class StudentPhotoUploadComponent {
     this.uploading.set(true);
     this.errorMessage.set(null);
 
-    this.studentService.uploadStudentPhoto(
-      this.studentId(),
+    this.archiveService.uploadPhoto(
+      this.archiveId(),
       this.selectedFile,
       this.year,
       this.setActive,

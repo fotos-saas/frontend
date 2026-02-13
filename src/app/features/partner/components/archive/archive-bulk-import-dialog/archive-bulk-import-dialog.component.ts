@@ -1,62 +1,61 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, input, output, DestroyRef } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
-import { ICONS } from '../../../../shared/constants/icons.constants';
-import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
-import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
-import { PartnerStudentService } from '../../services/partner-student.service';
-import { SchoolItem } from '../../models/partner.models';
+import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { SearchableSelectComponent, SelectOption } from '../../../../../shared/components/searchable-select/searchable-select.component';
+import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { SchoolItem } from '../../../models/partner.models';
 import {
-  StudentBulkImportPreviewItem,
-  StudentBulkImportAction,
-  StudentBulkImportExecuteItem,
-  StudentBulkImportExecuteResult,
-} from '../../models/student.models';
+  ARCHIVE_SERVICE,
+  ArchiveConfig,
+  ArchiveBulkImportAction,
+  ArchiveBulkImportPreviewItem,
+  ArchiveBulkImportExecuteItem,
+  ArchiveBulkImportExecuteResult,
+} from '../../../models/archive.models';
 
 type Phase = 'input' | 'review' | 'done';
 
-interface ReviewRow extends StudentBulkImportPreviewItem {
-  action: StudentBulkImportAction;
+interface ReviewRow extends ArchiveBulkImportPreviewItem {
+  action: ArchiveBulkImportAction;
 }
 
 @Component({
-  selector: 'app-student-bulk-import-dialog',
+  selector: 'app-archive-bulk-import-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, LucideAngularModule, SearchableSelectComponent, DialogWrapperComponent],
-  templateUrl: './student-bulk-import-dialog.component.html',
-  styleUrl: './student-bulk-import-dialog.component.scss',
+  imports: [DecimalPipe, FormsModule, LucideAngularModule, SearchableSelectComponent, DialogWrapperComponent],
+  templateUrl: './archive-bulk-import-dialog.component.html',
+  styleUrl: './archive-bulk-import-dialog.component.scss',
 })
-export class StudentBulkImportDialogComponent {
+export class ArchiveBulkImportDialogComponent {
+  readonly config = input.required<ArchiveConfig>();
   readonly schools = input.required<SchoolItem[]>();
   readonly close = output<void>();
   readonly imported = output<void>();
 
-  private readonly studentService = inject(PartnerStudentService);
+  private readonly archiveService = inject(ARCHIVE_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
 
-  // State
   readonly phase = signal<Phase>('input');
   readonly loading = signal(false);
   readonly errorMessage = signal('');
 
-  // Input phase
   readonly namesText = signal('');
   readonly selectedSchoolId = signal('');
   readonly selectedFile = signal<File | null>(null);
 
-  // Review phase
   readonly reviewRows = signal<ReviewRow[]>([]);
-
-  // Done phase
-  readonly result = signal<StudentBulkImportExecuteResult | null>(null);
+  readonly result = signal<ArchiveBulkImportExecuteResult | null>(null);
 
   readonly phaseTitle = computed(() => {
+    const label = this.config().entityLabel;
     switch (this.phase()) {
-      case 'input': return 'Tömeges diák import';
+      case 'input': return `Tömeges ${label} import`;
       case 'review': return 'Eredmények áttekintése';
       case 'done': return 'Import befejezve';
     }
@@ -113,8 +112,8 @@ export class StudentBulkImportDialogComponent {
     const file = this.selectedFile();
 
     const obs = file
-      ? this.studentService.bulkImportPreviewFile(schoolId, file)
-      : this.studentService.bulkImportPreview(schoolId, this.parseNames());
+      ? this.archiveService.bulkImportPreviewFile(schoolId, file)
+      : this.archiveService.bulkImportPreview(schoolId, this.parseNames());
 
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
@@ -133,7 +132,7 @@ export class StudentBulkImportDialogComponent {
     });
   }
 
-  setAction(index: number, action: StudentBulkImportAction): void {
+  setAction(index: number, action: ArchiveBulkImportAction): void {
     this.reviewRows.update(rows => {
       const updated = [...rows];
       updated[index] = { ...updated[index], action };
@@ -146,13 +145,13 @@ export class StudentBulkImportDialogComponent {
     this.errorMessage.set('');
     const schoolId = parseInt(this.selectedSchoolId(), 10);
 
-    const items: StudentBulkImportExecuteItem[] = this.reviewRows().map(row => ({
+    const items: ArchiveBulkImportExecuteItem[] = this.reviewRows().map(row => ({
       input_name: row.inputName,
       action: row.action,
-      student_id: row.studentId,
+      match_id: row.matchId,
     }));
 
-    this.studentService.bulkImportExecute(schoolId, items)
+    this.archiveService.bulkImportExecute(schoolId, items)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -178,6 +177,16 @@ export class StudentBulkImportDialogComponent {
     this.errorMessage.set('');
   }
 
+  getMatchLabel(type: string): string {
+    return this.config().bulkImportMatchLabels[type] ?? type;
+  }
+
+  getConfidenceClass(confidence: number): string {
+    if (confidence >= 0.8) return 'confidence--high';
+    if (confidence >= 0.5) return 'confidence--medium';
+    return 'confidence--low';
+  }
+
   private parseNames(): string[] {
     return this.namesText()
       .split('\n')
@@ -185,17 +194,10 @@ export class StudentBulkImportDialogComponent {
       .filter(n => n.length > 0);
   }
 
-  private suggestAction(item: StudentBulkImportPreviewItem): StudentBulkImportAction {
-    // Diákoknál csak exact match van, nincs fuzzy/AI
+  private suggestAction(item: ArchiveBulkImportPreviewItem): ArchiveBulkImportAction {
     if (item.matchType === 'no_match') return 'create';
-    return 'skip'; // exact match → skip by default
-  }
-
-  getMatchLabel(type: string): string {
-    const labels: Record<string, string> = {
-      exact: 'Pontos egyezés',
-      no_match: 'Nem található',
-    };
-    return labels[type] ?? type;
+    if (item.matchType === 'exact') return 'skip';
+    if (this.config().bulkImportHasConfidence && (item.confidence ?? 0) >= 0.8) return 'skip';
+    return this.config().bulkImportHasConfidence ? 'update' : 'skip';
   }
 }

@@ -2,26 +2,26 @@ import { Component, input, output, inject, signal, computed, ChangeDetectionStra
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { PartnerStudentService } from '../../services/partner-student.service';
-import { StudentListItem } from '../../models/student.models';
-import { SchoolItem } from '../../models/partner.models';
-import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
-import { ICONS } from '../../../../shared/constants/icons.constants';
-import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { ARCHIVE_SERVICE, ArchiveConfig, ArchiveField } from '../../../models/archive.models';
+import { SchoolItem } from '../../../models/partner.models';
+import { SearchableSelectComponent, SelectOption } from '../../../../../shared/components/searchable-select/searchable-select.component';
+import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 @Component({
-  selector: 'app-student-edit-modal',
+  selector: 'app-archive-edit-modal',
   standalone: true,
   imports: [FormsModule, LucideAngularModule, SearchableSelectComponent, DialogWrapperComponent],
-  templateUrl: './student-edit-modal.component.html',
-  styleUrl: './student-edit-modal.component.scss',
+  templateUrl: './archive-edit-modal.component.html',
+  styleUrl: './archive-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StudentEditModalComponent {
-  private readonly studentService = inject(PartnerStudentService);
+export class ArchiveEditModalComponent {
+  private readonly archiveService = inject(ARCHIVE_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly student = input<StudentListItem | null>(null);
+  readonly config = input.required<ArchiveConfig>();
+  readonly archiveItem = input<{ id: number; canonicalName: string; schoolId: number; photoThumbUrl?: string | null } | null>(null);
   readonly mode = input<'create' | 'edit'>('create');
   readonly schools = input<SchoolItem[]>([]);
   readonly prefillName = input('');
@@ -36,11 +36,10 @@ export class StudentEditModalComponent {
   );
 
   canonicalName = '';
-  className = '';
+  extraFieldValues: Record<string, string> = {};
   schoolId: number | null = null;
   notes = '';
   aliases = signal<string[]>([]);
-  // Fotó feltöltés
   currentPhotoUrl = signal<string | null>(null);
   selectedFile: File | null = null;
   photoPreviewUrl = signal<string | null>(null);
@@ -53,13 +52,17 @@ export class StudentEditModalComponent {
   loading = signal(false);
 
   ngOnInit(): void {
-    const student = this.student();
-    if (student && this.mode() === 'edit') {
-      this.canonicalName = student.canonicalName;
-      this.className = (student as any).className ?? '';
-      this.schoolId = student.schoolId;
-      this.currentPhotoUrl.set(student.photoThumbUrl ?? null);
-      this.loadStudentDetail(student.id);
+    // Extra mezők inicializálása
+    for (const field of this.config().extraFields) {
+      this.extraFieldValues[field.name] = '';
+    }
+
+    const item = this.archiveItem();
+    if (item && this.mode() === 'edit') {
+      this.canonicalName = item.canonicalName;
+      this.schoolId = item.schoolId;
+      this.currentPhotoUrl.set(item.photoThumbUrl ?? null);
+      this.loadDetail(item.id);
     } else if (this.prefillName()) {
       this.canonicalName = this.prefillName();
       if (this.prefillSchoolId()) {
@@ -68,16 +71,19 @@ export class StudentEditModalComponent {
     }
   }
 
-  private loadStudentDetail(id: number): void {
+  private loadDetail(id: number): void {
     this.loading.set(true);
-    this.studentService.getStudent(id)
+    this.archiveService.getArchive(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           if (res.data) {
-            this.className = res.data.className ?? '';
+            // Extra mezők kitöltése a detail adatokból
+            for (const field of this.config().extraFields) {
+              this.extraFieldValues[field.name] = res.data[field.name] ?? '';
+            }
             this.notes = res.data.notes ?? '';
-            this.aliases.set(res.data.aliases.map(a => a.aliasName));
+            this.aliases.set((res.data.aliases ?? []).map((a: any) => a.aliasName));
             if (res.data.photoUrl) {
               this.currentPhotoUrl.set(res.data.photoUrl);
             }
@@ -112,24 +118,28 @@ export class StudentEditModalComponent {
     this.saving.set(true);
     this.errorMessage.set(null);
 
-    const payload = {
+    const payload: Record<string, any> = {
       canonical_name: this.canonicalName.trim(),
-      class_name: this.className.trim() || null,
       school_id: this.schoolId,
       aliases: this.aliases().length > 0 ? this.aliases() : undefined,
       notes: this.notes.trim() || null,
     };
 
+    // Extra mezők hozzáadása
+    for (const field of this.config().extraFields) {
+      payload[field.name] = this.extraFieldValues[field.name]?.trim() || null;
+    }
+
     const request$ = this.mode() === 'create'
-      ? this.studentService.createStudent(payload)
-      : this.studentService.updateStudent(this.student()!.id, payload);
+      ? this.archiveService.createArchive(payload)
+      : this.archiveService.updateArchive(this.archiveItem()!.id, payload);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
-          const studentId = response.data?.id ?? this.student()?.id;
-          if (this.selectedFile && studentId) {
-            this.uploadPhoto(studentId);
+          const archiveId = response.data?.id ?? this.archiveItem()?.id;
+          if (this.selectedFile && archiveId) {
+            this.uploadPhotoAfterSave(archiveId);
           } else {
             this.saving.set(false);
             this.saved.emit();
@@ -146,10 +156,10 @@ export class StudentEditModalComponent {
     });
   }
 
-  private uploadPhoto(studentId: number): void {
+  private uploadPhotoAfterSave(archiveId: number): void {
     this.uploading.set(true);
-    this.studentService.uploadStudentPhoto(
-      studentId,
+    this.archiveService.uploadPhoto(
+      archiveId,
       this.selectedFile!,
       this.photoYear,
       this.setPhotoActive,

@@ -9,11 +9,11 @@
       </div>
     </div>
     <div class="header-right">
-      @if (school().syncAvailable) {
+      @if (config().isSyncable && school().syncAvailable) {
         <button
           class="sync-badge"
           [class.sync-badge--loading]="isSyncing()"
-          [matTooltip]="isSyncing() ? 'Szinkronizálás...' : syncableCount() + ' tanár szinkronizálható'"
+          [matTooltip]="isSyncing() ? 'Szinkronizálás...' : syncableCount() + ' ' + config().entityLabel + ' szinkronizálható'"
           [disabled]="isSyncing()"
           (click)="onSync($event)"
         >
@@ -32,12 +32,12 @@
         </span>
       }
       <span class="badge badge--info">
-        {{ school().teacherCount }} tanár
+        {{ school().itemCount }} {{ config().entityLabel }}
       </span>
     </div>
   </button>
 
-  <!-- Tanár lista (expanded) -->
+  <!-- Lista (expanded) -->
   @if (expanded()) {
     <div class="card-body">
       <!-- Osztályok kontextus -->
@@ -47,89 +47,75 @@
         }
       </div>
 
-      @if (school().teachers.length === 0) {
-        <div class="empty-teachers">Nincs tanár ehhez az iskolához rendelve.</div>
+      @if (school().items.length === 0) {
+        <div class="empty-items">Nincs {{ config().entityLabel }} ehhez az iskolához rendelve.</div>
       } @else {
-        <div class="teacher-list">
-          @for (teacher of school().teachers; track teacher.archiveId) {
+        <div class="item-list">
+          @for (item of school().items; track item.archiveId) {
             <div
-              class="teacher-row"
-              [class.teacher-row--missing]="!teacher.hasPhoto && !teacher.noPhotoMarked"
-              [class.teacher-row--marked]="teacher.noPhotoMarked && !teacher.hasPhoto"
+              class="item-row"
+              [class.item-row--missing]="!item.hasPhoto && !item.noPhotoMarked"
+              [class.item-row--marked]="item.noPhotoMarked && !item.hasPhoto"
             >
-              <div class="teacher-info">
+              <div class="item-info">
                 <div
-                  class="teacher-avatar"
-                  [class.teacher-avatar--clickable]="!!teacher.photoUrl"
-                  (click)="onViewPhoto(teacher, $event)"
+                  class="item-avatar"
+                  [class.item-avatar--clickable]="!!item.photoUrl"
+                  (click)="onViewPhoto(item, $event)"
                 >
-                  @if (teacher.photoThumbUrl) {
-                    <img [src]="teacher.photoThumbUrl" [alt]="teacher.name"  loading="lazy" />
+                  @if (item.photoThumbUrl) {
+                    <img [src]="item.photoThumbUrl" [alt]="item.name" loading="lazy" />
                   } @else {
                     <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
                   }
                 </div>
-                <div class="teacher-details">
-                  <span class="teacher-name">{{ teacher.name }}</span>
-                  @if (teacher.hasPhoto && teacher.photoFileName) {
-                    <span class="teacher-meta">
-                      {{ teacher.photoFileName }}
-                      @if (teacher.photoTakenAt) {
-                        · {{ teacher.photoTakenAt }}
+                <div class="item-details">
+                  <span class="item-name">{{ item.name }}</span>
+                  @if (item.hasPhoto && item.photoFileName) {
+                    <span class="item-meta">
+                      {{ item.photoFileName }}
+                      @if (item.photoTakenAt) {
+                        &middot; {{ item.photoTakenAt }}
                       }
                     </span>
+                  } @else if (item.className) {
+                    <span class="item-meta">{{ item.className }}</span>
                   }
                 </div>
               </div>
 
-              <div class="teacher-status">
-                @if (teacher.hasPhoto && !teacher.hasSyncablePhoto) {
+              <div class="item-status">
+                @if (item.hasPhoto && !item.hasSyncablePhoto) {
                   <span class="status-badge status-badge--ok" matTooltip="Van fotó">
                     <lucide-icon [name]="ICONS.CHECK" [size]="14" />
                   </span>
-                } @else if (teacher.hasPhoto && teacher.hasSyncablePhoto) {
+                } @else if (item.hasPhoto && item.hasSyncablePhoto) {
                   <span class="status-badge status-badge--sync" matTooltip="Archívban van fotó, projektbe szinkronizálás szükséges">
                     <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
                   </span>
-                } @else if (teacher.noPhotoMarked) {
+                } @else if (item.noPhotoMarked) {
                   <div class="action-buttons">
-                    <button
-                      class="upload-btn"
-                      (click)="onUpload(teacher)"
-                    >
+                    <button class="upload-btn" (click)="onUpload(item)">
                       <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
                       Feltöltés
                     </button>
-                    <button
-                      class="undo-mark-btn"
-                      matTooltip="Jelölés visszavonása"
-                      (click)="onUndoNoPhoto(teacher)"
-                    >
+                    <button class="undo-mark-btn" matTooltip="Jelölés visszavonása" (click)="onUndoNoPhoto(item)">
                       <lucide-icon [name]="ICONS.UNDO" [size]="14" />
                     </button>
                   </div>
                 } @else {
                   <div class="action-buttons">
-                    @if (teacher.hasSyncablePhoto) {
-                      <button
-                        class="sync-single-btn"
-                        (click)="onSyncSingle(teacher)"
-                      >
+                    @if (config().isSyncable && item.hasSyncablePhoto) {
+                      <button class="sync-single-btn" (click)="onSyncSingle(item)">
                         <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
                         Szinkronizálom
                       </button>
                     }
-                    <button
-                      class="upload-btn"
-                      (click)="onUpload(teacher)"
-                    >
+                    <button class="upload-btn" (click)="onUpload(item)">
                       <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
                       Feltöltés
                     </button>
-                    <button
-                      class="no-photo-btn"
-                      (click)="onMarkNoPhoto(teacher)"
-                    >
+                    <button class="no-photo-btn" (click)="onMarkNoPhoto(item)">
                       <lucide-icon [name]="ICONS.X" [size]="14" />
                       Nem találom
                     </button>

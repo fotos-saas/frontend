@@ -1,6 +1,5 @@
-// Teacher Edit Modal - tartalmi stílusok
-// Footer gombok → DialogWrapperComponent ::ng-deep
-@use '../../../../shared/styles/dialog-forms' as form;
+// Archive Edit Modal - tartalmi stílusok
+@use '../../../../../shared/styles/dialog-forms' as form;
 
 .loading-spinner { @include form.loading-spinner; }
 

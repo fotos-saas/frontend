@@ -239,8 +239,8 @@
 
 <!-- Photo Upload Modal -->
 @if (showPhotoUpload()) {
-  <app-student-photo-upload
-    [studentId]="studentId"
+  <app-archive-photo-upload
+    [archiveId]="studentId"
     (close)="showPhotoUpload.set(false)"
     (uploaded)="onPhotoUploaded()"
   />

@@ -2,8 +2,8 @@
   [variant]="mode() === 'create' ? 'create' : 'edit'"
   headerStyle="flat"
   theme="blue"
-  [icon]="ICONS.GRADUATION_CAP"
-  [title]="mode() === 'create' ? 'Új diák' : 'Diák szerkesztése'"
+  [icon]="config().icon"
+  [title]="mode() === 'create' ? 'Új ' + config().entityLabel : config().entityLabel + ' szerkesztése'"
   size="lg"
   [closable]="!saving()"
   [isSubmitting]="saving()"
@@ -17,31 +17,69 @@
         <lucide-icon [name]="ICONS.LOADER" [size]="24" class="spin" />
       </div>
     } @else {
-      <form id="studentForm" (ngSubmit)="save()" class="modal-form">
-        <div class="form-group form-group--lg">
-          <label for="canonicalName">Név *</label>
-          <input
-            type="text"
-            id="canonicalName"
-            [(ngModel)]="canonicalName"
-            name="canonicalName"
-            required
-            class="form-input"
-            placeholder="Pl. Kiss Anna"
-          />
-        </div>
+      <form id="archiveForm" (ngSubmit)="save()" class="modal-form">
+        <!-- Extra mezők a név előtt (pl. titulus) -->
+        @if (config().extraFields.length > 0) {
+          <div class="form-row">
+            @for (field of config().extraFields; track field.name) {
+              @if (field.gridSize === 'sm') {
+                <div class="form-group form-group--sm">
+                  <label [for]="field.name">{{ field.label }}</label>
+                  <input
+                    [type]="field.type"
+                    [id]="field.name"
+                    [(ngModel)]="extraFieldValues[field.name]"
+                    [name]="field.name"
+                    class="form-input"
+                    [placeholder]="field.placeholder ?? ''"
+                  />
+                </div>
+              }
+            }
+            <div class="form-group form-group--lg">
+              <label for="canonicalName">Név *</label>
+              <input
+                type="text"
+                id="canonicalName"
+                [(ngModel)]="canonicalName"
+                name="canonicalName"
+                required
+                class="form-input"
+                [placeholder]="config().placeholderName"
+              />
+            </div>
+          </div>
+        } @else {
+          <div class="form-group form-group--lg">
+            <label for="canonicalName">Név *</label>
+            <input
+              type="text"
+              id="canonicalName"
+              [(ngModel)]="canonicalName"
+              name="canonicalName"
+              required
+              class="form-input"
+              [placeholder]="config().placeholderName"
+            />
+          </div>
+        }
 
-        <div class="form-group">
-          <label for="className">Osztály</label>
-          <input
-            type="text"
-            id="className"
-            [(ngModel)]="className"
-            name="className"
-            class="form-input"
-            placeholder="Pl. 12.c"
-          />
-        </div>
+        <!-- Extra mezők a név után (pl. osztály, pozíció) -->
+        @for (field of config().extraFields; track field.name) {
+          @if (field.gridSize !== 'sm') {
+            <div class="form-group">
+              <label [for]="field.name">{{ field.label }}</label>
+              <input
+                [type]="field.type"
+                [id]="field.name"
+                [(ngModel)]="extraFieldValues[field.name]"
+                [name]="field.name"
+                class="form-input"
+                [placeholder]="field.placeholder ?? ''"
+              />
+            </div>
+          }
+        }
 
         <div class="form-group">
           <label>Iskola *</label>
@@ -130,7 +168,7 @@
     </button>
     <button
       type="submit"
-      form="studentForm"
+      form="archiveForm"
       class="btn btn--primary"
       [disabled]="saving() || !canonicalName.trim() || !schoolId"
     >

@@ -44,7 +44,8 @@
   </header>
 
   @if (viewMode() === 'project') {
-    <app-teacher-project-view
+    <app-archive-project-view
+      [config]="archiveConfig"
       [classYears]="classYears()"
       [syncingSchoolId]="syncingSchoolId()"
       (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
@@ -228,8 +229,9 @@
 
 <!-- Create/Edit Modal -->
 @if (showEditModal()) {
-  <app-teacher-edit-modal
-    [teacher]="selectedTeacher()"
+  <app-archive-edit-modal
+    [config]="archiveConfig"
+    [archiveItem]="selectedTeacher()"
     [mode]="modalMode()"
     [schools]="schools()"
     (close)="closeEditModal()"
@@ -261,7 +263,8 @@
 
 <!-- Bulk Import Dialog -->
 @if (showBulkImport()) {
-  <app-teacher-bulk-import-dialog
+  <app-archive-bulk-import-dialog
+    [config]="archiveConfig"
     [schools]="schools()"
     (close)="closeBulkImport()"
     (imported)="onBulkImported()"
@@ -282,8 +285,8 @@
 
 <!-- Upload Photo (project view) -->
 @if (uploadTarget(); as target) {
-  <app-teacher-photo-upload
-    [teacherId]="target.archiveId"
+  <app-archive-photo-upload
+    [archiveId]="target.archiveId"
     (close)="uploadTarget.set(null)"
     (uploaded)="onProjectPhotoUploaded()"
   />
@@ -291,8 +294,9 @@
 
 <!-- Create Teacher for Upload (project view) -->
 @if (showCreateForProject()) {
-  <app-teacher-edit-modal
-    [teacher]="null"
+  <app-archive-edit-modal
+    [config]="archiveConfig"
+    [archiveItem]="null"
     mode="create"
     [schools]="schools()"
     [prefillName]="createForTeacher()?.name ?? ''"

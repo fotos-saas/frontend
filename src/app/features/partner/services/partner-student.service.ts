@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   StudentListItem,
@@ -15,11 +15,18 @@ import {
   StudentsBySchoolResponse,
 } from '../models/student.models';
 import { PaginatedResponse } from '../models/partner.models';
+import {
+  ArchiveService,
+  ArchiveBySchoolResponse,
+  ArchiveBulkImportPreviewItem,
+  ArchiveBulkImportExecuteItem,
+  ArchiveBulkImportExecuteResult,
+} from '../models/archive.models';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PartnerStudentService {
+export class PartnerStudentService implements ArchiveService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/partner/students`;
 
@@ -106,28 +113,93 @@ export class PartnerStudentService {
     return this.http.get<PaginatedResponse<StudentChangeLogEntry>>(`${this.baseUrl}/${studentId}/changelog`, { params: httpParams });
   }
 
-  bulkImportPreview(schoolId: number, names: string[]): Observable<{ success: boolean; data: StudentBulkImportPreviewItem[] }> {
+  bulkImportPreview(schoolId: number, names: string[]): Observable<{ success: boolean; data: ArchiveBulkImportPreviewItem[] }> {
     return this.http.post<{ success: boolean; data: StudentBulkImportPreviewItem[] }>(`${this.baseUrl}/bulk-import/preview`, {
       school_id: schoolId,
       names,
-    });
+    }).pipe(map(res => ({
+      ...res,
+      data: res.data.map(item => ({ ...item, matchId: item.studentId, matchName: item.studentName })),
+    })));
   }
 
-  bulkImportPreviewFile(schoolId: number, file: File): Observable<{ success: boolean; data: StudentBulkImportPreviewItem[] }> {
+  bulkImportPreviewFile(schoolId: number, file: File): Observable<{ success: boolean; data: ArchiveBulkImportPreviewItem[] }> {
     const formData = new FormData();
     formData.append('school_id', schoolId.toString());
     formData.append('file', file);
-    return this.http.post<{ success: boolean; data: StudentBulkImportPreviewItem[] }>(`${this.baseUrl}/bulk-import/preview`, formData);
+    return this.http.post<{ success: boolean; data: StudentBulkImportPreviewItem[] }>(`${this.baseUrl}/bulk-import/preview`, formData).pipe(
+      map(res => ({
+        ...res,
+        data: res.data.map(item => ({ ...item, matchId: item.studentId, matchName: item.studentName })),
+      }))
+    );
   }
 
-  bulkImportExecute(schoolId: number, items: StudentBulkImportExecuteItem[]): Observable<{ success: boolean; message: string; data: StudentBulkImportExecuteResult }> {
+  bulkImportExecute(schoolId: number, items: ArchiveBulkImportExecuteItem[]): Observable<{ success: boolean; message: string; data: ArchiveBulkImportExecuteResult }> {
+    const mappedItems: StudentBulkImportExecuteItem[] = items.map(i => ({
+      input_name: i.input_name,
+      action: i.action,
+      student_id: i.match_id,
+    }));
     return this.http.post<{ success: boolean; message: string; data: StudentBulkImportExecuteResult }>(`${this.baseUrl}/bulk-import/execute`, {
       school_id: schoolId,
-      items,
+      items: mappedItems,
     });
   }
 
   exportCsv(): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/export-csv`, { responseType: 'blob' });
+  }
+
+  // ============ ArchiveService adapter metódusok ============
+
+  uploadPhoto(id: number, file: File, year: number, setActive = false): Observable<any> {
+    return this.uploadStudentPhoto(id, file, year, setActive);
+  }
+
+  getArchive(id: number): Observable<{ success: boolean; data: any }> {
+    return this.getStudent(id);
+  }
+
+  createArchive(payload: any): Observable<{ success: boolean; message: string; data: any }> {
+    return this.createStudent(payload);
+  }
+
+  updateArchive(id: number, payload: any): Observable<{ success: boolean; message: string; data: any }> {
+    return this.updateStudent(id, payload);
+  }
+
+  getBySchool(params?: { class_year?: string; school_id?: number; missing_only?: boolean }): Observable<ArchiveBySchoolResponse> {
+    return this.getStudentsBySchool(params).pipe(
+      map(res => ({
+        schools: res.schools.map(s => ({
+          schoolId: s.schoolId,
+          schoolName: s.schoolName,
+          classes: s.classes,
+          classCount: s.classCount,
+          itemCount: s.studentCount,
+          missingPhotoCount: s.missingPhotoCount,
+          items: s.students.map(st => ({
+            archiveId: st.archiveId,
+            name: st.name,
+            className: st.className,
+            hasPhoto: st.hasPhoto,
+            noPhotoMarked: st.noPhotoMarked,
+            photoThumbUrl: st.photoThumbUrl,
+            photoUrl: st.photoUrl,
+          })),
+        })),
+        summary: {
+          totalSchools: res.summary.totalSchools,
+          totalItems: res.summary.totalStudents,
+          withPhoto: res.summary.withPhoto,
+          missingPhoto: res.summary.missingPhoto,
+        },
+      }))
+    );
+  }
+
+  getBySchoolRaw(params?: { class_year?: string; school_id?: number; missing_only?: boolean }): Observable<StudentsBySchoolResponse> {
+    return this.getStudentsBySchool(params);
   }
 }

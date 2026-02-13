@@ -1,15 +1,16 @@
-import { Component, ChangeDetectionStrategy, inject, input, signal, OnInit, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, signal, OnInit, DestroyRef, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
+import { InfoBoxComponent } from '../../../components/info-box';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-project-settings-tab',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, InfoBoxComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-settings-tab.component.html',
   styleUrl: './project-settings-tab.component.scss',
@@ -22,6 +23,7 @@ export class ProjectSettingsTabComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+  readonly infoBox = viewChild(InfoBoxComponent);
 
   loading = signal(true);
   saving = signal(false);

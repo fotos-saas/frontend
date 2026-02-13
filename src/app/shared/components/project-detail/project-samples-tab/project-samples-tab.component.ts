@@ -1,10 +1,11 @@
-import { Component, ChangeDetectionStrategy, input, signal, computed, inject, DestroyRef, OnInit, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, computed, inject, DestroyRef, OnInit, output, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
+import { InfoBoxComponent } from '../../../components/info-box';
 import { PartnerService, SamplePackage, SampleVersion } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
@@ -27,7 +28,7 @@ export interface DeleteVersionRequest {
 @Component({
   selector: 'app-project-samples-tab',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, InfoBoxComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-samples-tab.component.html',
   styleUrl: './project-samples-tab.component.scss',
@@ -46,6 +47,7 @@ export class ProjectSamplesTabComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+  readonly infoBox = viewChild(InfoBoxComponent);
 
   loading = signal(true);
   packages = signal<SamplePackage[]>([]);

@@ -333,6 +333,28 @@
   color: #94a3b8;
 }
 
+// === INFO RESTORE BUTTON ===
+.info-restore-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #3b82f6;
+    background: #dbeafe;
+  }
+}
+
 // === UTILITY ===
 .mt-4 {
   margin-top: 16px;

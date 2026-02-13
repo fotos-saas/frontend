@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerService } from '../../../services/partner.service';
+import { PartnerProjectService } from '../../../services/partner-project.service';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
 import { ModalPersonCardComponent } from '../modal-person-card/modal-person-card.component';
@@ -34,6 +35,7 @@ export class PersonsModalComponent implements OnInit {
   readonly openUploadWizard = output<void>();
 
   private partnerService = inject(PartnerService);
+  private projectService = inject(PartnerProjectService);
   private destroyRef = inject(DestroyRef);
 
   loading = signal(true);
@@ -115,5 +117,20 @@ export class PersonsModalComponent implements OnInit {
 
   closeLightbox(): void {
     this.lightboxPerson.set(null);
+  }
+
+  resetOverride(person: TabloPersonItem): void {
+    this.projectService.resetPersonPhoto(this.projectId(), person.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          const updated = this.allPersons().map(p =>
+            p.id === person.id
+              ? { ...p, hasOverride: false, hasPhoto: res.data.hasPhoto, photoThumbUrl: res.data.photoThumbUrl, photoUrl: res.data.photoUrl }
+              : p
+          );
+          this.allPersons.set(updated);
+        }
+      });
   }
 }

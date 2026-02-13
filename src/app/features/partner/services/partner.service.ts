@@ -179,6 +179,14 @@ export class PartnerService {
     return this.projectService.getProjectMissingPersons(projectId, withoutPhoto);
   }
 
+  overridePersonPhoto(projectId: number, personId: number, photoId: number) {
+    return this.projectService.overridePersonPhoto(projectId, personId, photoId);
+  }
+
+  resetPersonPhoto(projectId: number, personId: number) {
+    return this.projectService.resetPersonPhoto(projectId, personId);
+  }
+
   getProjectsAutocomplete(search?: string): Observable<ProjectAutocompleteItem[]> {
     return this.projectService.getProjectsAutocomplete(search);
   }

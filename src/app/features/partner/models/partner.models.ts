@@ -146,6 +146,8 @@ export interface TabloPersonItem {
   email: string | null;
   photoThumbUrl: string | null;
   photoUrl: string | null;
+  archiveId: number | null;
+  hasOverride: boolean;
 }
 
 /**

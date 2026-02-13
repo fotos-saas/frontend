@@ -32,9 +32,20 @@ import { TabloPersonItem } from '../persons-modal.types';
       </div>
       <div class="card-info">
         <span class="card-name" [attr.data-tooltip]="person().name">{{ person().name }}</span>
-        <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">
-          {{ person().type === 'student' ? 'Diák' : 'Tanár' }}
-        </span>
+        <div class="card-meta">
+          <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">
+            {{ person().type === 'student' ? 'Diák' : 'Tanár' }}
+          </span>
+          @if (person().hasOverride) {
+            <span class="card-badge card-badge--override">Egyedi</span>
+          }
+        </div>
+        @if (person().hasOverride) {
+          <button class="card-reset-btn" (click)="onResetOverride($event)" title="Visszaállítás alapértelmezettre">
+            <lucide-icon [name]="ICONS.UNDO" [size]="12" />
+            Visszaállítás
+          </button>
+        }
       </div>
     </div>
   `,
@@ -143,6 +154,50 @@ import { TabloPersonItem } from '../persons-modal.types';
       font-weight: 500;
     }
 
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .card-badge {
+      font-size: 0.5625rem;
+      padding: 1px 4px;
+      border-radius: 3px;
+      margin-left: 4px;
+      font-weight: 500;
+    }
+
+    .card-badge--override {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+
+    .card-reset-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 3px 0;
+      border: none;
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 0.5625rem;
+      cursor: pointer;
+      border-top: 1px solid #e2e8f0;
+      transition: all 0.15s ease;
+    }
+
+    .card-reset-btn:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .card-reset-btn lucide-icon {
+      margin-right: 3px;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .person-card {
         animation-duration: 0.01ms !important;
@@ -158,10 +213,16 @@ export class ModalPersonCardComponent {
   readonly animationDelay = input<string>('0s');
 
   readonly cardClick = output<TabloPersonItem>();
+  readonly resetOverride = output<TabloPersonItem>();
 
   onCardClick(): void {
     if (this.person().photoUrl) {
       this.cardClick.emit(this.person());
     }
+  }
+
+  onResetOverride(event: Event): void {
+    event.stopPropagation();
+    this.resetOverride.emit(this.person());
   }
 }

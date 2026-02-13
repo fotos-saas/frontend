@@ -163,6 +163,36 @@ export class PartnerProjectService {
     return this.getProjectPersons(projectId, withoutPhoto);
   }
 
+  /**
+   * Override: projekt-specifikus fotó beállítása
+   */
+  overridePersonPhoto(projectId: number, personId: number, photoId: number): Observable<{
+    success: boolean;
+    message: string;
+    data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
+  }> {
+    return this.http.patch<{
+      success: boolean;
+      message: string;
+      data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
+    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/override-photo`, { photo_id: photoId });
+  }
+
+  /**
+   * Override visszaállítása (archive default fotó)
+   */
+  resetPersonPhoto(projectId: number, personId: number): Observable<{
+    success: boolean;
+    message: string;
+    data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
+  }> {
+    return this.http.patch<{
+      success: boolean;
+      message: string;
+      data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
+    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/override-photo`, { photo_id: null });
+  }
+
   // ============================================
   // AUTOCOMPLETE
   // ============================================

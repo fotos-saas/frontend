@@ -108,6 +108,18 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   qrCodesHistory: QrCodeHistory[];
   tabloGalleryId: number | null;
   galleryPhotosCount: number;
+  personsCount?: number;
+  studentsCount?: number;
+  teachersCount?: number;
+  studentsWithPhotoCount?: number;
+  teachersWithPhotoCount?: number;
+  personsPreview?: Array<{
+    id: number;
+    name: string;
+    type: 'student' | 'teacher';
+    hasPhoto: boolean;
+    photoThumbUrl: string | null;
+  }>;
   updatedAt: string;
 }
 

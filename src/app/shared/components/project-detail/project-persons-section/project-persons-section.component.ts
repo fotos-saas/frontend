@@ -8,7 +8,7 @@ import { ICONS } from '../../../constants/icons.constants';
   standalone: true,
   imports: [LucideAngularModule],
   templateUrl: './project-persons-section.component.html',
-  styleUrl: './project-persons-section.component.scss',
+  styleUrls: ['./project-persons-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectPersonsSectionComponent {

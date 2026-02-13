@@ -57,6 +57,12 @@ export class PartnerProjectDetailComponent {
     qrCodesHistory: project.qrCodesHistory ?? [],
     tabloGalleryId: project.tabloGalleryId,
     galleryPhotosCount: project.galleryPhotosCount,
+    personsCount: project.personsCount,
+    studentsCount: project.studentsCount,
+    teachersCount: project.teachersCount,
+    studentsWithPhotoCount: project.studentsWithPhotoCount,
+    teachersWithPhotoCount: project.teachersWithPhotoCount,
+    personsPreview: project.personsPreview,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

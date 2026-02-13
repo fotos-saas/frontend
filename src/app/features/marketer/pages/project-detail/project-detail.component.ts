@@ -46,6 +46,12 @@ export class ProjectDetailComponent {
     qrCode: project.qrCode,
     activeQrCodes: project.activeQrCodes ?? [],
     qrCodesHistory: project.qrCodesHistory ?? [],
+    personsCount: (project as any).personsCount,
+    studentsCount: (project as any).studentsCount,
+    teachersCount: (project as any).teachersCount,
+    studentsWithPhotoCount: (project as any).studentsWithPhotoCount,
+    teachersWithPhotoCount: (project as any).teachersWithPhotoCount,
+    personsPreview: (project as any).personsPreview,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

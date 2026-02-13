@@ -168,6 +168,7 @@ export interface ApiPhoto {
   filename: string;
   url?: string;
   thumbnail_url?: string;
+  preview_url?: string;
   media?: {
     id: number;
     original_url: string;
@@ -307,7 +308,8 @@ export function mapApiPhoto(apiPhoto: ApiPhoto): WorkflowPhoto {
   // Media-ból vagy közvetlen url-ből
   const media = apiPhoto.media?.[0];
   const url = media?.original_url || apiPhoto.url || '';
-  const thumbnailUrl = media?.preview_url || apiPhoto.thumbnail_url || url;
+  // preview_url = 1200x1200 vízjeles, thumbnail_url = 300x300 (grid-hez elég)
+  const thumbnailUrl = apiPhoto.preview_url || media?.preview_url || apiPhoto.thumbnail_url || url;
 
   return {
     id: apiPhoto.id,

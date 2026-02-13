@@ -11,27 +11,41 @@
       </button>
     </div>
 
-    <!-- Search Box -->
+    <!-- Search + Photo Filter -->
     <div class="search-section">
-      <div class="search-box">
-        <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-        <input
-          type="text"
-          placeholder="Keresés név alapján..."
-          [ngModel]="searchQuery()"
-          (ngModelChange)="searchQuery.set($event)"
-          class="search-input"
-        />
-        @if (searchQuery()) {
-          <button class="clear-btn" (click)="searchQuery.set('')">
-            <lucide-icon [name]="ICONS.X" [size]="14" />
-          </button>
-        }
+      <div class="search-row">
+        <div class="search-box">
+          <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+          <input
+            type="text"
+            placeholder="Keresés név alapján..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            class="search-input"
+          />
+          @if (searchQuery()) {
+            <button class="clear-btn" (click)="searchQuery.set('')">
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          }
+        </div>
+        <label class="photo-filter-toggle">
+          <span class="custom-checkbox" [class.custom-checkbox--checked]="showOnlyWithoutPhoto()">
+            @if (showOnlyWithoutPhoto()) {
+              <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+            }
+          </span>
+          <input type="checkbox" [ngModel]="showOnlyWithoutPhoto()" (ngModelChange)="showOnlyWithoutPhoto.set($event)" class="sr-only" />
+          <span class="toggle-label">Kép nélkül</span>
+          @if (!loading()) {
+            <span class="toggle-count">({{ withoutPhotoCount() }})</span>
+          }
+        </label>
       </div>
     </div>
 
     <!-- Type Filter Tabs -->
-    <div class="filter-tabs">
+    <div class="filter-tabs" [class.filter-tabs--hidden]="!!searchQuery()">
       <button type="button" class="tab" [class.tab--active]="typeFilter() === 'student'" (click)="typeFilter.set('student')">
         Diákok
         @if (!loading()) {
@@ -44,22 +58,6 @@
           <span class="tab-count">({{ teacherCount() }})</span>
         }
       </button>
-    </div>
-
-    <!-- Photo Filter Toggle -->
-    <div class="photo-filter">
-      <label class="photo-filter-toggle">
-        <span class="custom-checkbox" [class.custom-checkbox--checked]="showOnlyWithoutPhoto()">
-          @if (showOnlyWithoutPhoto()) {
-            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-          }
-        </span>
-        <input type="checkbox" [ngModel]="showOnlyWithoutPhoto()" (ngModelChange)="showOnlyWithoutPhoto.set($event)" class="sr-only" />
-        <span class="toggle-label">Csak kép nélküliek</span>
-        @if (!loading()) {
-          <span class="toggle-count">({{ withoutPhotoCount() }})</span>
-        }
-      </label>
     </div>
 
     <!-- Content -->

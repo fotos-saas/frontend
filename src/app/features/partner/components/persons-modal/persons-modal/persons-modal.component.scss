@@ -41,10 +41,18 @@
   padding: 0 24px 16px;
 }
 
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .search-box {
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .search-icon {
@@ -94,6 +102,11 @@
   gap: 8px;
   padding: 0 24px 16px;
   border-bottom: 1px solid #e2e8f0;
+  transition: all 0.15s ease;
+}
+
+.filter-tabs--hidden {
+  display: none;
 }
 
 .tab {
@@ -124,17 +137,15 @@
   opacity: 0.8;
 }
 
-.photo-filter {
-  padding: 0 24px 16px;
-}
-
 .photo-filter-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #475569;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .sr-only {

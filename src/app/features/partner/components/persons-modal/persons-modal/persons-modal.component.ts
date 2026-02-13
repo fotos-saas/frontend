@@ -53,16 +53,17 @@ export class PersonsModalComponent implements OnInit {
   readonly teacherCount = computed(() => this.allPersons().filter(p => p.type === 'teacher').length);
   readonly withoutPhotoCount = computed(() => this.allPersons().filter(p => !p.hasPhoto).length);
 
-  // Filtered persons
+  // Filtered persons — keresés mindkét típusban keres, tab nélkül szűri a típust
   readonly filteredPersons = computed(() => {
     let result = this.allPersons();
-    result = result.filter(p => p.type === this.typeFilter());
+    const query = this.searchQuery().trim().toLowerCase();
+    if (!query) {
+      result = result.filter(p => p.type === this.typeFilter());
+    } else {
+      result = result.filter(p => p.name.toLowerCase().includes(query));
+    }
     if (this.showOnlyWithoutPhoto()) {
       result = result.filter(p => !p.hasPhoto);
-    }
-    const query = this.searchQuery().trim().toLowerCase();
-    if (query) {
-      result = result.filter(p => p.name.toLowerCase().includes(query));
     }
     return result;
   });

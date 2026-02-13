@@ -31,6 +31,7 @@ export class ProjectCardComponent {
   readonly qrClick = output<PartnerProjectListItem>();
   readonly awareClick = output<PartnerProjectListItem>();
   readonly orderDataClick = output<PartnerProjectListItem>();
+  readonly deleteClick = output<PartnerProjectListItem>();
 
   /**
    * Rövidített státusz címke a badge-hez
@@ -111,5 +112,10 @@ export class ProjectCardComponent {
   onOrderDataClick(event: MouseEvent): void {
     event.stopPropagation();
     this.orderDataClick.emit(this.project());
+  }
+
+  onDeleteClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.deleteClick.emit(this.project());
   }
 }

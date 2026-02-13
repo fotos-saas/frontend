@@ -1,6 +1,6 @@
 .project-row {
   display: grid;
-  grid-template-columns: 48px 1fr 24px 110px 75px 32px;
+  grid-template-columns: 48px 1fr 24px 110px 75px 56px;
   align-items: center;
   gap: 8px;
   background: #ffffff;
@@ -283,6 +283,16 @@
 
 .action-btn:hover {
   background: #059669;
+}
+
+.action-btn--delete {
+  background: transparent;
+  color: #94a3b8;
+}
+
+.action-btn--delete:hover {
+  background: #fef2f2;
+  color: #dc2626;
 }
 
 /* Responsive */

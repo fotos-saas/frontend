@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild, ComponentRef } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
+import { ToastService } from '@core/services/toast.service';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -14,6 +15,7 @@ import { IQrCodeService } from '../../../../shared/interfaces/qr-code.interface'
 import { PhotoUploadWizardComponent } from '../../components/photo-upload-wizard/photo-upload-wizard/photo-upload-wizard.component';
 import { SamplesLightboxComponent, SampleLightboxItem } from '../../../../shared/components/samples-lightbox';
 import { ExpandableFiltersComponent, FilterConfig, FilterChangeEvent } from '../../../../shared/components/expandable-filters';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { ProjectTableHeaderComponent } from './components/project-table-header/project-table-header.component';
@@ -38,6 +40,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     PhotoUploadWizardComponent,
     SamplesLightboxComponent,
     ExpandableFiltersComponent,
+    ConfirmDialogComponent,
     ProjectTableHeaderComponent,
     ProjectMobileSortComponent,
     ProjectPaginationComponent,
@@ -48,6 +51,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
 })
 export class PartnerProjectListComponent implements OnInit {
   private readonly logger = inject(LoggerService);
+  private readonly toast = inject(ToastService);
   private readonly partnerService = inject(PartnerService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
@@ -118,6 +122,12 @@ export class PartnerProjectListComponent implements OnInit {
   showQrModal = signal(false);
   showUploadWizard = signal(false);
   selectedProject = signal<PartnerProjectListItem | null>(null);
+
+  // Delete Confirm
+  showDeleteConfirm = signal(false);
+  deletingProjectName = signal('');
+  isDeleting = signal(false);
+  private deletingProjectId = signal<number | null>(null);
 
   // Order Data Dialog
   private orderDataContainer = viewChild('orderDataContainer', { read: ViewContainerRef });
@@ -284,5 +294,46 @@ export class PartnerProjectListComponent implements OnInit {
   closeOrderDataDialog(): void {
     this.orderDataRef?.destroy();
     this.orderDataRef = null;
+  }
+
+  // Delete Project
+  confirmDeleteProject(project: PartnerProjectListItem): void {
+    this.deletingProjectId.set(project.id);
+    this.deletingProjectName.set(project.name || project.schoolName || 'Ismeretlen');
+    this.showDeleteConfirm.set(true);
+  }
+
+  onDeleteResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      this.executeDeleteProject();
+    } else {
+      this.showDeleteConfirm.set(false);
+      this.deletingProjectId.set(null);
+    }
+  }
+
+  private executeDeleteProject(): void {
+    const projectId = this.deletingProjectId();
+    if (!projectId) return;
+
+    this.isDeleting.set(true);
+    this.partnerService.deleteProject(projectId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isDeleting.set(false);
+          this.showDeleteConfirm.set(false);
+          this.projects.update(list => list.filter(p => p.id !== projectId));
+          this.totalProjects.update(t => t - 1);
+          this.deletingProjectId.set(null);
+          this.toast.success('Törölve', 'A projekt sikeresen törölve.');
+        },
+        error: (err) => {
+          this.isDeleting.set(false);
+          this.showDeleteConfirm.set(false);
+          this.logger.error('Failed to delete project', err);
+          this.toast.error('Hiba', 'Nem sikerült törölni a projektet.');
+        }
+      });
   }
 }

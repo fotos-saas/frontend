@@ -61,7 +61,7 @@ export interface SortColumn {
   styles: [`
     .table-header {
       display: grid;
-      grid-template-columns: 48px 1fr 24px 110px 75px 32px;
+      grid-template-columns: 48px 1fr 24px 110px 75px 56px;
       gap: 8px;
       padding: 8px 12px;
       margin-bottom: 4px;

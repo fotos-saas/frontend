@@ -86,17 +86,25 @@
     <span class="missing-label">T:</span><span class="missing-num" [class.missing-num--active]="project().missingTeachersCount > 0">{{ project().missingTeachersCount }}</span>
   </div>
 
-  <!-- Col 6: QR -->
+  <!-- Col 6: Műveletek -->
   <div class="col col-actions">
     @if (project().hasActiveQrCode) {
       <button
         type="button"
         class="action-btn"
         (click)="onQrClick($event)"
-        title="QR kód"
+        matTooltip="QR kód"
       >
         <lucide-icon [name]="ICONS.QR_CODE" [size]="14" />
       </button>
     }
+    <button
+      type="button"
+      class="action-btn action-btn--delete"
+      (click)="onDeleteClick($event)"
+      matTooltip="Projekt törlése"
+    >
+      <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+    </button>
   </div>
 </div>

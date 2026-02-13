@@ -100,6 +100,7 @@
           (qrClick)="openQrModal($event)"
           (awareClick)="toggleAware($event)"
           (orderDataClick)="openOrderDataDialog($event)"
+          (deleteClick)="confirmDeleteProject($event)"
         />
       }
     </div>
@@ -166,3 +167,14 @@
 
 <!-- Order Data Dialog Container -->
 <ng-container #orderDataContainer></ng-container>
+
+<!-- Delete Project Confirmation -->
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Projekt törlése"
+    [message]="'Biztosan törölni szeretnéd a \'' + deletingProjectName() + '\' projektet? Ez a művelet nem visszavonható, minden adat (képek, galéria, fórum) véglegesen törlődik!'"
+    confirmText="Végleges törlés"
+    [isSubmitting]="isDeleting()"
+    (resultEvent)="onDeleteResult($event)"
+  />
+}

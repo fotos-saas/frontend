@@ -1,1 +1,1 @@
-export { InfoBoxComponent, InfoBoxTheme } from './info-box.component';
+export { InfoBoxComponent, InfoBoxTheme, InfoBoxMode } from './info-box.component';

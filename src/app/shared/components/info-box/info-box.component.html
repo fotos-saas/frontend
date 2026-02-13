@@ -1,16 +1,45 @@
-@if (visible()) {
-  <div class="info-box" [class]="'info-box info-box--' + theme()">
-    <lucide-icon [name]="icon()" [size]="20" class="info-box__icon" />
-    <div class="info-box__content">
-      <strong>{{ title() }}</strong>
-      <p><ng-content /></p>
-    </div>
-    <button class="info-box__close" (click)="dismiss()" matTooltip="Bezárás">
-      <lucide-icon [name]="ICONS.X" [size]="16" />
-    </button>
-  </div>
-} @else {
-  <button class="info-box__restore" (click)="restore()" [matTooltip]="title()">
+@if (mode() === 'dialog') {
+  <!-- Dialog mód: mindig csak ? gomb + felugró -->
+  <button class="info-box__restore" (click)="openDialog()" [matTooltip]="title()">
     <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="15" />
   </button>
+
+  @if (dialogOpen()) {
+    <app-dialog-wrapper
+      headerStyle="flat"
+      theme="blue"
+      [icon]="ICONS.INFO"
+      [title]="title()"
+      size="md"
+      [columns]="1"
+      variant="info"
+      (closeEvent)="closeDialog()"
+      (backdropClickEvent)="closeDialog()"
+    >
+      <div dialogBody class="info-dialog-body">
+        <ng-content />
+      </div>
+      <div dialogFooter>
+        <button class="info-dialog-close-btn" (click)="closeDialog()">Bezárás</button>
+      </div>
+    </app-dialog-wrapper>
+  }
+} @else {
+  <!-- Inline mód: banner vagy restore gomb -->
+  @if (visible()) {
+    <div class="info-box" [class]="'info-box info-box--' + theme()">
+      <lucide-icon [name]="icon()" [size]="20" class="info-box__icon" />
+      <div class="info-box__content">
+        <strong>{{ title() }}</strong>
+        <p><ng-content /></p>
+      </div>
+      <button class="info-box__close" (click)="dismiss()" matTooltip="Bezárás">
+        <lucide-icon [name]="ICONS.X" [size]="16" />
+      </button>
+    </div>
+  } @else {
+    <button class="info-box__restore" (click)="restore()" [matTooltip]="title()">
+      <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="15" />
+    </button>
+  }
 }

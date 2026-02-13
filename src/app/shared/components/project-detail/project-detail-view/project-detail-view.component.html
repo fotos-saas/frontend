@@ -1,4 +1,13 @@
 @if (project()) {
+  <div class="overview-header">
+    <app-info-box storageKey="overview-tab" title="Projekt áttekintés" mode="dialog">
+      <p><strong>QR Kódok</strong> – Generálj QR kódokat a regisztrációs linkekhez, hogy a szülők egyszerűen csatlakozhassanak a projekthez. Többféle QR kód típus érhető el (koordinátor, szülő, diák).</p>
+      <p><strong>Galéria</strong> – Ha van galéria a projekthez, itt látod a fotók számát és a képválasztási határidőt. A határidőt gyorsan meghosszabbíthatod az előre definiált gombokkal.</p>
+      <p><strong>Kapcsolattartók</strong> – Add meg az iskola vagy intézmény kapcsolattartóit (tanárok, igazgatók). A „FŐ" jelölésű kapcsolattartó az elsődleges.</p>
+      <p><strong>Megrendelési adatok</strong> – Ha a projekt le van adva, itt tekintheted meg a megrendelés részleteit.</p>
+    </app-info-box>
+  </div>
+
   <!-- QR Kódok szekció -->
   <section class="mb-6">
     @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {

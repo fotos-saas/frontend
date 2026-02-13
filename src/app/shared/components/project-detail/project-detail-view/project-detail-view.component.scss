@@ -1,1 +1,7 @@
 /* A detail-badge stílusok a header komponensbe kerültek */
+
+.overview-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}

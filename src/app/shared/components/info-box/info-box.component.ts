@@ -2,18 +2,20 @@ import { Component, ChangeDetectionStrategy, input, signal, computed } from '@an
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../constants/icons.constants';
+import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
 export type InfoBoxTheme = 'blue' | 'green' | 'amber' | 'red';
+export type InfoBoxMode = 'inline' | 'dialog';
 
 @Component({
   selector: 'app-info-box',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [LucideAngularModule, MatTooltipModule, DialogWrapperComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './info-box.component.html',
   styleUrl: './info-box.component.scss',
   host: {
-    '[style.display]': 'visible() ? "block" : "contents"',
+    '[style.display]': 'hostDisplay()',
   },
 })
 export class InfoBoxComponent {
@@ -29,18 +31,25 @@ export class InfoBoxComponent {
   /** Ikon neve (lucide) - alapértelmezett: info */
   icon = input<string>(ICONS.INFO);
 
+  /** Megjelenítési mód: inline (kis banner) vagy dialog (? gomb + felugró) */
+  mode = input<InfoBoxMode>('inline');
+
   readonly ICONS = ICONS;
 
   visible = signal(true);
+  dialogOpen = signal(false);
 
   private fullKey = computed(() => `info-box-${this.storageKey()}`);
 
-  constructor() {
-    // Késleltetett init nem kell, a signal default true, majd ngOnInit-ben olvassuk
-  }
+  hostDisplay = computed(() => {
+    if (this.mode() === 'dialog') return 'contents';
+    return this.visible() ? 'block' : 'contents';
+  });
 
   ngOnInit(): void {
-    this.visible.set(!localStorage.getItem(this.fullKey()));
+    if (this.mode() === 'inline') {
+      this.visible.set(!localStorage.getItem(this.fullKey()));
+    }
   }
 
   dismiss(): void {
@@ -51,5 +60,13 @@ export class InfoBoxComponent {
   restore(): void {
     localStorage.removeItem(this.fullKey());
     this.visible.set(true);
+  }
+
+  openDialog(): void {
+    this.dialogOpen.set(true);
+  }
+
+  closeDialog(): void {
+    this.dialogOpen.set(false);
   }
 }

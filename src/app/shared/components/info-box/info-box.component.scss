@@ -128,6 +128,41 @@
   }
 }
 
+// === DIALOG MODE ===
+.info-dialog-body {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #334155;
+
+  p {
+    margin: 0 0 10px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      color: #1e293b;
+    }
+  }
+}
+
+.info-dialog-close-btn {
+  padding: 8px 20px;
+  background: var(--color-primary, #1e3a5f);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--color-primary-dark, #152a45);
+  }
+}
+
 @keyframes infoBoxFadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }

@@ -55,7 +55,7 @@ export interface SortColumn {
           <lucide-icon [name]="sortDir() === 'asc' ? ICONS.ARROW_UP : ICONS.ARROW_DOWN" [size]="12" />
         }
       </button>
-      <span class="th th-qr">QR</span>
+      <span class="th th-actions"></span>
     </div>
   `,
   styles: [`
@@ -113,13 +113,11 @@ export interface SortColumn {
     .th-status { justify-content: center; }
     .th-num { justify-content: center; }
 
-    .th-qr {
-      justify-content: center;
+    .th-actions {
       cursor: default;
     }
-    .th-qr:hover {
+    .th-actions:hover {
       background: none;
-      color: #64748b;
     }
 
     @media (max-width: 640px) {

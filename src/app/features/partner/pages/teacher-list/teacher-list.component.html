@@ -23,15 +23,6 @@
           Projekt nézet
         </button>
       </div>
-      <button
-        type="button"
-        class="btn-secondary"
-        [disabled]="exportingCsv()"
-        (click)="exportCsv()"
-      >
-        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="18" />
-        {{ exportingCsv() ? 'Exportálás...' : 'CSV export' }}
-      </button>
       <button type="button" class="btn-secondary" (click)="openBulkImport()">
         <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
         Tömeges import

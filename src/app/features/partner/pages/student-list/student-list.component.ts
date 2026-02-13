@@ -18,7 +18,6 @@ import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/co
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
-import { saveFile } from '../../../../shared/utils/file.util';
 
 @Component({
   selector: 'app-partner-student-list',
@@ -255,21 +254,6 @@ export class PartnerStudentListComponent implements OnInit {
   onBulkImported(): void {
     this.closeBulkImport();
     this.loadStudents();
-  }
-
-  exportingCsv = signal(false);
-
-  exportCsv(): void {
-    this.exportingCsv.set(true);
-    this.studentService.exportCsv()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => {
-          saveFile(blob, 'diak_archiv_export.csv');
-          this.exportingCsv.set(false);
-        },
-        error: () => this.exportingCsv.set(false),
-      });
   }
 
   onUploadPhotoFromProject(item: ArchivePersonInSchool): void {

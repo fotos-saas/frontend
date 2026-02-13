@@ -19,7 +19,6 @@ import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/co
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
-import { saveFile } from '../../../../shared/utils/file.util';
 
 @Component({
   selector: 'app-partner-teacher-list',
@@ -288,21 +287,6 @@ export class PartnerTeacherListComponent implements OnInit {
     this.teacherService.unlinkTeacher(teacher.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({ next: () => this.loadTeachers() });
-  }
-
-  exportingCsv = signal(false);
-
-  exportCsv(): void {
-    this.exportingCsv.set(true);
-    this.teacherService.exportCsv()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => {
-          saveFile(blob, 'tanar_archiv_export.csv');
-          this.exportingCsv.set(false);
-        },
-        error: () => this.exportingCsv.set(false),
-      });
   }
 
   onUploadPhotoFromProject(item: ArchivePersonInSchool): void {

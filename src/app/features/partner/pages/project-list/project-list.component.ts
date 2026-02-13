@@ -59,10 +59,17 @@ export class PartnerProjectListComponent implements OnInit {
   readonly ICONS = ICONS;
   readonly qrService: IQrCodeService = this.partnerService;
 
+  // Tanév opciók generálása (aktuális évtől visszafelé)
+  private readonly currentYear = new Date().getFullYear();
+  readonly yearOptions = Array.from({ length: 10 }, (_, i) => {
+    const year = this.currentYear - i;
+    return { value: year.toString(), label: `${year}` };
+  });
+
   // Filter state
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'projects' },
-    defaultFilters: { status: '', aware: '', draft: '', school_id: '' },
+    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: this.currentYear.toString() },
     defaultSortBy: 'created_at',
     defaultSortDir: 'desc',
     validation: {
@@ -98,6 +105,7 @@ export class PartnerProjectListComponent implements OnInit {
   ];
 
   readonly filterConfigs: FilterConfig[] = [
+    { id: 'graduation_year', label: 'Tanév', icon: 'calendar', options: this.yearOptions },
     { id: 'status', label: 'Összes státusz', icon: 'filter', options: this.statusOptions },
     { id: 'draft', label: 'Draft képek?', options: [
       { value: 'true', label: 'Van draft' },
@@ -164,7 +172,8 @@ export class PartnerProjectListComponent implements OnInit {
       status: filters['status'] || undefined,
       is_aware: filters['aware'] ? filters['aware'] === 'true' : undefined,
       has_draft: filters['draft'] ? filters['draft'] === 'true' : undefined,
-      school_id: filters['school_id'] ? parseInt(filters['school_id'], 10) : undefined
+      school_id: filters['school_id'] ? parseInt(filters['school_id'], 10) : undefined,
+      graduation_year: filters['graduation_year'] ? parseInt(filters['graduation_year'], 10) : undefined
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -183,7 +192,7 @@ export class PartnerProjectListComponent implements OnInit {
   }
 
   onFilterChange(event: FilterChangeEvent): void {
-    this.filterState.setFilter(event.id as 'status' | 'aware' | 'draft', event.value);
+    this.filterState.setFilter(event.id as 'status' | 'aware' | 'draft' | 'graduation_year', event.value);
   }
 
   viewProject(project: PartnerProjectListItem): void {

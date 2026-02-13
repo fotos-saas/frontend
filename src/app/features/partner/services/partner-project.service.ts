@@ -52,6 +52,7 @@ export class PartnerProjectService {
     is_aware?: boolean;
     has_draft?: boolean;
     school_id?: number;
+    graduation_year?: number;
   }): Observable<ProjectListResponse> {
     let httpParams = new HttpParams();
 
@@ -64,6 +65,7 @@ export class PartnerProjectService {
     if (params?.is_aware !== undefined) httpParams = httpParams.set('is_aware', params.is_aware.toString());
     if (params?.has_draft !== undefined) httpParams = httpParams.set('has_draft', params.has_draft.toString());
     if (params?.school_id) httpParams = httpParams.set('school_id', params.school_id.toString());
+    if (params?.graduation_year) httpParams = httpParams.set('graduation_year', params.graduation_year.toString());
 
     return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });
   }

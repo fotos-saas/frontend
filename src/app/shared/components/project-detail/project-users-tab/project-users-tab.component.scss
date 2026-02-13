@@ -1,5 +1,92 @@
 @use '../../../../shared/styles/list-page' as list;
 
+/* Info box */
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  animation: fadeIn 0.2s ease;
+
+  &__icon {
+    flex-shrink: 0;
+    color: #3b82f6;
+    margin-top: 2px;
+    margin-right: 12px;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: #1e40af;
+      opacity: 0.85;
+    }
+  }
+
+  &__close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: #3b82f6;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  &__restore {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #94a3b8;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    margin-left: auto;
+    transition: all 0.15s;
+
+    &:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      background: #eff6ff;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .users-grid {
   grid-template-columns: 1fr 100px 100px 140px 110px;
 }

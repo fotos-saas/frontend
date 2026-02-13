@@ -32,6 +32,20 @@ export class ProjectUsersTabComponent implements OnInit {
   readonly ICONS = ICONS;
   readonly isDevMode = this.devLoginService.isDevMode();
 
+  // Info box
+  private readonly INFO_KEY = 'users-tab-info-dismissed';
+  showInfoBox = signal(!localStorage.getItem(this.INFO_KEY));
+
+  dismissInfoBox(): void {
+    localStorage.setItem(this.INFO_KEY, '1');
+    this.showInfoBox.set(false);
+  }
+
+  restoreInfoBox(): void {
+    localStorage.removeItem(this.INFO_KEY);
+    this.showInfoBox.set(true);
+  }
+
   // State
   loading = signal(true);
   sessions = signal<GuestSession[]>([]);

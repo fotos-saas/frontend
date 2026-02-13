@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal, inject, DestroyRef, OnInit, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, inject, DestroyRef, OnInit, output, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -32,6 +32,7 @@ export class ProjectUsersTabComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly isDevMode = this.devLoginService.isDevMode();
+  readonly infoBox = viewChild(InfoBoxComponent);
 
   // State
   loading = signal(true);

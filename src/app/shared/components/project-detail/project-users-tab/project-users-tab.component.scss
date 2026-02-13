@@ -97,6 +97,27 @@
   justify-content: center;
 }
 
+.info-restore-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #94a3b8;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+  }
+}
+
 @media (max-width: 768px) {
   .users-grid {
     grid-template-columns: 1fr;

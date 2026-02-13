@@ -26,6 +26,9 @@ export class InfoBoxComponent {
   /** Ikon neve (lucide) - alapértelmezett: info */
   icon = input<string>(ICONS.INFO);
 
+  /** Ha false, a restore gombot nem rendereli (a szülő kezeli) */
+  showRestore = input<boolean>(true);
+
   readonly ICONS = ICONS;
 
   visible = signal(true);

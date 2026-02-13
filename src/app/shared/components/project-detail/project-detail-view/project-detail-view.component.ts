@@ -11,7 +11,7 @@ import {
 } from '../../../components/action-buttons';
 import { ICONS } from '../../../constants/icons.constants';
 import { QR_CODE_TYPES, QrCodeTypeKey } from '../../../constants/qr-code-types';
-import { InfoBoxComponent } from '../../../components/info-box';
+import { InfoBoxComponent, InfoHelpItemComponent } from '../../../components/info-box';
 
 /**
  * Project Detail View - Közös presentational (dumb) komponens.
@@ -30,6 +30,7 @@ import { InfoBoxComponent } from '../../../components/info-box';
     EditButtonComponent,
     DeleteButtonComponent,
     InfoBoxComponent,
+    InfoHelpItemComponent,
   ],
   templateUrl: './project-detail-view.component.html',
   styleUrl: './project-detail-view.component.scss',

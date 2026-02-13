@@ -2,42 +2,18 @@
   <div class="overview-header">
     <app-info-box storageKey="overview-tab" title="Projekt áttekintés" mode="dialog">
       <div dialogContent class="info-help-grid">
-        <div class="info-help-item">
-          <div class="info-help-icon info-help-icon--purple">
-            <lucide-icon [name]="ICONS.QR_CODE" [size]="18" />
-          </div>
-          <div>
-            <strong>QR Kódok</strong>
-            <p>Generálj QR kódokat a regisztrációs linkekhez. Többféle típus érhető el: koordinátor, szülő, diák.</p>
-          </div>
-        </div>
-        <div class="info-help-item">
-          <div class="info-help-icon info-help-icon--indigo">
-            <lucide-icon [name]="ICONS.IMAGES" [size]="18" />
-          </div>
-          <div>
-            <strong>Galéria</strong>
-            <p>Fotók száma és a képválasztási határidő. A határidőt gyorsan meghosszabbíthatod az előre definiált gombokkal.</p>
-          </div>
-        </div>
-        <div class="info-help-item">
-          <div class="info-help-icon info-help-icon--teal">
-            <lucide-icon [name]="ICONS.USERS" [size]="18" />
-          </div>
-          <div>
-            <strong>Kapcsolattartók</strong>
-            <p>Az iskola vagy intézmény kapcsolattartói (tanárok, igazgatók). A „FŐ" jelölésű az elsődleges.</p>
-          </div>
-        </div>
-        <div class="info-help-item">
-          <div class="info-help-icon info-help-icon--emerald">
-            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="18" />
-          </div>
-          <div>
-            <strong>Megrendelési adatok</strong>
-            <p>Ha a projekt le van adva, itt tekintheted meg a megrendelés részleteit.</p>
-          </div>
-        </div>
+        <app-info-help-item [icon]="ICONS.QR_CODE" title="QR Kódok" color="purple">
+          Generálj QR kódokat a regisztrációs linkekhez. Többféle típus érhető el: koordinátor, szülő, diák.
+        </app-info-help-item>
+        <app-info-help-item [icon]="ICONS.IMAGES" title="Galéria" color="indigo">
+          Fotók száma és a képválasztási határidő. A határidőt gyorsan meghosszabbíthatod az előre definiált gombokkal.
+        </app-info-help-item>
+        <app-info-help-item [icon]="ICONS.USERS" title="Kapcsolattartók" color="teal">
+          Az iskola vagy intézmény kapcsolattartói (tanárok, igazgatók). A „FŐ" jelölésű az elsődleges.
+        </app-info-help-item>
+        <app-info-help-item [icon]="ICONS.FILE_TEXT" title="Megrendelési adatok" color="emerald">
+          Ha a projekt le van adva, itt tekintheted meg a megrendelés részleteit.
+        </app-info-help-item>
       </div>
     </app-info-box>
   </div>

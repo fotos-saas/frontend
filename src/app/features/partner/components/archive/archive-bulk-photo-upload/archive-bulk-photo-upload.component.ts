@@ -46,17 +46,21 @@ export class ArchiveBulkPhotoUploadComponent {
 
   matchSummary = computed(() => {
     const m = this.matches();
-    return {
-      matched: m.filter(x => x.match_type === 'matched' && !x.skip).length,
-      ambiguous: m.filter(x => x.match_type === 'ambiguous' && !x.skip).length,
-      unmatched: m.filter(x => x.match_type === 'unmatched' && !x.skip).length,
-      skipped: m.filter(x => x.skip).length,
-      total: m.length,
-    };
+    let matched = 0, ambiguous = 0, unmatched = 0, skipped = 0;
+    for (const item of m) {
+      if (item.skip) { skipped++; continue; }
+      if (item.match_type === 'matched') matched++;
+      else if (item.match_type === 'ambiguous') ambiguous++;
+      else unmatched++;
+    }
+    return { matched, ambiguous, unmatched, skipped, total: m.length };
   });
 
   canStartMatch = computed(() =>
-    this.selectedSchoolId() !== null && this.selectedFiles().length > 0 && this.year() >= 2000
+    this.selectedSchoolId() !== null
+    && this.selectedFiles().length > 0
+    && this.year() >= 2000
+    && this.year() <= 2100
   );
 
   canStartUpload = computed(() => {
@@ -76,7 +80,10 @@ export class ArchiveBulkPhotoUploadComponent {
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
-      this.selectedFiles.set(Array.from(input.files));
+      const imageFiles = Array.from(input.files).filter(f => f.type.startsWith('image/'));
+      if (imageFiles.length > 0) {
+        this.selectedFiles.set(imageFiles);
+      }
     }
   }
 

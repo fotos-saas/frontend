@@ -11,6 +11,7 @@ import { QrButtonComponent, AddButtonComponent } from '../../../../shared/compon
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SortDef } from '../../../../shared/components/smart-filter-bar';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 
 /**
  * Marketer Project List - Projektek paginált listája.
@@ -18,7 +19,7 @@ import { SmartFilterBarComponent, SortDef } from '../../../../shared/components/
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [RouterModule, FormsModule, LucideAngularModule, SharedQrCodeModalComponent, QrButtonComponent, AddButtonComponent, SmartFilterBarComponent],
+  imports: [RouterModule, FormsModule, LucideAngularModule, SharedQrCodeModalComponent, QrButtonComponent, AddButtonComponent, SmartFilterBarComponent, ListPaginationComponent],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -90,11 +91,6 @@ export class ProjectListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.filterState.setPage(page);
   }
 
   viewProject(project: ProjectListItem): void {

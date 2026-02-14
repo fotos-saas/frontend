@@ -1,0 +1,12 @@
+<div class="view-toggle">
+  @for (option of options(); track option.value) {
+    <button
+      class="toggle-btn"
+      [class.toggle-btn--active]="value() === option.value"
+      (click)="valueChange.emit(option.value)"
+    >
+      <lucide-icon [name]="option.icon" [size]="16" />
+      {{ option.label }}
+    </button>
+  }
+</div>

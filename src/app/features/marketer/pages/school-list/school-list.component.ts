@@ -7,6 +7,7 @@ import { MarketerService, SchoolListItem, PaginatedResponse } from '../../servic
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 import { FilterConfig } from '../../../../shared/components/expandable-filters';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 
 /**
  * Marketer School List - Iskolák paginált listája.
@@ -14,7 +15,7 @@ import { FilterConfig } from '../../../../shared/components/expandable-filters';
 @Component({
   selector: 'app-school-list',
   standalone: true,
-  imports: [FormsModule, RouterModule, SmartFilterBarComponent],
+  imports: [FormsModule, RouterModule, SmartFilterBarComponent, ListPaginationComponent],
   templateUrl: './school-list.component.html',
   styleUrls: ['./school-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -87,11 +88,6 @@ export class SchoolListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.filterState.setPage(page);
   }
 
   viewSchoolProjects(school: SchoolListItem): void {

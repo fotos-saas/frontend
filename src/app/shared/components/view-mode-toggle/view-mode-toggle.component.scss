@@ -1,0 +1,42 @@
+.view-toggle {
+  display: flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 34px;
+  border: none;
+  background: #ffffff;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #f8fafc;
+    color: #64748b;
+  }
+
+  &--active {
+    background: var(--color-primary, #1e3a5f);
+    color: #ffffff;
+
+    &:hover {
+      background: var(--color-primary, #1e3a5f);
+      color: #ffffff;
+      opacity: 0.9;
+    }
+  }
+
+  & + & {
+    border-left: 1px solid #e2e8f0;
+  }
+}

@@ -5,24 +5,11 @@
       <p class="subtitle">{{ totalStudents() }} diák összesen</p>
     </div>
     <div class="header-buttons">
-      <div class="view-toggle">
-        <button
-          class="toggle-btn"
-          [class.toggle-btn--active]="viewMode() === 'flat'"
-          (click)="setViewMode('flat')"
-        >
-          <lucide-icon [name]="ICONS.LIST" [size]="16" />
-          Diák nézet
-        </button>
-        <button
-          class="toggle-btn"
-          [class.toggle-btn--active]="viewMode() === 'project'"
-          (click)="setViewMode('project')"
-        >
-          <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
-          Projekt nézet
-        </button>
-      </div>
+      <app-view-mode-toggle
+        [options]="viewModeOptions"
+        [value]="viewMode()"
+        (valueChange)="setViewMode($event)"
+      />
       <button type="button" class="btn-secondary" (click)="openBulkPhotoUpload()">
         <lucide-icon [name]="ICONS.IMAGES" [size]="18" />
         Tömeges fotó
@@ -138,32 +125,13 @@
       }
     </div>
 
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <button
-          class="page-btn"
-          [disabled]="filterState.page() === 1"
-          (click)="goToPage(filterState.page() - 1)"
-        >
-          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-          Előző
-        </button>
-
-        <div class="page-info">
-          {{ filterState.page() }} / {{ totalPages() }} oldal
-          <span class="total-count">({{ totalStudents() }} diák)</span>
-        </div>
-
-        <button
-          class="page-btn"
-          [disabled]="filterState.page() === totalPages()"
-          (click)="goToPage(filterState.page() + 1)"
-        >
-          Következő
-          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-        </button>
-      </div>
-    }
+    <app-list-pagination
+      [currentPage]="filterState.page()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalStudents()"
+      itemLabel="diák"
+      (pageChange)="filterState.setPage($event)"
+    />
   }
 
   } <!-- /viewMode flat -->

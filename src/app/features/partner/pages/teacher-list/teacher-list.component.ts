@@ -21,6 +21,8 @@ import { SearchableSelectComponent, SelectOption } from '../../../../shared/comp
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared/components/smart-filter-bar';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { ViewModeToggleComponent, ViewModeOption } from '../../../../shared/components/view-mode-toggle/view-mode-toggle.component';
 
 @Component({
   selector: 'app-partner-teacher-list',
@@ -39,6 +41,8 @@ import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared
     MediaLightboxComponent,
     SearchableSelectComponent,
     SmartFilterBarComponent,
+    ListPaginationComponent,
+    ViewModeToggleComponent,
   ],
   providers: [{ provide: ARCHIVE_SERVICE, useExisting: PartnerTeacherService }],
   templateUrl: './teacher-list.component.html',
@@ -53,6 +57,11 @@ export class PartnerTeacherListComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   readonly ICONS = ICONS;
+
+  readonly viewModeOptions: ViewModeOption[] = [
+    { value: 'flat', label: 'Tanár nézet', icon: ICONS.LIST },
+    { value: 'project', label: 'Projekt nézet', icon: ICONS.FOLDER },
+  ];
 
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'teachers' },
@@ -187,14 +196,10 @@ export class PartnerTeacherListComponent implements OnInit {
       });
   }
 
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.filterState.setPage(page);
-  }
-
-  setViewMode(mode: 'flat' | 'project'): void {
-    this.viewMode.set(mode);
-    sessionStorage.setItem('teacher-list-view', mode);
+  setViewMode(mode: string): void {
+    const m = mode as 'flat' | 'project';
+    this.viewMode.set(m);
+    sessionStorage.setItem('teacher-list-view', m);
   }
 
   onSchoolFilterChange(value: string): void {

@@ -20,6 +20,7 @@ import { SCHOOLS_TOUR } from '../../../../shared/components/guided-tour/tours';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchConfig, FilterConfig } from '../../../../shared/components/smart-filter-bar';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { generateYearOptions } from '../../../../shared/utils/year-options.util';
 
 /**
@@ -39,6 +40,7 @@ import { generateYearOptions } from '../../../../shared/utils/year-options.util'
     UpgradeDialogComponent,
     GuidedTourComponent,
     SmartFilterBarComponent,
+    ListPaginationComponent,
   ],
   templateUrl: './school-list.component.html',
   styleUrl: './school-list.component.scss',
@@ -126,11 +128,6 @@ export class PartnerSchoolListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.filterState.setPage(page);
   }
 
   openSchoolDetail(school: SchoolListItem): void {

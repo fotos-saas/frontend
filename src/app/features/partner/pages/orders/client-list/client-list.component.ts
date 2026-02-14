@@ -10,6 +10,7 @@ import { ConfirmDialogComponent } from '../../../../../shared/components/confirm
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../../shared/utils/use-filter-state';
 import { getInitials } from '../../../../../shared/utils/formatters.util';
+import { ListPaginationComponent } from '../../../../../shared/components/list-pagination/list-pagination.component';
 
 /**
  * Partner Client List - Ügyfelek listája a partner felületen.
@@ -24,6 +25,7 @@ import { getInitials } from '../../../../../shared/utils/formatters.util';
     MatTooltipModule,
     ClientEditModalComponent,
     ConfirmDialogComponent,
+    ListPaginationComponent,
   ],
   templateUrl: './client-list.component.html',
   styleUrl: './client-list.component.scss',
@@ -79,11 +81,6 @@ export class PartnerClientListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.filterState.setPage(page);
   }
 
   viewClient(client: PartnerClient): void {

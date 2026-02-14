@@ -21,7 +21,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchConfig, SortDef } from '../../../../shared/components/smart-filter-bar';
 import { ProjectTableHeaderComponent } from './components/project-table-header/project-table-header.component';
 import { ProjectMobileSortComponent, SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
-import { ProjectPaginationComponent } from './components/project-pagination/project-pagination.component';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
 
 /**
@@ -45,7 +45,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     SmartFilterBarComponent,
     ProjectTableHeaderComponent,
     ProjectMobileSortComponent,
-    ProjectPaginationComponent,
+    ListPaginationComponent,
   ],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss',

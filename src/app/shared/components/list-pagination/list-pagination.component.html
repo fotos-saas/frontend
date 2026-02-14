@@ -1,0 +1,28 @@
+@if (totalPages() > 1) {
+  <div class="pagination">
+    <button
+      class="page-btn"
+      [disabled]="currentPage() === 1"
+      (click)="goToPage(currentPage() - 1)"
+      aria-label="Előző oldal"
+    >
+      <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+      Előző
+    </button>
+
+    <div class="page-info">
+      {{ currentPage() }} / {{ totalPages() }} oldal
+      <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>
+    </div>
+
+    <button
+      class="page-btn"
+      [disabled]="currentPage() === totalPages()"
+      (click)="goToPage(currentPage() + 1)"
+      aria-label="Következő oldal"
+    >
+      Következő
+      <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+    </button>
+  </div>
+}

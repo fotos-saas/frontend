@@ -11,6 +11,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { PlansService, PlanOption } from '../../../../shared/services/plans.service';
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 import { FilterConfig } from '../../../../shared/components/expandable-filters';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 
 /**
  * Előfizetők lista - Super Admin felületen.
@@ -25,6 +26,7 @@ import { FilterConfig } from '../../../../shared/components/expandable-filters';
     MatTooltipModule,
     NgClass,
     SmartFilterBarComponent,
+    ListPaginationComponent,
   ],
   templateUrl: './subscribers-list.component.html',
   styleUrl: './subscribers-list.component.scss',
@@ -121,11 +123,6 @@ export class SubscribersListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.filterState.setPage(page);
   }
 
   // Központi konstansból (rövid verzió)

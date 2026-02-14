@@ -49,30 +49,12 @@
       }
     </div>
 
-    <!-- Paginálás -->
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <button
-          class="page-btn"
-          [disabled]="filterState.page() === 1"
-          (click)="goToPage(filterState.page() - 1)"
-        >
-          ← Előző
-        </button>
-
-        <div class="page-info">
-          {{ filterState.page() }} / {{ totalPages() }} oldal
-          <span class="total-count">({{ totalSchools() }} iskola)</span>
-        </div>
-
-        <button
-          class="page-btn"
-          [disabled]="filterState.page() === totalPages()"
-          (click)="goToPage(filterState.page() + 1)"
-        >
-          Következő →
-        </button>
-      </div>
-    }
+    <app-list-pagination
+      [currentPage]="filterState.page()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalSchools()"
+      itemLabel="iskola"
+      (pageChange)="filterState.setPage($event)"
+    />
   }
 </div>

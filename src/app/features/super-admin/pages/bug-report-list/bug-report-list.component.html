@@ -109,20 +109,12 @@
       }
     </div>
 
-    <!-- Lapozó -->
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <button class="page-btn" [disabled]="currentPage() <= 1" (click)="goToPage(currentPage() - 1)">
-          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" /> Előző
-        </button>
-        <span class="page-info">
-          {{ currentPage() }} / {{ totalPages() }}
-          <span class="total-count">({{ totalItems() }} db)</span>
-        </span>
-        <button class="page-btn" [disabled]="currentPage() >= totalPages()" (click)="goToPage(currentPage() + 1)">
-          Következő <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-        </button>
-      </div>
-    }
+    <app-list-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalItems()"
+      itemLabel="db"
+      (pageChange)="onPageChange($event)"
+    />
   }
 </div>

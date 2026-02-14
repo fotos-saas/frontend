@@ -12,6 +12,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { saveFile } from '../../../../shared/utils/file.util';
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 
 /**
  * Partner Contact List - Kapcsolattartók listája a partner felületen.
@@ -28,6 +29,7 @@ import { SmartFilterBarComponent } from '../../../../shared/components/smart-fil
     ConfirmDialogComponent,
     UpgradeDialogComponent,
     SmartFilterBarComponent,
+    ListPaginationComponent,
   ],
   templateUrl: './contact-list.component.html',
   styleUrl: './contact-list.component.scss',
@@ -92,11 +94,6 @@ export class PartnerContactListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.filterState.setPage(page);
   }
 
   viewProject(contact: ContactListItem): void {

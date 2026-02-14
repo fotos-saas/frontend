@@ -74,31 +74,13 @@
       }
     </div>
 
-    <!-- Paginálás -->
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <button
-          class="page-btn"
-          [disabled]="filterState.page() === 1"
-          (click)="goToPage(filterState.page() - 1)"
-        >
-          ← Előző
-        </button>
-
-        <div class="page-info">
-          {{ filterState.page() }} / {{ totalPages() }} oldal
-          <span class="total-count">({{ totalProjects() }} projekt)</span>
-        </div>
-
-        <button
-          class="page-btn"
-          [disabled]="filterState.page() === totalPages()"
-          (click)="goToPage(filterState.page() + 1)"
-        >
-          Következő →
-        </button>
-      </div>
-    }
+    <app-list-pagination
+      [currentPage]="filterState.page()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalProjects()"
+      itemLabel="projekt"
+      (pageChange)="filterState.setPage($event)"
+    />
   }
 </div>
 

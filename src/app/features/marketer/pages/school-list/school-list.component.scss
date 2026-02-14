@@ -1,84 +1,11 @@
+@use '../../../../shared/styles/list-page' as list;
+
 // max-width → page-card default kezeli
 .school-list-page {}
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 4px 0;
-}
-
-.subtitle {
-  color: #64748b;
-  font-size: 0.875rem;
-  margin: 0;
-}
-
-/* Filters */
-.filters {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.search-box {
-  flex: 1;
-  min-width: 280px;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 14px;
-  font-size: 1rem;
-  opacity: 0.5;
-}
-
-.search-input {
-  width: 100%;
-  padding: 12px 40px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.9375rem;
-  transition: all 0.2s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #1e3a5f;
-  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-}
-
-.clear-btn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  font-size: 1rem;
-}
 
 .filter-controls {
   display: flex;
   gap: 8px;
-}
-
-.filter-select {
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.875rem;
-  background: #ffffff;
-  cursor: pointer;
-  min-width: 180px;
 }
 
 /* School Grid */
@@ -98,7 +25,7 @@
   gap: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  animation: fadeIn 0.3s ease forwards;
+  animation: cardEntry 0.3s ease forwards;
   opacity: 0;
 }
 
@@ -165,72 +92,6 @@
   opacity: 0.9;
 }
 
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-top: 32px;
-  padding: 16px;
-}
-
-.page-btn {
-  padding: 10px 20px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.page-btn:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #1e3a5f;
-}
-
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-info {
-  font-size: 0.875rem;
-  color: #475569;
-}
-
-.total-count {
-  color: #94a3b8;
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-}
-
-.empty-icon {
-  font-size: 4rem;
-  display: block;
-  margin-bottom: 16px;
-}
-
-.empty-state h3 {
-  font-size: 1.125rem;
-  color: #1e293b;
-  margin: 0 0 8px 0;
-}
-
-.empty-state p {
-  color: #64748b;
-  margin: 0;
-}
-
 /* Loading State */
 .loading-state {
   display: grid;
@@ -243,20 +104,6 @@
   background: #e2e8f0;
   animation: none;
   opacity: 1;
-}
-
-.skeleton-shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
 }
 
 /* Responsive */

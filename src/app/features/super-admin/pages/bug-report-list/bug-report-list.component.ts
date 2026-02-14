@@ -11,11 +11,12 @@ import {
   BUG_REPORT_PRIORITY_OPTIONS,
 } from '../../../../shared/types/bug-report.types';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 
 @Component({
   selector: 'app-admin-bug-report-list',
   standalone: true,
-  imports: [FormsModule, DatePipe, LucideAngularModule],
+  imports: [FormsModule, DatePipe, LucideAngularModule, ListPaginationComponent],
   templateUrl: './bug-report-list.component.html',
   styleUrl: './bug-report-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -92,8 +93,7 @@ export class AdminBugReportListComponent implements OnInit {
     this.loadReports();
   }
 
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
+  onPageChange(page: number): void {
     this.currentPage.set(page);
     this.loadReports();
   }

@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ArchiveSchoolGroup, ArchivePersonInSchool, ArchiveConfig } from '../../../models/archive.models';
+import { ArchiveSchoolGroup, ArchivePersonInSchool, ArchiveConfig, ArchiveClassGroup } from '../../../models/archive.models';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 
 @Component({
@@ -31,6 +31,56 @@ export class ArchiveProjectCardComponent {
   undoNoPhoto = output<ArchivePersonInSchool>();
 
   readonly ICONS = ICONS;
+
+  expandedClassNames = signal<Set<string>>(new Set());
+
+  classGroups = computed<ArchiveClassGroup[]>(() => {
+    const items = this.school().items;
+    const map = new Map<string, ArchivePersonInSchool[]>();
+    for (const item of items) {
+      const key = item.className?.trim() || '__no_class__';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(item);
+    }
+    const groups: ArchiveClassGroup[] = [];
+    for (const [key, students] of map) {
+      groups.push({
+        className: key,
+        displayName: key === '__no_class__' ? 'Osztály nélkül' : key,
+        studentCount: students.length,
+        missingPhotoCount: students.filter(s => !s.hasPhoto).length,
+        items: students,
+      });
+    }
+    return groups.sort((a, b) => {
+      if (a.className === '__no_class__') return 1;
+      if (b.className === '__no_class__') return -1;
+      return a.className.localeCompare(b.className, 'hu');
+    });
+  });
+
+  hasMultipleClasses = computed(() => this.classGroups().length > 1);
+
+  isClassExpanded(className: string): boolean {
+    if (!this.hasMultipleClasses()) return true;
+    return this.expandedClassNames().has(className);
+  }
+
+  toggleClass(className: string): void {
+    this.expandedClassNames.update(set => {
+      const next = new Set(set);
+      next.has(className) ? next.delete(className) : next.add(className);
+      return next;
+    });
+  }
+
+  expandAllClasses(): void {
+    this.expandedClassNames.set(new Set(this.classGroups().map(g => g.className)));
+  }
+
+  collapseAllClasses(): void {
+    this.expandedClassNames.set(new Set());
+  }
 
   onToggle(): void {
     this.toggle.emit();

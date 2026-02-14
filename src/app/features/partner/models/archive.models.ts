@@ -110,6 +110,14 @@ export interface ArchiveSchoolGroup {
   items: ArchivePersonInSchool[];
 }
 
+export interface ArchiveClassGroup {
+  className: string;
+  displayName: string;
+  studentCount: number;
+  missingPhotoCount: number;
+  items: ArchivePersonInSchool[];
+}
+
 export interface ArchiveSchoolSummary {
   totalSchools: number;
   totalItems: number;

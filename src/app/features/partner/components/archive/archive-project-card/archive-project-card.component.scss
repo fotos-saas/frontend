@@ -99,23 +99,75 @@
 
 .card-body { padding: 8px 0; }
 
-.classes-bar {
+.class-actions-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 6px 16px 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
   border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 4px;
 }
 
-.class-chip {
-  display: inline-block;
+.class-count-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.class-action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.class-expand-btn {
   padding: 2px 8px;
   font-size: 0.6875rem;
-  font-weight: 500;
-  color: #475569;
-  background: #f1f5f9;
+  color: #64748b;
+  background: none;
+  border: 1px solid #e2e8f0;
   border-radius: 4px;
+  cursor: pointer;
+  &:hover { background: #f1f5f9; }
+}
+
+.class-section {
+  &:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
+}
+
+.class-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 16px;
+  background: #f8fafc;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  &:hover { background: #f1f5f9; }
+}
+
+.class-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.class-display-name {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: #334155;
+}
+
+.class-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge--sm {
+  padding: 1px 6px;
+  font-size: 0.6875rem;
 }
 
 .empty-items {

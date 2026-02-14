@@ -283,6 +283,7 @@ export interface SchoolListItem {
   projectsCount: number;
   activeProjectsCount: number;
   hasActiveProjects: boolean;
+  latestClassYear: string | null;
   linkedGroup: string | null;
   linkedSchools: SchoolItem[];
 }

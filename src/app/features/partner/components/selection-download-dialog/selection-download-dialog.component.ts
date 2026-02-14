@@ -22,8 +22,10 @@ export interface SelectionDownloadResult {
   styleUrl: './selection-download-dialog.component.scss',
 })
 export class SelectionDownloadDialogComponent {
-  /** 'project' = személytípus + fájlnév, 'school' = csak fájlnév (tanárok fix) */
+  /** 'project' = személytípus + fájlnév, 'school' = hatókör + fájlnév (tanárok fix) */
   readonly mode = input<SelectionDialogMode>('project');
+  /** Legfrissebb tanév az iskolához (pl. "2025-2026") */
+  readonly latestClassYear = input<string | null>(null);
 
   readonly download = output<SelectionDownloadResult>();
   readonly close = output<void>();

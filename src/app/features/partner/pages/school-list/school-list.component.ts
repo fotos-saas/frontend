@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild } from '@angular/core';
+import { Component, OnInit, inject, signal, effect, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -14,6 +14,9 @@ import { SchoolEditModalComponent } from '../../components/school-edit-modal/sch
 import { SchoolLinkDialogComponent } from '../../components/school-link-dialog/school-link-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { UpgradeDialogComponent } from '../../../../shared/components/upgrade-dialog/upgrade-dialog.component';
+import { GuidedTourComponent } from '../../../../shared/components/guided-tour/guided-tour.component';
+import { GuidedTourService } from '../../../../core/services/guided-tour.service';
+import { SCHOOLS_TOUR } from '../../../../shared/components/guided-tour/tours';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 
@@ -32,6 +35,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
     SchoolLinkDialogComponent,
     ConfirmDialogComponent,
     UpgradeDialogComponent,
+    GuidedTourComponent,
   ],
   templateUrl: './school-list.component.html',
   styleUrl: './school-list.component.scss',
@@ -43,6 +47,7 @@ export class PartnerSchoolListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  readonly tourService = inject(GuidedTourService);
 
   private readonly downloadDialogContainer = viewChild('downloadDialogContainer', { read: ViewContainerRef });
 
@@ -69,6 +74,14 @@ export class PartnerSchoolListComponent implements OnInit {
   showLinkDialog = signal(false);
   selectedSchool = signal<SchoolListItem | null>(null);
   modalMode = signal<'create' | 'edit'>('create');
+
+  private readonly tourStartEffect = effect(() => {
+    // Tour indítás, ha a loading befejeződött és vannak iskolák
+    if (!this.filterState.loading() && this.schools().length > 0) {
+      // requestAnimationFrame: DOM renderelés után
+      requestAnimationFrame(() => this.tourService.startIfNeeded(SCHOOLS_TOUR));
+    }
+  });
 
   ngOnInit(): void {
     this.loadSchools();

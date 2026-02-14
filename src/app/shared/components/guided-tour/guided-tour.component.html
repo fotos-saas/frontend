@@ -1,0 +1,64 @@
+<div class="gt-overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-label="Bemutató">
+
+  <!-- SVG Spotlight mask -->
+  <svg class="gt-overlay__svg"
+       [attr.viewBox]="viewBox()"
+       preserveAspectRatio="none"
+       (click)="onOverlayClick($event)">
+    <defs>
+      <mask id="gt-spotlight-mask">
+        <rect x="0" y="0" width="100%" height="100%" fill="white" />
+        @if (tourService.targetRect(); as rect) {
+          @if (tourService.currentStep()?.highlightType !== 'none') {
+            <rect class="gt-spotlight-cutout"
+                  [attr.x]="rect.x"
+                  [attr.y]="rect.y"
+                  [attr.width]="rect.width"
+                  [attr.height]="rect.height"
+                  rx="8"
+                  fill="black" />
+          }
+        }
+      </mask>
+    </defs>
+    <rect x="0" y="0" width="100%" height="100%"
+          fill="rgba(0, 0, 0, 0.6)"
+          mask="url(#gt-spotlight-mask)" />
+  </svg>
+
+  <!-- Border highlight -->
+  @if (tourService.targetRect(); as rect) {
+    @if (tourService.currentStep()?.highlightType === 'border') {
+      <div class="gt-highlight-border"
+           [style.top.px]="rect.y"
+           [style.left.px]="rect.x"
+           [style.width.px]="rect.width"
+           [style.height.px]="rect.height">
+      </div>
+    }
+  }
+
+  <!-- Tooltip -->
+  @if (tourService.currentStep(); as step) {
+    <div class="gt-tooltip-wrapper"
+         [class.gt-tooltip-wrapper--visible]="tooltipVisible()"
+         [class.gt-tooltip-wrapper--transitioning]="tourService.isTransitioning()"
+         [style.top.px]="tooltipPosition().top"
+         [style.left.px]="tooltipPosition().left"
+         aria-live="polite">
+      <app-guided-tour-tooltip
+        [step]="step"
+        [isFirstStep]="tourService.isFirstStep()"
+        [isLastStep]="tourService.isLastStep()"
+        [stepCounter]="tourService.stepCounter()"
+        [arrowPosition]="tooltipPosition().arrowPosition"
+        [progressPercent]="progressPercent()"
+        (nextEvent)="tourService.next()"
+        (previousEvent)="tourService.prev()"
+        (skipEvent)="tourService.skip()" />
+    </div>
+  }
+</div>

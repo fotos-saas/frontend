@@ -1,0 +1,39 @@
+<div class="gtt" [class.gtt--no-arrow]="arrowPosition() === 'none'">
+  <!-- Arrow -->
+  @if (arrowPosition() !== 'none') {
+    <div class="gtt__arrow" [class]="'gtt__arrow--' + arrowPosition()"></div>
+  }
+
+  <!-- Content -->
+  <div class="gtt__content">
+    <h3 class="gtt__title">{{ step().title }}</h3>
+    <p class="gtt__description">{{ step().description }}</p>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="gtt__progress">
+    <div class="gtt__progress-bar" [style.width.%]="progressPercent()"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="gtt__footer">
+    <span class="gtt__counter">{{ stepCounter() }}</span>
+    <div class="gtt__actions">
+      @if (!isFirstStep()) {
+        <button class="gtt__btn gtt__btn--secondary" (click)="previousEvent.emit()">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="14" />
+          Vissza
+        </button>
+      }
+      <button class="gtt__btn gtt__btn--ghost" (click)="skipEvent.emit()">
+        Kihagyás
+      </button>
+      <button class="gtt__btn gtt__btn--primary" (click)="nextEvent.emit()">
+        {{ isLastStep() ? 'Befejezés' : 'Következő' }}
+        @if (!isLastStep()) {
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="14" />
+        }
+      </button>
+    </div>
+  </div>
+</div>

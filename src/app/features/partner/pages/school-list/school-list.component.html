@@ -230,3 +230,8 @@
     (savedEvent)="onLinkSaved()"
   />
 }
+
+<!-- Guided Tour -->
+@if (tourService.isActive()) {
+  <app-guided-tour />
+}

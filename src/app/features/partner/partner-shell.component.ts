@@ -14,6 +14,7 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
 import { BrandingService } from './services/branding.service';
 import { ICONS, TEAM_MEMBER_ROLES, getSubscriptionStatusLabel } from '../../shared/constants';
+import { environment } from '../../../environments/environment';
 import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
 
@@ -166,17 +167,35 @@ export class PartnerShellComponent implements OnInit {
       },
     ];
 
+    let items: MenuItem[];
+
     if (this.isOwner()) {
-      return allItems;
+      items = allItems;
+    } else {
+      // Csapattagok: nincs Csapatom, nincs Testreszabás, nincs Előfizetésem (de van Fiók törlése + Beállítások)
+      items = allItems
+        .filter(item => !['team', 'customization', 'subscription', 'partner-settings'].includes(item.id))
+        .concat([
+          { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások', icon: 'settings' },
+          { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },
+        ]);
     }
 
-    // Csapattagok: nincs Csapatom, nincs Testreszabás, nincs Előfizetésem (de van Fiók törlése + Beállítások)
-    return allItems
-      .filter(item => !['team', 'customization', 'subscription', 'partner-settings'].includes(item.id))
-      .concat([
-        { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások', icon: 'settings' },
-        { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },
-      ]);
+    // Production-ben a devBadge menüpontok elrejtése
+    if (environment.production) {
+      items = items
+        .filter(item => !item.devBadge)
+        .map(item => {
+          if (item.children) {
+            const filtered = item.children.filter(c => !c.devBadge);
+            return filtered.length ? { ...item, children: filtered } : null;
+          }
+          return item;
+        })
+        .filter((item): item is MenuItem => item !== null);
+    }
+
+    return items;
   });
 
   private readonly destroyRef = inject(DestroyRef);

@@ -20,6 +20,7 @@ import { PartnerService } from '../../../../features/partner/services/partner.se
 import { PartnerGalleryService } from '../../../../features/partner/services/partner-gallery.service';
 import { SelectionPersonType } from '../../../../features/partner/components/selection-download-dialog/selection-download-dialog.component';
 import { saveFile } from '../../../utils/file.util';
+import { projectShortName } from '../../../utils/string.util';
 import { ProjectDetailHeaderComponent } from '../project-detail-header/project-detail-header.component';
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
 import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
@@ -322,8 +323,8 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
           takeUntilDestroyed(this.destroyRef)
         ).subscribe({
           next: (blob) => {
-            const today = new Date().toISOString().slice(0, 10);
-            saveFile(blob, `kivalasztasok-${projectId}-${today}.zip`);
+            const name = projectShortName(this.projectData()?.name ?? '', projectId);
+            saveFile(blob, `${name}.zip`);
             this.downloadingSelections.set(false);
             this.toast.success('Siker', 'ZIP letöltve');
           },

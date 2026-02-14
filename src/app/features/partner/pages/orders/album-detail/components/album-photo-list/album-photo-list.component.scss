@@ -1,8 +1,3 @@
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 @keyframes listItemEntry {
   from { opacity: 0; transform: translateX(-8px); }
   to { opacity: 1; transform: translateX(0); }
@@ -381,8 +376,4 @@
 .spinner--dark {
   border-color: rgba(255, 255, 255, 0.3);
   border-top-color: white;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }

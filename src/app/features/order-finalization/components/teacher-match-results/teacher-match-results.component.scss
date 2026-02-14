@@ -23,10 +23,6 @@
   }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .match-results {
   display: flex;
   flex-direction: column;

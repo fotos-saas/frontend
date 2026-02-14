@@ -244,11 +244,6 @@
   animation: shimmer 1.5s infinite;
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
 .modal-footer {
   padding: 16px 24px;
   border-top: 1px solid #e2e8f0;

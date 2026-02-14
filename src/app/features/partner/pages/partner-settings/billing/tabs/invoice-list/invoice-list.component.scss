@@ -165,17 +165,6 @@
   }
 }
 
-@keyframes cardEntry {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .td {
   font-size: 0.875rem;
   color: #1e293b;
@@ -320,11 +309,6 @@
   animation: shimmer 1.5s infinite;
   border-radius: 10px;
   margin-bottom: 6px;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
 
 // === RESPONSIVE ===

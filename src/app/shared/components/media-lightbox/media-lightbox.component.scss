@@ -349,15 +349,6 @@ $primary-color: #6366f1;
 }
 
 // Animations
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 @keyframes scaleIn {
   from {
     transform: scale(0.95);

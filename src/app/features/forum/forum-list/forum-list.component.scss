@@ -9,18 +9,6 @@ $amber-500: #f59e0b;
 // ANIMATIONS - Keyframes
 // ============================================
 
-// Skeleton shimmer effect
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-// Empty state floating animation
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
 .forum-list {
   min-height: 100%;
   max-width: 48rem; // Ugyanaz mint forum-detail

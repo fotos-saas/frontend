@@ -60,10 +60,6 @@ $green-600: #059669;
   }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 // Participants list
 .participants-list {
   display: flex;

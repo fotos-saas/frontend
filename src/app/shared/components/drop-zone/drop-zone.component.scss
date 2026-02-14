@@ -102,10 +102,6 @@
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .progress-text {
   font-size: 0.9375rem;
   font-weight: 500;

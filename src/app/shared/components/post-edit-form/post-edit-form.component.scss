@@ -128,12 +128,6 @@
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .post-edit-form__textarea,
   .post-edit-form__btn {

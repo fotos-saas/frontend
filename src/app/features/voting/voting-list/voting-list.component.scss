@@ -13,18 +13,6 @@ $gray-700: #374151;
 // ANIMATIONS - Keyframes
 // ============================================
 
-// Skeleton shimmer effect
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-// Empty state floating animation
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
 // max-width → page-card default kezeli (1000→1200)
 .voting-page {
   min-height: 100%;

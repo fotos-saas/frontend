@@ -58,11 +58,6 @@
   width: 60%;
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
 /* Error state */
 .error-container {
   text-align: center;
@@ -92,11 +87,6 @@
   border-radius: 50%;
   margin-bottom: 20px;
   animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
 }
 
 .empty-icon {
@@ -226,13 +216,6 @@
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 20px;
-}
-
-@keyframes cardEntry {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .album-card:hover {

@@ -88,17 +88,6 @@
   }
 }
 
-@keyframes cardEntry {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 // Staggered animation for list items
 :host:nth-child(1) .forum-post { animation-delay: 0.05s; }
 :host:nth-child(2) .forum-post { animation-delay: 0.1s; }

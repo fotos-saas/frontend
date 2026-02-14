@@ -254,10 +254,6 @@
   border-top-color: #64748b;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .form-actions {

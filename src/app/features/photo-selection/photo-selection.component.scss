@@ -389,10 +389,6 @@ $transition: 0.2s ease;
 // Animations
 @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@keyframes cardEntry { from { opacity: 0; transform: translateY(16px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
 // Reduced motion
 @media (prefers-reduced-motion: reduce) {
   .photo-selection__error, .photo-selection__validation, .photo-selection__gallery-item { animation: none !important; }

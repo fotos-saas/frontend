@@ -3,26 +3,6 @@ $blue-500: #3b82f6;
 $blue-600: #2563eb;
 
 // ============================================
-// ANIMATIONS
-// ============================================
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// ============================================
 // LIGHTBOX CONTAINER
 // ============================================
 

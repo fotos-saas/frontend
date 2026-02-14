@@ -257,10 +257,6 @@
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .auth-footer {
   text-align: center;
   margin-top: 1.5rem;

@@ -12,6 +12,7 @@ import {
 import { SelectOption } from '../../../../../shared/components/searchable-select/searchable-select.component';
 import { SearchableSelectComponent } from '../../../../../shared/components/searchable-select/searchable-select.component';
 import { ArchiveProjectCardComponent } from '../archive-project-card/archive-project-card.component';
+import { ListPaginationComponent } from '../../../../../shared/components/list-pagination/list-pagination.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 
 @Component({
@@ -22,6 +23,7 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
     LucideAngularModule,
     SearchableSelectComponent,
     ArchiveProjectCardComponent,
+    ListPaginationComponent,
   ],
   templateUrl: './archive-project-view.component.html',
   styleUrl: './archive-project-view.component.scss',
@@ -48,6 +50,9 @@ export class ArchiveProjectViewComponent implements OnInit {
 
   expandedIds = signal<Set<number>>(new Set());
 
+  currentPage = signal(1);
+  readonly perPage = 10;
+
   uploadPhotoRequest = output<ArchivePersonInSchool>();
   syncPhotosRequest = output<{ schoolId: number; classYear?: string }>();
   syncSingleItemRequest = output<ArchivePersonInSchool>();
@@ -60,6 +65,14 @@ export class ArchiveProjectViewComponent implements OnInit {
     const groups = this.schoolGroups();
     if (!query) return groups;
     return groups.filter(g => g.schoolName.toLowerCase().includes(query));
+  });
+
+  totalPages = computed(() => Math.ceil(this.filteredSchoolGroups().length / this.perPage));
+  totalSchoolCount = computed(() => this.filteredSchoolGroups().length);
+
+  paginatedSchoolGroups = computed(() => {
+    const start = (this.currentPage() - 1) * this.perPage;
+    return this.filteredSchoolGroups().slice(start, start + this.perPage);
   });
 
   ngOnInit(): void {
@@ -101,16 +114,23 @@ export class ArchiveProjectViewComponent implements OnInit {
 
   onSchoolSearchChange(value: string): void {
     this.schoolSearch.set(value);
+    this.currentPage.set(1);
   }
 
   onYearChange(value: string): void {
     this.selectedYear.set(value);
+    this.currentPage.set(1);
     this.loadData();
   }
 
   onMissingOnlyChange(): void {
     this.missingOnly.update(v => !v);
+    this.currentPage.set(1);
     this.loadData();
+  }
+
+  setPage(page: number): void {
+    this.currentPage.set(page);
   }
 
   toggleSchool(schoolId: number): void {
@@ -126,11 +146,23 @@ export class ArchiveProjectViewComponent implements OnInit {
   }
 
   expandAll(): void {
-    this.expandedIds.set(new Set(this.schoolGroups().map(s => s.schoolId)));
+    this.expandedIds.update(ids => {
+      const next = new Set(ids);
+      for (const s of this.paginatedSchoolGroups()) {
+        next.add(s.schoolId);
+      }
+      return next;
+    });
   }
 
   collapseAll(): void {
-    this.expandedIds.set(new Set());
+    this.expandedIds.update(ids => {
+      const next = new Set(ids);
+      for (const s of this.paginatedSchoolGroups()) {
+        next.delete(s.schoolId);
+      }
+      return next;
+    });
   }
 
   isExpanded(schoolId: number): boolean {

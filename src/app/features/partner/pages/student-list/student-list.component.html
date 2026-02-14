@@ -120,8 +120,8 @@
               [class.student-avatar--clickable]="!!student.photoUrl"
               (click)="openAvatarLightbox(student, $event)"
             >
-              @if (student.photoThumbUrl) {
-                <img [src]="student.photoThumbUrl" [alt]="student.canonicalName" loading="lazy" />
+              @if (student.photoMiniThumbUrl || student.photoThumbUrl) {
+                <img [src]="student.photoMiniThumbUrl || student.photoThumbUrl" [alt]="student.canonicalName" loading="lazy" />
               } @else {
                 <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="20" />
               }

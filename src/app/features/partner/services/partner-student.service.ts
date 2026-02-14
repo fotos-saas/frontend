@@ -193,6 +193,7 @@ export class PartnerStudentService implements ArchiveService {
             hasPhoto: st.hasPhoto,
             noPhotoMarked: st.noPhotoMarked,
             photoThumbUrl: st.photoThumbUrl,
+            photoMiniThumbUrl: st.photoMiniThumbUrl,
             photoUrl: st.photoUrl,
           })),
         })),

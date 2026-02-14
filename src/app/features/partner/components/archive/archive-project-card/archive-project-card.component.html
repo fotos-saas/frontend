@@ -63,8 +63,8 @@
                   [class.item-avatar--clickable]="!!item.photoUrl"
                   (click)="onViewPhoto(item, $event)"
                 >
-                  @if (item.photoThumbUrl) {
-                    <img [src]="item.photoThumbUrl" [alt]="item.name" loading="lazy" />
+                  @if (item.photoMiniThumbUrl || item.photoThumbUrl) {
+                    <img [src]="item.photoMiniThumbUrl || item.photoThumbUrl" [alt]="item.name" loading="lazy" />
                   } @else {
                     <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" />
                   }

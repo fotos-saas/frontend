@@ -10,6 +10,7 @@ export interface StudentListItem {
   schoolName: string | null;
   isActive: boolean;
   photoThumbUrl: string | null;
+  photoMiniThumbUrl: string | null;
   photoUrl: string | null;
   aliasesCount: number;
   photosCount: number;
@@ -108,6 +109,7 @@ export interface StudentInSchool {
   hasPhoto: boolean;
   noPhotoMarked: boolean;
   photoThumbUrl: string | null;
+  photoMiniThumbUrl: string | null;
   photoUrl: string | null;
   schoolId?: number;
 }

@@ -239,6 +239,7 @@ export class PartnerTeacherService implements ArchiveService {
             hasSyncablePhoto: t.hasSyncablePhoto,
             noPhotoMarked: t.noPhotoMarked,
             photoThumbUrl: t.photoThumbUrl,
+            photoMiniThumbUrl: t.photoMiniThumbUrl,
             photoUrl: t.photoUrl,
             photoFileName: t.photoFileName,
             photoTakenAt: t.photoTakenAt,

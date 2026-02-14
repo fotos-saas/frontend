@@ -12,6 +12,7 @@ export interface TeacherListItem {
   schoolName: string | null;
   isActive: boolean;
   photoThumbUrl: string | null;
+  photoMiniThumbUrl: string | null;
   photoUrl: string | null;
   aliasesCount: number;
   photosCount: number;
@@ -32,6 +33,7 @@ export interface TeacherLinkedGroupItem {
   fullDisplayName: string;
   schoolName: string | null;
   photoThumbUrl: string | null;
+  photoMiniThumbUrl: string | null;
 }
 
 export interface TeacherAlias {
@@ -131,6 +133,7 @@ export interface TeacherInSchool {
   hasSyncablePhoto: boolean;
   noPhotoMarked: boolean;
   photoThumbUrl: string | null;
+  photoMiniThumbUrl: string | null;
   photoUrl: string | null;
   photoFileName?: string | null;
   photoTakenAt?: string | null;

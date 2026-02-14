@@ -85,6 +85,7 @@ export interface ArchivePersonInSchool {
   hasSyncablePhoto?: boolean;
   noPhotoMarked: boolean;
   photoThumbUrl: string | null;
+  photoMiniThumbUrl: string | null;
   photoUrl: string | null;
   photoFileName?: string | null;
   photoTakenAt?: string | null;

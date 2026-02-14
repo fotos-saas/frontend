@@ -1,5 +1,5 @@
 import { ApplicationConfig, APP_INITIALIZER, importProvidersFrom } from '@angular/core';
-import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { provideRouter, withPreloading } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
@@ -9,10 +9,11 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { provideSentry, SentryService } from './core/services/sentry.service';
 import { LUCIDE_ICONS_MAP } from './shared/constants/lucide-icons';
+import { RoleBasedPreloadingStrategy } from './core/strategies/role-based-preloading.strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideRouter(routes, withPreloading(RoleBasedPreloadingStrategy)),
     provideAnimationsAsync(),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     importProvidersFrom(LucideAngularModule.pick(LUCIDE_ICONS_MAP)),

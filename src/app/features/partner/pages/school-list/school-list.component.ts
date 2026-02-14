@@ -76,9 +76,7 @@ export class PartnerSchoolListComponent implements OnInit {
   modalMode = signal<'create' | 'edit'>('create');
 
   private readonly tourStartEffect = effect(() => {
-    // Tour indítás, ha a loading befejeződött és vannak iskolák
-    if (!this.filterState.loading() && this.schools().length > 0) {
-      // requestAnimationFrame: DOM renderelés után
+    if (!this.filterState.loading()) {
       requestAnimationFrame(() => this.tourService.startIfNeeded(SCHOOLS_TOUR));
     }
   });

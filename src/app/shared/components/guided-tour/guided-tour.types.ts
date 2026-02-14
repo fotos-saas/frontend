@@ -8,6 +8,9 @@ export interface TourStep {
   placement?: TourPlacement;
   highlightType?: HighlightType;
   spotlightPadding?: number;
+  since?: number;
+  requiredSelector?: string;
+  isOutro?: boolean;
 }
 
 export interface Tour {

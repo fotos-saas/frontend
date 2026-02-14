@@ -21,6 +21,7 @@
 | 10 | **`matTooltip` tooltiphez** | Angular Material tooltip |
 | 11 | **`createBackdropHandler` dialógusokhoz** | Szöveg kijelölés közben NE záródjon be! |
 | 12 | **Lista stílus: `_list-page.scss`** | MINDIG a közös stílusokat használd! |
+| 13 | **Guided Tour bővítés** | Új feature/gomb = tour lépés `since: N+1` |
 
 ---
 

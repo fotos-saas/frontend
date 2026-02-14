@@ -1,7 +1,17 @@
 <div class="school-list-page page-card">
   <header class="page-header">
     <div class="header-content">
-      <h1>Iskolák</h1>
+      <div class="title-row">
+        <h1>Iskolák</h1>
+        <button
+          type="button"
+          class="tour-btn"
+          (click)="restartTour()"
+        >
+          <lucide-icon [name]="ICONS.PLAY_CIRCLE" [size]="15" />
+          Bemutató
+        </button>
+      </div>
       @if (schoolLimits()?.max !== null) {
         <p class="subtitle">{{ schoolLimits()?.current }} / {{ schoolLimits()?.max }} iskola</p>
       } @else {
@@ -9,14 +19,6 @@
       }
     </div>
     <div class="header-actions">
-      <button
-        type="button"
-        class="btn-icon"
-        matTooltip="Bemutató újranézése"
-        (click)="restartTour()"
-      >
-        <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="20" />
-      </button>
       <button
         type="button"
         class="btn-primary"

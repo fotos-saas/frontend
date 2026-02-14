@@ -3,31 +3,37 @@
 .school-list-page {
 }
 
-.header-actions {
+.title-row {
   display: flex;
   align-items: center;
-  // gap helyett margin (Safari compat)
+
   > * + * {
-    margin-left: 8px;
+    margin-left: 10px;
   }
 }
 
-.btn-icon {
+.tour-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #94a3b8;
+  padding: 3px 10px 3px 8px;
+  border: 1px solid #e0d4fc;
+  border-radius: 20px;
+  background: #f5f0ff;
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color 150ms ease, border-color 150ms ease;
+  white-space: nowrap;
+
+  lucide-icon {
+    margin-right: 4px;
+    display: inline-flex;
+  }
 
   &:hover {
-    background: #f1f5f9;
-    color: #64748b;
+    background: #ede5ff;
+    border-color: #c4b5fd;
   }
 }
 

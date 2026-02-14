@@ -29,6 +29,7 @@
     <app-archive-project-view
       [config]="archiveConfig"
       [classYears]="classYears()"
+      [schoolOptions]="schoolOptions()"
       (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
       (viewPhotoRequest)="onViewPhotoFromProject($event)"
       (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"

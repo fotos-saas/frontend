@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal, computed, input, output, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import {
@@ -19,7 +18,6 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
   selector: 'app-archive-project-view',
   standalone: true,
   imports: [
-    FormsModule,
     LucideAngularModule,
     SearchableSelectComponent,
     ArchiveProjectCardComponent,
@@ -32,6 +30,7 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
 export class ArchiveProjectViewComponent implements OnInit {
   config = input.required<ArchiveConfig>();
   classYears = input<SelectOption[]>([]);
+  schoolOptions = input<SelectOption[]>([]);
   syncingSchoolId = input(0);
 
   private readonly archiveService = inject(ARCHIVE_SERVICE);
@@ -44,7 +43,7 @@ export class ArchiveProjectViewComponent implements OnInit {
   loading = signal(true);
   initialized = signal(false);
 
-  schoolSearch = signal('');
+  selectedSchoolId = signal('');
   selectedYear = signal('');
   missingOnly = signal(false);
 
@@ -61,10 +60,10 @@ export class ArchiveProjectViewComponent implements OnInit {
   undoNoPhotoRequest = output<ArchivePersonInSchool>();
 
   filteredSchoolGroups = computed(() => {
-    const query = this.schoolSearch().toLowerCase().trim();
+    const schoolId = this.selectedSchoolId();
     const groups = this.schoolGroups();
-    if (!query) return groups;
-    return groups.filter(g => g.schoolName.toLowerCase().includes(query));
+    if (!schoolId) return groups;
+    return groups.filter(g => String(g.schoolId) === schoolId);
   });
 
   totalPages = computed(() => Math.ceil(this.filteredSchoolGroups().length / this.perPage));
@@ -112,8 +111,8 @@ export class ArchiveProjectViewComponent implements OnInit {
       });
   }
 
-  onSchoolSearchChange(value: string): void {
-    this.schoolSearch.set(value);
+  onSchoolChange(value: string): void {
+    this.selectedSchoolId.set(value);
     this.currentPage.set(1);
   }
 

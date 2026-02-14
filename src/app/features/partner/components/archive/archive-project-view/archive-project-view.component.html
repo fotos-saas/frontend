@@ -1,20 +1,13 @@
 <!-- Szűrők -->
 <div class="project-filters">
-  <div class="search-box">
-    <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-    <input
-      type="text"
-      placeholder="Iskola keresése..."
-      [ngModel]="schoolSearch()"
-      (ngModelChange)="onSchoolSearchChange($event)"
-      class="search-input"
-    />
-    @if (schoolSearch()) {
-      <button class="clear-btn" (click)="onSchoolSearchChange('')">
-        <lucide-icon [name]="ICONS.X" [size]="14" />
-      </button>
-    }
-  </div>
+  <app-searchable-select
+    class="filter-select"
+    [options]="schoolOptions()"
+    [value]="selectedSchoolId()"
+    placeholder="Iskola keresése..."
+    allLabel="Minden iskola"
+    (valueChange)="onSchoolChange($event)"
+  />
 
   <app-searchable-select
     class="filter-select filter-select--sm"

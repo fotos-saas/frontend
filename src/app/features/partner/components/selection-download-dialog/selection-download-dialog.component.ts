@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, output, signal, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, output, signal, input, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -24,8 +24,6 @@ export interface SelectionDownloadResult {
 export class SelectionDownloadDialogComponent {
   /** 'project' = személytípus + fájlnév, 'school' = hatókör + fájlnév (tanárok fix) */
   readonly mode = input<SelectionDialogMode>('project');
-  /** Legfrissebb tanév az iskolához (pl. "2025-2026") */
-  readonly latestClassYear = input<string | null>(null);
 
   readonly download = output<SelectionDownloadResult>();
   readonly close = output<void>();
@@ -34,6 +32,14 @@ export class SelectionDownloadDialogComponent {
   readonly selectedType = signal<SelectionPersonType>('both');
   readonly selectedNaming = signal<SelectionFileNaming>('student_name');
   readonly allProjects = signal(false);
+
+  /** Aktuális tanév: szept-től új tanév (pl. "2025-2026") */
+  readonly currentSchoolYear = computed(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const startYear = now.getMonth() >= 8 ? year : year - 1;
+    return `${startYear}-${startYear + 1}`;
+  });
 
   selectType(type: SelectionPersonType): void {
     this.selectedType.set(type);

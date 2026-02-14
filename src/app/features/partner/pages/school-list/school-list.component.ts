@@ -213,7 +213,6 @@ export class PartnerSchoolListComponent implements OnInit {
     );
     const ref = container.createComponent(SelectionDownloadDialogComponent);
     ref.setInput('mode', 'school');
-    ref.setInput('latestClassYear', school.latestClassYear);
     ref.instance.close.subscribe(() => container.clear());
     ref.instance.download.subscribe((result: SelectionDownloadResult) => {
       container.clear();

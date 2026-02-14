@@ -23,10 +23,9 @@ $purple-500: #a855f7;
   50% { transform: translateY(-10px); }
 }
 
+// max-width → page-card default kezeli (1000→1200)
 .newsfeed-list {
   min-height: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
   // padding: page-card class-tól jön
 
   // Header

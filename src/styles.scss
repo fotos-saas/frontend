@@ -274,6 +274,10 @@ body.dialog-open {
   flex: 1; // Kitölti a rendelkezésre álló helyet
   width: 100%; // Mindig teljes szélesség - ne ugorjon össze betöltés közben
 
+  // Egységes méretezés (default: 1200px)
+  max-width: 1200px;
+  margin: 0 auto;
+
   // Egységes padding
   padding: 2rem;
 
@@ -317,6 +321,16 @@ body.dialog-open {
     0 24px 48px -12px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transform: translateY(-2px);
+}
+
+// Narrow variant (formok, beállítások)
+.page-card--narrow {
+  max-width: 768px;
+}
+
+// Wide variant (sok oszlopos listák)
+.page-card--wide {
+  max-width: 1400px;
 }
 
 // Full-width variant (nincs max-width korlátozás)

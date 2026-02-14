@@ -20,10 +20,8 @@
 }
 
 // === LAYOUT ===
-.list-page {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+// max-width + margin: 0 auto → .page-card default kezeli (styles.scss)
+.list-page {}
 
 // === HEADER ===
 .page-header {

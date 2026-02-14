@@ -1,5 +1,5 @@
 @if (accessDenied()) {
-  <div class="access-denied page-card">
+  <div class="access-denied page-card page-card--narrow">
     <div class="access-denied__content">
       <div class="access-denied__icon">
         <lucide-icon [name]="ICONS.PALETTE" [size]="48" />
@@ -40,7 +40,7 @@
     </div>
   </div>
 } @else {
-<div class="branding-page page-card">
+<div class="branding-page page-card page-card--narrow">
   <h1 class="page-title">
     <lucide-icon [name]="ICONS.PALETTE" [size]="24" />
     Márkajelzés

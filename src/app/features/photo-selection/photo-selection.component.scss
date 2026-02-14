@@ -17,13 +17,12 @@ $transition: 0.2s ease;
   --shimmer-mid: #e0e0e0;
 }
 
+// max-width → page-card default kezeli
 .photo-selection {
   flex: 1;
   display: flex;
   flex-direction: column;
   padding: 16px;
-  max-width: $max-width;
-  margin: 0 auto;
   @media (min-width: 768px) { padding: 24px; }
 }
 

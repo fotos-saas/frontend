@@ -229,11 +229,27 @@ export class MyDialogComponent {
 
 ## PAGE-CARD LAYOUT
 
+3 méretosztály — `styles.scss`-ben definiálva, `margin: 0 auto` centrálja:
+
+| Class | Max-width | Mikor |
+|-------|-----------|-------|
+| `page-card--narrow` | 768px | Formok, beállítások (branding, settings) |
+| `.page-card` (default) | **1200px** | Listák, táblázatok, dashboard |
+| `page-card--wide` | 1400px | Sok oszlopos listák (projektek) |
+| `page-card--full` | none | Teljes szélesség |
+
 ```html
-<div class="my-component page-card">
-  <!-- Tartalom -->
-</div>
+<!-- Default (1200px) -->
+<div class="my-component page-card">...</div>
+
+<!-- Narrow (768px) - formok -->
+<div class="my-component page-card page-card--narrow">...</div>
+
+<!-- Wide (1400px) - projekt lista -->
+<div class="my-component page-card page-card--wide">...</div>
 ```
+
+**FONTOS:** Komponens SCSS-ben NE írj `max-width` + `margin: 0 auto`-t — a page-card class kezeli!
 
 ---
 

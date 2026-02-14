@@ -1,8 +1,5 @@
-/* Access Denied */
-.access-denied {
-  max-width: 700px;
-  margin: 0 auto;
-}
+/* Access Denied - max-width → page-card--narrow kezeli */
+.access-denied {}
 
 .access-denied__content {
   display: flex;
@@ -74,10 +71,8 @@
   }
 }
 
-.branding-page {
-  max-width: 700px;
-  margin: 0 auto;
-}
+// max-width → page-card--narrow kezeli
+.branding-page {}
 
 .page-title {
   display: flex;

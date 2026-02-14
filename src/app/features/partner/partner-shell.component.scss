@@ -1,14 +1,16 @@
 .partner-layout {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  overflow: hidden;
 }
 
 /* ============ Main Container ============ */
 .main-container {
   display: flex;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
   position: relative;
 }
@@ -112,6 +114,7 @@
   flex-direction: column;
   transition: width 0.2s ease;
   flex-shrink: 0;
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
 }
@@ -302,12 +305,11 @@
   flex: 1;
   padding: 24px;
   overflow-y: auto;
-  max-height: calc(100vh - 64px);
+  min-height: 0;
   margin-left: 0;
 }
 
 .content--full {
-  max-height: calc(100vh - 56px);
   padding: 16px;
 }
 

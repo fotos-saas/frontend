@@ -324,6 +324,25 @@ body.dialog-open {
   max-width: none;
 }
 
+// Sticky page-header: scrollozásnál a tetején marad
+// A .content (partner-shell/app-shell) overflow-y: auto → ez a scroll container
+// A negatív margin + padding trükk kompenzálja a .page-card 2rem paddingjét
+.page-card > .page-header {
+  position: -webkit-sticky; // Safari
+  position: sticky;
+  top: -2rem; // page-card padding kompenzáció
+  margin: -2rem -2rem 24px -2rem;
+  padding: 2rem 2rem 16px 2rem;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(248, 250, 252, 0.95) 100%
+  );
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  border-radius: 16px 16px 0 0;
+}
+
 // Dark mode support
 @media (prefers-color-scheme: dark) {
   .page-card {
@@ -359,6 +378,13 @@ body.dialog-open {
       0 24px 48px -12px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(71, 85, 105, 0.5);
   }
+
+  .page-card > .page-header {
+    background: linear-gradient(135deg,
+      rgba(30, 41, 59, 0.98) 0%,
+      rgba(15, 23, 42, 0.95) 100%
+    );
+  }
 }
 
 .dark .page-card {
@@ -386,6 +412,13 @@ body.dialog-open {
       0 20px 40px -10px rgba(0, 0, 0, 0.25),
       inset 0 1px 0 rgba(71, 85, 105, 0.5);
   }
+}
+
+.dark .page-card > .page-header {
+  background: linear-gradient(135deg,
+    rgba(30, 41, 59, 0.98) 0%,
+    rgba(15, 23, 42, 0.95) 100%
+  );
 }
 
 .dark .page-card--hoverable:hover {

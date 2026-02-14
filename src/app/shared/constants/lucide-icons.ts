@@ -155,6 +155,8 @@ import {
   Undo2,
   // Tags
   Tag,
+  // File
+  File,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -306,4 +308,6 @@ export const LUCIDE_ICONS_MAP = {
   Undo2,
   // Tags
   Tag,
+  // File
+  File,
 };

@@ -7,43 +7,11 @@
   </header>
 
   <!-- Szűrők -->
-  <div class="filters">
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-      <input
-        type="text"
-        placeholder="Keresés név, email vagy cégnév alapján..."
-        [ngModel]="filterState.search()"
-        (ngModelChange)="filterState.setSearch($event)"
-        class="search-input"
-      />
-      @if (filterState.search()) {
-        <button class="clear-btn" (click)="filterState.clearSearch()">
-          <lucide-icon [name]="ICONS.X" [size]="14" />
-        </button>
-      }
-    </div>
-
-    <select
-      class="filter-select"
-      [ngModel]="filterState.filters().plan"
-      (ngModelChange)="filterState.setFilter('plan', $event)"
-    >
-      @for (option of planOptions(); track option.value) {
-        <option [value]="option.value">{{ option.label }}</option>
-      }
-    </select>
-
-    <select
-      class="filter-select"
-      [ngModel]="filterState.filters().status"
-      (ngModelChange)="filterState.setFilter('status', $event)"
-    >
-      @for (option of statusOptions; track option.value) {
-        <option [value]="option.value">{{ option.label }}</option>
-      }
-    </select>
-  </div>
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="{ placeholder: 'Keresés név, email vagy cégnév alapján...' }"
+    [filterConfigs]="subscriberFilterConfigs()"
+  />
 
   <!-- Lista -->
   @if (filterState.loading()) {

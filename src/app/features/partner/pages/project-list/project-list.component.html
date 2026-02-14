@@ -20,33 +20,14 @@
     </button>
   </header>
 
-  <!-- Keresés és szűrők -->
-  <div class="filters">
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-      <input
-        type="text"
-        placeholder='Keresés (#ID, @ügyintéző, "pontos kifejezés")...'
-        [ngModel]="filterState.search()"
-        (ngModelChange)="filterState.setSearch($event)"
-        class="search-input"
-      />
-      @if (filterState.search()) {
-        <button class="clear-btn" (click)="filterState.clearSearch()">
-          <lucide-icon [name]="ICONS.X" [size]="14" />
-        </button>
-      }
-    </div>
-
-    <div class="filter-controls">
-      <app-expandable-filters
-        [filters]="filterConfigs"
-        [values]="filterState.filters()"
-        [visibleCount]="2"
-        (filterChange)="onFilterChange($event)"
-      />
-    </div>
-  </div>
+  <!-- Keresés, szűrők és mobil rendezés -->
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="searchConfig"
+    [filterConfigs]="filterConfigs"
+    [visibleFilterCount]="2"
+    [sortConfig]="sortDef"
+  />
 
   <!-- Lista -->
   @if (filterState.loading()) {
@@ -72,15 +53,6 @@
       }
     </div>
   } @else {
-    <!-- Mobil rendezés -->
-    <app-project-mobile-sort
-      [options]="sortOptions"
-      [sortBy]="filterState.sortBy()"
-      [sortDir]="filterState.sortDir()"
-      (sortByChange)="filterState.setSortBy($event)"
-      (sortDirChange)="filterState.toggleSortDir()"
-    />
-
     <!-- Asztali fejléc -->
     <app-project-table-header
       [sortBy]="filterState.sortBy()"

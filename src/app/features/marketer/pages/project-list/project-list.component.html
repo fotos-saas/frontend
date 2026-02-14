@@ -11,35 +11,12 @@
     />
   </header>
 
-  <!-- Keresés -->
-  <div class="filters">
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-      <input
-        type="text"
-        placeholder="Keresés iskola vagy osztály neve alapján..."
-        [ngModel]="filterState.search()"
-        (ngModelChange)="filterState.setSearch($event)"
-        class="search-input"
-      />
-      @if (filterState.search()) {
-        <button class="clear-btn" (click)="filterState.clearSearch()">
-          <lucide-icon [name]="ICONS.X" [size]="14" />
-        </button>
-      }
-    </div>
-
-    <div class="filter-controls">
-      <select [ngModel]="filterState.sortBy()" (ngModelChange)="filterState.setSortBy($event)" class="filter-select">
-        <option value="created_at">Létrehozás dátuma</option>
-        <option value="class_year">Évfolyam</option>
-      </select>
-
-      <button class="sort-dir-btn" (click)="filterState.toggleSortDir()">
-        <lucide-icon [name]="filterState.sortDir() === 'desc' ? ICONS.ARROW_DOWN : ICONS.ARROW_UP" [size]="16" />
-      </button>
-    </div>
-  </div>
+  <!-- Keresés + rendezés -->
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="{ placeholder: 'Keresés iskola vagy osztály neve alapján...' }"
+    [sortConfig]="marketerSortDef"
+  />
 
   <!-- Lista -->
   @if (filterState.loading()) {

@@ -20,6 +20,7 @@ import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/co
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
+import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared/components/smart-filter-bar';
 
 @Component({
   selector: 'app-partner-teacher-list',
@@ -37,6 +38,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     ConfirmDialogComponent,
     MediaLightboxComponent,
     SearchableSelectComponent,
+    SmartFilterBarComponent,
   ],
   providers: [{ provide: ARCHIVE_SERVICE, useExisting: PartnerTeacherService }],
   templateUrl: './teacher-list.component.html',
@@ -78,6 +80,21 @@ export class PartnerTeacherListComponent implements OnInit {
       sublabel: s.city ?? undefined,
     }))
   );
+
+  readonly teacherSearchableFilters = computed<SearchableFilterDef[]>(() => [
+    {
+      id: 'school_id',
+      placeholder: 'Iskola keresése...',
+      allLabel: 'Minden iskola',
+      options: this.schoolOptions(),
+    },
+    {
+      id: 'class_year',
+      placeholder: 'Évfolyam...',
+      allLabel: 'Minden évfolyam',
+      options: this.classYears(),
+    },
+  ]);
 
   // Lightbox
   lightboxMedia = signal<LightboxMediaItem[]>([]);

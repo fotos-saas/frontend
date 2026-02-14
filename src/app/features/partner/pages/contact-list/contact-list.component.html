@@ -56,23 +56,10 @@
   </header>
 
   <!-- Keresés -->
-  <div class="filters">
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-      <input
-        type="text"
-        placeholder="Keresés név, email vagy telefon alapján..."
-        [ngModel]="filterState.search()"
-        (ngModelChange)="filterState.setSearch($event)"
-        class="search-input"
-      />
-      @if (filterState.search()) {
-        <button class="clear-btn" (click)="filterState.clearSearch()">
-          <lucide-icon [name]="ICONS.X" [size]="14" />
-        </button>
-      }
-    </div>
-  </div>
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="{ placeholder: 'Keresés név, email vagy telefon alapján...' }"
+  />
 
   <!-- Lista -->
   @if (filterState.loading()) {

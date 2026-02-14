@@ -19,6 +19,7 @@ import { GuidedTourService } from '../../../../core/services/guided-tour.service
 import { SCHOOLS_TOUR } from '../../../../shared/components/guided-tour/tours';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
+import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 
 /**
  * Partner School List - Iskolák listája a partner felületen.
@@ -36,6 +37,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
     ConfirmDialogComponent,
     UpgradeDialogComponent,
     GuidedTourComponent,
+    SmartFilterBarComponent,
   ],
   templateUrl: './school-list.component.html',
   styleUrl: './school-list.component.scss',

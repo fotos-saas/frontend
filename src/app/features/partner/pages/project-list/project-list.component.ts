@@ -18,6 +18,7 @@ import { ExpandableFiltersComponent, FilterConfig, FilterChangeEvent } from '../
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
+import { SmartFilterBarComponent, SearchConfig, SortDef } from '../../../../shared/components/smart-filter-bar';
 import { ProjectTableHeaderComponent } from './components/project-table-header/project-table-header.component';
 import { ProjectMobileSortComponent, SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
 import { ProjectPaginationComponent } from './components/project-pagination/project-pagination.component';
@@ -41,6 +42,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     SamplesLightboxComponent,
     ExpandableFiltersComponent,
     ConfirmDialogComponent,
+    SmartFilterBarComponent,
     ProjectTableHeaderComponent,
     ProjectMobileSortComponent,
     ProjectPaginationComponent,
@@ -58,6 +60,11 @@ export class PartnerProjectListComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly qrService: IQrCodeService = this.partnerService;
+
+  readonly searchConfig: SearchConfig = {
+    placeholder: 'Keresés (#ID, @ügyintéző, "pontos kifejezés")...',
+    features: { id: true, assignee: true, exact: true },
+  };
 
   // Tanév opciók generálása (aktuális évtől visszafelé)
   private readonly currentYear = new Date().getFullYear();
@@ -124,6 +131,10 @@ export class PartnerProjectListComponent implements OnInit {
     { value: 'created_at', label: 'Létrehozva' },
   ];
 
+  readonly sortDef: SortDef = {
+    options: this.sortOptions,
+  };
+
   // Modals
   showMissingModal = signal(false);
   showCreateModal = signal(false);
@@ -189,10 +200,6 @@ export class PartnerProjectListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
-  }
-
-  onFilterChange(event: FilterChangeEvent): void {
-    this.filterState.setFilter(event.id as 'status' | 'aware' | 'draft' | 'graduation_year', event.value);
   }
 
   viewProject(project: PartnerProjectListItem): void {

@@ -19,6 +19,7 @@ import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/co
 import { SearchableSelectComponent, SelectOption } from '../../../../shared/components/searchable-select/searchable-select.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
+import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared/components/smart-filter-bar';
 
 @Component({
   selector: 'app-partner-student-list',
@@ -35,6 +36,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     ConfirmDialogComponent,
     MediaLightboxComponent,
     SearchableSelectComponent,
+    SmartFilterBarComponent,
   ],
   providers: [{ provide: ARCHIVE_SERVICE, useExisting: PartnerStudentService }],
   templateUrl: './student-list.component.html',
@@ -75,6 +77,13 @@ export class PartnerStudentListComponent implements OnInit {
       sublabel: s.city ?? undefined,
     }))
   );
+
+  readonly studentSearchableFilters = computed<SearchableFilterDef[]>(() => [{
+    id: 'school_id',
+    placeholder: 'Iskola keresése...',
+    allLabel: 'Minden iskola',
+    options: this.schoolOptions(),
+  }]);
 
   // Lightbox
   lightboxMedia = signal<LightboxMediaItem[]>([]);

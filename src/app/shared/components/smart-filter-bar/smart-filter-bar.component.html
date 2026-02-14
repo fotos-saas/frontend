@@ -1,0 +1,125 @@
+<div class="smart-filter-bar" role="search">
+  <!-- Search box -->
+  <div class="search-box">
+    <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+    <input
+      type="text"
+      [placeholder]="searchConfig().placeholder"
+      [ngModel]="filterState().search()"
+      (ngModelChange)="filterState().setSearch($event)"
+      class="search-input"
+    />
+    @if (filterState().search()) {
+      <button class="clear-btn" (click)="filterState().clearSearch()">
+        <lucide-icon [name]="ICONS.X" [size]="14" />
+      </button>
+    }
+
+    <!-- Search help button (smart search features) -->
+    @if (hasSearchFeatures()) {
+      <button
+        type="button"
+        class="search-help-btn"
+        [class.search-help-btn--active]="showSearchHelp()"
+        (click)="toggleSearchHelp($event)"
+        matTooltip="Keresési szintaxis súgó"
+      >
+        <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="14" />
+      </button>
+
+      @if (showSearchHelp()) {
+        <div class="search-help-tooltip" (click)="$event.stopPropagation()">
+          <div class="search-help-title">Keresési szintaxis</div>
+          @if (searchConfig().features?.id) {
+            <div class="search-help-row">
+              <code>#123</code>
+              <span>Projekt ID keresése</span>
+            </div>
+          }
+          @if (searchConfig().features?.assignee) {
+            <div class="search-help-row">
+              <code>&#64;név</code>
+              <span>Ügyintéző keresése</span>
+            </div>
+          }
+          @if (searchConfig().features?.exact) {
+            <div class="search-help-row">
+              <code>"szöveg"</code>
+              <span>Pontos egyezés</span>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Searchable Select filters -->
+  @for (sf of searchableFilters(); track sf.id) {
+    <app-searchable-select
+      class="searchable-filter"
+      [options]="sf.options"
+      [value]="filterState().filters()[sf.id]"
+      [placeholder]="sf.placeholder"
+      [allLabel]="sf.allLabel"
+      (valueChange)="onSearchableFilterChange(sf.id, $event)"
+    />
+  }
+
+  <!-- Expandable Filters -->
+  @if (filterConfigs().length > 0) {
+    <div class="filter-controls">
+      <app-expandable-filters
+        [filters]="filterConfigs()"
+        [values]="filterState().filters()"
+        [visibleCount]="visibleFilterCount()"
+        (filterChange)="onFilterChange($event)"
+      />
+    </div>
+  }
+</div>
+
+<!-- Mobile sort bar (640px alatt) -->
+@if (sortConfig(); as sort) {
+  @if (sort.showMobileSort !== false) {
+    <div class="mobile-sort-bar">
+      <div class="mobile-sort-group">
+        <label class="mobile-sort-label">Rendezés:</label>
+        <div class="mobile-sort-dropdown">
+          <button
+            type="button"
+            class="mobile-sort-trigger"
+            (click)="toggleMobileSortDropdown()"
+          >
+            <span>{{ currentSortLabel() }}</span>
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="16" />
+          </button>
+          @if (mobileSortOpen()) {
+            <div class="mobile-sort-options">
+              @for (opt of sort.options; track opt.value) {
+                <button
+                  type="button"
+                  class="mobile-sort-option"
+                  [class.mobile-sort-option--active]="filterState().sortBy() === opt.value"
+                  (click)="selectMobileSortOption(opt.value)"
+                >
+                  @if (filterState().sortBy() === opt.value) {
+                    <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  }
+                  {{ opt.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="mobile-sort-dir-btn"
+          (click)="toggleMobileSortDir()"
+          [attr.aria-label]="filterState().sortDir() === 'asc' ? 'Növekvő sorrend' : 'Csökkenő sorrend'"
+        >
+          <lucide-icon [name]="filterState().sortDir() === 'asc' ? ICONS.ARROW_UP : ICONS.ARROW_DOWN" [size]="16" />
+        </button>
+      </div>
+    </div>
+  }
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -9,6 +9,8 @@ import { SuperAdminService, SubscriberListItem } from '../../services/super-admi
 import { ICONS, getSubscriptionStatusLabel } from '../../../../shared/constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { PlansService, PlanOption } from '../../../../shared/services/plans.service';
+import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
+import { FilterConfig } from '../../../../shared/components/expandable-filters';
 
 /**
  * Előfizetők lista - Super Admin felületen.
@@ -22,6 +24,7 @@ import { PlansService, PlanOption } from '../../../../shared/services/plans.serv
     LucideAngularModule,
     MatTooltipModule,
     NgClass,
+    SmartFilterBarComponent,
   ],
   templateUrl: './subscribers-list.component.html',
   styleUrl: './subscribers-list.component.scss',
@@ -61,6 +64,23 @@ export class SubscribersListComponent implements OnInit {
     },
     onStateChange: () => this.loadSubscribers(),
   });
+
+  readonly subscriberFilterConfigs = computed<FilterConfig[]>(() => [
+    {
+      id: 'plan',
+      label: 'Összes csomag',
+      options: this.planOptions()
+        .filter(o => o.value !== '')
+        .map(o => ({ value: o.value, label: o.label })),
+    },
+    {
+      id: 'status',
+      label: 'Összes státusz',
+      options: this.statusOptions
+        .filter(o => o.value !== '')
+        .map(o => ({ value: o.value, label: o.label })),
+    },
+  ]);
 
   subscribers = signal<SubscriberListItem[]>([]);
   totalPages = signal(1);

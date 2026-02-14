@@ -11,6 +11,7 @@ import { UpgradeDialogComponent } from '../../../../shared/components/upgrade-di
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { saveFile } from '../../../../shared/utils/file.util';
+import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 
 /**
  * Partner Contact List - Kapcsolattartók listája a partner felületen.
@@ -26,6 +27,7 @@ import { saveFile } from '../../../../shared/utils/file.util';
     ContactEditModalComponent,
     ConfirmDialogComponent,
     UpgradeDialogComponent,
+    SmartFilterBarComponent,
   ],
   templateUrl: './contact-list.component.html',
   styleUrl: './contact-list.component.scss',

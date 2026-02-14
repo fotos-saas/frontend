@@ -52,41 +52,11 @@
   } @else {
 
   <!-- Szűrők -->
-  <div class="filters">
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-      <input
-        type="text"
-        placeholder="Keresés név, pozíció, iskola, fájlnév..."
-        [ngModel]="filterState.search()"
-        (ngModelChange)="filterState.setSearch($event)"
-        class="search-input"
-      />
-      @if (filterState.search()) {
-        <button class="clear-btn" (click)="filterState.clearSearch()">
-          <lucide-icon [name]="ICONS.X" [size]="14" />
-        </button>
-      }
-    </div>
-
-    <app-searchable-select
-      class="school-filter"
-      [options]="schoolOptions()"
-      [value]="filterState.filters().school_id"
-      placeholder="Iskola keresése..."
-      allLabel="Minden iskola"
-      (valueChange)="onSchoolFilterChange($event)"
-    />
-
-    <app-searchable-select
-      class="year-filter"
-      [options]="classYears()"
-      [value]="filterState.filters().class_year"
-      placeholder="Évfolyam..."
-      allLabel="Minden évfolyam"
-      (valueChange)="onClassYearChange($event)"
-    />
-  </div>
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="{ placeholder: 'Keresés név, pozíció, iskola, fájlnév...' }"
+    [searchableFilters]="teacherSearchableFilters()"
+  />
 
   <!-- Lista -->
   @if (filterState.loading()) {

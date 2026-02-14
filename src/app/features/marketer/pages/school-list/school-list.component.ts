@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MarketerService, SchoolListItem, PaginatedResponse } from '../../services/marketer.service';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
+import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
+import { FilterConfig } from '../../../../shared/components/expandable-filters';
 
 /**
  * Marketer School List - Iskolák paginált listája.
@@ -12,7 +14,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
 @Component({
   selector: 'app-school-list',
   standalone: true,
-  imports: [FormsModule, RouterModule],
+  imports: [FormsModule, RouterModule, SmartFilterBarComponent],
   templateUrl: './school-list.component.html',
   styleUrls: ['./school-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -36,6 +38,13 @@ export class SchoolListComponent implements OnInit {
   cities = signal<string[]>([]);
   totalPages = signal(1);
   totalSchools = signal(0);
+
+  readonly cityFilterConfigs = computed<FilterConfig[]>(() => {
+    const opts = this.cities().map(c => ({ value: c, label: c }));
+    return opts.length > 0
+      ? [{ id: 'city', label: 'Minden város', options: opts }]
+      : [];
+  });
 
   ngOnInit(): void {
     this.loadCities();

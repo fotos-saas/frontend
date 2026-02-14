@@ -10,6 +10,7 @@ import { IQrCodeService } from '../../../../shared/interfaces/qr-code.interface'
 import { QrButtonComponent, AddButtonComponent } from '../../../../shared/components/action-buttons';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
+import { SmartFilterBarComponent, SortDef } from '../../../../shared/components/smart-filter-bar';
 
 /**
  * Marketer Project List - Projektek paginált listája.
@@ -17,7 +18,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [RouterModule, FormsModule, LucideAngularModule, SharedQrCodeModalComponent, QrButtonComponent, AddButtonComponent],
+  imports: [RouterModule, FormsModule, LucideAngularModule, SharedQrCodeModalComponent, QrButtonComponent, AddButtonComponent, SmartFilterBarComponent],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,6 +34,13 @@ export class ProjectListComponent implements OnInit {
 
   /** QR Service interface a shared modalhoz */
   readonly qrService: IQrCodeService = this.marketerService;
+
+  readonly marketerSortDef: SortDef = {
+    options: [
+      { value: 'created_at', label: 'Létrehozás dátuma' },
+      { value: 'class_year', label: 'Évfolyam' },
+    ],
+  };
 
   // Filter state - központosított perzisztencia rendszerrel
   readonly filterState = useFilterState({

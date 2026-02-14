@@ -5,30 +5,11 @@
   </header>
 
   <!-- Keresés és szűrés -->
-  <div class="filters">
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input
-        type="text"
-        placeholder="Keresés iskola neve vagy város alapján..."
-        [ngModel]="filterState.search()"
-        (ngModelChange)="filterState.setSearch($event)"
-        class="search-input"
-      />
-      @if (filterState.search()) {
-        <button class="clear-btn" (click)="filterState.clearSearch()">✕</button>
-      }
-    </div>
-
-    <div class="filter-controls">
-      <select [ngModel]="filterState.filters()['city'] || ''" (ngModelChange)="filterState.setFilter('city', $event)" class="filter-select">
-        <option value="">Minden város</option>
-        @for (city of cities(); track city) {
-          <option [value]="city">{{ city }}</option>
-        }
-      </select>
-    </div>
-  </div>
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="{ placeholder: 'Keresés iskola neve vagy város alapján...' }"
+    [filterConfigs]="cityFilterConfigs()"
+  />
 
   <!-- Lista -->
   @if (filterState.loading()) {

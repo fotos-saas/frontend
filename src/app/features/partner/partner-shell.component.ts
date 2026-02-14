@@ -250,7 +250,7 @@ export class PartnerShellComponent implements OnInit {
 
   ngOnInit(): void {
     // Sidebar scope beállítása + persistence betöltése
-    this.sidebarState.setScope('partner', ['projects', 'subscription', 'customization', 'partner-settings', 'webshop']);
+    this.sidebarState.setScope('partner', []);
 
     // Route-alapú auto-expand: aktuális URL-re
     this.sidebarState.expandSectionForRoute(this.router.url, this.routeToSectionMap);

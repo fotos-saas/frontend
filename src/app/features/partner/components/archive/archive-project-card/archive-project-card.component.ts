@@ -37,16 +37,21 @@ export class ArchiveProjectCardComponent {
   classGroups = computed<ArchiveClassGroup[]>(() => {
     const items = this.school().items;
     const map = new Map<string, ArchivePersonInSchool[]>();
+    const displayNames = new Map<string, string>();
     for (const item of items) {
-      const key = item.className?.trim() || '__no_class__';
-      if (!map.has(key)) map.set(key, []);
+      const raw = item.className?.trim() || '';
+      const key = raw ? raw.toLocaleLowerCase('hu') : '__no_class__';
+      if (!map.has(key)) {
+        map.set(key, []);
+        displayNames.set(key, raw);
+      }
       map.get(key)!.push(item);
     }
     const groups: ArchiveClassGroup[] = [];
     for (const [key, students] of map) {
       groups.push({
         className: key,
-        displayName: key === '__no_class__' ? 'Osztály nélkül' : key,
+        displayName: key === '__no_class__' ? 'Osztály nélkül' : displayNames.get(key)!,
         studentCount: students.length,
         missingPhotoCount: students.filter(s => !s.hasPhoto).length,
         items: students,

@@ -5,8 +5,8 @@
       <lucide-icon [name]="expanded() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT" [size]="18" class="toggle-icon" />
       <div class="header-info">
         <span class="school-name">{{ school().schoolName }}</span>
-        @if (school().classCount > 0) {
-          <span class="class-list">{{ school().classCount }} osztály</span>
+        @if (hasMultipleClasses()) {
+          <span class="class-list">{{ classGroups().length }} osztály</span>
         }
       </div>
     </div>

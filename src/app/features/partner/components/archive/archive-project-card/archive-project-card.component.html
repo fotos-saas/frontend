@@ -5,7 +5,7 @@
       <lucide-icon [name]="expanded() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT" [size]="18" class="toggle-icon" />
       <div class="header-info">
         <span class="school-name">{{ school().schoolName }}</span>
-        @if (hasMultipleClasses()) {
+        @if (hasMultipleClasses() && isClassNameGrouping()) {
           <span class="class-list">{{ classGroups().length }} osztály</span>
         }
       </div>
@@ -47,7 +47,13 @@
       } @else {
         @if (hasMultipleClasses()) {
           <div class="class-actions-bar">
-            <span class="class-count-label">{{ classGroups().length }} osztály</span>
+            <span class="class-count-label">
+              @if (isClassNameGrouping()) {
+                {{ classGroups().length }} osztály
+              } @else {
+                {{ classGroups().length }} csoport
+              }
+            </span>
             <div class="class-action-buttons">
               <button class="class-expand-btn" (click)="expandAllClasses()">Mind</button>
               <button class="class-expand-btn" (click)="collapseAllClasses()">Bezár</button>

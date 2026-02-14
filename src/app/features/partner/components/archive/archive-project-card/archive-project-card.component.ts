@@ -36,6 +36,15 @@ export class ArchiveProjectCardComponent {
 
   classGroups = computed<ArchiveClassGroup[]>(() => {
     const items = this.school().items;
+    const hasAnyClassName = items.some(i => i.className?.trim());
+
+    if (hasAnyClassName) {
+      return this.groupByClassName(items);
+    }
+    return this.groupByPhotoStatus(items);
+  });
+
+  private groupByClassName(items: ArchivePersonInSchool[]): ArchiveClassGroup[] {
     const map = new Map<string, ArchivePersonInSchool[]>();
     const displayNames = new Map<string, string>();
     for (const item of items) {
@@ -62,9 +71,35 @@ export class ArchiveProjectCardComponent {
       if (b.className === '__no_class__') return -1;
       return a.className.localeCompare(b.className, 'hu');
     });
-  });
+  }
+
+  private groupByPhotoStatus(items: ArchivePersonInSchool[]): ArchiveClassGroup[] {
+    const withPhoto = items.filter(i => i.hasPhoto);
+    const withoutPhoto = items.filter(i => !i.hasPhoto);
+    const groups: ArchiveClassGroup[] = [];
+    if (withPhoto.length > 0) {
+      groups.push({
+        className: '__with_photo__',
+        displayName: 'Fotóval',
+        studentCount: withPhoto.length,
+        missingPhotoCount: 0,
+        items: withPhoto,
+      });
+    }
+    if (withoutPhoto.length > 0) {
+      groups.push({
+        className: '__without_photo__',
+        displayName: 'Fotó nélkül',
+        studentCount: withoutPhoto.length,
+        missingPhotoCount: withoutPhoto.length,
+        items: withoutPhoto,
+      });
+    }
+    return groups;
+  }
 
   hasMultipleClasses = computed(() => this.classGroups().length > 1);
+  isClassNameGrouping = computed(() => this.school().items.some(i => i.className?.trim()));
 
   isClassExpanded(className: string): boolean {
     if (!this.hasMultipleClasses()) return true;

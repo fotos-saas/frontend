@@ -3,12 +3,14 @@
   theme="blue"
   [icon]="ICONS.DOWNLOAD"
   title="Kiválasztott fotók letöltése"
-  description="Válaszd ki, kinek a kiválasztott képeit szeretnéd letölteni ZIP-ben."
+  description="Válaszd ki a letöltési beállításokat."
   size="sm"
   (closeEvent)="onClose()"
   (submitEvent)="onSubmit()"
 >
   <ng-container dialogBody>
+    <!-- Személyek -->
+    <p class="section-label">Kinek a képei?</p>
     <div class="radio-group">
       <label class="radio-option" (click)="selectType('student')">
         <input type="radio" name="personType" [checked]="selectedType() === 'student'" />
@@ -17,7 +19,6 @@
             <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" class="radio-icon" />
             Diákok
           </span>
-          <span class="radio-desc">Csak a diákok kiválasztott képei</span>
         </div>
       </label>
 
@@ -28,7 +29,6 @@
             <lucide-icon [name]="ICONS.USER" [size]="16" class="radio-icon" />
             Tanárok
           </span>
-          <span class="radio-desc">Csak a tanárok kiválasztott képei</span>
         </div>
       </label>
 
@@ -39,7 +39,32 @@
             <lucide-icon [name]="ICONS.USERS" [size]="16" class="radio-icon" />
             Mindkettő
           </span>
-          <span class="radio-desc">Diákok és tanárok képei együtt</span>
+        </div>
+      </label>
+    </div>
+
+    <!-- Fájlnév -->
+    <p class="section-label section-label--mt">Fájlnév</p>
+    <div class="radio-group">
+      <label class="radio-option" (click)="selectNaming('student_name')">
+        <input type="radio" name="fileNaming" [checked]="selectedNaming() === 'student_name'" />
+        <div class="radio-content">
+          <span class="radio-title">
+            <lucide-icon [name]="ICONS.TAG" [size]="16" class="radio-icon" />
+            Elnevezett
+          </span>
+          <span class="radio-desc">Személy neve a fájlnévben (pl. Kiss Péter.jpg)</span>
+        </div>
+      </label>
+
+      <label class="radio-option" (click)="selectNaming('original')">
+        <input type="radio" name="fileNaming" [checked]="selectedNaming() === 'original'" />
+        <div class="radio-content">
+          <span class="radio-title">
+            <lucide-icon [name]="ICONS.FILE" [size]="16" class="radio-icon" />
+            Eredeti fájlnév
+          </span>
+          <span class="radio-desc">A feltöltéskori fájlnév (pl. IMG_1234.jpg)</span>
         </div>
       </label>
     </div>

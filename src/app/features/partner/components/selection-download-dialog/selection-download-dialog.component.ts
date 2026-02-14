@@ -4,6 +4,12 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 export type SelectionPersonType = 'student' | 'teacher' | 'both';
+export type SelectionFileNaming = 'original' | 'student_name';
+
+export interface SelectionDownloadResult {
+  personType: SelectionPersonType;
+  fileNaming: SelectionFileNaming;
+}
 
 @Component({
   selector: 'app-selection-download-dialog',
@@ -14,18 +20,26 @@ export type SelectionPersonType = 'student' | 'teacher' | 'both';
   styleUrl: './selection-download-dialog.component.scss',
 })
 export class SelectionDownloadDialogComponent {
-  readonly download = output<SelectionPersonType>();
+  readonly download = output<SelectionDownloadResult>();
   readonly close = output<void>();
 
   readonly ICONS = ICONS;
   readonly selectedType = signal<SelectionPersonType>('both');
+  readonly selectedNaming = signal<SelectionFileNaming>('student_name');
 
   selectType(type: SelectionPersonType): void {
     this.selectedType.set(type);
   }
 
+  selectNaming(naming: SelectionFileNaming): void {
+    this.selectedNaming.set(naming);
+  }
+
   onSubmit(): void {
-    this.download.emit(this.selectedType());
+    this.download.emit({
+      personType: this.selectedType(),
+      fileNaming: this.selectedNaming(),
+    });
   }
 
   onClose(): void {

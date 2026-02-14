@@ -153,6 +153,8 @@ import {
   Truck,
   // Undo
   Undo2,
+  // Tags
+  Tag,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -302,4 +304,6 @@ export const LUCIDE_ICONS_MAP = {
   Truck,
   // Undo
   Undo2,
+  // Tags
+  Tag,
 };

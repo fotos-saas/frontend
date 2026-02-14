@@ -18,7 +18,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { PartnerGalleryService } from '../../../../features/partner/services/partner-gallery.service';
-import { SelectionPersonType } from '../../../../features/partner/components/selection-download-dialog/selection-download-dialog.component';
+import { SelectionDownloadResult } from '../../../../features/partner/components/selection-download-dialog/selection-download-dialog.component';
 import { saveFile } from '../../../utils/file.util';
 import { projectShortName } from '../../../utils/string.util';
 import { ProjectDetailHeaderComponent } from '../project-detail-header/project-detail-header.component';
@@ -297,46 +297,35 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     );
     const ref = container.createComponent(SelectionDownloadDialogComponent);
     ref.instance.close.subscribe(() => container.clear());
-    ref.instance.download.subscribe((type: SelectionPersonType) => {
+    ref.instance.download.subscribe((result: SelectionDownloadResult) => {
       container.clear();
-      this.downloadSelections(type);
+      this.downloadSelections(result);
     });
   }
 
-  private downloadSelections(type: SelectionPersonType): void {
+  private downloadSelections(result: SelectionDownloadResult): void {
     const projectId = this.projectData()?.id;
-    if (!projectId || !this.partnerService || !this.galleryService) return;
+    if (!projectId || !this.galleryService) return;
 
     this.downloadingSelections.set(true);
-    this.partnerService.getProjectSettings(projectId).pipe(
+    this.galleryService.downloadMonitoringZip(projectId, {
+      zipContent: 'all',
+      fileNaming: result.fileNaming,
+      includeExcel: false,
+      personType: result.personType === 'both' ? undefined : result.personType,
+      effectiveOnly: true,
+    }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: (res) => {
-        const exp = res.data.effective_export;
-        this.galleryService!.downloadMonitoringZip(projectId, {
-          zipContent: exp.zip_content,
-          fileNaming: exp.file_naming,
-          includeExcel: false,
-          personType: type === 'both' ? undefined : type,
-          effectiveOnly: true,
-        }).pipe(
-          takeUntilDestroyed(this.destroyRef)
-        ).subscribe({
-          next: (blob) => {
-            const name = projectShortName(this.projectData()?.name ?? '', projectId);
-            saveFile(blob, `${name}.zip`);
-            this.downloadingSelections.set(false);
-            this.toast.success('Siker', 'ZIP letöltve');
-          },
-          error: () => {
-            this.downloadingSelections.set(false);
-            this.toast.error('Hiba', 'A ZIP letöltés nem sikerült');
-          },
-        });
+      next: (blob) => {
+        const name = projectShortName(this.projectData()?.name ?? '', projectId);
+        saveFile(blob, `${name}.zip`);
+        this.downloadingSelections.set(false);
+        this.toast.success('Siker', 'ZIP letöltve');
       },
       error: () => {
         this.downloadingSelections.set(false);
-        this.toast.error('Hiba', 'A beállítások nem tölthetők be');
+        this.toast.error('Hiba', 'A ZIP letöltés nem sikerült');
       },
     });
   }

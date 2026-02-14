@@ -207,6 +207,7 @@ export const ICONS = {
   FOLDER_OPEN: 'folder-open',
   FILE: 'file',
   FILE_TEXT: 'file-text',
+  TAG: 'tag',
 
   // Felhasználók
   USER: 'user',

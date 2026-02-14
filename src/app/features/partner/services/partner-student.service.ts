@@ -21,6 +21,9 @@ import {
   ArchiveBulkImportPreviewItem,
   ArchiveBulkImportExecuteItem,
   ArchiveBulkImportExecuteResult,
+  BulkPhotoMatch,
+  BulkPhotoUploadSummary,
+  BulkPhotoUploadResult,
 } from '../models/archive.models';
 
 @Injectable({
@@ -201,5 +204,25 @@ export class PartnerStudentService implements ArchiveService {
 
   getBySchoolRaw(params?: { class_year?: string; school_id?: number; missing_only?: boolean }): Observable<StudentsBySchoolResponse> {
     return this.getStudentsBySchool(params);
+  }
+
+  bulkPhotoMatch(schoolId: number, year: number, filenames: string[]): Observable<{ success: boolean; data: BulkPhotoMatch[] }> {
+    return this.http.post<{ success: boolean; data: BulkPhotoMatch[] }>(`${this.baseUrl}/bulk-photos/match`, {
+      school_id: schoolId,
+      year,
+      filenames,
+    });
+  }
+
+  bulkPhotoUpload(schoolId: number, year: number, setActive: boolean, assignments: Record<string, number>, photos: File[]): Observable<{ success: boolean; data: { summary: BulkPhotoUploadSummary; results: BulkPhotoUploadResult[] } }> {
+    const formData = new FormData();
+    formData.append('school_id', schoolId.toString());
+    formData.append('year', year.toString());
+    formData.append('set_active', setActive ? '1' : '0');
+    formData.append('assignments', JSON.stringify(assignments));
+    for (const photo of photos) {
+      formData.append('photos[]', photo);
+    }
+    return this.http.post<{ success: boolean; data: { summary: BulkPhotoUploadSummary; results: BulkPhotoUploadResult[] } }>(`${this.baseUrl}/bulk-photos/upload`, formData);
   }
 }

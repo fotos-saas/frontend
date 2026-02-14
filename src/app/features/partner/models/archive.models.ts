@@ -73,6 +73,41 @@ export interface ArchiveBulkImportExecuteResult {
   skipped: number;
 }
 
+// ============ Bulk photo upload ============
+
+export type BulkPhotoMatchType = 'matched' | 'ambiguous' | 'unmatched';
+
+export interface BulkPhotoMatchAlternative {
+  person_id: number;
+  person_name: string;
+  confidence: number;
+}
+
+export interface BulkPhotoMatch {
+  filename: string;
+  person_id: number | null;
+  person_name: string | null;
+  match_type: BulkPhotoMatchType;
+  confidence: number;
+  alternatives: BulkPhotoMatchAlternative[];
+  /** Frontend-only: manuálisan átírt person_id */
+  overridden_person_id?: number | null;
+  /** Frontend-only: kihagyás jelölő */
+  skip?: boolean;
+}
+
+export interface BulkPhotoUploadSummary {
+  uploaded: number;
+  skipped: number;
+  failed: number;
+}
+
+export interface BulkPhotoUploadResult {
+  filename: string;
+  status: 'success' | 'skipped' | 'failed';
+  reason?: string;
+}
+
 // ============ Konfiguráció ============
 
 export interface ArchiveField {
@@ -110,6 +145,8 @@ export interface ArchiveService {
   bulkImportExecute(schoolId: number, items: ArchiveBulkImportExecuteItem[]): Observable<{ success: boolean; message: string; data: ArchiveBulkImportExecuteResult }>;
   markNoPhoto(id: number): Observable<{ success: boolean; message: string }>;
   undoNoPhoto(id: number): Observable<{ success: boolean; message: string }>;
+  bulkPhotoMatch(schoolId: number, year: number, filenames: string[]): Observable<{ success: boolean; data: BulkPhotoMatch[] }>;
+  bulkPhotoUpload(schoolId: number, year: number, setActive: boolean, assignments: Record<string, number>, photos: File[]): Observable<{ success: boolean; data: { summary: BulkPhotoUploadSummary; results: BulkPhotoUploadResult[] } }>;
 }
 
 export const ARCHIVE_SERVICE = new InjectionToken<ArchiveService>('ArchiveService');

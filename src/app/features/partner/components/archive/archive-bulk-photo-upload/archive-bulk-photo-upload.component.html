@@ -1,0 +1,275 @@
+<app-dialog-wrapper
+  title="Tömeges fotó feltöltés"
+  headerStyle="flat"
+  theme="blue"
+  size="lg"
+  [icon]="ICONS.IMAGES"
+  (closeEvent)="close.emit()"
+>
+  <ng-container dialogBody>
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <div class="step" [class.step--active]="step() >= 1" [class.step--done]="step() > 1">
+        <span class="step-num">1</span>
+        <span class="step-label">Beállítás</span>
+      </div>
+      <div class="step-line" [class.step-line--active]="step() >= 2"></div>
+      <div class="step" [class.step--active]="step() >= 2" [class.step--done]="step() > 2">
+        <span class="step-num">2</span>
+        <span class="step-label">Párosítás</span>
+      </div>
+      <div class="step-line" [class.step-line--active]="step() >= 3"></div>
+      <div class="step" [class.step--active]="step() >= 3">
+        <span class="step-num">3</span>
+        <span class="step-label">Feltöltés</span>
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="error-banner">
+        <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+        {{ error() }}
+      </div>
+    }
+
+    <!-- STEP 1: Setup -->
+    @if (step() === 1) {
+      <div class="step-content">
+        <div class="form-row">
+          <label class="form-label">Iskola</label>
+          <app-searchable-select
+            [options]="schoolOptions()"
+            [value]="selectedSchoolId()?.toString() ?? ''"
+            placeholder="Válassz iskolát..."
+            (valueChange)="onSchoolChange($event)"
+          />
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Évszám</label>
+          <input
+            type="number"
+            class="form-input"
+            [ngModel]="year()"
+            (ngModelChange)="year.set($event)"
+            min="2000"
+            max="2100"
+          />
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Fotók ({{ selectedFiles().length }} fájl kiválasztva)</label>
+          <div
+            class="drop-zone"
+            [class.drop-zone--has-files]="selectedFiles().length > 0"
+            (drop)="onDrop($event)"
+            (dragover)="onDragOver($event)"
+          >
+            @if (selectedFiles().length === 0) {
+              <div class="drop-zone__content">
+                <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-zone__icon" />
+                <p class="drop-zone__text">Húzd ide a fotókat, vagy kattints a tallózáshoz</p>
+                <p class="drop-zone__hint">JPG, PNG fájlok, max. 20 MB / fájl</p>
+              </div>
+            } @else {
+              <div class="drop-zone__file-list">
+                <div class="drop-zone__file-summary">
+                  <lucide-icon [name]="ICONS.IMAGES" [size]="18" />
+                  <span>{{ selectedFiles().length }} fájl kiválasztva</span>
+                  <button type="button" class="drop-zone__clear" (click)="clearFiles()">
+                    <lucide-icon [name]="ICONS.X" [size]="14" />
+                    Törlés
+                  </button>
+                </div>
+                <div class="drop-zone__file-names">
+                  @for (file of selectedFiles().slice(0, 10); track file.name) {
+                    <span class="drop-zone__file-tag">{{ file.name }}</span>
+                  }
+                  @if (selectedFiles().length > 10) {
+                    <span class="drop-zone__file-tag drop-zone__file-tag--more">+{{ selectedFiles().length - 10 }} további</span>
+                  }
+                </div>
+              </div>
+            }
+            <input
+              type="file"
+              class="drop-zone__input"
+              accept="image/*"
+              multiple
+              (change)="onFilesSelected($event)"
+            />
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 2: Preview/Match -->
+    @if (step() === 2) {
+      <div class="step-content">
+        <div class="match-summary">
+          <div class="match-stat match-stat--success">
+            <span class="match-stat__count">{{ matchSummary().matched }}</span>
+            <span class="match-stat__label">Párosítva</span>
+          </div>
+          <div class="match-stat match-stat--warning">
+            <span class="match-stat__count">{{ matchSummary().ambiguous }}</span>
+            <span class="match-stat__label">Bizonytalan</span>
+          </div>
+          <div class="match-stat match-stat--danger">
+            <span class="match-stat__count">{{ matchSummary().unmatched }}</span>
+            <span class="match-stat__label">Nem párosított</span>
+          </div>
+          <div class="match-stat match-stat--muted">
+            <span class="match-stat__count">{{ matchSummary().skipped }}</span>
+            <span class="match-stat__label">Kihagyva</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">
+            <input type="checkbox" [ngModel]="setActive()" (ngModelChange)="setActive.set($event)" />
+            Aktív fotónak beállítás
+          </label>
+        </div>
+
+        <div class="match-table-wrapper">
+          <div class="match-table">
+            <div class="match-table__header">
+              <span class="match-th match-th--file">Fájlnév</span>
+              <span class="match-th match-th--person">Párosított személy</span>
+              <span class="match-th match-th--status">Státusz</span>
+              <span class="match-th match-th--action">Kihagyás</span>
+            </div>
+
+            @for (match of matches(); track match.filename; let i = $index) {
+              <div class="match-row" [class.match-row--skipped]="match.skip">
+                <div class="match-cell match-cell--file">
+                  <span class="filename-text" [title]="match.filename">{{ match.filename }}</span>
+                </div>
+                <div class="match-cell match-cell--person">
+                  @if (match.person_name && !match.skip) {
+                    <span class="person-name">{{ match.person_name }}</span>
+                    @if (match.confidence > 0 && match.confidence < 100) {
+                      <span class="confidence-badge">{{ match.confidence }}%</span>
+                    }
+                  } @else if (!match.skip) {
+                    <span class="no-match-text">Nincs párosítás</span>
+                  } @else {
+                    <span class="skipped-text">Kihagyva</span>
+                  }
+                </div>
+                <div class="match-cell match-cell--status">
+                  @if (!match.skip) {
+                    @switch (match.match_type) {
+                      @case ('matched') {
+                        <span class="status-badge status-badge--success">
+                          <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                        </span>
+                      }
+                      @case ('ambiguous') {
+                        <span class="status-badge status-badge--warning">
+                          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="12" />
+                        </span>
+                      }
+                      @case ('unmatched') {
+                        <span class="status-badge status-badge--danger">
+                          <lucide-icon [name]="ICONS.X" [size]="12" />
+                        </span>
+                      }
+                    }
+                  }
+                </div>
+                <div class="match-cell match-cell--action">
+                  <input
+                    type="checkbox"
+                    [checked]="match.skip"
+                    (change)="toggleSkip(i)"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 3: Upload Progress -->
+    @if (step() === 3) {
+      <div class="step-content step-content--center">
+        @if (uploading()) {
+          <div class="upload-progress">
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="48" class="upload-icon upload-icon--spin" />
+            <h3 class="upload-title">Feltöltés folyamatban...</h3>
+            <div class="progress-bar">
+              <div class="progress-bar__fill" [style.width.%]="progressPercent()"></div>
+            </div>
+            <p class="upload-hint">Kérlek ne zárd be az ablakot a feltöltés befejezéséig.</p>
+          </div>
+        } @else if (done()) {
+          <div class="upload-result">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="48" class="result-icon result-icon--success" />
+            <h3 class="upload-title">Feltöltés kész!</h3>
+            <div class="result-stats">
+              <div class="result-stat result-stat--success">
+                <span class="result-stat__count">{{ uploadProgress().success }}</span>
+                <span class="result-stat__label">Sikeres</span>
+              </div>
+              @if (uploadProgress().skipped > 0) {
+                <div class="result-stat result-stat--muted">
+                  <span class="result-stat__count">{{ uploadProgress().skipped }}</span>
+                  <span class="result-stat__label">Kihagyott</span>
+                </div>
+              }
+              @if (uploadProgress().failed > 0) {
+                <div class="result-stat result-stat--danger">
+                  <span class="result-stat__count">{{ uploadProgress().failed }}</span>
+                  <span class="result-stat__label">Hibás</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </ng-container>
+
+  <ng-container dialogFooter>
+    @if (step() === 1) {
+      <button type="button" class="btn-secondary" (click)="close.emit()">Mégse</button>
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="!canStartMatch() || matching()"
+        (click)="startMatching()"
+      >
+        @if (matching()) {
+          Párosítás...
+        } @else {
+          <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+          Párosítás indítása
+        }
+      </button>
+    }
+    @if (step() === 2) {
+      <button type="button" class="btn-secondary" (click)="backToStep1()">
+        <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+        Vissza
+      </button>
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="!canStartUpload()"
+        (click)="startUpload()"
+      >
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+        Feltöltés indítása ({{ matchSummary().matched + matchSummary().ambiguous }})
+      </button>
+    }
+    @if (step() === 3 && done()) {
+      <button type="button" class="btn-primary" (click)="finish()">
+        <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        Kész
+      </button>
+    }
+  </ng-container>
+</app-dialog-wrapper>

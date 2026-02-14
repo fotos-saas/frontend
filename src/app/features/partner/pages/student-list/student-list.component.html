@@ -23,6 +23,10 @@
           Projekt nézet
         </button>
       </div>
+      <button type="button" class="btn-secondary" (click)="openBulkPhotoUpload()">
+        <lucide-icon [name]="ICONS.IMAGES" [size]="18" />
+        Tömeges fotó
+      </button>
       <button type="button" class="btn-secondary" (click)="openBulkImport()">
         <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
         Tömeges import
@@ -217,6 +221,16 @@
     [schools]="schools()"
     (close)="closeBulkImport()"
     (imported)="onBulkImported()"
+  />
+}
+
+<!-- Bulk Photo Upload Dialog -->
+@if (showBulkPhotoUpload()) {
+  <app-archive-bulk-photo-upload
+    [schools]="schools()"
+    entityLabel="diák"
+    (close)="showBulkPhotoUpload.set(false)"
+    (uploaded)="onBulkPhotoUploaded()"
   />
 }
 

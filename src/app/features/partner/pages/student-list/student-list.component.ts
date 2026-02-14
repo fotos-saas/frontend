@@ -11,6 +11,7 @@ import { SchoolItem } from '../../models/partner.models';
 import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool } from '../../models/archive.models';
 import { ArchiveEditModalComponent } from '../../components/archive/archive-edit-modal/archive-edit-modal.component';
 import { ArchiveBulkImportDialogComponent } from '../../components/archive/archive-bulk-import-dialog/archive-bulk-import-dialog.component';
+import { ArchiveBulkPhotoUploadComponent } from '../../components/archive/archive-bulk-photo-upload/archive-bulk-photo-upload.component';
 import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
 import { ArchiveProjectViewComponent } from '../../components/archive/archive-project-view/archive-project-view.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -28,6 +29,7 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
     MatTooltipModule,
     ArchiveEditModalComponent,
     ArchiveBulkImportDialogComponent,
+    ArchiveBulkPhotoUploadComponent,
     ArchivePhotoUploadComponent,
     ArchiveProjectViewComponent,
     ConfirmDialogComponent,
@@ -107,6 +109,7 @@ export class PartnerStudentListComponent implements OnInit {
   showEditModal = signal(false);
   showDeleteConfirm = signal(false);
   showBulkImport = signal(false);
+  showBulkPhotoUpload = signal(false);
   selectedStudent = signal<StudentListItem | null>(null);
   modalMode = signal<'create' | 'edit'>('create');
 
@@ -254,6 +257,16 @@ export class PartnerStudentListComponent implements OnInit {
   onBulkImported(): void {
     this.closeBulkImport();
     this.loadStudents();
+  }
+
+  openBulkPhotoUpload(): void {
+    this.showBulkPhotoUpload.set(true);
+  }
+
+  onBulkPhotoUploaded(): void {
+    this.showBulkPhotoUpload.set(false);
+    this.loadStudents();
+    this.projectView()?.loadData();
   }
 
   onUploadPhotoFromProject(item: ArchivePersonInSchool): void {

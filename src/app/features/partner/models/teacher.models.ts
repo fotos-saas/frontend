@@ -51,6 +51,13 @@ export interface TeacherPhoto {
   fileName: string | null;
 }
 
+export interface TeacherProject {
+  projectId: number;
+  className: string | null;
+  classYear: string | null;
+  schoolName: string | null;
+}
+
 export interface TeacherDetail {
   id: number;
   canonicalName: string;
@@ -65,6 +72,7 @@ export interface TeacherDetail {
   photoUrl: string | null;
   aliases: TeacherAlias[];
   photos: TeacherPhoto[];
+  projects: TeacherProject[];
   createdAt: string;
   updatedAt: string;
 }

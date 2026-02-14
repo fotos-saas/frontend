@@ -183,6 +183,36 @@
           }
         </section>
 
+        <!-- Projektek szekció -->
+        @if (t.projects.length > 0) {
+          <section class="content-section">
+            <div class="section-head">
+              <div class="section-title">
+                <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
+                <h2>Projektek</h2>
+                <span class="count-badge">{{ t.projects.length }}</span>
+              </div>
+            </div>
+
+            <div class="projects-list">
+              @for (proj of t.projects; track proj.projectId) {
+                <a class="project-row" [routerLink]="['/partner/projects', proj.projectId]">
+                  <div class="project-info">
+                    <span class="project-class">{{ proj.className || 'Névtelen osztály' }}</span>
+                    @if (proj.schoolName) {
+                      <span class="project-school">{{ proj.schoolName }}</span>
+                    }
+                  </div>
+                  @if (proj.classYear) {
+                    <span class="project-year">{{ proj.classYear }}</span>
+                  }
+                  <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="13" class="project-link-icon" />
+                </a>
+              }
+            </div>
+          </section>
+        }
+
         <!-- Változásnapló szekció -->
         @if (changelog().length > 0) {
           <section class="content-section">

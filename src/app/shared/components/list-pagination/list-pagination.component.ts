@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../constants/icons.constants';
 
@@ -18,9 +18,15 @@ export class ListPaginationComponent {
   readonly pageChange = output<number>();
 
   readonly ICONS = ICONS;
+  readonly pages = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
 
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages()) return;
     this.pageChange.emit(page);
+  }
+
+  onSelectChange(event: Event): void {
+    const page = Number((event.target as HTMLSelectElement).value);
+    this.goToPage(page);
   }
 }

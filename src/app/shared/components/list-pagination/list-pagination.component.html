@@ -7,12 +7,24 @@
       aria-label="Előző oldal"
     >
       <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-      Előző
+      <span class="btn-text">Előző</span>
     </button>
 
-    <div class="page-info">
-      {{ currentPage() }} / {{ totalPages() }} oldal
-      <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>
+    <div class="page-select-group">
+      <select
+        class="page-select"
+        [value]="currentPage()"
+        (change)="onSelectChange($event)"
+        aria-label="Oldal választása"
+      >
+        @for (page of pages(); track page) {
+          <option [value]="page" [selected]="page === currentPage()">{{ page }}. oldal</option>
+        }
+      </select>
+      <span class="page-context">
+        {{ totalPages() }}-ból
+        <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>
+      </span>
     </div>
 
     <button
@@ -21,7 +33,7 @@
       (click)="goToPage(currentPage() + 1)"
       aria-label="Következő oldal"
     >
-      Következő
+      <span class="btn-text">Következő</span>
       <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
     </button>
   </div>

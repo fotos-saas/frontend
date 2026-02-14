@@ -121,6 +121,7 @@ export class AppShellComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.sidebarState.setScope('tablo', []);
     this.sidebarRouteService.syncWithCurrentRoute();
 
     // Üzleti logika delegálása a service-nek

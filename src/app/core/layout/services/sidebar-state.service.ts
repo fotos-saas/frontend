@@ -11,6 +11,7 @@ export type SidebarMode = 'expanded' | 'collapsed' | 'hidden' | 'overlay';
  *
  * Kezeli a sidebar állapotát (nyitva/zárva, kibontott szekciók).
  * Támogatja a responsive viselkedést és localStorage persistenciát.
+ * Scope kezeléssel: shell-specifikus localStorage key (tablo, partner, stb.)
  */
 @Injectable({
   providedIn: 'root'
@@ -20,8 +21,11 @@ export class SidebarStateService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly storage = inject(TabloStorageService);
 
-  /** Storage key a globális beállításokhoz */
-  private readonly STORAGE_KEY = 'sidebar_expanded_sections';
+  /** Storage key prefix */
+  private readonly STORAGE_KEY_PREFIX = 'sidebar_expanded_sections';
+
+  /** Aktuális scope (shell-specifikus) */
+  private _currentScope = '';
 
   /** Debounce timeout a resize-hoz */
   private resizeDebounceTimeout?: ReturnType<typeof setTimeout>;
@@ -82,7 +86,7 @@ export class SidebarStateService {
 
   constructor() {
     this.initResponsiveListeners();
-    this.loadExpandedSections();
+    this.migrateOldStorageKey();
 
     this.destroyRef.onDestroy(() => {
       if (this.resizeDebounceTimeout) {
@@ -164,7 +168,59 @@ export class SidebarStateService {
     return this._expandedSections().includes(sectionId);
   }
 
+  // ============ Scope Management ============
+
+  /**
+   * Scope beállítása és betöltés (shell-specifikus localStorage key).
+   * Ha nincs mentett adat, a defaults tömböt használja.
+   */
+  setScope(scope: string, defaults: string[]): void {
+    this._currentScope = scope;
+    const saved = this.storage.getGlobalSetting<string[]>(this.storageKeyForScope(scope));
+    if (saved && Array.isArray(saved)) {
+      this._expandedSections.set(saved);
+    } else {
+      this._expandedSections.set(defaults);
+      this.saveExpandedSections(defaults);
+    }
+  }
+
+  /**
+   * Route-alapján kibontja a megfelelő parent szekciót.
+   * Pl. /partner/subscription/invoices → 'subscription' szekciót expandál.
+   */
+  expandSectionForRoute(url: string, routeToSectionMap: Record<string, string>): void {
+    for (const [routeSegment, sectionId] of Object.entries(routeToSectionMap)) {
+      if (url.includes(routeSegment)) {
+        this.expandSection(sectionId);
+        return;
+      }
+    }
+  }
+
   // ============ Private Methods ============
+
+  /**
+   * Storage key a scope-hoz
+   */
+  private storageKeyForScope(scope: string): string {
+    return scope ? `${this.STORAGE_KEY_PREFIX}_${scope}` : this.STORAGE_KEY_PREFIX;
+  }
+
+  /**
+   * Régi storage key migrálása → tablo scope-ba
+   */
+  private migrateOldStorageKey(): void {
+    const oldKey = this.STORAGE_KEY_PREFIX;
+    const newKey = this.storageKeyForScope('tablo');
+    const oldData = this.storage.getGlobalSetting<string[]>(oldKey);
+    const newData = this.storage.getGlobalSetting<string[]>(newKey);
+
+    if (oldData && Array.isArray(oldData) && !newData) {
+      this.storage.setGlobalSetting(newKey, oldData);
+      this.storage.setGlobalSetting(oldKey, null);
+    }
+  }
 
   /**
    * Initialize responsive breakpoint listeners
@@ -200,19 +256,9 @@ export class SidebarStateService {
   }
 
   /**
-   * Load expanded sections from global storage
-   */
-  private loadExpandedSections(): void {
-    const saved = this.storage.getGlobalSetting<string[]>(this.STORAGE_KEY);
-    if (saved && Array.isArray(saved)) {
-      this._expandedSections.set(saved);
-    }
-  }
-
-  /**
-   * Save expanded sections to global storage
+   * Save expanded sections to global storage (scope-olt key)
    */
   private saveExpandedSections(sections: string[]): void {
-    this.storage.setGlobalSetting(this.STORAGE_KEY, sections);
+    this.storage.setGlobalSetting(this.storageKeyForScope(this._currentScope), sections);
   }
 }

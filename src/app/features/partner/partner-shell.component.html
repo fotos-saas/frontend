@@ -57,9 +57,9 @@
           <div class="nav-section">
             <button
               class="nav-item nav-item--section"
-              [class.expanded]="isSectionExpanded(item.id)"
+              [class.expanded]="sidebarState.isSectionExpanded(item.id)"
               [title]="sidebarState.isTablet() ? item.label : ''"
-              (click)="toggleSection(item.id)"
+              (click)="sidebarState.toggleSection(item.id)"
             >
               <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
               <span class="nav-label">{{ item.label }}</span>
@@ -67,12 +67,12 @@
                 <span class="dev-badge">DEV</span>
               }
               <lucide-icon
-                [name]="isSectionExpanded(item.id) ? 'chevron-up' : 'chevron-down'"
+                [name]="sidebarState.isSectionExpanded(item.id) ? 'chevron-up' : 'chevron-down'"
                 [size]="16"
                 class="nav-chevron"
               ></lucide-icon>
             </button>
-            @if (isSectionExpanded(item.id) && !sidebarState.isTablet()) {
+            @if (sidebarState.isSectionExpanded(item.id) && !sidebarState.isTablet()) {
               <div class="nav-children">
                 @for (child of item.children; track child.id) {
                   <a

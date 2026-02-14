@@ -1,7 +1,9 @@
-import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit, DestroyRef } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { NgClass } from '@angular/common';
-import { Router, RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterModule, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/operators';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/services/auth.service';
@@ -177,26 +179,19 @@ export class PartnerShellComponent implements OnInit {
       ]);
   });
 
+  private readonly destroyRef = inject(DestroyRef);
+
   /** Hibajelentés link - sidebar aljára rögzítve */
   bugReportLink = computed(() => `${this.baseUrl()}/bugs`);
 
-  // Kibontott szekciók
-  expandedSections = signal<Set<string>>(new Set(['projects', 'subscription', 'customization', 'partner-settings', 'webshop']));
-
-  toggleSection(sectionId: string): void {
-    const current = this.expandedSections();
-    const updated = new Set(current);
-    if (updated.has(sectionId)) {
-      updated.delete(sectionId);
-    } else {
-      updated.add(sectionId);
-    }
-    this.expandedSections.set(updated);
-  }
-
-  isSectionExpanded(sectionId: string): boolean {
-    return this.expandedSections().has(sectionId);
-  }
+  /** Route szegmens → szekció ID mapping az auto-expand-hez */
+  private readonly routeToSectionMap: Record<string, string> = {
+    '/projects': 'projects',
+    '/subscription': 'subscription',
+    '/customization': 'customization',
+    '/settings': 'partner-settings',
+    '/webshop': 'webshop',
+  };
 
   // Mobile menü items (desktop + hibajelentés)
   mobileMenuItems = computed<MenuItem[]>(() => [
@@ -235,6 +230,20 @@ export class PartnerShellComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Sidebar scope beállítása + persistence betöltése
+    this.sidebarState.setScope('partner', ['projects', 'subscription', 'customization', 'partner-settings', 'webshop']);
+
+    // Route-alapú auto-expand: aktuális URL-re
+    this.sidebarState.expandSectionForRoute(this.router.url, this.routeToSectionMap);
+
+    // Route-alapú auto-expand: navigáció figyelése
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(e => {
+      this.sidebarState.expandSectionForRoute(e.urlAfterRedirects, this.routeToSectionMap);
+    });
+
     this.loadSubscriptionInfo();
     this.loadBranding();
   }

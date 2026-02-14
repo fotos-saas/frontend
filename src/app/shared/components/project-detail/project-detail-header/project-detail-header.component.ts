@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -23,6 +23,9 @@ export class ProjectDetailHeaderComponent {
   readonly back = output<void>();
   readonly editProject = output<void>();
   readonly deleteProject = output<void>();
+  readonly downloadSelections = output<void>();
+
+  readonly hasGallery = computed(() => !!this.project()?.tabloGalleryId);
 
   getStatusIcon(status: string | null): string {
     const iconMap: Record<string, string> = {

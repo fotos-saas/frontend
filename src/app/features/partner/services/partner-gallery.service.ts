@@ -230,6 +230,7 @@ export class PartnerGalleryService {
     zipContent: string;
     fileNaming: string;
     includeExcel: boolean;
+    personType?: 'student' | 'teacher';
   }): Observable<Blob> {
     return this.http.post(
       `${this.baseUrl}/projects/${projectId}/gallery/monitoring/download-zip`,
@@ -237,6 +238,7 @@ export class PartnerGalleryService {
         zip_content: options.zipContent,
         file_naming: options.fileNaming,
         include_excel: options.includeExcel,
+        ...(options.personType ? { person_type: options.personType } : {}),
       },
       { responseType: 'blob' },
     );

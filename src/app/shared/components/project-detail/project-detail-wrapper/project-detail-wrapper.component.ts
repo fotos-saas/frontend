@@ -12,10 +12,14 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
+import { PartnerGalleryService } from '../../../../features/partner/services/partner-gallery.service';
+import { SelectionPersonType } from '../../../../features/partner/components/selection-download-dialog/selection-download-dialog.component';
+import { saveFile } from '../../../utils/file.util';
 import { ProjectDetailHeaderComponent } from '../project-detail-header/project-detail-header.component';
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
 import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
@@ -82,6 +86,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly location = inject(Location);
   private readonly partnerService = inject(PartnerService, { optional: true });
+  private readonly galleryService = inject(PartnerGalleryService, { optional: true });
   private readonly toast = inject(ToastService);
 
   readonly facade = inject(ProjectDetailWrapperFacadeService<T>);
@@ -93,6 +98,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly orderDataDialogContainer = viewChild('orderDataDialogContainer', { read: ViewContainerRef });
   private readonly personsModalContainer = viewChild('personsModalContainer', { read: ViewContainerRef });
   private readonly uploadWizardContainer = viewChild('uploadWizardContainer', { read: ViewContainerRef });
+  private readonly selectionDownloadContainer = viewChild('selectionDownloadContainer', { read: ViewContainerRef });
 
   readonly ICONS = ICONS;
   readonly isMarketer = this.authService.isMarketer;
@@ -276,4 +282,60 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   extendGalleryDeadline(days: number): void { this.facade.extendGalleryDeadline(days); }
   createGallery(): void { this.facade.createGallery(); }
 
+  // === SELECTION DOWNLOAD ===
+
+  readonly downloadingSelections = signal(false);
+
+  async openSelectionDownloadDialog(): Promise<void> {
+    const container = this.selectionDownloadContainer();
+    if (!container || !this.projectData()?.tabloGalleryId) return;
+
+    container.clear();
+    const { SelectionDownloadDialogComponent } = await import(
+      '../../../../features/partner/components/selection-download-dialog/selection-download-dialog.component'
+    );
+    const ref = container.createComponent(SelectionDownloadDialogComponent);
+    ref.instance.close.subscribe(() => container.clear());
+    ref.instance.download.subscribe((type: SelectionPersonType) => {
+      container.clear();
+      this.downloadSelections(type);
+    });
+  }
+
+  private downloadSelections(type: SelectionPersonType): void {
+    const projectId = this.projectData()?.id;
+    if (!projectId || !this.partnerService || !this.galleryService) return;
+
+    this.downloadingSelections.set(true);
+    this.partnerService.getProjectSettings(projectId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        const exp = res.data.effective_export;
+        this.galleryService!.downloadMonitoringZip(projectId, {
+          zipContent: exp.zip_content,
+          fileNaming: exp.file_naming,
+          includeExcel: false,
+          personType: type === 'both' ? undefined : type,
+        }).pipe(
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
+          next: (blob) => {
+            const today = new Date().toISOString().slice(0, 10);
+            saveFile(blob, `kivalasztasok-${projectId}-${today}.zip`);
+            this.downloadingSelections.set(false);
+            this.toast.success('Siker', 'ZIP letöltve');
+          },
+          error: () => {
+            this.downloadingSelections.set(false);
+            this.toast.error('Hiba', 'A ZIP letöltés nem sikerült');
+          },
+        });
+      },
+      error: () => {
+        this.downloadingSelections.set(false);
+        this.toast.error('Hiba', 'A beállítások nem tölthetők be');
+      },
+    });
+  }
 }

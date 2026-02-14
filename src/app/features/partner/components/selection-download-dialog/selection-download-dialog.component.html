@@ -1,0 +1,64 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+>
+  <div class="dialog-panel">
+    <!-- Header -->
+    <div class="dialog-header">
+      <h3>Kiválasztott fotók letöltése</h3>
+      <button class="dialog-close" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="18" />
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog-body">
+      <p class="dialog-desc">Válaszd ki, kinek a kiválasztott képeit szeretnéd letölteni ZIP-ben.</p>
+
+      <div class="radio-group">
+        <label class="radio-option" (click)="selectType('student')">
+          <input type="radio" name="personType" [checked]="selectedType() === 'student'" />
+          <div class="radio-content">
+            <span class="radio-title">
+              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" class="radio-icon" />
+              Diákok
+            </span>
+            <span class="radio-desc">Csak a diákok kiválasztott képei</span>
+          </div>
+        </label>
+
+        <label class="radio-option" (click)="selectType('teacher')">
+          <input type="radio" name="personType" [checked]="selectedType() === 'teacher'" />
+          <div class="radio-content">
+            <span class="radio-title">
+              <lucide-icon [name]="ICONS.USER" [size]="16" class="radio-icon" />
+              Tanárok
+            </span>
+            <span class="radio-desc">Csak a tanárok kiválasztott képei</span>
+          </div>
+        </label>
+
+        <label class="radio-option" (click)="selectType('both')">
+          <input type="radio" name="personType" [checked]="selectedType() === 'both'" />
+          <div class="radio-content">
+            <span class="radio-title">
+              <lucide-icon [name]="ICONS.USERS" [size]="16" class="radio-icon" />
+              Mindkettő
+            </span>
+            <span class="radio-desc">Diákok és tanárok képei együtt</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog-footer">
+      <button class="btn-cancel" (click)="close.emit()">Mégsem</button>
+      <button class="btn-primary" (click)="onSubmit()">
+        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+        Letöltés
+      </button>
+    </div>
+  </div>
+</div>

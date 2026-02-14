@@ -13,6 +13,7 @@
       (back)="goBack()"
       (editProject)="openEditProjectModal()"
       (deleteProject)="confirmDeleteProject()"
+      (downloadSelections)="openSelectionDownloadDialog()"
     />
 
     <!-- Tab navigáció -->
@@ -100,6 +101,9 @@
 
 <!-- Upload Wizard container -->
 <ng-container #uploadWizardContainer></ng-container>
+
+<!-- Selection Download Dialog container -->
+<ng-container #selectionDownloadContainer></ng-container>
 
 <!-- Delete User Confirmation - page-card-on KÍVÜL -->
 @if (showDeleteUserConfirm()) {

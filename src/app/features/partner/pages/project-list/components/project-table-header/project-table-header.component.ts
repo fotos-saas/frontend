@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 
 export interface SortColumn {
@@ -17,7 +18,7 @@ export interface SortColumn {
 @Component({
   selector: 'app-project-table-header',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="table-header">
@@ -32,7 +33,7 @@ export interface SortColumn {
           <lucide-icon [name]="sortDir() === 'asc' ? ICONS.ARROW_UP : ICONS.ARROW_DOWN" [size]="12" />
         }
       </button>
-      <span class="th th-aware" data-tooltip="Tudnak róla">
+      <span class="th th-aware" matTooltip="Tudnak róla">
         <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" />
       </span>
       <button

@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TabloPersonItem } from '../persons-modal.types';
 
@@ -9,7 +10,7 @@ import { TabloPersonItem } from '../persons-modal.types';
 @Component({
   selector: 'app-modal-person-card',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, MatTooltipModule],
   template: `
     <div
       class="person-card"
@@ -31,7 +32,7 @@ import { TabloPersonItem } from '../persons-modal.types';
         }
       </div>
       <div class="card-info">
-        <span class="card-name" [attr.data-tooltip]="person().name">{{ person().name }}</span>
+        <span class="card-name" [matTooltip]="person().name">{{ person().name }}</span>
         <div class="card-meta">
           <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">
             {{ person().type === 'student' ? 'Diák' : 'Tanár' }}

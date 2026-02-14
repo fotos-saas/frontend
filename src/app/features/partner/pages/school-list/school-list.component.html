@@ -102,7 +102,7 @@
             <span
               class="projects-badge"
               [class.projects-badge--active]="school.hasActiveProjects"
-              [attr.data-tooltip]="school.activeProjectsCount + ' aktív / ' + school.projectsCount + ' összes'"
+              [matTooltip]="school.activeProjectsCount + ' aktív / ' + school.projectsCount + ' összes'"
             >
               @if (school.hasActiveProjects) {
                 {{ school.activeProjectsCount }}/{{ school.projectsCount }}

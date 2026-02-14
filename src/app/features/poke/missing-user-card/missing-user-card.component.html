@@ -41,7 +41,7 @@
       } @else {
         <!-- Tooltip wrapper a disabled állapot magyarázatához -->
         <div class="poke-btn-wrapper"
-             [attr.data-tooltip]="!user().pokeStatus.canPoke ? pokeTooltip() : null">
+             [matTooltip]="!user().pokeStatus.canPoke ? pokeTooltip() : null">
           <button
             class="poke-btn"
             [class.disabled]="!user().pokeStatus.canPoke"

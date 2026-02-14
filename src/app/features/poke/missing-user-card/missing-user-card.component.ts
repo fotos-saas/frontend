@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, input, signal, output } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MissingUser } from '../../../core/models/poke.models';
 
 /**
@@ -8,7 +9,7 @@ import { MissingUser } from '../../../core/models/poke.models';
  */
 @Component({
   selector: 'app-missing-user-card',
-  imports: [],
+  imports: [MatTooltipModule],
   templateUrl: './missing-user-card.component.html',
   styleUrls: ['./missing-user-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

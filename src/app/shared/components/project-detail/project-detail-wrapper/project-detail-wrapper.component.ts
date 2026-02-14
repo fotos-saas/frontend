@@ -317,6 +317,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
           fileNaming: exp.file_naming,
           includeExcel: false,
           personType: type === 'both' ? undefined : type,
+          effectiveOnly: true,
         }).pipe(
           takeUntilDestroyed(this.destroyRef)
         ).subscribe({

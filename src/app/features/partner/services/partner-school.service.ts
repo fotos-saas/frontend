@@ -59,12 +59,14 @@ export class PartnerSchoolService {
     page?: number;
     per_page?: number;
     search?: string;
+    graduation_year?: number;
   }): Observable<PaginatedResponse<SchoolListItem> & { limits?: SchoolLimits }> {
     let httpParams = new HttpParams();
 
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());
     if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
     if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.graduation_year) httpParams = httpParams.set('graduation_year', params.graduation_year.toString());
 
     return this.http.get<PaginatedResponse<SchoolListItem> & { limits?: SchoolLimits }>(
       `${this.baseUrl}/schools`,

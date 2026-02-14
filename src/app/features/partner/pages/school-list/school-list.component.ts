@@ -19,7 +19,8 @@ import { GuidedTourService } from '../../../../core/services/guided-tour.service
 import { SCHOOLS_TOUR } from '../../../../shared/components/guided-tour/tours';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
-import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
+import { SmartFilterBarComponent, SearchConfig, FilterConfig } from '../../../../shared/components/smart-filter-bar';
+import { generateYearOptions } from '../../../../shared/utils/year-options.util';
 
 /**
  * Partner School List - Iskolák listája a partner felületen.
@@ -55,10 +56,21 @@ export class PartnerSchoolListComponent implements OnInit {
 
   readonly ICONS = ICONS;
 
+  readonly searchConfig: SearchConfig = {
+    placeholder: 'Keresés (#ID, "pontos kifejezés", iskola neve vagy város)...',
+    features: { id: true, exact: true },
+  };
+
+  private readonly currentYear = new Date().getFullYear();
+
+  readonly schoolFilterConfigs: FilterConfig[] = [
+    { id: 'graduation_year', label: 'Tanév', icon: 'calendar', options: generateYearOptions(10) },
+  ];
+
   // Filter state - központosított perzisztencia rendszerrel
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'schools' },
-    defaultFilters: {},
+    defaultFilters: { graduation_year: this.currentYear.toString() },
     defaultSortBy: 'name',
     defaultSortDir: 'asc',
     onStateChange: () => this.loadSchools(),
@@ -94,10 +106,12 @@ export class PartnerSchoolListComponent implements OnInit {
   loadSchools(): void {
     this.filterState.loading.set(true);
 
+    const filters = this.filterState.filters();
     this.partnerService.getSchools({
       page: this.filterState.page(),
       per_page: 18,
-      search: this.filterState.search() || undefined
+      search: this.filterState.search() || undefined,
+      graduation_year: filters['graduation_year'] ? parseInt(filters['graduation_year'], 10) : undefined,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

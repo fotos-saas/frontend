@@ -30,10 +30,11 @@
     </div>
   </header>
 
-  <!-- Keresés -->
+  <!-- Keresés + szűrők -->
   <app-smart-filter-bar
     [filterState]="filterState"
-    [searchConfig]="{ placeholder: 'Keresés iskola neve vagy város alapján...' }"
+    [searchConfig]="searchConfig"
+    [filterConfigs]="schoolFilterConfigs"
   />
 
   <!-- Lista -->

@@ -6,6 +6,7 @@ import { ConfirmDialogComponent, ConfirmDialogResult } from '../confirm-dialog/c
 import { ICONS } from '../../constants/icons.constants';
 import { QR_CODE_TYPES, QR_CODE_TYPE_LIST, QrCodeTypeKey } from '../../constants/qr-code-types';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { ClipboardService } from '../../../core/services/clipboard.service';
 import { QrCode, IQrCodeService } from '../../interfaces/qr-code.interface';
 
 @Component({
@@ -30,6 +31,7 @@ export class SharedQrCodeModalComponent implements OnInit {
   qrCodeChanged = output<QrCode[]>();
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly clipboardService = inject(ClipboardService);
 
   loading = signal(true);
   qrCodes = signal<QrCode[]>([]);
@@ -155,18 +157,22 @@ export class SharedQrCodeModalComponent implements OnInit {
   }
 
   copyCode(code: string, codeId: number): void {
-    navigator.clipboard.writeText(code).then(() => {
-      this.copied.set(codeId);
-      if (this.copyTimeoutId) clearTimeout(this.copyTimeoutId);
-      this.copyTimeoutId = setTimeout(() => this.copied.set(null), 2000);
+    this.clipboardService.copy(code, 'QR kód').then((success) => {
+      if (success) {
+        this.copied.set(codeId);
+        if (this.copyTimeoutId) clearTimeout(this.copyTimeoutId);
+        this.copyTimeoutId = setTimeout(() => this.copied.set(null), 2000);
+      }
     });
   }
 
   copyLink(url: string, codeId: number): void {
-    navigator.clipboard.writeText(url).then(() => {
-      this.linkCopied.set(codeId);
-      if (this.linkCopyTimeoutId) clearTimeout(this.linkCopyTimeoutId);
-      this.linkCopyTimeoutId = setTimeout(() => this.linkCopied.set(null), 2000);
+    this.clipboardService.copyLink(url).then((success) => {
+      if (success) {
+        this.linkCopied.set(codeId);
+        if (this.linkCopyTimeoutId) clearTimeout(this.linkCopyTimeoutId);
+        this.linkCopyTimeoutId = setTimeout(() => this.linkCopied.set(null), 2000);
+      }
     });
   }
 

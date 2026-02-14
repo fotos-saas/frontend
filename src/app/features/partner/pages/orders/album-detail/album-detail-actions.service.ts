@@ -5,6 +5,7 @@ import { forkJoin } from 'rxjs';
 import { PartnerOrdersService } from '../../../services/partner-orders.service';
 import { PartnerWebshopService } from '../../../services/partner-webshop.service';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { ClipboardService } from '../../../../../core/services/clipboard.service';
 import { AlbumDetailState } from './album-detail.state';
 import { AlbumEditFormData } from './components/album-edit-modal/album-edit-modal.component';
 
@@ -19,6 +20,7 @@ export class AlbumDetailActionsService {
   private readonly ordersService = inject(PartnerOrdersService);
   private readonly webshopService = inject(PartnerWebshopService);
   private readonly toast = inject(ToastService);
+  private readonly clipboardService = inject(ClipboardService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -322,10 +324,11 @@ export class AlbumDetailActionsService {
     if (!token) return;
 
     const url = `${window.location.origin}/shop/${token}`;
-    navigator.clipboard.writeText(url).then(() => {
-      state.linkCopied.set(true);
-      this.toast.success('Siker', 'Webshop link vágólapra másolva');
-      setTimeout(() => state.linkCopied.set(false), 2000);
+    this.clipboardService.copyLink(url).then((success) => {
+      if (success) {
+        state.linkCopied.set(true);
+        setTimeout(() => state.linkCopied.set(false), 2000);
+      }
     });
   }
 

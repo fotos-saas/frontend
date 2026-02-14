@@ -115,7 +115,8 @@ export class ProjectDetailWrapperFacadeService<T> {
     this.projectService.getProjectDetails(id).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: (project: T) => {
+      next: (raw: unknown) => {
+        const project = raw as T;
         this.project.set(project);
         this.projectData.set(mapFn(project));
         this.loading.set(false);

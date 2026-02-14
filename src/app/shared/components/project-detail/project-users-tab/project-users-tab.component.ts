@@ -8,6 +8,7 @@ import { ICONS } from '../../../constants/icons.constants';
 import { InfoBoxComponent } from '../../../components/info-box';
 import { PartnerService, GuestSession, PaginatedResponse } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { ClipboardService } from '../../../../core/services/clipboard.service';
 import { DevLoginService } from '../../../../core/services/dev-login.service';
 import { GuestSessionEditDialogComponent } from '../guest-session-edit-dialog/guest-session-edit-dialog.component';
 
@@ -27,6 +28,7 @@ export class ProjectUsersTabComponent implements OnInit {
 
   private partnerService = inject(PartnerService);
   private toast = inject(ToastService);
+  private readonly clipboardService = inject(ClipboardService);
   private destroyRef = inject(DestroyRef);
   private devLoginService = inject(DevLoginService);
 
@@ -176,7 +178,7 @@ export class ProjectUsersTabComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          navigator.clipboard.writeText(res.url);
+          this.clipboardService.copyLink(res.url);
           this.toast.success('Dev login', 'URL vágólapra másolva (5 perc érvényes)');
         },
         error: () => {

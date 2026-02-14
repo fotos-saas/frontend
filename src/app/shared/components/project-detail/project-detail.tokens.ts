@@ -2,17 +2,27 @@ import { InjectionToken, Type } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ProjectContact, ProjectDetailData, QrCode } from './project-detail.types';
 
+/** Közös API válasz típus sikeres műveletekhez */
+export interface ApiSuccessResponse {
+  success: boolean;
+  message: string;
+}
+
 /**
  * Interface a projekt detail service-ekhez.
  * Marketer és Partner service-ek egyaránt implementálják.
+ *
+ * A getProjectDetails return type-ja szándékosan `unknown`, mert
+ * a Marketer (ProjectDetails) és Partner (PartnerProjectDetails)
+ * eltérő típust ad vissza - a wrapper generikus mapFn-nel kezeli.
  */
 export interface IProjectDetailService {
-  getProjectDetails(id: number): Observable<any>;
-  deleteContact(projectId: number, contactId: number): Observable<any>;
-  deleteProject(projectId: number): Observable<any>;
+  getProjectDetails(id: number): Observable<unknown>;
+  deleteContact(projectId: number, contactId: number): Observable<ApiSuccessResponse>;
+  deleteProject(projectId: number): Observable<ApiSuccessResponse>;
   getProjectQrCode(projectId: number): Observable<{ hasQrCode: boolean; qrCode?: QrCode }>;
   generateQrCode(projectId: number): Observable<{ qrCode: QrCode }>;
-  deactivateQrCode(projectId: number): Observable<any>;
+  deactivateQrCode(projectId: number): Observable<ApiSuccessResponse>;
   addContact(projectId: number, data: Partial<ProjectContact>): Observable<{ data: ProjectContact }>;
   updateContact(projectId: number, contactId: number, data: Partial<ProjectContact>): Observable<{ data: ProjectContact }>;
 }

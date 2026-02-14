@@ -92,6 +92,18 @@ export interface ProjectDetails extends ProjectListItem {
   qrCode: QrCode | null;
   activeQrCodes: Array<{ id: number; code: string; type: string; typeLabel: string; usageCount: number; isValid: boolean; registrationUrl: string }>;
   qrCodesHistory: QrCodeHistory[];
+  personsCount?: number;
+  studentsCount?: number;
+  teachersCount?: number;
+  studentsWithPhotoCount?: number;
+  teachersWithPhotoCount?: number;
+  personsPreview?: Array<{
+    id: number;
+    name: string;
+    type: 'student' | 'teacher';
+    hasPhoto: boolean;
+    photoThumbUrl: string | null;
+  }>;
   updatedAt: string;
 }
 

@@ -2,7 +2,7 @@ import { Component, input, output, inject, signal, computed, ChangeDetectionStra
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { ARCHIVE_SERVICE, ArchiveConfig, ArchiveField } from '../../../models/archive.models';
+import { ARCHIVE_SERVICE, ArchiveConfig, ArchiveField, CreateArchivePayload, UpdateArchivePayload } from '../../../models/archive.models';
 import { SchoolItem } from '../../../models/partner.models';
 import { SearchableSelectComponent, SelectOption } from '../../../../../shared/components/searchable-select/searchable-select.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -78,12 +78,13 @@ export class ArchiveEditModalComponent {
       .subscribe({
         next: (res) => {
           if (res.data) {
-            // Extra mezők kitöltése a detail adatokból
+            // Extra mezők kitöltése a detail adatokból (dinamikus hozzáférés)
+            const data = res.data as unknown as Record<string, unknown>;
             for (const field of this.config().extraFields) {
-              this.extraFieldValues[field.name] = res.data[field.name] ?? '';
+              this.extraFieldValues[field.name] = (data[field.name] as string) ?? '';
             }
             this.notes = res.data.notes ?? '';
-            this.aliases.set((res.data.aliases ?? []).map((a: any) => a.aliasName));
+            this.aliases.set((res.data.aliases ?? []).map(a => a.aliasName));
             if (res.data.photoUrl) {
               this.currentPhotoUrl.set(res.data.photoUrl);
             }
@@ -118,7 +119,7 @@ export class ArchiveEditModalComponent {
     this.saving.set(true);
     this.errorMessage.set(null);
 
-    const payload: Record<string, any> = {
+    const payload: Record<string, unknown> = {
       canonical_name: this.canonicalName.trim(),
       school_id: this.schoolId,
       aliases: this.aliases().length > 0 ? this.aliases() : undefined,
@@ -131,8 +132,8 @@ export class ArchiveEditModalComponent {
     }
 
     const request$ = this.mode() === 'create'
-      ? this.archiveService.createArchive(payload)
-      : this.archiveService.updateArchive(this.archiveItem()!.id, payload);
+      ? this.archiveService.createArchive(payload as unknown as CreateArchivePayload)
+      : this.archiveService.updateArchive(this.archiveItem()!.id, payload as unknown as UpdateArchivePayload);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {

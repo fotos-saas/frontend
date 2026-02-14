@@ -10,6 +10,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ErrorBoundaryService } from '../../../core/services/error-boundary.service';
 import { SentryService } from '../../../core/services/sentry.service';
+import { ClipboardService } from '../../../core/services/clipboard.service';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 
 /**
@@ -30,6 +31,7 @@ export class ErrorFeedbackDialogComponent {
   readonly ICONS = ICONS;
 
   private readonly logger = inject(LoggerService);
+  private readonly clipboardService = inject(ClipboardService);
   private errorBoundary = inject(ErrorBoundaryService);
   private sentryService = inject(SentryService);
 
@@ -63,12 +65,10 @@ export class ErrorFeedbackDialogComponent {
     const eventId = this.errorInfo()?.eventId;
     if (!eventId) return;
 
-    try {
-      await navigator.clipboard.writeText(eventId);
+    const success = await this.clipboardService.copy(eventId, 'Hiba azonosító');
+    if (success) {
       this.copiedEventId.set(true);
       setTimeout(() => this.copiedEventId.set(false), 2000);
-    } catch {
-      this.logger.warn('Clipboard API not available');
     }
   }
 

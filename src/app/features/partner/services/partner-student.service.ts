@@ -21,6 +21,10 @@ import {
   ArchiveBulkImportPreviewItem,
   ArchiveBulkImportExecuteItem,
   ArchiveBulkImportExecuteResult,
+  ArchivePhoto,
+  ArchiveDetail,
+  CreateArchivePayload,
+  UpdateArchivePayload,
   BulkPhotoMatch,
   BulkPhotoUploadSummary,
   BulkPhotoUploadResult,
@@ -156,20 +160,20 @@ export class PartnerStudentService implements ArchiveService {
 
   // ============ ArchiveService adapter metódusok ============
 
-  uploadPhoto(id: number, file: File, year: number, setActive = false): Observable<any> {
+  uploadPhoto(id: number, file: File, year: number, setActive = false): Observable<{ success: boolean; message: string; data: ArchivePhoto }> {
     return this.uploadStudentPhoto(id, file, year, setActive);
   }
 
-  getArchive(id: number): Observable<{ success: boolean; data: any }> {
-    return this.getStudent(id);
+  getArchive(id: number): Observable<{ success: boolean; data: ArchiveDetail }> {
+    return this.getStudent(id) as Observable<{ success: boolean; data: ArchiveDetail }>;
   }
 
-  createArchive(payload: any): Observable<{ success: boolean; message: string; data: any }> {
-    return this.createStudent(payload);
+  createArchive(payload: CreateArchivePayload): Observable<{ success: boolean; message: string; data: ArchiveDetail }> {
+    return this.createStudent(payload as CreateStudentRequest) as Observable<{ success: boolean; message: string; data: ArchiveDetail }>;
   }
 
-  updateArchive(id: number, payload: any): Observable<{ success: boolean; message: string; data: any }> {
-    return this.updateStudent(id, payload);
+  updateArchive(id: number, payload: UpdateArchivePayload): Observable<{ success: boolean; message: string; data: ArchiveDetail }> {
+    return this.updateStudent(id, payload as UpdateStudentRequest) as Observable<{ success: boolean; message: string; data: ArchiveDetail }>;
   }
 
   getBySchool(params?: { class_year?: string; school_id?: number; missing_only?: boolean }): Observable<ArchiveBySchoolResponse> {

@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ClipboardService } from '../../../../core/services/clipboard.service';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
   AddButtonComponent,
@@ -39,6 +40,7 @@ import { ProjectPersonsSectionComponent } from '../project-persons-section/proje
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectDetailViewComponent {
+  private readonly clipboardService = inject(ClipboardService);
   readonly ICONS = ICONS;
 
   readonly project = input<ProjectDetailData | null>(null);
@@ -73,9 +75,11 @@ export class ProjectDetailViewComponent {
   }
 
   copyLink(url: string, codeId: number): void {
-    navigator.clipboard.writeText(url).then(() => {
-      this.copiedCodeId = codeId;
-      setTimeout(() => this.copiedCodeId = null, 2000);
+    this.clipboardService.copyLink(url).then((success) => {
+      if (success) {
+        this.copiedCodeId = codeId;
+        setTimeout(() => this.copiedCodeId = null, 2000);
+      }
     });
   }
 

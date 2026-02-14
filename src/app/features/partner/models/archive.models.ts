@@ -1,6 +1,80 @@
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 
+// ============ Közös archive CRUD típusok ============
+
+/**
+ * Közös fotó interface (StudentPhoto és TeacherPhoto közös mezői)
+ */
+export interface ArchivePhoto {
+  id: number;
+  mediaId: number;
+  year: number;
+  isActive: boolean;
+  url: string | null;
+  thumbUrl: string | null;
+  fileName: string | null;
+}
+
+/**
+ * Közös alias interface
+ */
+export interface ArchiveAlias {
+  id: number;
+  aliasName: string;
+}
+
+/**
+ * Közös archive detail interface (StudentDetail és TeacherDetail közös mezői).
+ */
+export interface ArchiveDetail {
+  id: number;
+  canonicalName: string;
+  schoolId: number;
+  schoolName: string | null;
+  isActive: boolean;
+  notes: string | null;
+  photoThumbUrl: string | null;
+  photoUrl: string | null;
+  aliases: ArchiveAlias[];
+  photos: ArchivePhoto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Közös archive létrehozás payload (Create request közös mezői)
+ */
+export interface CreateArchivePayload {
+  canonical_name: string;
+  school_id: number;
+  aliases?: string[];
+  notes?: string | null;
+  /** Student-specifikus */
+  class_name?: string | null;
+  /** Teacher-specifikus */
+  title_prefix?: string | null;
+  /** Teacher-specifikus */
+  position?: string | null;
+}
+
+/**
+ * Közös archive frissítés payload (Update request közös mezői)
+ */
+export interface UpdateArchivePayload {
+  canonical_name?: string;
+  school_id?: number;
+  aliases?: string[];
+  notes?: string | null;
+  is_active?: boolean;
+  /** Student-specifikus */
+  class_name?: string | null;
+  /** Teacher-specifikus */
+  title_prefix?: string | null;
+  /** Teacher-specifikus */
+  position?: string | null;
+}
+
 // ============ Közös archive interfészek ============
 
 export interface ArchivePersonInSchool {
@@ -134,10 +208,10 @@ export interface ArchiveConfig {
 // ============ ArchiveService InjectionToken ============
 
 export interface ArchiveService {
-  uploadPhoto(id: number, file: File, year: number, setActive?: boolean): Observable<any>;
-  getArchive(id: number): Observable<{ success: boolean; data: any }>;
-  createArchive(payload: any): Observable<{ success: boolean; message: string; data: any }>;
-  updateArchive(id: number, payload: any): Observable<{ success: boolean; message: string; data: any }>;
+  uploadPhoto(id: number, file: File, year: number, setActive?: boolean): Observable<{ success: boolean; message: string; data: ArchivePhoto }>;
+  getArchive(id: number): Observable<{ success: boolean; data: ArchiveDetail }>;
+  createArchive(payload: CreateArchivePayload): Observable<{ success: boolean; message: string; data: ArchiveDetail }>;
+  updateArchive(id: number, payload: UpdateArchivePayload): Observable<{ success: boolean; message: string; data: ArchiveDetail }>;
   getBySchool(params?: { class_year?: string; school_id?: number; missing_only?: boolean }): Observable<ArchiveBySchoolResponse>;
   getClassYears(): Observable<string[]>;
   bulkImportPreview(schoolId: number, names: string[]): Observable<{ success: boolean; data: ArchiveBulkImportPreviewItem[] }>;

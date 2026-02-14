@@ -8,6 +8,7 @@ import { ConfirmDialogComponent } from '../../../../../shared/components/confirm
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DevLoginService } from '../../../../../core/services/dev-login.service';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { ClipboardService } from '../../../../../core/services/clipboard.service';
 
 /**
  * Partner Team List - Csapatom oldal
@@ -31,6 +32,7 @@ export class PartnerTeamListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly devLoginService = inject(DevLoginService);
   private readonly toast = inject(ToastService);
+  private readonly clipboardService = inject(ClipboardService);
 
   readonly ICONS = ICONS;
   readonly isDevMode = this.devLoginService.isDevMode();
@@ -187,7 +189,7 @@ export class PartnerTeamListComponent implements OnInit {
 
   // Clipboard másolás
   copyToClipboard(text: string): void {
-    navigator.clipboard.writeText(text);
+    this.clipboardService.copy(text);
   }
 
   // Dev login URL generálás
@@ -196,7 +198,7 @@ export class PartnerTeamListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          navigator.clipboard.writeText(res.url);
+          this.clipboardService.copyLink(res.url);
           this.toast.success('Dev login', 'URL vágólapra másolva (5 perc érvényes)');
         },
         error: () => {

@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { ClipboardService } from '../../../../../core/services/clipboard.service';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
 import { ClientDetailState } from './client-detail.state';
@@ -42,6 +43,7 @@ export class PartnerClientDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
+  private readonly clipboardService = inject(ClipboardService);
   private readonly actions = inject(ClientDetailActionsService);
 
   readonly ICONS = ICONS;
@@ -72,8 +74,7 @@ export class PartnerClientDetailComponent implements OnInit {
   onCopyCode(): void {
     const code = this.state.client()?.accessCode;
     if (code) {
-      navigator.clipboard.writeText(code);
-      this.toast.success('Siker', 'Kod masolva!');
+      this.clipboardService.copy(code, 'Hozzáférési kód');
     }
   }
 

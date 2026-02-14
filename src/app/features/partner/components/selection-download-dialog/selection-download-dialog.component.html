@@ -2,49 +2,51 @@
   headerStyle="flat"
   theme="blue"
   [icon]="ICONS.DOWNLOAD"
-  title="Kiválasztott fotók letöltése"
+  [title]="mode() === 'school' ? 'Tanári fotók letöltése' : 'Kiválasztott fotók letöltése'"
   description="Válaszd ki a letöltési beállításokat."
   size="sm"
   (closeEvent)="onClose()"
   (submitEvent)="onSubmit()"
 >
   <ng-container dialogBody>
-    <!-- Személyek -->
-    <p class="section-label">Kinek a képei?</p>
-    <div class="radio-group">
-      <label class="radio-option" (click)="selectType('student')">
-        <input type="radio" name="personType" [checked]="selectedType() === 'student'" />
-        <div class="radio-content">
-          <span class="radio-title">
-            <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" class="radio-icon" />
-            Diákok
-          </span>
-        </div>
-      </label>
+    <!-- Személyek (csak project módban) -->
+    @if (mode() === 'project') {
+      <p class="section-label">Kinek a képei?</p>
+      <div class="radio-group">
+        <label class="radio-option" (click)="selectType('student')">
+          <input type="radio" name="personType" [checked]="selectedType() === 'student'" />
+          <div class="radio-content">
+            <span class="radio-title">
+              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" class="radio-icon" />
+              Diákok
+            </span>
+          </div>
+        </label>
 
-      <label class="radio-option" (click)="selectType('teacher')">
-        <input type="radio" name="personType" [checked]="selectedType() === 'teacher'" />
-        <div class="radio-content">
-          <span class="radio-title">
-            <lucide-icon [name]="ICONS.USER" [size]="16" class="radio-icon" />
-            Tanárok
-          </span>
-        </div>
-      </label>
+        <label class="radio-option" (click)="selectType('teacher')">
+          <input type="radio" name="personType" [checked]="selectedType() === 'teacher'" />
+          <div class="radio-content">
+            <span class="radio-title">
+              <lucide-icon [name]="ICONS.USER" [size]="16" class="radio-icon" />
+              Tanárok
+            </span>
+          </div>
+        </label>
 
-      <label class="radio-option" (click)="selectType('both')">
-        <input type="radio" name="personType" [checked]="selectedType() === 'both'" />
-        <div class="radio-content">
-          <span class="radio-title">
-            <lucide-icon [name]="ICONS.USERS" [size]="16" class="radio-icon" />
-            Mindkettő
-          </span>
-        </div>
-      </label>
-    </div>
+        <label class="radio-option" (click)="selectType('both')">
+          <input type="radio" name="personType" [checked]="selectedType() === 'both'" />
+          <div class="radio-content">
+            <span class="radio-title">
+              <lucide-icon [name]="ICONS.USERS" [size]="16" class="radio-icon" />
+              Mindkettő
+            </span>
+          </div>
+        </label>
+      </div>
+    }
 
     <!-- Fájlnév -->
-    <p class="section-label section-label--mt">Fájlnév</p>
+    <p class="section-label" [class.section-label--mt]="mode() === 'project'">Fájlnév</p>
     <div class="radio-group">
       <label class="radio-option" (click)="selectNaming('student_name')">
         <input type="radio" name="fileNaming" [checked]="selectedNaming() === 'student_name'" />

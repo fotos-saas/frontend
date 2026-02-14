@@ -132,6 +132,13 @@
             }
             <button
               class="action-btn"
+              matTooltip="Tanári fotók letöltése"
+              (click)="openDownloadDialog(school)"
+            >
+              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+            </button>
+            <button
+              class="action-btn"
               matTooltip="Szerkesztés"
               (click)="editSchool(school)"
             >
@@ -210,6 +217,9 @@
     (close)="showUpgradeDialog.set(false)"
   />
 }
+
+<!-- Download Dialog container -->
+<ng-container #downloadDialogContainer></ng-container>
 
 <!-- School Link Dialog -->
 @if (showLinkDialog() && selectedSchool()) {

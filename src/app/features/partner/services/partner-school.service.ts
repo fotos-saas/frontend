@@ -138,6 +138,17 @@ export class PartnerSchoolService {
   }
 
   /**
+   * Tanári aktív fotók ZIP letöltése iskolához (blob)
+   */
+  downloadTeacherPhotosZip(schoolId: number, fileNaming: string): Observable<Blob> {
+    return this.http.post(
+      `${this.baseUrl}/schools/${schoolId}/download-teacher-photos`,
+      { file_naming: fileNaming },
+      { responseType: 'blob' },
+    );
+  }
+
+  /**
    * Összekapcsolt csoportok lekérése
    */
   getLinkedGroups(): Observable<{ data: Array<{ linkedGroup: string; schools: SchoolItem[] }> }> {

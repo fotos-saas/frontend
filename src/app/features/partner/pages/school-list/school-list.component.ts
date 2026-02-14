@@ -1,10 +1,15 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, SchoolListItem, SchoolItem, SchoolLimits } from '../../services/partner.service';
+import { PartnerSchoolService } from '../../services/partner-school.service';
+import { SelectionDownloadResult } from '../../components/selection-download-dialog/selection-download-dialog.component';
+import { saveFile } from '../../../../shared/utils/file.util';
+import { abbreviateMiddle } from '../../../../shared/utils/string.util';
+import { ToastService } from '../../../../core/services/toast.service';
 import { SchoolEditModalComponent } from '../../components/school-edit-modal/school-edit-modal.component';
 import { SchoolLinkDialogComponent } from '../../components/school-link-dialog/school-link-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -34,8 +39,12 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
 })
 export class PartnerSchoolListComponent implements OnInit {
   private readonly partnerService = inject(PartnerService);
+  private readonly schoolService = inject(PartnerSchoolService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
+
+  private readonly downloadDialogContainer = viewChild('downloadDialogContainer', { read: ViewContainerRef });
 
   readonly ICONS = ICONS;
 
@@ -189,5 +198,40 @@ export class PartnerSchoolListComponent implements OnInit {
     this.partnerService.unlinkSchool(school.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({ next: () => this.loadSchools() });
+  }
+
+  // === Tanári fotók letöltése ===
+
+  async openDownloadDialog(school: SchoolListItem): Promise<void> {
+    const container = this.downloadDialogContainer();
+    if (!container) return;
+
+    this.selectedSchool.set(school);
+    container.clear();
+    const { SelectionDownloadDialogComponent } = await import(
+      '../../components/selection-download-dialog/selection-download-dialog.component'
+    );
+    const ref = container.createComponent(SelectionDownloadDialogComponent);
+    ref.setInput('mode', 'school');
+    ref.instance.close.subscribe(() => container.clear());
+    ref.instance.download.subscribe((result: SelectionDownloadResult) => {
+      container.clear();
+      this.downloadTeacherPhotos(school, result.fileNaming);
+    });
+  }
+
+  private downloadTeacherPhotos(school: SchoolListItem, fileNaming: string): void {
+    this.schoolService.downloadTeacherPhotosZip(school.id, fileNaming)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          const name = abbreviateMiddle(school.name, 40);
+          saveFile(blob, `${name} - tanarok.zip`);
+          this.toast.success('Siker', 'ZIP letöltve');
+        },
+        error: () => {
+          this.toast.error('Hiba', 'A ZIP letöltés nem sikerült');
+        },
+      });
   }
 }

@@ -1,10 +1,11 @@
-import { Component, ChangeDetectionStrategy, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, output, signal, input } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 export type SelectionPersonType = 'student' | 'teacher' | 'both';
 export type SelectionFileNaming = 'original' | 'student_name';
+export type SelectionDialogMode = 'project' | 'school';
 
 export interface SelectionDownloadResult {
   personType: SelectionPersonType;
@@ -20,6 +21,9 @@ export interface SelectionDownloadResult {
   styleUrl: './selection-download-dialog.component.scss',
 })
 export class SelectionDownloadDialogComponent {
+  /** 'project' = személytípus + fájlnév, 'school' = csak fájlnév (tanárok fix) */
+  readonly mode = input<SelectionDialogMode>('project');
+
   readonly download = output<SelectionDownloadResult>();
   readonly close = output<void>();
 
@@ -37,7 +41,7 @@ export class SelectionDownloadDialogComponent {
 
   onSubmit(): void {
     this.download.emit({
-      personType: this.selectedType(),
+      personType: this.mode() === 'school' ? 'teacher' : this.selectedType(),
       fileNaming: this.selectedNaming(),
     });
   }

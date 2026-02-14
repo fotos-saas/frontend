@@ -87,6 +87,10 @@ export class PartnerSchoolListComponent implements OnInit {
     this.loadSchools();
   }
 
+  restartTour(): void {
+    this.tourService.start(SCHOOLS_TOUR);
+  }
+
   loadSchools(): void {
     this.filterState.loading.set(true);
 

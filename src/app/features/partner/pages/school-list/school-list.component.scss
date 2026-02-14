@@ -3,6 +3,34 @@
 .school-list-page {
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  // gap helyett margin (Safari compat)
+  > * + * {
+    margin-left: 8px;
+  }
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+}
+
 // Table Header
 .table-header {
   grid-template-columns: 1fr 100px 120px;

@@ -8,14 +8,24 @@
         <p class="subtitle">{{ totalSchools() }} iskola összesen</p>
       }
     </div>
-    <button
-      type="button"
-      class="btn-primary"
-      (click)="onNewSchoolClick()"
-    >
-      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
-      Új iskola
-    </button>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn-icon"
+        matTooltip="Bemutató újranézése"
+        (click)="restartTour()"
+      >
+        <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="20" />
+      </button>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="onNewSchoolClick()"
+      >
+        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        Új iskola
+      </button>
+    </div>
   </header>
 
   <!-- Keresés -->

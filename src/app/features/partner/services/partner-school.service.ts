@@ -140,10 +140,10 @@ export class PartnerSchoolService {
   /**
    * Tanári aktív fotók ZIP letöltése iskolához (blob)
    */
-  downloadTeacherPhotosZip(schoolId: number, fileNaming: string): Observable<Blob> {
+  downloadTeacherPhotosZip(schoolId: number, fileNaming: string, allProjects = false): Observable<Blob> {
     return this.http.post(
       `${this.baseUrl}/schools/${schoolId}/download-teacher-photos`,
-      { file_naming: fileNaming },
+      { file_naming: fileNaming, ...(allProjects ? { all_projects: true } : {}) },
       { responseType: 'blob' },
     );
   }

@@ -10,6 +10,7 @@ export type SelectionDialogMode = 'project' | 'school';
 export interface SelectionDownloadResult {
   personType: SelectionPersonType;
   fileNaming: SelectionFileNaming;
+  allProjects: boolean;
 }
 
 @Component({
@@ -30,6 +31,7 @@ export class SelectionDownloadDialogComponent {
   readonly ICONS = ICONS;
   readonly selectedType = signal<SelectionPersonType>('both');
   readonly selectedNaming = signal<SelectionFileNaming>('student_name');
+  readonly allProjects = signal(false);
 
   selectType(type: SelectionPersonType): void {
     this.selectedType.set(type);
@@ -43,6 +45,7 @@ export class SelectionDownloadDialogComponent {
     this.download.emit({
       personType: this.mode() === 'school' ? 'teacher' : this.selectedType(),
       fileNaming: this.selectedNaming(),
+      allProjects: this.allProjects(),
     });
   }
 

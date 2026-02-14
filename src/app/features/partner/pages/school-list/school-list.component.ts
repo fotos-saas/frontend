@@ -216,12 +216,12 @@ export class PartnerSchoolListComponent implements OnInit {
     ref.instance.close.subscribe(() => container.clear());
     ref.instance.download.subscribe((result: SelectionDownloadResult) => {
       container.clear();
-      this.downloadTeacherPhotos(school, result.fileNaming);
+      this.downloadTeacherPhotos(school, result.fileNaming, result.allProjects);
     });
   }
 
-  private downloadTeacherPhotos(school: SchoolListItem, fileNaming: string): void {
-    this.schoolService.downloadTeacherPhotosZip(school.id, fileNaming)
+  private downloadTeacherPhotos(school: SchoolListItem, fileNaming: string, allProjects = false): void {
+    this.schoolService.downloadTeacherPhotosZip(school.id, fileNaming, allProjects)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {

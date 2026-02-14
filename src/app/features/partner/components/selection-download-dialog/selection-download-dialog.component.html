@@ -45,8 +45,36 @@
       </div>
     }
 
+    <!-- Hatókör (csak school módban) -->
+    @if (mode() === 'school') {
+      <p class="section-label">Hatókör</p>
+      <div class="radio-group">
+        <label class="radio-option" (click)="allProjects.set(false)">
+          <input type="radio" name="scope" [checked]="!allProjects()" />
+          <div class="radio-content">
+            <span class="radio-title">
+              <lucide-icon [name]="ICONS.SCHOOL" [size]="16" class="radio-icon" />
+              Tanári adatbázis
+            </span>
+            <span class="radio-desc">Csak az archívban tárolt aktív fotók</span>
+          </div>
+        </label>
+
+        <label class="radio-option" (click)="allProjects.set(true)">
+          <input type="radio" name="scope" [checked]="allProjects()" />
+          <div class="radio-content">
+            <span class="radio-title">
+              <lucide-icon [name]="ICONS.CALENDAR" [size]="16" class="radio-icon" />
+              Összes projekt
+            </span>
+            <span class="radio-desc">Minden évfolyam tanárai, mappákba rendezve</span>
+          </div>
+        </label>
+      </div>
+    }
+
     <!-- Fájlnév -->
-    <p class="section-label" [class.section-label--mt]="mode() === 'project'">Fájlnév</p>
+    <p class="section-label section-label--mt">Fájlnév</p>
     <div class="radio-group">
       <label class="radio-option" (click)="selectNaming('student_name')">
         <input type="radio" name="fileNaming" [checked]="selectedNaming() === 'student_name'" />

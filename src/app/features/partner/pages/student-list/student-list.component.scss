@@ -1,14 +1,9 @@
 @use '../../../../shared/styles/list-page' as list;
 
 .student-list-page {
-  @extend .list-page;
 }
 
 // Header
-.page-header { @extend .page-header; }
-.subtitle { @extend .subtitle; }
-.btn-primary { @extend .btn-primary; }
-
 .header-buttons {
   display: flex;
   gap: 8px;
@@ -72,26 +67,17 @@
 
 // Filters
 .filters {
-  @extend .filters;
   display: flex;
   gap: 12px;
   align-items: center;
 }
-.search-box { @extend .search-box; }
-.search-icon { @extend .search-icon; }
-.search-input { @extend .search-input; }
-.clear-btn { @extend .clear-btn; }
 
 .school-filter { min-width: 220px; }
 
 // Table
 .table-header {
-  @extend .table-header;
   grid-template-columns: 1fr 100px 200px 100px;
 }
-
-.th { @extend .th; }
-.th-actions { @extend .th-actions; }
 
 .student-grid {
   @extend .row-grid;
@@ -182,24 +168,6 @@
   justify-content: center;
   gap: 4px;
 }
-
-// Action buttons
-.action-btn { @extend .action-btn; }
-.action-btn--danger { @extend .action-btn--danger; }
-
-// States
-.empty-state { @extend .empty-state; }
-.empty-icon { @extend .empty-icon; }
-.loading-state { @extend .loading-state; }
-.skeleton-row { @extend .skeleton-row; }
-.skeleton-shimmer { @extend .skeleton-shimmer; }
-.mt-4 { @extend .mt-4; }
-
-// Pagination
-.pagination { @extend .pagination; }
-.page-btn { @extend .page-btn; }
-.page-info { @extend .page-info; }
-.total-count { @extend .total-count; }
 
 // Responsive
 @media (max-width: 768px) {

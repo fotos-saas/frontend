@@ -142,8 +142,6 @@ export class NewsfeedService {
   deleteMedia(mediaId: number) { return this.postService.deleteMedia(mediaId); }
   deletePost(id: number) { return this.postService.deletePost(id); }
   toggleReaction(postId: number, reaction?: string) { return this.postService.toggleReaction(postId, reaction); }
-  /** @deprecated Use toggleReaction() instead */
-  toggleLike(postId: number) { return this.postService.toggleLike(postId); }
   pinPost(id: number) { return this.postService.pinPost(id); }
   unpinPost(id: number) { return this.postService.unpinPost(id); }
 

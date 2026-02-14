@@ -161,16 +161,6 @@ export class ForumPostService {
     );
   }
 
-  /**
-   * Like toggle (legacy)
-   * @deprecated Use toggleReaction() instead
-   */
-  toggleLike(postId: number): Observable<{ hasLiked: boolean; likesCount: number }> {
-    return this.toggleReaction(postId, '\u2764\uFE0F').pipe(
-      map(result => ({ hasLiked: result.hasReacted, likesCount: result.likesCount }))
-    );
-  }
-
   // === PRIVATE ===
 
   private mapPost(post: ApiPost): DiscussionPost {

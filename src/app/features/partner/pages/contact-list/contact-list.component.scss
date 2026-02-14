@@ -1,13 +1,7 @@
 @use '../../../../shared/styles/list-page' as list;
 
 .contact-list-page {
-  @extend .list-page;
 }
-
-// Header - közös stílusok
-.page-header { @extend .page-header; }
-.subtitle { @extend .subtitle; }
-.btn-primary { @extend .btn-primary; }
 
 .header-actions {
   display: flex;
@@ -51,21 +45,10 @@
   display: none;
 }
 
-// Filters - közös stílusok
-.filters { @extend .filters; }
-.search-box { @extend .search-box; }
-.search-icon { @extend .search-icon; }
-.search-input { @extend .search-input; }
-.clear-btn { @extend .clear-btn; }
-
 // Table Header
 .table-header {
-  @extend .table-header;
   grid-template-columns: 1fr 1fr 120px 80px;
 }
-
-.th { @extend .th; }
-.th-actions { @extend .th-actions; }
 
 // Contact Grid - specifikus
 .contact-grid {
@@ -229,25 +212,6 @@
   gap: 4px;
 }
 
-// Action buttons - közös stílusok
-.action-btn { @extend .action-btn; }
-.action-btn--danger { @extend .action-btn--danger; }
-
-// States - közös stílusok
-.empty-state { @extend .empty-state; }
-.empty-icon { @extend .empty-icon; }
-.loading-state { @extend .loading-state; }
-.skeleton-row { @extend .skeleton-row; }
-.skeleton-row--tall { @extend .skeleton-row--tall; }
-.skeleton-shimmer { @extend .skeleton-shimmer; }
-.mt-4 { @extend .mt-4; }
-
-// Pagination - közös stílusok
-.pagination { @extend .pagination; }
-.page-btn { @extend .page-btn; }
-.page-info { @extend .page-info; }
-.total-count { @extend .total-count; }
-
 // Import Result Dialog
 .dialog-backdrop {
   position: fixed;
@@ -339,16 +303,6 @@
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 // Responsive

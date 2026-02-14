@@ -1,28 +1,12 @@
 @use '../../../../shared/styles/list-page' as list;
 
 .subscribers-list-page {
-  @extend .list-page;
 }
-
-// Header - közös stílusok
-.page-header { @extend .page-header; }
-.subtitle { @extend .subtitle; }
-
-// Filters - közös stílusok
-.filters { @extend .filters; }
-.search-box { @extend .search-box; }
-.search-icon { @extend .search-icon; }
-.search-input { @extend .search-input; }
-.clear-btn { @extend .clear-btn; }
-.filter-select { @extend .filter-select; }
 
 // Table Header
 .table-header {
-  @extend .table-header;
   grid-template-columns: 1fr 120px 120px 120px 100px 40px;
 }
-
-.th { @extend .th; }
 
 // Subscriber Grid
 .subscriber-grid {
@@ -205,21 +189,6 @@
     border-color: #cbd5e1;
   }
 }
-
-// States - közös stílusok
-.empty-state { @extend .empty-state; }
-.empty-icon { @extend .empty-icon; }
-.loading-state { @extend .loading-state; }
-.skeleton-row { @extend .skeleton-row; }
-.skeleton-row--tall { @extend .skeleton-row--tall; }
-.skeleton-shimmer { @extend .skeleton-shimmer; }
-.mt-4 { @extend .mt-4; }
-
-// Pagination - közös stílusok
-.pagination { @extend .pagination; }
-.page-btn { @extend .page-btn; }
-.page-info { @extend .page-info; }
-.total-count { @extend .total-count; }
 
 // Responsive
 @media (max-width: 768px) {

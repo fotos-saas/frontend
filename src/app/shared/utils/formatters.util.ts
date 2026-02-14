@@ -55,25 +55,6 @@ export function formatAmount(
 }
 
 /**
- * Ár formázása számlázási ciklussal
- *
- * @param price - Ár (Ft-ban)
- * @param cycle - 'monthly' | 'yearly'
- * @returns Formázott string (pl. "4 990 Ft/hó")
- *
- * @example
- * formatPriceWithCycle(4990, 'monthly') // => "4 990 Ft/hó"
- * formatPriceWithCycle(49900, 'yearly') // => "49 900 Ft/év"
- */
-export function formatPriceWithCycle(
-  price: number,
-  cycle: 'monthly' | 'yearly'
-): string {
-  const suffix = cycle === 'yearly' ? '/év' : '/hó';
-  return formatPrice(price) + suffix;
-}
-
-/**
  * Név kezdőbetűinek kinyerése
  *
  * @param name - Teljes név
@@ -111,21 +92,6 @@ export function formatDateTime(date: string | null): string {
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
-  });
-}
-
-/**
- * Dátum formázása idő nélkül
- *
- * @param date - ISO dátum string vagy null
- * @returns Formázott dátum (pl. "2026. jan. 30.")
- */
-export function formatDate(date: string | null): string {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('hu-HU', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
   });
 }
 

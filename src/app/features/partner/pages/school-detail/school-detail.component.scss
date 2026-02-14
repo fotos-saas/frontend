@@ -1,12 +1,7 @@
 @use '../../../../shared/styles/list-page' as list;
 
 .school-detail-page {
-  @extend .list-page;
 }
-
-.loading-state { @extend .loading-state; }
-.skeleton-row { @extend .skeleton-row; }
-.skeleton-shimmer { @extend .skeleton-shimmer; }
 
 // === FEJLÉC ===
 .detail-header {

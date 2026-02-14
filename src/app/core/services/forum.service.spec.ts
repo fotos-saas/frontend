@@ -486,35 +486,6 @@ describe('ForumService', () => {
     });
   });
 
-  // ==================== TOGGLE LIKE TESZTEK ====================
-
-  describe('toggleLike', () => {
-    it('should add like successfully', async () => {
-      const likePromise = firstValueFrom(service.toggleLike(1));
-
-      const req = httpMock.expectOne(`${API_BASE}/posts/1/like`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({});
-
-      req.flush({ hasLiked: true, likesCount: 4 });
-
-      const response = await likePromise;
-      expect(response.hasLiked).toBe(true);
-      expect(response.likesCount).toBe(4);
-    });
-
-    it('should remove like successfully', async () => {
-      const likePromise = firstValueFrom(service.toggleLike(1));
-
-      const req = httpMock.expectOne(`${API_BASE}/posts/1/like`);
-      req.flush({ hasLiked: false, likesCount: 3 });
-
-      const response = await likePromise;
-      expect(response.hasLiked).toBe(false);
-      expect(response.likesCount).toBe(3);
-    });
-  });
-
   // ==================== ERROR HANDLING TESZTEK ====================
 
   describe('error handling', () => {

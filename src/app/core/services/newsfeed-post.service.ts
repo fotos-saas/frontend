@@ -182,17 +182,6 @@ export class NewsfeedPostService {
   }
 
   /**
-   * Like toggle (legacy)
-   * @deprecated Use toggleReaction() instead
-   */
-  toggleLike(postId: number): Observable<{ liked: boolean; likesCount: number }> {
-    return this.toggleReaction(postId, '\u2764\uFE0F').pipe(
-      map(result => ({ liked: result.hasReacted, likesCount: result.likesCount })),
-      tap(result => this.updateLikeInCache(postId, result.liked, result.likesCount))
-    );
-  }
-
-  /**
    * Poszt kitűzése
    */
   pinPost(id: number): Observable<{ success: boolean }> {
@@ -296,15 +285,6 @@ export class NewsfeedPostService {
   private removePostFromCache(id: number): void {
     const current = this.postsCache();
     this.postsCache.set(current.filter(p => p.id !== id));
-  }
-
-  private updateLikeInCache(postId: number, liked: boolean, likesCount: number): void {
-    const current = this.postsCache();
-    const index = current.findIndex(p => p.id === postId);
-    if (index !== -1) {
-      current[index] = { ...current[index], hasLiked: liked, likesCount };
-      this.postsCache.set([...current]);
-    }
   }
 
   private updateReactionInCache(

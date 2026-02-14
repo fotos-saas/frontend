@@ -134,6 +134,4 @@ export class ForumService {
   }
   deletePost(postId: number) { return this.postService.deletePost(postId); }
   toggleReaction(postId: number, reaction?: string) { return this.postService.toggleReaction(postId, reaction); }
-  /** @deprecated Use toggleReaction() instead */
-  toggleLike(postId: number) { return this.postService.toggleLike(postId); }
 }

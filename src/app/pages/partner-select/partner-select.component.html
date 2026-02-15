@@ -1,0 +1,136 @@
+<div class="partner-select">
+
+  <!-- Header -->
+  <header class="partner-select__header">
+    <div class="partner-select__header-row">
+      <svg class="partner-select__logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <h1 class="partner-select__title">Partnerválasztó</h1>
+    </div>
+    <p class="partner-select__subtitle">Válaszd ki, melyik partnernél szeretnél dolgozni</p>
+  </header>
+
+  <!-- Loading skeleton -->
+  @if (loading()) {
+    <div class="partner-select__grid">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="partner-select__card partner-select__card--skeleton" [style.--card-index]="i - 1">
+          <div class="partner-select__card-body">
+            <div class="skeleton skeleton--icon"></div>
+            <div class="skeleton skeleton--title"></div>
+            <div class="skeleton skeleton--badge"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (error()) {
+    <div class="partner-select__error">
+      <svg class="partner-select__error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+      </svg>
+      <p>{{ error() }}</p>
+      <button class="partner-select__retry-btn" (click)="loading.set(true); error.set(null); ngOnInit()">
+        Újrapróbálás
+      </button>
+    </div>
+  }
+
+  <!-- Partner Cards Grid -->
+  @if (!loading() && !error() && partners().length > 0) {
+    <div class="partner-select__grid">
+      @for (partner of partners(); track partner.partner_id; let i = $index) {
+        <article
+          class="partner-select__card"
+          [ngClass]="'partner-select__card--' + getRoleColor(partner.role)"
+          [class.partner-select__card--current]="isCurrent(partner)"
+          [class.partner-select__card--switching]="switching()"
+          [style.--card-index]="i"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Váltás: ' + partner.partner_name + ' - ' + partner.role_name"
+          (click)="selectPartner(partner)"
+          (keydown)="onCardKeydown($event, partner)"
+        >
+          <!-- Current badge -->
+          @if (isCurrent(partner)) {
+            <div class="partner-select__current-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Jelenlegi
+            </div>
+          }
+
+          <div class="partner-select__card-body">
+            <!-- Icon -->
+            <div class="partner-select__icon-container" [ngClass]="'partner-select__icon-container--' + getRoleColor(partner.role)">
+              @switch (partner.role) {
+                @case ('designer') {
+                  <svg class="partner-select__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                }
+                @case ('marketer') {
+                  <svg class="partner-select__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                  </svg>
+                }
+                @case ('printer') {
+                  <svg class="partner-select__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"/>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                    <rect x="6" y="14" width="12" height="8"/>
+                  </svg>
+                }
+                @case ('assistant') {
+                  <svg class="partner-select__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                  </svg>
+                }
+                @default {
+                  <svg class="partner-select__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                }
+              }
+            </div>
+
+            <!-- Partner name -->
+            <h2 class="partner-select__card-title" [title]="partner.partner_name">
+              {{ partner.partner_name }}
+            </h2>
+
+            <!-- Role badge -->
+            <span class="partner-select__badge" [ngClass]="'partner-select__badge--' + getRoleColor(partner.role)">
+              {{ partner.role_name }}
+            </span>
+          </div>
+        </article>
+      }
+    </div>
+
+    <!-- Hint -->
+    <p class="partner-select__hint">
+      A kiválasztott partner kontextusa lesz aktív a munka során
+    </p>
+  }
+
+  <!-- Switching overlay -->
+  @if (switching()) {
+    <div class="partner-select__overlay">
+      <div class="partner-select__spinner"></div>
+      <p>Partner váltás...</p>
+    </div>
+  }
+</div>

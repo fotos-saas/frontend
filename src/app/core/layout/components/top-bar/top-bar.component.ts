@@ -23,6 +23,7 @@ import { PokeReceivedDialogComponent } from '../../../../shared/components/poke-
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TopBarActionsComponent } from './components/top-bar-actions/top-bar-actions.component';
 import { TopBarUserBadgesComponent } from './components/top-bar-user-badges/top-bar-user-badges.component';
+import { PartnerSwitcherDropdownComponent } from '../../../../shared/components/partner-switcher-dropdown/partner-switcher-dropdown.component';
 
 /**
  * Top Bar Component
@@ -43,6 +44,7 @@ import { TopBarUserBadgesComponent } from './components/top-bar-user-badges/top-
     ConfirmDialogComponent,
     TopBarActionsComponent,
     TopBarUserBadgesComponent,
+    PartnerSwitcherDropdownComponent,
   ],
   templateUrl: './top-bar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,6 +78,8 @@ export class TopBarComponent {
   readonly externalUserInfo = input<{ name: string; email?: string } | null>(null);
   readonly homeRoute = input<string>('/home');
   readonly useExternalLogout = input<boolean>(false);
+  readonly showPartnerSwitcher = input<boolean>(false);
+  readonly currentPartnerId = input<number | null>(null);
 
   // ============ Output-ok ============
 

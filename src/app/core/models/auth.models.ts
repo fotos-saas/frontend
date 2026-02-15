@@ -163,6 +163,41 @@ export interface AuthUser {
   has_partner?: boolean;
   /** Partner ID (marketer/partner felhasználóknál) */
   partner_id?: number | null;
+  /** Aktív partnerek száma (multi-partner csapattagoknál) */
+  partners_count?: number;
+}
+
+/**
+ * Partner opció a partner-választóhoz
+ */
+export interface PartnerOption {
+  partner_id: number;
+  partner_name: string;
+  partner_type: string | null;
+  role: string;
+  role_name: string;
+}
+
+/**
+ * Partner lista válasz
+ */
+export interface MyPartnersResponse {
+  partners: PartnerOption[];
+  current_partner_id: number | null;
+}
+
+/**
+ * Partner váltás válasz
+ */
+export interface SwitchPartnerResponse {
+  user: AuthUser;
+  token: string;
+  switched_to: {
+    partner_id: number;
+    partner_name: string;
+    role: string;
+    role_name: string;
+  };
 }
 
 /**

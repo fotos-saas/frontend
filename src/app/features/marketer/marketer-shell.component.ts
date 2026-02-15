@@ -32,6 +32,8 @@ import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-
         [showPokeBadge]="false"
         [showUserBadges]="false"
         [showAccountSwitch]="false"
+        [showPartnerSwitcher]="hasMultiplePartners()"
+        [currentPartnerId]="currentPartnerId()"
         userInfoMode="inline"
         [externalUserInfo]="userInfo()"
         homeRoute="/marketer/dashboard"
@@ -265,6 +267,18 @@ export class MarketerShellComponent {
   private authService = inject(AuthService);
   protected sidebarState = inject(SidebarStateService);
   protected chatOpen = signal(false);
+
+  /** Több partnerhez tartozik-e a user */
+  hasMultiplePartners = computed(() => {
+    const user = this.authService.getCurrentUser();
+    return (user?.partners_count ?? 0) > 1;
+  });
+
+  /** Jelenlegi partner ID */
+  currentPartnerId = computed(() => {
+    const user = this.authService.getCurrentUser();
+    return user?.partner_id ?? null;
+  });
 
   // Menü items (Lucide ikonokkal - desktop, tablet és mobile egyaránt)
   navItems: MenuItem[] = [

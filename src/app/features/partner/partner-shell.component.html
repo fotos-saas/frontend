@@ -11,6 +11,8 @@
     [showPokeBadge]="false"
     [showUserBadges]="false"
     [showAccountSwitch]="false"
+    [showPartnerSwitcher]="hasMultiplePartners()"
+    [currentPartnerId]="currentPartnerId()"
     userInfoMode="inline"
     [externalUserInfo]="userInfo()"
     [homeRoute]="baseUrl() + '/dashboard'"

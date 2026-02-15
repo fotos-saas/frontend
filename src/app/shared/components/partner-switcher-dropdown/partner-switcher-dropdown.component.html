@@ -1,0 +1,52 @@
+<div class="partner-switcher">
+  <!-- Trigger button -->
+  <button
+    class="partner-switcher__trigger"
+    [class.partner-switcher__trigger--open]="isOpen()"
+    [class.partner-switcher__trigger--switching]="switching()"
+    (click)="toggleDropdown()"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="listbox"
+    type="button"
+  >
+    @if (switching()) {
+      <span class="partner-switcher__spinner"></span>
+    }
+    <span class="partner-switcher__name">{{ currentPartnerName() || 'Partner...' }}</span>
+    <svg class="partner-switcher__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </button>
+
+  <!-- Dropdown -->
+  @if (isOpen()) {
+    <div class="partner-switcher__dropdown" role="listbox" aria-label="Partner választó">
+      @if (loading()) {
+        <div class="partner-switcher__loading">Betöltés...</div>
+      } @else {
+        @for (partner of partners(); track partner.partner_id) {
+          <button
+            class="partner-switcher__option"
+            [class.partner-switcher__option--current]="isCurrent(partner)"
+            role="option"
+            [attr.aria-selected]="isCurrent(partner)"
+            (click)="selectPartner(partner)"
+            type="button"
+          >
+            <div class="partner-switcher__option-info">
+              <span class="partner-switcher__option-name">{{ partner.partner_name }}</span>
+              <span class="partner-switcher__option-role" [ngClass]="'partner-switcher__option-role--' + partner.role">
+                {{ partner.role_name }}
+              </span>
+            </div>
+            @if (isCurrent(partner)) {
+              <svg class="partner-switcher__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            }
+          </button>
+        }
+      }
+    </div>
+  }
+</div>

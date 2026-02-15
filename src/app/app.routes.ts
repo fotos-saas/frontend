@@ -85,6 +85,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/session-chooser/session-chooser.component').then(m => m.SessionChooserComponent)
   },
 
+  // Partner Select - multi-partner csapattagoknak
+  {
+    path: 'partner-select',
+    loadComponent: () => import('./pages/partner-select/partner-select.component').then(m => m.PartnerSelectComponent)
+  },
+
   // Super Admin routes - rendszer adminisztrációs felület
   {
     path: 'super-admin',

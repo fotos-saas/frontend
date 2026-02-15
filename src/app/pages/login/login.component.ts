@@ -129,7 +129,7 @@ export class LoginComponent implements OnInit {
         .subscribe({
           next: (response) => {
             this.loading.set(false);
-            this.navigateByRole(response.user.roles);
+            this.navigateByRole(response.user.roles, response.user.partners_count);
           },
           error: async (err: Error) => {
             this.loading.set(false);
@@ -165,7 +165,7 @@ export class LoginComponent implements OnInit {
         .subscribe({
           next: (response) => {
             this.biometricLoading.set(false);
-            this.navigateByRole(response.user.roles);
+            this.navigateByRole(response.user.roles, response.user.partners_count);
           },
           error: (err: Error) => {
             this.biometricLoading.set(false);
@@ -260,7 +260,7 @@ export class LoginComponent implements OnInit {
             }
           }
 
-          this.navigateByRole(response.user.roles);
+          this.navigateByRole(response.user.roles, response.user.partners_count);
         },
         error: (err: Error) => {
           this.loading.set(false);
@@ -271,16 +271,25 @@ export class LoginComponent implements OnInit {
 
   /**
    * Role-alapú átirányítás
+   * Ha a user több partnerhez is tartozik, partner-select oldalra irányít
    */
-  private navigateByRole(roles?: string[]): void {
+  private navigateByRole(roles?: string[], partnersCount?: number): void {
     if (roles?.includes('super_admin')) {
       this.router.navigate(['/super-admin/dashboard']);
-    } else if (roles?.includes('partner')) {
+      return;
+    }
+
+    // Multi-partner csapattag → partner-select oldal
+    if (partnersCount && partnersCount > 1) {
+      this.router.navigate(['/partner-select']);
+      return;
+    }
+
+    if (roles?.includes('partner')) {
       this.router.navigate(['/partner/dashboard']);
     } else if (roles?.includes('designer')) {
       this.router.navigate(['/designer/dashboard']);
     } else if (roles?.some(r => ['marketer', 'printer', 'assistant'].includes(r))) {
-      // Többi csapattag egyelőre partner URL-en (később saját URL)
       this.router.navigate(['/partner/dashboard']);
     } else {
       this.router.navigate(['/home']);

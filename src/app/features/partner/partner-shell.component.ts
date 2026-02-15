@@ -82,6 +82,18 @@ export class PartnerShellComponent implements OnInit {
   private userRoles = signal<string[]>(this.authService.getCurrentUser()?.roles ?? []);
   partnerName = signal<string>(''); // Főnök neve csapattagok számára
 
+  /** Több partnerhez tartozik-e a user */
+  hasMultiplePartners = computed(() => {
+    const user = this.authService.getCurrentUser();
+    return (user?.partners_count ?? 0) > 1;
+  });
+
+  /** Jelenlegi partner ID */
+  currentPartnerId = computed(() => {
+    const user = this.authService.getCurrentUser();
+    return user?.partner_id ?? null;
+  });
+
   /** Aktuális role badge (Partner, Grafikus, stb.) */
   roleBadge = computed(() => {
     const roles = this.userRoles();

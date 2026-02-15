@@ -41,6 +41,12 @@
             {{ roleBadge() }}
           </span>
         }
+        @if (showPartnerSwitcher() && currentPartnerId()) {
+          <app-partner-switcher-dropdown
+            class="hidden sm:inline-flex"
+            [currentPartnerId]="currentPartnerId()!"
+          />
+        }
       </a>
 
       <!-- User badges -->

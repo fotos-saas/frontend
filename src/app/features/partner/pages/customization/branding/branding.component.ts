@@ -10,6 +10,7 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
 
 interface PendingMedia {
   file: File;
@@ -19,7 +20,7 @@ interface PendingMedia {
 @Component({
   selector: 'app-branding',
   standalone: true,
-  imports: [FormsModule, RouterModule, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, RouterModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent],
   templateUrl: './branding.component.html',
   styleUrl: './branding.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

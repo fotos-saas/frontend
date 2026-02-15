@@ -2,8 +2,10 @@ import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed, D
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger.service';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { PsCheckboxComponent } from '@shared/components/form';
 import { SubscriptionService, AccountStatusResponse } from '../../../services/subscription.service';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { ICONS, TEAM_MEMBER_ROLES } from '../../../../../shared/constants';
@@ -19,7 +21,7 @@ import { ICONS, TEAM_MEMBER_ROLES } from '../../../../../shared/constants';
 @Component({
   selector: 'app-account-delete',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, MatTooltipModule],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsCheckboxComponent],
   templateUrl: './account-delete.component.html',
   styleUrls: ['./account-delete.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

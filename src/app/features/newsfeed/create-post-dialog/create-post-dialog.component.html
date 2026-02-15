@@ -43,26 +43,18 @@
 
     <!-- Title field -->
     <div class="field">
-      <label class="field__label" for="post-title">
-        Cím <span class="field__required">*</span>
-      </label>
-      <input
-        #titleInput
-        type="text"
-        id="post-title"
-        class="field__input"
-        [class.field__input--error]="errors.title"
+      <ps-input
+        label="Cím"
+        [required]="true"
         [(ngModel)]="title"
         (ngModelChange)="onInputChange()"
         [placeholder]="postType === 'event' ? 'Pl.: Osztálykirándulás' : 'Pl.: Fontos bejelentés'"
         [disabled]="isSubmitting()"
-        maxlength="255"
         autocomplete="off"
+        [errorMessage]="errors.title || ''"
       />
       <div class="field__footer">
-        @if (errors.title) {
-          <span class="field__error">{{ errors.title }}</span>
-        } @else {
+        @if (!errors.title) {
           <span class="field__char-count">{{ titleCharCount() }}</span>
         }
       </div>
@@ -73,22 +65,15 @@
     <div class="event-details">
       <!-- Event date -->
       <div class="field field--half">
-        <label class="field__label" for="event-date">
-          Dátum <span class="field__required">*</span>
-        </label>
-        <input
-          type="date"
-          id="event-date"
-          class="field__input"
-          [class.field__input--error]="errors.eventDate"
+        <ps-datepicker
+          label="Dátum"
+          [required]="true"
           [(ngModel)]="eventDate"
           (ngModelChange)="onInputChange()"
           [min]="minDate()"
           [disabled]="isSubmitting()"
+          [errorMessage]="errors.eventDate || ''"
         />
-        @if (errors.eventDate) {
-          <span class="field__error">{{ errors.eventDate }}</span>
-        }
       </div>
 
       <!-- Event time -->
@@ -108,18 +93,12 @@
 
       <!-- Event location -->
       <div class="field">
-        <label class="field__label" for="event-location">
-          Helyszín <span class="field__optional">(opcionális)</span>
-        </label>
-        <input
-          type="text"
-          id="event-location"
-          class="field__input"
+        <ps-input
+          label="Helyszín (opcionális)"
           [(ngModel)]="eventLocation"
           (ngModelChange)="onInputChange()"
           placeholder="Pl.: Eger, Dobó tér"
           [disabled]="isSubmitting()"
-          maxlength="255"
         />
       </div>
     </div>

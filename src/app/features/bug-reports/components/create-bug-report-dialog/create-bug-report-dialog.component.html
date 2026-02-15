@@ -14,15 +14,12 @@
   <div dialogBody>
     <!-- Cím -->
     <div class="form-group">
-      <label for="bug-title">Cím <span class="required">*</span></label>
-      <input
-        id="bug-title"
-        type="text"
-        class="form-input"
+      <ps-input
+        label="Cím"
+        [required]="true"
         placeholder="Rövid leírás a hibáról..."
         [ngModel]="title()"
         (ngModelChange)="title.set($event)"
-        maxlength="255"
       />
     </div>
 
@@ -39,17 +36,12 @@
 
     <!-- Prioritás -->
     <div class="form-group">
-      <label for="bug-priority">Prioritás</label>
-      <select
-        id="bug-priority"
-        class="form-select"
+      <ps-select
+        label="Prioritás"
+        [options]="prioritySelectOptions"
         [ngModel]="priority()"
         (ngModelChange)="priority.set($event)"
-      >
-        @for (opt of priorityOptions; track opt.value) {
-          <option [value]="opt.value">{{ opt.label }}</option>
-        }
-      </select>
+      />
     </div>
 
     <!-- Mellékletek -->

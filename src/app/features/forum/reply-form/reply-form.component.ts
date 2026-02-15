@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, viewChild, input, output, c
 import { FormsModule } from '@angular/forms';
 import { RichTextEditorComponent, EditorMode } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { MediaEditorComponent } from '../../../shared/components/media-editor/media-editor.component';
+import { PsTextareaComponent } from '@shared/components/form';
 
 /**
  * Reply Form Component
@@ -12,7 +13,7 @@ import { MediaEditorComponent } from '../../../shared/components/media-editor/me
  */
 @Component({
   selector: 'app-reply-form',
-  imports: [FormsModule, RichTextEditorComponent, MediaEditorComponent],
+  imports: [FormsModule, RichTextEditorComponent, MediaEditorComponent, PsTextareaComponent],
   templateUrl: './reply-form.component.html',
   styleUrls: ['./reply-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

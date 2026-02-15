@@ -1,8 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
 import { PartnerOrderAlbumDetails } from '../../../../../services/partner-orders.service';
+import { PsDatepickerComponent } from '@shared/components/form';
 
 /**
  * Album Info Bar Component
@@ -13,7 +15,7 @@ import { PartnerOrderAlbumDetails } from '../../../../../services/partner-orders
   selector: 'app-album-info-bar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsDatepickerComponent],
   templateUrl: './album-info-bar.component.html',
   styleUrls: ['./album-info-bar.component.scss']
 })
@@ -34,10 +36,4 @@ export class AlbumInfoBarComponent {
   readonly expiryChange = output<string>();
   readonly extendExpiry = output<number>();
 
-  onExpiryChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.value) {
-      this.expiryChange.emit(input.value);
-    }
-  }
 }

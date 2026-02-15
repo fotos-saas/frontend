@@ -9,11 +9,13 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { RichTextEditorComponent } from '../../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 
 @Component({
   selector: 'app-create-bug-report-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent, DialogWrapperComponent, PsInputComponent, PsSelectComponent],
   templateUrl: './create-bug-report-dialog.component.html',
   styleUrl: './create-bug-report-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,6 +32,7 @@ export class CreateBugReportDialogComponent {
 
   readonly ICONS = ICONS;
   readonly priorityOptions = BUG_REPORT_PRIORITY_OPTIONS;
+  readonly prioritySelectOptions: PsSelectOption[] = BUG_REPORT_PRIORITY_OPTIONS.map(o => ({ id: o.value, label: o.label }));
 
   title = signal('');
   description = signal('');

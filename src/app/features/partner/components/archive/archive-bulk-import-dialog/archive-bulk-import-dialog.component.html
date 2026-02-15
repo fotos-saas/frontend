@@ -28,13 +28,12 @@
       @if (!selectedFile()) {
         <div class="form-group">
           <label class="form-label">{{ config().bulkImportTextareaLabel }}</label>
-          <textarea
-            class="names-textarea"
+          <ps-textarea
             [ngModel]="namesText()"
             (ngModelChange)="onNamesInput($event)"
             [placeholder]="config().bulkImportTextareaPlaceholder"
-            rows="8"
-          ></textarea>
+            [rows]="8"
+          />
         </div>
       }
 

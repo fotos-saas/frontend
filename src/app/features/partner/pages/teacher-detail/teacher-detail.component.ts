@@ -12,6 +12,7 @@ import { ArchivePhotoUploadComponent } from '../../components/archive/archive-ph
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsInputComponent } from '@shared/components/form';
 
 @Component({
   selector: 'app-partner-teacher-detail',
@@ -22,6 +23,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     RouterLink,
     LucideAngularModule,
     MatTooltipModule,
+    PsInputComponent,
     ArchivePhotoUploadComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,

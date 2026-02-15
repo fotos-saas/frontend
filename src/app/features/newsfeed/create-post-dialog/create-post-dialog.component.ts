@@ -20,6 +20,7 @@ import { MediaEditorComponent, MediaEditorItem } from '../../../shared/component
 import { PostFormValidatorService, PostFormErrors } from '../services/post-form-validator.service';
 import { DialogWrapperComponent } from '../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { CreatePostDialogActionsService } from './create-post-dialog-actions.service';
+import { PsInputComponent, PsDatepickerComponent } from '@shared/components/form';
 
 /**
  * Dialog eredmeny tipus
@@ -37,7 +38,7 @@ export type CreatePostResult =
  */
 @Component({
   selector: 'app-create-post-dialog',
-  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent, MediaEditorComponent, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, RichTextEditorComponent, MediaEditorComponent, DialogWrapperComponent, PsInputComponent, PsDatepickerComponent],
   templateUrl: './create-post-dialog.component.html',
   styleUrls: ['./create-post-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -64,45 +64,32 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="brandName">Márkanév</label>
-        <input
-          id="brandName"
-          type="text"
-          class="form-input"
-          [value]="brandName()"
-          (input)="brandName.set($any($event.target).value)"
+        <ps-input
+          label="Márkanév"
+          fieldId="brandName"
+          [ngModel]="brandName()"
+          (ngModelChange)="brandName.set($event)"
           placeholder="pl. Fotó Kovács Stúdió"
-          maxlength="100"
+          hint="Maximum 100 karakter. Ha üres, a rendszer neve jelenik meg."
         />
-        <span class="form-hint">Maximum 100 karakter. Ha üres, a rendszer neve jelenik meg.</span>
       </div>
 
       <div class="form-group">
-        <label class="toggle-label">
-          <input
-            type="checkbox"
-            class="toggle-input"
-            [checked]="isActive()"
-            (change)="isActive.set($any($event.target).checked)"
-          />
-          <span class="toggle-switch"></span>
-          <span class="toggle-text">Márkajelzés aktív</span>
-        </label>
-        <span class="form-hint">Ha aktív, a diákok az oldalakon a te márkajelzésedet látják.</span>
+        <ps-toggle
+          label="Márkajelzés aktív"
+          hint="Ha aktív, a diákok az oldalakon a te márkajelzésedet látják."
+          [ngModel]="isActive()"
+          (ngModelChange)="isActive.set($event)"
+        />
       </div>
 
       <div class="form-group">
-        <label class="toggle-label">
-          <input
-            type="checkbox"
-            class="toggle-input"
-            [checked]="hideBrandName()"
-            (change)="hideBrandName.set($any($event.target).checked)"
-          />
-          <span class="toggle-switch"></span>
-          <span class="toggle-text">Szöveg elrejtése a fejlécben</span>
-        </label>
-        <span class="form-hint">Ha a logód már tartalmazza a neved, kapcsold be hogy ne jelenjen meg a szöveg külön.</span>
+        <ps-toggle
+          label="Szöveg elrejtése a fejlécben"
+          hint="Ha a logód már tartalmazza a neved, kapcsold be hogy ne jelenjen meg a szöveg külön."
+          [ngModel]="hideBrandName()"
+          (ngModelChange)="hideBrandName.set($event)"
+        />
       </div>
     </section>
 

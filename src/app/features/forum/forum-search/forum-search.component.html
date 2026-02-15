@@ -1,33 +1,11 @@
 <div class="forum-search">
   <!-- Search bar -->
   <div class="forum-search__bar">
-    <div class="forum-search__input-wrapper">
-      <svg class="forum-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <input
-        type="text"
-        class="forum-search__input"
-        [(ngModel)]="searchText"
-        (keyup.enter)="onSearch()"
-        placeholder="Keresés a beszélgetésekben..."
-        aria-label="Keresés"
-      />
-      @if (searchText) {
-        <button
-          type="button"
-          class="forum-search__clear"
-          (click)="clearSearch()"
-          aria-label="Keresés törlése"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      }
-    </div>
+    <ps-input
+      [(ngModel)]="searchText"
+      (blur)="onSearch()"
+      placeholder="Keresés a beszélgetésekben..."
+    />
 
     <!-- Search button -->
     <button
@@ -61,34 +39,24 @@
       <!-- Template filter -->
       @if (templates().length > 0) {
         <div class="forum-search__filter">
-          <label class="forum-search__label" for="template-filter">Sablon</label>
-          <select
-            id="template-filter"
-            class="forum-search__select"
+          <ps-select
+            label="Sablon"
+            emptyLabel="Összes sablon"
+            [options]="templateSelectOptions()"
             [(ngModel)]="selectedTemplateId"
             (ngModelChange)="onTemplateChange()"
-          >
-            <option [ngValue]="null">Összes sablon</option>
-            @for (tpl of templates(); track tpl.id) {
-              <option [ngValue]="tpl.id">{{ tpl.name }}</option>
-            }
-          </select>
+          />
         </div>
       }
 
       <!-- Sort -->
       <div class="forum-search__filter">
-        <label class="forum-search__label" for="sort-filter">Rendezés</label>
-        <select
-          id="sort-filter"
-          class="forum-search__select"
+        <ps-select
+          label="Rendezés"
+          [options]="sortSelectOptions"
           [(ngModel)]="sortBy"
           (ngModelChange)="onSortChange()"
-        >
-          @for (opt of sortOptions; track opt.value) {
-            <option [ngValue]="opt.value">{{ opt.label }}</option>
-          }
-        </select>
+        />
       </div>
 
       <!-- Clear all -->

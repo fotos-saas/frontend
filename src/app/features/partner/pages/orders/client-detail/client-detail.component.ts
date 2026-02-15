@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsTextareaComponent, PsCheckboxComponent } from '@shared/components/form';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { ClipboardService } from '../../../../../core/services/clipboard.service';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -29,6 +30,9 @@ import { ClientAlbumListComponent } from './components/client-album-list/client-
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
+    PsInputComponent,
+    PsTextareaComponent,
+    PsCheckboxComponent,
     ConfirmDialogComponent,
     ClientHeaderComponent,
     ClientAccessCodeComponent,

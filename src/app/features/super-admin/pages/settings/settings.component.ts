@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -6,6 +6,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SystemSettings } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants';
 import { PlansService, PlanOption } from '../../../../shared/services/plans.service';
+import { PsToggleComponent, PsInputComponent, PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 
 type TabId = 'system' | 'email' | 'stripe' | 'info';
 
@@ -20,6 +22,9 @@ type TabId = 'system' | 'email' | 'stripe' | 'info';
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
+    PsToggleComponent,
+    PsInputComponent,
+    PsSelectComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -52,6 +57,11 @@ export class SettingsComponent implements OnInit {
 
   // Plan opciók - PlansService-ből töltve
   planOptions = signal<PlanOption[]>([]);
+
+  // PsSelect kompatibilis opciók
+  planSelectOptions = computed<PsSelectOption[]>(() =>
+    this.planOptions().map(o => ({ id: o.value, label: o.label }))
+  );
 
   ngOnInit(): void {
     this.loadPlanOptions();

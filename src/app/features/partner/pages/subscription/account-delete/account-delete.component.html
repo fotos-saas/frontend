@@ -99,14 +99,11 @@
       </div>
 
       <div class="confirmation-section">
-        <label class="checkbox-label">
-          <input
-            type="checkbox"
-            [checked]="confirmChecked()"
-            (change)="confirmChecked.set(!confirmChecked())"
-          />
-          <span>Megértettem és elfogadom a következményeket</span>
-        </label>
+        <ps-checkbox
+          label="Megértettem és elfogadom a következményeket"
+          [ngModel]="confirmChecked()"
+          (ngModelChange)="confirmChecked.set($event)"
+        />
 
         <button
           class="btn btn--danger"

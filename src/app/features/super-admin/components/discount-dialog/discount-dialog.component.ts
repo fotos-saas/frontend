@@ -19,6 +19,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { SuperAdminService, DiscountInfo } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsTextareaComponent, PsRadioGroupComponent } from '@shared/components/form';
+import { PsRadioOption } from '@shared/components/form/form.types';
 
 /**
  * Kedvezmény beállítás dialógus
@@ -27,7 +29,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-discount-dialog',
   standalone: true,
-  imports: [FormsModule, A11yModule, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, A11yModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsTextareaComponent, PsRadioGroupComponent],
   templateUrl: './discount-dialog.component.html',
   styleUrls: ['../dialog-shared.scss', './discount-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,6 +43,11 @@ export class DiscountDialogComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+
+  readonly durationOptions: PsRadioOption[] = [
+    { value: 'forever', label: 'Örökre' },
+    { value: 'months', label: 'Meghatározott időre' },
+  ];
 
   /** Inputs */
   readonly subscriberId = input.required<number>();

@@ -8,6 +8,7 @@ import { SubscriptionService, Invoice } from '../../../services/subscription.ser
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { ICONS, getInvoiceStatusLabel } from '../../../../../shared/constants';
 import { formatAmount as sharedFormatAmount } from '@shared/utils/formatters.util';
+import { PsSelectComponent, PsSelectOption } from '@shared/components/form';
 
 /**
  * Invoices Page
@@ -21,7 +22,7 @@ import { formatAmount as sharedFormatAmount } from '@shared/utils/formatters.uti
 @Component({
   selector: 'app-invoices',
   standalone: true,
-  imports: [FormsModule, DatePipe, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, DatePipe, LucideAngularModule, MatTooltipModule, PsSelectComponent],
   templateUrl: './invoices.component.html',
   styleUrls: ['./invoices.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -31,6 +32,13 @@ export class InvoicesComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly logger = inject(LoggerService);
   protected readonly ICONS = ICONS;
+
+  readonly statusOptions: PsSelectOption[] = [
+    { id: '', label: 'Összes' },
+    { id: 'paid', label: 'Fizetve' },
+    { id: 'open', label: 'Nyitott' },
+    { id: 'void', label: 'Érvénytelen' },
+  ];
 
   invoices = signal<Invoice[]>([]);
   loading = signal(true);

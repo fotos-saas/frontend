@@ -8,6 +8,7 @@ import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { SearchableDropdownComponent, DropdownOption } from './components/searchable-dropdown.component';
+import { PsInputComponent } from '@shared/components/form';
 
 /**
  * Create Project Modal - Új projekt létrehozása.
@@ -22,6 +23,7 @@ import { SearchableDropdownComponent, DropdownOption } from './components/search
     AddContactModalComponent,
     SearchableDropdownComponent,
     DialogWrapperComponent,
+    PsInputComponent,
   ],
   templateUrl: './create-project-modal.component.html',
   styleUrl: './create-project-modal.component.scss',

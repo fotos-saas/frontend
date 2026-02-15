@@ -1,15 +1,13 @@
 <!-- Szűrő sor -->
 <div class="photo-list__toolbar">
-  <div class="photo-list__search">
-    <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="photo-list__search-icon" />
-    <input
-      type="text"
-      class="photo-list__search-input"
-      placeholder="Keresés fájlnév vagy cím alapján..."
-      [value]="searchQuery()"
-      (input)="searchChange.emit($any($event.target).value)"
-    />
-  </div>
+  <ps-input
+    class="photo-list__search"
+    prefix="search"
+    placeholder="Keresés fájlnév vagy cím alapján..."
+    size="md"
+    [ngModel]="searchQuery()"
+    (ngModelChange)="searchChange.emit($event)"
+  />
   <span class="photo-list__count">
     {{ filteredCount() }}/{{ totalCount() }} fotó
   </span>

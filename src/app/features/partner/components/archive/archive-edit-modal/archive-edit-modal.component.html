@@ -24,41 +24,33 @@
             @for (field of config().extraFields; track field.name) {
               @if (field.gridSize === 'sm') {
                 <div class="form-group form-group--sm">
-                  <label [for]="field.name">{{ field.label }}</label>
-                  <input
+                  <ps-input
+                    [label]="field.label"
                     [type]="field.type"
-                    [id]="field.name"
                     [(ngModel)]="extraFieldValues[field.name]"
                     [name]="field.name"
-                    class="form-input"
                     [placeholder]="field.placeholder ?? ''"
                   />
                 </div>
               }
             }
             <div class="form-group form-group--lg">
-              <label for="canonicalName">Név *</label>
-              <input
-                type="text"
-                id="canonicalName"
+              <ps-input
+                label="Név"
                 [(ngModel)]="canonicalName"
                 name="canonicalName"
-                required
-                class="form-input"
+                [required]="true"
                 [placeholder]="config().placeholderName"
               />
             </div>
           </div>
         } @else {
           <div class="form-group form-group--lg">
-            <label for="canonicalName">Név *</label>
-            <input
-              type="text"
-              id="canonicalName"
+            <ps-input
+              label="Név"
               [(ngModel)]="canonicalName"
               name="canonicalName"
-              required
-              class="form-input"
+              [required]="true"
               [placeholder]="config().placeholderName"
             />
           </div>
@@ -68,13 +60,11 @@
         @for (field of config().extraFields; track field.name) {
           @if (field.gridSize !== 'sm') {
             <div class="form-group">
-              <label [for]="field.name">{{ field.label }}</label>
-              <input
+              <ps-input
+                [label]="field.label"
                 [type]="field.type"
-                [id]="field.name"
                 [(ngModel)]="extraFieldValues[field.name]"
                 [name]="field.name"
-                class="form-input"
                 [placeholder]="field.placeholder ?? ''"
               />
             </div>
@@ -125,15 +115,14 @@
                   <span class="photo-status photo-status--new">Új fotó kiválasztva</span>
                   <div class="photo-fields">
                     <div class="form-group form-group--inline">
-                      <label for="photoYear">Évszám</label>
-                      <input
+                      <ps-input
+                        label="Évszám"
                         type="number"
-                        id="photoYear"
                         [(ngModel)]="photoYear"
                         name="photoYear"
-                        class="form-input form-input--sm"
-                        min="2000"
-                        max="2100"
+                        size="sm"
+                        [min]="2000"
+                        [max]="2100"
                       />
                     </div>
                     <ps-checkbox label="Aktív fotó" [(ngModel)]="setPhotoActive" name="setPhotoActive" />

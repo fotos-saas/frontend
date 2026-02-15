@@ -6,6 +6,7 @@ import { PartnerService, SchoolItem } from '../../services/partner.service';
 import { ProjectDetailData } from '../../../../shared/components/project-detail';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { PsInputComponent, PsDatepickerComponent } from '@shared/components/form';
 
 /**
  * Project Edit Modal - Projekt adatok szerkesztése.
@@ -14,7 +15,7 @@ import { DialogWrapperComponent } from '../../../../shared/components/dialog-wra
 @Component({
   selector: 'app-project-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent, PsDatepickerComponent],
   templateUrl: './project-edit-modal.component.html',
   styleUrl: './project-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

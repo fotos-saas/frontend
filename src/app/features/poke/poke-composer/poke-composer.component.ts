@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit, D
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PresetSelectorComponent } from '../preset-selector/preset-selector.component';
+import { PsTextareaComponent } from '@shared/components/form';
 import { PokeService } from '../../../core/services/poke.service';
 import { MissingUser, PokeCategory, PokePreset } from '../../../core/models/poke.models';
 import { createBackdropHandler } from '../../../shared/utils/dialog.util';
@@ -16,6 +17,7 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
   imports: [
     FormsModule,
     PresetSelectorComponent,
+    PsTextareaComponent,
   ],
   templateUrl: './poke-composer.component.html',
   styleUrls: ['./poke-composer.component.scss'],

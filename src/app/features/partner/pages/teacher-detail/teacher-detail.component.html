@@ -35,30 +35,22 @@
         @if (editing()) {
           <!-- Szerkesztés mód -->
           <div class="edit-form">
-            <label class="edit-label">Titulus</label>
-            <input
-              type="text"
+            <ps-input
+              label="Titulus"
               [(ngModel)]="editTitlePrefix"
-              class="edit-input"
               placeholder="pl. Dr., PhD..."
             />
 
-            <label class="edit-label">Név</label>
-            <input
-              type="text"
+            <ps-input
+              label="Név"
               [(ngModel)]="editName"
-              class="edit-input"
               placeholder="Tanár neve..."
-              (keydown.enter)="$event.preventDefault(); saveProfile()"
             />
 
-            <label class="edit-label">Pozíció</label>
-            <input
-              type="text"
+            <ps-input
+              label="Pozíció"
               [(ngModel)]="editPosition"
-              class="edit-input"
               placeholder="pl. igazgató, angol nyelv..."
-              (keydown.enter)="$event.preventDefault(); saveProfile()"
             />
 
             <div class="edit-actions">
@@ -114,12 +106,10 @@
           </div>
           @if (t.aliases.length < 10) {
             <div class="alias-add">
-              <input
-                type="text"
+              <ps-input
                 [(ngModel)]="newAlias"
-                class="alias-input"
                 placeholder="Új variáns..."
-                (keydown.enter)="$event.preventDefault(); addAlias()"
+                size="sm"
               />
               <button class="alias-add-btn" matTooltip="Hozzáadás" (click)="addAlias()" [disabled]="!newAlias.trim() || savingAlias()">
                 <lucide-icon [name]="ICONS.PLUS" [size]="14" />
@@ -222,15 +212,14 @@
                 <h2>Változásnapló</h2>
                 <span class="count-badge">{{ changelog().length }}</span>
               </div>
-              <div class="changelog-search">
-                <lucide-icon [name]="ICONS.SEARCH" [size]="13" />
-                <input
-                  type="text"
-                  placeholder="Keresés..."
-                  [ngModel]="changelogSearch()"
-                  (ngModelChange)="changelogSearch.set($event)"
-                />
-              </div>
+              <ps-input
+                class="changelog-search"
+                prefix="search"
+                placeholder="Keresés..."
+                size="sm"
+                [ngModel]="changelogSearch()"
+                (ngModelChange)="changelogSearch.set($event)"
+              />
             </div>
 
             <div class="changelog-table">

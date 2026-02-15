@@ -2,10 +2,13 @@ import {
   Component,
   ChangeDetectionStrategy,
   signal,
+  computed,
   input,
   output
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 
 /**
  * Szűrési opciók
@@ -34,7 +37,7 @@ export interface TemplateOption {
  */
 @Component({
   selector: 'app-forum-search',
-  imports: [FormsModule],
+  imports: [FormsModule, PsInputComponent, PsSelectComponent],
   templateUrl: './forum-search.component.html',
   styleUrls: ['./forum-search.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -65,6 +68,13 @@ export class ForumSearchComponent {
     { value: 'most_posts', label: 'Legtöbb hozzászólás' },
     { value: 'most_views', label: 'Legtöbb megtekintés' }
   ];
+
+  /** PsSelect opciók */
+  readonly sortSelectOptions: PsSelectOption[] = this.sortOptions.map(o => ({ id: o.value!, label: o.label }));
+
+  readonly templateSelectOptions = computed<PsSelectOption[]>(() =>
+    this.templates().map(t => ({ id: t.id, label: t.name }))
+  );
 
   /**
    * Keresés indítása

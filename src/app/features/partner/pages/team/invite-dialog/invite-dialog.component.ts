@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TeamService, TeamRole } from '../../../services/team.service';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
+import { PsInputComponent, PsRadioGroupComponent, PsRadioOption } from '@shared/components/form';
 
 /**
  * Invite Dialog - Új csapattag meghívása
@@ -12,7 +13,7 @@ import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-invite-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsRadioGroupComponent],
   templateUrl: './invite-dialog.component.html',
   styleUrls: ['./invite-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,6 +27,12 @@ export class InviteDialogComponent {
 
   readonly ICONS = ICONS;
   readonly backdropHandler = createBackdropHandler(() => this.close.emit());
+
+  readonly roleOptions: PsRadioOption[] = this.teamService.roles.map(r => ({
+    value: r.value,
+    label: r.label,
+    sublabel: r.description,
+  }));
 
   email = '';
   selectedRole = signal<TeamRole>('designer');

@@ -4,14 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ARCHIVE_SERVICE, ArchiveConfig, ArchiveField, CreateArchivePayload, UpdateArchivePayload } from '../../../models/archive.models';
 import { SchoolItem } from '../../../models/partner.models';
-import { PsSearchableSelectComponent, PsCheckboxComponent, SelectOption } from '@shared/components/form';
+import { PsSearchableSelectComponent, PsCheckboxComponent, PsInputComponent, SelectOption } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 @Component({
   selector: 'app-archive-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsSearchableSelectComponent, PsCheckboxComponent, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, PsSearchableSelectComponent, PsCheckboxComponent, PsInputComponent, DialogWrapperComponent],
   templateUrl: './archive-edit-modal.component.html',
   styleUrl: './archive-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

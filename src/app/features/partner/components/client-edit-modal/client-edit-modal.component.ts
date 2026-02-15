@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { PartnerOrdersService, PartnerClient } from '../../services/partner-orders.service';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsTextareaComponent } from '@shared/components/form';
 
 /**
  * Client Edit Modal - Ügyfél szerkesztése.
@@ -12,7 +13,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-client-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsTextareaComponent],
   templateUrl: './client-edit-modal.component.html',
   styleUrls: ['./client-edit-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

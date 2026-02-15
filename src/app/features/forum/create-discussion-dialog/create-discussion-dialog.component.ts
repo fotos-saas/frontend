@@ -20,6 +20,8 @@ import { MediaEditorComponent, MediaEditorItem } from '../../../shared/component
 import { DialogWrapperComponent } from '../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { DiscussionFormValidatorService, DiscussionFormErrors } from './discussion-form-validator.service';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PsInputComponent, PsTextareaComponent, PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 
 /**
  * Sablon interface (minimalis)
@@ -62,6 +64,9 @@ export interface EditDiscussionData {
     RichTextEditorComponent,
     MediaEditorComponent,
     DialogWrapperComponent,
+    PsInputComponent,
+    PsTextareaComponent,
+    PsSelectComponent,
   ],
   templateUrl: './create-discussion-dialog.component.html',
   styleUrls: ['./create-discussion-dialog.component.scss'],
@@ -97,6 +102,10 @@ export class CreateDiscussionDialogComponent {
   readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
 
   readonly ICONS = ICONS;
+
+  readonly templateSelectOptions = computed<PsSelectOption[]>(() =>
+    this.templates().map(t => ({ id: t.id, label: t.name }))
+  );
 
   private readonly forumService = inject(ForumService);
   private readonly destroyRef = inject(DestroyRef);

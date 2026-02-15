@@ -61,9 +61,7 @@
           }
         </div>
         <div class="status-note-row">
-          <input
-            type="text"
-            class="status-note-input"
+          <ps-input
             placeholder="Megjegyzés a státuszváltozáshoz (opcionális)"
             [ngModel]="statusNote()"
             (ngModelChange)="statusNote.set($event)"
@@ -178,14 +176,11 @@
           placeholder="Írd ide a hozzászólásodat..."
         />
         <div class="comment-controls">
-          <label class="internal-checkbox">
-            <input
-              type="checkbox"
-              [ngModel]="isInternal()"
-              (ngModelChange)="isInternal.set($event)"
-            />
-            Belső jegyzet (a bejelentő nem látja)
-          </label>
+          <ps-toggle
+            label="Belső jegyzet (a bejelentő nem látja)"
+            [ngModel]="isInternal()"
+            (ngModelChange)="isInternal.set($event)"
+          />
           <button
             class="btn-comment"
             (click)="submitComment()"

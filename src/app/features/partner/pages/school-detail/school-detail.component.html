@@ -31,22 +31,16 @@
         @if (editing()) {
           <!-- Szerkesztés mód -->
           <div class="edit-form">
-            <label class="edit-label">Iskola neve</label>
-            <input
-              type="text"
+            <ps-input
+              label="Iskola neve"
               [(ngModel)]="editName"
-              class="edit-input"
               placeholder="Iskola neve..."
-              (keydown.enter)="$event.preventDefault(); saveProfile()"
             />
 
-            <label class="edit-label">Város</label>
-            <input
-              type="text"
+            <ps-input
+              label="Város"
               [(ngModel)]="editCity"
-              class="edit-input"
               placeholder="Város..."
-              (keydown.enter)="$event.preventDefault(); saveProfile()"
             />
 
             <div class="edit-actions">
@@ -199,15 +193,14 @@
                 <h2>Változásnapló</h2>
                 <span class="count-badge">{{ changelog().length }}</span>
               </div>
-              <div class="changelog-search">
-                <lucide-icon [name]="ICONS.SEARCH" [size]="13" />
-                <input
-                  type="text"
-                  placeholder="Keresés..."
-                  [ngModel]="changelogSearch()"
-                  (ngModelChange)="changelogSearch.set($event)"
-                />
-              </div>
+              <ps-input
+                class="changelog-search"
+                prefix="search"
+                placeholder="Keresés..."
+                size="sm"
+                [ngModel]="changelogSearch()"
+                (ngModelChange)="changelogSearch.set($event)"
+              />
             </div>
 
             <div class="changelog-table">

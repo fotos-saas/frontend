@@ -11,6 +11,7 @@ import { trackById } from '../../../shared/utils/track-by.utils';
 import { MissingFilterService, CategoryTab, PersonTab } from '../services/missing-filter.service';
 import { PokeCategory, MissingUser, Poke } from '../../../core/models/poke.models';
 import { StaggerAnimationDirective } from '../../../shared/directives';
+import { PsInputComponent } from '@shared/components/form';
 
 /**
  * Missing Page Component
@@ -27,6 +28,7 @@ import { StaggerAnimationDirective } from '../../../shared/directives';
     DailyLimitBadgeComponent,
     ReceivedPokesDialogComponent,
     StaggerAnimationDirective,
+    PsInputComponent,
   ],
   providers: [MissingFilterService],
   templateUrl: './missing-page.component.html',

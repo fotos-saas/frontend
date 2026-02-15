@@ -14,26 +14,18 @@
   <ng-container dialogBody>
     <!-- Title field -->
     <div class="dialog__field">
-      <label class="dialog__label" for="discussion-title">
-        Téma címe <span class="dialog__required">*</span>
-      </label>
-      <input
-        #titleInput
-        type="text"
-        id="discussion-title"
-        class="dialog__input"
-        [class.dialog__input--error]="errors.title"
+      <ps-input
+        label="Téma címe"
+        [required]="true"
         [(ngModel)]="title"
         (ngModelChange)="onInputChange()"
         placeholder="Pl.: Osztálykirándulás ötletek"
         [disabled]="_isSubmitting()"
-        maxlength="255"
+        [errorMessage]="errors.title || ''"
         autocomplete="off"
       />
       <div class="dialog__field-footer">
-        @if (errors.title) {
-          <span class="dialog__error">{{ errors.title }}</span>
-        } @else {
+        @if (!errors.title) {
           <span class="dialog__char-count">{{ titleCharCount() }}</span>
         }
       </div>
@@ -59,17 +51,15 @@
         />
       } @else {
         <!-- Simple Textarea fallback -->
-        <textarea
-          id="discussion-content"
-          class="dialog__textarea"
-          [class.dialog__textarea--error]="errors.content"
+        <ps-textarea
           [(ngModel)]="content"
           (ngModelChange)="onInputChange()"
           placeholder="Írd le részletesen, miről szól a téma..."
           [disabled]="_isSubmitting()"
-          maxlength="10000"
-          rows="5"
-        ></textarea>
+          [maxLength]="10000"
+          [rows]="5"
+          [errorMessage]="errors.content || ''"
+        />
       }
 
       <div class="dialog__field-footer">
@@ -107,26 +97,15 @@
     <!-- Template selector (opcionális, csak create módban) -->
     @if (templates().length > 0 && mode() === 'create') {
       <div class="dialog__field">
-        <label class="dialog__label" for="discussion-template">
-          Kapcsolódó sablon <span class="dialog__optional">(opcionális)</span>
-        </label>
-        <select
-          id="discussion-template"
-          class="dialog__select"
+        <ps-select
+          label="Kapcsolódó sablon"
+          emptyLabel="— Nincs kapcsolódó sablon —"
+          [options]="templateSelectOptions()"
           [(ngModel)]="templateId"
           (ngModelChange)="onInputChange()"
           [disabled]="_isSubmitting()"
-        >
-          <option [ngValue]="null">— Nincs kapcsolódó sablon —</option>
-          @for (template of templates(); track template.id) {
-            <option [ngValue]="template.id">
-              {{ template.name }}
-            </option>
-          }
-        </select>
-        <span class="dialog__hint">
-          Ha a téma egy konkrét sablonhoz kapcsolódik, válaszd ki itt.
-        </span>
+          hint="Ha a téma egy konkrét sablonhoz kapcsolódik, válaszd ki itt."
+        />
       </div>
     }
   </ng-container>

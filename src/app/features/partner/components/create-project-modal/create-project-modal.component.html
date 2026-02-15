@@ -47,24 +47,20 @@
     <!-- Osztály és Évfolyam -->
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Osztály neve</label>
-        <input
-          type="text"
+        <ps-input
+          label="Osztály neve"
           placeholder="pl. 12.A"
           [(ngModel)]="formData.class_name"
           name="className"
-          class="form-input"
         />
       </div>
 
       <div class="form-group">
-        <label class="form-label">Évfolyam</label>
-        <input
-          type="text"
+        <ps-input
+          label="Évfolyam"
           placeholder="pl. 2024"
           [(ngModel)]="formData.class_year"
           name="classYear"
-          class="form-input"
         />
       </div>
     </div>

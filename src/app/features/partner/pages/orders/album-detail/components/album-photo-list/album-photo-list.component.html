@@ -1,25 +1,20 @@
 <div class="photo-list">
   <!-- Filter bar -->
   <div class="photo-list__filters">
-    <select
+    <ps-select
+      [options]="filterOptions()"
       [ngModel]="filter()"
       (ngModelChange)="filterChange.emit($event)"
-      class="photo-list__select"
-    >
-      <option value="all">Összes kép ({{ totalCount() }})</option>
-      <option value="selected">Kiválasztottak ({{ selectedCount() }})</option>
-      <option value="unselected">Nem kiválasztottak ({{ totalCount() - selectedCount() }})</option>
-    </select>
-    <div class="photo-list__search">
-      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
-      <input
-        type="text"
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchChange.emit($event)"
-        placeholder="Keresés névre vagy fájlnévre..."
-        class="photo-list__search-input"
-      />
-    </div>
+      size="md"
+    />
+    <ps-input
+      class="photo-list__search"
+      prefix="search"
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchChange.emit($event)"
+      placeholder="Keresés névre vagy fájlnévre..."
+      size="md"
+    />
   </div>
 
   <!-- Action bar -->

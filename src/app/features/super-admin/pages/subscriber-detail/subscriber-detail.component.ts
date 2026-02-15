@@ -6,7 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
 import { SubscriberDetail, DiscountInfo } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants';
-import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectComponent, PsInputComponent, PsToggleComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ChargeSubscriberDialogComponent } from '../../components/charge-subscriber-dialog/charge-subscriber-dialog.component';
@@ -32,6 +32,8 @@ import { SubscriberDetailStateService } from './subscriber-detail-state.service'
     DiscountDialogComponent,
     NgClass,
     PsSelectComponent,
+    PsInputComponent,
+    PsToggleComponent,
   ],
   providers: [SubscriberDetailStateService],
   templateUrl: './subscriber-detail.component.html',

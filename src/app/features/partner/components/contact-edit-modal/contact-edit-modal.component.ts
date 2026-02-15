@@ -7,6 +7,7 @@ import { PartnerService, ContactListItem, ProjectAutocompleteItem } from '../../
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { formatHungarianPhone, validatePhone } from '../../../../shared/utils/phone-formatter.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsTextareaComponent } from '@shared/components/form';
 
 /**
  * Contact Edit Modal - Kapcsolattartó létrehozása/szerkesztése.
@@ -15,7 +16,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-contact-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsTextareaComponent],
   templateUrl: './contact-edit-modal.component.html',
   styleUrl: './contact-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

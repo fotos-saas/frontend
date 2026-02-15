@@ -14,13 +14,14 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PsInputComponent } from '@shared/components/form';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import type { TeacherListItem } from '../../models/teacher.models';
 
 @Component({
   selector: 'app-teacher-link-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent],
   templateUrl: './teacher-link-dialog.component.html',
   styleUrl: './teacher-link-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

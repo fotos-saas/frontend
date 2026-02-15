@@ -14,27 +14,22 @@
 
     <form (ngSubmit)="save()" class="modal-form">
       <div class="form-group">
-        <label for="name">Név *</label>
-        <input
-          type="text"
-          id="name"
+        <ps-input
+          label="Név"
           [(ngModel)]="name"
           name="name"
-          required
-          class="form-input"
+          [required]="true"
           placeholder="Pl. Kovács János"
         />
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="email">Email</label>
-          <input
+          <ps-input
+            label="Email"
             type="email"
-            id="email"
             [(ngModel)]="email"
             name="email"
-            class="form-input"
             placeholder="email@example.com"
           />
         </div>
@@ -59,15 +54,13 @@
       </div>
 
       <div class="form-group">
-        <label for="note">Megjegyzés</label>
-        <textarea
-          id="note"
+        <ps-textarea
+          label="Megjegyzés"
           [(ngModel)]="note"
           name="note"
-          class="form-input form-textarea"
           placeholder="Opcionális megjegyzés..."
-          rows="2"
-        ></textarea>
+          [rows]="2"
+        />
       </div>
 
       <!-- Projekt autocomplete (opcionális) -->

@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerSchoolService } from '../../services/partner-school.service';
 import { SchoolDetail, SchoolChangeLogEntry } from '../../models/partner.models';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsInputComponent } from '@shared/components/form';
 
 @Component({
   selector: 'app-partner-school-detail',
@@ -18,6 +19,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
     RouterLink,
     LucideAngularModule,
     MatTooltipModule,
+    PsInputComponent,
   ],
   templateUrl: './school-detail.component.html',
   styleUrl: './school-detail.component.scss',

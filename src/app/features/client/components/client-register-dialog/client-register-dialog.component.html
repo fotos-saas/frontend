@@ -50,53 +50,30 @@
 
       <!-- Email -->
       <div class="form-group">
-        <label for="email" class="form-label">Email cím</label>
-        <input
-          #emailInput
+        <ps-input
           type="email"
-          id="email"
-          name="email"
-          class="form-input"
+          label="Email cím"
           [(ngModel)]="email"
-          [class.form-input--error]="errors['email']"
-          (input)="onInputChange()"
+          (ngModelChange)="onInputChange()"
           placeholder="pelda@email.hu"
           autocomplete="email"
-          required
+          [required]="true"
+          [errorMessage]="errors['email'] || ''"
         />
-        @if (errors['email']) {
-          <p class="form-error">{{ errors['email'] }}</p>
-        }
       </div>
 
       <!-- Password -->
       <div class="form-group">
-        <label for="password" class="form-label">Jelszó</label>
-        <div class="password-input-wrapper">
-          <input
-            [type]="showPassword() ? 'text' : 'password'"
-            id="password"
-            name="password"
-            class="form-input"
-            [(ngModel)]="password"
-            [class.form-input--error]="errors['password']"
-            (input)="onInputChange()"
-            placeholder="Legalább 8 karakter"
-            autocomplete="new-password"
-            required
-          />
-          <button
-            type="button"
-            class="password-toggle"
-            (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword() ? 'Jelszó elrejtése' : 'Jelszó megjelenítése'"
-          >
-            <lucide-icon [name]="showPassword() ? ICONS.EYE_OFF : ICONS.EYE" [size]="18"></lucide-icon>
-          </button>
-        </div>
-        @if (errors['password']) {
-          <p class="form-error">{{ errors['password'] }}</p>
-        }
+        <ps-input
+          type="password"
+          label="Jelszó"
+          [(ngModel)]="password"
+          (ngModelChange)="onInputChange()"
+          placeholder="Legalább 8 karakter"
+          autocomplete="new-password"
+          [required]="true"
+          [errorMessage]="errors['password'] || ''"
+        />
 
         <!-- Password strength -->
         <app-password-strength [password]="password" [compact]="true" />
@@ -104,32 +81,16 @@
 
       <!-- Password confirmation -->
       <div class="form-group">
-        <label for="passwordConfirmation" class="form-label">Jelszó megerősítése</label>
-        <div class="password-input-wrapper">
-          <input
-            [type]="showPasswordConfirmation() ? 'text' : 'password'"
-            id="passwordConfirmation"
-            name="passwordConfirmation"
-            class="form-input"
-            [(ngModel)]="passwordConfirmation"
-            [class.form-input--error]="errors['passwordConfirmation']"
-            (input)="onInputChange()"
-            placeholder="Írd be újra a jelszót"
-            autocomplete="new-password"
-            required
-          />
-          <button
-            type="button"
-            class="password-toggle"
-            (click)="toggleConfirmationVisibility()"
-            [attr.aria-label]="showPasswordConfirmation() ? 'Jelszó elrejtése' : 'Jelszó megjelenítése'"
-          >
-            <lucide-icon [name]="showPasswordConfirmation() ? ICONS.EYE_OFF : ICONS.EYE" [size]="18"></lucide-icon>
-          </button>
-        </div>
-        @if (errors['passwordConfirmation']) {
-          <p class="form-error">{{ errors['passwordConfirmation'] }}</p>
-        }
+        <ps-input
+          type="password"
+          label="Jelszó megerősítése"
+          [(ngModel)]="passwordConfirmation"
+          (ngModelChange)="onInputChange()"
+          placeholder="Írd be újra a jelszót"
+          autocomplete="new-password"
+          [required]="true"
+          [errorMessage]="errors['passwordConfirmation'] || ''"
+        />
       </div>
 
       <!-- API error -->

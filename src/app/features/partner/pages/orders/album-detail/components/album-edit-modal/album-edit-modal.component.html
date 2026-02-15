@@ -14,54 +14,41 @@
 
       <form (ngSubmit)="onSubmit()" class="dialog-body">
         <!-- Név -->
-        <div class="form-group">
-          <label class="form-label">Album neve *</label>
-          <input
-            type="text"
-            [(ngModel)]="formData.name"
-            name="name"
-            class="form-input"
-            required
-          />
-        </div>
+        <ps-input
+          label="Album neve"
+          [required]="true"
+          [(ngModel)]="formData.name"
+          name="name"
+        />
 
         <!-- Típustól függő mezők -->
         @if (album().type === 'selection') {
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Min. kiválasztás</label>
-              <input
-                type="number"
-                [(ngModel)]="formData.minSelections"
-                name="minSelections"
-                class="form-input"
-                min="0"
-              />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Max. kiválasztás</label>
-              <input
-                type="number"
-                [(ngModel)]="formData.maxSelections"
-                name="maxSelections"
-                class="form-input"
-                min="0"
-              />
-            </div>
+            <ps-input
+              label="Min. kiválasztás"
+              type="number"
+              [(ngModel)]="formData.minSelections"
+              name="minSelections"
+              min="0"
+            />
+            <ps-input
+              label="Max. kiválasztás"
+              type="number"
+              [(ngModel)]="formData.maxSelections"
+              name="maxSelections"
+              min="0"
+            />
           </div>
         }
 
         @if (album().type === 'tablo') {
-          <div class="form-group">
-            <label class="form-label">Max. retusálás</label>
-            <input
-              type="number"
-              [(ngModel)]="formData.maxRetouchPhotos"
-              name="maxRetouchPhotos"
-              class="form-input"
-              min="0"
-            />
-          </div>
+          <ps-input
+            label="Max. retusálás"
+            type="number"
+            [(ngModel)]="formData.maxRetouchPhotos"
+            name="maxRetouchPhotos"
+            min="0"
+          />
         }
 
         <div class="dialog-actions">

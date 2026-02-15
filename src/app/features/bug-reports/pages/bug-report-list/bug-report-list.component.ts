@@ -7,12 +7,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { BugReportService } from '../../../../shared/services/bug-report.service';
 import { BugReport, BUG_REPORT_STATUS_OPTIONS } from '../../../../shared/types/bug-report.types';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { CreateBugReportDialogComponent } from '../../components/create-bug-report-dialog/create-bug-report-dialog.component';
 
 @Component({
   selector: 'app-bug-report-list',
   standalone: true,
-  imports: [FormsModule, DatePipe, LucideAngularModule, CreateBugReportDialogComponent],
+  imports: [FormsModule, DatePipe, LucideAngularModule, CreateBugReportDialogComponent, PsInputComponent, PsSelectComponent],
   templateUrl: './bug-report-list.component.html',
   styleUrl: './bug-report-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -24,6 +26,7 @@ export class BugReportListComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly statusOptions = BUG_REPORT_STATUS_OPTIONS;
+  readonly statusSelectOptions: PsSelectOption[] = BUG_REPORT_STATUS_OPTIONS.map(o => ({ id: o.value, label: o.label }));
 
   reports = signal<BugReport[]>([]);
   loading = signal(true);

@@ -15,16 +15,12 @@
 
   <!-- Simple Textarea (alapértelmezett) -->
   @if (!useRichEditor()) {
-    <textarea
-      id="reply-content"
-      class="reply-form__input"
+    <ps-textarea
       [(ngModel)]="content"
-      name="content"
       [placeholder]="placeholder()"
-      rows="3"
+      [rows]="3"
       [disabled]="isSubmitting()"
-      aria-label="Hozzászólás szövege"
-    ></textarea>
+    />
   }
 
   <!-- Media Editor -->

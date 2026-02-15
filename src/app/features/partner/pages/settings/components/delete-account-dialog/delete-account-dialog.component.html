@@ -44,16 +44,11 @@
       </div>
 
       <div class="confirm-input">
-        <label for="confirm-text">
-          A megerősítéshez írd be: <strong>TÖRLÉS</strong>
-        </label>
-        <input
-          id="confirm-text"
-          type="text"
+        <ps-input
+          label="A megerősítéshez írd be: TÖRLÉS"
           [(ngModel)]="confirmText"
           placeholder="TÖRLÉS"
           autocomplete="off"
-          [attr.aria-invalid]="confirmText().length > 0 && confirmText() !== 'TÖRLÉS'"
         />
       </div>
     </div>

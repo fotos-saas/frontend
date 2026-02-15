@@ -13,6 +13,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PasswordStrengthComponent } from '../../../../shared/components/password-strength/password-strength.component';
+import { PsInputComponent } from '@shared/components/form';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { ClientRegisterFormService } from './client-register-form.service';
@@ -37,7 +38,7 @@ export type ClientRegisterResult =
 @Component({
   selector: 'app-client-register-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent],
+  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent, PsInputComponent],
   templateUrl: './client-register-dialog.component.html',
   styleUrl: './client-register-dialog.component.scss',
   providers: [ClientRegisterFormService],

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
 import { createBackdropHandler } from '../../../../../../../shared/utils/dialog.util';
+import { PsInputComponent } from '@shared/components/form';
 import { PartnerOrderAlbumDetails } from '../../../../../services/partner-orders.service';
 
 export interface AlbumEditFormData {
@@ -21,7 +22,7 @@ export interface AlbumEditFormData {
   selector: 'app-album-edit-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent],
   templateUrl: './album-edit-modal.component.html',
   styleUrls: ['./album-edit-modal.component.scss']
 })

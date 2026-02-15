@@ -11,47 +11,24 @@
     <!-- Content -->
     <div class="dialog-content">
       <!-- Email -->
-      <div class="form-group">
-        <label for="email">Email cím</label>
-        <input
-          type="email"
-          id="email"
-          [(ngModel)]="email"
-          placeholder="munkatars@example.com"
-          [class.error]="emailError()"
-        />
-        @if (emailError()) {
-          <span class="error-text">{{ emailError() }}</span>
-        }
-      </div>
+      <ps-input
+        label="Email cím"
+        type="email"
+        fieldId="email"
+        [(ngModel)]="email"
+        placeholder="munkatars@example.com"
+        [errorMessage]="emailError() ?? ''"
+        [state]="emailError() ? 'error' : 'default'"
+      />
 
       <!-- Szerepkör -->
-      <div class="form-group">
-        <label>Szerepkör</label>
-        <div class="role-options">
-          @for (role of teamService.roles; track role.value) {
-            <label class="role-option" [class.selected]="selectedRole() === role.value">
-              <input
-                type="radio"
-                name="role"
-                [value]="role.value"
-                [checked]="selectedRole() === role.value"
-                (change)="selectedRole.set(role.value)"
-              />
-              <div class="role-content">
-                <span class="role-label">{{ role.label }}</span>
-                <span class="role-description">{{ role.description }}</span>
-              </div>
-              <lucide-icon
-                [name]="ICONS.CHECK_CIRCLE"
-                [size]="20"
-                class="check-icon"
-                [class.visible]="selectedRole() === role.value"
-              />
-            </label>
-          }
-        </div>
-      </div>
+      <ps-radio-group
+        label="Szerepkör"
+        [options]="roleOptions"
+        variant="cards"
+        [ngModel]="selectedRole()"
+        (ngModelChange)="selectedRole.set($event)"
+      />
     </div>
 
     <!-- Footer -->

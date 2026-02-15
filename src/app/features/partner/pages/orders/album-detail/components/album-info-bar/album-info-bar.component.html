@@ -42,12 +42,11 @@
     @if (album().expiresAt && album().status !== 'completed') {
       <div class="info-expiry">
         <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
-        <input
-          type="date"
-          [value]="expiryDateValue()"
-          (change)="onExpiryChange($event)"
+        <ps-datepicker
+          size="sm"
+          [ngModel]="expiryDateValue()"
+          (ngModelChange)="expiryChange.emit($event)"
           [min]="tomorrowDate()"
-          class="expiry-input-compact"
           [disabled]="extendingExpiry()"
         />
         @if (isExpired()) {

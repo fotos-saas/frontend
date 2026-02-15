@@ -10,21 +10,14 @@
   </p>
 
   <div class="filter-section">
-    <label for="statusFilter" class="filter-label">
-      <lucide-icon [name]="ICONS.FILTER" [size]="16" />
-      Szűrés:
-    </label>
-    <select
-      id="statusFilter"
-      class="filter-select"
+    <ps-select
+      label="Szűrés"
+      fieldId="statusFilter"
+      [options]="statusOptions"
+      size="md"
       [ngModel]="statusFilter()"
       (ngModelChange)="onStatusFilterChange($event)"
-    >
-      <option value="">Összes</option>
-      <option value="paid">Fizetve</option>
-      <option value="open">Nyitott</option>
-      <option value="void">Érvénytelen</option>
-    </select>
+    />
   </div>
 
   @if (loading() && invoices().length === 0) {

@@ -342,21 +342,12 @@
 
         <!-- Filter sáv -->
         <div class="audit-filters">
-          <div class="search-box">
-            <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-            <input
-              type="text"
-              placeholder="Keresés admin név alapján..."
-              [ngModel]="auditSearch()"
-              (ngModelChange)="setAuditSearch($event)"
-              class="search-input"
-            />
-            @if (auditSearch()) {
-              <button class="clear-btn" (click)="clearAuditSearch()" matTooltip="Keresés törlése">
-                <lucide-icon [name]="ICONS.X" [size]="14" />
-              </button>
-            }
-          </div>
+          <ps-input
+            size="md"
+            placeholder="Keresés admin név alapján..."
+            [ngModel]="auditSearch()"
+            (ngModelChange)="setAuditSearch($event)"
+          />
           <ps-select
             size="sm"
             emptyLabel="Összes művelet"
@@ -364,15 +355,11 @@
             [ngModel]="auditActionFilter()"
             (ngModelChange)="setAuditActionFilter($event)"
           />
-          <label class="show-views-toggle" matTooltip="Megtekintések megjelenítése/elrejtése">
-            <input
-              type="checkbox"
-              [checked]="auditShowViews()"
-              (change)="toggleShowViews()"
-            />
-            <lucide-icon [name]="ICONS.EYE" [size]="16" />
-            <span>Megtekintések</span>
-          </label>
+          <ps-toggle
+            label="Megtekintések"
+            [ngModel]="auditShowViews()"
+            (ngModelChange)="toggleShowViews()"
+          />
         </div>
 
         @if (auditLogsLoading()) {

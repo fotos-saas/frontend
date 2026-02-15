@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
 import { AlbumPhoto, AlbumStatus } from '../../../../../services/partner-orders.service';
+import { PsInputComponent, PsSelectComponent, PsSelectOption } from '@shared/components/form';
 
 /**
  * Album Photo List Component
@@ -14,7 +15,7 @@ import { AlbumPhoto, AlbumStatus } from '../../../../../services/partner-orders.
   selector: 'app-album-photo-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent],
   templateUrl: './album-photo-list.component.html',
   styleUrls: ['./album-photo-list.component.scss']
 })
@@ -35,6 +36,12 @@ export class AlbumPhotoListComponent {
   readonly downloading = input<boolean>(false);
   readonly exporting = input<boolean>(false);
   readonly albumStatus = input<AlbumStatus>('draft');
+
+  readonly filterOptions = computed<PsSelectOption[]>(() => [
+    { id: 'all', label: `Összes kép (${this.totalCount()})` },
+    { id: 'selected', label: `Kiválasztottak (${this.selectedCount()})` },
+    { id: 'unselected', label: `Nem kiválasztottak (${this.totalCount() - this.selectedCount()})` },
+  ]);
 
   // Outputs
   readonly filterChange = output<'all' | 'selected' | 'unselected'>();

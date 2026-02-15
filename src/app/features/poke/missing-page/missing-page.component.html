@@ -73,21 +73,11 @@
     } @else {
       <!-- Search -->
       <div class="search-section">
-        <div class="search-input-wrapper">
-          <span class="search-icon">🔍</span>
-          <input
-            type="text"
-            class="search-input"
-            placeholder="keresés név szerint..."
-            [ngModel]="searchQuery()"
-            (ngModelChange)="searchQuery.set($event)"
-          />
-          @if (searchQuery()) {
-            <button class="clear-search-btn" (click)="clearSearch()">
-              <span>✕</span>
-            </button>
-          }
-        </div>
+        <ps-input
+          placeholder="keresés név szerint..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
       </div>
 
       <!-- Category tabs -->

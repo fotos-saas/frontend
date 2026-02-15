@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 import { createBackdropHandler } from '../../../../../../shared/utils/dialog.util';
+import { PsInputComponent } from '@shared/components/form';
 
 /**
  * Delete Account Dialog Component
@@ -13,7 +14,7 @@ import { createBackdropHandler } from '../../../../../../shared/utils/dialog.uti
 @Component({
   selector: 'app-delete-account-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent],
   templateUrl: './delete-account-dialog.component.html',
   styleUrls: ['./delete-account-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

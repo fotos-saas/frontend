@@ -1,14 +1,16 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 import { GalleryPhoto } from '../../../../models/gallery.models';
+import { PsInputComponent } from '@shared/components/form';
 
 @Component({
   selector: 'app-gallery-photo-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent],
   templateUrl: './gallery-photo-list.component.html',
   styleUrl: './gallery-photo-list.component.scss',
 })

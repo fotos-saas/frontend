@@ -14,11 +14,12 @@ import {
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { RichTextEditorComponent } from '../../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { SafeHtmlPipe } from '../../../../shared/pipes/safe-html.pipe';
+import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
 
 @Component({
   selector: 'app-admin-bug-report-detail',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, RichTextEditorComponent, SafeHtmlPipe],
+  imports: [DatePipe, FormsModule, LucideAngularModule, RichTextEditorComponent, SafeHtmlPipe, PsInputComponent, PsToggleComponent],
   templateUrl: './bug-report-detail.component.html',
   styleUrl: './bug-report-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -53,16 +53,12 @@
       <!-- Custom message input -->
       @if (showCustomInput()) {
         <div class="dialog__custom-input">
-          <label for="custom-message" class="visually-hidden">Egyéni üzenet</label>
-          <textarea
-            id="custom-message"
+          <ps-textarea
             [(ngModel)]="customMessage"
             placeholder="írd ide az üzeneted..."
-            maxlength="500"
-            rows="3"
-            aria-describedby="char-count"
-            (ngModelChange)="customMessage.set($event)"></textarea>
-          <span id="char-count" class="dialog__char-count" aria-live="polite">{{ customMessage().length }}/500</span>
+            [maxLength]="500"
+            [rows]="3"
+          />
         </div>
       }
     </div>

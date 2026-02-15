@@ -8,6 +8,7 @@ import { PartnerOrdersService, PartnerClient } from '../../../services/partner-o
 import { ClientEditModalComponent } from '../../../components/client-edit-modal/client-edit-modal.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { PsInputComponent } from '@shared/components/form';
 import { useFilterState } from '../../../../../shared/utils/use-filter-state';
 import { getInitials } from '../../../../../shared/utils/formatters.util';
 import { ListPaginationComponent } from '../../../../../shared/components/list-pagination/list-pagination.component';
@@ -23,6 +24,7 @@ import { ListPaginationComponent } from '../../../../../shared/components/list-p
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
+    PsInputComponent,
     ClientEditModalComponent,
     ConfirmDialogComponent,
     ListPaginationComponent,

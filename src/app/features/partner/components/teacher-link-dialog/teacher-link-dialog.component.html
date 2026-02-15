@@ -29,21 +29,11 @@
     </div>
 
     <!-- Kereső -->
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" [size]="14" class="search-box__icon" />
-      <input
-        type="text"
-        placeholder="Tanár keresése név vagy iskola alapján..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event)"
-        class="search-box__input"
-      />
-      @if (searchQuery()) {
-        <button class="search-box__clear" (click)="searchQuery.set('')">
-          <lucide-icon [name]="ICONS.X" [size]="12" />
-        </button>
-      }
-    </div>
+    <ps-input
+      placeholder="Tanár keresése név vagy iskola alapján..."
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+    />
 
     <!-- Tanár lista -->
     <div class="teacher-list">

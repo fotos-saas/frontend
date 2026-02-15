@@ -3,7 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { AuthService, TabloProject, TabloPerson } from '../../core/services/auth.service';
-import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectComponent, PsInputComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -19,7 +19,7 @@ import { map } from 'rxjs/operators';
 @Component({
     selector: 'app-persons',
     standalone: true,
-    imports: [FormsModule, AsyncPipe, PsSelectComponent],
+    imports: [FormsModule, AsyncPipe, PsSelectComponent, PsInputComponent],
     templateUrl: './persons.component.html',
     styleUrls: ['./persons.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

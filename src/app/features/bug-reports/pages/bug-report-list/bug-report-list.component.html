@@ -13,31 +13,18 @@
 
   <!-- Szűrők -->
   <div class="filters">
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" [size]="18" class="search-icon" />
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Keresés cím alapján..."
-        [ngModel]="search()"
-        (ngModelChange)="onSearchChange($event)"
-      />
-      @if (search()) {
-        <button class="clear-btn" (click)="onSearchChange('')">
-          <lucide-icon [name]="ICONS.X" [size]="16" />
-        </button>
-      }
-    </div>
-    <select
-      class="filter-select"
+    <ps-input
+      placeholder="Keresés cím alapján..."
+      [ngModel]="search()"
+      (ngModelChange)="onSearchChange($event)"
+    />
+    <ps-select
+      size="sm"
+      emptyLabel="Minden státusz"
+      [options]="statusSelectOptions"
       [ngModel]="statusFilter()"
       (ngModelChange)="onStatusFilterChange($event)"
-    >
-      <option value="">Minden státusz</option>
-      @for (opt of statusOptions; track opt.value) {
-        <option [value]="opt.value">{{ opt.label }}</option>
-      }
-    </select>
+    />
   </div>
 
   <!-- Loading -->

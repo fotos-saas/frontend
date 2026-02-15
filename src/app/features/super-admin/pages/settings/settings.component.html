@@ -39,14 +39,10 @@
               <label class="setting-label">Regisztráció engedélyezése</label>
               <span class="setting-description">Új felhasználók regisztrálhatnak a rendszerbe</span>
             </div>
-            <label class="toggle">
-              <input
-                type="checkbox"
-                [ngModel]="registrationEnabled()"
-                (ngModelChange)="registrationEnabled.set($event)"
-              />
-              <span class="toggle-slider"></span>
-            </label>
+            <ps-toggle
+              [ngModel]="registrationEnabled()"
+              (ngModelChange)="registrationEnabled.set($event)"
+            />
           </div>
 
           <div class="setting-item">
@@ -54,13 +50,13 @@
               <label class="setting-label">Próbaidőszak napokban</label>
               <span class="setting-description">Új regisztrációk próbaidőszakának hossza</span>
             </div>
-            <input
+            <ps-input
               type="number"
-              class="setting-input setting-input--small"
+              size="sm"
               [ngModel]="trialDays()"
               (ngModelChange)="trialDays.set($event)"
-              min="0"
-              max="90"
+              [min]="0"
+              [max]="90"
             />
           </div>
 
@@ -69,15 +65,12 @@
               <label class="setting-label">Alapértelmezett csomag</label>
               <span class="setting-description">Új regisztrációk alapértelmezett csomagja</span>
             </div>
-            <select
-              class="setting-select"
+            <ps-select
+              size="sm"
+              [options]="planSelectOptions()"
               [ngModel]="defaultPlan()"
               (ngModelChange)="defaultPlan.set($event)"
-            >
-              @for (option of planOptions(); track option.value) {
-                <option [value]="option.value">{{ option.label }}</option>
-              }
-            </select>
+            />
           </div>
 
           <div class="actions">

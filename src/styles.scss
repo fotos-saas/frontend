@@ -4,6 +4,17 @@
 // Form Design System — CSS custom properties (globálisan kell!)
 @use 'app/shared/components/form/form-tokens';
 
+// Checkbox label linkek (ng-content projected → globális scope kell)
+.ps-checkbox__label a {
+  color: var(--ps-focus-border, var(--color-primary, #2563eb));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

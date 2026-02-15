@@ -54,6 +54,7 @@ export class FormShowcaseComponent {
 
   // Checkbox & Toggle
   checkboxValue = signal(false);
+  checkboxTerms = signal(false);
   checkboxIndeterminate = signal(false);
   toggleValue = signal(false);
   toggleBefore = signal(true);

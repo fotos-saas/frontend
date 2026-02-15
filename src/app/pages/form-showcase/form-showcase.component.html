@@ -119,6 +119,11 @@
     <div class="showcase__grid">
       <div class="showcase__group">
         <ps-checkbox label="Elfogadom a feltételeket" [(ngModel)]="checkboxValue" />
+        <ps-checkbox [(ngModel)]="checkboxTerms" [required]="true">
+          Elolvastam és elfogadom az
+          <a href="javascript:void(0)">Általános Szerződési Feltételeket</a>
+          és az <a href="javascript:void(0)">Adatvédelmi Szabályzatot</a>
+        </ps-checkbox>
         <ps-checkbox label="Indeterminate" [indeterminate]="true" [(ngModel)]="checkboxIndeterminate" />
         <ps-checkbox label="Letiltott checkbox" [disabled]="true" />
       </div>

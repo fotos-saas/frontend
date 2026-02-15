@@ -4,7 +4,7 @@
 
 .ps-checkbox {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   cursor: pointer;
   user-select: none;
 
@@ -31,6 +31,7 @@
     justify-content: center;
     width: 20px;
     height: 20px;
+    margin-top: 1px;
     border: $ps-field-border-width solid var(--ps-check-border);
     border-radius: 5px;
     background: var(--ps-field-bg);
@@ -74,6 +75,16 @@
     font-size: $ps-field-font-size;
     color: var(--ps-text-color);
     line-height: 1.4;
+
+    a {
+      color: var(--ps-focus-border, var(--color-primary, #2563eb));
+      text-decoration: underline;
+      text-underline-offset: 2px;
+
+      &:hover {
+        text-decoration-thickness: 2px;
+      }
+    }
   }
 
   &--error &__box {

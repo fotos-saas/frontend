@@ -51,6 +51,13 @@
         <span class="ps-field__required">*</span>
       }
     </span>
+  } @else {
+    <span class="ps-checkbox__label">
+      <ng-content />
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </span>
   }
 </label>
 

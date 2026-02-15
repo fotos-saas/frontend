@@ -5,11 +5,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { PasswordStrengthComponent } from '../../../shared/components/password-strength/password-strength.component';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
+import { PsInputComponent } from '@shared/components/form';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterModule, PasswordStrengthComponent, AuthLayoutComponent],
+  imports: [ReactiveFormsModule, RouterModule, PasswordStrengthComponent, AuthLayoutComponent, PsInputComponent],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

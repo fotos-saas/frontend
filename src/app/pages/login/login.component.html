@@ -105,17 +105,13 @@
       <div class="login-page__tab-content" role="tabpanel">
         <form [formGroup]="passwordForm" (ngSubmit)="onPasswordLogin()" class="login-page__form space-y-5">
           <div class="login-page__field">
-            <label for="email" class="login-page__label block text-sm font-medium text-slate-900 mb-2">
-              Email cím
-            </label>
-            <input
-              id="email"
+            <ps-input
               type="email"
               formControlName="email"
-              class="login-page__input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition hover:border-blue-400"
+              label="Email cím"
               placeholder="pelda@email.hu"
               [disabled]="loading()"
-              [class.border-red-500]="passwordForm.get('email')?.invalid && passwordForm.get('email')?.touched"
+              autocomplete="email"
             />
             @if (passwordForm.get('email')?.errors?.['email'] && passwordForm.get('email')?.touched) {
               <span class="text-red-500 text-xs mt-1 block">Érvénytelen email cím</span>
@@ -123,29 +119,17 @@
           </div>
 
           <div class="login-page__field">
-            <label for="password" class="login-page__label block text-sm font-medium text-slate-900 mb-2">
-              Jelszó
-            </label>
-            <input
-              id="password"
+            <ps-input
               type="password"
               formControlName="password"
-              class="login-page__input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition hover:border-blue-400"
+              label="Jelszó"
               placeholder="Jelszó"
               [disabled]="loading()"
-              [class.border-red-500]="passwordForm.get('password')?.invalid && passwordForm.get('password')?.touched"
             />
           </div>
 
           <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                formControlName="rememberMe"
-                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span class="text-sm text-gray-600">Emlékezz rám</span>
-            </label>
+            <ps-checkbox formControlName="rememberMe" label="Emlékezz rám" />
             <a
               routerLink="/forgot-password"
               class="text-sm text-blue-600 hover:text-blue-700 hover:underline font-medium"

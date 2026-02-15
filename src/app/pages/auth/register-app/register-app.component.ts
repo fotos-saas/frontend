@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { PasswordStrengthComponent } from '../../../shared/components/password-strength/password-strength.component';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
@@ -9,16 +9,21 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../shared/constants';
 import { PlansService, PricingPlan } from '../../../shared/services/plans.service';
 import { SubscriptionService } from '../../../features/partner/services/subscription.service';
+import { PsInputComponent, PsSelectComponent, PsCheckboxComponent, PsSelectOption } from '@shared/components/form';
 
 @Component({
   selector: 'app-register-app',
   standalone: true,
   imports: [
+    FormsModule,
     ReactiveFormsModule,
     RouterModule,
     PasswordStrengthComponent,
     AuthLayoutComponent,
     LucideAngularModule,
+    PsInputComponent,
+    PsSelectComponent,
+    PsCheckboxComponent,
   ],
   templateUrl: './register-app.component.html',
   styleUrls: ['./register-app.component.scss'],
@@ -34,6 +39,14 @@ export class RegisterAppComponent implements OnInit {
   private subscriptionService = inject(SubscriptionService);
 
   readonly ICONS = ICONS;
+
+  readonly countryOptions: PsSelectOption[] = [
+    { id: 'Magyarország', label: 'Magyarország' },
+    { id: 'Ausztria', label: 'Ausztria' },
+    { id: 'Németország', label: 'Németország' },
+    { id: 'Szlovákia', label: 'Szlovákia' },
+    { id: 'Románia', label: 'Románia' },
+  ];
 
   // Steps
   currentStep = signal(1);

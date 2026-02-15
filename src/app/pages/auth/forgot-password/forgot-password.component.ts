@@ -4,11 +4,12 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
+import { PsInputComponent } from '@shared/components/form';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterModule, AuthLayoutComponent],
+  imports: [ReactiveFormsModule, RouterModule, AuthLayoutComponent, PsInputComponent],
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

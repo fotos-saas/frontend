@@ -45,14 +45,11 @@
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-group">
-          <label for="name">Neved</label>
-          <input
-            type="text"
-            id="name"
+          <ps-input
             formControlName="name"
+            label="Neved"
             placeholder="Teljes neved"
             autocomplete="name"
-            [class.invalid]="form.get('name')?.invalid && form.get('name')?.touched"
           />
           @if (form.get('name')?.invalid && form.get('name')?.touched) {
             <span class="error-text">Add meg a neved (min. 2 karakter)</span>
@@ -60,14 +57,12 @@
         </div>
 
         <div class="form-group">
-          <label for="email">Email címed</label>
-          <input
+          <ps-input
             type="email"
-            id="email"
             formControlName="email"
+            label="Email címed"
             placeholder="pelda@email.hu"
             autocomplete="email"
-            [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
           />
           @if (form.get('email')?.errors?.['email'] && form.get('email')?.touched) {
             <span class="error-text">Érvénytelen email cím</span>
@@ -75,11 +70,10 @@
         </div>
 
         <div class="form-group">
-          <label for="phone">Telefonszámod (opcionális)</label>
-          <input
+          <ps-input
             type="tel"
-            id="phone"
             formControlName="phone"
+            label="Telefonszámod (opcionális)"
             placeholder="+36 30 123 4567"
             autocomplete="tel"
           />

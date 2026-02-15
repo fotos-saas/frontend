@@ -4,6 +4,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { PsInputComponent } from '@shared/components/form';
 
 interface InvitationValidationResponse {
   valid: boolean;
@@ -34,7 +35,7 @@ interface InviteRegisterResponse {
 @Component({
   selector: 'app-invite-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterModule, AuthLayoutComponent],
+  imports: [ReactiveFormsModule, RouterModule, AuthLayoutComponent, PsInputComponent],
   templateUrl: './invite-register.component.html',
   styleUrls: ['./invite-register.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

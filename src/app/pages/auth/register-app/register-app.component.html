@@ -192,12 +192,9 @@
           <form [formGroup]="accountForm" class="space-y-5">
             <!-- Name -->
             <div>
-              <label for="name" class="block text-sm font-medium text-gray-700 mb-1.5">Teljes név</label>
-              <input
-                id="name"
-                type="text"
+              <ps-input
                 formControlName="name"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                label="Teljes név"
                 placeholder="Kovács János"
                 autocomplete="name"
               />
@@ -208,13 +205,11 @@
 
             <!-- Email -->
             <div>
-              <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email cím</label>
-              <input
-                id="email"
+              <ps-input
                 type="email"
                 formControlName="email"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="pelda&#64;email.hu"
+                label="Email cím"
+                placeholder="pelda@email.hu"
                 autocomplete="email"
               />
               @if (accountForm.get('email')?.errors?.['email'] && accountForm.get('email')?.touched) {
@@ -224,12 +219,10 @@
 
             <!-- Password -->
             <div>
-              <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Jelszó</label>
-              <input
-                id="password"
+              <ps-input
                 type="password"
                 formControlName="password"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                label="Jelszó"
                 placeholder="Min. 8 karakter"
                 autocomplete="new-password"
               />
@@ -238,12 +231,10 @@
 
             <!-- Password Confirmation -->
             <div>
-              <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1.5">Jelszó újra</label>
-              <input
-                id="password_confirmation"
+              <ps-input
                 type="password"
                 formControlName="password_confirmation"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                label="Jelszó újra"
                 placeholder="Jelszó megerősítése"
                 autocomplete="new-password"
               />
@@ -266,12 +257,9 @@
           <form [formGroup]="billingForm" class="space-y-5">
             <!-- Company Name -->
             <div>
-              <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1.5">Cégnév / Számlázási név</label>
-              <input
-                id="company_name"
-                type="text"
+              <ps-input
                 formControlName="company_name"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                label="Cégnév / Számlázási név"
                 placeholder="Cégnév vagy saját név"
               />
               @if (billingForm.get('company_name')?.invalid && billingForm.get('company_name')?.touched) {
@@ -281,55 +269,36 @@
 
             <!-- Tax Number -->
             <div>
-              <label for="tax_number" class="block text-sm font-medium text-gray-700 mb-1.5">
-                Adószám
-                <span class="text-gray-400 font-normal">(opcionális)</span>
-              </label>
-              <input
-                id="tax_number"
-                type="text"
+              <ps-input
                 formControlName="tax_number"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                label="Adószám"
                 placeholder="12345678-1-12"
+                hint="Opcionális"
               />
             </div>
 
             <!-- Country -->
             <div>
-              <label for="country" class="block text-sm font-medium text-gray-700 mb-1.5">Ország</label>
-              <select
-                id="country"
+              <ps-select
                 formControlName="country"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
-              >
-                <option value="Magyarország">Magyarország</option>
-                <option value="Ausztria">Ausztria</option>
-                <option value="Németország">Németország</option>
-                <option value="Szlovákia">Szlovákia</option>
-                <option value="Románia">Románia</option>
-              </select>
+                label="Ország"
+                [options]="countryOptions"
+              />
             </div>
 
             <!-- Postal Code & City Row -->
             <div class="grid grid-cols-3 gap-4">
               <div>
-                <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-1.5">Irányítószám</label>
-                <input
-                  id="postal_code"
-                  type="text"
+                <ps-input
                   formControlName="postal_code"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  label="Irányítószám"
                   placeholder="1234"
-                  maxlength="4"
                 />
               </div>
               <div class="col-span-2">
-                <label for="city" class="block text-sm font-medium text-gray-700 mb-1.5">Város</label>
-                <input
-                  id="city"
-                  type="text"
+                <ps-input
                   formControlName="city"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  label="Város"
                   placeholder="Budapest"
                 />
               </div>
@@ -337,12 +306,9 @@
 
             <!-- Address -->
             <div>
-              <label for="address" class="block text-sm font-medium text-gray-700 mb-1.5">Utca, házszám</label>
-              <input
-                id="address"
-                type="text"
+              <ps-input
                 formControlName="address"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                label="Utca, házszám"
                 placeholder="Példa utca 12."
               />
               @if (billingForm.get('address')?.invalid && billingForm.get('address')?.touched) {
@@ -352,12 +318,10 @@
 
             <!-- Phone -->
             <div>
-              <label for="phone" class="block text-sm font-medium text-gray-700 mb-1.5">Telefonszám</label>
-              <input
-                id="phone"
+              <ps-input
                 type="tel"
                 formControlName="phone"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                label="Telefonszám"
                 placeholder="+36 30 123 4567"
               />
               @if (billingForm.get('phone')?.invalid && billingForm.get('phone')?.touched) {
@@ -475,12 +439,11 @@
 
           <!-- Terms & Conditions -->
           <div class="max-w-3xl mx-auto mt-6">
-            <label class="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                [checked]="termsAccepted()"
-                (change)="termsAccepted.set(!termsAccepted())"
-                class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            <div class="flex items-start gap-3">
+              <ps-checkbox
+                [ngModel]="termsAccepted()"
+                (ngModelChange)="termsAccepted.set($event)"
+                [ngModelOptions]="{standalone: true}"
               />
               <span class="text-sm text-gray-600">
                 Elfogadom az
@@ -488,7 +451,7 @@
                 és az
                 <a href="/privacy" target="_blank" class="text-blue-600 hover:underline">Adatkezelési Tájékoztatót</a>.
               </span>
-            </label>
+            </div>
           </div>
         </div>
       }

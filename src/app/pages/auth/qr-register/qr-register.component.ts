@@ -4,11 +4,12 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService, QrCodeValidationResponse } from '../../../core/services/auth.service';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
+import { PsInputComponent } from '@shared/components/form';
 
 @Component({
   selector: 'app-qr-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterModule, AuthLayoutComponent],
+  imports: [ReactiveFormsModule, RouterModule, AuthLayoutComponent, PsInputComponent],
   templateUrl: './qr-register.component.html',
   styleUrls: ['./qr-register.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

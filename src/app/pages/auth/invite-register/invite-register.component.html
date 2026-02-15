@@ -51,14 +51,11 @@
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-group">
-          <label for="name">Neved</label>
-          <input
-            type="text"
-            id="name"
+          <ps-input
             formControlName="name"
+            label="Neved"
             placeholder="Teljes neved"
             autocomplete="name"
-            [class.invalid]="form.get('name')?.invalid && form.get('name')?.touched"
           />
           @if (form.get('name')?.invalid && form.get('name')?.touched) {
             <span class="error-text">Add meg a neved (min. 2 karakter)</span>
@@ -66,14 +63,12 @@
         </div>
 
         <div class="form-group">
-          <label for="email">Email címed</label>
-          <input
+          <ps-input
             type="email"
-            id="email"
             formControlName="email"
+            label="Email címed"
             placeholder="pelda@email.hu"
             autocomplete="email"
-            [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
             [readonly]="!!invitationInfo()?.email"
           />
           @if (form.get('email')?.errors?.['email'] && form.get('email')?.touched) {
@@ -85,14 +80,12 @@
         </div>
 
         <div class="form-group">
-          <label for="password">Jelszó</label>
-          <input
+          <ps-input
             type="password"
-            id="password"
             formControlName="password"
+            label="Jelszó"
             placeholder="Min. 8 karakter"
             autocomplete="new-password"
-            [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
           />
           @if (form.get('password')?.invalid && form.get('password')?.touched) {
             <span class="error-text">A jelszó legalább 8 karakter legyen</span>
@@ -100,14 +93,12 @@
         </div>
 
         <div class="form-group">
-          <label for="password_confirmation">Jelszó megerősítése</label>
-          <input
+          <ps-input
             type="password"
-            id="password_confirmation"
             formControlName="password_confirmation"
+            label="Jelszó megerősítése"
             placeholder="Jelszó újra"
             autocomplete="new-password"
-            [class.invalid]="form.get('password_confirmation')?.invalid && form.get('password_confirmation')?.touched"
           />
           @if (form.get('password_confirmation')?.errors?.['passwordMismatch'] && form.get('password_confirmation')?.touched) {
             <span class="error-text">A két jelszó nem egyezik</span>

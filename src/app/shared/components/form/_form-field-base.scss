@@ -140,6 +140,15 @@
     &:disabled {
       cursor: not-allowed;
     }
+
+    // Chrome/Safari autofill háttér felülírás
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px var(--ps-field-bg) inset;
+      -webkit-text-fill-color: var(--ps-text-color);
+      transition: background-color 5000s ease-in-out 0s;
+    }
   }
 
   // ──────────────────────────────────────

@@ -3,12 +3,9 @@
 .ps-toggle {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   cursor: pointer;
   user-select: none;
-
-  &--before {
-    flex-direction: row-reverse;
-  }
 
   &--disabled {
     opacity: 0.6;
@@ -79,13 +76,7 @@
   &__label {
     font-size: $ps-field-font-size;
     color: var(--ps-text-color);
-    margin-left: 8px;
     line-height: 1.4;
-  }
-
-  &--before &__label {
-    margin-left: 0;
-    margin-right: 8px;
   }
 }
 

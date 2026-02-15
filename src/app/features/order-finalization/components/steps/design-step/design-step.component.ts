@@ -12,6 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
+import { PsInputComponent } from '@shared/components/form';
 import { DesignData } from '../../../models/order-finalization.models';
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
 import { FileUploadService } from '../../../services/file-upload.service';
@@ -33,7 +34,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
   styleUrls: ['./design-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule, NgxEditorModule]
+  imports: [FormsModule, NgxEditorModule, PsInputComponent]
 })
 export class DesignStepComponent implements OnInit {
   private readonly validationService = inject(OrderValidationService);

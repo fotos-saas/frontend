@@ -13,6 +13,7 @@ import { DEADLINE_OPTIONS } from '../voting-create-dialog/voting-create-dialog.c
 import { MediaUploaderComponent } from '../../../shared/components/media-uploader/media-uploader.component';
 import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { BaseDialogComponent } from '../../../shared/components/base-dialog/base-dialog.component';
+import { PsInputComponent, PsCheckboxComponent } from '@shared/components/form';
 
 export interface VotingEditResult {
   action: 'save' | 'cancel';
@@ -42,7 +43,7 @@ export interface VotingEditResult {
 @Component({
   selector: 'app-voting-edit-dialog',
   standalone: true,
-  imports: [FormsModule, MediaUploaderComponent, RichTextEditorComponent],
+  imports: [FormsModule, MediaUploaderComponent, RichTextEditorComponent, PsInputComponent, PsCheckboxComponent],
   templateUrl: './voting-edit-dialog.component.html',
   styleUrls: ['./voting-edit-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

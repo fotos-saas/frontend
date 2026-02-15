@@ -7,6 +7,7 @@ import {
   computed
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PsInputComponent } from '@shared/components/form';
 import { ContactData } from '../../../models/order-finalization.models';
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
 
@@ -26,7 +27,7 @@ import { OrderValidationService, ValidationError } from '../../../services/order
   styleUrls: ['./contact-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule]
+  imports: [FormsModule, PsInputComponent]
 })
 export class ContactStepComponent {
   private readonly validationService = inject(OrderValidationService);

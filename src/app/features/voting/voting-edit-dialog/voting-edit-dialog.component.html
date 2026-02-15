@@ -26,18 +26,14 @@
 
       <!-- Title -->
       <div class="form-group">
-        <label for="poll-title" class="form-label">
-          Szavazás címe <span class="required">*</span>
-        </label>
-        <input
-          type="text"
-          id="poll-title"
-          class="form-input"
-          [(ngModel)]="title"
+        <ps-input
+          label="Szavazás címe"
+          [required]="true"
+          fieldId="poll-title"
           placeholder="Pl. Melyik tabló tetszik?"
-          maxlength="100"
+          [(ngModel)]="title"
+          hint="Min. 3 karakter"
         />
-        <span class="form-hint">Min. 3 karakter</span>
       </div>
 
       <!-- Description - Rich Text Editor -->
@@ -149,35 +145,29 @@
       <div class="form-group">
         <label class="form-label">Beállítások</label>
         <div class="settings-list">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="isMultipleChoice"
-            />
-            <span class="checkbox-text">Több választás engedélyezése</span>
-          </label>
+          <ps-checkbox
+            label="Több választás engedélyezése"
+            [(ngModel)]="isMultipleChoice"
+          />
           <!-- Max votes input - csak ha több választás engedélyezve -->
           @if (isMultipleChoice) {
             <div class="max-votes-row">
-              <label for="max-votes" class="max-votes-label">Maximum választható:</label>
-              <input
+              <ps-input
+                label="Maximum választható"
                 type="number"
-                id="max-votes"
-                class="max-votes-input"
+                fieldId="max-votes"
                 [(ngModel)]="maxVotesPerGuest"
                 [min]="1"
                 [max]="poll().options && poll().options!.length > 0 ? poll().options!.length : 10"
+                size="sm"
+                hint="db"
               />
-              <span class="max-votes-hint">db</span>
             </div>
           }
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="showResultsBeforeVote"
-            />
-            <span class="checkbox-text">Eredmények mutatása szavazás előtt</span>
-          </label>
+          <ps-checkbox
+            label="Eredmények mutatása szavazás előtt"
+            [(ngModel)]="showResultsBeforeVote"
+          />
         </div>
       </div>
     </div>

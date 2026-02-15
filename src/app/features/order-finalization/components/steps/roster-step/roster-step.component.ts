@@ -11,6 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, switchMap, of, catchError, filter, distinctUntilChanged } from 'rxjs';
+import { PsSelectComponent, PsTextareaComponent, PsCheckboxComponent, PsSelectOption } from '@shared/components/form';
 import {
   RosterData,
   SortType,
@@ -28,7 +29,7 @@ import { TeacherMatchResultsComponent } from '../../teacher-match-results/teache
   styleUrls: ['./roster-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule, TeacherMatchResultsComponent]
+  imports: [FormsModule, TeacherMatchResultsComponent, PsSelectComponent, PsTextareaComponent, PsCheckboxComponent]
 })
 export class RosterStepComponent {
   private readonly validationService = inject(OrderValidationService);
@@ -39,6 +40,12 @@ export class RosterStepComponent {
   dataChange = output<RosterData>();
 
   readonly sortTypeOptions = SORT_TYPE_OPTIONS;
+
+  /** PsSelectOption formátumra mappolt opciók */
+  readonly selectOptions: PsSelectOption[] = SORT_TYPE_OPTIONS.map(o => ({
+    id: o.value,
+    label: o.label
+  }));
 
   /** AI matching állapot */
   matchResults = signal<TeacherMatchResult[]>([]);

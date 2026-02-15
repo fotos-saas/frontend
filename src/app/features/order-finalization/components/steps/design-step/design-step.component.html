@@ -5,41 +5,24 @@
   <!-- Betűtípus és szín sor -->
   <div class="form-row">
     <!-- Betűtípus -->
-    <div class="form-group">
-      <label for="fontFamily" class="form-label">
-        Betűtípus (opcionális)
-      </label>
-      <input
-        type="text"
-        id="fontFamily"
-        class="form-input"
-        [value]="data().fontFamily"
-        (input)="updateField('fontFamily', $any($event.target).value)"
-        (blur)="touched['fontFamily'] = true"
-        placeholder="Grafikusra bízom"
-        maxlength="100"
-        aria-describedby="fontFamily-hint"
-      />
-      <span id="fontFamily-hint" class="form-hint">
-        <a href="https://fonts.google.com/" target="_blank" rel="noopener" aria-label="Google Fonts - új ablakban nyílik meg">Google Fonts</a> oldalon kereshetsz betűtípusokat
-      </span>
-    </div>
+    <ps-input
+      label="Betűtípus (opcionális)"
+      placeholder="Grafikusra bízom"
+      [ngModel]="data().fontFamily"
+      (ngModelChange)="updateField('fontFamily', $event)"
+      (blur)="touched['fontFamily'] = true"
+      hint="Google Fonts oldalon kereshetsz betűtípusokat"
+    />
 
     <!-- Betűszín -->
     <div class="form-group">
-      <label for="fontColor" class="form-label">
-        Betűszín (opcionális)
-      </label>
       <div class="color-input-wrapper">
-        <input
-          type="text"
-          id="fontColor"
-          class="form-input color-input"
-          [value]="data().fontColor || '#000000'"
-          (input)="updateField('fontColor', $any($event.target).value)"
-          (blur)="touched['fontColor'] = true"
+        <ps-input
+          label="Betűszín (opcionális)"
           placeholder="#000000"
-          maxlength="7"
+          [ngModel]="data().fontColor || '#000000'"
+          (ngModelChange)="updateField('fontColor', $event)"
+          (blur)="touched['fontColor'] = true"
         />
         <input
           type="color"

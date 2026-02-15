@@ -26,35 +26,33 @@
         <h4>Kapcsolattartó adatok</h4>
 
         <div class="form-group">
-          <label class="form-label">Név *</label>
-          <input
-            type="text"
-            class="form-input"
+          <ps-input
+            label="Név"
+            [required]="true"
+            placeholder="Teljes név"
             [ngModel]="customerName()"
             (ngModelChange)="customerName.set($event)"
-            placeholder="Teljes név"
           />
         </div>
 
         <div class="form-group">
-          <label class="form-label">E-mail *</label>
-          <input
+          <ps-input
+            label="E-mail"
             type="email"
-            class="form-input"
+            [required]="true"
+            placeholder="pelda@email.hu"
             [ngModel]="customerEmail()"
             (ngModelChange)="customerEmail.set($event)"
-            placeholder="pelda@email.hu"
           />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Telefonszám</label>
-          <input
+          <ps-input
+            label="Telefonszám"
             type="tel"
-            class="form-input"
+            placeholder="+36 30 123 4567"
             [ngModel]="customerPhone()"
             (ngModelChange)="customerPhone.set($event)"
-            placeholder="+36 30 123 4567"
           />
         </div>
       </div>
@@ -63,42 +61,12 @@
       @if (config().allow_pickup && config().allow_shipping) {
         <div class="form-section">
           <h4>Átvételi mód</h4>
-          <div class="radio-group">
-            <label class="radio-option" (click)="deliveryMethod.set('pickup')">
-              <input
-                type="radio"
-                name="delivery"
-                [checked]="deliveryMethod() === 'pickup'"
-              />
-              <div class="radio-content">
-                <span class="radio-title">
-                  <lucide-icon [name]="ICONS.PACKAGE" [size]="16" />
-                  Személyes átvétel
-                </span>
-                <span class="radio-desc">Ingyenes</span>
-              </div>
-            </label>
-            <label class="radio-option" (click)="deliveryMethod.set('shipping')">
-              <input
-                type="radio"
-                name="delivery"
-                [checked]="deliveryMethod() === 'shipping'"
-              />
-              <div class="radio-content">
-                <span class="radio-title">
-                  <lucide-icon [name]="ICONS.TRUCK" [size]="16" />
-                  Házhozszállítás
-                </span>
-                <span class="radio-desc">
-                  @if (config().shipping_free_threshold_huf && cartTotal() >= config().shipping_free_threshold_huf!) {
-                    Ingyenes szállítás
-                  } @else {
-                    {{ config().shipping_cost_huf | number }} Ft
-                  }
-                </span>
-              </div>
-            </label>
-          </div>
+          <ps-radio-group
+            [options]="deliveryOptions()"
+            variant="cards"
+            [ngModel]="deliveryMethod()"
+            (ngModelChange)="deliveryMethod.set($event)"
+          />
         </div>
       }
 
@@ -107,23 +75,21 @@
         <div class="form-section">
           <h4>Szállítási adatok</h4>
           <div class="form-group">
-            <label class="form-label">Szállítási cím *</label>
-            <textarea
-              class="form-input form-textarea"
+            <ps-textarea
+              label="Szállítási cím"
+              [required]="true"
+              placeholder="Irányítószám, város, utca, házszám"
+              [rows]="2"
               [ngModel]="shippingAddress()"
               (ngModelChange)="shippingAddress.set($event)"
-              placeholder="Irányítószám, város, utca, házszám"
-              rows="2"
-            ></textarea>
+            />
           </div>
           <div class="form-group">
-            <label class="form-label">Megjegyzés a szállításhoz</label>
-            <input
-              type="text"
-              class="form-input"
+            <ps-input
+              label="Megjegyzés a szállításhoz"
+              placeholder="pl. kapucsengő, emelet"
               [ngModel]="shippingNotes()"
               (ngModelChange)="shippingNotes.set($event)"
-              placeholder="pl. kapucsengő, emelet"
             />
           </div>
         </div>
@@ -132,14 +98,13 @@
       <!-- Megjegyzés -->
       <div class="form-section">
         <div class="form-group">
-          <label class="form-label">Megjegyzés a rendeléshez</label>
-          <textarea
-            class="form-input form-textarea"
+          <ps-textarea
+            label="Megjegyzés a rendeléshez"
+            placeholder="Bármilyen kérés vagy megjegyzés..."
+            [rows]="2"
             [ngModel]="customerNotes()"
             (ngModelChange)="customerNotes.set($event)"
-            placeholder="Bármilyen kérés vagy megjegyzés..."
-            rows="2"
-          ></textarea>
+          />
         </div>
       </div>
 
@@ -169,14 +134,12 @@
 
       <!-- ÁSZF -->
       @if (config().terms_text) {
-        <label class="checkbox-option">
-          <input
-            type="checkbox"
-            [ngModel]="acceptTerms()"
-            (ngModelChange)="acceptTerms.set($event)"
-          />
-          <span>Elfogadom az <a class="terms-link" href="javascript:void(0)">Általános Szerződési Feltételeket</a></span>
-        </label>
+        <ps-checkbox
+          [ngModel]="acceptTerms()"
+          (ngModelChange)="acceptTerms.set($event)"
+        >
+          Elfogadom az <a class="terms-link" href="javascript:void(0)">Általános Szerződési Feltételeket</a>
+        </ps-checkbox>
       }
     </div>
 

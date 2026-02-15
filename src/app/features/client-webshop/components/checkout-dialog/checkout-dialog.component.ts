@@ -5,13 +5,14 @@ import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { PsInputComponent, PsTextareaComponent, PsCheckboxComponent, PsRadioGroupComponent, PsRadioOption } from '@shared/components/form';
 import { ClientWebshopService, ShopConfig, CheckoutRequest } from '../../client-webshop.service';
 import { cartItems, cartTotal } from '../../client-webshop.state';
 
 @Component({
   selector: 'app-checkout-dialog',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, LucideAngularModule],
+  imports: [FormsModule, DecimalPipe, LucideAngularModule, PsInputComponent, PsTextareaComponent, PsCheckboxComponent, PsRadioGroupComponent],
   templateUrl: './checkout-dialog.component.html',
   styleUrl: './checkout-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,6 +42,17 @@ export class CheckoutDialogComponent {
 
   readonly cartItems = cartItems;
   readonly cartTotal = cartTotal;
+
+  readonly deliveryOptions = computed<PsRadioOption[]>(() => {
+    const cfg = this.config();
+    const total = this.cartTotal();
+    const isFreeShipping = cfg.shipping_free_threshold_huf && total >= cfg.shipping_free_threshold_huf;
+    const shippingLabel = isFreeShipping ? 'Ingyenes szállítás' : `${cfg.shipping_cost_huf?.toLocaleString('hu-HU') ?? 0} Ft`;
+    return [
+      { value: 'pickup', label: 'Személyes átvétel', sublabel: 'Ingyenes' },
+      { value: 'shipping', label: 'Házhozszállítás', sublabel: shippingLabel },
+    ];
+  });
 
   readonly shippingCost = computed(() => {
     const cfg = this.config();

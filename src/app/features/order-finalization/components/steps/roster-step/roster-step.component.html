@@ -3,89 +3,63 @@
   <p class="step-content__description">Add meg a diákok és tanárok neveit, akik megjelennek a tablón.</p>
 
   <!-- Sorrend típus -->
-  <div class="form-group">
-    <label for="sortType" class="form-label">Nevek sorrendje</label>
-    <select
-      id="sortType"
-      class="form-select"
-      [value]="data().sortType"
-      (change)="updateSortType($any($event.target).value)"
-      aria-describedby="sortType-hint"
-    >
-      @for (option of sortTypeOptions; track option.value) {
-        <option [value]="option.value">{{ option.label }}</option>
-      }
-    </select>
-    <span id="sortType-hint" class="form-hint">Válaszd ki, milyen sorrendben jelenjenek meg a nevek a tablón</span>
-  </div>
+  <ps-select
+    label="Nevek sorrendje"
+    [options]="selectOptions"
+    [ngModel]="data().sortType"
+    (ngModelChange)="updateSortType($event)"
+    hint="Válaszd ki, milyen sorrendben jelenjenek meg a nevek a tablón"
+  />
 
   <!-- Diákok névsora -->
   <div class="form-group">
-    <label for="studentRoster" class="form-label">
-      Diákok névsora <span class="required" aria-label="kötelező">*</span>
+    <div class="form-label-row">
       @if (studentCount() > 0) {
         <span class="form-label__count">({{ studentCount() }} fő)</span>
       }
-    </label>
-    <textarea
-      id="studentRoster"
-      class="form-textarea form-textarea--large"
-      [class.form-textarea--error]="hasError('studentRoster')"
-      [value]="data().studentRoster"
-      (input)="updateField('studentRoster', $any($event.target).value)"
-      (blur)="touched['studentRoster'] = true"
+    </div>
+    <ps-textarea
+      label="Diákok névsora"
+      [required]="true"
+      [rows]="8"
+      [maxLength]="10000"
       placeholder="Írd be a diákok neveit, soronként egyet:
 Kovács János
 Nagy Péter
 Kiss Anna
 ..."
-      maxlength="10000"
-      rows="8"
-      required
-      aria-required="true"
-      [attr.aria-invalid]="hasError('studentRoster') ? 'true' : null"
-      [attr.aria-describedby]="hasError('studentRoster') ? 'studentRoster-error studentRoster-hint' : 'studentRoster-hint'"
-    ></textarea>
-    @if (hasError('studentRoster')) {
-      <span id="studentRoster-error" class="form-error" role="alert" aria-live="polite">
-        {{ getFieldError('studentRoster') }}
-      </span>
-    }
-    <span id="studentRoster-hint" class="form-hint">Soronként egy név, maximum 10000 karakter</span>
+      [ngModel]="data().studentRoster"
+      (ngModelChange)="updateField('studentRoster', $event)"
+      (blur)="touched['studentRoster'] = true"
+      [state]="hasError('studentRoster') ? 'error' : 'default'"
+      [errorMessage]="getFieldError('studentRoster') ?? ''"
+      hint="Soronként egy név, maximum 10000 karakter"
+    />
   </div>
 
   <!-- Tanárok névsora -->
   <div class="form-group">
-    <label for="teacherRoster" class="form-label">
-      Tanárok névsora <span class="required" aria-label="kötelező">*</span>
+    <div class="form-label-row">
       @if (teacherCount() > 0) {
         <span class="form-label__count">({{ teacherCount() }} fő)</span>
       }
-    </label>
-    <textarea
-      id="teacherRoster"
-      class="form-textarea"
-      [class.form-textarea--error]="hasError('teacherRoster')"
-      [value]="data().teacherRoster"
-      (input)="updateField('teacherRoster', $any($event.target).value)"
-      (blur)="onTeacherBlur()"
+    </div>
+    <ps-textarea
+      label="Tanárok névsora"
+      [required]="true"
+      [rows]="5"
+      [maxLength]="5000"
       placeholder="Írd be a tanárok neveit, soronként egyet:
 Dr. Szabó Mária - Osztályfőnök
 Kiss László - Matematikatanár
 ..."
-      maxlength="5000"
-      rows="5"
-      required
-      aria-required="true"
-      [attr.aria-invalid]="hasError('teacherRoster') ? 'true' : null"
-      [attr.aria-describedby]="hasError('teacherRoster') ? 'teacherRoster-error teacherRoster-hint' : 'teacherRoster-hint'"
-    ></textarea>
-    @if (hasError('teacherRoster')) {
-      <span id="teacherRoster-error" class="form-error" role="alert" aria-live="polite">
-        {{ getFieldError('teacherRoster') }}
-      </span>
-    }
-    <span id="teacherRoster-hint" class="form-hint">Soronként egy név, opcionálisan beosztással. Maximum 5000 karakter</span>
+      [ngModel]="data().teacherRoster"
+      (ngModelChange)="updateField('teacherRoster', $event)"
+      (blur)="onTeacherBlur()"
+      [state]="hasError('teacherRoster') ? 'error' : 'default'"
+      [errorMessage]="getFieldError('teacherRoster') ?? ''"
+      hint="Soronként egy név, opcionálisan beosztással. Maximum 5000 karakter"
+    />
 
     <!-- AI Tanárnév felismerés eredmények -->
     <app-teacher-match-results
@@ -97,34 +71,19 @@ Kiss László - Matematikatanár
   </div>
 
   <!-- ÁSZF checkbox -->
-  <div class="form-group form-group--checkbox">
-    <label class="checkbox">
-      <input
-        type="checkbox"
-        id="acceptTerms"
-        [checked]="data().acceptTerms"
-        (change)="updateAcceptTerms($any($event.target).checked)"
-        required
-        aria-required="true"
-        [attr.aria-invalid]="hasError('acceptTerms') ? 'true' : null"
-        [attr.aria-describedby]="hasError('acceptTerms') ? 'acceptTerms-error' : null"
-      />
-      <span class="checkbox__mark" aria-hidden="true"></span>
-      <span class="checkbox__label">
-        Elfogadom az
-        <a
-          href="https://tablostudio.hu/adatkezelesi-tajekoztato"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Adatkezelési tájékoztató - új ablakban nyílik meg"
-        >Adatkezelési tájékoztatót</a>
-        <span class="required" aria-label="kötelező">*</span>
-      </span>
-    </label>
-    @if (hasError('acceptTerms')) {
-      <span id="acceptTerms-error" class="form-error" role="alert" aria-live="polite">
-        {{ getFieldError('acceptTerms') }}
-      </span>
-    }
-  </div>
+  <ps-checkbox
+    [ngModel]="data().acceptTerms"
+    (ngModelChange)="updateAcceptTerms($event)"
+    [required]="true"
+    [state]="hasError('acceptTerms') ? 'error' : 'default'"
+    [errorMessage]="getFieldError('acceptTerms') ?? ''"
+  >
+    Elfogadom az
+    <a
+      href="https://tablostudio.hu/adatkezelesi-tajekoztato"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Adatkezelési tájékoztató - új ablakban nyílik meg"
+    >Adatkezelési tájékoztatót</a>
+  </ps-checkbox>
 </section>

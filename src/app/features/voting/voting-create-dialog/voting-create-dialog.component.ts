@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { MediaUploaderComponent } from '../../../shared/components/media-uploader/media-uploader.component';
 import { BaseDialogComponent } from '../../../shared/components/base-dialog/base-dialog.component';
+import { PsInputComponent, PsCheckboxComponent } from '@shared/components/form';
 
 /** Határidő opciók */
 export interface DeadlineOption {
@@ -56,7 +57,7 @@ export interface VotingCreateResult {
 @Component({
   selector: 'app-voting-create-dialog',
   standalone: true,
-  imports: [FormsModule, RichTextEditorComponent, MediaUploaderComponent],
+  imports: [FormsModule, RichTextEditorComponent, MediaUploaderComponent, PsInputComponent, PsCheckboxComponent],
   templateUrl: './voting-create-dialog.component.html',
   styleUrls: ['./voting-create-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

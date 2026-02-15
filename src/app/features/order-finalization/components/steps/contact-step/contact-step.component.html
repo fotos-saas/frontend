@@ -3,101 +3,41 @@
   <p class="step-content__description">Add meg a kapcsolattartási adataidat, hogy tudjunk értesíteni a tabló elkészüléséről.</p>
 
   <!-- Név mező -->
-  <div class="form-group">
-    <label for="contactName" class="form-label">
-      Név <span class="required" aria-label="kötelező">*</span>
-    </label>
-    <input
-      type="text"
-      id="contactName"
-      class="form-input"
-      [class.form-input--error]="hasError('name')"
-      [value]="data().name"
-      (input)="updateField('name', $any($event.target).value)"
-      (blur)="touched.name = true"
-      placeholder="Kovács János"
-      maxlength="100"
-      required
-      aria-required="true"
-      [attr.aria-invalid]="hasError('name') ? 'true' : null"
-      [attr.aria-describedby]="hasError('name') ? 'contactName-error' : null"
-    />
-    @if (hasError('name')) {
-      <span
-        id="contactName-error"
-        class="form-error"
-        role="alert"
-        aria-live="polite"
-      >
-        {{ getFieldError('name') }}
-      </span>
-    }
-  </div>
+  <ps-input
+    label="Kapcsolattartó neve"
+    placeholder="Kovács János"
+    [required]="true"
+    [ngModel]="data().name"
+    (ngModelChange)="updateField('name', $event)"
+    (blur)="touched.name = true"
+    [state]="hasError('name') ? 'error' : 'default'"
+    [errorMessage]="getFieldError('name') ?? ''"
+  />
 
   <!-- Email mező -->
-  <div class="form-group">
-    <label for="contactEmail" class="form-label">
-      Email cím <span class="required" aria-label="kötelező">*</span>
-    </label>
-    <input
-      type="email"
-      id="contactEmail"
-      class="form-input"
-      [class.form-input--error]="hasError('email')"
-      [value]="data().email"
-      (input)="updateField('email', $any($event.target).value)"
-      (blur)="touched.email = true"
-      placeholder="pelda@email.hu"
-      maxlength="254"
-      required
-      aria-required="true"
-      [attr.aria-invalid]="hasError('email') ? 'true' : null"
-      [attr.aria-describedby]="hasError('email') ? 'contactEmail-error' : null"
-    />
-    @if (hasError('email')) {
-      <span
-        id="contactEmail-error"
-        class="form-error"
-        role="alert"
-        aria-live="polite"
-      >
-        {{ getFieldError('email') }}
-      </span>
-    }
-  </div>
+  <ps-input
+    type="email"
+    label="Email cím"
+    placeholder="pelda@email.hu"
+    [required]="true"
+    [ngModel]="data().email"
+    (ngModelChange)="updateField('email', $event)"
+    (blur)="touched.email = true"
+    [state]="hasError('email') ? 'error' : 'default'"
+    [errorMessage]="getFieldError('email') ?? ''"
+  />
 
   <!-- Telefonszám mező -->
-  <div class="form-group">
-    <label for="contactPhone" class="form-label">
-      Telefonszám <span class="required" aria-label="kötelező">*</span>
-    </label>
-    <input
-      type="tel"
-      id="contactPhone"
-      class="form-input"
-      [class.form-input--error]="hasError('phone')"
-      [value]="data().phone"
-      (input)="updateField('phone', $any($event.target).value)"
-      (blur)="touched.phone = true"
-      placeholder="+36 30 123 4567"
-      maxlength="20"
-      required
-      aria-required="true"
-      [attr.aria-invalid]="hasError('phone') ? 'true' : null"
-      [attr.aria-describedby]="hasError('phone') ? 'contactPhone-error contactPhone-hint' : 'contactPhone-hint'"
-    />
-    @if (hasError('phone')) {
-      <span
-        id="contactPhone-error"
-        class="form-error"
-        role="alert"
-        aria-live="polite"
-      >
-        {{ getFieldError('phone') }}
-      </span>
-    }
-    <span id="contactPhone-hint" class="form-hint">
-      Magyar formátum: +36 XX XXX XXXX vagy 06 XX XXX XXXX
-    </span>
-  </div>
+  <ps-input
+    type="tel"
+    label="Telefonszám"
+    placeholder="+36 30 123 4567"
+    [required]="true"
+    [ngModel]="data().phone"
+    (ngModelChange)="updateField('phone', $event)"
+    (blur)="touched.phone = true"
+    [state]="hasError('phone') ? 'error' : 'default'"
+    [errorMessage]="getFieldError('phone') ?? ''"
+    hint="Magyar formátum: +36 XX XXX XXXX vagy 06 XX XXX XXXX"
+  />
 </section>

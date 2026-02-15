@@ -5,138 +5,68 @@
   <!-- Iskola és Város sor -->
   <div class="form-row">
     <!-- Iskola neve -->
-    <div class="form-group">
-      <label for="schoolName" class="form-label">
-        Iskola neve <span class="required" aria-label="kötelező">*</span>
-      </label>
-      <input
-        type="text"
-        id="schoolName"
-        class="form-input"
-        [class.form-input--error]="hasError('schoolName')"
-        [value]="data().schoolName"
-        (input)="updateField('schoolName', $any($event.target).value)"
-        (blur)="touched.schoolName = true"
-        placeholder="Példa Általános Iskola"
-        maxlength="200"
-        required
-        aria-required="true"
-        [attr.aria-invalid]="hasError('schoolName') ? 'true' : null"
-        [attr.aria-describedby]="hasError('schoolName') ? 'schoolName-error' : null"
-      />
-      @if (hasError('schoolName')) {
-        <span id="schoolName-error" class="form-error" role="alert" aria-live="polite">
-          {{ getFieldError('schoolName') }}
-        </span>
-      }
-    </div>
+    <ps-input
+      label="Iskola neve"
+      placeholder="Példa Általános Iskola"
+      [required]="true"
+      [ngModel]="data().schoolName"
+      (ngModelChange)="updateField('schoolName', $event)"
+      (blur)="touched.schoolName = true"
+      [state]="hasError('schoolName') ? 'error' : 'default'"
+      [errorMessage]="getFieldError('schoolName') ?? ''"
+    />
 
     <!-- Város -->
-    <div class="form-group">
-      <label for="city" class="form-label">
-        Város <span class="required" aria-label="kötelező">*</span>
-      </label>
-      <input
-        type="text"
-        id="city"
-        class="form-input"
-        [class.form-input--error]="hasError('city')"
-        [value]="data().city"
-        (input)="updateField('city', $any($event.target).value)"
-        (blur)="touched.city = true"
-        placeholder="Budapest"
-        maxlength="100"
-        required
-        aria-required="true"
-        [attr.aria-invalid]="hasError('city') ? 'true' : null"
-        [attr.aria-describedby]="hasError('city') ? 'city-error' : null"
-      />
-      @if (hasError('city')) {
-        <span id="city-error" class="form-error" role="alert" aria-live="polite">
-          {{ getFieldError('city') }}
-        </span>
-      }
-    </div>
+    <ps-input
+      label="Város"
+      placeholder="Budapest"
+      [required]="true"
+      [ngModel]="data().city"
+      (ngModelChange)="updateField('city', $event)"
+      (blur)="touched.city = true"
+      [state]="hasError('city') ? 'error' : 'default'"
+      [errorMessage]="getFieldError('city') ?? ''"
+    />
   </div>
 
   <!-- Osztály és Évfolyam sor -->
   <div class="form-row">
     <!-- Osztály neve -->
-    <div class="form-group">
-      <label for="className" class="form-label">
-        Osztály neve <span class="required" aria-label="kötelező">*</span>
-      </label>
-      <input
-        type="text"
-        id="className"
-        class="form-input"
-        [class.form-input--error]="hasError('className')"
-        [value]="data().className"
-        (input)="updateField('className', $any($event.target).value)"
-        (blur)="touched.className = true"
-        placeholder="12.A"
-        maxlength="50"
-        required
-        aria-required="true"
-        [attr.aria-invalid]="hasError('className') ? 'true' : null"
-        [attr.aria-describedby]="hasError('className') ? 'className-error' : null"
-      />
-      @if (hasError('className')) {
-        <span id="className-error" class="form-error" role="alert" aria-live="polite">
-          {{ getFieldError('className') }}
-        </span>
-      }
-    </div>
+    <ps-input
+      label="Osztály neve"
+      placeholder="12.A"
+      [required]="true"
+      [ngModel]="data().className"
+      (ngModelChange)="updateField('className', $event)"
+      (blur)="touched.className = true"
+      [state]="hasError('className') ? 'error' : 'default'"
+      [errorMessage]="getFieldError('className') ?? ''"
+    />
 
     <!-- Évfolyam -->
-    <div class="form-group">
-      <label for="classYear" class="form-label">
-        Évfolyam <span class="required" aria-label="kötelező">*</span>
-      </label>
-      <input
-        type="text"
-        id="classYear"
-        class="form-input"
-        [class.form-input--error]="hasError('classYear')"
-        [value]="data().classYear"
-        (input)="updateField('classYear', $any($event.target).value)"
-        (blur)="touched.classYear = true"
-        placeholder="2024/2025"
-        maxlength="20"
-        required
-        aria-required="true"
-        [attr.aria-invalid]="hasError('classYear') ? 'true' : null"
-        [attr.aria-describedby]="hasError('classYear') ? 'classYear-error' : null"
-      />
-      @if (hasError('classYear')) {
-        <span id="classYear-error" class="form-error" role="alert" aria-live="polite">
-          {{ getFieldError('classYear') }}
-        </span>
-      }
-    </div>
+    <ps-input
+      label="Évfolyam"
+      placeholder="2024/2025"
+      [required]="true"
+      [ngModel]="data().classYear"
+      (ngModelChange)="updateField('classYear', $event)"
+      (blur)="touched.classYear = true"
+      [state]="hasError('classYear') ? 'error' : 'default'"
+      [errorMessage]="getFieldError('classYear') ?? ''"
+    />
   </div>
 
   <!-- Idézet (opcionális) -->
-  <div class="form-group">
-    <label for="quote" class="form-label">Idézet (opcionális)</label>
-    <textarea
-      id="quote"
-      class="form-textarea"
-      [class.form-textarea--error]="hasError('quote')"
-      [value]="data().quote"
-      (input)="updateField('quote', $any($event.target).value)"
-      (blur)="touched.quote = true"
-      placeholder="Ide írhatsz egy motiváló idézetet, ami megjelenik a tablón..."
-      maxlength="500"
-      rows="3"
-      [attr.aria-invalid]="hasError('quote') ? 'true' : null"
-      [attr.aria-describedby]="hasError('quote') ? 'quote-error quote-hint' : 'quote-hint'"
-    ></textarea>
-    @if (hasError('quote')) {
-      <span id="quote-error" class="form-error" role="alert" aria-live="polite">
-        {{ getFieldError('quote') }}
-      </span>
-    }
-    <span id="quote-hint" class="form-hint">Maximum 500 karakter</span>
-  </div>
+  <ps-textarea
+    label="Idézet (opcionális)"
+    placeholder="Ide írhatsz egy motiváló idézetet, ami megjelenik a tablón..."
+    [rows]="3"
+    [maxLength]="500"
+    [ngModel]="data().quote"
+    (ngModelChange)="updateField('quote', $event)"
+    (blur)="touched.quote = true"
+    [state]="hasError('quote') ? 'error' : 'default'"
+    [errorMessage]="getFieldError('quote') ?? ''"
+    hint="Maximum 500 karakter"
+  />
 </section>

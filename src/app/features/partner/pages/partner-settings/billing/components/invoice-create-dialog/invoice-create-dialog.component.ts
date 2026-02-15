@@ -48,6 +48,13 @@ export class InvoiceCreateDialogComponent {
     { id: 'deposit', label: 'Előlegszámla' },
   ];
 
+  readonly unitOptions: PsSelectOption[] = [
+    { id: 'db', label: 'db' },
+    { id: 'ora', label: 'óra' },
+    { id: 'alkalom', label: 'alkalom' },
+    { id: 'csomag', label: 'csomag' },
+  ];
+
   readonly saving = signal(false);
 
   // Form fields

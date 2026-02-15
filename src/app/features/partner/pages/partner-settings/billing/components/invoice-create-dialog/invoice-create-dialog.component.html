@@ -96,15 +96,43 @@
         @for (item of items(); track $index; let i = $index) {
           <div class="item-row">
             <div class="item-main">
-              <input type="text" class="text-input item-name" [value]="item.name" (input)="updateItem(i, 'name', $any($event.target).value)" placeholder="Megnevezés *" />
-              <input type="number" class="number-input item-qty" [value]="item.quantity" (input)="updateItem(i, 'quantity', +$any($event.target).value)" min="0.01" step="1" />
-              <select class="select-input item-unit" [value]="item.unit" (change)="updateItem(i, 'unit', $any($event.target).value)">
-                <option value="db">db</option>
-                <option value="ora">óra</option>
-                <option value="alkalom">alkalom</option>
-                <option value="csomag">csomag</option>
-              </select>
-              <input type="number" class="number-input item-price" [value]="item.unitPrice" (input)="updateItem(i, 'unitPrice', +$any($event.target).value)" min="0" step="100" placeholder="Egységár" />
+              <ps-input
+                class="item-name"
+                size="sm"
+                placeholder="Megnevezés *"
+                [ngModel]="item.name"
+                (ngModelChange)="updateItem(i, 'name', $event)"
+                [attr.name]="'itemName' + i"
+              />
+              <ps-input
+                class="item-qty"
+                type="number"
+                size="sm"
+                min="0.01"
+                step="1"
+                [ngModel]="item.quantity"
+                (ngModelChange)="updateItem(i, 'quantity', +$event)"
+                [attr.name]="'itemQty' + i"
+              />
+              <ps-select
+                class="item-unit"
+                size="sm"
+                [options]="unitOptions"
+                [ngModel]="item.unit"
+                (ngModelChange)="updateItem(i, 'unit', $event)"
+                [attr.name]="'itemUnit' + i"
+              />
+              <ps-input
+                class="item-price"
+                type="number"
+                size="sm"
+                min="0"
+                step="100"
+                placeholder="Egységár"
+                [ngModel]="item.unitPrice"
+                (ngModelChange)="updateItem(i, 'unitPrice', +$event)"
+                [attr.name]="'itemPrice' + i"
+              />
               <span class="item-total">{{ formatAmount(item.quantity * item.unitPrice) }}</span>
               @if (items().length > 1) {
                 <button class="remove-item-btn" (click)="removeItem(i)">

@@ -28,25 +28,21 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
         <!-- Content -->
         <form class="modal-content" (ngSubmit)="onSubmit()">
           <!-- Iskola neve -->
-          <div class="form-group">
-            <ps-input
-              label="Iskola neve"
-              placeholder="pl. Petőfi Sándor Gimnázium"
-              [(ngModel)]="formData.name"
-              name="name"
-              [required]="true"
-            />
-          </div>
+          <ps-input
+            label="Iskola neve"
+            placeholder="pl. Petőfi Sándor Gimnázium"
+            [(ngModel)]="formData.name"
+            name="name"
+            [required]="true"
+          />
 
           <!-- Város -->
-          <div class="form-group">
-            <ps-input
-              label="Város"
-              placeholder="pl. Budapest"
-              [(ngModel)]="formData.city"
-              name="city"
-            />
-          </div>
+          <ps-input
+            label="Város"
+            placeholder="pl. Budapest"
+            [(ngModel)]="formData.city"
+            name="city"
+          />
 
           @if (error()) {
             <div class="error-message">
@@ -112,11 +108,6 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
     /* Modal Content */
     .modal-content {
       padding: 24px;
-    }
-
-    /* Form Elements */
-    .form-group {
-      margin-bottom: 16px;
     }
 
     /* Error */

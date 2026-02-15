@@ -50,23 +50,19 @@ type BillingCycleType = 'monthly' | 'yearly';
         <!-- Content -->
         <div class="dialog__content">
           <form (ngSubmit)="onSubmit()">
-            <div class="form-group">
-              <ps-select
-                label="Csomag"
-                [options]="planSelectOptions()"
-                [(ngModel)]="selectedPlan"
-                name="plan"
-              />
-            </div>
+            <ps-select
+              label="Csomag"
+              [options]="planSelectOptions()"
+              [(ngModel)]="selectedPlan"
+              name="plan"
+            />
 
-            <div class="form-group">
-              <ps-radio-group
-                label="Számlázási ciklus"
-                [options]="billingCycleOptions"
-                [(ngModel)]="selectedBillingCycle"
-                name="billingCycle"
-              />
-            </div>
+            <ps-radio-group
+              label="Számlázási ciklus"
+              [options]="billingCycleOptions"
+              [(ngModel)]="selectedBillingCycle"
+              name="billingCycle"
+            />
 
             <!-- Ár előnézet -->
             <div class="price-preview">

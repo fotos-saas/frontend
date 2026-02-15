@@ -28,7 +28,7 @@ export interface DropdownOption {
           (ngModelChange)="onSearchChange($event)"
           (focus)="onFocus()"
           (blur)="onBlur($event)"
-          class="form-input"
+          class="ps-field__input"
           autocomplete="off"
         />
         @if (selectedItem()) {
@@ -86,7 +86,7 @@ export interface DropdownOption {
       color: #9ca3af;
     }
 
-    .dropdown-search .form-input {
+    .dropdown-search .ps-field__input {
       width: 100%;
       padding: 10px 12px 10px 36px;
       border: 1px solid #d1d5db;
@@ -95,7 +95,7 @@ export interface DropdownOption {
       transition: all 0.15s ease;
     }
 
-    .dropdown-search .form-input:focus {
+    .dropdown-search .ps-field__input:focus {
       outline: none;
       border-color: var(--color-primary, #1e3a5f);
       box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);

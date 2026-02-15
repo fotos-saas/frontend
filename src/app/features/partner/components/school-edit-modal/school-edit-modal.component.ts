@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { PartnerService, SchoolListItem, SchoolItem } from '../../services/partner.service';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsInputComponent } from '../../../../shared/components/form/ps-input/ps-input.component';
 
 /**
  * School Edit Modal - Iskola szerkesztése.
@@ -12,7 +13,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-school-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent],
   template: `
     <div
       class="dialog-backdrop"
@@ -29,30 +30,20 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
         </header>
 
         <form (ngSubmit)="save()" class="modal-form">
-          <div class="form-group">
-            <label for="name">Iskola neve *</label>
-            <input
-              type="text"
-              id="name"
-              [(ngModel)]="name"
-              name="name"
-              required
-              class="form-input"
-              placeholder="Pl. Bolyai János Gimnázium"
-            />
-          </div>
+          <ps-input
+            label="Iskola neve"
+            [required]="true"
+            [(ngModel)]="name"
+            name="name"
+            placeholder="Pl. Bolyai János Gimnázium"
+          />
 
-          <div class="form-group">
-            <label for="city">Város</label>
-            <input
-              type="text"
-              id="city"
-              [(ngModel)]="city"
-              name="city"
-              class="form-input"
-              placeholder="Pl. Budapest"
-            />
-          </div>
+          <ps-input
+            label="Város"
+            [(ngModel)]="city"
+            name="city"
+            placeholder="Pl. Budapest"
+          />
 
           @if (errorMessage()) {
             <div class="error-message">
@@ -128,32 +119,6 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
       display: flex;
       flex-direction: column;
       gap: 16px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: #475569;
-    }
-
-    .form-input {
-      padding: 10px 14px;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 0.9375rem;
-      transition: all 0.2s ease;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: var(--color-primary, #1e3a5f);
-      box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
     }
 
     .error-message {

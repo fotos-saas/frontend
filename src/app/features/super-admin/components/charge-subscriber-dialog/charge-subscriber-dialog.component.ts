@@ -43,30 +43,26 @@ import { formatPrice } from '@shared/utils/formatters.util';
         <!-- Content -->
         <div class="dialog__content">
           <form (ngSubmit)="onSubmit()">
-            <div class="form-group">
-              <ps-input
-                type="number"
-                label="Összeg (Ft)"
-                [(ngModel)]="amount"
-                name="amount"
-                min="1"
-                [required]="true"
-                placeholder="pl. 5000"
-              />
-              @if (amount() > 0) {
-                <span class="form-hint">{{ formatAmount(amount()) }}</span>
-              }
-            </div>
+            <ps-input
+              type="number"
+              label="Összeg (Ft)"
+              [(ngModel)]="amount"
+              name="amount"
+              min="1"
+              [required]="true"
+              placeholder="pl. 5000"
+            />
+            @if (amount() > 0) {
+              <span class="ps-field__hint">{{ formatAmount(amount()) }}</span>
+            }
 
-            <div class="form-group">
-              <ps-input
-                label="Leírás"
-                [(ngModel)]="description"
-                name="description"
-                [required]="true"
-                placeholder="pl. Extra tárhely"
-              />
-            </div>
+            <ps-input
+              label="Leírás"
+              [(ngModel)]="description"
+              name="description"
+              [required]="true"
+              placeholder="pl. Extra tárhely"
+            />
 
             @if (errorMessage()) {
               <div class="error-message">

@@ -27,37 +27,31 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
         <!-- Content -->
         <form class="modal-content" (ngSubmit)="onSubmit()">
           <!-- Név -->
-          <div class="form-group">
-            <ps-input
-              label="Név"
-              placeholder="pl. Kovács János"
-              [(ngModel)]="formData.name"
-              name="name"
-              [required]="true"
-            />
-          </div>
+          <ps-input
+            label="Név"
+            placeholder="pl. Kovács János"
+            [(ngModel)]="formData.name"
+            name="name"
+            [required]="true"
+          />
 
           <!-- Email -->
-          <div class="form-group">
-            <ps-input
-              type="email"
-              label="Email"
-              placeholder="pl. kovacs.janos@iskola.hu"
-              [(ngModel)]="formData.email"
-              name="email"
-            />
-          </div>
+          <ps-input
+            type="email"
+            label="Email"
+            placeholder="pl. kovacs.janos@iskola.hu"
+            [(ngModel)]="formData.email"
+            name="email"
+          />
 
           <!-- Telefon -->
-          <div class="form-group">
-            <ps-input
-              type="tel"
-              label="Telefon"
-              placeholder="pl. +36 30 123 4567"
-              [(ngModel)]="formData.phone"
-              name="phone"
-            />
-          </div>
+          <ps-input
+            type="tel"
+            label="Telefon"
+            placeholder="pl. +36 30 123 4567"
+            [(ngModel)]="formData.phone"
+            name="phone"
+          />
 
           @if (error()) {
             <div class="error-message">
@@ -117,11 +111,6 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
     /* Modal Content */
     .modal-content {
       padding: 24px;
-    }
-
-    /* Form Elements */
-    .form-group {
-      margin-bottom: 16px;
     }
 
     /* Error */

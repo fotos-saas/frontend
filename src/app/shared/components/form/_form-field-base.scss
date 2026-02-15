@@ -239,6 +239,80 @@
     padding: 0 8px;
     animation: psFieldCheckIn 300ms $ps-spring-easing;
   }
+
+  // ──────────────────────────────────────
+  // Help button & popover (szintaxis súgó)
+  // ──────────────────────────────────────
+  &__help-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--ps-placeholder-color);
+    cursor: pointer;
+    border-radius: 6px;
+    margin-right: 4px;
+    transition: color $ps-transition-duration $ps-transition-easing,
+                background $ps-transition-duration $ps-transition-easing;
+
+    &:hover,
+    &--active {
+      color: var(--ps-focus-border);
+      background: var(--ps-option-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ps-focus-border);
+      outline-offset: -2px;
+    }
+  }
+
+  &__help-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: -$ps-field-border-width;
+    background: #1e293b;
+    color: #f1f5f9;
+    border-radius: $ps-field-border-radius;
+    padding: 12px 16px;
+    min-width: 240px;
+    z-index: $ps-dropdown-z + 1;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    animation: psHelpPopoverIn 150ms $ps-transition-easing;
+  }
+
+  &__help-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: #94a3b8;
+    margin-bottom: 8px;
+  }
+
+  &__help-row {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    font-size: $ps-hint-font-size;
+
+    code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+      font-size: $ps-hint-font-size;
+      white-space: nowrap;
+      margin-right: 12px;
+    }
+
+    span {
+      color: #cbd5e1;
+    }
+  }
 }
 
 // ============================================================================

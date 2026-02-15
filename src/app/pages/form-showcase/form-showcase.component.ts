@@ -19,6 +19,7 @@ import {
   DateRange,
   PsSelectOption,
   PsRadioOption,
+  PsHelpItem,
 } from '@shared/components/form';
 
 @Component({
@@ -129,6 +130,13 @@ export class FormShowcaseComponent {
   editorBasicValue = signal('');
   editorStandardValue = signal('');
   editorFullValue = signal('');
+
+  // Help items demó
+  searchHelpItems: PsHelpItem[] = [
+    { syntax: '#123', description: 'Projekt ID keresése' },
+    { syntax: '@név', description: 'Ügyintéző keresése' },
+    { syntax: '"szöveg"', description: 'Pontos egyezés' },
+  ];
 
   // Állapot demó
   stateError = signal('Ez a mező kötelező!');

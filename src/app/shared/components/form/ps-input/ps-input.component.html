@@ -52,10 +52,33 @@
       >
         <lucide-icon [name]="passwordVisible() ? ICONS.EYE_OFF : ICONS.EYE" [size]="18" />
       </button>
+    } @else if (hasHelp()) {
+      <button
+        type="button"
+        class="ps-field__help-btn"
+        [class.ps-field__help-btn--active]="showHelp()"
+        tabindex="-1"
+        matTooltip="Szintaxis súgó"
+        (mousedown)="toggleHelp($event)"
+      >
+        <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="16" />
+      </button>
     } @else if (suffix()) {
       <span class="ps-field__suffix">
         <lucide-icon [name]="suffix()" [size]="18" />
       </span>
+    }
+
+    @if (showHelp()) {
+      <div class="ps-field__help-popover" (click)="$event.stopPropagation()">
+        <div class="ps-field__help-title">{{ helpTitle() }}</div>
+        @for (item of helpItems(); track item.syntax) {
+          <div class="ps-field__help-row">
+            <code>{{ item.syntax }}</code>
+            <span>{{ item.description }}</span>
+          </div>
+        }
+      </div>
     }
   </div>
 

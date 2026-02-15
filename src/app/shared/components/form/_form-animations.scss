@@ -110,6 +110,12 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+// Help popover fade-in
+@keyframes psHelpPopoverIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 // ============================================================================
 // REDUCED MOTION
 // ============================================================================
@@ -128,4 +134,5 @@
   @keyframes psTagEnter { from, to { transform: none; opacity: 1; } }
   @keyframes psTagOut { from, to { transform: none; opacity: 0; } }
   @keyframes psOptionFadeIn { from, to { opacity: 1; transform: none; } }
+  @keyframes psHelpPopoverIn { from, to { opacity: 1; transform: none; } }
 }

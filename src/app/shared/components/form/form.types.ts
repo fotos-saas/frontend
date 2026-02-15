@@ -26,5 +26,11 @@ export const PS_FIELD_SIZES: Record<PsFieldSize, string> = {
 
 export const PS_FIELD_HEIGHT = '42px';
 
+/** Help popover sor (szintaxis súgó) */
+export interface PsHelpItem {
+  syntax: string;      // pl. "#123", "@név"
+  description: string; // pl. "Projekt ID keresése"
+}
+
 /** Backward compat alias — régi SearchableSelect SelectOption-je */
 export type SelectOption = PsSelectOption;

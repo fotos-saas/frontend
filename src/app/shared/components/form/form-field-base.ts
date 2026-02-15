@@ -1,6 +1,6 @@
 import { Directive, computed, input, output, signal } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
-import { PsFieldSize, PsFieldState } from './form.types';
+import { PsFieldSize, PsFieldState, PsHelpItem } from './form.types';
 
 let nextId = 0;
 
@@ -17,6 +17,8 @@ export abstract class PsFormFieldBase<T> implements ControlValueAccessor {
   readonly size = input<PsFieldSize>('full');
   readonly state = input<PsFieldState>('default');
   readonly fieldId = input<string>('');
+  readonly helpItems = input<PsHelpItem[]>([]);
+  readonly helpTitle = input<string>('Szintaxis súgó');
 
   // Közös outputok
   readonly blur = output<void>();

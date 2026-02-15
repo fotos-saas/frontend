@@ -5,10 +5,13 @@ import {
   input,
   signal,
   computed,
+  inject,
+  ElementRef,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { formatHungarianPhone } from '@shared/utils/phone-formatter.util';
 import { PsFormFieldBase } from '../form-field-base';
@@ -17,7 +20,7 @@ import { PsInputType } from '../form.types';
 @Component({
   selector: 'ps-input',
   standalone: true,
-  imports: [NgClass, LucideAngularModule],
+  imports: [NgClass, LucideAngularModule, MatTooltipModule],
   templateUrl: './ps-input.component.html',
   styleUrl: './ps-input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,8 +31,13 @@ import { PsInputType } from '../form.types';
       multi: true,
     },
   ],
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  },
 })
 export class PsInputComponent extends PsFormFieldBase<string> {
+  private readonly elementRef = inject(ElementRef);
+
   readonly ICONS = ICONS;
 
   readonly type = input<PsInputType>('text');
@@ -42,6 +50,7 @@ export class PsInputComponent extends PsFormFieldBase<string> {
 
   readonly value = signal('');
   readonly passwordVisible = signal(false);
+  readonly showHelp = signal(false);
 
   readonly effectiveType = computed(() => {
     if (this.type() === 'password' && this.passwordVisible()) return 'text';
@@ -50,8 +59,10 @@ export class PsInputComponent extends PsFormFieldBase<string> {
 
   readonly showPasswordToggle = computed(() => this.type() === 'password');
 
+  readonly hasHelp = computed(() => this.helpItems().length > 0);
+
   readonly showSuccessIcon = computed(() =>
-    this.computedState() === 'success' && !this.suffix()
+    this.computedState() === 'success' && !this.suffix() && !this.hasHelp()
   );
 
   writeValue(val: string): void {
@@ -101,5 +112,17 @@ export class PsInputComponent extends PsFormFieldBase<string> {
     event.preventDefault();
     event.stopPropagation();
     this.passwordVisible.update(v => !v);
+  }
+
+  toggleHelp(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showHelp.update(v => !v);
+  }
+
+  onDocumentClick(event: MouseEvent): void {
+    if (this.showHelp() && !this.elementRef.nativeElement.contains(event.target)) {
+      this.showHelp.set(false);
+    }
   }
 }

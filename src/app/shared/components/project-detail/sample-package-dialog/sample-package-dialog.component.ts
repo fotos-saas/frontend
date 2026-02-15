@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output, signal, inject, Dest
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { PsInputComponent } from '@shared/components/form';
 import { ICONS } from '../../../constants/icons.constants';
 import { createBackdropHandler } from '../../../utils/dialog.util';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
@@ -10,7 +11,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 @Component({
   selector: 'app-sample-package-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dialog-backdrop"
@@ -27,10 +28,8 @@ import { ToastService } from '../../../../core/services/toast.service';
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Csomag neve</label>
-          <input
-            type="text"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          <ps-input
+            label="Csomag neve"
             [(ngModel)]="title"
             placeholder="pl. Osztálykép minták"
           />

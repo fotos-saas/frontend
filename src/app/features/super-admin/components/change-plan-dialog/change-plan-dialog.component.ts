@@ -17,6 +17,8 @@ import { FormsModule } from '@angular/forms';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
+import { PsSelectComponent, PsRadioGroupComponent } from '@shared/components/form';
+import { PsSelectOption, PsRadioOption } from '@shared/components/form/form.types';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { PlansService, PlanOption } from '../../../../shared/services/plans.service';
@@ -32,7 +34,7 @@ type BillingCycleType = 'monthly' | 'yearly';
 @Component({
   selector: 'app-change-plan-dialog',
   standalone: true,
-  imports: [FormsModule, A11yModule, LucideAngularModule],
+  imports: [FormsModule, A11yModule, LucideAngularModule, PsSelectComponent, PsRadioGroupComponent],
   template: `
     <div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
       <div #dialogContent class="dialog dialog--md" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
@@ -49,42 +51,21 @@ type BillingCycleType = 'monthly' | 'yearly';
         <div class="dialog__content">
           <form (ngSubmit)="onSubmit()">
             <div class="form-group">
-              <label for="plan" class="form-label">Csomag</label>
-              <select
-                id="plan"
-                class="form-select"
+              <ps-select
+                label="Csomag"
+                [options]="planSelectOptions()"
                 [(ngModel)]="selectedPlan"
                 name="plan"
-                required
-              >
-                @for (plan of planOptions(); track plan.value) {
-                  <option [value]="plan.value">{{ plan.label }}</option>
-                }
-              </select>
+              />
             </div>
 
             <div class="form-group">
-              <label class="form-label">Számlázási ciklus</label>
-              <div class="radio-group">
-                <label class="radio-item" [class.radio-item--active]="selectedBillingCycle() === 'monthly'">
-                  <input
-                    type="radio"
-                    name="billingCycle"
-                    value="monthly"
-                    [(ngModel)]="selectedBillingCycle"
-                  />
-                  <span>Havi</span>
-                </label>
-                <label class="radio-item" [class.radio-item--active]="selectedBillingCycle() === 'yearly'">
-                  <input
-                    type="radio"
-                    name="billingCycle"
-                    value="yearly"
-                    [(ngModel)]="selectedBillingCycle"
-                  />
-                  <span>Éves (2 hónap ajándék)</span>
-                </label>
-              </div>
+              <ps-radio-group
+                label="Számlázási ciklus"
+                [options]="billingCycleOptions"
+                [(ngModel)]="selectedBillingCycle"
+                name="billingCycle"
+              />
             </div>
 
             <!-- Ár előnézet -->
@@ -195,6 +176,17 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit {
 
   // Plan options - PlansService-ből töltve
   planOptions = signal<PlanOption[]>([]);
+
+  // Mapped options for ps-select (PlanOption.value → PsSelectOption.id)
+  readonly planSelectOptions = computed(() =>
+    this.planOptions().map(p => ({ id: p.value, label: p.label }))
+  );
+
+  // Billing cycle options for ps-radio-group
+  readonly billingCycleOptions: PsRadioOption[] = [
+    { value: 'monthly', label: 'Havi' },
+    { value: 'yearly', label: 'Éves (2 hónap ajándék)' },
+  ];
 
   // Plan prices - PlansService-ből töltve
   planPrices = signal<Record<string, Record<BillingCycleType, number>>>({});

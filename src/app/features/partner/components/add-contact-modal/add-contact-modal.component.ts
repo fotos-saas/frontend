@@ -1,6 +1,7 @@
 import { Component, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
+import { PsInputComponent } from '@shared/components/form';
 import { ProjectContact } from '../../services/partner.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
@@ -11,7 +12,7 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-add-contact-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent],
   template: `
     <div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
       <div class="dialog-panel" (click)="$event.stopPropagation()">
@@ -27,41 +28,34 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
         <form class="modal-content" (ngSubmit)="onSubmit()">
           <!-- Név -->
           <div class="form-group">
-            <label class="form-label">
-              Név
-              <span class="required">*</span>
-            </label>
-            <input
-              type="text"
+            <ps-input
+              label="Név"
               placeholder="pl. Kovács János"
               [(ngModel)]="formData.name"
               name="name"
-              class="form-input"
-              required
+              [required]="true"
             />
           </div>
 
           <!-- Email -->
           <div class="form-group">
-            <label class="form-label">Email</label>
-            <input
+            <ps-input
               type="email"
+              label="Email"
               placeholder="pl. kovacs.janos@iskola.hu"
               [(ngModel)]="formData.email"
               name="email"
-              class="form-input"
             />
           </div>
 
           <!-- Telefon -->
           <div class="form-group">
-            <label class="form-label">Telefon</label>
-            <input
+            <ps-input
               type="tel"
+              label="Telefon"
               placeholder="pl. +36 30 123 4567"
               [(ngModel)]="formData.phone"
               name="phone"
-              class="form-input"
             />
           </div>
 
@@ -130,33 +124,6 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
       margin-bottom: 16px;
     }
 
-    .form-label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-      margin-bottom: 6px;
-    }
-
-    .required {
-      color: #dc2626;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 0.9375rem;
-      transition: all 0.15s ease;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: var(--color-primary, #1e3a5f);
-      box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-    }
-
     /* Error */
     .error-message {
       display: flex;
@@ -222,13 +189,6 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
       cursor: not-allowed;
     }
 
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

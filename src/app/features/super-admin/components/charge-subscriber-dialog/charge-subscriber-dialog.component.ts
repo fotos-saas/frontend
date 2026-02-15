@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
+import { PsInputComponent } from '@shared/components/form';
 import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -26,7 +27,7 @@ import { formatPrice } from '@shared/utils/formatters.util';
 @Component({
   selector: 'app-charge-subscriber-dialog',
   standalone: true,
-  imports: [FormsModule, A11yModule, LucideAngularModule],
+  imports: [FormsModule, A11yModule, LucideAngularModule, PsInputComponent],
   template: `
     <div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
       <div #dialogContent class="dialog dialog--md" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
@@ -43,15 +44,13 @@ import { formatPrice } from '@shared/utils/formatters.util';
         <div class="dialog__content">
           <form (ngSubmit)="onSubmit()">
             <div class="form-group">
-              <label for="amount" class="form-label">Összeg (Ft)</label>
-              <input
+              <ps-input
                 type="number"
-                id="amount"
-                class="form-input"
+                label="Összeg (Ft)"
                 [(ngModel)]="amount"
                 name="amount"
                 min="1"
-                required
+                [required]="true"
                 placeholder="pl. 5000"
               />
               @if (amount() > 0) {
@@ -60,15 +59,11 @@ import { formatPrice } from '@shared/utils/formatters.util';
             </div>
 
             <div class="form-group">
-              <label for="description" class="form-label">Leírás</label>
-              <input
-                type="text"
-                id="description"
-                class="form-input"
+              <ps-input
+                label="Leírás"
                 [(ngModel)]="description"
                 name="description"
-                maxlength="255"
-                required
+                [required]="true"
                 placeholder="pl. Extra tárhely"
               />
             </div>

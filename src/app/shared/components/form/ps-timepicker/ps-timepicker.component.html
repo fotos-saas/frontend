@@ -53,54 +53,37 @@
 
     @if (isOpen()) {
       <div class="ps-timepicker__panel" role="dialog" aria-label="Időpont választó">
-        <!-- Preview display -->
-        <div class="ps-timepicker__preview">
-          <span class="ps-timepicker__preview-time">
-            {{ selectedHour() || '--' }}<span class="ps-timepicker__preview-sep">:</span>{{ selectedMinute() || '--' }}
-          </span>
-        </div>
-
-        <!-- Two-column scroll area -->
-        <div class="ps-timepicker__columns">
+        <div class="ps-timepicker__body">
           <!-- Hours column -->
-          <div class="ps-timepicker__column ps-timepicker__column--hours">
+          <div class="ps-timepicker__col ps-timepicker__col--hours">
             @for (hour of HOURS; track hour) {
               <button
                 type="button"
-                class="ps-timepicker__item"
-                [ngClass]="{ 'ps-timepicker__item--selected': hour === selectedHour() }"
+                class="ps-timepicker__cell"
+                [ngClass]="{ 'ps-timepicker__cell--active': hour === selectedHour() }"
                 (click)="selectHour(hour)"
-              >
-                {{ hour }}
-              </button>
+              >{{ hour }}</button>
             }
           </div>
 
-          <!-- Separator -->
-          <div class="ps-timepicker__separator">:</div>
+          <div class="ps-timepicker__divider"></div>
 
           <!-- Minutes column -->
-          <div class="ps-timepicker__column ps-timepicker__column--minutes">
+          <div class="ps-timepicker__col ps-timepicker__col--minutes">
             @for (minute of filteredMinutes(); track minute) {
               <button
                 type="button"
-                class="ps-timepicker__item"
-                [ngClass]="{ 'ps-timepicker__item--selected': minute === selectedMinute() }"
+                class="ps-timepicker__cell"
+                [ngClass]="{ 'ps-timepicker__cell--active': minute === selectedMinute() }"
                 (click)="selectMinute(minute)"
-              >
-                {{ minute }}
-              </button>
+              >{{ minute }}</button>
             }
           </div>
         </div>
 
-        <!-- Footer -->
-        <div class="ps-timepicker__footer">
-          <button type="button" class="ps-timepicker__now" (click)="selectNow()">
-            <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
-            Most
-          </button>
-        </div>
+        <button type="button" class="ps-timepicker__now-btn" (click)="selectNow()">
+          Most
+        </button>
       </div>
     }
   </div>

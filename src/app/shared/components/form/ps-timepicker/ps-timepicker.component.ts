@@ -16,7 +16,7 @@ import { PsFormFieldBase } from '../form-field-base';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
-const ITEM_HEIGHT = 42; // 40px item + 2px margin
+const ITEM_HEIGHT = 32;
 
 @Component({
   selector: 'ps-timepicker',
@@ -149,8 +149,8 @@ export class PsTimepickerComponent extends PsFormFieldBase<string> {
       const panel = this.hostEl.nativeElement.querySelector('.ps-timepicker__panel');
       if (!panel) return;
 
-      const hourCol = panel.querySelector('.ps-timepicker__column--hours');
-      const minCol = panel.querySelector('.ps-timepicker__column--minutes');
+      const hourCol = panel.querySelector('.ps-timepicker__col--hours');
+      const minCol = panel.querySelector('.ps-timepicker__col--minutes');
 
       if (hourCol && this.selectedHour()) {
         const idx = HOURS.indexOf(this.selectedHour());

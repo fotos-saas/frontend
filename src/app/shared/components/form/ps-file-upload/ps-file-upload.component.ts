@@ -13,6 +13,7 @@ import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { formatFileSize } from '@shared/utils/formatters.util';
+import { MediaLightboxComponent, LightboxMediaItem } from '@shared/components/media-lightbox';
 import { PsFieldSize, PsFieldState } from '../form.types';
 
 export interface PsFilePreview {
@@ -27,7 +28,7 @@ let nextUploadId = 0;
 @Component({
   selector: 'ps-file-upload',
   standalone: true,
-  imports: [NgClass, LucideAngularModule],
+  imports: [NgClass, LucideAngularModule, MediaLightboxComponent],
   templateUrl: './ps-file-upload.component.html',
   styleUrl: './ps-file-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,6 +72,15 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
   readonly files = signal<PsFilePreview[]>([]);
   readonly isDragging = signal(false);
   private cvaDisabled = signal(false);
+
+  // --- Lightbox ---
+  readonly lightboxOpen = signal(false);
+  readonly lightboxIndex = signal(0);
+  readonly lightboxMedia = computed<LightboxMediaItem[]>(() =>
+    this.files()
+      .filter(f => f.previewUrl)
+      .map((f, i) => ({ id: i, url: f.previewUrl, fileName: f.name }))
+  );
 
   private onChange: (value: File[]) => void = () => {};
   private onTouched: () => void = () => {};
@@ -176,6 +186,25 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
       this.addFiles(Array.from(el.files));
       el.value = '';
     }
+  }
+
+  // --- Lightbox kezeles ---
+  openLightbox(previewIndex: number): void {
+    // previewIndex a files() tömbben, de a lightboxMedia csak a képes fájlokat tartalmazza
+    const file = this.files()[previewIndex];
+    if (!file?.previewUrl) return;
+    const lbIndex = this.lightboxMedia().findIndex(m => m.url === file.previewUrl);
+    if (lbIndex < 0) return;
+    this.lightboxIndex.set(lbIndex);
+    this.lightboxOpen.set(true);
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen.set(false);
+  }
+
+  onLightboxNavigate(index: number): void {
+    this.lightboxIndex.set(index);
   }
 
   // --- Fajl kezeles ---

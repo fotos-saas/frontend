@@ -53,7 +53,12 @@
         @for (preview of files(); track preview.name; let i = $index) {
           <div class="ps-upload__mini-file">
             @if (preview.previewUrl) {
-              <img [src]="preview.previewUrl" [alt]="preview.name" class="ps-upload__mini-thumb" />
+              <img
+                [src]="preview.previewUrl"
+                [alt]="preview.name"
+                class="ps-upload__mini-thumb ps-upload__mini-thumb--clickable"
+                (click)="openLightbox(i); $event.stopPropagation()"
+              />
             } @else {
               <lucide-icon [name]="ICONS.FILE" [size]="16" class="ps-upload__mini-file-icon" />
             }
@@ -133,8 +138,9 @@
               <img
                 [src]="preview.previewUrl"
                 [alt]="preview.name"
-                class="ps-upload__thumb"
+                class="ps-upload__thumb ps-upload__thumb--clickable"
                 loading="lazy"
+                (click)="openLightbox(i); $event.stopPropagation()"
               />
             } @else {
               <div class="ps-upload__thumb ps-upload__thumb--placeholder">
@@ -196,3 +202,13 @@
     </div>
   }
 </div>
+
+<!-- Lightbox (page-card KÍVÜL kell lennie) -->
+@if (lightboxOpen() && lightboxMedia().length > 0) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="lightboxIndex()"
+    (close)="closeLightbox()"
+    (navigate)="onLightboxNavigate($event)"
+  />
+}

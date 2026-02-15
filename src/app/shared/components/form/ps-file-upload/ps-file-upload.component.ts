@@ -103,8 +103,8 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
   readonly fileCountLabel = computed(() => {
     const count = this.files().length;
     return count === 0
-      ? '0 fajl kivalasztva'
-      : `${count} fajl kivalasztva`;
+      ? '0 fájl kiválasztva'
+      : `${count} fájl kiválasztva`;
   });
 
   readonly computedState = computed<PsFieldState>(() => {
@@ -130,20 +130,20 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
   });
 
   readonly resolvedDropzoneText = computed(() =>
-    this.dropzoneText() || 'Huzd ide a fotokat, vagy kattints a tallozashoz'
+    this.dropzoneText() || 'Húzd ide a fotókat, vagy kattints a tallózáshoz'
   );
 
   readonly resolvedDropzoneHint = computed(() => {
     if (this.dropzoneHint()) return this.dropzoneHint();
     const parts: string[] = [];
-    if (this.acceptLabel()) parts.push(this.acceptLabel() + ' fajlok');
-    parts.push(`max. ${this.maxSizeMB()} MB / fajl`);
+    if (this.acceptLabel()) parts.push(this.acceptLabel() + ' fájlok');
+    parts.push(`max. ${this.maxSizeMB()} MB / fájl`);
     return parts.join(', ');
   });
 
   // --- CVA ---
   writeValue(val: File[] | null): void {
-    // CVA writeValue - fajlokhoz nem tipikus, de tamogatjuk a reset-et
+    // CVA writeValue - fájlokhoz nem tipikus, de támogatjuk a reset-et
     if (!val || val.length === 0) {
       this.clearAllPreviews();
       this.files.set([]);
@@ -256,7 +256,7 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
     const remaining = max - current.length;
 
     if (remaining <= 0) {
-      this.uploadError.emit(`Maximum ${max} fajl toltheto fel.`);
+      this.uploadError.emit(`Maximum ${max} fájl tölthető fel.`);
       return;
     }
 
@@ -270,12 +270,12 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
     for (const file of newFiles.slice(0, remaining)) {
       const ext = file.name.split('.').pop()?.toLowerCase();
       if (ext && !validExtensions.includes(ext)) {
-        this.uploadError.emit(`"${file.name}" nem tamogatott formatum.`);
+        this.uploadError.emit(`"${file.name}" nem támogatott formátum.`);
         continue;
       }
       if (file.size > maxSize) {
         this.uploadError.emit(
-          `"${file.name}" tul nagy. Maximum ${this.maxSizeMB()} MB engedelyezett.`
+          `"${file.name}" túl nagy. Maximum ${this.maxSizeMB()} MB engedélyezett.`
         );
         continue;
       }

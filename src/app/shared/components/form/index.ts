@@ -16,3 +16,4 @@ export { PsMultiSelectBoxComponent } from './ps-multi-select-box/ps-multi-select
 export { PsTagInputComponent } from './ps-tag-input/ps-tag-input.component';
 export { PsEditorComponent } from './ps-editor/ps-editor.component';
 export { PsDatepickerComponent } from './ps-datepicker/ps-datepicker.component';
+export { PsTimepickerComponent } from './ps-timepicker/ps-timepicker.component';

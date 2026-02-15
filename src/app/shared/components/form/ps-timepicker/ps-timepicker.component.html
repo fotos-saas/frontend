@@ -1,0 +1,115 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="ps-timepicker" [ngClass]="{ 'ps-timepicker--open': isOpen() }">
+    <button
+      type="button"
+      class="ps-timepicker__trigger"
+      [ngClass]="{
+        'ps-field__wrapper--focused': focused() || isOpen(),
+        'ps-field__wrapper--disabled': isDisabled()
+      }"
+      [disabled]="isDisabled()"
+      [attr.aria-expanded]="isOpen()"
+      [attr.aria-invalid]="computedState() === 'error'"
+      role="combobox"
+      aria-haspopup="dialog"
+      (click)="toggle()"
+      (keydown)="onKeydown($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+    >
+      <span class="ps-timepicker__icon">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
+      </span>
+
+      <span class="ps-timepicker__value" [ngClass]="{ 'ps-timepicker__value--placeholder': !displayValue() }">
+        {{ displayValue() || placeholder() || 'Válassz időpontot...' }}
+      </span>
+
+      @if (value() && !isDisabled()) {
+        <button
+          type="button"
+          class="ps-timepicker__clear"
+          tabindex="-1"
+          (click)="clearValue($event)"
+          aria-label="Időpont törlése"
+        >
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+
+      <span class="ps-timepicker__chevron">
+        <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="18" />
+      </span>
+    </button>
+
+    @if (isOpen()) {
+      <div class="ps-timepicker__panel" role="dialog" aria-label="Időpont választó">
+        <!-- Column headers -->
+        <div class="ps-timepicker__column-headers">
+          <span class="ps-timepicker__column-header">Óra</span>
+          <span class="ps-timepicker__column-header">Perc</span>
+        </div>
+
+        <!-- Two-column scroll area -->
+        <div class="ps-timepicker__columns">
+          <!-- Hours column -->
+          <div class="ps-timepicker__column ps-timepicker__column--hours">
+            @for (hour of HOURS; track hour) {
+              <button
+                type="button"
+                class="ps-timepicker__item"
+                [ngClass]="{ 'ps-timepicker__item--selected': hour === selectedHour() }"
+                (click)="selectHour(hour)"
+              >
+                {{ hour }}
+              </button>
+            }
+          </div>
+
+          <!-- Minutes column -->
+          <div class="ps-timepicker__column ps-timepicker__column--minutes">
+            @for (minute of filteredMinutes(); track minute) {
+              <button
+                type="button"
+                class="ps-timepicker__item"
+                [ngClass]="{ 'ps-timepicker__item--selected': minute === selectedMinute() }"
+                (click)="selectMinute(minute)"
+              >
+                {{ minute }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="ps-timepicker__footer">
+          <button type="button" class="ps-timepicker__now" (click)="selectNow()">
+            Most
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (computedState() === 'error' && errorMessage()) {
+    <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (hint() && computedState() !== 'error') {
+    <div class="ps-field__hint" [id]="uniqueId() + '-hint'">
+      {{ hint() }}
+    </div>
+  }
+</div>

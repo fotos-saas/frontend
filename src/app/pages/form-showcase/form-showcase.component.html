@@ -58,9 +58,8 @@
         [(ngModel)]="dateValue"
         size="md"
       />
-      <ps-input
+      <ps-timepicker
         label="Időpont"
-        type="time"
         [(ngModel)]="timeValue"
         size="sm"
       />
@@ -191,6 +190,38 @@
         errorMessage="Dátum megadása kötelező!"
       />
       <ps-datepicker
+        label="Letiltott"
+        size="md"
+        [disabled]="true"
+        placeholder="Nem választható"
+      />
+    </div>
+  </section>
+
+  <!-- 6c. Timepicker -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Timepicker</h2>
+    <div class="showcase__grid">
+      <ps-timepicker
+        label="Alapértelmezett"
+        [(ngModel)]="timepickerValue"
+        placeholder="Válassz időpontot..."
+        size="md"
+      />
+      <ps-timepicker
+        label="15 perces lépés"
+        [(ngModel)]="timepickerStep"
+        [minuteStep]="15"
+        placeholder="Negyedórás bontás..."
+        size="md"
+        hint="0, 15, 30, 45 percek"
+      />
+      <ps-timepicker
+        label="Hibás"
+        size="md"
+        errorMessage="Időpont megadása kötelező!"
+      />
+      <ps-timepicker
         label="Letiltott"
         size="md"
         [disabled]="true"

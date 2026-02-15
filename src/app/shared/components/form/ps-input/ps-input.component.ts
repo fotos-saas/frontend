@@ -10,6 +10,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { formatHungarianPhone } from '@shared/utils/phone-formatter.util';
 import { PsFormFieldBase } from '../form-field-base';
 import { PsInputType } from '../form.types';
 
@@ -54,13 +55,46 @@ export class PsInputComponent extends PsFormFieldBase<string> {
   );
 
   writeValue(val: string): void {
-    this.value.set(val ?? '');
+    let v = val ?? '';
+    if (this.type() === 'tel' && v) {
+      v = formatHungarianPhone(v);
+    }
+    this.value.set(v);
   }
 
   onInput(event: Event): void {
-    const val = (event.target as HTMLInputElement).value;
+    const el = event.target as HTMLInputElement;
+    let val = el.value;
+
+    if (this.type() === 'tel') {
+      val = formatHungarianPhone(val);
+      el.value = val;
+    }
+
     this.value.set(val);
     this.onChange(val);
+  }
+
+  onPaste(event: ClipboardEvent): void {
+    if (this.type() !== 'tel') return;
+    event.preventDefault();
+    const pasted = event.clipboardData?.getData('text') ?? '';
+    const formatted = formatHungarianPhone(pasted);
+    const el = event.target as HTMLInputElement;
+    el.value = formatted;
+    this.value.set(formatted);
+    this.onChange(formatted);
+  }
+
+  override onBlur(): void {
+    if (this.type() === 'email') {
+      const trimmed = this.value().trim();
+      if (trimmed !== this.value()) {
+        this.value.set(trimmed);
+        this.onChange(trimmed);
+      }
+    }
+    super.onBlur();
   }
 
   togglePassword(event: MouseEvent): void {

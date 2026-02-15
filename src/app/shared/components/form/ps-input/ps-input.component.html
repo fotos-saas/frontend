@@ -31,6 +31,7 @@
       [attr.aria-invalid]="computedState() === 'error'"
       [attr.aria-describedby]="errorMessage() ? uniqueId() + '-error' : hint() ? uniqueId() + '-hint' : null"
       (input)="onInput($event)"
+      (paste)="onPaste($event)"
       (focus)="onFocus()"
       (blur)="onBlur()"
     />

@@ -11,32 +11,18 @@
   (backdropClickEvent)="close.emit()">
   <div dialogBody>
     <div class="form-fields">
-      <!-- Drop zone -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Minta képek</label>
-        <div
-          class="drop-zone"
-          tabindex="0"
-          [class.drop-zone--active]="isDragging()"
-          (dragover)="onDragOver($event)"
-          (dragleave)="onDragLeave()"
-          (drop)="onDrop($event)"
-          (click)="fileInput.click()"
-          (paste)="onPaste($event)"
-        >
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-icon" />
-          <p class="drop-text">Húzd ide a képeket, kattints a tallózáshoz, vagy illeszd be (Ctrl+V)</p>
-          <p class="drop-hint">JPEG, PNG, WebP - max 10 MB / kép</p>
-        </div>
-        <input
-          #fileInput
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          class="hidden"
-          (change)="onFileSelected($event)"
-        />
-      </div>
+      <!-- Fájl feltöltés -->
+      <ps-file-upload
+        variant="compact"
+        label="Minta képek"
+        accept=".jpg,.jpeg,.png,.webp"
+        acceptLabel="JPEG, PNG, WebP"
+        [maxSizeMB]="10"
+        [maxFiles]="20"
+        dropzoneText="Húzd ide a képeket vagy kattints a tallózáshoz"
+        [ngModel]="facade.selectedFiles()"
+        (ngModelChange)="onFilesChange($event)"
+      />
 
       <!-- Thumbnail grid -->
       @if (totalImageCount() > 0) {

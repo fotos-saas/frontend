@@ -41,41 +41,17 @@
     />
 
     <!-- Mellékletek -->
-    <div class="form-field">
-      <label>
-        <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
-        Képek (max 5, max 5 MB/kép)
-      </label>
-      <div class="attachments-area">
-        @if (attachments().length > 0) {
-          <div class="attachment-list">
-            @for (file of attachments(); track $index) {
-              <div class="attachment-item" [class.attachment-item--fresh]="freshIndex() === $index">
-                <lucide-icon [name]="ICONS.IMAGE" [size]="14" class="attachment-icon" />
-                <span class="attachment-name">{{ file.name }}</span>
-                <button class="attachment-remove" (click)="removeAttachment($index)">
-                  <lucide-icon [name]="ICONS.X" [size]="14" />
-                </button>
-              </div>
-            }
-          </div>
-        }
-        @if (attachments().length < 5) {
-          <label class="upload-btn">
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-            Kép feltöltése
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              multiple
-              (change)="onFileSelect($event)"
-              hidden
-            />
-          </label>
-          <p class="paste-hint">Tipp: Ctrl+V a vágólapról is beilleszthetsz képet!</p>
-        }
-      </div>
-    </div>
+    <ps-file-upload
+      label="Képek (max 5, max 5 MB/kép)"
+      accept=".jpg,.jpeg,.png,.gif,.webp"
+      acceptLabel="JPEG, PNG, GIF, WebP"
+      [maxFiles]="5"
+      [maxSizeMB]="5"
+      dropzoneText="Húzd ide a képeket vagy kattints a tallózáshoz"
+      [ngModel]="attachments()"
+      (ngModelChange)="attachments.set($event)"
+      (uploadError)="onUploadError($event)"
+    />
   </div>
 
   <!-- Footer -->

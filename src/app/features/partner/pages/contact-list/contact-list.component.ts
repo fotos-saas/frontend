@@ -14,6 +14,7 @@ import { saveFile } from '../../../../shared/utils/file.util';
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { PsFileUploadComponent } from '@shared/components/form';
 
 /**
  * Partner Contact List - Kapcsolattartók listája a partner felületen.
@@ -32,6 +33,7 @@ import { DialogWrapperComponent } from '../../../../shared/components/dialog-wra
     SmartFilterBarComponent,
     ListPaginationComponent,
     DialogWrapperComponent,
+    PsFileUploadComponent,
   ],
   templateUrl: './contact-list.component.html',
   styleUrl: './contact-list.component.scss',
@@ -61,6 +63,7 @@ export class PartnerContactListComponent implements OnInit {
   // Export/Import
   exporting = signal(false);
   importing = signal(false);
+  importFile = signal<File[]>([]);
   importResult = signal<ImportResult['data'] | null>(null);
   showImportResult = signal(false);
 
@@ -194,9 +197,8 @@ export class PartnerContactListComponent implements OnInit {
       });
   }
 
-  onImportFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  onImportFileChange(files: File[]): void {
+    const file = files[0];
     if (!file) return;
 
     this.importing.set(true);
@@ -208,12 +210,12 @@ export class PartnerContactListComponent implements OnInit {
           this.importResult.set(result.data);
           this.showImportResult.set(true);
           this.importing.set(false);
+          this.importFile.set([]);
           this.loadContacts();
-          input.value = '';
         },
         error: () => {
           this.importing.set(false);
-          input.value = '';
+          this.importFile.set([]);
         },
       });
   }

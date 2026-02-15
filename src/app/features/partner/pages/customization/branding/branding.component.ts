@@ -10,7 +10,7 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
-import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
+import { PsInputComponent, PsToggleComponent, PsFileUploadComponent } from '@shared/components/form';
 
 interface PendingMedia {
   file: File;
@@ -20,7 +20,7 @@ interface PendingMedia {
 @Component({
   selector: 'app-branding',
   standalone: true,
-  imports: [FormsModule, RouterModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent],
+  imports: [FormsModule, RouterModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent, PsFileUploadComponent],
   templateUrl: './branding.component.html',
   styleUrl: './branding.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -52,11 +52,6 @@ export class BrandingComponent implements OnInit {
   deleteLogo = signal(false);
   deleteFavicon = signal(false);
   deleteOgImage = signal(false);
-
-  // Drag state
-  logoDragging = signal(false);
-  faviconDragging = signal(false);
-  ogImageDragging = signal(false);
 
   // Computed: van-e mentetlen változás a médiáknál
   hasMediaChanges = computed(() =>
@@ -142,25 +137,9 @@ export class BrandingComponent implements OnInit {
   }
 
   // --- Logo ---
-  onLogoDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.logoDragging.set(false);
-    const file = event.dataTransfer?.files[0];
-    if (file && this.isImageFile(file)) {
-      this.setLogoFile(file);
-    }
-  }
-
-  onLogoSelect(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.setLogoFile(file);
-    }
-    (event.target as HTMLInputElement).value = '';
-  }
-
-  private setLogoFile(file: File): void {
+  onLogoFileChange(files: File[]): void {
+    const file = files[0];
+    if (!file) return;
     this.revokePreview(this.pendingLogo());
     this.pendingLogo.set({ file, previewUrl: URL.createObjectURL(file) });
     this.deleteLogo.set(false);
@@ -175,25 +154,9 @@ export class BrandingComponent implements OnInit {
   }
 
   // --- Favicon ---
-  onFaviconDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.faviconDragging.set(false);
-    const file = event.dataTransfer?.files[0];
-    if (file && this.isImageFile(file)) {
-      this.setFaviconFile(file);
-    }
-  }
-
-  onFaviconSelect(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.setFaviconFile(file);
-    }
-    (event.target as HTMLInputElement).value = '';
-  }
-
-  private setFaviconFile(file: File): void {
+  onFaviconFileChange(files: File[]): void {
+    const file = files[0];
+    if (!file) return;
     this.revokePreview(this.pendingFavicon());
     this.pendingFavicon.set({ file, previewUrl: URL.createObjectURL(file) });
     this.deleteFavicon.set(false);
@@ -208,25 +171,9 @@ export class BrandingComponent implements OnInit {
   }
 
   // --- OG Image ---
-  onOgImageDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.ogImageDragging.set(false);
-    const file = event.dataTransfer?.files[0];
-    if (file && this.isImageFile(file)) {
-      this.setOgImageFile(file);
-    }
-  }
-
-  onOgImageSelect(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.setOgImageFile(file);
-    }
-    (event.target as HTMLInputElement).value = '';
-  }
-
-  private setOgImageFile(file: File): void {
+  onOgImageFileChange(files: File[]): void {
+    const file = files[0];
+    if (!file) return;
     this.revokePreview(this.pendingOgImage());
     this.pendingOgImage.set({ file, previewUrl: URL.createObjectURL(file) });
     this.deleteOgImage.set(false);
@@ -238,17 +185,6 @@ export class BrandingComponent implements OnInit {
     if (this.branding()?.og_image_url) {
       this.deleteOgImage.set(true);
     }
-  }
-
-  // --- Drag handlers ---
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  // --- Helpers ---
-  private isImageFile(file: File): boolean {
-    return file.type.startsWith('image/') || file.name.endsWith('.svg') || file.name.endsWith('.svgz');
   }
 
   private revokePreview(pending: PendingMedia | null): void {

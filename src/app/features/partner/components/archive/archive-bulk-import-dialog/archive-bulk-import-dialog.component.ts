@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
-import { PsSearchableSelectComponent, PsTextareaComponent, SelectOption } from '@shared/components/form';
+import { PsSearchableSelectComponent, PsTextareaComponent, PsFileUploadComponent, SelectOption } from '@shared/components/form';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { SchoolItem } from '../../../models/partner.models';
 import {
@@ -26,7 +26,7 @@ interface ReviewRow extends ArchiveBulkImportPreviewItem {
   selector: 'app-archive-bulk-import-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, FormsModule, LucideAngularModule, PsSearchableSelectComponent, PsTextareaComponent, DialogWrapperComponent],
+  imports: [DecimalPipe, FormsModule, LucideAngularModule, PsSearchableSelectComponent, PsTextareaComponent, PsFileUploadComponent, DialogWrapperComponent],
   templateUrl: './archive-bulk-import-dialog.component.html',
   styleUrl: './archive-bulk-import-dialog.component.scss',
 })
@@ -87,9 +87,8 @@ export class ArchiveBulkImportDialogComponent {
     this.selectedSchoolId.set(value);
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0] ?? null;
+  onFileChange(files: File[]): void {
+    const file = files[0] ?? null;
     this.selectedFile.set(file);
     if (file) this.namesText.set('');
   }

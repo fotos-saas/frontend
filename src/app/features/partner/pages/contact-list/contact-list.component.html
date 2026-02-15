@@ -29,21 +29,15 @@
         <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
         <span class="btn-label">vCard</span>
       </button>
-      <label
-        class="btn-secondary btn-icon-text import-btn"
-        matTooltip="Importálás Excel fájlból"
-        [class.disabled]="importing()"
-      >
-        <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-        <span class="btn-label">Import</span>
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          class="hidden-input"
-          [disabled]="importing()"
-          (change)="onImportFileSelected($event)"
-        />
-      </label>
+      <ps-file-upload
+        variant="mini"
+        [multiple]="false"
+        accept=".xlsx,.xls"
+        acceptLabel="Excel"
+        [disabled]="importing()"
+        [ngModel]="importFile()"
+        (ngModelChange)="onImportFileChange($event)"
+      />
       <button
         type="button"
         class="btn-primary"

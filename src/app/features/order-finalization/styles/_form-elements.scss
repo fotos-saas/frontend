@@ -183,38 +183,6 @@ $green-600: #16a34a;
   margin-bottom: 0.25rem;
 }
 
-.file-upload__label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 1.5rem;
-  background: #f8fafc;
-  border: 2px dashed #e2e8f0;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.15s;
-  color: #64748b;
-  font-size: 0.875rem;
-  font-weight: 500;
-
-  svg {
-    width: 32px;
-    height: 32px;
-    color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
-  }
-
-  &:hover {
-    border-color: $blue-500;
-    background: #eff6ff;
-    color: $blue-600;
-
-    svg {
-      color: $blue-500;
-    }
-  }
-}
 
 .file-upload__loading {
   display: flex;

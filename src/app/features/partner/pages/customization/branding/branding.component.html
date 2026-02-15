@@ -108,23 +108,16 @@
           </div>
         </div>
       } @else {
-        <div
-          class="dropzone"
-          [class.dropzone--active]="logoDragging()"
-          (dragover)="onDragOver($event); logoDragging.set(true)"
-          (dragleave)="logoDragging.set(false)"
-          (drop)="onLogoDrop($event)"
-          (click)="logoInput.click()"
-        >
-          <input #logoInput type="file" accept="image/*,.svg" (change)="onLogoSelect($event)" hidden />
-          <div class="dropzone__content">
-            <div class="dropzone__icon">
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="24" />
-            </div>
-            <span class="dropzone__text">Húzd ide a logót vagy kattints!</span>
-            <span class="dropzone__hint">Maximum 2 MB (PNG, JPG, SVG)</span>
-          </div>
-        </div>
+        <ps-file-upload
+          variant="mini"
+          [multiple]="false"
+          accept="image/*,.svg"
+          acceptLabel="PNG, JPG, SVG"
+          [maxSizeMB]="2"
+          dropzoneText="Húzd ide a logót vagy kattints!"
+          (ngModelChange)="onLogoFileChange($event)"
+          [ngModel]="[]"
+        />
       }
     </section>
 
@@ -149,23 +142,17 @@
           </div>
         </div>
       } @else {
-        <div
-          class="dropzone dropzone--sm"
-          [class.dropzone--active]="faviconDragging()"
-          (dragover)="onDragOver($event); faviconDragging.set(true)"
-          (dragleave)="faviconDragging.set(false)"
-          (drop)="onFaviconDrop($event)"
-          (click)="faviconInput.click()"
-        >
-          <input #faviconInput type="file" accept="image/*,.svg" (change)="onFaviconSelect($event)" hidden />
-          <div class="dropzone__content">
-            <div class="dropzone__icon dropzone__icon--sm">
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="20" />
-            </div>
-            <span class="dropzone__text">Húzd ide a favicont vagy kattints!</span>
-            <span class="dropzone__hint">Maximum 500 KB, négyzetes kép ajánlott (32x32 vagy 64x64)</span>
-          </div>
-        </div>
+        <ps-file-upload
+          variant="mini"
+          [multiple]="false"
+          accept="image/*,.svg"
+          acceptLabel="PNG, ICO, SVG"
+          [maxSizeMB]="0.5"
+          dropzoneText="Húzd ide a favicont vagy kattints!"
+          hint="Négyzetes kép ajánlott (32x32 vagy 64x64)"
+          (ngModelChange)="onFaviconFileChange($event)"
+          [ngModel]="[]"
+        />
       }
     </section>
 
@@ -194,23 +181,17 @@
           </div>
         </div>
       } @else {
-        <div
-          class="dropzone"
-          [class.dropzone--active]="ogImageDragging()"
-          (dragover)="onDragOver($event); ogImageDragging.set(true)"
-          (dragleave)="ogImageDragging.set(false)"
-          (drop)="onOgImageDrop($event)"
-          (click)="ogImageInput.click()"
-        >
-          <input #ogImageInput type="file" accept="image/*,.svg" (change)="onOgImageSelect($event)" hidden />
-          <div class="dropzone__content">
-            <div class="dropzone__icon">
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="24" />
-            </div>
-            <span class="dropzone__text">Húzd ide a megosztási képet vagy kattints!</span>
-            <span class="dropzone__hint">Maximum 5 MB, ajánlott méret: 1200x630 pixel</span>
-          </div>
-        </div>
+        <ps-file-upload
+          variant="mini"
+          [multiple]="false"
+          accept="image/*,.svg"
+          acceptLabel="PNG, JPG, SVG"
+          [maxSizeMB]="5"
+          dropzoneText="Húzd ide a megosztási képet vagy kattints!"
+          hint="Ajánlott méret: 1200x630 pixel"
+          (ngModelChange)="onOgImageFileChange($event)"
+          [ngModel]="[]"
+        />
       }
     </section>
 

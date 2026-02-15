@@ -53,19 +53,19 @@
           </div>
 
           <!-- Media Upload (max 5 képek, 10MB/kép) -->
-          <div class="form-field">
-            <label class="form-label">Képek (opcionális)</label>
-            @if (mediaUploadError()) {
-              <div class="media-upload-error">{{ mediaUploadError() }}</div>
-            }
-            <app-media-uploader
-              [maxFiles]="5"
-              [maxSizeMB]="10"
-              [disabled]="isSubmitting()"
-              (filesChangeEvent)="onMediaFilesChange($event)"
-              (uploadErrorEvent)="onMediaUploadError($event)"
-            />
-          </div>
+          <ps-file-upload
+            variant="compact"
+            label="Képek (opcionális)"
+            accept=".jpg,.jpeg,.png,.gif,.webp"
+            acceptLabel="JPEG, PNG, GIF, WebP"
+            [maxFiles]="5"
+            [maxSizeMB]="10"
+            [disabled]="isSubmitting()"
+            dropzoneText="Húzd ide a képeket vagy kattints"
+            [ngModel]="selectedMediaFiles()"
+            (ngModelChange)="onMediaFilesChange($event)"
+            (uploadError)="onMediaUploadError($event)"
+          />
 
           <!-- Deadline -->
           <div class="form-field">

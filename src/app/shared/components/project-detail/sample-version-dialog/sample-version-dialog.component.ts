@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
 import { DialogWrapperComponent } from '../../dialog-wrapper/dialog-wrapper.component';
-import { PsTextareaComponent } from '@shared/components/form';
+import { PsTextareaComponent, PsFileUploadComponent } from '@shared/components/form';
 import { SampleVersion } from '../../../../features/partner/services/partner.service';
 import { SampleVersionDialogFacade } from './sample-version-dialog-facade.service';
 import { SamplesLightboxComponent } from '../../samples-lightbox/samples-lightbox.component';
@@ -12,7 +12,7 @@ import { SampleLightboxItem } from '../../samples-lightbox/samples-lightbox.type
 @Component({
   selector: 'app-sample-version-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, SamplesLightboxComponent, PsTextareaComponent, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, SamplesLightboxComponent, PsTextareaComponent, PsFileUploadComponent, DialogWrapperComponent],
   providers: [SampleVersionDialogFacade],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sample-version-dialog.component.html',
@@ -33,7 +33,6 @@ export class SampleVersionDialogComponent implements OnInit {
     this.destroyRef.onDestroy(() => this.facade.cleanup());
   }
 
-  isDragging = signal(false);
   lightboxOpen = signal(false);
   lightboxIndex = signal(0);
 
@@ -44,46 +43,8 @@ export class SampleVersionDialogComponent implements OnInit {
     }
   }
 
-  onFileSelected(event: Event): void {
-    const el = event.target as HTMLInputElement;
-    if (el.files?.length) {
-      this.facade.addFiles(Array.from(el.files));
-      el.value = '';
-    }
-  }
-
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    this.isDragging.set(false);
-    const files = event.dataTransfer?.files;
-    if (files?.length) {
-      this.facade.addFiles(Array.from(files));
-    }
-  }
-
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    this.isDragging.set(true);
-  }
-
-  onDragLeave(): void {
-    this.isDragging.set(false);
-  }
-
-  onPaste(event: ClipboardEvent): void {
-    const items = event.clipboardData?.items;
-    if (!items) return;
-    const imageFiles: File[] = [];
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.startsWith('image/')) {
-        const file = items[i].getAsFile();
-        if (file) imageFiles.push(file);
-      }
-    }
-    if (imageFiles.length > 0) {
-      event.preventDefault();
-      this.facade.addFiles(imageFiles);
-    }
+  onFilesChange(files: File[]): void {
+    this.facade.setFiles(files);
   }
 
   openLightbox(index: number): void {

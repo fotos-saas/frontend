@@ -76,15 +76,17 @@
 
         <!-- New media upload -->
         @if (maxNewFiles() > 0) {
-          @if (mediaUploadError()) {
-            <div class="media-upload-error">{{ mediaUploadError() }}</div>
-          }
-          <app-media-uploader
+          <ps-file-upload
+            variant="compact"
+            accept=".jpg,.jpeg,.png,.gif,.webp"
+            acceptLabel="JPEG, PNG, GIF, WebP"
             [maxFiles]="maxNewFiles()"
             [maxSizeMB]="10"
             [disabled]="isSubmitting()"
-            (filesChangeEvent)="onNewMediaFilesChange($event)"
-            (uploadErrorEvent)="onMediaUploadError($event)"
+            dropzoneText="Húzd ide a képeket vagy kattints"
+            [ngModel]="newMediaFiles()"
+            (ngModelChange)="onNewMediaFilesChange($event)"
+            (uploadError)="onMediaUploadError($event)"
           />
         } @else {
           <div class="media-limit-info">

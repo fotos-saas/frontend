@@ -53,6 +53,15 @@ export class SampleVersionDialogFacade {
     this.previewUrls.update(prev => [...prev, ...newUrls]);
   }
 
+  setFiles(files: File[]): void {
+    // Revoke old previews
+    for (const url of this.previewUrls()) {
+      URL.revokeObjectURL(url);
+    }
+    this.selectedFiles.set(files);
+    this.previewUrls.set(files.map(f => URL.createObjectURL(f)));
+  }
+
   removeNewFile(index: number): void {
     const urls = this.previewUrls();
     if (urls[index]) {

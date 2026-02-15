@@ -12,7 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
-import { PsInputComponent } from '@shared/components/form';
+import { PsInputComponent, PsFileUploadComponent } from '@shared/components/form';
 import { DesignData } from '../../../models/order-finalization.models';
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
 import { FileUploadService } from '../../../services/file-upload.service';
@@ -34,7 +34,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
   styleUrls: ['./design-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule, NgxEditorModule, PsInputComponent]
+  imports: [FormsModule, NgxEditorModule, PsInputComponent, PsFileUploadComponent]
 })
 export class DesignStepComponent implements OnInit {
   private readonly validationService = inject(OrderValidationService);
@@ -132,13 +132,11 @@ export class DesignStepComponent implements OnInit {
   }
 
   /**
-   * Háttérkép feltöltése
+   * Háttérkép feltöltése (ps-file-upload-ból)
    */
-  onBackgroundFileSelect(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-
-    const file = input.files[0];
+  onBackgroundFileChange(files: File[]): void {
+    const file = files[0];
+    if (!file) return;
 
     this.fileUploadService.uploadBackgroundImage(file)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -154,19 +152,14 @@ export class DesignStepComponent implements OnInit {
           }
         }
       });
-
-    // Input reset (hogy ugyanazt a fájlt újra lehessen választani)
-    input.value = '';
   }
 
   /**
-   * Csatolmány feltöltése
+   * Csatolmány feltöltése (ps-file-upload-ból)
    */
-  onAttachmentFileSelect(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-
-    const file = input.files[0];
+  onAttachmentFileChange(files: File[]): void {
+    const file = files[0];
+    if (!file) return;
 
     this.fileUploadService.uploadAttachment(file)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -185,8 +178,6 @@ export class DesignStepComponent implements OnInit {
           }
         }
       });
-
-    input.value = '';
   }
 
   /**

@@ -34,35 +34,15 @@
       }
 
       <!-- Fájl feltöltés -->
-      <div class="form-field">
-        <label class="form-label">
-          @if (selectedFile()) {
-            Feltöltött fájl
-          } @else {
-            Vagy tölts fel fájlt (CSV, XLSX, TXT)
-          }
-        </label>
-        @if (selectedFile()) {
-          <div class="file-info">
-            <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="18" />
-            <span class="file-name">{{ selectedFile()!.name }}</span>
-            <button class="file-remove" (click)="clearFile()">
-              <lucide-icon [name]="ICONS.X" [size]="14" />
-            </button>
-          </div>
-        } @else {
-          <label class="file-upload-area">
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls,.txt"
-              (change)="onFileSelected($event)"
-              hidden
-            />
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="24" />
-            <span>Fájl kiválasztása</span>
-          </label>
-        }
-      </div>
+      <ps-file-upload
+        variant="mini"
+        [label]="selectedFile() ? 'Feltöltött fájl' : 'Vagy tölts fel fájlt (CSV, XLSX, TXT)'"
+        [multiple]="false"
+        accept=".csv,.xlsx,.xls,.txt"
+        acceptLabel="CSV, XLSX, TXT"
+        [ngModel]="selectedFile() ? [selectedFile()!] : []"
+        (ngModelChange)="onFileChange($event)"
+      />
     }
 
     <!-- === REVIEW PHASE === -->

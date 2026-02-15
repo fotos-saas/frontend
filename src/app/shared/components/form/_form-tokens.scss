@@ -93,6 +93,10 @@ $ps-dropdown-z: 100;
   --ps-tag-bg: rgba(37, 99, 235, 0.1);
   --ps-tag-text: var(--color-primary, #2563eb);
   --ps-tag-border: rgba(37, 99, 235, 0.2);
+
+  // Autofill
+  --ps-autofill-bg: #eef3ff;
+  --ps-autofill-border: rgba(37, 99, 235, 0.3);
 }
 
 // Dark mode overrides
@@ -106,6 +110,8 @@ $ps-dropdown-z: 100;
     --ps-dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     --ps-option-hover-bg: var(--bg-tertiary, #374151);
     --ps-tag-bg: rgba(37, 99, 235, 0.15);
+    --ps-autofill-bg: rgba(37, 99, 235, 0.1);
+    --ps-autofill-border: rgba(37, 99, 235, 0.25);
   }
 }
 
@@ -118,4 +124,6 @@ $ps-dropdown-z: 100;
   --ps-dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   --ps-option-hover-bg: var(--bg-tertiary, #374151);
   --ps-tag-bg: rgba(37, 99, 235, 0.15);
+  --ps-autofill-bg: rgba(37, 99, 235, 0.1);
+  --ps-autofill-border: rgba(37, 99, 235, 0.25);
 }

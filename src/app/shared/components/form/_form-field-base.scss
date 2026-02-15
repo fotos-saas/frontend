@@ -58,6 +58,12 @@
     &:hover:not(.ps-field__wrapper--disabled):not(.ps-field__wrapper--readonly) {
       border-color: var(--ps-field-border-hover);
     }
+
+    // Autofill — az egész wrapper (prefix ikon háttere is) kékes legyen
+    &:has(input:-webkit-autofill) {
+      background: var(--ps-autofill-bg, #eef3ff);
+      border-color: var(--ps-autofill-border, rgba(37, 99, 235, 0.3));
+    }
   }
 
   // Height variants
@@ -141,13 +147,14 @@
       cursor: not-allowed;
     }
 
-    // Chrome/Safari autofill háttér felülírás
+    // Chrome/Safari autofill — finom kékes háttér a sárga helyett
     &:-webkit-autofill,
     &:-webkit-autofill:hover,
     &:-webkit-autofill:focus {
-      -webkit-box-shadow: 0 0 0 1000px var(--ps-field-bg) inset;
+      -webkit-box-shadow: 0 0 0 1000px var(--ps-autofill-bg, #eef3ff) inset;
       -webkit-text-fill-color: var(--ps-text-color);
       transition: background-color 5000s ease-in-out 0s;
+      caret-color: var(--ps-text-color);
     }
   }
 

@@ -16,6 +16,7 @@ import {
   PsDatepickerComponent,
   PsTimepickerComponent,
   PsDaterangeComponent,
+  PsFileUploadComponent,
   DateRange,
   PsSelectOption,
   PsRadioOption,
@@ -42,6 +43,7 @@ import {
     PsDatepickerComponent,
     PsTimepickerComponent,
     PsDaterangeComponent,
+    PsFileUploadComponent,
   ],
   templateUrl: './form-showcase.component.html',
   styleUrl: './form-showcase.component.scss',
@@ -131,6 +133,12 @@ export class FormShowcaseComponent {
   editorStandardValue = signal('');
   editorFullValue = signal('');
 
+  // File upload
+  uploadFiles = signal<File[]>([]);
+  uploadCompactFiles = signal<File[]>([]);
+  uploadSingleFile = signal<File[]>([]);
+  uploadErrorMsg = signal('');
+
   // Help items demó
   searchHelpItems: PsHelpItem[] = [
     { syntax: '#123', description: 'Projekt ID keresése' },
@@ -141,6 +149,11 @@ export class FormShowcaseComponent {
   // Állapot demó
   stateError = signal('Ez a mező kötelező!');
   stateSuccess = signal(true);
+
+  onUploadError(msg: string): void {
+    this.uploadErrorMsg.set(msg);
+    setTimeout(() => this.uploadErrorMsg.set(''), 4000);
+  }
 
   onAutocompleteSearch(query: string): void {
     this.autoLoading.set(true);

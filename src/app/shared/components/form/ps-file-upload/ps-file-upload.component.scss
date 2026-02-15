@@ -1,0 +1,311 @@
+@use '../form-field-base';
+@use '../form-tokens' as *;
+
+:host { display: block; }
+
+// ============================================================================
+// DROPZONE
+// ============================================================================
+
+.ps-upload__input {
+  display: none;
+}
+
+.ps-upload__zone {
+  border: 2px dashed var(--ps-field-border);
+  border-radius: $ps-field-border-radius;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color $ps-transition-duration $ps-transition-easing,
+    background-color $ps-transition-duration $ps-transition-easing;
+  background: var(--ps-field-bg);
+
+  &:hover:not(.ps-upload__zone--disabled) {
+    border-color: var(--ps-focus-border);
+    background: var(--ps-field-bg-focus);
+  }
+
+  &--active {
+    border-color: var(--ps-focus-border);
+    border-style: solid;
+    background: rgba(37, 99, 235, 0.04);
+  }
+
+  &--error {
+    border-color: var(--ps-error-border);
+
+    &:hover {
+      border-color: var(--ps-error-border);
+    }
+  }
+
+  &--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--ps-field-bg-disabled);
+  }
+
+  &--has-files {
+    padding: 20px 16px;
+    border-style: dashed;
+  }
+
+  // Compact variant
+  &--compact {
+    padding: 16px;
+
+    .ps-upload__content {
+      flex-direction: row;
+      gap: 12px;
+    }
+
+    .ps-upload__icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    .ps-upload__text-group {
+      text-align: left;
+    }
+  }
+}
+
+// ============================================================================
+// DROPZONE CONTENT
+// ============================================================================
+
+.ps-upload__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ps-upload__icon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ps-field-bg-disabled, #f3f4f6);
+  border-radius: 50%;
+  color: var(--ps-placeholder-color);
+  transition:
+    background-color $ps-transition-duration $ps-transition-easing,
+    color $ps-transition-duration $ps-transition-easing,
+    transform $ps-transition-duration $ps-transition-easing;
+
+  &--active,
+  .ps-upload__zone:hover:not(.ps-upload__zone--disabled) & {
+    background: var(--ps-focus-border);
+    color: #ffffff;
+    transform: scale(1.05);
+  }
+}
+
+.ps-upload__text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ps-upload__text {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ps-text-color);
+}
+
+.ps-upload__subtext {
+  font-size: $ps-hint-font-size;
+  color: var(--ps-hint-color);
+}
+
+// ============================================================================
+// FILE COUNT IN LABEL
+// ============================================================================
+
+.ps-upload__count {
+  font-weight: 400;
+  color: var(--ps-hint-color);
+  margin-left: 4px;
+}
+
+// ============================================================================
+// PREVIEW LIST
+// ============================================================================
+
+.ps-upload__previews {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+
+  &--compact {
+    gap: 4px;
+  }
+}
+
+.ps-upload__preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--ps-field-bg, #ffffff);
+  border: 1px solid var(--ps-field-border);
+  border-radius: 8px;
+  transition:
+    background-color $ps-transition-duration $ps-transition-easing,
+    border-color $ps-transition-duration $ps-transition-easing;
+  animation: psUploadFileIn 200ms $ps-transition-easing;
+
+  &:hover {
+    background: var(--ps-option-hover-bg);
+    border-color: var(--ps-field-border-hover);
+  }
+}
+
+.ps-upload__thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: var(--ps-field-bg-disabled, #f3f4f6);
+
+  &--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ps-placeholder-color);
+  }
+}
+
+.ps-upload__file-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ps-upload__file-name {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ps-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-upload__file-size {
+  font-size: 0.6875rem;
+  color: var(--ps-hint-color);
+}
+
+.ps-upload__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ps-placeholder-color);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color $ps-transition-duration $ps-transition-easing,
+    color $ps-transition-duration $ps-transition-easing;
+
+  &:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+// ============================================================================
+// CLEAR ALL BUTTON
+// ============================================================================
+
+.ps-upload__clear-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: var(--ps-hint-color);
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: 6px;
+  align-self: flex-start;
+  transition:
+    color $ps-transition-duration $ps-transition-easing,
+    background-color $ps-transition-duration $ps-transition-easing;
+
+  &:hover:not(:disabled) {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+// ============================================================================
+// LIMIT REACHED
+// ============================================================================
+
+.ps-upload__limit-reached {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: var(--ps-success-bg);
+  border: 1px solid var(--ps-success-border);
+  border-radius: $ps-field-border-radius;
+  color: var(--ps-success-text);
+  font-size: 0.8125rem;
+}
+
+// ============================================================================
+// ANIMATION
+// ============================================================================
+
+@keyframes psUploadFileIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================================
+// REDUCED MOTION
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-upload__preview {
+    animation: none;
+  }
+
+  .ps-upload__icon {
+    transition: none;
+  }
+}

@@ -362,7 +362,68 @@
     />
   </section>
 
-  <!-- 13. Rich Text Editor -->
+  <!-- 13. File Upload -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Fájl feltöltés</h2>
+
+    @if (uploadErrorMsg()) {
+      <div class="showcase__toast">{{ uploadErrorMsg() }}</div>
+    }
+
+    <div class="showcase__stack">
+      <ps-file-upload
+        label="Fotók"
+        [(ngModel)]="uploadFiles"
+        accept=".jpg,.jpeg,.png,.webp"
+        acceptLabel="JPG, PNG, WebP"
+        [maxFiles]="5"
+        [maxSizeMB]="20"
+        size="full"
+        hint="Maximum 5 fájl, összesen 100 MB"
+        (uploadError)="onUploadError($event)"
+      />
+
+      <ps-file-upload
+        label="Kompakt feltöltő"
+        [(ngModel)]="uploadCompactFiles"
+        variant="compact"
+        accept=".jpg,.jpeg,.png,.webp,.pdf"
+        acceptLabel="JPG, PNG, WebP, PDF"
+        [maxFiles]="3"
+        [maxSizeMB]="10"
+        size="lg"
+        dropzoneText="Húzd ide vagy tallózz"
+        (uploadError)="onUploadError($event)"
+      />
+
+      <ps-file-upload
+        label="Egyetlen fájl (profilkép)"
+        [(ngModel)]="uploadSingleFile"
+        [multiple]="false"
+        accept=".jpg,.jpeg,.png"
+        acceptLabel="JPG, PNG"
+        [maxSizeMB]="5"
+        size="md"
+        dropzoneText="Válassz profilképet"
+        dropzoneHint="JPG vagy PNG, max. 5 MB"
+        (uploadError)="onUploadError($event)"
+      />
+
+      <ps-file-upload
+        label="Letiltott"
+        [disabled]="true"
+        size="md"
+      />
+
+      <ps-file-upload
+        label="Hibás"
+        errorMessage="Legalább egy fájl feltöltése kötelező!"
+        size="md"
+      />
+    </div>
+  </section>
+
+  <!-- 14. Rich Text Editor -->
   <section class="showcase__section">
     <h2 class="showcase__section-title">Rich Text Editor</h2>
     <div class="showcase__stack">

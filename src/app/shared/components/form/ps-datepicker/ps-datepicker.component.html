@@ -1,0 +1,116 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="ps-datepicker" [ngClass]="{ 'ps-datepicker--open': isOpen() }">
+    <button
+      type="button"
+      class="ps-datepicker__trigger"
+      [ngClass]="{
+        'ps-field__wrapper--focused': focused() || isOpen(),
+        'ps-field__wrapper--disabled': isDisabled()
+      }"
+      [disabled]="isDisabled()"
+      [attr.aria-expanded]="isOpen()"
+      [attr.aria-invalid]="computedState() === 'error'"
+      role="combobox"
+      aria-haspopup="dialog"
+      (click)="toggle()"
+      (keydown)="onKeydown($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+    >
+      <span class="ps-datepicker__icon">
+        <lucide-icon [name]="ICONS.CALENDAR" [size]="18" />
+      </span>
+
+      <span class="ps-datepicker__value" [ngClass]="{ 'ps-datepicker__value--placeholder': !displayValue() }">
+        {{ displayValue() || placeholder() || 'Válassz dátumot...' }}
+      </span>
+
+      @if (value() && !isDisabled()) {
+        <button
+          type="button"
+          class="ps-datepicker__clear"
+          tabindex="-1"
+          (click)="clearValue($event)"
+          aria-label="Dátum törlése"
+        >
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+        </button>
+      }
+
+      <span class="ps-datepicker__chevron">
+        <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="18" />
+      </span>
+    </button>
+
+    @if (isOpen()) {
+      <div class="ps-datepicker__panel" role="dialog" aria-label="Dátumválasztó naptár">
+        <!-- Header: prev / title / next -->
+        <div class="ps-datepicker__header">
+          <button type="button" class="ps-datepicker__nav" (click)="prevMonth()" aria-label="Előző hónap">
+            <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="18" />
+          </button>
+          <span class="ps-datepicker__title">{{ calendarTitle() }}</span>
+          <button type="button" class="ps-datepicker__nav" (click)="nextMonth()" aria-label="Következő hónap">
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="18" />
+          </button>
+        </div>
+
+        <!-- Weekday headers -->
+        <div class="ps-datepicker__weekdays">
+          @for (day of DAY_NAMES; track day) {
+            <span class="ps-datepicker__weekday">{{ day }}</span>
+          }
+        </div>
+
+        <!-- Day grid -->
+        <div class="ps-datepicker__grid">
+          @for (day of calendarDays(); track day.iso) {
+            <button
+              type="button"
+              class="ps-datepicker__day"
+              [ngClass]="{
+                'ps-datepicker__day--other': !day.isCurrentMonth,
+                'ps-datepicker__day--today': day.isToday,
+                'ps-datepicker__day--selected': day.isSelected,
+                'ps-datepicker__day--disabled': day.isDisabled
+              }"
+              [disabled]="day.isDisabled"
+              (click)="selectDay(day)"
+            >
+              {{ day.date }}
+            </button>
+          }
+        </div>
+
+        <!-- Footer -->
+        <div class="ps-datepicker__footer">
+          <button type="button" class="ps-datepicker__today" (click)="selectToday()">
+            Ma
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (computedState() === 'error' && errorMessage()) {
+    <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (hint() && computedState() !== 'error') {
+    <div class="ps-field__hint" [id]="uniqueId() + '-hint'">
+      {{ hint() }}
+    </div>
+  }
+</div>

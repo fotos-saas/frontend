@@ -53,9 +53,8 @@
         [(ngModel)]="urlValue"
         size="md"
       />
-      <ps-input
+      <ps-datepicker
         label="Dátum"
-        type="date"
         [(ngModel)]="dateValue"
         size="md"
       />
@@ -163,6 +162,39 @@
         [(ngModel)]="radioValue"
         variant="cards"
         direction="horizontal"
+      />
+    </div>
+  </section>
+
+  <!-- 6b. Datepicker -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Datepicker</h2>
+    <div class="showcase__grid">
+      <ps-datepicker
+        label="Alapértelmezett"
+        [(ngModel)]="datepickerValue"
+        placeholder="Válassz dátumot..."
+        size="md"
+      />
+      <ps-datepicker
+        label="Min/Max korláttal"
+        [(ngModel)]="datepickerMinMax"
+        min="2026-01-01"
+        max="2026-12-31"
+        placeholder="Csak 2026-os dátum..."
+        size="md"
+        hint="2026. jan. 1. - dec. 31."
+      />
+      <ps-datepicker
+        label="Hibás"
+        size="md"
+        errorMessage="Dátum megadása kötelező!"
+      />
+      <ps-datepicker
+        label="Letiltott"
+        size="md"
+        [disabled]="true"
+        placeholder="Nem választható"
       />
     </div>
   </section>

@@ -1,0 +1,323 @@
+@use '../form-tokens' as *;
+@use '../form-field-base';
+
+.ps-datepicker {
+  position: relative;
+
+  &__trigger {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: $ps-field-height;
+    border: $ps-field-border-width solid var(--ps-field-border);
+    border-radius: $ps-field-border-radius;
+    background: var(--ps-field-bg);
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    text-align: left;
+    transition:
+      border-color $ps-transition-duration $ps-transition-easing,
+      box-shadow $ps-transition-duration $ps-transition-easing,
+      background-color $ps-transition-duration $ps-transition-easing;
+
+    &:hover:not(.ps-field__wrapper--disabled) {
+      border-color: var(--ps-field-border-hover);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    padding-right: 0;
+    color: var(--ps-placeholder-color);
+    flex-shrink: 0;
+  }
+
+  &__value {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: $ps-field-font-size;
+    color: var(--ps-text-color);
+    padding: $ps-field-padding-y $ps-field-padding-x;
+    padding-right: 0;
+
+    &--placeholder {
+      color: var(--ps-placeholder-color);
+    }
+  }
+
+  &__clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--ps-placeholder-color);
+    cursor: pointer;
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition:
+      color $ps-transition-duration $ps-transition-easing,
+      background $ps-transition-duration $ps-transition-easing;
+
+    &:hover {
+      color: var(--ps-text-color);
+      background: var(--ps-option-hover-bg);
+    }
+  }
+
+  &__chevron {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    color: var(--ps-placeholder-color);
+    transition: transform $ps-transition-duration $ps-transition-easing;
+    flex-shrink: 0;
+  }
+
+  // Open state
+  &--open &__chevron {
+    transform: rotate(180deg);
+  }
+
+  &--open &__trigger {
+    border-color: var(--ps-focus-border);
+    box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
+    background: var(--ps-field-bg-focus);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  // ──────────────────────────────────────
+  // Calendar panel
+  // ──────────────────────────────────────
+  &__panel {
+    position: absolute;
+    top: 100%;
+    left: -$ps-field-border-width;
+    right: -$ps-field-border-width;
+    z-index: $ps-dropdown-z;
+    background: var(--ps-dropdown-bg);
+    border: 1px solid var(--ps-dropdown-border);
+    border-top: none;
+    border-radius: 0 0 $ps-field-border-radius $ps-field-border-radius;
+    box-shadow: var(--ps-dropdown-shadow);
+    padding: 12px;
+    min-width: 280px;
+    transform-origin: top center;
+    animation: psDropdownOpen 200ms $ps-spring-easing;
+  }
+
+  // ──────────────────────────────────────
+  // Header (nav + title)
+  // ──────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--ps-text-color);
+    cursor: pointer;
+    border-radius: 6px;
+    transition:
+      background $ps-transition-duration $ps-transition-easing,
+      color $ps-transition-duration $ps-transition-easing;
+
+    &:hover {
+      background: var(--ps-option-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ps-focus-border);
+      outline-offset: -2px;
+    }
+  }
+
+  &__title {
+    font-size: $ps-field-font-size;
+    font-weight: 600;
+    color: var(--ps-text-color);
+    text-transform: capitalize;
+    user-select: none;
+  }
+
+  // ──────────────────────────────────────
+  // Weekday headers
+  // ──────────────────────────────────────
+  &__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 4px;
+  }
+
+  &__weekday {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    font-size: $ps-hint-font-size;
+    font-weight: 600;
+    color: var(--ps-hint-color);
+    user-select: none;
+  }
+
+  // ──────────────────────────────────────
+  // Day grid (7 columns x 6 rows)
+  // ──────────────────────────────────────
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  &__day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: 0 auto;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ps-text-color);
+    font-size: $ps-hint-font-size;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+      background $ps-transition-duration $ps-transition-easing,
+      color $ps-transition-duration $ps-transition-easing,
+      border-color $ps-transition-duration $ps-transition-easing;
+
+    &:hover:not(:disabled):not(.ps-datepicker__day--selected) {
+      background: var(--ps-option-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ps-focus-border);
+      outline-offset: -2px;
+    }
+
+    &--other {
+      color: var(--ps-placeholder-color);
+      opacity: 0.5;
+    }
+
+    &--today {
+      border-color: var(--ps-focus-border);
+      font-weight: 700;
+    }
+
+    &--selected {
+      background: var(--ps-check-bg);
+      color: #ffffff;
+      font-weight: 600;
+      border-color: var(--ps-check-bg);
+
+      &:hover:not(:disabled) {
+        background: var(--ps-check-bg);
+        opacity: 0.9;
+      }
+    }
+
+    &--disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+
+  // ──────────────────────────────────────
+  // Footer
+  // ──────────────────────────────────────
+  &__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--ps-dropdown-border);
+  }
+
+  &__today {
+    padding: 4px 16px;
+    border: none;
+    background: transparent;
+    color: var(--ps-option-selected-text);
+    font-size: $ps-hint-font-size;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    transition:
+      background $ps-transition-duration $ps-transition-easing,
+      color $ps-transition-duration $ps-transition-easing;
+
+    &:hover {
+      background: var(--ps-option-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ps-focus-border);
+      outline-offset: -2px;
+    }
+  }
+}
+
+// Error state
+.ps-field--error .ps-datepicker__trigger {
+  border-color: var(--ps-error-border);
+  background: var(--ps-error-bg);
+  animation: psFieldShake 0.4s ease;
+}
+
+.ps-field--success .ps-datepicker__trigger {
+  border-color: var(--ps-success-border);
+  background: var(--ps-success-bg);
+}
+
+.ps-field__wrapper--focused.ps-datepicker__trigger {
+  border-color: var(--ps-focus-border);
+  box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-field--error .ps-datepicker__trigger {
+    animation: none;
+  }
+
+  .ps-datepicker__chevron {
+    transition: none;
+  }
+
+  .ps-datepicker__panel {
+    animation: none;
+  }
+
+  .ps-datepicker__day,
+  .ps-datepicker__nav,
+  .ps-datepicker__today,
+  .ps-datepicker__clear {
+    transition: none;
+  }
+}

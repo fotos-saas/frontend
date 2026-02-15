@@ -13,6 +13,7 @@ import {
   PsMultiSelectBoxComponent,
   PsTagInputComponent,
   PsEditorComponent,
+  PsDatepickerComponent,
   PsSelectOption,
   PsRadioOption,
 } from '@shared/components/form';
@@ -34,6 +35,7 @@ import {
     PsMultiSelectBoxComponent,
     PsTagInputComponent,
     PsEditorComponent,
+    PsDatepickerComponent,
   ],
   templateUrl: './form-showcase.component.html',
   styleUrl: './form-showcase.component.scss',
@@ -48,6 +50,8 @@ export class FormShowcaseComponent {
   telValue = signal('');
   urlValue = signal('');
   dateValue = signal('');
+  datepickerValue = signal('');
+  datepickerMinMax = signal('');
   timeValue = signal('');
 
   // Textarea

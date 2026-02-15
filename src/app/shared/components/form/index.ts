@@ -14,3 +14,4 @@ export { PsAutocompleteComponent } from './ps-autocomplete/ps-autocomplete.compo
 export { PsMultiSelectComponent } from './ps-multi-select/ps-multi-select.component';
 export { PsMultiSelectBoxComponent } from './ps-multi-select-box/ps-multi-select-box.component';
 export { PsTagInputComponent } from './ps-tag-input/ps-tag-input.component';
+export { PsEditorComponent } from './ps-editor/ps-editor.component';

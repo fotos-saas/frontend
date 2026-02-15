@@ -272,4 +272,34 @@
       size="md"
     />
   </section>
+
+  <!-- 13. Rich Text Editor -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Rich Text Editor</h2>
+    <div class="showcase__stack">
+      <ps-editor
+        label="Rövid szerkesztő (basic)"
+        mode="basic"
+        placeholder="Rövid formázott szöveg..."
+        [(ngModel)]="editorBasicValue"
+        size="full"
+        hint="Bold, italic, underline, link"
+      />
+      <ps-editor
+        label="Standard szerkesztő"
+        mode="standard"
+        placeholder="Írj ide formázott szöveget..."
+        [(ngModel)]="editorStandardValue"
+        size="full"
+        [maxLength]="1000"
+      />
+      <ps-editor
+        label="Teljes szerkesztő"
+        mode="full"
+        placeholder="Minden formázási lehetőséggel..."
+        [(ngModel)]="editorFullValue"
+        size="full"
+      />
+    </div>
+  </section>
 </div>

@@ -1,0 +1,254 @@
+@use '../form-tokens' as *;
+@use '../form-field-base';
+
+// ============================================================================
+// PS-EDITOR — Rich Text Editor (BEM: .ps-editor)
+// ============================================================================
+
+.ps-editor {
+  &__container {
+    border: $ps-field-border-width solid var(--ps-field-border);
+    border-radius: $ps-field-border-radius;
+    background: var(--ps-field-bg);
+    overflow: hidden;
+    transition:
+      border-color $ps-transition-duration $ps-transition-easing,
+      box-shadow $ps-transition-duration $ps-transition-easing,
+      background-color $ps-transition-duration $ps-transition-easing;
+
+    &:hover:not(.ps-editor__container--disabled) {
+      border-color: var(--ps-field-border-hover);
+    }
+
+    // Focus
+    &--focused {
+      border-color: var(--ps-focus-border);
+      box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
+      background: var(--ps-field-bg-focus);
+    }
+
+    // Disabled
+    &--disabled {
+      opacity: 0.6;
+      pointer-events: none;
+      background: var(--ps-field-bg-disabled);
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 4px;
+  }
+
+  &__char-count {
+    font-size: $ps-hint-font-size;
+    color: var(--ps-hint-color);
+    margin-left: auto;
+    flex-shrink: 0;
+
+    &--limit {
+      color: var(--ps-error-text);
+      font-weight: 500;
+    }
+  }
+}
+
+// ============================================================================
+// ERROR / SUCCESS STATES
+// ============================================================================
+
+.ps-field--error .ps-editor__container {
+  border-color: var(--ps-error-border);
+  background: var(--ps-error-bg);
+  animation: psFieldShake 0.4s ease;
+}
+
+.ps-field--error .ps-editor__container--focused {
+  box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-error-ring);
+}
+
+.ps-field--success .ps-editor__container {
+  border-color: var(--ps-success-border);
+  background: var(--ps-success-bg);
+}
+
+.ps-field--success .ps-editor__container--focused {
+  box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-success-ring);
+}
+
+// ============================================================================
+// QUILL OVERRIDES — Design token integration
+// ============================================================================
+
+:host ::ng-deep {
+  .ql-toolbar {
+    border: none !important;
+    border-bottom: 1px solid var(--ps-field-border) !important;
+    background: var(--ps-field-bg);
+    padding: 6px 8px !important;
+    font-family: inherit;
+
+    .ql-formats {
+      margin-right: 12px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    // Toolbar gombok
+    button {
+      width: 28px !important;
+      height: 28px !important;
+      padding: 3px !important;
+      border-radius: 4px;
+      transition: background $ps-transition-duration $ps-transition-easing;
+
+      &:hover {
+        background: var(--ps-option-hover-bg);
+      }
+
+      &.ql-active {
+        color: var(--ps-check-bg) !important;
+
+        .ql-stroke {
+          stroke: var(--ps-check-bg) !important;
+        }
+
+        .ql-fill {
+          fill: var(--ps-check-bg) !important;
+        }
+      }
+
+      .ql-stroke {
+        stroke: var(--ps-text-color);
+      }
+
+      .ql-fill {
+        fill: var(--ps-text-color);
+      }
+    }
+
+    // Select (header dropdown)
+    .ql-picker {
+      color: var(--ps-text-color);
+      font-size: $ps-field-font-size;
+
+      .ql-picker-label {
+        border-color: transparent !important;
+        padding: 2px 4px;
+        border-radius: 4px;
+        transition: background $ps-transition-duration $ps-transition-easing;
+
+        &:hover {
+          background: var(--ps-option-hover-bg);
+        }
+
+        &::before {
+          color: var(--ps-text-color);
+        }
+
+        .ql-stroke {
+          stroke: var(--ps-text-color);
+        }
+      }
+
+      .ql-picker-options {
+        background: var(--ps-dropdown-bg);
+        border: 1px solid var(--ps-dropdown-border);
+        border-radius: $ps-field-border-radius;
+        box-shadow: var(--ps-dropdown-shadow);
+        padding: 4px;
+
+        .ql-picker-item {
+          padding: 4px 8px;
+          border-radius: 4px;
+          color: var(--ps-text-color);
+
+          &:hover {
+            background: var(--ps-option-hover-bg);
+          }
+
+          &.ql-selected {
+            color: var(--ps-check-bg);
+          }
+        }
+      }
+    }
+  }
+
+  .ql-container {
+    border: none !important;
+    font-family: inherit;
+    font-size: $ps-field-font-size;
+  }
+
+  .ql-editor {
+    min-height: var(--ps-editor-min-height, 160px);
+    max-height: var(--ps-editor-max-height, 400px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px $ps-field-padding-x;
+    color: var(--ps-text-color);
+    line-height: 1.6;
+
+    &.ql-blank::before {
+      color: var(--ps-placeholder-color);
+      font-style: normal;
+      left: $ps-field-padding-x;
+      right: $ps-field-padding-x;
+    }
+
+    // Tartalom stílusok
+    p {
+      margin-bottom: 0.5em;
+    }
+
+    a {
+      color: var(--ps-focus-border);
+      text-decoration: underline;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--ps-field-border);
+      padding-left: 12px;
+      color: var(--ps-hint-color);
+    }
+
+    pre.ql-syntax {
+      background: var(--ps-field-bg-disabled);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 0.875rem;
+    }
+
+    ul, ol {
+      padding-left: 1.5em;
+    }
+  }
+
+  // Basic mode — kompakt toolbar
+  .ps-editor__container--basic {
+    .ql-toolbar {
+      padding: 4px 6px !important;
+
+      button {
+        width: 26px !important;
+        height: 26px !important;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// REDUCED MOTION
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-field--error .ps-editor__container {
+    animation: none;
+  }
+}

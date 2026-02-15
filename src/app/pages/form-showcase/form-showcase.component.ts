@@ -12,6 +12,7 @@ import {
   PsMultiSelectComponent,
   PsMultiSelectBoxComponent,
   PsTagInputComponent,
+  PsEditorComponent,
   PsSelectOption,
   PsRadioOption,
 } from '@shared/components/form';
@@ -32,6 +33,7 @@ import {
     PsMultiSelectComponent,
     PsMultiSelectBoxComponent,
     PsTagInputComponent,
+    PsEditorComponent,
   ],
   templateUrl: './form-showcase.component.html',
   styleUrl: './form-showcase.component.scss',
@@ -110,6 +112,11 @@ export class FormShowcaseComponent {
 
   // Tag input
   tagValues = signal<string[]>(['Angular', 'TypeScript']);
+
+  // Rich text editor
+  editorBasicValue = signal('');
+  editorStandardValue = signal('');
+  editorFullValue = signal('');
 
   // Állapot demó
   stateError = signal('Ez a mező kötelező!');

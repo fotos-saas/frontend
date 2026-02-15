@@ -1,0 +1,53 @@
+<div [ngClass]="hostClasses()" class="ps-editor">
+  @if (label()) {
+    <label [for]="uniqueId()" class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div
+    class="ps-editor__container"
+    [ngClass]="{
+      'ps-editor__container--focused': focused(),
+      'ps-editor__container--disabled': isDisabled(),
+      'ps-editor__container--basic': mode() === 'basic'
+    }"
+    [ngStyle]="editorStyle()"
+  >
+    <quill-editor
+      [ngModel]="content()"
+      (ngModelChange)="onContentChanged({ html: $event, text: null })"
+      [modules]="modules"
+      [placeholder]="placeholder()"
+      [readOnly]="isDisabled() || readonly()"
+      [attr.id]="uniqueId()"
+      [attr.aria-invalid]="computedState() === 'error'"
+      [attr.aria-describedby]="errorMessage() ? uniqueId() + '-error' : hint() ? uniqueId() + '-hint' : null"
+      (onFocus)="onEditorFocus()"
+      (onBlur)="onEditorBlur()"
+      (onContentChanged)="onContentChanged($event)"
+    />
+  </div>
+
+  <div class="ps-editor__footer">
+    @if (computedState() === 'error' && errorMessage()) {
+      <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">
+        <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+        {{ errorMessage() }}
+      </div>
+    } @else if (hint()) {
+      <div class="ps-field__hint" [id]="uniqueId() + '-hint'">
+        {{ hint() }}
+      </div>
+    }
+
+    @if (charCountText()) {
+      <div class="ps-editor__char-count" [class.ps-editor__char-count--limit]="isOverLimit()">
+        {{ charCountText() }}
+      </div>
+    }
+  </div>
+</div>

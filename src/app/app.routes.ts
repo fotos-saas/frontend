@@ -558,6 +558,13 @@ export const routes: Routes = [
     title: 'Sikeres rendelés'
   },
 
+  // Dev - Form showcase (no auth)
+  {
+    path: 'dev/form-showcase',
+    loadComponent: () => import('./pages/form-showcase/form-showcase.component').then(m => m.FormShowcaseComponent),
+    title: 'Form Showcase'
+  },
+
   // 404 - ismeretlen route-ok
   {
     path: '**',

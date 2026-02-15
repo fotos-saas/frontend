@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
-import { SearchableSelectComponent, SelectOption } from '../../../../../shared/components/searchable-select/searchable-select.component';
+import { PsSearchableSelectComponent, SelectOption } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { SchoolItem } from '../../../models/partner.models';
 import { ARCHIVE_SERVICE, ArchiveService, BulkPhotoMatch } from '../../../models/archive.models';
@@ -11,7 +11,7 @@ import { ARCHIVE_SERVICE, ArchiveService, BulkPhotoMatch } from '../../../models
 @Component({
   selector: 'app-archive-bulk-photo-upload',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, SearchableSelectComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsSearchableSelectComponent],
   templateUrl: './archive-bulk-photo-upload.component.html',
   styleUrl: './archive-bulk-photo-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

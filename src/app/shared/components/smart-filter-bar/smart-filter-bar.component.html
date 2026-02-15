@@ -55,7 +55,7 @@
 
   <!-- Searchable Select filters -->
   @for (sf of searchableFilters(); track sf.id) {
-    <app-searchable-select
+    <ps-searchable-select
       class="searchable-filter"
       [options]="sf.options"
       [value]="filterState().filters()[sf.id]"

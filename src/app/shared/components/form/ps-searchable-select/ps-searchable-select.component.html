@@ -1,0 +1,113 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label [for]="uniqueId()" class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="ps-searchable-select" [ngClass]="{ 'ps-searchable-select--open': isOpen() }">
+    <!-- Trigger / Input -->
+    <div
+      class="ps-searchable-select__trigger"
+      [ngClass]="{
+        'ps-field__wrapper--focused': focused() || isOpen(),
+        'ps-field__wrapper--disabled': isDisabled()
+      }"
+      (click)="isOpen() ? null : open()"
+    >
+      <span class="ps-field__prefix">
+        <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+      </span>
+
+      <input
+        #searchInput
+        class="ps-field__input"
+        [id]="uniqueId()"
+        type="text"
+        [value]="displayValue()"
+        [placeholder]="selectedLabel() || placeholder()"
+        [disabled]="isDisabled()"
+        [readOnly]="!isOpen()"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-invalid]="computedState() === 'error'"
+        role="combobox"
+        autocomplete="off"
+        (input)="onInputChange($event)"
+        (keydown)="onKeydown($event)"
+        (focus)="onFocus(); isOpen() ? null : open()"
+        (blur)="onBlur()"
+      />
+
+      @if (clearable() && currentValue()) {
+        <button type="button" class="ps-field__suffix-btn" tabindex="-1" (click)="clear($event)">
+          <lucide-icon [name]="ICONS.X" [size]="16" />
+        </button>
+      }
+
+      <span class="ps-searchable-select__chevron">
+        <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="18" />
+      </span>
+    </div>
+
+    <!-- Dropdown -->
+    @if (isOpen()) {
+      <div class="ps-dropdown" role="listbox">
+        @if (allLabel()) {
+          <div
+            class="ps-dropdown__option"
+            [ngClass]="{
+              'ps-dropdown__option--highlighted': highlightedIndex() === 0,
+              'ps-dropdown__option--selected': !currentValue()
+            }"
+            role="option"
+            (click)="selectAll()"
+          >
+            <span class="ps-dropdown__option-label">{{ allLabel() }}</span>
+          </div>
+        }
+
+        @for (option of filteredOptions(); track option.id; let i = $index) {
+          <div
+            class="ps-dropdown__option"
+            [ngClass]="{
+              'ps-dropdown__option--highlighted': highlightedIndex() === (allLabel() ? i + 1 : i),
+              'ps-dropdown__option--selected': isSelected(option),
+              'ps-dropdown__option--disabled': option.disabled
+            }"
+            role="option"
+            [attr.aria-selected]="isSelected(option)"
+            (click)="selectOption(option)"
+          >
+            <span class="ps-dropdown__option-label">{{ option.label }}</span>
+            @if (option.sublabel) {
+              <span class="ps-dropdown__option-sublabel">{{ option.sublabel }}</span>
+            }
+            @if (isSelected(option)) {
+              <span class="ps-dropdown__option-check">
+                <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+              </span>
+            }
+          </div>
+        } @empty {
+          <div class="ps-dropdown__empty">{{ noResultsText() }}</div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (computedState() === 'error' && errorMessage()) {
+    <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (hint() && computedState() !== 'error') {
+    <div class="ps-field__hint" [id]="uniqueId() + '-hint'">
+      {{ hint() }}
+    </div>
+  }
+</div>

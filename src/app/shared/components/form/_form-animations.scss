@@ -1,0 +1,131 @@
+// ============================================================================
+// FORM ANIMATIONS
+// PhotoStack Form Component System
+// ============================================================================
+
+// Error shake
+@keyframes psFieldShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
+// Error message slide-in
+@keyframes psFieldErrorSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Error icon pop
+@keyframes psFieldErrorPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+// Success checkmark fade-in + scale
+@keyframes psFieldCheckIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+// Success checkmark pulse (egyszeri)
+@keyframes psFieldCheckPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+// Dropdown open
+@keyframes psDropdownOpen {
+  from {
+    opacity: 0;
+    transform: scaleY(0.85) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+}
+
+// Dropdown close
+@keyframes psDropdownClose {
+  from {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0.85) translateY(-4px);
+  }
+}
+
+// Checkbox SVG draw
+@keyframes psCheckDraw {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+// Checkbox background fill
+@keyframes psCheckBgFill {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+// Radio dot spring
+@keyframes psRadioDotIn {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+// Toggle knob slide (handled via CSS transition, not keyframes)
+
+// Tag enter
+@keyframes psTagEnter {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+// Tag remove
+@keyframes psTagOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.6); opacity: 0; }
+}
+
+// Option stagger fade-in
+@keyframes psOptionFadeIn {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ============================================================================
+// REDUCED MOTION
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes psFieldShake { from, to { transform: none; } }
+  @keyframes psFieldErrorSlideIn { from, to { opacity: 1; transform: none; } }
+  @keyframes psFieldErrorPop { from, to { transform: none; opacity: 1; } }
+  @keyframes psFieldCheckIn { from, to { transform: none; opacity: 1; } }
+  @keyframes psFieldCheckPulse { from, to { transform: none; } }
+  @keyframes psDropdownOpen { from, to { opacity: 1; transform: none; } }
+  @keyframes psDropdownClose { from, to { opacity: 0; transform: none; } }
+  @keyframes psCheckDraw { from, to { stroke-dashoffset: 0; } }
+  @keyframes psCheckBgFill { from, to { transform: none; } }
+  @keyframes psRadioDotIn { from, to { transform: none; } }
+  @keyframes psTagEnter { from, to { transform: none; opacity: 1; } }
+  @keyframes psTagOut { from, to { transform: none; opacity: 0; } }
+  @keyframes psOptionFadeIn { from, to { opacity: 1; transform: none; } }
+}

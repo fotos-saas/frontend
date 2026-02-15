@@ -1,0 +1,22 @@
+@use '../form-tokens' as *;
+@use '../form-field-base';
+
+.ps-autocomplete {
+  position: relative;
+
+  &__spinner {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    color: var(--ps-placeholder-color);
+  }
+
+  &__spin {
+    animation: spin 0.7s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

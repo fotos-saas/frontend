@@ -1,0 +1,53 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label [for]="uniqueId()" class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="ps-textarea__wrapper" [ngClass]="{
+    'ps-field__wrapper--focused': focused(),
+    'ps-field__wrapper--disabled': isDisabled(),
+    'ps-field__wrapper--readonly': readonly()
+  }">
+    <textarea
+      #textareaEl
+      class="ps-textarea__input"
+      [id]="uniqueId()"
+      [value]="value()"
+      [placeholder]="placeholder()"
+      [rows]="rows()"
+      [disabled]="isDisabled()"
+      [readOnly]="readonly()"
+      [attr.maxlength]="maxLength() || null"
+      [attr.required]="required() || null"
+      [attr.aria-invalid]="computedState() === 'error'"
+      [attr.aria-describedby]="errorMessage() ? uniqueId() + '-error' : hint() ? uniqueId() + '-hint' : null"
+      (input)="onInput($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+    ></textarea>
+  </div>
+
+  <div class="ps-textarea__footer">
+    @if (computedState() === 'error' && errorMessage()) {
+      <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">
+        <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+        {{ errorMessage() }}
+      </div>
+    } @else if (hint()) {
+      <div class="ps-field__hint" [id]="uniqueId() + '-hint'">
+        {{ hint() }}
+      </div>
+    }
+
+    @if (charCountText()) {
+      <div class="ps-textarea__char-count" [class.ps-textarea__char-count--limit]="maxLength() > 0 && charCount() >= maxLength()">
+        {{ charCountText() }}
+      </div>
+    }
+  </div>
+</div>

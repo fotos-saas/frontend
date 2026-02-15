@@ -1,0 +1,38 @@
+<label
+  class="ps-toggle"
+  [ngClass]="{
+    'ps-toggle--checked': checked(),
+    'ps-toggle--disabled': isDisabled(),
+    'ps-toggle--pressing': pressing(),
+    'ps-toggle--before': labelPosition() === 'before'
+  }"
+  (mousedown)="onMouseDown()"
+  (mouseup)="onMouseUp()"
+  (mouseleave)="onMouseUp()"
+>
+  <input
+    type="checkbox"
+    class="ps-toggle__native"
+    [id]="uniqueId()"
+    [checked]="checked()"
+    [disabled]="isDisabled()"
+    role="switch"
+    [attr.aria-checked]="checked()"
+    (change)="toggle()"
+    (keydown)="onKeydown($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  />
+
+  @if (labelPosition() === 'before' && label()) {
+    <span class="ps-toggle__label">{{ label() }}</span>
+  }
+
+  <span class="ps-toggle__track" [ngClass]="{ 'ps-toggle__track--focused': focused() }">
+    <span class="ps-toggle__knob"></span>
+  </span>
+
+  @if (labelPosition() === 'after' && label()) {
+    <span class="ps-toggle__label">{{ label() }}</span>
+  }
+</label>

@@ -1,0 +1,78 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label [for]="uniqueId()" class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="ps-autocomplete" [ngClass]="{ 'ps-autocomplete--open': showDropdown() }">
+    <div [ngClass]="wrapperClasses()">
+      <input
+        class="ps-field__input"
+        [id]="uniqueId()"
+        type="text"
+        [value]="value()"
+        [placeholder]="placeholder()"
+        [disabled]="isDisabled()"
+        [readOnly]="readonly()"
+        role="combobox"
+        autocomplete="off"
+        [attr.aria-expanded]="showDropdown()"
+        [attr.aria-invalid]="computedState() === 'error'"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+      />
+
+      @if (loading()) {
+        <span class="ps-autocomplete__spinner">
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" />
+        </span>
+      }
+    </div>
+
+    @if (showDropdown()) {
+      <div class="ps-dropdown" role="listbox">
+        @for (item of filteredSuggestions(); track item.id; let i = $index) {
+          <div
+            class="ps-dropdown__option"
+            [ngClass]="{
+              'ps-dropdown__option--highlighted': highlightedIndex() === i
+            }"
+            role="option"
+            (click)="selectSuggestion(item)"
+          >
+            <span class="ps-dropdown__option-label">{{ item.label }}</span>
+            @if (item.sublabel) {
+              <span class="ps-dropdown__option-sublabel">{{ item.sublabel }}</span>
+            }
+          </div>
+        }
+
+        @if (loading()) {
+          <div class="ps-dropdown__empty">
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="ps-autocomplete__spin" />
+            Keresés...
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (computedState() === 'error' && errorMessage()) {
+    <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (hint() && computedState() !== 'error') {
+    <div class="ps-field__hint" [id]="uniqueId() + '-hint'">
+      {{ hint() }}
+    </div>
+  }
+</div>

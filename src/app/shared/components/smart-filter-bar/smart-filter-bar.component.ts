@@ -13,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants';
 import { FilterStateApi } from '../../utils/use-filter-state';
 import { ExpandableFiltersComponent, FilterChangeEvent } from '../expandable-filters';
-import { SearchableSelectComponent } from '../searchable-select/searchable-select.component';
+import { PsSearchableSelectComponent } from '../form';
 import { SearchConfig, SearchableFilterDef, SortDef, FilterConfig } from './smart-filter-bar.types';
 
 @Component({
@@ -24,7 +24,7 @@ import { SearchConfig, SearchableFilterDef, SortDef, FilterConfig } from './smar
     LucideAngularModule,
     MatTooltipModule,
     ExpandableFiltersComponent,
-    SearchableSelectComponent,
+    PsSearchableSelectComponent,
   ],
   templateUrl: './smart-filter-bar.component.html',
   styleUrl: './smart-filter-bar.component.scss',

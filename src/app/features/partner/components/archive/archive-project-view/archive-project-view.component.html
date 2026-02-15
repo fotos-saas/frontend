@@ -1,6 +1,6 @@
 <!-- Szűrők -->
 <div class="project-filters">
-  <app-searchable-select
+  <ps-searchable-select
     class="filter-select"
     [options]="schoolOptions()"
     [value]="selectedSchoolId()"
@@ -9,7 +9,7 @@
     (valueChange)="onSchoolChange($event)"
   />
 
-  <app-searchable-select
+  <ps-searchable-select
     class="filter-select filter-select--sm"
     [options]="classYears()"
     [value]="selectedYear()"

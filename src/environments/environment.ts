@@ -1,10 +1,10 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://api.tablostudio.hu/api',
+  apiUrl: 'http://localhost:8000/api',
   // WebSocket konfiguráció
-  wsHost: 'api.tablostudio.hu',
-  wsPort: 443,
-  wsScheme: 'https',
+  wsHost: 'localhost',
+  wsPort: 6001,
+  wsScheme: 'http',
   wsKey: 'tablo-production-key',
   wsCluster: 'mt1',
   wsEnabled: true,

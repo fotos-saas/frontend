@@ -1,0 +1,58 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label [for]="uniqueId()" class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="ps-tag-input__wrapper" [ngClass]="{
+    'ps-field__wrapper--focused': focused(),
+    'ps-field__wrapper--disabled': isDisabled(),
+    'ps-tag-input__wrapper--error': computedState() === 'error'
+  }">
+    <div class="ps-tag-input__tags">
+      @for (tag of tags(); track tag; let i = $index) {
+        <span class="ps-tag" [ngClass]="{ 'ps-tag--removing': removingIndex() === i }">
+          <span class="ps-tag__text">{{ tag }}</span>
+          <button type="button" class="ps-tag__remove" (click)="removeTag(tag, $event)">
+            <lucide-icon [name]="ICONS.X" [size]="12" />
+          </button>
+        </span>
+      }
+
+      @if (canAddMore()) {
+        <input
+          class="ps-tag-input__input"
+          [id]="uniqueId()"
+          type="text"
+          [value]="inputValue()"
+          [placeholder]="tags().length === 0 ? (placeholder() || 'Tag hozzáadása...') : ''"
+          [disabled]="isDisabled()"
+          (input)="onInput($event)"
+          (keydown)="onInputKeydown($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()"
+        />
+      }
+    </div>
+  </div>
+
+  @if (computedState() === 'error' && errorMessage()) {
+    <div class="ps-field__error" role="alert">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (hint() && computedState() !== 'error') {
+    <div class="ps-field__hint">
+      {{ hint() }}
+      @if (maxTags() > 0) {
+        ({{ tags().length }}/{{ maxTags() }})
+      }
+    </div>
+  }
+</div>

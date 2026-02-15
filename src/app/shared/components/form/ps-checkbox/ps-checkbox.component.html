@@ -1,0 +1,61 @@
+<label
+  class="ps-checkbox"
+  [ngClass]="{
+    'ps-checkbox--checked': checked(),
+    'ps-checkbox--indeterminate': indeterminate() && !checked(),
+    'ps-checkbox--disabled': isDisabled(),
+    'ps-checkbox--error': computedState() === 'error'
+  }"
+>
+  <input
+    type="checkbox"
+    class="ps-checkbox__native"
+    [id]="uniqueId()"
+    [checked]="checked()"
+    [disabled]="isDisabled()"
+    [indeterminate]="indeterminate() && !checked()"
+    [attr.aria-invalid]="computedState() === 'error'"
+    (change)="toggle()"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  />
+
+  <span class="ps-checkbox__box" [ngClass]="{ 'ps-checkbox__box--focused': focused() }">
+    <svg class="ps-checkbox__icon" viewBox="0 0 16 16" fill="none">
+      @if (checked()) {
+        <path
+          class="ps-checkbox__check"
+          d="M3.5 8.5L6.5 11.5L12.5 4.5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      }
+      @if (indeterminate() && !checked()) {
+        <line
+          class="ps-checkbox__dash"
+          x1="4" y1="8" x2="12" y2="8"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      }
+    </svg>
+  </span>
+
+  @if (label()) {
+    <span class="ps-checkbox__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </span>
+  }
+</label>
+
+@if (computedState() === 'error' && errorMessage()) {
+  <div class="ps-field__error" role="alert">
+    {{ errorMessage() }}
+  </div>
+}

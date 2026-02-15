@@ -1,0 +1,67 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="ps-multi-select-box" [ngClass]="{ 'ps-multi-select-box--disabled': isDisabled(), 'ps-multi-select-box--error': computedState() === 'error' }">
+    @if (searchable()) {
+      <div class="ps-multi-select-box__search">
+        <lucide-icon [name]="ICONS.SEARCH" [size]="14" />
+        <input
+          type="text"
+          class="ps-multi-select-box__search-input"
+          placeholder="Keresés..."
+          [value]="searchQuery()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    }
+
+    <div class="ps-multi-select-box__list" [style.max-height]="maxHeight()">
+      @for (option of filteredOptions(); track option.id) {
+        <label
+          class="ps-multi-select-box__item"
+          [ngClass]="{
+            'ps-multi-select-box__item--selected': isSelected(option),
+            'ps-multi-select-box__item--disabled': option.disabled
+          }"
+        >
+          <input
+            type="checkbox"
+            class="ps-multi-select-box__checkbox"
+            [checked]="isSelected(option)"
+            [disabled]="option.disabled || isDisabled()"
+            (change)="toggleOption(option)"
+          />
+          <span class="ps-multi-select-box__check-icon">
+            @if (isSelected(option)) {
+              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            }
+          </span>
+          <span class="ps-multi-select-box__label">{{ option.label }}</span>
+          @if (option.sublabel) {
+            <span class="ps-multi-select-box__sublabel">{{ option.sublabel }}</span>
+          }
+        </label>
+      } @empty {
+        <div class="ps-multi-select-box__empty">Nincs találat</div>
+      }
+    </div>
+  </div>
+
+  @if (computedState() === 'error' && errorMessage()) {
+    <div class="ps-field__error" role="alert">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (hint() && computedState() !== 'error') {
+    <div class="ps-field__hint">{{ hint() }}</div>
+  }
+</div>

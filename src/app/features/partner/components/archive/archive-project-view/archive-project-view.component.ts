@@ -8,8 +8,7 @@ import {
   ArchivePersonInSchool,
   ArchiveConfig,
 } from '../../../models/archive.models';
-import { SelectOption } from '../../../../../shared/components/searchable-select/searchable-select.component';
-import { SearchableSelectComponent } from '../../../../../shared/components/searchable-select/searchable-select.component';
+import { PsSearchableSelectComponent, SelectOption } from '@shared/components/form';
 import { ArchiveProjectCardComponent } from '../archive-project-card/archive-project-card.component';
 import { ListPaginationComponent } from '../../../../../shared/components/list-pagination/list-pagination.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -19,7 +18,7 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
   standalone: true,
   imports: [
     LucideAngularModule,
-    SearchableSelectComponent,
+    PsSearchableSelectComponent,
     ArchiveProjectCardComponent,
     ListPaginationComponent,
   ],

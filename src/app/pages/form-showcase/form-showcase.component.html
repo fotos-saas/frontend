@@ -1,0 +1,230 @@
+<div class="form-showcase page-card page-card--wide">
+  <h1 class="showcase__title">Form Komponens Rendszer</h1>
+  <p class="showcase__subtitle">Egységes ps- prefix, BEM naming, CVA kompatibilis</p>
+
+  <!-- 1. Szöveges mezők -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Szöveges mezők</h2>
+    <div class="showcase__grid">
+      <ps-input
+        label="Név"
+        placeholder="Vezetéknév Keresztnév"
+        [(ngModel)]="textValue"
+        size="md"
+        required
+      />
+      <ps-input
+        label="E-mail"
+        type="email"
+        placeholder="pelda@email.hu"
+        [(ngModel)]="emailValue"
+        size="md"
+        prefix="mail"
+      />
+      <ps-input
+        label="Jelszó"
+        type="password"
+        placeholder="Legalább 8 karakter"
+        [(ngModel)]="passwordValue"
+        size="md"
+        hint="Min. 8 karakter, kis- és nagybetű"
+      />
+      <ps-input
+        label="Telefonszám"
+        type="tel"
+        placeholder="+36 30 123 4567"
+        [(ngModel)]="telValue"
+        size="md"
+        prefix="phone"
+      />
+      <ps-input
+        label="Szám"
+        type="number"
+        placeholder="0"
+        [(ngModel)]="numberValue"
+        size="sm"
+        [min]="0"
+        [max]="100"
+      />
+      <ps-input
+        label="Weboldal"
+        type="url"
+        placeholder="https://example.com"
+        [(ngModel)]="urlValue"
+        size="md"
+      />
+      <ps-input
+        label="Dátum"
+        type="date"
+        [(ngModel)]="dateValue"
+        size="md"
+      />
+      <ps-input
+        label="Időpont"
+        type="time"
+        [(ngModel)]="timeValue"
+        size="sm"
+      />
+    </div>
+  </section>
+
+  <!-- 2. Állapotok -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Állapotok</h2>
+    <div class="showcase__grid">
+      <ps-input label="Alapértelmezett" placeholder="Default állapot" size="md" />
+      <ps-input label="Hibaüzenettel" placeholder="Hibás érték" size="md" [errorMessage]="stateError()" />
+      <ps-input label="Sikeres" placeholder="Jó érték" size="md" state="success" />
+      <ps-input label="Letiltott" placeholder="Nem szerkeszthető" size="md" [disabled]="true" />
+      <ps-input label="Csak olvasható" placeholder="Readonly" size="md" [readonly]="true" ngModel="Nem módosítható" />
+    </div>
+  </section>
+
+  <!-- 3. Méretek -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Méretek</h2>
+    <div class="showcase__stack">
+      <ps-input label="Small (240px)" placeholder="sm" size="sm" />
+      <ps-input label="Medium (360px)" placeholder="md" size="md" />
+      <ps-input label="Large (480px)" placeholder="lg" size="lg" />
+      <ps-input label="Full width" placeholder="full" size="full" />
+    </div>
+  </section>
+
+  <!-- 4. Textarea -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Textarea</h2>
+    <div class="showcase__grid">
+      <ps-textarea
+        label="Leírás"
+        placeholder="Írd le részletesen..."
+        [(ngModel)]="textareaValue"
+        size="md"
+        [maxLength]="500"
+      />
+      <ps-textarea
+        label="Auto-resize"
+        placeholder="Automatikusan nő a magassága..."
+        [(ngModel)]="textareaAutoValue"
+        size="md"
+        [autoResize]="true"
+        hint="Gépeléssel együtt nő"
+      />
+    </div>
+  </section>
+
+  <!-- 5. Checkbox és Toggle -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Checkbox és Toggle</h2>
+    <div class="showcase__grid">
+      <div class="showcase__group">
+        <ps-checkbox label="Elfogadom a feltételeket" [(ngModel)]="checkboxValue" />
+        <ps-checkbox label="Indeterminate" [indeterminate]="true" [(ngModel)]="checkboxIndeterminate" />
+        <ps-checkbox label="Letiltott checkbox" [disabled]="true" />
+      </div>
+      <div class="showcase__group">
+        <ps-toggle label="Értesítések" [(ngModel)]="toggleValue" />
+        <ps-toggle label="Label előtte" [(ngModel)]="toggleBefore" labelPosition="before" />
+        <ps-toggle label="Letiltott toggle" [disabled]="true" />
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Radio group -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Radio group</h2>
+    <div class="showcase__grid">
+      <ps-radio-group
+        label="Megjelenés"
+        [options]="radioOptions"
+        [(ngModel)]="radioValue"
+      />
+      <ps-radio-group
+        label="Horizontális"
+        [options]="radioOptions"
+        [(ngModel)]="radioValue"
+        direction="horizontal"
+      />
+    </div>
+  </section>
+
+  <!-- 7. Select -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Select (natív dropdown)</h2>
+    <ps-select
+      label="Nyelv"
+      [options]="selectOptions"
+      [(ngModel)]="selectValue"
+      emptyLabel="Válassz nyelvet..."
+      size="md"
+    />
+  </section>
+
+  <!-- 8. Searchable Select -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Kereshető Select</h2>
+    <ps-searchable-select
+      label="Város"
+      [options]="cityOptions"
+      [(ngModel)]="searchableValue"
+      placeholder="Város keresése..."
+      allLabel="Minden város"
+      [clearable]="true"
+      size="md"
+    />
+  </section>
+
+  <!-- 9. Autocomplete -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Autocomplete</h2>
+    <ps-autocomplete
+      label="Tanár keresése"
+      [(ngModel)]="autocompleteValue"
+      [suggestions]="autoSuggestions()"
+      [loading]="autoLoading()"
+      placeholder="Kezdj el gépelni..."
+      hint="Legalább 2 karakter a kereséshez"
+      size="md"
+      (search)="onAutocompleteSearch($event)"
+    />
+  </section>
+
+  <!-- 10. Multi-select -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Multi-select (dropdown + chipek)</h2>
+    <ps-multi-select
+      label="Tantárgyak"
+      [options]="multiSelectOptions"
+      [(ngModel)]="multiSelectValue"
+      placeholder="Válassz tantárgyakat..."
+      size="md"
+      [maxSelections]="4"
+    />
+  </section>
+
+  <!-- 11. Multi-select box -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Multi-select box (görgethető)</h2>
+    <ps-multi-select-box
+      label="Tantárgyak (box)"
+      [options]="multiSelectOptions"
+      [(ngModel)]="multiBoxValue"
+      [searchable]="true"
+      maxHeight="180px"
+      size="md"
+    />
+  </section>
+
+  <!-- 12. Tag input -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Tag input</h2>
+    <ps-tag-input
+      label="Címkék"
+      [(ngModel)]="tagValues"
+      placeholder="Tag hozzáadása (Enter)..."
+      hint="Enter vagy vessző elválasztó"
+      [maxTags]="8"
+      size="md"
+    />
+  </section>
+</div>

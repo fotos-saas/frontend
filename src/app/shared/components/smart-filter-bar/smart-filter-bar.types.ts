@@ -1,4 +1,4 @@
-import { SelectOption } from '../searchable-select/searchable-select.component';
+import { SelectOption } from '../form';
 import { FilterConfig } from '../expandable-filters';
 
 export { FilterConfig, SelectOption };

@@ -1,0 +1,61 @@
+<fieldset
+  class="ps-radio-group"
+  [ngClass]="{
+    'ps-radio-group--horizontal': direction() === 'horizontal',
+    'ps-radio-group--error': computedState() === 'error',
+    'ps-radio-group--disabled': isDisabled()
+  }"
+>
+  @if (label()) {
+    <legend class="ps-radio-group__legend">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </legend>
+  }
+
+  <div class="ps-radio-group__options" [ngClass]="{ 'ps-radio-group__options--horizontal': direction() === 'horizontal' }">
+    @for (option of options(); track option.value; let i = $index) {
+      <label
+        class="ps-radio"
+        [ngClass]="{
+          'ps-radio--selected': isSelected(option),
+          'ps-radio--disabled': option.disabled || isDisabled()
+        }"
+      >
+        <input
+          type="radio"
+          class="ps-radio__native"
+          [name]="uniqueId()"
+          [value]="option.value"
+          [checked]="isSelected(option)"
+          [disabled]="option.disabled || isDisabled()"
+          (change)="select(option)"
+          (keydown)="onKeydown($event, i)"
+          (focus)="onFocus()"
+          (blur)="onBlur()"
+        />
+
+        <span class="ps-radio__circle" [ngClass]="{ 'ps-radio__circle--focused': focused() && isSelected(option) }">
+          @if (isSelected(option)) {
+            <span class="ps-radio__dot"></span>
+          }
+        </span>
+
+        <span class="ps-radio__content">
+          <span class="ps-radio__label">{{ option.label }}</span>
+          @if (option.sublabel) {
+            <span class="ps-radio__sublabel">{{ option.sublabel }}</span>
+          }
+        </span>
+      </label>
+    }
+  </div>
+</fieldset>
+
+@if (computedState() === 'error' && errorMessage()) {
+  <div class="ps-field__error" role="alert">
+    {{ errorMessage() }}
+  </div>
+}

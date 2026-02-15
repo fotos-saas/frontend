@@ -1,0 +1,121 @@
+// ============================================================================
+// FORM DESIGN TOKENS
+// PhotoStack Form Component System
+// ============================================================================
+
+// Magasságok
+$ps-field-height: 42px;
+$ps-field-height-sm: 36px;
+$ps-field-height-lg: 48px;
+
+// Szélesség méretek
+$ps-field-width-sm: 240px;
+$ps-field-width-md: 360px;
+$ps-field-width-lg: 480px;
+
+// Padding
+$ps-field-padding-x: 12px;
+$ps-field-padding-y: 0;
+
+// Border
+$ps-field-border-width: 2px;
+$ps-field-border-radius: 8px;
+
+// Font
+$ps-field-font-size: 0.9375rem; // 15px
+$ps-label-font-size: 0.875rem;  // 14px
+$ps-error-font-size: 0.8125rem; // 13px
+$ps-hint-font-size: 0.8125rem;  // 13px
+
+// Focus ring
+$ps-focus-ring-width: 4px;
+$ps-focus-ring-opacity: 0.15;
+
+// Transition
+$ps-transition-duration: 200ms;
+$ps-transition-easing: cubic-bezier(0.33, 1, 0.68, 1);
+$ps-spring-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// Z-index
+$ps-dropdown-z: 100;
+
+// ============================================================================
+// CSS CUSTOM PROPERTIES (runtime theme support)
+// ============================================================================
+
+:root {
+  // Field colors
+  --ps-field-bg: var(--bg-primary, #ffffff);
+  --ps-field-bg-focus: #ffffff;
+  --ps-field-bg-disabled: var(--bg-tertiary, #f3f4f6);
+  --ps-field-border: var(--input-border, var(--border-color, #e5e7eb));
+  --ps-field-border-hover: var(--text-muted, #6b7280);
+
+  // Focus colors
+  --ps-focus-border: var(--input-focus, var(--color-primary, #2563eb));
+  --ps-focus-ring: rgba(37, 99, 235, #{$ps-focus-ring-opacity});
+  --ps-focus-label: var(--color-primary, #2563eb);
+
+  // Error colors
+  --ps-error-border: var(--input-error, var(--color-error, #dc2626));
+  --ps-error-bg: #fef2f2;
+  --ps-error-text: var(--color-error, #dc2626);
+  --ps-error-ring: rgba(220, 38, 38, #{$ps-focus-ring-opacity});
+
+  // Success colors
+  --ps-success-border: var(--input-success, var(--color-success, #22c55e));
+  --ps-success-bg: #f0fdf4;
+  --ps-success-text: var(--color-success, #22c55e);
+  --ps-success-ring: rgba(34, 197, 94, #{$ps-focus-ring-opacity});
+
+  // Text colors
+  --ps-label-color: var(--text-secondary, #4b5563);
+  --ps-text-color: var(--text-primary, #1f2937);
+  --ps-placeholder-color: var(--text-muted, #6b7280);
+  --ps-hint-color: var(--text-muted, #6b7280);
+
+  // Dropdown
+  --ps-dropdown-bg: var(--bg-primary, #ffffff);
+  --ps-dropdown-border: var(--border-color, #e5e7eb);
+  --ps-dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --ps-option-hover-bg: var(--bg-secondary, #f9fafb);
+  --ps-option-selected-bg: rgba(37, 99, 235, 0.08);
+  --ps-option-selected-text: var(--color-primary, #2563eb);
+
+  // Checkbox / Toggle / Radio
+  --ps-check-bg: var(--color-primary, #2563eb);
+  --ps-check-border: var(--border-color, #e5e7eb);
+  --ps-toggle-bg-off: #d1d5db;
+  --ps-toggle-bg-on: var(--color-primary, #2563eb);
+  --ps-toggle-knob: #ffffff;
+
+  // Tag / Chip
+  --ps-tag-bg: rgba(37, 99, 235, 0.1);
+  --ps-tag-text: var(--color-primary, #2563eb);
+  --ps-tag-border: rgba(37, 99, 235, 0.2);
+}
+
+// Dark mode overrides
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ps-field-bg: var(--bg-secondary, #111827);
+    --ps-field-bg-focus: var(--bg-secondary, #111827);
+    --ps-field-bg-disabled: var(--bg-tertiary, #374151);
+    --ps-error-bg: rgba(220, 38, 38, 0.1);
+    --ps-success-bg: rgba(34, 197, 94, 0.1);
+    --ps-dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --ps-option-hover-bg: var(--bg-tertiary, #374151);
+    --ps-tag-bg: rgba(37, 99, 235, 0.15);
+  }
+}
+
+.dark {
+  --ps-field-bg: var(--bg-secondary, #111827);
+  --ps-field-bg-focus: var(--bg-secondary, #111827);
+  --ps-field-bg-disabled: var(--bg-tertiary, #374151);
+  --ps-error-bg: rgba(220, 38, 38, 0.1);
+  --ps-success-bg: rgba(34, 197, 94, 0.1);
+  --ps-dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --ps-option-hover-bg: var(--bg-tertiary, #374151);
+  --ps-tag-bg: rgba(37, 99, 235, 0.15);
+}

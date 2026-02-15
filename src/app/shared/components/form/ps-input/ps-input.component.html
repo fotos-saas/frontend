@@ -1,0 +1,73 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label [for]="uniqueId()" class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div [ngClass]="wrapperClasses()">
+    @if (prefix()) {
+      <span class="ps-field__prefix">
+        <lucide-icon [name]="prefix()" [size]="18" />
+      </span>
+    }
+
+    <input
+      class="ps-field__input"
+      [id]="uniqueId()"
+      [type]="effectiveType()"
+      [value]="value()"
+      [placeholder]="placeholder()"
+      [disabled]="isDisabled()"
+      [readOnly]="readonly()"
+      [attr.min]="min() || null"
+      [attr.max]="max() || null"
+      [attr.step]="step() || null"
+      [attr.autocomplete]="autocomplete() || null"
+      [attr.required]="required() || null"
+      [attr.aria-invalid]="computedState() === 'error'"
+      [attr.aria-describedby]="errorMessage() ? uniqueId() + '-error' : hint() ? uniqueId() + '-hint' : null"
+      (input)="onInput($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+    />
+
+    @if (showSuccessIcon()) {
+      <span class="ps-field__success-icon">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18" />
+      </span>
+    }
+
+    @if (showPasswordToggle()) {
+      <button
+        type="button"
+        class="ps-field__suffix-btn"
+        tabindex="-1"
+        [attr.aria-label]="passwordVisible() ? 'Jelszó elrejtése' : 'Jelszó mutatása'"
+        (mousedown)="togglePassword($event)"
+      >
+        <lucide-icon [name]="passwordVisible() ? ICONS.EYE_OFF : ICONS.EYE" [size]="18" />
+      </button>
+    } @else if (suffix()) {
+      <span class="ps-field__suffix">
+        <lucide-icon [name]="suffix()" [size]="18" />
+      </span>
+    }
+  </div>
+
+  @if (computedState() === 'error' && errorMessage()) {
+    <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">
+      <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (hint() && computedState() !== 'error') {
+    <div class="ps-field__hint" [id]="uniqueId() + '-hint'">
+      {{ hint() }}
+    </div>
+  }
+</div>

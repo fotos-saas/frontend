@@ -1,0 +1,84 @@
+@use '../form-tokens' as *;
+@use '../form-field-base';
+
+.ps-select {
+  &__wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: $ps-field-height;
+    border: $ps-field-border-width solid var(--ps-field-border);
+    border-radius: $ps-field-border-radius;
+    background: var(--ps-field-bg);
+    transition:
+      border-color $ps-transition-duration $ps-transition-easing,
+      box-shadow $ps-transition-duration $ps-transition-easing,
+      background-color $ps-transition-duration $ps-transition-easing;
+
+    &:hover:not(.ps-field__wrapper--disabled) {
+      border-color: var(--ps-field-border-hover);
+    }
+  }
+
+  &__native {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--ps-text-color);
+    font-size: $ps-field-font-size;
+    font-family: inherit;
+    padding: $ps-field-padding-y $ps-field-padding-x;
+    padding-right: 36px;
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+
+    // Hide default arrow in IE
+    &::-ms-expand {
+      display: none;
+    }
+  }
+
+  &__chevron {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    color: var(--ps-placeholder-color);
+    pointer-events: none;
+    transition: transform $ps-transition-duration $ps-transition-easing;
+  }
+}
+
+// States
+.ps-field--error .ps-select__wrapper {
+  border-color: var(--ps-error-border);
+  background: var(--ps-error-bg);
+  animation: psFieldShake 0.4s ease;
+}
+
+.ps-field--success .ps-select__wrapper {
+  border-color: var(--ps-success-border);
+  background: var(--ps-success-bg);
+}
+
+.ps-field__wrapper--focused.ps-select__wrapper {
+  border-color: var(--ps-focus-border);
+  box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-field--error .ps-select__wrapper {
+    animation: none;
+  }
+}

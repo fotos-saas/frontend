@@ -1,0 +1,411 @@
+// ============================================================================
+// FORM FIELD BASE STYLES (BEM: .ps-field)
+// PhotoStack Form Component System
+// ============================================================================
+
+@use 'form-tokens' as *;
+@use 'form-animations';
+
+// .ps-field — Fő wrapper block
+.ps-field {
+  display: flex;
+  flex-direction: column;
+
+  // Méret variánsok
+  &--sm { max-width: $ps-field-width-sm; }
+  &--md { max-width: $ps-field-width-md; }
+  &--lg { max-width: $ps-field-width-lg; }
+  &--full { max-width: 100%; }
+
+  // ──────────────────────────────────────
+  // Label
+  // ──────────────────────────────────────
+  &__label {
+    display: flex;
+    align-items: center;
+    font-size: $ps-label-font-size;
+    font-weight: 500;
+    color: var(--ps-label-color);
+    margin-bottom: 6px;
+    transition: color $ps-transition-duration $ps-transition-easing;
+    cursor: default;
+    user-select: none;
+  }
+
+  &__required {
+    color: var(--ps-error-text);
+    margin-left: 2px;
+    font-weight: 600;
+  }
+
+  // ──────────────────────────────────────
+  // Input wrapper (border + focus ring)
+  // ──────────────────────────────────────
+  &__wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: $ps-field-height;
+    border: $ps-field-border-width solid var(--ps-field-border);
+    border-radius: $ps-field-border-radius;
+    background: var(--ps-field-bg);
+    transition:
+      border-color $ps-transition-duration $ps-transition-easing,
+      box-shadow $ps-transition-duration $ps-transition-easing,
+      background-color $ps-transition-duration $ps-transition-easing;
+    overflow: hidden;
+
+    &:hover:not(.ps-field__wrapper--disabled):not(.ps-field__wrapper--readonly) {
+      border-color: var(--ps-field-border-hover);
+    }
+  }
+
+  // Height variants
+  &--height-sm .ps-field__wrapper { height: $ps-field-height-sm; }
+  &--height-lg .ps-field__wrapper { height: $ps-field-height-lg; }
+
+  // ──────────────────────────────────────
+  // Focus state
+  // ──────────────────────────────────────
+  &__wrapper--focused {
+    border-color: var(--ps-focus-border);
+    box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
+    background: var(--ps-field-bg-focus);
+  }
+
+  &__wrapper--focused ~ .ps-field__label,
+  &--focused .ps-field__label {
+    color: var(--ps-focus-label);
+  }
+
+  // ──────────────────────────────────────
+  // Error state
+  // ──────────────────────────────────────
+  &--error .ps-field__wrapper {
+    border-color: var(--ps-error-border);
+    background: var(--ps-error-bg);
+    animation: psFieldShake 0.4s ease;
+  }
+
+  &--error .ps-field__wrapper--focused {
+    box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-error-ring);
+  }
+
+  // ──────────────────────────────────────
+  // Success state
+  // ──────────────────────────────────────
+  &--success .ps-field__wrapper {
+    border-color: var(--ps-success-border);
+    background: var(--ps-success-bg);
+  }
+
+  &--success .ps-field__wrapper--focused {
+    box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-success-ring);
+  }
+
+  // ──────────────────────────────────────
+  // Disabled & Readonly state
+  // ──────────────────────────────────────
+  &__wrapper--disabled {
+    background: var(--ps-field-bg-disabled);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &__wrapper--readonly {
+    background: var(--ps-field-bg-disabled);
+    cursor: default;
+  }
+
+  // ──────────────────────────────────────
+  // Native input/textarea inside wrapper
+  // ──────────────────────────────────────
+  &__input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--ps-text-color);
+    font-size: $ps-field-font-size;
+    font-family: inherit;
+    padding: $ps-field-padding-y $ps-field-padding-x;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+
+    &::placeholder {
+      color: var(--ps-placeholder-color);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  // ──────────────────────────────────────
+  // Prefix & Suffix icons
+  // ──────────────────────────────────────
+  &__prefix,
+  &__suffix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ps-placeholder-color);
+    flex-shrink: 0;
+    padding: 0 8px;
+  }
+
+  &__prefix { padding-right: 0; }
+  &__suffix { padding-left: 0; }
+
+  // Suffix action button (pl. eye toggle, clear)
+  &__suffix-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--ps-placeholder-color);
+    cursor: pointer;
+    border-radius: 6px;
+    margin-right: 4px;
+    transition: color $ps-transition-duration $ps-transition-easing,
+                background $ps-transition-duration $ps-transition-easing;
+
+    &:hover {
+      color: var(--ps-text-color);
+      background: var(--ps-option-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ps-focus-border);
+      outline-offset: -2px;
+    }
+  }
+
+  // ──────────────────────────────────────
+  // Error message
+  // ──────────────────────────────────────
+  &__error {
+    display: flex;
+    align-items: center;
+    font-size: $ps-error-font-size;
+    color: var(--ps-error-text);
+    margin-top: 4px;
+    animation: psFieldErrorSlideIn 200ms $ps-transition-easing;
+
+    lucide-icon,
+    .ps-field__error-icon {
+      margin-right: 4px;
+      animation: psFieldErrorPop 300ms $ps-spring-easing;
+    }
+  }
+
+  // ──────────────────────────────────────
+  // Hint text
+  // ──────────────────────────────────────
+  &__hint {
+    font-size: $ps-hint-font-size;
+    color: var(--ps-hint-color);
+    margin-top: 4px;
+  }
+
+  // ──────────────────────────────────────
+  // Success icon
+  // ──────────────────────────────────────
+  &__success-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ps-success-text);
+    padding: 0 8px;
+    animation: psFieldCheckIn 300ms $ps-spring-easing;
+  }
+}
+
+// ============================================================================
+// DROPDOWN PANEL (shared by select, searchable-select, autocomplete, multi-select)
+// ============================================================================
+
+.ps-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: -$ps-field-border-width;
+  right: -$ps-field-border-width;
+  z-index: $ps-dropdown-z;
+  background: var(--ps-dropdown-bg);
+  border: 1px solid var(--ps-dropdown-border);
+  border-radius: $ps-field-border-radius;
+  box-shadow: var(--ps-dropdown-shadow);
+  max-height: 240px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform-origin: top center;
+  animation: psDropdownOpen 200ms $ps-spring-easing;
+
+  &--closing {
+    animation: psDropdownClose 150ms ease forwards;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    padding: 8px $ps-field-padding-x;
+    font-size: $ps-field-font-size;
+    color: var(--ps-text-color);
+    cursor: pointer;
+    transition: background $ps-transition-duration $ps-transition-easing;
+    min-height: 38px;
+
+    &:hover,
+    &--highlighted {
+      background: var(--ps-option-hover-bg);
+    }
+
+    &--selected {
+      background: var(--ps-option-selected-bg);
+      color: var(--ps-option-selected-text);
+      font-weight: 500;
+    }
+
+    &--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+
+  &__option-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__option-sublabel {
+    font-size: $ps-hint-font-size;
+    color: var(--ps-hint-color);
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+
+  &__option-check {
+    margin-left: 8px;
+    color: var(--ps-option-selected-text);
+    flex-shrink: 0;
+  }
+
+  &__empty {
+    padding: 12px $ps-field-padding-x;
+    font-size: $ps-hint-font-size;
+    color: var(--ps-hint-color);
+    text-align: center;
+  }
+
+  &__group-label {
+    padding: 8px $ps-field-padding-x 4px;
+    font-size: $ps-hint-font-size;
+    font-weight: 600;
+    color: var(--ps-hint-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+// ============================================================================
+// TAG / CHIP (shared by multi-select, tag-input)
+// ============================================================================
+
+.ps-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px;
+  background: var(--ps-tag-bg);
+  color: var(--ps-tag-text);
+  border: 1px solid var(--ps-tag-border);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  animation: psTagEnter 300ms $ps-spring-easing;
+  transition: transform $ps-transition-duration $ps-transition-easing;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &--removing {
+    animation: psTagOut 200ms ease forwards;
+  }
+
+  &__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+  }
+
+  &__remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: opacity $ps-transition-duration ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// ============================================================================
+// REDUCED MOTION
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-field {
+    &--error .ps-field__wrapper {
+      animation: none;
+    }
+
+    &__error {
+      animation: none;
+
+      lucide-icon,
+      .ps-field__error-icon {
+        animation: none;
+      }
+    }
+
+    &__success-icon {
+      animation: none;
+    }
+  }
+
+  .ps-dropdown {
+    animation: none;
+
+    &--closing {
+      animation: none;
+    }
+  }
+
+  .ps-tag {
+    animation: none;
+    transition: none;
+
+    &:hover { transform: none; }
+    &--removing { animation: none; }
+  }
+}

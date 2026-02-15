@@ -1,0 +1,131 @@
+@use '../form-tokens' as *;
+@use '../form-animations';
+@use '../form-field-base';
+
+.ps-radio-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+
+  &__legend {
+    font-size: $ps-label-font-size;
+    font-weight: 500;
+    color: var(--ps-label-color);
+    margin-bottom: 8px;
+    padding: 0;
+  }
+
+  &__options {
+    display: flex;
+    flex-direction: column;
+
+    &--horizontal {
+      flex-direction: row;
+      flex-wrap: wrap;
+      margin: -4px;
+
+      > .ps-radio {
+        margin: 4px;
+      }
+    }
+  }
+
+  &--disabled {
+    opacity: 0.6;
+  }
+}
+
+.ps-radio {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  padding: 6px 0;
+  user-select: none;
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &__native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  &__circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: $ps-field-border-width solid var(--ps-check-border);
+    border-radius: 50%;
+    background: var(--ps-field-bg);
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition:
+      border-color $ps-transition-duration $ps-transition-easing,
+      box-shadow $ps-transition-duration $ps-transition-easing;
+
+    &--focused {
+      border-color: var(--ps-focus-border);
+      box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
+    }
+  }
+
+  &--selected &__circle {
+    border-color: var(--ps-check-bg);
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ps-check-bg);
+    animation: psRadioDotIn 300ms $ps-spring-easing;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    margin-left: 8px;
+  }
+
+  &__label {
+    font-size: $ps-field-font-size;
+    color: var(--ps-text-color);
+    line-height: 1.4;
+  }
+
+  &__sublabel {
+    font-size: $ps-hint-font-size;
+    color: var(--ps-hint-color);
+    line-height: 1.3;
+    margin-top: 2px;
+  }
+
+  &:hover:not(.ps-radio--disabled) &__circle {
+    border-color: var(--ps-field-border-hover);
+  }
+
+  &--selected:hover:not(.ps-radio--disabled) &__circle {
+    border-color: var(--ps-check-bg);
+  }
+}
+
+.ps-radio-group--error .ps-radio__circle {
+  border-color: var(--ps-error-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-radio__dot {
+    animation: none;
+  }
+}

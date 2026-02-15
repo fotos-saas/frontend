@@ -1,55 +1,55 @@
-<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel dialog-panel--md" (mousedown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
-    <header class="dialog-header">
-      <h2>{{ isEdit ? 'Szolgáltatás szerkesztése' : 'Új szolgáltatás' }}</h2>
-      <button class="close-btn" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="18" />
-      </button>
-    </header>
+<app-dialog-wrapper
+  [variant]="isEdit ? 'edit' : 'create'"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.SETTINGS"
+  [title]="isEdit ? 'Szolgáltatás szerkesztése' : 'Új szolgáltatás'"
+  size="md"
+  (closeEvent)="close.emit()"
+  (submitEvent)="save()"
+  (backdropClickEvent)="close.emit()">
+  <div dialogBody>
+    <ps-input
+      label="Név"
+      [required]="true"
+      placeholder="Pl. Képcsere"
+      [(ngModel)]="name" />
 
-    <div class="dialog-body">
-      <ps-input
-        label="Név"
-        [required]="true"
-        placeholder="Pl. Képcsere"
-        [(ngModel)]="name" />
+    <ps-select
+      label="Típus"
+      [options]="typeOptions"
+      [(ngModel)]="serviceType" />
 
-      <ps-select
-        label="Típus"
-        [options]="typeOptions"
-        [(ngModel)]="serviceType" />
+    <ps-input
+      label="Alapár (Ft)"
+      type="number"
+      [min]="0"
+      [(ngModel)]="defaultPrice" />
 
-      <ps-input
-        label="Alapár (Ft)"
-        type="number"
-        [min]="0"
-        [(ngModel)]="defaultPrice" />
+    <ps-input
+      label="ÁFA (%)"
+      type="number"
+      [min]="0"
+      [max]="100"
+      [(ngModel)]="vatPercentage" />
 
-      <ps-input
-        label="ÁFA (%)"
-        type="number"
-        [min]="0"
-        [max]="100"
-        [(ngModel)]="vatPercentage" />
+    <ps-textarea
+      label="Leírás"
+      placeholder="Opcionális leírás..."
+      [rows]="3"
+      [(ngModel)]="description" />
 
-      <ps-textarea
-        label="Leírás"
-        placeholder="Opcionális leírás..."
-        [rows]="3"
-        [(ngModel)]="description" />
-
-      @if (isEdit) {
-        <ps-toggle
-          label="Aktív"
-          [(ngModel)]="isActive" />
-      }
-    </div>
-
-    <footer class="dialog-footer">
-      <button class="btn btn-cancel" (click)="close.emit()">Mégse</button>
-      <button class="btn btn-save" (click)="save()" [disabled]="!name.trim()">
-        {{ isEdit ? 'Mentés' : 'Létrehozás' }}
-      </button>
-    </footer>
+    @if (isEdit) {
+      <ps-toggle
+        label="Aktív"
+        [(ngModel)]="isActive" />
+    }
   </div>
-</div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+    <button class="btn btn--primary" (click)="save()" [disabled]="!name.trim()">
+      {{ isEdit ? 'Mentés' : 'Létrehozás' }}
+    </button>
+  </div>
+</app-dialog-wrapper>

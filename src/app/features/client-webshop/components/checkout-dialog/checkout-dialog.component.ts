@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent, PsTextareaComponent, PsCheckboxComponent, PsRadioGroupComponent, PsRadioOption } from '@shared/components/form';
 import { ClientWebshopService, ShopConfig, CheckoutRequest } from '../../client-webshop.service';
 import { cartItems, cartTotal } from '../../client-webshop.state';
@@ -12,7 +12,7 @@ import { cartItems, cartTotal } from '../../client-webshop.state';
 @Component({
   selector: 'app-checkout-dialog',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, LucideAngularModule, PsInputComponent, PsTextareaComponent, PsCheckboxComponent, PsRadioGroupComponent],
+  imports: [FormsModule, DecimalPipe, LucideAngularModule, DialogWrapperComponent, PsInputComponent, PsTextareaComponent, PsCheckboxComponent, PsRadioGroupComponent],
   templateUrl: './checkout-dialog.component.html',
   styleUrl: './checkout-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,8 +26,6 @@ export class CheckoutDialogComponent {
   token = input.required<string>();
   close = output<void>();
   checkoutRedirect = output<string>();
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   customerName = signal('');
   customerEmail = signal('');

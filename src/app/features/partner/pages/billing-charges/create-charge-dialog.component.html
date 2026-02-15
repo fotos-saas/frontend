@@ -1,75 +1,79 @@
-<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel dialog-panel--lg" (mousedown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
-    <header class="dialog-header">
-      <h2>Új terhelés</h2>
-      <button class="close-btn" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="18" />
-      </button>
-    </header>
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.CREDIT_CARD"
+  title="Új terhelés"
+  size="lg"
+  [isSubmitting]="saving()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="save()"
+  (backdropClickEvent)="close.emit()">
+  <div dialogBody>
+    <!-- Projekt -->
+    <ps-select
+      label="Projekt"
+      [required]="true"
+      emptyLabel="Válassz projektet..."
+      [options]="projectOptions()"
+      [ngModel]="selectedProjectId"
+      (ngModelChange)="selectedProjectId = $event; onProjectChange()" />
 
-    <div class="dialog-body">
-      <!-- Projekt -->
-      <ps-select
-        label="Projekt"
-        [required]="true"
-        emptyLabel="Válassz projektet..."
-        [options]="projectOptions()"
-        [ngModel]="selectedProjectId"
-        (ngModelChange)="selectedProjectId = $event; onProjectChange()" />
+    <!-- Személy -->
+    <ps-select
+      label="Diák"
+      [required]="true"
+      emptyLabel="Válassz diákot..."
+      [options]="personOptions()"
+      [ngModel]="selectedPersonId"
+      (ngModelChange)="selectedPersonId = $event"
+      [disabled]="!selectedProjectId" />
 
-      <!-- Személy -->
-      <ps-select
-        label="Diák"
-        [required]="true"
-        emptyLabel="Válassz diákot..."
-        [options]="personOptions()"
-        [ngModel]="selectedPersonId"
-        (ngModelChange)="selectedPersonId = $event"
-        [disabled]="!selectedProjectId" />
+    <!-- Szolgáltatás -->
+    <ps-select
+      label="Szolgáltatás"
+      emptyLabel="Egyedi (nincs katalógusból)"
+      [options]="serviceOptions()"
+      [ngModel]="selectedServiceId"
+      (ngModelChange)="selectedServiceId = $event; onServiceChange()" />
 
-      <!-- Szolgáltatás -->
-      <ps-select
-        label="Szolgáltatás"
-        emptyLabel="Egyedi (nincs katalógusból)"
-        [options]="serviceOptions()"
-        [ngModel]="selectedServiceId"
-        (ngModelChange)="selectedServiceId = $event; onServiceChange()" />
+    <!-- Összeg -->
+    <ps-input
+      label="Összeg (Ft)"
+      [required]="true"
+      type="number"
+      [min]="1"
+      [(ngModel)]="amountHuf" />
 
-      <!-- Összeg -->
-      <ps-input
-        label="Összeg (Ft)"
-        [required]="true"
-        type="number"
-        [min]="1"
-        [(ngModel)]="amountHuf" />
+    <!-- Leírás -->
+    <ps-input
+      label="Leírás"
+      placeholder="Mi a terhelés oka?"
+      [(ngModel)]="description" />
 
-      <!-- Leírás -->
-      <ps-input
-        label="Leírás"
-        placeholder="Mi a terhelés oka?"
-        [(ngModel)]="description" />
+    <!-- Határidő -->
+    <ps-datepicker
+      label="Fizetési határidő"
+      [(ngModel)]="dueDate" />
 
-      <!-- Határidő -->
-      <ps-datepicker
-        label="Fizetési határidő"
-        [(ngModel)]="dueDate" />
-
-      <!-- Megjegyzés -->
-      <ps-textarea
-        label="Megjegyzés (belső)"
-        placeholder="Csak te látod..."
-        [rows]="2"
-        [(ngModel)]="notes" />
-    </div>
-
-    <footer class="dialog-footer">
-      <button class="btn btn-cancel" (click)="close.emit()">Mégse</button>
-      <button
-        class="btn btn-save"
-        (click)="save()"
-        [disabled]="!selectedProjectId || !selectedPersonId || amountHuf <= 0 || saving()">
-        {{ saving() ? 'Mentés...' : 'Terhelés létrehozása' }}
-      </button>
-    </footer>
+    <!-- Megjegyzés -->
+    <ps-textarea
+      label="Megjegyzés (belső)"
+      placeholder="Csak te látod..."
+      [rows]="2"
+      [(ngModel)]="notes" />
   </div>
-</div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+    <button
+      class="btn btn--primary"
+      (click)="save()"
+      [disabled]="!selectedProjectId || !selectedPersonId || amountHuf <= 0 || saving()">
+      @if (saving()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      Terhelés létrehozása
+    </button>
+  </div>
+</app-dialog-wrapper>

@@ -1,11 +1,13 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit, DestroyRef, input, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '../../../shared/constants/icons.constants';
+import { DialogWrapperComponent } from '../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PresetSelectorComponent } from '../preset-selector/preset-selector.component';
 import { PsTextareaComponent } from '@shared/components/form';
 import { PokeService } from '../../../core/services/poke.service';
 import { MissingUser, PokeCategory, PokePreset } from '../../../core/models/poke.models';
-import { createBackdropHandler } from '../../../shared/utils/dialog.util';
 
 /**
  * Poke Composer Component
@@ -16,6 +18,8 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
   selector: 'app-poke-composer',
   imports: [
     FormsModule,
+    LucideAngularModule,
+    DialogWrapperComponent,
     PresetSelectorComponent,
     PsTextareaComponent,
   ],
@@ -26,6 +30,8 @@ import { createBackdropHandler } from '../../../shared/utils/dialog.util';
 export class PokeComposerComponent implements OnInit {
   private readonly pokeService = inject(PokeService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly ICONS = ICONS;
 
   /** Signal-based inputs */
   readonly user = input.required<MissingUser>();
@@ -49,9 +55,6 @@ export class PokeComposerComponent implements OnInit {
 
   /** Preset-ek */
   readonly presets = signal<PokePreset[]>([]);
-
-  /** Backdrop handler - megakadályozza a véletlen bezárást szöveg kijelöléskor */
-  readonly backdropHandler = createBackdropHandler(() => this.cancel());
 
   ngOnInit(): void {
     // Preset-ek betöltése (cache-ből vagy API-ból)

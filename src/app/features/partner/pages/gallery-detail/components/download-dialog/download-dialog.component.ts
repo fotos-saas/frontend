@@ -2,9 +2,9 @@ import { Component, ChangeDetectionStrategy, input, output, signal } from '@angu
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../../../shared/utils/dialog.util';
 import { PsSelectComponent, PsRadioGroupComponent, PsCheckboxComponent } from '@shared/components/form';
 import { PsSelectOption, PsRadioOption } from '@shared/components/form/form.types';
+import { DialogWrapperComponent } from '../../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 export interface DownloadOptions {
   zipContent: 'retouch_only' | 'tablo_only' | 'all' | 'retouch_and_tablo';
@@ -16,7 +16,7 @@ export interface DownloadOptions {
   selector: 'app-download-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, LucideAngularModule, PsSelectComponent, PsRadioGroupComponent, PsCheckboxComponent],
+  imports: [FormsModule, LucideAngularModule, PsSelectComponent, PsRadioGroupComponent, PsCheckboxComponent, DialogWrapperComponent],
   templateUrl: './download-dialog.component.html',
   styleUrl: './download-dialog.component.scss',
 })
@@ -31,8 +31,6 @@ export class DownloadDialogComponent {
   readonly zipContent = signal<DownloadOptions['zipContent']>('all');
   readonly fileNaming = signal<DownloadOptions['fileNaming']>('original');
   readonly includeExcel = signal<boolean>(true);
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   readonly zipContentOptions: PsSelectOption[] = [
     { id: 'all', label: 'Összes kép (saját + retusált + tablókép)' },

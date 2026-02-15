@@ -46,187 +46,177 @@
 
 <!-- Edit Modal -->
 @if (state.editDialog.isOpen()) {
-  <div
-    class="dialog-backdrop"
-    (mousedown)="editBackdropHandler.onMouseDown($event)"
-    (click)="editBackdropHandler.onClick($event)"
+  <app-dialog-wrapper
+    variant="edit"
+    headerStyle="flat"
+    theme="blue"
+    [icon]="ICONS.USER"
+    title="Ügyfél szerkesztése"
+    size="md"
+    [closable]="true"
+    [isSubmitting]="state.saving()"
+    (closeEvent)="state.closeEditModal()"
+    (submitEvent)="updateClient()"
   >
-    <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Ügyfél szerkesztése</h2>
-        <button
-          (click)="state.closeEditModal()"
-          class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-        >
-          <lucide-icon [name]="ICONS.X" [size]="20" />
-        </button>
+    <div dialogBody>
+      <ps-input
+        label="Név"
+        [required]="true"
+        [(ngModel)]="state.editForm.name"
+        name="name"
+      />
+
+      <ps-input
+        label="Email"
+        type="email"
+        [(ngModel)]="state.editForm.email"
+        name="email"
+      />
+
+      <ps-input
+        label="Telefonszám"
+        type="tel"
+        [(ngModel)]="state.editForm.phone"
+        name="phone"
+      />
+
+      <ps-textarea
+        label="Megjegyzés"
+        [(ngModel)]="state.editForm.note"
+        name="note"
+        [rows]="3"
+      />
+
+      <!-- Regisztráció engedélyezése -->
+      <div class="pt-4 mt-2 border-t border-gray-200 dark:border-gray-700">
+        <ps-checkbox
+          label="Regisztráció engedélyezése"
+          hint="Az ügyfél email/jelszóval regisztrálhat. Ezután csak azzal léphet be, a kód inaktív lesz."
+          [(ngModel)]="state.editForm.allowRegistration"
+          name="allowRegistration"
+        />
       </div>
-
-      <form (ngSubmit)="updateClient()" class="p-4 space-y-4">
-        <ps-input
-          label="Név"
-          [required]="true"
-          [(ngModel)]="state.editForm.name"
-          name="name"
-        />
-
-        <ps-input
-          label="Email"
-          type="email"
-          [(ngModel)]="state.editForm.email"
-          name="email"
-        />
-
-        <ps-input
-          label="Telefonszám"
-          type="tel"
-          [(ngModel)]="state.editForm.phone"
-          name="phone"
-        />
-
-        <ps-textarea
-          label="Megjegyzés"
-          [(ngModel)]="state.editForm.note"
-          name="note"
-          [rows]="3"
-        />
-
-        <!-- Regisztráció engedélyezése -->
-        <div class="pt-4 mt-2 border-t border-gray-200 dark:border-gray-700">
-          <ps-checkbox
-            label="Regisztráció engedélyezése"
-            hint="Az ügyfél email/jelszóval regisztrálhat. Ezután csak azzal léphet be, a kód inaktív lesz."
-            [(ngModel)]="state.editForm.allowRegistration"
-            name="allowRegistration"
-          />
-        </div>
-
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            type="button"
-            (click)="state.closeEditModal()"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-          >
-            Mégsem
-          </button>
-          <button
-            type="submit"
-            [disabled]="!state.editForm.name || state.saving()"
-            class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
-          >
-            Mentés
-          </button>
-        </div>
-      </form>
     </div>
-  </div>
+
+    <div dialogFooter>
+      <button
+        type="button"
+        (click)="state.closeEditModal()"
+        class="btn btn--outline"
+      >
+        Mégsem
+      </button>
+      <button
+        type="submit"
+        [disabled]="!state.editForm.name || state.saving()"
+        class="btn btn--primary"
+      >
+        Mentés
+      </button>
+    </div>
+  </app-dialog-wrapper>
 }
 
 <!-- Create Album Modal -->
 @if (state.albumDialog.isOpen()) {
-  <div
-    class="dialog-backdrop"
-    (mousedown)="albumBackdropHandler.onMouseDown($event)"
-    (click)="albumBackdropHandler.onClick($event)"
+  <app-dialog-wrapper
+    variant="create"
+    headerStyle="flat"
+    theme="blue"
+    [icon]="ICONS.FOLDER_PLUS"
+    title="Új album"
+    size="md"
+    [closable]="true"
+    [isSubmitting]="state.saving()"
+    (closeEvent)="state.closeAlbumModal()"
+    (submitEvent)="createAlbum()"
   >
-    <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Új album</h2>
-        <button
-          (click)="state.closeAlbumModal()"
-          class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-        >
-          <lucide-icon [name]="ICONS.X" [size]="20" />
-        </button>
-      </div>
+    <div dialogBody>
+      <ps-input
+        label="Album neve"
+        [required]="true"
+        [(ngModel)]="state.albumForm.name"
+        name="name"
+        placeholder="pl. Esküvői fotók"
+      />
 
-      <form (ngSubmit)="createAlbum()" class="p-4 space-y-4">
-        <ps-input
-          label="Album neve"
-          [required]="true"
-          [(ngModel)]="state.albumForm.name"
-          name="name"
-          placeholder="pl. Esküvői fotók"
-        />
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Album típusa <span class="text-red-500">*</span>
-          </label>
-          <div class="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              (click)="state.albumForm.type = 'selection'"
-              class="p-4 border-2 rounded-lg text-left transition-colors"
-              [class]="state.albumForm.type === 'selection' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'"
-            >
-              <lucide-icon [name]="ICONS.GRID" [size]="24" class="text-primary-600 dark:text-primary-400 mb-2" />
-              <h3 class="font-medium text-gray-900 dark:text-white">Képválasztás</h3>
-              <p class="text-sm text-gray-500 mt-1">Egyszerű képválasztás</p>
-            </button>
-            <button
-              type="button"
-              (click)="state.albumForm.type = 'tablo'"
-              class="p-4 border-2 rounded-lg text-left transition-colors"
-              [class]="state.albumForm.type === 'tablo' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'"
-            >
-              <lucide-icon [name]="ICONS.FRAME" [size]="24" class="text-primary-600 dark:text-primary-400 mb-2" />
-              <h3 class="font-medium text-gray-900 dark:text-white">Tablókép</h3>
-              <p class="text-sm text-gray-500 mt-1">Teljes workflow</p>
-            </button>
-          </div>
-        </div>
-
-        @if (state.albumForm.type === 'selection') {
-          <div class="grid grid-cols-2 gap-4">
-            <ps-input
-              label="Min. kiválasztás"
-              type="number"
-              [(ngModel)]="state.albumForm.min_selections"
-              name="min_selections"
-              min="1"
-            />
-            <ps-input
-              label="Max. kiválasztás"
-              type="number"
-              [(ngModel)]="state.albumForm.max_selections"
-              name="max_selections"
-              min="1"
-            />
-          </div>
-        }
-
-        @if (state.albumForm.type === 'tablo') {
-          <ps-input
-            label="Max. retusálandó kép"
-            type="number"
-            [(ngModel)]="state.albumForm.max_retouch_photos"
-            name="max_retouch_photos"
-            min="1"
-            max="20"
-            placeholder="5"
-          />
-        }
-
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Album típusa <span class="text-red-500">*</span>
+        </label>
+        <div class="grid grid-cols-2 gap-3">
           <button
             type="button"
-            (click)="state.closeAlbumModal()"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            (click)="state.albumForm.type = 'selection'"
+            class="p-4 border-2 rounded-lg text-left transition-colors"
+            [class]="state.albumForm.type === 'selection' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'"
           >
-            Mégsem
+            <lucide-icon [name]="ICONS.GRID" [size]="24" class="text-primary-600 dark:text-primary-400 mb-2" />
+            <h3 class="font-medium text-gray-900 dark:text-white">Képválasztás</h3>
+            <p class="text-sm text-gray-500 mt-1">Egyszerű képválasztás</p>
           </button>
           <button
-            type="submit"
-            [disabled]="!state.albumForm.name || !state.albumForm.type || state.saving()"
-            class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+            type="button"
+            (click)="state.albumForm.type = 'tablo'"
+            class="p-4 border-2 rounded-lg text-left transition-colors"
+            [class]="state.albumForm.type === 'tablo' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'"
           >
-            Létrehozás
+            <lucide-icon [name]="ICONS.FRAME" [size]="24" class="text-primary-600 dark:text-primary-400 mb-2" />
+            <h3 class="font-medium text-gray-900 dark:text-white">Tablókép</h3>
+            <p class="text-sm text-gray-500 mt-1">Teljes workflow</p>
           </button>
         </div>
-      </form>
+      </div>
+
+      @if (state.albumForm.type === 'selection') {
+        <div class="grid grid-cols-2 gap-4">
+          <ps-input
+            label="Min. kiválasztás"
+            type="number"
+            [(ngModel)]="state.albumForm.min_selections"
+            name="min_selections"
+            min="1"
+          />
+          <ps-input
+            label="Max. kiválasztás"
+            type="number"
+            [(ngModel)]="state.albumForm.max_selections"
+            name="max_selections"
+            min="1"
+          />
+        </div>
+      }
+
+      @if (state.albumForm.type === 'tablo') {
+        <ps-input
+          label="Max. retusálandó kép"
+          type="number"
+          [(ngModel)]="state.albumForm.max_retouch_photos"
+          name="max_retouch_photos"
+          min="1"
+          max="20"
+          placeholder="5"
+        />
+      }
     </div>
-  </div>
+
+    <div dialogFooter>
+      <button
+        type="button"
+        (click)="state.closeAlbumModal()"
+        class="btn btn--outline"
+      >
+        Mégsem
+      </button>
+      <button
+        type="submit"
+        [disabled]="!state.albumForm.name || !state.albumForm.type || state.saving()"
+        class="btn btn--primary"
+      >
+        Létrehozás
+      </button>
+    </div>
+  </app-dialog-wrapper>
 }
 
 <!-- Disable Code Confirm Dialog -->

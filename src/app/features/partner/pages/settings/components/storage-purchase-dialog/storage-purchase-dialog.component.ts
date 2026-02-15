@@ -3,7 +3,7 @@ import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { StorageUsage } from '../../../../services/storage.service';
 
 /**
@@ -15,7 +15,7 @@ import { StorageUsage } from '../../../../services/storage.service';
 @Component({
   selector: 'app-storage-purchase-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DecimalPipe],
+  imports: [FormsModule, LucideAngularModule, DecimalPipe, DialogWrapperComponent],
   templateUrl: './storage-purchase-dialog.component.html',
   styleUrls: ['./storage-purchase-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,9 +37,6 @@ export class StoragePurchaseDialogComponent implements OnInit {
 
   /** Kiválasztott GB mennyiség */
   selectedGb = signal(0);
-
-  /** Backdrop click handler */
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   /** Éves előfizetés-e */
   isYearly = computed(() => this.usage().billing_cycle === 'yearly');

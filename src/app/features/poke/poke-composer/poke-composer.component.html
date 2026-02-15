@@ -1,77 +1,55 @@
-<!-- Backdrop overlay (glassmorphism) -->
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="dialog-title">
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="hero"
+  theme="purple"
+  [icon]="ICONS.SEND"
+  [title]="'Bökj: ' + user().name"
+  [description]="'Válassz egy előre megírt üzenetet vagy írj sajátot'"
+  size="md"
+  [closable]="true"
+  (closeEvent)="cancel()"
+  (submitEvent)="send()"
+>
+  <div dialogBody>
+    <!-- Preset selector -->
+    <div class="dialog__section">
+      <app-preset-selector
+        [presets]="presets()"
+        [selected]="selectedPreset()"
+        (select)="onPresetSelect($event)" />
+    </div>
 
-  <!-- Dialog container -->
-  <div class="dialog">
-    <!-- Close button -->
+    <!-- Custom message toggle -->
     <button
       type="button"
-      class="dialog__close"
-      (click)="cancel()"
-      aria-label="Bezárás">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" />
-      </svg>
+      class="dialog__custom-toggle"
+      [class.dialog__custom-toggle--active]="showCustomInput()"
+      [attr.aria-pressed]="showCustomInput()"
+      (click)="toggleCustomInput()">
+      <span class="dialog__custom-emoji" aria-hidden="true">✍️</span>
+      <span class="dialog__custom-label">egyéni üzenet</span>
     </button>
 
-    <!-- Header -->
-    <div class="dialog__header">
-      <div class="dialog__icon">
-        <span class="dialog__emoji" aria-hidden="true">👉</span>
+    <!-- Custom message input -->
+    @if (showCustomInput()) {
+      <div class="dialog__custom-input">
+        <ps-textarea
+          [(ngModel)]="customMessage"
+          placeholder="írd ide az üzeneted..."
+          [maxLength]="500"
+          [rows]="3"
+        />
       </div>
-      <h2 id="dialog-title" class="dialog__title">Bökj: {{ user().name }}</h2>
-      <p class="dialog__description">Válassz egy előre megírt üzenetet vagy írj sajátot</p>
-    </div>
-
-    <!-- Content -->
-    <div class="dialog__content">
-      <!-- Preset selector -->
-      <div class="dialog__section">
-        <app-preset-selector
-          [presets]="presets()"
-          [selected]="selectedPreset()"
-          (select)="onPresetSelect($event)" />
-      </div>
-
-      <!-- Custom message toggle -->
-      <button
-        type="button"
-        class="dialog__custom-toggle"
-        [class.dialog__custom-toggle--active]="showCustomInput()"
-        [attr.aria-pressed]="showCustomInput()"
-        (click)="toggleCustomInput()">
-        <span class="dialog__custom-emoji" aria-hidden="true">✍️</span>
-        <span class="dialog__custom-label">egyéni üzenet</span>
-      </button>
-
-      <!-- Custom message input -->
-      @if (showCustomInput()) {
-        <div class="dialog__custom-input">
-          <ps-textarea
-            [(ngModel)]="customMessage"
-            placeholder="írd ide az üzeneted..."
-            [maxLength]="500"
-            [rows]="3"
-          />
-        </div>
-      }
-    </div>
-
-    <!-- Footer -->
-    <div class="dialog__actions">
-      <button type="button" class="dialog__btn dialog__btn--secondary" (click)="cancel()">
-        Mégse
-      </button>
-      <button type="button" class="dialog__btn dialog__btn--primary" (click)="send()">
-        <span class="dialog__btn-emoji" aria-hidden="true">👉</span>
-        Küldés
-      </button>
-    </div>
+    }
   </div>
-</div>
+
+  <div dialogFooter>
+    <button type="button" class="btn btn--outline" (click)="cancel()">
+      Mégse
+    </button>
+    <button type="button" class="btn btn--primary" type="submit">
+      <lucide-icon [name]="ICONS.SEND" [size]="16" />
+      Küldés
+    </button>
+  </div>
+</app-dialog-wrapper>

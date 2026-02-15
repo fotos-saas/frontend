@@ -1,105 +1,96 @@
-<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-  <div #dialogContent class="dialog dialog--md" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
-    <!-- Header -->
-    <header class="dialog__header">
-      <div class="dialog__icon dialog__icon--discount">
-        <lucide-icon [name]="ICONS.PERCENT" [size]="28" />
+<app-dialog-wrapper
+  [variant]="currentDiscount() ? 'edit' : 'create'"
+  headerStyle="hero"
+  theme="amber"
+  [icon]="ICONS.PERCENT"
+  [title]="currentDiscount() ? 'Kedvezmény módosítása' : 'Kedvezmény beállítása'"
+  [description]="subscriberName()"
+  size="md"
+  [closable]="!isSubmitting()"
+  [isSubmitting]="isSubmitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="onCancel()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <!-- Százalék -->
+    <ps-input
+      type="number"
+      label="Kedvezmény mértéke (%)"
+      [ngModel]="percent()"
+      (ngModelChange)="percent.set($event)"
+      [min]="1"
+      [max]="99"
+      [required]="true"
+      placeholder="pl. 20"
+    />
+    @if (percent() > 0 && percent() <= 99) {
+      <span class="ps-field__hint">{{ percent() }}% kedvezmény minden számlából</span>
+    }
+
+    <!-- Időtartam típus -->
+    <ps-radio-group
+      label="Érvényesség"
+      [options]="durationOptions"
+      [ngModel]="durationType()"
+      (ngModelChange)="durationType.set($event)"
+      direction="horizontal"
+    />
+
+    <!-- Hónapok száma -->
+    @if (durationType() === 'months') {
+      <ps-input
+        type="number"
+        label="Hónapok száma"
+        [ngModel]="durationMonths()"
+        (ngModelChange)="durationMonths.set($event)"
+        [min]="1"
+        [max]="120"
+        [required]="true"
+        placeholder="pl. 6"
+      />
+      @if (durationMonths() > 0) {
+        <span class="ps-field__hint">{{ formatExpiryDate() }}-ig érvényes</span>
+      }
+    }
+
+    <!-- Megjegyzés -->
+    <ps-textarea
+      label="Megjegyzés (opcionális)"
+      [ngModel]="note()"
+      (ngModelChange)="note.set($event)"
+      [maxLength]="500"
+      [rows]="3"
+      placeholder="pl. Hűségkedvezmény, egyedi megállapodás..."
+    />
+
+    @if (currentDiscount()) {
+      <div class="info-box">
+        <lucide-icon [name]="ICONS.INFO" [size]="16" />
+        <span>A jelenlegi {{ currentDiscount() }}% kedvezmény felülírásra kerül.</span>
       </div>
-      <h2 class="dialog__title">{{ currentDiscount() ? 'Kedvezmény módosítása' : 'Kedvezmény beállítása' }}</h2>
-      <p class="dialog__subtitle">{{ subscriberName() }}</p>
-    </header>
+    }
+  </ng-container>
 
-    <!-- Content -->
-    <div class="dialog__content">
-      <form (ngSubmit)="onSubmit()">
-        <!-- Százalék -->
-        <ps-input
-          type="number"
-          label="Kedvezmény mértéke (%)"
-          [ngModel]="percent()"
-          (ngModelChange)="percent.set($event)"
-          [min]="1"
-          [max]="99"
-          [required]="true"
-          placeholder="pl. 20"
-        />
-        @if (percent() > 0 && percent() <= 99) {
-          <span class="ps-field__hint">{{ percent() }}% kedvezmény minden számlából</span>
-        }
-
-        <!-- Időtartam típus -->
-        <ps-radio-group
-          label="Érvényesség"
-          [options]="durationOptions"
-          [ngModel]="durationType()"
-          (ngModelChange)="durationType.set($event)"
-          direction="horizontal"
-        />
-
-        <!-- Hónapok száma -->
-        @if (durationType() === 'months') {
-          <ps-input
-            type="number"
-            label="Hónapok száma"
-            [ngModel]="durationMonths()"
-            (ngModelChange)="durationMonths.set($event)"
-            [min]="1"
-            [max]="120"
-            [required]="true"
-            placeholder="pl. 6"
-          />
-          @if (durationMonths() > 0) {
-            <span class="ps-field__hint">{{ formatExpiryDate() }}-ig érvényes</span>
-          }
-        }
-
-        <!-- Megjegyzés -->
-        <ps-textarea
-          label="Megjegyzés (opcionális)"
-          [ngModel]="note()"
-          (ngModelChange)="note.set($event)"
-          [maxLength]="500"
-          [rows]="3"
-          placeholder="pl. Hűségkedvezmény, egyedi megállapodás..."
-        />
-
-        @if (currentDiscount()) {
-          <div class="info-box">
-            <lucide-icon [name]="ICONS.INFO" [size]="16" />
-            <span>A jelenlegi {{ currentDiscount() }}% kedvezmény felülírásra kerül.</span>
-          </div>
-        }
-
-        @if (errorMessage()) {
-          <div class="error-message">
-            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-            {{ errorMessage() }}
-          </div>
-        }
-      </form>
-    </div>
-
-    <!-- Footer -->
-    <footer class="dialog__footer">
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="onCancel()"
-        [disabled]="isSubmitting()"
-      >
-        Mégse
-      </button>
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="onSubmit()"
-        [disabled]="isSubmitting() || !isFormValid()"
-      >
-        @if (isSubmitting()) {
-          <span class="btn__spinner"></span>
-        }
-        Mentés
-      </button>
-    </footer>
-  </div>
-</div>
+  <ng-container dialogFooter>
+    <button
+      type="button"
+      class="btn btn--outline"
+      (click)="onCancel()"
+      [disabled]="isSubmitting()"
+    >
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn btn--warning"
+      (click)="onSubmit()"
+      [disabled]="isSubmitting() || !isFormValid()"
+    >
+      @if (isSubmitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      Mentés
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

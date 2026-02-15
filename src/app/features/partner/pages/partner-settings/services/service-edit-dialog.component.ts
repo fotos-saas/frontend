@@ -2,7 +2,7 @@ import { Component, inject, input, output, OnInit, ChangeDetectionStrategy } fro
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerServiceCatalogService } from '../../../services/partner-service-catalog.service';
@@ -15,9 +15,8 @@ import {
 @Component({
   selector: 'app-service-edit-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent, DialogWrapperComponent],
   templateUrl: './service-edit-dialog.component.html',
-  styleUrl: './service-edit-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServiceEditDialogComponent implements OnInit {
@@ -28,7 +27,6 @@ export class ServiceEditDialogComponent implements OnInit {
   private readonly catalogService = inject(PartnerServiceCatalogService);
   readonly ICONS = ICONS;
   readonly SERVICE_TYPE_OPTIONS = SERVICE_TYPE_OPTIONS;
-  readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
   readonly typeOptions: PsSelectOption[] = SERVICE_TYPE_OPTIONS.map(opt => ({
     id: opt.value,

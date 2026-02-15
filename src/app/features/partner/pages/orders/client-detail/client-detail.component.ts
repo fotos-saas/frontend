@@ -4,11 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent, PsTextareaComponent, PsCheckboxComponent } from '@shared/components/form';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { ClipboardService } from '../../../../../core/services/clipboard.service';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
 import { ClientDetailState } from './client-detail.state';
 import { ClientDetailActionsService } from './client-detail-actions.service';
 import { ClientHeaderComponent } from './components/client-header/client-header.component';
@@ -30,6 +30,7 @@ import { ClientAlbumListComponent } from './components/client-album-list/client-
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
+    DialogWrapperComponent,
     PsInputComponent,
     PsTextareaComponent,
     PsCheckboxComponent,
@@ -52,9 +53,6 @@ export class PartnerClientDetailComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly state = new ClientDetailState();
-
-  readonly editBackdropHandler = createBackdropHandler(() => this.state.closeEditModal());
-  readonly albumBackdropHandler = createBackdropHandler(() => this.state.closeAlbumModal());
 
   ngOnInit(): void {
     this.actions.init(this.destroyRef, this.state);

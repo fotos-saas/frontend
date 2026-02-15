@@ -3,9 +3,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerOrdersService, PartnerClient } from '../../services/partner-orders.service';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { PsInputComponent, PsTextareaComponent } from '@shared/components/form';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Client Edit Modal - Ügyfél szerkesztése.
@@ -13,9 +13,8 @@ import { PsInputComponent, PsTextareaComponent } from '@shared/components/form';
 @Component({
   selector: 'app-client-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsTextareaComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsTextareaComponent, DialogWrapperComponent],
   templateUrl: './client-edit-modal.component.html',
-  styleUrls: ['./client-edit-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientEditModalComponent {
@@ -35,8 +34,6 @@ export class ClientEditModalComponent {
   note = '';
   saving = signal(false);
   errorMessage = signal<string | null>(null);
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   ngOnInit(): void {
     const client = this.client();

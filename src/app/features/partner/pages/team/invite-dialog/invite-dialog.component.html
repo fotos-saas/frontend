@@ -1,53 +1,51 @@
-<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel dialog-panel--md" (mousedown)="$event.stopPropagation()">
-    <!-- Header -->
-    <div class="dialog-header">
-      <h2>Új csapattag meghívása</h2>
-      <button class="close-btn" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="20" />
-      </button>
-    </div>
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="flat"
+  theme="purple"
+  [icon]="ICONS.MAIL"
+  title="Új csapattag meghívása"
+  size="md"
+  [isSubmitting]="saving()"
+  [errorMessage]="emailError()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSave()"
+  (backdropClickEvent)="close.emit()">
+  <div dialogBody>
+    <!-- Email -->
+    <ps-input
+      label="Email cím"
+      type="email"
+      fieldId="email"
+      [(ngModel)]="email"
+      placeholder="munkatars@example.com"
+      [errorMessage]="emailError() ?? ''"
+      [state]="emailError() ? 'error' : 'default'"
+    />
 
-    <!-- Content -->
-    <div class="dialog-content">
-      <!-- Email -->
-      <ps-input
-        label="Email cím"
-        type="email"
-        fieldId="email"
-        [(ngModel)]="email"
-        placeholder="munkatars@example.com"
-        [errorMessage]="emailError() ?? ''"
-        [state]="emailError() ? 'error' : 'default'"
-      />
-
-      <!-- Szerepkör -->
-      <ps-radio-group
-        label="Szerepkör"
-        [options]="roleOptions"
-        variant="cards"
-        [ngModel]="selectedRole()"
-        (ngModelChange)="selectedRole.set($event)"
-      />
-    </div>
-
-    <!-- Footer -->
-    <div class="dialog-footer">
-      <button class="btn btn-secondary" (click)="close.emit()">
-        Mégse
-      </button>
-      <button
-        class="btn btn-primary"
-        [disabled]="saving() || !isValid()"
-        (click)="onSave()"
-      >
-        @if (saving()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-        } @else {
-          <lucide-icon [name]="ICONS.MAIL" [size]="18" />
-        }
-        <span>Meghívó küldése</span>
-      </button>
-    </div>
+    <!-- Szerepkör -->
+    <ps-radio-group
+      label="Szerepkör"
+      [options]="roleOptions"
+      variant="cards"
+      [ngModel]="selectedRole()"
+      (ngModelChange)="selectedRole.set($event)"
+    />
   </div>
-</div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">
+      Mégse
+    </button>
+    <button
+      class="btn btn--purple"
+      [disabled]="saving() || !isValid()"
+      (click)="onSave()">
+      @if (saving()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      } @else {
+        <lucide-icon [name]="ICONS.MAIL" [size]="16" />
+      }
+      Meghívó küldése
+    </button>
+  </div>
+</app-dialog-wrapper>

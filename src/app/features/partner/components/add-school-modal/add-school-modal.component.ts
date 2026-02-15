@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { PsInputComponent } from '@shared/components/form';
 import { PartnerService, SchoolItem, CreateSchoolRequest } from '../../services/partner.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Add School Modal - Új iskola hozzáadása.
@@ -13,189 +13,63 @@ import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-add-school-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, DialogWrapperComponent],
   template: `
-    <div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-      <div class="dialog-panel" (click)="$event.stopPropagation()">
-        <!-- Header -->
-        <div class="modal-header">
-          <div class="header-icon">
-            <lucide-icon [name]="ICONS.BUILDING_2" [size]="24" />
-          </div>
-          <h2>Új iskola hozzáadása</h2>
-        </div>
+    <app-dialog-wrapper
+      variant="create"
+      headerStyle="hero"
+      theme="green"
+      [icon]="ICONS.BUILDING_2"
+      title="Új iskola hozzáadása"
+      size="sm"
+      [closable]="!submitting()"
+      [isSubmitting]="submitting()"
+      [errorMessage]="error()"
+      (closeEvent)="close.emit()"
+      (submitEvent)="onSubmit()"
+    >
+      <ng-container dialogBody>
+        <ps-input
+          label="Iskola neve"
+          placeholder="pl. Petőfi Sándor Gimnázium"
+          [(ngModel)]="formData.name"
+          name="name"
+          [required]="true"
+        />
 
-        <!-- Content -->
-        <form class="modal-content" (ngSubmit)="onSubmit()">
-          <!-- Iskola neve -->
-          <ps-input
-            label="Iskola neve"
-            placeholder="pl. Petőfi Sándor Gimnázium"
-            [(ngModel)]="formData.name"
-            name="name"
-            [required]="true"
-          />
+        <ps-input
+          label="Város"
+          placeholder="pl. Budapest"
+          [(ngModel)]="formData.city"
+          name="city"
+        />
+      </ng-container>
 
-          <!-- Város -->
-          <ps-input
-            label="Város"
-            placeholder="pl. Budapest"
-            [(ngModel)]="formData.city"
-            name="city"
-          />
-
-          @if (error()) {
-            <div class="error-message">
-              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-              {{ error() }}
-            </div>
+      <ng-container dialogFooter>
+        <button type="button" class="btn btn--outline" (click)="close.emit()" [disabled]="submitting()">
+          Mégse
+        </button>
+        <button
+          type="button"
+          class="btn btn--confirm"
+          (click)="onSubmit()"
+          [disabled]="submitting() || !formData.name"
+        >
+          @if (submitting()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+            Iskola hozzáadása
           }
-
-          <!-- Actions -->
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn-secondary"
-              (click)="close.emit()"
-              [disabled]="submitting()"
-            >
-              Mégse
-            </button>
-            <button
-              type="submit"
-              class="btn-primary"
-              [disabled]="submitting() || !formData.name"
-            >
-              @if (submitting()) {
-                <span class="spinner"></span>
-                Mentés...
-              } @else {
-                <lucide-icon [name]="ICONS.CHECK" [size]="18" />
-                Iskola hozzáadása
-              }
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </button>
+      </ng-container>
+    </app-dialog-wrapper>
   `,
-  styles: [`
-    /* Modal Header */
-    .modal-header {
-      text-align: center;
-      padding: 24px 24px 0;
-    }
-
-    .header-icon {
-      width: 56px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #10b981;
-      border-radius: 16px;
-      color: #ffffff;
-      margin: 0 auto 16px;
-    }
-
-    .modal-header h2 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #1e293b;
-      margin: 0;
-    }
-
-    /* Modal Content */
-    .modal-content {
-      padding: 24px;
-    }
-
-    /* Error */
-    .error-message {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      color: #dc2626;
-      font-size: 0.875rem;
-      margin-bottom: 16px;
-    }
-
-    /* Actions */
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .btn-secondary {
-      padding: 10px 16px;
-      background: #f3f4f6;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: #e5e7eb;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      background: #10b981;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #ffffff;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: #059669;
-    }
-
-    .btn-primary:disabled,
-    .btn-secondary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddSchoolModalComponent {
   readonly ICONS = ICONS;
-
-  /** Backdrop kezelő - megakadályozza a véletlen bezárást szöveg kijelöléskor */
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   readonly close = output<void>();
   readonly schoolCreated = output<SchoolItem>();

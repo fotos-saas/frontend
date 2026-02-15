@@ -1,16 +1,15 @@
-<div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel dialog-panel--lg" (click)="$event.stopPropagation()">
-    <!-- Header -->
-    <div class="modal-header">
-      <div class="header-content">
-        <h2>Személyek</h2>
-        <p class="subtitle">{{ projectName() }}</p>
-      </div>
-      <button type="button" class="close-btn" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="20" />
-      </button>
-    </div>
-
+<app-dialog-wrapper
+  variant="info"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.USERS"
+  [title]="'Személyek'"
+  [description]="projectName()"
+  size="lg"
+  [closable]="true"
+  (closeEvent)="close.emit()"
+>
+  <div dialogBody>
     <!-- Search + Photo Filter -->
     <div class="search-section">
       <div class="search-row">
@@ -105,7 +104,7 @@
       </div>
     }
   </div>
-</div>
+</app-dialog-wrapper>
 
 <!-- Lightbox -->
 <app-photo-lightbox

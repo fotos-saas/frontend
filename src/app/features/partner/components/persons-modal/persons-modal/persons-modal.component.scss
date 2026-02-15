@@ -1,44 +1,5 @@
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 20px 24px 16px;
-}
-
-.header-content h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 4px 0;
-}
-
-.subtitle {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin: 0;
-}
-
-.close-btn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f1f5f9;
-  border: none;
-  border-radius: 8px;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.close-btn:hover {
-  background: #e2e8f0;
-  color: #1e293b;
-}
-
 .search-section {
-  padding: 0 24px 16px;
+  padding-bottom: 16px;
 }
 
 .search-row {
@@ -100,7 +61,7 @@
 .filter-tabs {
   display: flex;
   gap: 8px;
-  padding: 0 24px 16px;
+  padding-bottom: 16px;
   border-bottom: 1px solid #e2e8f0;
   transition: all 0.15s ease;
 }
@@ -142,7 +103,7 @@ ps-toggle {
 }
 
 .modal-content {
-  padding: 16px 24px;
+  padding: 16px 0;
   max-height: 50vh;
   overflow-y: auto;
 }
@@ -193,11 +154,14 @@ ps-toggle {
   animation: shimmer 1.5s infinite;
 }
 
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .modal-footer {
-  padding: 16px 24px;
+  padding-top: 16px;
   border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
-  border-radius: 0 0 12px 12px;
 }
 
 .stats-row {

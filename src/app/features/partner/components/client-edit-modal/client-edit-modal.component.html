@@ -1,76 +1,67 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  [variant]="mode() === 'create' ? 'create' : 'edit'"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.USER"
+  [title]="mode() === 'create' ? 'Új ügyfél' : 'Ügyfél szerkesztése'"
+  size="md"
+  [closable]="!saving()"
+  [isSubmitting]="saving()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="save()"
 >
-  <div class="dialog-panel dialog-panel--md" (click)="$event.stopPropagation()">
-    <div class="modal-content">
-    <header class="modal-header">
-      <h2>{{ mode() === 'create' ? 'Új ügyfél' : 'Ügyfél szerkesztése' }}</h2>
-      <button class="close-btn" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="20" />
-      </button>
-    </header>
+  <ng-container dialogBody>
+    <ps-input
+      label="Név"
+      [(ngModel)]="name"
+      name="name"
+      [required]="true"
+      placeholder="Pl. Kiss Péter"
+    />
 
-    <form (ngSubmit)="save()" class="modal-form">
-      <ps-input
-        label="Név"
-        [(ngModel)]="name"
-        name="name"
-        [required]="true"
-        placeholder="Pl. Kiss Péter"
-      />
+    <ps-input
+      label="Email"
+      type="email"
+      [(ngModel)]="email"
+      name="email"
+      placeholder="Pl. pelda@email.hu"
+    />
 
-      <ps-input
-        label="Email"
-        type="email"
-        [(ngModel)]="email"
-        name="email"
-        placeholder="Pl. pelda@email.hu"
-      />
+    <ps-input
+      label="Telefon"
+      type="tel"
+      [(ngModel)]="phone"
+      name="phone"
+      placeholder="Pl. +36 30 123 4567"
+    />
 
-      <ps-input
-        label="Telefon"
-        type="tel"
-        [(ngModel)]="phone"
-        name="phone"
-        placeholder="Pl. +36 30 123 4567"
-      />
+    <ps-textarea
+      label="Megjegyzés"
+      [(ngModel)]="note"
+      name="note"
+      [rows]="3"
+      placeholder="Egyéb megjegyzések..."
+    />
+  </ng-container>
 
-      <ps-textarea
-        label="Megjegyzés"
-        [(ngModel)]="note"
-        name="note"
-        [rows]="3"
-        placeholder="Egyéb megjegyzések..."
-      />
-
-      @if (errorMessage()) {
-        <div class="error-message">
-          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-          {{ errorMessage() }}
-        </div>
+  <ng-container dialogFooter>
+    <button type="button" class="btn btn--outline" (click)="close.emit()" [disabled]="saving()">
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="save()"
+      [disabled]="saving() || !name.trim()"
+    >
+      @if (saving()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Mentés...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}
       }
-
-      <div class="modal-actions">
-        <button type="button" class="btn-secondary" (click)="close.emit()">
-          Mégse
-        </button>
-        <button
-          type="submit"
-          class="btn-primary"
-          [disabled]="saving() || !name.trim()"
-        >
-          @if (saving()) {
-            <span class="spinner"></span>
-            Mentés...
-          } @else {
-            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-            {{ mode() === 'create' ? 'Létrehozás' : 'Mentés' }}
-          }
-        </button>
-      </div>
-    </form>
-    </div>
-  </div>
-</div>
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

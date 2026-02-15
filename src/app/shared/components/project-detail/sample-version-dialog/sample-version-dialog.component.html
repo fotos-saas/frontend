@@ -1,16 +1,15 @@
-<div class="dialog-backdrop"
-     (mousedown)="backdropHandler.onMouseDown($event)"
-     (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel dialog-panel--lg p-5" (click)="$event.stopPropagation()">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-900">
-        {{ editVersion() ? 'Verzió szerkesztése' : 'Új verzió' }}
-      </h3>
-      <button class="close-btn" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="18" />
-      </button>
-    </div>
-
+<app-dialog-wrapper
+  [variant]="editVersion() ? 'edit' : 'create'"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.FILE_IMAGE"
+  [title]="editVersion() ? 'Verzió szerkesztése' : 'Új verzió'"
+  size="lg"
+  [isSubmitting]="facade.saving()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="save()"
+  (backdropClickEvent)="close.emit()">
+  <div dialogBody>
     <div class="form-fields">
       <!-- Drop zone -->
       <div>
@@ -95,35 +94,34 @@
           />
           <div class="summary-actions" style="margin: -4px; margin-top: 8px;">
             <button
-              class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-xs transition-colors"
-              style="margin: 4px;"
+              class="btn btn--outline"
               (click)="facade.dismissSummary()"
             >Elvetés</button>
             <button
-              class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs transition-colors"
-              style="margin: 4px;"
+              class="btn btn--primary"
               (click)="facade.applySummary()"
             >Használat leírásként</button>
           </div>
         </div>
       }
     </div>
-
-    <div class="flex justify-end mt-5" style="margin: -4px; margin-top: 20px;">
-      <button
-        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors"
-        style="margin: 4px;"
-        (click)="close.emit()"
-      >Mégse</button>
-      <button
-        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg text-sm transition-colors"
-        style="margin: 4px;"
-        [disabled]="facade.saving() || !facade.isValid()"
-        (click)="save()"
-      >{{ facade.saving() ? 'Mentés...' : 'Mentés' }}</button>
-    </div>
   </div>
-</div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">
+      Mégse
+    </button>
+    <button
+      class="btn btn--primary"
+      [disabled]="facade.saving() || !facade.isValid()"
+      (click)="save()">
+      @if (facade.saving()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      Mentés
+    </button>
+  </div>
+</app-dialog-wrapper>
 
 <!-- Lightbox -->
 @if (lightboxOpen()) {

@@ -1,41 +1,41 @@
-<div class="dialog-backdrop"
-     (mousedown)="backdropHandler.onMouseDown($event)"
-     (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel dialog-panel--md p-5" (click)="$event.stopPropagation()">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-900">Felhasználó szerkesztése</h3>
-      <button class="action-btn" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="18" />
-      </button>
-    </div>
+<app-dialog-wrapper
+  variant="edit"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.USER"
+  title="Felhasználó szerkesztése"
+  size="md"
+  [isSubmitting]="saving()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="save()"
+  (backdropClickEvent)="close.emit()">
+  <div dialogBody class="space-y-4">
+    <ps-input
+      label="Név"
+      placeholder="Felhasználó neve"
+      [(ngModel)]="name"
+    />
 
-    <div class="space-y-4">
-      <ps-input
-        label="Név"
-        placeholder="Felhasználó neve"
-        [(ngModel)]="name"
-      />
-
-      <ps-input
-        type="email"
-        label="Email"
-        placeholder="Email cím (opcionális)"
-        [(ngModel)]="email"
-      />
-    </div>
-
-    <div class="flex justify-end mt-5" style="margin: -4px; margin-top: 20px;">
-      <button
-        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors"
-        style="margin: 4px;"
-        (click)="close.emit()"
-      >Mégse</button>
-      <button
-        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg text-sm transition-colors"
-        style="margin: 4px;"
-        [disabled]="saving() || !name.trim()"
-        (click)="save()"
-      >{{ saving() ? 'Mentés...' : 'Mentés' }}</button>
-    </div>
+    <ps-input
+      type="email"
+      label="Email"
+      placeholder="Email cím (opcionális)"
+      [(ngModel)]="email"
+    />
   </div>
-</div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">
+      Mégse
+    </button>
+    <button
+      class="btn btn--primary"
+      [disabled]="saving() || !name.trim()"
+      (click)="save()">
+      @if (saving()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      Mentés
+    </button>
+  </div>
+</app-dialog-wrapper>

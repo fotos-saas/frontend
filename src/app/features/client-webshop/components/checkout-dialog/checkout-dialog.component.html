@@ -1,148 +1,137 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  variant="wizard"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.SHOPPING_CART"
+  title="Megrendelés"
+  size="lg"
+  [closable]="true"
+  [isSubmitting]="submitting()"
+  [errorMessage]="error()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="submit()"
 >
-  <div class="dialog-panel dialog-panel--lg">
-    <!-- Header -->
-    <div class="dialog-header">
-      <h3>Megrendelés</h3>
-      <button class="dialog-close" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="18" />
-      </button>
+  <div dialogBody>
+    <!-- Kapcsolattartó adatok -->
+    <div class="form-section">
+      <h4>Kapcsolattartó adatok</h4>
+
+      <ps-input
+        label="Név"
+        [required]="true"
+        placeholder="Teljes név"
+        [ngModel]="customerName()"
+        (ngModelChange)="customerName.set($event)"
+      />
+
+      <ps-input
+        label="E-mail"
+        type="email"
+        [required]="true"
+        placeholder="pelda@email.hu"
+        [ngModel]="customerEmail()"
+        (ngModelChange)="customerEmail.set($event)"
+      />
+
+      <ps-input
+        label="Telefonszám"
+        type="tel"
+        placeholder="+36 30 123 4567"
+        [ngModel]="customerPhone()"
+        (ngModelChange)="customerPhone.set($event)"
+      />
     </div>
 
-    <!-- Body -->
-    <div class="dialog-body">
-      @if (error()) {
-        <div class="error-msg">
-          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-          {{ error() }}
-        </div>
-      }
-
-      <!-- Kapcsolattartó adatok -->
+    <!-- Átvételi mód -->
+    @if (config().allow_pickup && config().allow_shipping) {
       <div class="form-section">
-        <h4>Kapcsolattartó adatok</h4>
-
-        <ps-input
-          label="Név"
-          [required]="true"
-          placeholder="Teljes név"
-          [ngModel]="customerName()"
-          (ngModelChange)="customerName.set($event)"
-        />
-
-        <ps-input
-          label="E-mail"
-          type="email"
-          [required]="true"
-          placeholder="pelda@email.hu"
-          [ngModel]="customerEmail()"
-          (ngModelChange)="customerEmail.set($event)"
-        />
-
-        <ps-input
-          label="Telefonszám"
-          type="tel"
-          placeholder="+36 30 123 4567"
-          [ngModel]="customerPhone()"
-          (ngModelChange)="customerPhone.set($event)"
+        <h4>Átvételi mód</h4>
+        <ps-radio-group
+          [options]="deliveryOptions()"
+          variant="cards"
+          [ngModel]="deliveryMethod()"
+          (ngModelChange)="deliveryMethod.set($event)"
         />
       </div>
+    }
 
-      <!-- Átvételi mód -->
-      @if (config().allow_pickup && config().allow_shipping) {
-        <div class="form-section">
-          <h4>Átvételi mód</h4>
-          <ps-radio-group
-            [options]="deliveryOptions()"
-            variant="cards"
-            [ngModel]="deliveryMethod()"
-            (ngModelChange)="deliveryMethod.set($event)"
-          />
-        </div>
-      }
-
-      <!-- Szállítási cím -->
-      @if (deliveryMethod() === 'shipping') {
-        <div class="form-section">
-          <h4>Szállítási adatok</h4>
-          <ps-textarea
-            label="Szállítási cím"
-            [required]="true"
-            placeholder="Irányítószám, város, utca, házszám"
-            [rows]="2"
-            [ngModel]="shippingAddress()"
-            (ngModelChange)="shippingAddress.set($event)"
-          />
-          <ps-input
-            label="Megjegyzés a szállításhoz"
-            placeholder="pl. kapucsengő, emelet"
-            [ngModel]="shippingNotes()"
-            (ngModelChange)="shippingNotes.set($event)"
-          />
-        </div>
-      }
-
-      <!-- Megjegyzés -->
+    <!-- Szállítási cím -->
+    @if (deliveryMethod() === 'shipping') {
       <div class="form-section">
+        <h4>Szállítási adatok</h4>
         <ps-textarea
-          label="Megjegyzés a rendeléshez"
-          placeholder="Bármilyen kérés vagy megjegyzés..."
+          label="Szállítási cím"
+          [required]="true"
+          placeholder="Irányítószám, város, utca, házszám"
           [rows]="2"
-          [ngModel]="customerNotes()"
-          (ngModelChange)="customerNotes.set($event)"
+          [ngModel]="shippingAddress()"
+          (ngModelChange)="shippingAddress.set($event)"
+        />
+        <ps-input
+          label="Megjegyzés a szállításhoz"
+          placeholder="pl. kapucsengő, emelet"
+          [ngModel]="shippingNotes()"
+          (ngModelChange)="shippingNotes.set($event)"
         />
       </div>
+    }
 
-      <!-- Összesítő -->
-      <div class="order-summary">
-        <div class="summary-row">
-          <span>Tételek ({{ cartItems().length }} db)</span>
-          <span>{{ cartTotal() | number }} Ft</span>
-        </div>
-        @if (deliveryMethod() === 'shipping') {
-          <div class="summary-row">
-            <span>Szállítási költség</span>
-            <span>
-              @if (shippingCost() === 0) {
-                Ingyenes
-              } @else {
-                {{ shippingCost() | number }} Ft
-              }
-            </span>
-          </div>
-        }
-        <div class="summary-row summary-total">
-          <strong>Összesen</strong>
-          <strong>{{ grandTotal() | number }} Ft</strong>
-        </div>
+    <!-- Megjegyzés -->
+    <div class="form-section">
+      <ps-textarea
+        label="Megjegyzés a rendeléshez"
+        placeholder="Bármilyen kérés vagy megjegyzés..."
+        [rows]="2"
+        [ngModel]="customerNotes()"
+        (ngModelChange)="customerNotes.set($event)"
+      />
+    </div>
+
+    <!-- Összesítő -->
+    <div class="order-summary">
+      <div class="summary-row">
+        <span>Tételek ({{ cartItems().length }} db)</span>
+        <span>{{ cartTotal() | number }} Ft</span>
       </div>
-
-      <!-- ÁSZF -->
-      @if (config().terms_text) {
-        <ps-checkbox
-          [ngModel]="acceptTerms()"
-          (ngModelChange)="acceptTerms.set($event)"
-        >
-          Elfogadom az <a class="terms-link" href="javascript:void(0)">Általános Szerződési Feltételeket</a>
-        </ps-checkbox>
+      @if (deliveryMethod() === 'shipping') {
+        <div class="summary-row">
+          <span>Szállítási költség</span>
+          <span>
+            @if (shippingCost() === 0) {
+              Ingyenes
+            } @else {
+              {{ shippingCost() | number }} Ft
+            }
+          </span>
+        </div>
       }
+      <div class="summary-row summary-total">
+        <strong>Összesen</strong>
+        <strong>{{ grandTotal() | number }} Ft</strong>
+      </div>
     </div>
 
-    <!-- Footer -->
-    <div class="dialog-footer">
-      <button class="btn-cancel" (click)="close.emit()" [disabled]="submitting()">Mégsem</button>
-      <button class="btn-primary" (click)="submit()" [disabled]="submitting()">
-        @if (submitting()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-          Feldolgozás...
-        } @else {
-          <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="16" />
-          Fizetés ({{ grandTotal() | number }} Ft)
-        }
-      </button>
-    </div>
+    <!-- ÁSZF -->
+    @if (config().terms_text) {
+      <ps-checkbox
+        [ngModel]="acceptTerms()"
+        (ngModelChange)="acceptTerms.set($event)"
+      >
+        Elfogadom az <a class="terms-link" href="javascript:void(0)">Általános Szerződési Feltételeket</a>
+      </ps-checkbox>
+    }
   </div>
-</div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()" [disabled]="submitting()">Mégsem</button>
+    <button class="btn btn--primary" type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Feldolgozás...
+      } @else {
+        <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="16" />
+        Fizetés ({{ grandTotal() | number }} Ft)
+      }
+    </button>
+  </div>
+</app-dialog-wrapper>

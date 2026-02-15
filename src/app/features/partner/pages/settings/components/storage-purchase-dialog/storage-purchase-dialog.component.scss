@@ -1,81 +1,3 @@
-/* ============ Backdrop & Panel ============ */
-.dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 16px;
-  animation: fadeIn 0.2s ease;
-}
-
-.dialog-panel {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  width: 100%;
-  max-width: 480px;
-  max-height: calc(100vh - 32px);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ============ Header ============ */
-.dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--color-gray-200, #e2e8f0);
-}
-
-.dialog-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary, #1e293b);
-  margin: 0;
-}
-
-.dialog-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--text-secondary, #64748b);
-  transition: all 0.2s ease;
-}
-
-.dialog-close:hover:not(:disabled) {
-  background: var(--color-gray-100, #f1f5f9);
-  color: var(--text-primary, #1e293b);
-}
-
-.dialog-close:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ============ Content ============ */
-.dialog-content {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  overflow-y: auto;
-}
-
 /* ============ Slider ============ */
 .slider-section {
   display: flex;
@@ -231,15 +153,6 @@
   color: var(--color-warning-dark, #b45309);
 }
 
-/* ============ Footer ============ */
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--color-gray-200, #e2e8f0);
-}
-
 /* ============ Buttons ============ */
 .btn {
   display: inline-flex;
@@ -260,13 +173,13 @@
   cursor: not-allowed;
 }
 
-.btn--secondary {
+.btn--outline {
   background: var(--color-gray-100, #f1f5f9);
   color: var(--text-primary, #1e293b);
   border: 1px solid var(--color-gray-300, #cbd5e1);
 }
 
-.btn--secondary:hover:not(:disabled) {
+.btn--outline:hover:not(:disabled) {
   background: var(--color-gray-200, #e2e8f0);
 }
 
@@ -280,17 +193,20 @@
 }
 
 /* ============ Animations ============ */
-.animate-spin {
+.spin {
   animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ============ Reduced Motion ============ */
 @media (prefers-reduced-motion: reduce) {
-  .dialog-backdrop,
-  .dialog-panel,
   .btn,
   .slider::-webkit-slider-thumb,
-  .animate-spin {
+  .spin {
     animation: none;
     transition: none;
   }

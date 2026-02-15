@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output, signal, inject, OnIn
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
-import { createBackdropHandler } from '../../../utils/dialog.util';
+import { DialogWrapperComponent } from '../../dialog-wrapper/dialog-wrapper.component';
 import { PsTextareaComponent } from '@shared/components/form';
 import { SampleVersion } from '../../../../features/partner/services/partner.service';
 import { SampleVersionDialogFacade } from './sample-version-dialog-facade.service';
@@ -12,7 +12,7 @@ import { SampleLightboxItem } from '../../samples-lightbox/samples-lightbox.type
 @Component({
   selector: 'app-sample-version-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, SamplesLightboxComponent, PsTextareaComponent],
+  imports: [FormsModule, LucideAngularModule, SamplesLightboxComponent, PsTextareaComponent, DialogWrapperComponent],
   providers: [SampleVersionDialogFacade],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sample-version-dialog.component.html',
@@ -36,8 +36,6 @@ export class SampleVersionDialogComponent implements OnInit {
   isDragging = signal(false);
   lightboxOpen = signal(false);
   lightboxIndex = signal(0);
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   ngOnInit(): void {
     const ver = this.editVersion();

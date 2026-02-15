@@ -4,7 +4,7 @@ import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent, PsSelectComponent, PsTextareaComponent, PsDatepickerComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerBillingService } from '../../services/partner-billing.service';
@@ -25,9 +25,8 @@ interface PersonOption {
 @Component({
   selector: 'app-create-charge-dialog',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsDatepickerComponent],
+  imports: [DecimalPipe, FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsDatepickerComponent, DialogWrapperComponent],
   templateUrl: './create-charge-dialog.component.html',
-  styleUrl: './create-charge-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateChargeDialogComponent implements OnInit {
@@ -39,7 +38,6 @@ export class CreateChargeDialogComponent implements OnInit {
   private readonly projectService = inject(PartnerProjectService);
   readonly catalogService = inject(PartnerServiceCatalogService);
   readonly ICONS = ICONS;
-  readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
   readonly projects = signal<ProjectOption[]>([]);
   readonly persons = signal<PersonOption[]>([]);

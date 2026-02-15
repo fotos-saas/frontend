@@ -6,10 +6,10 @@ import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
 import { PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
 import { ModalPersonCardComponent } from '../modal-person-card/modal-person-card.component';
 import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.component';
-import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
 
 /**
  * Persons Modal - Személyek listája modal (grid nézet thumbnail-ekkel + lightbox).
@@ -17,16 +17,13 @@ import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent],
+  imports: [FormsModule, LucideAngularModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonsModalComponent implements OnInit {
   readonly ICONS = ICONS;
-
-  /** Backdrop handler a kijelölés közbeni bezárás megelőzéséhez */
-  readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
   readonly projectId = input.required<number>();
   readonly projectName = input<string>('');

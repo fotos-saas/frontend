@@ -1,68 +1,65 @@
 @if (isOpen()) {
-  <div
-    class="dialog-backdrop"
-    (mousedown)="backdropHandler.onMouseDown($event)"
-    (click)="backdropHandler.onClick($event)"
-  >
-    <div class="dialog-panel dialog-panel--md" (mousedown)="$event.stopPropagation()">
-      <div class="dialog-header">
-        <h2 class="dialog-title">Album szerkesztése</h2>
-        <button type="button" class="dialog-close" (click)="close.emit()">
-          <lucide-icon [name]="ICONS.X" [size]="20" />
-        </button>
-      </div>
+  <app-dialog-wrapper
+    variant="edit"
+    headerStyle="flat"
+    theme="blue"
+    [icon]="ICONS.BOOK_OPEN"
+    title="Album szerkesztése"
+    size="md"
+    [isSubmitting]="saving()"
+    (closeEvent)="close.emit()"
+    (submitEvent)="onSubmit()"
+    (backdropClickEvent)="close.emit()">
+    <form dialogBody (ngSubmit)="onSubmit()">
+      <!-- Név -->
+      <ps-input
+        label="Album neve"
+        [required]="true"
+        [(ngModel)]="formData.name"
+        name="name"
+      />
 
-      <form (ngSubmit)="onSubmit()" class="dialog-body">
-        <!-- Név -->
-        <ps-input
-          label="Album neve"
-          [required]="true"
-          [(ngModel)]="formData.name"
-          name="name"
-        />
-
-        <!-- Típustól függő mezők -->
-        @if (album().type === 'selection') {
-          <div class="form-row">
-            <ps-input
-              label="Min. kiválasztás"
-              type="number"
-              [(ngModel)]="formData.minSelections"
-              name="minSelections"
-              min="0"
-            />
-            <ps-input
-              label="Max. kiválasztás"
-              type="number"
-              [(ngModel)]="formData.maxSelections"
-              name="maxSelections"
-              min="0"
-            />
-          </div>
-        }
-
-        @if (album().type === 'tablo') {
+      <!-- Típustól függő mezők -->
+      @if (album().type === 'selection') {
+        <div class="form-row">
           <ps-input
-            label="Max. retusálás"
+            label="Min. kiválasztás"
             type="number"
-            [(ngModel)]="formData.maxRetouchPhotos"
-            name="maxRetouchPhotos"
+            [(ngModel)]="formData.minSelections"
+            name="minSelections"
             min="0"
           />
-        }
-
-        <div class="dialog-actions">
-          <button type="button" class="btn-secondary" (click)="close.emit()">
-            Mégse
-          </button>
-          <button type="submit" class="btn-primary" [disabled]="saving()">
-            @if (saving()) {
-              <div class="spinner spinner--dark"></div>
-            }
-            Mentés
-          </button>
+          <ps-input
+            label="Max. kiválasztás"
+            type="number"
+            [(ngModel)]="formData.maxSelections"
+            name="maxSelections"
+            min="0"
+          />
         </div>
-      </form>
+      }
+
+      @if (album().type === 'tablo') {
+        <ps-input
+          label="Max. retusálás"
+          type="number"
+          [(ngModel)]="formData.maxRetouchPhotos"
+          name="maxRetouchPhotos"
+          min="0"
+        />
+      }
+    </form>
+
+    <div dialogFooter>
+      <button type="button" class="btn btn--outline" (click)="close.emit()">
+        Mégse
+      </button>
+      <button type="submit" class="btn btn--primary" [disabled]="saving()" (click)="onSubmit()">
+        @if (saving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        }
+        Mentés
+      </button>
     </div>
-  </div>
+  </app-dialog-wrapper>
 }

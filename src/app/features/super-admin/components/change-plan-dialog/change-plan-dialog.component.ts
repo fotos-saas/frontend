@@ -1,8 +1,6 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  viewChild,
-  ElementRef,
   AfterViewInit,
   OnInit,
   input,
@@ -14,15 +12,14 @@ import {
 } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { FormsModule } from '@angular/forms';
-import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { PsSelectComponent, PsRadioGroupComponent } from '@shared/components/form';
-import { PsSelectOption, PsRadioOption } from '@shared/components/form/form.types';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
+import { PsRadioOption } from '@shared/components/form/form.types';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { PlansService, PlanOption } from '../../../../shared/services/plans.service';
 import { ICONS } from '../../../../shared/constants';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 type PlanType = 'alap' | 'iskola' | 'studio' | 'vip';
 type BillingCycleType = 'monthly' | 'yearly';
@@ -34,85 +31,96 @@ type BillingCycleType = 'monthly' | 'yearly';
 @Component({
   selector: 'app-change-plan-dialog',
   standalone: true,
-  imports: [FormsModule, A11yModule, LucideAngularModule, PsSelectComponent, PsRadioGroupComponent],
+  imports: [FormsModule, LucideAngularModule, PsSelectComponent, PsRadioGroupComponent, DialogWrapperComponent],
   template: `
-    <div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-      <div #dialogContent class="dialog dialog--md" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
-        <!-- Header -->
-        <header class="dialog__header">
-          <div class="dialog__icon">
-            <lucide-icon [name]="ICONS.PACKAGE" [size]="28" />
-          </div>
-          <h2 class="dialog__title">Csomag váltás</h2>
-          <p class="dialog__subtitle">{{ subscriberName() }}</p>
-        </header>
+    <app-dialog-wrapper
+      variant="edit"
+      headerStyle="hero"
+      theme="blue"
+      [icon]="ICONS.PACKAGE"
+      title="Csomag váltás"
+      [description]="subscriberName()"
+      size="md"
+      [closable]="!isSubmitting()"
+      [isSubmitting]="isSubmitting()"
+      [errorMessage]="errorMessage()"
+      (closeEvent)="onCancel()"
+      (submitEvent)="onSubmit()"
+    >
+      <ng-container dialogBody>
+        <ps-select
+          label="Csomag"
+          [options]="planSelectOptions()"
+          [(ngModel)]="selectedPlan"
+          name="plan"
+        />
 
-        <!-- Content -->
-        <div class="dialog__content">
-          <form (ngSubmit)="onSubmit()">
-            <ps-select
-              label="Csomag"
-              [options]="planSelectOptions()"
-              [(ngModel)]="selectedPlan"
-              name="plan"
-            />
+        <ps-radio-group
+          label="Számlázási ciklus"
+          [options]="billingCycleOptions"
+          [(ngModel)]="selectedBillingCycle"
+          name="billingCycle"
+        />
 
-            <ps-radio-group
-              label="Számlázási ciklus"
-              [options]="billingCycleOptions"
-              [(ngModel)]="selectedBillingCycle"
-              name="billingCycle"
-            />
-
-            <!-- Ár előnézet -->
-            <div class="price-preview">
-              <div class="price-preview__label">Új ár</div>
-              <div class="price-preview__value">{{ formatPrice(newPrice()) }}</div>
-            </div>
-
-            @if (hasChanges()) {
-              <div class="change-info">
-                <lucide-icon [name]="ICONS.INFO" [size]="16" />
-                <span>A változás azonnal érvénybe lép. A Stripe automatikusan számolja a proration-t.</span>
-              </div>
-            }
-
-            @if (errorMessage()) {
-              <div class="error-message">
-                <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-                {{ errorMessage() }}
-              </div>
-            }
-          </form>
+        <!-- Ár előnézet -->
+        <div class="price-preview">
+          <div class="price-preview__label">Új ár</div>
+          <div class="price-preview__value">{{ formatPrice(newPrice()) }}</div>
         </div>
 
-        <!-- Footer -->
-        <footer class="dialog__footer">
-          <button
-            type="button"
-            class="btn btn--secondary"
-            (click)="onCancel()"
-            [disabled]="isSubmitting()"
-          >
-            Mégse
-          </button>
-          <button
-            type="button"
-            class="btn btn--primary"
-            (click)="onSubmit()"
-            [disabled]="isSubmitting() || !hasChanges()"
-          >
-            @if (isSubmitting()) {
-              <span class="btn__spinner"></span>
-            }
-            Módosítás
-          </button>
-        </footer>
-      </div>
-    </div>
+        @if (hasChanges()) {
+          <div class="change-info">
+            <lucide-icon [name]="ICONS.INFO" [size]="16" />
+            <span>A változás azonnal érvénybe lép. A Stripe automatikusan számolja a proration-t.</span>
+          </div>
+        }
+      </ng-container>
+
+      <ng-container dialogFooter>
+        <button
+          type="button"
+          class="btn btn--outline"
+          (click)="onCancel()"
+          [disabled]="isSubmitting()"
+        >
+          Mégse
+        </button>
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting() || !hasChanges()"
+        >
+          @if (isSubmitting()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          }
+          Módosítás
+        </button>
+      </ng-container>
+    </app-dialog-wrapper>
   `,
   styles: [`
-    @use '../dialog-shared.scss';
+    .price-preview {
+      padding: 1rem;
+      background: #f9fafb;
+      border-radius: 8px;
+      margin-top: 1rem;
+
+      &__label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        margin-bottom: 0.25rem;
+      }
+
+      &__value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+      }
+    }
 
     .change-info {
       display: flex;
@@ -133,13 +141,9 @@ type BillingCycleType = 'monthly' | 'yearly';
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(document:keydown)': 'handleKeyboardEvent($event)',
-  }
 })
 export class ChangePlanDialogComponent implements OnInit, AfterViewInit {
   private readonly logger = inject(LoggerService);
-  private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly service = inject(SuperAdminService);
   private readonly plansService = inject(PlansService);
   private readonly destroyRef = inject(DestroyRef);
@@ -155,20 +159,6 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit {
   /** Outputs */
   readonly close = output<void>();
   readonly changed = output<void>();
-
-  readonly dialogContent = viewChild<ElementRef<HTMLElement>>('dialogContent');
-
-  private focusTrap: FocusTrap | null = null;
-  private previousActiveElement: HTMLElement | null = null;
-
-  constructor() {
-    this.destroyRef.onDestroy(() => {
-      this.focusTrap?.destroy();
-      if (this.previousActiveElement?.focus) {
-        setTimeout(() => this.previousActiveElement?.focus(), 0);
-      }
-    });
-  }
 
   // Plan options - PlansService-ből töltve
   planOptions = signal<PlanOption[]>([]);
@@ -205,12 +195,10 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit {
   }
 
   private loadPlanData(): void {
-    // Load plan options
     this.plansService.getPlanSelectOptions().pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(options => this.planOptions.set(options));
 
-    // Load plan prices
     this.plansService.getPlanPrices().pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -228,29 +216,9 @@ export class ChangePlanDialogComponent implements OnInit, AfterViewInit {
            this.selectedBillingCycle() !== this.currentBillingCycle();
   });
 
-  readonly backdropHandler = createBackdropHandler(() => this.onCancel());
-
   ngAfterViewInit(): void {
-    // Set initial values from inputs
     this.selectedPlan.set(this.currentPlan());
     this.selectedBillingCycle.set(this.currentBillingCycle());
-
-    this.previousActiveElement = document.activeElement as HTMLElement;
-
-    if (this.dialogContent()?.nativeElement) {
-      this.focusTrap = this.focusTrapFactory.create(this.dialogContent()!.nativeElement);
-      this.focusTrap.focusInitialElementWhenReady();
-    }
-  }
-
-  handleKeyboardEvent(event: Event): void {
-    if (!(event instanceof KeyboardEvent)) return;
-
-    if (event.key === 'Escape' || event.key === 'Esc') {
-      if (this.dialogContent()?.nativeElement) {
-        this.onCancel();
-      }
-    }
   }
 
   formatPrice(price: number): string {

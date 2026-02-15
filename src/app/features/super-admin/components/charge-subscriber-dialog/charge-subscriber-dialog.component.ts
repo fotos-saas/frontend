@@ -1,9 +1,6 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  viewChild,
-  ElementRef,
-  AfterViewInit,
   input,
   output,
   inject,
@@ -11,14 +8,13 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { PsInputComponent } from '@shared/components/form';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { formatPrice } from '@shared/utils/formatters.util';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Manuális terhelés dialógus
@@ -27,85 +23,71 @@ import { formatPrice } from '@shared/utils/formatters.util';
 @Component({
   selector: 'app-charge-subscriber-dialog',
   standalone: true,
-  imports: [FormsModule, A11yModule, LucideAngularModule, PsInputComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, DialogWrapperComponent],
   template: `
-    <div class="dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
-      <div #dialogContent class="dialog dialog--md" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
-        <!-- Header -->
-        <header class="dialog__header">
-          <div class="dialog__icon">
-            <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="28" />
-          </div>
-          <h2 class="dialog__title">Manuális terhelés</h2>
-          <p class="dialog__subtitle">{{ subscriberName() }}</p>
-        </header>
+    <app-dialog-wrapper
+      variant="create"
+      headerStyle="hero"
+      theme="blue"
+      [icon]="ICONS.CREDIT_CARD"
+      title="Manuális terhelés"
+      [description]="subscriberName()"
+      size="md"
+      [closable]="!isSubmitting()"
+      [isSubmitting]="isSubmitting()"
+      [errorMessage]="errorMessage()"
+      (closeEvent)="onCancel()"
+      (submitEvent)="onSubmit()"
+    >
+      <ng-container dialogBody>
+        <ps-input
+          type="number"
+          label="Összeg (Ft)"
+          [(ngModel)]="amount"
+          name="amount"
+          min="1"
+          [required]="true"
+          placeholder="pl. 5000"
+        />
+        @if (amount() > 0) {
+          <span class="ps-field__hint">{{ formatAmount(amount()) }}</span>
+        }
 
-        <!-- Content -->
-        <div class="dialog__content">
-          <form (ngSubmit)="onSubmit()">
-            <ps-input
-              type="number"
-              label="Összeg (Ft)"
-              [(ngModel)]="amount"
-              name="amount"
-              min="1"
-              [required]="true"
-              placeholder="pl. 5000"
-            />
-            @if (amount() > 0) {
-              <span class="ps-field__hint">{{ formatAmount(amount()) }}</span>
-            }
+        <ps-input
+          label="Leírás"
+          [(ngModel)]="description"
+          name="description"
+          [required]="true"
+          placeholder="pl. Extra tárhely"
+        />
+      </ng-container>
 
-            <ps-input
-              label="Leírás"
-              [(ngModel)]="description"
-              name="description"
-              [required]="true"
-              placeholder="pl. Extra tárhely"
-            />
-
-            @if (errorMessage()) {
-              <div class="error-message">
-                <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-                {{ errorMessage() }}
-              </div>
-            }
-          </form>
-        </div>
-
-        <!-- Footer -->
-        <footer class="dialog__footer">
-          <button
-            type="button"
-            class="btn btn--secondary"
-            (click)="onCancel()"
-            [disabled]="isSubmitting()"
-          >
-            Mégse
-          </button>
-          <button
-            type="button"
-            class="btn btn--primary"
-            (click)="onSubmit()"
-            [disabled]="isSubmitting() || !isValid()"
-          >
-            @if (isSubmitting()) {
-              <span class="btn__spinner"></span>
-            }
-            Terhelés
-          </button>
-        </footer>
-      </div>
-    </div>
+      <ng-container dialogFooter>
+        <button
+          type="button"
+          class="btn btn--outline"
+          (click)="onCancel()"
+          [disabled]="isSubmitting()"
+        >
+          Mégse
+        </button>
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting() || !isValid()"
+        >
+          @if (isSubmitting()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          }
+          Terhelés
+        </button>
+      </ng-container>
+    </app-dialog-wrapper>
   `,
-  styleUrls: ['../dialog-shared.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(document:keydown)': 'handleKeyboardEvent($event)',
-  }
 })
-export class ChargeSubscriberDialogComponent implements AfterViewInit {
-  private readonly focusTrapFactory = inject(FocusTrapFactory);
+export class ChargeSubscriberDialogComponent {
   private readonly service = inject(SuperAdminService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -119,46 +101,11 @@ export class ChargeSubscriberDialogComponent implements AfterViewInit {
   readonly close = output<void>();
   readonly charged = output<void>();
 
-  readonly dialogContent = viewChild<ElementRef<HTMLElement>>('dialogContent');
-
-  private focusTrap: FocusTrap | null = null;
-  private previousActiveElement: HTMLElement | null = null;
-
-  constructor() {
-    this.destroyRef.onDestroy(() => {
-      this.focusTrap?.destroy();
-      if (this.previousActiveElement?.focus) {
-        setTimeout(() => this.previousActiveElement?.focus(), 0);
-      }
-    });
-  }
-
   // Form state
   amount = signal(0);
   description = signal('');
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
-
-  readonly backdropHandler = createBackdropHandler(() => this.onCancel());
-
-  ngAfterViewInit(): void {
-    this.previousActiveElement = document.activeElement as HTMLElement;
-
-    if (this.dialogContent()?.nativeElement) {
-      this.focusTrap = this.focusTrapFactory.create(this.dialogContent()!.nativeElement);
-      this.focusTrap.focusInitialElementWhenReady();
-    }
-  }
-
-  handleKeyboardEvent(event: Event): void {
-    if (!(event instanceof KeyboardEvent)) return;
-
-    if (event.key === 'Escape' || event.key === 'Esc') {
-      if (this.dialogContent()?.nativeElement) {
-        this.onCancel();
-      }
-    }
-  }
 
   isValid(): boolean {
     return this.amount() > 0 && this.description().trim().length > 0;

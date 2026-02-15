@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent } from '@shared/components/form';
 import { PartnerOrderAlbumDetails } from '../../../../../services/partner-orders.service';
 
@@ -22,9 +22,8 @@ export interface AlbumEditFormData {
   selector: 'app-album-edit-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, DialogWrapperComponent],
   templateUrl: './album-edit-modal.component.html',
-  styleUrls: ['./album-edit-modal.component.scss']
 })
 export class AlbumEditModalComponent {
   readonly ICONS = ICONS;
@@ -51,14 +50,6 @@ export class AlbumEditModalComponent {
     maxSelections: null,
     maxRetouchPhotos: null,
   };
-
-  // Backdrop handler
-  backdropHandler = createBackdropHandler(() => this.close.emit());
-
-  constructor() {
-    // Update form data when input changes
-    // Note: In a real app, we'd use effect() for this
-  }
 
   ngOnChanges(): void {
     const initial = this.initialFormData();

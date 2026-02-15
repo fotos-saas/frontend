@@ -1,75 +1,70 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  variant="confirm"
+  headerStyle="hero"
+  theme="red"
+  [icon]="ICONS.ALERT_TRIANGLE"
+  title="Fiók törlése"
+  size="md"
+  [closable]="true"
+  [isSubmitting]="isSubmitting()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="confirm.emit()"
 >
-  <div class="dialog-panel dialog-panel--md" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
-    <header class="dialog-header">
-      <div class="header-icon">
-        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="24" />
-      </div>
-      <h2 id="delete-dialog-title">Fiók törlése</h2>
-      <button class="close-btn" (click)="close.emit()" aria-label="Bezárás">
-        <lucide-icon [name]="ICONS.X" [size]="20" />
-      </button>
-    </header>
+  <div dialogBody>
+    <p class="warning-text">
+      Ez a művelet <strong>visszavonhatatlan</strong>! A következők törlődnek:
+    </p>
 
-    <div class="dialog-body">
-      <p class="warning-text">
-        Ez a művelet <strong>visszavonhatatlan</strong>! A következők törlődnek:
-      </p>
+    <ul class="deletion-list">
+      <li>
+        <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
+        Minden projektadat és fotó
+      </li>
+      <li>
+        <lucide-icon [name]="ICONS.SCHOOL" [size]="16" />
+        Iskolák és kapcsolattartók
+      </li>
+      <li>
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+        Számlázási előzmények
+      </li>
+      <li>
+        <lucide-icon [name]="ICONS.USER" [size]="16" />
+        Felhasználói fiók
+      </li>
+    </ul>
 
-      <ul class="deletion-list">
-        <li>
-          <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
-          Minden projektadat és fotó
-        </li>
-        <li>
-          <lucide-icon [name]="ICONS.SCHOOL" [size]="16" />
-          Iskolák és kapcsolattartók
-        </li>
-        <li>
-          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
-          Számlázási előzmények
-        </li>
-        <li>
-          <lucide-icon [name]="ICONS.USER" [size]="16" />
-          Felhasználói fiók
-        </li>
-      </ul>
-
-      <div class="retention-notice">
-        <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
-        <p>A törlés <strong>30 napon belül</strong> véglegesül. Addig visszavonható.</p>
-      </div>
-
-      <div class="confirm-input">
-        <ps-input
-          label="A megerősítéshez írd be: TÖRLÉS"
-          [(ngModel)]="confirmText"
-          placeholder="TÖRLÉS"
-          autocomplete="off"
-        />
-      </div>
+    <div class="retention-notice">
+      <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
+      <p>A törlés <strong>30 napon belül</strong> véglegesül. Addig visszavonható.</p>
     </div>
 
-    <footer class="dialog-footer">
-      <button class="btn btn--secondary" (click)="close.emit()" [disabled]="isSubmitting()">
-        Mégse
-      </button>
-      <button
-        class="btn btn--danger"
-        [disabled]="confirmText() !== 'TÖRLÉS' || isSubmitting()"
-        (click)="confirm.emit()"
-      >
-        @if (isSubmitting()) {
-          <span class="btn-spinner"></span>
-          Törlés...
-        } @else {
-          <lucide-icon [name]="ICONS.DELETE" [size]="18" />
-          Fiók törlése véglegesen
-        }
-      </button>
-    </footer>
+    <div class="confirm-input">
+      <ps-input
+        label="A megerősítéshez írd be: TÖRLÉS"
+        [(ngModel)]="confirmText"
+        placeholder="TÖRLÉS"
+        autocomplete="off"
+      />
+    </div>
   </div>
-</div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()" [disabled]="isSubmitting()">
+      Mégse
+    </button>
+    <button
+      class="btn btn--danger"
+      type="submit"
+      [disabled]="confirmText() !== 'TÖRLÉS' || isSubmitting()"
+    >
+      @if (isSubmitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Törlés...
+      } @else {
+        <lucide-icon [name]="ICONS.DELETE" [size]="18" />
+        Fiók törlése véglegesen
+      }
+    </button>
+  </div>
+</app-dialog-wrapper>

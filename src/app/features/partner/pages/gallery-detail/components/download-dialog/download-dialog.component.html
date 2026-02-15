@@ -1,51 +1,44 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  variant="info"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.DOWNLOAD"
+  title="ZIP letöltés beállítások"
+  size="md"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
 >
-  <div class="dialog-panel dialog-panel--md">
-    <!-- Header -->
-    <div class="dialog-header">
-      <h3>ZIP letöltés beállítások</h3>
-      <button class="dialog-close" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="18" />
-      </button>
-    </div>
+  <ng-container dialogBody>
+    <!-- ZIP tartalom -->
+    <ps-select
+      label="Tartalom"
+      [options]="zipContentOptions"
+      [ngModel]="zipContent()"
+      (ngModelChange)="zipContent.set($event)"
+    />
 
-    <!-- Content -->
-    <div class="dialog-body">
-      <!-- ZIP tartalom -->
-      <ps-select
-        label="Tartalom"
-        [options]="zipContentOptions"
-        [ngModel]="zipContent()"
-        (ngModelChange)="zipContent.set($event)"
-      />
+    <!-- Fájlnév stratégia -->
+    <ps-radio-group
+      label="Fájlnevek"
+      [options]="fileNamingOptions"
+      variant="cards"
+      [ngModel]="fileNaming()"
+      (ngModelChange)="fileNaming.set($event)"
+    />
 
-      <!-- Fájlnév stratégia -->
-      <ps-radio-group
-        label="Fájlnevek"
-        [options]="fileNamingOptions"
-        variant="cards"
-        [ngModel]="fileNaming()"
-        (ngModelChange)="fileNaming.set($event)"
-      />
+    <!-- Excel mellékelés -->
+    <ps-checkbox
+      label="Excel fájl mellékelése a ZIP-ben"
+      [ngModel]="includeExcel()"
+      (ngModelChange)="includeExcel.set($event)"
+    />
+  </ng-container>
 
-      <!-- Excel mellékelés -->
-      <ps-checkbox
-        label="Excel fájl mellékelése a ZIP-ben"
-        [ngModel]="includeExcel()"
-        (ngModelChange)="includeExcel.set($event)"
-      />
-    </div>
-
-    <!-- Footer -->
-    <div class="dialog-footer">
-      <button class="btn-cancel" (click)="close.emit()">Mégsem</button>
-      <button class="btn-primary" (click)="onSubmit()">
-        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-        Letöltés
-      </button>
-    </div>
-  </div>
-</div>
+  <ng-container dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">Mégsem</button>
+    <button class="btn btn--primary" (click)="onSubmit()">
+      <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+      Letöltés
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

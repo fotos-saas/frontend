@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { TeamService, TeamRole } from '../../../services/team.service';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent, PsRadioGroupComponent, PsRadioOption } from '@shared/components/form';
 
 /**
@@ -13,9 +13,8 @@ import { PsInputComponent, PsRadioGroupComponent, PsRadioOption } from '@shared/
 @Component({
   selector: 'app-invite-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsRadioGroupComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsRadioGroupComponent, DialogWrapperComponent],
   templateUrl: './invite-dialog.component.html',
-  styleUrls: ['./invite-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InviteDialogComponent {
@@ -26,7 +25,6 @@ export class InviteDialogComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
-  readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
   readonly roleOptions: PsRadioOption[] = this.teamService.roles.map(r => ({
     value: r.value,

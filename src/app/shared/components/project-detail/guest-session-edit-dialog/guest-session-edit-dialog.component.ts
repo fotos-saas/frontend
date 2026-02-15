@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
-import { createBackdropHandler } from '../../../utils/dialog.util';
+import { DialogWrapperComponent } from '../../dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent } from '@shared/components/form';
 import { PartnerService, GuestSession } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -11,10 +11,9 @@ import { ToastService } from '../../../../core/services/toast.service';
 @Component({
   selector: 'app-guest-session-edit-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, DialogWrapperComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './guest-session-edit-dialog.component.html',
-  styleUrl: './guest-session-edit-dialog.component.scss',
 })
 export class GuestSessionEditDialogComponent {
   projectId = input.required<number>();
@@ -31,8 +30,6 @@ export class GuestSessionEditDialogComponent {
 
   name = '';
   email = '';
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   ngOnInit(): void {
     const s = this.session();

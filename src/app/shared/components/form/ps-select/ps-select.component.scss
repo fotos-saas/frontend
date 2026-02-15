@@ -95,12 +95,150 @@
   box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
 }
 
+// ============================================================================
+// CARDS VARIANT
+// ============================================================================
+
+.ps-select-cards {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -4px;
+
+  &--vertical {
+    flex-direction: column;
+    margin: 0;
+  }
+
+  &--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.ps-select-card {
+  display: flex;
+  align-items: flex-start;
+  margin: 4px;
+  padding: 10px 14px;
+  border: $ps-field-border-width solid var(--ps-field-border);
+  border-radius: $ps-field-border-radius;
+  background: var(--ps-field-bg);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition:
+    border-color $ps-transition-duration $ps-transition-easing,
+    background-color $ps-transition-duration $ps-transition-easing,
+    box-shadow $ps-transition-duration $ps-transition-easing;
+
+  .ps-select-cards--vertical & {
+    margin: 0;
+    border-radius: 0;
+    border-bottom-width: 0;
+
+    &:first-child {
+      border-radius: $ps-field-border-radius $ps-field-border-radius 0 0;
+    }
+
+    &:last-child {
+      border-radius: 0 0 $ps-field-border-radius $ps-field-border-radius;
+      border-bottom-width: $ps-field-border-width;
+    }
+
+    &:only-child {
+      border-radius: $ps-field-border-radius;
+    }
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--ps-field-border-hover);
+    background: var(--ps-option-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ps-focus-border);
+    outline-offset: -2px;
+    z-index: 1;
+  }
+
+  &--selected {
+    border-color: var(--ps-check-bg);
+    background: var(--ps-option-selected-bg);
+
+    &:hover:not(:disabled) {
+      border-color: var(--ps-check-bg);
+    }
+
+    .ps-select-cards--vertical & {
+      border-color: var(--ps-check-bg);
+      // A szomszédos kártyák ne takarják el a selected border-t
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &__check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: $ps-field-border-width solid var(--ps-check-border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+    margin-right: 10px;
+    transition:
+      border-color $ps-transition-duration $ps-transition-easing,
+      background-color $ps-transition-duration $ps-transition-easing;
+
+    .ps-select-card--selected & {
+      background: var(--ps-check-bg);
+      border-color: var(--ps-check-bg);
+      color: white;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: $ps-field-font-size;
+    color: var(--ps-text-color);
+    line-height: 1.4;
+  }
+
+  &__sublabel {
+    font-size: $ps-hint-font-size;
+    color: var(--ps-hint-color);
+    line-height: 1.3;
+    margin-top: 2px;
+  }
+}
+
+// Error state for cards
+.ps-field--error .ps-select-card {
+  border-color: var(--ps-error-border);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ps-field--error .ps-select__trigger {
     animation: none;
   }
 
   .ps-select__chevron {
+    transition: none;
+  }
+
+  .ps-select-card {
     transition: none;
   }
 }

@@ -8,63 +8,97 @@
     </label>
   }
 
-  <div class="ps-select" [ngClass]="{ 'ps-select--open': isOpen() }">
-    <!-- Trigger button -->
-    <button
-      type="button"
-      class="ps-select__trigger"
-      [ngClass]="{
-        'ps-field__wrapper--focused': focused() || isOpen(),
-        'ps-field__wrapper--disabled': isDisabled()
-      }"
-      [disabled]="isDisabled()"
-      [attr.aria-expanded]="isOpen()"
-      [attr.aria-invalid]="computedState() === 'error'"
-      role="combobox"
-      aria-haspopup="listbox"
-      (click)="toggle()"
-      (keydown)="onKeydown($event)"
-      (focus)="onFocus()"
-      (blur)="onBlur()"
-    >
-      <span class="ps-select__value" [ngClass]="{ 'ps-select__value--placeholder': !selectedLabel() }">
-        {{ selectedLabel() || emptyLabel() }}
-      </span>
-
-      <span class="ps-select__chevron">
-        <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="18" />
-      </span>
-    </button>
-
-    <!-- Dropdown -->
-    @if (isOpen()) {
-      <div class="ps-dropdown" role="listbox">
-        @for (option of options(); track option.id; let i = $index) {
-          <div
-            class="ps-dropdown__option"
-            [ngClass]="{
-              'ps-dropdown__option--highlighted': highlightedIndex() === i,
-              'ps-dropdown__option--selected': isSelected(option),
-              'ps-dropdown__option--disabled': option.disabled
-            }"
-            role="option"
-            [attr.aria-selected]="isSelected(option)"
-            (click)="selectOption(option)"
-          >
-            <span class="ps-dropdown__option-label">{{ option.label }}</span>
-            @if (option.sublabel) {
-              <span class="ps-dropdown__option-sublabel">{{ option.sublabel }}</span>
-            }
+  @if (variant() === 'cards') {
+    <!-- Cards variant -->
+    <div class="ps-select-cards" [ngClass]="{
+      'ps-select-cards--vertical': direction() === 'vertical',
+      'ps-select-cards--disabled': isDisabled()
+    }" role="radiogroup">
+      @for (option of options(); track option.id) {
+        <button
+          type="button"
+          class="ps-select-card"
+          [ngClass]="{
+            'ps-select-card--selected': isSelected(option),
+            'ps-select-card--disabled': option.disabled
+          }"
+          [disabled]="option.disabled || isDisabled()"
+          role="radio"
+          [attr.aria-checked]="isSelected(option)"
+          (click)="selectOption(option)"
+        >
+          <span class="ps-select-card__check">
             @if (isSelected(option)) {
-              <span class="ps-dropdown__option-check">
-                <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-              </span>
+              <lucide-icon [name]="ICONS.CHECK" [size]="16" />
             }
-          </div>
-        }
-      </div>
-    }
-  </div>
+          </span>
+          <span class="ps-select-card__content">
+            <span class="ps-select-card__label">{{ option.label }}</span>
+            @if (option.sublabel) {
+              <span class="ps-select-card__sublabel">{{ option.sublabel }}</span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  } @else {
+    <!-- Dropdown variant -->
+    <div class="ps-select" [ngClass]="{ 'ps-select--open': isOpen() }">
+      <button
+        type="button"
+        class="ps-select__trigger"
+        [ngClass]="{
+          'ps-field__wrapper--focused': focused() || isOpen(),
+          'ps-field__wrapper--disabled': isDisabled()
+        }"
+        [disabled]="isDisabled()"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-invalid]="computedState() === 'error'"
+        role="combobox"
+        aria-haspopup="listbox"
+        (click)="toggle()"
+        (keydown)="onKeydown($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+      >
+        <span class="ps-select__value" [ngClass]="{ 'ps-select__value--placeholder': !selectedLabel() }">
+          {{ selectedLabel() || emptyLabel() }}
+        </span>
+
+        <span class="ps-select__chevron">
+          <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="18" />
+        </span>
+      </button>
+
+      @if (isOpen()) {
+        <div class="ps-dropdown" role="listbox">
+          @for (option of options(); track option.id; let i = $index) {
+            <div
+              class="ps-dropdown__option"
+              [ngClass]="{
+                'ps-dropdown__option--highlighted': highlightedIndex() === i,
+                'ps-dropdown__option--selected': isSelected(option),
+                'ps-dropdown__option--disabled': option.disabled
+              }"
+              role="option"
+              [attr.aria-selected]="isSelected(option)"
+              (click)="selectOption(option)"
+            >
+              <span class="ps-dropdown__option-label">{{ option.label }}</span>
+              @if (option.sublabel) {
+                <span class="ps-dropdown__option-sublabel">{{ option.sublabel }}</span>
+              }
+              @if (isSelected(option)) {
+                <span class="ps-dropdown__option-check">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+                </span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
 
   @if (computedState() === 'error' && errorMessage()) {
     <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">

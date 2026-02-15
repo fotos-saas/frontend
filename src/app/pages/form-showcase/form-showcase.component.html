@@ -153,14 +153,40 @@
     </div>
   </section>
 
-  <!-- 7. Select -->
+  <!-- 7. Select (dropdown) -->
   <section class="showcase__section">
-    <h2 class="showcase__section-title">Select (natív dropdown)</h2>
+    <h2 class="showcase__section-title">Select (dropdown)</h2>
     <ps-select
       label="Nyelv"
       [options]="selectOptions"
       [(ngModel)]="selectValue"
       emptyLabel="Válassz nyelvet..."
+      size="md"
+    />
+  </section>
+
+  <!-- 7b. Select (cards - horizontális) -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Select (kártyák - horizontális)</h2>
+    <ps-select
+      label="Nyelv"
+      [options]="selectOptions"
+      [(ngModel)]="selectValue"
+      variant="cards"
+      direction="horizontal"
+      size="full"
+    />
+  </section>
+
+  <!-- 7c. Select (cards - vertikális) -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Select (kártyák - vertikális)</h2>
+    <ps-select
+      label="Nyelv"
+      [options]="selectOptions"
+      [(ngModel)]="selectValue"
+      variant="cards"
+      direction="vertical"
       size="md"
     />
   </section>

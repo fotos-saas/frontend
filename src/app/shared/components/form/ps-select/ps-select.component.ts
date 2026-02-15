@@ -38,6 +38,8 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
 
   readonly options = input.required<PsSelectOption[]>();
   readonly emptyLabel = input('Válassz...');
+  readonly variant = input<'dropdown' | 'cards'>('dropdown');
+  readonly direction = input<'horizontal' | 'vertical'>('horizontal');
 
   private readonly hostEl = inject(ElementRef);
 
@@ -90,7 +92,9 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
     this.value.set(val);
     this.onChange(val);
     this.onTouched();
-    this.close();
+    if (this.variant() === 'dropdown') {
+      this.close();
+    }
   }
 
   isSelected(option: PsSelectOption): boolean {

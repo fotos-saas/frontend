@@ -78,13 +78,8 @@
 
       <!-- Event time -->
       <div class="field field--half">
-        <label class="field__label" for="event-time">
-          Időpont <span class="field__optional">(opcionális)</span>
-        </label>
-        <input
-          type="time"
-          id="event-time"
-          class="field__input"
+        <ps-timepicker
+          label="Időpont (opcionális)"
           [(ngModel)]="eventTime"
           (ngModelChange)="onInputChange()"
           [disabled]="isSubmitting()"

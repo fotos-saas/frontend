@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   forwardRef,
   input,
+  output,
   signal,
   computed,
   ElementRef,
@@ -45,7 +46,7 @@ export class PsSearchableSelectComponent extends PsFormFieldBase<string | number
 
   // Backward compat: value/valueChange (non-CVA) support
   readonly value = input<string | number>('');
-  readonly valueChange = signal<((val: string) => void) | null>(null);
+  readonly valueChange = output<string>();
 
   private readonly hostEl = inject(ElementRef);
   private searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
@@ -119,6 +120,7 @@ export class PsSearchableSelectComponent extends PsFormFieldBase<string | number
     const val = String(option.id);
     this.internalValue.set(val);
     this.onChange(val);
+    this.valueChange.emit(val);
     this.onTouched();
     this.close();
   }
@@ -126,6 +128,7 @@ export class PsSearchableSelectComponent extends PsFormFieldBase<string | number
   selectAll(): void {
     this.internalValue.set('');
     this.onChange('');
+    this.valueChange.emit('');
     this.onTouched();
     this.close();
   }
@@ -134,6 +137,7 @@ export class PsSearchableSelectComponent extends PsFormFieldBase<string | number
     event.stopPropagation();
     this.internalValue.set('');
     this.onChange('');
+    this.valueChange.emit('');
     this.onTouched();
     this.searchQuery.set('');
   }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
-import { SearchableSelectComponent, SelectOption } from '../../../../../shared/components/searchable-select/searchable-select.component';
+import { PsSearchableSelectComponent, SelectOption } from '@shared/components/form';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { SchoolItem } from '../../../models/partner.models';
 import {
@@ -26,7 +26,7 @@ interface ReviewRow extends ArchiveBulkImportPreviewItem {
   selector: 'app-archive-bulk-import-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, FormsModule, LucideAngularModule, SearchableSelectComponent, DialogWrapperComponent],
+  imports: [DecimalPipe, FormsModule, LucideAngularModule, PsSearchableSelectComponent, DialogWrapperComponent],
   templateUrl: './archive-bulk-import-dialog.component.html',
   styleUrl: './archive-bulk-import-dialog.component.scss',
 })

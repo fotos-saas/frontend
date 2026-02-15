@@ -9,38 +9,32 @@
       <h3>Stripe API kulcsok</h3>
       <p class="section-desc">Add meg a Stripe fiókod API kulcsait a vendégek online fizetésének fogadásához.</p>
 
-      <div class="form-group">
-        <ps-input
-          label="Publikus kulcs (pk_...)"
-          fieldId="pk"
-          type="text"
-          [(ngModel)]="publicKey"
-          [placeholder]="stripeService.settings()?.has_public_key ? '••••••••••• (már megadva)' : 'pk_live_... vagy pk_test_...'"
-        />
-      </div>
+      <ps-input
+        label="Publikus kulcs (pk_...)"
+        fieldId="pk"
+        type="text"
+        [(ngModel)]="publicKey"
+        [placeholder]="stripeService.settings()?.has_public_key ? '••••••••••• (már megadva)' : 'pk_live_... vagy pk_test_...'"
+      />
 
-      <div class="form-group">
-        <ps-input
-          label="Titkos kulcs (sk_...)"
-          fieldId="sk"
-          type="password"
-          [(ngModel)]="secretKey"
-          [placeholder]="stripeService.settings()?.has_secret_key ? '••••••••••• (már megadva)' : 'sk_live_... vagy sk_test_...'"
-        />
-      </div>
+      <ps-input
+        label="Titkos kulcs (sk_...)"
+        fieldId="sk"
+        type="password"
+        [(ngModel)]="secretKey"
+        [placeholder]="stripeService.settings()?.has_secret_key ? '••••••••••• (már megadva)' : 'sk_live_... vagy sk_test_...'"
+      />
 
-      <div class="form-group">
-        <ps-input
-          label="Webhook secret (whsec_...)"
-          fieldId="wh"
-          type="password"
-          [(ngModel)]="webhookSecret"
-          [placeholder]="stripeService.settings()?.has_webhook_secret ? '••••••••••• (már megadva)' : 'whsec_...'"
-        />
-      </div>
+      <ps-input
+        label="Webhook secret (whsec_...)"
+        fieldId="wh"
+        type="password"
+        [(ngModel)]="webhookSecret"
+        [placeholder]="stripeService.settings()?.has_webhook_secret ? '••••••••••• (már megadva)' : 'whsec_...'"
+      />
 
       @if (stripeService.settings(); as settings) {
-        <div class="form-group">
+        <div class="form-field">
           <label>Webhook URL (másold be a Stripe dashboardba)</label>
           <div class="webhook-url">
             <code>{{ settings.webhook_url }}</code>

@@ -13,7 +13,7 @@
 >
   <ng-container dialogBody>
     <!-- Iskola kiválasztás -->
-    <div class="form-group">
+    <div class="form-field">
       <label class="form-label">Iskola</label>
       <app-searchable-dropdown
         placeholder="Keress iskola név vagy város alapján..."
@@ -29,7 +29,7 @@
     </div>
 
     <!-- Kapcsolattartó -->
-    <div class="form-group">
+    <div class="form-field">
       <label class="form-label">Kapcsolattartó</label>
       <app-searchable-dropdown
         placeholder="Keress kapcsolattartó név, email vagy telefon alapján..."
@@ -46,23 +46,19 @@
 
     <!-- Osztály és Évfolyam -->
     <div class="form-row">
-      <div class="form-group">
-        <ps-input
-          label="Osztály neve"
-          placeholder="pl. 12.A"
-          [(ngModel)]="formData.class_name"
-          name="className"
-        />
-      </div>
+      <ps-input
+        label="Osztály neve"
+        placeholder="pl. 12.A"
+        [(ngModel)]="formData.class_name"
+        name="className"
+      />
 
-      <div class="form-group">
-        <ps-input
-          label="Évfolyam"
-          placeholder="pl. 2024"
-          [(ngModel)]="formData.class_year"
-          name="classYear"
-        />
-      </div>
+      <ps-input
+        label="Évfolyam"
+        placeholder="pl. 2024"
+        [(ngModel)]="formData.class_year"
+        name="classYear"
+      />
     </div>
   </ng-container>
 

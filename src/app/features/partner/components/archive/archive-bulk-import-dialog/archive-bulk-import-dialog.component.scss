@@ -2,7 +2,6 @@
 @use '../../../../../shared/styles/dialog-forms' as form;
 
 // --- FORM ---
-.form-group { margin-bottom: 1rem; }
 .form-label { @include form.label; display: block; font-weight: 600; margin-bottom: 0.5rem; }
 
 .names-textarea {

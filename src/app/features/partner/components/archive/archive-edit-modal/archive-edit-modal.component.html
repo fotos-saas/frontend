@@ -23,7 +23,7 @@
           <div class="form-row">
             @for (field of config().extraFields; track field.name) {
               @if (field.gridSize === 'sm') {
-                <div class="form-group form-group--sm">
+                <div class="form-field form-field--sm">
                   <ps-input
                     [label]="field.label"
                     [type]="field.type"
@@ -34,7 +34,7 @@
                 </div>
               }
             }
-            <div class="form-group form-group--lg">
+            <div class="form-field form-field--lg">
               <ps-input
                 label="Név"
                 [(ngModel)]="canonicalName"
@@ -45,33 +45,29 @@
             </div>
           </div>
         } @else {
-          <div class="form-group form-group--lg">
-            <ps-input
-              label="Név"
-              [(ngModel)]="canonicalName"
-              name="canonicalName"
-              [required]="true"
-              [placeholder]="config().placeholderName"
-            />
-          </div>
+          <ps-input
+            label="Név"
+            [(ngModel)]="canonicalName"
+            name="canonicalName"
+            [required]="true"
+            [placeholder]="config().placeholderName"
+          />
         }
 
         <!-- Extra mezők a név után (pl. osztály, pozíció) -->
         @for (field of config().extraFields; track field.name) {
           @if (field.gridSize !== 'sm') {
-            <div class="form-group">
-              <ps-input
-                [label]="field.label"
-                [type]="field.type"
-                [(ngModel)]="extraFieldValues[field.name]"
-                [name]="field.name"
-                [placeholder]="field.placeholder ?? ''"
-              />
-            </div>
+            <ps-input
+              [label]="field.label"
+              [type]="field.type"
+              [(ngModel)]="extraFieldValues[field.name]"
+              [name]="field.name"
+              [placeholder]="field.placeholder ?? ''"
+            />
           }
         }
 
-        <div class="form-group">
+        <div class="form-field">
           <label>Iskola *</label>
           <ps-searchable-select
             [options]="schoolOptions()"
@@ -114,17 +110,15 @@
                 @if (photoPreviewUrl()) {
                   <span class="photo-status photo-status--new">Új fotó kiválasztva</span>
                   <div class="photo-fields">
-                    <div class="form-group form-group--inline">
-                      <ps-input
-                        label="Évszám"
-                        type="number"
-                        [(ngModel)]="photoYear"
-                        name="photoYear"
-                        size="sm"
-                        [min]="2000"
-                        [max]="2100"
-                      />
-                    </div>
+                    <ps-input
+                      label="Évszám"
+                      type="number"
+                      [(ngModel)]="photoYear"
+                      name="photoYear"
+                      size="sm"
+                      [min]="2000"
+                      [max]="2100"
+                    />
                     <ps-checkbox label="Aktív fotó" [(ngModel)]="setPhotoActive" name="setPhotoActive" />
                   </div>
                 } @else if (currentPhotoUrl()) {

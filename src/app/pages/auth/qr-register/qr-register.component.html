@@ -44,40 +44,30 @@
       }
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <ps-input
-            formControlName="name"
-            label="Neved"
-            placeholder="Teljes neved"
-            autocomplete="name"
-          />
-          @if (form.get('name')?.invalid && form.get('name')?.touched) {
-            <span class="error-text">Add meg a neved (min. 2 karakter)</span>
-          }
-        </div>
+        <ps-input
+          formControlName="name"
+          label="Neved"
+          placeholder="Teljes neved"
+          autocomplete="name"
+          [errorMessage]="form.get('name')?.invalid && form.get('name')?.touched ? 'Add meg a neved (min. 2 karakter)' : ''"
+        />
 
-        <div class="form-group">
-          <ps-input
-            type="email"
-            formControlName="email"
-            label="Email címed"
-            placeholder="pelda@email.hu"
-            autocomplete="email"
-          />
-          @if (form.get('email')?.errors?.['email'] && form.get('email')?.touched) {
-            <span class="error-text">Érvénytelen email cím</span>
-          }
-        </div>
+        <ps-input
+          type="email"
+          formControlName="email"
+          label="Email címed"
+          placeholder="pelda@email.hu"
+          autocomplete="email"
+          [errorMessage]="form.get('email')?.errors?.['email'] && form.get('email')?.touched ? 'Érvénytelen email cím' : ''"
+        />
 
-        <div class="form-group">
-          <ps-input
-            type="tel"
-            formControlName="phone"
-            label="Telefonszámod (opcionális)"
-            placeholder="+36 30 123 4567"
-            autocomplete="tel"
-          />
-        </div>
+        <ps-input
+          type="tel"
+          formControlName="phone"
+          label="Telefonszámod (opcionális)"
+          placeholder="+36 30 123 4567"
+          autocomplete="tel"
+        />
 
         <button type="submit" class="btn-primary" [disabled]="isLoading() || form.invalid">
           @if (isLoading()) {

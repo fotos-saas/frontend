@@ -29,19 +29,17 @@
         <!-- Bal oszlop: Alap adatok -->
         <div class="dialog__column dialog__column--main">
           <!-- Title -->
-          <div class="form-group">
-            <ps-input
-              label="Szavazás címe"
-              [required]="true"
-              fieldId="poll-title"
-              placeholder="Pl. Melyik tabló tetszik?"
-              [(ngModel)]="title"
-              hint="Min. 3 karakter"
-            />
-          </div>
+          <ps-input
+            label="Szavazás címe"
+            [required]="true"
+            fieldId="poll-title"
+            placeholder="Pl. Melyik tabló tetszik?"
+            [(ngModel)]="title"
+            hint="Min. 3 karakter"
+          />
 
           <!-- Description - Rich Text Editor -->
-          <div class="form-group">
+          <div class="form-field">
             <label class="form-label">
               Leírás (opcionális)
             </label>
@@ -55,7 +53,7 @@
           </div>
 
           <!-- Media Upload (max 5 képek, 10MB/kép) -->
-          <div class="form-group">
+          <div class="form-field">
             <label class="form-label">Képek (opcionális)</label>
             @if (mediaUploadError()) {
               <div class="media-upload-error">{{ mediaUploadError() }}</div>
@@ -70,7 +68,7 @@
           </div>
 
           <!-- Deadline -->
-          <div class="form-group">
+          <div class="form-field">
             <label class="form-label">Határidő</label>
             <div class="deadline-options">
               @for (option of deadlineOptions; track option.days) {
@@ -84,11 +82,11 @@
                 </button>
               }
             </div>
-            <span class="form-hint">A szavazás automatikusan lezárul a határidő lejártakor</span>
+            <span class="ps-field__hint">A szavazás automatikusan lezárul a határidő lejártakor</span>
           </div>
 
           <!-- Settings -->
-          <div class="form-group">
+          <div class="form-field">
             <label class="form-label">Beállítások</label>
             <div class="settings-list">
               <ps-checkbox
@@ -159,7 +157,7 @@
             </svg>
             Opció hozzáadása
           </button>
-          <span class="form-hint">Min. 2, max. 10 opció</span>
+          <span class="ps-field__hint">Min. 2, max. 10 opció</span>
         </div>
       </div>
     </div>

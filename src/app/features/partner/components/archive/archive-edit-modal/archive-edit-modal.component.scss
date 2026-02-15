@@ -7,7 +7,7 @@
 .modal-form { @include form.form-layout; }
 .form-row { @include form.form-row; }
 
-.form-group {
+.form-field {
   @include form.form-group;
   &--sm { flex: 0 0 100px; }
   &--lg { flex: 1; }

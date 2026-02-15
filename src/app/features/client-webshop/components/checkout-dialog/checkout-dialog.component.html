@@ -25,36 +25,30 @@
       <div class="form-section">
         <h4>Kapcsolattartó adatok</h4>
 
-        <div class="form-group">
-          <ps-input
-            label="Név"
-            [required]="true"
-            placeholder="Teljes név"
-            [ngModel]="customerName()"
-            (ngModelChange)="customerName.set($event)"
-          />
-        </div>
+        <ps-input
+          label="Név"
+          [required]="true"
+          placeholder="Teljes név"
+          [ngModel]="customerName()"
+          (ngModelChange)="customerName.set($event)"
+        />
 
-        <div class="form-group">
-          <ps-input
-            label="E-mail"
-            type="email"
-            [required]="true"
-            placeholder="pelda@email.hu"
-            [ngModel]="customerEmail()"
-            (ngModelChange)="customerEmail.set($event)"
-          />
-        </div>
+        <ps-input
+          label="E-mail"
+          type="email"
+          [required]="true"
+          placeholder="pelda@email.hu"
+          [ngModel]="customerEmail()"
+          (ngModelChange)="customerEmail.set($event)"
+        />
 
-        <div class="form-group">
-          <ps-input
-            label="Telefonszám"
-            type="tel"
-            placeholder="+36 30 123 4567"
-            [ngModel]="customerPhone()"
-            (ngModelChange)="customerPhone.set($event)"
-          />
-        </div>
+        <ps-input
+          label="Telefonszám"
+          type="tel"
+          placeholder="+36 30 123 4567"
+          [ngModel]="customerPhone()"
+          (ngModelChange)="customerPhone.set($event)"
+        />
       </div>
 
       <!-- Átvételi mód -->
@@ -74,38 +68,32 @@
       @if (deliveryMethod() === 'shipping') {
         <div class="form-section">
           <h4>Szállítási adatok</h4>
-          <div class="form-group">
-            <ps-textarea
-              label="Szállítási cím"
-              [required]="true"
-              placeholder="Irányítószám, város, utca, házszám"
-              [rows]="2"
-              [ngModel]="shippingAddress()"
-              (ngModelChange)="shippingAddress.set($event)"
-            />
-          </div>
-          <div class="form-group">
-            <ps-input
-              label="Megjegyzés a szállításhoz"
-              placeholder="pl. kapucsengő, emelet"
-              [ngModel]="shippingNotes()"
-              (ngModelChange)="shippingNotes.set($event)"
-            />
-          </div>
+          <ps-textarea
+            label="Szállítási cím"
+            [required]="true"
+            placeholder="Irányítószám, város, utca, házszám"
+            [rows]="2"
+            [ngModel]="shippingAddress()"
+            (ngModelChange)="shippingAddress.set($event)"
+          />
+          <ps-input
+            label="Megjegyzés a szállításhoz"
+            placeholder="pl. kapucsengő, emelet"
+            [ngModel]="shippingNotes()"
+            (ngModelChange)="shippingNotes.set($event)"
+          />
         </div>
       }
 
       <!-- Megjegyzés -->
       <div class="form-section">
-        <div class="form-group">
-          <ps-textarea
-            label="Megjegyzés a rendeléshez"
-            placeholder="Bármilyen kérés vagy megjegyzés..."
-            [rows]="2"
-            [ngModel]="customerNotes()"
-            (ngModelChange)="customerNotes.set($event)"
-          />
-        </div>
+        <ps-textarea
+          label="Megjegyzés a rendeléshez"
+          placeholder="Bármilyen kérés vagy megjegyzés..."
+          [rows]="2"
+          [ngModel]="customerNotes()"
+          (ngModelChange)="customerNotes.set($event)"
+        />
       </div>
 
       <!-- Összesítő -->

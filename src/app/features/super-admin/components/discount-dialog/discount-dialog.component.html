@@ -13,63 +13,55 @@
     <div class="dialog__content">
       <form (ngSubmit)="onSubmit()">
         <!-- Százalék -->
-        <div class="form-group">
-          <ps-input
-            type="number"
-            label="Kedvezmény mértéke (%)"
-            [ngModel]="percent()"
-            (ngModelChange)="percent.set($event)"
-            [min]="1"
-            [max]="99"
-            [required]="true"
-            placeholder="pl. 20"
-          />
-          @if (percent() > 0 && percent() <= 99) {
-            <span class="form-hint">{{ percent() }}% kedvezmény minden számlából</span>
-          }
-        </div>
+        <ps-input
+          type="number"
+          label="Kedvezmény mértéke (%)"
+          [ngModel]="percent()"
+          (ngModelChange)="percent.set($event)"
+          [min]="1"
+          [max]="99"
+          [required]="true"
+          placeholder="pl. 20"
+        />
+        @if (percent() > 0 && percent() <= 99) {
+          <span class="ps-field__hint">{{ percent() }}% kedvezmény minden számlából</span>
+        }
 
         <!-- Időtartam típus -->
-        <div class="form-group">
-          <ps-radio-group
-            label="Érvényesség"
-            [options]="durationOptions"
-            [ngModel]="durationType()"
-            (ngModelChange)="durationType.set($event)"
-            direction="horizontal"
-          />
-        </div>
+        <ps-radio-group
+          label="Érvényesség"
+          [options]="durationOptions"
+          [ngModel]="durationType()"
+          (ngModelChange)="durationType.set($event)"
+          direction="horizontal"
+        />
 
         <!-- Hónapok száma -->
         @if (durationType() === 'months') {
-          <div class="form-group">
-            <ps-input
-              type="number"
-              label="Hónapok száma"
-              [ngModel]="durationMonths()"
-              (ngModelChange)="durationMonths.set($event)"
-              [min]="1"
-              [max]="120"
-              [required]="true"
-              placeholder="pl. 6"
-            />
-            @if (durationMonths() > 0) {
-              <span class="form-hint">{{ formatExpiryDate() }}-ig érvényes</span>
-            }
-          </div>
+          <ps-input
+            type="number"
+            label="Hónapok száma"
+            [ngModel]="durationMonths()"
+            (ngModelChange)="durationMonths.set($event)"
+            [min]="1"
+            [max]="120"
+            [required]="true"
+            placeholder="pl. 6"
+          />
+          @if (durationMonths() > 0) {
+            <span class="ps-field__hint">{{ formatExpiryDate() }}-ig érvényes</span>
+          }
         }
 
         <!-- Megjegyzés -->
-        <div class="form-group">
-          <ps-textarea
-            label="Megjegyzés (opcionális)"
-            [ngModel]="note()"
-            (ngModelChange)="note.set($event)"
-            [maxLength]="500"
-            [rows]="3"
-            placeholder="pl. Hűségkedvezmény, egyedi megállapodás..."
-          />
-        </div>
+        <ps-textarea
+          label="Megjegyzés (opcionális)"
+          [ngModel]="note()"
+          (ngModelChange)="note.set($event)"
+          [maxLength]="500"
+          [rows]="3"
+          placeholder="pl. Hűségkedvezmény, egyedi megállapodás..."
+        />
 
         @if (currentDiscount()) {
           <div class="info-box">

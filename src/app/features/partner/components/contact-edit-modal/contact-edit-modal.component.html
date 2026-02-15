@@ -13,59 +13,45 @@
     </header>
 
     <form (ngSubmit)="save()" class="modal-form">
-      <div class="form-group">
-        <ps-input
-          label="Név"
-          [(ngModel)]="name"
-          name="name"
-          [required]="true"
-          placeholder="Pl. Kovács János"
-        />
-      </div>
+      <ps-input
+        label="Név"
+        [(ngModel)]="name"
+        name="name"
+        [required]="true"
+        placeholder="Pl. Kovács János"
+      />
 
       <div class="form-row">
-        <div class="form-group">
-          <ps-input
-            label="Email"
-            type="email"
-            [(ngModel)]="email"
-            name="email"
-            placeholder="email@example.com"
-          />
-        </div>
+        <ps-input
+          label="Email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="email@example.com"
+        />
 
-        <div class="form-group">
-          <label for="phone">Telefon</label>
-          <input
-            type="tel"
-            id="phone"
-            [(ngModel)]="phone"
-            name="phone"
-            class="form-input"
-            [class.form-input--error]="phoneError()"
-            placeholder="+36 30 123 4567"
-            (input)="onPhoneInput($event)"
-            (paste)="onPhoneInput($event)"
-          />
-          @if (phoneError()) {
-            <span class="field-error">{{ phoneError() }}</span>
-          }
-        </div>
-      </div>
-
-      <div class="form-group">
-        <ps-textarea
-          label="Megjegyzés"
-          [(ngModel)]="note"
-          name="note"
-          placeholder="Opcionális megjegyzés..."
-          [rows]="2"
+        <ps-input
+          label="Telefon"
+          type="tel"
+          [(ngModel)]="phone"
+          name="phone"
+          placeholder="+36 30 123 4567"
+          [errorMessage]="phoneError() ?? ''"
+          (blur)="onPhoneBlur()"
         />
       </div>
 
+      <ps-textarea
+        label="Megjegyzés"
+        [(ngModel)]="note"
+        name="note"
+        placeholder="Opcionális megjegyzés..."
+        [rows]="2"
+      />
+
       <!-- Projekt autocomplete (opcionális) -->
-      <div class="form-group">
-        <label for="project">Projekt <span class="optional-label">(opcionális)</span></label>
+      <div class="autocomplete-section">
+        <label for="project" class="ps-field__label">Projekt <span class="optional-label">(opcionális)</span></label>
         <div class="autocomplete-container">
           <div class="autocomplete-input-wrapper">
             <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="autocomplete-icon" />
@@ -74,7 +60,7 @@
               id="project"
               [(ngModel)]="projectSearch"
               name="projectSearch"
-              class="form-input autocomplete-input"
+              class="ps-field__input autocomplete-input"
               placeholder="Keresés iskola vagy osztály alapján..."
               (focus)="onProjectInputFocus()"
               (input)="onProjectSearch()"

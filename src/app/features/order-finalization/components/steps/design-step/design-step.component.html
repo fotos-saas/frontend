@@ -15,7 +15,7 @@
     />
 
     <!-- Betűszín -->
-    <div class="form-group">
+    <div class="form-field">
       <div class="color-input-wrapper">
         <ps-input
           label="Betűszín (opcionális)"
@@ -36,7 +36,7 @@
   </div>
 
   <!-- Rich text editor - Megjegyzés -->
-  <div class="form-group">
+  <div class="form-field">
     <label id="description-label" class="form-label">Megjegyzés, elképzelés (opcionális)</label>
     <div class="editor-container" role="group" aria-labelledby="description-label">
       <ngx-editor-menu [editor]="editor" [toolbar]="editorToolbar"></ngx-editor-menu>
@@ -47,13 +47,13 @@
         [placeholder]="'Írd le részletesen, hogyan képzeled el a tablót. Milyen stílusú legyen? Van-e referencia kép?'"
       ></ngx-editor>
     </div>
-    <span class="form-hint">Maximum 5000 karakter</span>
+    <span class="ps-field__hint">Maximum 5000 karakter</span>
   </div>
 
   <!-- Fájl feltöltés sor -->
   <div class="form-row">
     <!-- Háttérkép -->
-    <div class="form-group">
+    <div class="form-field">
       <label id="background-label" class="form-label">Háttérkép (opcionális)</label>
       <div class="file-upload" role="group" aria-labelledby="background-label">
         @if (backgroundUploading()) {
@@ -92,11 +92,11 @@
           </label>
         }
       </div>
-      <span id="background-hint" class="form-hint">JPG, JPEG vagy BMP, max. 16MB</span>
+      <span id="background-hint" class="ps-field__hint">JPG, JPEG vagy BMP, max. 16MB</span>
     </div>
 
     <!-- Csatolmányok -->
-    <div class="form-group">
+    <div class="form-field">
       <label id="attachment-label" class="form-label">Csatolmányok (opcionális)</label>
       <div class="file-upload" role="group" aria-labelledby="attachment-label">
         @if (attachmentUploading()) {
@@ -140,7 +140,7 @@
           }
         </div>
       }
-      <span id="attachment-hint" class="form-hint">ZIP, RAR vagy 7Z, max. 64MB</span>
+      <span id="attachment-hint" class="ps-field__hint">ZIP, RAR vagy 7Z, max. 64MB</span>
     </div>
   </div>
 </section>

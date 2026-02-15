@@ -150,58 +150,46 @@
 
     <div class="setting-card">
       <div class="form-row">
-        <div class="form-group form-group--half">
-          <ps-input
-            label="Számla előtag"
-            [ngModel]="prefix()"
-            (ngModelChange)="prefix.set($event)" />
-        </div>
-        <div class="form-group form-group--half">
-          <ps-select
-            label="Pénznem"
-            [options]="currencyOptions"
-            [ngModel]="currency()"
-            (ngModelChange)="currency.set($event)" />
-        </div>
+        <ps-input
+          label="Számla előtag"
+          [ngModel]="prefix()"
+          (ngModelChange)="prefix.set($event)" />
+        <ps-select
+          label="Pénznem"
+          [options]="currencyOptions"
+          [ngModel]="currency()"
+          (ngModelChange)="currency.set($event)" />
       </div>
       <div class="form-row">
-        <div class="form-group form-group--half">
-          <ps-select
-            label="Nyelv"
-            [options]="languageOptions"
-            [ngModel]="language()"
-            (ngModelChange)="language.set($event)" />
-        </div>
-        <div class="form-group form-group--half">
-          <ps-input
-            label="Fizetési határidő (nap)"
-            type="number"
-            [min]="0"
-            [max]="365"
-            [ngModel]="dueDays()"
-            (ngModelChange)="dueDays.set($event)" />
-        </div>
+        <ps-select
+          label="Nyelv"
+          [options]="languageOptions"
+          [ngModel]="language()"
+          (ngModelChange)="language.set($event)" />
+        <ps-input
+          label="Fizetési határidő (nap)"
+          type="number"
+          [min]="0"
+          [max]="365"
+          [ngModel]="dueDays()"
+          (ngModelChange)="dueDays.set($event)" />
       </div>
       <div class="form-row">
-        <div class="form-group form-group--half">
-          <ps-input
-            label="ÁFA kulcs (%)"
-            type="number"
-            [min]="0"
-            [max]="100"
-            [ngModel]="vatPercentage()"
-            (ngModelChange)="vatPercentage.set($event)" />
-        </div>
-        <div class="form-group form-group--half">
-          <div class="setting-row">
-            <div class="setting-info">
-              <span class="setting-label setting-label--sub">EU ÁFA</span>
-            </div>
-            <div class="setting-control">
-              <ps-toggle
-                [ngModel]="euVat()"
-                (ngModelChange)="euVat.set($event)" />
-            </div>
+        <ps-input
+          label="ÁFA kulcs (%)"
+          type="number"
+          [min]="0"
+          [max]="100"
+          [ngModel]="vatPercentage()"
+          (ngModelChange)="vatPercentage.set($event)" />
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label setting-label--sub">EU ÁFA</span>
+          </div>
+          <div class="setting-control">
+            <ps-toggle
+              [ngModel]="euVat()"
+              (ngModelChange)="euVat.set($event)" />
           </div>
         </div>
       </div>

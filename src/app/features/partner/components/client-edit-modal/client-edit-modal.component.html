@@ -13,45 +13,37 @@
     </header>
 
     <form (ngSubmit)="save()" class="modal-form">
-      <div class="form-group">
-        <ps-input
-          label="Név"
-          [(ngModel)]="name"
-          name="name"
-          [required]="true"
-          placeholder="Pl. Kiss Péter"
-        />
-      </div>
+      <ps-input
+        label="Név"
+        [(ngModel)]="name"
+        name="name"
+        [required]="true"
+        placeholder="Pl. Kiss Péter"
+      />
 
-      <div class="form-group">
-        <ps-input
-          label="Email"
-          type="email"
-          [(ngModel)]="email"
-          name="email"
-          placeholder="Pl. pelda@email.hu"
-        />
-      </div>
+      <ps-input
+        label="Email"
+        type="email"
+        [(ngModel)]="email"
+        name="email"
+        placeholder="Pl. pelda@email.hu"
+      />
 
-      <div class="form-group">
-        <ps-input
-          label="Telefon"
-          type="tel"
-          [(ngModel)]="phone"
-          name="phone"
-          placeholder="Pl. +36 30 123 4567"
-        />
-      </div>
+      <ps-input
+        label="Telefon"
+        type="tel"
+        [(ngModel)]="phone"
+        name="phone"
+        placeholder="Pl. +36 30 123 4567"
+      />
 
-      <div class="form-group">
-        <ps-textarea
-          label="Megjegyzés"
-          [(ngModel)]="note"
-          name="note"
-          [rows]="3"
-          placeholder="Egyéb megjegyzések..."
-        />
-      </div>
+      <ps-textarea
+        label="Megjegyzés"
+        [(ngModel)]="note"
+        name="note"
+        [rows]="3"
+        placeholder="Egyéb megjegyzések..."
+      />
 
       @if (errorMessage()) {
         <div class="error-message">

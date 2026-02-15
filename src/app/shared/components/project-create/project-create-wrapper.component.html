@@ -10,13 +10,13 @@
 
   <form class="create-form" (ngSubmit)="onSubmit()">
     <!-- Iskola választó -->
-    <div class="form-group">
-      <label for="school">Iskola</label>
+    <div class="autocomplete-section">
+      <label for="school" class="ps-field__label">Iskola</label>
       <div class="autocomplete-wrapper">
         <input
           type="text"
           id="school"
-          class="form-input"
+          class="ps-field__input"
           placeholder="Kezdj el gépelni az iskola nevét..."
           [(ngModel)]="schoolSearchQuery"
           name="schoolSearch"
@@ -60,32 +60,28 @@
           </div>
         }
       </div>
-      <span class="form-hint">Opcionális - keress rá az iskola nevére vagy városára</span>
+      <span class="ps-field__hint">Opcionális - keress rá az iskola nevére vagy városára</span>
     </div>
 
     <!-- Osztály neve -->
-    <div class="form-group">
-      <ps-input
-        label="Osztály neve"
-        fieldId="className"
-        placeholder="pl. 12.A"
-        [(ngModel)]="className"
-        name="className"
-        hint="Opcionális - pl. 12.A, Ballagók 2024"
-      />
-    </div>
+    <ps-input
+      label="Osztály neve"
+      fieldId="className"
+      placeholder="pl. 12.A"
+      [(ngModel)]="className"
+      name="className"
+      hint="Opcionális - pl. 12.A, Ballagók 2024"
+    />
 
     <!-- Évfolyam -->
-    <div class="form-group">
-      <ps-input
-        label="Évfolyam"
-        fieldId="classYear"
-        placeholder="pl. 2024"
-        [(ngModel)]="classYear"
-        name="classYear"
-        hint="Opcionális - pl. 2024, 2024/2025"
-      />
-    </div>
+    <ps-input
+      label="Évfolyam"
+      fieldId="classYear"
+      placeholder="pl. 2024"
+      [(ngModel)]="classYear"
+      name="classYear"
+      hint="Opcionális - pl. 2024, 2024/2025"
+    />
 
     <!-- Hibaüzenet -->
     @if (errorMessage()) {

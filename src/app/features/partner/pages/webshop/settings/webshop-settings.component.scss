@@ -74,21 +74,11 @@
   }
 }
 
-.form-group {
-  margin-bottom: 16px;
-
-  .help-text {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-top: 4px;
-  }
-}
-
 .form-row {
   display: flex;
   gap: 16px;
 
-  .form-group {
+  > * {
     flex: 1;
   }
 }

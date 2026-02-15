@@ -102,16 +102,14 @@ export class ContactEditModalComponent implements OnInit {
     return this.name.trim().length > 0 && !this.phoneError();
   }
 
-  /** Telefon formázás és validáció */
-  onPhoneInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const formatted = formatHungarianPhone(input.value);
-
-    this.phone = formatted;
-    input.value = formatted;
-
-    const result = validatePhone(formatted);
-    this.phoneError.set(result.error ?? null);
+  /** Telefon validáció blur-kor (formázást a ps-input kezeli) */
+  onPhoneBlur(): void {
+    if (this.phone.trim()) {
+      const result = validatePhone(this.phone);
+      this.phoneError.set(result.error ?? null);
+    } else {
+      this.phoneError.set(null);
+    }
   }
 
   onProjectInputFocus(): void {

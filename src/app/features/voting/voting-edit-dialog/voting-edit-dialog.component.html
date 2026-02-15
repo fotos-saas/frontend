@@ -25,19 +25,17 @@
       }
 
       <!-- Title -->
-      <div class="form-group">
-        <ps-input
-          label="Szavazás címe"
-          [required]="true"
-          fieldId="poll-title"
-          placeholder="Pl. Melyik tabló tetszik?"
-          [(ngModel)]="title"
-          hint="Min. 3 karakter"
-        />
-      </div>
+      <ps-input
+        label="Szavazás címe"
+        [required]="true"
+        fieldId="poll-title"
+        placeholder="Pl. Melyik tabló tetszik?"
+        [(ngModel)]="title"
+        hint="Min. 3 karakter"
+      />
 
       <!-- Description - Rich Text Editor -->
-      <div class="form-group">
+      <div class="form-field">
         <label class="form-label">
           Leírás (opcionális)
         </label>
@@ -51,7 +49,7 @@
       </div>
 
       <!-- Media Section -->
-      <div class="form-group">
+      <div class="form-field">
         <label class="form-label">Képek</label>
 
         <!-- Existing media -->
@@ -101,7 +99,7 @@
       </div>
 
       <!-- Options info (read-only) -->
-      <div class="form-group">
+      <div class="form-field">
         <label class="form-label">Választási lehetőségek</label>
         <div class="options-info">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -124,7 +122,7 @@
       </div>
 
       <!-- Deadline -->
-      <div class="form-group">
+      <div class="form-field">
         <label class="form-label">Határidő</label>
         <div class="deadline-options">
           @for (option of deadlineOptions; track option.days) {
@@ -142,7 +140,7 @@
       </div>
 
       <!-- Settings -->
-      <div class="form-group">
+      <div class="form-field">
         <label class="form-label">Beállítások</label>
         <div class="settings-list">
           <ps-checkbox

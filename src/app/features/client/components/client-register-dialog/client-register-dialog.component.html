@@ -49,21 +49,19 @@
       </div>
 
       <!-- Email -->
-      <div class="form-group">
-        <ps-input
-          type="email"
-          label="Email cím"
-          [(ngModel)]="email"
-          (ngModelChange)="onInputChange()"
-          placeholder="pelda@email.hu"
-          autocomplete="email"
-          [required]="true"
-          [errorMessage]="errors['email'] || ''"
-        />
-      </div>
+      <ps-input
+        type="email"
+        label="Email cím"
+        [(ngModel)]="email"
+        (ngModelChange)="onInputChange()"
+        placeholder="pelda@email.hu"
+        autocomplete="email"
+        [required]="true"
+        [errorMessage]="errors['email'] || ''"
+      />
 
       <!-- Password -->
-      <div class="form-group">
+      <div class="form-field">
         <ps-input
           type="password"
           label="Jelszó"
@@ -80,18 +78,16 @@
       </div>
 
       <!-- Password confirmation -->
-      <div class="form-group">
-        <ps-input
-          type="password"
-          label="Jelszó megerősítése"
-          [(ngModel)]="passwordConfirmation"
-          (ngModelChange)="onInputChange()"
-          placeholder="Írd be újra a jelszót"
-          autocomplete="new-password"
-          [required]="true"
-          [errorMessage]="errors['passwordConfirmation'] || ''"
-        />
-      </div>
+      <ps-input
+        type="password"
+        label="Jelszó megerősítése"
+        [(ngModel)]="passwordConfirmation"
+        (ngModelChange)="onInputChange()"
+        placeholder="Írd be újra a jelszót"
+        autocomplete="new-password"
+        [required]="true"
+        [errorMessage]="errors['passwordConfirmation'] || ''"
+      />
 
       <!-- API error -->
       @if (apiError()) {

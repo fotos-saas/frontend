@@ -1,11 +1,8 @@
-.project-create-page {
-  max-width: 600px;
-  margin: 0 auto;
-}
+@use '../../../shared/styles/dialog-forms' as form;
 
-.page-header {
-  margin-bottom: 32px;
-}
+.project-create-page { max-width: 600px; margin: 0 auto; }
+
+.page-header { margin-bottom: 32px; }
 
 .back-btn {
   display: inline-flex;
@@ -20,11 +17,7 @@
   margin: -8px -12px 16px;
   border-radius: 8px;
   transition: all 0.15s ease;
-}
-
-.back-btn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  &:hover { background: #f1f5f9; color: #1e293b; }
 }
 
 .page-header h1 {
@@ -34,55 +27,37 @@
   margin: 0 0 4px 0;
 }
 
-.subtitle {
-  color: #64748b;
-  font-size: 0.875rem;
-  margin: 0;
-}
+.subtitle { color: #64748b; font-size: 0.875rem; margin: 0; }
 
-/* Form */
-.create-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
+.create-form { @include form.form-layout(24px); }
 
-.form-group {
+// Autocomplete section
+.autocomplete-section {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.form-group label {
+.autocomplete-wrapper { position: relative; }
+
+.ps-field__input {
+  @include form.input(var(--color-primary, #2563eb));
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+.ps-field__label {
+  @include form.label;
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
 }
 
-.form-input {
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.9375rem;
-  transition: all 0.2s ease;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--color-primary, #2563eb);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-hint {
+.ps-field__hint {
   font-size: 0.8125rem;
   color: #94a3b8;
-}
-
-/* Autocomplete */
-.autocomplete-wrapper {
-  position: relative;
 }
 
 .clear-selection {
@@ -101,11 +76,7 @@
   cursor: pointer;
   color: #64748b;
   transition: all 0.15s ease;
-}
-
-.clear-selection:hover {
-  background: #cbd5e1;
-  color: #1e293b;
+  &:hover { background: #cbd5e1; color: #1e293b; }
 }
 
 .autocomplete-dropdown {
@@ -125,14 +96,8 @@
 }
 
 @keyframes dropdownIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-item {
@@ -146,22 +111,10 @@
   border: none;
   cursor: pointer;
   transition: background 0.1s ease;
-}
+  &:hover, &.highlighted { background: #f1f5f9; }
 
-.dropdown-item:hover,
-.dropdown-item.highlighted {
-  background: #f1f5f9;
-}
-
-.dropdown-item .school-name {
-  font-weight: 500;
-  color: #1e293b;
-  font-size: 0.9375rem;
-}
-
-.dropdown-item .school-city {
-  font-size: 0.8125rem;
-  color: #64748b;
+  .school-name { font-weight: 500; color: #1e293b; font-size: 0.9375rem; }
+  .school-city { font-size: 0.8125rem; color: #64748b; }
 }
 
 .dropdown-loading,
@@ -179,7 +132,6 @@
   gap: 8px;
 }
 
-/* Error message */
 .error-message {
   display: flex;
   align-items: center;
@@ -192,7 +144,6 @@
   font-size: 0.875rem;
 }
 
-/* Actions */
 .form-actions {
   display: flex;
   gap: 12px;
@@ -215,31 +166,15 @@
   border: none;
 }
 
-.btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.btn-secondary:hover {
-  background: #e2e8f0;
-}
+.btn-secondary { background: #f1f5f9; color: #475569; &:hover { background: #e2e8f0; } }
 
 .btn-primary {
   background: var(--color-primary, #2563eb);
   color: #ffffff;
+  &:hover:not(:disabled) { background: var(--color-primary-dark, #1d4ed8); transform: translateY(-1px); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-dark, #1d4ed8);
-  transform: translateY(-1px);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Spinner */
 .spinner {
   width: 18px;
   height: 18px;
@@ -254,22 +189,11 @@
   border-top-color: #64748b;
 }
 
-/* Responsive */
 @media (max-width: 640px) {
-  .form-actions {
-    flex-direction: column-reverse;
-  }
-
-  .btn {
-    width: 100%;
-    justify-content: center;
-  }
+  .form-actions { flex-direction: column-reverse; }
+  .btn { width: 100%; justify-content: center; }
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

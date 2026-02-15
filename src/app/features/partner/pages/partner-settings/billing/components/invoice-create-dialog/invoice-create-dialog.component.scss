@@ -94,30 +94,16 @@
   margin-bottom: 0;
 }
 
-.form-group {
-  margin-bottom: 12px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  &--half {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
 .form-row {
   display: flex;
   margin: -6px;
 
-  .form-group,
-  .form-group--half {
+  > * {
     margin: 6px;
   }
 
   &--three {
-    .form-group {
+    > * {
       flex: 1;
       min-width: 0;
     }
@@ -312,8 +298,7 @@ ps-input.item-price {
     flex-direction: column;
     margin: 0;
 
-    .form-group,
-    .form-group--half {
+    > * {
       margin: 0;
       margin-bottom: 12px;
     }

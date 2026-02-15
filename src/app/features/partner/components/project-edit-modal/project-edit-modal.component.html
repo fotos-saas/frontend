@@ -13,8 +13,8 @@
 >
   <ng-container dialogBody>
     <!-- Iskola kiválasztás -->
-    <div class="form-group">
-      <label class="form-label">Iskola</label>
+    <div class="autocomplete-section">
+      <label class="ps-field__label">Iskola</label>
       <div class="school-input-wrapper">
         <div class="school-search">
           <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="search-icon" />
@@ -26,7 +26,7 @@
             (input)="onSchoolSearch()"
             (focus)="onSchoolFocus()"
             (blur)="onSchoolBlur($event)"
-            class="form-input form-input--search"
+            class="ps-field__input school-search-input"
             autocomplete="off"
           />
           @if (selectedSchool) {
@@ -66,42 +66,32 @@
 
     <!-- Osztály és Évfolyam -->
     <div class="form-row">
-      <div class="form-group">
-        <ps-input
-          label="Osztály neve"
-          placeholder="pl. 12.A"
-          [(ngModel)]="formData.class_name"
-          name="className"
-        />
-      </div>
-
-      <div class="form-group">
-        <ps-input
-          label="Évfolyam"
-          placeholder="pl. 2024"
-          [(ngModel)]="formData.class_year"
-          name="classYear"
-        />
-      </div>
+      <ps-input
+        label="Osztály neve"
+        placeholder="pl. 12.A"
+        [(ngModel)]="formData.class_name"
+        name="className"
+      />
+      <ps-input
+        label="Évfolyam"
+        placeholder="pl. 2024"
+        [(ngModel)]="formData.class_year"
+        name="classYear"
+      />
     </div>
 
     <!-- Dátumok -->
     <div class="form-row">
-      <div class="form-group">
-        <ps-datepicker
-          label="Fotózás dátuma"
-          [(ngModel)]="formData.photo_date"
-          name="photoDate"
-        />
-      </div>
-
-      <div class="form-group">
-        <ps-datepicker
-          label="Határidő"
-          [(ngModel)]="formData.deadline"
-          name="deadline"
-        />
-      </div>
+      <ps-datepicker
+        label="Fotózás dátuma"
+        [(ngModel)]="formData.photo_date"
+        name="photoDate"
+      />
+      <ps-datepicker
+        label="Határidő"
+        [(ngModel)]="formData.deadline"
+        name="deadline"
+      />
     </div>
   </ng-container>
 

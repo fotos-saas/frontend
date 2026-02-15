@@ -30,12 +30,10 @@
     <section class="settings-section">
       <h2>Általános</h2>
 
-      <div class="form-group">
-        <ps-toggle label="Webshop engedélyezve"
-                   [ngModel]="settings()!.is_enabled"
-                   (ngModelChange)="updateField('is_enabled', $event)" />
-        <p class="help-text">Ha ki van kapcsolva, az ügyfelek nem tudnak rendelni.</p>
-      </div>
+      <ps-toggle label="Webshop engedélyezve"
+                 [ngModel]="settings()!.is_enabled"
+                 (ngModelChange)="updateField('is_enabled', $event)" />
+      <p class="help-text">Ha ki van kapcsolva, az ügyfelek nem tudnak rendelni.</p>
 
       <ps-textarea label="Üdvözlő üzenet"
                    [rows]="3"

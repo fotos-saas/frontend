@@ -13,18 +13,16 @@
 >
   <div dialogBody>
     <!-- Cím -->
-    <div class="form-group">
-      <ps-input
-        label="Cím"
-        [required]="true"
-        placeholder="Rövid leírás a hibáról..."
-        [ngModel]="title()"
-        (ngModelChange)="title.set($event)"
-      />
-    </div>
+    <ps-input
+      label="Cím"
+      [required]="true"
+      placeholder="Rövid leírás a hibáról..."
+      [ngModel]="title()"
+      (ngModelChange)="title.set($event)"
+    />
 
     <!-- Leírás -->
-    <div class="form-group">
+    <div class="form-field">
       <label>Leírás <span class="required">*</span></label>
       <app-rich-text-editor
         [ngModel]="description()"
@@ -35,17 +33,15 @@
     </div>
 
     <!-- Prioritás -->
-    <div class="form-group">
-      <ps-select
-        label="Prioritás"
-        [options]="prioritySelectOptions"
-        [ngModel]="priority()"
-        (ngModelChange)="priority.set($event)"
-      />
-    </div>
+    <ps-select
+      label="Prioritás"
+      [options]="prioritySelectOptions"
+      [ngModel]="priority()"
+      (ngModelChange)="priority.set($event)"
+    />
 
     <!-- Mellékletek -->
-    <div class="form-group">
+    <div class="form-field">
       <label>
         <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
         Képek (max 5, max 5 MB/kép)

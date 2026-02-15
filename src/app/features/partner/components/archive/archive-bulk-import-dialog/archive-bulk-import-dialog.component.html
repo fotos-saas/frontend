@@ -14,31 +14,27 @@
     <!-- === INPUT PHASE === -->
     @if (phase() === 'input') {
       <!-- Iskola választó -->
-      <div class="form-group">
-        <label class="form-label">Iskola</label>
-        <ps-searchable-select
-          [options]="schoolOptions()"
-          [value]="selectedSchoolId()"
-          placeholder="Iskola keresése..."
-          allLabel=""
-          (valueChange)="onSchoolChange($event)"
-        />
-      </div>
+      <ps-searchable-select
+        label="Iskola"
+        [options]="schoolOptions()"
+        [value]="selectedSchoolId()"
+        placeholder="Iskola keresése..."
+        allLabel=""
+        (valueChange)="onSchoolChange($event)"
+      />
 
       @if (!selectedFile()) {
-        <div class="form-group">
-          <label class="form-label">{{ config().bulkImportTextareaLabel }}</label>
-          <ps-textarea
-            [ngModel]="namesText()"
-            (ngModelChange)="onNamesInput($event)"
-            [placeholder]="config().bulkImportTextareaPlaceholder"
-            [rows]="8"
-          />
-        </div>
+        <ps-textarea
+          [label]="config().bulkImportTextareaLabel"
+          [ngModel]="namesText()"
+          (ngModelChange)="onNamesInput($event)"
+          [placeholder]="config().bulkImportTextareaPlaceholder"
+          [rows]="8"
+        />
       }
 
       <!-- Fájl feltöltés -->
-      <div class="form-group">
+      <div class="form-field">
         <label class="form-label">
           @if (selectedFile()) {
             Feltöltött fájl

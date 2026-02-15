@@ -1,6 +1,6 @@
-.modal-content {
-  padding: 1.5rem;
-}
+@use '../../../../shared/styles/dialog-forms' as form;
+
+.modal-content { padding: 1.5rem; }
 
 .modal-header {
   display: flex;
@@ -9,13 +9,13 @@
   padding-bottom: 16px;
   border-bottom: 1px solid #e2e8f0;
   margin-bottom: 20px;
-}
 
-.modal-header h2 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0;
+  h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+  }
 }
 
 .close-btn {
@@ -30,36 +30,11 @@
   color: #64748b;
   cursor: pointer;
   transition: all 0.15s ease;
+  &:hover { background: #f1f5f9; color: #1e293b; }
 }
 
-.close-btn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-}
-
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: #475569;
-}
+.modal-form { @include form.form-layout; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .optional-label {
   font-weight: 400;
@@ -67,41 +42,14 @@
   font-size: 0.75rem;
 }
 
-.form-input {
-  padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  transition: all 0.2s ease;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--color-primary, #1e3a5f);
-  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 60px;
-  font-family: inherit;
-}
-
-.form-input--error {
-  border-color: #f87171;
-}
-
-.field-error {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.75rem;
-  color: #dc2626;
-}
-
 /* Autocomplete */
-.autocomplete-container {
-  position: relative;
+.autocomplete-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
+
+.autocomplete-container { position: relative; }
 
 .autocomplete-input-wrapper {
   position: relative;
@@ -117,8 +65,8 @@
 }
 
 .autocomplete-input {
-  padding-left: 36px;
-  padding-right: 36px;
+  padding-left: 36px !important;
+  padding-right: 36px !important;
 }
 
 .clear-project-btn {
@@ -135,11 +83,7 @@
   color: #64748b;
   cursor: pointer;
   transition: all 0.15s ease;
-}
-
-.clear-project-btn:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+  &:hover { background: #e2e8f0; color: #1e293b; }
 }
 
 .autocomplete-dropdown {
@@ -167,18 +111,8 @@
   text-align: left;
   cursor: pointer;
   transition: background 0.1s ease;
-}
-
-.autocomplete-option:hover {
-  background: #f8fafc;
-}
-
-.autocomplete-option--selected {
-  background: #e0f2fe;
-}
-
-.autocomplete-option--selected:hover {
-  background: #bae6fd;
+  &:hover { background: #f8fafc; }
+  &--selected { background: #e0f2fe; &:hover { background: #bae6fd; } }
 }
 
 .option-main {
@@ -227,9 +161,7 @@
   font-size: 0.8125rem;
 }
 
-.selected-school {
-  color: #22c55e;
-}
+.selected-school { color: #22c55e; }
 
 .error-message {
   display: flex;
@@ -261,11 +193,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
-}
-
-.btn-secondary:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  &:hover { background: #f8fafc; border-color: #cbd5e1; }
 }
 
 .btn-primary {
@@ -281,15 +209,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-dark, #152a45);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  &:hover:not(:disabled) { background: var(--color-primary-dark, #152a45); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .spinner {
@@ -306,8 +227,13 @@
   border-top-color: #64748b;
 }
 
+// ps-field__input stílus az autocomplete natív inputnak
+.ps-field__input {
+  @include form.input(var(--color-primary, #1e3a5f));
+  width: 100%;
+  box-sizing: border-box;
+}
+
 @media (max-width: 480px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+  .form-row { grid-template-columns: 1fr; }
 }

@@ -3,7 +3,6 @@
 @use '../../../../shared/styles/dialog-forms' as form;
 
 // --- FORM ---
-.form-group { @include form.form-group; }
 .form-label { @include form.label; }
 .form-input { @include form.input(var(--color-primary, #1e3a5f)); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }

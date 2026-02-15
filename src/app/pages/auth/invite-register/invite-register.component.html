@@ -50,60 +50,42 @@
       }
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <ps-input
-            formControlName="name"
-            label="Neved"
-            placeholder="Teljes neved"
-            autocomplete="name"
-          />
-          @if (form.get('name')?.invalid && form.get('name')?.touched) {
-            <span class="error-text">Add meg a neved (min. 2 karakter)</span>
-          }
-        </div>
+        <ps-input
+          formControlName="name"
+          label="Neved"
+          placeholder="Teljes neved"
+          autocomplete="name"
+          [errorMessage]="form.get('name')?.invalid && form.get('name')?.touched ? 'Add meg a neved (min. 2 karakter)' : ''"
+        />
 
-        <div class="form-group">
-          <ps-input
-            type="email"
-            formControlName="email"
-            label="Email címed"
-            placeholder="pelda@email.hu"
-            autocomplete="email"
-            [readonly]="!!invitationInfo()?.email"
-          />
-          @if (form.get('email')?.errors?.['email'] && form.get('email')?.touched) {
-            <span class="error-text">Érvénytelen email cím</span>
-          }
-          @if (invitationInfo()?.email) {
-            <span class="hint-text">A meghívóhoz tartozó email cím</span>
-          }
-        </div>
+        <ps-input
+          type="email"
+          formControlName="email"
+          label="Email címed"
+          placeholder="pelda@email.hu"
+          autocomplete="email"
+          [readonly]="!!invitationInfo()?.email"
+          [errorMessage]="form.get('email')?.errors?.['email'] && form.get('email')?.touched ? 'Érvénytelen email cím' : ''"
+          [hint]="invitationInfo()?.email ? 'A meghívóhoz tartozó email cím' : ''"
+        />
 
-        <div class="form-group">
-          <ps-input
-            type="password"
-            formControlName="password"
-            label="Jelszó"
-            placeholder="Min. 8 karakter"
-            autocomplete="new-password"
-          />
-          @if (form.get('password')?.invalid && form.get('password')?.touched) {
-            <span class="error-text">A jelszó legalább 8 karakter legyen</span>
-          }
-        </div>
+        <ps-input
+          type="password"
+          formControlName="password"
+          label="Jelszó"
+          placeholder="Min. 8 karakter"
+          autocomplete="new-password"
+          [errorMessage]="form.get('password')?.invalid && form.get('password')?.touched ? 'A jelszó legalább 8 karakter legyen' : ''"
+        />
 
-        <div class="form-group">
-          <ps-input
-            type="password"
-            formControlName="password_confirmation"
-            label="Jelszó megerősítése"
-            placeholder="Jelszó újra"
-            autocomplete="new-password"
-          />
-          @if (form.get('password_confirmation')?.errors?.['passwordMismatch'] && form.get('password_confirmation')?.touched) {
-            <span class="error-text">A két jelszó nem egyezik</span>
-          }
-        </div>
+        <ps-input
+          type="password"
+          formControlName="password_confirmation"
+          label="Jelszó megerősítése"
+          placeholder="Jelszó újra"
+          autocomplete="new-password"
+          [errorMessage]="form.get('password_confirmation')?.errors?.['passwordMismatch'] && form.get('password_confirmation')?.touched ? 'A két jelszó nem egyezik' : ''"
+        />
 
         <button type="submit" class="btn-primary" [disabled]="isLoading() || form.invalid">
           @if (isLoading()) {

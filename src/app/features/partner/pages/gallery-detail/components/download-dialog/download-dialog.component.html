@@ -15,25 +15,21 @@
     <!-- Content -->
     <div class="dialog-body">
       <!-- ZIP tartalom -->
-      <div class="form-group">
-        <ps-select
-          label="Tartalom"
-          [options]="zipContentOptions"
-          [ngModel]="zipContent()"
-          (ngModelChange)="zipContent.set($event)"
-        />
-      </div>
+      <ps-select
+        label="Tartalom"
+        [options]="zipContentOptions"
+        [ngModel]="zipContent()"
+        (ngModelChange)="zipContent.set($event)"
+      />
 
       <!-- Fájlnév stratégia -->
-      <div class="form-group">
-        <ps-radio-group
-          label="Fájlnevek"
-          [options]="fileNamingOptions"
-          variant="cards"
-          [ngModel]="fileNaming()"
-          (ngModelChange)="fileNaming.set($event)"
-        />
-      </div>
+      <ps-radio-group
+        label="Fájlnevek"
+        [options]="fileNamingOptions"
+        variant="cards"
+        [ngModel]="fileNaming()"
+        (ngModelChange)="fileNaming.set($event)"
+      />
 
       <!-- Excel mellékelés -->
       <ps-checkbox

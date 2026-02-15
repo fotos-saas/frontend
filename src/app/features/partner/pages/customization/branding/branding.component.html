@@ -63,34 +63,28 @@
         <h2 class="section-title">Alapbeállítások</h2>
       </div>
 
-      <div class="form-group">
-        <ps-input
-          label="Márkanév"
-          fieldId="brandName"
-          [ngModel]="brandName()"
-          (ngModelChange)="brandName.set($event)"
-          placeholder="pl. Fotó Kovács Stúdió"
-          hint="Maximum 100 karakter. Ha üres, a rendszer neve jelenik meg."
-        />
-      </div>
+      <ps-input
+        label="Márkanév"
+        fieldId="brandName"
+        [ngModel]="brandName()"
+        (ngModelChange)="brandName.set($event)"
+        placeholder="pl. Fotó Kovács Stúdió"
+        hint="Maximum 100 karakter. Ha üres, a rendszer neve jelenik meg."
+      />
 
-      <div class="form-group">
-        <ps-toggle
-          label="Márkajelzés aktív"
-          hint="Ha aktív, a diákok az oldalakon a te márkajelzésedet látják."
-          [ngModel]="isActive()"
-          (ngModelChange)="isActive.set($event)"
-        />
-      </div>
+      <ps-toggle
+        label="Márkajelzés aktív"
+        hint="Ha aktív, a diákok az oldalakon a te márkajelzésedet látják."
+        [ngModel]="isActive()"
+        (ngModelChange)="isActive.set($event)"
+      />
 
-      <div class="form-group">
-        <ps-toggle
-          label="Szöveg elrejtése a fejlécben"
-          hint="Ha a logód már tartalmazza a neved, kapcsold be hogy ne jelenjen meg a szöveg külön."
-          [ngModel]="hideBrandName()"
-          (ngModelChange)="hideBrandName.set($event)"
-        />
-      </div>
+      <ps-toggle
+        label="Szöveg elrejtése a fejlécben"
+        hint="Ha a logód már tartalmazza a neved, kapcsold be hogy ne jelenjen meg a szöveg külön."
+        [ngModel]="hideBrandName()"
+        (ngModelChange)="hideBrandName.set($event)"
+      />
     </section>
 
     <!-- Logó -->

@@ -16,6 +16,7 @@ interface InvitationValidationResponse {
     partnerName: string;
     expiresAt: string;
   };
+  user_exists?: boolean;
 }
 
 interface InviteRegisterResponse {
@@ -52,6 +53,7 @@ export class InviteRegisterComponent implements OnInit {
   registrationSuccess = signal(false);
   errorMessage = signal<string | null>(null);
   invitationInfo = signal<InvitationValidationResponse['invitation'] | null>(null);
+  userExists = signal(false);
 
   private code = '';
 
@@ -85,6 +87,7 @@ export class InviteRegisterComponent implements OnInit {
 
               if (response.valid && response.invitation) {
                 this.invitationInfo.set(response.invitation);
+                this.userExists.set(!!response.user_exists);
                 // Pre-fill email from invitation
                 if (response.invitation.email) {
                   this.form.patchValue({ email: response.invitation.email });
@@ -110,6 +113,33 @@ export class InviteRegisterComponent implements OnInit {
     return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
+  onAcceptInvite() {
+    if (!this.code || !this.invitationInfo()) return;
+
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    this.authService.registerWithInvite({
+      code: this.code,
+      name: '',
+      email: this.invitationInfo()!.email,
+      password: '',
+      password_confirmation: '',
+      accept_existing: true
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.registrationSuccess.set(true);
+        },
+        error: (error) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(error.error?.message || 'Hiba történt a meghívó elfogadása során.');
+        }
+      });
+  }
+
   onSubmit() {
     if (this.form.invalid || !this.code) return;
 
@@ -128,7 +158,6 @@ export class InviteRegisterComponent implements OnInit {
         next: () => {
           this.isLoading.set(false);
           this.registrationSuccess.set(true);
-          // Sikeres regisztráció - a felhasználó kattint a bejelentkezés gombra
         },
         error: (error) => {
           this.isLoading.set(false);

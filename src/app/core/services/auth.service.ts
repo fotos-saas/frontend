@@ -585,6 +585,7 @@ export class AuthService {
       partnerName: string;
       expiresAt: string;
     };
+    user_exists?: boolean;
   }> {
     return this.http.post<{
       valid: boolean;
@@ -596,6 +597,7 @@ export class AuthService {
         partnerName: string;
         expiresAt: string;
       };
+      user_exists?: boolean;
     }>(`${environment.apiUrl}/invite/validate`, { code });
   }
 
@@ -608,6 +610,7 @@ export class AuthService {
     email: string;
     password: string;
     password_confirmation: string;
+    accept_existing?: boolean;
   }): Observable<{
     message: string;
     user: {
@@ -616,6 +619,7 @@ export class AuthService {
       email: string;
     };
     token?: string;
+    accepted_existing?: boolean;
   }> {
     return this.http.post<{
       message: string;
@@ -625,6 +629,7 @@ export class AuthService {
         email: string;
       };
       token?: string;
+      accepted_existing?: boolean;
     }>(`${environment.apiUrl}/invite/register`, data);
   }
 }

@@ -23,12 +23,56 @@
             <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
           </svg>
         </div>
-        <h2>Sikeres regisztráció!</h2>
-        <p>Csatlakoztál a {{ invitationInfo()?.partnerName }} csapatához.</p>
+        @if (userExists()) {
+          <h2>Meghívó elfogadva!</h2>
+          <p>Csatlakoztál a {{ invitationInfo()?.partnerName }} csapatához. Jelentkezz be a folytatáshoz.</p>
+        } @else {
+          <h2>Sikeres regisztráció!</h2>
+          <p>Csatlakoztál a {{ invitationInfo()?.partnerName }} csapatához.</p>
+        }
         <a routerLink="/login" class="btn-primary-link">Bejelentkezés</a>
       </div>
+    } @else if (userExists()) {
+      <!-- Létező user — meghívó elfogadás mód -->
+      <header class="auth-header">
+        <h1>Csatlakozás a csapathoz</h1>
+        @if (invitationInfo()) {
+          <div class="invitation-info">
+            <span class="partner-badge">{{ invitationInfo()!.partnerName }}</span>
+            <span class="role-badge">{{ invitationInfo()!.roleName }}</span>
+          </div>
+        }
+        <p class="auth-subtitle">Már van fiókod ezzel az email címmel. Kattints a csatlakozáshoz.</p>
+      </header>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+          </svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <div class="accept-info">
+        <div class="email-display">{{ invitationInfo()!.email }}</div>
+        <p class="accept-hint">A meghívó elfogadása után jelentkezz be a fenti email címmel.</p>
+      </div>
+
+      <button type="button" class="btn-primary" [disabled]="isLoading()" (click)="onAcceptInvite()">
+        @if (isLoading()) {
+          <span class="spinner"></span>
+          Elfogadás...
+        } @else {
+          Meghívó elfogadása
+        }
+      </button>
+
+      <footer class="auth-footer">
+        <p><a routerLink="/login">Vissza a bejelentkezéshez</a></p>
+      </footer>
     } @else {
-      <!-- Valid code - show registration form -->
+      <!-- Új user — regisztrációs form -->
       <header class="auth-header">
         <h1>Csatlakozás a csapathoz</h1>
         @if (invitationInfo()) {

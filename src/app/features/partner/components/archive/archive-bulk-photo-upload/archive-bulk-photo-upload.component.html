@@ -46,14 +46,13 @@
         </div>
 
         <div class="form-row">
-          <label class="form-label">Évszám</label>
-          <input
+          <ps-input
+            label="Évszám"
             type="number"
-            class="form-input"
             [ngModel]="year()"
             (ngModelChange)="year.set($event)"
-            min="2000"
-            max="2100"
+            [min]="2000"
+            [max]="2100"
           />
         </div>
 
@@ -126,10 +125,11 @@
         </div>
 
         <div class="form-row">
-          <label class="form-label">
-            <input type="checkbox" [ngModel]="setActive()" (ngModelChange)="setActive.set($event)" />
-            Aktív fotónak beállítás
-          </label>
+          <ps-checkbox
+            label="Aktív fotónak beállítás"
+            [ngModel]="setActive()"
+            (ngModelChange)="setActive.set($event)"
+          />
         </div>
 
         <div class="match-table-wrapper">
@@ -180,10 +180,9 @@
                   }
                 </div>
                 <div class="match-cell match-cell--action">
-                  <input
-                    type="checkbox"
-                    [checked]="match.skip"
-                    (change)="toggleSkip(i)"
+                  <ps-checkbox
+                    [ngModel]="match.skip"
+                    (ngModelChange)="toggleSkip(i)"
                   />
                 </div>
               </div>

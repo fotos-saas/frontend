@@ -7,13 +7,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { PsInputComponent } from '@shared/components/form';
 import { PartnerWebshopService, ShopOrderDetail } from '../../../services/partner-webshop.service';
 import { WEBSHOP_STATUS_LABELS, NEXT_STATUS, NEXT_STATUS_LABELS } from '../../../models/webshop.models';
 
 @Component({
   selector: 'app-webshop-order-detail',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent],
+  imports: [DecimalPipe, DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent, PsInputComponent],
   templateUrl: './webshop-order-detail.component.html',
   styleUrl: './webshop-order-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,12 +2,13 @@ import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@ang
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
 import { PartnerStripeSettingsService } from '../../../../../services/partner-stripe-settings.service';
 
 @Component({
   selector: 'app-stripe-settings',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsToggleComponent],
   templateUrl: './stripe-settings.component.html',
   styleUrl: './stripe-settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,7 +52,4 @@ export class StripeSettingsComponent implements OnInit {
     });
   }
 
-  toggleEnabled(): void {
-    this.stripeEnabled = !this.stripeEnabled;
-  }
 }

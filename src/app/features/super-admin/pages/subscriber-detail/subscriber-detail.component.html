@@ -357,15 +357,13 @@
               </button>
             }
           </div>
-          <select class="filter-select" [ngModel]="auditActionFilter()" (ngModelChange)="setAuditActionFilter($event)">
-            <option value="">Összes művelet</option>
-            <option value="view">Megtekintés</option>
-            <option value="charge">Terhelés</option>
-            <option value="change_plan">Csomagváltás</option>
-            <option value="set_discount">Kedvezmény beállítás</option>
-            <option value="remove_discount">Kedvezmény törlés</option>
-            <option value="cancel_subscription">Törlés</option>
-          </select>
+          <ps-select
+            size="sm"
+            emptyLabel="Összes művelet"
+            [options]="auditActionOptions"
+            [ngModel]="auditActionFilter()"
+            (ngModelChange)="setAuditActionFilter($event)"
+          />
           <label class="show-views-toggle" matTooltip="Megtekintések megjelenítése/elrejtése">
             <input
               type="checkbox"

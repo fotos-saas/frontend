@@ -44,34 +44,19 @@
 
   <!-- Toolbar: szűrők + export -->
   <div class="toolbar">
-    <div class="search-box">
-      <lucide-icon class="search-icon" [name]="ICONS.SEARCH" [size]="14" />
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Keresés..."
-        [value]="state.searchQuery()"
-        (input)="state.setSearchQuery(searchInput.value)"
-        #searchInput
-      />
-      @if (state.searchQuery()) {
-        <button class="clear-btn" (click)="state.setSearchQuery(''); searchInput.value = ''">
-          <lucide-icon [name]="ICONS.X" [size]="12" />
-        </button>
-      }
-    </div>
+    <ps-input
+      placeholder="Keresés..."
+      size="sm"
+      [ngModel]="state.searchQuery()"
+      (ngModelChange)="state.setSearchQuery($event)"
+    />
 
-    <select
-      class="filter-select"
-      [value]="state.filterStatus()"
-      (change)="onFilterChange($event)"
-    >
-      <option value="all">Mindenki</option>
-      <option value="finalized">Véglegesített</option>
-      <option value="in_progress">Folyamatban</option>
-      <option value="not_started">Nem kezdte el</option>
-      <option value="stale">Figyelmeztetés</option>
-    </select>
+    <ps-select
+      size="sm"
+      [options]="filterOptions"
+      [ngModel]="state.filterStatus()"
+      (ngModelChange)="onFilterChange($event)"
+    />
 
     <div class="toolbar__spacer"></div>
 

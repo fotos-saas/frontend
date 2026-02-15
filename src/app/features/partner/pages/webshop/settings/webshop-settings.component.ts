@@ -5,12 +5,13 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { PsInputComponent, PsTextareaComponent, PsToggleComponent } from '@shared/components/form';
 import { PartnerWebshopService, ShopSettings, PaperSize, PaperType } from '../../../services/partner-webshop.service';
 
 @Component({
   selector: 'app-webshop-settings',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent, PsInputComponent, PsTextareaComponent, PsToggleComponent],
   templateUrl: './webshop-settings.component.html',
   styleUrl: './webshop-settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

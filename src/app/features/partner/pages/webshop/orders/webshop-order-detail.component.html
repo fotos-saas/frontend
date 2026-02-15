@@ -100,12 +100,9 @@
     @if (NEXT_STATUS[o.status]) {
       <section class="actions-section">
         @if (o.status === 'processing' && o.delivery_method === 'shipping') {
-          <div class="form-group">
-            <label>Nyomkövetési szám</label>
-            <input type="text" placeholder="Opcionális"
-                   [ngModel]="trackingNumber()"
-                   (ngModelChange)="trackingNumber.set($event)">
-          </div>
+          <ps-input label="Nyomkövetési szám" placeholder="Opcionális"
+                    [ngModel]="trackingNumber()"
+                    (ngModelChange)="trackingNumber.set($event)" />
         }
 
         <div class="action-buttons">

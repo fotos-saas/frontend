@@ -1,7 +1,10 @@
 import { Component, ChangeDetectionStrategy, signal, inject, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { InvoiceSettingsService } from '../../../../../services/invoice-settings.service';
 import { InvoiceProvider, INVOICE_PROVIDER_LABELS } from '../../../../../models/invoice.models';
 import { ToastService } from '../../../../../../../core/services/toast.service';
@@ -9,7 +12,7 @@ import { ToastService } from '../../../../../../../core/services/toast.service';
 @Component({
   selector: 'app-invoice-settings',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-settings.component.html',
   styleUrl: './invoice-settings.component.scss',
@@ -21,6 +24,23 @@ export class InvoiceSettingsComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly PROVIDER_LABELS = INVOICE_PROVIDER_LABELS;
+
+  readonly providerOptions: PsSelectOption[] = [
+    { id: 'szamlazz_hu', label: 'Számlázz.hu' },
+    { id: 'billingo', label: 'Billingo' },
+  ];
+
+  readonly currencyOptions: PsSelectOption[] = [
+    { id: 'HUF', label: 'HUF' },
+    { id: 'EUR', label: 'EUR' },
+    { id: 'USD', label: 'USD' },
+  ];
+
+  readonly languageOptions: PsSelectOption[] = [
+    { id: 'hu', label: 'Magyar' },
+    { id: 'en', label: 'Angol' },
+    { id: 'de', label: 'Német' },
+  ];
 
   readonly loading = signal(true);
   readonly saving = signal(false);

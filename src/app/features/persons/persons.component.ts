@@ -3,6 +3,8 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { AuthService, TabloProject, TabloPerson } from '../../core/services/auth.service';
+import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -17,12 +19,18 @@ import { map } from 'rxjs/operators';
 @Component({
     selector: 'app-persons',
     standalone: true,
-    imports: [FormsModule, AsyncPipe],
+    imports: [FormsModule, AsyncPipe, PsSelectComponent],
     templateUrl: './persons.component.html',
     styleUrls: ['./persons.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonsComponent implements OnInit {
+  readonly filterOptions: PsSelectOption[] = [
+    { id: 'all', label: 'Mind' },
+    { id: 'student', label: 'Csak diákok' },
+    { id: 'teacher', label: 'Csak tanárok' },
+  ];
+
   /** Aktuális projekt */
   project$: Observable<TabloProject | null>;
 
@@ -97,14 +105,6 @@ export class PersonsComponent implements OnInit {
   onSearchChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchQuery.set(value);
-  }
-
-  /**
-   * Szűrő változás
-   */
-  onFilterChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as 'all' | 'student' | 'teacher';
-    this.filterType.set(value);
   }
 
   /**

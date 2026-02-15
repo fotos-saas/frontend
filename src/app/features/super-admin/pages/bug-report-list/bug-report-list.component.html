@@ -24,18 +24,20 @@
         </button>
       }
     </div>
-    <select class="filter-select" [ngModel]="statusFilter()" (ngModelChange)="onStatusFilterChange($event)">
-      <option value="">Minden státusz</option>
-      @for (opt of statusOptions; track opt.value) {
-        <option [value]="opt.value">{{ opt.label }}</option>
-      }
-    </select>
-    <select class="filter-select" [ngModel]="priorityFilter()" (ngModelChange)="onPriorityFilterChange($event)">
-      <option value="">Minden prioritás</option>
-      @for (opt of priorityOptions; track opt.value) {
-        <option [value]="opt.value">{{ opt.label }}</option>
-      }
-    </select>
+    <ps-select
+      size="sm"
+      emptyLabel="Minden státusz"
+      [options]="statusSelectOptions"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="onStatusFilterChange($event)"
+    />
+    <ps-select
+      size="sm"
+      emptyLabel="Minden prioritás"
+      [options]="prioritySelectOptions"
+      [ngModel]="priorityFilter()"
+      (ngModelChange)="onPriorityFilterChange($event)"
+    />
     <button
       class="filter-toggle"
       [class.active]="unreadOnly()"

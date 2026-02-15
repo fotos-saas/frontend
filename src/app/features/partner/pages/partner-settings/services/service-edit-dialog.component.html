@@ -8,42 +8,40 @@
     </header>
 
     <div class="dialog-body">
-      <div class="form-group">
-        <label for="name">Név *</label>
-        <input id="name" type="text" [(ngModel)]="name" placeholder="Pl. Képcsere" class="form-input" />
-      </div>
+      <ps-input
+        label="Név"
+        [required]="true"
+        placeholder="Pl. Képcsere"
+        [(ngModel)]="name" />
 
-      <div class="form-group">
-        <label for="type">Típus</label>
-        <select id="type" [(ngModel)]="serviceType" class="form-input">
-          @for (opt of SERVICE_TYPE_OPTIONS; track opt.value) {
-            <option [value]="opt.value">{{ opt.label }}</option>
-          }
-        </select>
-      </div>
+      <ps-select
+        label="Típus"
+        [options]="typeOptions"
+        [(ngModel)]="serviceType" />
 
-      <div class="form-group">
-        <label for="price">Alapár (Ft)</label>
-        <input id="price" type="number" [(ngModel)]="defaultPrice" min="0" class="form-input" />
-      </div>
+      <ps-input
+        label="Alapár (Ft)"
+        type="number"
+        [min]="0"
+        [(ngModel)]="defaultPrice" />
 
-      <div class="form-group">
-        <label for="vat">ÁFA (%)</label>
-        <input id="vat" type="number" [(ngModel)]="vatPercentage" min="0" max="100" class="form-input" />
-      </div>
+      <ps-input
+        label="ÁFA (%)"
+        type="number"
+        [min]="0"
+        [max]="100"
+        [(ngModel)]="vatPercentage" />
 
-      <div class="form-group">
-        <label for="desc">Leírás</label>
-        <textarea id="desc" [(ngModel)]="description" rows="3" class="form-input" placeholder="Opcionális leírás..."></textarea>
-      </div>
+      <ps-textarea
+        label="Leírás"
+        placeholder="Opcionális leírás..."
+        [rows]="3"
+        [(ngModel)]="description" />
 
       @if (isEdit) {
-        <div class="form-group form-group--toggle">
-          <label>
-            <input type="checkbox" [(ngModel)]="isActive" />
-            Aktív
-          </label>
-        </div>
+        <ps-toggle
+          label="Aktív"
+          [(ngModel)]="isActive" />
       }
     </div>
 

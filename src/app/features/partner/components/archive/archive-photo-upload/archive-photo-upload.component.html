@@ -30,23 +30,16 @@
       />
     </div>
 
-    <div class="form-group">
-      <label for="year">Évszám *</label>
-      <input
-        type="number"
-        id="year"
-        [(ngModel)]="year"
-        name="year"
-        class="form-input"
-        min="2000"
-        max="2100"
-      />
-    </div>
+    <ps-input
+      label="Évszám"
+      [required]="true"
+      type="number"
+      [min]="2000"
+      [max]="2100"
+      [(ngModel)]="year"
+      name="year" />
 
-    <label class="checkbox-label">
-      <input type="checkbox" [(ngModel)]="setActive" name="setActive" />
-      <span>Beállítás aktív fotónak</span>
-    </label>
+    <ps-checkbox label="Beállítás aktív fotónak" [(ngModel)]="setActive" name="setActive" />
   </ng-container>
 
   <ng-container dialogFooter>

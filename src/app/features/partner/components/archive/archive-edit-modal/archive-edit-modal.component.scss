@@ -26,8 +26,6 @@
   &--sm { @include form.input-sm; }
 }
 
-.checkbox-label { @include form.checkbox-label(var(--color-primary, #1e3a5f)); }
-
 // --- PHOTO SECTION ---
 .photo-section {
   @include form.form-group;

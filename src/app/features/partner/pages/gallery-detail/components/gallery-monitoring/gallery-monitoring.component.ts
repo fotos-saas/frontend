@@ -1,8 +1,11 @@
 import { Component, ChangeDetectionStrategy, input, OnInit, inject, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { PhotoThumbListComponent, ThumbPhoto } from '../../../../../../shared/components/photo-thumb-list';
 import { ExpandDetailPanelComponent, DetailGroupComponent } from '../../../../../../shared/components/expand-detail-panel';
 import { MonitoringFilter, SelectionPhoto } from '../../../../models/gallery-monitoring.models';
@@ -14,7 +17,7 @@ import { DownloadOptions } from '../download-dialog/download-dialog.component';
   selector: 'app-gallery-monitoring',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, LucideAngularModule, MatTooltipModule, PhotoThumbListComponent, ExpandDetailPanelComponent, DetailGroupComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, PhotoThumbListComponent, ExpandDetailPanelComponent, DetailGroupComponent],
   providers: [GalleryMonitoringActionsService],
   templateUrl: './gallery-monitoring.component.html',
   styleUrl: './gallery-monitoring.component.scss',
@@ -27,6 +30,14 @@ export class GalleryMonitoringComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly state = new GalleryMonitoringState();
+
+  readonly filterOptions: PsSelectOption[] = [
+    { id: 'all', label: 'Mindenki' },
+    { id: 'finalized', label: 'Véglegesített' },
+    { id: 'in_progress', label: 'Folyamatban' },
+    { id: 'not_started', label: 'Nem kezdte el' },
+    { id: 'stale', label: 'Figyelmeztetés' },
+  ];
 
   /** Dialog defaults - computed-ként cast-olva a megfelelő típusra */
   readonly dialogDefaults = computed<Partial<DownloadOptions>>(() => {
@@ -49,9 +60,8 @@ export class GalleryMonitoringComponent implements OnInit {
     }
   }
 
-  onFilterChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as MonitoringFilter;
-    this.state.setFilter(value);
+  onFilterChange(value: string): void {
+    this.state.setFilter(value as MonitoringFilter);
   }
 
   onExportExcel(): void {

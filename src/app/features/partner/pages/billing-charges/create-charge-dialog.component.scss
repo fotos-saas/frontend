@@ -42,35 +42,6 @@
 
 .dialog-body { padding: 12px 24px 20px; }
 
-.form-group {
-  margin-bottom: 14px;
-
-  label {
-    display: block;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #475569;
-    margin-bottom: 4px;
-  }
-}
-
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: #1e293b;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-
-  &:focus { outline: none; border-color: var(--color-primary, #1e3a5f); }
-  &:disabled { background: #f1f5f9; color: #94a3b8; }
-}
-
-select.form-input { cursor: pointer; }
-textarea.form-input { resize: vertical; }
-
 .dialog-footer {
   display: flex;
   justify-content: flex-end;

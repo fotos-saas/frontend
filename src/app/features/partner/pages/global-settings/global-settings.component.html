@@ -29,15 +29,15 @@
             </span>
           </div>
           <div class="setting-control">
-            <input
+            <ps-input
               type="number"
-              class="number-input"
+              size="sm"
+              suffix="kép"
               min="1"
               max="20"
               [ngModel]="maxRetouchPhotos()"
               (ngModelChange)="maxRetouchPhotos.set($event)"
             />
-            <span class="input-suffix">kép</span>
           </div>
         </div>
       </div>
@@ -53,17 +53,11 @@
             </span>
           </div>
           <div class="setting-control">
-            <button
-              class="toggle-btn"
-              [class.toggle-btn--active]="billingEnabled()"
-              (click)="billingEnabled.set(!billingEnabled())"
-              type="button"
-            >
-              <span class="toggle-track">
-                <span class="toggle-thumb"></span>
-              </span>
-              <span class="toggle-label">{{ billingEnabled() ? 'Aktív' : 'Inaktív' }}</span>
-            </button>
+            <ps-toggle
+              [label]="billingEnabled() ? 'Aktív' : 'Inaktív'"
+              [ngModel]="billingEnabled()"
+              (ngModelChange)="billingEnabled.set($event)"
+            />
           </div>
         </div>
 
@@ -79,15 +73,15 @@
                 </span>
               </div>
               <div class="setting-control">
-                <input
+                <ps-input
                   type="number"
-                  class="number-input"
+                  size="sm"
+                  suffix="óra"
                   min="0"
                   max="168"
                   [ngModel]="freeEditWindowHours()"
                   (ngModelChange)="freeEditWindowHours.set($event)"
                 />
-                <span class="input-suffix">óra</span>
               </div>
             </div>
           </div>
@@ -112,16 +106,12 @@
             </span>
           </div>
           <div class="setting-control">
-            <select
-              class="select-input"
+            <ps-select
+              size="md"
+              [options]="zipContentOptions"
               [ngModel]="defaultZipContent()"
               (ngModelChange)="defaultZipContent.set($event)"
-            >
-              <option value="all">Összes kép</option>
-              <option value="retouch_and_tablo">Retusált + Tablókép</option>
-              <option value="retouch_only">Csak retusált</option>
-              <option value="tablo_only">Csak tablókép</option>
-            </select>
+            />
           </div>
         </div>
       </div>
@@ -135,15 +125,12 @@
             </span>
           </div>
           <div class="setting-control">
-            <select
-              class="select-input"
+            <ps-select
+              size="md"
+              [options]="fileNamingOptions"
               [ngModel]="defaultFileNaming()"
               (ngModelChange)="defaultFileNaming.set($event)"
-            >
-              <option value="original">Eredeti fájlnév</option>
-              <option value="student_name">Diák neve</option>
-              <option value="student_name_iptc">IPTC beágyazás</option>
-            </select>
+            />
           </div>
         </div>
       </div>
@@ -158,17 +145,11 @@
             </span>
           </div>
           <div class="setting-control">
-            <button
-              class="toggle-btn"
-              [class.toggle-btn--active]="exportAlwaysAsk()"
-              (click)="exportAlwaysAsk.set(!exportAlwaysAsk())"
-              type="button"
-            >
-              <span class="toggle-track">
-                <span class="toggle-thumb"></span>
-              </span>
-              <span class="toggle-label">{{ exportAlwaysAsk() ? 'Aktív' : 'Inaktív' }}</span>
-            </button>
+            <ps-toggle
+              [label]="exportAlwaysAsk() ? 'Aktív' : 'Inaktív'"
+              [ngModel]="exportAlwaysAsk()"
+              (ngModelChange)="exportAlwaysAsk.set($event)"
+            />
           </div>
         </div>
       </div>

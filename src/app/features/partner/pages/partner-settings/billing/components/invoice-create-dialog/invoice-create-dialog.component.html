@@ -13,36 +13,47 @@
 
     <div class="dialog-body">
       <!-- Típus -->
-      <div class="form-group">
-        <label class="form-label">Számla típus</label>
-        <select class="select-input" [value]="type()" (change)="type.set($any($event.target).value)">
-          <option value="invoice">Számla</option>
-          <option value="proforma">Díjbekérő</option>
-          <option value="deposit">Előlegszámla</option>
-        </select>
-      </div>
+      <ps-select
+        label="Számla típus"
+        [options]="typeOptions"
+        [ngModel]="type()"
+        (ngModelChange)="type.set($event)" />
 
       <!-- Vevő adatok -->
       <div class="form-section">
         <h3 class="form-section-title">Vevő adatok</h3>
         <div class="form-row">
           <div class="form-group form-group--half">
-            <label class="form-label">Név *</label>
-            <input type="text" class="text-input" [value]="customerName()" (input)="customerName.set($any($event.target).value)" placeholder="Vevő neve" />
+            <ps-input
+              label="Név"
+              [required]="true"
+              placeholder="Vevő neve"
+              [ngModel]="customerName()"
+              (ngModelChange)="customerName.set($event)" />
           </div>
           <div class="form-group form-group--half">
-            <label class="form-label">Email</label>
-            <input type="email" class="text-input" [value]="customerEmail()" (input)="customerEmail.set($any($event.target).value)" placeholder="vevo@email.hu" />
+            <ps-input
+              label="Email"
+              type="email"
+              placeholder="vevo@email.hu"
+              [ngModel]="customerEmail()"
+              (ngModelChange)="customerEmail.set($event)" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group form-group--half">
-            <label class="form-label">Adószám</label>
-            <input type="text" class="text-input" [value]="customerTaxNumber()" (input)="customerTaxNumber.set($any($event.target).value)" placeholder="12345678-1-42" />
+            <ps-input
+              label="Adószám"
+              placeholder="12345678-1-42"
+              [ngModel]="customerTaxNumber()"
+              (ngModelChange)="customerTaxNumber.set($event)" />
           </div>
           <div class="form-group form-group--half">
-            <label class="form-label">Cím</label>
-            <input type="text" class="text-input" [value]="customerAddress()" (input)="customerAddress.set($any($event.target).value)" placeholder="1234 Budapest, Példa u. 1." />
+            <ps-input
+              label="Cím"
+              placeholder="1234 Budapest, Példa u. 1."
+              [ngModel]="customerAddress()"
+              (ngModelChange)="customerAddress.set($event)" />
           </div>
         </div>
       </div>
@@ -52,16 +63,22 @@
         <h3 class="form-section-title">Dátumok</h3>
         <div class="form-row form-row--three">
           <div class="form-group">
-            <label class="form-label">Kiállítás</label>
-            <input type="date" class="text-input" [value]="issueDate()" (input)="issueDate.set($any($event.target).value)" />
+            <ps-datepicker
+              label="Kiállítás"
+              [ngModel]="issueDate()"
+              (ngModelChange)="issueDate.set($event)" />
           </div>
           <div class="form-group">
-            <label class="form-label">Teljesítés</label>
-            <input type="date" class="text-input" [value]="fulfillmentDate()" (input)="fulfillmentDate.set($any($event.target).value)" />
+            <ps-datepicker
+              label="Teljesítés"
+              [ngModel]="fulfillmentDate()"
+              (ngModelChange)="fulfillmentDate.set($event)" />
           </div>
           <div class="form-group">
-            <label class="form-label">Fizetési határidő</label>
-            <input type="date" class="text-input" [value]="dueDate()" (input)="dueDate.set($any($event.target).value)" />
+            <ps-datepicker
+              label="Fizetési határidő"
+              [ngModel]="dueDate()"
+              (ngModelChange)="dueDate.set($event)" />
           </div>
         </div>
       </div>
@@ -116,17 +133,19 @@
       </div>
 
       <!-- Megjegyzés -->
-      <div class="form-group">
-        <label class="form-label">Megjegyzés</label>
-        <textarea class="textarea-input" rows="2" [value]="comment()" (input)="comment.set($any($event.target).value)" placeholder="Opcionális megjegyzés..."></textarea>
-      </div>
+      <ps-textarea
+        label="Megjegyzés"
+        [rows]="2"
+        placeholder="Opcionális megjegyzés..."
+        [ngModel]="comment()"
+        (ngModelChange)="comment.set($event)" />
 
       <!-- Azonnali küldés -->
       <div class="sync-toggle">
-        <button class="toggle-btn" [class.toggle-btn--active]="syncImmediately()" (click)="onToggleSyncImmediately()">
-          <span class="toggle-track"><span class="toggle-thumb"></span></span>
-          <span class="toggle-label">{{ syncImmediately() ? 'Azonnali kiállítás' : 'Piszkozatként mentés' }}</span>
-        </button>
+        <ps-toggle
+          [label]="syncImmediately() ? 'Azonnali kiállítás' : 'Piszkozatként mentés'"
+          [ngModel]="syncImmediately()"
+          (ngModelChange)="syncImmediately.set($event)" />
       </div>
     </div>
 

@@ -19,10 +19,11 @@
           <span class="setting-description">Válaszd ki a számlázáshoz használt szolgáltatót.</span>
         </div>
         <div class="setting-control">
-          <select class="select-input" [value]="provider()" (change)="onProviderChange($any($event.target).value)">
-            <option value="szamlazz_hu">Számlázz.hu</option>
-            <option value="billingo">Billingo</option>
-          </select>
+          <ps-select
+
+            [options]="providerOptions"
+            [ngModel]="provider()"
+            (ngModelChange)="onProviderChange($event)" />
         </div>
       </div>
 
@@ -33,10 +34,9 @@
             <span class="setting-description">Ha aktív, a rendszer a kiválasztott szolgáltatón keresztül állít ki számlákat.</span>
           </div>
           <div class="setting-control">
-            <button class="toggle-btn" [class.toggle-btn--active]="enabled()" (click)="onToggleEnabled()">
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-              <span class="toggle-label">{{ enabled() ? 'Aktív' : 'Inaktív' }}</span>
-            </button>
+            <ps-toggle
+              [ngModel]="enabled()"
+              (ngModelChange)="enabled.set($event)" />
           </div>
         </div>
       </div>
@@ -63,13 +63,12 @@
           </span>
         </div>
         <div class="setting-control api-key-control">
-          <input
+          <ps-input
+
             type="password"
-            class="text-input"
-            [value]="apiKey()"
-            (input)="apiKey.set($any($event.target).value)"
             placeholder="API kulcs..."
-          />
+            [ngModel]="apiKey()"
+            (ngModelChange)="apiKey.set($event)" />
           <button
             class="validate-btn"
             (click)="validateApiKey()"
@@ -100,36 +99,22 @@
       </div>
 
       <div class="setting-card">
-        <div class="form-group">
-          <label class="form-label">Bank neve</label>
-          <input
-            type="text"
-            class="text-input"
-            [value]="szamlazzBankName()"
-            (input)="szamlazzBankName.set($any($event.target).value)"
-            placeholder="pl. OTP Bank"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Bankszámlaszám</label>
-          <input
-            type="text"
-            class="text-input"
-            [value]="szamlazzBankAccount()"
-            (input)="szamlazzBankAccount.set($any($event.target).value)"
-            placeholder="pl. 11773016-01234567-00000000"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Válasz email cím</label>
-          <input
-            type="email"
-            class="text-input"
-            [value]="szamlazzReplyEmail()"
-            (input)="szamlazzReplyEmail.set($any($event.target).value)"
-            placeholder="pl. szamlazas@cegem.hu"
-          />
-        </div>
+        <ps-input
+          label="Bank neve"
+          placeholder="pl. OTP Bank"
+          [ngModel]="szamlazzBankName()"
+          (ngModelChange)="szamlazzBankName.set($event)" />
+        <ps-input
+          label="Bankszámlaszám"
+          placeholder="pl. 11773016-01234567-00000000"
+          [ngModel]="szamlazzBankAccount()"
+          (ngModelChange)="szamlazzBankAccount.set($event)" />
+        <ps-input
+          label="Válasz email cím"
+          type="email"
+          placeholder="pl. szamlazas@cegem.hu"
+          [ngModel]="szamlazzReplyEmail()"
+          (ngModelChange)="szamlazzReplyEmail.set($event)" />
       </div>
     </div>
   }
@@ -142,26 +127,16 @@
       </div>
 
       <div class="setting-card">
-        <div class="form-group">
-          <label class="form-label">Számlatömb azonosító</label>
-          <input
-            type="text"
-            class="text-input"
-            [value]="billingoBlockId()"
-            (input)="billingoBlockId.set($any($event.target).value)"
-            placeholder="pl. 12345"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Bankszámla azonosító</label>
-          <input
-            type="text"
-            class="text-input"
-            [value]="billingoBankAccountId()"
-            (input)="billingoBankAccountId.set($any($event.target).value)"
-            placeholder="pl. 67890"
-          />
-        </div>
+        <ps-input
+          label="Számlatömb azonosító"
+          placeholder="pl. 12345"
+          [ngModel]="billingoBlockId()"
+          (ngModelChange)="billingoBlockId.set($event)" />
+        <ps-input
+          label="Bankszámla azonosító"
+          placeholder="pl. 67890"
+          [ngModel]="billingoBankAccountId()"
+          (ngModelChange)="billingoBankAccountId.set($event)" />
       </div>
     </div>
   }
@@ -176,56 +151,46 @@
     <div class="setting-card">
       <div class="form-row">
         <div class="form-group form-group--half">
-          <label class="form-label">Számla előtag</label>
-          <input
-            type="text"
-            class="text-input"
-            [value]="prefix()"
-            (input)="prefix.set($any($event.target).value)"
-            maxlength="20"
-          />
+          <ps-input
+            label="Számla előtag"
+            [ngModel]="prefix()"
+            (ngModelChange)="prefix.set($event)" />
         </div>
         <div class="form-group form-group--half">
-          <label class="form-label">Pénznem</label>
-          <select class="select-input" [value]="currency()" (change)="currency.set($any($event.target).value)">
-            <option value="HUF">HUF</option>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-          </select>
+          <ps-select
+            label="Pénznem"
+            [options]="currencyOptions"
+            [ngModel]="currency()"
+            (ngModelChange)="currency.set($event)" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group form-group--half">
-          <label class="form-label">Nyelv</label>
-          <select class="select-input" [value]="language()" (change)="language.set($any($event.target).value)">
-            <option value="hu">Magyar</option>
-            <option value="en">Angol</option>
-            <option value="de">Német</option>
-          </select>
+          <ps-select
+            label="Nyelv"
+            [options]="languageOptions"
+            [ngModel]="language()"
+            (ngModelChange)="language.set($event)" />
         </div>
         <div class="form-group form-group--half">
-          <label class="form-label">Fizetési határidő (nap)</label>
-          <input
+          <ps-input
+            label="Fizetési határidő (nap)"
             type="number"
-            class="number-input"
-            [value]="dueDays()"
-            (input)="dueDays.set(+$any($event.target).value)"
-            min="0"
-            max="365"
-          />
+            [min]="0"
+            [max]="365"
+            [ngModel]="dueDays()"
+            (ngModelChange)="dueDays.set($event)" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group form-group--half">
-          <label class="form-label">ÁFA kulcs (%)</label>
-          <input
+          <ps-input
+            label="ÁFA kulcs (%)"
             type="number"
-            class="number-input"
-            [value]="vatPercentage()"
-            (input)="vatPercentage.set(+$any($event.target).value)"
-            min="0"
-            max="100"
-          />
+            [min]="0"
+            [max]="100"
+            [ngModel]="vatPercentage()"
+            (ngModelChange)="vatPercentage.set($event)" />
         </div>
         <div class="form-group form-group--half">
           <div class="setting-row">
@@ -233,23 +198,19 @@
               <span class="setting-label setting-label--sub">EU ÁFA</span>
             </div>
             <div class="setting-control">
-              <button class="toggle-btn" [class.toggle-btn--active]="euVat()" (click)="onToggleEuVat()">
-                <span class="toggle-track"><span class="toggle-thumb"></span></span>
-              </button>
+              <ps-toggle
+                [ngModel]="euVat()"
+                (ngModelChange)="euVat.set($event)" />
             </div>
           </div>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Alapértelmezett megjegyzés</label>
-        <textarea
-          class="textarea-input"
-          rows="3"
-          [value]="comment()"
-          (input)="comment.set($any($event.target).value)"
-          placeholder="Megjelenik a számlákon alapértelmezettként..."
-        ></textarea>
-      </div>
+      <ps-textarea
+        label="Alapértelmezett megjegyzés"
+        [rows]="3"
+        placeholder="Megjelenik a számlákon alapértelmezettként..."
+        [ngModel]="comment()"
+        (ngModelChange)="comment.set($event)" />
     </div>
   </div>
 

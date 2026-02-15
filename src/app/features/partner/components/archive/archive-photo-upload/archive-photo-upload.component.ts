@@ -3,13 +3,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ARCHIVE_SERVICE } from '../../../models/archive.models';
+import { PsCheckboxComponent, PsInputComponent } from '@shared/components/form';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 
 @Component({
   selector: 'app-archive-photo-upload',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsCheckboxComponent, PsInputComponent],
   templateUrl: './archive-photo-upload.component.html',
   styleUrl: './archive-photo-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -51,11 +51,9 @@
               @for (type of activeTypes(); track type.id) {
                 <td class="price-cell" [class.inactive]="!getIsActive(size.id, type.id)">
                   <div class="price-input-group">
-                    <input type="number" min="0" step="10"
-                           [ngModel]="getPrice(size.id, type.id)"
-                           (ngModelChange)="updatePrice(size.id, type.id, $event)"
-                           class="price-input">
-                    <span class="currency">Ft</span>
+                    <ps-input type="number" [min]="0" [step]="10" suffix="Ft"
+                              [ngModel]="getPrice(size.id, type.id)"
+                              (ngModelChange)="updatePrice(size.id, type.id, $event)" />
                   </div>
                   <button class="toggle-btn"
                           [class.active]="getIsActive(size.id, type.id)"

@@ -29,18 +29,12 @@
             </button>
           }
         </div>
-        <label class="photo-filter-toggle">
-          <span class="custom-checkbox" [class.custom-checkbox--checked]="showOnlyWithoutPhoto()">
-            @if (showOnlyWithoutPhoto()) {
-              <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-            }
-          </span>
-          <input type="checkbox" [ngModel]="showOnlyWithoutPhoto()" (ngModelChange)="showOnlyWithoutPhoto.set($event)" class="sr-only" />
-          <span class="toggle-label">Kép nélkül</span>
-          @if (!loading()) {
-            <span class="toggle-count">({{ withoutPhotoCount() }})</span>
-          }
-        </label>
+        <ps-toggle
+          [label]="'Kép nélkül' + (!loading() ? ' (' + withoutPhotoCount() + ')' : '')"
+          labelPosition="after"
+          [ngModel]="showOnlyWithoutPhoto()"
+          (ngModelChange)="showOnlyWithoutPhoto.set($event)"
+        />
       </div>
     </div>
 

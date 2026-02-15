@@ -93,22 +93,6 @@
   margin-bottom: 6px;
 }
 
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: 8px;
-  font-size: 14px;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  outline: none;
-  transition: border-color 0.15s;
-
-  &:focus {
-    border-color: var(--color-primary, #6366f1);
-  }
-}
-
 // Drop zone
 .drop-zone {
   position: relative;

@@ -56,11 +56,12 @@
                 autocomplete="off"
               />
             </div>
-            <select class="controls__filter" (change)="onFilterChange($event)">
-              <option value="all">Mind</option>
-              <option value="student">Csak diákok</option>
-              <option value="teacher">Csak tanárok</option>
-            </select>
+            <ps-select
+              size="sm"
+              [options]="filterOptions"
+              [ngModel]="filterType()"
+              (ngModelChange)="filterType.set($event)"
+            />
           </div>
         }
 

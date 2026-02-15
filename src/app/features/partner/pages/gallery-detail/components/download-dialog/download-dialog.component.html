@@ -16,64 +16,31 @@
     <div class="dialog-body">
       <!-- ZIP tartalom -->
       <div class="form-group">
-        <label class="form-label">Tartalom</label>
-        <select
-          class="form-select"
-          [value]="zipContent()"
-          (change)="onZipContentChange($event)"
-        >
-          <option value="all">Összes kép (saját + retusált + tablókép)</option>
-          <option value="retouch_and_tablo">Retusált + Tablókép</option>
-          <option value="retouch_only">Csak retusált képek</option>
-          <option value="tablo_only">Csak tablókép</option>
-        </select>
+        <ps-select
+          label="Tartalom"
+          [options]="zipContentOptions"
+          [ngModel]="zipContent()"
+          (ngModelChange)="zipContent.set($event)"
+        />
       </div>
 
       <!-- Fájlnév stratégia -->
       <div class="form-group">
-        <label class="form-label">Fájlnevek</label>
-        <div class="radio-group">
-          <label class="radio-option" (click)="onFileNamingChange('original')">
-            <input
-              type="radio"
-              name="fileNaming"
-              [checked]="fileNaming() === 'original'"
-            />
-            <div class="radio-content">
-              <span class="radio-title">Eredeti fájlnév</span>
-              <span class="radio-desc">pl. BG7A5017.JPG</span>
-            </div>
-          </label>
-          <label class="radio-option" (click)="onFileNamingChange('student_name')">
-            <input
-              type="radio"
-              name="fileNaming"
-              [checked]="fileNaming() === 'student_name'"
-            />
-            <div class="radio-content">
-              <span class="radio-title">Diák neve</span>
-              <span class="radio-desc">pl. Kiss Anna_retusalt_01.jpg</span>
-            </div>
-          </label>
-          <label class="radio-option" (click)="onFileNamingChange('student_name_iptc')">
-            <input
-              type="radio"
-              name="fileNaming"
-              [checked]="fileNaming() === 'student_name_iptc'"
-            />
-            <div class="radio-content">
-              <span class="radio-title">IPTC beágyazás</span>
-              <span class="radio-desc">Eredeti fájlnév, IPTC-ben a diák neve</span>
-            </div>
-          </label>
-        </div>
+        <ps-radio-group
+          label="Fájlnevek"
+          [options]="fileNamingOptions"
+          variant="cards"
+          [ngModel]="fileNaming()"
+          (ngModelChange)="fileNaming.set($event)"
+        />
       </div>
 
       <!-- Excel mellékelés -->
-      <label class="checkbox-option" (click)="onExcelToggle()">
-        <input type="checkbox" [checked]="includeExcel()" />
-        <span>Excel fájl mellékelése a ZIP-ben</span>
-      </label>
+      <ps-checkbox
+        label="Excel fájl mellékelése a ZIP-ben"
+        [ngModel]="includeExcel()"
+        (ngModelChange)="includeExcel.set($event)"
+      />
     </div>
 
     <!-- Footer -->

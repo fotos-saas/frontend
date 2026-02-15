@@ -27,22 +27,13 @@
 
   <!-- Filters -->
   <div class="filter-bar">
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
-      <input type="text" placeholder="Keresés rendelés számra, névre..."
-             [ngModel]="searchQuery()"
-             (ngModelChange)="searchQuery.set($event)"
-             (keyup.enter)="onSearch()">
-    </div>
-    <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()">
-      <option value="">Minden státusz</option>
-      <option value="pending">Függőben</option>
-      <option value="paid">Fizetve</option>
-      <option value="processing">Feldolgozás</option>
-      <option value="shipped">Szállítás alatt</option>
-      <option value="completed">Kész</option>
-      <option value="cancelled">Visszamondva</option>
-    </select>
+    <ps-input placeholder="Keresés rendelés számra, névre..."
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
+              (keyup.enter)="onSearch()" />
+    <ps-select [options]="statusOptions" emptyLabel="Minden státusz"
+               [ngModel]="statusFilter()"
+               (ngModelChange)="statusFilter.set($event); onFilterChange()" />
   </div>
 
   <!-- Orders list -->

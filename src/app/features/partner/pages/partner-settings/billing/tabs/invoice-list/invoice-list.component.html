@@ -27,28 +27,22 @@
 <!-- Szűrők + Új számla -->
 <div class="filters">
   <div class="filters-left">
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
-      <input
-        type="text"
-        placeholder="Keresés számlaszámra vagy névre..."
-        [value]="searchTerm()"
-        (input)="onSearch($any($event.target).value)"
-      />
-    </div>
-    <select class="filter-select" [value]="statusFilter()" (change)="onStatusFilter($any($event.target).value)">
-      <option value="">Összes státusz</option>
-      <option value="draft">Piszkozat</option>
-      <option value="sent">Kiküldve</option>
-      <option value="paid">Fizetve</option>
-      <option value="cancelled">Sztornózva</option>
-      <option value="overdue">Lejárt</option>
-    </select>
-    <select class="filter-select" [value]="yearFilter()" (change)="onYearFilter($any($event.target).value)">
-      @for (year of getYearOptions(); track year) {
-        <option [value]="year">{{ year }}</option>
-      }
-    </select>
+    <ps-input
+      size="sm"
+      placeholder="Keresés számlaszámra vagy névre..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="onSearch($event)" />
+    <ps-select
+      size="sm"
+      emptyLabel="Összes státusz"
+      [options]="statusOptions"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="onStatusFilter($event)" />
+    <ps-select
+      size="sm"
+      [options]="yearOptions"
+      [ngModel]="yearFilter()"
+      (ngModelChange)="onYearFilter('' + $event)" />
   </div>
   <button class="btn-primary" (click)="showCreateDialog.set(true)">
     <lucide-icon [name]="ICONS.PLUS" [size]="16" />

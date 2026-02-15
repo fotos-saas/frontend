@@ -12,92 +12,33 @@
     <!-- Személyek (csak project módban) -->
     @if (mode() === 'project') {
       <p class="section-label">Kinek a képei?</p>
-      <div class="radio-group">
-        <label class="radio-option" (click)="selectType('student')">
-          <input type="radio" name="personType" [checked]="selectedType() === 'student'" />
-          <div class="radio-content">
-            <span class="radio-title">
-              <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="16" class="radio-icon" />
-              Diákok
-            </span>
-          </div>
-        </label>
-
-        <label class="radio-option" (click)="selectType('teacher')">
-          <input type="radio" name="personType" [checked]="selectedType() === 'teacher'" />
-          <div class="radio-content">
-            <span class="radio-title">
-              <lucide-icon [name]="ICONS.USER" [size]="16" class="radio-icon" />
-              Tanárok
-            </span>
-          </div>
-        </label>
-
-        <label class="radio-option" (click)="selectType('both')">
-          <input type="radio" name="personType" [checked]="selectedType() === 'both'" />
-          <div class="radio-content">
-            <span class="radio-title">
-              <lucide-icon [name]="ICONS.USERS" [size]="16" class="radio-icon" />
-              Mindkettő
-            </span>
-          </div>
-        </label>
-      </div>
+      <ps-radio-group
+        [options]="personTypeOptions"
+        variant="cards"
+        [ngModel]="selectedType()"
+        (ngModelChange)="selectedType.set($event)"
+      />
     }
 
     <!-- Hatókör (csak school módban) -->
     @if (mode() === 'school') {
       <p class="section-label">Hatókör</p>
-      <div class="radio-group">
-        <label class="radio-option" (click)="allProjects.set(false)">
-          <input type="radio" name="scope" [checked]="!allProjects()" />
-          <div class="radio-content">
-            <span class="radio-title">
-              <lucide-icon [name]="ICONS.USER" [size]="16" class="radio-icon" />
-              Aktuális tanárok
-            </span>
-            <span class="radio-desc">A jelenleg aktív tanárok fotói ({{ currentSchoolYear() }})</span>
-          </div>
-        </label>
-
-        <label class="radio-option" (click)="allProjects.set(true)">
-          <input type="radio" name="scope" [checked]="allProjects()" />
-          <div class="radio-content">
-            <span class="radio-title">
-              <lucide-icon [name]="ICONS.CALENDAR" [size]="16" class="radio-icon" />
-              Összes évfolyam
-            </span>
-            <span class="radio-desc">Minden projekt tanárai, évfolyamonként mappázva</span>
-          </div>
-        </label>
-      </div>
+      <ps-radio-group
+        [options]="scopeOptions()"
+        variant="cards"
+        [ngModel]="scopeValue()"
+        (ngModelChange)="onScopeChange($event)"
+      />
     }
 
     <!-- Fájlnév -->
     <p class="section-label section-label--mt">Fájlnév</p>
-    <div class="radio-group">
-      <label class="radio-option" (click)="selectNaming('student_name')">
-        <input type="radio" name="fileNaming" [checked]="selectedNaming() === 'student_name'" />
-        <div class="radio-content">
-          <span class="radio-title">
-            <lucide-icon [name]="ICONS.TAG" [size]="16" class="radio-icon" />
-            Elnevezett
-          </span>
-          <span class="radio-desc">Személy neve a fájlnévben (pl. Kiss Péter.jpg)</span>
-        </div>
-      </label>
-
-      <label class="radio-option" (click)="selectNaming('original')">
-        <input type="radio" name="fileNaming" [checked]="selectedNaming() === 'original'" />
-        <div class="radio-content">
-          <span class="radio-title">
-            <lucide-icon [name]="ICONS.FILE" [size]="16" class="radio-icon" />
-            Eredeti fájlnév
-          </span>
-          <span class="radio-desc">A feltöltéskori fájlnév (pl. IMG_1234.jpg)</span>
-        </div>
-      </label>
-    </div>
+    <ps-radio-group
+      [options]="fileNamingOptions"
+      variant="cards"
+      [ngModel]="selectedNaming()"
+      (ngModelChange)="selectedNaming.set($event)"
+    />
   </ng-container>
 
   <ng-container dialogFooter>

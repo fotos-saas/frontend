@@ -5,6 +5,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
+import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { InfoBoxComponent } from '../../../components/info-box';
 import { PartnerService, GuestSession, PaginatedResponse } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -15,7 +17,7 @@ import { GuestSessionEditDialogComponent } from '../guest-session-edit-dialog/gu
 @Component({
   selector: 'app-project-users-tab',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, InfoBoxComponent, GuestSessionEditDialogComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsSelectComponent, InfoBoxComponent, GuestSessionEditDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-users-tab.component.html',
   styleUrl: './project-users-tab.component.scss',
@@ -55,6 +57,8 @@ export class ProjectUsersTabComponent implements OnInit {
     { value: 'verified', label: 'Verifikált' },
     { value: 'pending', label: 'Függőben' },
   ];
+
+  readonly filterSelectOptions: PsSelectOption[] = this.filters.filter(f => f.value !== '').map(f => ({ id: f.value, label: f.label }));
 
   ngOnInit(): void {
     this.loadSessions();

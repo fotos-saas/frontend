@@ -50,36 +50,12 @@
 
 .filter-bar {
   display: flex;
+  align-items: flex-start;
   gap: 12px;
   margin-bottom: 16px;
 
-  .search-box {
+  ps-input {
     flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-primary);
-
-    input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      font-size: 0.875rem;
-      color: var(--text-primary);
-      outline: none;
-    }
-  }
-
-  select {
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.875rem;
-    background: var(--bg-primary);
-    color: var(--text-primary);
   }
 }
 

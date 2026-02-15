@@ -172,26 +172,9 @@
   border-radius: 8px;
   margin-bottom: 24px;
 
-  .form-group {
+  ps-input {
     margin-bottom: 12px;
-
-    label {
-      display: block;
-      font-weight: 500;
-      font-size: 0.875rem;
-      margin-bottom: 6px;
-    }
-
-    input {
-      width: 100%;
-      max-width: 300px;
-      padding: 8px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
+    max-width: 300px;
   }
 
   .action-buttons {

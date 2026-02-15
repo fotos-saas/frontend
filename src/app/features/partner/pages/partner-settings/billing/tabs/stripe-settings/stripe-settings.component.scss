@@ -22,28 +22,6 @@
 
 .form-group {
   margin-bottom: 14px;
-
-  label {
-    display: block;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #475569;
-    margin-bottom: 4px;
-  }
-}
-
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: #1e293b;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-  font-family: monospace;
-
-  &:focus { outline: none; border-color: var(--color-primary, #1e3a5f); }
 }
 
 .webhook-url {
@@ -59,28 +37,6 @@
   }
 }
 
-.toggle-row {
-  display: flex;
-  flex-direction: column;
-}
-
-.toggle-label {
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #1e293b;
-  cursor: pointer;
-
-  input[type="checkbox"] { margin-right: 8px; }
-}
-
-.toggle-hint {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  margin-top: 4px;
-  padding-left: 24px;
-}
 
 .actions-bar {
   display: flex;

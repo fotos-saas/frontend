@@ -1,8 +1,11 @@
 import { Component, ChangeDetectionStrategy, signal, inject, DestroyRef, output, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
 import { createBackdropHandler } from '../../../../../../../shared/utils/dialog.util';
+import { PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent, PsDatepickerComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { InvoiceService } from '../../../../../services/invoice.service';
 import {
   InvoiceType,
@@ -23,7 +26,7 @@ interface ItemRow {
 @Component({
   selector: 'app-invoice-create-dialog',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent, PsDatepickerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-create-dialog.component.html',
   styleUrl: './invoice-create-dialog.component.scss',
@@ -38,6 +41,12 @@ export class InvoiceCreateDialogComponent {
 
   readonly ICONS = ICONS;
   readonly TYPE_LABELS = INVOICE_TYPE_LABELS;
+
+  readonly typeOptions: PsSelectOption[] = [
+    { id: 'invoice', label: 'Számla' },
+    { id: 'proforma', label: 'Díjbekérő' },
+    { id: 'deposit', label: 'Előlegszámla' },
+  ];
 
   readonly saving = signal(false);
 

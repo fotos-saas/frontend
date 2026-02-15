@@ -3,13 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsSelectComponent, PsToggleComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerService } from '../../services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-global-settings',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsToggleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './global-settings.component.html',
   styleUrl: './global-settings.component.scss',
@@ -20,6 +22,19 @@ export class GlobalSettingsComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+
+  readonly zipContentOptions: PsSelectOption[] = [
+    { id: 'all', label: 'Összes kép' },
+    { id: 'retouch_and_tablo', label: 'Retusált + Tablókép' },
+    { id: 'retouch_only', label: 'Csak retusált' },
+    { id: 'tablo_only', label: 'Csak tablókép' },
+  ];
+
+  readonly fileNamingOptions: PsSelectOption[] = [
+    { id: 'original', label: 'Eredeti fájlnév' },
+    { id: 'student_name', label: 'Diák neve' },
+    { id: 'student_name_iptc', label: 'IPTC beágyazás' },
+  ];
 
   loading = signal(true);
   saving = signal(false);

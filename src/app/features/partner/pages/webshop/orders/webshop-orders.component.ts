@@ -6,13 +6,15 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerWebshopService, ShopOrder, OrderStats } from '../../../services/partner-webshop.service';
 import { WEBSHOP_STATUS_LABELS } from '../../../models/webshop.models';
 
 @Component({
   selector: 'app-webshop-orders',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LucideAngularModule, MatTooltipModule],
+  imports: [DecimalPipe, DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent],
   templateUrl: './webshop-orders.component.html',
   styleUrl: './webshop-orders.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +25,14 @@ export class WebshopOrdersComponent implements OnInit {
   private router = inject(Router);
   readonly ICONS = ICONS;
   readonly STATUS_LABELS = WEBSHOP_STATUS_LABELS;
+  readonly statusOptions: PsSelectOption[] = [
+    { id: 'pending', label: 'Függőben' },
+    { id: 'paid', label: 'Fizetve' },
+    { id: 'processing', label: 'Feldolgozás' },
+    { id: 'shipped', label: 'Szállítás alatt' },
+    { id: 'completed', label: 'Kész' },
+    { id: 'cancelled', label: 'Visszamondva' },
+  ];
 
   orders = signal<ShopOrder[]>([]);
   stats = signal<OrderStats | null>(null);

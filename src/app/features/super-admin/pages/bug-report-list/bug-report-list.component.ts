@@ -11,12 +11,14 @@ import {
   BUG_REPORT_PRIORITY_OPTIONS,
 } from '../../../../shared/types/bug-report.types';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 
 @Component({
   selector: 'app-admin-bug-report-list',
   standalone: true,
-  imports: [FormsModule, DatePipe, LucideAngularModule, ListPaginationComponent],
+  imports: [FormsModule, DatePipe, LucideAngularModule, PsSelectComponent, ListPaginationComponent],
   templateUrl: './bug-report-list.component.html',
   styleUrl: './bug-report-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -29,6 +31,9 @@ export class AdminBugReportListComponent implements OnInit {
   readonly ICONS = ICONS;
   readonly statusOptions = BUG_REPORT_STATUS_OPTIONS;
   readonly priorityOptions = BUG_REPORT_PRIORITY_OPTIONS;
+
+  readonly statusSelectOptions: PsSelectOption[] = BUG_REPORT_STATUS_OPTIONS.map(o => ({ id: o.value, label: o.label }));
+  readonly prioritySelectOptions: PsSelectOption[] = BUG_REPORT_PRIORITY_OPTIONS.map(o => ({ id: o.value, label: o.label }));
 
   reports = signal<BugReport[]>([]);
   loading = signal(true);

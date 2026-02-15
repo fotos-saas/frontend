@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerServiceCatalogService } from '../../../services/partner-service-catalog.service';
 import {
   PartnerService,
@@ -13,7 +15,7 @@ import {
 @Component({
   selector: 'app-service-edit-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent],
   templateUrl: './service-edit-dialog.component.html',
   styleUrl: './service-edit-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +29,11 @@ export class ServiceEditDialogComponent implements OnInit {
   readonly ICONS = ICONS;
   readonly SERVICE_TYPE_OPTIONS = SERVICE_TYPE_OPTIONS;
   readonly backdropHandler = createBackdropHandler(() => this.close.emit());
+
+  readonly typeOptions: PsSelectOption[] = SERVICE_TYPE_OPTIONS.map(opt => ({
+    id: opt.value,
+    label: opt.label,
+  }));
 
   name = '';
   description = '';

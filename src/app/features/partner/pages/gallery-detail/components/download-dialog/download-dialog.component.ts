@@ -1,7 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 import { createBackdropHandler } from '../../../../../../shared/utils/dialog.util';
+import { PsSelectComponent, PsRadioGroupComponent, PsCheckboxComponent } from '@shared/components/form';
+import { PsSelectOption, PsRadioOption } from '@shared/components/form/form.types';
 
 export interface DownloadOptions {
   zipContent: 'retouch_only' | 'tablo_only' | 'all' | 'retouch_and_tablo';
@@ -13,7 +16,7 @@ export interface DownloadOptions {
   selector: 'app-download-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsSelectComponent, PsRadioGroupComponent, PsCheckboxComponent],
   templateUrl: './download-dialog.component.html',
   styleUrl: './download-dialog.component.scss',
 })
@@ -31,6 +34,19 @@ export class DownloadDialogComponent {
 
   backdropHandler = createBackdropHandler(() => this.close.emit());
 
+  readonly zipContentOptions: PsSelectOption[] = [
+    { id: 'all', label: 'Összes kép (saját + retusált + tablókép)' },
+    { id: 'retouch_and_tablo', label: 'Retusált + Tablókép' },
+    { id: 'retouch_only', label: 'Csak retusált képek' },
+    { id: 'tablo_only', label: 'Csak tablókép' },
+  ];
+
+  readonly fileNamingOptions: PsRadioOption[] = [
+    { value: 'original', label: 'Eredeti fájlnév', sublabel: 'pl. BG7A5017.JPG' },
+    { value: 'student_name', label: 'Diák neve', sublabel: 'pl. Kiss Anna_retusalt_01.jpg' },
+    { value: 'student_name_iptc', label: 'IPTC beágyazás', sublabel: 'Eredeti fájlnév, IPTC-ben a diák neve' },
+  ];
+
   ngOnInit(): void {
     const d = this.defaults();
     if (d.zipContent) this.zipContent.set(d.zipContent);
@@ -44,17 +60,5 @@ export class DownloadDialogComponent {
       fileNaming: this.fileNaming(),
       includeExcel: this.includeExcel(),
     });
-  }
-
-  onZipContentChange(event: Event): void {
-    this.zipContent.set((event.target as HTMLSelectElement).value as DownloadOptions['zipContent']);
-  }
-
-  onFileNamingChange(value: DownloadOptions['fileNaming']): void {
-    this.fileNaming.set(value);
-  }
-
-  onExcelToggle(): void {
-    this.includeExcel.update(v => !v);
   }
 }

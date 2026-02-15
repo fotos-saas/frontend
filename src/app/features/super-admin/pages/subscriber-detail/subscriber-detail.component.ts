@@ -6,6 +6,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
 import { SubscriberDetail, DiscountInfo } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants';
+import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ChargeSubscriberDialogComponent } from '../../components/charge-subscriber-dialog/charge-subscriber-dialog.component';
 import { ChangePlanDialogComponent } from '../../components/change-plan-dialog/change-plan-dialog.component';
@@ -29,6 +31,7 @@ import { SubscriberDetailStateService } from './subscriber-detail-state.service'
     ChangePlanDialogComponent,
     DiscountDialogComponent,
     NgClass,
+    PsSelectComponent,
   ],
   providers: [SubscriberDetailStateService],
   templateUrl: './subscriber-detail.component.html',
@@ -41,6 +44,15 @@ export class SubscriberDetailComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly ICONS = ICONS;
+
+  readonly auditActionOptions: PsSelectOption[] = [
+    { id: 'view', label: 'Megtekintés' },
+    { id: 'charge', label: 'Terhelés' },
+    { id: 'change_plan', label: 'Csomagváltás' },
+    { id: 'set_discount', label: 'Kedvezmény beállítás' },
+    { id: 'remove_discount', label: 'Kedvezmény törlés' },
+    { id: 'cancel_subscription', label: 'Törlés' },
+  ];
 
   // --- Signal delegálások (template binding) ---
   readonly subscriber = this.state.subscriber;

@@ -137,59 +137,8 @@
   opacity: 0.8;
 }
 
-.photo-filter-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 0.8125rem;
-  color: #475569;
-  white-space: nowrap;
+ps-toggle {
   flex-shrink: 0;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.custom-checkbox {
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #cbd5e1;
-  border-radius: 5px;
-  background: #ffffff;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.custom-checkbox--checked {
-  background: var(--color-primary, #1e3a5f);
-  border-color: var(--color-primary, #1e3a5f);
-  color: #ffffff;
-}
-
-.photo-filter-toggle:hover .custom-checkbox:not(.custom-checkbox--checked) {
-  border-color: #94a3b8;
-}
-
-.toggle-label {
-  font-weight: 500;
-}
-
-.toggle-count {
-  color: #94a3b8;
-  font-weight: 400;
 }
 
 .modal-content {

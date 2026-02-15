@@ -1,9 +1,12 @@
 import { Component, ChangeDetectionStrategy, signal, inject, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
+import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { InvoiceService } from '../../../../../services/invoice.service';
 import {
   Invoice,
@@ -19,7 +22,7 @@ import { InvoiceCreateDialogComponent } from '../../components/invoice-create-di
 @Component({
   selector: 'app-invoice-list',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, MatTooltipModule, InvoiceCreateDialogComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, InvoiceCreateDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-list.component.html',
   styleUrl: './invoice-list.component.scss',
@@ -33,6 +36,16 @@ export class InvoiceListComponent implements OnInit {
   readonly STATUS_LABELS = PARTNER_INVOICE_STATUS_LABELS;
   readonly STATUS_COLORS = PARTNER_INVOICE_STATUS_COLORS;
   readonly formatPrice = formatPrice;
+
+  readonly statusOptions: PsSelectOption[] = [
+    { id: 'draft', label: 'Piszkozat' },
+    { id: 'sent', label: 'Kiküldve' },
+    { id: 'paid', label: 'Fizetve' },
+    { id: 'cancelled', label: 'Sztornózva' },
+    { id: 'overdue', label: 'Lejárt' },
+  ];
+
+  readonly yearOptions: PsSelectOption[] = this.getYearOptions().map(y => ({ id: y, label: '' + y }));
 
   readonly loading = signal(true);
   readonly invoices = signal<Invoice[]>([]);

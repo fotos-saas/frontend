@@ -1,10 +1,12 @@
-import { Component, inject, OnInit, signal, output, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, output, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { PsInputComponent, PsSelectComponent, PsTextareaComponent, PsDatepickerComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerBillingService } from '../../services/partner-billing.service';
 import { PartnerServiceCatalogService } from '../../services/partner-service-catalog.service';
 import { PartnerProjectService } from '../../services/partner-project.service';
@@ -23,7 +25,7 @@ interface PersonOption {
 @Component({
   selector: 'app-create-charge-dialog',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, LucideAngularModule],
+  imports: [DecimalPipe, FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsDatepickerComponent],
   templateUrl: './create-charge-dialog.component.html',
   styleUrl: './create-charge-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +44,21 @@ export class CreateChargeDialogComponent implements OnInit {
   readonly projects = signal<ProjectOption[]>([]);
   readonly persons = signal<PersonOption[]>([]);
   readonly saving = signal(false);
+
+  readonly projectOptions = computed<PsSelectOption[]>(() =>
+    this.projects().map(p => ({ id: p.id, label: p.name }))
+  );
+
+  readonly personOptions = computed<PsSelectOption[]>(() =>
+    this.persons().map(p => ({ id: p.id, label: p.name }))
+  );
+
+  readonly serviceOptions = computed<PsSelectOption[]>(() =>
+    this.catalogService.services().map((s: PartnerService) => ({
+      id: s.id,
+      label: `${s.name} — ${s.default_price.toLocaleString('hu-HU')} Ft`,
+    }))
+  );
 
   selectedProjectId: number | null = null;
   selectedPersonId: number | null = null;

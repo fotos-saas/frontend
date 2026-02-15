@@ -10,34 +10,31 @@
       <p class="section-desc">Add meg a Stripe fiókod API kulcsait a vendégek online fizetésének fogadásához.</p>
 
       <div class="form-group">
-        <label for="pk">Publikus kulcs (pk_...)</label>
-        <input
-          id="pk"
+        <ps-input
+          label="Publikus kulcs (pk_...)"
+          fieldId="pk"
           type="text"
           [(ngModel)]="publicKey"
-          class="form-input"
           [placeholder]="stripeService.settings()?.has_public_key ? '••••••••••• (már megadva)' : 'pk_live_... vagy pk_test_...'"
         />
       </div>
 
       <div class="form-group">
-        <label for="sk">Titkos kulcs (sk_...)</label>
-        <input
-          id="sk"
+        <ps-input
+          label="Titkos kulcs (sk_...)"
+          fieldId="sk"
           type="password"
           [(ngModel)]="secretKey"
-          class="form-input"
           [placeholder]="stripeService.settings()?.has_secret_key ? '••••••••••• (már megadva)' : 'sk_live_... vagy sk_test_...'"
         />
       </div>
 
       <div class="form-group">
-        <label for="wh">Webhook secret (whsec_...)</label>
-        <input
-          id="wh"
+        <ps-input
+          label="Webhook secret (whsec_...)"
+          fieldId="wh"
           type="password"
           [(ngModel)]="webhookSecret"
-          class="form-input"
           [placeholder]="stripeService.settings()?.has_webhook_secret ? '••••••••••• (már megadva)' : 'whsec_...'"
         />
       </div>
@@ -53,13 +50,11 @@
     </div>
 
     <div class="setting-section">
-      <div class="toggle-row">
-        <label class="toggle-label">
-          <input type="checkbox" [(ngModel)]="stripeEnabled" />
-          Online fizetés engedélyezése
-        </label>
-        <span class="toggle-hint">Ha be van kapcsolva, a vendégek online fizethetnek a terheléseikre.</span>
-      </div>
+      <ps-toggle
+        label="Online fizetés engedélyezése"
+        hint="Ha be van kapcsolva, a vendégek online fizethetnek a terheléseikre."
+        [(ngModel)]="stripeEnabled"
+      />
     </div>
 
     <div class="actions-bar">

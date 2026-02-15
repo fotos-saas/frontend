@@ -5,12 +5,13 @@ import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PsInputComponent } from '@shared/components/form';
 import { PartnerWebshopService, ShopProduct, PaperSize, PaperType, PricingUpdate } from '../../../services/partner-webshop.service';
 
 @Component({
   selector: 'app-webshop-products',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, DecimalPipe, LucideAngularModule, MatTooltipModule, PsInputComponent],
   templateUrl: './webshop-products.component.html',
   styleUrl: './webshop-products.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

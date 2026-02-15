@@ -16,11 +16,13 @@
     }
   </div>
 
-  <select class="filter-select" [value]="activeFilter()" (change)="onFilterChange($any($event.target).value)">
-    @for (f of filters; track f.value) {
-      <option [value]="f.value">{{ f.label }}</option>
-    }
-  </select>
+  <ps-select
+    size="sm"
+    emptyLabel="Összes"
+    [options]="filterSelectOptions"
+    [ngModel]="activeFilter()"
+    (ngModelChange)="onFilterChange($event)"
+  />
 
   <app-info-box storageKey="users-tab" title="Kik a felhasználók?">
     Azok a személyek, akik hozzáfértek a projekthez — megosztási linken, QR-kódon vagy jelszóval.

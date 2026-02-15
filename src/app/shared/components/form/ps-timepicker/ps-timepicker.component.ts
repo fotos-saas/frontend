@@ -7,7 +7,6 @@ import {
   computed,
   ElementRef,
   inject,
-  afterNextRender,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgClass } from '@angular/common';
@@ -17,7 +16,7 @@ import { PsFormFieldBase } from '../form-field-base';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
-const ITEM_HEIGHT = 36;
+const ITEM_HEIGHT = 42; // 40px item + 2px margin
 
 @Component({
   selector: 'ps-timepicker',
@@ -74,18 +73,6 @@ export class PsTimepickerComponent extends PsFormFieldBase<string> {
     return MINUTES.filter((_, i) => i % step === 0);
   });
 
-  private pendingScroll = false;
-
-  constructor() {
-    super();
-    afterNextRender(() => {
-      if (this.pendingScroll) {
-        this.pendingScroll = false;
-        this.scrollToSelected();
-      }
-    });
-  }
-
   writeValue(val: string): void {
     this.value.set(val ?? '');
   }
@@ -104,8 +91,7 @@ export class PsTimepickerComponent extends PsFormFieldBase<string> {
   open(): void {
     if (this.isDisabled()) return;
     this.isOpen.set(true);
-    this.pendingScroll = true;
-    // afterNextRender will handle scrolling
+    this.scrollToSelected();
   }
 
   close(): void {
@@ -157,8 +143,8 @@ export class PsTimepickerComponent extends PsFormFieldBase<string> {
     }
   }
 
-  /** Scroll the hour/minute columns to show selected values centered */
   private scrollToSelected(): void {
+    // Wait for DOM to render the panel
     requestAnimationFrame(() => {
       const panel = this.hostEl.nativeElement.querySelector('.ps-timepicker__panel');
       if (!panel) return;

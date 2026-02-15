@@ -1,7 +1,8 @@
 @use '../form-tokens' as *;
 @use '../form-field-base';
 
-$item-height: 36px;
+$item-size: 40px;
+$column-width: 64px;
 
 .ps-timepicker {
   position: relative;
@@ -98,44 +99,54 @@ $item-height: 36px;
     border-color: var(--ps-focus-border);
     box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
     background: var(--ps-field-bg-focus);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
   }
 
   // ──────────────────────────────────────
-  // Panel
+  // Panel — detached dropdown
   // ──────────────────────────────────────
   &__panel {
     position: absolute;
-    top: 100%;
-    left: -$ps-field-border-width;
-    right: -$ps-field-border-width;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
     z-index: $ps-dropdown-z;
     background: var(--ps-dropdown-bg);
     border: 1px solid var(--ps-dropdown-border);
-    border-top: none;
-    border-radius: 0 0 $ps-field-border-radius $ps-field-border-radius;
-    box-shadow: var(--ps-dropdown-shadow);
+    border-radius: 12px;
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 0;
+    width: auto;
+    min-width: 200px;
+    overflow: hidden;
     transform-origin: top center;
-    animation: psDropdownOpen 200ms $ps-spring-easing;
+    animation: psTimepickerOpen 250ms $ps-spring-easing;
   }
 
   // ──────────────────────────────────────
-  // Column headers
+  // Preview — large time display at top
   // ──────────────────────────────────────
-  &__column-headers {
+  &__preview {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 16px 10px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(37, 99, 235, 0.02) 100%);
     border-bottom: 1px solid var(--ps-dropdown-border);
   }
 
-  &__column-header {
-    flex: 1;
-    text-align: center;
-    padding: 8px 0;
-    font-size: $ps-hint-font-size;
-    font-weight: 600;
-    color: var(--ps-hint-color);
-    user-select: none;
+  &__preview-time {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ps-text-color);
+    letter-spacing: 0.02em;
+  }
+
+  &__preview-sep {
+    color: var(--ps-check-bg);
+    animation: psTimepickerBlink 1.2s step-end infinite;
   }
 
   // ──────────────────────────────────────
@@ -143,60 +154,68 @@ $item-height: 36px;
   // ──────────────────────────────────────
   &__columns {
     display: flex;
-    height: $item-height * 7; // 7 visible items
+    align-items: stretch;
+    padding: 8px 4px;
+  }
+
+  &__separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ps-hint-color);
+    flex-shrink: 0;
+    user-select: none;
   }
 
   &__column {
-    flex: 1;
+    flex: 0 0 $column-width;
+    height: $item-size * 5; // 5 visible items
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    padding: 4px;
 
-    // Divider between columns
-    &--hours {
-      border-right: 1px solid var(--ps-dropdown-border);
-    }
-
-    // Hide scrollbar but keep functionality
-    scrollbar-width: thin;
-    scrollbar-color: var(--ps-field-border) transparent;
+    // Minimal scrollbar
+    scrollbar-width: none;
 
     &::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: var(--ps-field-border);
-      border-radius: 2px;
+      width: 0;
+      display: none;
     }
   }
 
   // ──────────────────────────────────────
-  // Items (hour/minute buttons)
+  // Items — pill shaped buttons
   // ──────────────────────────────────────
   &__item {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: $item-height;
+    height: $item-size;
     border: none;
     background: transparent;
     color: var(--ps-text-color);
-    font-size: $ps-field-font-size;
+    font-size: 0.875rem;
     font-family: inherit;
     font-variant-numeric: tabular-nums;
     cursor: pointer;
+    border-radius: 8px;
+    margin-bottom: 2px;
     transition:
       background $ps-transition-duration $ps-transition-easing,
-      color $ps-transition-duration $ps-transition-easing;
+      color $ps-transition-duration $ps-transition-easing,
+      transform 100ms ease;
 
     &:hover:not(.ps-timepicker__item--selected) {
       background: var(--ps-option-hover-bg);
+    }
+
+    &:active:not(.ps-timepicker__item--selected) {
+      transform: scale(0.95);
     }
 
     &:focus-visible {
@@ -208,6 +227,7 @@ $item-height: 36px;
       background: var(--ps-check-bg);
       color: #ffffff;
       font-weight: 600;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
     }
   }
 
@@ -217,36 +237,52 @@ $item-height: 36px;
   &__footer {
     display: flex;
     justify-content: center;
-    padding: 8px;
+    padding: 8px 12px 10px;
     border-top: 1px solid var(--ps-dropdown-border);
   }
 
   &__now {
-    padding: 4px 16px;
-    border: none;
-    background: transparent;
-    color: var(--ps-option-selected-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    // Safari-kompatibilis gap alternatíva
+    padding: 6px 16px;
+    border: 1px solid var(--ps-check-bg);
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--ps-check-bg);
     font-size: $ps-hint-font-size;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 8px;
     transition:
       background $ps-transition-duration $ps-transition-easing,
-      color $ps-transition-duration $ps-transition-easing;
+      color $ps-transition-duration $ps-transition-easing,
+      transform 100ms ease;
+
+    lucide-icon {
+      margin-right: 6px;
+    }
 
     &:hover {
-      background: var(--ps-option-hover-bg);
+      background: var(--ps-check-bg);
+      color: #ffffff;
+    }
+
+    &:active {
+      transform: scale(0.97);
     }
 
     &:focus-visible {
       outline: 2px solid var(--ps-focus-border);
-      outline-offset: -2px;
+      outline-offset: 2px;
     }
   }
 }
 
-// Error state
+// ──────────────────────────────────────
+// Error / Success states
+// ──────────────────────────────────────
 .ps-field--error .ps-timepicker__trigger {
   border-color: var(--ps-error-border);
   background: var(--ps-error-bg);
@@ -263,6 +299,51 @@ $item-height: 36px;
   box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
 }
 
+// ──────────────────────────────────────
+// Animations
+// ──────────────────────────────────────
+@keyframes psTimepickerOpen {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes psTimepickerBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+// ──────────────────────────────────────
+// Dark mode
+// ──────────────────────────────────────
+.dark .ps-timepicker {
+  &__panel {
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.35),
+      0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  &__preview {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.04) 100%);
+  }
+
+  &__item--selected {
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  }
+
+  &__now {
+    background: rgba(37, 99, 235, 0.15);
+  }
+}
+
+// ──────────────────────────────────────
+// Reduced motion
+// ──────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   .ps-field--error .ps-timepicker__trigger {
     animation: none;
@@ -273,6 +354,10 @@ $item-height: 36px;
   }
 
   .ps-timepicker__panel {
+    animation: none;
+  }
+
+  .ps-timepicker__preview-sep {
     animation: none;
   }
 

@@ -53,10 +53,11 @@
 
     @if (isOpen()) {
       <div class="ps-timepicker__panel" role="dialog" aria-label="Időpont választó">
-        <!-- Column headers -->
-        <div class="ps-timepicker__column-headers">
-          <span class="ps-timepicker__column-header">Óra</span>
-          <span class="ps-timepicker__column-header">Perc</span>
+        <!-- Preview display -->
+        <div class="ps-timepicker__preview">
+          <span class="ps-timepicker__preview-time">
+            {{ selectedHour() || '--' }}<span class="ps-timepicker__preview-sep">:</span>{{ selectedMinute() || '--' }}
+          </span>
         </div>
 
         <!-- Two-column scroll area -->
@@ -74,6 +75,9 @@
               </button>
             }
           </div>
+
+          <!-- Separator -->
+          <div class="ps-timepicker__separator">:</div>
 
           <!-- Minutes column -->
           <div class="ps-timepicker__column ps-timepicker__column--minutes">
@@ -93,6 +97,7 @@
         <!-- Footer -->
         <div class="ps-timepicker__footer">
           <button type="button" class="ps-timepicker__now" (click)="selectNow()">
+            <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
             Most
           </button>
         </div>

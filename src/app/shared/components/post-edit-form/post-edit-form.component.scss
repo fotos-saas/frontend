@@ -1,36 +1,6 @@
 .post-edit-form {
   margin-top: 0.5rem;
 
-  &__textarea {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 0.9375rem;
-    font-family: inherit;
-    color: #374151;
-    line-height: 1.6;
-    background: #f9fafb;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.5rem;
-    resize: vertical;
-    outline: none;
-    transition: all 0.2s;
-
-    &::placeholder {
-      color: #9ca3af;
-    }
-
-    &:focus {
-      border-color: #3b82f6;
-      background: white;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
   &__media {
     margin-top: 1rem;
   }
@@ -129,7 +99,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .post-edit-form__textarea,
   .post-edit-form__btn {
     transition: none;
   }

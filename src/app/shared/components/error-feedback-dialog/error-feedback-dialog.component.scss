@@ -1,41 +1,9 @@
 // ErrorFeedbackDialog - only content-specific styles
 // Shell handled by DialogWrapperComponent
+// Form elemek → ps-textarea kezeli
 
 .feedback-section {
   margin-bottom: 1rem;
-}
-
-.feedback-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-.feedback-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 0.9375rem;
-  font-family: inherit;
-  color: #374151;
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.5rem;
-  outline: none;
-  resize: vertical;
-  min-height: 4.5rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-
-  &:focus {
-    border-color: #3b82f6;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-  }
 }
 
 .event-id-section {
@@ -128,7 +96,6 @@
 
 // A11y - reduced motion
 @media (prefers-reduced-motion: reduce) {
-  .feedback-input,
   .event-id-value,
   .btn {
     transition: none;

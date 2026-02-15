@@ -1,137 +1,33 @@
 // ScheduleReminderDialog - content-specific styles only
 // Shell handled by DialogWrapperComponent
+// Dátum mező → ps-datepicker kezeli
 
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
 
-.date-toggle {
+.date-save-row {
+  margin-top: 0.75rem;
+}
+
+.date-picker__save-btn {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.875rem 1rem;
-  background: #eff6ff;
-  border: 2px solid #bfdbfe;
-  border-radius: 0.75rem;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  background: $blue-500;
+  border: none;
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
 
-  &:hover {
-    background: #dbeafe;
-    border-color: #93c5fd;
+  &:hover:not(:disabled) {
+    background: $blue-600;
   }
 
-  &--open {
-    border-color: $blue-500;
-  }
-
-  &__inner {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-
-    lucide-icon {
-      color: $blue-500;
-    }
-  }
-
-  &__text {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-  }
-
-  &__arrow {
-    color: $blue-500;
-    transition: transform 0.2s;
-
-    &--open {
-      transform: rotate(180deg);
-    }
-  }
-}
-
-.date-picker {
-  margin-top: 0.75rem;
-  padding: 1rem;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  animation: slideDown 0.2s ease-out;
-
-  &__input-wrapper {
-    position: relative;
-    margin-bottom: 0.75rem;
-    cursor: pointer;
-  }
-
-  &__input {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
-    background: white;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    outline: none;
-    caret-color: transparent;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-
-    &:focus {
-      outline: none;
-    }
-
-    &::-webkit-datetime-edit {
-      color: transparent;
-      -webkit-text-fill-color: transparent;
-    }
-
-    &::-webkit-datetime-edit-fields-wrapper {
-      color: transparent;
-      -webkit-text-fill-color: transparent;
-    }
-
-    &::-webkit-calendar-picker-indicator {
-      cursor: pointer;
-      opacity: 0.6;
-      transition: opacity 0.2s;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
-
-  &__display {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1rem;
-    color: #374151;
-    pointer-events: none;
-  }
-
-  &__save-btn {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: white;
-    background: $blue-500;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover:not(:disabled) {
-      background: $blue-600;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
@@ -189,17 +85,6 @@ $blue-600: #2563eb;
   }
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 200px;
-  }
-}
-
 // Mobile responsive
 @media (max-width: 480px) {
   .snooze-buttons {
@@ -209,12 +94,8 @@ $blue-600: #2563eb;
 
 // Reduced motion
 @media (prefers-reduced-motion: reduce) {
-  .date-toggle,
-  .date-toggle__arrow,
-  .date-picker,
   .date-picker__save-btn,
   .snooze-btn {
     transition: none;
-    animation: none;
   }
 }

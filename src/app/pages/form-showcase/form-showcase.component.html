@@ -151,6 +151,21 @@
         direction="horizontal"
       />
     </div>
+    <div class="showcase__grid" style="margin-top: 24px">
+      <ps-radio-group
+        label="Kártyák (vertikális)"
+        [options]="radioOptions"
+        [(ngModel)]="radioValue"
+        variant="cards"
+      />
+      <ps-radio-group
+        label="Kártyák (horizontális)"
+        [options]="radioOptions"
+        [(ngModel)]="radioValue"
+        variant="cards"
+        direction="horizontal"
+      />
+    </div>
   </section>
 
   <!-- 7. Select (dropdown) -->

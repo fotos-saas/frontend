@@ -120,12 +120,82 @@
   }
 }
 
+// ============================================================================
+// CARDS VARIANT
+// ============================================================================
+
+.ps-radio--card {
+  padding: 10px 14px;
+  border: $ps-field-border-width solid var(--ps-field-border);
+  border-radius: $ps-field-border-radius;
+  background: var(--ps-field-bg);
+  transition:
+    border-color $ps-transition-duration $ps-transition-easing,
+    background-color $ps-transition-duration $ps-transition-easing;
+
+  &:hover:not(.ps-radio--disabled) {
+    border-color: var(--ps-field-border-hover);
+    background: var(--ps-option-hover-bg);
+  }
+
+  &.ps-radio--selected {
+    border-color: var(--ps-check-bg);
+    background: var(--ps-option-selected-bg);
+  }
+
+  // Vertikális cards: összefüggő lista
+  .ps-radio-group__options--cards:not(.ps-radio-group__options--horizontal) & {
+    border-radius: 0;
+    border-bottom-width: 0;
+
+    &:first-child {
+      border-radius: $ps-field-border-radius $ps-field-border-radius 0 0;
+    }
+
+    &:last-child {
+      border-radius: 0 0 $ps-field-border-radius $ps-field-border-radius;
+      border-bottom-width: $ps-field-border-width;
+    }
+
+    &:only-child {
+      border-radius: $ps-field-border-radius;
+    }
+
+    &.ps-radio--selected {
+      position: relative;
+      z-index: 1;
+      border-bottom-width: $ps-field-border-width;
+    }
+  }
+
+  // Horizontális cards: külön kártyák margin-nal
+  .ps-radio-group__options--horizontal & {
+    margin: 4px;
+  }
+}
+
+// Horizontális + cards: flex-wrap
+.ps-radio-group__options--horizontal.ps-radio-group__options--cards {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: -4px;
+}
+
+// Error states
 .ps-radio-group--error .ps-radio__circle {
+  border-color: var(--ps-error-border);
+}
+
+.ps-radio-group--error .ps-radio--card {
   border-color: var(--ps-error-border);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ps-radio__dot {
     animation: none;
+  }
+
+  .ps-radio--card {
+    transition: none;
   }
 }

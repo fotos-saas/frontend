@@ -2,6 +2,7 @@
   class="ps-radio-group"
   [ngClass]="{
     'ps-radio-group--horizontal': direction() === 'horizontal',
+    'ps-radio-group--cards': variant() === 'cards',
     'ps-radio-group--error': computedState() === 'error',
     'ps-radio-group--disabled': isDisabled()
   }"
@@ -15,13 +16,17 @@
     </legend>
   }
 
-  <div class="ps-radio-group__options" [ngClass]="{ 'ps-radio-group__options--horizontal': direction() === 'horizontal' }">
+  <div class="ps-radio-group__options" [ngClass]="{
+    'ps-radio-group__options--horizontal': direction() === 'horizontal',
+    'ps-radio-group__options--cards': variant() === 'cards'
+  }">
     @for (option of options(); track option.value; let i = $index) {
       <label
         class="ps-radio"
         [ngClass]="{
           'ps-radio--selected': isSelected(option),
-          'ps-radio--disabled': option.disabled || isDisabled()
+          'ps-radio--disabled': option.disabled || isDisabled(),
+          'ps-radio--card': variant() === 'cards'
         }"
       >
         <input

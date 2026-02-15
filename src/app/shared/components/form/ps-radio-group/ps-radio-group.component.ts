@@ -28,6 +28,7 @@ import { PsRadioOption } from '../form.types';
 export class PsRadioGroupComponent extends PsFormFieldBase<string | number> {
   readonly options = input.required<PsRadioOption[]>();
   readonly direction = input<'horizontal' | 'vertical'>('vertical');
+  readonly variant = input<'list' | 'cards'>('list');
 
   readonly value = signal<string | number>('');
 

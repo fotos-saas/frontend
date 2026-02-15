@@ -3,8 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../../../../shared/utils/dialog.util';
 import { PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent, PsDatepickerComponent } from '@shared/components/form';
+import { DialogWrapperComponent } from '../../../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { InvoiceService } from '../../../../../services/invoice.service';
 import {
@@ -26,7 +26,7 @@ interface ItemRow {
 @Component({
   selector: 'app-invoice-create-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent, PsDatepickerComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsToggleComponent, PsDatepickerComponent, DialogWrapperComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-create-dialog.component.html',
   styleUrl: './invoice-create-dialog.component.scss',
@@ -84,8 +84,6 @@ export class InvoiceCreateDialogComponent {
     const vat = Math.round(net * (this.vatPercentage / 100));
     return { net, vat, gross: net + vat };
   });
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   addItem(): void {
     this.items.update(items => [...items, { name: '', quantity: 1, unitPrice: 0, unit: 'db', description: '' }]);

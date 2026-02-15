@@ -4,10 +4,10 @@ import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, of } from 'rxjs';
 import { PartnerService, ContactListItem, ProjectAutocompleteItem } from '../../services/partner.service';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { formatHungarianPhone, validatePhone } from '../../../../shared/utils/phone-formatter.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { PsInputComponent, PsTextareaComponent } from '@shared/components/form';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Contact Edit Modal - Kapcsolattartó létrehozása/szerkesztése.
@@ -16,7 +16,7 @@ import { PsInputComponent, PsTextareaComponent } from '@shared/components/form';
 @Component({
   selector: 'app-contact-edit-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsTextareaComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsTextareaComponent, DialogWrapperComponent],
   templateUrl: './contact-edit-modal.component.html',
   styleUrl: './contact-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -51,8 +51,6 @@ export class ContactEditModalComponent implements OnInit {
   loadingProjects = signal(false);
 
   private searchSubject = new Subject<string>();
-
-  backdropHandler = createBackdropHandler(() => this.close.emit());
 
   ngOnInit(): void {
     // Populate form if editing

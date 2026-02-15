@@ -14,8 +14,8 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PasswordStrengthComponent } from '../../../../shared/components/password-strength/password-strength.component';
 import { PsInputComponent } from '@shared/components/form';
-import { createBackdropHandler } from '../../../../shared/utils/dialog.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ClientRegisterFormService } from './client-register-form.service';
 
 /**
@@ -38,7 +38,7 @@ export type ClientRegisterResult =
 @Component({
   selector: 'app-client-register-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent, PsInputComponent],
+  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent, PsInputComponent, DialogWrapperComponent],
   templateUrl: './client-register-dialog.component.html',
   styleUrl: './client-register-dialog.component.scss',
   providers: [ClientRegisterFormService],
@@ -64,9 +64,6 @@ export class ClientRegisterDialogComponent implements OnInit {
   /** ViewChild references */
   readonly emailInput = viewChild<ElementRef<HTMLInputElement>>('emailInput');
   readonly passwordStrength = viewChild(PasswordStrengthComponent);
-
-  /** Backdrop handler - prevents close when selecting text */
-  backdropHandler = createBackdropHandler(() => this.onCancel());
 
   /** Delegált state a service-ből */
   readonly isSubmitting = this.formService.isSubmitting;

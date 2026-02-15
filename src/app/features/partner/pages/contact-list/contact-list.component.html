@@ -220,9 +220,16 @@
 
 <!-- Import Result Dialog -->
 @if (showImportResult() && importResult()) {
-  <div class="dialog-backdrop" (click)="closeImportResult()">
-    <div class="dialog-panel" (click)="$event.stopPropagation()">
-      <h3 class="dialog-title">Importálás eredménye</h3>
+  <app-dialog-wrapper
+    variant="info"
+    headerStyle="flat"
+    theme="blue"
+    [icon]="ICONS.FILE_CHECK"
+    title="Importálás eredménye"
+    size="sm"
+    (closeEvent)="closeImportResult()"
+  >
+    <ng-container dialogBody>
       <div class="import-results">
         @if (importResult()!.imported > 0) {
           <div class="result-row result-success">
@@ -253,9 +260,10 @@
           </details>
         }
       </div>
-      <div class="dialog-actions">
-        <button type="button" class="btn-primary" (click)="closeImportResult()">Bezárás</button>
-      </div>
-    </div>
-  </div>
+    </ng-container>
+
+    <ng-container dialogFooter>
+      <button type="button" class="btn btn--primary" (click)="closeImportResult()">Bezárás</button>
+    </ng-container>
+  </app-dialog-wrapper>
 }

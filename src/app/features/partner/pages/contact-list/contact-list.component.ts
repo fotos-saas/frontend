@@ -13,6 +13,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
 import { saveFile } from '../../../../shared/utils/file.util';
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 /**
  * Partner Contact List - Kapcsolattartók listája a partner felületen.
@@ -30,6 +31,7 @@ import { ListPaginationComponent } from '../../../../shared/components/list-pagi
     UpgradeDialogComponent,
     SmartFilterBarComponent,
     ListPaginationComponent,
+    DialogWrapperComponent,
   ],
   templateUrl: './contact-list.component.html',
   styleUrl: './contact-list.component.scss',

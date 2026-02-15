@@ -1,176 +1,176 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.FILE_TEXT"
+  title="Új számla"
+  size="lg"
+  [closable]="!saving()"
+  [isSubmitting]="saving()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="submit()"
 >
-  <div class="dialog-panel dialog-panel--lg">
-    <div class="dialog-header">
-      <h2>Új számla</h2>
-      <button class="close-btn" (click)="close.emit()">
-        <lucide-icon [name]="ICONS.X" [size]="18" />
-      </button>
+  <ng-container dialogBody>
+    <!-- Típus -->
+    <ps-select
+      label="Számla típus"
+      [options]="typeOptions"
+      [ngModel]="type()"
+      (ngModelChange)="type.set($event)" />
+
+    <!-- Vevő adatok -->
+    <div class="form-section">
+      <h3 class="form-section-title">Vevő adatok</h3>
+      <div class="form-row">
+        <ps-input
+          label="Név"
+          [required]="true"
+          placeholder="Vevő neve"
+          [ngModel]="customerName()"
+          (ngModelChange)="customerName.set($event)" />
+        <ps-input
+          label="Email"
+          type="email"
+          placeholder="vevo@email.hu"
+          [ngModel]="customerEmail()"
+          (ngModelChange)="customerEmail.set($event)" />
+      </div>
+      <div class="form-row">
+        <ps-input
+          label="Adószám"
+          placeholder="12345678-1-42"
+          [ngModel]="customerTaxNumber()"
+          (ngModelChange)="customerTaxNumber.set($event)" />
+        <ps-input
+          label="Cím"
+          placeholder="1234 Budapest, Példa u. 1."
+          [ngModel]="customerAddress()"
+          (ngModelChange)="customerAddress.set($event)" />
+      </div>
     </div>
 
-    <div class="dialog-body">
-      <!-- Típus -->
-      <ps-select
-        label="Számla típus"
-        [options]="typeOptions"
-        [ngModel]="type()"
-        (ngModelChange)="type.set($event)" />
+    <!-- Dátumok -->
+    <div class="form-section">
+      <h3 class="form-section-title">Dátumok</h3>
+      <div class="form-row form-row--three">
+        <ps-datepicker
+          label="Kiállítás"
+          [ngModel]="issueDate()"
+          (ngModelChange)="issueDate.set($event)" />
+        <ps-datepicker
+          label="Teljesítés"
+          [ngModel]="fulfillmentDate()"
+          (ngModelChange)="fulfillmentDate.set($event)" />
+        <ps-datepicker
+          label="Fizetési határidő"
+          [ngModel]="dueDate()"
+          (ngModelChange)="dueDate.set($event)" />
+      </div>
+    </div>
 
-      <!-- Vevő adatok -->
-      <div class="form-section">
-        <h3 class="form-section-title">Vevő adatok</h3>
-        <div class="form-row">
-          <ps-input
-            label="Név"
-            [required]="true"
-            placeholder="Vevő neve"
-            [ngModel]="customerName()"
-            (ngModelChange)="customerName.set($event)" />
-          <ps-input
-            label="Email"
-            type="email"
-            placeholder="vevo@email.hu"
-            [ngModel]="customerEmail()"
-            (ngModelChange)="customerEmail.set($event)" />
-        </div>
-        <div class="form-row">
-          <ps-input
-            label="Adószám"
-            placeholder="12345678-1-42"
-            [ngModel]="customerTaxNumber()"
-            (ngModelChange)="customerTaxNumber.set($event)" />
-          <ps-input
-            label="Cím"
-            placeholder="1234 Budapest, Példa u. 1."
-            [ngModel]="customerAddress()"
-            (ngModelChange)="customerAddress.set($event)" />
-        </div>
+    <!-- Tételek -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <h3 class="form-section-title">Tételek</h3>
+        <button class="add-item-btn" (click)="addItem()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+          Tétel hozzáadása
+        </button>
       </div>
 
-      <!-- Dátumok -->
-      <div class="form-section">
-        <h3 class="form-section-title">Dátumok</h3>
-        <div class="form-row form-row--three">
-          <ps-datepicker
-            label="Kiállítás"
-            [ngModel]="issueDate()"
-            (ngModelChange)="issueDate.set($event)" />
-          <ps-datepicker
-            label="Teljesítés"
-            [ngModel]="fulfillmentDate()"
-            (ngModelChange)="fulfillmentDate.set($event)" />
-          <ps-datepicker
-            label="Fizetési határidő"
-            [ngModel]="dueDate()"
-            (ngModelChange)="dueDate.set($event)" />
-        </div>
-      </div>
-
-      <!-- Tételek -->
-      <div class="form-section">
-        <div class="form-section-header">
-          <h3 class="form-section-title">Tételek</h3>
-          <button class="add-item-btn" (click)="addItem()">
-            <lucide-icon [name]="ICONS.PLUS" [size]="14" />
-            Tétel hozzáadása
-          </button>
-        </div>
-
-        @for (item of items(); track $index; let i = $index) {
-          <div class="item-row">
-            <div class="item-main">
-              <ps-input
-                class="item-name"
-                size="sm"
-                placeholder="Megnevezés *"
-                [ngModel]="item.name"
-                (ngModelChange)="updateItem(i, 'name', $event)"
-                [attr.name]="'itemName' + i"
-              />
-              <ps-input
-                class="item-qty"
-                type="number"
-                size="sm"
-                min="0.01"
-                step="1"
-                [ngModel]="item.quantity"
-                (ngModelChange)="updateItem(i, 'quantity', +$event)"
-                [attr.name]="'itemQty' + i"
-              />
-              <ps-select
-                class="item-unit"
-                size="sm"
-                [options]="unitOptions"
-                [ngModel]="item.unit"
-                (ngModelChange)="updateItem(i, 'unit', $event)"
-                [attr.name]="'itemUnit' + i"
-              />
-              <ps-input
-                class="item-price"
-                type="number"
-                size="sm"
-                min="0"
-                step="100"
-                placeholder="Egységár"
-                [ngModel]="item.unitPrice"
-                (ngModelChange)="updateItem(i, 'unitPrice', +$event)"
-                [attr.name]="'itemPrice' + i"
-              />
-              <span class="item-total">{{ formatAmount(item.quantity * item.unitPrice) }}</span>
-              @if (items().length > 1) {
-                <button class="remove-item-btn" (click)="removeItem(i)">
-                  <lucide-icon [name]="ICONS.DELETE" [size]="14" />
-                </button>
-              }
-            </div>
+      @for (item of items(); track $index; let i = $index) {
+        <div class="item-row">
+          <div class="item-main">
+            <ps-input
+              class="item-name"
+              size="sm"
+              placeholder="Megnevezés *"
+              [ngModel]="item.name"
+              (ngModelChange)="updateItem(i, 'name', $event)"
+              [attr.name]="'itemName' + i"
+            />
+            <ps-input
+              class="item-qty"
+              type="number"
+              size="sm"
+              min="0.01"
+              step="1"
+              [ngModel]="item.quantity"
+              (ngModelChange)="updateItem(i, 'quantity', +$event)"
+              [attr.name]="'itemQty' + i"
+            />
+            <ps-select
+              class="item-unit"
+              size="sm"
+              [options]="unitOptions"
+              [ngModel]="item.unit"
+              (ngModelChange)="updateItem(i, 'unit', $event)"
+              [attr.name]="'itemUnit' + i"
+            />
+            <ps-input
+              class="item-price"
+              type="number"
+              size="sm"
+              min="0"
+              step="100"
+              placeholder="Egységár"
+              [ngModel]="item.unitPrice"
+              (ngModelChange)="updateItem(i, 'unitPrice', +$event)"
+              [attr.name]="'itemPrice' + i"
+            />
+            <span class="item-total">{{ formatAmount(item.quantity * item.unitPrice) }}</span>
+            @if (items().length > 1) {
+              <button class="remove-item-btn" (click)="removeItem(i)">
+                <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              </button>
+            }
           </div>
-        }
+        </div>
+      }
+    </div>
+
+    <!-- Összesítő -->
+    <div class="totals">
+      <div class="total-row">
+        <span>Nettó:</span>
+        <span class="total-amount">{{ formatAmount(totals().net) }}</span>
       </div>
-
-      <!-- Összesítő -->
-      <div class="totals">
-        <div class="total-row">
-          <span>Nettó:</span>
-          <span class="total-amount">{{ formatAmount(totals().net) }}</span>
-        </div>
-        <div class="total-row">
-          <span>ÁFA ({{ vatPercentage }}%):</span>
-          <span class="total-amount">{{ formatAmount(totals().vat) }}</span>
-        </div>
-        <div class="total-row total-row--gross">
-          <span>Bruttó:</span>
-          <span class="total-amount">{{ formatAmount(totals().gross) }}</span>
-        </div>
+      <div class="total-row">
+        <span>ÁFA ({{ vatPercentage }}%):</span>
+        <span class="total-amount">{{ formatAmount(totals().vat) }}</span>
       </div>
-
-      <!-- Megjegyzés -->
-      <ps-textarea
-        label="Megjegyzés"
-        [rows]="2"
-        placeholder="Opcionális megjegyzés..."
-        [ngModel]="comment()"
-        (ngModelChange)="comment.set($event)" />
-
-      <!-- Azonnali küldés -->
-      <div class="sync-toggle">
-        <ps-toggle
-          [label]="syncImmediately() ? 'Azonnali kiállítás' : 'Piszkozatként mentés'"
-          [ngModel]="syncImmediately()"
-          (ngModelChange)="syncImmediately.set($event)" />
+      <div class="total-row total-row--gross">
+        <span>Bruttó:</span>
+        <span class="total-amount">{{ formatAmount(totals().gross) }}</span>
       </div>
     </div>
 
-    <div class="dialog-footer">
-      <button class="cancel-btn" (click)="close.emit()">Mégse</button>
-      <button class="submit-btn" (click)="submit()" [disabled]="saving()">
-        @if (saving()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="animate-spin" />
-        }
-        {{ syncImmediately() ? 'Kiállítás' : 'Mentés' }}
-      </button>
+    <!-- Megjegyzés -->
+    <ps-textarea
+      label="Megjegyzés"
+      [rows]="2"
+      placeholder="Opcionális megjegyzés..."
+      [ngModel]="comment()"
+      (ngModelChange)="comment.set($event)" />
+
+    <!-- Azonnali küldés -->
+    <div class="sync-toggle">
+      <ps-toggle
+        [label]="syncImmediately() ? 'Azonnali kiállítás' : 'Piszkozatként mentés'"
+        [ngModel]="syncImmediately()"
+        (ngModelChange)="syncImmediately.set($event)" />
     </div>
-  </div>
-</div>
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button type="button" class="btn btn--outline" (click)="close.emit()" [disabled]="saving()">
+      Mégse
+    </button>
+    <button type="button" class="btn btn--primary" (click)="submit()" [disabled]="saving()">
+      @if (saving()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      {{ syncImmediately() ? 'Kiállítás' : 'Mentés' }}
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

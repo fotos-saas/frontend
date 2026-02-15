@@ -1,126 +1,100 @@
-<div
-  class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
-  (keydown.escape)="onCancel()"
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="hero"
+  theme="blue"
+  [icon]="ICONS.USER_PLUS"
+  title="Regisztráció"
+  size="md"
+  [closable]="!isSubmitting()"
+  [isSubmitting]="isSubmitting()"
+  [errorMessage]="apiError()"
+  (closeEvent)="onCancel()"
+  (submitEvent)="onSubmit()"
 >
-  <div
-    class="dialog-panel dialog-panel--md"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="register-dialog-title"
-    (click)="$event.stopPropagation()"
-  >
-    <!-- Header -->
-    <div class="dialog-header">
-      <h2 id="register-dialog-title" class="dialog-title">
-        <lucide-icon [name]="ICONS.USER_PLUS" [size]="20" class="dialog-icon"></lucide-icon>
-        Regisztráció
-      </h2>
-      <button
-        type="button"
-        class="dialog-close"
-        (click)="onCancel()"
-        aria-label="Bezárás"
-      >
-        <lucide-icon [name]="ICONS.X" [size]="20"></lucide-icon>
-      </button>
+  <ng-container dialogBody>
+    <!-- Info box -->
+    <div class="info-box">
+      <lucide-icon [name]="ICONS.INFO" [size]="18" class="info-box__icon"></lucide-icon>
+      <div class="info-box__content">
+        <p class="info-box__title">Mire jó a regisztráció?</p>
+        <ul class="info-box__list">
+          @if (hasDownloadableAlbum()) {
+            <li>Letöltheted a kiválasztott képeidet</li>
+          }
+          <li>Email értesítéseket kapsz az albumokról</li>
+          <li>Visszanézheted korábbi albumjaidat</li>
+        </ul>
+        <p class="info-box__warning">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
+          A regisztráció után a belépési kód megszűnik, és csak email/jelszóval léphetsz be.
+        </p>
+      </div>
     </div>
 
-    <!-- Content -->
-    <form (ngSubmit)="onSubmit()" class="dialog-content">
-      <!-- Info box -->
-      <div class="info-box">
-        <lucide-icon [name]="ICONS.INFO" [size]="18" class="info-box__icon"></lucide-icon>
-        <div class="info-box__content">
-          <p class="info-box__title">Mire jó a regisztráció?</p>
-          <ul class="info-box__list">
-            @if (hasDownloadableAlbum()) {
-              <li>Letöltheted a kiválasztott képeidet</li>
-            }
-            <li>Email értesítéseket kapsz az albumokról</li>
-            <li>Visszanézheted korábbi albumjaidat</li>
-          </ul>
-          <p class="info-box__warning">
-            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
-            A regisztráció után a belépési kód megszűnik, és csak email/jelszóval léphetsz be.
-          </p>
-        </div>
-      </div>
+    <!-- Email -->
+    <ps-input
+      type="email"
+      label="Email cím"
+      [(ngModel)]="email"
+      (ngModelChange)="onInputChange()"
+      placeholder="pelda@email.hu"
+      autocomplete="email"
+      [required]="true"
+      [errorMessage]="errors['email'] || ''"
+    />
 
-      <!-- Email -->
-      <ps-input
-        type="email"
-        label="Email cím"
-        [(ngModel)]="email"
-        (ngModelChange)="onInputChange()"
-        placeholder="pelda@email.hu"
-        autocomplete="email"
-        [required]="true"
-        [errorMessage]="errors['email'] || ''"
-      />
-
-      <!-- Password -->
-      <div class="form-field">
-        <ps-input
-          type="password"
-          label="Jelszó"
-          [(ngModel)]="password"
-          (ngModelChange)="onInputChange()"
-          placeholder="Legalább 8 karakter"
-          autocomplete="new-password"
-          [required]="true"
-          [errorMessage]="errors['password'] || ''"
-        />
-
-        <!-- Password strength -->
-        <app-password-strength [password]="password" [compact]="true" />
-      </div>
-
-      <!-- Password confirmation -->
+    <!-- Password -->
+    <div class="form-field">
       <ps-input
         type="password"
-        label="Jelszó megerősítése"
-        [(ngModel)]="passwordConfirmation"
+        label="Jelszó"
+        [(ngModel)]="password"
         (ngModelChange)="onInputChange()"
-        placeholder="Írd be újra a jelszót"
+        placeholder="Legalább 8 karakter"
         autocomplete="new-password"
         [required]="true"
-        [errorMessage]="errors['passwordConfirmation'] || ''"
+        [errorMessage]="errors['password'] || ''"
       />
 
-      <!-- API error -->
-      @if (apiError()) {
-        <div class="api-error">
-          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16"></lucide-icon>
-          {{ apiError() }}
-        </div>
-      }
+      <!-- Password strength -->
+      <app-password-strength [password]="password" [compact]="true" />
+    </div>
 
-      <!-- Footer -->
-      <div class="dialog-footer">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          (click)="onCancel()"
-          [disabled]="isSubmitting()"
-        >
-          Mégse
-        </button>
-        <button
-          type="submit"
-          class="btn btn-primary"
-          [disabled]="!isFormValid() || isSubmitting()"
-        >
-          @if (isSubmitting()) {
-            <span class="spinner"></span>
-            Regisztráció...
-          } @else {
-            <lucide-icon [name]="ICONS.CHECK" [size]="16"></lucide-icon>
-            Regisztráció
-          }
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+    <!-- Password confirmation -->
+    <ps-input
+      type="password"
+      label="Jelszó megerősítése"
+      [(ngModel)]="passwordConfirmation"
+      (ngModelChange)="onInputChange()"
+      placeholder="Írd be újra a jelszót"
+      autocomplete="new-password"
+      [required]="true"
+      [errorMessage]="errors['passwordConfirmation'] || ''"
+    />
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button
+      type="button"
+      class="btn btn--outline"
+      (click)="onCancel()"
+      [disabled]="isSubmitting()"
+    >
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="onSubmit()"
+      [disabled]="!isFormValid() || isSubmitting()"
+    >
+      @if (isSubmitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Regisztráció...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        Regisztráció
+      }
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

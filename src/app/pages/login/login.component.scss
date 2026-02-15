@@ -36,15 +36,7 @@
   }
 }
 
-// Input focus glow
-@keyframes inputGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
-  }
-}
+// Input focus glow (removed infinite animation - caused flicker)
 
 // Tab content fade
 @keyframes tabContentFade {
@@ -142,7 +134,7 @@
     transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s, transform 0.15s;
 
     &:focus {
-      animation: inputGlow 1.5s ease-in-out infinite;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
       transform: scale(1.01);
     }
 
@@ -235,7 +227,6 @@
       transition: none;
 
       &:focus {
-        animation: none;
         transform: none;
       }
 

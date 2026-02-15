@@ -59,57 +59,13 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
     // KEYFRAMES
     // ============================================
 
-    // Dot grid átlós mozgás (30s - nagyon lassú, subtle)
-    @keyframes dotFlow {
-      0% {
-        background-position: 0 0;
-      }
-      100% {
-        background-position: 60px 60px;
-      }
-    }
-
-    // Mesh gradient mozgás (15s - lassú, elegáns)
+    // Mesh gradient mozgás (60s - nagyon lassú, nem terheli a GPU-t)
     @keyframes meshMove {
       0%, 100% {
         background-position: 0% 50%;
       }
       50% {
         background-position: 100% 50%;
-      }
-    }
-
-    // Lebegő körök - aszinkron időzítések
-    @keyframes float1 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1);
-      }
-      33% {
-        transform: translate(30px, -50px) scale(1.1);
-      }
-      66% {
-        transform: translate(-20px, 30px) scale(0.9);
-      }
-    }
-
-    @keyframes float2 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1);
-      }
-      50% {
-        transform: translate(-40px, -30px) scale(1.05);
-      }
-    }
-
-    @keyframes float3 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1);
-      }
-      25% {
-        transform: translate(20px, 40px) scale(0.95);
-      }
-      75% {
-        transform: translate(-30px, -20px) scale(1.08);
       }
     }
 
@@ -130,7 +86,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
         background: var(--bg-base);
       }
 
-      // Animated dot grid pattern
+      // Static dot grid pattern (no animation - prevents flickering)
       &__dots {
         position: absolute;
         inset: 0;
@@ -143,18 +99,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
           transparent 1.5px
         );
         background-size: 30px 30px;
-
-        // Átlós mozgás animáció
-        animation: dotFlow 30s linear infinite;
-
-        // GPU acceleration
-        will-change: background-position;
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        transform: translateZ(0);
       }
 
-      // Base mesh gradient
+      // Base mesh gradient (slowed down to 60s to avoid flicker)
       &__gradient {
         position: absolute;
         inset: -50%;
@@ -169,25 +116,17 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
           var(--aurora-1) 100%
         );
         background-size: 400% 400%;
-        animation: meshMove 15s ease-in-out infinite;
+        animation: meshMove 60s ease-in-out infinite;
         opacity: 0.15;
-        will-change: background-position;
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        transform: translateZ(0);
       }
 
-      // Floating orbs
+      // Static floating orbs (no animation - blur(80px) + animation = Safari flicker)
       &__orb {
         position: absolute;
         border-radius: 50%;
-        // Safari-safe blur: -webkit-filter + filter
         -webkit-filter: blur(80px);
         filter: blur(80px);
         opacity: 0.5;
-        will-change: transform;
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
 
         &--1 {
           width: 400px;
@@ -195,7 +134,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
           top: -100px;
           left: -100px;
           background: var(--aurora-1);
-          animation: float1 20s ease-in-out infinite;
         }
 
         &--2 {
@@ -204,7 +142,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
           bottom: -50px;
           right: -100px;
           background: var(--aurora-2);
-          animation: float2 25s ease-in-out infinite;
         }
 
         &--3 {
@@ -213,7 +150,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
           top: 50%;
           left: 60%;
           background: var(--aurora-3);
-          animation: float3 22s ease-in-out infinite;
         }
       }
 
@@ -245,17 +181,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
     // ============================================
     @media (prefers-reduced-motion: reduce) {
       .auth-layout {
-        &__dots {
-          animation: none;
-        }
-
         &__gradient {
           animation: none;
           background-position: 50% 50%;
-        }
-
-        &__orb {
-          animation: none;
         }
       }
     }
@@ -267,24 +195,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
       .auth-layout {
         &__content {
           padding-top: 2rem;
-        }
-
-        // Smaller orbs on mobile for performance
-        &__orb {
-          &--1 {
-            width: 250px;
-            height: 250px;
-          }
-
-          &--2 {
-            width: 200px;
-            height: 200px;
-          }
-
-          &--3 {
-            width: 180px;
-            height: 180px;
-          }
         }
       }
     }

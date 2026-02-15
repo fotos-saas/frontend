@@ -239,22 +239,25 @@
 .ps-upload__clear-all {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border: none;
-  background: transparent;
-  color: var(--ps-hint-color);
-  font-size: 0.75rem;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.06);
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
   border-radius: 6px;
   align-self: flex-start;
   transition:
     color $ps-transition-duration $ps-transition-easing,
-    background-color $ps-transition-duration $ps-transition-easing;
+    background-color $ps-transition-duration $ps-transition-easing,
+    border-color $ps-transition-duration $ps-transition-easing;
 
   &:hover:not(:disabled) {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.06);
+    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.4);
   }
 
   &:disabled {

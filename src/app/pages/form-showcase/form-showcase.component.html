@@ -480,6 +480,21 @@
     </div>
   </section>
 
+  <!-- 15. Szűrő sáv (További + Reset) -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Szűrő sáv (További + Reset)</h2>
+    <p class="showcase__description">
+      Az első 2 szűrő inline látható, a többi a "További" dropdown-ban.
+      Ha bármelyik szűrő aktív, megjelenik az × (reset) gomb.
+    </p>
+    <app-expandable-filters
+      [filters]="filterConfigs"
+      [values]="filterValues()"
+      [visibleCount]="2"
+      (filterChange)="onFilterChange($event)"
+    />
+  </section>
+
   <!-- 14. Rich Text Editor -->
   <section class="showcase__section">
     <h2 class="showcase__section-title">Rich Text Editor</h2>

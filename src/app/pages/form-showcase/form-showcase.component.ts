@@ -23,6 +23,8 @@ import {
   PsRadioOption,
   PsHelpItem,
 } from '@shared/components/form';
+import { ExpandableFiltersComponent } from '@shared/components/expandable-filters/expandable-filters.component';
+import { FilterConfig, FilterChangeEvent } from '@shared/components/expandable-filters/expandable-filters.model';
 
 @Component({
   selector: 'app-form-showcase',
@@ -46,6 +48,7 @@ import {
     PsDaterangeComponent,
     PsFileUploadComponent,
     PsCodeInputComponent,
+    ExpandableFiltersComponent,
   ],
   templateUrl: './form-showcase.component.html',
   styleUrl: './form-showcase.component.scss',
@@ -144,6 +147,45 @@ export class FormShowcaseComponent {
   uploadCompactFiles = signal<File[]>([]);
   uploadSingleFile = signal<File[]>([]);
   uploadErrorMsg = signal('');
+
+  // Expandable Filters demó
+  filterConfigs: FilterConfig[] = [
+    {
+      id: 'year', label: 'Év',
+      options: [
+        { value: '2026', label: '2026' },
+        { value: '2025', label: '2025' },
+        { value: '2024', label: '2024' },
+      ],
+    },
+    {
+      id: 'status', label: 'Státusz',
+      options: [
+        { value: 'active', label: 'Aktív' },
+        { value: 'draft', label: 'Draft' },
+        { value: 'archived', label: 'Archivált' },
+      ],
+    },
+    {
+      id: 'draft_photos', label: 'Draft képek?',
+      options: [
+        { value: 'yes', label: 'Igen' },
+        { value: 'no', label: 'Nem' },
+      ],
+    },
+    {
+      id: 'notified', label: 'Tudnak róla?',
+      options: [
+        { value: 'yes', label: 'Igen' },
+        { value: 'no', label: 'Nem' },
+      ],
+    },
+  ];
+  filterValues = signal<Record<string, string>>({ year: '2026' });
+
+  onFilterChange(event: FilterChangeEvent): void {
+    this.filterValues.update(v => ({ ...v, [event.id]: event.value }));
+  }
 
   // Help items demó
   searchHelpItems: PsHelpItem[] = [

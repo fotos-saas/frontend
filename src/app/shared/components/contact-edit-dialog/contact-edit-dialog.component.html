@@ -9,66 +9,37 @@
   (closeEvent)="onClose()"
 >
   <ng-container dialogBody>
-    <!-- Name field -->
-    <div class="field">
-      <label class="field__label" for="contact-name">
-        Név <span class="field__required">*</span>
-      </label>
-      <input
-        type="text"
-        id="contact-name"
-        class="field__input"
-        [class.field__input--error]="errors.name"
-        [(ngModel)]="formData.name"
-        (ngModelChange)="onInputChange()"
-        placeholder="Kovács János"
-        [disabled]="isSaving()"
-      />
-      @if (errors.name) {
-        <span class="field__error">{{ errors.name }}</span>
-      }
-    </div>
+    <ps-input
+      label="Név"
+      [required]="true"
+      placeholder="Kovács János"
+      [(ngModel)]="formData.name"
+      (ngModelChange)="onInputChange()"
+      [disabled]="isSaving()"
+      [errorMessage]="errors.name ?? ''"
+    />
 
-    <!-- Email field -->
-    <div class="field">
-      <label class="field__label" for="contact-email">
-        Email <span class="field__required">*</span>
-      </label>
-      <input
-        type="email"
-        id="contact-email"
-        class="field__input"
-        [class.field__input--error]="errors.email"
-        [(ngModel)]="formData.email"
-        (ngModelChange)="onInputChange()"
-        placeholder="pelda@email.hu"
-        [disabled]="isSaving()"
-      />
-      @if (errors.email) {
-        <span class="field__error">{{ errors.email }}</span>
-      }
-    </div>
+    <ps-input
+      type="email"
+      label="Email"
+      [required]="true"
+      placeholder="pelda@email.hu"
+      [(ngModel)]="formData.email"
+      (ngModelChange)="onInputChange()"
+      [disabled]="isSaving()"
+      [errorMessage]="errors.email ?? ''"
+    />
 
-    <!-- Phone field -->
-    <div class="field">
-      <label class="field__label" for="contact-phone">
-        Telefonszám <span class="field__required">*</span>
-      </label>
-      <input
-        type="tel"
-        id="contact-phone"
-        class="field__input"
-        [class.field__input--error]="errors.phone"
-        [(ngModel)]="formData.phone"
-        (ngModelChange)="onInputChange()"
-        placeholder="+36 30 123 4567"
-        [disabled]="isSaving()"
-      />
-      @if (errors.phone) {
-        <span class="field__error">{{ errors.phone }}</span>
-      }
-    </div>
-
+    <ps-input
+      type="tel"
+      label="Telefonszám"
+      [required]="true"
+      placeholder="+36 30 123 4567"
+      [(ngModel)]="formData.phone"
+      (ngModelChange)="onInputChange()"
+      [disabled]="isSaving()"
+      [errorMessage]="errors.phone ?? ''"
+    />
   </ng-container>
 
   <ng-container dialogFooter>

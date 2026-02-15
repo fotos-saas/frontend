@@ -12,17 +12,14 @@
     <ng-container dialogBody>
       <!-- Feedback textarea -->
       <div class="feedback-section">
-        <label for="feedback" class="feedback-label">
-          Mit csináltál amikor a hiba történt? (opcionális)
-        </label>
-        <textarea
-          id="feedback"
-          class="feedback-input"
+        <ps-textarea
+          label="Mit csináltál amikor a hiba történt? (opcionális)"
+          fieldId="feedback"
           placeholder="Pl. Megpróbáltam menteni a változtatásokat..."
-          [value]="feedbackText()"
-          (input)="feedbackText.set($any($event.target).value)"
-          rows="3"
-        ></textarea>
+          [ngModel]="feedbackText()"
+          (ngModelChange)="feedbackText.set($event)"
+          [rows]="3"
+        />
       </div>
 
       <!-- Event ID -->

@@ -1,15 +1,13 @@
 <!-- Fejléc: keresés + Új minta gomb -->
 <div class="samples-header">
   @if (packages().length > 0) {
-    <div class="search-box">
-      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
-      <input
-        type="text"
-        placeholder="Keresés cím vagy leírás alapján..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event)"
-      />
-    </div>
+    <ps-input
+      class="search-box"
+      prefix="search"
+      placeholder="Keresés cím vagy leírás alapján..."
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+    />
   }
   <button class="btn-add" (click)="addNewSample()">
     <lucide-icon [name]="ICONS.PLUS" [size]="16" />

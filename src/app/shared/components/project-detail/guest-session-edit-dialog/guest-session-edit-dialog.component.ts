@@ -4,13 +4,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
 import { createBackdropHandler } from '../../../utils/dialog.util';
+import { PsInputComponent } from '@shared/components/form';
 import { PartnerService, GuestSession } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-guest-session-edit-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './guest-session-edit-dialog.component.html',
   styleUrl: './guest-session-edit-dialog.component.scss',

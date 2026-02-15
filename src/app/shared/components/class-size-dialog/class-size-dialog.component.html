@@ -11,39 +11,20 @@
   (closeEvent)="cancel()"
 >
   <ng-container dialogBody>
-    <!-- Class size field -->
-    <div class="field">
-      <label class="field__label" for="class-size">
-        Osztálylétszám <span class="field__required">*</span>
-      </label>
-      <div class="field__input-wrapper">
-        <input
-          #sizeInput
-          type="number"
-          id="class-size"
-          class="field__input"
-          [class.field__input--error]="error"
-          [(ngModel)]="classSize"
-          (ngModelChange)="onInputChange()"
-          placeholder="pl. 28"
-          [disabled]="isBusy()"
-          [min]="MIN_SIZE"
-          [max]="MAX_SIZE"
-          step="1"
-          inputmode="numeric"
-        />
-        <span class="field__input-suffix">fő</span>
-      </div>
-      @if (error) {
-        <span class="field__error">{{ error }}</span>
-      }
-      @if (!error) {
-        <span class="field__hint">
-          {{ MIN_SIZE }}-{{ MAX_SIZE }} fő között
-        </span>
-      }
-    </div>
-
+    <ps-input
+      type="number"
+      label="Osztálylétszám"
+      [required]="true"
+      placeholder="pl. 28"
+      [(ngModel)]="classSize"
+      (ngModelChange)="onInputChange()"
+      [disabled]="isBusy()"
+      [min]="MIN_SIZE"
+      [max]="MAX_SIZE"
+      step="1"
+      [errorMessage]="error ?? ''"
+      [hint]="!error ? MIN_SIZE + '-' + MAX_SIZE + ' fő között' : ''"
+    />
   </ng-container>
 
   <ng-container dialogFooter>

@@ -8,9 +8,11 @@ import {
   inject,
   ChangeDetectionStrategy
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants';
+import { PsSelectComponent, PsSelectOption } from '@shared/components/form';
 import { FilterConfig, FilterChangeEvent } from './expandable-filters.model';
 
 /**
@@ -31,7 +33,7 @@ import { FilterConfig, FilterChangeEvent } from './expandable-filters.model';
 @Component({
   selector: 'app-expandable-filters',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsSelectComponent],
   templateUrl: './expandable-filters.component.html',
   styleUrl: './expandable-filters.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -99,6 +101,16 @@ export class ExpandableFiltersComponent {
   toggleExpanded(event: MouseEvent): void {
     event.stopPropagation();
     this.expanded.update(v => !v);
+  }
+
+  /** FilterOption[] → PsSelectOption[] konvertáló */
+  toPsOptions(filter: FilterConfig): PsSelectOption[] {
+    return filter.options.map(o => ({ id: o.value, label: o.label }));
+  }
+
+  /** Szűrő select változás (ps-select-ből) */
+  onPsSelectChange(filterId: string, value: string | number): void {
+    this.filterChange.emit({ id: filterId, value: String(value) });
   }
 
   /** Szűrő select változás */

@@ -1,8 +1,9 @@
-import { Component, input, output, ChangeDetectionStrategy, AfterViewInit, viewChild, ElementRef, OnInit, computed } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy, OnInit, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { PsInputComponent } from '@shared/components/form';
 import { isValidEmail } from '../../utils/validators.util';
 
 /**
@@ -30,12 +31,12 @@ export type GuestNameResult =
 @Component({
   selector: 'app-guest-name-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent],
   templateUrl: './guest-name-dialog.component.html',
   styleUrls: ['./guest-name-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GuestNameDialogComponent implements OnInit, AfterViewInit {
+export class GuestNameDialogComponent implements OnInit {
   readonly ICONS = ICONS;
 
   /** Signal-based inputs */
@@ -95,18 +96,9 @@ export class GuestNameDialogComponent implements OnInit, AfterViewInit {
   /** Validációs hibák */
   errors: { name?: string; email?: string } = {};
 
-  /** ViewChild referenciák */
-  readonly firstInput = viewChild<ElementRef<HTMLInputElement>>('firstInput');
-
   ngOnInit(): void {
     this.guestName = this.initialName();
     this.guestEmail = this.initialEmail();
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.firstInput()?.nativeElement.focus();
-    }, 100);
   }
 
   /** Input change - töröljük a hibát */

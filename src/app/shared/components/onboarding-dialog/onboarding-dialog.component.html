@@ -85,33 +85,16 @@
       @if (currentStep() === 'search') {
         <div class="dialog__step" @fadeSlide>
           <div class="dialog__field">
-            <label class="dialog__label" for="search-name">
-              Neved a tablón
-            </label>
-            <div class="dialog__search-wrapper">
-              <input
-                #searchInput
-                type="text"
-                id="search-name"
-                class="dialog__input dialog__input--search"
-                [class.dialog__input--error]="errors.search"
-                [(ngModel)]="searchQuery"
-                (input)="onSearchInput()"
-                placeholder="Pl. Balaton Levente"
-                [disabled]="isSubmitting()"
-                maxlength="100"
-                autocomplete="off"
-              />
-              @if (isSearching()) {
-                <svg class="dialog__search-spinner" viewBox="0 0 24 24" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-                </svg>
-              }
-            </div>
-            @if (errors.search) {
-              <span class="dialog__error" role="alert">{{ errors.search }}</span>
-            }
+            <ps-input
+              label="Neved a tablón"
+              fieldId="search-name"
+              placeholder="Pl. Balaton Levente"
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearchInput()"
+              [disabled]="isSubmitting()"
+              autocomplete="off"
+              [errorMessage]="errors.search ?? ''"
+            />
           </div>
 
           <!-- Keresési eredmények -->
@@ -203,28 +186,18 @@
       @if (currentStep() === 'nickname') {
         <div class="dialog__step" @fadeSlide>
           <div class="dialog__field">
-            <label class="dialog__label" for="nickname">
-              Becenév <span class="dialog__required">*</span>
-            </label>
-            <input
-              #nicknameInput
-              type="text"
-              id="nickname"
-              class="dialog__input"
-              [class.dialog__input--error]="errors.nickname"
-              [(ngModel)]="nickname"
-              (input)="clearErrors()"
+            <ps-input
+              label="Becenév"
+              [required]="true"
+              fieldId="nickname"
               placeholder="Pl. Levi"
+              [(ngModel)]="nickname"
+              (ngModelChange)="clearErrors()"
               [disabled]="isSubmitting()"
-              maxlength="100"
               autocomplete="given-name"
+              [errorMessage]="errors.nickname ?? ''"
+              hint="Ezen a néven fogsz megjelenni a hozzászólásaidnál és szavazataidnál."
             />
-            @if (errors.nickname) {
-              <span class="dialog__error" role="alert">{{ errors.nickname }}</span>
-            }
-            <span class="dialog__hint">
-              Ezen a néven fogsz megjelenni a hozzászólásaidnál és szavazataidnál.
-            </span>
           </div>
         </div>
       }
@@ -233,28 +206,19 @@
       @if (currentStep() === 'email') {
         <div class="dialog__step" @fadeSlide>
           <div class="dialog__field">
-            <label class="dialog__label" for="email">
-              Email <span class="dialog__required">*</span>
-            </label>
-            <input
-              #emailInput
+            <ps-input
               type="email"
-              id="email"
-              class="dialog__input"
-              [class.dialog__input--error]="errors.email"
-              [(ngModel)]="email"
-              (input)="clearErrors()"
+              label="Email"
+              [required]="true"
+              fieldId="email"
               placeholder="pelda@email.hu"
+              [(ngModel)]="email"
+              (ngModelChange)="clearErrors()"
               [disabled]="isSubmitting()"
-              maxlength="255"
               autocomplete="email"
+              [errorMessage]="errors.email ?? ''"
+              hint="Az email címedre küldünk egy linket, amivel más eszközön is beléphetsz."
             />
-            @if (errors.email) {
-              <span class="dialog__error" role="alert">{{ errors.email }}</span>
-            }
-            <span class="dialog__hint">
-              Az email címedre küldünk egy linket, amivel más eszközön is beléphetsz.
-            </span>
           </div>
         </div>
       }
@@ -367,17 +331,14 @@
           <!-- Email input (ha még nem sikerült) -->
           @if (!restoreSuccess()) {
             <div class="dialog__field">
-              <label class="dialog__label" for="restore-email">Email címed</label>
-              <input
-                #restoreEmailInput
+              <ps-input
                 type="email"
-                id="restore-email"
-                class="dialog__input"
-                [(ngModel)]="restoreEmail"
-                (input)="restoreError.set(null)"
+                label="Email címed"
+                fieldId="restore-email"
                 placeholder="pelda@email.hu"
+                [(ngModel)]="restoreEmail"
+                (ngModelChange)="restoreError.set(null)"
                 [disabled]="isRestoreSending()"
-                maxlength="255"
                 autocomplete="email"
               />
             </div>

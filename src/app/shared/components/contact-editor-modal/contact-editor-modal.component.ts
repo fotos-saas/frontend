@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
+import { PsInputComponent, PsCheckboxComponent } from '@shared/components/form';
 import { PROJECT_DETAIL_SERVICE } from '../project-detail/project-detail.tokens';
 import { ProjectContact } from '../project-detail/project-detail.types';
 import { formatHungarianPhone, validatePhone } from '../../utils/phone-formatter.util';
@@ -15,7 +16,7 @@ import { formatHungarianPhone, validatePhone } from '../../utils/phone-formatter
 @Component({
   selector: 'app-contact-editor-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent, PsCheckboxComponent],
   templateUrl: './contact-editor-modal.component.html',
   styleUrl: './contact-editor-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

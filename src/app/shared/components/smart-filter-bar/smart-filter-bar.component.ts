@@ -13,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants';
 import { FilterStateApi } from '../../utils/use-filter-state';
 import { ExpandableFiltersComponent, FilterChangeEvent } from '../expandable-filters';
-import { PsSearchableSelectComponent } from '../form';
+import { PsSearchableSelectComponent, PsInputComponent, PsHelpItem } from '../form';
 import { SearchConfig, SearchableFilterDef, SortDef, FilterConfig } from './smart-filter-bar.types';
 
 @Component({
@@ -25,6 +25,7 @@ import { SearchConfig, SearchableFilterDef, SortDef, FilterConfig } from './smar
     MatTooltipModule,
     ExpandableFiltersComponent,
     PsSearchableSelectComponent,
+    PsInputComponent,
   ],
   templateUrl: './smart-filter-bar.component.html',
   styleUrl: './smart-filter-bar.component.scss',
@@ -49,13 +50,23 @@ export class SmartFilterBarComponent {
   readonly sortConfig = input<SortDef | null>(null);
 
   // === INTERNAL STATE ===
-  readonly showSearchHelp = signal(false);
   readonly mobileSortOpen = signal(false);
 
   /** Mutatja-e a search help tooltipet */
   readonly hasSearchFeatures = computed(() => {
     const features = this.searchConfig().features;
     return features && (features.id || features.assignee || features.exact);
+  });
+
+  /** Keresési szintaxis help items ps-input-hoz */
+  readonly searchHelpItems = computed<PsHelpItem[]>(() => {
+    const features = this.searchConfig().features;
+    if (!features) return [];
+    const items: PsHelpItem[] = [];
+    if (features.id) items.push({ syntax: '#123', description: 'Projekt ID keresése' });
+    if (features.assignee) items.push({ syntax: '@név', description: 'Ügyintéző keresése' });
+    if (features.exact) items.push({ syntax: '"szöveg"', description: 'Pontos egyezés' });
+    return items;
   });
 
   /** Aktuális rendezés label-je (mobil sort-hoz) */
@@ -92,16 +103,9 @@ export class SmartFilterBarComponent {
     this.mobileSortOpen.update(v => !v);
   }
 
-  /** Search help toggle */
-  toggleSearchHelp(event: MouseEvent): void {
-    event.stopPropagation();
-    this.showSearchHelp.update(v => !v);
-  }
-
   /** Dokumentum kattintás - dropdown-ok bezárása */
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.showSearchHelp.set(false);
       this.mobileSortOpen.set(false);
     }
   }

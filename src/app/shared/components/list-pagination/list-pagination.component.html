@@ -11,16 +11,13 @@
     </button>
 
     <div class="page-select-group">
-      <select
+      <ps-select
         class="page-select"
-        [value]="currentPage()"
-        (change)="onSelectChange($event)"
-        aria-label="Oldal választása"
-      >
-        @for (page of pages(); track page) {
-          <option [value]="page" [selected]="page === currentPage()">{{ page }}. oldal</option>
-        }
-      </select>
+        size="sm"
+        [options]="pageOptions()"
+        [ngModel]="'' + currentPage()"
+        (ngModelChange)="onSelectChange($event)"
+      />
       <span class="page-context">
         {{ totalPages() }}-ból
         <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>

@@ -65,32 +65,26 @@
 
     <!-- Osztály neve -->
     <div class="form-group">
-      <label for="className">Osztály neve</label>
-      <input
-        type="text"
-        id="className"
-        class="form-input"
+      <ps-input
+        label="Osztály neve"
+        fieldId="className"
         placeholder="pl. 12.A"
         [(ngModel)]="className"
         name="className"
-        maxlength="255"
+        hint="Opcionális - pl. 12.A, Ballagók 2024"
       />
-      <span class="form-hint">Opcionális - pl. 12.A, Ballagók 2024</span>
     </div>
 
     <!-- Évfolyam -->
     <div class="form-group">
-      <label for="classYear">Évfolyam</label>
-      <input
-        type="text"
-        id="classYear"
-        class="form-input"
+      <ps-input
+        label="Évfolyam"
+        fieldId="classYear"
         placeholder="pl. 2024"
         [(ngModel)]="classYear"
         name="classYear"
-        maxlength="50"
+        hint="Opcionális - pl. 2024, 2024/2025"
       />
-      <span class="form-hint">Opcionális - pl. 2024, 2024/2025</span>
     </div>
 
     <!-- Hibaüzenet -->

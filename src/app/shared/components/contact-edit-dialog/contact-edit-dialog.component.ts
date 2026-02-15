@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { isValidEmail, isValidPhone } from '../../utils/validators.util';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { PsInputComponent } from '@shared/components/form';
 
 /**
  * Contact data interface
@@ -30,7 +31,7 @@ export type ContactEditResult =
 @Component({
   selector: 'app-contact-edit-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent],
   templateUrl: './contact-edit-dialog.component.html',
   styleUrls: ['./contact-edit-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

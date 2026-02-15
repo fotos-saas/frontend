@@ -1,21 +1,14 @@
 <div class="expandable-filters">
   <!-- Látható szűrők (első N db) - inline -->
   @for (filter of visibleFilters(); track filter.id) {
-    <div class="filter-item" [class.filter-item--with-icon]="filter.icon">
-      @if (filter.icon) {
-        <lucide-icon [name]="filter.icon" [size]="14" class="filter-icon" />
-      }
-      <select
-        (change)="onFilterSelectChange(filter.id, $event)"
-        class="filter-select"
-        [class.filter-select--with-icon]="filter.icon"
-      >
-        <option value="" [selected]="!getFilterValue(filter.id)">{{ filter.label }}</option>
-        @for (opt of filter.options; track opt.value) {
-          <option [value]="opt.value" [selected]="getFilterValue(filter.id) === opt.value">{{ opt.label }}</option>
-        }
-      </select>
-    </div>
+    <ps-select
+      class="filter-item"
+      size="sm"
+      [emptyLabel]="filter.label"
+      [options]="toPsOptions(filter)"
+      [ngModel]="getFilterValue(filter.id)"
+      (ngModelChange)="onPsSelectChange(filter.id, $event)"
+    />
   }
 
   <!-- "További szűrők" gomb + dropdown (ha van rejtett) -->
@@ -44,16 +37,14 @@
         <div class="filters-dropdown" (click)="$event.stopPropagation()">
           @for (filter of hiddenFilters(); track filter.id) {
             <div class="dropdown-filter">
-              <label class="dropdown-label">{{ filter.label }}</label>
-              <select
-                (change)="onFilterSelectChange(filter.id, $event)"
-                class="dropdown-select"
-              >
-                <option value="" [selected]="!getFilterValue(filter.id)">Mind</option>
-                @for (opt of filter.options; track opt.value) {
-                  <option [value]="opt.value" [selected]="getFilterValue(filter.id) === opt.value">{{ opt.label }}</option>
-                }
-              </select>
+              <ps-select
+                [label]="filter.label"
+                size="sm"
+                emptyLabel="Mind"
+                [options]="toPsOptions(filter)"
+                [ngModel]="getFilterValue(filter.id)"
+                (ngModelChange)="onPsSelectChange(filter.id, $event)"
+              />
             </div>
           }
 

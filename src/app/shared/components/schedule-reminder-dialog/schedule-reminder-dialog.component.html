@@ -10,58 +10,24 @@
   (backdropClickEvent)="onBackdropClicked()"
 >
   <ng-container dialogBody>
-    <!-- Date picker toggle button -->
-    <button
-      type="button"
-      class="date-toggle"
-      [class.date-toggle--open]="isDatePickerOpen"
-      (click)="toggleDatePicker()"
-      aria-label="Fotózás dátumának választása"
-      [attr.aria-expanded]="isDatePickerOpen"
-    >
-      <span class="date-toggle__inner">
-        <lucide-icon [name]="ICONS.CALENDAR" [size]="20" />
-        <span class="date-toggle__text">
-          {{ selectedDate ? formattedDate : 'Válassz dátumot' }}
-        </span>
-      </span>
-      <lucide-icon
-        [name]="ICONS.CHEVRON_DOWN"
-        [size]="20"
-        class="date-toggle__arrow"
-        [class.date-toggle__arrow--open]="isDatePickerOpen"
-      />
-    </button>
+    <ps-datepicker
+      label="Fotózás időpontja"
+      placeholder="Válassz dátumot..."
+      [(ngModel)]="selectedDate"
+      [min]="minDate"
+      [max]="maxDate"
+    />
 
-    <!-- Inline date picker -->
-    @if (isDatePickerOpen) {
-      <div class="date-picker">
-        <div class="date-picker__input-wrapper" (click)="openDatePicker()">
-          <input
-            #dateInput
-            type="date"
-            class="date-picker__input"
-            [(ngModel)]="selectedDate"
-            [min]="minDate"
-            [max]="maxDate"
-            aria-label="Fotózás időpontja"
-          />
-          @if (selectedDate) {
-            <span class="date-picker__display">
-              {{ formattedDateShort }}
-            </span>
-          }
-        </div>
-        <button
-          type="button"
-          class="date-picker__save-btn"
-          [disabled]="!selectedDate || isSaving"
-          (click)="saveDate()"
-        >
-          {{ isSaving ? 'Mentés...' : 'Mentés' }}
-        </button>
-      </div>
-    }
+    <div class="date-save-row" style="margin-top: 12px;">
+      <button
+        type="button"
+        class="date-picker__save-btn"
+        [disabled]="!selectedDate || isSaving"
+        (click)="saveDate()"
+      >
+        {{ isSaving ? 'Mentés...' : 'Mentés' }}
+      </button>
+    </div>
 
     <!-- Divider -->
     <div class="divider">

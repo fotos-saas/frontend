@@ -1,8 +1,9 @@
-import { Component, output, ChangeDetectionStrategy, viewChild, ElementRef, inject } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { PsDatepickerComponent } from '@shared/components/form';
 import { LoggerService } from '../../../core/services/logger.service';
 
 /**
@@ -23,7 +24,7 @@ export type ScheduleReminderResult =
 @Component({
   selector: 'app-schedule-reminder-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsDatepickerComponent],
   templateUrl: './schedule-reminder-dialog.component.html',
   styleUrls: ['./schedule-reminder-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -35,12 +36,6 @@ export class ScheduleReminderDialogComponent {
   readonly resultEvent = output<ScheduleReminderResult>();
 
   private readonly logger = inject(LoggerService);
-
-  /** Dátumválasztó megnyitva */
-  isDatePickerOpen = false;
-
-  /** ViewChild referenciák */
-  readonly dateInput = viewChild<ElementRef<HTMLInputElement>>('dateInput');
 
   /** Kiválasztott dátum */
   selectedDate: string = '';
@@ -57,20 +52,6 @@ export class ScheduleReminderDialogComponent {
 
   /** Engedélyezett snooze napok */
   private readonly allowedSnoozeDays = [7, 21];
-
-  /**
-   * Dátumválasztó toggle
-   */
-  toggleDatePicker(): void {
-    this.isDatePickerOpen = !this.isDatePickerOpen;
-  }
-
-  /**
-   * Dátumválasztó megnyitása (natív picker)
-   */
-  openDatePicker(): void {
-    this.dateInput()?.nativeElement.showPicker();
-  }
 
   /**
    * Dátum mentése

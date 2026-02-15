@@ -12,68 +12,47 @@
 >
   <ng-container dialogBody>
     <form class="form" (ngSubmit)="onSubmit()">
-      <!-- Név -->
-      <div class="form-group">
-        <label class="form-label" for="ce-name">Név <span class="form-required">*</span></label>
-        <input
-          type="text"
-          id="ce-name"
-          class="form-input"
-          [(ngModel)]="formData.name"
-          name="name"
-          required
-          placeholder="Kapcsolattartó neve"
-          [disabled]="saving()"
-          autocomplete="name"
-        />
-      </div>
+      <ps-input
+        label="Név"
+        [required]="true"
+        placeholder="Kapcsolattartó neve"
+        [ngModel]="formData.name"
+        (ngModelChange)="formData.name = $event"
+        name="name"
+        [disabled]="saving()"
+        autocomplete="name"
+      />
 
-      <!-- Email -->
-      <div class="form-group">
-        <label class="form-label" for="ce-email">E-mail</label>
-        <input
-          type="email"
-          id="ce-email"
-          class="form-input"
-          [(ngModel)]="formData.email"
-          name="email"
-          placeholder="pelda&#64;email.hu"
-          [disabled]="saving()"
-          autocomplete="email"
-        />
-      </div>
+      <ps-input
+        type="email"
+        label="E-mail"
+        placeholder="pelda&#64;email.hu"
+        [ngModel]="formData.email"
+        (ngModelChange)="formData.email = $event"
+        name="email"
+        [disabled]="saving()"
+        autocomplete="email"
+      />
 
-      <!-- Telefon -->
-      <div class="form-group">
-        <label class="form-label" for="ce-phone">Telefon</label>
-        <input
-          type="tel"
-          id="ce-phone"
-          class="form-input"
-          [class.form-input--error]="phoneError()"
-          [(ngModel)]="formData.phone"
-          name="phone"
-          placeholder="+36 30 123 4567"
-          [disabled]="saving()"
-          (input)="formatPhone($event)"
-          (paste)="formatPhone($event)"
-          autocomplete="tel"
-        />
-        @if (phoneError()) {
-          <span class="form-error">{{ phoneError() }}</span>
-        }
-      </div>
+      <ps-input
+        type="tel"
+        label="Telefon"
+        placeholder="+36 30 123 4567"
+        [ngModel]="formData.phone"
+        (ngModelChange)="formData.phone = $event"
+        name="phone"
+        [disabled]="saving()"
+        autocomplete="tel"
+        [errorMessage]="phoneError() ?? ''"
+      />
 
-      <!-- Elsődleges -->
-      <label class="form-checkbox">
-        <input
-          type="checkbox"
-          [(ngModel)]="formData.isPrimary"
-          name="isPrimary"
-          [disabled]="saving()"
-        />
-        <span>Elsődleges kapcsolattartó</span>
-      </label>
+      <ps-checkbox
+        label="Elsődleges kapcsolattartó"
+        [ngModel]="formData.isPrimary"
+        (ngModelChange)="formData.isPrimary = $event"
+        name="isPrimary"
+        [disabled]="saving()"
+      />
     </form>
   </ng-container>
 

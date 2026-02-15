@@ -4,8 +4,6 @@ import {
   output,
   ChangeDetectionStrategy,
   AfterViewInit,
-  viewChild,
-  ElementRef,
   OnInit,
   inject,
   DestroyRef,
@@ -14,6 +12,7 @@ import {
   computed
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PsInputComponent } from '@shared/components/form';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -43,7 +42,7 @@ export { OnboardingStep } from './onboarding-form.service';
 @Component({
   selector: 'app-onboarding-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, PsInputComponent],
   providers: [OnboardingFormService],
   templateUrl: './onboarding-dialog.component.html',
   styleUrls: ['./onboarding-dialog.component.scss'],
@@ -78,11 +77,6 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit {
   nickname = '';
   email = '';
 
-  /** ViewChild referenciák */
-  readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
-  readonly nicknameInputRef = viewChild<ElementRef<HTMLInputElement>>('nicknameInput');
-  readonly emailInputRef = viewChild<ElementRef<HTMLInputElement>>('emailInput');
-  readonly restoreEmailInputRef = viewChild<ElementRef<HTMLInputElement>>('restoreEmailInput');
 
   /** Restore mode (már regisztráltál korábban?) */
   showRestoreMode = signal(false);
@@ -144,10 +138,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit {
   }
 
   private focusCurrentStepInput(): void {
-    const step = this.currentStep();
-    if (step === 'search') this.searchInputRef()?.nativeElement.focus();
-    else if (step === 'nickname') this.nicknameInputRef()?.nativeElement.focus();
-    else if (step === 'email') this.emailInputRef()?.nativeElement.focus();
+    // ps-input components handle their own focus
   }
 
   onSearchInput(): void {
@@ -234,7 +225,7 @@ export class OnboardingDialogComponent implements OnInit, AfterViewInit {
     this.restoreEmail = '';
     this.restoreSuccess.set(false);
     this.restoreError.set(null);
-    setTimeout(() => this.restoreEmailInputRef()?.nativeElement.focus(), 100);
+    // ps-input handles focus internally
   }
 
   exitRestoreMode(): void {

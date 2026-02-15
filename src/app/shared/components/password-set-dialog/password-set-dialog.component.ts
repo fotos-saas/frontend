@@ -3,7 +3,6 @@ import {
   output,
   ChangeDetectionStrategy,
   viewChild,
-  ElementRef,
   inject,
   signal,
   computed,
@@ -15,6 +14,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PasswordStrengthComponent } from '../password-strength/password-strength.component';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { PsInputComponent } from '@shared/components/form';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -38,7 +38,7 @@ export type PasswordSetResult = { action: 'success' };
 @Component({
   selector: 'app-password-set-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, PasswordStrengthComponent, DialogWrapperComponent, PsInputComponent],
   templateUrl: './password-set-dialog.component.html',
   styleUrls: ['./password-set-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -57,10 +57,6 @@ export class PasswordSetDialogComponent {
   /** Form adatok */
   password = '';
   passwordConfirmation = '';
-
-  /** Jelszó láthatóság */
-  readonly showPassword = signal(false);
-  readonly showPasswordConfirmation = signal(false);
 
   /** Állapotok */
   readonly isSubmitting = signal(false);
@@ -83,20 +79,6 @@ export class PasswordSetDialogComponent {
   onInputChange(): void {
     this.errors = {};
     this.errorMessage.set(null);
-  }
-
-  /**
-   * Jelszó láthatóság toggle
-   */
-  togglePasswordVisibility(): void {
-    this.showPassword.update(v => !v);
-  }
-
-  /**
-   * Megerősítés láthatóság toggle
-   */
-  toggleConfirmationVisibility(): void {
-    this.showPasswordConfirmation.update(v => !v);
   }
 
   /**

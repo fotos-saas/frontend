@@ -1,57 +1,14 @@
 <div class="smart-filter-bar" role="search">
   <!-- Search box -->
-  <div class="search-box">
-    <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-    <input
-      type="text"
-      [placeholder]="searchConfig().placeholder"
-      [ngModel]="filterState().search()"
-      (ngModelChange)="filterState().setSearch($event)"
-      class="search-input"
-    />
-    @if (filterState().search()) {
-      <button class="clear-btn" (click)="filterState().clearSearch()">
-        <lucide-icon [name]="ICONS.X" [size]="14" />
-      </button>
-    }
-
-    <!-- Search help button (smart search features) -->
-    @if (hasSearchFeatures()) {
-      <button
-        type="button"
-        class="search-help-btn"
-        [class.search-help-btn--active]="showSearchHelp()"
-        (click)="toggleSearchHelp($event)"
-        matTooltip="Keresési szintaxis súgó"
-      >
-        <lucide-icon [name]="ICONS.HELP_CIRCLE" [size]="14" />
-      </button>
-
-      @if (showSearchHelp()) {
-        <div class="search-help-tooltip" (click)="$event.stopPropagation()">
-          <div class="search-help-title">Keresési szintaxis</div>
-          @if (searchConfig().features?.id) {
-            <div class="search-help-row">
-              <code>#123</code>
-              <span>Projekt ID keresése</span>
-            </div>
-          }
-          @if (searchConfig().features?.assignee) {
-            <div class="search-help-row">
-              <code>&#64;név</code>
-              <span>Ügyintéző keresése</span>
-            </div>
-          }
-          @if (searchConfig().features?.exact) {
-            <div class="search-help-row">
-              <code>"szöveg"</code>
-              <span>Pontos egyezés</span>
-            </div>
-          }
-        </div>
-      }
-    }
-  </div>
+  <ps-input
+    class="search-box"
+    prefix="search"
+    [placeholder]="searchConfig().placeholder"
+    [ngModel]="filterState().search()"
+    (ngModelChange)="filterState().setSearch($event)"
+    [helpItems]="searchHelpItems()"
+    helpTitle="Keresési szintaxis"
+  />
 
   <!-- Searchable Select filters -->
   @for (sf of searchableFilters(); track sf.id) {

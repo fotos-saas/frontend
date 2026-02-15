@@ -23,30 +23,21 @@
         </div>
       </div>
 
-      <!-- Toggle -->
-      <label class="toggle-row">
-        <input
-          type="checkbox"
-          class="toggle-input"
-          [checked]="useCustomLimit()"
-          (change)="toggleCustomLimit()"
-        />
-        <span class="toggle-label">Egyedi limit beállítása erre a projektre</span>
-      </label>
+      <ps-toggle
+        label="Egyedi limit beállítása erre a projektre"
+        [ngModel]="useCustomLimit()"
+        (ngModelChange)="toggleCustomLimit()"
+      />
 
       @if (useCustomLimit()) {
-        <div class="number-input-row">
-          <label class="number-label" for="maxRetouch">Maximum képek száma</label>
-          <input
-            id="maxRetouch"
-            type="number"
-            class="number-input"
-            min="1"
-            max="20"
-            [ngModel]="customLimit()"
-            (ngModelChange)="customLimit.set($event)"
-          />
-        </div>
+        <ps-input
+          type="number"
+          label="Maximum képek száma"
+          min="1"
+          max="20"
+          [ngModel]="customLimit()"
+          (ngModelChange)="customLimit.set($event)"
+        />
       }
 
       <div class="info-row">
@@ -72,29 +63,21 @@
         </div>
       </div>
 
-      <label class="toggle-row">
-        <input
-          type="checkbox"
-          class="toggle-input"
-          [checked]="useCustomEditWindow()"
-          (change)="toggleCustomEditWindow()"
-        />
-        <span class="toggle-label">Egyedi érték beállítása erre a projektre</span>
-      </label>
+      <ps-toggle
+        label="Egyedi érték beállítása erre a projektre"
+        [ngModel]="useCustomEditWindow()"
+        (ngModelChange)="toggleCustomEditWindow()"
+      />
 
       @if (useCustomEditWindow()) {
-        <div class="number-input-row">
-          <label class="number-label" for="editWindow">Időablak (óra)</label>
-          <input
-            id="editWindow"
-            type="number"
-            class="number-input"
-            min="1"
-            max="168"
-            [ngModel]="customEditWindowHours()"
-            (ngModelChange)="customEditWindowHours.set($event)"
-          />
-        </div>
+        <ps-input
+          type="number"
+          label="Időablak (óra)"
+          min="1"
+          max="168"
+          [ngModel]="customEditWindowHours()"
+          (ngModelChange)="customEditWindowHours.set($event)"
+        />
       }
 
       <div class="info-row">
@@ -124,54 +107,31 @@
         </div>
       </div>
 
-      <label class="toggle-row">
-        <input
-          type="checkbox"
-          class="toggle-input"
-          [checked]="useCustomExport()"
-          (change)="toggleCustomExport()"
-        />
-        <span class="toggle-label">Egyedi export beállítás erre a projektre</span>
-      </label>
+      <ps-toggle
+        label="Egyedi export beállítás erre a projektre"
+        [ngModel]="useCustomExport()"
+        (ngModelChange)="toggleCustomExport()"
+      />
 
       @if (useCustomExport()) {
         <div class="sub-settings">
-          <div class="number-input-row">
-            <label class="number-label" for="exportZipContent">ZIP tartalom</label>
-            <select
-              id="exportZipContent"
-              class="select-input"
-              [ngModel]="exportZipContent()"
-              (ngModelChange)="exportZipContent.set($event)"
-            >
-              <option value="all">Összes kép</option>
-              <option value="retouch_and_tablo">Retusált + Tablókép</option>
-              <option value="retouch_only">Csak retusált</option>
-              <option value="tablo_only">Csak tablókép</option>
-            </select>
-          </div>
-          <div class="number-input-row">
-            <label class="number-label" for="exportFileNaming">Fájlnév stratégia</label>
-            <select
-              id="exportFileNaming"
-              class="select-input"
-              [ngModel]="exportFileNaming()"
-              (ngModelChange)="exportFileNaming.set($event)"
-            >
-              <option value="original">Eredeti fájlnév</option>
-              <option value="student_name">Diák neve</option>
-              <option value="student_name_iptc">IPTC beágyazás</option>
-            </select>
-          </div>
-          <label class="toggle-row">
-            <input
-              type="checkbox"
-              class="toggle-input"
-              [checked]="exportAlwaysAsk()"
-              (change)="exportAlwaysAsk.set(!exportAlwaysAsk())"
-            />
-            <span class="toggle-label">Mindig kérdezzen rá letöltésnél</span>
-          </label>
+          <ps-select
+            label="ZIP tartalom"
+            [options]="zipContentOptions"
+            [ngModel]="exportZipContent()"
+            (ngModelChange)="exportZipContent.set($event)"
+          />
+          <ps-select
+            label="Fájlnév stratégia"
+            [options]="fileNamingOptions"
+            [ngModel]="exportFileNaming()"
+            (ngModelChange)="exportFileNaming.set($event)"
+          />
+          <ps-toggle
+            label="Mindig kérdezzen rá letöltésnél"
+            [ngModel]="exportAlwaysAsk()"
+            (ngModelChange)="exportAlwaysAsk.set($event)"
+          />
         </div>
       }
 

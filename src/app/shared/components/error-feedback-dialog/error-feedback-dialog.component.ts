@@ -12,6 +12,7 @@ import { ErrorBoundaryService } from '../../../core/services/error-boundary.serv
 import { SentryService } from '../../../core/services/sentry.service';
 import { ClipboardService } from '../../../core/services/clipboard.service';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { PsTextareaComponent } from '@shared/components/form';
 
 /**
  * ErrorFeedbackDialogComponent
@@ -22,7 +23,7 @@ import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.compone
 @Component({
   selector: 'app-error-feedback-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsTextareaComponent],
   templateUrl: './error-feedback-dialog.component.html',
   styleUrls: ['./error-feedback-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

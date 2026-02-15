@@ -11,6 +11,7 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
+import { PsInputComponent } from '@shared/components/form';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, of } from 'rxjs';
 import { PROJECT_CREATE_SERVICE, PROJECT_CREATE_ROUTE_PREFIX } from './project-create.tokens';
 import { SchoolOption } from './project-create.types';
@@ -21,7 +22,7 @@ import { SchoolOption } from './project-create.types';
 @Component({
   selector: 'app-project-create-wrapper',
   standalone: true,
-  imports: [RouterModule, FormsModule, LucideAngularModule],
+  imports: [RouterModule, FormsModule, LucideAngularModule, PsInputComponent],
   templateUrl: './project-create-wrapper.component.html',
   styleUrls: ['./project-create-wrapper.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

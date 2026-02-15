@@ -3,8 +3,6 @@ import {
   input,
   output,
   ChangeDetectionStrategy,
-  viewChild,
-  ElementRef,
   computed,
   signal
 } from '@angular/core';
@@ -13,6 +11,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { validateNumberRange } from '../../utils/validators.util';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { PsInputComponent } from '@shared/components/form';
 
 /**
  * Dialog eredmény típus
@@ -30,7 +29,7 @@ export type ClassSizeResult =
 @Component({
   selector: 'app-class-size-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent],
   templateUrl: './class-size-dialog.component.html',
   styleUrls: ['./class-size-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -59,9 +58,6 @@ export class ClassSizeDialogComponent {
   /** Limit értékek */
   readonly MIN_SIZE = 5;
   readonly MAX_SIZE = 500;
-
-  /** ViewChild referencia */
-  readonly sizeInput = viewChild<ElementRef<HTMLInputElement>>('sizeInput');
 
   private initialized = false;
 

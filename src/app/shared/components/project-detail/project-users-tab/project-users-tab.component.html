@@ -1,20 +1,12 @@
 <!-- Szűrők -->
 <div class="filters">
-  <div class="search-box">
-    <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="search-icon" />
-    <input
-      type="text"
-      class="search-input"
-      placeholder="Keresés név vagy email alapján..."
-      [(ngModel)]="search"
-      (keyup.enter)="onSearch()"
-    />
-    @if (search) {
-      <button class="clear-btn" (click)="clearSearch()">
-        <lucide-icon [name]="ICONS.X" [size]="14" />
-      </button>
-    }
-  </div>
+  <ps-input
+    class="search-box"
+    prefix="search"
+    placeholder="Keresés név vagy email alapján..."
+    [(ngModel)]="search"
+    (blur)="onSearch()"
+  />
 
   <ps-select
     size="sm"

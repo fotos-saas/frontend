@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
-import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectComponent, PsInputComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { InfoBoxComponent } from '../../../components/info-box';
 import { PartnerService, GuestSession, PaginatedResponse } from '../../../../features/partner/services/partner.service';
@@ -17,7 +17,7 @@ import { GuestSessionEditDialogComponent } from '../guest-session-edit-dialog/gu
 @Component({
   selector: 'app-project-users-tab',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsSelectComponent, InfoBoxComponent, GuestSessionEditDialogComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsSelectComponent, PsInputComponent, InfoBoxComponent, GuestSessionEditDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-users-tab.component.html',
   styleUrl: './project-users-tab.component.scss',

@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import DOMPurify from 'dompurify';
+import { PsTextareaComponent } from '@shared/components/form';
 import { MediaEditorComponent, MediaEditorItem } from '../media-editor/media-editor.component';
 
 /**
@@ -39,7 +40,7 @@ export interface PostEditSaveData {
 @Component({
   selector: 'app-post-edit-form',
   standalone: true,
-  imports: [FormsModule, MediaEditorComponent],
+  imports: [FormsModule, PsTextareaComponent, MediaEditorComponent],
   templateUrl: './post-edit-form.component.html',
   styleUrls: ['./post-edit-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

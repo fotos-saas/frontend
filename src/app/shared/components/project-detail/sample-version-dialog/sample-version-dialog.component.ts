@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
 import { createBackdropHandler } from '../../../utils/dialog.util';
+import { PsTextareaComponent } from '@shared/components/form';
 import { SampleVersion } from '../../../../features/partner/services/partner.service';
 import { SampleVersionDialogFacade } from './sample-version-dialog-facade.service';
 import { SamplesLightboxComponent } from '../../samples-lightbox/samples-lightbox.component';
@@ -11,7 +12,7 @@ import { SampleLightboxItem } from '../../samples-lightbox/samples-lightbox.type
 @Component({
   selector: 'app-sample-version-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, SamplesLightboxComponent],
+  imports: [FormsModule, LucideAngularModule, SamplesLightboxComponent, PsTextareaComponent],
   providers: [SampleVersionDialogFacade],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sample-version-dialog.component.html',

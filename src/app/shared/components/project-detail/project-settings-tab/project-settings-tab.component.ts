@@ -4,13 +4,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
 import { InfoBoxComponent } from '../../../components/info-box';
+import { PsInputComponent, PsToggleComponent, PsSelectComponent, PsSelectOption } from '@shared/components/form';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-project-settings-tab',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, InfoBoxComponent],
+  imports: [FormsModule, LucideAngularModule, InfoBoxComponent, PsInputComponent, PsToggleComponent, PsSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-settings-tab.component.html',
   styleUrl: './project-settings-tab.component.scss',
@@ -23,6 +24,19 @@ export class ProjectSettingsTabComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+
+  readonly zipContentOptions: PsSelectOption[] = [
+    { id: 'all', label: 'Összes kép' },
+    { id: 'retouch_and_tablo', label: 'Retusált + Tablókép' },
+    { id: 'retouch_only', label: 'Csak retusált' },
+    { id: 'tablo_only', label: 'Csak tablókép' },
+  ];
+
+  readonly fileNamingOptions: PsSelectOption[] = [
+    { id: 'original', label: 'Eredeti fájlnév' },
+    { id: 'student_name', label: 'Diák neve' },
+    { id: 'student_name_iptc', label: 'IPTC beágyazás' },
+  ];
 
   loading = signal(true);
   saving = signal(false);

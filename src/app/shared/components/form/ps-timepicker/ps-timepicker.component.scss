@@ -102,7 +102,8 @@ $col-w: 52px;
   &__panel {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    left: -$ps-field-border-width;
+    right: -$ps-field-border-width;
     z-index: $ps-dropdown-z;
     background: var(--ps-dropdown-bg);
     border: 1px solid var(--ps-dropdown-border);
@@ -126,7 +127,7 @@ $col-w: 52px;
   }
 
   &__col {
-    flex: 0 0 $col-w;
+    flex: 1;
     height: $cell-h * 6; // 6 visible rows
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;

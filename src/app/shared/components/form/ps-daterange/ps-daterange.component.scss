@@ -1,0 +1,41 @@
+@use '../form-tokens' as *;
+@use '../form-field-base';
+
+.ps-daterange {
+  display: flex;
+  align-items: flex-end;
+
+  // Safari-kompatibilis gap alternatíva
+  > ps-datepicker {
+    flex: 1;
+    min-width: 0;
+    margin: 0 6px;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
+
+    &:last-of-type {
+      margin-right: 0;
+    }
+  }
+
+  &__separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: $ps-field-height;
+    color: var(--ps-hint-color);
+    font-size: 1.125rem;
+    font-weight: 500;
+    user-select: none;
+    // igazítás a label alá (ha van)
+    padding-top: 22px;
+  }
+
+  &--disabled &__separator {
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,50 @@
+<div [ngClass]="hostClasses()">
+  @if (label()) {
+    <label class="ps-field__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="ps-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="ps-daterange" [ngClass]="{ 'ps-daterange--disabled': isDisabled() }">
+    <ps-datepicker
+      [label]="fromLabel()"
+      [ngModel]="fromValue()"
+      (ngModelChange)="onFromChange($event)"
+      [min]="min()"
+      [max]="fromMax()"
+      [placeholder]="fromPlaceholder()"
+      [disabled]="isDisabled()"
+      [state]="computedState()"
+      size="full"
+    />
+
+    <span class="ps-daterange__separator">–</span>
+
+    <ps-datepicker
+      [label]="toLabel()"
+      [ngModel]="toValue()"
+      (ngModelChange)="onToChange($event)"
+      [min]="toMin()"
+      [max]="max()"
+      [placeholder]="toPlaceholder()"
+      [disabled]="isDisabled()"
+      [state]="computedState()"
+      size="full"
+    />
+  </div>
+
+  @if (computedState() === 'error' && errorMessage()) {
+    <div class="ps-field__error" [id]="uniqueId() + '-error'" role="alert">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (hint() && computedState() !== 'error') {
+    <div class="ps-field__hint" [id]="uniqueId() + '-hint'">
+      {{ hint() }}
+    </div>
+  }
+</div>

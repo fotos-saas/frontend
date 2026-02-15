@@ -198,6 +198,17 @@
     </div>
   </section>
 
+  <!-- 6b2. Daterange -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Dátum tartomány (tól–ig)</h2>
+    <ps-daterange
+      label="Időszak"
+      [(ngModel)]="dateRangeValue"
+      size="lg"
+      hint="A kezdő dátum automatikusan korlátozza a záró dátumot"
+    />
+  </section>
+
   <!-- 6c. Timepicker -->
   <section class="showcase__section">
     <h2 class="showcase__section-title">Timepicker</h2>

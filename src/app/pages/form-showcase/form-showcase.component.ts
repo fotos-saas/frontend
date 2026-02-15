@@ -15,6 +15,8 @@ import {
   PsEditorComponent,
   PsDatepickerComponent,
   PsTimepickerComponent,
+  PsDaterangeComponent,
+  DateRange,
   PsSelectOption,
   PsRadioOption,
 } from '@shared/components/form';
@@ -38,6 +40,7 @@ import {
     PsEditorComponent,
     PsDatepickerComponent,
     PsTimepickerComponent,
+    PsDaterangeComponent,
   ],
   templateUrl: './form-showcase.component.html',
   styleUrl: './form-showcase.component.scss',
@@ -57,6 +60,7 @@ export class FormShowcaseComponent {
   timeValue = signal('');
   timepickerValue = signal('');
   timepickerStep = signal('');
+  dateRangeValue = signal<DateRange>({ from: '', to: '' });
 
   // Textarea
   textareaValue = signal('');

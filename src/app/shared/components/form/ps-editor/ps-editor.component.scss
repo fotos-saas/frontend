@@ -82,16 +82,44 @@
 // QUILL OVERRIDES — Design token integration
 // ============================================================================
 
+:host {
+  display: block;
+  width: 100%;
+}
+
 :host ::ng-deep {
+  // Force quill-editor to fill width
+  quill-editor {
+    display: block;
+    width: 100%;
+  }
+
   .ql-toolbar {
     border: none !important;
     border-bottom: 1px solid var(--ps-field-border) !important;
-    background: var(--ps-field-bg);
-    padding: 6px 8px !important;
+    background: var(--bg-secondary, #f9fafb);
+    padding: 8px 10px !important;
     font-family: inherit;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
 
     .ql-formats {
-      margin-right: 12px;
+      display: inline-flex;
+      align-items: center;
+      margin-right: 10px;
+      margin-bottom: 0;
+
+      // Vizuális elválasztó csoportok között
+      &:not(:last-child)::after {
+        content: '';
+        display: inline-block;
+        width: 1px;
+        height: 18px;
+        background: var(--ps-field-border);
+        margin-left: 10px;
+        flex-shrink: 0;
+      }
 
       &:last-child {
         margin-right: 0;
@@ -100,18 +128,23 @@
 
     // Toolbar gombok
     button {
-      width: 28px !important;
-      height: 28px !important;
-      padding: 3px !important;
-      border-radius: 4px;
-      transition: background $ps-transition-duration $ps-transition-easing;
+      width: 30px !important;
+      height: 30px !important;
+      padding: 4px !important;
+      border-radius: 6px !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      transition:
+        background $ps-transition-duration $ps-transition-easing,
+        color $ps-transition-duration $ps-transition-easing;
 
       &:hover {
         background: var(--ps-option-hover-bg);
       }
 
       &.ql-active {
-        color: var(--ps-check-bg) !important;
+        background: rgba(37, 99, 235, 0.1);
 
         .ql-stroke {
           stroke: var(--ps-check-bg) !important;
@@ -123,36 +156,51 @@
       }
 
       .ql-stroke {
-        stroke: var(--ps-text-color);
+        stroke: var(--ps-label-color);
+        stroke-width: 2;
       }
 
       .ql-fill {
-        fill: var(--ps-text-color);
+        fill: var(--ps-label-color);
       }
     }
 
     // Select (header dropdown)
     .ql-picker {
       color: var(--ps-text-color);
-      font-size: $ps-field-font-size;
+      font-size: 0.8125rem;
+      height: 30px;
 
       .ql-picker-label {
-        border-color: transparent !important;
-        padding: 2px 4px;
-        border-radius: 4px;
-        transition: background $ps-transition-duration $ps-transition-easing;
+        border: 1px solid var(--ps-field-border) !important;
+        border-radius: 6px;
+        padding: 2px 8px;
+        display: inline-flex;
+        align-items: center;
+        height: 30px;
+        transition:
+          background $ps-transition-duration $ps-transition-easing,
+          border-color $ps-transition-duration $ps-transition-easing;
 
         &:hover {
           background: var(--ps-option-hover-bg);
+          border-color: var(--ps-field-border-hover) !important;
         }
 
         &::before {
-          color: var(--ps-text-color);
+          color: var(--ps-label-color);
+          font-weight: 500;
+          line-height: 1;
         }
 
         .ql-stroke {
-          stroke: var(--ps-text-color);
+          stroke: var(--ps-label-color);
         }
+      }
+
+      &.ql-expanded .ql-picker-label {
+        border-color: var(--ps-focus-border) !important;
+        background: rgba(37, 99, 235, 0.06);
       }
 
       .ql-picker-options {
@@ -161,11 +209,13 @@
         border-radius: $ps-field-border-radius;
         box-shadow: var(--ps-dropdown-shadow);
         padding: 4px;
+        margin-top: 4px;
 
         .ql-picker-item {
-          padding: 4px 8px;
+          padding: 6px 10px;
           border-radius: 4px;
           color: var(--ps-text-color);
+          transition: background 150ms ease;
 
           &:hover {
             background: var(--ps-option-hover-bg);
@@ -173,6 +223,7 @@
 
           &.ql-selected {
             color: var(--ps-check-bg);
+            font-weight: 500;
           }
         }
       }
@@ -190,7 +241,7 @@
     max-height: var(--ps-editor-max-height, 400px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 10px $ps-field-padding-x;
+    padding: 12px $ps-field-padding-x;
     color: var(--ps-text-color);
     line-height: 1.6;
 
@@ -230,16 +281,36 @@
     }
   }
 
-  // Basic mode — kompakt toolbar
+  // Basic mode — kompaktabb
   .ps-editor__container--basic {
     .ql-toolbar {
-      padding: 4px 6px !important;
+      padding: 6px 8px !important;
 
       button {
-        width: 26px !important;
-        height: 26px !important;
+        width: 28px !important;
+        height: 28px !important;
+      }
+
+      .ql-formats::after {
+        height: 16px;
       }
     }
+  }
+}
+
+// ============================================================================
+// DARK MODE — toolbar háttér
+// ============================================================================
+
+@media (prefers-color-scheme: dark) {
+  :host ::ng-deep .ql-toolbar {
+    background: var(--bg-tertiary, #1f2937);
+  }
+}
+
+.dark {
+  :host ::ng-deep .ql-toolbar {
+    background: var(--bg-tertiary, #1f2937);
   }
 }
 

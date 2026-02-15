@@ -1,6 +1,8 @@
 @use '../form-tokens' as *;
 @use '../form-field-base';
 
+:host { display: block; }
+
 .ps-select {
   position: relative;
 

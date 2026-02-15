@@ -1,6 +1,8 @@
 @use '../form-tokens' as *;
 @use '../form-field-base';
 
+:host { display: block; }
+
 $cell-h: 32px;
 $col-w: 52px;
 

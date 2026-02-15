@@ -1,6 +1,8 @@
 @use '../form-tokens' as *;
 @use '../form-field-base';
 
+:host { display: block; }
+
 .ps-textarea {
   &__wrapper {
     border: $ps-field-border-width solid var(--ps-field-border);

@@ -1,5 +1,7 @@
 @use '../form-tokens' as *;
 
+:host { display: inline-block; }
+
 .ps-toggle {
   display: inline-flex;
   align-items: center;

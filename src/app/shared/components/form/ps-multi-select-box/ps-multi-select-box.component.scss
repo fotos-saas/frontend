@@ -1,6 +1,8 @@
 @use '../form-tokens' as *;
 @use '../form-field-base';
 
+:host { display: block; }
+
 .ps-multi-select-box {
   border: $ps-field-border-width solid var(--ps-field-border);
   border-radius: $ps-field-border-radius;

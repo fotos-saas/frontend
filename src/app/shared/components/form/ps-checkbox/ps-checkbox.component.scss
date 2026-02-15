@@ -2,6 +2,8 @@
 @use '../form-animations';
 @use '../form-field-base';
 
+:host { display: inline-block; }
+
 .ps-checkbox {
   display: inline-flex;
   align-items: flex-start;

@@ -2,6 +2,8 @@
 @use '../form-animations';
 @use '../form-field-base';
 
+:host { display: block; }
+
 .ps-radio-group {
   border: none;
   padding: 0;

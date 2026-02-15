@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import type { MyPartnersResponse, SwitchPartnerResponse } from '../../models/auth.models';
 
@@ -20,18 +20,24 @@ export class PartnerSwitchService {
    * User aktív partnereinek lekérdezése
    */
   getMyPartners(): Observable<MyPartnersResponse> {
-    return this.http.get<MyPartnersResponse>(`${environment.apiUrl}/auth/my-partners`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<{ data: MyPartnersResponse }>(`${environment.apiUrl}/auth/my-partners`)
+      .pipe(
+        map(res => res.data),
+        catchError(this.handleError)
+      );
   }
 
   /**
    * Partner váltás (token rotáció + tablo_partner_id frissítés)
    */
   switchPartner(partnerId: number): Observable<SwitchPartnerResponse> {
-    return this.http.post<SwitchPartnerResponse>(
+    return this.http.post<{ data: SwitchPartnerResponse }>(
       `${environment.apiUrl}/auth/switch-partner`,
       { partner_id: partnerId }
-    ).pipe(catchError(this.handleError));
+    ).pipe(
+      map(res => res.data),
+      catchError(this.handleError)
+    );
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

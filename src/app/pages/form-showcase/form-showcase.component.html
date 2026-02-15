@@ -410,6 +410,29 @@
       />
 
       <ps-file-upload
+        label="Mini feltöltő"
+        variant="mini"
+        accept=".jpg,.jpeg,.png"
+        acceptLabel="JPG, PNG"
+        [maxFiles]="3"
+        [maxSizeMB]="5"
+        size="md"
+        (uploadError)="onUploadError($event)"
+      />
+
+      <ps-file-upload
+        label="Mini (egyetlen fájl)"
+        variant="mini"
+        [multiple]="false"
+        accept=".pdf,.doc,.docx"
+        acceptLabel="PDF, DOC"
+        [maxSizeMB]="10"
+        size="lg"
+        hint="Dokumentum csatolása"
+        (uploadError)="onUploadError($event)"
+      />
+
+      <ps-file-upload
         label="Letiltott"
         [disabled]="true"
         size="md"

@@ -6,25 +6,25 @@
       @if (required()) {
         <span class="ps-field__required">*</span>
       }
-      @if (files().length > 0) {
+      @if (files().length > 0 && variant() !== 'mini') {
         <span class="ps-upload__count">({{ files().length }} fájl kiválasztva)</span>
       }
     </label>
   }
 
-  <!-- Dropzone -->
-  @if (canAddMore()) {
+  <!-- ================================================================ -->
+  <!-- MINI VARIANT — input-méretű sáv                                 -->
+  <!-- ================================================================ -->
+  @if (variant() === 'mini') {
     <div
-      class="ps-upload__zone"
-      [class.ps-upload__zone--active]="isDragging()"
-      [class.ps-upload__zone--disabled]="isDisabled()"
-      [class.ps-upload__zone--compact]="variant() === 'compact'"
-      [class.ps-upload__zone--error]="computedState() === 'error'"
-      [class.ps-upload__zone--has-files]="files().length > 0"
+      class="ps-upload__mini"
+      [class.ps-upload__mini--active]="isDragging()"
+      [class.ps-upload__mini--disabled]="isDisabled()"
+      [class.ps-upload__mini--error]="computedState() === 'error'"
+      [class.ps-upload__mini--has-file]="files().length > 0"
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave($event)"
       (drop)="onDrop($event)"
-      (click)="fileInput.click()"
     >
       <input
         #fileInput
@@ -36,72 +36,149 @@
         class="ps-upload__input"
       />
 
-      <div class="ps-upload__content">
-        <div class="ps-upload__icon" [class.ps-upload__icon--active]="isDragging()">
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="variant() === 'compact' ? 20 : 28" />
-        </div>
-        <div class="ps-upload__text-group">
-          <span class="ps-upload__text">{{ resolvedDropzoneText() }}</span>
-          <span class="ps-upload__subtext">{{ resolvedDropzoneHint() }}</span>
-        </div>
-      </div>
-    </div>
-  }
-
-  <!-- Preview lista -->
-  @if (files().length > 0) {
-    <div class="ps-upload__previews" [class.ps-upload__previews--compact]="variant() === 'compact'">
-      @for (preview of files(); track preview.previewUrl || preview.name; let i = $index) {
-        <div class="ps-upload__preview">
-          @if (preview.previewUrl) {
-            <img
-              [src]="preview.previewUrl"
-              [alt]="preview.name"
-              class="ps-upload__thumb"
-              loading="lazy"
-            />
-          } @else {
-            <div class="ps-upload__thumb ps-upload__thumb--placeholder">
-              <lucide-icon [name]="ICONS.FILE" [size]="20" />
-            </div>
-          }
-          <div class="ps-upload__file-info">
-            <span class="ps-upload__file-name" [title]="preview.name">{{ preview.name }}</span>
-            <span class="ps-upload__file-size">{{ preview.size }}</span>
-          </div>
-          <button
-            type="button"
-            class="ps-upload__remove"
-            (click)="removeFile(i); $event.stopPropagation()"
-            [disabled]="isDisabled()"
-            aria-label="Fájl eltávolítása"
-          >
-            <lucide-icon [name]="ICONS.X" [size]="14" />
-          </button>
-        </div>
-      }
-
-      <!-- Összes törlése -->
-      @if (files().length > 1) {
+      @if (files().length === 0) {
+        <!-- Üres állapot: tallózó gomb -->
         <button
           type="button"
-          class="ps-upload__clear-all"
-          (click)="clearAll()"
+          class="ps-upload__mini-browse"
+          (click)="fileInput.click()"
           [disabled]="isDisabled()"
         >
-          <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
-          Összes törlése
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+          <span>Tallózás...</span>
         </button>
+        <span class="ps-upload__mini-hint">{{ resolvedDropzoneHint() }}</span>
+      } @else {
+        <!-- Fájl kiválasztva -->
+        @for (preview of files(); track preview.name; let i = $index) {
+          <div class="ps-upload__mini-file">
+            @if (preview.previewUrl) {
+              <img [src]="preview.previewUrl" [alt]="preview.name" class="ps-upload__mini-thumb" />
+            } @else {
+              <lucide-icon [name]="ICONS.FILE" [size]="16" class="ps-upload__mini-file-icon" />
+            }
+            <span class="ps-upload__mini-name" [title]="preview.name">{{ preview.name }}</span>
+            <span class="ps-upload__mini-size">{{ preview.size }}</span>
+            <button
+              type="button"
+              class="ps-upload__mini-remove"
+              (click)="removeFile(i); $event.stopPropagation()"
+              [disabled]="isDisabled()"
+              aria-label="Fájl eltávolítása"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          </div>
+        }
+        @if (canAddMore()) {
+          <button
+            type="button"
+            class="ps-upload__mini-add"
+            (click)="fileInput.click()"
+            [disabled]="isDisabled()"
+            aria-label="További fájl"
+          >
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+          </button>
+        }
       }
     </div>
-  }
+  } @else {
+    <!-- ================================================================ -->
+    <!-- DEFAULT / COMPACT VARIANT                                        -->
+    <!-- ================================================================ -->
 
-  <!-- Limit elérve -->
-  @if (!canAddMore() && files().length > 0) {
-    <div class="ps-upload__limit-reached">
-      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
-      <span>Maximum {{ multiple() ? maxFiles() : 1 }} fájl feltöltve</span>
-    </div>
+    <!-- Dropzone -->
+    @if (canAddMore()) {
+      <div
+        class="ps-upload__zone"
+        [class.ps-upload__zone--active]="isDragging()"
+        [class.ps-upload__zone--disabled]="isDisabled()"
+        [class.ps-upload__zone--compact]="variant() === 'compact'"
+        [class.ps-upload__zone--error]="computedState() === 'error'"
+        [class.ps-upload__zone--has-files]="files().length > 0"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+      >
+        <input
+          #fileInput
+          type="file"
+          [accept]="accept()"
+          [multiple]="multiple()"
+          [disabled]="isDisabled()"
+          (change)="onFileInputChange($event)"
+          class="ps-upload__input"
+        />
+
+        <div class="ps-upload__content">
+          <div class="ps-upload__icon" [class.ps-upload__icon--active]="isDragging()">
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="variant() === 'compact' ? 20 : 28" />
+          </div>
+          <div class="ps-upload__text-group">
+            <span class="ps-upload__text">{{ resolvedDropzoneText() }}</span>
+            <span class="ps-upload__subtext">{{ resolvedDropzoneHint() }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Preview lista -->
+    @if (files().length > 0) {
+      <div class="ps-upload__previews" [class.ps-upload__previews--compact]="variant() === 'compact'">
+        @for (preview of files(); track preview.previewUrl || preview.name; let i = $index) {
+          <div class="ps-upload__preview">
+            @if (preview.previewUrl) {
+              <img
+                [src]="preview.previewUrl"
+                [alt]="preview.name"
+                class="ps-upload__thumb"
+                loading="lazy"
+              />
+            } @else {
+              <div class="ps-upload__thumb ps-upload__thumb--placeholder">
+                <lucide-icon [name]="ICONS.FILE" [size]="20" />
+              </div>
+            }
+            <div class="ps-upload__file-info">
+              <span class="ps-upload__file-name" [title]="preview.name">{{ preview.name }}</span>
+              <span class="ps-upload__file-size">{{ preview.size }}</span>
+            </div>
+            <button
+              type="button"
+              class="ps-upload__remove"
+              (click)="removeFile(i); $event.stopPropagation()"
+              [disabled]="isDisabled()"
+              aria-label="Fájl eltávolítása"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          </div>
+        }
+
+        <!-- Összes törlése -->
+        @if (files().length > 1) {
+          <button
+            type="button"
+            class="ps-upload__clear-all"
+            (click)="clearAll()"
+            [disabled]="isDisabled()"
+          >
+            <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
+            Összes törlése
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Limit elérve -->
+    @if (!canAddMore() && files().length > 0) {
+      <div class="ps-upload__limit-reached">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+        <span>Maximum {{ multiple() ? maxFiles() : 1 }} fájl feltöltve</span>
+      </div>
+    }
   }
 
   <!-- Error -->

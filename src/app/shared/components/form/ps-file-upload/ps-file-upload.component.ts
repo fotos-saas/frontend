@@ -61,7 +61,7 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
   readonly maxFiles = input<number>(10);
   readonly maxSizeMB = input<number>(20);
   readonly multiple = input<boolean>(true);
-  readonly variant = input<'default' | 'compact'>('default');
+  readonly variant = input<'default' | 'compact' | 'mini'>('default');
   readonly dropzoneText = input<string>('');
   readonly dropzoneHint = input<string>('');
 

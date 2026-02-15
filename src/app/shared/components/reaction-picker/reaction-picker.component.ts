@@ -37,10 +37,12 @@ export const REACTIONS = [...REACTION_EMOJIS];
  *   (reactionSelected)="onReaction($event)"
  * />
  */
+import { DropdownFlipDirective } from '@shared/directives';
+
 @Component({
   selector: 'app-reaction-picker',
   standalone: true,
-  imports: [],
+  imports: [DropdownFlipDirective],
   templateUrl: './reaction-picker.component.html',
   styleUrls: ['./reaction-picker.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

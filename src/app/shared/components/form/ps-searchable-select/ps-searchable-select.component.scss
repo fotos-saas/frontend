@@ -56,6 +56,21 @@
     top: 100%;
     left: -$ps-field-border-width;
     right: -$ps-field-border-width;
+
+    &.ps-dropdown--flip-up {
+      top: auto;
+      bottom: 100%;
+      border-radius: $ps-field-border-radius $ps-field-border-radius 0 0;
+      border-top: 1px solid var(--ps-dropdown-border);
+      border-bottom: none;
+    }
+  }
+
+  &.ps-dropdown-container--flip-up.ps-searchable-select--open .ps-searchable-select__trigger {
+    border-bottom-left-radius: $ps-field-border-radius;
+    border-bottom-right-radius: $ps-field-border-radius;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
 }
 

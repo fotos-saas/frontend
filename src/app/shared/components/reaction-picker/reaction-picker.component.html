@@ -39,7 +39,7 @@
 
       <!-- Picker dropdown -->
       @if (isPickerOpen()) {
-        <div class="reaction-picker" (click)="$event.stopPropagation()">
+        <div class="reaction-picker" psDropdownFlip (click)="$event.stopPropagation()">
           @for (emoji of availableReactions; track emoji) {
             <button
               type="button"

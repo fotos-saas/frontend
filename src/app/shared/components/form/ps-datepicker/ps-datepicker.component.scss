@@ -120,6 +120,25 @@
     min-width: 280px;
     transform-origin: top center;
     animation: psDropdownOpen 200ms $ps-spring-easing;
+
+    // Flip-up: felfelé nyílik
+    &.ps-dropdown--flip-up {
+      top: auto;
+      bottom: 100%;
+      border-radius: $ps-field-border-radius $ps-field-border-radius 0 0;
+      border-top: 1px solid var(--ps-dropdown-border);
+      border-bottom: none;
+      transform-origin: bottom center;
+      animation: psDropdownOpenUp 200ms $ps-spring-easing;
+    }
+  }
+
+  // Flip-up: trigger border radius csere
+  &.ps-dropdown-container--flip-up.ps-datepicker--open .ps-datepicker__trigger {
+    border-bottom-left-radius: $ps-field-border-radius;
+    border-bottom-right-radius: $ps-field-border-radius;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
 
   // ──────────────────────────────────────
@@ -314,6 +333,10 @@
 
   .ps-datepicker__panel {
     animation: none;
+
+    &.ps-dropdown--flip-up {
+      animation: none;
+    }
   }
 
   .ps-datepicker__day,

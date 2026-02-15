@@ -113,6 +113,13 @@ $col-w: 52px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     animation: psDropdownOpen 200ms $ps-spring-easing;
+
+    &.ps-dropdown--flip-up {
+      top: auto;
+      bottom: calc(100% + 4px);
+      transform-origin: bottom center;
+      animation: psDropdownOpenUp 200ms $ps-spring-easing;
+    }
   }
 
   // ── Body (two columns) ────────────
@@ -220,7 +227,7 @@ $col-w: 52px;
 @media (prefers-reduced-motion: reduce) {
   .ps-field--error .ps-timepicker__trigger { animation: none; }
   .ps-timepicker__chevron { transition: none; }
-  .ps-timepicker__panel { animation: none; }
+  .ps-timepicker__panel { animation: none; &.ps-dropdown--flip-up { animation: none; } }
   .ps-timepicker__cell,
   .ps-timepicker__now-btn,
   .ps-timepicker__clear { transition: none; }

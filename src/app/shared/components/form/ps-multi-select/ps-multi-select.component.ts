@@ -12,13 +12,14 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { DropdownFlipDirective } from '@shared/directives';
 import { PsFormFieldBase } from '../form-field-base';
 import { PsSelectOption } from '../form.types';
 
 @Component({
   selector: 'ps-multi-select',
   standalone: true,
-  imports: [NgClass, LucideAngularModule],
+  imports: [NgClass, LucideAngularModule, DropdownFlipDirective],
   templateUrl: './ps-multi-select.component.html',
   styleUrl: './ps-multi-select.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -17,13 +17,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '@shared/constants/icons.constants';
+import { DropdownFlipDirective } from '@shared/directives';
 import { PsFormFieldBase } from '../form-field-base';
 import { PsSelectOption } from '../form.types';
 
 @Component({
   selector: 'ps-autocomplete',
   standalone: true,
-  imports: [NgClass, LucideAngularModule],
+  imports: [NgClass, LucideAngularModule, DropdownFlipDirective],
   templateUrl: './ps-autocomplete.component.html',
   styleUrl: './ps-autocomplete.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

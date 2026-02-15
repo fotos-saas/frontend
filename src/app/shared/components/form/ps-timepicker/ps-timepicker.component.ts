@@ -12,6 +12,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { DropdownFlipDirective } from '@shared/directives';
 import { PsFormFieldBase } from '../form-field-base';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -21,7 +22,7 @@ const ITEM_HEIGHT = 32;
 @Component({
   selector: 'ps-timepicker',
   standalone: true,
-  imports: [NgClass, LucideAngularModule],
+  imports: [NgClass, LucideAngularModule, DropdownFlipDirective],
   templateUrl: './ps-timepicker.component.html',
   styleUrl: './ps-timepicker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

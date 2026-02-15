@@ -395,6 +395,14 @@
     text-align: center;
   }
 
+  // ── Flip-up modifier (panel felfelé nyílik) ──
+  &--flip-up {
+    top: auto;
+    bottom: calc(100% + 4px);
+    transform-origin: bottom center;
+    animation: psDropdownOpenUp 200ms $ps-spring-easing;
+  }
+
   &__group-label {
     padding: 8px $ps-field-padding-x 4px;
     font-size: $ps-hint-font-size;
@@ -487,6 +495,10 @@
     animation: none;
 
     &--closing {
+      animation: none;
+    }
+
+    &--flip-up {
       animation: none;
     }
   }

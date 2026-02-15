@@ -69,6 +69,18 @@
   }
 }
 
+// Dropdown open (flip-up: felfelé nyílik)
+@keyframes psDropdownOpenUp {
+  from {
+    opacity: 0;
+    transform: scaleY(0.85) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+}
+
 // Checkbox SVG draw
 @keyframes psCheckDraw {
   from { stroke-dashoffset: 24; }
@@ -128,6 +140,7 @@
   @keyframes psFieldCheckPulse { from, to { transform: none; } }
   @keyframes psDropdownOpen { from, to { opacity: 1; transform: none; } }
   @keyframes psDropdownClose { from, to { opacity: 0; transform: none; } }
+  @keyframes psDropdownOpenUp { from, to { opacity: 1; transform: none; } }
   @keyframes psCheckDraw { from, to { stroke-dashoffset: 0; } }
   @keyframes psCheckBgFill { from, to { transform: none; } }
   @keyframes psRadioDotIn { from, to { transform: none; } }

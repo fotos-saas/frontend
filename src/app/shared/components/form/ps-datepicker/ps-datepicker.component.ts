@@ -12,6 +12,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { DropdownFlipDirective } from '@shared/directives';
 import { PsFormFieldBase } from '../form-field-base';
 
 interface CalendarDay {
@@ -30,7 +31,7 @@ const DAY_NAMES = ['H', 'K', 'Sze', 'Cs', 'P', 'Szo', 'V'];
 @Component({
   selector: 'ps-datepicker',
   standalone: true,
-  imports: [NgClass, LucideAngularModule],
+  imports: [NgClass, LucideAngularModule, DropdownFlipDirective],
   templateUrl: './ps-datepicker.component.html',
   styleUrl: './ps-datepicker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

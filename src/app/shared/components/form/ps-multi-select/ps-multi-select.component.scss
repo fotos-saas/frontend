@@ -66,6 +66,12 @@
     box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
   }
 
+  // Flip-up: nem kell trigger radius csere mert a multi-select gap-pel nyílik
+  &--open .ps-dropdown.ps-dropdown--flip-up {
+    top: auto;
+    bottom: calc(100% + 4px);
+  }
+
   &__check {
     display: flex;
     align-items: center;

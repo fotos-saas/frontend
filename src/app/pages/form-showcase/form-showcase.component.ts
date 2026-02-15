@@ -17,6 +17,7 @@ import {
   PsTimepickerComponent,
   PsDaterangeComponent,
   PsFileUploadComponent,
+  PsCodeInputComponent,
   DateRange,
   PsSelectOption,
   PsRadioOption,
@@ -44,6 +45,7 @@ import {
     PsTimepickerComponent,
     PsDaterangeComponent,
     PsFileUploadComponent,
+    PsCodeInputComponent,
   ],
   templateUrl: './form-showcase.component.html',
   styleUrl: './form-showcase.component.scss',
@@ -127,6 +129,10 @@ export class FormShowcaseComponent {
 
   // Tag input
   tagValues = signal<string[]>(['Angular', 'TypeScript']);
+
+  // Code input
+  codeValue = signal('');
+  codeMaskedValue = signal('');
 
   // Rich text editor
   editorBasicValue = signal('');

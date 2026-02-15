@@ -8,7 +8,7 @@ import { BiometricService } from '../../core/services/biometric.service';
 import { CapacitorService } from '../../core/services/capacitor.service';
 import { ElectronService } from '../../core/services/electron.service';
 import { LucideAngularModule } from 'lucide-angular';
-import { PsInputComponent, PsCheckboxComponent } from '@shared/components/form';
+import { PsInputComponent, PsCheckboxComponent, PsCodeInputComponent } from '@shared/components/form';
 
 type LoginTab = 'code' | 'password';
 
@@ -23,7 +23,7 @@ type LoginTab = 'code' | 'password';
     styleUrls: ['./login.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, ReactiveFormsModule, RouterModule, AuthLayoutComponent, LucideAngularModule, PsInputComponent, PsCheckboxComponent]
+    imports: [FormsModule, ReactiveFormsModule, RouterModule, AuthLayoutComponent, LucideAngularModule, PsInputComponent, PsCheckboxComponent, PsCodeInputComponent]
 })
 export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

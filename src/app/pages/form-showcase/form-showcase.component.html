@@ -66,6 +66,40 @@
     </div>
   </section>
 
+  <!-- 1b. Kód bevitel (PIN/OTP) -->
+  <section class="showcase__section">
+    <h2 class="showcase__section-title">Kód bevitel (PIN/OTP)</h2>
+    <div class="showcase__grid">
+      <ps-code-input
+        label="6-jegyű kód"
+        [(ngModel)]="codeValue"
+        placeholder="123456"
+        size="md"
+        hint="Csak számokat fogad el"
+      />
+      <ps-code-input
+        label="Rejtett kód (szem ikonnal)"
+        [(ngModel)]="codeMaskedValue"
+        placeholder="000000"
+        [masked]="true"
+        size="md"
+        hint="Kattints a szem ikonra"
+      />
+      <ps-code-input
+        label="4-jegyű PIN"
+        placeholder="0000"
+        [maxLength]="4"
+        size="sm"
+      />
+      <ps-code-input
+        label="Letiltott"
+        [disabled]="true"
+        placeholder="------"
+        size="md"
+      />
+    </div>
+  </section>
+
   <!-- 2. Állapotok -->
   <section class="showcase__section">
     <h2 class="showcase__section-title">Állapotok</h2>

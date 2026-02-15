@@ -19,3 +19,4 @@ export { PsDatepickerComponent } from './ps-datepicker/ps-datepicker.component';
 export { PsTimepickerComponent } from './ps-timepicker/ps-timepicker.component';
 export { PsDaterangeComponent, DateRange } from './ps-daterange/ps-daterange.component';
 export { PsFileUploadComponent, PsFilePreview } from './ps-file-upload/ps-file-upload.component';
+export { PsCodeInputComponent } from './ps-code-input/ps-code-input.component';

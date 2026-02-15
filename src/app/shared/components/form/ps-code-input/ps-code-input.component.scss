@@ -1,0 +1,63 @@
+@use '../form-tokens' as *;
+@use '../form-field-base';
+
+// ============================================================================
+// PS-CODE-INPUT — PIN/OTP kód beviteli mező
+// ============================================================================
+
+.ps-code__wrapper {
+  position: relative;
+}
+
+.ps-code__input {
+  text-align: center;
+  font-size: 1.75rem;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', 'DejaVu Sans Mono', monospace;
+  letter-spacing: 0.25em;
+  padding: 0 48px 0 $ps-field-padding-x;
+  height: 52px;
+
+  &::placeholder {
+    letter-spacing: 0.25em;
+  }
+}
+
+// Szem ikon (masked mód)
+.ps-code__toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--ps-placeholder-color);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color $ps-transition-duration $ps-transition-easing,
+              background $ps-transition-duration $ps-transition-easing;
+
+  &:hover {
+    color: var(--ps-text-color);
+    background: var(--ps-option-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ps-focus-border);
+    outline-offset: -2px;
+  }
+}
+
+// Wrapper magasság felülírás
+:host .ps-field__wrapper {
+  height: 52px;
+}
+
+// Ha nincs toggle, ne legyen jobb padding
+.ps-code__wrapper:not(:has(.ps-code__toggle)) .ps-code__input {
+  padding-right: $ps-field-padding-x;
+}

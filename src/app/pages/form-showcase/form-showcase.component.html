@@ -138,19 +138,18 @@
   <!-- 6. Radio group -->
   <section class="showcase__section">
     <h2 class="showcase__section-title">Radio group</h2>
-    <div class="showcase__grid">
-      <ps-radio-group
-        label="Megjelenés"
-        [options]="radioOptions"
-        [(ngModel)]="radioValue"
-      />
-      <ps-radio-group
-        label="Horizontális"
-        [options]="radioOptions"
-        [(ngModel)]="radioValue"
-        direction="horizontal"
-      />
-    </div>
+    <ps-radio-group
+      label="Vertikális (alapértelmezett)"
+      [options]="radioOptions"
+      [(ngModel)]="radioValue"
+    />
+    <ps-radio-group
+      label="Horizontális"
+      [options]="radioOptions"
+      [(ngModel)]="radioValue"
+      direction="horizontal"
+      style="margin-top: 24px"
+    />
     <div class="showcase__grid" style="margin-top: 24px">
       <ps-radio-group
         label="Kártyák (vertikális)"

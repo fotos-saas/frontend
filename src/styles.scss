@@ -1,6 +1,9 @@
 // Globális animációk (fadeIn, spin, pulse, stb.)
 @use 'styles/animations';
 
+// Form Design System — CSS custom properties (globálisan kell!)
+@use 'app/shared/components/form/form-tokens';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

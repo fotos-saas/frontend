@@ -203,12 +203,3 @@
   }
 </div>
 
-<!-- Lightbox (page-card KÍVÜL kell lennie) -->
-@if (lightboxOpen() && lightboxMedia().length > 0) {
-  <app-media-lightbox
-    [media]="lightboxMedia()"
-    [currentIndex]="lightboxIndex()"
-    (close)="closeLightbox()"
-    (navigate)="onLightboxNavigate($event)"
-  />
-}

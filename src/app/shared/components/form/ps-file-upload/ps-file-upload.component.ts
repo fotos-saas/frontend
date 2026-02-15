@@ -7,7 +7,13 @@ import {
   signal,
   computed,
   OnDestroy,
+  inject,
+  ApplicationRef,
+  createComponent,
+  EnvironmentInjector,
+  ComponentRef,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -28,7 +34,7 @@ let nextUploadId = 0;
 @Component({
   selector: 'ps-file-upload',
   standalone: true,
-  imports: [NgClass, LucideAngularModule, MediaLightboxComponent],
+  imports: [NgClass, LucideAngularModule],
   templateUrl: './ps-file-upload.component.html',
   styleUrl: './ps-file-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +52,11 @@ let nextUploadId = 0;
 })
 export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
   readonly ICONS = ICONS;
+
+  private readonly document = inject(DOCUMENT);
+  private readonly appRef = inject(ApplicationRef);
+  private readonly envInjector = inject(EnvironmentInjector);
+  private lightboxRef: ComponentRef<MediaLightboxComponent> | null = null;
 
   // --- Közös ps-field inputok ---
   readonly label = input<string>('');
@@ -74,8 +85,6 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
   private cvaDisabled = signal(false);
 
   // --- Lightbox ---
-  readonly lightboxOpen = signal(false);
-  readonly lightboxIndex = signal(0);
   readonly lightboxMedia = computed<LightboxMediaItem[]>(() =>
     this.files()
       .filter(f => f.previewUrl)
@@ -188,23 +197,36 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
     }
   }
 
-  // --- Lightbox kezeles ---
+  // --- Lightbox kezeles (document.body-ra appendelve a stacking context miatt) ---
   openLightbox(previewIndex: number): void {
-    // previewIndex a files() tömbben, de a lightboxMedia csak a képes fájlokat tartalmazza
     const file = this.files()[previewIndex];
     if (!file?.previewUrl) return;
-    const lbIndex = this.lightboxMedia().findIndex(m => m.url === file.previewUrl);
+
+    const media = this.lightboxMedia();
+    const lbIndex = media.findIndex(m => m.url === file.previewUrl);
     if (lbIndex < 0) return;
-    this.lightboxIndex.set(lbIndex);
-    this.lightboxOpen.set(true);
+
+    this.destroyLightbox();
+
+    const ref = createComponent(MediaLightboxComponent, {
+      environmentInjector: this.envInjector,
+    });
+
+    ref.setInput('media', media);
+    ref.setInput('currentIndex', lbIndex);
+    ref.instance.close.subscribe(() => this.destroyLightbox());
+    ref.instance.navigate.subscribe((i: number) => ref.setInput('currentIndex', i));
+
+    this.appRef.attachView(ref.hostView);
+    this.document.body.appendChild(ref.location.nativeElement);
+    this.lightboxRef = ref;
   }
 
-  closeLightbox(): void {
-    this.lightboxOpen.set(false);
-  }
-
-  onLightboxNavigate(index: number): void {
-    this.lightboxIndex.set(index);
+  private destroyLightbox(): void {
+    if (!this.lightboxRef) return;
+    this.appRef.detachView(this.lightboxRef.hostView);
+    this.lightboxRef.destroy();
+    this.lightboxRef = null;
   }
 
   // --- Fajl kezeles ---
@@ -223,6 +245,7 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyLightbox();
     this.clearAllPreviews();
   }
 

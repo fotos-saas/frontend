@@ -50,84 +50,76 @@
     <span class="ps-field__hint">Maximum 5000 karakter</span>
   </div>
 
-  <!-- Fájl feltöltés sor -->
-  <div class="form-row">
-    <!-- Háttérkép -->
-    <div class="form-field">
-      @if (backgroundUploading()) {
-        <div class="file-upload__loading" role="status" aria-live="polite">
-          <div class="spinner spinner--small" aria-hidden="true"></div>
-          <span>Feltöltés...</span>
-        </div>
-      } @else if (backgroundFileName()) {
-        <label class="form-label">Háttérkép (opcionális)</label>
-        <div class="file-upload__preview">
-          <span class="file-upload__filename">{{ backgroundFileName() }}</span>
-          <button
-            type="button"
-            class="file-upload__remove"
-            (click)="removeBackgroundImage()"
-            aria-label="Háttérkép törlése"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      } @else {
-        <ps-file-upload
-          variant="compact"
-          label="Háttérkép (opcionális)"
-          [multiple]="false"
-          accept=".jpg,.jpeg,.bmp"
-          acceptLabel="JPG, JPEG, BMP"
-          [maxSizeMB]="16"
-          dropzoneText="Húzd ide a háttérképet vagy kattints!"
-          [ngModel]="[]"
-          (ngModelChange)="onBackgroundFileChange($event)"
-        />
-      }
-    </div>
-
-    <!-- Csatolmányok -->
-    <div class="form-field">
-      @if (attachmentUploading()) {
-        <div class="file-upload__loading" role="status" aria-live="polite">
-          <div class="spinner spinner--small" aria-hidden="true"></div>
-          <span>Feltöltés...</span>
-        </div>
-      } @else {
-        <ps-file-upload
-          variant="compact"
-          label="Csatolmányok (opcionális)"
-          [multiple]="false"
-          accept=".zip,.rar,.7z"
-          acceptLabel="ZIP, RAR, 7Z"
-          [maxSizeMB]="64"
-          dropzoneText="Húzd ide a csatolmányt vagy kattints!"
-          [ngModel]="[]"
-          (ngModelChange)="onAttachmentFileChange($event)"
-        />
-      }
-      @if (attachmentFileNames().length > 0) {
-        <div class="file-list" role="list" aria-label="Feltöltött csatolmányok">
-          @for (filename of attachmentFileNames(); track $index) {
-            <div class="file-list__item" role="listitem">
-              <span class="file-list__filename">{{ filename }}</span>
-              <button
-                type="button"
-                class="file-list__remove"
-                (click)="removeAttachment($index)"
-                [attr.aria-label]="'Csatolmány törlése: ' + filename"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          }
-        </div>
-      }
-    </div>
+  <!-- Háttérkép -->
+  <div class="form-field">
+    @if (backgroundUploading()) {
+      <div class="file-upload__loading" role="status" aria-live="polite">
+        <div class="spinner spinner--small" aria-hidden="true"></div>
+        <span>Feltöltés...</span>
+      </div>
+    } @else if (backgroundFileName()) {
+      <label class="form-label">Háttérkép (opcionális)</label>
+      <div class="file-upload__preview">
+        <span class="file-upload__filename">{{ backgroundFileName() }}</span>
+        <button
+          type="button"
+          class="file-upload__remove"
+          (click)="removeBackgroundImage()"
+          aria-label="Háttérkép törlése"
+        >
+          <lucide-icon [name]="ICONS.X" [size]="16" />
+        </button>
+      </div>
+    } @else {
+      <ps-file-upload
+        variant="mini"
+        label="Háttérkép (opcionális)"
+        [multiple]="false"
+        accept=".jpg,.jpeg,.bmp"
+        acceptLabel="JPG, JPEG, BMP"
+        [maxSizeMB]="16"
+        hint="JPG, JPEG vagy BMP, max. 16MB"
+        [ngModel]="[]"
+        (ngModelChange)="onBackgroundFileChange($event)"
+      />
+    }
   </div>
+
+  <!-- Csatolmányok -->
+  <div class="form-field">
+    @if (attachmentUploading()) {
+      <div class="file-upload__loading" role="status" aria-live="polite">
+        <div class="spinner spinner--small" aria-hidden="true"></div>
+        <span>Feltöltés...</span>
+      </div>
+    } @else {
+      <ps-file-upload
+        variant="mini"
+        label="Csatolmányok (opcionális)"
+        [multiple]="false"
+        accept=".zip,.rar,.7z"
+        acceptLabel="ZIP, RAR, 7Z"
+        [maxSizeMB]="64"
+        hint="ZIP, RAR vagy 7Z, max. 64MB"
+        [ngModel]="[]"
+        (ngModelChange)="onAttachmentFileChange($event)"
+      />
+    }
+    @if (attachmentFileNames().length > 0) {
+      <div class="file-list" role="list" aria-label="Feltöltött csatolmányok">
+        @for (filename of attachmentFileNames(); track $index) {
+          <div class="file-list__item" role="listitem">
+            <span class="file-list__filename">{{ filename }}</span>
+            <button
+              type="button"
+              class="file-list__remove"
+              (click)="removeAttachment($index)"
+              [attr.aria-label]="'Csatolmány törlése: ' + filename"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          </div>
+        }
+      </div>
+    }
 </section>

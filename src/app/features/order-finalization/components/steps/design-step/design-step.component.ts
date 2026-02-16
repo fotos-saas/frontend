@@ -13,6 +13,8 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONS } from '@shared/constants/icons.constants';
 import { PsInputComponent, PsFileUploadComponent } from '@shared/components/form';
 import { DesignData, FileUploadResponse } from '../../../models/order-finalization.models';
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
@@ -35,13 +37,15 @@ import { ToastService } from '../../../../../core/services/toast.service';
   styleUrls: ['./design-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule, NgxEditorModule, PsInputComponent, PsFileUploadComponent]
+  imports: [FormsModule, NgxEditorModule, LucideAngularModule, PsInputComponent, PsFileUploadComponent]
 })
 export class DesignStepComponent implements OnInit {
   private readonly validationService = inject(OrderValidationService);
   private readonly fileUploadService = inject(FileUploadService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly ICONS = ICONS;
 
   /** Input: Design adatok */
   data = input.required<DesignData>();

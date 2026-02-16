@@ -131,6 +131,43 @@ export class OrderValidationService {
   }
 
   /**
+   * Step 1 (Kapcsolattartó) validáció - Partner mód
+   * Telefonszám nem kötelező
+   */
+  validateContactDataPartner(data: ContactData): ValidationResult {
+    const errors: ValidationError[] = [];
+
+    if (!this.isNotEmpty(data.name)) {
+      errors.push({ field: 'name', message: 'A név megadása kötelező' });
+    } else if (!this.isWithinMaxLength(data.name, 100)) {
+      errors.push({ field: 'name', message: 'A név maximum 100 karakter lehet' });
+    }
+
+    if (!this.isNotEmpty(data.email)) {
+      errors.push({ field: 'email', message: 'Az email cím megadása kötelező' });
+    } else if (!this.isValidEmail(data.email)) {
+      errors.push({ field: 'email', message: 'Kérlek, adj meg egy érvényes email címet' });
+    }
+
+    // Telefon opcionális, de ha meg van adva, valid kell legyen
+    if (this.isNotEmpty(data.phone) && !this.isValidPhone(data.phone)) {
+      errors.push({ field: 'phone', message: 'Kérlek, adj meg egy érvényes magyar telefonszámot (pl. +36 30 123 4567)' });
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Step 1 partner mód egyszerű valid check
+   */
+  isContactDataValidForPartner(data: ContactData): boolean {
+    return this.validateContactDataPartner(data).valid;
+  }
+
+  /**
    * Step 2 (Alap adatok) validáció
    * @param data - BasicInfoData
    * @returns ValidationResult

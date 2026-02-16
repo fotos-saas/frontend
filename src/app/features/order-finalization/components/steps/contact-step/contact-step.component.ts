@@ -35,12 +35,17 @@ export class ContactStepComponent {
   /** Input: Kapcsolattartó adatok */
   data = input.required<ContactData>();
 
+  /** Input: Partner mód (telefon nem kötelező) */
+  partnerMode = input<boolean>(false);
+
   /** Output: Adatok változása */
   dataChange = output<ContactData>();
 
   /** Validációs hibák (computed) */
   errors = computed<ValidationError[]>(() => {
-    const result = this.validationService.validateContactData(this.data());
+    const result = this.partnerMode()
+      ? this.validationService.validateContactDataPartner(this.data())
+      : this.validationService.validateContactData(this.data());
     return result.errors;
   });
 

@@ -49,6 +49,7 @@
           @case (0) {
             <app-contact-step
               [data]="formData().contact"
+              [partnerMode]="true"
               (dataChange)="onContactChange($event)"
             />
           }

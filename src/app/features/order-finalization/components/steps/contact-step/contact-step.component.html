@@ -32,7 +32,7 @@
     type="tel"
     label="Telefonszám"
     placeholder="+36 30 123 4567"
-    [required]="true"
+    [required]="!partnerMode()"
     [ngModel]="data().phone"
     (ngModelChange)="updateField('phone', $event)"
     (blur)="touched.phone = true"

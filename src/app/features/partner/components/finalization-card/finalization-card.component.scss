@@ -187,8 +187,22 @@
   color: #ffffff;
 }
 
-.action-btn--download:hover {
+.action-btn--download:hover:not(:disabled) {
   background: #059669;
+}
+
+.action-btn--spinning {
+  opacity: 0.8;
+  cursor: wait;
+
+  lucide-icon {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .action-btn--upload {

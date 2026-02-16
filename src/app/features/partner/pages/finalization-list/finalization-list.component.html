@@ -48,6 +48,7 @@
         <app-finalization-card
           [item]="item"
           [availableSizes]="availableTabloSizes()"
+          [downloading]="downloadingId() === item.id"
           [style.animation-delay]="i * 0.05 + 's'"
           (cardClick)="viewProject($event)"
           (thumbnailClick)="openLightbox($event)"

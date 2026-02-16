@@ -21,6 +21,7 @@ export class FinalizationCardComponent {
 
   readonly item = input.required<FinalizationListItem>();
   readonly availableSizes = input<TabloSize[]>([]);
+  readonly downloading = input(false);
 
   readonly cardClick = output<FinalizationListItem>();
   readonly thumbnailClick = output<FinalizationListItem>();

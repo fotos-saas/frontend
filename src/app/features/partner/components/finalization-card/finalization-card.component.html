@@ -81,10 +81,12 @@
       <button
         type="button"
         class="action-btn action-btn--download"
+        [class.action-btn--spinning]="downloading()"
+        [disabled]="downloading()"
         (click)="onDownloadClick($event)"
-        matTooltip="Flat letöltése"
+        [matTooltip]="downloading() ? 'Letöltés folyamatban...' : 'Flat letöltése'"
       >
-        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+        <lucide-icon [name]="downloading() ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="14" />
       </button>
     }
     <button

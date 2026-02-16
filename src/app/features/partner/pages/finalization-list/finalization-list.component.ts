@@ -88,6 +88,9 @@ export class FinalizationListComponent implements OnInit {
   lightboxMedia = signal<LightboxMediaItem[]>([]);
   lightboxOpen = signal(false);
 
+  // Download state
+  downloadingId = signal<number | null>(null);
+
   // Upload dialog
   showUploadDialog = signal(false);
   uploadFileType = signal<'small_tablo' | 'flat'>('small_tablo');
@@ -173,16 +176,21 @@ export class FinalizationListComponent implements OnInit {
 
   downloadFile(item: FinalizationListItem): void {
     const file = item.printFlat;
-    if (!file) return;
+    if (!file || this.downloadingId() === item.id) return;
 
+    this.downloadingId.set(item.id);
     const fileName = file.fileName;
     this.finalizationService.downloadPrintReady(item.id, 'flat')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (blob) => saveFile(blob, fileName),
+        next: (blob) => {
+          saveFile(blob, fileName);
+          this.downloadingId.set(null);
+        },
         error: (err) => {
           this.logger.error('Failed to download print ready file', err);
           this.toast.error('Hiba', 'Nem sikerült letölteni a fájlt.');
+          this.downloadingId.set(null);
         },
       });
   }

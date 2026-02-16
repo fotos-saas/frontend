@@ -21,3 +21,14 @@
     transform: none;
   }
 }
+
+/* Partner switcher dropdown a sidebar-on belül marad */
+.mobile-partner-switcher {
+  // A dropdown ne lógjon ki a sidebar-ból
+  ::ng-deep .partner-switcher__dropdown {
+    left: 0;
+    right: 0;
+    min-width: auto;
+    max-width: none;
+  }
+}

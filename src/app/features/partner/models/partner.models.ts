@@ -529,6 +529,7 @@ export interface FinalizationListItem {
   className: string | null;
   classYear: string | null;
   sampleThumbUrl: string | null;
+  samplePreviewUrl: string | null;
   finalizedAt: string | null;
   orderSubmittedAt: string | null;
   tabloSize: string | null;

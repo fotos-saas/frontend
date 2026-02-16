@@ -23,6 +23,7 @@ export class FinalizationCardComponent {
   readonly availableSizes = input<TabloSize[]>([]);
 
   readonly cardClick = output<FinalizationListItem>();
+  readonly thumbnailClick = output<FinalizationListItem>();
   readonly downloadClick = output<FinalizationListItem>();
   readonly uploadClick = output<FinalizationListItem>();
   readonly markDoneClick = output<FinalizationListItem>();
@@ -31,6 +32,13 @@ export class FinalizationCardComponent {
   readonly sizeOptions = computed<PsSelectOption[]>(() =>
     this.availableSizes().map(s => ({ id: s.value, label: s.label }))
   );
+
+  onThumbnailClick(event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.item().samplePreviewUrl) {
+      this.thumbnailClick.emit(this.item());
+    }
+  }
 
   onDownloadClick(event: MouseEvent): void {
     event.stopPropagation();

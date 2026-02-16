@@ -6,7 +6,9 @@
         [src]="item().sampleThumbUrl"
         alt="Minta"
         class="sample-thumb"
-        loading="lazy" />
+        [class.sample-thumb--clickable]="!!item().samplePreviewUrl"
+        loading="lazy"
+        (click)="onThumbnailClick($event)" />
     } @else {
       <div class="sample-placeholder">
         <lucide-icon [name]="ICONS.IMAGE" [size]="16" />

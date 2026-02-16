@@ -15,6 +15,8 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { saveFile } from '../../../../shared/utils/file.util';
+import { MediaLightboxComponent } from '../../../../shared/components/media-lightbox/media-lightbox.component';
+import { LightboxMediaItem } from '../../../../shared/components/media-lightbox/media-lightbox.types';
 
 @Component({
   selector: 'app-finalization-list',
@@ -27,6 +29,7 @@ import { saveFile } from '../../../../shared/utils/file.util';
     SmartFilterBarComponent,
     ListPaginationComponent,
     ConfirmDialogComponent,
+    MediaLightboxComponent,
   ],
   templateUrl: './finalization-list.component.html',
   styleUrl: './finalization-list.component.scss',
@@ -81,6 +84,10 @@ export class FinalizationListComponent implements OnInit {
   totalItems = signal(0);
   availableTabloSizes = signal<TabloSize[]>([]);
 
+  // Lightbox
+  lightboxMedia = signal<LightboxMediaItem[]>([]);
+  lightboxOpen = signal(false);
+
   // Upload dialog
   showUploadDialog = signal(false);
   uploadFileType = signal<'small_tablo' | 'flat'>('small_tablo');
@@ -130,6 +137,22 @@ export class FinalizationListComponent implements OnInit {
 
   viewProject(item: FinalizationListItem): void {
     this.router.navigate(['/partner/projects', item.id]);
+  }
+
+  openLightbox(item: FinalizationListItem): void {
+    if (!item.samplePreviewUrl) return;
+    this.lightboxMedia.set([{
+      id: item.id,
+      url: item.samplePreviewUrl,
+      fileName: `${item.schoolName ?? 'Minta'} - ${item.className ?? ''}`.trim(),
+    }]);
+    this.lightboxOpen.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen.set(false);
+    document.body.style.overflow = '';
   }
 
   openUploadDialog(item: FinalizationListItem): void {

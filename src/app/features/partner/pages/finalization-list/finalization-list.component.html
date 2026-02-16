@@ -50,6 +50,7 @@
           [availableSizes]="availableTabloSizes()"
           [style.animation-delay]="i * 0.05 + 's'"
           (cardClick)="viewProject($event)"
+          (thumbnailClick)="openLightbox($event)"
           (downloadClick)="downloadFile($event)"
           (uploadClick)="openUploadDialog($event)"
           (markDoneClick)="onMarkAsDone($event)"
@@ -91,5 +92,15 @@
     (close)="closeUploadDialog()"
     (uploaded)="onFileUploaded()"
     (tabloSizeChanged)="onDialogSizeChange($event)"
+  />
+}
+
+<!-- Lightbox -->
+@if (lightboxOpen()) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="0"
+    (close)="closeLightbox()"
+    (navigate)=""
   />
 }

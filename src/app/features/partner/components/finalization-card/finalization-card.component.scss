@@ -139,6 +139,17 @@
   object-fit: cover;
   border-radius: 4px;
   border: 1px solid #e2e8f0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sample-thumb--clickable {
+  cursor: zoom-in;
+}
+
+.sample-thumb--clickable:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border-color: #94a3b8;
 }
 
 .sample-placeholder {

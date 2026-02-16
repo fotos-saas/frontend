@@ -35,12 +35,17 @@ export class BasicInfoStepComponent {
   /** Input: Alap adatok */
   data = input.required<BasicInfoData>();
 
+  /** Input: Partner mód (város nem kötelező) */
+  partnerMode = input<boolean>(false);
+
   /** Output: Adatok változása */
   dataChange = output<BasicInfoData>();
 
   /** Validációs hibák (computed) */
   errors = computed<ValidationError[]>(() => {
-    const result = this.validationService.validateBasicInfo(this.data());
+    const result = this.partnerMode()
+      ? this.validationService.validateBasicInfoPartner(this.data())
+      : this.validationService.validateBasicInfo(this.data());
     return result.errors;
   });
 

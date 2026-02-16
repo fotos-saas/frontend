@@ -55,6 +55,7 @@
           @case (1) {
             <app-basic-info-step
               [data]="formData().basicInfo"
+              [partnerMode]="true"
               (dataChange)="onBasicInfoChange($event)"
             />
           }

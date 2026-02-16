@@ -81,7 +81,7 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
     const step = this.currentStep();
     switch (step) {
       case 0: return this.validation.isContactDataValid(data.contact);
-      case 1: return this.validation.isBasicInfoValid(data.basicInfo);
+      case 1: return this.validation.isBasicInfoValidForPartner(data.basicInfo);
       case 2: return this.validation.isDesignDataValid(data.design);
       case 3: return this.validation.isRosterDataValidForPartner(data.roster);
       default: return false;
@@ -91,7 +91,7 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
   canFinalize = computed(() => {
     const data = this.formData();
     return this.validation.isContactDataValid(data.contact)
-      && this.validation.isBasicInfoValid(data.basicInfo)
+      && this.validation.isBasicInfoValidForPartner(data.basicInfo)
       && this.validation.isDesignDataValid(data.design)
       && this.validation.isRosterDataValidForPartner(data.roster);
   });

@@ -183,6 +183,53 @@ export class OrderValidationService {
   }
 
   /**
+   * Step 2 (Alap adatok) validáció - Partner mód
+   * Város nem kötelező
+   */
+  validateBasicInfoPartner(data: BasicInfoData): ValidationResult {
+    const errors: ValidationError[] = [];
+
+    if (!this.isNotEmpty(data.schoolName)) {
+      errors.push({ field: 'schoolName', message: 'Az iskola nevének megadása kötelező' });
+    } else if (!this.isWithinMaxLength(data.schoolName, 200)) {
+      errors.push({ field: 'schoolName', message: 'Az iskola neve maximum 200 karakter lehet' });
+    }
+
+    // Város opcionális partner módban
+    if (data.city && !this.isWithinMaxLength(data.city, 100)) {
+      errors.push({ field: 'city', message: 'A város neve maximum 100 karakter lehet' });
+    }
+
+    if (!this.isNotEmpty(data.className)) {
+      errors.push({ field: 'className', message: 'Az osztály nevének megadása kötelező' });
+    } else if (!this.isWithinMaxLength(data.className, 50)) {
+      errors.push({ field: 'className', message: 'Az osztály neve maximum 50 karakter lehet' });
+    }
+
+    if (!this.isNotEmpty(data.classYear)) {
+      errors.push({ field: 'classYear', message: 'Az évfolyam megadása kötelező' });
+    } else if (!this.isWithinMaxLength(data.classYear, 20)) {
+      errors.push({ field: 'classYear', message: 'Az évfolyam maximum 20 karakter lehet' });
+    }
+
+    if (data.quote && !this.isWithinMaxLength(data.quote, 500)) {
+      errors.push({ field: 'quote', message: 'Az idézet maximum 500 karakter lehet' });
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Step 2 partner mód egyszerű valid check
+   */
+  isBasicInfoValidForPartner(data: BasicInfoData): boolean {
+    return this.validateBasicInfoPartner(data).valid;
+  }
+
+  /**
    * Step 3 (Elképzelés) validáció
    * Betűtípus és betűszín opcionális - ha üres, grafikusra bízza / fekete lesz
    * @param data - DesignData

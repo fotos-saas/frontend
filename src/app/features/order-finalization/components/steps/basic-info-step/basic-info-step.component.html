@@ -20,7 +20,7 @@
     <ps-input
       label="Város"
       placeholder="Budapest"
-      [required]="true"
+      [required]="!partnerMode()"
       [ngModel]="data().city"
       (ngModelChange)="updateField('city', $event)"
       (blur)="touched.city = true"

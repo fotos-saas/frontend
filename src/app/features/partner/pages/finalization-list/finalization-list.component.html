@@ -1,0 +1,79 @@
+<div class="finalization-list-page page-card page-card--wide">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Véglegesítések</h1>
+      <p class="subtitle">{{ totalItems() }} véglegesített projekt</p>
+    </div>
+  </header>
+
+  <!-- Keresés + szűrők -->
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="searchConfig"
+    [filterConfigs]="filterConfigs"
+    [visibleFilterCount]="1"
+    [sortConfig]="sortDef"
+  />
+
+  <!-- Lista -->
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-card skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.PRINTER" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      @if (filterState.search()) {
+        <p>Próbálj más keresési feltételekkel!</p>
+      } @else {
+        <p>Még nincsenek véglegesített projektek.</p>
+      }
+    </div>
+  } @else {
+    <!-- Asztali fejléc -->
+    <app-finalization-table-header
+      [sortBy]="filterState.sortBy()"
+      [sortDir]="filterState.sortDir()"
+      (sortChange)="filterState.setSortBy($event)"
+    />
+
+    <!-- Sorok -->
+    <div class="finalization-grid">
+      @for (item of items(); track item.id; let i = $index) {
+        <app-finalization-card
+          [item]="item"
+          [style.animation-delay]="i * 0.05 + 's'"
+          (cardClick)="viewProject($event)"
+          (downloadClick)="downloadFile($event)"
+          (uploadClick)="openUploadDialog($event)"
+          (tabloSizeChange)="onTabloSizeChange($event)"
+        />
+      }
+    </div>
+
+    <!-- Paginálás -->
+    <app-list-pagination
+      [currentPage]="filterState.page()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalItems()"
+      itemLabel="véglegesítés"
+      (pageChange)="filterState.setPage($event)"
+    />
+  }
+</div>
+
+<!-- Upload Dialog -->
+@if (showUploadDialog() && selectedItem()) {
+  <app-print-ready-upload-dialog
+    [projectId]="selectedItem()!.id"
+    [projectName]="selectedItem()!.name"
+    [currentTabloSize]="selectedItem()!.tabloSize"
+    (close)="closeUploadDialog()"
+    (uploaded)="onFileUploaded()"
+  />
+}

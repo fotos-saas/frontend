@@ -189,6 +189,11 @@ export const routes: Routes = [
         title: 'Beállítások'
       },
       {
+        path: 'projects/finalizations',
+        loadComponent: () => import('./features/partner/pages/finalization-list/finalization-list.component').then(m => m.FinalizationListComponent),
+        title: 'Véglegesítések'
+      },
+      {
         path: 'projects/schools',
         loadComponent: () => import('./features/partner/pages/school-list/school-list.component').then(m => m.PartnerSchoolListComponent)
       },
@@ -359,6 +364,11 @@ export const routes: Routes = [
         path: 'projects/settings',
         loadComponent: () => import('./features/partner/pages/global-settings/global-settings.component').then(m => m.GlobalSettingsComponent),
         title: 'Beállítások'
+      },
+      {
+        path: 'projects/finalizations',
+        loadComponent: () => import('./features/partner/pages/finalization-list/finalization-list.component').then(m => m.FinalizationListComponent),
+        title: 'Véglegesítések'
       },
       {
         path: 'projects/schools',

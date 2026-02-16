@@ -1,0 +1,93 @@
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.UPLOAD"
+  title="Nyomdakész fájl feltöltése"
+  [description]="projectName()"
+  size="md"
+  [closable]="!isUploading()"
+  [isSubmitting]="isUploading()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <!-- Drag & Drop terület -->
+    <div
+      class="drop-zone"
+      [class.drop-zone--active]="isDragging()"
+      [class.drop-zone--has-file]="selectedFile()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+      (click)="openFileDialog()"
+    >
+      @if (selectedFile()) {
+        <div class="selected-file">
+          <lucide-icon [name]="ICONS.FILE_CHECK" [size]="24" class="file-icon" />
+          <div class="file-info">
+            <span class="file-name">{{ selectedFile()!.name }}</span>
+            <span class="file-size">{{ formatFileSize(selectedFile()!.size) }}</span>
+          </div>
+          <button
+            type="button"
+            class="remove-btn"
+            (click)="removeFile(); $event.stopPropagation()"
+          >
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+          </button>
+        </div>
+      } @else {
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="upload-icon" />
+        <p class="drop-text">Húzd ide a fájlt, vagy kattints a tallózáshoz</p>
+        <p class="drop-hint">PDF, TIFF, PSD, JPG, PNG — max 200 MB</p>
+      }
+    </div>
+
+    <input
+      #fileInput
+      type="file"
+      [accept]="acceptExtensions"
+      (change)="onFileSelected($event)"
+      class="hidden-input"
+    />
+
+    <!-- Tablóméret -->
+    <div class="field">
+      <label class="field-label">Tablóméret (opcionális)</label>
+      <input
+        type="text"
+        class="field-input"
+        [ngModel]="tabloSize()"
+        (ngModelChange)="tabloSize.set($event)"
+        placeholder="pl. 50×70 cm"
+        maxlength="50"
+      />
+    </div>
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button
+      type="button"
+      class="btn btn--outline"
+      (click)="close.emit()"
+      [disabled]="isUploading()"
+    >
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="onSubmit()"
+      [disabled]="isUploading() || !selectedFile()"
+    >
+      @if (isUploading()) {
+        Feltöltés...
+      } @else {
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+        Feltöltés
+      }
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

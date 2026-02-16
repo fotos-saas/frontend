@@ -504,5 +504,34 @@ export interface SchoolChangeLogEntry {
   createdAt: string;
 }
 
+/**
+ * Véglegesítés lista elem
+ */
+export interface FinalizationListItem {
+  id: number;
+  name: string;
+  schoolName: string | null;
+  schoolCity: string | null;
+  className: string | null;
+  classYear: string | null;
+  sampleThumbUrl: string | null;
+  finalizedAt: string | null;
+  tabloSize: string | null;
+  printReadyFile: PrintReadyFile | null;
+  contact: { name: string } | null;
+  createdAt: string;
+}
+
+/**
+ * Nyomdakész fájl adatok
+ */
+export interface PrintReadyFile {
+  id: number;
+  fileName: string;
+  size: number;
+  mimeType: string;
+  uploadedAt: string;
+}
+
 // Re-export QrCode from shared
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';

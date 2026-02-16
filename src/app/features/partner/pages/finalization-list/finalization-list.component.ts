@@ -1,0 +1,168 @@
+import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
+import { LoggerService } from '@core/services/logger.service';
+import { ToastService } from '@core/services/toast.service';
+import { PartnerFinalizationService } from '../../services/partner-finalization.service';
+import { FinalizationListItem } from '../../models/partner.models';
+import { FinalizationCardComponent } from '../../components/finalization-card/finalization-card.component';
+import { PrintReadyUploadDialogComponent } from '../../components/print-ready-upload-dialog/print-ready-upload-dialog.component';
+import { FinalizationTableHeaderComponent } from './components/finalization-table-header/finalization-table-header.component';
+import { SmartFilterBarComponent, SearchConfig, SortDef, FilterConfig } from '../../../../shared/components/smart-filter-bar';
+import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { useFilterState } from '../../../../shared/utils/use-filter-state';
+import { ICONS } from '../../../../shared/constants/icons.constants';
+import { saveFile } from '../../../../shared/utils/file.util';
+
+@Component({
+  selector: 'app-finalization-list',
+  standalone: true,
+  imports: [
+    LucideAngularModule,
+    FinalizationCardComponent,
+    PrintReadyUploadDialogComponent,
+    FinalizationTableHeaderComponent,
+    SmartFilterBarComponent,
+    ListPaginationComponent,
+  ],
+  templateUrl: './finalization-list.component.html',
+  styleUrl: './finalization-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class FinalizationListComponent implements OnInit {
+  private readonly logger = inject(LoggerService);
+  private readonly toast = inject(ToastService);
+  private readonly finalizationService = inject(PartnerFinalizationService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+
+  readonly ICONS = ICONS;
+
+  readonly searchConfig: SearchConfig = {
+    placeholder: 'Keresés (#ID, "pontos kifejezés")...',
+    features: { id: true, exact: true },
+  };
+
+  private readonly currentYear = new Date().getFullYear();
+  readonly yearOptions = Array.from({ length: 10 }, (_, i) => {
+    const year = this.currentYear - i;
+    return { value: year.toString(), label: `${year}` };
+  });
+
+  readonly filterConfigs: FilterConfig[] = [
+    { id: 'graduation_year', label: 'Tanév', icon: 'calendar', options: this.yearOptions },
+  ];
+
+  readonly sortDef: SortDef = {
+    options: [
+      { value: 'finalized_at', label: 'Véglegesítve' },
+      { value: 'school_name', label: 'Iskola' },
+      { value: 'class_year', label: 'Évfolyam' },
+      { value: 'created_at', label: 'Létrehozva' },
+    ],
+  };
+
+  readonly filterState = useFilterState({
+    context: { type: 'partner', page: 'finalizations' },
+    defaultFilters: { graduation_year: '' },
+    defaultSortBy: 'finalized_at',
+    defaultSortDir: 'desc',
+    validation: {
+      sortByOptions: ['finalized_at', 'school_name', 'class_year', 'created_at'],
+    },
+    onStateChange: () => this.loadFinalizations(),
+  });
+
+  items = signal<FinalizationListItem[]>([]);
+  totalPages = signal(1);
+  totalItems = signal(0);
+
+  // Upload dialog
+  showUploadDialog = signal(false);
+  selectedItem = signal<FinalizationListItem | null>(null);
+
+  ngOnInit(): void {
+    this.loadFinalizations();
+  }
+
+  loadFinalizations(): void {
+    this.filterState.loading.set(true);
+    const filters = this.filterState.filters();
+
+    this.finalizationService.getFinalizations({
+      page: this.filterState.page(),
+      per_page: 15,
+      search: this.filterState.search() || undefined,
+      sort_by: this.filterState.sortBy() as 'created_at' | 'finalized_at' | 'school_name' | 'class_year',
+      sort_dir: this.filterState.sortDir(),
+      graduation_year: filters['graduation_year'] ? parseInt(filters['graduation_year'], 10) : undefined,
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.items.set(response.data);
+          this.totalPages.set(response.last_page);
+          this.totalItems.set(response.total);
+          this.filterState.loading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load finalizations', err);
+          this.filterState.loading.set(false);
+        },
+      });
+  }
+
+  viewProject(item: FinalizationListItem): void {
+    this.router.navigate(['/partner/projects', item.id]);
+  }
+
+  openUploadDialog(item: FinalizationListItem): void {
+    this.selectedItem.set(item);
+    this.showUploadDialog.set(true);
+  }
+
+  closeUploadDialog(): void {
+    this.showUploadDialog.set(false);
+    this.selectedItem.set(null);
+  }
+
+  onFileUploaded(): void {
+    this.closeUploadDialog();
+    this.loadFinalizations();
+    this.toast.success('Feltöltve', 'Nyomdakész fájl sikeresen feltöltve.');
+  }
+
+  downloadFile(item: FinalizationListItem): void {
+    if (!item.printReadyFile) return;
+
+    const fileName = item.printReadyFile.fileName;
+    this.finalizationService.downloadPrintReady(item.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => saveFile(blob, fileName),
+        error: (err) => {
+          this.logger.error('Failed to download print ready file', err);
+          this.toast.error('Hiba', 'Nem sikerült letölteni a fájlt.');
+        },
+      });
+  }
+
+  onTabloSizeChange(event: { item: FinalizationListItem; size: string }): void {
+    this.finalizationService.updateTabloSize(event.item.id, event.size || null)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.items.update(list =>
+            list.map(i =>
+              i.id === event.item.id ? { ...i, tabloSize: response.data.tabloSize } : i
+            )
+          );
+        },
+        error: (err) => {
+          this.logger.error('Failed to update tablo size', err);
+          this.toast.error('Hiba', 'Nem sikerült frissíteni a tablóméretet.');
+        },
+      });
+  }
+}

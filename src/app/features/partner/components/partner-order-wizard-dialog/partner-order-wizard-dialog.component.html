@@ -1,22 +1,15 @@
-<div class="dialog-backdrop"
-  (mousedown)="backdropHandler.onMouseDown($event)"
-  (click)="backdropHandler.onClick($event)"
+<app-dialog-wrapper
+  headerStyle="flat"
+  [icon]="ICONS.FILE_TEXT"
+  [title]="dialogTitle()"
+  theme="purple"
+  size="lg"
+  variant="wizard"
+  [isSubmitting]="submitting()"
+  (closeEvent)="close.emit()"
 >
-  <div class="dialog-panel dialog-panel--lg" (click)="$event.stopPropagation()">
-    <!-- Header -->
-    <div class="wizard-header">
-      <div class="wizard-header__title">
-        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="20" />
-        <h2>Megrendelés leadása</h2>
-        @if (projectName()) {
-          <span class="wizard-header__project">— {{ projectName() }}</span>
-        }
-      </div>
-      <button class="wizard-header__close" (click)="close.emit()" aria-label="Bezárás">
-        <lucide-icon [name]="ICONS.X" [size]="20" />
-      </button>
-    </div>
-
+  <!-- Body -->
+  <div dialogBody>
     <!-- Stepper -->
     <div class="wizard-stepper">
       @for (step of steps; track $index) {
@@ -83,43 +76,58 @@
         }
       }
     </div>
+  </div>
 
-    <!-- Footer -->
-    <div class="wizard-footer">
-      <div class="wizard-footer__left">
-        @if (currentStep() > 0) {
-          <button class="btn btn--outline" (click)="prevStep()">
-            <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-            Előző
-          </button>
-        }
-      </div>
-      <div class="wizard-footer__right">
-        @if (currentStep() < steps.length - 1) {
-          <button
-            class="btn btn--primary"
-            [disabled]="!isStepValid()"
-            (click)="nextStep()"
-          >
-            Következő
-            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-          </button>
-        } @else {
-          <button
-            class="btn btn--primary"
-            [disabled]="!canFinalize() || submitting()"
-            (click)="finalize()"
-          >
-            @if (submitting()) {
-              <div class="spinner spinner--small spinner--white"></div>
-              Mentés...
-            } @else {
-              <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-              Megrendelés véglegesítése
-            }
-          </button>
-        }
-      </div>
+  <!-- Footer -->
+  <div dialogFooter class="wizard-footer">
+    <div class="wizard-footer__left">
+      @if (currentStep() > 0) {
+        <button class="btn btn--outline" (click)="prevStep()">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+      }
+    </div>
+    <div class="wizard-footer__right">
+      @if (isEditMode() && canFinalize()) {
+        <button
+          class="btn btn--confirm"
+          [disabled]="submitting()"
+          (click)="finalize()"
+        >
+          @if (submitting()) {
+            <div class="spinner spinner--small spin"></div>
+            Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            Mentés
+          }
+        </button>
+      }
+      @if (currentStep() < steps.length - 1) {
+        <button
+          class="btn btn--purple"
+          [disabled]="!isStepValid()"
+          (click)="nextStep()"
+        >
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      } @else {
+        <button
+          class="btn btn--purple"
+          [disabled]="!canFinalize() || submitting()"
+          (click)="finalize()"
+        >
+          @if (submitting()) {
+            <div class="spinner spinner--small spin"></div>
+            Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            Megrendelés véglegesítése
+          }
+        </button>
+      }
     </div>
   </div>
-</div>
+</app-dialog-wrapper>

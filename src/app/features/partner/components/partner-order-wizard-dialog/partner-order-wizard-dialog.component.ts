@@ -13,7 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject, debounceTime, switchMap, catchError, of } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { PartnerFinalizationApiService } from '../../services/partner-finalization-api.service';
@@ -42,6 +42,7 @@ import {
   standalone: true,
   imports: [
     LucideAngularModule,
+    DialogWrapperComponent,
     ContactStepComponent,
     BasicInfoStepComponent,
     DesignStepComponent,
@@ -67,6 +68,7 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
   currentStep = signal(0);
   loading = signal(true);
   submitting = signal(false);
+  isEditMode = signal(false);
   formData = signal<OrderFinalizationData>({ ...EMPTY_ORDER_FINALIZATION_DATA });
 
   backgroundFileName = signal<string | null>(null);
@@ -74,7 +76,11 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
 
   private readonly draftSave$ = new Subject<void>();
 
-  backdropHandler = createBackdropHandler(() => this.close.emit());
+  dialogTitle = computed(() => {
+    const name = this.projectName();
+    const base = 'Megrendelés leadása';
+    return name ? `${base} — ${name}` : base;
+  });
 
   isStepValid = computed(() => {
     const data = this.formData();
@@ -126,6 +132,11 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
           }
           if (response.data?.otherFiles?.length) {
             this.attachmentFileNames.set(response.data.otherFiles.map(f => f.filename));
+          }
+
+          // Ha van meglévő adat, szerkesztés módban vagyunk
+          if (response.data?.isFinalized) {
+            this.isEditMode.set(true);
           }
 
           this.loading.set(false);

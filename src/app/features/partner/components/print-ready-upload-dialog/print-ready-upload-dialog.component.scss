@@ -1,3 +1,13 @@
+// A select dropdown ne legyen levágva a dialog body overflow-ja által
+:host ::ng-deep {
+  .dw {
+    overflow: visible;
+  }
+  .dw__body {
+    overflow: visible;
+  }
+}
+
 .drop-zone {
   border: 2px dashed #cbd5e1;
   border-radius: 8px;

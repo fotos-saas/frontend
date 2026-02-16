@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
+import { DragScrollDirective } from '../../../../../../shared/directives/drag-scroll/drag-scroll.directive';
 
 export type GalleryTab = 'gallery' | 'monitoring';
 
@@ -18,10 +19,10 @@ const GALLERY_TABS: GalleryTabDef[] = [
 @Component({
   selector: 'app-gallery-tabs',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, DragScrollDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nav class="tabs-nav">
+    <nav class="tabs-nav" appDragScroll>
       @for (tab of tabs; track tab.id) {
         <button
           class="tab-btn"
@@ -40,13 +41,6 @@ const GALLERY_TABS: GalleryTabDef[] = [
       border-bottom: 2px solid #e2e8f0;
       margin: -4px;
       margin-bottom: 24px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-
-      &::-webkit-scrollbar {
-        display: none;
-      }
     }
 
     .tab-btn {

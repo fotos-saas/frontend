@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
+import { DragScrollDirective } from '../../../directives/drag-scroll/drag-scroll.directive';
 
 export type ProjectDetailTab = 'overview' | 'users' | 'samples' | 'settings' | 'print';
 
@@ -21,10 +22,10 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
 @Component({
   selector: 'app-project-detail-tabs',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, DragScrollDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nav class="tabs-nav">
+    <nav class="tabs-nav" appDragScroll>
       @for (tab of visibleTabs(); track tab.id) {
         <button
           class="tab-btn"
@@ -43,13 +44,6 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
       border-bottom: 2px solid #e2e8f0;
       margin: -4px;
       margin-bottom: 24px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-
-      &::-webkit-scrollbar {
-        display: none;
-      }
     }
 
     .tab-btn {

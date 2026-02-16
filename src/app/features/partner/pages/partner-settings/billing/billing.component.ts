@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { DragScrollDirective } from '../../../../../shared/directives/drag-scroll/drag-scroll.directive';
 import { InvoiceSettingsComponent } from './tabs/invoice-settings/invoice-settings.component';
 import { InvoiceListComponent } from './tabs/invoice-list/invoice-list.component';
 import { StripeSettingsComponent } from './tabs/stripe-settings/stripe-settings.component';
@@ -22,7 +23,7 @@ const BILLING_TABS: BillingTabDef[] = [
 @Component({
   selector: 'app-billing',
   standalone: true,
-  imports: [LucideAngularModule, InvoiceSettingsComponent, InvoiceListComponent, StripeSettingsComponent],
+  imports: [LucideAngularModule, DragScrollDirective, InvoiceSettingsComponent, InvoiceListComponent, StripeSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './billing.component.html',
   styleUrl: './billing.component.scss',

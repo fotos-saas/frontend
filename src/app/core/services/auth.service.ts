@@ -632,4 +632,21 @@ export class AuthService {
       accepted_existing?: boolean;
     }>(`${environment.apiUrl}/invite/register`, data);
   }
+
+  /**
+   * Meghívó elfogadása bejelentkezett userként
+   */
+  acceptInviteAsLoggedIn(code: string): Observable<{
+    message: string;
+    partner: { id: number; name: string };
+    role: string;
+    roleName: string;
+  }> {
+    return this.http.post<{
+      message: string;
+      partner: { id: number; name: string };
+      role: string;
+      roleName: string;
+    }>(`${environment.apiUrl}/invite/accept`, { code });
+  }
 }

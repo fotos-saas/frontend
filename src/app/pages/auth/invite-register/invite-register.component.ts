@@ -44,6 +44,7 @@ interface InviteRegisterResponse {
 export class InviteRegisterComponent implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private destroyRef = inject(DestroyRef);
   private authService = inject(AuthService);
 
@@ -55,6 +56,9 @@ export class InviteRegisterComponent implements OnInit {
   invitationInfo = signal<InvitationValidationResponse['invitation'] | null>(null);
   userExists = signal(false);
 
+  /** Be van-e jelentkezve a user */
+  isLoggedIn = signal(false);
+
   private code = '';
 
   form = this.fb.group({
@@ -65,6 +69,9 @@ export class InviteRegisterComponent implements OnInit {
   });
 
   ngOnInit() {
+    // Bejelentkezett user ellenőrzése
+    this.isLoggedIn.set(this.authService.hasToken());
+
     // Get code from query params
     this.route.queryParams
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -113,6 +120,28 @@ export class InviteRegisterComponent implements OnInit {
     return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
+  /** Bejelentkezett user meghívó elfogadása (auth:sanctum) */
+  onAcceptAsLoggedIn() {
+    if (!this.code) return;
+
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    this.authService.acceptInviteAsLoggedIn(this.code)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.registrationSuccess.set(true);
+        },
+        error: (error) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(error.error?.message || 'Hiba történt a meghívó elfogadása során.');
+        }
+      });
+  }
+
+  /** Nem bejelentkezett, de létező user → accept_existing flag */
   onAcceptInvite() {
     if (!this.code || !this.invitationInfo()) return;
 

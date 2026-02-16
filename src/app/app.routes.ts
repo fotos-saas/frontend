@@ -72,11 +72,10 @@ export const routes: Routes = [
     path: 'tablo/register',
     loadComponent: () => import('./pages/auth/qr-register/qr-register.component').then(m => m.QrRegisterComponent)
   },
-  // Invite registration - meghívó kóddal
+  // Invite registration - meghívó kóddal (bejelentkezett user is megnyithatja)
   {
     path: 'auth/invite',
     loadComponent: () => import('./pages/auth/invite-register/invite-register.component').then(m => m.InviteRegisterComponent),
-    canActivate: [NoAuthGuard]
   },
 
   // Session Chooser - ha több tárolt session van

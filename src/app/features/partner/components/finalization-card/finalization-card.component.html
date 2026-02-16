@@ -75,12 +75,12 @@
         <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
       </button>
     }
-    @if (item().printSmallTablo || item().printFlat) {
+    @if (item().printFlat) {
       <button
         type="button"
         class="action-btn action-btn--download"
         (click)="onDownloadClick($event)"
-        matTooltip="Letöltés"
+        matTooltip="Flat letöltése"
       >
         <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
       </button>

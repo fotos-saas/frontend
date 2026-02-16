@@ -149,12 +149,11 @@ export class FinalizationListComponent implements OnInit {
   }
 
   downloadFile(item: FinalizationListItem): void {
-    const file = item.printSmallTablo ?? item.printFlat;
+    const file = item.printFlat;
     if (!file) return;
 
-    const type = item.printSmallTablo ? 'small_tablo' as const : 'flat' as const;
     const fileName = file.fileName;
-    this.finalizationService.downloadPrintReady(item.id, type)
+    this.finalizationService.downloadPrintReady(item.id, 'flat')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => saveFile(blob, fileName),

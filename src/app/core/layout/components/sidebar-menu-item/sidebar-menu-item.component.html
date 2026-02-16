@@ -11,7 +11,8 @@
       [ngClass]="{
         'justify-center': collapsed(),
         'justify-between': !collapsed(),
-        'bg-slate-800/40': flyoutOpen()
+        'bg-slate-800/40': flyoutOpen(),
+        'section-active': isSectionActive()
       }"
       (click)="toggleSection($event)"
       [attr.title]="collapsed() ? item().label : null"

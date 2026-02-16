@@ -72,6 +72,7 @@
             <button
               class="nav-item nav-item--section"
               [class.expanded]="sidebarState.isTablet() ? activeFlyout() === item.id : sidebarState.isSectionExpanded(item.id)"
+              [class.section-active]="isSectionActive(item)"
               [title]="sidebarState.isTablet() ? item.label : ''"
               (click)="toggleSectionOrFlyout(item.id, $event)"
               [attr.aria-expanded]="sidebarState.isTablet() ? activeFlyout() === item.id : sidebarState.isSectionExpanded(item.id)"

@@ -5,9 +5,12 @@ import {
   computed,
   signal,
   ChangeDetectionStrategy,
-  ElementRef
+  ElementRef,
+  DestroyRef
 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/operators';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MenuItem } from '../../models/menu-item.model';
@@ -51,17 +54,36 @@ export class SidebarMenuItemComponent {
   private readonly sidebarState = inject(SidebarStateService);
   private readonly navigationLoading = inject(NavigationLoadingService);
   private readonly elementRef = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Aktuális URL (signal, NavigationEnd-re frissül) */
+  private readonly currentUrl = signal(this.router.url);
 
   /** Szekció kibontott-e */
   readonly isExpanded = computed(() =>
     this.sidebarState.isSectionExpanded(this.item().id)
   );
 
+  /** Szülő szekció aktív-e (valamelyik gyerek route-ja egyezik az aktuális URL-lel) */
+  readonly isSectionActive = computed(() => {
+    const children = this.item().children;
+    if (!children?.length) return false;
+    const url = this.currentUrl();
+    return children.some(child => child.route && url.startsWith(child.route));
+  });
+
   /** Flyout almenü nyitva van-e (collapsed módban) */
   readonly flyoutOpen = signal(false);
 
   /** Flyout panel pozíciója (fixed) */
   readonly flyoutPosition = signal<{ top: number; left: number }>({ top: 0, left: 0 });
+
+  constructor() {
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(e => this.currentUrl.set(e.urlAfterRedirects));
+  }
 
   /** Pending state - erre a route-ra navigálunk */
   readonly isPending = computed(() => {

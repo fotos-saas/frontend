@@ -7,7 +7,7 @@ import {
   output,
   computed
 } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { SidebarStateService } from '../../services/sidebar-state.service';
@@ -51,6 +51,7 @@ export class MobileNavOverlayComponent {
   protected readonly sidebarState = inject(SidebarStateService);
   protected readonly menuConfig = inject(MenuConfigService);
   private readonly scrollLockService = inject(ScrollLockService);
+  private readonly router = inject(Router);
 
   // Opcionális egyedi menüelemek (ha nincs megadva, MenuConfigService-ből jön)
   customMenuItems = input<MenuItem[]>();
@@ -96,6 +97,15 @@ export class MobileNavOverlayComponent {
     if (this.sidebarState.isOpen()) {
       this.sidebarState.close();
     }
+  }
+
+  /**
+   * Szülő szekció aktív-e (valamelyik gyerek route-ja egyezik az aktuális URL-lel)
+   */
+  isSectionActive(item: MenuItem): boolean {
+    if (!item.children?.length) return false;
+    const url = this.router.url;
+    return item.children.some(child => child.route && url.startsWith(child.route));
   }
 
   /**

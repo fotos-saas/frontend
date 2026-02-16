@@ -184,6 +184,12 @@
   justify-content: flex-start;
 }
 
+.nav-item--section.section-active {
+  color: var(--shell-nav-item-active-color, #f1f5f9);
+  background: rgba(139, 92, 246, 0.1);
+  border-left: 2px solid rgba(139, 92, 246, 0.5);
+}
+
 .nav-item--section .nav-chevron {
   margin-left: auto;
   opacity: 0.6;

@@ -34,6 +34,13 @@
   }
 }
 
+/* Szülő szekció aktív jelölés (ha valamelyik gyerek route aktív) */
+.section-active {
+  color: #f1f5f9 !important; /* slate-100 */
+  background: rgba(139, 92, 246, 0.1); /* purple-500/10 */
+  border-left: 2px solid rgba(139, 92, 246, 0.5); /* purple-500/50 */
+}
+
 /* Menu item click feedback - feltűnőbb effekt */
 .menu-item:active:not(.menu-item--pending) {
   transform: scale(0.95);

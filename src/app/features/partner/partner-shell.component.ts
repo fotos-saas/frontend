@@ -344,6 +344,13 @@ export class PartnerShellComponent implements OnInit {
     return parts.join(' • ');
   }
 
+  /** Szülő szekció aktív-e (valamelyik gyerek route-ja egyezik az aktuális URL-lel) */
+  isSectionActive(item: MenuItem): boolean {
+    if (!item.children?.length) return false;
+    const url = this.router.url;
+    return item.children.some(child => child.route && url.startsWith(child.route));
+  }
+
   /** Szekció kattintás — tablet módban flyout toggle, egyébként section toggle */
   toggleSectionOrFlyout(sectionId: string, event: MouseEvent): void {
     if (this.sidebarState.isTablet()) {

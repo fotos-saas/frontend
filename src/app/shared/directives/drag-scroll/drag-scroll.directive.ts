@@ -57,6 +57,9 @@ export class DragScrollDirective implements AfterViewInit {
       // Scroll → frissíti a fade mask-ot
       host.addEventListener('scroll', this.updateMask, { passive: true });
 
+      // Görgő → horizontális scroll
+      host.addEventListener('wheel', this.onWheel, { passive: false });
+
       // Click prevention drag közben
       host.addEventListener('click', this.onClickCapture, true);
 
@@ -192,6 +195,18 @@ export class DragScrollDirective implements AfterViewInit {
     host.style.userSelect = '';
   };
 
+  private readonly onWheel = (e: WheelEvent): void => {
+    const host = this.el.nativeElement;
+    if (host.scrollWidth <= host.clientWidth) return;
+
+    // Függőleges görgőt horizontálisra alakítjuk
+    const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+    if (delta === 0) return;
+
+    e.preventDefault();
+    host.scrollLeft += delta;
+  };
+
   private readonly onClickCapture = (e: MouseEvent): void => {
     if (this.hasMoved) {
       e.stopPropagation();
@@ -206,6 +221,7 @@ export class DragScrollDirective implements AfterViewInit {
     document.removeEventListener('mousemove', this.onMouseMove);
     document.removeEventListener('mouseup', this.onMouseUp);
     host.removeEventListener('scroll', this.updateMask);
+    host.removeEventListener('wheel', this.onWheel);
     host.removeEventListener('click', this.onClickCapture, true);
     this.resizeObserver?.disconnect();
     this.mutationObserver?.disconnect();

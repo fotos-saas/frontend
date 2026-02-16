@@ -9,6 +9,7 @@ import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.co
 import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
+import { PartnerSwitcherDropdownComponent } from '../../shared/components/partner-switcher-dropdown/partner-switcher-dropdown.component';
 
 /**
  * Marketer Shell - Layout komponens a marketinges felülethez.
@@ -20,7 +21,7 @@ import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-
 @Component({
   selector: 'app-marketer-shell',
   standalone: true,
-  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent, HelpFabComponent, ChatbotPanelComponent],
+  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent, HelpFabComponent, ChatbotPanelComponent, PartnerSwitcherDropdownComponent],
   template: `
     <div class="marketer-layout">
       <!-- Top Bar (közös komponens) -->
@@ -32,8 +33,7 @@ import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-
         [showPokeBadge]="false"
         [showUserBadges]="false"
         [showAccountSwitch]="false"
-        [showPartnerSwitcher]="hasMultiplePartners()"
-        [currentPartnerId]="currentPartnerId()"
+        [showPartnerSwitcher]="false"
         userInfoMode="inline"
         [externalUserInfo]="userInfo()"
         homeRoute="/marketer/dashboard"
@@ -51,6 +51,16 @@ import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-
             'sidebar--hidden': sidebarState.isMobile()
           }"
         >
+          <!-- Partner Switcher (sidebar tetejére) -->
+          @if (hasMultiplePartners() && currentPartnerId()) {
+            <div class="sidebar-partner-switcher">
+              <span class="sidebar-partner-label">Partner</span>
+              <app-partner-switcher-dropdown
+                [currentPartnerId]="currentPartnerId()!"
+              />
+            </div>
+          }
+
           @for (item of navItems; track item.id) {
             <a
               [routerLink]="item.route"
@@ -235,6 +245,95 @@ import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-
     .nav-item--bottom:hover,
     .nav-item--bottom.active {
       opacity: 1;
+    }
+
+    /* ============ Sidebar Partner Switcher ============ */
+    .sidebar-partner-switcher {
+      padding: 0 12px 12px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--shell-sidebar-border);
+    }
+
+    .sidebar-partner-label {
+      display: block;
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(148, 163, 184, 0.6);
+      margin-bottom: 6px;
+      padding-left: 4px;
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher {
+      display: flex;
+      width: 100%;
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__trigger {
+      width: 100%;
+      max-width: none;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__trigger:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__name {
+      max-width: none;
+      flex: 1;
+      color: #e2e8f0;
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__chevron {
+      color: #94a3b8;
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__dropdown {
+      left: 0;
+      right: 0;
+      min-width: auto;
+      max-width: none;
+      background: #1e293b;
+      border-color: #334155;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__option:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__option--current {
+      background: rgba(139, 92, 246, 0.15);
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__option-name {
+      color: #e2e8f0;
+    }
+
+    .sidebar-partner-switcher ::ng-deep .partner-switcher__check {
+      color: #a78bfa;
+    }
+
+    .sidebar--collapsed .sidebar-partner-switcher {
+      padding: 0 8px 8px;
+    }
+
+    .sidebar--collapsed .sidebar-partner-label {
+      display: none;
+    }
+
+    .sidebar--collapsed .sidebar-partner-switcher ::ng-deep .partner-switcher__name {
+      display: none;
+    }
+
+    .sidebar--collapsed .sidebar-partner-switcher ::ng-deep .partner-switcher__trigger {
+      justify-content: center;
+      padding: 6px;
     }
 
     /* ============ Content Area ============ */

@@ -11,8 +11,7 @@
     [showPokeBadge]="false"
     [showUserBadges]="false"
     [showAccountSwitch]="false"
-    [showPartnerSwitcher]="hasMultiplePartners()"
-    [currentPartnerId]="currentPartnerId()"
+    [showPartnerSwitcher]="false"
     userInfoMode="inline"
     [externalUserInfo]="userInfo()"
     [homeRoute]="baseUrl() + '/dashboard'"
@@ -56,6 +55,16 @@
         'sidebar--hidden': sidebarState.isMobile()
       }"
     >
+      <!-- Partner Switcher (sidebar tetejére) -->
+      @if (hasMultiplePartners() && currentPartnerId()) {
+        <div class="sidebar-partner-switcher">
+          <span class="sidebar-partner-label">Partner</span>
+          <app-partner-switcher-dropdown
+            [currentPartnerId]="currentPartnerId()!"
+          />
+        </div>
+      }
+
       @for (item of navItems(); track item.id) {
         @if (item.children && item.children.length > 0) {
           <!-- Szekció gyermek elemekkel -->

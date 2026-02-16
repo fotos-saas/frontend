@@ -284,6 +284,119 @@
   display: none;
 }
 
+/* ============ Sidebar Partner Switcher ============ */
+.sidebar-partner-switcher {
+  padding: 0 12px 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--shell-sidebar-border);
+}
+
+.sidebar-partner-label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(148, 163, 184, 0.6);
+  margin-bottom: 6px;
+  padding-left: 4px;
+}
+
+// Sötét stílus a sidebar-hoz
+.sidebar-partner-switcher {
+  ::ng-deep .partner-switcher {
+    display: flex;
+    width: 100%;
+  }
+
+  ::ng-deep .partner-switcher__trigger {
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    &.partner-switcher__trigger--open {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+  }
+
+  ::ng-deep .partner-switcher__name {
+    max-width: none;
+    flex: 1;
+    color: #e2e8f0;
+  }
+
+  ::ng-deep .partner-switcher__chevron {
+    color: #94a3b8;
+  }
+
+  ::ng-deep .partner-switcher__spinner {
+    border-color: rgba(255, 255, 255, 0.15);
+    border-top-color: #a78bfa;
+  }
+
+  ::ng-deep .partner-switcher__dropdown {
+    left: 0;
+    right: 0;
+    min-width: auto;
+    max-width: none;
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  ::ng-deep .partner-switcher__option {
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    &--current {
+      background: rgba(139, 92, 246, 0.15);
+
+      &:hover {
+        background: rgba(139, 92, 246, 0.2);
+      }
+    }
+  }
+
+  ::ng-deep .partner-switcher__option-name {
+    color: #e2e8f0;
+  }
+
+  ::ng-deep .partner-switcher__check {
+    color: #a78bfa;
+  }
+
+  ::ng-deep .partner-switcher__loading {
+    color: #64748b;
+  }
+}
+
+// Tablet collapsed: label elrejtés, kompakt megjelenés
+.sidebar--collapsed .sidebar-partner-switcher {
+  padding: 0 8px 8px;
+
+  .sidebar-partner-label {
+    display: none;
+  }
+
+  ::ng-deep .partner-switcher__name {
+    display: none;
+  }
+
+  ::ng-deep .partner-switcher__trigger {
+    justify-content: center;
+    padding: 6px;
+  }
+}
+
 /* ============ Sidebar Bottom (Hibajelentés) ============ */
 .sidebar-spacer {
   flex: 1;

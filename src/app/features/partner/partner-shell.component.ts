@@ -18,6 +18,7 @@ import { environment } from '../../../environments/environment';
 import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
 import { InviteBannerComponent } from '../../shared/components/invite-banner/invite-banner.component';
+import { PartnerSwitcherDropdownComponent } from '../../shared/components/partner-switcher-dropdown/partner-switcher-dropdown.component';
 
 
 /** Role badge nevek */
@@ -51,6 +52,7 @@ const ROLE_BADGES: Record<string, string> = {
     HelpFabComponent,
     ChatbotPanelComponent,
     InviteBannerComponent,
+    PartnerSwitcherDropdownComponent,
   ],
   templateUrl: './partner-shell.component.html',
   styleUrl: './partner-shell.component.scss',

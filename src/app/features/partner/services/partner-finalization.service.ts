@@ -68,8 +68,12 @@ export class PartnerFinalizationService {
     }>(`${this.baseUrl}/${projectId}/tablo-size`, { tablo_size: tabloSize });
   }
 
-  getInPrintCount(): Observable<{ count: number }> {
-    return this.http.get<{ count: number }>(`${this.baseUrl}/in-print-count`);
+  getInPrintCount(graduationYear?: number): Observable<{ count: number }> {
+    let params = new HttpParams();
+    if (graduationYear) {
+      params = params.set('graduation_year', graduationYear.toString());
+    }
+    return this.http.get<{ count: number }>(`${this.baseUrl}/in-print-count`, { params });
   }
 
   markAsDone(projectId: number): Observable<{

@@ -314,7 +314,7 @@ export class PartnerShellComponent implements OnInit {
   }
 
   private loadInPrintCount(): void {
-    this.finalizationService.getInPrintCount()
+    this.finalizationService.getInPrintCount(new Date().getFullYear())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => this.inPrintCount.set(res.count),

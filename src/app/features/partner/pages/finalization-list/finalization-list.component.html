@@ -69,6 +69,17 @@
   }
 </div>
 
+<!-- Mark Done Confirm Dialog -->
+@if (showMarkDoneConfirm()) {
+  <app-confirm-dialog
+    title="Készre állítás"
+    [message]="'Biztosan készre állítod a projektet?'"
+    confirmText="Igen, kész"
+    confirmType="warning"
+    (resultEvent)="onMarkDoneConfirmResult($event)"
+  />
+}
+
 <!-- Upload Dialog -->
 @if (showUploadDialog() && selectedItem()) {
   <app-print-ready-upload-dialog

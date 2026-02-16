@@ -11,6 +11,7 @@ import { PrintReadyUploadDialogComponent } from '../../components/print-ready-up
 import { FinalizationTableHeaderComponent } from './components/finalization-table-header/finalization-table-header.component';
 import { SmartFilterBarComponent, SearchConfig, SortDef, FilterConfig } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { saveFile } from '../../../../shared/utils/file.util';
@@ -25,6 +26,7 @@ import { saveFile } from '../../../../shared/utils/file.util';
     FinalizationTableHeaderComponent,
     SmartFilterBarComponent,
     ListPaginationComponent,
+    ConfirmDialogComponent,
   ],
   templateUrl: './finalization-list.component.html',
   styleUrl: './finalization-list.component.scss',
@@ -81,6 +83,9 @@ export class FinalizationListComponent implements OnInit {
 
   // Upload dialog
   showUploadDialog = signal(false);
+  // Mark done confirm dialog
+  showMarkDoneConfirm = signal(false);
+  private markDoneItem = signal<FinalizationListItem | null>(null);
   private selectedItemId = signal<number | null>(null);
   readonly selectedItem = computed(() => {
     const id = this.selectedItemId();
@@ -166,22 +171,34 @@ export class FinalizationListComponent implements OnInit {
   }
 
   onMarkAsDone(item: FinalizationListItem): void {
-    this.finalizationService.markAsDone(item.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.items.update(list =>
-            list.map(i =>
-              i.id === item.id ? { ...i, status: 'done' } : i
-            )
-          );
-          this.toast.success('Kész', 'Projekt készre állítva.');
-        },
-        error: (err) => {
-          this.logger.error('Failed to mark as done', err);
-          this.toast.error('Hiba', 'Nem sikerült készre állítani a projektet.');
-        },
-      });
+    this.markDoneItem.set(item);
+    this.showMarkDoneConfirm.set(true);
+  }
+
+  onMarkDoneConfirmResult(result: { action: 'confirm' | 'cancel' }): void {
+    if (result.action === 'confirm') {
+      const item = this.markDoneItem();
+      if (item) {
+        this.finalizationService.markAsDone(item.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.items.update(list =>
+                list.map(i =>
+                  i.id === item.id ? { ...i, status: 'done' } : i
+                )
+              );
+              this.toast.success('Kész', 'Projekt készre állítva.');
+            },
+            error: (err) => {
+              this.logger.error('Failed to mark as done', err);
+              this.toast.error('Hiba', 'Nem sikerült készre állítani a projektet.');
+            },
+          });
+      }
+    }
+    this.showMarkDoneConfirm.set(false);
+    this.markDoneItem.set(null);
   }
 
   onTabloSizeChange(event: { item: FinalizationListItem; size: string }): void {

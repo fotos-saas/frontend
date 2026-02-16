@@ -37,160 +37,176 @@ const MAX_SIZE = 200 * 1024 * 1024; // 200 MB
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="print-tab">
-      <!-- Státusz idővonal -->
-      <section class="timeline-section">
-        <h3 class="section-title">
-          <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
-          Státusz idővonal
-        </h3>
-        <div class="timeline">
-          @if (project()?.inPrintAt) {
-            <div class="timeline-item">
-              <div class="timeline-dot timeline-dot--purple"></div>
-              <div class="timeline-content">
-                <span class="timeline-label">Nyomdába adva</span>
-                <span class="timeline-date">{{ project()!.inPrintAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
+      <!-- Bal oszlop: Státusz idővonal -->
+      <div class="print-col print-col--left">
+        <section class="timeline-section">
+          <h3 class="section-title">
+            <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+            Státusz idővonal
+          </h3>
+          <div class="timeline">
+            @if (project()?.inPrintAt) {
+              <div class="timeline-item">
+                <div class="timeline-dot timeline-dot--purple"></div>
+                <div class="timeline-content">
+                  <span class="timeline-label">Nyomdába adva</span>
+                  <span class="timeline-date">{{ project()!.inPrintAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
+                </div>
               </div>
-            </div>
-          }
-          @if (project()?.doneAt) {
-            <div class="timeline-item">
-              <div class="timeline-dot timeline-dot--green"></div>
-              <div class="timeline-content">
-                <span class="timeline-label">Kész</span>
-                <span class="timeline-date">{{ project()!.doneAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
+            }
+            @if (project()?.doneAt) {
+              <div class="timeline-item">
+                <div class="timeline-dot timeline-dot--green"></div>
+                <div class="timeline-content">
+                  <span class="timeline-label">Kész</span>
+                  <span class="timeline-date">{{ project()!.doneAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
+                </div>
+              </div>
+            } @else {
+              <div class="timeline-item timeline-item--pending">
+                <div class="timeline-dot timeline-dot--gray"></div>
+                <div class="timeline-content">
+                  <span class="timeline-label">Kész</span>
+                  <span class="timeline-date timeline-date--pending">Folyamatban...</span>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+
+      <!-- Jobb oszlop: Fájlok -->
+      <div class="print-col print-col--right">
+        <!-- Kistabló fájl -->
+        <section class="file-section">
+          <h3 class="section-title">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+            Kistabló
+          </h3>
+          @if (project()?.printSmallTablo) {
+            <div class="file-card">
+              <div class="file-info">
+                <lucide-icon [name]="smallTabloIcon()" [size]="28" class="file-type-icon" />
+                <div class="file-details">
+                  <span class="file-name">{{ project()!.printSmallTablo!.fileName }}</span>
+                  <span class="file-meta">{{ formatFileSize(project()!.printSmallTablo!.size) }} · Feltöltve: {{ project()!.printSmallTablo!.uploadedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
+                </div>
+              </div>
+              <div class="file-actions">
+                <button type="button" class="download-btn" (click)="downloadClick.emit({ type: 'small_tablo' })">
+                  <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+                  Letöltés
+                </button>
+                <button type="button" class="replace-btn" (click)="smallTabloInput()?.nativeElement?.click()">
+                  <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+                  Csere
+                </button>
+                <button type="button" class="delete-btn" (click)="deleteClick.emit({ type: 'small_tablo' })">
+                  <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+                </button>
               </div>
             </div>
           } @else {
-            <div class="timeline-item timeline-item--pending">
-              <div class="timeline-dot timeline-dot--gray"></div>
-              <div class="timeline-content">
-                <span class="timeline-label">Kész</span>
-                <span class="timeline-date timeline-date--pending">Folyamatban...</span>
-              </div>
+            <div
+              class="drop-zone"
+              [class.drop-zone--drag]="draggingSmallTablo()"
+              (dragover)="onDragOver($event, 'small_tablo')"
+              (dragleave)="onDragLeave($event, 'small_tablo')"
+              (drop)="onDrop($event, 'small_tablo')"
+              (click)="smallTabloInput()?.nativeElement?.click()"
+            >
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-icon" />
+              <p class="drop-text">Húzd ide a kistabló fájlt vagy kattints a feltöltéshez</p>
+              <p class="drop-hint">PDF, TIFF, PSD, JPG, PNG — max 200 MB</p>
             </div>
           }
-        </div>
-      </section>
+          <input
+            #smallTabloInputRef
+            type="file"
+            accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png"
+            class="hidden-input"
+            (change)="onFileSelected($event, 'small_tablo')"
+          />
+        </section>
 
-      <!-- Kistabló fájl -->
-      <section class="file-section">
-        <h3 class="section-title">
-          <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
-          Kistabló
-        </h3>
-        @if (project()?.printSmallTablo) {
-          <div class="file-card">
-            <div class="file-info">
-              <lucide-icon [name]="smallTabloIcon()" [size]="28" class="file-type-icon" />
-              <div class="file-details">
-                <span class="file-name">{{ project()!.printSmallTablo!.fileName }}</span>
-                <span class="file-meta">{{ formatFileSize(project()!.printSmallTablo!.size) }} · Feltöltve: {{ project()!.printSmallTablo!.uploadedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
+        <!-- Nyomdai flat fájl -->
+        <section class="file-section">
+          <h3 class="section-title">
+            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+            Nyomdai flat
+          </h3>
+          @if (project()?.printFlat) {
+            <div class="file-card">
+              <div class="file-info">
+                <lucide-icon [name]="flatIcon()" [size]="28" class="file-type-icon" />
+                <div class="file-details">
+                  <span class="file-name">{{ project()!.printFlat!.fileName }}</span>
+                  <span class="file-meta">{{ formatFileSize(project()!.printFlat!.size) }} · Feltöltve: {{ project()!.printFlat!.uploadedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
+                </div>
+              </div>
+              <div class="file-actions">
+                <button type="button" class="download-btn" (click)="downloadClick.emit({ type: 'flat' })">
+                  <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+                  Letöltés
+                </button>
+                <button type="button" class="replace-btn" (click)="flatInput()?.nativeElement?.click()">
+                  <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+                  Csere
+                </button>
+                <button type="button" class="delete-btn" (click)="deleteClick.emit({ type: 'flat' })">
+                  <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+                </button>
               </div>
             </div>
-            <div class="file-actions">
-              <button type="button" class="download-btn" (click)="downloadClick.emit({ type: 'small_tablo' })">
-                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-                Letöltés
-              </button>
-              <button type="button" class="replace-btn" (click)="smallTabloInput()?.nativeElement?.click()">
-                <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-                Csere
-              </button>
-              <button type="button" class="delete-btn" (click)="deleteClick.emit({ type: 'small_tablo' })">
-                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
-              </button>
+          } @else {
+            <div
+              class="drop-zone"
+              [class.drop-zone--drag]="draggingFlat()"
+              (dragover)="onDragOver($event, 'flat')"
+              (dragleave)="onDragLeave($event, 'flat')"
+              (drop)="onDrop($event, 'flat')"
+              (click)="flatInput()?.nativeElement?.click()"
+            >
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-icon" />
+              <p class="drop-text">Húzd ide a nyomdai flat fájlt vagy kattints a feltöltéshez</p>
+              <p class="drop-hint">PDF, TIFF, PSD, JPG, PNG — max 200 MB</p>
             </div>
-          </div>
-        } @else {
-          <div
-            class="drop-zone"
-            [class.drop-zone--drag]="draggingSmallTablo()"
-            (dragover)="onDragOver($event, 'small_tablo')"
-            (dragleave)="onDragLeave($event, 'small_tablo')"
-            (drop)="onDrop($event, 'small_tablo')"
-            (click)="smallTabloInput()?.nativeElement?.click()"
-          >
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-icon" />
-            <p class="drop-text">Húzd ide a kistabló fájlt vagy kattints a feltöltéshez</p>
-            <p class="drop-hint">PDF, TIFF, PSD, JPG, PNG — max 200 MB</p>
+          }
+          <input
+            #flatInputRef
+            type="file"
+            accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png"
+            class="hidden-input"
+            (change)="onFileSelected($event, 'flat')"
+          />
+        </section>
+
+        @if (uploadError()) {
+          <p class="upload-error">{{ uploadError() }}</p>
+        }
+
+        @if (uploading()) {
+          <div class="upload-progress">
+            <div class="spinner"></div>
+            <span>Feltöltés folyamatban...</span>
           </div>
         }
-        <input
-          #smallTabloInputRef
-          type="file"
-          accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png"
-          class="hidden-input"
-          (change)="onFileSelected($event, 'small_tablo')"
-        />
-      </section>
-
-      <!-- Nyomdai flat fájl -->
-      <section class="file-section">
-        <h3 class="section-title">
-          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
-          Nyomdai flat
-        </h3>
-        @if (project()?.printFlat) {
-          <div class="file-card">
-            <div class="file-info">
-              <lucide-icon [name]="flatIcon()" [size]="28" class="file-type-icon" />
-              <div class="file-details">
-                <span class="file-name">{{ project()!.printFlat!.fileName }}</span>
-                <span class="file-meta">{{ formatFileSize(project()!.printFlat!.size) }} · Feltöltve: {{ project()!.printFlat!.uploadedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
-              </div>
-            </div>
-            <div class="file-actions">
-              <button type="button" class="download-btn" (click)="downloadClick.emit({ type: 'flat' })">
-                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-                Letöltés
-              </button>
-              <button type="button" class="replace-btn" (click)="flatInput()?.nativeElement?.click()">
-                <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-                Csere
-              </button>
-              <button type="button" class="delete-btn" (click)="deleteClick.emit({ type: 'flat' })">
-                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
-              </button>
-            </div>
-          </div>
-        } @else {
-          <div
-            class="drop-zone"
-            [class.drop-zone--drag]="draggingFlat()"
-            (dragover)="onDragOver($event, 'flat')"
-            (dragleave)="onDragLeave($event, 'flat')"
-            (drop)="onDrop($event, 'flat')"
-            (click)="flatInput()?.nativeElement?.click()"
-          >
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-icon" />
-            <p class="drop-text">Húzd ide a nyomdai flat fájlt vagy kattints a feltöltéshez</p>
-            <p class="drop-hint">PDF, TIFF, PSD, JPG, PNG — max 200 MB</p>
-          </div>
-        }
-        <input
-          #flatInputRef
-          type="file"
-          accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png"
-          class="hidden-input"
-          (change)="onFileSelected($event, 'flat')"
-        />
-      </section>
-
-      @if (uploadError()) {
-        <p class="upload-error">{{ uploadError() }}</p>
-      }
-
-      @if (uploading()) {
-        <div class="upload-progress">
-          <div class="spinner"></div>
-          <span>Feltöltés folyamatban...</span>
-        </div>
-      }
+      </div>
     </div>
   `,
   styles: [`
     .print-tab {
+      display: flex;
+      gap: 32px;
+    }
+
+    .print-col--left {
+      flex: 0 0 280px;
+    }
+
+    .print-col--right {
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -463,6 +479,17 @@ const MAX_SIZE = 200 * 1024 * 1024; // 200 MB
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .print-tab {
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .print-col--left {
+        flex: none;
+      }
     }
 
     @media (max-width: 480px) {

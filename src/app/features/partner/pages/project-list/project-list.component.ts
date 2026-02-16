@@ -96,6 +96,7 @@ export class PartnerProjectListComponent implements OnInit {
 
   // Státusz opciók
   readonly statusOptions = [
+    { value: '', label: 'Mind' },
     { value: 'not_started', label: 'Nincs elkezdve' },
     { value: 'should_finish', label: 'Be kellene fejeznem' },
     { value: 'waiting_for_response', label: 'Válaszra várok' },

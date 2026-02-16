@@ -7,6 +7,7 @@ import { PsInputComponent, PsSelectComponent, PsToggleComponent } from '@shared/
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerService } from '../../services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { TabloSize } from '../../models/partner.models';
 
 @Component({
   selector: 'app-global-settings',
@@ -45,8 +46,18 @@ export class GlobalSettingsComponent implements OnInit {
   defaultFileNaming = signal('original');
   exportAlwaysAsk = signal(true);
 
+  // Tablóméretek
+  tabloSizes = signal<TabloSize[]>([]);
+  defaultTabloSizes = signal<TabloSize[]>([]);
+  sizesLoading = signal(true);
+  sizesSaving = signal(false);
+  sizesIsDefault = signal(true);
+  newSizeLabel = signal('');
+  newSizeValue = signal('');
+
   ngOnInit(): void {
     this.loadSettings();
+    this.loadTabloSizes();
   }
 
   private loadSettings(): void {
@@ -67,6 +78,79 @@ export class GlobalSettingsComponent implements OnInit {
         this.toast.error('Hiba', 'Nem sikerült betölteni a beállításokat');
       },
     });
+  }
+
+  loadTabloSizes(): void {
+    this.sizesLoading.set(true);
+    this.partnerService.getTabloSizes().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.tabloSizes.set(res.sizes);
+        this.defaultTabloSizes.set(res.defaults);
+        this.sizesIsDefault.set(res.isDefault);
+        this.sizesLoading.set(false);
+      },
+      error: () => {
+        this.sizesLoading.set(false);
+        this.toast.error('Hiba', 'Nem sikerült betölteni a tablóméreteket');
+      },
+    });
+  }
+
+  addCustomSize(): void {
+    const label = this.newSizeLabel().trim();
+    const value = this.newSizeValue().trim();
+
+    if (!label || !value) {
+      this.toast.error('Hiba', 'A megnevezés és az érték megadása kötelező.');
+      return;
+    }
+
+    if (this.tabloSizes().some(s => s.value === value)) {
+      this.toast.error('Hiba', 'Ez az érték már létezik.');
+      return;
+    }
+
+    this.tabloSizes.update(sizes => [...sizes, { label, value }]);
+    this.newSizeLabel.set('');
+    this.newSizeValue.set('');
+  }
+
+  removeSize(index: number): void {
+    this.tabloSizes.update(sizes => sizes.filter((_, i) => i !== index));
+  }
+
+  saveTabloSizes(): void {
+    if (this.tabloSizes().length === 0) {
+      this.toast.error('Hiba', 'Legalább egy méretet meg kell adni.');
+      return;
+    }
+
+    this.sizesSaving.set(true);
+    this.partnerService.updateTabloSizes(this.tabloSizes()).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.tabloSizes.set(res.data.sizes);
+        this.sizesIsDefault.set(res.data.isDefault);
+        this.sizesSaving.set(false);
+        this.toast.success('Siker', 'Tablóméretek mentve');
+      },
+      error: () => {
+        this.sizesSaving.set(false);
+        this.toast.error('Hiba', 'Nem sikerült menteni a tablóméreteket');
+      },
+    });
+  }
+
+  resetToDefaults(): void {
+    this.tabloSizes.set([...this.defaultTabloSizes()]);
+    this.sizesIsDefault.set(true);
+  }
+
+  isDefaultSize(size: TabloSize): boolean {
+    return this.defaultTabloSizes().some(d => d.value === size.value);
   }
 
   save(): void {

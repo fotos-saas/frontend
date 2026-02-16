@@ -342,6 +342,9 @@ export const ICONS = {
   // Webshop
   STORE: 'store',
   TRUCK: 'truck',
+
+  // Tablóméretek
+  RULER: 'ruler',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

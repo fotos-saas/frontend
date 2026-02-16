@@ -506,6 +506,14 @@ export interface SchoolChangeLogEntry {
 }
 
 /**
+ * Tablóméret (elérhető méretek a partner beállításokban)
+ */
+export interface TabloSize {
+  label: string;
+  value: string;
+}
+
+/**
  * Véglegesítés lista elem
  */
 export interface FinalizationListItem {

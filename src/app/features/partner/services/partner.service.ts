@@ -40,6 +40,7 @@ import {
   PaginatedResponse,
   ProjectListResponse,
   UploadProgress,
+  TabloSize,
 } from '../models/partner.models';
 import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
 
@@ -80,6 +81,7 @@ export {
   PaginatedResponse,
   ProjectListResponse,
   UploadProgress,
+  TabloSize,
 };
 export type { QrCode };
 export type { ImportResult };
@@ -215,6 +217,14 @@ export class PartnerService {
     export_always_ask?: boolean | null;
   }) {
     return this.projectService.updateProjectSettings(projectId, data);
+  }
+
+  getTabloSizes() {
+    return this.projectService.getTabloSizes();
+  }
+
+  updateTabloSizes(sizes: Parameters<PartnerProjectService['updateTabloSizes']>[0]) {
+    return this.projectService.updateTabloSizes(sizes);
   }
 
   getGlobalSettings() {

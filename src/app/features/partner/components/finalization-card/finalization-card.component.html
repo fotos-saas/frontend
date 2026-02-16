@@ -31,33 +31,16 @@
 
   <!-- Col 4: Tablóméret -->
   <div class="col col-size" (click)="$event.stopPropagation()">
-    @if (editingSize()) {
-      <input
-        type="text"
-        class="size-input"
-        [ngModel]="sizeValue()"
-        (ngModelChange)="sizeValue.set($event)"
-        (blur)="saveSize()"
-        (keydown)="onSizeKeydown($event)"
-        maxlength="50"
-        placeholder="pl. 50×70"
-        #sizeInput
+    @if (sizeOptions().length > 0) {
+      <ps-select
+        size="sm"
+        emptyLabel="Méret..."
+        [options]="sizeOptions()"
+        [ngModel]="item().tabloSize ?? ''"
+        (ngModelChange)="onSizeSelected($event)"
       />
     } @else {
-      <button
-        type="button"
-        class="size-btn"
-        (click)="startEditSize($event)"
-        [matTooltip]="item().tabloSize ? 'Méret szerkesztése' : 'Méret hozzáadása'"
-      >
-        @if (item().tabloSize) {
-          {{ item().tabloSize }}
-        } @else {
-          <span class="size-placeholder">
-            <lucide-icon [name]="ICONS.EDIT" [size]="10" />
-          </span>
-        }
-      </button>
+      <span class="size-empty">-</span>
     }
   </div>
 

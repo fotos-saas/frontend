@@ -1,15 +1,17 @@
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { FinalizationListItem } from '../../models/partner.models';
+import { FinalizationListItem, TabloSize } from '../../models/partner.models';
+import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 @Component({
   selector: 'app-finalization-card',
   standalone: true,
-  imports: [LucideAngularModule, DatePipe, MatTooltipModule, FormsModule],
+  imports: [LucideAngularModule, DatePipe, MatTooltipModule, FormsModule, PsSelectComponent],
   templateUrl: './finalization-card.component.html',
   styleUrl: './finalization-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,14 +20,16 @@ export class FinalizationCardComponent {
   readonly ICONS = ICONS;
 
   readonly item = input.required<FinalizationListItem>();
+  readonly availableSizes = input<TabloSize[]>([]);
 
   readonly cardClick = output<FinalizationListItem>();
   readonly downloadClick = output<FinalizationListItem>();
   readonly uploadClick = output<FinalizationListItem>();
   readonly tabloSizeChange = output<{ item: FinalizationListItem; size: string }>();
 
-  editingSize = signal(false);
-  sizeValue = signal('');
+  readonly sizeOptions = computed<PsSelectOption[]>(() =>
+    this.availableSizes().map(s => ({ id: s.value, label: s.label }))
+  );
 
   onDownloadClick(event: MouseEvent): void {
     event.stopPropagation();
@@ -37,29 +41,10 @@ export class FinalizationCardComponent {
     this.uploadClick.emit(this.item());
   }
 
-  startEditSize(event: MouseEvent): void {
-    event.stopPropagation();
-    this.sizeValue.set(this.item().tabloSize ?? '');
-    this.editingSize.set(true);
-  }
-
-  saveSize(): void {
-    const newSize = this.sizeValue().trim();
-    if (newSize !== (this.item().tabloSize ?? '')) {
-      this.tabloSizeChange.emit({ item: this.item(), size: newSize });
-    }
-    this.editingSize.set(false);
-  }
-
-  cancelEditSize(): void {
-    this.editingSize.set(false);
-  }
-
-  onSizeKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.saveSize();
-    } else if (event.key === 'Escape') {
-      this.cancelEditSize();
+  onSizeSelected(value: string | number): void {
+    const size = String(value);
+    if (size !== (this.item().tabloSize ?? '')) {
+      this.tabloSizeChange.emit({ item: this.item(), size });
     }
   }
 

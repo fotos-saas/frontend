@@ -90,6 +90,103 @@
 
     </div>
 
+    <!-- Elérhető tablóméretek szekció -->
+    <div class="settings-section">
+      <div class="section-title">
+        <lucide-icon [name]="ICONS.RULER" [size]="18" />
+        <h2>Elérhető tablóméretek</h2>
+      </div>
+
+      @if (sizesLoading()) {
+        <div class="setting-card">
+          <div class="flex items-center justify-center py-8">
+            <div class="w-6 h-6 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+          </div>
+        </div>
+      } @else {
+        <div class="setting-card">
+          <div class="setting-info" style="margin-bottom: 12px">
+            <span class="setting-description">
+              A véglegesítésnél ezek közül a méretek közül lehet választani.
+              @if (sizesIsDefault()) {
+                Jelenleg az alapértelmezett méretek vannak beállítva.
+              }
+            </span>
+          </div>
+
+          <!-- Méretek listája -->
+          <div class="sizes-list">
+            @for (size of tabloSizes(); track size.value; let i = $index) {
+              <div class="size-item">
+                <span class="size-label">{{ size.label }}</span>
+                <span class="size-value">{{ size.value }}</span>
+                @if (isDefaultSize(size)) {
+                  <span class="size-badge">alap</span>
+                }
+                <button
+                  type="button"
+                  class="size-remove"
+                  (click)="removeSize(i)"
+                >
+                  <lucide-icon [name]="ICONS.X" [size]="12" />
+                </button>
+              </div>
+            }
+          </div>
+
+          @if (tabloSizes().length === 0) {
+            <p class="no-sizes-text">Nincs méret megadva. Adj hozzá legalább egyet, vagy állítsd vissza az alapértelmezéseket.</p>
+          }
+
+          <!-- Egyedi méret hozzáadása -->
+          <div class="add-size-row">
+            <ps-input
+              size="sm"
+              placeholder="Megnevezés (pl. 60×90 cm)"
+              [ngModel]="newSizeLabel()"
+              (ngModelChange)="newSizeLabel.set($event)"
+            />
+            <ps-input
+              size="sm"
+              placeholder="Érték (pl. 60x90)"
+              [ngModel]="newSizeValue()"
+              (ngModelChange)="newSizeValue.set($event)"
+            />
+            <button
+              type="button"
+              class="add-size-btn"
+              (click)="addCustomSize()"
+            >
+              <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+              Hozzáadás
+            </button>
+          </div>
+
+          <!-- Műveletek -->
+          <div class="sizes-actions">
+            <button
+              type="button"
+              class="reset-btn"
+              (click)="resetToDefaults()"
+            >
+              <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+              Alapértelmezés visszaállítása
+            </button>
+            <button
+              class="save-btn"
+              [disabled]="sizesSaving()"
+              (click)="saveTabloSizes()"
+            >
+              @if (sizesSaving()) {
+                <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              }
+              Méretek mentése
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
     <!-- Export beállítások szekció -->
     <div class="settings-section">
       <div class="section-title">

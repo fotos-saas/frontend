@@ -11,6 +11,7 @@ import {
   ProjectAutocompleteItem,
   SampleItem,
   TabloPersonItem,
+  TabloSize,
 } from '../models/partner.models';
 
 /**
@@ -246,6 +247,40 @@ export class PartnerProjectService {
       pdfUrl?: string;
       message?: string;
     }>(`${this.baseUrl}/projects/${projectId}/order-data/view-pdf`, {});
+  }
+
+  // ============================================
+  // TABLO SIZES
+  // ============================================
+
+  /**
+   * Elérhető tablóméretek lekérése
+   */
+  getTabloSizes(): Observable<{
+    sizes: TabloSize[];
+    defaults: TabloSize[];
+    isDefault: boolean;
+  }> {
+    return this.http.get<{
+      sizes: TabloSize[];
+      defaults: TabloSize[];
+      isDefault: boolean;
+    }>(`${this.baseUrl}/tablo-sizes`);
+  }
+
+  /**
+   * Elérhető tablóméretek mentése
+   */
+  updateTabloSizes(sizes: TabloSize[]): Observable<{
+    success: boolean;
+    message: string;
+    data: { sizes: TabloSize[]; isDefault: boolean };
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: { sizes: TabloSize[]; isDefault: boolean };
+    }>(`${this.baseUrl}/tablo-sizes`, { sizes });
   }
 
   // ============================================

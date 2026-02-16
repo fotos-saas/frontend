@@ -151,6 +151,8 @@ import {
   // Webshop
   Store,
   Truck,
+  // Tablóméretek
+  Ruler,
   // Undo
   Undo2,
   // Tags
@@ -304,6 +306,8 @@ export const LUCIDE_ICONS_MAP = {
   // Webshop
   Store,
   Truck,
+  // Tablóméretek
+  Ruler,
   // Undo
   Undo2,
   // Tags

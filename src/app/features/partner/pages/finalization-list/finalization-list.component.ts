@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { LoggerService } from '@core/services/logger.service';
 import { ToastService } from '@core/services/toast.service';
 import { PartnerFinalizationService } from '../../services/partner-finalization.service';
-import { FinalizationListItem } from '../../models/partner.models';
+import { FinalizationListItem, TabloSize } from '../../models/partner.models';
 import { FinalizationCardComponent } from '../../components/finalization-card/finalization-card.component';
 import { PrintReadyUploadDialogComponent } from '../../components/print-ready-upload-dialog/print-ready-upload-dialog.component';
 import { FinalizationTableHeaderComponent } from './components/finalization-table-header/finalization-table-header.component';
@@ -77,6 +77,7 @@ export class FinalizationListComponent implements OnInit {
   items = signal<FinalizationListItem[]>([]);
   totalPages = signal(1);
   totalItems = signal(0);
+  availableTabloSizes = signal<TabloSize[]>([]);
 
   // Upload dialog
   showUploadDialog = signal(false);
@@ -100,10 +101,13 @@ export class FinalizationListComponent implements OnInit {
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.items.set(response.data);
           this.totalPages.set(response.last_page);
           this.totalItems.set(response.total);
+          if (response.available_tablo_sizes) {
+            this.availableTabloSizes.set(response.available_tablo_sizes);
+          }
           this.filterState.loading.set(false);
         },
         error: (err) => {

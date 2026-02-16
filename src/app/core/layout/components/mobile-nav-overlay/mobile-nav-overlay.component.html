@@ -41,13 +41,41 @@
       </button>
     </div>
 
-    <!-- Partner Switcher (mobil) -->
+    <!-- Partner Switcher (mobil inline lista) -->
     @if (showPartnerSwitcher() && currentPartnerId()) {
-      <div class="px-4 py-3 border-b border-slate-800">
-        <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-slate-500 mb-2 block">Partner</span>
-        <app-partner-switcher-dropdown
-          [currentPartnerId]="currentPartnerId()!"
-        />
+      <div class="px-3 py-3 border-b border-slate-800">
+        <span class="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-500 mb-2 block px-1">Partner</span>
+        @for (partner of partners(); track partner.partner_id) {
+          <button
+            class="flex items-center justify-between w-full px-3 py-2.5 rounded-lg
+                   transition-all duration-150 text-left"
+            [ngClass]="{
+              'bg-purple-600/20 text-white': isCurrentPartner(partner),
+              'text-slate-300 hover:bg-slate-800/60 hover:text-slate-200': !isCurrentPartner(partner),
+              'opacity-50 pointer-events-none': switchingPartnerId() === partner.partner_id
+            }"
+            (click)="switchPartner(partner)"
+            type="button"
+          >
+            <div class="flex flex-col gap-0.5 min-w-0">
+              <span class="text-sm font-medium truncate">{{ partner.partner_name }}</span>
+              <span class="text-[0.65rem] font-semibold uppercase tracking-wide"
+                [ngClass]="{
+                  'text-purple-400': partner.role === 'designer',
+                  'text-blue-400': partner.role === 'marketer',
+                  'text-green-400': partner.role === 'printer',
+                  'text-amber-400': partner.role === 'assistant'
+                }"
+              >{{ partner.role_name }}</span>
+            </div>
+            @if (isCurrentPartner(partner)) {
+              <lucide-icon name="check" [size]="16" class="text-green-400 flex-shrink-0"></lucide-icon>
+            }
+            @if (switchingPartnerId() === partner.partner_id) {
+              <span class="w-4 h-4 border-2 border-slate-600 border-t-purple-400 rounded-full animate-spin flex-shrink-0"></span>
+            }
+          </button>
+        }
       </div>
     }
 

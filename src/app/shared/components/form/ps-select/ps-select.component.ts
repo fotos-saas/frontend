@@ -9,7 +9,6 @@ import {
   inject,
   Renderer2,
   DestroyRef,
-  afterNextRender,
   ViewContainerRef,
   TemplateRef,
   viewChild,
@@ -122,10 +121,8 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
     const idx = this.options().findIndex(o => String(o.id) === String(this.value()));
     this.highlightedIndex.set(idx);
 
-    // Create overlay after signal update triggers template
-    afterNextRender(() => {
-      this.createOverlay();
-    });
+    // Microtask: megvárjuk a CD-t, utána overlay létrehozás
+    Promise.resolve().then(() => this.createOverlay());
   }
 
   close(): void {

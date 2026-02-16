@@ -52,6 +52,10 @@ export class ProjectDetailComponent {
     studentsWithPhotoCount: project.studentsWithPhotoCount,
     teachersWithPhotoCount: project.teachersWithPhotoCount,
     personsPreview: project.personsPreview,
+    inPrintAt: (project as any).inPrintAt,
+    doneAt: (project as any).doneAt,
+    printSmallTablo: (project as any).printSmallTablo,
+    printFlat: (project as any).printFlat,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

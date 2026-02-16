@@ -121,6 +121,10 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
     hasPhoto: boolean;
     photoThumbUrl: string | null;
   }>;
+  inPrintAt?: string | null;
+  doneAt?: string | null;
+  printSmallTablo?: PrintReadyFile | null;
+  printFlat?: PrintReadyFile | null;
   updatedAt: string;
 }
 
@@ -528,7 +532,8 @@ export interface FinalizationListItem {
   finalizedAt: string | null;
   orderSubmittedAt: string | null;
   tabloSize: string | null;
-  printReadyFile: PrintReadyFile | null;
+  printSmallTablo: PrintReadyFile | null;
+  printFlat: PrintReadyFile | null;
   contact: { name: string } | null;
   createdAt: string;
 }

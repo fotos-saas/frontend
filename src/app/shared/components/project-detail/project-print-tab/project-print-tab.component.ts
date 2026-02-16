@@ -4,6 +4,21 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ProjectDetailData } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
 
+export type PrintFileType = 'small_tablo' | 'flat';
+
+export interface PrintFileUploadEvent {
+  file: File;
+  type: PrintFileType;
+}
+
+export interface PrintFileDeleteEvent {
+  type: PrintFileType;
+}
+
+export interface PrintFileDownloadEvent {
+  type: PrintFileType;
+}
+
 const ALLOWED_TYPES = [
   'application/pdf',
   'image/tiff',
@@ -58,68 +73,120 @@ const MAX_SIZE = 200 * 1024 * 1024; // 200 MB
         </div>
       </section>
 
-      <!-- Nyomdakész fájl -->
+      <!-- Kistabló fájl -->
       <section class="file-section">
         <h3 class="section-title">
-          <lucide-icon [name]="ICONS.FILE_CHECK" [size]="16" />
-          Nyomdakész fájl
+          <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+          Kistabló
         </h3>
-        @if (project()?.printReadyFile) {
+        @if (project()?.printSmallTablo) {
           <div class="file-card">
             <div class="file-info">
-              <lucide-icon [name]="fileIcon()" [size]="28" class="file-type-icon" />
+              <lucide-icon [name]="smallTabloIcon()" [size]="28" class="file-type-icon" />
               <div class="file-details">
-                <span class="file-name">{{ project()!.printReadyFile!.fileName }}</span>
-                <span class="file-meta">{{ formatFileSize(project()!.printReadyFile!.size) }} · Feltöltve: {{ project()!.printReadyFile!.uploadedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
+                <span class="file-name">{{ project()!.printSmallTablo!.fileName }}</span>
+                <span class="file-meta">{{ formatFileSize(project()!.printSmallTablo!.size) }} · Feltöltve: {{ project()!.printSmallTablo!.uploadedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
               </div>
             </div>
             <div class="file-actions">
-              <button type="button" class="download-btn" (click)="downloadClick.emit()">
+              <button type="button" class="download-btn" (click)="downloadClick.emit({ type: 'small_tablo' })">
                 <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
                 Letöltés
               </button>
-              <button type="button" class="replace-btn" (click)="fileInput()?.nativeElement?.click()">
+              <button type="button" class="replace-btn" (click)="smallTabloInput()?.nativeElement?.click()">
                 <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
                 Csere
+              </button>
+              <button type="button" class="delete-btn" (click)="deleteClick.emit({ type: 'small_tablo' })">
+                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
               </button>
             </div>
           </div>
         } @else {
-          <!-- Üres állapot — drag & drop -->
           <div
             class="drop-zone"
-            [class.drop-zone--drag]="dragging()"
-            (dragover)="onDragOver($event)"
-            (dragleave)="onDragLeave($event)"
-            (drop)="onDrop($event)"
-            (click)="fileInput()?.nativeElement?.click()"
+            [class.drop-zone--drag]="draggingSmallTablo()"
+            (dragover)="onDragOver($event, 'small_tablo')"
+            (dragleave)="onDragLeave($event, 'small_tablo')"
+            (drop)="onDrop($event, 'small_tablo')"
+            (click)="smallTabloInput()?.nativeElement?.click()"
           >
             <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-icon" />
-            <p class="drop-text">Húzd ide a fájlt vagy kattints a feltöltéshez</p>
+            <p class="drop-text">Húzd ide a kistabló fájlt vagy kattints a feltöltéshez</p>
             <p class="drop-hint">PDF, TIFF, PSD, JPG, PNG — max 200 MB</p>
           </div>
         }
-
-        <!-- Rejtett file input -->
         <input
-          #fileInputRef
+          #smallTabloInputRef
           type="file"
           accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png"
           class="hidden-input"
-          (change)="onFileSelected($event)"
+          (change)="onFileSelected($event, 'small_tablo')"
         />
+      </section>
 
-        @if (uploadError()) {
-          <p class="upload-error">{{ uploadError() }}</p>
-        }
-
-        @if (uploading()) {
-          <div class="upload-progress">
-            <div class="spinner"></div>
-            <span>Feltöltés folyamatban...</span>
+      <!-- Nyomdai flat fájl -->
+      <section class="file-section">
+        <h3 class="section-title">
+          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+          Nyomdai flat
+        </h3>
+        @if (project()?.printFlat) {
+          <div class="file-card">
+            <div class="file-info">
+              <lucide-icon [name]="flatIcon()" [size]="28" class="file-type-icon" />
+              <div class="file-details">
+                <span class="file-name">{{ project()!.printFlat!.fileName }}</span>
+                <span class="file-meta">{{ formatFileSize(project()!.printFlat!.size) }} · Feltöltve: {{ project()!.printFlat!.uploadedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
+              </div>
+            </div>
+            <div class="file-actions">
+              <button type="button" class="download-btn" (click)="downloadClick.emit({ type: 'flat' })">
+                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+                Letöltés
+              </button>
+              <button type="button" class="replace-btn" (click)="flatInput()?.nativeElement?.click()">
+                <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+                Csere
+              </button>
+              <button type="button" class="delete-btn" (click)="deleteClick.emit({ type: 'flat' })">
+                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div
+            class="drop-zone"
+            [class.drop-zone--drag]="draggingFlat()"
+            (dragover)="onDragOver($event, 'flat')"
+            (dragleave)="onDragLeave($event, 'flat')"
+            (drop)="onDrop($event, 'flat')"
+            (click)="flatInput()?.nativeElement?.click()"
+          >
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-icon" />
+            <p class="drop-text">Húzd ide a nyomdai flat fájlt vagy kattints a feltöltéshez</p>
+            <p class="drop-hint">PDF, TIFF, PSD, JPG, PNG — max 200 MB</p>
           </div>
         }
+        <input
+          #flatInputRef
+          type="file"
+          accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png"
+          class="hidden-input"
+          (change)="onFileSelected($event, 'flat')"
+        />
       </section>
+
+      @if (uploadError()) {
+        <p class="upload-error">{{ uploadError() }}</p>
+      }
+
+      @if (uploading()) {
+        <div class="upload-progress">
+          <div class="spinner"></div>
+          <span>Feltöltés folyamatban...</span>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -301,6 +368,25 @@ const MAX_SIZE = 200 * 1024 * 1024; // 200 MB
       border-color: #cbd5e1;
     }
 
+    .delete-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: #fef2f2;
+      color: #ef4444;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .delete-btn:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+
     /* Drop zone */
     .drop-zone {
       display: flex;
@@ -409,50 +495,52 @@ export class ProjectPrintTabComponent {
   readonly ICONS = ICONS;
 
   readonly project = input<ProjectDetailData | null>(null);
-  readonly downloadClick = output<void>();
-  readonly uploadFile = output<File>();
+  readonly downloadClick = output<PrintFileDownloadEvent>();
+  readonly uploadFile = output<PrintFileUploadEvent>();
+  readonly deleteClick = output<PrintFileDeleteEvent>();
 
-  readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInputRef');
+  readonly smallTabloInput = viewChild<ElementRef<HTMLInputElement>>('smallTabloInputRef');
+  readonly flatInput = viewChild<ElementRef<HTMLInputElement>>('flatInputRef');
 
-  readonly dragging = signal(false);
+  readonly draggingSmallTablo = signal(false);
+  readonly draggingFlat = signal(false);
   readonly uploading = signal(false);
   readonly uploadError = signal<string | null>(null);
 
-  readonly fileIcon = computed(() => {
-    const mime = this.project()?.printReadyFile?.mimeType ?? '';
-    if (mime.includes('pdf')) return ICONS.FILE_TEXT;
-    if (mime.includes('image')) return ICONS.IMAGE;
-    return ICONS.FILE_CHECK;
-  });
+  readonly smallTabloIcon = computed(() => this.getFileIcon(this.project()?.printSmallTablo?.mimeType));
+  readonly flatIcon = computed(() => this.getFileIcon(this.project()?.printFlat?.mimeType));
 
-  onDragOver(event: DragEvent): void {
+  onDragOver(event: DragEvent, type: PrintFileType): void {
     event.preventDefault();
     event.stopPropagation();
-    this.dragging.set(true);
+    if (type === 'small_tablo') this.draggingSmallTablo.set(true);
+    else this.draggingFlat.set(true);
   }
 
-  onDragLeave(event: DragEvent): void {
+  onDragLeave(event: DragEvent, type: PrintFileType): void {
     event.preventDefault();
     event.stopPropagation();
-    this.dragging.set(false);
+    if (type === 'small_tablo') this.draggingSmallTablo.set(false);
+    else this.draggingFlat.set(false);
   }
 
-  onDrop(event: DragEvent): void {
+  onDrop(event: DragEvent, type: PrintFileType): void {
     event.preventDefault();
     event.stopPropagation();
-    this.dragging.set(false);
+    this.draggingSmallTablo.set(false);
+    this.draggingFlat.set(false);
     const file = event.dataTransfer?.files?.[0];
-    if (file) this.processFile(file);
+    if (file) this.processFile(file, type);
   }
 
-  onFileSelected(event: Event): void {
+  onFileSelected(event: Event, type: PrintFileType): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (file) this.processFile(file);
+    if (file) this.processFile(file, type);
     input.value = '';
   }
 
-  private processFile(file: File): void {
+  private processFile(file: File, type: PrintFileType): void {
     this.uploadError.set(null);
 
     if (!ALLOWED_TYPES.includes(file.type) && !this.hasAllowedExtension(file.name)) {
@@ -465,12 +553,19 @@ export class ProjectPrintTabComponent {
       return;
     }
 
-    this.uploadFile.emit(file);
+    this.uploadFile.emit({ file, type });
   }
 
   private hasAllowedExtension(name: string): boolean {
     const ext = name.split('.').pop()?.toLowerCase() ?? '';
     return ['pdf', 'tiff', 'tif', 'psd', 'jpg', 'jpeg', 'png'].includes(ext);
+  }
+
+  private getFileIcon(mime?: string): string {
+    if (!mime) return ICONS.FILE_CHECK;
+    if (mime.includes('pdf')) return ICONS.FILE_TEXT;
+    if (mime.includes('image')) return ICONS.IMAGE;
+    return ICONS.FILE_CHECK;
   }
 
   formatFileSize(bytes: number): string {

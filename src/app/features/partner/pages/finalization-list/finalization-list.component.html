@@ -85,6 +85,7 @@
   <app-print-ready-upload-dialog
     [projectId]="selectedItem()!.id"
     [projectName]="selectedItem()!.name"
+    [fileType]="uploadFileType()"
     [currentTabloSize]="selectedItem()!.tabloSize"
     [availableSizes]="availableTabloSizes()"
     (close)="closeUploadDialog()"

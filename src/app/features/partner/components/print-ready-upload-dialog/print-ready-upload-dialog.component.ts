@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
-import { PartnerFinalizationService } from '../../services/partner-finalization.service';
+import { PartnerFinalizationService, PrintFileType } from '../../services/partner-finalization.service';
 import { PrintReadyFile, TabloSize } from '../../models/partner.models';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
@@ -28,6 +28,7 @@ export class PrintReadyUploadDialogComponent {
 
   readonly projectId = input.required<number>();
   readonly projectName = input.required<string>();
+  readonly fileType = input.required<PrintFileType>();
   readonly currentTabloSize = input<string | null>(null);
   readonly availableSizes = input<TabloSize[]>([]);
 
@@ -102,6 +103,7 @@ export class PrintReadyUploadDialogComponent {
     this.finalizationService.uploadPrintReady(
       this.projectId(),
       file,
+      this.fileType(),
       newSize || undefined,
     )
       .pipe(takeUntilDestroyed(this.destroyRef))

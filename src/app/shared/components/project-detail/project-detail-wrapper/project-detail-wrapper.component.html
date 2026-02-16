@@ -63,8 +63,9 @@
         @defer {
           <app-project-print-tab
             [project]="projectData()"
-            (downloadClick)="downloadPrintReadyFile()"
-            (uploadFile)="uploadPrintReadyFile($event)"
+            (downloadClick)="downloadPrintFile($event)"
+            (uploadFile)="uploadPrintFile($event)"
+            (deleteClick)="deletePrintFile($event)"
           />
         }
       }

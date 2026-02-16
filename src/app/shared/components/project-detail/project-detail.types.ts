@@ -119,7 +119,14 @@ export interface ProjectDetailData {
   personsPreview?: PersonPreviewItem[];
   inPrintAt?: string | null;
   doneAt?: string | null;
-  printReadyFile?: {
+  printSmallTablo?: {
+    id: number;
+    fileName: string;
+    size: number;
+    mimeType: string;
+    uploadedAt: string;
+  } | null;
+  printFlat?: {
     id: number;
     fileName: string;
     size: number;

@@ -83,6 +83,7 @@ export class FinalizationListComponent implements OnInit {
 
   // Upload dialog
   showUploadDialog = signal(false);
+  uploadFileType = signal<'small_tablo' | 'flat'>('small_tablo');
   // Mark done confirm dialog
   showMarkDoneConfirm = signal(false);
   private markDoneItem = signal<FinalizationListItem | null>(null);
@@ -148,10 +149,12 @@ export class FinalizationListComponent implements OnInit {
   }
 
   downloadFile(item: FinalizationListItem): void {
-    if (!item.printReadyFile) return;
+    const file = item.printSmallTablo ?? item.printFlat;
+    if (!file) return;
 
-    const fileName = item.printReadyFile.fileName;
-    this.finalizationService.downloadPrintReady(item.id)
+    const type = item.printSmallTablo ? 'small_tablo' as const : 'flat' as const;
+    const fileName = file.fileName;
+    this.finalizationService.downloadPrintReady(item.id, type)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => saveFile(blob, fileName),

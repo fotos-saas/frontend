@@ -64,6 +64,10 @@ export class PartnerProjectDetailComponent {
     studentsWithPhotoCount: project.studentsWithPhotoCount,
     teachersWithPhotoCount: project.teachersWithPhotoCount,
     personsPreview: project.personsPreview,
+    inPrintAt: project.inPrintAt,
+    doneAt: project.doneAt,
+    printSmallTablo: project.printSmallTablo,
+    printFlat: project.printFlat,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

@@ -46,11 +46,15 @@
 
   <!-- Col 5: Fájl státusz -->
   <div class="col col-file">
-    @if (item().printReadyFile) {
-      <span class="file-status file-status--ready" [matTooltip]="item().printReadyFile!.fileName + ' (' + formatFileSize(item().printReadyFile!.size) + ')'">
-        <lucide-icon [name]="ICONS.FILE_CHECK" [size]="12" />
-        <span class="file-name">{{ item().printReadyFile!.fileName }}</span>
-      </span>
+    @if (item().printSmallTablo || item().printFlat) {
+      <div class="file-badges">
+        @if (item().printSmallTablo) {
+          <span class="file-badge file-badge--ready" [matTooltip]="'Kistabló: ' + item().printSmallTablo!.fileName">KT</span>
+        }
+        @if (item().printFlat) {
+          <span class="file-badge file-badge--ready" [matTooltip]="'Flat: ' + item().printFlat!.fileName">FL</span>
+        }
+      </div>
     } @else {
       <span class="file-status file-status--empty">
         <lucide-icon [name]="ICONS.FILE" [size]="12" />
@@ -71,7 +75,7 @@
         <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
       </button>
     }
-    @if (item().printReadyFile) {
+    @if (item().printSmallTablo || item().printFlat) {
       <button
         type="button"
         class="action-btn action-btn--download"
@@ -85,7 +89,7 @@
       type="button"
       class="action-btn action-btn--upload"
       (click)="onUploadClick($event)"
-      [matTooltip]="item().printReadyFile ? 'Fájl cseréje' : 'Fájl feltöltése'"
+      [matTooltip]="(item().printSmallTablo || item().printFlat) ? 'Fájl cseréje' : 'Fájl feltöltése'"
     >
       <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
     </button>

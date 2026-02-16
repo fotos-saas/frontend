@@ -26,7 +26,7 @@ import { ProjectDetailViewComponent } from '../project-detail-view/project-detai
 import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
 import { ProjectSettingsTabComponent } from '../project-settings-tab/project-settings-tab.component';
 import { ProjectUsersTabComponent } from '../project-users-tab/project-users-tab.component';
-import { ProjectPrintTabComponent } from '../project-print-tab/project-print-tab.component';
+import { ProjectPrintTabComponent, PrintFileUploadEvent, PrintFileDownloadEvent, PrintFileDeleteEvent } from '../project-print-tab/project-print-tab.component';
 import {
   ProjectSamplesTabComponent,
   PackageDialogRequest,
@@ -316,20 +316,22 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   // === PRINT TAB ===
 
-  downloadPrintReadyFile(): void {
+  downloadPrintFile(event: PrintFileDownloadEvent): void {
     const project = this.projectData();
-    if (!project?.printReadyFile || !this.finalizationService) return;
+    if (!project || !this.finalizationService) return;
 
-    const fileName = project.printReadyFile.fileName;
-    this.finalizationService.downloadPrintReady(project.id)
+    const file = event.type === 'small_tablo' ? project.printSmallTablo : project.printFlat;
+    if (!file) return;
+
+    this.finalizationService.downloadPrintReady(project.id, event.type)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (blob) => saveFile(blob, fileName),
+        next: (blob) => saveFile(blob, file.fileName),
         error: () => this.toast.error('Hiba', 'Nem sikerült letölteni a fájlt.'),
       });
   }
 
-  uploadPrintReadyFile(file: File): void {
+  uploadPrintFile(event: PrintFileUploadEvent): void {
     const project = this.projectData();
     if (!project || !this.finalizationService) return;
 
@@ -337,7 +339,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     tab?.uploading.set(true);
     tab?.uploadError.set(null);
 
-    this.finalizationService.uploadPrintReady(project.id, file)
+    this.finalizationService.uploadPrintReady(project.id, event.file, event.type)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -350,6 +352,21 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
           tab?.uploadError.set('Hiba történt a feltöltés során.');
           this.toast.error('Hiba', 'Nem sikerült feltölteni a fájlt.');
         },
+      });
+  }
+
+  deletePrintFile(event: PrintFileDeleteEvent): void {
+    const project = this.projectData();
+    if (!project || !this.finalizationService) return;
+
+    this.finalizationService.deletePrintReady(project.id, event.type)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.success('Siker', 'Fájl sikeresen törölve.');
+          this.facade.loadProject(project.id, this.mapToDetailData());
+        },
+        error: () => this.toast.error('Hiba', 'Nem sikerült törölni a fájlt.'),
       });
   }
 

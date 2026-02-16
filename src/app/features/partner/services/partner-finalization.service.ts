@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { FinalizationListItem, PaginatedResponse, PrintReadyFile } from '../models/partner.models';
 
+export type PrintFileType = 'small_tablo' | 'flat';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -33,13 +35,14 @@ export class PartnerFinalizationService {
     return this.http.get<PaginatedResponse<FinalizationListItem>>(this.baseUrl, { params: httpParams });
   }
 
-  uploadPrintReady(projectId: number, file: File, tabloSize?: string): Observable<{
+  uploadPrintReady(projectId: number, file: File, type: PrintFileType, tabloSize?: string): Observable<{
     success: boolean;
     message: string;
     data: PrintReadyFile;
   }> {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('type', type);
     if (tabloSize) {
       formData.append('tablo_size', tabloSize);
     }
@@ -50,10 +53,19 @@ export class PartnerFinalizationService {
     }>(`${this.baseUrl}/${projectId}/upload`, formData);
   }
 
-  downloadPrintReady(projectId: number): Observable<Blob> {
+  downloadPrintReady(projectId: number, type: PrintFileType): Observable<Blob> {
+    const params = new HttpParams().set('type', type);
     return this.http.get(`${this.baseUrl}/${projectId}/download`, {
       responseType: 'blob',
+      params,
     });
+  }
+
+  deletePrintReady(projectId: number, type: PrintFileType): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.baseUrl}/${projectId}/print-file`,
+      { body: { type } }
+    );
   }
 
   updateTabloSize(projectId: number, tabloSize: string | null): Observable<{

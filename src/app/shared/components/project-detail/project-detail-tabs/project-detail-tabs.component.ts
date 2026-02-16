@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output, computed } from '@an
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
 
-export type ProjectDetailTab = 'overview' | 'users' | 'samples' | 'settings';
+export type ProjectDetailTab = 'overview' | 'users' | 'samples' | 'settings' | 'print';
 
 export interface TabDefinition {
   id: ProjectDetailTab;
@@ -14,6 +14,7 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
   { id: 'overview', label: 'Áttekintés', icon: ICONS.LAYOUT_DASHBOARD },
   { id: 'users', label: 'Felhasználók', icon: ICONS.USERS },
   { id: 'samples', label: 'Minták', icon: ICONS.PALETTE },
+  { id: 'print', label: 'Nyomda', icon: ICONS.PRINTER },
   { id: 'settings', label: 'Beállítások', icon: ICONS.SETTINGS },
 ];
 

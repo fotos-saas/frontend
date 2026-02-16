@@ -59,6 +59,14 @@
           />
         }
       }
+      @case ('print') {
+        @defer {
+          <app-project-print-tab
+            [project]="projectData()"
+            (downloadClick)="downloadPrintReadyFile()"
+          />
+        }
+      }
       @case ('settings') {
         @defer {
           <app-project-settings-tab

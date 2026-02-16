@@ -26,6 +26,7 @@ import { ProjectDetailViewComponent } from '../project-detail-view/project-detai
 import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
 import { ProjectSettingsTabComponent } from '../project-settings-tab/project-settings-tab.component';
 import { ProjectUsersTabComponent } from '../project-users-tab/project-users-tab.component';
+import { ProjectPrintTabComponent } from '../project-print-tab/project-print-tab.component';
 import {
   ProjectSamplesTabComponent,
   PackageDialogRequest,
@@ -47,6 +48,7 @@ import {
 import { ICONS } from '../../../constants/icons.constants';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../confirm-dialog/confirm-dialog.component';
 import { GuestSession, SamplePackage } from '../../../../features/partner/services/partner.service';
+import { PartnerFinalizationService } from '../../../../features/partner/services/partner-finalization.service';
 import { ProjectDetailWrapperFacadeService } from './project-detail-wrapper-facade.service';
 import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persistence.util';
 
@@ -65,6 +67,7 @@ import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persiste
     ProjectUsersTabComponent,
     ProjectSamplesTabComponent,
     ProjectSettingsTabComponent,
+    ProjectPrintTabComponent,
     ConfirmDialogComponent,
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
@@ -88,6 +91,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly location = inject(Location);
   private readonly partnerService = inject(PartnerService, { optional: true });
   private readonly galleryService = inject(PartnerGalleryService, { optional: true });
+  private readonly finalizationService = inject(PartnerFinalizationService, { optional: true });
   private readonly toast = inject(ToastService);
 
   readonly facade = inject(ProjectDetailWrapperFacadeService<T>);
@@ -106,9 +110,13 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   readonly isMarketer = this.authService.isMarketer;
 
   activeTab = signal<ProjectDetailTab>('overview');
-  hiddenTabs = computed<ProjectDetailTab[]>(() =>
-    this.isMarketer() ? ['settings'] : []
-  );
+  hiddenTabs = computed<ProjectDetailTab[]>(() => {
+    const hidden: ProjectDetailTab[] = [];
+    if (this.isMarketer()) hidden.push('settings');
+    const status = this.projectData()?.status;
+    if (status !== 'in_print' && status !== 'done') hidden.push('print');
+    return hidden;
+  });
 
   // Delegate state signals from facade - direct signal references
   readonly loading = this.facade.loading;
@@ -152,7 +160,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
     this.facade.setMapFn(this.mapToDetailData());
 
-    initTabFromFragment(this.activeTab, this.location, ['overview', 'users', 'samples', 'settings'] as const, 'overview');
+    initTabFromFragment(this.activeTab, this.location, ['overview', 'users', 'samples', 'settings', 'print'] as const, 'overview');
 
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id || isNaN(id) || id < 1) {
@@ -303,6 +311,21 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       container.clear();
       this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
     });
+  }
+
+  // === PRINT TAB ===
+
+  downloadPrintReadyFile(): void {
+    const project = this.projectData();
+    if (!project?.printReadyFile || !this.finalizationService) return;
+
+    const fileName = project.printReadyFile.fileName;
+    this.finalizationService.downloadPrintReady(project.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => saveFile(blob, fileName),
+        error: () => this.toast.error('Hiba', 'Nem sikerült letölteni a fájlt.'),
+      });
   }
 
   // === GALLERY ===

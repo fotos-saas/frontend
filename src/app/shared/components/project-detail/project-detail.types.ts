@@ -117,6 +117,15 @@ export interface ProjectDetailData {
   studentsWithPhotoCount?: number;
   teachersWithPhotoCount?: number;
   personsPreview?: PersonPreviewItem[];
+  inPrintAt?: string | null;
+  doneAt?: string | null;
+  printReadyFile?: {
+    id: number;
+    fileName: string;
+    size: number;
+    mimeType: string;
+    uploadedAt: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
 }

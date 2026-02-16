@@ -27,22 +27,11 @@
     aria-label="Mobil navigáció"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between px-4 border-b border-slate-800 flex-shrink-0"
-         [class.h-14]="!showPartnerSwitcher() || !currentPartnerId()"
-         [class.py-3]="showPartnerSwitcher() && currentPartnerId()">
-      @if (showPartnerSwitcher() && currentPartnerId()) {
-        <div class="mobile-partner-switcher flex-1 min-w-0 mr-2">
-          <span class="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">Partner</span>
-          <app-partner-switcher-dropdown
-            [currentPartnerId]="currentPartnerId()!"
-          />
-        </div>
-      } @else {
-        <span class="text-lg font-medium text-slate-200">Menü</span>
-      }
+    <div class="h-14 flex items-center justify-between px-4 border-b border-slate-800 flex-shrink-0">
+      <span class="text-lg font-medium text-slate-200">Menü</span>
       <button
         class="p-2 hover:bg-slate-800 rounded-full transition-colors
-               text-slate-300 hover:text-slate-200 flex-shrink-0
+               text-slate-300 hover:text-slate-200
                focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
         (click)="sidebarState.close()"
         aria-label="Menü bezárása"
@@ -51,6 +40,16 @@
         <lucide-icon name="x" [size]="20"></lucide-icon>
       </button>
     </div>
+
+    <!-- Partner Switcher (mobil) -->
+    @if (showPartnerSwitcher() && currentPartnerId()) {
+      <div class="px-4 py-3 border-b border-slate-800 mobile-partner-switcher">
+        <span class="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-500 mb-2 block">Partner</span>
+        <app-partner-switcher-dropdown
+          [currentPartnerId]="currentPartnerId()!"
+        />
+      </div>
+    }
 
     <!-- Menu Items -->
     <nav class="flex-1 overflow-y-auto py-4" aria-label="Fő navigáció">

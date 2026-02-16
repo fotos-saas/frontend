@@ -65,7 +65,7 @@ export class FinalizationListComponent implements OnInit {
 
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'finalizations' },
-    defaultFilters: { graduation_year: '' },
+    defaultFilters: { graduation_year: this.currentYear.toString() },
     defaultSortBy: 'finalized_at',
     defaultSortDir: 'desc',
     validation: {

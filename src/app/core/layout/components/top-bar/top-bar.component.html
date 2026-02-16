@@ -1,9 +1,9 @@
 <header
-  class="h-14 md:h-16 backdrop-blur-md border-b border-slate-200/50 shadow-sm left-0 right-0 z-40"
+  class="h-14 md:h-16 border-b border-slate-200/50 shadow-sm left-0 right-0 z-40"
   [class.fixed]="position() === 'fixed'"
   [class.sticky]="position() === 'sticky'"
   [class.top-0]="true"
-  [style.background]="'var(--shell-topbar-bg, rgba(255, 255, 255, 0.8))'"
+  [style.background]="'var(--shell-topbar-bg, rgba(255, 255, 255, 1))'"
 >
   <div class="h-full flex items-center justify-between px-3 md:px-4 lg:px-6"
        [class.pl-20]="isElectronMac()">
@@ -41,13 +41,13 @@
             {{ roleBadge() }}
           </span>
         }
-        @if (showPartnerSwitcher() && currentPartnerId()) {
-          <app-partner-switcher-dropdown
-            class="hidden sm:inline-flex"
-            [currentPartnerId]="currentPartnerId()!"
-          />
-        }
       </a>
+      @if (showPartnerSwitcher() && currentPartnerId()) {
+        <app-partner-switcher-dropdown
+          class="hidden sm:inline-flex"
+          [currentPartnerId]="currentPartnerId()!"
+        />
+      }
 
       <!-- User badges -->
       <app-top-bar-user-badges

@@ -117,7 +117,7 @@ input, textarea, [contenteditable="true"] {
   // Alap: AppShell sötét téma (slate-900 sidebar, fehér topbar)
   // ==============================================
   // TopBar - fehér/világos háttér (AppShell eredeti)
-  --shell-topbar-bg: rgba(255, 255, 255, 0.8);
+  --shell-topbar-bg: rgba(255, 255, 255, 1);
   --shell-topbar-text: #1f2937;
   --shell-topbar-height: 64px;
   --shell-topbar-border: rgba(226, 232, 240, 0.5);

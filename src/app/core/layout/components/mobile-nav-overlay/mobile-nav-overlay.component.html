@@ -41,6 +41,16 @@
       </button>
     </div>
 
+    <!-- Partner Switcher (mobil) -->
+    @if (showPartnerSwitcher() && currentPartnerId()) {
+      <div class="px-4 py-3 border-b border-slate-800">
+        <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-slate-500 mb-2 block">Partner</span>
+        <app-partner-switcher-dropdown
+          [currentPartnerId]="currentPartnerId()!"
+        />
+      </div>
+    }
+
     <!-- Menu Items -->
     <nav class="flex-1 overflow-y-auto py-4" aria-label="Fő navigáció">
       @for (item of menuItems(); track item.id) {

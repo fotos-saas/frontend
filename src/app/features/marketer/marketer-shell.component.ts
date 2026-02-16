@@ -84,6 +84,8 @@ import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-
         <app-mobile-nav-overlay
           [customMenuItems]="mobileMenuItems()"
           [userInfo]="{ name: userName(), email: userEmail() }"
+          [showPartnerSwitcher]="hasMultiplePartners()"
+          [currentPartnerId]="currentPartnerId()"
           (logoutEvent)="logout()"
         />
 

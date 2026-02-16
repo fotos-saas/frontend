@@ -2,6 +2,7 @@ import {
   Component,
   inject,
   signal,
+  computed,
   input,
   output,
   ChangeDetectionStrategy,
@@ -42,6 +43,10 @@ export class PartnerSwitcherDropdownComponent implements OnInit {
   readonly loading = signal(false);
   readonly switching = signal(false);
   readonly currentPartnerName = signal<string>('');
+  readonly partnerInitial = computed(() => {
+    const name = this.currentPartnerName();
+    return name ? name.charAt(0).toUpperCase() : '?';
+  });
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {

@@ -14,6 +14,7 @@ import { SidebarStateService } from '../../services/sidebar-state.service';
 import { MenuConfigService } from '../../services/menu-config.service';
 import { ScrollLockService } from '../../../services/scroll-lock.service';
 import { MenuItem } from '../../models/menu-item.model';
+import { PartnerSwitcherDropdownComponent } from '../../../../shared/components/partner-switcher-dropdown/partner-switcher-dropdown.component';
 
 /**
  * User info interface a mobil menü alsó részéhez
@@ -38,7 +39,7 @@ export interface MobileNavUserInfo {
 @Component({
   selector: 'app-mobile-nav-overlay',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgClass, LucideAngularModule],
+  imports: [RouterLink, RouterLinkActive, NgClass, LucideAngularModule, PartnerSwitcherDropdownComponent],
   templateUrl: './mobile-nav-overlay.component.html',
   styleUrls: ['./mobile-nav-overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +57,10 @@ export class MobileNavOverlayComponent {
 
   // User section adatok (opcionális - ha megadva, megjelenik az alsó rész)
   userInfo = input<MobileNavUserInfo>();
+
+  // Partner switcher (opcionális)
+  showPartnerSwitcher = input<boolean>(false);
+  currentPartnerId = input<number | null>(null);
 
   // Logout callback (opcionális - ha megadva, megjelenik a kijelentkezés gomb)
   logoutEvent = output<void>();

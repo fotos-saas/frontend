@@ -73,42 +73,28 @@
   flex-shrink: 0;
 }
 
-/* Finalized badge */
+/* Finalized badge (clickable - opens order data) */
 .finalized-badge {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   font-size: 0.625rem;
   font-weight: 600;
-  padding: 2px 5px;
+  padding: 2px 6px;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  color: #ffffff;
+  background: #f3f4f6;
+  color: #4b5563;
   white-space: nowrap;
-  cursor: default;
-  flex-shrink: 0;
-}
-
-/* Order data quick button */
-.order-data-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: none;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: #ffffff;
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
-.order-data-btn:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  transform: scale(1.1);
+.finalized-badge:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  color: #374151;
 }
 
 /* Col: Tudnak róla */

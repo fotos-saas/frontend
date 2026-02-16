@@ -29,17 +29,14 @@
         </span>
       }
       @if (project().orderSubmittedAt && !isMarketer()) {
-        <span class="finalized-badge" [title]="'Megrendelés leadva: ' + (project().orderSubmittedAt | date:'yyyy. MMM d.':'':'hu-HU')">
-          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
-          Leadva
-        </span>
         <button
           type="button"
-          class="order-data-btn"
-          matTooltip="Megrendelési adatok"
+          class="finalized-badge"
+          [matTooltip]="'Megrendelés leadva: ' + (project().orderSubmittedAt | date:'yyyy. MMM d.':'':'hu-HU')"
           (click)="onOrderDataClick($event)"
         >
-          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="12" />
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
+          Leadva
         </button>
       }
     </div>

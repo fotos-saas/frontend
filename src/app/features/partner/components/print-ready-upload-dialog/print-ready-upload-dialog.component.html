@@ -54,17 +54,28 @@
     />
 
     <!-- Tablóméret -->
-    <div class="field">
-      <label class="field-label">Tablóméret (opcionális)</label>
-      <input
-        type="text"
-        class="field-input"
+    @if (sizeOptions().length > 0) {
+      <ps-select
+        label="Tablóméret (opcionális)"
+        [options]="sizeOptions()"
         [ngModel]="tabloSize()"
         (ngModelChange)="tabloSize.set($event)"
-        placeholder="pl. 50×70 cm"
-        maxlength="50"
+        emptyLabel="Válassz méretet..."
+        size="full"
       />
-    </div>
+    } @else {
+      <div class="field">
+        <label class="field-label">Tablóméret (opcionális)</label>
+        <input
+          type="text"
+          class="field-input"
+          [ngModel]="tabloSize()"
+          (ngModelChange)="tabloSize.set($event)"
+          placeholder="pl. 50×70 cm"
+          maxlength="50"
+        />
+      </div>
+    }
   </ng-container>
 
   <ng-container dialogFooter>

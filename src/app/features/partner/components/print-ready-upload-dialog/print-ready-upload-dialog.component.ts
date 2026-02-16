@@ -1,10 +1,12 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, DestroyRef, ElementRef, viewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, ElementRef, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { PsSelectComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerFinalizationService } from '../../services/partner-finalization.service';
-import { PrintReadyFile } from '../../models/partner.models';
+import { PrintReadyFile, TabloSize } from '../../models/partner.models';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 
 const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
@@ -14,7 +16,7 @@ const ALLOWED_EXTENSIONS = ['.pdf', '.tiff', '.tif', '.psd', '.jpg', '.jpeg', '.
 @Component({
   selector: 'app-print-ready-upload-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsSelectComponent],
   templateUrl: './print-ready-upload-dialog.component.html',
   styleUrl: './print-ready-upload-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,9 +29,14 @@ export class PrintReadyUploadDialogComponent {
   readonly projectId = input.required<number>();
   readonly projectName = input.required<string>();
   readonly currentTabloSize = input<string | null>(null);
+  readonly availableSizes = input<TabloSize[]>([]);
 
   readonly close = output<void>();
   readonly uploaded = output<PrintReadyFile>();
+
+  readonly sizeOptions = computed<PsSelectOption[]>(() =>
+    this.availableSizes().map(s => ({ id: s.value, label: s.label }))
+  );
 
   private fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 

@@ -74,6 +74,7 @@
     [projectId]="selectedItem()!.id"
     [projectName]="selectedItem()!.name"
     [currentTabloSize]="selectedItem()!.tabloSize"
+    [availableSizes]="availableTabloSizes()"
     (close)="closeUploadDialog()"
     (uploaded)="onFileUploaded()"
   />

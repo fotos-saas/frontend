@@ -66,34 +66,6 @@
     border-color: var(--ps-focus-border);
     box-shadow: 0 0 0 $ps-focus-ring-width var(--ps-focus-ring);
     background: var(--ps-field-bg-focus);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  &--open .ps-dropdown {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-    top: 100%;
-    left: -$ps-field-border-width;
-    right: -$ps-field-border-width;
-
-    // Flip-up: felfelé nyílik
-    &.ps-dropdown--flip-up {
-      top: auto;
-      bottom: 100%;
-      border-radius: $ps-field-border-radius $ps-field-border-radius 0 0;
-      border-top: 1px solid var(--ps-dropdown-border);
-      border-bottom: none;
-    }
-  }
-
-  // Flip-up: trigger border radius csere
-  &.ps-dropdown-container--flip-up.ps-select--open .ps-select__trigger {
-    border-bottom-left-radius: $ps-field-border-radius;
-    border-bottom-right-radius: $ps-field-border-radius;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
   }
 }
 
@@ -119,40 +91,7 @@
   }
 
   .ps-select--open .ps-select__trigger {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
     box-shadow: 0 0 0 2px var(--ps-focus-ring);
-  }
-
-  .ps-dropdown {
-    border-radius: 0 0 6px 6px;
-
-    &__option {
-      padding: 4px 8px;
-      font-size: 0.75rem;
-      min-height: 28px;
-    }
-
-    &__option-sublabel {
-      font-size: 0.6875rem;
-    }
-
-    &__empty {
-      padding: 8px;
-      font-size: 0.6875rem;
-    }
-  }
-
-  // Flip-up
-  .ps-select--open .ps-dropdown--flip-up {
-    border-radius: 6px 6px 0 0;
-  }
-
-  .ps-dropdown-container--flip-up.ps-select--open .ps-select__trigger {
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
   }
 }
 

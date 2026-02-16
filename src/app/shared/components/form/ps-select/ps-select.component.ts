@@ -7,19 +7,25 @@ import {
   computed,
   ElementRef,
   inject,
+  Renderer2,
+  DestroyRef,
+  afterNextRender,
+  ViewContainerRef,
+  TemplateRef,
+  viewChild,
+  EmbeddedViewRef,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { DropdownFlipDirective } from '@shared/directives';
 import { PsFormFieldBase } from '../form-field-base';
 import { PsSelectOption } from '../form.types';
 
 @Component({
   selector: 'ps-select',
   standalone: true,
-  imports: [NgClass, LucideAngularModule, DropdownFlipDirective],
+  imports: [NgClass, LucideAngularModule],
   templateUrl: './ps-select.component.html',
   styleUrl: './ps-select.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +38,8 @@ import { PsSelectOption } from '../form.types';
   ],
   host: {
     '(document:click)': 'onDocumentClick($event)',
+    '(window:resize)': 'onWindowResize()',
+    '(window:scroll)': 'onWindowScroll()',
   },
 })
 export class PsSelectComponent extends PsFormFieldBase<string | number> {
@@ -43,10 +51,15 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
   readonly direction = input<'horizontal' | 'vertical'>('horizontal');
 
   private readonly hostEl = inject(ElementRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly dropdownTpl = viewChild<TemplateRef<unknown>>('dropdownTpl');
 
   readonly value = signal<string | number>('');
   readonly isOpen = signal(false);
   readonly highlightedIndex = signal(-1);
+  readonly isFlipped = signal(false);
 
   readonly selectedLabel = computed(() => {
     const v = this.value();
@@ -61,13 +74,40 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
     this.options().filter(o => !o.disabled)
   );
 
+  // Overlay state
+  private overlayEl: HTMLElement | null = null;
+  private embeddedViewRef: EmbeddedViewRef<unknown> | null = null;
+  private readonly vcr = inject(ViewContainerRef);
+  private scrollListeners: (() => void)[] = [];
+
+  constructor() {
+    super();
+    this.destroyRef.onDestroy(() => this.destroyOverlay());
+  }
+
   writeValue(val: string | number): void {
     this.value.set(val ?? '');
   }
 
   onDocumentClick(event: MouseEvent): void {
-    if (!this.hostEl.nativeElement.contains(event.target)) {
+    const target = event.target as Node;
+    if (
+      !this.hostEl.nativeElement.contains(target) &&
+      (!this.overlayEl || !this.overlayEl.contains(target))
+    ) {
       this.close();
+    }
+  }
+
+  onWindowResize(): void {
+    if (this.isOpen()) {
+      this.updateOverlayPosition();
+    }
+  }
+
+  onWindowScroll(): void {
+    if (this.isOpen()) {
+      this.updateOverlayPosition();
     }
   }
 
@@ -79,14 +119,20 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
   open(): void {
     if (this.isDisabled()) return;
     this.isOpen.set(true);
-    // Highlight current selection
     const idx = this.options().findIndex(o => String(o.id) === String(this.value()));
     this.highlightedIndex.set(idx);
+
+    // Create overlay after signal update triggers template
+    afterNextRender(() => {
+      this.createOverlay();
+    });
   }
 
   close(): void {
     this.isOpen.set(false);
     this.highlightedIndex.set(-1);
+    this.isFlipped.set(false);
+    this.destroyOverlay();
   }
 
   selectOption(option: PsSelectOption): void {
@@ -143,12 +189,111 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
     }
   }
 
+  // ── Overlay Management ──
+
+  private createOverlay(): void {
+    const tpl = this.dropdownTpl();
+    if (!tpl) return;
+
+    this.destroyOverlay();
+
+    // Create embedded view from template
+    this.embeddedViewRef = this.vcr.createEmbeddedView(tpl);
+    this.embeddedViewRef.detectChanges();
+
+    // Create overlay container
+    this.overlayEl = this.renderer.createElement('div');
+    this.renderer.addClass(this.overlayEl, 'ps-select-overlay');
+    this.renderer.setStyle(this.overlayEl, 'position', 'fixed');
+    this.renderer.setStyle(this.overlayEl, 'z-index', '10000');
+    this.renderer.setStyle(this.overlayEl, 'pointer-events', 'auto');
+
+    // Append view nodes to overlay
+    for (const node of this.embeddedViewRef.rootNodes) {
+      this.renderer.appendChild(this.overlayEl, node);
+    }
+
+    // Append to document body
+    this.renderer.appendChild(document.body, this.overlayEl);
+
+    // Position it
+    this.updateOverlayPosition();
+
+    // Listen to scroll on all scrollable ancestors
+    this.setupScrollListeners();
+  }
+
+  private destroyOverlay(): void {
+    this.cleanupScrollListeners();
+
+    if (this.embeddedViewRef) {
+      this.embeddedViewRef.destroy();
+      this.embeddedViewRef = null;
+    }
+    if (this.overlayEl && this.overlayEl.parentNode) {
+      this.renderer.removeChild(document.body, this.overlayEl);
+      this.overlayEl = null;
+    }
+  }
+
+  private updateOverlayPosition(): void {
+    if (!this.overlayEl) return;
+
+    // Find the trigger button
+    const trigger = this.hostEl.nativeElement.querySelector('.ps-select__trigger') as HTMLElement;
+    if (!trigger) return;
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const panelEl = this.overlayEl.querySelector('.ps-dropdown') as HTMLElement;
+    if (!panelEl) return;
+
+    const panelHeight = panelEl.offsetHeight;
+    const viewportHeight = window.innerHeight;
+    const spaceBelow = viewportHeight - triggerRect.bottom - 4;
+    const spaceAbove = triggerRect.top - 4;
+
+    const shouldFlip = panelHeight > spaceBelow && spaceAbove > spaceBelow;
+    this.isFlipped.set(shouldFlip);
+
+    // Width matches trigger
+    this.renderer.setStyle(this.overlayEl, 'width', triggerRect.width + 'px');
+    this.renderer.setStyle(this.overlayEl, 'left', triggerRect.left + 'px');
+
+    if (shouldFlip) {
+      this.renderer.setStyle(this.overlayEl, 'top', (triggerRect.top - panelHeight) + 'px');
+      this.renderer.addClass(panelEl, 'ps-dropdown--flip-up');
+    } else {
+      this.renderer.setStyle(this.overlayEl, 'top', triggerRect.bottom + 'px');
+      this.renderer.removeClass(panelEl, 'ps-dropdown--flip-up');
+    }
+  }
+
+  private setupScrollListeners(): void {
+    let el: HTMLElement | null = this.hostEl.nativeElement.parentElement;
+    while (el) {
+      const style = getComputedStyle(el);
+      if (style.overflow !== 'visible' || style.overflowY !== 'visible') {
+        const listener = () => this.updateOverlayPosition();
+        el.addEventListener('scroll', listener, { passive: true });
+        const captured = el;
+        this.scrollListeners.push(() => captured.removeEventListener('scroll', listener));
+      }
+      el = el.parentElement;
+    }
+  }
+
+  private cleanupScrollListeners(): void {
+    for (const cleanup of this.scrollListeners) {
+      cleanup();
+    }
+    this.scrollListeners = [];
+  }
+
   private moveHighlight(direction: number): void {
     const opts = this.options();
     const total = opts.length;
     let idx = this.highlightedIndex();
 
-    // Find next non-disabled option
     for (let i = 0; i < total; i++) {
       idx = (idx + direction + total) % total;
       if (!opts[idx].disabled) {

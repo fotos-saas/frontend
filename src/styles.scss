@@ -706,6 +706,51 @@ body.dialog-open {
 }
 
 // ==============================================
+// PS-SELECT OVERLAY — Dropdown portaled to body
+// ==============================================
+// A ps-select dropdown overlay a document.body-hoz van csatolva (CDK overlay pattern),
+// ezért globális stílusok kellenek.
+
+.ps-select-overlay {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: auto;
+
+  .ps-dropdown {
+    // Felülírjuk a shared _form-field-base.scss position: absolute-ot
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    border-radius: 8px;
+    transform-origin: top center;
+    animation: psSelectOverlayIn 150ms ease-out;
+
+    &--flip-up {
+      transform-origin: bottom center;
+    }
+  }
+}
+
+@keyframes psSelectOverlayIn {
+  from {
+    opacity: 0;
+    transform: scaleY(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-select-overlay .ps-dropdown {
+    animation: none;
+  }
+}
+
+// ==============================================
 // GLOBÁLIS TOOLTIP RENDSZER
 // ==============================================
 // Használat: [attr.data-tooltip]="szöveg" + has-tooltip class

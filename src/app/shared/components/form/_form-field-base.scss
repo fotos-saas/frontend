@@ -12,6 +12,7 @@
   flex-direction: column;
 
   // Méret variánsok
+  &--xs { max-width: $ps-field-width-xs; }
   &--sm { max-width: $ps-field-width-sm; }
   &--md { max-width: $ps-field-width-md; }
   &--lg { max-width: $ps-field-width-lg; }
@@ -67,6 +68,7 @@
   }
 
   // Height variants
+  &--height-xs .ps-field__wrapper { height: $ps-field-height-xs; }
   &--height-sm .ps-field__wrapper { height: $ps-field-height-sm; }
   &--height-lg .ps-field__wrapper { height: $ps-field-height-lg; }
 

@@ -1,6 +1,6 @@
 .finalization-row {
   display: grid;
-  grid-template-columns: 48px 1fr 100px 80px 140px 80px;
+  grid-template-columns: 48px 1fr 100px 120px 140px 80px;
   align-items: center;
   gap: 8px;
   background: #ffffff;
@@ -72,40 +72,9 @@
   justify-content: center;
 }
 
-.size-btn {
-  background: none;
-  border: 1px dashed transparent;
-  border-radius: 4px;
-  padding: 2px 6px;
+.size-empty {
   font-size: 0.75rem;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.size-btn:hover {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
-}
-
-.size-placeholder {
   color: #94a3b8;
-  display: flex;
-  align-items: center;
-}
-
-.size-input {
-  width: 72px;
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  border: 1px solid #3b82f6;
-  border-radius: 4px;
-  outline: none;
-  text-align: center;
 }
 
 /* Col: Fájl státusz */

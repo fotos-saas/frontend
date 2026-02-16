@@ -97,6 +97,65 @@
   }
 }
 
+// ============================================================================
+// XS (MINI) VARIANT
+// ============================================================================
+
+.ps-field--xs {
+  .ps-select__trigger {
+    height: $ps-field-height-xs;
+    border-radius: 6px;
+    border-width: 1px;
+  }
+
+  .ps-select__value {
+    font-size: 0.75rem;
+    padding: 0 8px;
+    padding-right: 0;
+  }
+
+  .ps-select__chevron {
+    padding: 0 4px;
+  }
+
+  .ps-select--open .ps-select__trigger {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 0 0 2px var(--ps-focus-ring);
+  }
+
+  .ps-dropdown {
+    border-radius: 0 0 6px 6px;
+
+    &__option {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      min-height: 28px;
+    }
+
+    &__option-sublabel {
+      font-size: 0.6875rem;
+    }
+
+    &__empty {
+      padding: 8px;
+      font-size: 0.6875rem;
+    }
+  }
+
+  // Flip-up
+  .ps-select--open .ps-dropdown--flip-up {
+    border-radius: 6px 6px 0 0;
+  }
+
+  .ps-dropdown-container--flip-up.ps-select--open .ps-select__trigger {
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
 // Error state
 .ps-field--error .ps-select__trigger {
   border-color: var(--ps-error-border);

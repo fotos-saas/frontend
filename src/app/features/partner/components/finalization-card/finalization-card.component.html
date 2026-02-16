@@ -33,7 +33,7 @@
   <div class="col col-size" (click)="$event.stopPropagation()">
     @if (sizeOptions().length > 0) {
       <ps-select
-        size="sm"
+        size="xs"
         emptyLabel="Méret..."
         [options]="sizeOptions()"
         [ngModel]="item().tabloSize ?? ''"

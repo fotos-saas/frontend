@@ -55,6 +55,8 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
     return opt?.label ?? '';
   });
 
+  readonly chevronSize = computed(() => this.size() === 'xs' ? 14 : 18);
+
   readonly enabledOptions = computed(() =>
     this.options().filter(o => !o.disabled)
   );

@@ -131,6 +131,7 @@
   <section class="showcase__section">
     <h2 class="showcase__section-title">Méretek</h2>
     <div class="showcase__stack">
+      <ps-input label="Extra Small (160px)" placeholder="xs" size="xs" />
       <ps-input label="Small (240px)" placeholder="sm" size="sm" />
       <ps-input label="Medium (360px)" placeholder="md" size="md" />
       <ps-input label="Large (480px)" placeholder="lg" size="lg" />
@@ -293,13 +294,22 @@
   <!-- 7. Select (dropdown) -->
   <section class="showcase__section">
     <h2 class="showcase__section-title">Select (dropdown)</h2>
-    <ps-select
-      label="Nyelv"
-      [options]="selectOptions"
-      [(ngModel)]="selectValue"
-      emptyLabel="Válassz nyelvet..."
-      size="md"
-    />
+    <div class="showcase__grid">
+      <ps-select
+        label="Mini (xs)"
+        [options]="selectOptions"
+        [(ngModel)]="selectValue"
+        emptyLabel="Válassz..."
+        size="xs"
+      />
+      <ps-select
+        label="Nyelv (md)"
+        [options]="selectOptions"
+        [(ngModel)]="selectValue"
+        emptyLabel="Válassz nyelvet..."
+        size="md"
+      />
+    </div>
   </section>
 
   <!-- 7b. Select (cards - horizontális) -->

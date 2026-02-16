@@ -1,4 +1,4 @@
-export type PsFieldSize = 'sm' | 'md' | 'lg' | 'full';
+export type PsFieldSize = 'xs' | 'sm' | 'md' | 'lg' | 'full';
 export type PsFieldState = 'default' | 'error' | 'success';
 export type PsInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'time' | 'url';
 
@@ -18,6 +18,7 @@ export interface PsRadioOption {
 }
 
 export const PS_FIELD_SIZES: Record<PsFieldSize, string> = {
+  xs: '160px',
   sm: '240px',
   md: '360px',
   lg: '480px',

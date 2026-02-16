@@ -25,6 +25,7 @@ export class FinalizationCardComponent {
   readonly cardClick = output<FinalizationListItem>();
   readonly downloadClick = output<FinalizationListItem>();
   readonly uploadClick = output<FinalizationListItem>();
+  readonly markDoneClick = output<FinalizationListItem>();
   readonly tabloSizeChange = output<{ item: FinalizationListItem; size: string }>();
 
   readonly sizeOptions = computed<PsSelectOption[]>(() =>
@@ -39,6 +40,11 @@ export class FinalizationCardComponent {
   onUploadClick(event: MouseEvent): void {
     event.stopPropagation();
     this.uploadClick.emit(this.item());
+  }
+
+  onMarkDoneClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.markDoneClick.emit(this.item());
   }
 
   onSizeSelected(value: string | number): void {

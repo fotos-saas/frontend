@@ -61,6 +61,16 @@
 
   <!-- Col 6: Műveletek -->
   <div class="col col-actions">
+    @if (item().status === 'in_print') {
+      <button
+        type="button"
+        class="action-btn action-btn--done"
+        (click)="onMarkDoneClick($event)"
+        matTooltip="Készre állítás"
+      >
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+      </button>
+    }
     @if (item().printReadyFile) {
       <button
         type="button"

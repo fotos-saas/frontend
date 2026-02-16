@@ -1,6 +1,6 @@
 .finalization-row {
   display: grid;
-  grid-template-columns: 48px 1fr 100px 120px 140px 80px;
+  grid-template-columns: 48px 1fr 100px 120px 140px 104px;
   align-items: center;
   gap: 8px;
   background: #ffffff;
@@ -166,6 +166,15 @@
 
 .action-btn--upload:hover {
   background: #2563eb;
+}
+
+.action-btn--done {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.action-btn--done:hover {
+  background: #d97706;
 }
 
 /* Responsive */

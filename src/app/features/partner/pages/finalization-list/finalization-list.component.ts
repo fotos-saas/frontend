@@ -165,6 +165,25 @@ export class FinalizationListComponent implements OnInit {
     );
   }
 
+  onMarkAsDone(item: FinalizationListItem): void {
+    this.finalizationService.markAsDone(item.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.items.update(list =>
+            list.map(i =>
+              i.id === item.id ? { ...i, status: 'done' } : i
+            )
+          );
+          this.toast.success('Kész', 'Projekt készre állítva.');
+        },
+        error: (err) => {
+          this.logger.error('Failed to mark as done', err);
+          this.toast.error('Hiba', 'Nem sikerült készre állítani a projektet.');
+        },
+      });
+  }
+
   onTabloSizeChange(event: { item: FinalizationListItem; size: string }): void {
     this.finalizationService.updateTabloSize(event.item.id, event.size || null)
       .pipe(takeUntilDestroyed(this.destroyRef))

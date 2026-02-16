@@ -38,7 +38,7 @@ import { ICONS } from '../../../../../../shared/constants/icons.constants';
   styles: [`
     .table-header {
       display: grid;
-      grid-template-columns: 48px 1fr 100px 80px 140px 80px;
+      grid-template-columns: 48px 1fr 100px 80px 140px 104px;
       gap: 8px;
       padding: 8px 12px;
       margin-bottom: 4px;

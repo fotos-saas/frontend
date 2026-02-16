@@ -519,6 +519,7 @@ export interface TabloSize {
 export interface FinalizationListItem {
   id: number;
   name: string;
+  status: string;
   schoolName: string | null;
   schoolCity: string | null;
   className: string | null;

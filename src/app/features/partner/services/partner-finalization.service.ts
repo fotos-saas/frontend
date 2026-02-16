@@ -67,4 +67,16 @@ export class PartnerFinalizationService {
       data: { tabloSize: string | null };
     }>(`${this.baseUrl}/${projectId}/tablo-size`, { tablo_size: tabloSize });
   }
+
+  markAsDone(projectId: number): Observable<{
+    success: boolean;
+    message: string;
+    data: { status: string };
+  }> {
+    return this.http.patch<{
+      success: boolean;
+      message: string;
+      data: { status: string };
+    }>(`${this.baseUrl}/${projectId}/mark-done`, {});
+  }
 }

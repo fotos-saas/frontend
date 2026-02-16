@@ -40,11 +40,19 @@ const GALLERY_TABS: GalleryTabDef[] = [
       border-bottom: 2px solid #e2e8f0;
       margin: -4px;
       margin-bottom: 24px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
 
     .tab-btn {
       display: inline-flex;
       align-items: center;
+      flex-shrink: 0;
       margin: 4px;
       padding: 10px 16px;
       background: none;
@@ -79,8 +87,12 @@ const GALLERY_TABS: GalleryTabDef[] = [
 
     @media (max-width: 480px) {
       .tab-btn {
-        padding: 8px 12px;
+        padding: 8px 10px;
         font-size: 0.8125rem;
+
+        lucide-icon {
+          display: none;
+        }
       }
     }
 

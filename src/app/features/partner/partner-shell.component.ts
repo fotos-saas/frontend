@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit, DestroyRef, ElementRef } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { NgClass } from '@angular/common';
 import { Router, RouterModule, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
@@ -56,7 +56,11 @@ const ROLE_BADGES: Record<string, string> = {
   ],
   templateUrl: './partner-shell.component.html',
   styleUrl: './partner-shell.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'closeFlyout()',
+  },
 })
 export class PartnerShellComponent implements OnInit {
   private readonly logger = inject(LoggerService);
@@ -67,6 +71,13 @@ export class PartnerShellComponent implements OnInit {
   protected sidebarState = inject(SidebarStateService);
   protected readonly ICONS = ICONS;
   protected chatOpen = signal(false);
+  private readonly elementRef = inject(ElementRef);
+
+  /** Flyout almenü — melyik szekció van nyitva collapsed módban */
+  protected activeFlyout = signal<string | null>(null);
+
+  /** Flyout panel pozíció */
+  protected flyoutPosition = signal<{ top: number; left: number }>({ top: 0, left: 0 });
 
   /** Base URL a route-okhoz - role alapján */
   protected baseUrl = computed(() => {
@@ -331,6 +342,44 @@ export class PartnerShellComponent implements OnInit {
 
     parts.push('Kattints a kezeléshez');
     return parts.join(' • ');
+  }
+
+  /** Szekció kattintás — tablet módban flyout toggle, egyébként section toggle */
+  toggleSectionOrFlyout(sectionId: string, event: MouseEvent): void {
+    if (this.sidebarState.isTablet()) {
+      if (this.activeFlyout() === sectionId) {
+        this.activeFlyout.set(null);
+      } else {
+        const button = (event.currentTarget as HTMLElement);
+        const rect = button.getBoundingClientRect();
+        this.flyoutPosition.set({
+          top: rect.top,
+          left: rect.right + 4,
+        });
+        this.activeFlyout.set(sectionId);
+      }
+    } else {
+      this.sidebarState.toggleSection(sectionId);
+    }
+  }
+
+  /** Flyout bezárása */
+  closeFlyout(): void {
+    this.activeFlyout.set(null);
+  }
+
+  /** Flyout navigáció — bezárás + menü bezárás */
+  onFlyoutNavigate(): void {
+    this.activeFlyout.set(null);
+  }
+
+  /** Kívülre kattintás — flyout bezárás */
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.activeFlyout()) return;
+    const sidebar = this.elementRef.nativeElement.querySelector('.sidebar');
+    if (sidebar && !sidebar.contains(event.target as Node)) {
+      this.activeFlyout.set(null);
+    }
   }
 
   logout(): void {

@@ -10,11 +10,12 @@
              focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
       [ngClass]="{
         'justify-center': collapsed(),
-        'justify-between': !collapsed()
+        'justify-between': !collapsed(),
+        'bg-slate-800/40': flyoutOpen()
       }"
-      (click)="toggleSection()"
+      (click)="toggleSection($event)"
       [attr.title]="collapsed() ? item().label : null"
-      [attr.aria-expanded]="isExpanded()"
+      [attr.aria-expanded]="collapsed() ? flyoutOpen() : isExpanded()"
       [attr.aria-controls]="'section-' + item().id"
       type="button"
     >
@@ -44,7 +45,46 @@
       }
     </button>
 
-    <!-- Children (animated) -->
+    <!-- Flyout panel (collapsed módban, fixed pozíció) -->
+    @if (collapsed() && flyoutOpen()) {
+      <div
+        [id]="'section-' + item().id"
+        class="flyout-panel"
+        role="menu"
+        [attr.aria-label]="item().label + ' almenü'"
+        [style.top.px]="flyoutPosition().top"
+        [style.left.px]="flyoutPosition().left"
+      >
+        <div class="flyout-header">{{ item().label }}</div>
+        @for (child of item().children; track child.id; let i = $index) {
+          <a
+            [routerLink]="child.route"
+            routerLinkActive="flyout-item--active"
+            #rla="routerLinkActive"
+            class="flyout-item"
+            [ngClass]="{
+              'opacity-50 pointer-events-none': child.disabled
+            }"
+            role="menuitem"
+            (click)="onFlyoutNavigate()"
+            [style.animation-delay]="(i * 0.03) + 's'"
+          >
+            {{ child.label }}
+            @if (child.badge) {
+              <span
+                class="child-badge ml-2 w-5 h-5 text-xs font-bold
+                       bg-amber-500 text-slate-900 rounded-full
+                       inline-flex items-center justify-center"
+              >
+                {{ child.badge }}
+              </span>
+            }
+          </a>
+        }
+      </div>
+    }
+
+    <!-- Children (expanded módban, nem collapsed) -->
     @if (!collapsed() && isExpanded()) {
       <div
         [id]="'section-' + item().id"

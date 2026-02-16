@@ -173,7 +173,7 @@
 
 /* ============ Section with children ============ */
 .nav-section {
-  /* Nincs extra margin - egységes spacing a nav-item margin-jain keresztül */
+  position: relative; /* Flyout panel pozícionáláshoz */
 }
 
 .nav-item--section {
@@ -447,5 +447,80 @@
 @media (max-width: 767px) {
   .subscription-badge {
     display: none;
+  }
+}
+
+/* ============ Flyout Panel (collapsed sidebar) ============ */
+
+@keyframes flyoutIn {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.flyout-panel {
+  position: fixed;
+  min-width: 180px;
+  max-width: 240px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  z-index: 100;
+  animation: flyoutIn 0.15s ease-out;
+}
+
+.flyout-header {
+  padding: 8px 12px 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(148, 163, 184, 0.7);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+  margin-bottom: 4px;
+}
+
+.flyout-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  opacity: 0;
+  animation: flyoutIn 0.15s ease-out forwards;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f1f5f9;
+  }
+
+  &--active {
+    background: linear-gradient(to right, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+    color: #ffffff;
+    font-weight: 500;
+  }
+
+  .dev-badge {
+    margin-left: 6px;
+    font-size: 0.5625rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flyout-panel,
+  .flyout-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }

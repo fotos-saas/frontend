@@ -71,9 +71,10 @@
           <div class="nav-section">
             <button
               class="nav-item nav-item--section"
-              [class.expanded]="sidebarState.isSectionExpanded(item.id)"
+              [class.expanded]="sidebarState.isTablet() ? activeFlyout() === item.id : sidebarState.isSectionExpanded(item.id)"
               [title]="sidebarState.isTablet() ? item.label : ''"
-              (click)="sidebarState.toggleSection(item.id)"
+              (click)="toggleSectionOrFlyout(item.id, $event)"
+              [attr.aria-expanded]="sidebarState.isTablet() ? activeFlyout() === item.id : sidebarState.isSectionExpanded(item.id)"
             >
               <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
               <span class="nav-label">{{ item.label }}</span>
@@ -86,6 +87,35 @@
                 class="nav-chevron"
               ></lucide-icon>
             </button>
+
+            <!-- Flyout panel (tablet collapsed módban) -->
+            @if (sidebarState.isTablet() && activeFlyout() === item.id) {
+              <div
+                class="flyout-panel"
+                role="menu"
+                [attr.aria-label]="item.label + ' almenü'"
+                [style.top.px]="flyoutPosition().top"
+                [style.left.px]="flyoutPosition().left"
+              >
+                <div class="flyout-header">{{ item.label }}</div>
+                @for (child of item.children; track child.id) {
+                  <a
+                    [routerLink]="child.route"
+                    routerLinkActive="flyout-item--active"
+                    class="flyout-item"
+                    role="menuitem"
+                    (click)="onFlyoutNavigate()"
+                  >
+                    {{ child.label }}
+                    @if (child.devBadge) {
+                      <span class="dev-badge">DEV</span>
+                    }
+                  </a>
+                }
+              </div>
+            }
+
+            <!-- Children (desktop expanded módban) -->
             @if (sidebarState.isSectionExpanded(item.id) && !sidebarState.isTablet()) {
               <div class="nav-children">
                 @for (child of item.children; track child.id) {

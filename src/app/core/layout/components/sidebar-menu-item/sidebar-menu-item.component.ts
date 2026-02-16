@@ -3,7 +3,9 @@ import {
   input,
   inject,
   computed,
-  ChangeDetectionStrategy
+  signal,
+  ChangeDetectionStrategy,
+  ElementRef
 } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgClass } from '@angular/common';
@@ -19,12 +21,12 @@ import { NavigationLoadingService } from '../../../services/navigation-loading.s
  * Támogatja:
  * - Egyszerű elemeket (route + icon + label)
  * - Szekciók (children + expand/collapse)
- * - Collapsed mód (csak ikon, tooltip)
+ * - Collapsed mód: flyout almenü (sidebar jobb oldalán)
  * - Badge megjelenítés
  * - Disabled állapot
  * - Dark theme + gradient active state
  * - Lucide ikonok
- * - A11y: focus-visible, aria-expanded
+ * - A11y: focus-visible, aria-expanded, Escape bezárás
  */
 @Component({
   selector: 'app-sidebar-menu-item',
@@ -33,6 +35,10 @@ import { NavigationLoadingService } from '../../../services/navigation-loading.s
   templateUrl: './sidebar-menu-item.component.html',
   styleUrls: ['./sidebar-menu-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'closeFlyout()',
+  },
 })
 export class SidebarMenuItemComponent {
   /** Menüelem adat */
@@ -44,11 +50,18 @@ export class SidebarMenuItemComponent {
   private readonly router = inject(Router);
   private readonly sidebarState = inject(SidebarStateService);
   private readonly navigationLoading = inject(NavigationLoadingService);
+  private readonly elementRef = inject(ElementRef);
 
   /** Szekció kibontott-e */
   readonly isExpanded = computed(() =>
     this.sidebarState.isSectionExpanded(this.item().id)
   );
+
+  /** Flyout almenü nyitva van-e (collapsed módban) */
+  readonly flyoutOpen = signal(false);
+
+  /** Flyout panel pozíciója (fixed) */
+  readonly flyoutPosition = signal<{ top: number; left: number }>({ top: 0, left: 0 });
 
   /** Pending state - erre a route-ra navigálunk */
   readonly isPending = computed(() => {
@@ -58,10 +71,48 @@ export class SidebarMenuItemComponent {
   });
 
   /**
-   * Szekció toggle
+   * Szekció toggle — collapsed módban flyout-ot nyit/zár
    */
-  toggleSection(): void {
-    this.sidebarState.toggleSection(this.item().id);
+  toggleSection(event: MouseEvent): void {
+    if (this.collapsed()) {
+      if (this.flyoutOpen()) {
+        this.flyoutOpen.set(false);
+      } else {
+        const button = (event.currentTarget as HTMLElement);
+        const rect = button.getBoundingClientRect();
+        this.flyoutPosition.set({
+          top: rect.top,
+          left: rect.right + 4,
+        });
+        this.flyoutOpen.set(true);
+      }
+    } else {
+      this.sidebarState.toggleSection(this.item().id);
+    }
+  }
+
+  /**
+   * Flyout bezárása
+   */
+  closeFlyout(): void {
+    this.flyoutOpen.set(false);
+  }
+
+  /**
+   * Flyout menüpont navigáció
+   */
+  onFlyoutNavigate(): void {
+    this.flyoutOpen.set(false);
+  }
+
+  /**
+   * Kívülre kattintás — flyout bezárás
+   */
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.flyoutOpen()) return;
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.flyoutOpen.set(false);
+    }
   }
 
   /**
@@ -70,7 +121,6 @@ export class SidebarMenuItemComponent {
   onMenuClick(event: MouseEvent, isActive: boolean): void {
     if (isActive && this.item().route) {
       event.preventDefault();
-      // Újranavigálás ugyanarra a route-ra (onSameUrlNavigation: 'reload' kell a routerben)
       this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
         this.router.navigate([this.item().route]);
       });

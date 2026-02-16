@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -81,7 +81,12 @@ export class FinalizationListComponent implements OnInit {
 
   // Upload dialog
   showUploadDialog = signal(false);
-  selectedItem = signal<FinalizationListItem | null>(null);
+  private selectedItemId = signal<number | null>(null);
+  readonly selectedItem = computed(() => {
+    const id = this.selectedItemId();
+    if (!id) return null;
+    return this.items().find(i => i.id === id) ?? null;
+  });
 
   ngOnInit(): void {
     this.loadFinalizations();
@@ -122,13 +127,13 @@ export class FinalizationListComponent implements OnInit {
   }
 
   openUploadDialog(item: FinalizationListItem): void {
-    this.selectedItem.set(item);
+    this.selectedItemId.set(item.id);
     this.showUploadDialog.set(true);
   }
 
   closeUploadDialog(): void {
     this.showUploadDialog.set(false);
-    this.selectedItem.set(null);
+    this.selectedItemId.set(null);
   }
 
   onFileUploaded(): void {

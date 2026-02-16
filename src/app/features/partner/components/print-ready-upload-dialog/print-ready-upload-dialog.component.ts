@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, ElementRef, viewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, ElementRef, viewChild, linkedSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -42,8 +42,7 @@ export class PrintReadyUploadDialogComponent {
   private fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
   selectedFile = signal<File | null>(null);
-  tabloSize = signal('');
-  private initialTabloSize = '';
+  tabloSize = linkedSignal(() => this.currentTabloSize() ?? '');
   isDragging = signal(false);
   isUploading = signal(false);
   errorMessage = signal('');
@@ -51,11 +50,7 @@ export class PrintReadyUploadDialogComponent {
 
   readonly acceptExtensions = ALLOWED_EXTENSIONS.join(',');
 
-  constructor() {
-    const initial = this.currentTabloSize() ?? '';
-    this.tabloSize.set(initial);
-    this.initialTabloSize = initial;
-  }
+  readonly initialTabloSize = computed(() => this.currentTabloSize() ?? '');
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
@@ -113,7 +108,7 @@ export class PrintReadyUploadDialogComponent {
       .subscribe({
         next: (response) => {
           this.isUploading.set(false);
-          if (newSize !== this.initialTabloSize) {
+          if (newSize !== this.initialTabloSize()) {
             this.tabloSizeChanged.emit({ projectId: this.projectId(), size: newSize });
           }
           this.uploaded.emit(response.data);

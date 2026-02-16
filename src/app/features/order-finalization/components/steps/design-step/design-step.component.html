@@ -83,7 +83,6 @@
           acceptLabel="JPG, JPEG, BMP"
           [maxSizeMB]="16"
           dropzoneText="Húzd ide a háttérképet vagy kattints!"
-          hint="JPG, JPEG vagy BMP, max. 16MB"
           [ngModel]="[]"
           (ngModelChange)="onBackgroundFileChange($event)"
         />
@@ -106,7 +105,6 @@
           acceptLabel="ZIP, RAR, 7Z"
           [maxSizeMB]="64"
           dropzoneText="Húzd ide a csatolmányt vagy kattints!"
-          hint="ZIP, RAR vagy 7Z, max. 64MB"
           [ngModel]="[]"
           (ngModelChange)="onAttachmentFileChange($event)"
         />

@@ -33,6 +33,7 @@ export class PrintReadyUploadDialogComponent {
 
   readonly close = output<void>();
   readonly uploaded = output<PrintReadyFile>();
+  readonly tabloSizeChanged = output<{ projectId: number; size: string }>();
 
   readonly sizeOptions = computed<PsSelectOption[]>(() =>
     this.availableSizes().map(s => ({ id: s.value, label: s.label }))
@@ -42,6 +43,7 @@ export class PrintReadyUploadDialogComponent {
 
   selectedFile = signal<File | null>(null);
   tabloSize = signal('');
+  private initialTabloSize = '';
   isDragging = signal(false);
   isUploading = signal(false);
   errorMessage = signal('');
@@ -50,11 +52,9 @@ export class PrintReadyUploadDialogComponent {
   readonly acceptExtensions = ALLOWED_EXTENSIONS.join(',');
 
   constructor() {
-    // Init tabloSize from current value
-    const current = this.currentTabloSize;
-    if (current) {
-      this.tabloSize.set(current() ?? '');
-    }
+    const initial = this.currentTabloSize() ?? '';
+    this.tabloSize.set(initial);
+    this.initialTabloSize = initial;
   }
 
   onDragOver(event: DragEvent): void {
@@ -102,15 +102,20 @@ export class PrintReadyUploadDialogComponent {
     this.isUploading.set(true);
     this.errorMessage.set('');
 
+    const newSize = this.tabloSize().trim();
+
     this.finalizationService.uploadPrintReady(
       this.projectId(),
       file,
-      this.tabloSize().trim() || undefined,
+      newSize || undefined,
     )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.isUploading.set(false);
+          if (newSize !== this.initialTabloSize) {
+            this.tabloSizeChanged.emit({ projectId: this.projectId(), size: newSize });
+          }
           this.uploaded.emit(response.data);
           this.close.emit();
         },

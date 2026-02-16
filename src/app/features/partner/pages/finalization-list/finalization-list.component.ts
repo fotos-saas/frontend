@@ -152,6 +152,14 @@ export class FinalizationListComponent implements OnInit {
       });
   }
 
+  onDialogSizeChange(event: { projectId: number; size: string }): void {
+    this.items.update(list =>
+      list.map(i =>
+        i.id === event.projectId ? { ...i, tabloSize: event.size || null } : i
+      )
+    );
+  }
+
   onTabloSizeChange(event: { item: FinalizationListItem; size: string }): void {
     this.finalizationService.updateTabloSize(event.item.id, event.size || null)
       .pipe(takeUntilDestroyed(this.destroyRef))

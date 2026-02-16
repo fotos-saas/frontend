@@ -77,5 +77,6 @@
     [availableSizes]="availableTabloSizes()"
     (close)="closeUploadDialog()"
     (uploaded)="onFileUploaded()"
+    (tabloSizeChanged)="onDialogSizeChange($event)"
   />
 }

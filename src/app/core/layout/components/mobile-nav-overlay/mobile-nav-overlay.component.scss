@@ -22,9 +22,24 @@
   }
 }
 
-/* Partner switcher dropdown a sidebar-on belül marad */
+/* Partner switcher: teljes szélesség a sidebar-on belül */
 .mobile-partner-switcher {
-  // A dropdown ne lógjon ki a sidebar-ból
+  ::ng-deep .partner-switcher {
+    display: flex;
+    width: 100%;
+  }
+
+  ::ng-deep .partner-switcher__trigger {
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
+  }
+
+  ::ng-deep .partner-switcher__name {
+    max-width: none;
+    flex: 1;
+  }
+
   ::ng-deep .partner-switcher__dropdown {
     left: 0;
     right: 0;

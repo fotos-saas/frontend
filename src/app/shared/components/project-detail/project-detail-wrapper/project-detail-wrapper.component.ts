@@ -140,6 +140,8 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   readonly deletingVersionData = this.facade.deletingVersionData;
   readonly showDeleteProjectConfirm = this.facade.showDeleteProjectConfirm;
   readonly deletingProject = this.facade.deletingProject;
+  readonly showDeletePrintFileConfirm = this.facade.showDeletePrintFileConfirm;
+  readonly deletingPrintFileType = this.facade.deletingPrintFileType;
 
   // Tab references
   private readonly usersTab = viewChild(ProjectUsersTabComponent);
@@ -355,19 +357,29 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       });
   }
 
-  deletePrintFile(event: PrintFileDeleteEvent): void {
-    const project = this.projectData();
-    if (!project || !this.finalizationService) return;
+  confirmDeletePrintFile(event: PrintFileDeleteEvent): void {
+    this.facade.deletingPrintFileType.set(event.type);
+    this.facade.showDeletePrintFileConfirm.set(true);
+  }
 
-    this.finalizationService.deletePrintReady(project.id, event.type)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.toast.success('Siker', 'Fájl sikeresen törölve.');
-          this.facade.loadProject(project.id, this.mapToDetailData());
-        },
-        error: () => this.toast.error('Hiba', 'Nem sikerült törölni a fájlt.'),
-      });
+  onDeletePrintFileResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      const project = this.projectData();
+      const type = this.facade.deletingPrintFileType();
+      if (!project || !type || !this.finalizationService) return;
+
+      this.finalizationService.deletePrintReady(project.id, type)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.toast.success('Siker', 'Fájl sikeresen törölve.');
+            this.facade.loadProject(project.id, this.mapToDetailData());
+          },
+          error: () => this.toast.error('Hiba', 'Nem sikerült törölni a fájlt.'),
+        });
+    }
+    this.facade.showDeletePrintFileConfirm.set(false);
+    this.facade.deletingPrintFileType.set(null);
   }
 
   // === GALLERY ===

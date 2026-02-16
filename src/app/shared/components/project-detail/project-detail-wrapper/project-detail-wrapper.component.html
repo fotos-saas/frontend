@@ -65,7 +65,7 @@
             [project]="projectData()"
             (downloadClick)="downloadPrintFile($event)"
             (uploadFile)="uploadPrintFile($event)"
-            (deleteClick)="deletePrintFile($event)"
+            (deleteClick)="confirmDeletePrintFile($event)"
           />
         }
       }
@@ -191,5 +191,15 @@
     [message]="'Biztosan törölni szeretnéd a v' + (deletingVersionData()?.version?.versionNumber ?? '') + ' verziót?'"
     confirmText="Törlés"
     (resultEvent)="onDeleteVersionResult($event)"
+  />
+}
+
+<!-- Delete Print File Confirmation - page-card-on KÍVÜL -->
+@if (showDeletePrintFileConfirm()) {
+  <app-confirm-dialog
+    title="Nyomdai fájl törlése"
+    [message]="'Biztosan törölni szeretnéd a ' + (deletingPrintFileType() === 'small_tablo' ? 'Kistabló' : 'Nyomdai flat') + ' fájlt?'"
+    confirmText="Törlés"
+    (resultEvent)="onDeletePrintFileResult($event)"
   />
 }

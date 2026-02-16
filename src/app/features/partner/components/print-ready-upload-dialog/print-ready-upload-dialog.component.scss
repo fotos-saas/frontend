@@ -5,6 +5,12 @@
   }
   .dw__body {
     overflow: visible;
+    position: relative;
+    z-index: 1;
+  }
+  .dw__footer {
+    position: relative;
+    z-index: 0;
   }
 }
 

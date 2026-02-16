@@ -213,8 +213,9 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
     // Append to document body
     this.renderer.appendChild(document.body, this.overlayEl);
 
-    // Position it
+    // Position it — kétszer: egyszer most, egyszer a layout után (flip-up panelHeight kell)
     this.updateOverlayPosition();
+    requestAnimationFrame(() => this.updateOverlayPosition());
 
     // Listen to scroll on all scrollable ancestors
     this.setupScrollListeners();
@@ -257,9 +258,12 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
     this.renderer.setStyle(this.overlayEl, 'left', triggerRect.left + 'px');
 
     if (shouldFlip) {
-      this.renderer.setStyle(this.overlayEl, 'top', (triggerRect.top - panelHeight) + 'px');
+      // Flip-up: bottom-mal pozícionálunk a trigger tetejéhez
+      this.renderer.removeStyle(this.overlayEl, 'top');
+      this.renderer.setStyle(this.overlayEl, 'bottom', (viewportHeight - triggerRect.top) + 'px');
       this.renderer.addClass(panelEl, 'ps-dropdown--flip-up');
     } else {
+      this.renderer.removeStyle(this.overlayEl, 'bottom');
       this.renderer.setStyle(this.overlayEl, 'top', triggerRect.bottom + 'px');
       this.renderer.removeClass(panelEl, 'ps-dropdown--flip-up');
     }

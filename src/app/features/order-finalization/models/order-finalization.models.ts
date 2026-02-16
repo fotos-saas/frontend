@@ -183,8 +183,13 @@ export interface FinalizationDataResponse {
     fontFamily: string | null;
     color: string | null;
     description: string | null;
-    background: string | null;
-    otherFile: string | null;
+    // Guest flow (legacy)
+    background?: string | null;
+    otherFile?: string | null;
+    // Partner flow (új, fájlnevekkel)
+    backgroundPath?: string | null;
+    backgroundFileName?: string | null;
+    otherFiles?: { path: string; filename: string }[];
 
     // Step 4: Névsor
     sortType: SortType | null;

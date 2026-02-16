@@ -62,8 +62,8 @@ export class PartnerFinalizationApiService {
         fontFamily: d.fontFamily || '',
         fontColor: d.color || '#000000',
         description: d.description || '',
-        backgroundImageId: d.background || null,
-        attachmentIds: d.otherFile ? [d.otherFile] : []
+        backgroundImageId: d.backgroundPath || null,
+        attachmentIds: (d.otherFiles || []).map(f => f.path)
       },
       roster: {
         studentRoster: d.studentDescription || '',

@@ -119,6 +119,15 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
         next: (response) => {
           const data = this.api.mapResponseToFormData(response);
           this.formData.set(data);
+
+          // Fájlnevek beállítása a meglévő feltöltésekből
+          if (response.data?.backgroundFileName) {
+            this.backgroundFileName.set(response.data.backgroundFileName);
+          }
+          if (response.data?.otherFiles?.length) {
+            this.attachmentFileNames.set(response.data.otherFiles.map(f => f.filename));
+          }
+
           this.loading.set(false);
         },
         error: () => {

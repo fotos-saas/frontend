@@ -1,8 +1,19 @@
-import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, signal, ElementRef, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProjectDetailData } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
+
+const ALLOWED_TYPES = [
+  'application/pdf',
+  'image/tiff',
+  'image/x-tiff',
+  'image/vnd.adobe.photoshop',
+  'application/x-photoshop',
+  'image/jpeg',
+  'image/png',
+];
+const MAX_SIZE = 200 * 1024 * 1024; // 200 MB
 
 @Component({
   selector: 'app-project-print-tab',
@@ -62,19 +73,50 @@ import { ICONS } from '../../../constants/icons.constants';
                 <span class="file-meta">{{ formatFileSize(project()!.printReadyFile!.size) }} · Feltöltve: {{ project()!.printReadyFile!.uploadedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
               </div>
             </div>
-            <button
-              type="button"
-              class="download-btn"
-              (click)="downloadClick.emit()"
-            >
-              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-              Letöltés
-            </button>
+            <div class="file-actions">
+              <button type="button" class="download-btn" (click)="downloadClick.emit()">
+                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+                Letöltés
+              </button>
+              <button type="button" class="replace-btn" (click)="fileInput()?.nativeElement?.click()">
+                <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+                Csere
+              </button>
+            </div>
           </div>
         } @else {
-          <div class="empty-file">
-            <lucide-icon [name]="ICONS.FILE" [size]="32" class="empty-icon" />
-            <p>Még nincs nyomdakész fájl feltöltve.</p>
+          <!-- Üres állapot — drag & drop -->
+          <div
+            class="drop-zone"
+            [class.drop-zone--drag]="dragging()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+            (click)="fileInput()?.nativeElement?.click()"
+          >
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="32" class="drop-icon" />
+            <p class="drop-text">Húzd ide a fájlt vagy kattints a feltöltéshez</p>
+            <p class="drop-hint">PDF, TIFF, PSD, JPG, PNG — max 200 MB</p>
+          </div>
+        }
+
+        <!-- Rejtett file input -->
+        <input
+          #fileInputRef
+          type="file"
+          accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png"
+          class="hidden-input"
+          (change)="onFileSelected($event)"
+        />
+
+        @if (uploadError()) {
+          <p class="upload-error">{{ uploadError() }}</p>
+        }
+
+        @if (uploading()) {
+          <div class="upload-progress">
+            <div class="spinner"></div>
+            <span>Feltöltés folyamatban...</span>
           </div>
         }
       </section>
@@ -185,6 +227,7 @@ import { ICONS } from '../../../constants/icons.constants';
       align-items: center;
       gap: 12px;
       min-width: 0;
+      flex: 1;
     }
 
     .file-type-icon {
@@ -213,6 +256,12 @@ import { ICONS } from '../../../constants/icons.constants';
       color: #64748b;
     }
 
+    .file-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
     .download-btn {
       display: inline-flex;
       align-items: center;
@@ -226,33 +275,108 @@ import { ICONS } from '../../../constants/icons.constants';
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s ease;
-      flex-shrink: 0;
     }
 
     .download-btn:hover {
       background: #059669;
     }
 
-    .empty-file {
+    .replace-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .replace-btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    /* Drop zone */
+    .drop-zone {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      padding: 32px;
+      padding: 40px 24px;
       background: #f8fafc;
-      border: 1px dashed #cbd5e1;
+      border: 2px dashed #cbd5e1;
       border-radius: 10px;
       text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
 
-    .empty-icon {
+    .drop-zone:hover {
+      border-color: #94a3b8;
+      background: #f1f5f9;
+    }
+
+    .drop-zone--drag {
+      border-color: #8b5cf6;
+      background: rgba(139, 92, 246, 0.05);
+    }
+
+    .drop-icon {
       color: #94a3b8;
     }
 
-    .empty-file p {
+    .drop-zone--drag .drop-icon {
+      color: #8b5cf6;
+    }
+
+    .drop-text {
       margin: 0;
       font-size: 0.875rem;
+      font-weight: 500;
+      color: #475569;
+    }
+
+    .drop-hint {
+      margin: 0;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .hidden-input {
+      display: none;
+    }
+
+    .upload-error {
+      margin: 8px 0 0;
+      font-size: 0.8125rem;
+      color: #ef4444;
+    }
+
+    .upload-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 0.8125rem;
       color: #64748b;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e2e8f0;
+      border-top-color: #8b5cf6;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     @media (max-width: 480px) {
@@ -262,7 +386,13 @@ import { ICONS } from '../../../constants/icons.constants';
         align-items: stretch;
       }
 
-      .download-btn {
+      .file-actions {
+        justify-content: stretch;
+      }
+
+      .download-btn,
+      .replace-btn {
+        flex: 1;
         justify-content: center;
       }
     }
@@ -270,6 +400,7 @@ import { ICONS } from '../../../constants/icons.constants';
     @media (prefers-reduced-motion: reduce) {
       * {
         transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
       }
     }
   `],
@@ -279,6 +410,13 @@ export class ProjectPrintTabComponent {
 
   readonly project = input<ProjectDetailData | null>(null);
   readonly downloadClick = output<void>();
+  readonly uploadFile = output<File>();
+
+  readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInputRef');
+
+  readonly dragging = signal(false);
+  readonly uploading = signal(false);
+  readonly uploadError = signal<string | null>(null);
 
   readonly fileIcon = computed(() => {
     const mime = this.project()?.printReadyFile?.mimeType ?? '';
@@ -286,6 +424,54 @@ export class ProjectPrintTabComponent {
     if (mime.includes('image')) return ICONS.IMAGE;
     return ICONS.FILE_CHECK;
   });
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragging.set(true);
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragging.set(false);
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragging.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.processFile(file);
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) this.processFile(file);
+    input.value = '';
+  }
+
+  private processFile(file: File): void {
+    this.uploadError.set(null);
+
+    if (!ALLOWED_TYPES.includes(file.type) && !this.hasAllowedExtension(file.name)) {
+      this.uploadError.set('Nem támogatott fájlformátum. Engedélyezett: PDF, TIFF, PSD, JPG, PNG.');
+      return;
+    }
+
+    if (file.size > MAX_SIZE) {
+      this.uploadError.set('A fájl túl nagy. Maximum 200 MB engedélyezett.');
+      return;
+    }
+
+    this.uploadFile.emit(file);
+  }
+
+  private hasAllowedExtension(name: string): boolean {
+    const ext = name.split('.').pop()?.toLowerCase() ?? '';
+    return ['pdf', 'tiff', 'tif', 'psd', 'jpg', 'jpeg', 'png'].includes(ext);
+  }
 
   formatFileSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';

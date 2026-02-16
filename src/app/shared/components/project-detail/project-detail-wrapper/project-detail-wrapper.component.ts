@@ -144,6 +144,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   // Tab references
   private readonly usersTab = viewChild(ProjectUsersTabComponent);
   private readonly samplesTab = viewChild(ProjectSamplesTabComponent);
+  private readonly printTab = viewChild(ProjectPrintTabComponent);
 
   ngOnInit(): void {
     this.facade.init({
@@ -325,6 +326,30 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       .subscribe({
         next: (blob) => saveFile(blob, fileName),
         error: () => this.toast.error('Hiba', 'Nem sikerült letölteni a fájlt.'),
+      });
+  }
+
+  uploadPrintReadyFile(file: File): void {
+    const project = this.projectData();
+    if (!project || !this.finalizationService) return;
+
+    const tab = this.printTab();
+    tab?.uploading.set(true);
+    tab?.uploadError.set(null);
+
+    this.finalizationService.uploadPrintReady(project.id, file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          tab?.uploading.set(false);
+          this.toast.success('Siker', 'Nyomdakész fájl feltöltve.');
+          this.facade.loadProject(project.id, this.mapToDetailData());
+        },
+        error: () => {
+          tab?.uploading.set(false);
+          tab?.uploadError.set('Hiba történt a feltöltés során.');
+          this.toast.error('Hiba', 'Nem sikerült feltölteni a fájlt.');
+        },
       });
   }
 

@@ -35,6 +35,7 @@
           (openContactModal)="openContactModal($event)"
           (deleteContact)="confirmDeleteContact($event)"
           (openOrderData)="openOrderDataDialog()"
+          (openOrderWizard)="openOrderWizardDialog()"
           (createGallery)="createGallery()"
           (galleryDeadlineExtend)="extendGalleryDeadline($event)"
         />
@@ -105,6 +106,9 @@
 
 <!-- Selection Download Dialog container -->
 <ng-container #selectionDownloadContainer></ng-container>
+
+<!-- Order Wizard Dialog container -->
+<ng-container #orderWizardContainer></ng-container>
 
 <!-- Delete User Confirmation - page-card-on KÍVÜL -->
 @if (showDeleteUserConfirm()) {

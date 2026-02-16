@@ -1,0 +1,123 @@
+<div class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)"
+>
+  <div class="dialog-panel dialog-panel--lg" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="wizard-header">
+      <div class="wizard-header__title">
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="20" />
+        <h2>Megrendelés leadása</h2>
+        @if (projectName()) {
+          <span class="wizard-header__project">— {{ projectName() }}</span>
+        }
+      </div>
+      <button class="wizard-header__close" (click)="close.emit()" aria-label="Bezárás">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </div>
+
+    <!-- Stepper -->
+    <div class="wizard-stepper">
+      @for (step of steps; track $index) {
+        <button
+          class="wizard-stepper__step"
+          [class.active]="currentStep() === $index"
+          [class.completed]="$index < currentStep()"
+          [class.clickable]="$index <= currentStep()"
+          [disabled]="$index > currentStep()"
+          (click)="goToStep($index)"
+        >
+          <span class="wizard-stepper__number">{{ $index + 1 }}</span>
+          <span class="wizard-stepper__label">{{ step }}</span>
+        </button>
+        @if ($index < steps.length - 1) {
+          <div class="wizard-stepper__line" [class.completed]="$index < currentStep()"></div>
+        }
+      }
+    </div>
+
+    <!-- Content -->
+    <div class="wizard-content">
+      @if (loading()) {
+        <div class="wizard-loading">
+          <div class="spinner"></div>
+          <p>Betöltés...</p>
+        </div>
+      } @else {
+        @switch (currentStep()) {
+          @case (0) {
+            <app-contact-step
+              [data]="formData().contact"
+              (dataChange)="onContactChange($event)"
+            />
+          }
+          @case (1) {
+            <app-basic-info-step
+              [data]="formData().basicInfo"
+              (dataChange)="onBasicInfoChange($event)"
+            />
+          }
+          @case (2) {
+            <app-design-step
+              [data]="formData().design"
+              [backgroundFileName]="backgroundFileName()"
+              [attachmentFileNames]="attachmentFileNames()"
+              [uploadBackgroundFn]="uploadBackgroundFn"
+              [uploadAttachmentFn]="uploadAttachmentFn"
+              [deleteFileFn]="deleteFileFn"
+              (dataChange)="onDesignChange($event)"
+              (backgroundFileNameChange)="onBackgroundFileNameChange($event)"
+              (attachmentFileNamesChange)="onAttachmentFileNamesChange($event)"
+            />
+          }
+          @case (3) {
+            <app-roster-step
+              [data]="formData().roster"
+              [partnerMode]="true"
+              (dataChange)="onRosterChange($event)"
+            />
+          }
+        }
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="wizard-footer">
+      <div class="wizard-footer__left">
+        @if (currentStep() > 0) {
+          <button class="btn btn--outline" (click)="prevStep()">
+            <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+            Előző
+          </button>
+        }
+      </div>
+      <div class="wizard-footer__right">
+        @if (currentStep() < steps.length - 1) {
+          <button
+            class="btn btn--primary"
+            [disabled]="!isStepValid()"
+            (click)="nextStep()"
+          >
+            Következő
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+          </button>
+        } @else {
+          <button
+            class="btn btn--primary"
+            [disabled]="!canFinalize() || submitting()"
+            (click)="finalize()"
+          >
+            @if (submitting()) {
+              <div class="spinner spinner--small spinner--white"></div>
+              Mentés...
+            } @else {
+              <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+              Megrendelés véglegesítése
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

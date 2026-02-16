@@ -92,27 +92,61 @@
     }
   </section>
 
-  <!-- Megrendelési adatok - kompakt sor (csak ha leadva van ÉS nem marketinges) -->
-  @if (project()!.finalizedAt && !isMarketer()) {
+  <!-- Megrendelési adatok szekció (nem marketinges) -->
+  @if (!isMarketer()) {
     <section class="mb-6">
-      <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="20" class="text-emerald-600" />
+      @if (project()!.finalizedAt) {
+        <!-- Leadva - zöld banner -->
+        <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <lucide-icon [name]="ICONS.FILE_TEXT" [size]="20" class="text-emerald-600" />
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900">Megrendelési adatok</p>
+              <p class="text-xs text-gray-500">Leadva: {{ project()!.finalizedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</p>
+            </div>
           </div>
-          <div>
-            <p class="text-sm font-semibold text-gray-900">Megrendelési adatok</p>
-            <p class="text-xs text-gray-500">Leadva: {{ project()!.finalizedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</p>
+          <div class="flex items-center" style="margin: -4px;">
+            <button
+              class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+              style="margin: 4px;"
+              (click)="openOrderData.emit()"
+            >
+              <lucide-icon [name]="ICONS.EYE" [size]="15" />
+              Megtekintés
+            </button>
+            <button
+              class="px-3 py-2 text-emerald-700 hover:bg-emerald-100 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+              style="margin: 4px;"
+              (click)="openOrderWizard.emit()"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+              Szerkesztés
+            </button>
           </div>
         </div>
-        <button
-          class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-          (click)="openOrderData.emit()"
-        >
-          <lucide-icon [name]="ICONS.EYE" [size]="16" />
-          Megtekintés
-        </button>
-      </div>
+      } @else {
+        <!-- Még nincs leadva - sárga banner -->
+        <div class="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <lucide-icon [name]="ICONS.FILE_TEXT" [size]="20" class="text-amber-600" />
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900">Megrendelési adatok</p>
+              <p class="text-xs text-gray-500">Még nincs leadva</p>
+            </div>
+          </div>
+          <button
+            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+            (click)="openOrderWizard.emit()"
+          >
+            <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+            Megrendelés leadása
+          </button>
+        </div>
+      }
     </section>
   }
 

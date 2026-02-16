@@ -37,6 +37,7 @@ export class RosterStepComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   data = input.required<RosterData>();
+  partnerMode = input<boolean>(false);
   dataChange = output<RosterData>();
 
   readonly sortTypeOptions = SORT_TYPE_OPTIONS;
@@ -55,7 +56,9 @@ export class RosterStepComponent {
   private readonly teacherNames$ = new Subject<string>();
 
   errors = computed<ValidationError[]>(() => {
-    const result = this.validationService.validateRosterData(this.data());
+    const result = this.partnerMode()
+      ? this.validationService.validateRosterDataPartner(this.data())
+      : this.validationService.validateRosterData(this.data());
     return result.errors;
   });
 

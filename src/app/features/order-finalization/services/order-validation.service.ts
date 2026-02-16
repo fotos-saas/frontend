@@ -261,6 +261,34 @@ export class OrderValidationService {
   }
 
   /**
+   * Step 4 (Névsor) validáció - Partner mód
+   * Névsorok nem kötelezőek, ÁSZF nem ellenőrzött
+   */
+  validateRosterDataPartner(data: RosterData): ValidationResult {
+    const errors: ValidationError[] = [];
+
+    if (data.studentRoster && !this.isWithinMaxLength(data.studentRoster, 10000)) {
+      errors.push({ field: 'studentRoster', message: 'A diákok névsora maximum 10000 karakter lehet' });
+    }
+
+    if (data.teacherRoster && !this.isWithinMaxLength(data.teacherRoster, 5000)) {
+      errors.push({ field: 'teacherRoster', message: 'A tanárok névsora maximum 5000 karakter lehet' });
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Step 4 partner mód egyszerű valid check
+   */
+  isRosterDataValidForPartner(data: RosterData): boolean {
+    return this.validateRosterDataPartner(data).valid;
+  }
+
+  /**
    * Hex színkód validáció
    * @param color - Színkód (pl. #FF0000 vagy #F00)
    * @returns true ha valid hex színkód

@@ -52,6 +52,7 @@ export class ProjectDetailViewComponent {
   readonly deleteContact = output<ProjectContact>();
   readonly qrCodeChanged = output<QrCode | null>();
   readonly openOrderData = output<void>();
+  readonly openOrderWizard = output<void>();
   readonly createGallery = output<void>();
   readonly galleryDeadlineExtend = output<number>();
 

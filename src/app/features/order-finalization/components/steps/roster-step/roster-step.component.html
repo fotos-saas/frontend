@@ -20,7 +20,7 @@
     </div>
     <ps-textarea
       label="Diákok névsora"
-      [required]="true"
+      [required]="!partnerMode()"
       [rows]="8"
       [maxLength]="10000"
       placeholder="Írd be a diákok neveit, soronként egyet:
@@ -46,7 +46,7 @@ Kiss Anna
     </div>
     <ps-textarea
       label="Tanárok névsora"
-      [required]="true"
+      [required]="!partnerMode()"
       [rows]="5"
       [maxLength]="5000"
       placeholder="Írd be a tanárok neveit, soronként egyet:
@@ -70,20 +70,22 @@ Kiss László - Matematikatanár
     />
   </div>
 
-  <!-- ÁSZF checkbox -->
-  <ps-checkbox
-    [ngModel]="data().acceptTerms"
-    (ngModelChange)="updateAcceptTerms($event)"
-    [required]="true"
-    [state]="hasError('acceptTerms') ? 'error' : 'default'"
-    [errorMessage]="getFieldError('acceptTerms') ?? ''"
-  >
-    Elfogadom az
-    <a
-      href="https://tablostudio.hu/adatkezelesi-tajekoztato"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Adatkezelési tájékoztató - új ablakban nyílik meg"
-    >Adatkezelési tájékoztatót</a>
-  </ps-checkbox>
+  <!-- ÁSZF checkbox (csak vendég módban, partner módban nem szükséges) -->
+  @if (!partnerMode()) {
+    <ps-checkbox
+      [ngModel]="data().acceptTerms"
+      (ngModelChange)="updateAcceptTerms($event)"
+      [required]="true"
+      [state]="hasError('acceptTerms') ? 'error' : 'default'"
+      [errorMessage]="getFieldError('acceptTerms') ?? ''"
+    >
+      Elfogadom az
+      <a
+        href="https://tablostudio.hu/adatkezelesi-tajekoztato"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Adatkezelési tájékoztató - új ablakban nyílik meg"
+      >Adatkezelési tájékoztatót</a>
+    </ps-checkbox>
+  }
 </section>

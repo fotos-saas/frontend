@@ -11,9 +11,10 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
 import { PsInputComponent, PsFileUploadComponent } from '@shared/components/form';
-import { DesignData } from '../../../models/order-finalization.models';
+import { DesignData, FileUploadResponse } from '../../../models/order-finalization.models';
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
 import { FileUploadService } from '../../../services/file-upload.service';
 import { ToastService } from '../../../../../core/services/toast.service';
@@ -59,6 +60,11 @@ export class DesignStepComponent implements OnInit {
 
   /** Output: Csatolmány fájlnevek változás */
   attachmentFileNamesChange = output<string[]>();
+
+  /** Custom upload callback-ek (partner wizard használja) */
+  uploadBackgroundFn = input<((file: File) => Observable<FileUploadResponse>) | null>(null);
+  uploadAttachmentFn = input<((file: File) => Observable<FileUploadResponse>) | null>(null);
+  deleteFileFn = input<((fileId: string) => Observable<{ success: boolean }>) | null>(null);
 
   /** Rich text editor */
   editor!: Editor;
@@ -138,7 +144,11 @@ export class DesignStepComponent implements OnInit {
     const file = files[0];
     if (!file) return;
 
-    this.fileUploadService.uploadBackgroundImage(file)
+    const upload$ = this.uploadBackgroundFn()
+      ? this.uploadBackgroundFn()!(file)
+      : this.fileUploadService.uploadBackgroundImage(file);
+
+    upload$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -161,7 +171,11 @@ export class DesignStepComponent implements OnInit {
     const file = files[0];
     if (!file) return;
 
-    this.fileUploadService.uploadAttachment(file)
+    const upload$ = this.uploadAttachmentFn()
+      ? this.uploadAttachmentFn()!(file)
+      : this.fileUploadService.uploadAttachment(file);
+
+    upload$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -187,7 +201,11 @@ export class DesignStepComponent implements OnInit {
     const fileId = this.data().backgroundImageId;
     if (!fileId) return;
 
-    this.fileUploadService.deleteFile(fileId)
+    const delete$ = this.deleteFileFn()
+      ? this.deleteFileFn()!(fileId)
+      : this.fileUploadService.deleteFile(fileId);
+
+    delete$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -207,7 +225,11 @@ export class DesignStepComponent implements OnInit {
     const fileId = this.data().attachmentIds[index];
     if (!fileId) return;
 
-    this.fileUploadService.deleteFile(fileId)
+    const delete$ = this.deleteFileFn()
+      ? this.deleteFileFn()!(fileId)
+      : this.fileUploadService.deleteFile(fileId);
+
+    delete$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

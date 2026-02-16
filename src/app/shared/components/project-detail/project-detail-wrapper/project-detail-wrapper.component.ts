@@ -100,6 +100,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly personsModalContainer = viewChild('personsModalContainer', { read: ViewContainerRef });
   private readonly uploadWizardContainer = viewChild('uploadWizardContainer', { read: ViewContainerRef });
   private readonly selectionDownloadContainer = viewChild('selectionDownloadContainer', { read: ViewContainerRef });
+  private readonly orderWizardContainer = viewChild('orderWizardContainer', { read: ViewContainerRef });
 
   readonly ICONS = ICONS;
   readonly isMarketer = this.authService.isMarketer;
@@ -277,6 +278,28 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       container.clear();
     });
     ref.instance.completed.subscribe(() => {
+      container.clear();
+      this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
+    });
+  }
+
+  // === ORDER WIZARD ===
+
+  async openOrderWizardDialog(): Promise<void> {
+    const container = this.orderWizardContainer();
+    if (!container || !this.projectData()) return;
+
+    container.clear();
+    const { PartnerOrderWizardDialogComponent } = await import(
+      '../../../../features/partner/components/partner-order-wizard-dialog/partner-order-wizard-dialog.component'
+    );
+    const ref = container.createComponent(PartnerOrderWizardDialogComponent);
+    ref.setInput('projectId', this.projectData()!.id);
+    ref.setInput('projectName', this.projectData()!.name);
+    ref.instance.close.subscribe(() => {
+      container.clear();
+    });
+    ref.instance.saved.subscribe(() => {
       container.clear();
       this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
     });

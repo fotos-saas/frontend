@@ -5,11 +5,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData } from '../project-detail.types';
 import { BackButtonComponent } from '../../../components/action-buttons';
 import { ICONS } from '../../../constants/icons.constants';
+import { StatusDropdownComponent } from '../../status-dropdown/status-dropdown.component';
 
 @Component({
   selector: 'app-project-detail-header',
   standalone: true,
-  imports: [NgClass, DatePipe, LucideAngularModule, MatTooltipModule, BackButtonComponent],
+  imports: [NgClass, DatePipe, LucideAngularModule, MatTooltipModule, BackButtonComponent, StatusDropdownComponent],
   templateUrl: './project-detail-header.component.html',
   styleUrl: './project-detail-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +25,7 @@ export class ProjectDetailHeaderComponent {
   readonly editProject = output<void>();
   readonly deleteProject = output<void>();
   readonly downloadSelections = output<void>();
+  readonly statusChange = output<{ value: string; label: string; color: string }>();
 
   readonly hasGallery = computed(() => !!this.project()?.tabloGalleryId);
 

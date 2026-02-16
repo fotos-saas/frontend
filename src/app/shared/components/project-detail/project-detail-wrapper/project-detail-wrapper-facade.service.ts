@@ -131,6 +131,30 @@ export class ProjectDetailWrapperFacadeService<T> {
     this.router.navigate([this.backRoute]);
   }
 
+  updateProjectStatus(event: { value: string; label: string; color: string }): void {
+    const id = this.projectData()?.id;
+    if (!id || !this.partnerService) return;
+
+    this.partnerService.updateProject(id, { status: event.value }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => {
+        const current = this.projectData();
+        if (current) {
+          this.projectData.set({
+            ...current,
+            status: event.value,
+            statusLabel: event.label,
+            statusColor: event.color,
+          });
+        }
+      },
+      error: () => {
+        this.toast.error('Hiba', 'Nem sikerült frissíteni a státuszt');
+      },
+    });
+  }
+
   // === QR MODAL ===
 
   openQrModal(container: ViewContainerRef): void {

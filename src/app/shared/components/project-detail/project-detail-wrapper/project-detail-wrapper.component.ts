@@ -163,6 +163,10 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   goBack(): void { this.facade.goBack(); }
 
+  onStatusChange(event: { value: string; label: string; color: string }): void {
+    this.facade.updateProjectStatus(event);
+  }
+
   changeTab(tab: ProjectDetailTab): void {
     setTabFragment(this.activeTab, this.location, tab, 'overview');
   }

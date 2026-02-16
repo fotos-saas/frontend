@@ -155,7 +155,11 @@ export class PartnerService {
     return this.projectService.createProject(data);
   }
 
-  updateProject(projectId: number, data: Partial<CreateProjectRequest>): Observable<{ success: boolean; message: string }> {
+  updateProject(projectId: number, data: Partial<CreateProjectRequest> & { status?: string }): Observable<{
+    success: boolean;
+    message: string;
+    data?: { status: string; statusLabel: string; statusColor: string };
+  }> {
     return this.projectService.updateProject(projectId, data);
   }
 

@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerProjectListItem } from '../../services/partner.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { StatusDropdownComponent } from '../../../../shared/components/status-dropdown/status-dropdown.component';
 
 /**
  * Partner Project Card - Projekt sor a fotós felületen.
@@ -13,7 +14,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 @Component({
   selector: 'app-partner-project-card',
   standalone: true,
-  imports: [LucideAngularModule, NgClass, DatePipe, MatTooltipModule],
+  imports: [LucideAngularModule, NgClass, DatePipe, MatTooltipModule, StatusDropdownComponent],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -32,6 +33,7 @@ export class ProjectCardComponent {
   readonly awareClick = output<PartnerProjectListItem>();
   readonly orderDataClick = output<PartnerProjectListItem>();
   readonly deleteClick = output<PartnerProjectListItem>();
+  readonly statusChangeClick = output<{ projectId: number; status: string; label: string; color: string }>();
 
   /**
    * Rövidített státusz címke a badge-hez
@@ -117,5 +119,14 @@ export class ProjectCardComponent {
   onDeleteClick(event: MouseEvent): void {
     event.stopPropagation();
     this.deleteClick.emit(this.project());
+  }
+
+  onStatusChange(event: { value: string; label: string; color: string }): void {
+    this.statusChangeClick.emit({
+      projectId: this.project().id,
+      status: event.value,
+      label: event.label,
+      color: event.color,
+    });
   }
 }

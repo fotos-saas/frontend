@@ -1,0 +1,153 @@
+.status-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Trigger badge */
+.trigger-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  transition: all 0.15s ease;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.chevron {
+  opacity: 0.7;
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.chevron--open {
+  transform: rotate(180deg);
+}
+
+/* Badge szín variánsok */
+.trigger-badge--gray { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
+.trigger-badge--red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+.trigger-badge--amber { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.trigger-badge--green { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+.trigger-badge--blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.trigger-badge--purple { background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); }
+
+/* Dropdown panel */
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  min-width: 220px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  animation: dropdownFade 0.15s ease;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Dropdown item */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  font-size: 0.75rem;
+  color: #334155;
+  text-align: left;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+
+  &--active {
+    background: #f0f9ff;
+    font-weight: 600;
+  }
+}
+
+.color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--gray { background: #64748b; }
+  &--red { background: #ef4444; }
+  &--amber { background: #f59e0b; }
+  &--green { background: #22c55e; }
+  &--blue { background: #3b82f6; }
+  &--purple { background: #a855f7; }
+}
+
+.item-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.item-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.check-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Detail header variant (nagyobb badge) */
+:host-context(app-project-detail-header) {
+  .trigger-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .trigger-badge,
+  .chevron {
+    transition: none;
+  }
+
+  .dropdown-panel {
+    animation: none;
+  }
+}

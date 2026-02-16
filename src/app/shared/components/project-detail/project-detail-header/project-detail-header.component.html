@@ -55,13 +55,12 @@
       @if (p.statusLabel || p.finalizedAt) {
         <div class="flex items-center justify-center gap-2 mt-3">
           @if (p.statusLabel) {
-            <span
-              class="detail-badge"
-              [ngClass]="'detail-badge--' + (p.statusColor ?? 'gray')"
-            >
-              <lucide-icon [name]="getStatusIcon(p.status)" [size]="12" />
-              {{ p.statusLabel }}
-            </span>
+            <app-status-dropdown
+              [currentStatus]="p.status ?? 'not_started'"
+              [currentLabel]="p.statusLabel"
+              [currentColor]="p.statusColor ?? 'gray'"
+              (statusChange)="statusChange.emit($event)"
+            />
           }
           @if (p.draftPhotoCount && p.draftPhotoCount! > 0) {
             <span

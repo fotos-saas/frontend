@@ -281,6 +281,23 @@ export class PartnerProjectListComponent implements OnInit {
     this.loadProjects();
   }
 
+  onStatusChange(event: { projectId: number; status: string; label: string; color: string }): void {
+    this.partnerService.updateProject(event.projectId, { status: event.status })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.projects.update(projects =>
+            projects.map(p =>
+              p.id === event.projectId
+                ? { ...p, status: event.status, statusLabel: event.label, statusColor: event.color }
+                : p
+            )
+          );
+        },
+        error: (err) => this.logger.error('Failed to update status', err)
+      });
+  }
+
   toggleAware(project: PartnerProjectListItem): void {
     this.partnerService.toggleProjectAware(project.id)
       .pipe(takeUntilDestroyed(this.destroyRef))

@@ -95,11 +95,16 @@ export class PartnerProjectService {
   /**
    * Projekt módosítása
    */
-  updateProject(projectId: number, data: Partial<CreateProjectRequest>): Observable<{
+  updateProject(projectId: number, data: Partial<CreateProjectRequest> & { status?: string }): Observable<{
     success: boolean;
     message: string;
+    data?: { status: string; statusLabel: string; statusColor: string };
   }> {
-    return this.http.put<{ success: boolean; message: string }>(
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data?: { status: string; statusLabel: string; statusColor: string };
+    }>(
       `${this.baseUrl}/projects/${projectId}`,
       data,
     );

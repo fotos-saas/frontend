@@ -61,16 +61,15 @@
   </div>
 
   <!-- Col 4: Státusz -->
-  <div class="col col-status">
+  <div class="col col-status" (click)="$event.stopPropagation()">
     @if (project().statusLabel) {
-      <span
-        class="badge"
-        [ngClass]="'badge--' + (project().statusColor ?? 'gray')"
-        [title]="project().statusLabel"
-      >
-        <lucide-icon [name]="getStatusIcon(project().status)" [size]="11" />
-        {{ getShortStatusLabel(project().statusLabel) }}
-      </span>
+      <app-status-dropdown
+        [currentStatus]="project().status ?? 'not_started'"
+        [currentLabel]="getShortStatusLabel(project().statusLabel)"
+        [currentColor]="project().statusColor ?? 'gray'"
+        [shortLabels]="true"
+        (statusChange)="onStatusChange($event)"
+      />
     }
   </div>
 

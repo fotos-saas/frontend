@@ -108,6 +108,9 @@
                     (click)="onFlyoutNavigate()"
                   >
                     {{ child.label }}
+                    @if (child.badge) {
+                      <span class="child-badge">{{ child.badge }}</span>
+                    }
                     @if (child.devBadge) {
                       <span class="dev-badge">DEV</span>
                     }
@@ -127,6 +130,9 @@
                     class="nav-child"
                   >
                     {{ child.label }}
+                    @if (child.badge) {
+                      <span class="child-badge">{{ child.badge }}</span>
+                    }
                     @if (child.devBadge) {
                       <span class="dev-badge">DEV</span>
                     }

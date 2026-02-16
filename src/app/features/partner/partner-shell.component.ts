@@ -12,6 +12,7 @@ import { MobileNavOverlayComponent } from '../../core/layout/components/mobile-n
 import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.component';
 import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
+import { PartnerFinalizationService } from './services/partner-finalization.service';
 import { BrandingService } from './services/branding.service';
 import { ICONS, TEAM_MEMBER_ROLES, getSubscriptionStatusLabel } from '../../shared/constants';
 import { environment } from '../../../environments/environment';
@@ -66,6 +67,7 @@ export class PartnerShellComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
+  private finalizationService = inject(PartnerFinalizationService);
   protected readonly brandingService = inject(BrandingService);
   private router = inject(Router);
   protected sidebarState = inject(SidebarStateService);
@@ -92,6 +94,8 @@ export class PartnerShellComponent implements OnInit {
 
   // Subscription info
   subscriptionInfo = signal<SubscriptionInfo | null>(null);
+  // Nyomdában lévő projektek száma (badge)
+  inPrintCount = signal(0);
 
   // User role info - azonnal inicializálva a computed-ok miatt
   private userRoles = signal<string[]>(this.authService.getCurrentUser()?.roles ?? []);
@@ -145,7 +149,7 @@ export class PartnerShellComponent implements OnInit {
         icon: 'folder-open',
         children: [
           { id: 'projects-list', route: `${base}/projects`, label: 'Projektek' },
-          { id: 'finalizations', route: `${base}/projects/finalizations`, label: 'Véglegesítések' },
+          { id: 'finalizations', route: `${base}/projects/finalizations`, label: 'Véglegesítések', badge: this.inPrintCount() || undefined },
           { id: 'schools', route: `${base}/projects/schools`, label: 'Iskolák' },
           { id: 'teachers', route: `${base}/projects/teachers`, label: 'Tanárok' },
           { id: 'students', route: `${base}/projects/students`, label: 'Diákok' },
@@ -293,6 +297,7 @@ export class PartnerShellComponent implements OnInit {
 
     this.loadSubscriptionInfo();
     this.loadBranding();
+    this.loadInPrintCount();
   }
 
   private loadSubscriptionInfo(): void {
@@ -306,6 +311,15 @@ export class PartnerShellComponent implements OnInit {
       },
       error: (err) => this.logger.error('Failed to load subscription info', err)
     });
+  }
+
+  private loadInPrintCount(): void {
+    this.finalizationService.getInPrintCount()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => this.inPrintCount.set(res.count),
+        error: () => {},
+      });
   }
 
   private loadBranding(): void {

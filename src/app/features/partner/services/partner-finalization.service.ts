@@ -68,6 +68,10 @@ export class PartnerFinalizationService {
     }>(`${this.baseUrl}/${projectId}/tablo-size`, { tablo_size: tabloSize });
   }
 
+  getInPrintCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.baseUrl}/in-print-count`);
+  }
+
   markAsDone(projectId: number): Observable<{
     success: boolean;
     message: string;

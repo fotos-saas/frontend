@@ -120,7 +120,7 @@ export class InviteRegisterComponent implements OnInit {
     return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
-  /** Bejelentkezett user meghívó elfogadása (auth:sanctum) */
+  /** Bejelentkezett user meghívó elfogadása (auth:sanctum) — token rotáció + auto-switch */
   onAcceptAsLoggedIn() {
     if (!this.code) return;
 
@@ -130,9 +130,17 @@ export class InviteRegisterComponent implements OnInit {
     this.authService.acceptInviteAsLoggedIn(this.code)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (response: any) => {
           this.isLoading.set(false);
-          this.registrationSuccess.set(true);
+          if (response.token && response.user) {
+            // Token + user frissítés sessionStorage-ban
+            sessionStorage.setItem('marketer_token', response.token);
+            sessionStorage.setItem('marketer_user', JSON.stringify(response.user));
+            // Reload → új partner context
+            window.location.href = '/partner/dashboard';
+          } else {
+            this.registrationSuccess.set(true);
+          }
         },
         error: (error) => {
           this.isLoading.set(false);

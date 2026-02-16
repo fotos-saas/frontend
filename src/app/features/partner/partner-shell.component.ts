@@ -17,6 +17,7 @@ import { ICONS, TEAM_MEMBER_ROLES, getSubscriptionStatusLabel } from '../../shar
 import { environment } from '../../../environments/environment';
 import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
+import { InviteBannerComponent } from '../../shared/components/invite-banner/invite-banner.component';
 
 
 /** Role badge nevek */
@@ -49,6 +50,7 @@ const ROLE_BADGES: Record<string, string> = {
     TopBarComponent,
     HelpFabComponent,
     ChatbotPanelComponent,
+    InviteBannerComponent,
   ],
   templateUrl: './partner-shell.component.html',
   styleUrl: './partner-shell.component.scss',

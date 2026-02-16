@@ -364,3 +364,35 @@ export interface TwoFactorSetupResponse {
   qr_code?: string;
   secret?: string;
 }
+
+/**
+ * Függő meghívó
+ */
+export interface PendingInvitation {
+  id: number;
+  code: string;
+  partnerName: string;
+  role: string;
+  roleName: string;
+  expiresAt: string | null;
+}
+
+/**
+ * Függő meghívók lekérdezés válasz
+ */
+export interface PendingInvitationsResponse {
+  invitations: PendingInvitation[];
+  count: number;
+}
+
+/**
+ * Meghívó elfogadás válasz (bejelentkezve)
+ */
+export interface AcceptInviteResponse {
+  message: string;
+  token: string;
+  user: AuthUser;
+  partner: { id: number; name: string };
+  role: string;
+  roleName: string;
+}

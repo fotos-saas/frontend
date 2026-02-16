@@ -22,7 +22,8 @@ import type {
   QrCodeValidationResponse,
   QrRegistrationData,
   ActiveSession,
-  TwoFactorSetupResponse
+  TwoFactorSetupResponse,
+  AcceptInviteResponse
 } from '../models/auth.models';
 
 // Re-export type-ok kompatibilitás miatt
@@ -47,7 +48,8 @@ export type {
   QrCodeValidationResponse,
   QrRegistrationData,
   ActiveSession,
-  TwoFactorSetupResponse
+  TwoFactorSetupResponse,
+  AcceptInviteResponse
 } from '../models/auth.models';
 
 /**
@@ -634,19 +636,9 @@ export class AuthService {
   }
 
   /**
-   * Meghívó elfogadása bejelentkezett userként
+   * Meghívó elfogadása bejelentkezett userként (token rotáció + auto-switch)
    */
-  acceptInviteAsLoggedIn(code: string): Observable<{
-    message: string;
-    partner: { id: number; name: string };
-    role: string;
-    roleName: string;
-  }> {
-    return this.http.post<{
-      message: string;
-      partner: { id: number; name: string };
-      role: string;
-      roleName: string;
-    }>(`${environment.apiUrl}/invite/accept`, { code });
+  acceptInviteAsLoggedIn(code: string): Observable<AcceptInviteResponse> {
+    return this.http.post<AcceptInviteResponse>(`${environment.apiUrl}/invite/accept`, { code });
   }
 }

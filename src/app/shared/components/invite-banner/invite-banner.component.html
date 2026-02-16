@@ -1,0 +1,33 @@
+@for (invitation of visibleInvitations; track invitation.id) {
+  <div class="invite-banner">
+    <div class="invite-banner__content">
+      <lucide-icon [name]="ICONS.MAIL" [size]="18" class="invite-banner__icon" />
+      <span class="invite-banner__text">
+        <strong>{{ invitation.partnerName }}</strong> meghívott a csapatába
+        <span class="invite-banner__role">({{ invitation.roleName }})</span>
+      </span>
+    </div>
+    <div class="invite-banner__actions">
+      <button
+        class="invite-banner__btn invite-banner__btn--accept"
+        [disabled]="accepting() !== null"
+        (click)="accept(invitation)"
+      >
+        @if (accepting() === invitation.code) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="14" class="invite-banner__spinner" />
+          Elfogadás...
+        } @else {
+          <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+          Elfogadás
+        }
+      </button>
+      <button
+        class="invite-banner__btn invite-banner__btn--dismiss"
+        [disabled]="accepting() !== null"
+        (click)="dismiss(invitation)"
+      >
+        <lucide-icon [name]="ICONS.X" [size]="14" />
+      </button>
+    </div>
+  </div>
+}

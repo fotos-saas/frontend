@@ -64,7 +64,9 @@
 
     .ps-upload__icon {
       width: 40px;
+      min-width: 40px;
       height: 40px;
+      flex-shrink: 0;
     }
 
     .ps-upload__text-group {

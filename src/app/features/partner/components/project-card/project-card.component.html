@@ -28,8 +28,8 @@
           {{ project().draftPhotoCount }}
         </span>
       }
-      @if (project().finalizedAt && !isMarketer()) {
-        <span class="finalized-badge" [title]="'Tablóterv leadva: ' + (project().finalizedAt | date:'yyyy. MMM d.':'':'hu-HU')">
+      @if (project().orderSubmittedAt && !isMarketer()) {
+        <span class="finalized-badge" [title]="'Megrendelés leadva: ' + (project().orderSubmittedAt | date:'yyyy. MMM d.':'':'hu-HU')">
           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
           Leadva
         </span>

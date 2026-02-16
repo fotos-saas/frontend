@@ -95,7 +95,7 @@
   <!-- Megrendelési adatok szekció (nem marketinges) -->
   @if (!isMarketer()) {
     <section class="mb-6">
-      @if (project()!.finalizedAt) {
+      @if (project()!.orderSubmittedAt) {
         <!-- Leadva - zöld banner -->
         <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
           <div class="flex items-center gap-3">
@@ -104,7 +104,7 @@
             </div>
             <div>
               <p class="text-sm font-semibold text-gray-900">Megrendelési adatok</p>
-              <p class="text-xs text-gray-500">Leadva: {{ project()!.finalizedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</p>
+              <p class="text-xs text-gray-500">Leadva: {{ project()!.orderSubmittedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</p>
             </div>
           </div>
           <div class="flex items-center" style="margin: -4px;">

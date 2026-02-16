@@ -49,6 +49,7 @@ export class PartnerProjectDetailComponent {
     deadline: project.deadline,
     expectedClassSize: project.expectedClassSize,
     finalizedAt: project.finalizedAt,
+    orderSubmittedAt: project.orderSubmittedAt,
     draftPhotoCount: project.draftPhotoCount,
     contact: project.contact,
     contacts: project.contacts ?? [],

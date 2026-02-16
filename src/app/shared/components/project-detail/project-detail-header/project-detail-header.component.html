@@ -52,7 +52,7 @@
       </div>
 
       <!-- Státusz + Leadva badge-ek -->
-      @if (p.statusLabel || p.finalizedAt) {
+      @if (p.statusLabel || p.orderSubmittedAt) {
         <div class="flex items-center justify-center gap-2 mt-3">
           @if (p.statusLabel) {
             <app-status-dropdown
@@ -71,10 +71,10 @@
               {{ p.draftPhotoCount }} kép vár
             </span>
           }
-          @if (p.finalizedAt && !isMarketer()) {
+          @if (p.orderSubmittedAt && !isMarketer()) {
             <span
               class="detail-badge detail-badge--green"
-              [matTooltip]="'Tablóterv leadva: ' + (p.finalizedAt | date:'yyyy. MMM d.':'':'hu-HU')"
+              [matTooltip]="'Megrendelés leadva: ' + (p.orderSubmittedAt | date:'yyyy. MMM d.':'':'hu-HU')"
             >
               <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" />
               Leadva

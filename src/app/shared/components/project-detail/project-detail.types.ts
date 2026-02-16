@@ -102,6 +102,7 @@ export interface ProjectDetailData {
   deadline: string | null;
   expectedClassSize: number | null;
   finalizedAt?: string | null;
+  orderSubmittedAt?: string | null;
   draftPhotoCount?: number;
   contact: ProjectContact | null;
   contacts: ProjectContact[];

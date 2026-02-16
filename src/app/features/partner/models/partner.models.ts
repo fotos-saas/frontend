@@ -68,6 +68,7 @@ export interface PartnerProjectListItem {
   isAware: boolean;
   createdAt: string;
   finalizedAt: string | null;
+  orderSubmittedAt: string | null;
 }
 
 /**
@@ -516,6 +517,7 @@ export interface FinalizationListItem {
   classYear: string | null;
   sampleThumbUrl: string | null;
   finalizedAt: string | null;
+  orderSubmittedAt: string | null;
   tabloSize: string | null;
   printReadyFile: PrintReadyFile | null;
   contact: { name: string } | null;

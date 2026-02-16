@@ -22,8 +22,8 @@
 
   <!-- Col 3: Véglegesítés dátuma -->
   <div class="col col-date">
-    @if (item().finalizedAt) {
-      <span class="date-value">{{ item().finalizedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
+    @if (item().orderSubmittedAt) {
+      <span class="date-value">{{ item().orderSubmittedAt | date:'yyyy. MMM d.':'':'hu-HU' }}</span>
     } @else {
       <span class="date-empty">-</span>
     }

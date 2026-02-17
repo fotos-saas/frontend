@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  overflow: hidden;
+}
+
 .search-section {
   padding-bottom: 16px;
 }
@@ -106,11 +111,13 @@ ps-toggle {
   padding: 16px 0;
   max-height: 50vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
 }
 
 .persons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: 10px;
 }
 
@@ -138,7 +145,7 @@ ps-toggle {
 
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: 10px;
 }
 

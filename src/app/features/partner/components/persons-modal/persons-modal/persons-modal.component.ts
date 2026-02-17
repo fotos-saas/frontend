@@ -20,7 +20,7 @@ import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.compone
   imports: [FormsModule, LucideAngularModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonsModalComponent implements OnInit {
   readonly ICONS = ICONS;

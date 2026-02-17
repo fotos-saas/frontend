@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, inject, DestroyRef, OnInit } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TabloPersonItem } from '../persons-modal.types';
@@ -168,12 +168,10 @@ import { TabloPersonItem } from '../persons-modal.types';
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(document:keydown)': 'onKeydown($event)',
-  }
 })
-export class PhotoLightboxComponent {
+export class PhotoLightboxComponent implements OnInit {
   readonly ICONS = ICONS;
+  private destroyRef = inject(DestroyRef);
 
   /** Aktuálisan megjelenített személy */
   readonly person = input<TabloPersonItem | null>(null);
@@ -183,6 +181,12 @@ export class PhotoLightboxComponent {
 
   readonly close = output<void>();
   readonly navigate = output<TabloPersonItem>();
+
+  ngOnInit(): void {
+    const handler = (event: KeyboardEvent) => this.onKeydown(event);
+    document.addEventListener('keydown', handler, true); // capture fázis
+    this.destroyRef.onDestroy(() => document.removeEventListener('keydown', handler, true));
+  }
 
   readonly canNavigatePrev = computed(() => {
     const p = this.person();

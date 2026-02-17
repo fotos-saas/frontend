@@ -204,12 +204,15 @@ ps-toggle {
   100% { background-position: -200% 0; }
 }
 
+// A dw__footer-t felülírjuk: nem flex-end gombok, hanem saját layout
+:host ::ng-deep .dw__footer {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 12px 1.5rem;
+}
+
 .modal-footer {
-  padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
-  flex-shrink: 0;
-  // Felfelé mutató shadow jelzi a scrollozhatóságot
-  box-shadow: 0 -8px 16px -4px rgba(0, 0, 0, 0.08);
+  width: 100%;
 }
 
 .stats-row {

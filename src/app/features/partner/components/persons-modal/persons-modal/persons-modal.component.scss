@@ -114,13 +114,12 @@ ps-toggle {
   overflow-x: hidden;
 }
 
-// --- CSS Grid: egyforma cellák, kitölti a helyet ---
-// A %-os szélesség garantálja hogy pontosan N oszlop legyen, kitöltve a teret
+// --- CSS Grid: auto-fill automatikusan számolja az oszlopokat ---
 .persons-grid,
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
 }
 
 .empty-state {
@@ -229,11 +228,6 @@ ps-toggle {
     max-height: 55vh;
   }
 
-  .persons-grid,
-  .skeleton-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-  }
 }
 
 // --- Mobil (≤480px) ---
@@ -268,12 +262,6 @@ ps-toggle {
   .modal-content {
     max-height: 60vh;
     padding: 12px 0;
-  }
-
-  .persons-grid,
-  .skeleton-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
   }
 
   .skeleton-card {

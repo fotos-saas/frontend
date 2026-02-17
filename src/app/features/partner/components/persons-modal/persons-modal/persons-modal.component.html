@@ -10,6 +10,9 @@
   (closeEvent)="close.emit()"
 >
   <div dialogBody>
+    <!-- Rövid projektnév (csak mobilon) -->
+    <p class="mobile-desc">{{ shortProjectName() }}</p>
+
     <!-- Filter toggle gomb (csak mobilon látszik) -->
     <button type="button" class="filter-toggle" (click)="filtersOpen.set(!filtersOpen())">
       <lucide-icon [name]="ICONS.FILTER" [size]="14" />

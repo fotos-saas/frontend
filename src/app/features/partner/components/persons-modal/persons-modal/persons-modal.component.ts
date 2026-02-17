@@ -50,6 +50,13 @@ export class PersonsModalComponent implements OnInit {
 
   readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
 
+  /** Mobilon rövidített projektnév: csak osztály + évfolyam (a " - " utáni rész) */
+  readonly shortProjectName = computed(() => {
+    const name = this.projectName();
+    const idx = name.indexOf(' - ');
+    return idx >= 0 ? name.substring(idx + 3) : name;
+  });
+
   // Computed counts
   readonly allCount = computed(() => this.allPersons().length);
   readonly studentCount = computed(() => this.allPersons().filter(p => p.type === 'student').length);

@@ -11,6 +11,25 @@
   overflow: hidden;
 }
 
+// Mobilon a teljes description rejtve, helyette a rövid nevet mutatjuk
+.mobile-desc {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  :host ::ng-deep .dw__desc {
+    display: none;
+  }
+
+  .mobile-desc {
+    display: block;
+    font-size: 0.8125rem;
+    color: #6b7280;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+  }
+}
+
 // --- Filter toggle gomb (csak mobilon) ---
 .filter-toggle {
   display: none; // desktopon rejtve

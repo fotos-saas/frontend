@@ -10,47 +10,60 @@
   (closeEvent)="close.emit()"
 >
   <div dialogBody>
-    <!-- Search + Photo Filter -->
-    <div class="search-section">
-      <div class="search-row">
-        <div class="search-box">
-          <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-          <input
-            type="text"
-            placeholder="Keresés név alapján..."
-            [ngModel]="searchQuery()"
-            (ngModelChange)="searchQuery.set($event)"
-            class="search-input"
-          />
-          @if (searchQuery()) {
-            <button class="clear-btn" (click)="searchQuery.set('')">
-              <lucide-icon [name]="ICONS.X" [size]="14" />
-            </button>
-          }
-        </div>
-        <ps-toggle
-          [label]="'Kép nélkül' + (!loading() ? ' (' + withoutPhotoCount() + ')' : '')"
-          labelPosition="after"
-          [ngModel]="showOnlyWithoutPhoto()"
-          (ngModelChange)="showOnlyWithoutPhoto.set($event)"
-        />
-      </div>
-    </div>
+    <!-- Filter toggle gomb (csak mobilon látszik) -->
+    <button type="button" class="filter-toggle" (click)="filtersOpen.set(!filtersOpen())">
+      <lucide-icon [name]="ICONS.FILTER" [size]="14" />
+      Szűrők
+      @if (hasActiveFilter()) {
+        <span class="filter-badge"></span>
+      }
+      <lucide-icon [name]="filtersOpen() ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN" [size]="14" class="filter-chevron" />
+    </button>
 
-    <!-- Type Filter Tabs -->
-    <div class="filter-tabs" [class.filter-tabs--hidden]="!!searchQuery()">
-      <button type="button" class="tab" [class.tab--active]="typeFilter() === 'student'" (click)="typeFilter.set('student')">
-        Diákok
-        @if (!loading()) {
-          <span class="tab-count">({{ studentCount() }})</span>
-        }
-      </button>
-      <button type="button" class="tab" [class.tab--active]="typeFilter() === 'teacher'" (click)="typeFilter.set('teacher')">
-        Tanárok
-        @if (!loading()) {
-          <span class="tab-count">({{ teacherCount() }})</span>
-        }
-      </button>
+    <!-- Szűrők (mobilon összecsukható) -->
+    <div class="filters-collapsible" [class.filters-collapsible--open]="filtersOpen()">
+      <!-- Search + Photo Filter -->
+      <div class="search-section">
+        <div class="search-row">
+          <div class="search-box">
+            <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
+            <input
+              type="text"
+              placeholder="Keresés név alapján..."
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
+              class="search-input"
+            />
+            @if (searchQuery()) {
+              <button class="clear-btn" (click)="searchQuery.set('')">
+                <lucide-icon [name]="ICONS.X" [size]="14" />
+              </button>
+            }
+          </div>
+          <ps-toggle
+            [label]="'Kép nélkül' + (!loading() ? ' (' + withoutPhotoCount() + ')' : '')"
+            labelPosition="after"
+            [ngModel]="showOnlyWithoutPhoto()"
+            (ngModelChange)="showOnlyWithoutPhoto.set($event)"
+          />
+        </div>
+      </div>
+
+      <!-- Type Filter Tabs -->
+      <div class="filter-tabs" [class.filter-tabs--hidden]="!!searchQuery()">
+        <button type="button" class="tab" [class.tab--active]="typeFilter() === 'student'" (click)="typeFilter.set('student')">
+          Diákok
+          @if (!loading()) {
+            <span class="tab-count">({{ studentCount() }})</span>
+          }
+        </button>
+        <button type="button" class="tab" [class.tab--active]="typeFilter() === 'teacher'" (click)="typeFilter.set('teacher')">
+          Tanárok
+          @if (!loading()) {
+            <span class="tab-count">({{ teacherCount() }})</span>
+          }
+        </button>
+      </div>
     </div>
 
     <!-- Content -->

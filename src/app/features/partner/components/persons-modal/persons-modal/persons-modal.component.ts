@@ -43,9 +43,12 @@ export class PersonsModalComponent implements OnInit {
   typeFilter = signal<TypeFilter>('student');
   showOnlyWithoutPhoto = signal(false);
   searchQuery = signal('');
+  filtersOpen = signal(false);
 
   // Lightbox
   lightboxPerson = signal<TabloPersonItem | null>(null);
+
+  readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
 
   // Computed counts
   readonly allCount = computed(() => this.allPersons().length);

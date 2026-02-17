@@ -89,9 +89,12 @@ import { TableColumn, SortDirection } from './table-header.types';
       border: none;
       cursor: pointer;
       transition: all 0.15s ease;
-      font: inherit;
-      text-transform: inherit;
-      letter-spacing: inherit;
+      font-family: inherit;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
     }
 
     .th--sortable:hover {

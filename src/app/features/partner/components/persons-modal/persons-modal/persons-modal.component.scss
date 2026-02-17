@@ -114,19 +114,13 @@ ps-toggle {
   overflow-x: hidden;
 }
 
-// --- Flex-based card grid ---
-.persons-grid {
-  display: flex;
-  flex-wrap: wrap;
+// --- CSS Grid: egyforma cellák, kitölti a helyet ---
+// A %-os szélesség garantálja hogy pontosan N oszlop legyen, kitöltve a teret
+.persons-grid,
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
   gap: 10px;
-}
-
-// flex-grow: kitölti a rendelkezésre álló helyet
-// flex-basis: minimum szélesség, ez határozza meg hány fér egy sorba
-// max-width: ne nőjön túl nagyra
-:host ::ng-deep .persons-grid > app-modal-person-card {
-  flex: 1 1 100px;
-  max-width: 150px;
 }
 
 .empty-state {
@@ -151,15 +145,7 @@ ps-toggle {
   margin: 0;
 }
 
-.skeleton-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
 .skeleton-card {
-  flex: 1 1 100px;
-  max-width: 150px;
   aspect-ratio: 0.8;
   border-radius: 8px;
   background: #e2e8f0;
@@ -243,14 +229,10 @@ ps-toggle {
     max-height: 55vh;
   }
 
-  :host ::ng-deep .persons-grid > app-modal-person-card {
-    flex: 1 1 90px;
-    max-width: 140px;
-  }
-
-  .skeleton-card {
-    flex: 1 1 90px;
-    max-width: 140px;
+  .persons-grid,
+  .skeleton-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
 }
 
@@ -290,17 +272,11 @@ ps-toggle {
 
   .persons-grid,
   .skeleton-grid {
+    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
   }
 
-  :host ::ng-deep .persons-grid > app-modal-person-card {
-    flex: 1 1 80px;
-    max-width: 130px;
-  }
-
   .skeleton-card {
-    flex: 1 1 80px;
-    max-width: 130px;
     aspect-ratio: 0.7;
   }
 

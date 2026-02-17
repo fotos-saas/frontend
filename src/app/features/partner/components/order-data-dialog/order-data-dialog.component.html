@@ -140,7 +140,7 @@
         @if (orderData.description) {
           <section class="order-dialog__section">
             <h3 class="order-dialog__section-title">Leírás / Megjegyzések</h3>
-            <div class="order-dialog__description" [innerHTML]="orderData.description | linkify"></div>
+            <div class="order-dialog__description" [innerHTML]="orderData.description | safeHtml"></div>
           </section>
         }
 

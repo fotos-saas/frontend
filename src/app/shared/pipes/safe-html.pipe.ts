@@ -67,8 +67,30 @@ export class SafeHtmlPipe implements PipeTransform {
       ALLOWED_ATTR: ['class', 'href', 'target'] // style removed for security
     });
 
+    // Linkify: nyers URL-eket kattintható linkekké alakítjuk
+    const linkedHtml = this.linkifyUrls(cleanHtml);
+
     // After sanitization, bypass Angular's security for the clean HTML
-    return this.sanitizer.bypassSecurityTrustHtml(cleanHtml);
+    return this.sanitizer.bypassSecurityTrustHtml(linkedHtml);
+  }
+
+  /**
+   * Nyers URL-eket (amik nem <a> tag belsejében vannak) linkekké alakítja.
+   * "Link megnyitása" szöveggel jelenik meg, nem a teljes URL-lel.
+   */
+  private linkifyUrls(html: string): string {
+    // Regex: URL-ek keresése, de nem <a> tagben lévők
+    // Felosztjuk a HTML-t <a>...</a> és azon kívüli részekre
+    const parts = html.split(/(<a\s[^>]*>.*?<\/a>)/gi);
+    return parts.map(part => {
+      // Ha <a> tag, érintetlenül hagyjuk
+      if (part.match(/^<a\s/i)) return part;
+      // Különben linkifáljuk az URL-eket
+      return part.replace(
+        /(https?:\/\/[^\s<>"']+)/gi,
+        '<a href="$1" target="_blank" rel="noopener noreferrer">Link megnyitása</a>'
+      );
+    }).join('');
   }
 
   /**

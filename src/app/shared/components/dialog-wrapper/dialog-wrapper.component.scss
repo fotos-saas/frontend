@@ -443,7 +443,7 @@ $gray-900: #111827;
 // MOBILE RESPONSIVE
 // ============================================================================
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .dw-backdrop {
     padding: 0.5rem;
     align-items: flex-end;
@@ -458,7 +458,7 @@ $gray-900: #111827;
 
   // Hero → kompakt flat stílus mobilon
   .dw__header--hero {
-    padding: 1rem 1.25rem;
+    padding: 0.875rem 1.25rem;
     text-align: left;
     display: flex;
     align-items: center;

@@ -1,12 +1,12 @@
 .finalization-row {
   display: grid;
-  grid-template-columns: 48px 1fr 100px 100px 140px 88px;
+  grid-template-columns: var(--table-cols, 48px 1fr 100px 100px 140px 88px);
   align-items: center;
   gap: 8px;
   background: #ffffff;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
-  padding: 8px 12px;
+  padding: 8px 16px;
   cursor: pointer;
   transition: all 0.15s ease;
 }

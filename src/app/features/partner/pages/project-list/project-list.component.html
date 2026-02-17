@@ -53,6 +53,7 @@
       }
     </div>
   } @else {
+    <div [style.--table-cols]="gridTemplate">
     <!-- Asztali fejléc -->
     <app-table-header
       [columns]="tableCols"
@@ -77,6 +78,7 @@
           (statusChangeClick)="onStatusChange($event)"
         />
       }
+    </div>
     </div>
 
     <!-- Paginálás -->

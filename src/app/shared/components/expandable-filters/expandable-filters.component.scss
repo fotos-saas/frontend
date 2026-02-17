@@ -9,6 +9,11 @@
   position: relative;
   display: flex;
   align-items: center;
+
+  &--active ::ng-deep .ps-select__trigger {
+    border-color: #93c5fd;
+    background: #f0f7ff;
+  }
 }
 
 /* Tovabbi szurok gomb */

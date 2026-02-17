@@ -3,6 +3,7 @@
   @for (filter of visibleFilters(); track filter.id) {
     <ps-select
       class="filter-item"
+      [class.filter-item--active]="!!getFilterValue(filter.id)"
       size="sm"
       [emptyLabel]="filter.label"
       [options]="toPsOptions(filter)"

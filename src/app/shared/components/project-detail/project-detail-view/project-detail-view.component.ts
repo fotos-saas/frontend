@@ -63,7 +63,6 @@ export class ProjectDetailViewComponent {
     { days: 3, label: '+3 nap' },
     { days: 7, label: '+1 hét' },
     { days: 14, label: '+2 hét' },
-    { days: 21, label: '+3 hét' },
   ];
 
   isDeadlineExpired(dateStr: string): boolean {

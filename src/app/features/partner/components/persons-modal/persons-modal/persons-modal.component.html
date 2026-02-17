@@ -70,8 +70,7 @@
     </div>
 
     <!-- Content -->
-    <div class="modal-content-wrap" [class.modal-content-wrap--scrolled]="isScrolledToBottom()">
-    <div class="modal-content" (scroll)="onContentScroll($event)">
+    <div class="modal-content">
       @if (loading()) {
         <div class="skeleton-grid">
           @for (i of [1, 2, 3, 4, 5, 6]; track i) {
@@ -96,7 +95,6 @@
           }
         </div>
       }
-    </div>
     </div>
 
     <!-- Footer Stats -->

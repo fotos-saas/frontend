@@ -6,6 +6,12 @@
   margin-bottom: 8px;
 }
 
+@media (max-width: 480px) {
+  .overview-header {
+    display: none;
+  }
+}
+
 .info-help-grid {
   display: flex;
   flex-direction: column;

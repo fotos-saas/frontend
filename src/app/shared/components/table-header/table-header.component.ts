@@ -29,6 +29,7 @@ import { TableColumn, SortDirection } from './table-header.types';
             }
             @if (sortBy() === col.key) {
               <lucide-icon
+                class="sort-icon"
                 [name]="sortDir() === 'asc' ? ICONS.ARROW_UP : ICONS.ARROW_DOWN"
                 [size]="12"
               />
@@ -103,6 +104,10 @@ import { TableColumn, SortDirection } from './table-header.types';
 
     .th--active {
       color: #475569;
+    }
+
+    .sort-icon {
+      color: var(--color-primary, #3b82f6);
     }
 
     @media (max-width: 640px) {

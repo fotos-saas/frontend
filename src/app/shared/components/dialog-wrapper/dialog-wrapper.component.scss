@@ -454,20 +454,19 @@ $gray-900: #111827;
     max-height: 95vh;
     margin: 0;
     border-radius: 1.25rem 1.25rem 0 0;
+  }
 
-    // Hero → kompakt flat stílus mobilon
-    &__header--hero {
-      padding: 1rem 1.25rem;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      border-bottom: 1px solid $gray-100;
-      // Gradient eltávolítás mobilon - egyszerű fehér háttér
-      background: white !important;
-    }
+  // Hero → kompakt flat stílus mobilon
+  .dw__header--hero {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid $gray-100;
+    background: white !important;
 
-    &__icon--hero {
+    .dw__icon--hero {
       width: 2.25rem;
       height: 2.25rem;
       margin-bottom: 0;
@@ -479,42 +478,41 @@ $gray-900: #111827;
       }
     }
 
-    &__hero-text {
+    .dw__hero-text {
       flex: 1;
       min-width: 0;
     }
 
-    // Hero cím + leírás egymás alá, balra igazítva
-    &__header--hero &__title {
+    .dw__title {
       font-size: 1rem;
       font-weight: 600;
       margin: 0;
     }
 
-    &__header--hero &__desc {
+    .dw__desc {
       font-size: 0.8125rem;
       color: $gray-400;
       margin: 1px 0 0;
       max-width: none;
     }
+  }
 
-    &__header--flat {
-      padding: 1rem 1.25rem;
-    }
+  .dw__header--flat {
+    padding: 1rem 1.25rem;
+  }
 
-    &__body {
-      padding: 1.25rem;
-    }
+  .dw__body {
+    padding: 1.25rem;
+  }
 
-    &__footer {
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 0.75rem 1.25rem;
-    }
+  .dw__footer {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+  }
 
-    &__columns {
-      grid-template-columns: 1fr;
-    }
+  .dw__columns {
+    grid-template-columns: 1fr;
   }
 }
 

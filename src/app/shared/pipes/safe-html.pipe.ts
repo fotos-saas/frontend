@@ -37,9 +37,12 @@ export class SafeHtmlPipe implements PipeTransform {
       if (node.tagName === 'A' && node.hasAttribute('href')) {
         const href = node.getAttribute('href') || '';
         if (!this.isValidHref(href)) {
-          // Veszélyes URL - eltávolítjuk a href-et
           node.removeAttribute('href');
           node.setAttribute('data-blocked-href', 'true');
+        } else {
+          // Külső linkek: target="_blank" + rel hozzáadása
+          node.setAttribute('target', '_blank');
+          node.setAttribute('rel', 'noopener noreferrer');
         }
       }
       });
@@ -64,7 +67,7 @@ export class SafeHtmlPipe implements PipeTransform {
         'ul', 'ol', 'li', 'span', 'a', 'div',
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
       ],
-      ALLOWED_ATTR: ['class', 'href', 'target'] // style removed for security
+      ALLOWED_ATTR: ['class', 'href', 'target', 'rel'] // style removed for security
     });
 
     // Linkify: nyers URL-eket kattintható linkekké alakítjuk
@@ -75,17 +78,21 @@ export class SafeHtmlPipe implements PipeTransform {
   }
 
   /**
-   * Nyers URL-eket (amik nem <a> tag belsejében vannak) linkekké alakítja.
-   * "Link megnyitása" szöveggel jelenik meg, nem a teljes URL-lel.
+   * URL-eket kattintható "Link megnyitása" linkekké alakítja.
+   * - Meglévő <a> tagek szövegét lecseréli ha URL-t tartalmaz
+   * - Nyers URL-eket (nem <a> tagben) új linkké alakít
    */
   private linkifyUrls(html: string): string {
-    // Regex: URL-ek keresése, de nem <a> tagben lévők
-    // Felosztjuk a HTML-t <a>...</a> és azon kívüli részekre
-    const parts = html.split(/(<a\s[^>]*>.*?<\/a>)/gi);
+    // 1. Meglévő <a> tagek: ha a szöveg URL, cseréljük "Link megnyitása"-ra
+    let result = html.replace(
+      /(<a\s[^>]*>)(https?:\/\/[^<]+)(<\/a>)/gi,
+      '$1Link megnyitása$3'
+    );
+
+    // 2. Nyers URL-ek: amik nem <a> tagben vannak
+    const parts = result.split(/(<a\s[^>]*>.*?<\/a>)/gi);
     return parts.map(part => {
-      // Ha <a> tag, érintetlenül hagyjuk
       if (part.match(/^<a\s/i)) return part;
-      // Különben linkifáljuk az URL-eket
       return part.replace(
         /(https?:\/\/[^\s<>"']+)/gi,
         '<a href="$1" target="_blank" rel="noopener noreferrer">Link megnyitása</a>'

@@ -128,21 +128,22 @@ $blue-600: #2563eb;
   overflow-wrap: break-word;
   word-break: break-word;
 
-  p {
+  // ::ng-deep kell mert az innerHTML-ből jövő elemeknek nincs _ngcontent attribútuma
+  ::ng-deep p {
     margin: 0 0 0.5rem;
     &:last-child { margin-bottom: 0; }
   }
 
-  a {
+  ::ng-deep a {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 10px;
+    padding: 3px 12px;
     background: #dbeafe;
     color: #1d4ed8;
     border-radius: 6px;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: background 0.15s;
 
@@ -182,16 +183,16 @@ $blue-600: #2563eb;
   overflow-wrap: break-word;
   word-break: break-word;
 
-  a {
+  ::ng-deep a {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 10px;
+    padding: 3px 12px;
     background: #dbeafe;
     color: #1d4ed8;
     border-radius: 6px;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: background 0.15s;
 

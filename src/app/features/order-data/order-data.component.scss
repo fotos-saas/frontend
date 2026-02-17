@@ -216,16 +216,16 @@ $blue-700: #1d4ed8;
     margin-top: 0.5rem;
   }
 
-  a {
+  ::ng-deep a {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 10px;
+    padding: 3px 12px;
     background: #dbeafe;
     color: #1d4ed8;
     border-radius: 6px;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: background 0.15s;
 
@@ -264,16 +264,16 @@ $blue-700: #1d4ed8;
   overflow-wrap: break-word;
   word-break: break-word;
 
-  a {
+  ::ng-deep a {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 10px;
+    padding: 3px 12px;
     background: #dbeafe;
     color: #1d4ed8;
     border-radius: 6px;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: background 0.15s;
 

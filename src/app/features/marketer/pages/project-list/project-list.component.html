@@ -32,12 +32,8 @@
       <p>Próbálj más keresési feltételekkel!</p>
     </div>
   } @else {
-    <!-- Táblázat fejléc -->
-    <div class="table-header">
-      <div class="col-school">Iskola / Osztály</div>
-      <div class="col-contact">Kapcsolattartó</div>
-      <div class="col-actions">Műveletek</div>
-    </div>
+    <div [style.--table-cols]="gridTemplate">
+    <app-table-header [columns]="tableCols" />
 
     <!-- Projekt sorok -->
     <div class="project-list">
@@ -72,6 +68,7 @@
           </div>
         </div>
       }
+    </div>
     </div>
 
     <app-list-pagination

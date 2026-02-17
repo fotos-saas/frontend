@@ -54,7 +54,8 @@
     </div>
   } @else {
     <!-- Asztali fejléc -->
-    <app-project-table-header
+    <app-table-header
+      [columns]="tableCols"
       [sortBy]="filterState.sortBy()"
       [sortDir]="filterState.sortDir()"
       (sortChange)="filterState.setSortBy($event)"

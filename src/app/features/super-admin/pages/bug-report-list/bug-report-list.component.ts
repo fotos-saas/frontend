@@ -14,11 +14,12 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 
 @Component({
   selector: 'app-admin-bug-report-list',
   standalone: true,
-  imports: [FormsModule, DatePipe, LucideAngularModule, PsSelectComponent, ListPaginationComponent],
+  imports: [FormsModule, DatePipe, LucideAngularModule, PsSelectComponent, ListPaginationComponent, TableHeaderComponent],
   templateUrl: './bug-report-list.component.html',
   styleUrl: './bug-report-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,6 +31,16 @@ export class AdminBugReportListComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly statusOptions = BUG_REPORT_STATUS_OPTIONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'title', label: 'Cím' },
+    { key: 'reporter', label: 'Bejelentő', width: '140px' },
+    { key: 'status', label: 'Státusz', width: '110px' },
+    { key: 'priority', label: 'Prioritás', width: '110px' },
+    { key: 'answered', label: 'Válasz', width: '80px' },
+    { key: 'date', label: 'Dátum', width: '140px' },
+  ];
+  readonly gridTemplate = this.tableCols.map(c => c.width ?? '1fr').join(' ');
   readonly priorityOptions = BUG_REPORT_PRIORITY_OPTIONS;
 
   readonly statusSelectOptions: PsSelectOption[] = BUG_REPORT_STATUS_OPTIONS.map(o => ({ id: o.value, label: o.label }));

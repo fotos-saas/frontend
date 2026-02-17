@@ -34,14 +34,8 @@
     </div>
   } @else {
     <div class="table-wrapper">
-      <div class="invoices-list">
-        <div class="table-header">
-          <span class="th th-number">Számlaszám</span>
-          <span class="th th-date">Dátum</span>
-          <span class="th th-amount">Összeg</span>
-          <span class="th th-status">Státusz</span>
-          <span class="th th-actions">Műveletek</span>
-        </div>
+      <div class="invoices-list" [style.--table-cols]="gridTemplate()">
+        <app-table-header [columns]="tableCols" />
 
         <div class="row-grid">
           @for (invoice of invoices(); track invoice.id; let i = $index) {

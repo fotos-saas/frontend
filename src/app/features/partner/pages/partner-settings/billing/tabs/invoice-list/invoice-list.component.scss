@@ -134,21 +134,9 @@
 }
 
 // === TABLE ===
-.table-header {
-  display: grid;
-  grid-template-columns: 1.5fr 1.5fr 1fr 0.8fr 0.8fr 1fr;
-  padding: 8px 16px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #e2e8f0;
-}
-
 .list-row {
   display: grid;
-  grid-template-columns: 1.5fr 1.5fr 1fr 0.8fr 0.8fr 1fr;
+  grid-template-columns: var(--table-cols, 1.5fr 1.5fr 1fr 0.8fr 0.8fr 1fr);
   align-items: center;
   padding: 12px 16px;
   background: #ffffff;
@@ -315,10 +303,6 @@
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .table-header {
-    display: none;
   }
 
   .list-row {

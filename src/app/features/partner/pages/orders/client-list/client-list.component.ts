@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,6 +12,7 @@ import { PsInputComponent } from '@shared/components/form';
 import { useFilterState } from '../../../../../shared/utils/use-filter-state';
 import { getInitials } from '../../../../../shared/utils/formatters.util';
 import { ListPaginationComponent } from '../../../../../shared/components/list-pagination/list-pagination.component';
+import { TableHeaderComponent, TableColumn } from '../../../../../shared/components/table-header';
 
 /**
  * Partner Client List - Ügyfelek listája a partner felületen.
@@ -28,6 +29,7 @@ import { ListPaginationComponent } from '../../../../../shared/components/list-p
     ClientEditModalComponent,
     ConfirmDialogComponent,
     ListPaginationComponent,
+    TableHeaderComponent,
   ],
   templateUrl: './client-list.component.html',
   styleUrl: './client-list.component.scss',
@@ -39,6 +41,13 @@ export class PartnerClientListComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'name', label: 'Ügyfél' },
+    { key: 'albums', label: 'Albumok', width: '100px', align: 'center' },
+    { key: 'actions', label: 'Műveletek', width: '80px', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
 
   // Filter state - központosított perzisztencia rendszerrel
   readonly filterState = useFilterState({

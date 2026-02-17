@@ -79,13 +79,9 @@
       }
     </div>
   } @else {
+    <div [style.--table-cols]="gridTemplate()">
     <!-- Asztali fejléc (640px felett) -->
-    <div class="table-header">
-      <span class="th th-name">Név</span>
-      <span class="th th-contact">Elérhetőség</span>
-      <span class="th th-project">Projekt</span>
-      <span class="th th-actions">Műveletek</span>
-    </div>
+    <app-table-header [columns]="tableCols" />
 
     <!-- Kapcsolattartó sorok -->
     <div class="contact-grid">
@@ -178,6 +174,7 @@
       itemLabel="kapcsolat"
       (pageChange)="filterState.setPage($event)"
     />
+    </div>
   }
 </div>
 

@@ -64,14 +64,8 @@
     <p>Még nem készítettél számlát. Kattints az "Új számla" gombra az első számla kiállításához.</p>
   </div>
 } @else {
-  <div class="table-header">
-    <span class="th th-number">Számlaszám</span>
-    <span class="th th-customer">Vevő</span>
-    <span class="th th-amount">Összeg</span>
-    <span class="th th-status">Státusz</span>
-    <span class="th th-date">Dátum</span>
-    <span class="th th-actions">Műveletek</span>
-  </div>
+  <div [style.--table-cols]="gridTemplate">
+  <app-table-header [columns]="tableCols" />
 
   <div class="row-grid">
     @for (invoice of invoices(); track invoice.id; let i = $index) {
@@ -113,6 +107,7 @@
         </span>
       </div>
     }
+  </div>
   </div>
 
   <!-- Lapozó -->

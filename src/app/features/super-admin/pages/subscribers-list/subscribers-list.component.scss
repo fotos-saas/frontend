@@ -3,11 +3,6 @@
 .subscribers-list-page {
 }
 
-// Table Header
-.table-header {
-  grid-template-columns: 1fr 120px 120px 120px 100px 40px;
-}
-
 // Subscriber Grid
 .subscriber-grid {
   @extend .row-grid;
@@ -15,7 +10,6 @@
 
 .subscriber-row {
   @extend .list-row;
-  grid-template-columns: 1fr 120px 120px 120px 100px 40px;
 
   &--clickable {
     cursor: pointer;

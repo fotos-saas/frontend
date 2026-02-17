@@ -371,49 +371,48 @@
         } @else if (auditLogs().length === 0) {
           <p class="empty-text">{{ auditSearch() || auditActionFilter() ? 'Nincs a szűrésnek megfelelő bejegyzés.' : 'Még nincs bejegyzés.' }}</p>
         } @else {
-          <!-- Táblázat fejléc -->
-          <div class="table-header audit-table-header">
-            <span class="th">Művelet</span>
-            <span class="th">Részletek</span>
-            <span class="th">Admin</span>
-            <span class="th th-sortable" (click)="toggleAuditSort()" matTooltip="Rendezés dátum szerint">
-              Dátum
-              <lucide-icon [name]="auditSortDir() === 'desc' ? ICONS.ARROW_DOWN : ICONS.ARROW_UP" [size]="14" />
-            </span>
-          </div>
-          <!-- Táblázat sorok -->
-          <div class="row-grid">
-            @for (log of auditLogs(); track log.id; let i = $index) {
-              <div class="list-row audit-row" [style.animation-delay]="i * 0.03 + 's'">
-                <span class="audit-cell">
-                  <span class="audit-badge" [ngClass]="getActionClass(log.action)">
-                    {{ log.actionLabel }}
+          <div [style.--table-cols]="auditGridTemplate">
+            <app-table-header
+              [columns]="auditCols"
+              sortBy="date"
+              [sortDir]="auditSortDir()"
+              (sortChange)="toggleAuditSort()"
+            />
+
+            <!-- Táblázat sorok -->
+            <div class="row-grid">
+              @for (log of auditLogs(); track log.id; let i = $index) {
+                <div class="list-row audit-row" [style.animation-delay]="i * 0.03 + 's'">
+                  <span class="audit-cell">
+                    <span class="audit-badge" [ngClass]="getActionClass(log.action)">
+                      {{ log.actionLabel }}
+                    </span>
                   </span>
-                </span>
-                <span class="audit-cell audit-cell--details">
-                  @if (log.action === 'charge' && log.details) {
-                    {{ log.details['amount'] }} Ft - {{ log.details['description'] }}
-                  } @else if (log.action === 'change_plan' && log.details) {
-                    {{ log.details['old_plan'] }} → {{ log.details['new_plan'] }}
-                  } @else if (log.action === 'set_discount' && log.details) {
-                    {{ log.details['percent'] }}%{{ log.details['duration_months'] ? ' (' + log.details['duration_months'] + ' hónap)' : ' (örök)' }}
-                  } @else if (log.action === 'remove_discount' && log.details) {
-                    {{ log.details['old_percent'] }}% törölve
-                  } @else if (log.action === 'cancel_subscription' && log.details) {
-                    {{ log.details['immediate'] ? 'Azonnali' : 'Periódus végén' }}
-                  } @else {
-                    <span class="text-muted">-</span>
-                  }
-                </span>
-                <span class="audit-cell audit-cell--admin">
-                  {{ log.adminName }}
-                  @if (log.ipAddress) {
-                    <span class="audit-ip">{{ log.ipAddress }}</span>
-                  }
-                </span>
-                <span class="audit-cell audit-cell--date">{{ formatDateTime(log.createdAt) }}</span>
-              </div>
-            }
+                  <span class="audit-cell audit-cell--details">
+                    @if (log.action === 'charge' && log.details) {
+                      {{ log.details['amount'] }} Ft - {{ log.details['description'] }}
+                    } @else if (log.action === 'change_plan' && log.details) {
+                      {{ log.details['old_plan'] }} → {{ log.details['new_plan'] }}
+                    } @else if (log.action === 'set_discount' && log.details) {
+                      {{ log.details['percent'] }}%{{ log.details['duration_months'] ? ' (' + log.details['duration_months'] + ' hónap)' : ' (örök)' }}
+                    } @else if (log.action === 'remove_discount' && log.details) {
+                      {{ log.details['old_percent'] }}% törölve
+                    } @else if (log.action === 'cancel_subscription' && log.details) {
+                      {{ log.details['immediate'] ? 'Azonnali' : 'Periódus végén' }}
+                    } @else {
+                      <span class="text-muted">-</span>
+                    }
+                  </span>
+                  <span class="audit-cell audit-cell--admin">
+                    {{ log.adminName }}
+                    @if (log.ipAddress) {
+                      <span class="audit-ip">{{ log.ipAddress }}</span>
+                    }
+                  </span>
+                  <span class="audit-cell audit-cell--date">{{ formatDateTime(log.createdAt) }}</span>
+                </div>
+              }
+            </div>
           </div>
 
           <!-- Paginálás -->

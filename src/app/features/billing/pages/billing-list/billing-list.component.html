@@ -35,15 +35,9 @@
   <!-- Tartalom -->
   @if (!billingService.loading()) {
     @if (billingService.filteredCharges().length > 0) {
+      <div [style.--table-cols]="gridTemplate()">
       <!-- Táblázat fejléc -->
-      <div class="table-header">
-        <span class="th th-type">Típus</span>
-        <span class="th th-desc">Leírás</span>
-        <span class="th th-amount">Összeg</span>
-        <span class="th th-status">Státusz</span>
-        <span class="th th-actions">Művelet</span>
-        <span class="th th-date">Dátum</span>
-      </div>
+      <app-table-header [columns]="tableCols" />
 
       <!-- Sorok -->
       <div class="row-grid">
@@ -102,6 +96,7 @@
             </div>
           </div>
         }
+      </div>
       </div>
     } @else {
       <!-- Üres állapot -->

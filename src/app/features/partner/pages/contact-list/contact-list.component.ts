@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,6 +13,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
 import { saveFile } from '../../../../shared/utils/file.util';
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsFileUploadComponent } from '@shared/components/form';
 
@@ -32,6 +33,7 @@ import { PsFileUploadComponent } from '@shared/components/form';
     UpgradeDialogComponent,
     SmartFilterBarComponent,
     ListPaginationComponent,
+    TableHeaderComponent,
     DialogWrapperComponent,
     PsFileUploadComponent,
   ],
@@ -45,6 +47,14 @@ export class PartnerContactListComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'name', label: 'Név' },
+    { key: 'contact', label: 'Elérhetőség' },
+    { key: 'project', label: 'Projekt', width: '120px' },
+    { key: 'actions', label: 'Műveletek', width: '80px', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
 
   // Filter state - központosított perzisztencia rendszerrel
   readonly filterState = useFilterState({

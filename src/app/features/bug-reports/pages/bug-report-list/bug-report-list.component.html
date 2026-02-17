@@ -42,13 +42,9 @@
       <p>Kattints az "Új hibajelentés" gombra egy új bejelentéshez.</p>
     </div>
   } @else {
+    <div [style.--table-cols]="gridTemplate()">
     <!-- Táblázat fejléc -->
-    <div class="table-header">
-      <span class="th th-title">Cím</span>
-      <span class="th th-status">Státusz</span>
-      <span class="th th-priority">Prioritás</span>
-      <span class="th th-date">Dátum</span>
-    </div>
+    <app-table-header [columns]="tableCols" />
 
     <!-- Lista -->
     <div class="row-grid">
@@ -104,6 +100,7 @@
         </button>
       </div>
     }
+    </div>
   }
 </div>
 

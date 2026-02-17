@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, effect, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -21,6 +21,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchConfig, FilterConfig } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { generateYearOptions } from '../../../../shared/utils/year-options.util';
 
 /**
@@ -41,6 +42,7 @@ import { generateYearOptions } from '../../../../shared/utils/year-options.util'
     GuidedTourComponent,
     SmartFilterBarComponent,
     ListPaginationComponent,
+    TableHeaderComponent,
   ],
   templateUrl: './school-list.component.html',
   styleUrl: './school-list.component.scss',
@@ -57,6 +59,13 @@ export class PartnerSchoolListComponent implements OnInit {
   private readonly downloadDialogContainer = viewChild('downloadDialogContainer', { read: ViewContainerRef });
 
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'name', label: 'Iskola' },
+    { key: 'projects', label: 'Projektek', width: '100px', align: 'center' },
+    { key: 'actions', label: 'Műveletek', width: '120px', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
 
   readonly searchConfig: SearchConfig = {
     placeholder: 'Keresés (#ID, "pontos kifejezés", iskola neve vagy város)...',

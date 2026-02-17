@@ -45,11 +45,6 @@
   display: none;
 }
 
-// Table Header
-.table-header {
-  grid-template-columns: 1fr 1fr 120px 80px;
-}
-
 // Contact Grid - specifikus
 .contact-grid {
   @extend .row-grid;
@@ -57,7 +52,6 @@
 
 .contact-row {
   @extend .list-row;
-  grid-template-columns: 1fr 1fr 120px 80px;
 }
 
 .contact-name {
@@ -307,7 +301,7 @@
 
 // Responsive
 @media (max-width: 640px) {
-  .table-header {
+  app-table-header {
     display: none;
   }
 

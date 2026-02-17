@@ -18,11 +18,12 @@ import {
 import { ToastService } from '../../../../../../../core/services/toast.service';
 import { formatAmount, formatPrice } from '@shared/utils/formatters.util';
 import { InvoiceCreateDialogComponent } from '../../components/invoice-create-dialog/invoice-create-dialog.component';
+import { TableHeaderComponent, TableColumn } from '../../../../../../../shared/components/table-header';
 
 @Component({
   selector: 'app-invoice-list',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, InvoiceCreateDialogComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, InvoiceCreateDialogComponent, TableHeaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-list.component.html',
   styleUrl: './invoice-list.component.scss',
@@ -36,6 +37,16 @@ export class InvoiceListComponent implements OnInit {
   readonly STATUS_LABELS = PARTNER_INVOICE_STATUS_LABELS;
   readonly STATUS_COLORS = PARTNER_INVOICE_STATUS_COLORS;
   readonly formatPrice = formatPrice;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'number', label: 'Számlaszám', width: '1.5fr' },
+    { key: 'customer', label: 'Vevő', width: '1.5fr' },
+    { key: 'amount', label: 'Összeg', width: '1fr' },
+    { key: 'status', label: 'Státusz', width: '0.8fr' },
+    { key: 'date', label: 'Dátum', width: '0.8fr' },
+    { key: 'actions', label: 'Műveletek', width: '1fr' },
+  ];
+  readonly gridTemplate = this.tableCols.map(c => c.width ?? '1fr').join(' ');
 
   readonly statusOptions: PsSelectOption[] = [
     { id: 'draft', label: 'Piszkozat' },

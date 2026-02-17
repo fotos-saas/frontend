@@ -48,12 +48,9 @@
       }
     </div>
   } @else {
+    <div [style.--table-cols]="gridTemplate()">
     <!-- Asztali fejléc (640px felett) -->
-    <div class="table-header">
-      <span class="th th-client">Ügyfél</span>
-      <span class="th th-albums">Albumok</span>
-      <span class="th th-actions">Műveletek</span>
-    </div>
+    <app-table-header [columns]="tableCols" />
 
     <!-- Ügyfél sorok -->
     <div class="client-grid">
@@ -135,6 +132,7 @@
       itemLabel="ügyfél"
       (pageChange)="filterState.setPage($event)"
     />
+    </div>
   }
 </div>
 

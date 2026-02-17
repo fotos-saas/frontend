@@ -12,6 +12,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SortDef } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 
 /**
  * Marketer Project List - Projektek paginált listája.
@@ -19,7 +20,7 @@ import { ListPaginationComponent } from '../../../../shared/components/list-pagi
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [RouterModule, FormsModule, LucideAngularModule, SharedQrCodeModalComponent, QrButtonComponent, AddButtonComponent, SmartFilterBarComponent, ListPaginationComponent],
+  imports: [RouterModule, FormsModule, LucideAngularModule, SharedQrCodeModalComponent, QrButtonComponent, AddButtonComponent, SmartFilterBarComponent, ListPaginationComponent, TableHeaderComponent],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -32,6 +33,13 @@ export class ProjectListComponent implements OnInit {
 
   /** ICONS konstansok a template-hez */
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'school', label: 'Iskola / Osztály', width: '2fr' },
+    { key: 'contact', label: 'Kapcsolattartó', width: '1.5fr' },
+    { key: 'actions', label: 'Műveletek', width: '1fr', align: 'right' },
+  ];
+  readonly gridTemplate = this.tableCols.map(c => c.width ?? '1fr').join(' ');
 
   /** QR Service interface a shared modalhoz */
   readonly qrService: IQrCodeService = this.marketerService;

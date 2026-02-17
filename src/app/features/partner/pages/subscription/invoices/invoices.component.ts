@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -8,6 +8,7 @@ import { SubscriptionService, Invoice } from '../../../services/subscription.ser
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { ICONS, getInvoiceStatusLabel } from '../../../../../shared/constants';
 import { formatAmount as sharedFormatAmount } from '@shared/utils/formatters.util';
+import { TableHeaderComponent, TableColumn } from '../../../../../shared/components/table-header';
 import { PsSelectComponent, PsSelectOption } from '@shared/components/form';
 
 /**
@@ -22,7 +23,7 @@ import { PsSelectComponent, PsSelectOption } from '@shared/components/form';
 @Component({
   selector: 'app-invoices',
   standalone: true,
-  imports: [FormsModule, DatePipe, LucideAngularModule, MatTooltipModule, PsSelectComponent],
+  imports: [FormsModule, DatePipe, LucideAngularModule, MatTooltipModule, PsSelectComponent, TableHeaderComponent],
   templateUrl: './invoices.component.html',
   styleUrls: ['./invoices.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -32,6 +33,15 @@ export class InvoicesComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly logger = inject(LoggerService);
   protected readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'number', label: 'Számlaszám', width: '1.2fr' },
+    { key: 'date', label: 'Dátum' },
+    { key: 'amount', label: 'Összeg', width: '0.8fr' },
+    { key: 'status', label: 'Státusz', width: '100px', align: 'center' },
+    { key: 'actions', label: 'Műveletek', width: '180px', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
 
   readonly statusOptions: PsSelectOption[] = [
     { id: '', label: 'Összes' },

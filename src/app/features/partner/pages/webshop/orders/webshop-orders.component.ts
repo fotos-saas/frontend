@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { DecimalPipe, DatePipe } from '@angular/common';
@@ -8,13 +8,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
+import { TableHeaderComponent, TableColumn } from '../../../../../shared/components/table-header';
 import { PartnerWebshopService, ShopOrder, OrderStats } from '../../../services/partner-webshop.service';
 import { WEBSHOP_STATUS_LABELS } from '../../../models/webshop.models';
 
 @Component({
   selector: 'app-webshop-orders',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent],
+  imports: [DecimalPipe, DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, TableHeaderComponent],
   templateUrl: './webshop-orders.component.html',
   styleUrl: './webshop-orders.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +26,15 @@ export class WebshopOrdersComponent implements OnInit {
   private router = inject(Router);
   readonly ICONS = ICONS;
   readonly STATUS_LABELS = WEBSHOP_STATUS_LABELS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'order', label: 'Rendelés' },
+    { key: 'customer', label: 'Ügyfél' },
+    { key: 'total', label: 'Összeg', align: 'right' },
+    { key: 'status', label: 'Státusz', align: 'center' },
+    { key: 'date', label: 'Dátum', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
   readonly statusOptions: PsSelectOption[] = [
     { id: 'pending', label: 'Függőben' },
     { id: 'paid', label: 'Fizetve' },

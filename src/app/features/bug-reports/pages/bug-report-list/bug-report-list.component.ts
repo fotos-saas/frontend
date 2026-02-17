@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,11 +10,12 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { CreateBugReportDialogComponent } from '../../components/create-bug-report-dialog/create-bug-report-dialog.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 
 @Component({
   selector: 'app-bug-report-list',
   standalone: true,
-  imports: [FormsModule, DatePipe, LucideAngularModule, CreateBugReportDialogComponent, PsInputComponent, PsSelectComponent],
+  imports: [FormsModule, DatePipe, LucideAngularModule, CreateBugReportDialogComponent, PsInputComponent, PsSelectComponent, TableHeaderComponent],
   templateUrl: './bug-report-list.component.html',
   styleUrl: './bug-report-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,6 +26,15 @@ export class BugReportListComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'title', label: 'Cím' },
+    { key: 'status', label: 'Státusz', width: '120px', align: 'center' },
+    { key: 'priority', label: 'Prioritás', width: '120px', align: 'center' },
+    { key: 'date', label: 'Dátum', width: '150px', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
+
   readonly statusOptions = BUG_REPORT_STATUS_OPTIONS;
   readonly statusSelectOptions: PsSelectOption[] = BUG_REPORT_STATUS_OPTIONS.map(o => ({ id: o.value, label: o.label }));
 

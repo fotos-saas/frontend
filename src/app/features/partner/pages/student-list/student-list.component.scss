@@ -13,17 +13,12 @@
 .school-filter { min-width: 220px; }
 
 // Table
-.table-header {
-  grid-template-columns: 1fr 100px 200px 100px;
-}
-
 .student-grid {
   @extend .row-grid;
 }
 
 .student-row {
   @extend .list-row;
-  grid-template-columns: 1fr 100px 200px 100px;
 }
 
 .student-info {
@@ -109,7 +104,7 @@
 
 // Responsive
 @media (max-width: 768px) {
-  .table-header {
+  app-table-header {
     display: none;
   }
 

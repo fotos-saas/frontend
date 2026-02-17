@@ -14,17 +14,12 @@
 .year-filter { min-width: 160px; }
 
 // Table
-.table-header {
-  grid-template-columns: 1fr 200px 120px;
-}
-
 .teacher-grid {
   @extend .row-grid;
 }
 
 .teacher-row {
   @extend .list-row;
-  grid-template-columns: 1fr 200px 120px;
 }
 
 .teacher-info {
@@ -135,7 +130,7 @@
 
 // Responsive
 @media (max-width: 768px) {
-  .table-header {
+  app-table-header {
     display: none;
   }
 

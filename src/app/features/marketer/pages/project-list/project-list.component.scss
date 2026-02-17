@@ -28,37 +28,17 @@
   }
 }
 
-/* Table Header */
-.table-header {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr;
-  gap: 16px;
-  padding: 12px 20px;
-  background: #f8fafc;
-  border-radius: 10px 10px 0 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-
-  .col-actions {
-    text-align: right;
-  }
-}
-
 /* Project List */
 .project-list {
   background: #ffffff;
-  border-radius: 0 0 10px 10px;
+  border-radius: 10px;
   overflow: hidden;
   border: 1px solid #e2e8f0;
-  border-top: none;
 }
 
 .project-row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr;
+  grid-template-columns: var(--table-cols);
   gap: 16px;
   padding: 16px 20px;
   border-bottom: 1px solid #f1f5f9;
@@ -142,10 +122,6 @@
 
 /* Responsive - Tablet */
 @media (max-width: 1024px) {
-  .table-header {
-    display: none;
-  }
-
   .filter-controls {
     display: none;
   }

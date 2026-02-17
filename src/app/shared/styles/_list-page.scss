@@ -167,6 +167,7 @@
 // === TABLE HEADER ===
 .table-header {
   display: grid;
+  grid-template-columns: var(--table-cols);
   gap: 8px;
   padding: 8px 16px;
   margin-bottom: 4px;
@@ -191,6 +192,7 @@
 
 .list-row {
   display: grid;
+  grid-template-columns: var(--table-cols);
   gap: 8px;
   align-items: center;
   background: #ffffff;

@@ -31,13 +31,8 @@
 
   @if (!catalogService.loading()) {
     @if (catalogService.services().length > 0) {
-      <div class="table-header">
-        <span class="th th-name">Név</span>
-        <span class="th th-type">Típus</span>
-        <span class="th th-price">Alapár</span>
-        <span class="th th-status">Állapot</span>
-        <span class="th th-actions">Műveletek</span>
-      </div>
+      <div [style.--table-cols]="gridTemplate()">
+      <app-table-header [columns]="tableCols" />
 
       <div class="row-grid">
         @for (service of catalogService.services(); track service.id; let i = $index) {
@@ -68,6 +63,7 @@
             </div>
           </div>
         }
+      </div>
       </div>
     } @else {
       <div class="empty-state">

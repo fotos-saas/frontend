@@ -3,13 +3,6 @@
 .client-list-page {
 }
 
-// Table Header
-.table-header {
-  grid-template-columns: 1fr 100px 80px;
-}
-
-.th-albums { text-align: center; }
-
 // Client Grid - specifikus
 .client-grid {
   @extend .row-grid;
@@ -17,7 +10,6 @@
 
 .client-row {
   @extend .list-row;
-  grid-template-columns: 1fr 100px 80px;
 }
 
 .client-info {
@@ -154,7 +146,7 @@
 
 // Responsive
 @media (max-width: 640px) {
-  .table-header {
+  app-table-header {
     display: none;
   }
 

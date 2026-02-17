@@ -4,12 +4,7 @@
   display: block;
 }
 
-.table-header {
-  grid-template-columns: 1fr 120px 120px 150px;
-}
-
 .list-row {
-  grid-template-columns: 1fr 120px 120px 150px;
   cursor: pointer;
 }
 
@@ -85,7 +80,7 @@
 }
 
 @media (max-width: 640px) {
-  .table-header {
+  app-table-header {
     display: none;
   }
 

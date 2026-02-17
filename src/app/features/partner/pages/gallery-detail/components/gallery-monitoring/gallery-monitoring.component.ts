@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
 import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
+import { TableHeaderComponent, TableColumn } from '../../../../../../shared/components/table-header';
 import { PhotoThumbListComponent, ThumbPhoto } from '../../../../../../shared/components/photo-thumb-list';
 import { ExpandDetailPanelComponent, DetailGroupComponent } from '../../../../../../shared/components/expand-detail-panel';
 import { MonitoringFilter, SelectionPhoto } from '../../../../models/gallery-monitoring.models';
@@ -17,7 +18,7 @@ import { DownloadOptions } from '../download-dialog/download-dialog.component';
   selector: 'app-gallery-monitoring',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, PhotoThumbListComponent, ExpandDetailPanelComponent, DetailGroupComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, TableHeaderComponent, PhotoThumbListComponent, ExpandDetailPanelComponent, DetailGroupComponent],
   providers: [GalleryMonitoringActionsService],
   templateUrl: './gallery-monitoring.component.html',
   styleUrl: './gallery-monitoring.component.scss',
@@ -30,6 +31,16 @@ export class GalleryMonitoringComponent implements OnInit {
 
   readonly ICONS = ICONS;
   readonly state = new GalleryMonitoringState();
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'name', label: 'Név', width: '2fr' },
+    { key: 'type', label: 'Típus', width: '70px', align: 'center' },
+    { key: 'status', label: 'Státusz', width: '130px', align: 'center' },
+    { key: 'step', label: 'Lépés', width: '90px', align: 'center' },
+    { key: 'retouch', label: 'Retusálás', width: '80px', align: 'center' },
+    { key: 'activity', label: 'Utolsó aktivitás', width: '120px', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
 
   readonly filterOptions: PsSelectOption[] = [
     { id: 'all', label: 'Mindenki' },

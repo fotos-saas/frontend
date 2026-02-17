@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
 import { SubscriberDetail, DiscountInfo } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { PsSelectComponent, PsInputComponent, PsToggleComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -34,6 +35,7 @@ import { SubscriberDetailStateService } from './subscriber-detail-state.service'
     PsSelectComponent,
     PsInputComponent,
     PsToggleComponent,
+    TableHeaderComponent,
   ],
   providers: [SubscriberDetailStateService],
   templateUrl: './subscriber-detail.component.html',
@@ -46,6 +48,14 @@ export class SubscriberDetailComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly ICONS = ICONS;
+
+  readonly auditCols: TableColumn[] = [
+    { key: 'action', label: 'Művelet', width: '120px' },
+    { key: 'details', label: 'Részletek' },
+    { key: 'admin', label: 'Admin', width: '140px' },
+    { key: 'date', label: 'Dátum', width: '130px', sortable: true },
+  ];
+  readonly auditGridTemplate = this.auditCols.map(c => c.width ?? '1fr').join(' ');
 
   readonly auditActionOptions: PsSelectOption[] = [
     { id: 'view', label: 'Megtekintés' },

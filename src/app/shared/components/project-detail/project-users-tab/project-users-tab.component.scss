@@ -1,9 +1,5 @@
 @use '../../../../shared/styles/list-page' as list;
 
-.users-grid {
-  grid-template-columns: 1fr 100px 100px 140px 110px;
-}
-
 .user-info {
   display: flex;
   flex-direction: column;
@@ -99,15 +95,8 @@
 
 
 @media (max-width: 768px) {
-  .users-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .table-header {
-    display: none;
-  }
-
   .list-row {
+    grid-template-columns: 1fr;
     display: flex;
     flex-wrap: wrap;
   }

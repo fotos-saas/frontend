@@ -37,13 +37,6 @@
   }
 }
 
-// Table Header
-.table-header {
-  grid-template-columns: 1fr 100px 120px;
-}
-
-.th-projects { text-align: center; }
-
 // School Grid - specifikus
 .school-grid {
   @extend .row-grid;
@@ -51,7 +44,6 @@
 
 .school-row {
   @extend .list-row;
-  grid-template-columns: 1fr 100px 120px;
 }
 
 .school-info {
@@ -160,7 +152,7 @@
 
 // Responsive
 @media (max-width: 640px) {
-  .table-header {
+  app-table-header {
     display: none;
   }
 

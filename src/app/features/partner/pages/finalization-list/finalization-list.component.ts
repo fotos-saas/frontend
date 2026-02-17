@@ -8,7 +8,7 @@ import { PartnerFinalizationService } from '../../services/partner-finalization.
 import { FinalizationListItem, TabloSize } from '../../models/partner.models';
 import { FinalizationCardComponent } from '../../components/finalization-card/finalization-card.component';
 import { PrintReadyUploadDialogComponent } from '../../components/print-ready-upload-dialog/print-ready-upload-dialog.component';
-import { FinalizationTableHeaderComponent } from './components/finalization-table-header/finalization-table-header.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { SmartFilterBarComponent, SearchConfig, SortDef, FilterConfig } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -25,7 +25,7 @@ import { LightboxMediaItem } from '../../../../shared/components/media-lightbox/
     LucideAngularModule,
     FinalizationCardComponent,
     PrintReadyUploadDialogComponent,
-    FinalizationTableHeaderComponent,
+    TableHeaderComponent,
     SmartFilterBarComponent,
     ListPaginationComponent,
     ConfirmDialogComponent,
@@ -43,6 +43,16 @@ export class FinalizationListComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'sample', label: '', width: '48px' },
+    { key: 'school_name', label: 'Iskola / Osztály', sortable: true },
+    { key: 'finalized_at', label: 'Véglegesítve', width: '100px', align: 'center', sortable: true },
+    { key: 'size', label: 'Méret', width: '100px', align: 'center' },
+    { key: 'file', label: 'Fájl', width: '140px', align: 'center' },
+    { key: 'actions', label: '', width: '88px' },
+  ];
+  readonly gridTemplate = this.tableCols.map(c => c.width ?? '1fr').join(' ');
 
   readonly searchConfig: SearchConfig = {
     placeholder: 'Keresés (#ID, "pontos kifejezés")...',

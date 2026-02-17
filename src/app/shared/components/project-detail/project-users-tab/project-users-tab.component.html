@@ -39,92 +39,87 @@
     <p>Még senki nem csatlakozott ehhez a projekthez.</p>
   </div>
 } @else {
-  <!-- Fejléc -->
-  <div class="table-header users-grid">
-    <span class="th">Név</span>
-    <span class="th">Státusz</span>
-    <span class="th">Rang</span>
-    <span class="th">Utolsó aktivitás</span>
-    <span class="th th-actions">Műveletek</span>
-  </div>
+  <div [style.--table-cols]="gridTemplate">
+    <app-table-header [columns]="tableCols" />
 
-  <!-- Lista -->
-  <div class="row-grid">
-    @for (session of sessions(); track session.id; let i = $index) {
-      <div class="list-row users-grid" [style.animation-delay]="i * 0.03 + 's'">
-        <div class="user-info">
-          <span class="user-name">{{ session.guestName }}</span>
-          @if (session.guestEmail) {
-            <span class="user-email">{{ session.guestEmail }}</span>
-          }
-          @if (session.registrationTypeLabel) {
-            <span class="type-badge" [matTooltip]="session.registrationTypeLabel">
-              {{ session.registrationTypeLabel }}
+    <!-- Lista -->
+    <div class="row-grid">
+      @for (session of sessions(); track session.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+          <div class="user-info">
+            <span class="user-name">{{ session.guestName }}</span>
+            @if (session.guestEmail) {
+              <span class="user-email">{{ session.guestEmail }}</span>
+            }
+            @if (session.registrationTypeLabel) {
+              <span class="type-badge" [matTooltip]="session.registrationTypeLabel">
+                {{ session.registrationTypeLabel }}
+              </span>
+            } @else if (session.isCoordinator) {
+              <span class="coordinator-badge" matTooltip="Kapcsolattartó">
+                <lucide-icon [name]="ICONS.KEY" [size]="12" />
+              </span>
+            }
+          </div>
+
+          <div>
+            <span [class]="getStatusBadgeClass(session)">
+              {{ getStatusLabel(session) }}
             </span>
-          } @else if (session.isCoordinator) {
-            <span class="coordinator-badge" matTooltip="Kapcsolattartó">
-              <lucide-icon [name]="ICONS.KEY" [size]="12" />
-            </span>
-          }
-        </div>
+          </div>
 
-        <div>
-          <span [class]="getStatusBadgeClass(session)">
-            {{ getStatusLabel(session) }}
-          </span>
-        </div>
+          <div class="rank-info">
+            <span class="rank-level">{{ session.rankName }}</span>
+            <span class="rank-points">{{ session.points }} pont</span>
+          </div>
 
-        <div class="rank-info">
-          <span class="rank-level">{{ session.rankName }}</span>
-          <span class="rank-points">{{ session.points }} pont</span>
-        </div>
+          <div class="activity-date">
+            @if (session.lastActivityAt) {
+              {{ session.lastActivityAt | date:'yyyy.MM.dd HH:mm' }}
+            } @else {
+              <span class="text-gray-400">-</span>
+            }
+          </div>
 
-        <div class="activity-date">
-          @if (session.lastActivityAt) {
-            {{ session.lastActivityAt | date:'yyyy.MM.dd HH:mm' }}
-          } @else {
-            <span class="text-gray-400">-</span>
-          }
-        </div>
-
-        <div class="actions" style="margin: -2px;">
-          @if (isDevMode) {
+          <div class="actions" style="margin: -2px;">
+            @if (isDevMode) {
+              <button
+                class="action-btn"
+                style="margin: 2px;"
+                matTooltip="Dev login URL"
+                (click)="generateDevLogin(session.id)"
+              >
+                <lucide-icon [name]="ICONS.KEY" [size]="15" />
+              </button>
+            }
             <button
               class="action-btn"
               style="margin: 2px;"
-              matTooltip="Dev login URL"
-              (click)="generateDevLogin(session.id)"
+              matTooltip="Szerkesztés"
+              (click)="openEdit(session)"
             >
-              <lucide-icon [name]="ICONS.KEY" [size]="15" />
+              <lucide-icon [name]="ICONS.EDIT" [size]="15" />
             </button>
-          }
-          <button
-            class="action-btn"
-            style="margin: 2px;"
-            matTooltip="Szerkesztés"
-            (click)="openEdit(session)"
-          >
-            <lucide-icon [name]="ICONS.EDIT" [size]="15" />
-          </button>
-          <button
-            class="action-btn"
-            style="margin: 2px;"
-            [matTooltip]="session.isBanned ? 'Feloldás' : 'Tiltás'"
-            (click)="toggleBan(session)"
-          >
-            <lucide-icon [name]="session.isBanned ? ICONS.CHECK_CIRCLE : ICONS.BAN" [size]="15" />
-          </button>
-          <button
-            class="action-btn action-btn--danger"
-            style="margin: 2px;"
-            matTooltip="Törlés"
-            (click)="confirmDelete(session)"
-          >
-            <lucide-icon [name]="ICONS.DELETE" [size]="15" />
-          </button>
+            <button
+              class="action-btn"
+              style="margin: 2px;"
+              [matTooltip]="session.isBanned ? 'Feloldás' : 'Tiltás'"
+              (click)="toggleBan(session)"
+            >
+              <lucide-icon [name]="session.isBanned ? ICONS.CHECK_CIRCLE : ICONS.BAN" [size]="15" />
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              style="margin: 2px;"
+              matTooltip="Törlés"
+              (click)="confirmDelete(session)"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+            </button>
+          </div>
         </div>
-      </div>
-    }
+      }
+    </div>
   </div>
 
   <!-- Pagination -->

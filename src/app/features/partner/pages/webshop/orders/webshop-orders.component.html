@@ -49,13 +49,8 @@
       <p>Még nincsenek rendelések.</p>
     </div>
   } @else {
-    <div class="table-header">
-      <span class="th th-number">Rendelés</span>
-      <span class="th th-customer">Ügyfél</span>
-      <span class="th th-total">Összeg</span>
-      <span class="th th-status">Státusz</span>
-      <span class="th th-date">Dátum</span>
-    </div>
+    <div [style.--table-cols]="gridTemplate()">
+      <app-table-header [columns]="tableCols" />
 
     <div class="row-grid">
       @for (order of orders(); track order.id; let i = $index) {
@@ -77,6 +72,7 @@
           <span class="td td-date">{{ order.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
         </div>
       }
+    </div>
     </div>
   }
 </div>

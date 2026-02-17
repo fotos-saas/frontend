@@ -90,15 +90,9 @@
     </div>
   </div>
 
-  <!-- Táblázat fejléc -->
-  <div class="table-header">
-    <span class="th th-name">Név</span>
-    <span class="th th-type">Típus</span>
-    <span class="th th-status">Státusz</span>
-    <span class="th th-step">Lépés</span>
-    <span class="th th-retouch">Retusálás</span>
-    <span class="th th-activity">Utolsó aktivitás</span>
-  </div>
+  <!-- Táblázat fejléc + sorok -->
+  <div [style.--table-cols]="gridTemplate()">
+  <app-table-header [columns]="tableCols" />
 
   <!-- Sorok -->
   @if (state.filteredPersons().length > 0) {
@@ -220,4 +214,5 @@
       <p>A keresési feltételeknek egyetlen személy sem felel meg.</p>
     </div>
   }
+  </div>
 }

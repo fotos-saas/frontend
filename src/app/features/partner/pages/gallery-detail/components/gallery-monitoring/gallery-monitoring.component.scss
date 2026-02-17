@@ -110,16 +110,7 @@ ps-select {
 
 // === TÁBLÁZAT ===
 
-.table-header {
-  display: grid;
-  grid-template-columns: 2fr 70px 130px 90px 80px 120px;
-  padding: 6px 14px;
-  margin-bottom: 2px;
-}
-
 .list-row {
-  display: grid;
-  grid-template-columns: 2fr 70px 130px 90px 80px 120px;
   padding: 9px 14px;
 
   &--clickable {
@@ -283,7 +274,7 @@ ps-select {
     height: 16px;
   }
 
-  .table-header {
+  app-table-header {
     display: none;
   }
 

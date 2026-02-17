@@ -68,12 +68,8 @@
       }
     </div>
   } @else {
-    <div class="table-header">
-      <span class="th th-student">Diák</span>
-      <span class="th th-class">Osztály</span>
-      <span class="th th-school">Iskola</span>
-      <span class="th th-actions">Műveletek</span>
-    </div>
+    <div [style.--table-cols]="gridTemplate()">
+    <app-table-header [columns]="tableCols" />
 
     <div class="student-grid">
       @for (student of students(); track student.id; let i = $index) {
@@ -133,6 +129,7 @@
       itemLabel="diák"
       (pageChange)="filterState.setPage($event)"
     />
+    </div>
   }
 
   } <!-- /viewMode flat -->

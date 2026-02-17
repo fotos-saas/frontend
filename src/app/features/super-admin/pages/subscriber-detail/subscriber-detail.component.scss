@@ -436,34 +436,6 @@
 }
 
 // === AUDIT LOG (uses _list-page.scss base styles) ===
-.audit-section {
-  .table-header,
-  .list-row {
-    grid-template-columns: 120px 1fr 140px 130px;
-  }
-}
-
-.th-sortable {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.15s ease;
-
-  &:hover {
-    color: var(--color-primary, #1e3a5f);
-  }
-
-  lucide-icon {
-    color: #64748b;
-    transition: color 0.15s ease;
-  }
-
-  &:hover lucide-icon {
-    color: var(--color-primary, #1e3a5f);
-  }
-}
 
 .audit-cell {
   font-size: 0.8125rem;
@@ -560,10 +532,6 @@
   }
 
   .audit-section {
-    .table-header {
-      display: none;
-    }
-
     .list-row {
       grid-template-columns: 1fr;
       gap: 8px;

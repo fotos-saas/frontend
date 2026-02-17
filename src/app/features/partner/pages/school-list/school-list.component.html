@@ -61,12 +61,9 @@
       }
     </div>
   } @else {
+    <div [style.--table-cols]="gridTemplate()">
     <!-- Asztali fejléc (640px felett) -->
-    <div class="table-header">
-      <span class="th th-school">Iskola</span>
-      <span class="th th-projects">Projektek</span>
-      <span class="th th-actions">Műveletek</span>
-    </div>
+    <app-table-header [columns]="tableCols" />
 
     <!-- Iskola sorok -->
     <div class="school-grid">
@@ -164,6 +161,7 @@
       itemLabel="iskola"
       (pageChange)="filterState.setPage($event)"
     />
+    </div>
   }
 </div>
 

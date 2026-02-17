@@ -1,13 +1,8 @@
-@use '../../../../shared/styles/list-page' as *;
+@use '../../../../shared/styles/list-page' as list;
 
 :host { display: block; }
 
-.table-header {
-  grid-template-columns: 1fr 140px 110px 110px 80px 140px;
-}
-
 .list-row {
-  grid-template-columns: 1fr 140px 110px 110px 80px 140px;
   cursor: pointer;
 
   &.unread {

@@ -12,6 +12,7 @@ import { PlansService, PlanOption } from '../../../../shared/services/plans.serv
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 import { FilterConfig } from '../../../../shared/components/expandable-filters';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 
 /**
  * Előfizetők lista - Super Admin felületen.
@@ -27,6 +28,7 @@ import { ListPaginationComponent } from '../../../../shared/components/list-pagi
     NgClass,
     SmartFilterBarComponent,
     ListPaginationComponent,
+    TableHeaderComponent,
   ],
   templateUrl: './subscribers-list.component.html',
   styleUrl: './subscribers-list.component.scss',
@@ -39,6 +41,16 @@ export class SubscribersListComponent implements OnInit {
   private readonly plansService = inject(PlansService);
 
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'name', label: 'Név' },
+    { key: 'plan', label: 'Csomag', width: '120px' },
+    { key: 'price', label: 'Ár', width: '120px' },
+    { key: 'date', label: 'Hónapforduló', width: '120px' },
+    { key: 'status', label: 'Státusz', width: '100px' },
+    { key: 'arrow', label: '', width: '40px' },
+  ];
+  readonly gridTemplate = this.tableCols.map(c => c.width ?? '1fr').join(' ');
 
   // Szűrő opciók - PlansService-ből töltve
   planOptions = signal<PlanOption[]>([{ value: '', label: 'Összes csomag' }]);

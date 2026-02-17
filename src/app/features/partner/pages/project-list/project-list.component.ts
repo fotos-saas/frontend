@@ -19,7 +19,7 @@ import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchConfig, SortDef } from '../../../../shared/components/smart-filter-bar';
-import { ProjectTableHeaderComponent } from './components/project-table-header/project-table-header.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { ProjectMobileSortComponent, SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
@@ -43,7 +43,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     ExpandableFiltersComponent,
     ConfirmDialogComponent,
     SmartFilterBarComponent,
-    ProjectTableHeaderComponent,
+    TableHeaderComponent,
     ProjectMobileSortComponent,
     ListPaginationComponent,
   ],
@@ -59,6 +59,16 @@ export class PartnerProjectListComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'sample', label: '', width: '48px' },
+    { key: 'school_name', label: 'Iskola / Osztály', sortable: true },
+    { key: 'aware', label: '', width: '24px', align: 'center', icon: 'check-circle', tooltip: 'Tudnak róla' },
+    { key: 'tablo_status', label: 'Státusz', width: '110px', align: 'center', sortable: true },
+    { key: 'missing_count', label: 'Hiányzó', width: '75px', align: 'center', sortable: true },
+    { key: 'actions', label: '', width: '56px' },
+  ];
+  readonly gridTemplate = this.tableCols.map(c => c.width ?? '1fr').join(' ');
   readonly qrService: IQrCodeService = this.partnerService;
 
   readonly searchConfig: SearchConfig = {

@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { PartnerBillingService, PartnerCharge } from '../../services/partner-billing.service';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { CreateChargeDialogComponent } from './create-charge-dialog.component';
@@ -11,7 +12,7 @@ import { STATUS_LABELS, STATUS_COLORS } from '../../../billing/models/billing.mo
 @Component({
   selector: 'app-billing-charges',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent, CreateChargeDialogComponent],
+  imports: [DecimalPipe, DatePipe, LucideAngularModule, MatTooltipModule, ConfirmDialogComponent, CreateChargeDialogComponent, TableHeaderComponent],
   templateUrl: './billing-charges.component.html',
   styleUrl: './billing-charges.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +20,16 @@ import { STATUS_LABELS, STATUS_COLORS } from '../../../billing/models/billing.mo
 export class BillingChargesComponent implements OnInit {
   readonly billingService = inject(PartnerBillingService);
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'person', label: 'Diák' },
+    { key: 'service', label: 'Szolgáltatás' },
+    { key: 'amount', label: 'Összeg', width: '120px', align: 'right' },
+    { key: 'status', label: 'Státusz', width: '110px', align: 'center' },
+    { key: 'date', label: 'Dátum', width: '110px', align: 'center' },
+    { key: 'actions', label: 'Műveletek', width: '100px', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
 
   readonly showCreateDialog = signal(false);
   readonly showCancelConfirm = signal(false);

@@ -62,15 +62,8 @@
       <p>Jelenleg nincs beérkezett hibajelentés.</p>
     </div>
   } @else {
-    <!-- Táblázat fejléc -->
-    <div class="table-header">
-      <span class="th th-title">Cím</span>
-      <span class="th th-reporter">Bejelentő</span>
-      <span class="th th-status">Státusz</span>
-      <span class="th th-priority">Prioritás</span>
-      <span class="th th-answered">Válasz</span>
-      <span class="th th-date">Dátum</span>
-    </div>
+    <div [style.--table-cols]="gridTemplate">
+    <app-table-header [columns]="tableCols" />
 
     <!-- Lista -->
     <div class="row-grid">
@@ -109,6 +102,7 @@
           <span class="cell cell-date">{{ report.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
         </div>
       }
+    </div>
     </div>
 
     <app-list-pagination

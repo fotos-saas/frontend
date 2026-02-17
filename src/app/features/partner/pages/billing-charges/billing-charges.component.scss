@@ -147,7 +147,7 @@
 
 @media (max-width: 768px) {
   .summary-row { flex-direction: column; }
-  .table-header { display: none; }
+  app-table-header { display: none; }
   .list-row { flex-direction: column; padding: 16px; }
 }
 

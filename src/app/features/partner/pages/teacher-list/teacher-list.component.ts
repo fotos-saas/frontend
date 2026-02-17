@@ -22,6 +22,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
+import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { ViewModeToggleComponent, ViewModeOption } from '../../../../shared/components/view-mode-toggle/view-mode-toggle.component';
 
 @Component({
@@ -42,6 +43,7 @@ import { ViewModeToggleComponent, ViewModeOption } from '../../../../shared/comp
     PsSearchableSelectComponent,
     SmartFilterBarComponent,
     ListPaginationComponent,
+    TableHeaderComponent,
     ViewModeToggleComponent,
   ],
   providers: [{ provide: ARCHIVE_SERVICE, useExisting: PartnerTeacherService }],
@@ -57,6 +59,13 @@ export class PartnerTeacherListComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   readonly ICONS = ICONS;
+
+  readonly tableCols: TableColumn[] = [
+    { key: 'name', label: 'Tanár' },
+    { key: 'school', label: 'Iskola', width: '200px' },
+    { key: 'actions', label: 'Műveletek', width: '120px', align: 'center' },
+  ];
+  readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));
 
   readonly viewModeOptions: ViewModeOption[] = [
     { value: 'flat', label: 'Tanár nézet', icon: ICONS.LIST },

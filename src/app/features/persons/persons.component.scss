@@ -11,10 +11,7 @@ $amber-600: #d97706;
 
 .persons__main {
   flex: 1;
-  max-width: 800px;
   width: 100%;
-  margin: 0 auto;
-  // padding: page-card class-tól jön a külső div-re
 }
 
 // Page Header
@@ -178,10 +175,11 @@ $amber-600: #d97706;
   border-radius: 999px;
 }
 
-// Person Grid
+// Person Grid — auto-fill: annyi kártya fér el amennyit a sor megenged,
+// mindegyik egyforma szélességű és magasságú, kitölti a rendelkezésre álló helyet
 .person-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 0.75rem;
 }
 
@@ -341,7 +339,7 @@ $amber-600: #d97706;
   }
 
   .person-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
 
   .stats-banner {
@@ -351,9 +349,4 @@ $amber-600: #d97706;
   }
 }
 
-// Tablet and up
-@media (min-width: 768px) {
-  .person-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+// Tablet and up — nem kell felülírni, az auto-fill automatikusan kezeli

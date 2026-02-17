@@ -16,7 +16,7 @@
   &--sm { max-width: $ps-field-width-sm; }
   &--md { max-width: $ps-field-width-md; }
   &--lg { max-width: $ps-field-width-lg; }
-  &--full { max-width: 100%; }
+  &--full { width: 100%; max-width: 100%; }
 
   // ──────────────────────────────────────
   // Label

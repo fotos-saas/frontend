@@ -294,9 +294,9 @@
   }
 
   <!-- Kapcsolattartók -->
-  <section class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+  <section class="contacts-section">
     <!-- Section Header -->
-    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+    <div class="contacts-section__header">
       <h2 class="font-semibold text-gray-900">Kapcsolattartók</h2>
       <app-add-button
         [label]="'Új'"
@@ -305,45 +305,22 @@
       />
     </div>
     <!-- Contact List -->
-    <div class="p-4">
-      @if (project()!.contacts && project()!.contacts.length > 0) {
-        <div class="space-y-2">
-          @for (contact of project()!.contacts; track contact.id; let i = $index) {
-            <div
-              class="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
-              [class.bg-primary-50/50]="contact.isPrimary"
-              [style.animation-delay]="i * 0.03 + 's'"
-            >
-              <div class="flex items-center gap-3 min-w-0">
-                <!-- Avatar -->
-                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0">
-                  {{ getInitials(contact.name) }}
-                </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <span class="font-medium text-gray-900">{{ contact.name }}</span>
-                    @if (contact.isPrimary) {
-                      <span class="px-1.5 py-0.5 bg-primary text-white text-[10px] font-bold rounded">FŐ</span>
-                    }
-                  </div>
-                  <div class="contact-details">
-                    @if (contact.email) {
-                      <a [href]="'mailto:' + contact.email" class="contact-detail-link">
-                        <lucide-icon [name]="ICONS.MAIL" [size]="12" />
-                        <span class="truncate">{{ contact.email }}</span>
-                      </a>
-                    }
-                    @if (contact.phone) {
-                      <a [href]="'tel:' + contact.phone" class="contact-detail-link">
-                        <lucide-icon [name]="ICONS.PHONE" [size]="12" />
-                        {{ contact.phone }}
-                      </a>
-                    }
-                  </div>
-                </div>
+    @if (project()!.contacts && project()!.contacts.length > 0) {
+      <div class="contacts-list">
+        @for (contact of project()!.contacts; track contact.id; let i = $index) {
+          <div class="contact-card" [class.contact-card--primary]="contact.isPrimary">
+            <!-- Felső sor: avatar + név + badge + akciók -->
+            <div class="contact-card__top">
+              <div class="contact-card__avatar">
+                {{ getInitials(contact.name) }}
               </div>
-              <!-- Actions -->
-              <div class="contact-actions">
+              <div class="contact-card__name-row">
+                <span class="contact-card__name">{{ contact.name }}</span>
+                @if (contact.isPrimary) {
+                  <span class="contact-card__badge">FŐ</span>
+                }
+              </div>
+              <div class="contact-card__actions">
                 <app-edit-button
                   [display]="'icon-only'"
                   (clicked)="openContactModal.emit(contact)"
@@ -354,21 +331,36 @@
                 />
               </div>
             </div>
-          }
-        </div>
-      } @else {
-        <!-- Empty State -->
-        <div class="text-center py-8">
-          <lucide-icon [name]="ICONS.USER_PLUS" [size]="32" class="text-gray-300 mx-auto mb-3" />
-          <p class="text-sm text-gray-500 mb-3">Még nincs kapcsolattartó</p>
-          <app-add-button
-            [label]="'Hozzáadás'"
-            [variant]="'primary'"
-            (clicked)="openContactModal.emit(null)"
-          />
-        </div>
-      }
-    </div>
+            <!-- Alsó sor: email + telefon (kattintható chipek) -->
+            <div class="contact-card__details">
+              @if (contact.email) {
+                <a [href]="'mailto:' + contact.email" class="contact-chip">
+                  <lucide-icon [name]="ICONS.MAIL" [size]="13" />
+                  <span class="contact-chip__text">{{ contact.email }}</span>
+                </a>
+              }
+              @if (contact.phone) {
+                <a [href]="'tel:' + contact.phone" class="contact-chip">
+                  <lucide-icon [name]="ICONS.PHONE" [size]="13" />
+                  <span>{{ contact.phone }}</span>
+                </a>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="contacts-empty">
+        <lucide-icon [name]="ICONS.USER_PLUS" [size]="32" class="text-gray-300" />
+        <p>Még nincs kapcsolattartó</p>
+        <app-add-button
+          [label]="'Hozzáadás'"
+          [variant]="'primary'"
+          (clicked)="openContactModal.emit(null)"
+        />
+      </div>
+    }
   </section>
 
   <!-- QR History -->

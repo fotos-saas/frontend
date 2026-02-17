@@ -5,6 +5,7 @@ import { OrderDataService, OrderData } from './services/order-data.service';
 import { LoggerService } from '../../core/services/logger.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SafeHtmlPipe } from '../../shared/pipes/safe-html.pipe';
+import { LinkifyPipe } from '../../shared/pipes/linkify.pipe';
 import { isSecureUrl, openSecureUrl } from '../../core/utils/url-validator.util';
 
 /**
@@ -17,7 +18,7 @@ import { isSecureUrl, openSecureUrl } from '../../core/utils/url-validator.util'
 @Component({
     selector: 'app-order-data',
     standalone: true,
-    imports: [SafeHtmlPipe, AsyncPipe, DatePipe],
+    imports: [SafeHtmlPipe, LinkifyPipe, AsyncPipe, DatePipe],
     templateUrl: './order-data.component.html',
     styleUrls: ['./order-data.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -199,6 +199,8 @@ $blue-700: #1d4ed8;
   color: #475569;
   line-height: 1.6;
   font-size: 0.95rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
 
   p {
     margin: 0 0 0.75rem;
@@ -213,6 +215,16 @@ $blue-700: #1d4ed8;
     content: "";
     margin-top: 0.5rem;
   }
+
+  a {
+    color: $blue-600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: $blue-500;
+    }
+  }
 }
 
 // Quote
@@ -224,19 +236,30 @@ $blue-700: #1d4ed8;
   margin: 0;
 }
 
-// Namelist (pre formatted) - scrollbar mindig látható
+// Namelist - scrollbar mindig látható
 .order-data__namelist {
   color: #475569;
   line-height: 1.6;
   margin: 0;
   font-family: inherit;
-  white-space: pre-wrap;
   background: #f8fafc;
   padding: 1rem;
   border-radius: 8px;
   font-size: 0.85rem;
   max-height: 300px;
   overflow-y: scroll; // mindig scroll, nem auto
+  overflow-wrap: break-word;
+  word-break: break-word;
+
+  a {
+    color: $blue-600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: $blue-500;
+    }
+  }
 
   // Custom scrollbar
   &::-webkit-scrollbar {

@@ -15,6 +15,7 @@ import { PartnerService } from '../../services/partner.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { SafeHtmlPipe } from '../../../../shared/pipes/safe-html.pipe';
+import { LinkifyPipe } from '../../../../shared/pipes/linkify.pipe';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { isSecureUrl, openSecureUrl } from '../../../../core/utils/url-validator.util';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -23,7 +24,7 @@ import { OrderData } from '../../../order-data/services/order-data.service';
 @Component({
   selector: 'app-order-data-dialog',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, SafeHtmlPipe, DialogWrapperComponent],
+  imports: [DatePipe, LucideAngularModule, SafeHtmlPipe, LinkifyPipe, DialogWrapperComponent],
   templateUrl: './order-data-dialog.component.html',
   styleUrls: ['./order-data-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

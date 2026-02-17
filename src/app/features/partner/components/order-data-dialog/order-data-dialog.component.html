@@ -140,7 +140,7 @@
         @if (orderData.description) {
           <section class="order-dialog__section">
             <h3 class="order-dialog__section-title">Leírás / Megjegyzések</h3>
-            <div class="order-dialog__description" [innerHTML]="orderData.description | safeHtml"></div>
+            <div class="order-dialog__description" [innerHTML]="orderData.description | linkify"></div>
           </section>
         }
 
@@ -158,13 +158,13 @@
             @if (orderData.studentDescription) {
               <section class="order-dialog__section">
                 <h3 class="order-dialog__section-title">Diákok névsora</h3>
-                <pre class="order-dialog__namelist">{{ orderData.studentDescription }}</pre>
+                <div class="order-dialog__namelist" [innerHTML]="orderData.studentDescription | linkify"></div>
               </section>
             }
             @if (orderData.teacherDescription) {
               <section class="order-dialog__section">
                 <h3 class="order-dialog__section-title">Tanárok névsora</h3>
-                <pre class="order-dialog__namelist">{{ orderData.teacherDescription }}</pre>
+                <div class="order-dialog__namelist" [innerHTML]="orderData.teacherDescription | linkify"></div>
               </section>
             }
           </div>

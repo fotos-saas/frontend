@@ -20,3 +20,112 @@
 .info-help-grid > * + * {
   margin-top: 12px;
 }
+
+// === Quick Actions (mobilon látható, desktopon rejtett) ===
+.quick-actions {
+  display: none;
+}
+
+.desktop-section {
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .quick-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: none;
+    border: none;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    font-family: inherit;
+    font-size: inherit;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    &:hover,
+    &:active {
+      background-color: #f9fafb;
+    }
+
+    &__icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      &--purple {
+        background-color: #f3e8ff;
+        color: #7c3aed;
+      }
+
+      &--green {
+        background-color: #dcfce7;
+        color: #16a34a;
+      }
+
+      &--amber {
+        background-color: #fef3c7;
+        color: #d97706;
+      }
+
+      &--indigo {
+        background-color: #e0e7ff;
+        color: #4f46e5;
+      }
+
+      &--gray {
+        background-color: #f3f4f6;
+        color: #9ca3af;
+      }
+    }
+
+    &__text {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    &__title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    &__desc {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    &__arrow {
+      color: #d1d5db;
+      flex-shrink: 0;
+    }
+  }
+
+  .desktop-section {
+    display: none !important;
+  }
+}

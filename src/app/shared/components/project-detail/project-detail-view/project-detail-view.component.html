@@ -24,8 +24,78 @@
     (openPersonsModal)="openPersonsModal.emit($event)"
   />
 
+  <!-- === MOBIL: Kompakt gyorsműveletek lista === -->
+  <div class="quick-actions">
+    <!-- QR Kódok sor -->
+    <button type="button" class="quick-action" (click)="openQrModal.emit()">
+      <div class="quick-action__icon quick-action__icon--purple">
+        <lucide-icon [name]="ICONS.QR_CODE" [size]="16" />
+      </div>
+      <div class="quick-action__text">
+        <span class="quick-action__title">QR Kódok</span>
+        <span class="quick-action__desc">
+          @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {
+            {{ project()!.activeQrCodes.length }} aktív kód
+          } @else {
+            Nincs generálva
+          }
+        </span>
+      </div>
+      <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" class="quick-action__arrow" />
+    </button>
+
+    <!-- Megrendelési adatok sor -->
+    @if (!isMarketer()) {
+      <button type="button" class="quick-action" (click)="project()!.orderSubmittedAt ? openOrderData.emit() : openOrderWizard.emit()">
+        <div class="quick-action__icon" [class.quick-action__icon--green]="project()!.orderSubmittedAt" [class.quick-action__icon--amber]="!project()!.orderSubmittedAt">
+          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+        </div>
+        <div class="quick-action__text">
+          <span class="quick-action__title">Megrendelés</span>
+          <span class="quick-action__desc">
+            @if (project()!.orderSubmittedAt) {
+              Leadva: {{ project()!.orderSubmittedAt | date:'MMM d.':'':'hu-HU' }}
+            } @else {
+              Még nincs leadva
+            }
+          </span>
+        </div>
+        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" class="quick-action__arrow" />
+      </button>
+    }
+
+    <!-- Galéria sor -->
+    @if (!isMarketer()) {
+      @if (project()!.tabloGalleryId) {
+        <a [routerLink]="'gallery'" class="quick-action">
+          <div class="quick-action__icon quick-action__icon--indigo">
+            <lucide-icon [name]="ICONS.IMAGES" [size]="16" />
+          </div>
+          <div class="quick-action__text">
+            <span class="quick-action__title">Galéria</span>
+            <span class="quick-action__desc">{{ project()!.galleryPhotosCount ?? 0 }} fotó</span>
+          </div>
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" class="quick-action__arrow" />
+        </a>
+      } @else {
+        <button type="button" class="quick-action" (click)="createGallery.emit()">
+          <div class="quick-action__icon quick-action__icon--gray">
+            <lucide-icon [name]="ICONS.IMAGES" [size]="16" />
+          </div>
+          <div class="quick-action__text">
+            <span class="quick-action__title">Galéria</span>
+            <span class="quick-action__desc">Nincs létrehozva</span>
+          </div>
+          <lucide-icon [name]="ICONS.PLUS" [size]="16" class="quick-action__arrow" />
+        </button>
+      }
+    }
+  </div>
+
+  <!-- === DESKTOP: Eredeti szekciók === -->
+
   <!-- QR Kódok szekció -->
-  <section class="mb-6">
+  <section class="mb-6 desktop-section">
     @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {
       <!-- Van aktív QR kód(ok) -->
       <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -94,7 +164,7 @@
 
   <!-- Megrendelési adatok szekció (nem marketinges) -->
   @if (!isMarketer()) {
-    <section class="mb-6">
+    <section class="mb-6 desktop-section">
       @if (project()!.orderSubmittedAt) {
         <!-- Leadva - zöld banner -->
         <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
@@ -152,7 +222,7 @@
 
   <!-- Galéria szekció (csak partner - nem marketer) -->
   @if (!isMarketer()) {
-    <section class="mb-6">
+    <section class="mb-6 desktop-section">
       @if (project()!.tabloGalleryId) {
         <!-- Van galéria -->
         <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">

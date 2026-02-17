@@ -199,6 +199,30 @@ import { TabloPersonItem } from '../persons-modal.types';
       margin-right: 3px;
     }
 
+    @media (max-width: 480px) {
+      .card-info {
+        padding: 4px 4px;
+      }
+
+      .card-name {
+        font-size: 0.625rem;
+      }
+
+      .card-type {
+        font-size: 0.5625rem;
+      }
+
+      .card-badge {
+        font-size: 0.5rem;
+        padding: 0 3px;
+      }
+
+      .card-reset-btn {
+        font-size: 0.5rem;
+        padding: 2px 0;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .person-card {
         animation-duration: 0.01ms !important;

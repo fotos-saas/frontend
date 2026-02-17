@@ -33,12 +33,12 @@
           <div class="stats-row">
             <span class="stat-item stat-item--green">
               <span class="stat-dot stat-dot--green"></span>
-              {{ studentsWithPhoto() }} fotóval
+              {{ studentsWithPhoto() }} <span class="stat-label">fotóval</span>
             </span>
             @if (studentsWithoutPhoto() > 0) {
               <span class="stat-item stat-item--red">
                 <span class="stat-dot stat-dot--red"></span>
-                {{ studentsWithoutPhoto() }} fotó nélkül
+                {{ studentsWithoutPhoto() }} <span class="stat-label">fotó nélkül</span>
               </span>
             }
           </div>
@@ -75,12 +75,12 @@
           <div class="stats-row">
             <span class="stat-item stat-item--green">
               <span class="stat-dot stat-dot--green"></span>
-              {{ teachersWithPhoto() }} fotóval
+              {{ teachersWithPhoto() }} <span class="stat-label">fotóval</span>
             </span>
             @if (teachersWithoutPhoto() > 0) {
               <span class="stat-item stat-item--red">
                 <span class="stat-dot stat-dot--red"></span>
-                {{ teachersWithoutPhoto() }} fotó nélkül
+                {{ teachersWithoutPhoto() }} <span class="stat-label">fotó nélkül</span>
               </span>
             }
           </div>

@@ -112,13 +112,19 @@ ps-toggle {
   max-height: 50vh;
   overflow-y: auto;
   overflow-x: hidden;
-  min-width: 0;
 }
 
+// --- Flex-based card grid ---
 .persons-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+// Kártya szélességet a child komponensen belül állítjuk
+// Desktop: ~110px, Tablet: ~100px, Mobil: ~90px
+:host ::ng-deep .persons-grid > app-modal-person-card {
+  width: 110px;
 }
 
 .empty-state {
@@ -144,12 +150,13 @@ ps-toggle {
 }
 
 .skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 .skeleton-card {
+  width: 110px;
   aspect-ratio: 0.8;
   border-radius: 8px;
   background: #e2e8f0;
@@ -233,10 +240,12 @@ ps-toggle {
     max-height: 55vh;
   }
 
-  .persons-grid,
-  .skeleton-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+  :host ::ng-deep .persons-grid > app-modal-person-card {
+    width: 100px;
+  }
+
+  .skeleton-card {
+    width: 100px;
   }
 }
 
@@ -276,11 +285,15 @@ ps-toggle {
 
   .persons-grid,
   .skeleton-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
   }
 
+  :host ::ng-deep .persons-grid > app-modal-person-card {
+    width: 90px;
+  }
+
   .skeleton-card {
+    width: 90px;
     aspect-ratio: 0.7;
   }
 

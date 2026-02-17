@@ -205,6 +205,7 @@ export class PhotoLightboxComponent {
 
     switch (event.key) {
       case 'Escape':
+        event.stopImmediatePropagation();
         this.close.emit();
         break;
       case 'ArrowLeft':

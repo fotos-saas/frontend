@@ -1,5 +1,10 @@
 @use '../../../../shared/styles/list-page' as list;
 
+:host ::ng-deep ps-input.search-box {
+  flex: 1;
+  min-width: 0;
+}
+
 .user-info {
   display: flex;
   flex-direction: column;

@@ -12,6 +12,11 @@ $green-600: #16a34a;
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  @media (max-width: 480px) {
+    padding: 0;
+    box-shadow: none;
+  }
 }
 
 .step-content__title {

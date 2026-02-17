@@ -20,6 +20,20 @@
         <lucide-icon [name]="ICONS.X" [size]="14" />
       </button>
     }
+    <!-- Mobil szűrő gomb -->
+    @if (filterConfigs().length > 0 || searchableFilters().length > 0) {
+      <button
+        type="button"
+        class="mobile-filter-toggle"
+        [class.mobile-filter-toggle--active]="mobileFiltersOpen() || hasActiveFilters()"
+        (click)="toggleMobileFilters()"
+      >
+        <lucide-icon [name]="ICONS.FILTER" [size]="16" />
+        @if (activeFilterCount() > 0) {
+          <span class="mobile-filter-badge">{{ activeFilterCount() }}</span>
+        }
+      </button>
+    }
   </div>
 
   <!-- Searchable Select filters -->
@@ -46,6 +60,29 @@
     </div>
   }
 </div>
+
+<!-- Mobil szűrők (összecsukható) -->
+@if (mobileFiltersOpen()) {
+  <div class="mobile-filters-panel">
+    @for (sf of searchableFilters(); track sf.id) {
+      <ps-searchable-select
+        [options]="sf.options"
+        [value]="filterState().filters()[sf.id]"
+        [placeholder]="sf.placeholder"
+        [allLabel]="sf.allLabel"
+        (valueChange)="onSearchableFilterChange(sf.id, $event)"
+      />
+    }
+    @if (filterConfigs().length > 0) {
+      <app-expandable-filters
+        [filters]="filterConfigs()"
+        [values]="filterState().filters()"
+        [visibleCount]="99"
+        (filterChange)="onFilterChange($event)"
+      />
+    }
+  </div>
+}
 
 <!-- Mobile sort bar (640px alatt) -->
 @if (sortConfig(); as sort) {

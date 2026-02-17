@@ -456,6 +456,19 @@ body.dialog-open {
     inset 0 1px 0 rgba(71, 85, 105, 0.5);
 }
 
+// Mobil - kisebb padding
+@media (max-width: 480px) {
+  .page-card {
+    padding: 1rem;
+  }
+
+  .page-card > .page-header {
+    top: -1rem;
+    margin: -1rem -1rem 16px -1rem;
+    padding: 1rem 1rem 12px 1rem;
+  }
+}
+
 // Reduced motion - animációk és transform kikapcsolása
 @media (prefers-reduced-motion: reduce) {
   .page-card {

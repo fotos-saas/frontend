@@ -36,11 +36,11 @@
           (click)="onOrderDataClick($event)"
         >
           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
-          Leadva
+          <span class="finalized-badge__text">Leadva</span>
         </button>
       }
     </div>
-    <span class="school-meta">{{ project().className ?? '-' }} @if (project().classYear) {({{ project().classYear }})} @if (project().contact) { · {{ project().contact!.name }}}</span>
+    <span class="school-meta">{{ project().className ?? '-' }} @if (project().classYear) {({{ project().classYear }})}@if (project().contact) {<span class="school-contact-sep"> · </span><span class="school-contact">{{ project().contact!.name }}</span>}</span>
   </div>
 
   <!-- Col 3: Tudnak róla -->

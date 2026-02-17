@@ -56,7 +56,7 @@
     font-family: inherit;
     font-size: inherit;
 
-    &:not(:last-child) {
+    &:not(:last-child):not(.quick-action__wrapper .quick-action) {
       border-bottom: 1px solid #f3f4f6;
     }
 
@@ -122,6 +122,39 @@
     &__arrow {
       color: #d1d5db;
       flex-shrink: 0;
+    }
+
+    &__wrapper {
+      display: flex;
+      align-items: stretch;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid #f3f4f6;
+      }
+
+      .quick-action {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+
+    &__edit-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      background: none;
+      border: none;
+      border-left: 1px solid #f3f4f6;
+      color: #9ca3af;
+      cursor: pointer;
+      transition: background-color 0.15s, color 0.15s;
+
+      &:hover,
+      &:active {
+        background-color: #f3f4f6;
+        color: #16a34a;
+      }
     }
   }
 

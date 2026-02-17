@@ -2,6 +2,7 @@
   headerStyle="flat"
   [icon]="ICONS.FILE_TEXT"
   [title]="dialogTitle()"
+  [description]="dialogDescription()"
   theme="purple"
   size="lg"
   variant="wizard"
@@ -31,7 +32,7 @@
     </div>
 
     <!-- Content -->
-    <div class="wizard-content">
+    <div class="wizard-content" #wizardContent>
       @if (loading()) {
         <div class="wizard-loading">
           <div class="spinner"></div>

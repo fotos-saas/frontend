@@ -8,6 +8,8 @@ import {
   computed,
   OnInit,
   DestroyRef,
+  ElementRef,
+  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject, debounceTime, switchMap, catchError, of } from 'rxjs';
@@ -65,6 +67,8 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
   readonly ICONS = ICONS;
   readonly steps = STEPPER_STEPS;
 
+  private readonly wizardContent = viewChild<ElementRef<HTMLElement>>('wizardContent');
+
   currentStep = signal(0);
   loading = signal(true);
   submitting = signal(false);
@@ -76,11 +80,8 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
 
   private readonly draftSave$ = new Subject<void>();
 
-  dialogTitle = computed(() => {
-    const name = this.projectName();
-    const base = 'Megrendelés leadása';
-    return name ? `${base} — ${name}` : base;
-  });
+  dialogTitle = computed(() => 'Megrendelés leadása');
+  dialogDescription = computed(() => this.projectName() || '');
 
   isStepValid = computed(() => {
     const data = this.formData();
@@ -192,18 +193,25 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
 
   prevStep(): void {
     this.currentStep.update(s => Math.max(0, s - 1));
+    this.scrollContentToTop();
   }
 
   nextStep(): void {
     if (this.isStepValid()) {
       this.currentStep.update(s => Math.min(this.steps.length - 1, s + 1));
+      this.scrollContentToTop();
     }
   }
 
   goToStep(index: number): void {
     if (index <= this.currentStep()) {
       this.currentStep.set(index);
+      this.scrollContentToTop();
     }
+  }
+
+  private scrollContentToTop(): void {
+    this.wizardContent()?.nativeElement.scrollTo({ top: 0 });
   }
 
   finalize(): void {

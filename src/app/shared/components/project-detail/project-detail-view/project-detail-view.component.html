@@ -46,22 +46,34 @@
 
     <!-- Megrendelési adatok sor -->
     @if (!isMarketer()) {
-      <button type="button" class="quick-action" (click)="project()!.orderSubmittedAt ? openOrderData.emit() : openOrderWizard.emit()">
-        <div class="quick-action__icon" [class.quick-action__icon--green]="project()!.orderSubmittedAt" [class.quick-action__icon--amber]="!project()!.orderSubmittedAt">
-          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
-        </div>
-        <div class="quick-action__text">
-          <span class="quick-action__title">Megrendelés</span>
-          <span class="quick-action__desc">
-            @if (project()!.orderSubmittedAt) {
-              Leadva: {{ project()!.orderSubmittedAt | date:'MMM d.':'':'hu-HU' }}
-            } @else {
-              Még nincs leadva
-            }
-          </span>
-        </div>
-        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" class="quick-action__arrow" />
-      </button>
+      <div class="quick-action__wrapper">
+        <button type="button" class="quick-action" (click)="project()!.orderSubmittedAt ? openOrderData.emit() : openOrderWizard.emit()">
+          <div class="quick-action__icon" [class.quick-action__icon--green]="project()!.orderSubmittedAt" [class.quick-action__icon--amber]="!project()!.orderSubmittedAt">
+            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+          </div>
+          <div class="quick-action__text">
+            <span class="quick-action__title">Megrendelés</span>
+            <span class="quick-action__desc">
+              @if (project()!.orderSubmittedAt) {
+                Leadva: {{ project()!.orderSubmittedAt | date:'MMM d.':'':'hu-HU' }}
+              } @else {
+                Még nincs leadva
+              }
+            </span>
+          </div>
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" class="quick-action__arrow" />
+        </button>
+        @if (project()!.orderSubmittedAt) {
+          <button
+            type="button"
+            class="quick-action__edit-btn"
+            matTooltip="Szerkesztés"
+            (click)="openOrderWizard.emit()"
+          >
+            <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+          </button>
+        }
+      </div>
     }
 
     <!-- Galéria sor -->
@@ -146,18 +158,11 @@
       </div>
     } @else {
       <!-- Nincs QR kód -->
-      <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
+      <div class="flex items-center p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
         <div class="flex items-center gap-3">
           <lucide-icon [name]="ICONS.QR_CODE" [size]="20" class="text-gray-400" />
           <span class="text-sm text-gray-500">Nincs hozzáférés létrehozva</span>
         </div>
-        <button
-          class="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-          (click)="openQrModal.emit()"
-        >
-          <lucide-icon [name]="ICONS.PLUS" [size]="16" />
-          QR kódok kezelése
-        </button>
       </div>
     }
   </section>

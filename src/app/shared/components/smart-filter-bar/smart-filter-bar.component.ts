@@ -51,9 +51,19 @@ export class SmartFilterBarComponent {
 
   // === INTERNAL STATE ===
   readonly mobileSortOpen = signal(false);
+  readonly mobileFiltersOpen = signal(false);
 
   /** Van-e aktív keresési szöveg */
   readonly hasSearchText = computed(() => !!this.filterState().search());
+
+  /** Aktív szűrők száma (nem üres értékek) */
+  readonly activeFilterCount = computed(() => {
+    const filters = this.filterState().filters();
+    return Object.values(filters).filter(v => v !== '' && v !== null && v !== undefined).length;
+  });
+
+  /** Van-e aktív szűrő */
+  readonly hasActiveFilters = computed(() => this.activeFilterCount() > 0);
 
   /** Mutatja-e a search help tooltipet */
   readonly hasSearchFeatures = computed(() => {
@@ -106,6 +116,11 @@ export class SmartFilterBarComponent {
     this.filterState().toggleSortDir();
   }
 
+  /** Mobil szűrők toggle */
+  toggleMobileFilters(): void {
+    this.mobileFiltersOpen.update(v => !v);
+  }
+
   /** Mobil sort dropdown toggle */
   toggleMobileSortDropdown(): void {
     this.mobileSortOpen.update(v => !v);
@@ -115,6 +130,7 @@ export class SmartFilterBarComponent {
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.mobileSortOpen.set(false);
+      this.mobileFiltersOpen.set(false);
     }
   }
 }

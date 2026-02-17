@@ -57,6 +57,11 @@
   line-height: 1.2;
 }
 
+.school-contact-sep,
+.school-contact {
+  display: inline;
+}
+
 /* Draft badge */
 .draft-badge {
   display: inline-flex;
@@ -297,6 +302,26 @@
   .sample-placeholder {
     width: 32px;
     height: 32px;
+  }
+
+  .finalized-badge {
+    padding: 2px 4px;
+    gap: 0;
+  }
+
+  .finalized-badge__text {
+    display: none;
+  }
+
+  .school-contact-sep {
+    display: none;
+  }
+
+  .school-contact {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

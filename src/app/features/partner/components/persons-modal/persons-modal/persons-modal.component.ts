@@ -48,6 +48,9 @@ export class PersonsModalComponent implements OnInit {
   // Lightbox
   lightboxPerson = signal<TabloPersonItem | null>(null);
 
+  // Scroll indicator
+  isScrolledToBottom = signal(false);
+
   readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
 
   /** Mobilon rövidített projektnév: iskola + osztály, évszámok nélkül */
@@ -115,6 +118,12 @@ export class PersonsModalComponent implements OnInit {
           this.loading.set(false);
         }
       });
+  }
+
+  onContentScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+    const threshold = 20;
+    this.isScrolledToBottom.set(el.scrollHeight - el.scrollTop - el.clientHeight < threshold);
   }
 
   openLightbox(person: TabloPersonItem): void {

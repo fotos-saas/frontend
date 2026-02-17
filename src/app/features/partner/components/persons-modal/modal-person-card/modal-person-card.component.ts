@@ -200,8 +200,16 @@ import { TabloPersonItem } from '../persons-modal.types';
     }
 
     @media (max-width: 480px) {
+      .card-photo {
+        aspect-ratio: 0.85;
+      }
+
+      .card-placeholder lucide-icon {
+        --lucide-icon-size: 18px !important;
+      }
+
       .card-info {
-        padding: 4px 4px;
+        padding: 3px 4px;
       }
 
       .card-name {

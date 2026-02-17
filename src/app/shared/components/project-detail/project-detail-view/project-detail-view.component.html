@@ -2,8 +2,8 @@
   <div class="overview-header">
     <app-info-box storageKey="overview-tab" title="Projekt áttekintés" mode="dialog">
       <div dialogContent class="info-help-grid">
-        <app-info-help-item [icon]="ICONS.QR_CODE" title="QR Kódok" color="purple">
-          Generálj QR kódokat a regisztrációs linkekhez. Többféle típus érhető el: koordinátor, szülő, diák.
+        <app-info-help-item [icon]="ICONS.QR_CODE" title="Hozzáférések" color="purple">
+          QR kód és hozzáférés létrehozás a regisztrációs linkekhez. Többféle típus érhető el: koordinátor, szülő, diák.
         </app-info-help-item>
         <app-info-help-item [icon]="ICONS.IMAGES" title="Galéria" color="indigo">
           Fotók száma és a képválasztási határidő. A határidőt gyorsan meghosszabbíthatod az előre definiált gombokkal.
@@ -26,13 +26,13 @@
 
   <!-- === MOBIL: Kompakt gyorsműveletek lista === -->
   <div class="quick-actions">
-    <!-- QR Kódok sor -->
+    <!-- Hozzáférések sor -->
     <button type="button" class="quick-action" (click)="openQrModal.emit()">
       <div class="quick-action__icon quick-action__icon--purple">
         <lucide-icon [name]="ICONS.QR_CODE" [size]="16" />
       </div>
       <div class="quick-action__text">
-        <span class="quick-action__title">QR Kódok</span>
+        <span class="quick-action__title">Hozzáférések</span>
         <span class="quick-action__desc">
           @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {
             {{ project()!.activeQrCodes.length }} aktív kód
@@ -94,16 +94,16 @@
 
   <!-- === DESKTOP: Eredeti szekciók === -->
 
-  <!-- QR Kódok szekció -->
+  <!-- Hozzáférések szekció -->
   <section class="mb-6 desktop-section">
     @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {
-      <!-- Van aktív QR kód(ok) -->
+      <!-- Van aktív hozzáférés(ek) -->
       <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <!-- Header -->
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <lucide-icon [name]="ICONS.QR_CODE" [size]="16" class="text-gray-500" />
-            <span class="text-sm font-semibold text-gray-900">QR Kódok</span>
+            <span class="text-sm font-semibold text-gray-900">Hozzáférések</span>
             <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded">
               {{ project()!.activeQrCodes.length }}
             </span>
@@ -113,7 +113,7 @@
             (click)="openQrModal.emit()"
           >
             <lucide-icon [name]="ICONS.SETTINGS" [size]="14" />
-            QR kódok kezelése
+            Hozzáférések kezelése
           </button>
         </div>
         <!-- QR kód lista -->
@@ -149,7 +149,7 @@
       <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
         <div class="flex items-center gap-3">
           <lucide-icon [name]="ICONS.QR_CODE" [size]="20" class="text-gray-400" />
-          <span class="text-sm text-gray-500">Nincs QR kód generálva</span>
+          <span class="text-sm text-gray-500">Nincs hozzáférés létrehozva</span>
         </div>
         <button
           class="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
@@ -367,7 +367,7 @@
   @if (project()!.qrCodesHistory && project()!.qrCodesHistory.length > 0) {
     <section class="mt-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
       <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-900">QR Kód előzmények</h2>
+        <h2 class="font-semibold text-gray-900">Hozzáférés előzmények</h2>
         <span class="text-xs text-gray-400">{{ project()!.qrCodesHistory.length }} kód</span>
       </div>
       <div class="divide-y divide-gray-100">

@@ -98,13 +98,11 @@ import { TableColumn, SortDirection } from './table-header.types';
     }
 
     .th--sortable:hover {
-      background: #f1f5f9;
       color: #475569;
     }
 
     .th--active {
-      color: var(--color-primary, #1e3a5f);
-      background: #e0f2fe;
+      color: #475569;
     }
 
     @media (max-width: 640px) {

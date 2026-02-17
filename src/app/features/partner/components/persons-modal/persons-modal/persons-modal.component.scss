@@ -121,10 +121,12 @@ ps-toggle {
   gap: 10px;
 }
 
-// Kártya szélességet a child komponensen belül állítjuk
-// Desktop: ~110px, Tablet: ~100px, Mobil: ~90px
+// flex-grow: kitölti a rendelkezésre álló helyet
+// flex-basis: minimum szélesség, ez határozza meg hány fér egy sorba
+// max-width: ne nőjön túl nagyra
 :host ::ng-deep .persons-grid > app-modal-person-card {
-  width: 110px;
+  flex: 1 1 100px;
+  max-width: 150px;
 }
 
 .empty-state {
@@ -156,7 +158,8 @@ ps-toggle {
 }
 
 .skeleton-card {
-  width: 110px;
+  flex: 1 1 100px;
+  max-width: 150px;
   aspect-ratio: 0.8;
   border-radius: 8px;
   background: #e2e8f0;
@@ -241,11 +244,13 @@ ps-toggle {
   }
 
   :host ::ng-deep .persons-grid > app-modal-person-card {
-    width: 100px;
+    flex: 1 1 90px;
+    max-width: 140px;
   }
 
   .skeleton-card {
-    width: 100px;
+    flex: 1 1 90px;
+    max-width: 140px;
   }
 }
 
@@ -289,11 +294,13 @@ ps-toggle {
   }
 
   :host ::ng-deep .persons-grid > app-modal-person-card {
-    width: 90px;
+    flex: 1 1 80px;
+    max-width: 130px;
   }
 
   .skeleton-card {
-    width: 90px;
+    flex: 1 1 80px;
+    max-width: 130px;
     aspect-ratio: 0.7;
   }
 

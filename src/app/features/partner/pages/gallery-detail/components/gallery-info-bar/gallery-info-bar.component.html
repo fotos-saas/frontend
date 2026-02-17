@@ -1,5 +1,5 @@
 <div class="info-bar">
-  <!-- Statisztikák -->
+  <!-- 1. sor: Statisztikák -->
   <div class="info-bar__stats">
     <span class="info-bar__stat">
       <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
@@ -10,67 +10,64 @@
       <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="14" />
       {{ totalSizeMb() }} MB
     </span>
-  </div>
-
-  <div class="info-bar__actions">
-    <!-- Progress (ha vannak diákok) -->
     @if (hasProgress()) {
+      <span class="info-bar__divider"></span>
       <div class="info-bar__progress" matTooltip="Diákok haladása a képválasztásban">
         <lucide-icon [name]="ICONS.USERS" [size]="14" />
         <span>{{ progress()!.finalized }}/{{ progress()!.totalUsers }} kész</span>
       </div>
     }
+  </div>
 
-    <!-- Deadline szekció -->
-    <div class="info-bar__deadline">
-      @if (deadline()) {
-        <div
-          class="info-bar__deadline-badge"
-          [class.info-bar__deadline-badge--expired]="isDeadlineExpired()"
-          matTooltip="Képválasztási határidő"
-        >
-          <lucide-icon [name]="ICONS.CALENDAR" [size]="13" />
-          <span>{{ deadlineFormatted() }}</span>
-          @if (isDeadlineExpired()) {
-            <span class="info-bar__deadline-expired-label">Lejárt</span>
-          }
-        </div>
-      }
-      <div class="info-bar__deadline-quick">
-        @for (opt of [{days: 1, label: '+1 nap'}, {days: 3, label: '+3 nap'}, {days: 7, label: '+1 hét'}, {days: 14, label: '+2 hét'}, {days: 21, label: '+3 hét'}]; track opt.days) {
-          <button
-            type="button"
-            class="info-bar__deadline-btn"
-            [disabled]="settingDeadline()"
-            [matTooltip]="deadline() ? 'Határidő meghosszabbítása ' + opt.label + '-pal' : 'Határidő beállítása mától + ' + opt.label"
-            (click)="deadlineExtend.emit(opt.days)"
-          >
-            {{ opt.label }}
-          </button>
+  <!-- Grid/Lista toggle -->
+  <div class="info-bar__toggle">
+    <button
+      type="button"
+      class="info-bar__toggle-btn"
+      [class.info-bar__toggle-btn--active]="viewMode() === 'grid'"
+      (click)="viewModeChange.emit('grid')"
+      matTooltip="Rácsnézet"
+    >
+      <lucide-icon [name]="ICONS.GRID" [size]="16" />
+    </button>
+    <button
+      type="button"
+      class="info-bar__toggle-btn"
+      [class.info-bar__toggle-btn--active]="viewMode() === 'list'"
+      (click)="viewModeChange.emit('list')"
+      matTooltip="Lista nézet"
+    >
+      <lucide-icon [name]="ICONS.LIST" [size]="16" />
+    </button>
+  </div>
+
+  <!-- 2. sor: Deadline (badge + gyors gombok) -->
+  <div class="info-bar__deadline">
+    @if (deadline()) {
+      <div
+        class="info-bar__deadline-badge"
+        [class.info-bar__deadline-badge--expired]="isDeadlineExpired()"
+        matTooltip="Képválasztási határidő"
+      >
+        <lucide-icon [name]="ICONS.CALENDAR" [size]="13" />
+        <span>{{ deadlineFormatted() }}</span>
+        @if (isDeadlineExpired()) {
+          <span class="info-bar__deadline-expired-label">Lejárt</span>
         }
       </div>
-    </div>
-
-    <!-- Grid/Lista toggle -->
-    <div class="info-bar__toggle">
-      <button
-        type="button"
-        class="info-bar__toggle-btn"
-        [class.info-bar__toggle-btn--active]="viewMode() === 'grid'"
-        (click)="viewModeChange.emit('grid')"
-        matTooltip="Rácsnézet"
-      >
-        <lucide-icon [name]="ICONS.GRID" [size]="16" />
-      </button>
-      <button
-        type="button"
-        class="info-bar__toggle-btn"
-        [class.info-bar__toggle-btn--active]="viewMode() === 'list'"
-        (click)="viewModeChange.emit('list')"
-        matTooltip="Lista nézet"
-      >
-        <lucide-icon [name]="ICONS.LIST" [size]="16" />
-      </button>
+    }
+    <div class="info-bar__deadline-quick">
+      @for (opt of [{days: 1, label: '+1 nap'}, {days: 3, label: '+3 nap'}, {days: 7, label: '+1 hét'}, {days: 14, label: '+2 hét'}, {days: 21, label: '+3 hét'}]; track opt.days) {
+        <button
+          type="button"
+          class="info-bar__deadline-btn"
+          [disabled]="settingDeadline()"
+          [matTooltip]="deadline() ? 'Határidő meghosszabbítása ' + opt.label + '-pal' : 'Határidő beállítása mától + ' + opt.label"
+          (click)="deadlineExtend.emit(opt.days)"
+        >
+          {{ opt.label }}
+        </button>
+      }
     </div>
   </div>
 </div>

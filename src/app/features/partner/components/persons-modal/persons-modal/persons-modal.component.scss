@@ -27,6 +27,9 @@
     color: #6b7280;
     margin-bottom: 8px;
     flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

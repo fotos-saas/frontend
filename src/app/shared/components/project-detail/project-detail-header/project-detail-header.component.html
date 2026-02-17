@@ -35,7 +35,7 @@
     </div>
     <!-- Hero Card -->
     <div class="text-center py-2">
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ p.school?.name ?? 'Ismeretlen iskola' }}</h1>
+      <h1 class="school-name">{{ p.school?.name ?? 'Ismeretlen iskola' }}</h1>
       <div class="flex items-center justify-center gap-4 text-sm text-gray-500">
         <span class="flex items-center gap-1.5">
           <lucide-icon [name]="ICONS.MAP_PIN" [size]="14" class="text-gray-400" />

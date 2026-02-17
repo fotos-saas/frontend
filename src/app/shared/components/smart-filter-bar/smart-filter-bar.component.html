@@ -1,14 +1,26 @@
 <div class="smart-filter-bar" role="search">
   <!-- Search box -->
-  <ps-input
-    class="search-box"
-    prefix="search"
-    [placeholder]="searchConfig().placeholder"
-    [ngModel]="filterState().search()"
-    (ngModelChange)="filterState().setSearch($event)"
-    [helpItems]="searchHelpItems()"
-    helpTitle="Keresési szintaxis"
-  />
+  <div class="search-box-wrapper" [class.search-box-wrapper--active]="hasSearchText()">
+    <ps-input
+      class="search-box"
+      prefix="search"
+      [placeholder]="searchConfig().placeholder"
+      [ngModel]="filterState().search()"
+      (ngModelChange)="filterState().setSearch($event)"
+      [helpItems]="searchHelpItems()"
+      helpTitle="Keresési szintaxis"
+    />
+    @if (hasSearchText()) {
+      <button
+        type="button"
+        class="search-clear-btn"
+        matTooltip="Keresés törlése"
+        (click)="clearSearch()"
+      >
+        <lucide-icon [name]="ICONS.X" [size]="14" />
+      </button>
+    }
+  </div>
 
   <!-- Searchable Select filters -->
   @for (sf of searchableFilters(); track sf.id) {

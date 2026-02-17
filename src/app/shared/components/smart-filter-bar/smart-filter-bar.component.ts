@@ -52,6 +52,9 @@ export class SmartFilterBarComponent {
   // === INTERNAL STATE ===
   readonly mobileSortOpen = signal(false);
 
+  /** Van-e aktív keresési szöveg */
+  readonly hasSearchText = computed(() => !!this.filterState().search());
+
   /** Mutatja-e a search help tooltipet */
   readonly hasSearchFeatures = computed(() => {
     const features = this.searchConfig().features;
@@ -76,6 +79,11 @@ export class SmartFilterBarComponent {
     const opt = config.options.find(o => o.value === this.filterState().sortBy());
     return opt?.label || 'Rendezés';
   });
+
+  /** Keresés törlése */
+  clearSearch(): void {
+    this.filterState().clearSearch();
+  }
 
   /** ExpandableFilters filterChange kezelése */
   onFilterChange(event: FilterChangeEvent): void {

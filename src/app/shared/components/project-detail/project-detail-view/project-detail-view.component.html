@@ -326,15 +326,15 @@
                       <span class="px-1.5 py-0.5 bg-primary text-white text-[10px] font-bold rounded">FŐ</span>
                     }
                   </div>
-                  <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-sm text-gray-500">
+                  <div class="contact-details">
                     @if (contact.email) {
-                      <a [href]="'mailto:' + contact.email" class="hover:text-primary transition-colors flex items-center gap-1">
+                      <a [href]="'mailto:' + contact.email" class="contact-detail-link">
                         <lucide-icon [name]="ICONS.MAIL" [size]="12" />
-                        {{ contact.email }}
+                        <span class="truncate">{{ contact.email }}</span>
                       </a>
                     }
                     @if (contact.phone) {
-                      <a [href]="'tel:' + contact.phone" class="hover:text-primary transition-colors flex items-center gap-1">
+                      <a [href]="'tel:' + contact.phone" class="contact-detail-link">
                         <lucide-icon [name]="ICONS.PHONE" [size]="12" />
                         {{ contact.phone }}
                       </a>
@@ -343,7 +343,7 @@
                 </div>
               </div>
               <!-- Actions -->
-              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <div class="contact-actions">
                 <app-edit-button
                   [display]="'icon-only'"
                   (clicked)="openContactModal.emit(contact)"
@@ -402,13 +402,13 @@
   }
 
   <!-- Meta Footer -->
-  <footer class="mt-6 pt-4 border-t border-gray-100">
-    <div class="flex items-center justify-center gap-6 text-xs text-gray-400">
-      <span class="flex items-center gap-1.5">
+  <footer class="meta-footer">
+    <div class="meta-footer__row">
+      <span class="meta-footer__item">
         <lucide-icon [name]="ICONS.CALENDAR" [size]="12" />
         Létrehozva: {{ project()!.createdAt | date:'yyyy. MMM d., HH:mm':'':'hu-HU' }}
       </span>
-      <span class="flex items-center gap-1.5">
+      <span class="meta-footer__item">
         <lucide-icon [name]="ICONS.CLOCK" [size]="12" />
         Módosítva: {{ project()!.updatedAt | date:'yyyy. MMM d., HH:mm':'':'hu-HU' }}
       </span>

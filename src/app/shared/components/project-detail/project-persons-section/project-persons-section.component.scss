@@ -103,7 +103,16 @@
   color: #9ca3af;
 }
 
+// Részletes nézet gomb — csak mobilon
+.mobile-open-btn {
+  display: none;
+}
+
 @media (max-width: 480px) {
+  .section-header {
+    display: none;
+  }
+
   .persons-grid {
     grid-template-columns: 1fr;
   }
@@ -111,5 +120,27 @@
   .persons-column:first-child {
     border-right: 0;
     border-bottom: 1px solid #f3f4f6;
+  }
+
+  .mobile-open-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: calc(100% - 24px);
+    margin: 0 12px 12px;
+    padding: 10px;
+    background: var(--color-primary, #1e3a5f);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: var(--color-primary-dark, #152a45);
+    }
   }
 }

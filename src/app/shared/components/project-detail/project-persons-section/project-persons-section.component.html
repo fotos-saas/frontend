@@ -1,8 +1,8 @@
 @if (hasPersons()) {
   <section class="mb-6">
     <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <!-- Header -->
-      <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+      <!-- Header (desktopon) -->
+      <div class="section-header px-4 py-3 border-b border-gray-100 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <lucide-icon [name]="ICONS.USERS" [size]="16" class="text-gray-500" />
           <span class="text-sm font-semibold text-gray-900">Névsor</span>
@@ -105,6 +105,12 @@
           }
         </div>
       </div>
+
+      <!-- Részletes nézet gomb (csak mobilon) -->
+      <button type="button" class="mobile-open-btn" (click)="openPersonsModal.emit(undefined)">
+        <lucide-icon [name]="ICONS.USERS" [size]="15" />
+        Részletes nézet
+      </button>
     </div>
   </section>
 } @else {

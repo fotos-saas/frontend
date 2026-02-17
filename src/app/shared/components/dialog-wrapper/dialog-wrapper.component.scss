@@ -134,12 +134,16 @@ $gray-900: #111827;
   }
 
   // ============================================================================
-  // HEADER TEXT WRAPPER (flat stílushoz)
+  // HEADER TEXT WRAPPERS
   // ============================================================================
 
   &__header-text {
     flex: 1;
     min-width: 0;
+  }
+
+  &__hero-text {
+    // Desktop: nincs hatása (text-align center marad a parenttől)
   }
 
   // ============================================================================
@@ -451,31 +455,51 @@ $gray-900: #111827;
     margin: 0;
     border-radius: 1.25rem 1.25rem 0 0;
 
-    &__header {
-      &--hero {
-        padding: 1.5rem 1rem 1.25rem;
-      }
-
-      &--flat {
-        padding: 1rem 1.25rem;
-      }
+    // Hero → kompakt flat stílus mobilon
+    &__header--hero {
+      padding: 1rem 1.25rem;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid $gray-100;
+      // Gradient eltávolítás mobilon - egyszerű fehér háttér
+      background: white !important;
     }
 
     &__icon--hero {
-      width: 3.5rem;
-      height: 3.5rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      margin-bottom: 0;
+      border-radius: 0.5rem;
+      flex-shrink: 0;
 
       lucide-icon {
-        --lucide-icon-size: 28px;
+        --lucide-icon-size: 18px;
       }
     }
 
-    &__title {
-      font-size: 1.375rem;
+    &__hero-text {
+      flex: 1;
+      min-width: 0;
     }
 
-    &__desc {
-      font-size: 0.875rem;
+    // Hero cím + leírás egymás alá, balra igazítva
+    &__header--hero &__title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    &__header--hero &__desc {
+      font-size: 0.8125rem;
+      color: $gray-400;
+      margin: 1px 0 0;
+      max-width: none;
+    }
+
+    &__header--flat {
+      padding: 1rem 1.25rem;
     }
 
     &__body {

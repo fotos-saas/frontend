@@ -113,13 +113,39 @@
     display: none;
   }
 
-  .persons-grid {
-    grid-template-columns: 1fr;
+  // Mobilon 2 oszlop marad, de kompaktabb
+  .persons-column {
+    padding: 10px 10px 12px;
   }
 
-  .persons-column:first-child {
-    border-right: 0;
-    border-bottom: 1px solid #f3f4f6;
+  .column-header {
+    margin-bottom: 6px;
+  }
+
+  .stats-row {
+    margin-bottom: 6px;
+  }
+
+  .stat-item {
+    font-size: 11px;
+  }
+
+  .avatar-grid {
+    margin: -2px;
+  }
+
+  .avatar-item {
+    width: 26px;
+    height: 26px;
+    margin: 2px;
+  }
+
+  .avatar-initials {
+    font-size: 8px;
+  }
+
+  .overflow-text {
+    font-size: 8px;
   }
 
   .mobile-open-btn {
@@ -127,20 +153,21 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    width: calc(100% - 24px);
-    margin: 0 12px 12px;
-    padding: 10px;
-    background: var(--color-primary, #1e3a5f);
-    color: #fff;
-    border: none;
+    width: calc(100% - 20px);
+    margin: 0 10px 10px;
+    padding: 8px;
+    background: transparent;
+    color: var(--color-primary, #1e3a5f);
+    border: 1px solid var(--color-primary, #1e3a5f);
     border-radius: 8px;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: all 0.15s;
 
     &:hover {
-      background: var(--color-primary-dark, #152a45);
+      background: var(--color-primary, #1e3a5f);
+      color: #fff;
     }
   }
 }

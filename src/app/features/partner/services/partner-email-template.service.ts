@@ -19,10 +19,8 @@ export class PartnerEmailTemplateService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/partner/email-templates`;
 
-  getTemplates(search?: string): Observable<EmailTemplateResponse<EmailTemplateListItem[]>> {
-    const params: Record<string, string> = {};
-    if (search) params['search'] = search;
-    return this.http.get<EmailTemplateResponse<EmailTemplateListItem[]>>(this.apiUrl, { params });
+  getTemplates(): Observable<EmailTemplateResponse<EmailTemplateListItem[]>> {
+    return this.http.get<EmailTemplateResponse<EmailTemplateListItem[]>>(this.apiUrl);
   }
 
   getTemplate(name: string): Observable<EmailTemplateResponse<EmailTemplateDetail>> {

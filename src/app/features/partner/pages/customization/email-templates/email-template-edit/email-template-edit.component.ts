@@ -5,7 +5,7 @@ import {
   signal,
   computed,
   DestroyRef,
-  ViewChild,
+  viewChild,
   ElementRef,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -47,9 +47,9 @@ export class EmailTemplateEditComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly sanitizer = inject(DomSanitizer);
 
-  @ViewChild('quillEditor') quillEditorRef?: QuillEditorComponent;
-  @ViewChild('htmlTextarea') htmlTextareaRef?: ElementRef<HTMLTextAreaElement>;
-  @ViewChild('subjectInput') subjectInputRef?: ElementRef<HTMLInputElement>;
+  readonly quillEditorRef = viewChild<QuillEditorComponent>('quillEditor');
+  readonly htmlTextareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('htmlTextarea');
+  readonly subjectInputRef = viewChild<ElementRef<HTMLInputElement>>('subjectInput');
 
   protected template = signal<EmailTemplateDetail | null>(null);
   protected variables = signal<EmailVariableGroup[]>([]);
@@ -159,20 +159,19 @@ export class EmailTemplateEditComponent {
     const tag = `{${key}}`;
 
     if (this.activeTab() === 'visual') {
-      const editor = this.quillEditorRef?.quillEditor;
+      const editor = this.quillEditorRef()?.quillEditor;
       if (editor) {
         const range = editor.getSelection(true);
         editor.insertText(range.index, tag, 'user');
         editor.setSelection(range.index + tag.length, 0);
       }
     } else {
-      const textarea = this.htmlTextareaRef?.nativeElement;
+      const textarea = this.htmlTextareaRef()?.nativeElement;
       if (textarea) {
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const value = this.editBody();
         this.editBody.set(value.substring(0, start) + tag + value.substring(end));
-        // Kurzor pozíció beállítás
         setTimeout(() => {
           textarea.selectionStart = textarea.selectionEnd = start + tag.length;
           textarea.focus();
@@ -183,7 +182,7 @@ export class EmailTemplateEditComponent {
 
   protected insertVariableToSubject(key: string): void {
     const tag = `{${key}}`;
-    const input = this.subjectInputRef?.nativeElement;
+    const input = this.subjectInputRef()?.nativeElement;
     if (input) {
       const start = input.selectionStart ?? this.editSubject().length;
       const end = input.selectionEnd ?? start;

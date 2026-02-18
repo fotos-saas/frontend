@@ -11,7 +11,6 @@ export interface EmailTemplateListItem {
 
 export interface EmailTemplateDetail extends EmailTemplateListItem {
   body: string;
-  available_variables: string[] | null;
   global_subject: string;
   global_body: string;
 }

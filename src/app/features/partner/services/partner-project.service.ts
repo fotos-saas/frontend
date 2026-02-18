@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import {
   PartnerDashboardStats,
   PartnerProjectListItem,
@@ -55,18 +56,18 @@ export class PartnerProjectService {
     school_id?: number;
     graduation_year?: number;
   }): Observable<ProjectListResponse> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
-    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
-    if (params?.status) httpParams = httpParams.set('status', params.status);
-    if (params?.is_aware !== undefined) httpParams = httpParams.set('is_aware', params.is_aware.toString());
-    if (params?.has_draft !== undefined) httpParams = httpParams.set('has_draft', params.has_draft.toString());
-    if (params?.school_id) httpParams = httpParams.set('school_id', params.school_id.toString());
-    if (params?.graduation_year) httpParams = httpParams.set('graduation_year', params.graduation_year.toString());
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      sort_by: params?.sort_by,
+      sort_dir: params?.sort_dir,
+      status: params?.status,
+      is_aware: params?.is_aware,
+      has_draft: params?.has_draft,
+      school_id: params?.school_id,
+      graduation_year: params?.graduation_year,
+    });
 
     return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });
   }
@@ -152,10 +153,9 @@ export class PartnerProjectService {
    * Projekt személyeinek lekérése
    */
   getProjectPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: TabloPersonItem[] }> {
-    let httpParams = new HttpParams();
-    if (withoutPhoto) {
-      httpParams = httpParams.set('without_photo', 'true');
-    }
+    const httpParams = buildHttpParams({
+      without_photo: withoutPhoto || undefined,
+    });
     return this.http.get<{ data: TabloPersonItem[] }>(
       `${this.baseUrl}/projects/${projectId}/persons`,
       { params: httpParams },
@@ -207,10 +207,7 @@ export class PartnerProjectService {
    * Projektek lekérése autocomplete-hez (kapcsolattartó modalhoz)
    */
   getProjectsAutocomplete(search?: string): Observable<ProjectAutocompleteItem[]> {
-    let httpParams = new HttpParams();
-    if (search) {
-      httpParams = httpParams.set('search', search);
-    }
+    const httpParams = buildHttpParams({ search });
     return this.http.get<ProjectAutocompleteItem[]>(
       `${this.baseUrl}/projects/autocomplete`,
       { params: httpParams },

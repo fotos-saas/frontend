@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import {
   GuestSession,
   PaginatedResponse,
@@ -33,11 +34,12 @@ export class PartnerGuestService {
     page?: number;
     per_page?: number;
   }): Observable<PaginatedResponse<GuestSession>> {
-    let httpParams = new HttpParams();
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.filter) httpParams = httpParams.set('filter', params.filter);
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+    const httpParams = buildHttpParams({
+      search: params?.search,
+      filter: params?.filter,
+      page: params?.page,
+      per_page: params?.per_page,
+    });
 
     return this.http.get<PaginatedResponse<GuestSession>>(
       `${this.baseUrl}/projects/${projectId}/guest-sessions`,

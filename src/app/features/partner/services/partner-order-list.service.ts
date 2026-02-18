@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import { getAlbumStatusLabel } from '../../../shared/constants';
 import type {
   PartnerClient,
@@ -35,10 +36,11 @@ export class PartnerOrderListService {
   getClients(params?: {
     page?: number; per_page?: number; search?: string;
   }): Observable<PaginatedResponse<PartnerClient>> {
-    let httpParams = new HttpParams();
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+    });
     return this.http.get<PaginatedResponse<PartnerClient>>(`${this.baseUrl}/clients`, { params: httpParams });
   }
 
@@ -88,13 +90,14 @@ export class PartnerOrderListService {
     page?: number; per_page?: number; search?: string;
     client_id?: number; type?: OrderAlbumType; status?: AlbumStatus;
   }): Observable<PaginatedResponse<PartnerOrderAlbumListItem>> {
-    let httpParams = new HttpParams();
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.client_id) httpParams = httpParams.set('client_id', params.client_id.toString());
-    if (params?.type) httpParams = httpParams.set('type', params.type);
-    if (params?.status) httpParams = httpParams.set('status', params.status);
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      client_id: params?.client_id,
+      type: params?.type,
+      status: params?.status,
+    });
     return this.http.get<PaginatedResponse<PartnerOrderAlbumListItem>>(`${this.baseUrl}/albums`, { params: httpParams });
   }
 

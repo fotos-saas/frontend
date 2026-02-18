@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import {
   Invoice,
   InvoiceStatistics,
@@ -41,12 +42,13 @@ export class InvoiceService {
     year?: number;
     search?: string;
   } = {}): Observable<InvoicePaginatedResponse<Invoice>> {
-    let httpParams = new HttpParams();
-    if (params.page) httpParams = httpParams.set('page', params.page);
-    if (params.per_page) httpParams = httpParams.set('per_page', params.per_page);
-    if (params.status) httpParams = httpParams.set('status', params.status);
-    if (params.year) httpParams = httpParams.set('year', params.year);
-    if (params.search) httpParams = httpParams.set('search', params.search);
+    const httpParams = buildHttpParams({
+      page: params.page,
+      per_page: params.per_page,
+      status: params.status,
+      year: params.year,
+      search: params.search,
+    });
 
     return this.http.get<InvoicePaginatedResponse<Invoice>>(this.baseUrl, { params: httpParams });
   }
@@ -68,8 +70,7 @@ export class InvoiceService {
   }
 
   getStatistics(year?: number): Observable<InvoiceStatistics> {
-    let httpParams = new HttpParams();
-    if (year) httpParams = httpParams.set('year', year);
+    const httpParams = buildHttpParams({ year });
 
     return this.http.get<{ success: boolean; data: InvoiceStatistics }>(`${this.baseUrl}/statistics`, { params: httpParams }).pipe(
       map(res => res.data),

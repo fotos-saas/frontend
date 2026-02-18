@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import { DashboardStats, DashboardProjectItem } from '../../../shared/components/dashboard';
 import type { PaginatedResponse } from '../../../core/models/api.models';
 
@@ -132,13 +133,13 @@ export class SuperAdminService {
     sort_by?: string;
     sort_dir?: 'asc' | 'desc';
   }): Observable<PaginatedResponse<DashboardProjectItem>> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
-    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      sort_by: params?.sort_by,
+      sort_dir: params?.sort_dir,
+    });
 
     return this.http.get<PaginatedResponse<DashboardProjectItem>>(`${this.baseUrl}/partners`, { params: httpParams });
   }
@@ -155,15 +156,15 @@ export class SuperAdminService {
     sort_by?: string;
     sort_dir?: 'asc' | 'desc';
   }): Observable<PaginatedResponse<SubscriberListItem>> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.plan) httpParams = httpParams.set('plan', params.plan);
-    if (params?.status) httpParams = httpParams.set('status', params.status);
-    if (params?.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
-    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      plan: params?.plan,
+      status: params?.status,
+      sort_by: params?.sort_by,
+      sort_dir: params?.sort_dir,
+    });
 
     return this.http.get<PaginatedResponse<SubscriberListItem>>(`${this.baseUrl}/subscribers`, { params: httpParams });
   }
@@ -223,14 +224,14 @@ export class SuperAdminService {
     sort_dir?: 'asc' | 'desc';
     show_views?: boolean;
   }): Observable<PaginatedResponse<AuditLogEntry>> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.action) httpParams = httpParams.set('action', params.action);
-    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
-    if (params?.show_views) httpParams = httpParams.set('show_views', '1');
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      action: params?.action,
+      sort_dir: params?.sort_dir,
+      show_views: params?.show_views ? '1' : undefined,
+    });
 
     return this.http.get<PaginatedResponse<AuditLogEntry>>(`${this.baseUrl}/subscribers/${id}/audit-logs`, { params: httpParams });
   }

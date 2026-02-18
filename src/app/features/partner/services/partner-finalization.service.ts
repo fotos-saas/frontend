@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import { FinalizationListItem, PaginatedResponse, PrintReadyFile } from '../models/partner.models';
 
 export type PrintFileType = 'small_tablo' | 'flat';
@@ -22,15 +23,15 @@ export class PartnerFinalizationService {
     school_id?: number;
     graduation_year?: number;
   }): Observable<PaginatedResponse<FinalizationListItem>> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
-    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
-    if (params?.school_id) httpParams = httpParams.set('school_id', params.school_id.toString());
-    if (params?.graduation_year) httpParams = httpParams.set('graduation_year', params.graduation_year.toString());
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      sort_by: params?.sort_by,
+      sort_dir: params?.sort_dir,
+      school_id: params?.school_id,
+      graduation_year: params?.graduation_year,
+    });
 
     return this.http.get<PaginatedResponse<FinalizationListItem>>(this.baseUrl, { params: httpParams });
   }
@@ -54,10 +55,10 @@ export class PartnerFinalizationService {
   }
 
   downloadPrintReady(projectId: number, type: PrintFileType): Observable<Blob> {
-    const params = new HttpParams().set('type', type);
+    const httpParams = buildHttpParams({ type });
     return this.http.get(`${this.baseUrl}/${projectId}/download`, {
       responseType: 'blob',
-      params,
+      params: httpParams,
     });
   }
 
@@ -81,11 +82,8 @@ export class PartnerFinalizationService {
   }
 
   getInPrintCount(graduationYear?: number): Observable<{ count: number }> {
-    let params = new HttpParams();
-    if (graduationYear) {
-      params = params.set('graduation_year', graduationYear.toString());
-    }
-    return this.http.get<{ count: number }>(`${this.baseUrl}/in-print-count`, { params });
+    const httpParams = buildHttpParams({ graduation_year: graduationYear });
+    return this.http.get<{ count: number }>(`${this.baseUrl}/in-print-count`, { params: httpParams });
   }
 
   markAsDone(projectId: number): Observable<{

@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import {
   SchoolItem,
   SchoolListItem,
@@ -27,10 +28,7 @@ export class PartnerSchoolService {
    * Összes iskola lekérése (projekt létrehozáshoz / autocomplete)
    */
   getAllSchools(search?: string): Observable<SchoolItem[]> {
-    let httpParams = new HttpParams();
-    if (search) {
-      httpParams = httpParams.set('search', search);
-    }
+    const httpParams = buildHttpParams({ search });
     return this.http.get<SchoolItem[]>(
       `${this.baseUrl}/schools/all`,
       { params: httpParams },
@@ -61,12 +59,12 @@ export class PartnerSchoolService {
     search?: string;
     graduation_year?: number;
   }): Observable<PaginatedResponse<SchoolListItem> & { limits?: SchoolLimits }> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.graduation_year) httpParams = httpParams.set('graduation_year', params.graduation_year.toString());
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      graduation_year: params?.graduation_year,
+    });
 
     return this.http.get<PaginatedResponse<SchoolListItem> & { limits?: SchoolLimits }>(
       `${this.baseUrl}/schools`,
@@ -102,8 +100,7 @@ export class PartnerSchoolService {
    * Iskola changelog lekérése
    */
   getChangelog(id: number, params?: { per_page?: number }): Observable<PaginatedResponse<SchoolChangeLogEntry>> {
-    let httpParams = new HttpParams();
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+    const httpParams = buildHttpParams({ per_page: params?.per_page });
 
     return this.http.get<PaginatedResponse<SchoolChangeLogEntry>>(
       `${this.baseUrl}/schools/${id}/changelog`,

@@ -1,6 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import { ApiResponse } from '../../../core/models/api.models';
 
 export interface PartnerCharge {
@@ -69,11 +70,10 @@ export class PartnerBillingService {
     this.loading.set(true);
     this.error.set(null);
 
-    let params = new HttpParams().set('page', page.toString());
-    const projectId = this.projectFilter();
-    if (projectId) {
-      params = params.set('project_id', projectId.toString());
-    }
+    const params = buildHttpParams({
+      page,
+      project_id: this.projectFilter(),
+    });
 
     this.http.get<ApiResponse<PaginatedChargesResponse>>(this.baseUrl, { params }).subscribe({
       next: (res) => {
@@ -89,11 +89,9 @@ export class PartnerBillingService {
   }
 
   loadSummary(): void {
-    let params = new HttpParams();
-    const projectId = this.projectFilter();
-    if (projectId) {
-      params = params.set('project_id', projectId.toString());
-    }
+    const params = buildHttpParams({
+      project_id: this.projectFilter(),
+    });
 
     this.http.get<ApiResponse<{ summary: PartnerBillingSummary }>>(`${this.baseUrl}/summary`, { params }).subscribe({
       next: (res) => {

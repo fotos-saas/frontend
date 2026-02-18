@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import {
   ProjectContact,
   ContactListItem,
@@ -28,10 +29,7 @@ export class PartnerContactService {
    * Összes kapcsolattartó lekérése (projekt létrehozáshoz)
    */
   getAllContacts(search?: string): Observable<ProjectContact[]> {
-    let httpParams = new HttpParams();
-    if (search) {
-      httpParams = httpParams.set('search', search);
-    }
+    const httpParams = buildHttpParams({ search });
     return this.http.get<ProjectContact[]>(
       `${this.baseUrl}/contacts/all`,
       { params: httpParams },
@@ -92,11 +90,11 @@ export class PartnerContactService {
     per_page?: number;
     search?: string;
   }): Observable<PaginatedResponse<ContactListItem> & { limits?: ContactLimits }> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+    });
 
     return this.http.get<PaginatedResponse<ContactListItem> & { limits?: ContactLimits }>(
       `${this.baseUrl}/contacts`,

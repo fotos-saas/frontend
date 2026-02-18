@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import type { ExtendedPaginatedResponse } from '../../../core/models/api.models';
 
 /**
@@ -156,14 +157,14 @@ export class MarketerService {
     sort_dir?: 'asc' | 'desc';
     status?: string;
   }): Observable<PaginatedResponse<ProjectListItem>> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
-    if (params?.sort_dir) httpParams = httpParams.set('sort_dir', params.sort_dir);
-    if (params?.status) httpParams = httpParams.set('status', params.status);
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      sort_by: params?.sort_by,
+      sort_dir: params?.sort_dir,
+      status: params?.status,
+    });
 
     return this.http.get<PaginatedResponse<ProjectListItem>>(`${this.baseUrl}/projects`, { params: httpParams });
   }
@@ -226,12 +227,12 @@ export class MarketerService {
     search?: string;
     city?: string;
   }): Observable<PaginatedResponse<SchoolListItem>> {
-    let httpParams = new HttpParams();
-
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.city) httpParams = httpParams.set('city', params.city);
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      city: params?.city,
+    });
 
     return this.http.get<PaginatedResponse<SchoolListItem>>(`${this.baseUrl}/schools`, { params: httpParams });
   }
@@ -295,10 +296,7 @@ export class MarketerService {
    * Visszaadja az összes iskolát, nem csak azokat ahol van projekt.
    */
   getAllSchools(search?: string): Observable<Array<{ id: number; name: string; city: string | null }>> {
-    let httpParams = new HttpParams();
-    if (search) {
-      httpParams = httpParams.set('search', search);
-    }
+    const httpParams = buildHttpParams({ search });
     return this.http.get<Array<{ id: number; name: string; city: string | null }>>(
       `${this.baseUrl}/schools/all`,
       { params: httpParams }

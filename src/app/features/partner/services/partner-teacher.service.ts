@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { buildHttpParams } from '@shared/utils/http-params.util';
 import {
   TeacherListItem,
   TeacherDetail,
@@ -48,12 +49,13 @@ export class PartnerTeacherService implements ArchiveService {
     school_id?: number;
     class_year?: string;
   }): Observable<PaginatedResponse<TeacherListItem>> {
-    let httpParams = new HttpParams();
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.school_id) httpParams = httpParams.set('school_id', params.school_id.toString());
-    if (params?.class_year) httpParams = httpParams.set('class_year', params.class_year);
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+      search: params?.search,
+      school_id: params?.school_id,
+      class_year: params?.class_year,
+    });
 
     return this.http.get<PaginatedResponse<TeacherListItem>>(this.baseUrl, { params: httpParams });
   }
@@ -63,10 +65,11 @@ export class PartnerTeacherService implements ArchiveService {
     school_id?: number;
     missing_only?: boolean;
   }): Observable<TeachersBySchoolResponse> {
-    let httpParams = new HttpParams();
-    if (params?.class_year) httpParams = httpParams.set('class_year', params.class_year);
-    if (params?.school_id) httpParams = httpParams.set('school_id', params.school_id.toString());
-    if (params?.missing_only) httpParams = httpParams.set('missing_only', '1');
+    const httpParams = buildHttpParams({
+      class_year: params?.class_year,
+      school_id: params?.school_id,
+      missing_only: params?.missing_only ? '1' : undefined,
+    });
 
     return this.http.get<TeachersBySchoolResponse>(`${this.baseUrl}/by-project`, { params: httpParams });
   }
@@ -76,9 +79,10 @@ export class PartnerTeacherService implements ArchiveService {
   }
 
   getAllTeachers(params?: { search?: string; school_id?: number }): Observable<TeacherListItem[]> {
-    let httpParams = new HttpParams();
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.school_id) httpParams = httpParams.set('school_id', params.school_id.toString());
+    const httpParams = buildHttpParams({
+      search: params?.search,
+      school_id: params?.school_id,
+    });
 
     return this.http.get<TeacherListItem[]>(`${this.baseUrl}/all`, { params: httpParams });
   }
@@ -125,9 +129,10 @@ export class PartnerTeacherService implements ArchiveService {
   }
 
   getChangelog(teacherId: number, params?: { page?: number; per_page?: number }): Observable<PaginatedResponse<TeacherChangeLogEntry>> {
-    let httpParams = new HttpParams();
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.per_page) httpParams = httpParams.set('per_page', params.per_page.toString());
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+    });
 
     return this.http.get<PaginatedResponse<TeacherChangeLogEntry>>(`${this.baseUrl}/${teacherId}/changelog`, { params: httpParams });
   }

@@ -1,128 +1,118 @@
 <div class="album-picker">
   <div class="picker-header">
-    <h3>Válaszd ki, hova szeretnél képeket feltölteni</h3>
+    <h3>Válaszd ki az albumot</h3>
     <p class="picker-subtitle">A diákok és tanárok képei külön albumban kezelhetők</p>
   </div>
 
   <div class="album-cards">
     <!-- Diákok album -->
-    <div
+    <button
+      type="button"
       class="album-card"
       [class.album-card--has-photos]="albums().students.photoCount > 0"
       (click)="selectAlbum('students')"
     >
-      <div class="album-icon">
-        <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="32" />
-      </div>
-      <h4 class="album-title">Diákok</h4>
-
-      <div class="album-stats">
-        @if (albums().students.missingCount > 0) {
-          <div class="stat stat--missing">
-            <lucide-icon [name]="ICONS.USER_X" [size]="16" />
-            <span>{{ albums().students.missingCount }} hiányzik</span>
-          </div>
-        }
-        @if (albums().students.photoCount > 0) {
-          <div class="stat stat--pending">
-            <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
-            <span>{{ albums().students.photoCount }} párosításra vár</span>
-          </div>
-        }
-        @if (albums().students.photoCount === 0 && albums().students.missingCount === 0) {
-          <div class="stat stat--empty">
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-            <span>Minden kép kész</span>
-          </div>
-        }
-      </div>
-
-      <!-- Kártya stack preview -->
-      @if (albums().students.previewThumbs && albums().students.previewThumbs.length > 0) {
-        <div class="photo-stack">
-          @for (thumb of albums().students.previewThumbs.slice(0, 3); track thumb; let i = $index) {
-            <div
-              class="stack-card"
-              [style.--stack-index]="i"
-              [style.z-index]="3 - i"
-            >
-              <img [src]="thumb" alt="Preview" loading="lazy" />
-            </div>
-          }
-          @if (albums().students.photoCount > 3) {
-            <div class="stack-more">+{{ albums().students.photoCount - 3 }}</div>
-          }
+      <div class="album-card__left">
+        <div class="album-icon">
+          <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="24" />
         </div>
-      }
+      </div>
 
-      <button class="album-btn" type="button">
-        @if (albums().students.photoCount > 0) {
-          Folytatás
-        } @else {
-          Megnyitás
+      <div class="album-card__content">
+        <div class="album-card__header">
+          <h4 class="album-title">Diákok</h4>
+          <div class="album-stats">
+            @if (albums().students.missingCount > 0) {
+              <span class="stat stat--missing">
+                <lucide-icon [name]="ICONS.USER_X" [size]="14" />
+                {{ albums().students.missingCount }} hiányzik
+              </span>
+            }
+            @if (albums().students.photoCount > 0) {
+              <span class="stat stat--pending">
+                <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                {{ albums().students.photoCount }} párosításra vár
+              </span>
+            }
+            @if (albums().students.photoCount === 0 && albums().students.missingCount === 0) {
+              <span class="stat stat--empty">
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                Minden kép kész
+              </span>
+            }
+          </div>
+        </div>
+
+        @if (albums().students.previewThumbs && albums().students.previewThumbs.length > 0) {
+          <div class="album-card__thumbs">
+            @for (thumb of albums().students.previewThumbs.slice(0, 4); track thumb) {
+              <img class="thumb" [src]="thumb" alt="" loading="lazy" />
+            }
+            @if (albums().students.photoCount > 4) {
+              <span class="thumb-more">+{{ albums().students.photoCount - 4 }}</span>
+            }
+          </div>
         }
-        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-      </button>
-    </div>
+      </div>
+
+      <div class="album-card__action">
+        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="20" />
+      </div>
+    </button>
 
     <!-- Tanárok album -->
-    <div
+    <button
+      type="button"
       class="album-card"
       [class.album-card--has-photos]="albums().teachers.photoCount > 0"
       (click)="selectAlbum('teachers')"
     >
-      <div class="album-icon album-icon--teachers">
-        <lucide-icon [name]="ICONS.BRIEFCASE" [size]="32" />
-      </div>
-      <h4 class="album-title">Tanárok</h4>
-
-      <div class="album-stats">
-        @if (albums().teachers.missingCount > 0) {
-          <div class="stat stat--missing">
-            <lucide-icon [name]="ICONS.USER_X" [size]="16" />
-            <span>{{ albums().teachers.missingCount }} hiányzik</span>
-          </div>
-        }
-        @if (albums().teachers.photoCount > 0) {
-          <div class="stat stat--pending">
-            <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
-            <span>{{ albums().teachers.photoCount }} párosításra vár</span>
-          </div>
-        }
-        @if (albums().teachers.photoCount === 0 && albums().teachers.missingCount === 0) {
-          <div class="stat stat--empty">
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-            <span>Minden kép kész</span>
-          </div>
-        }
-      </div>
-
-      <!-- Kártya stack preview -->
-      @if (albums().teachers.previewThumbs && albums().teachers.previewThumbs.length > 0) {
-        <div class="photo-stack">
-          @for (thumb of albums().teachers.previewThumbs.slice(0, 3); track thumb; let i = $index) {
-            <div
-              class="stack-card"
-              [style.--stack-index]="i"
-              [style.z-index]="3 - i"
-            >
-              <img [src]="thumb" alt="Preview" loading="lazy" />
-            </div>
-          }
-          @if (albums().teachers.photoCount > 3) {
-            <div class="stack-more">+{{ albums().teachers.photoCount - 3 }}</div>
-          }
+      <div class="album-card__left">
+        <div class="album-icon album-icon--teachers">
+          <lucide-icon [name]="ICONS.BRIEFCASE" [size]="24" />
         </div>
-      }
+      </div>
 
-      <button class="album-btn" type="button">
-        @if (albums().teachers.photoCount > 0) {
-          Folytatás
-        } @else {
-          Megnyitás
+      <div class="album-card__content">
+        <div class="album-card__header">
+          <h4 class="album-title">Tanárok</h4>
+          <div class="album-stats">
+            @if (albums().teachers.missingCount > 0) {
+              <span class="stat stat--missing">
+                <lucide-icon [name]="ICONS.USER_X" [size]="14" />
+                {{ albums().teachers.missingCount }} hiányzik
+              </span>
+            }
+            @if (albums().teachers.photoCount > 0) {
+              <span class="stat stat--pending">
+                <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                {{ albums().teachers.photoCount }} párosításra vár
+              </span>
+            }
+            @if (albums().teachers.photoCount === 0 && albums().teachers.missingCount === 0) {
+              <span class="stat stat--empty">
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                Minden kép kész
+              </span>
+            }
+          </div>
+        </div>
+
+        @if (albums().teachers.previewThumbs && albums().teachers.previewThumbs.length > 0) {
+          <div class="album-card__thumbs">
+            @for (thumb of albums().teachers.previewThumbs.slice(0, 4); track thumb) {
+              <img class="thumb" [src]="thumb" alt="" loading="lazy" />
+            }
+            @if (albums().teachers.photoCount > 4) {
+              <span class="thumb-more">+{{ albums().teachers.photoCount - 4 }}</span>
+            }
+          </div>
         }
-        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-      </button>
-    </div>
+      </div>
+
+      <div class="album-card__action">
+        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="20" />
+      </div>
+    </button>
   </div>
 </div>

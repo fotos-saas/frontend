@@ -880,3 +880,32 @@ body.dialog-open {
     transition: none;
   }
 }
+
+// ============ Scroll Shadow (content area - mobile only) ============
+@media (max-width: 768px) {
+  .content {
+    &::before,
+    &::after {
+      content: '';
+      position: sticky;
+      left: 0;
+      right: 0;
+      display: block;
+      height: 16px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    &::before {
+      top: 0;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.07), transparent);
+      margin-bottom: -16px;
+    }
+
+    &::after {
+      bottom: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.07), transparent);
+      margin-top: -16px;
+    }
+  }
+}

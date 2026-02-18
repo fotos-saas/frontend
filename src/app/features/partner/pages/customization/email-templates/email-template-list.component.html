@@ -16,29 +16,12 @@
       (ngModelChange)="search.set($event)"
     />
 
-    <!-- Desktop: chipek -->
-    <div class="category-chips">
-      @for (cat of categories; track cat) {
-        <button
-          type="button"
-          class="chip"
-          [class.chip--active]="activeCategory() === cat"
-          (click)="setCategory(cat)"
-        >
-          {{ CATEGORY_LABELS[cat] }}
-        </button>
-      }
-    </div>
-
-    <!-- Mobil: ps-select a kereső sorában -->
-    <div class="category-select-wrap">
-      <ps-select
-        size="sm"
-        [options]="categoryOptions"
-        [ngModel]="activeCategory()"
-        (ngModelChange)="setCategory($event)"
-      />
-    </div>
+    <ps-select
+      size="sm"
+      [options]="categoryOptions"
+      [ngModel]="activeCategory()"
+      (ngModelChange)="setCategory($event)"
+    />
   </div>
 
   <!-- Loading -->

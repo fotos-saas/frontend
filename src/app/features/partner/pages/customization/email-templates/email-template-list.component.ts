@@ -33,9 +33,7 @@ const CATEGORY_LABELS: Record<CategoryFilter, string> = {
 })
 export class EmailTemplateListComponent {
   protected readonly ICONS = ICONS;
-  protected readonly CATEGORY_LABELS = CATEGORY_LABELS;
-  protected readonly categories: CategoryFilter[] = ['all', 'auth', 'session', 'order', 'tablo', 'general'];
-  protected readonly categoryOptions: PsSelectOption[] = this.categories.map(c => ({ id: c, label: CATEGORY_LABELS[c] }));
+  protected readonly categoryOptions: PsSelectOption[] = Object.entries(CATEGORY_LABELS).map(([id, label]) => ({ id, label }));
 
   private readonly service = inject(PartnerEmailTemplateService);
   private readonly router = inject(Router);

@@ -8,6 +8,7 @@ import { PsInputComponent } from '@shared/components/form/ps-input/ps-input.comp
 import { PsSelectComponent } from '@shared/components/form/ps-select/ps-select.component';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { ListPaginationComponent } from '@shared/components/list-pagination/list-pagination.component';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PartnerEmailTemplateService } from '../../../services/partner-email-template.service';
 import { EmailTemplateListItem } from '../../../models/email-template.model';
@@ -26,7 +27,7 @@ const CATEGORY_LABELS: Record<CategoryFilter, string> = {
 @Component({
   selector: 'app-email-template-list',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, ConfirmDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, ConfirmDialogComponent, ListPaginationComponent],
   templateUrl: './email-template-list.component.html',
   styleUrl: './email-template-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,10 +40,13 @@ export class EmailTemplateListComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
+  protected readonly PER_PAGE = 10;
+
   protected templates = signal<EmailTemplateListItem[]>([]);
   protected loading = signal(true);
   protected search = signal('');
   protected activeCategory = signal<CategoryFilter>('all');
+  protected currentPage = signal(1);
   protected resetConfirm = signal<EmailTemplateListItem | null>(null);
   protected resetting = signal(false);
 
@@ -61,6 +65,13 @@ export class EmailTemplateListComponent {
       );
     }
     return items;
+  });
+
+  protected totalPages = computed(() => Math.max(1, Math.ceil(this.filteredTemplates().length / this.PER_PAGE)));
+
+  protected paginatedTemplates = computed(() => {
+    const start = (this.currentPage() - 1) * this.PER_PAGE;
+    return this.filteredTemplates().slice(start, start + this.PER_PAGE);
   });
 
   protected customizedCount = computed(() => this.templates().filter(t => t.is_customized).length);
@@ -84,6 +95,12 @@ export class EmailTemplateListComponent {
 
   protected setCategory(cat: CategoryFilter): void {
     this.activeCategory.set(cat);
+    this.currentPage.set(1);
+  }
+
+  protected setSearch(value: string): void {
+    this.search.set(value);
+    this.currentPage.set(1);
   }
 
   protected openTemplate(template: EmailTemplateListItem): void {

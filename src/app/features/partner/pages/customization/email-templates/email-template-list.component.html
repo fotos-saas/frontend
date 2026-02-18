@@ -13,7 +13,7 @@
       prefix="search"
       placeholder="Keresés..."
       [ngModel]="search()"
-      (ngModelChange)="search.set($event)"
+      (ngModelChange)="setSearch($event)"
     />
 
     <ps-select
@@ -51,7 +51,7 @@
 
     <!-- Lista sorok -->
     <div class="row-grid">
-      @for (template of filteredTemplates(); track template.name; let i = $index) {
+      @for (template of paginatedTemplates(); track template.name; let i = $index) {
         <div
           class="list-row"
           [style.animation-delay]="i * 0.03 + 's'"
@@ -94,6 +94,14 @@
         </div>
       }
     </div>
+
+    <app-list-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      [totalItems]="filteredTemplates().length"
+      itemLabel="sablon"
+      (pageChange)="currentPage.set($event)"
+    />
   }
 </div>
 

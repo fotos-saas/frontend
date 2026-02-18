@@ -463,9 +463,11 @@ body.dialog-open {
   }
 
   .page-card > .page-header {
-    top: -1rem;
+    position: static;
     margin: -1rem -1rem 16px -1rem;
     padding: 1rem 1rem 12px 1rem;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 

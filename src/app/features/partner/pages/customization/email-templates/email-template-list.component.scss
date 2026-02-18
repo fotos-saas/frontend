@@ -53,9 +53,19 @@
   display: none;
 }
 
-// Keresés: flex containerben ne nyúljon túlra
+// Keresés: ps-input komponens flex containerben
 .search-input {
+  flex: 1;
   min-width: 0;
+
+  // _list-page.scss .search-input natív inputra írt stílusait reseteljük,
+  // mert a ps-input saját wrapper-t + bordert hoz
+  width: auto;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: inherit;
+  box-shadow: none;
 }
 
 .template-display-name {

@@ -1,8 +1,8 @@
 <!-- Loading -->
 @if (loading()) {
   <div class="loading-state">
-    @for (i of [1, 2, 3, 4, 5]; track i) {
-      <div class="skeleton-card skeleton-shimmer"></div>
+    @for (i of [1, 2, 3]; track i) {
+      <div class="skeleton-timeline skeleton-shimmer"></div>
     }
   </div>
 } @else if (days().length === 0) {
@@ -15,95 +15,95 @@
     <p>A tanári fotók feltöltése után itt fogod látni az előzményeket.</p>
   </div>
 } @else {
-  <!-- Unseen count badge -->
-  @if (unseenCount() > 0) {
-    <div class="unseen-banner">
-      <lucide-icon [name]="ICONS.INFO" [size]="16" />
-      <span>{{ unseenCount() }} új feltöltési nap</span>
-    </div>
-  }
-
-  <!-- Day cards -->
-  <div class="day-list">
-    @for (day of days(); track day.date) {
-      <div class="day-card" [class.day-card--new]="day.isNew" [class.day-card--expanded]="isDayExpanded(day.date)">
-        <!-- Day header -->
-        <div class="day-header" (click)="toggleDay(day.date)">
-          <div class="day-header__left">
-            <lucide-icon
-              [name]="isDayExpanded(day.date) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
-              [size]="18"
-              class="expand-icon"
-            />
-            <div class="day-info">
-              <span class="day-date">{{ formatDate(day.date) }}</span>
-              <span class="day-count">{{ day.uploadCount }} fotó feltöltve</span>
-            </div>
-          </div>
-          <div class="day-header__right">
-            @if (day.isNew) {
-              <span class="new-badge">Új</span>
-            }
-            <button
-              type="button"
-              class="day-btn day-btn--seen"
-              [class.day-btn--disabled]="!day.isNew || markingDate() === day.date"
-              [matTooltip]="day.isNew ? 'Láttnak jelölés' : 'Már láttad'"
-              (click)="markSeen(day, $event)"
-              [disabled]="!day.isNew || markingDate() === day.date"
-            >
-              <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-              @if (markingDate() === day.date) {
-                <span class="btn-spinner"></span>
-              }
-            </button>
-            <button
-              type="button"
-              class="day-btn day-btn--download"
-              matTooltip="Napi fotók letöltése (ZIP)"
-              (click)="downloadZip(day, $event)"
-              [disabled]="downloadingDate() === day.date"
-            >
-              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-              @if (downloadingDate() === day.date) {
-                <span class="btn-spinner"></span>
-              }
-            </button>
-          </div>
+  <!-- Timeline -->
+  <div class="timeline">
+    @for (day of days(); track day.date; let isFirst = $first) {
+      <div class="timeline-item" [class.timeline-item--new]="day.isNew">
+        <!-- Left: date column -->
+        <div class="timeline-date">
+          <span class="timeline-day-num">{{ getDayNum(day.date) }}</span>
+          <span class="timeline-month">{{ getMonthShort(day.date) }}</span>
+          <span class="timeline-weekday">{{ getWeekday(day.date) }}</span>
         </div>
 
-        <!-- Day content (expanded) -->
-        @if (isDayExpanded(day.date)) {
-          <div class="day-content">
-            @for (school of day.schools; track school.schoolId) {
-              <div class="school-group">
-                <div class="school-header">
-                  <lucide-icon [name]="ICONS.SCHOOL" [size]="16" />
-                  <span class="school-name">{{ school.schoolName }}</span>
-                  <span class="school-count">({{ school.uploads.length }})</span>
-                </div>
-                <div class="upload-list">
-                  @for (upload of school.uploads; track upload.teacherId + upload.uploadedAt) {
-                    <div class="upload-row">
-                      <div class="upload-avatar">
-                        @if (upload.photoThumbUrl) {
-                          <img [src]="upload.photoThumbUrl" [alt]="upload.teacherName" loading="lazy" />
-                        } @else {
-                          <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="18" />
-                        }
-                      </div>
-                      <div class="upload-info">
-                        <span class="upload-teacher">{{ upload.teacherName }}</span>
-                        <span class="upload-file">{{ upload.fileName }}</span>
-                      </div>
-                      <span class="upload-time">{{ formatTime(upload.uploadedAt) }}</span>
+        <!-- Center: dot + line -->
+        <div class="timeline-line">
+          <div class="timeline-dot" [class.timeline-dot--new]="day.isNew"></div>
+        </div>
+
+        <!-- Right: content -->
+        <div class="timeline-content">
+          <!-- Header row -->
+          <div class="timeline-header">
+            <div class="timeline-meta">
+              <span class="timeline-count">
+                <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+                {{ day.uploadCount }} fotó
+              </span>
+              @if (day.isNew) {
+                <span class="new-dot"></span>
+              }
+            </div>
+            <div class="timeline-actions">
+              @if (day.isNew) {
+                <button
+                  type="button"
+                  class="tl-btn tl-btn--seen"
+                  matTooltip="Láttam"
+                  (click)="markSeen(day, $event)"
+                  [disabled]="markingDate() === day.date"
+                >
+                  @if (markingDate() === day.date) {
+                    <span class="btn-spinner"></span>
+                  } @else {
+                    <lucide-icon [name]="ICONS.EYE" [size]="14" />
+                  }
+                </button>
+              }
+              <button
+                type="button"
+                class="tl-btn tl-btn--download"
+                matTooltip="Letöltés (ZIP)"
+                (click)="downloadZip(day, $event)"
+                [disabled]="downloadingDate() === day.date"
+              >
+                @if (downloadingDate() === day.date) {
+                  <span class="btn-spinner"></span>
+                } @else {
+                  <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+                }
+              </button>
+            </div>
+          </div>
+
+          <!-- Schools compact -->
+          @for (school of day.schools; track school.schoolId) {
+            <div class="school-row">
+              <span class="school-label">{{ school.schoolName }}</span>
+              <div class="avatar-stack">
+                @for (upload of school.uploads; track upload.teacherId + upload.uploadedAt; let i = $index) {
+                  @if (i < 8) {
+                    <div
+                      class="mini-avatar"
+                      [matTooltip]="upload.teacherName"
+                    >
+                      @if (upload.photoThumbUrl) {
+                        <img [src]="upload.photoThumbUrl" [alt]="upload.teacherName" loading="lazy" />
+                      } @else {
+                        <span class="mini-avatar__initial">{{ getInitial(upload.teacherName) }}</span>
+                      }
                     </div>
                   }
-                </div>
+                }
+                @if (school.uploads.length > 8) {
+                  <div class="mini-avatar mini-avatar--more">
+                    +{{ school.uploads.length - 8 }}
+                  </div>
+                }
               </div>
-            }
-          </div>
-        }
+            </div>
+          }
+        </div>
       </div>
     }
   </div>

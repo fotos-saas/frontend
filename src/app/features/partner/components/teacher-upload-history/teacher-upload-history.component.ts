@@ -1,6 +1,5 @@
 import { Component, inject, signal, DestroyRef, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
@@ -9,11 +8,13 @@ import { ListPaginationComponent } from '../../../../shared/components/list-pagi
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { saveFile } from '../../../../shared/utils/file.util';
 
+const HU_MONTHS = ['jan', 'feb', 'már', 'ápr', 'máj', 'jún', 'júl', 'aug', 'sze', 'okt', 'nov', 'dec'];
+const HU_WEEKDAYS = ['vasárnap', 'hétfő', 'kedd', 'szerda', 'csütörtök', 'péntek', 'szombat'];
+
 @Component({
   selector: 'app-teacher-upload-history',
   standalone: true,
   imports: [
-    DatePipe,
     LucideAngularModule,
     MatTooltipModule,
     ListPaginationComponent,
@@ -35,7 +36,6 @@ export class TeacherUploadHistoryComponent implements OnInit {
   totalDays = signal(0);
   unseenCount = signal(0);
 
-  expandedDates = signal<string[]>([]);
   downloadingDate = signal<string | null>(null);
   markingDate = signal<string | null>(null);
 
@@ -64,21 +64,7 @@ export class TeacherUploadHistoryComponent implements OnInit {
 
   setPage(page: number): void {
     this.currentPage.set(page);
-    this.expandedDates.set([]);
     this.loadHistory();
-  }
-
-  toggleDay(date: string): void {
-    const current = this.expandedDates();
-    if (current.includes(date)) {
-      this.expandedDates.set(current.filter(d => d !== date));
-    } else {
-      this.expandedDates.set([...current, date]);
-    }
-  }
-
-  isDayExpanded(date: string): boolean {
-    return this.expandedDates().includes(date);
   }
 
   markSeen(day: TeacherUploadHistoryDay, event: MouseEvent): void {
@@ -87,7 +73,7 @@ export class TeacherUploadHistoryComponent implements OnInit {
 
     this.markingDate.set(day.date);
 
-    // Optimisztikus UI update
+    // Optimisztikus UI
     this.days.update(days =>
       days.map(d => d.date === day.date ? { ...d, isNew: false } : d)
     );
@@ -98,7 +84,6 @@ export class TeacherUploadHistoryComponent implements OnInit {
       .subscribe({
         next: () => this.markingDate.set(null),
         error: () => {
-          // Rollback
           this.days.update(days =>
             days.map(d => d.date === day.date ? { ...d, isNew: true } : d)
           );
@@ -125,21 +110,19 @@ export class TeacherUploadHistoryComponent implements OnInit {
       });
   }
 
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString('hu-HU', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long',
-    });
+  getDayNum(dateStr: string): string {
+    return new Date(dateStr + 'T00:00:00').getDate().toString();
   }
 
-  formatTime(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString('hu-HU', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  getMonthShort(dateStr: string): string {
+    return HU_MONTHS[new Date(dateStr + 'T00:00:00').getMonth()];
+  }
+
+  getWeekday(dateStr: string): string {
+    return HU_WEEKDAYS[new Date(dateStr + 'T00:00:00').getDay()];
+  }
+
+  getInitial(name: string): string {
+    return name.charAt(0).toUpperCase();
   }
 }

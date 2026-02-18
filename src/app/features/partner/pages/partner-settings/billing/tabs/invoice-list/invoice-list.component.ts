@@ -17,6 +17,7 @@ import {
 } from '../../../../../models/invoice.models';
 import { ToastService } from '../../../../../../../core/services/toast.service';
 import { formatAmount, formatPrice } from '@shared/utils/formatters.util';
+import { saveFile } from '@shared/utils/file.util';
 import { InvoiceCreateDialogComponent } from '../../components/invoice-create-dialog/invoice-create-dialog.component';
 import { TableHeaderComponent, TableColumn } from '../../../../../../../shared/components/table-header';
 
@@ -179,12 +180,7 @@ export class InvoiceListComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${invoice.invoice_number ?? 'szamla'}.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
+        saveFile(blob, `${invoice.invoice_number ?? 'szamla'}.pdf`);
       },
       error: () => {
         this.toast.error('Hiba', 'PDF letöltés sikertelen');

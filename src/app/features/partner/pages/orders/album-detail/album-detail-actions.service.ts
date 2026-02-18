@@ -8,6 +8,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { ClipboardService } from '../../../../../core/services/clipboard.service';
 import { UploadProgressService } from '../../../../../core/services/upload-progress.service';
 import { environment } from '../../../../../../environments/environment';
+import { saveFile } from '@shared/utils/file.util';
 import { AlbumDetailState } from './album-detail.state';
 import { AlbumEditFormData } from './components/album-edit-modal/album-edit-modal.component';
 
@@ -261,7 +262,7 @@ export class AlbumDetailActionsService {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
-          this.triggerDownload(blob, `album-${album.id}-selected.zip`);
+          saveFile(blob, `album-${album.id}-selected.zip`);
           state.downloading.set(false);
           this.toast.success('Siker', 'Letöltés elkezdődött');
         },
@@ -284,7 +285,7 @@ export class AlbumDetailActionsService {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
-          this.triggerDownload(blob, `album-${album.id}-export.xlsx`);
+          saveFile(blob, `album-${album.id}-export.xlsx`);
           state.exporting.set(false);
           this.toast.success('Siker', 'Excel export elkészült');
         },
@@ -341,16 +342,4 @@ export class AlbumDetailActionsService {
     });
   }
 
-  // === PRIVATE HELPERS ===
-
-  private triggerDownload(blob: Blob, filename: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  }
 }

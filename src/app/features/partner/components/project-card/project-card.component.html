@@ -77,9 +77,9 @@
     [class.col-missing--clickable]="project().missingCount > 0"
     (click)="onMissingClick($event)"
   >
-    <span class="missing-label">D:</span><span class="missing-num" [class.missing-num--active]="project().missingStudentsCount > 0">{{ project().missingStudentsCount }}</span>
+    <span class="missing-row"><span class="missing-label">D:</span><span class="missing-num" [class.missing-num--active]="project().missingStudentsCount > 0">{{ project().missingStudentsCount }}</span></span>
     <span class="missing-sep">/</span>
-    <span class="missing-label">T:</span><span class="missing-num" [class.missing-num--active]="project().missingTeachersCount > 0">{{ project().missingTeachersCount }}</span>
+    <span class="missing-row"><span class="missing-label">T:</span><span class="missing-num" [class.missing-num--active]="project().missingTeachersCount > 0">{{ project().missingTeachersCount }}</span></span>
   </div>
 
   <!-- Col 6: Műveletek -->

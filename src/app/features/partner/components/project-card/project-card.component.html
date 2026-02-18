@@ -1,4 +1,4 @@
-<div class="project-row" (click)="cardClick.emit(project())">
+<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" (click)="cardClick.emit(project())">
   <!-- Col 1: Minta kép -->
   <div
     class="col col-sample"

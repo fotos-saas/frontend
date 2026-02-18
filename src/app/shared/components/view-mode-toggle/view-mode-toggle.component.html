@@ -10,3 +10,13 @@
     </button>
   }
 </div>
+
+<select
+  class="view-select"
+  [value]="value()"
+  (change)="valueChange.emit($any($event.target).value)"
+>
+  @for (option of options(); track option.value) {
+    <option [value]="option.value">{{ option.label }}</option>
+  }
+</select>

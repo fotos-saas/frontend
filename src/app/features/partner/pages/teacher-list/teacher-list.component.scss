@@ -217,18 +217,6 @@
   margin-left: auto;
 }
 
-// Responsive — tablet
-@media (max-width: 1024px) {
-  .header-buttons {
-    flex-wrap: wrap;
-    width: 100%;
-  }
-
-  .header-actions {
-    margin-left: auto;
-  }
-}
-
 // Responsive
 @media (max-width: 768px) {
   app-table-header {

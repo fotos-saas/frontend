@@ -15,6 +15,7 @@
       (ngModelChange)="search.set($event)"
     />
 
+    <!-- Desktop: chipek -->
     <div class="category-chips">
       @for (cat of categories; track cat) {
         <button
@@ -27,6 +28,17 @@
         </button>
       }
     </div>
+
+    <!-- Mobil: dropdown -->
+    <select
+      class="category-select"
+      [ngModel]="activeCategory()"
+      (ngModelChange)="setCategory($event)"
+    >
+      @for (cat of categories; track cat) {
+        <option [value]="cat">{{ CATEGORY_LABELS[cat] }}</option>
+      }
+    </select>
   </div>
 
   <!-- Loading -->

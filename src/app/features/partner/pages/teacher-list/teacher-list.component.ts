@@ -14,12 +14,14 @@ import { ArchiveBulkImportDialogComponent } from '../../components/archive/archi
 import { ArchiveBulkPhotoUploadComponent } from '../../components/archive/archive-bulk-photo-upload/archive-bulk-photo-upload.component';
 import { TeacherLinkDialogComponent } from '../../components/teacher-link-dialog/teacher-link-dialog.component';
 import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
+import { ArchiveDownloadDialogComponent, ArchiveDownloadOptions } from '../../components/archive/archive-download-dialog/archive-download-dialog.component';
 import { ArchiveProjectViewComponent } from '../../components/archive/archive-project-view/archive-project-view.component';
 import { TeacherUploadHistoryComponent } from '../../components/teacher-upload-history/teacher-upload-history.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { PsSearchableSelectComponent, SelectOption } from '@shared/components/form';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { saveFile } from '../../../../shared/utils/file.util';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
@@ -38,6 +40,7 @@ import { ViewModeToggleComponent, ViewModeOption } from '../../../../shared/comp
     ArchiveBulkPhotoUploadComponent,
     TeacherLinkDialogComponent,
     ArchivePhotoUploadComponent,
+    ArchiveDownloadDialogComponent,
     ArchiveProjectViewComponent,
     TeacherUploadHistoryComponent,
     ConfirmDialogComponent,
@@ -152,6 +155,10 @@ export class PartnerTeacherListComponent implements OnInit {
   createForTeacher = signal<TeacherInSchool | null>(null);
   noPhotoTarget = signal<TeacherInSchool | null>(null);
   private readonly projectView = viewChild(ArchiveProjectViewComponent);
+
+  // Download dialog
+  showDownloadDialog = signal(false);
+  downloading = signal(false);
 
   // More menu dropdown
   showMoreMenu = signal(false);
@@ -424,5 +431,27 @@ export class PartnerTeacherListComponent implements OnInit {
     this.teacherService.undoNoPhoto(item.archiveId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.projectView()?.unmarkItemNoPhoto(item.archiveId));
+  }
+
+  onDownloadAllRequest(): void {
+    this.showDownloadDialog.set(true);
+  }
+
+  onDownloadConfirm(options: ArchiveDownloadOptions): void {
+    this.showDownloadDialog.set(false);
+    this.downloading.set(true);
+
+    const classYear = this.projectView()?.selectedYear() || undefined;
+
+    this.teacherService.downloadArchiveZip(classYear, options.fileNaming)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          const yearLabel = classYear || 'osszes';
+          saveFile(blob, `tanarok-${yearLabel}.zip`);
+          this.downloading.set(false);
+        },
+        error: () => this.downloading.set(false),
+      });
   }
 }

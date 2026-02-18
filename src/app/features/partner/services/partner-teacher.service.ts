@@ -292,6 +292,13 @@ export class PartnerTeacherService implements ArchiveService {
     return this.http.get(`${this.baseUrl}/upload-history/download/${date}`, { responseType: 'blob' });
   }
 
+  downloadArchiveZip(classYear?: string, fileNaming = 'student_name'): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/download-archive-zip`, {
+      class_year: classYear || null,
+      file_naming: fileNaming,
+    }, { responseType: 'blob' });
+  }
+
   bulkPhotoUpload(schoolId: number, year: number, setActive: boolean, assignments: Record<string, number>, photos: File[]): Observable<{ success: boolean; data: { summary: BulkPhotoUploadSummary; results: BulkPhotoUploadResult[] } }> {
     const formData = new FormData();
     formData.append('school_id', schoolId.toString());

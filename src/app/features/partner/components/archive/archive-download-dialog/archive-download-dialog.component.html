@@ -1,0 +1,28 @@
+<app-dialog-wrapper
+  variant="info"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.DOWNLOAD"
+  title="Tanári fotók letöltése"
+  size="sm"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <ps-radio-group
+      label="Fájlnevek"
+      [options]="fileNamingOptions"
+      variant="cards"
+      [ngModel]="fileNaming()"
+      (ngModelChange)="fileNaming.set($event)"
+    />
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+    <button class="btn btn--primary" (click)="onSubmit()">
+      <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+      Letöltés
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

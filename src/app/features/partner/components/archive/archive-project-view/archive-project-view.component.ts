@@ -31,6 +31,7 @@ export class ArchiveProjectViewComponent implements OnInit {
   classYears = input<SelectOption[]>([]);
   schoolOptions = input<SelectOption[]>([]);
   syncingSchoolId = input(0);
+  downloading = input(false);
 
   private readonly archiveService = inject(ARCHIVE_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
@@ -57,6 +58,7 @@ export class ArchiveProjectViewComponent implements OnInit {
   viewPhotoRequest = output<ArchivePersonInSchool>();
   markNoPhotoRequest = output<ArchivePersonInSchool>();
   undoNoPhotoRequest = output<ArchivePersonInSchool>();
+  downloadAllRequest = output<void>();
 
   filteredSchoolGroups = computed(() => {
     const schoolId = this.selectedSchoolId();

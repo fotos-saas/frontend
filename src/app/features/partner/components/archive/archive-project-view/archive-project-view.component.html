@@ -51,6 +51,16 @@
     }
 
     <div class="summary-actions">
+      @if (summary().withPhoto > 0) {
+        <button
+          class="download-btn"
+          (click)="downloadAllRequest.emit()"
+          [disabled]="downloading()"
+        >
+          <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+          {{ downloading() ? 'Letöltés...' : 'Letöltöm mind (' + summary().withPhoto + ')' }}
+        </button>
+      }
       <button class="expand-btn" (click)="expandAll()">
         <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="14" />
         Mind

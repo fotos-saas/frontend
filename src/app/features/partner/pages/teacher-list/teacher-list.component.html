@@ -46,11 +46,13 @@
       [classYears]="classYears()"
       [schoolOptions]="schoolOptions()"
       [syncingSchoolId]="syncingSchoolId()"
+      [downloading]="downloading()"
       (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
       (viewPhotoRequest)="onViewPhotoFromProject($event)"
       (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
       (undoNoPhotoRequest)="onUndoNoPhotoFromProject($event)"
       (syncPhotosRequest)="onSyncPhotosFromProject($event)"
+      (downloadAllRequest)="onDownloadAllRequest()"
     />
   } @else if (viewMode() === 'history') {
     <app-teacher-upload-history />
@@ -262,6 +264,14 @@
     [prefillSchoolId]="createForTeacher()?.schoolId ?? null"
     (close)="showCreateForProject.set(false); createForTeacher.set(null)"
     (saved)="onProjectTeacherCreated()"
+  />
+}
+
+<!-- Archive Download Dialog (project view) -->
+@if (showDownloadDialog()) {
+  <app-archive-download-dialog
+    (download)="onDownloadConfirm($event)"
+    (close)="showDownloadDialog.set(false)"
   />
 }
 

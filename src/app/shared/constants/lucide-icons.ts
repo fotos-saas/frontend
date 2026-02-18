@@ -159,6 +159,8 @@ import {
   Tag,
   // File
   File,
+  // More menu
+  MoreVertical,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -314,4 +316,6 @@ export const LUCIDE_ICONS_MAP = {
   Tag,
   // File
   File,
+  // More menu
+  MoreVertical,
 };

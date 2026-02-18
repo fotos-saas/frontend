@@ -167,6 +167,7 @@ export const ICONS = {
   CHEVRON_RIGHT: 'chevron-right',
   X: 'x',
   MENU: 'menu',
+  MORE_VERTICAL: 'more-vertical',
 
   // Általános műveletek
   PLUS: 'plus',

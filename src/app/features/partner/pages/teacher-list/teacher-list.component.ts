@@ -153,6 +153,17 @@ export class PartnerTeacherListComponent implements OnInit {
   noPhotoTarget = signal<TeacherInSchool | null>(null);
   private readonly projectView = viewChild(ArchiveProjectViewComponent);
 
+  // More menu dropdown
+  showMoreMenu = signal(false);
+
+  toggleMoreMenu(): void {
+    this.showMoreMenu.update(v => !v);
+  }
+
+  closeMoreMenu(): void {
+    this.showMoreMenu.set(false);
+  }
+
   // Modals
   showEditModal = signal(false);
   showDeleteConfirm = signal(false);

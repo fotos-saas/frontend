@@ -67,6 +67,11 @@ export class PhotoUploadWizardActionsService {
 
   // === UPLOAD ===
 
+  /**
+   * Fájlok feltöltése albumba valós idejű progress-szel.
+   * Egyedi képek: chunked HTTP progress
+   * ZIP: async job + polling (ha backend async: true)
+   */
   uploadFiles(
     projectId: number,
     album: AlbumType,
@@ -94,15 +99,22 @@ export class PhotoUploadWizardActionsService {
       .subscribe({
         next: (progress) => {
           uploadProgress.set(progress);
-          if (progress.completed && progress.photos.length > 0) {
-            const newPhotos: UploadedPhoto[] = progress.photos.map(p => ({
-              mediaId: p.mediaId,
-              filename: p.filename,
-              iptcTitle: p.iptcTitle ?? null,
-              thumbUrl: p.thumbUrl,
-              fullUrl: p.fullUrl ?? '',
-            }));
-            uploadedPhotos.update(current => [...newPhotos, ...current]);
+          if (progress.completed) {
+            if (progress.photos.length > 0) {
+              const newPhotos: UploadedPhoto[] = progress.photos.map(p => ({
+                mediaId: p.mediaId,
+                filename: p.filename,
+                iptcTitle: p.iptcTitle ?? null,
+                thumbUrl: p.thumbUrl,
+                fullUrl: p.fullUrl ?? '',
+              }));
+              uploadedPhotos.update(current => [...newPhotos, ...current]);
+            } else {
+              // Async ZIP: fotók nincsenek a polling válaszban → album újratöltés
+              this.loadAlbumDetails(projectId, album, uploadedPhotos);
+            }
+            uploading.set(false);
+          } else if (progress.phase === 'error') {
             uploading.set(false);
           }
         },

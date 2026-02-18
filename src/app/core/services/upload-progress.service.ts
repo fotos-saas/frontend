@@ -9,7 +9,7 @@ import {
   switchMap,
   takeWhile,
   startWith,
-  tap,
+  take,
 } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import type {
@@ -224,12 +224,17 @@ export class UploadProgressService {
     );
   }
 
-  /** Backend ZIP feldolgozás polling */
+  /** Backend ZIP feldolgozás polling (max 200 poll = ~5 perc) */
   private pollZipStatus(statusUrl: string): Observable<FileUploadProgress> {
+    let pollCount = 0;
+    const MAX_POLLS = 200;
+
     return interval(1500).pipe(
       startWith(0),
-      switchMap(() =>
-        this.http.get<ZipProcessingStatus>(statusUrl).pipe(
+      take(MAX_POLLS),
+      switchMap(() => {
+        pollCount++;
+        return this.http.get<ZipProcessingStatus>(statusUrl).pipe(
           catchError(() =>
             of({
               status: 'processing' as const,
@@ -239,8 +244,8 @@ export class UploadProgressService {
               errorMessage: undefined,
             } as ZipProcessingStatus),
           ),
-        ),
-      ),
+        );
+      }),
       map((status) => {
         const processingPct =
           status.totalFiles > 0
@@ -249,9 +254,10 @@ export class UploadProgressService {
         const overallProgress = 40 + Math.round(processingPct * 0.6); // 40-100% sáv
         const isCompleted = status.status === 'completed';
         const isError = status.status === 'error';
+        const isTimeout = pollCount >= MAX_POLLS && !isCompleted;
 
         return {
-          phase: isError ? 'error' : isCompleted ? 'completed' : 'processing',
+          phase: isError || isTimeout ? 'error' : isCompleted ? 'completed' : 'processing',
           transferProgress: 100,
           processingProgress: processingPct,
           overallProgress: isCompleted ? 100 : overallProgress,
@@ -261,7 +267,7 @@ export class UploadProgressService {
           totalCount: status.totalFiles,
           errorCount: 0,
           completed: isCompleted,
-          errorMessage: status.errorMessage,
+          errorMessage: isTimeout ? 'A feldolgozás túl sokáig tart. Frissítsd az oldalt.' : status.errorMessage,
           photos: status.uploadedPhotos ?? [],
         } as FileUploadProgress;
       }),

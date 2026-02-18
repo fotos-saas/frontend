@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
+import { handleAuthError } from '../../../shared/utils/http-error.util';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { SentryService } from '../sentry.service';
@@ -24,6 +25,16 @@ export interface MarketerLoginResponse {
   user: AuthUser;
   token: string;
 }
+
+/** Status kód => hibaüzenet mapping */
+const AUTH_ERROR_MESSAGES: Record<number, string> = {
+  401: 'Érvénytelen email vagy jelszó',
+  403: 'Nincs jogosultságod ehhez a muvelethez',
+  422: 'Érvénytelen adatok',
+  423: 'A fiók ideiglenesen zárolva van',
+  429: 'Túl sok próbálkozás. Kérlek várj néhány percet.',
+  500: 'Szerverhiba. Kérlek próbáld újra később.',
+};
 
 /**
  * Email/jelszó alapú autentikáció kezelése
@@ -80,7 +91,7 @@ export class PasswordAuthService {
             this.tabloAuth.storeAuthData(response as LoginResponse, 'code');
           }
         }),
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -113,7 +124,7 @@ export class PasswordAuthService {
   register(data: RegisterData): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${environment.apiUrl}/auth/register`, data)
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -123,7 +134,7 @@ export class PasswordAuthService {
   requestPasswordReset(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/forgot-password`, { email })
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -133,7 +144,7 @@ export class PasswordAuthService {
   resetPassword(data: ResetPasswordData): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, data)
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -143,7 +154,7 @@ export class PasswordAuthService {
   changePassword(data: ChangePasswordData): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/change-password`, data)
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -159,7 +170,7 @@ export class PasswordAuthService {
         // Sikeres jelszó beállítás után frissítjük a signal-t
         this.onPasswordSetChange?.(true);
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
     );
   }
 
@@ -170,7 +181,7 @@ export class PasswordAuthService {
     return this.http.get<{ message: string; already_verified?: boolean }>(
       `${environment.apiUrl}/auth/verify-email/${id}/${hash}`
     ).pipe(
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
     );
   }
 
@@ -180,7 +191,7 @@ export class PasswordAuthService {
   resendVerification(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/resend-verification`, { email })
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -190,7 +201,7 @@ export class PasswordAuthService {
   validateQrCode(code: string): Observable<QrCodeValidationResponse> {
     return this.http.get<QrCodeValidationResponse>(`${environment.apiUrl}/auth/qr-code/${code}/validate`)
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -203,7 +214,7 @@ export class PasswordAuthService {
         tap(response => {
           this.tabloAuth.storeAuthData(response, 'code');
         }),
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -217,7 +228,7 @@ export class PasswordAuthService {
   enable2FA(): Observable<TwoFactorSetupResponse> {
     return this.http.post<TwoFactorSetupResponse>(`${environment.apiUrl}/auth/2fa/enable`, {})
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -227,7 +238,7 @@ export class PasswordAuthService {
   confirm2FA(code: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/2fa/confirm`, { code })
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -237,7 +248,7 @@ export class PasswordAuthService {
   disable2FA(code: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/2fa/disable`, { code })
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -247,7 +258,7 @@ export class PasswordAuthService {
   verify2FA(code: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/2fa/verify`, { code })
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, AUTH_ERROR_MESSAGES)))
       );
   }
 
@@ -266,23 +277,4 @@ export class PasswordAuthService {
     }
   }
 
-  /**
-   * HTTP hiba kezelés
-   */
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    const messages: Record<number, string> = {
-      401: 'Érvénytelen email vagy jelszó',
-      403: 'Nincs jogosultságod ehhez a muvelethez',
-      422: 'Érvénytelen adatok',
-      423: 'A fiók ideiglenesen zárolva van',
-      429: 'Túl sok próbálkozás. Kérlek várj néhány percet.',
-      500: 'Szerverhiba. Kérlek próbáld újra később.'
-    };
-
-    const errorMessage = error.error instanceof ErrorEvent
-      ? 'Hálózati hiba. Ellenőrizd az internetkapcsolatot.'
-      : (error.error?.message || messages[error.status] || 'Hiba történt');
-
-    return throwError(() => new Error(errorMessage));
-  }
 }

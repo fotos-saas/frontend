@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
-import { HttpError } from '../../shared/types/http-error.types';
+import { handleHttpError } from '../../shared/utils/http-error.util';
 import { NewsfeedPostService } from './newsfeed-post.service';
 import type { NewsfeedComment, ReactionsSummary } from './newsfeed.service';
 
@@ -67,7 +67,7 @@ export class NewsfeedCommentService {
     }>(
       `${this.apiUrl}/newsfeed-comments/${commentId}/like`,
       { reaction },
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => ({
         hasReacted: response.data.has_reacted,
@@ -75,7 +75,7 @@ export class NewsfeedCommentService {
         reactions: response.data.reactions,
         likesCount: response.data.likes_count
       })),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -85,10 +85,10 @@ export class NewsfeedCommentService {
   getComments(postId: number, perPage = 20): Observable<NewsfeedComment[]> {
     return this.http.get<{ success: boolean; data: ApiPaginatedResponse<ApiNewsfeedComment> }>(
       `${this.apiUrl}/newsfeed/${postId}/comments`,
-      { headers: this.getHeaders(), params: { per_page: perPage.toString() } }
+      { headers: this.guestService.getGuestSessionHeader(), params: { per_page: perPage.toString() } }
     ).pipe(
       map(response => response.data.data.map(c => this.mapComment(c))),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -102,11 +102,11 @@ export class NewsfeedCommentService {
     return this.http.post<{ success: boolean; data: ApiNewsfeedComment }>(
       `${this.apiUrl}/newsfeed/${postId}/comments`,
       body,
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => this.mapComment(response.data)),
       tap(() => this.postService.incrementCommentsInCache(postId)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -116,10 +116,10 @@ export class NewsfeedCommentService {
   deleteComment(commentId: number, postId: number): Observable<{ success: boolean }> {
     return this.http.delete<{ success: boolean }>(
       `${this.apiUrl}/newsfeed-comments/${commentId}`,
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       tap(() => this.postService.decrementCommentsInCache(postId)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -141,18 +141,4 @@ export class NewsfeedCommentService {
     };
   }
 
-  private getHeaders(): HttpHeaders {
-    return this.guestService.getGuestSessionHeader();
-  }
-
-  private handleError(error: HttpError): Error {
-    let message = 'Ismeretlen hiba történt';
-    if (error.error?.message) message = error.error.message;
-    else if (error.status === 401) message = 'Nincs jogosultságod ehhez a művelethez';
-    else if (error.status === 403) message = 'A hozzáférés megtagadva';
-    else if (error.status === 404) message = 'A bejegyzés nem található';
-    else if (error.status === 422) message = 'Érvénytelen adatok';
-    else if (error.status === 429) message = 'Túl sok kérés, kérlek várj egy kicsit';
-    return new Error(message);
-  }
 }

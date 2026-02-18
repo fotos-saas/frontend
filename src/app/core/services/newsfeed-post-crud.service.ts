@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
-import { HttpError } from '../../shared/types/http-error.types';
+import { handleHttpError } from '../../shared/utils/http-error.util';
 import type {
   CreatePostRequest,
   UpdatePostRequest,
@@ -71,7 +71,7 @@ export class NewsfeedPostCrudService {
         `${this.apiUrl}/newsfeed`, formData, { headers }
       ).pipe(
         map(response => response.data),
-        catchError(error => throwError(() => this.handleError(error)))
+        catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
       );
     }
 
@@ -81,10 +81,10 @@ export class NewsfeedPostCrudService {
         post_type: request.postType, title: request.title, content: request.content,
         event_date: request.eventDate, event_time: request.eventTime, event_location: request.eventLocation
       },
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => response.data),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -107,7 +107,7 @@ export class NewsfeedPostCrudService {
         `${this.apiUrl}/newsfeed/${id}`, formData, { headers }
       ).pipe(
         map(response => response.data),
-        catchError(error => throwError(() => this.handleError(error)))
+        catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
       );
     }
 
@@ -117,10 +117,10 @@ export class NewsfeedPostCrudService {
         title: request.title, content: request.content,
         event_date: request.eventDate, event_time: request.eventTime, event_location: request.eventLocation
       },
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => response.data),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -130,8 +130,8 @@ export class NewsfeedPostCrudService {
   deleteMedia(mediaId: number): Observable<{ success: boolean }> {
     return this.http.delete<{ success: boolean }>(
       `${this.apiUrl}/newsfeed/media/${mediaId}`,
-      { headers: this.getHeaders() }
-    ).pipe(catchError(error => throwError(() => this.handleError(error))));
+      { headers: this.guestService.getGuestSessionHeader() }
+    ).pipe(catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' }))));
   }
 
   /**
@@ -140,26 +140,10 @@ export class NewsfeedPostCrudService {
   deletePost(id: number): Observable<{ success: boolean }> {
     return this.http.delete<{ success: boolean }>(
       `${this.apiUrl}/newsfeed/${id}`,
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
-  // === PRIVATE ===
-
-  private getHeaders(): HttpHeaders {
-    return this.guestService.getGuestSessionHeader();
-  }
-
-  private handleError(error: HttpError): Error {
-    let message = 'Ismeretlen hiba történt';
-    if (error.error?.message) message = error.error.message;
-    else if (error.status === 401) message = 'Nincs jogosultságod ehhez a művelethez';
-    else if (error.status === 403) message = 'A hozzáférés megtagadva';
-    else if (error.status === 404) message = 'A bejegyzés nem található';
-    else if (error.status === 422) message = 'Érvénytelen adatok';
-    else if (error.status === 429) message = 'Túl sok kérés, kérlek várj egy kicsit';
-    return new Error(message);
-  }
 }

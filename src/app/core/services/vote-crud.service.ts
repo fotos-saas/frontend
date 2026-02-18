@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
+import { handleVotingError } from '../../shared/utils/http-error.util';
 import { VOTING_API } from '../../features/voting/voting.constants';
 import {
   Poll,
@@ -44,7 +45,7 @@ export class VoteCrudService {
         }
         return mapPollFromApi(response.data);
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleVotingError(error)))
     );
   }
 
@@ -66,7 +67,7 @@ export class VoteCrudService {
           throw new Error(response.message);
         }
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleVotingError(error)))
     );
   }
 
@@ -82,7 +83,7 @@ export class VoteCrudService {
           throw new Error(response.message);
         }
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleVotingError(error)))
     );
   }
 
@@ -174,15 +175,4 @@ export class VoteCrudService {
     return formData;
   }
 
-  private handleError(error: { error?: { message?: string; requires_class_size?: boolean }; status?: number }): Observable<never> {
-    let message = 'Hiba történt. Próbáld újra!';
-
-    if (error.error?.message) {
-      message = error.error.message;
-    } else if (error.status === 0) {
-      message = 'Nincs internetkapcsolat.';
-    }
-
-    return throwError(() => new Error(message));
-  }
 }

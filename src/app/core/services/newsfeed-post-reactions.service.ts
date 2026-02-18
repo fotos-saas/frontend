@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
-import { HttpError } from '../../shared/types/http-error.types';
+import { handleHttpError } from '../../shared/utils/http-error.util';
 import type { ReactionsSummary } from './newsfeed.service';
 
 /**
@@ -29,13 +29,13 @@ export class NewsfeedPostReactionsService {
     return this.http.post<{
       success: boolean; data: { liked: boolean; has_reacted: boolean; user_reaction: string | null; reactions: ReactionsSummary; likes_count: number; };
     }>(
-      `${this.apiUrl}/newsfeed/${postId}/like`, { reaction }, { headers: this.getHeaders() }
+      `${this.apiUrl}/newsfeed/${postId}/like`, { reaction }, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => ({
         hasReacted: response.data.has_reacted, userReaction: response.data.user_reaction,
         reactions: response.data.reactions, likesCount: response.data.likes_count
       })),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -44,9 +44,9 @@ export class NewsfeedPostReactionsService {
    */
   pinPost(id: number): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(
-      `${this.apiUrl}/newsfeed/${id}/pin`, {}, { headers: this.getHeaders() }
+      `${this.apiUrl}/newsfeed/${id}/pin`, {}, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -55,26 +55,10 @@ export class NewsfeedPostReactionsService {
    */
   unpinPost(id: number): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(
-      `${this.apiUrl}/newsfeed/${id}/unpin`, {}, { headers: this.getHeaders() }
+      `${this.apiUrl}/newsfeed/${id}/unpin`, {}, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
-  // === PRIVATE ===
-
-  private getHeaders(): HttpHeaders {
-    return this.guestService.getGuestSessionHeader();
-  }
-
-  private handleError(error: HttpError): Error {
-    let message = 'Ismeretlen hiba történt';
-    if (error.error?.message) message = error.error.message;
-    else if (error.status === 401) message = 'Nincs jogosultságod ehhez a művelethez';
-    else if (error.status === 403) message = 'A hozzáférés megtagadva';
-    else if (error.status === 404) message = 'A bejegyzés nem található';
-    else if (error.status === 422) message = 'Érvénytelen adatok';
-    else if (error.status === 429) message = 'Túl sok kérés, kérlek várj egy kicsit';
-    return new Error(message);
-  }
 }

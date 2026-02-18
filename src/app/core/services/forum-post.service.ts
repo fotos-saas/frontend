@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
-import { HttpError } from '../../shared/types/http-error.types';
+import { handleHttpError } from '../../shared/utils/http-error.util';
 import type {
   DiscussionPost,
   CreatePostRequest,
@@ -72,17 +72,17 @@ export class ForumPostService {
         `${this.apiUrl}/discussions/${discussionId}/posts`, formData, { headers }
       ).pipe(
         map(response => this.mapPost(response.data)),
-        catchError(error => throwError(() => this.handleError(error)))
+        catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
       );
     }
 
     return this.http.post<{ data: ApiPost }>(
       `${this.apiUrl}/discussions/${discussionId}/posts`,
       { content: request.content, parent_id: request.parentId },
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => this.mapPost(response.data)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -115,12 +115,12 @@ export class ForumPostService {
             isImage: m.is_image || m.isImage || false
           }))
         })),
-        catchError(error => throwError(() => this.handleError(error)))
+        catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
       );
     }
 
     return this.http.put<{ success: boolean; data: { media: ApiMedia[] }; message: string }>(
-      `${this.apiUrl}/posts/${postId}`, { content }, { headers: this.getHeaders() }
+      `${this.apiUrl}/posts/${postId}`, { content }, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => ({
         media: (response.data?.media || []).map(m => ({
@@ -129,7 +129,7 @@ export class ForumPostService {
           isImage: m.is_image || m.isImage || false
         }))
       })),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -138,8 +138,8 @@ export class ForumPostService {
    */
   deletePost(postId: number): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(
-      `${this.apiUrl}/posts/${postId}`, { headers: this.getHeaders() }
-    ).pipe(catchError(error => throwError(() => this.handleError(error))));
+      `${this.apiUrl}/posts/${postId}`, { headers: this.guestService.getGuestSessionHeader() }
+    ).pipe(catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' }))));
   }
 
   /**
@@ -151,13 +151,13 @@ export class ForumPostService {
     return this.http.post<{
       success: boolean; data: { has_reacted: boolean; user_reaction: string | null; reactions: ReactionsSummary; likes_count: number; };
     }>(
-      `${this.apiUrl}/posts/${postId}/like`, { reaction }, { headers: this.getHeaders() }
+      `${this.apiUrl}/posts/${postId}/like`, { reaction }, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => ({
         hasReacted: response.data.has_reacted, userReaction: response.data.user_reaction,
         reactions: response.data.reactions, likesCount: response.data.likes_count
       })),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -183,18 +183,4 @@ export class ForumPostService {
     };
   }
 
-  private getHeaders(): HttpHeaders {
-    return this.guestService.getGuestSessionHeader();
-  }
-
-  private handleError(error: HttpError): Error {
-    let message = 'Ismeretlen hiba történt';
-    if (error.error?.message) message = error.error.message;
-    else if (error.status === 401) message = 'Nincs jogosultságod ehhez a művelethez';
-    else if (error.status === 403) message = 'A hozzáférés megtagadva';
-    else if (error.status === 404) message = 'A beszélgetés nem található';
-    else if (error.status === 422) message = 'Érvénytelen adatok';
-    else if (error.status === 429) message = 'Túl sok kérés, kérlek várj egy kicsit';
-    return new Error(message);
-  }
 }

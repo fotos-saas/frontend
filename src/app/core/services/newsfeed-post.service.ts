@@ -8,7 +8,7 @@ import { GuestService } from './guest.service';
 import { LoggerService } from './logger.service';
 import { NewsfeedPostCrudService } from './newsfeed-post-crud.service';
 import { NewsfeedPostReactionsService } from './newsfeed-post-reactions.service';
-import { HttpError } from '../../shared/types/http-error.types';
+import { handleHttpError } from '../../shared/utils/http-error.util';
 import type { ApiNewsfeedPost as BaseApiNewsfeedPost } from './newsfeed-post-crud.service';
 import type {
   NewsfeedPost,
@@ -90,7 +90,7 @@ export class NewsfeedPostService {
 
     return this.http.get<{ success: boolean; data: ApiPaginatedResponse<ApiNewsfeedPost> }>(
       `${this.apiUrl}/newsfeed`,
-      { headers: this.getHeaders(), params }
+      { headers: this.guestService.getGuestSessionHeader(), params }
     ).pipe(
       map(response => response.data.data.map(post => this.mapPost(post))),
       tap(posts => {
@@ -99,7 +99,7 @@ export class NewsfeedPostService {
       }),
       catchError(error => {
         this.isLoading.set(false);
-        return throwError(() => this.handleError(error));
+        return throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' }));
       })
     );
   }
@@ -110,10 +110,10 @@ export class NewsfeedPostService {
   getUpcomingEvents(limit = 5): Observable<NewsfeedPost[]> {
     return this.http.get<{ success: boolean; data: ApiNewsfeedPost[] }>(
       `${this.apiUrl}/newsfeed/events/upcoming`,
-      { headers: this.getHeaders(), params: { limit: limit.toString() } }
+      { headers: this.guestService.getGuestSessionHeader(), params: { limit: limit.toString() } }
     ).pipe(
       map(response => response.data.map(post => this.mapPost(post))),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -123,10 +123,10 @@ export class NewsfeedPostService {
   getPost(id: number): Observable<NewsfeedPostDetail> {
     return this.http.get<{ success: boolean; data: ApiNewsfeedPost }>(
       `${this.apiUrl}/newsfeed/${id}`,
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => this.mapPostDetail(response.data)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
 
@@ -258,10 +258,6 @@ export class NewsfeedPostService {
 
   // === PRIVATE CACHE METHODS ===
 
-  private getHeaders(): HttpHeaders {
-    return this.guestService.getGuestSessionHeader();
-  }
-
   private addPostToCache(post: NewsfeedPost): void {
     const current = this.postsCache();
     if (post.isPinned) {
@@ -313,14 +309,4 @@ export class NewsfeedPostService {
     }
   }
 
-  private handleError(error: HttpError): Error {
-    let message = 'Ismeretlen hiba történt';
-    if (error.error?.message) message = error.error.message;
-    else if (error.status === 401) message = 'Nincs jogosultságod ehhez a művelethez';
-    else if (error.status === 403) message = 'A hozzáférés megtagadva';
-    else if (error.status === 404) message = 'A bejegyzés nem található';
-    else if (error.status === 422) message = 'Érvénytelen adatok';
-    else if (error.status === 429) message = 'Túl sok kérés, kérlek várj egy kicsit';
-    return new Error(message);
-  }
 }

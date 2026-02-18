@@ -1,6 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
+import { handleVotingError } from '../../shared/utils/http-error.util';
 import { map, tap, catchError } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
@@ -87,18 +88,6 @@ export class VotingService {
   ) {}
 
   /**
-   * HTTP headers guest session-nel
-   */
-  private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders();
-    const sessionToken = this.guestService.getSessionToken();
-    if (sessionToken) {
-      headers = headers.set('X-Guest-Session', sessionToken);
-    }
-    return headers;
-  }
-
-  /**
    * Szavazások listázása
    */
   loadPolls(activeOnly = false): Observable<Poll[]> {
@@ -107,7 +96,7 @@ export class VotingService {
 
     return this.http.get<{ success: boolean; data: ApiPollResponse[] }>(
       `${environment.apiUrl}${VOTING_API.POLLS}${params}`,
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => {
         if (!response.success) {
@@ -121,7 +110,7 @@ export class VotingService {
       }),
       catchError(error => {
         this.isLoading.set(false);
-        return this.handleError(error);
+        return throwError(() => handleVotingError(error));
       })
     );
   }
@@ -132,7 +121,7 @@ export class VotingService {
   getPoll(id: number): Observable<Poll> {
     return this.http.get<{ success: boolean; data: ApiPollResponse }>(
       `${environment.apiUrl}${VOTING_API.poll(id)}`,
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => {
         if (!response.success) {
@@ -142,7 +131,7 @@ export class VotingService {
         this.selectedPoll.set(poll);
         return poll;
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleVotingError(error)))
     );
   }
 
@@ -271,20 +260,4 @@ export class VotingService {
     }
   }
 
-  /**
-   * Hiba kezelés
-   */
-  private handleError(error: { error?: { message?: string; requires_class_size?: boolean }; status?: number }): Observable<never> {
-    let message = 'Hiba történt. Próbáld újra!';
-
-    if (error.error?.message) {
-      message = error.error.message;
-    } else if (error.status === 0) {
-      message = 'Nincs internetkapcsolat.';
-    } else if (error.status === 422 && error.error?.requires_class_size) {
-      message = 'Először állítsd be az osztálylétszámot!';
-    }
-
-    return throwError(() => new Error(message));
-  }
 }

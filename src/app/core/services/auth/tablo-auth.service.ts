@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
+import { handleAuthError } from '../../../shared/utils/http-error.util';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { TabloStorageService, type StoredSession } from '../tablo-storage.service';
@@ -12,6 +13,15 @@ import type {
   AuthUser,
   LoginResponse,
 } from '../../models/auth.models';
+
+/** Status kód => hibaüzenet mapping */
+const TABLO_AUTH_ERROR_MESSAGES: Record<number, string> = {
+  401: 'Érvénytelen belépési kód',
+  403: 'Nincs jogosultságod ehhez a muvelethez',
+  423: 'A fiók ideiglenesen zárolva van',
+  429: 'Túl sok próbálkozás. Kérlek várj néhány percet.',
+  500: 'Szerverhiba. Kérlek próbáld újra később.',
+};
 
 /**
  * Tablo-specifikus autentikáció kezelése
@@ -65,7 +75,7 @@ export class TabloAuthService {
             this.storeClientAuthData(response);
           }
         }),
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, 'Hiba történt a bejelentkezés során')))
       );
   }
 
@@ -90,7 +100,7 @@ export class TabloAuthService {
             this.guestService.setRestoredSession(response.restoredSession);
           }
         }),
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, 'Hiba történt a bejelentkezés során')))
       );
   }
 
@@ -103,7 +113,7 @@ export class TabloAuthService {
         tap(response => {
           this.storeAuthData(response, 'preview');
         }),
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, 'Hiba történt a bejelentkezés során')))
       );
   }
 
@@ -221,22 +231,4 @@ export class TabloAuthService {
     }
   }
 
-  /**
-   * HTTP hiba kezelés
-   */
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    const messages: Record<number, string> = {
-      401: 'Érvénytelen belépési kód',
-      403: 'Nincs jogosultságod ehhez a muvelethez',
-      423: 'A fiók ideiglenesen zárolva van',
-      429: 'Túl sok próbálkozás. Kérlek várj néhány percet.',
-      500: 'Szerverhiba. Kérlek próbáld újra később.'
-    };
-
-    const errorMessage = error.error instanceof ErrorEvent
-      ? 'Hálózati hiba. Ellenőrizd az internetkapcsolatot.'
-      : (error.error?.message || messages[error.status] || 'Hiba történt a bejelentkezés során');
-
-    return throwError(() => new Error(errorMessage));
-  }
 }

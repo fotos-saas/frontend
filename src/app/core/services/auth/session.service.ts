@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { handleAuthError } from '../../../shared/utils/http-error.util';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -299,7 +300,7 @@ export class SessionService {
   getActiveSessions(): Observable<{ sessions: ActiveSession[] }> {
     return this.http.get<{ sessions: ActiveSession[] }>(`${environment.apiUrl}/auth/sessions`)
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, { 401: 'Nincs bejelentkezve', 403: 'Nincs jogosultságod ehhez a muvelethez', 500: 'Szerverhiba. Kérlek próbáld újra később.' })))
       );
   }
 
@@ -309,7 +310,7 @@ export class SessionService {
   revokeSession(tokenId: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/auth/sessions/${tokenId}`)
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, { 401: 'Nincs bejelentkezve', 403: 'Nincs jogosultságod ehhez a muvelethez', 500: 'Szerverhiba. Kérlek próbáld újra később.' })))
       );
   }
 
@@ -319,24 +320,8 @@ export class SessionService {
   revokeAllSessions(): Observable<{ message: string; revoked_count: number }> {
     return this.http.delete<{ message: string; revoked_count: number }>(`${environment.apiUrl}/auth/sessions`)
       .pipe(
-        catchError(this.handleError.bind(this))
+        catchError(error => throwError(() => handleAuthError(error, { 401: 'Nincs bejelentkezve', 403: 'Nincs jogosultságod ehhez a muvelethez', 500: 'Szerverhiba. Kérlek próbáld újra később.' })))
       );
   }
 
-  /**
-   * HTTP hiba kezelés
-   */
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    const messages: Record<number, string> = {
-      401: 'Nincs bejelentkezve',
-      403: 'Nincs jogosultságod ehhez a muvelethez',
-      500: 'Szerverhiba. Kérlek próbáld újra később.'
-    };
-
-    const errorMessage = error.error instanceof ErrorEvent
-      ? 'Hálózati hiba. Ellenőrizd az internetkapcsolatot.'
-      : (error.error?.message || messages[error.status] || 'Hiba történt');
-
-    return throwError(() => new Error(errorMessage));
-  }
 }

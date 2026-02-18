@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
+import { handleVotingError } from '../../shared/utils/http-error.util';
 import { VOTING_API } from '../../features/voting/voting.constants';
 
 /** Participant (résztvevő) interface */
@@ -56,18 +57,6 @@ export class VoteParticipantsService {
   ) {}
 
   /**
-   * HTTP headers guest session-nel
-   */
-  private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders();
-    const sessionToken = this.guestService.getSessionToken();
-    if (sessionToken) {
-      headers = headers.set('X-Guest-Session', sessionToken);
-    }
-    return headers;
-  }
-
-  /**
    * Résztvevők listázása (mindenki láthatja)
    */
   getParticipants(): Observable<ParticipantsResponse> {
@@ -96,7 +85,7 @@ export class VoteParticipantsService {
       current_guest_id: number | null;
     }>(
       `${environment.apiUrl}${VOTING_API.PARTICIPANTS}`,
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => {
         if (!response.success) {
@@ -127,7 +116,7 @@ export class VoteParticipantsService {
           currentGuestId: response.current_guest_id ?? null
         };
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleVotingError(error)))
     );
   }
 
@@ -145,22 +134,8 @@ export class VoteParticipantsService {
         }
         return { isExtra: response.is_extra };
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleVotingError(error)))
     );
   }
 
-  /**
-   * Hiba kezelés
-   */
-  private handleError(error: { error?: { message?: string }; status?: number }): Observable<never> {
-    let message = 'Hiba történt. Próbáld újra!';
-
-    if (error.error?.message) {
-      message = error.error.message;
-    } else if (error.status === 0) {
-      message = 'Nincs internetkapcsolat.';
-    }
-
-    return throwError(() => new Error(message));
-  }
 }

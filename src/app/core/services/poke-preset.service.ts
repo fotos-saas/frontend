@@ -69,7 +69,7 @@ export class PokePresetService {
    */
   loadPresets(category?: PokeCategory): Observable<PokePreset[]> {
     const options: { headers: HttpHeaders; params?: { category: PokeCategory } } = {
-      headers: this.getHeaders(),
+      headers: this.guestService.getGuestSessionHeader(),
       ...(category && { params: { category } })
     };
 
@@ -101,7 +101,7 @@ export class PokePresetService {
         };
         summary: MissingSummary;
       };
-    }>(`${this.apiUrl}/missing`, { headers: this.getHeaders() }).pipe(
+    }>(`${this.apiUrl}/missing`, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) {
           this.missingCategories.set({
@@ -135,15 +135,6 @@ export class PokePresetService {
   }
 
   // === PRIVATE ===
-
-  private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders();
-    const sessionToken = this.guestService.getSessionToken();
-    if (sessionToken) {
-      headers = headers.set('X-Guest-Session', sessionToken);
-    }
-    return headers;
-  }
 
   private mapPreset = (api: ApiPokePresetResponse): PokePreset => ({
     key: api.key,

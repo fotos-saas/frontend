@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuestService } from './guest.service';
-import { HttpError } from '../../shared/types/http-error.types';
+import { handleHttpError } from '../../shared/utils/http-error.util';
 import type {
   Discussion,
   DiscussionDetail,
@@ -118,7 +118,7 @@ export class ForumDiscussionService {
 
     return this.http.get<{ data: ApiDiscussionListItem[] }>(
       `${this.apiUrl}/discussions`,
-      { headers: this.getHeaders(), params }
+      { headers: this.guestService.getGuestSessionHeader(), params }
     ).pipe(
       map(response => response.data.map(item => this.mapDiscussionListItem(item))),
       tap(discussions => {
@@ -127,7 +127,7 @@ export class ForumDiscussionService {
       }),
       catchError(error => {
         this.isLoading.set(false);
-        return throwError(() => this.handleError(error));
+        return throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' }));
       })
     );
   }
@@ -141,10 +141,10 @@ export class ForumDiscussionService {
       data: { discussion: ApiDiscussion; posts: ApiPaginatedPosts };
     }>(
       `${this.apiUrl}/discussions/${slug}`,
-      { headers: this.getHeaders() }
+      { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => this.mapDiscussionDetail(response.data)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -153,14 +153,14 @@ export class ForumDiscussionService {
    */
   createDiscussion(request: CreateDiscussionRequest): Observable<Discussion> {
     return this.http.post<{ data: Discussion }>(
-      `${this.apiUrl}/discussions`, request, { headers: this.getHeaders() }
+      `${this.apiUrl}/discussions`, request, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => response.data),
       tap(discussion => {
         const current = this.discussionsCache();
         this.discussionsCache.set([discussion, ...current]);
       }),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -169,11 +169,11 @@ export class ForumDiscussionService {
    */
   lockDiscussion(id: number): Observable<Discussion> {
     return this.http.post<{ data: Discussion }>(
-      `${this.apiUrl}/discussions/${id}/lock`, {}, { headers: this.getHeaders() }
+      `${this.apiUrl}/discussions/${id}/lock`, {}, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => response.data),
       tap(updated => this.updateDiscussionInCache(updated)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -182,11 +182,11 @@ export class ForumDiscussionService {
    */
   unlockDiscussion(id: number): Observable<Discussion> {
     return this.http.post<{ data: Discussion }>(
-      `${this.apiUrl}/discussions/${id}/unlock`, {}, { headers: this.getHeaders() }
+      `${this.apiUrl}/discussions/${id}/unlock`, {}, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => response.data),
       tap(updated => this.updateDiscussionInCache(updated)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -195,11 +195,11 @@ export class ForumDiscussionService {
    */
   pinDiscussion(id: number): Observable<Discussion> {
     return this.http.post<{ data: Discussion }>(
-      `${this.apiUrl}/discussions/${id}/pin`, {}, { headers: this.getHeaders() }
+      `${this.apiUrl}/discussions/${id}/pin`, {}, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => response.data),
       tap(updated => this.updateDiscussionInCache(updated)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -208,11 +208,11 @@ export class ForumDiscussionService {
    */
   unpinDiscussion(id: number): Observable<Discussion> {
     return this.http.post<{ data: Discussion }>(
-      `${this.apiUrl}/discussions/${id}/unpin`, {}, { headers: this.getHeaders() }
+      `${this.apiUrl}/discussions/${id}/unpin`, {}, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => response.data),
       tap(updated => this.updateDiscussionInCache(updated)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -225,11 +225,11 @@ export class ForumDiscussionService {
     if (data.templateId !== undefined) body['template_id'] = data.templateId;
 
     return this.http.put<{ data: Discussion }>(
-      `${this.apiUrl}/discussions/${id}`, body, { headers: this.getHeaders() }
+      `${this.apiUrl}/discussions/${id}`, body, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => response.data),
       tap(updated => this.updateDiscussionInCache(updated)),
-      catchError(error => throwError(() => this.handleError(error)))
+      catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
 
@@ -292,18 +292,4 @@ export class ForumDiscussionService {
     }
   }
 
-  private getHeaders(): HttpHeaders {
-    return this.guestService.getGuestSessionHeader();
-  }
-
-  private handleError(error: HttpError): Error {
-    let message = 'Ismeretlen hiba történt';
-    if (error.error?.message) message = error.error.message;
-    else if (error.status === 401) message = 'Nincs jogosultságod ehhez a művelethez';
-    else if (error.status === 403) message = 'A hozzáférés megtagadva';
-    else if (error.status === 404) message = 'A beszélgetés nem található';
-    else if (error.status === 422) message = 'Érvénytelen adatok';
-    else if (error.status === 429) message = 'Túl sok kérés, kérlek várj egy kicsit';
-    return new Error(message);
-  }
 }

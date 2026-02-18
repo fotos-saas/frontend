@@ -115,7 +115,7 @@ export class PokeActionService {
       data: { poke: ApiPokeResponse; daily_limit: ApiDailyLimitResponse };
     }>(`${this.apiUrl}/pokes`, {
       target_id: targetId, category, preset_key: presetKey, custom_message: customMessage
-    }, { headers: this.getHeaders() }).pipe(
+    }, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) {
           const poke = this.mapPoke(response.data.poke);
@@ -141,7 +141,7 @@ export class PokeActionService {
     return this.http.get<{
       success: boolean;
       data: { pokes: ApiPokeResponse[]; daily_limit: ApiDailyLimitResponse };
-    }>(`${this.apiUrl}/pokes/sent`, { headers: this.getHeaders() }).pipe(
+    }>(`${this.apiUrl}/pokes/sent`, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) {
           this.sentPokes.set(response.data.pokes.map(this.mapPoke));
@@ -163,7 +163,7 @@ export class PokeActionService {
     return this.http.get<{
       success: boolean;
       data: { pokes: ApiPokeResponse[]; unread_count: number };
-    }>(`${this.apiUrl}/pokes/received`, { headers: this.getHeaders() }).pipe(
+    }>(`${this.apiUrl}/pokes/received`, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) {
           this.receivedPokes.set(response.data.pokes.map(this.mapPoke));
@@ -184,7 +184,7 @@ export class PokeActionService {
   addReaction(pokeId: number, reaction: ReactionEmoji): Observable<Poke | null> {
     return this.http.post<{
       success: boolean; data: { poke: ApiPokeResponse };
-    }>(`${this.apiUrl}/pokes/${pokeId}/reaction`, { reaction }, { headers: this.getHeaders() }).pipe(
+    }>(`${this.apiUrl}/pokes/${pokeId}/reaction`, { reaction }, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) {
           const updatedPoke = this.mapPoke(response.data.poke);
@@ -205,7 +205,7 @@ export class PokeActionService {
   markAsRead(pokeId: number): Observable<boolean> {
     return this.http.post<{
       success: boolean; data: { poke: ApiPokeResponse };
-    }>(`${this.apiUrl}/pokes/${pokeId}/read`, {}, { headers: this.getHeaders() }).pipe(
+    }>(`${this.apiUrl}/pokes/${pokeId}/read`, {}, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) {
           const updatedPoke = this.mapPoke(response.data.poke);
@@ -227,7 +227,7 @@ export class PokeActionService {
   markAllAsRead(): Observable<number> {
     return this.http.post<{
       success: boolean; data: { marked_count: number };
-    }>(`${this.apiUrl}/pokes/read-all`, {}, { headers: this.getHeaders() }).pipe(
+    }>(`${this.apiUrl}/pokes/read-all`, {}, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) {
           this.receivedPokes.update(pokes => pokes.map(p => ({ ...p, isRead: true })));
@@ -248,7 +248,7 @@ export class PokeActionService {
   refreshUnreadCount(): Observable<number> {
     return this.http.get<{
       success: boolean; data: { unread_count: number };
-    }>(`${this.apiUrl}/pokes/unread-count`, { headers: this.getHeaders() }).pipe(
+    }>(`${this.apiUrl}/pokes/unread-count`, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) this.unreadCount.set(response.data.unread_count);
       }),
@@ -266,7 +266,7 @@ export class PokeActionService {
   refreshDailyLimit(): Observable<PokeDailyLimit | null> {
     return this.http.get<{
       success: boolean; data: ApiDailyLimitResponse;
-    }>(`${this.apiUrl}/pokes/daily-limit`, { headers: this.getHeaders() }).pipe(
+    }>(`${this.apiUrl}/pokes/daily-limit`, { headers: this.guestService.getGuestSessionHeader() }).pipe(
       tap(response => {
         if (response.success) this.dailyLimit.set(this.mapDailyLimit(response.data));
       }),
@@ -358,13 +358,6 @@ export class PokeActionService {
 
 
   // === PRIVATE ===
-
-  private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders();
-    const sessionToken = this.guestService.getSessionToken();
-    if (sessionToken) headers = headers.set('X-Guest-Session', sessionToken);
-    return headers;
-  }
 
   private mapPoke = (api: ApiPokeResponse): Poke => ({
     id: api.id, from: api.from, target: api.target,

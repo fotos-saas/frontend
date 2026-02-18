@@ -6,7 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
-import { TeacherListItem, TeacherInSchool, SyncResultItem } from '../../models/teacher.models';
+import { TeacherListItem, SyncResultItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool } from '../../models/archive.models';
 import { ArchiveEditModalComponent } from '../../components/archive/archive-edit-modal/archive-edit-modal.component';
@@ -150,10 +150,10 @@ export class PartnerTeacherListComponent implements OnInit {
   };
 
   // Project view: upload, create, no-photo
-  uploadTarget = signal<TeacherInSchool | null>(null);
+  uploadTarget = signal<ArchivePersonInSchool | null>(null);
   showCreateForProject = signal(false);
-  createForTeacher = signal<TeacherInSchool | null>(null);
-  noPhotoTarget = signal<TeacherInSchool | null>(null);
+  createForTeacher = signal<ArchivePersonInSchool | null>(null);
+  noPhotoTarget = signal<ArchivePersonInSchool | null>(null);
   private readonly projectView = viewChild(ArchiveProjectViewComponent);
 
   // Download dialog
@@ -356,9 +356,9 @@ export class PartnerTeacherListComponent implements OnInit {
 
   onUploadPhotoFromProject(item: ArchivePersonInSchool): void {
     if (item.archiveId) {
-      this.uploadTarget.set(item as any);
+      this.uploadTarget.set(item);
     } else {
-      this.createForTeacher.set(item as any);
+      this.createForTeacher.set(item);
       this.showCreateForProject.set(true);
     }
   }
@@ -385,7 +385,7 @@ export class PartnerTeacherListComponent implements OnInit {
   }
 
   onMarkNoPhotoFromProject(item: ArchivePersonInSchool): void {
-    this.noPhotoTarget.set(item as any);
+    this.noPhotoTarget.set(item);
   }
 
   onConfirmNoPhoto(result: { action: 'confirm' | 'cancel' }): void {
@@ -452,6 +452,22 @@ export class PartnerTeacherListComponent implements OnInit {
           this.downloading.set(false);
         },
         error: () => this.downloading.set(false),
+      });
+  }
+
+  onSyncSingleItem(item: ArchivePersonInSchool): void {
+    if (!item.archiveId) return;
+    this.teacherService.syncCrossSchool(item.archiveId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.projectView()?.updateItemField(item.archiveId, {
+            hasPhoto: true,
+            hasSyncablePhoto: false,
+            photoUrl: res.data.photoUrl,
+            photoThumbUrl: res.data.photoThumbUrl,
+          });
+        },
       });
   }
 }

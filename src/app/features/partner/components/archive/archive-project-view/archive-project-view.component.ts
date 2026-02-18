@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, input, output, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, input, output, DestroyRef, ChangeDetectionStrategy, effect, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import {
@@ -26,7 +26,7 @@ import { ICONS } from '../../../../../shared/constants/icons.constants';
   styleUrl: './archive-project-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ArchiveProjectViewComponent implements OnInit {
+export class ArchiveProjectViewComponent {
   config = input.required<ArchiveConfig>();
   classYears = input<SelectOption[]>([]);
   schoolOptions = input<SelectOption[]>([]);
@@ -75,22 +75,15 @@ export class ArchiveProjectViewComponent implements OnInit {
     return this.filteredSchoolGroups().slice(start, start + this.perPage);
   });
 
-  ngOnInit(): void {
-    this.waitForYearsAndLoad();
-  }
-
-  private waitForYearsAndLoad(): void {
-    const checkAndLoad = (): void => {
+  constructor() {
+    effect(() => {
       const years = this.classYears();
       if (years.length > 0 && !this.initialized()) {
         this.selectedYear.set(String(years[0].id));
         this.initialized.set(true);
-        this.loadData();
-      } else if (!this.initialized()) {
-        setTimeout(() => checkAndLoad(), 100);
+        untracked(() => this.loadData());
       }
-    };
-    checkAndLoad();
+    });
   }
 
   loadData(): void {

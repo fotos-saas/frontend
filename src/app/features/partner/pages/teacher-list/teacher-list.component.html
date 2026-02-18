@@ -52,6 +52,7 @@
       (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
       (undoNoPhotoRequest)="onUndoNoPhotoFromProject($event)"
       (syncPhotosRequest)="onSyncPhotosFromProject($event)"
+      (syncSingleItemRequest)="onSyncSingleItem($event)"
       (downloadAllRequest)="onDownloadAllRequest()"
     />
   } @else if (viewMode() === 'history') {

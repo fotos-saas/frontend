@@ -9,8 +9,9 @@
   <!-- Keresés + Kategória szűrő -->
   <div class="filters">
     <ps-input
+      class="search-input"
       prefix="search"
-      placeholder="Keresés sablon neve vagy tárgya alapján..."
+      placeholder="Keresés..."
       [ngModel]="search()"
       (ngModelChange)="search.set($event)"
     />

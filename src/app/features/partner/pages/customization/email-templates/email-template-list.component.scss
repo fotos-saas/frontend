@@ -53,6 +53,11 @@
   display: none;
 }
 
+// Keresés: flex containerben ne nyúljon túlra
+.search-input {
+  min-width: 0;
+}
+
 .template-display-name {
   display: block;
   font-weight: 500;

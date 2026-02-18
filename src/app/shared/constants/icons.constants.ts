@@ -176,6 +176,7 @@ export const ICONS = {
   EDIT: 'pencil',
   DELETE: 'trash-2',
   COPY: 'copy',
+  CODE: 'code',
   CHECK: 'check',
   REFRESH: 'refresh-cw',
   DOWNLOAD: 'download',

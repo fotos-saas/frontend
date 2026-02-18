@@ -176,6 +176,7 @@ export class PartnerShellComponent implements OnInit {
         icon: 'palette',
         children: [
           { id: 'branding', route: `${base}/customization/branding`, label: 'Márkajelzés' },
+          { id: 'email-templates', route: `${base}/customization/email-templates`, label: 'Email sablonok' },
         ]
       },
       {

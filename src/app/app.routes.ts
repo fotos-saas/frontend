@@ -253,6 +253,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/customization/branding/branding.component').then(m => m.BrandingComponent),
         title: 'Márkajelzés'
       },
+      {
+        path: 'customization/email-templates',
+        loadComponent: () => import('./features/partner/pages/customization/email-templates/email-template-list.component').then(m => m.EmailTemplateListComponent),
+        title: 'Email sablonok'
+      },
+      {
+        path: 'customization/email-templates/:name',
+        loadComponent: () => import('./features/partner/pages/customization/email-templates/email-template-edit/email-template-edit.component').then(m => m.EmailTemplateEditComponent),
+        title: 'Email sablon szerkesztése'
+      },
       // Előfizetésem - subscription management
       {
         path: 'subscription',

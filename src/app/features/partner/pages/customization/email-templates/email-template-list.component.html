@@ -1,0 +1,114 @@
+<div class="email-template-list page-card">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Email sablonok</h1>
+      <p class="subtitle">{{ templates().length }} sablon, {{ customizedCount() }} testreszabott</p>
+    </div>
+  </header>
+
+  <!-- Keresés + Kategória szűrő -->
+  <div class="filters">
+    <ps-input
+      prefix="search"
+      placeholder="Keresés sablon neve vagy tárgya alapján..."
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+
+    <div class="category-chips">
+      @for (cat of categories; track cat) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="activeCategory() === cat"
+          (click)="setCategory(cat)"
+        >
+          {{ CATEGORY_LABELS[cat] }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (filteredTemplates().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.MAIL" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      <p>Próbálj más keresési feltételekkel vagy kategóriával!</p>
+    </div>
+  } @else {
+    <!-- Table header -->
+    <div class="table-header">
+      <span class="th th-name">Sablon neve</span>
+      <span class="th th-subject">Tárgy</span>
+      <span class="th th-status">Státusz</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <!-- Lista sorok -->
+    <div class="row-grid">
+      @for (template of filteredTemplates(); track template.name; let i = $index) {
+        <div
+          class="list-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+          (click)="openTemplate(template)"
+        >
+          <div class="cell cell-name">
+            <span class="template-display-name">{{ template.display_name }}</span>
+            <span class="template-slug">{{ template.name }}</span>
+          </div>
+          <div class="cell cell-subject">
+            {{ template.subject }}
+          </div>
+          <div class="cell cell-status">
+            @if (template.is_customized) {
+              <span class="badge badge--green">Testreszabott</span>
+            } @else {
+              <span class="badge badge--gray">Alapértelmezett</span>
+            }
+          </div>
+          <div class="cell cell-actions">
+            <button
+              type="button"
+              class="action-btn"
+              matTooltip="Szerkesztés"
+              (click)="openTemplate(template); $event.stopPropagation()"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </button>
+            @if (template.is_customized) {
+              <button
+                type="button"
+                class="action-btn action-btn--danger"
+                matTooltip="Visszaállítás"
+                (click)="askReset(template, $event)"
+              >
+                <lucide-icon [name]="ICONS.UNDO" [size]="16" />
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Visszaállítás megerősítő dialógus -->
+@if (resetConfirm()) {
+  <app-confirm-dialog
+    title="Sablon visszaállítása"
+    [message]="'Biztosan visszaállítod a \'' + resetConfirm()!.display_name + '\' sablont az alapértelmezettre? A testreszabott tartalom elvész.'"
+    confirmText="Visszaállítás"
+    confirmType="warning"
+    [isSubmitting]="resetting()"
+    (resultEvent)="confirmReset($event)"
+  />
+}

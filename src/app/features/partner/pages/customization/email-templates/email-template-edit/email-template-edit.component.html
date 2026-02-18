@@ -1,0 +1,186 @@
+<div class="email-template-edit page-card page-card--wide">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <button type="button" class="back-btn" (click)="goBack()" matTooltip="Vissza a sablonokhoz">
+        <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+      </button>
+      <div>
+        <h1>{{ template()?.display_name ?? 'Betöltés...' }}</h1>
+        @if (template(); as t) {
+          <p class="subtitle">
+            {{ t.name }}
+            @if (t.is_customized) {
+              <span class="badge badge--green">Testreszabott</span>
+            }
+          </p>
+        }
+      </div>
+    </div>
+    <div class="header-buttons">
+      <button
+        type="button"
+        class="btn-secondary"
+        [disabled]="previewing()"
+        (click)="openPreview()"
+      >
+        <lucide-icon [name]="ICONS.EYE" [size]="16" />
+        Előnézet
+      </button>
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="saving() || !isDirty()"
+        (click)="save()"
+      >
+        <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+        {{ saving() ? 'Mentés...' : 'Mentés' }}
+      </button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (template(); as t) {
+    <div class="editor-layout">
+      <!-- Bal oszlop: szerkesztő -->
+      <div class="editor-column">
+        <!-- Tárgy -->
+        <div class="field-group">
+          <label class="field-label">Tárgy</label>
+          <input
+            #subjectInput
+            type="text"
+            class="field-input"
+            [ngModel]="editSubject()"
+            (ngModelChange)="editSubject.set($event)"
+            placeholder="Email tárgy sora..."
+          />
+        </div>
+
+        <!-- Tab váltó -->
+        <div class="editor-tabs">
+          <button
+            type="button"
+            class="editor-tab"
+            [class.editor-tab--active]="activeTab() === 'visual'"
+            (click)="setTab('visual')"
+          >
+            <lucide-icon [name]="ICONS.EDIT" [size]="14" />
+            Vizuális
+          </button>
+          <button
+            type="button"
+            class="editor-tab"
+            [class.editor-tab--active]="activeTab() === 'html'"
+            (click)="setTab('html')"
+          >
+            <lucide-icon [name]="ICONS.CODE" [size]="14" />
+            HTML
+          </button>
+        </div>
+
+        <!-- WYSIWYG editor -->
+        @if (activeTab() === 'visual') {
+          <div class="quill-wrapper">
+            <quill-editor
+              #quillEditor
+              [ngModel]="editBody()"
+              [modules]="quillModules"
+              placeholder="Email sablon tartalma..."
+              (onContentChanged)="onQuillContentChanged($event)"
+            />
+          </div>
+        } @else {
+          <!-- HTML editor -->
+          <div class="html-editor-wrapper">
+            <p class="html-notice">
+              <lucide-icon [name]="ICONS.INFO" [size]="14" />
+              A vizuális szerkesztő átformázhatja a HTML-t
+            </p>
+            <textarea
+              #htmlTextarea
+              class="html-textarea"
+              [ngModel]="editBody()"
+              (ngModelChange)="onHtmlChanged($event)"
+              placeholder="HTML tartalom..."
+              spellcheck="false"
+            ></textarea>
+          </div>
+        }
+      </div>
+
+      <!-- Jobb oszlop: változók -->
+      <aside class="variables-column">
+        <h3 class="variables-title">
+          <lucide-icon [name]="ICONS.CODE" [size]="16" />
+          Elérhető változók
+        </h3>
+        <p class="variables-hint">Kattints egy változóra a beszúráshoz</p>
+
+        @for (group of variables(); track group.group) {
+          <div class="variable-group">
+            <button
+              type="button"
+              class="variable-group-header"
+              (click)="toggleGroup(group.group)"
+            >
+              <lucide-icon
+                [name]="isGroupExpanded(group.group) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
+                [size]="14"
+              />
+              <span>{{ group.label }}</span>
+              <span class="variable-count">{{ group.variables.length }}</span>
+            </button>
+
+            @if (isGroupExpanded(group.group)) {
+              <div class="variable-list">
+                @for (v of group.variables; track v.key) {
+                  <button
+                    type="button"
+                    class="variable-item"
+                    [matTooltip]="'Beszúrás a tárgyba: Shift+klikk'"
+                    (click)="$event.shiftKey ? insertVariableToSubject(v.key) : insertVariable(v.key)"
+                  >
+                    <code class="variable-key">{{ '{' + v.key + '}' }}</code>
+                    <span class="variable-desc">{{ v.description }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </aside>
+    </div>
+  }
+</div>
+
+<!-- Előnézet dialógus -->
+@if (previewOpen()) {
+  <app-dialog-wrapper
+    title="Email előnézet"
+    size="lg"
+    theme="blue"
+    headerStyle="flat"
+    icon="eye"
+    (closed)="closePreview()"
+  >
+    <div dialogBody>
+      <div class="preview-subject">
+        <strong>Tárgy:</strong> {{ previewSubject() }}
+      </div>
+      <div class="preview-frame">
+        <iframe
+          class="preview-iframe"
+          [srcdoc]="previewHtml()"
+          sandbox="allow-same-origin"
+          title="Email előnézet"
+        ></iframe>
+      </div>
+    </div>
+  </app-dialog-wrapper>
+}

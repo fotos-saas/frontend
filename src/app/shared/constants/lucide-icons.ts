@@ -161,6 +161,8 @@ import {
   File,
   // More menu
   MoreVertical,
+  // Code editor
+  Code,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -318,4 +320,6 @@ export const LUCIDE_ICONS_MAP = {
   File,
   // More menu
   MoreVertical,
+  // Code editor
+  Code,
 };

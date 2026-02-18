@@ -8,6 +8,7 @@ import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerFinalizationService, PrintFileType } from '../../services/partner-finalization.service';
 import { PrintReadyFile, TabloSize } from '../../models/partner.models';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { formatFileSize } from '@shared/utils/formatters.util';
 
 const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
 const ALLOWED_TYPES = ['application/pdf', 'image/tiff', 'image/jpeg', 'image/png', 'image/vnd.adobe.photoshop'];
@@ -124,9 +125,7 @@ export class PrintReadyUploadDialogComponent {
   }
 
   formatFileSize(bytes: number): string {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1048576).toFixed(1) + ' MB';
+    return formatFileSize(bytes);
   }
 
   private validateAndSetFile(file: File): void {

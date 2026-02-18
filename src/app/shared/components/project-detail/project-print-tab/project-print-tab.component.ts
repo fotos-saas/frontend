@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProjectDetailData } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
+import { formatFileSize } from '@shared/utils/formatters.util';
 
 export type PrintFileType = 'small_tablo' | 'flat';
 
@@ -596,8 +597,6 @@ export class ProjectPrintTabComponent {
   }
 
   formatFileSize(bytes: number): string {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1048576).toFixed(1) + ' MB';
+    return formatFileSize(bytes);
   }
 }

@@ -1,6 +1,7 @@
 /**
- * Gallery Photo interface
- * Represents a single photo from a TabloGallery
+ * Gallery Photo interface (guest/public nézet, camelCase)
+ * Represents a single photo from a TabloGallery.
+ * NE keverd össze: partner/models/gallery.models.ts → partner admin nézet (snake_case, más mezők)
  */
 export interface GalleryPhoto {
   id: number;

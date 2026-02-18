@@ -1,5 +1,6 @@
 /**
- * Gallery fotó (Spatie Media)
+ * Gallery fotó (partner admin nézet, Spatie Media snake_case válasz)
+ * NE keverd össze: core/models/gallery.models.ts → guest/public nézet (camelCase, más mezők)
  */
 export interface GalleryPhoto {
   id: number;

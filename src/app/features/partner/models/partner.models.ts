@@ -4,7 +4,7 @@
  */
 
 import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
-import type { PaginatedResponse as CorePaginatedResponse } from '../../../core/models/api.models';
+import type { ExtendedPaginatedResponse } from '../../../core/models/api.models';
 
 /**
  * Dashboard statisztikák
@@ -429,12 +429,9 @@ export interface ProjectLimits {
 }
 
 /**
- * Pagináció response interface (extends központi PaginatedResponse)
+ * Pagináció response interface (alias a központi ExtendedPaginatedResponse-ra)
  */
-export interface PaginatedResponse<T> extends CorePaginatedResponse<T> {
-  from: number | null;
-  to: number | null;
-}
+export type PaginatedResponse<T> = ExtendedPaginatedResponse<T>;
 
 /**
  * Projekt lista válasz interface (limitekkel)

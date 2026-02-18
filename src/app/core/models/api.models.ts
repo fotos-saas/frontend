@@ -10,3 +10,12 @@ export interface PaginatedResponse<T> {
   per_page: number;
   total: number;
 }
+
+/**
+ * Kiterjesztett pagináció response (from/to mezőkkel)
+ * Laravel paginator válasz formátum.
+ */
+export interface ExtendedPaginatedResponse<T> extends PaginatedResponse<T> {
+  from: number | null;
+  to: number | null;
+}

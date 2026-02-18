@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import type { PaginatedResponse } from '../../../core/models/api.models';
+import type { ExtendedPaginatedResponse } from '../../../core/models/api.models';
 
 /**
  * Dashboard statisztikák
@@ -118,18 +118,14 @@ export interface SchoolListItem {
 }
 
 /**
- * Marketer-specifikus pagináció response (extends központi PaginatedResponse)
+ * Marketer-specifikus pagináció response (alias a központi ExtendedPaginatedResponse-ra)
  */
-export interface MarketerPaginatedResponse<T> extends PaginatedResponse<T> {
-  from: number | null;
-  to: number | null;
-}
+export type MarketerPaginatedResponse<T> = ExtendedPaginatedResponse<T>;
 
 /**
  * Export alias - komponensek backward compatibility-hez
- * @deprecated Use MarketerPaginatedResponse instead
  */
-export { MarketerPaginatedResponse as PaginatedResponse };
+export type PaginatedResponse<T> = ExtendedPaginatedResponse<T>;
 
 /**
  * Marketer API Service

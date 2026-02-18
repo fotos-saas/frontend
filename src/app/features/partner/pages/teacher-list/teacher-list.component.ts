@@ -15,6 +15,7 @@ import { ArchiveBulkPhotoUploadComponent } from '../../components/archive/archiv
 import { TeacherLinkDialogComponent } from '../../components/teacher-link-dialog/teacher-link-dialog.component';
 import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
 import { ArchiveProjectViewComponent } from '../../components/archive/archive-project-view/archive-project-view.component';
+import { TeacherUploadHistoryComponent } from '../../components/teacher-upload-history/teacher-upload-history.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
 import { PsSearchableSelectComponent, SelectOption } from '@shared/components/form';
@@ -38,6 +39,7 @@ import { ViewModeToggleComponent, ViewModeOption } from '../../../../shared/comp
     TeacherLinkDialogComponent,
     ArchivePhotoUploadComponent,
     ArchiveProjectViewComponent,
+    TeacherUploadHistoryComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
     PsSearchableSelectComponent,
@@ -70,6 +72,7 @@ export class PartnerTeacherListComponent implements OnInit {
   readonly viewModeOptions: ViewModeOption[] = [
     { value: 'flat', label: 'Tanár nézet', icon: ICONS.LIST },
     { value: 'project', label: 'Projekt nézet', icon: ICONS.FOLDER },
+    { value: 'history', label: 'Előzmények', icon: ICONS.HISTORY },
   ];
 
   readonly filterState = useFilterState({
@@ -80,8 +83,8 @@ export class PartnerTeacherListComponent implements OnInit {
     onStateChange: () => this.loadTeachers(),
   });
 
-  viewMode = signal<'flat' | 'project'>(
-    (sessionStorage.getItem('teacher-list-view') as 'flat' | 'project') || 'flat'
+  viewMode = signal<'flat' | 'project' | 'history'>(
+    (sessionStorage.getItem('teacher-list-view') as 'flat' | 'project' | 'history') || 'flat'
   );
 
   teachers = signal<TeacherListItem[]>([]);
@@ -206,7 +209,7 @@ export class PartnerTeacherListComponent implements OnInit {
   }
 
   setViewMode(mode: string): void {
-    const m = mode as 'flat' | 'project';
+    const m = mode as 'flat' | 'project' | 'history';
     this.viewMode.set(m);
     sessionStorage.setItem('teacher-list-view', m);
   }

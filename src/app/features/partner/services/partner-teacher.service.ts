@@ -18,6 +18,7 @@ import {
   SyncTeacherRequest,
   SyncPreviewResponse,
   SyncExecuteResponse,
+  TeacherUploadHistoryResponse,
 } from '../models/teacher.models';
 import { PaginatedResponse } from '../models/partner.models';
 import {
@@ -270,6 +271,25 @@ export class PartnerTeacherService implements ArchiveService {
       year,
       filenames,
     });
+  }
+
+  // ============ Upload History (Feltöltési előzmények) ============
+
+  getUploadHistory(params?: { page?: number; per_page?: number }): Observable<TeacherUploadHistoryResponse> {
+    const httpParams = buildHttpParams({
+      page: params?.page,
+      per_page: params?.per_page,
+    });
+
+    return this.http.get<TeacherUploadHistoryResponse>(`${this.baseUrl}/upload-history`, { params: httpParams });
+  }
+
+  markUploadSeen(date: string): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/upload-history/mark-seen`, { date });
+  }
+
+  downloadUploadZip(date: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/upload-history/download/${date}`, { responseType: 'blob' });
   }
 
   bulkPhotoUpload(schoolId: number, year: number, setActive: boolean, assignments: Record<string, number>, photos: File[]): Observable<{ success: boolean; data: { summary: BulkPhotoUploadSummary; results: BulkPhotoUploadResult[] } }> {

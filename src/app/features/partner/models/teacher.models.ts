@@ -229,3 +229,37 @@ export interface SyncExecuteResponse {
   skipped: number;
   details: SyncResultItem[];
 }
+
+// Upload History típusok (Feltöltési előzmények)
+
+export interface TeacherUploadHistoryItem {
+  teacherId: number;
+  teacherName: string;
+  photoThumbUrl: string | null;
+  fileName: string | null;
+  uploadedAt: string;
+}
+
+export interface TeacherUploadHistorySchool {
+  schoolId: number;
+  schoolName: string;
+  uploads: TeacherUploadHistoryItem[];
+}
+
+export interface TeacherUploadHistoryDay {
+  date: string;
+  isNew: boolean;
+  uploadCount: number;
+  schools: TeacherUploadHistorySchool[];
+}
+
+export interface TeacherUploadHistoryResponse {
+  days: TeacherUploadHistoryDay[];
+  pagination: {
+    currentPage: number;
+    lastPage: number;
+    perPage: number;
+    total: number;
+  };
+  unseenCount: number;
+}

@@ -37,6 +37,8 @@
       (undoNoPhotoRequest)="onUndoNoPhotoFromProject($event)"
       (syncPhotosRequest)="onSyncPhotosFromProject($event)"
     />
+  } @else if (viewMode() === 'history') {
+    <app-teacher-upload-history />
   } @else {
 
   <!-- Szűrők -->

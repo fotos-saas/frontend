@@ -10,32 +10,34 @@
         [value]="viewMode()"
         (valueChange)="setViewMode($event)"
       />
-      <button type="button" class="btn-primary" (click)="openCreateModal()">
-        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
-        Új tanár
-      </button>
-      <div class="more-menu-wrapper">
-        <button
-          type="button"
-          class="btn-icon"
-          matTooltip="További műveletek"
-          (click)="toggleMoreMenu()"
-        >
-          <lucide-icon [name]="ICONS.MORE_VERTICAL" [size]="20" />
+      <div class="header-actions">
+        <button type="button" class="btn-primary" (click)="openCreateModal()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+          Új tanár
         </button>
-        @if (showMoreMenu()) {
-          <div class="more-menu-backdrop" (click)="closeMoreMenu()"></div>
-          <div class="more-menu">
-            <button type="button" class="more-menu__item" (click)="openBulkPhotoUpload(); closeMoreMenu()">
-              <lucide-icon [name]="ICONS.IMAGES" [size]="16" />
-              Tömeges fotó feltöltés
-            </button>
-            <button type="button" class="more-menu__item" (click)="openBulkImport(); closeMoreMenu()">
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-              Tömeges import
-            </button>
-          </div>
-        }
+        <div class="more-menu-wrapper">
+          <button
+            type="button"
+            class="btn-icon"
+            matTooltip="További műveletek"
+            (click)="toggleMoreMenu()"
+          >
+            <lucide-icon [name]="ICONS.MORE_VERTICAL" [size]="20" />
+          </button>
+          @if (showMoreMenu()) {
+            <div class="more-menu-backdrop" (click)="closeMoreMenu()"></div>
+            <div class="more-menu">
+              <button type="button" class="more-menu__item" (click)="openBulkPhotoUpload(); closeMoreMenu()">
+                <lucide-icon [name]="ICONS.IMAGES" [size]="16" />
+                Tömeges fotó feltöltés
+              </button>
+              <button type="button" class="more-menu__item" (click)="openBulkImport(); closeMoreMenu()">
+                <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+                Tömeges import
+              </button>
+            </div>
+          }
+        </div>
       </div>
     </div>
   </header>

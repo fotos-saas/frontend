@@ -104,8 +104,11 @@
 .editor-tab {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   padding: 8px 16px;
+
+  lucide-icon {
+    margin-right: 6px;
+  }
   border: none;
   background: none;
   font-size: 13px;
@@ -158,8 +161,11 @@
 .html-notice {
   display: flex;
   align-items: center;
-  gap: 6px;
   padding: 8px 14px;
+
+  lucide-icon {
+    margin-right: 6px;
+  }
   font-size: 12px;
   color: var(--text-tertiary, #94a3b8);
   background: var(--bg-muted, #f8fafc);
@@ -218,8 +224,11 @@
 .variables-title {
   display: flex;
   align-items: center;
-  gap: 8px;
   font-size: 14px;
+
+  lucide-icon {
+    margin-right: 8px;
+  }
   font-weight: 600;
   color: var(--text-primary, #1f2937);
   margin: 0 0 4px;
@@ -238,8 +247,11 @@
 .variable-group-header {
   display: flex;
   align-items: center;
-  gap: 6px;
   width: 100%;
+
+  > lucide-icon {
+    margin-right: 6px;
+  }
   padding: 8px 6px;
   border: none;
   background: none;
@@ -441,15 +453,19 @@
 @media (max-width: 640px) {
   .page-header {
     flex-direction: column;
-    gap: 12px;
+
+    .header-content {
+      margin-bottom: 12px;
+    }
   }
 
   .header-buttons {
     width: 100%;
     display: flex;
-    gap: 8px;
+    margin: -4px;
 
     button {
+      margin: 4px;
       flex: 1;
     }
   }

@@ -144,7 +144,7 @@
         Elérhető változók
       </h3>
       <button type="button" class="variables-sheet-close" (click)="closeVariables()">
-        <lucide-icon name="x" [size]="20" />
+        <lucide-icon [name]="ICONS.X" [size]="20" />
       </button>
     </div>
     <div class="variables-sheet-body">
@@ -213,7 +213,7 @@
         <iframe
           class="preview-iframe"
           [srcdoc]="previewHtml()"
-          sandbox="allow-same-origin"
+          sandbox=""
           title="Email előnézet"
         ></iframe>
       </div>

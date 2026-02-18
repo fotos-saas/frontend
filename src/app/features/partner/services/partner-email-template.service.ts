@@ -9,7 +9,7 @@ import {
   EmailTemplatePreview,
 } from '../models/email-template.model';
 
-interface ApiResponse<T> {
+interface EmailTemplateResponse<T> {
   data: T;
   message?: string;
 }
@@ -19,29 +19,29 @@ export class PartnerEmailTemplateService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/partner/email-templates`;
 
-  getTemplates(search?: string): Observable<ApiResponse<EmailTemplateListItem[]>> {
+  getTemplates(search?: string): Observable<EmailTemplateResponse<EmailTemplateListItem[]>> {
     const params: Record<string, string> = {};
     if (search) params['search'] = search;
-    return this.http.get<ApiResponse<EmailTemplateListItem[]>>(this.apiUrl, { params });
+    return this.http.get<EmailTemplateResponse<EmailTemplateListItem[]>>(this.apiUrl, { params });
   }
 
-  getTemplate(name: string): Observable<ApiResponse<EmailTemplateDetail>> {
-    return this.http.get<ApiResponse<EmailTemplateDetail>>(`${this.apiUrl}/${name}`);
+  getTemplate(name: string): Observable<EmailTemplateResponse<EmailTemplateDetail>> {
+    return this.http.get<EmailTemplateResponse<EmailTemplateDetail>>(`${this.apiUrl}/${name}`);
   }
 
-  getVariables(): Observable<ApiResponse<EmailVariableGroup[]>> {
-    return this.http.get<ApiResponse<EmailVariableGroup[]>>(`${this.apiUrl}/variables`);
+  getVariables(): Observable<EmailTemplateResponse<EmailVariableGroup[]>> {
+    return this.http.get<EmailTemplateResponse<EmailVariableGroup[]>>(`${this.apiUrl}/variables`);
   }
 
-  updateTemplate(name: string, data: { subject: string; body: string }): Observable<ApiResponse<EmailTemplateDetail>> {
-    return this.http.put<ApiResponse<EmailTemplateDetail>>(`${this.apiUrl}/${name}`, data);
+  updateTemplate(name: string, data: { subject: string; body: string }): Observable<EmailTemplateResponse<EmailTemplateDetail>> {
+    return this.http.put<EmailTemplateResponse<EmailTemplateDetail>>(`${this.apiUrl}/${name}`, data);
   }
 
-  resetToDefault(name: string): Observable<ApiResponse<null>> {
-    return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${name}/reset`);
+  resetToDefault(name: string): Observable<EmailTemplateResponse<null>> {
+    return this.http.delete<EmailTemplateResponse<null>>(`${this.apiUrl}/${name}/reset`);
   }
 
-  preview(name: string, data: { subject: string; body: string }): Observable<ApiResponse<EmailTemplatePreview>> {
-    return this.http.post<ApiResponse<EmailTemplatePreview>>(`${this.apiUrl}/${name}/preview`, data);
+  preview(name: string, data: { subject: string; body: string }): Observable<EmailTemplateResponse<EmailTemplatePreview>> {
+    return this.http.post<EmailTemplateResponse<EmailTemplatePreview>>(`${this.apiUrl}/${name}/preview`, data);
   }
 }

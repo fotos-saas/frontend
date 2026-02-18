@@ -184,6 +184,22 @@
           </div>
         }
       }
+      <!-- Segítség gomb (mobil help chatbot) -->
+      <div class="my-2 mx-4 border-t border-slate-800"></div>
+      <div class="px-2 mb-1">
+        <button
+          type="button"
+          class="flex items-center gap-3 px-4 py-3 w-full
+                 rounded-lg transition-all duration-200
+                 text-slate-300 hover:bg-slate-800/60 hover:text-slate-200
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500
+                 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+          (click)="onHelpClick()"
+        >
+          <lucide-icon name="help-circle" [size]="20"></lucide-icon>
+          <span class="text-sm">Segítség</span>
+        </button>
+      </div>
     </nav>
 
     <!-- User Section (opcionális - ha userInfo megadva) -->

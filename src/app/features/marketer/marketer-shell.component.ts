@@ -96,6 +96,7 @@ import { PartnerSwitcherDropdownComponent } from '../../shared/components/partne
           [userInfo]="{ name: userName(), email: userEmail() }"
           [showPartnerSwitcher]="hasMultiplePartners()"
           [currentPartnerId]="currentPartnerId()"
+          (helpClick)="chatOpen.set(true)"
           (logoutEvent)="logout()"
         />
 

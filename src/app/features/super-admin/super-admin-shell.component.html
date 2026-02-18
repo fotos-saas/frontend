@@ -61,6 +61,7 @@
     <app-mobile-nav-overlay
       [customMenuItems]="mobileMenuItems()"
       [userInfo]="{ name: userName(), email: userEmail() }"
+      (helpClick)="chatOpen.set(true)"
       (logoutEvent)="logout()"
     />
 

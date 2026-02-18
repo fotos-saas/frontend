@@ -37,6 +37,7 @@
   <!-- Mobile Overlay -->
   <app-mobile-nav-overlay
     [userInfo]="mobileUserInfo()"
+    (helpClick)="chatOpen.set(true)"
     (logoutEvent)="onLogout()"
   />
 

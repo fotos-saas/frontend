@@ -66,6 +66,9 @@ export class MobileNavOverlayComponent {
   // Logout callback (opcionális - ha megadva, megjelenik a kijelentkezés gomb)
   logoutEvent = output<void>();
 
+  // Help chatbot megnyitása (mobilon a FAB helyett)
+  helpClick = output<void>();
+
   // Computed: aktuális menüelemek (custom vagy MenuConfig)
   protected menuItems = computed(() => {
     const custom = this.customMenuItems();
@@ -127,6 +130,14 @@ export class MobileNavOverlayComponent {
    */
   onNavigate(): void {
     this.sidebarState.close();
+  }
+
+  /**
+   * Help chatbot megnyitása
+   */
+  onHelpClick(): void {
+    this.sidebarState.close();
+    this.helpClick.emit();
   }
 
   /**

@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
+import type { AlbumType } from '../../../../services/partner.service';
 
 /**
- * Wizard header - cím és bezárás gomb.
+ * Wizard header - cím (album névvel) és bezárás gomb.
  */
 @Component({
   selector: 'app-wizard-header',
@@ -12,7 +13,16 @@ import { ICONS } from '../../../../../../shared/constants/icons.constants';
   template: `
     <div class="wizard-header">
       <div class="header-content">
-        <h2>{{ title() }}</h2>
+        <h2>
+          {{ title() }}
+          @if (albumLabel()) {
+            <span class="album-separator">·</span>
+            <span class="album-label">
+              <lucide-icon [name]="albumIcon()" [size]="18" />
+              {{ albumLabel() }}
+            </span>
+          }
+        </h2>
         @if (subtitle()) {
           <p class="subtitle">{{ subtitle() }}</p>
         }
@@ -32,10 +42,28 @@ import { ICONS } from '../../../../../../shared/constants/icons.constants';
     }
 
     .header-content h2 {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
       font-size: 1.25rem;
       font-weight: 600;
       color: #1e293b;
       margin: 0 0 4px 0;
+    }
+
+    .album-separator {
+      margin: 0 8px;
+      color: #cbd5e1;
+      font-weight: 300;
+    }
+
+    .album-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: #475569;
     }
 
     .subtitle {
@@ -56,11 +84,22 @@ import { ICONS } from '../../../../../../shared/constants/icons.constants';
       color: #64748b;
       cursor: pointer;
       transition: all 0.15s ease;
+      flex-shrink: 0;
     }
 
     .close-btn:hover {
       background: #e2e8f0;
       color: #1e293b;
+    }
+
+    @media (max-width: 480px) {
+      .header-content h2 {
+        font-size: 1.0625rem;
+      }
+
+      .album-label {
+        font-size: 1rem;
+      }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -70,6 +109,18 @@ export class WizardHeaderComponent {
 
   readonly title = input<string>('Képek feltöltése');
   readonly subtitle = input<string>('');
+  readonly selectedAlbum = input<AlbumType | null>(null);
 
   readonly close = output<void>();
+
+  readonly albumLabel = computed(() => {
+    const album = this.selectedAlbum();
+    if (!album) return '';
+    return album === 'students' ? 'Diákok' : 'Tanárok';
+  });
+
+  readonly albumIcon = computed(() => {
+    const album = this.selectedAlbum();
+    return album === 'students' ? ICONS.GRADUATION_CAP : ICONS.BRIEFCASE;
+  });
 }

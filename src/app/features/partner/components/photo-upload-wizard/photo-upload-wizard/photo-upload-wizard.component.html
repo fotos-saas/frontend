@@ -4,16 +4,9 @@
     <app-wizard-header
       title="Képek feltöltése"
       [subtitle]="projectName()"
+      [selectedAlbum]="currentStep() !== 'albums' ? selectedAlbum() : null"
       (close)="onClose()"
     />
-
-    <!-- Album badge -->
-    @if (currentStep() !== 'albums' && selectedAlbum()) {
-      <div class="album-badge">
-        <lucide-icon [name]="selectedAlbum() === 'students' ? ICONS.GRADUATION_CAP : ICONS.BRIEFCASE" [size]="16" />
-        <span>{{ selectedAlbum() === 'students' ? 'Diákok' : 'Tanárok' }}</span>
-      </div>
-    }
 
     <!-- Stepper -->
     @if (currentStep() !== 'albums') {

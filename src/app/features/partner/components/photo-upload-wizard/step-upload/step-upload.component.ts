@@ -4,6 +4,8 @@ import {
   input,
   output,
   signal,
+  computed,
+  effect,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
@@ -36,14 +38,30 @@ export class StepUploadComponent {
   readonly removeAllPhotos = output<void>();
   readonly continueToMatching = output<void>();
 
-  showDropZone = signal(true);
+  /** Manuális toggle: a user "Elrejt"/"További képek" gombbal állítja */
+  private readonly userWantsDropZone = signal(true);
+
+  /** Drop zone látható: feltöltés közben MINDIG (progress miatt), egyébként user toggle */
+  readonly showDropZone = computed(() =>
+    this.uploading() || this.userWantsDropZone()
+  );
+
+  constructor() {
+    // Feltöltés végén elrejtjük a drop zone-t (ha vannak már képek)
+    effect(() => {
+      const wasUploading = this.uploading();
+      const hasPhotos = this.uploadedPhotos().length > 0;
+      if (!wasUploading && hasPhotos) {
+        this.userWantsDropZone.set(false);
+      }
+    });
+  }
 
   onFilesSelected(files: File[]): void {
     this.filesSelected.emit(files);
-    this.showDropZone.set(false); // Elrejtjük a drop zone-t feltöltés után
   }
 
   toggleDropZone(): void {
-    this.showDropZone.update(v => !v);
+    this.userWantsDropZone.update(v => !v);
   }
 }

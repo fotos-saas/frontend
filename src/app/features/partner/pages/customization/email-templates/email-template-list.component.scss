@@ -48,8 +48,8 @@
   }
 }
 
-// Mobil dropdown — desktop-on rejtett
-.category-select {
+// Mobil select wrapper — desktop-on rejtett
+.category-select-wrap {
   display: none;
 }
 
@@ -100,42 +100,16 @@
     --table-cols: 1fr;
   }
 
-  // Szűrők: oszlopba rendezés
-  :host ::ng-deep .filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   // Chipek eltűnnek
   .category-chips {
     display: none;
   }
 
-  // Dropdown megjelenik
-  .category-select {
+  // ps-select megjelenik a kereső mellett 1 sorban
+  .category-select-wrap {
     display: block;
-    width: 100%;
-    padding: 10px 14px;
-    margin-top: 8px;
-    border: 1px solid var(--border-light, #e2e8f0);
-    border-radius: 8px;
-    background: var(--bg-surface, #fff);
-    color: var(--text-primary, #1f2937);
-    font-size: 14px;
-    font-weight: 500;
-    -webkit-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
-    cursor: pointer;
-
-    &:focus {
-      outline: none;
-      border-color: var(--primary, #1e7b34);
-      box-shadow: 0 0 0 3px rgba(30, 123, 52, 0.1);
-    }
+    flex-shrink: 0;
+    width: 140px;
   }
 
   .cell-subject,

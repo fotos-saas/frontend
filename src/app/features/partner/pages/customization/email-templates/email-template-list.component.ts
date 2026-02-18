@@ -5,6 +5,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PsInputComponent } from '@shared/components/form/ps-input/ps-input.component';
+import { PsSelectComponent } from '@shared/components/form/ps-select/ps-select.component';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PartnerEmailTemplateService } from '../../../services/partner-email-template.service';
@@ -24,7 +26,7 @@ const CATEGORY_LABELS: Record<CategoryFilter, string> = {
 @Component({
   selector: 'app-email-template-list',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, ConfirmDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, ConfirmDialogComponent],
   templateUrl: './email-template-list.component.html',
   styleUrl: './email-template-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +35,7 @@ export class EmailTemplateListComponent {
   protected readonly ICONS = ICONS;
   protected readonly CATEGORY_LABELS = CATEGORY_LABELS;
   protected readonly categories: CategoryFilter[] = ['all', 'auth', 'session', 'order', 'tablo', 'general'];
+  protected readonly categoryOptions: PsSelectOption[] = this.categories.map(c => ({ id: c, label: CATEGORY_LABELS[c] }));
 
   private readonly service = inject(PartnerEmailTemplateService);
   private readonly router = inject(Router);

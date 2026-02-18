@@ -29,16 +29,15 @@
       }
     </div>
 
-    <!-- Mobil: dropdown -->
-    <select
-      class="category-select"
-      [ngModel]="activeCategory()"
-      (ngModelChange)="setCategory($event)"
-    >
-      @for (cat of categories; track cat) {
-        <option [value]="cat">{{ CATEGORY_LABELS[cat] }}</option>
-      }
-    </select>
+    <!-- Mobil: ps-select a kereső sorában -->
+    <div class="category-select-wrap">
+      <ps-select
+        size="sm"
+        [options]="categoryOptions"
+        [ngModel]="activeCategory()"
+        (ngModelChange)="setCategory($event)"
+      />
+    </div>
   </div>
 
   <!-- Loading -->

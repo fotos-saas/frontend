@@ -1,16 +1,16 @@
 @if (totalPages() > 1) {
   <div class="pagination">
-    <button
-      class="page-btn"
-      [disabled]="currentPage() === 1"
-      (click)="goToPage(currentPage() - 1)"
-      aria-label="Előző oldal"
-    >
-      <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-      <span class="btn-text">Előző</span>
-    </button>
+    <div class="pagination__nav">
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === 1"
+        (click)="goToPage(currentPage() - 1)"
+        aria-label="Előző oldal"
+      >
+        <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+        <span class="btn-text">Előző</span>
+      </button>
 
-    <div class="page-select-group">
       <ps-select
         class="page-select"
         size="sm"
@@ -18,20 +18,26 @@
         [ngModel]="'' + currentPage()"
         (ngModelChange)="onSelectChange($event)"
       />
-      <span class="page-context">
+
+      <span class="page-context page-context--inline">
         {{ totalPages() }}-ból
         <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>
       </span>
+
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === totalPages()"
+        (click)="goToPage(currentPage() + 1)"
+        aria-label="Következő oldal"
+      >
+        <span class="btn-text">Következő</span>
+        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+      </button>
     </div>
 
-    <button
-      class="page-btn"
-      [disabled]="currentPage() === totalPages()"
-      (click)="goToPage(currentPage() + 1)"
-      aria-label="Következő oldal"
-    >
-      <span class="btn-text">Következő</span>
-      <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-    </button>
+    <span class="page-context page-context--below">
+      {{ totalPages() }}-ból
+      <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>
+    </span>
   </div>
 }

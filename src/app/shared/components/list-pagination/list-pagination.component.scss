@@ -1,10 +1,16 @@
 .pagination {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 4px;
   margin-top: 24px;
   padding: 16px;
+}
+
+.pagination__nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .page-btn {
@@ -31,12 +37,6 @@
   }
 }
 
-.page-select-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .page-select {
   min-width: 120px;
 }
@@ -47,17 +47,27 @@
   white-space: nowrap;
 }
 
+/* Desktop: inline context látszik, below rejtve */
+.page-context--inline {
+  display: inline;
+}
+
+.page-context--below {
+  display: none;
+}
+
 .total-count {
   color: #94a3b8;
 }
 
 @media (max-width: 640px) {
   .pagination {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
     padding: 12px 8px;
     margin-top: 16px;
+  }
+
+  .pagination__nav {
+    gap: 8px;
   }
 
   .btn-text {
@@ -68,16 +78,17 @@
     padding: 8px 10px;
   }
 
-  .page-select-group {
-    display: contents;
-  }
-
   .page-select {
     min-width: 100px;
   }
 
-  .page-context {
-    flex-basis: 100%;
+  /* Mobil: inline context rejtve, below látszik */
+  .page-context--inline {
+    display: none;
+  }
+
+  .page-context--below {
+    display: block;
     text-align: center;
     font-size: 0.75rem;
   }

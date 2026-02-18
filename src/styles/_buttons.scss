@@ -1,0 +1,162 @@
+/**
+ * Design System - Centralizalt Gomb Stilusok
+ * Egyseges .btn-primary es .btn-secondary mixinek
+ *
+ * Hasznalat komponens SCSS-ben:
+ *   @use '../../../../styles/buttons' as *;
+ *   .btn-primary { @include btn-primary; }
+ *   .btn-secondary { @include btn-secondary; }
+ *
+ * Parameterek felulirhatoak:
+ *   .btn-primary { @include btn-primary($padding: 12px 24px, $radius: 10px); }
+ */
+
+// ============================================================================
+// BTN-PRIMARY MIXIN
+// ============================================================================
+
+/// Standard primary button - kek hatter, feher szoveg
+/// @param {string} $bg - Hatterszin [default: var(--color-primary, #1e3a5f)]
+/// @param {string} $hover-bg - Hover hatterszin [default: var(--color-primary-dark, #152a45)]
+/// @param {string} $color - Szovegszin [default: #ffffff]
+/// @param {string} $padding - Belteres [default: 10px 20px]
+/// @param {string} $radius - Sarok lekerekites [default: 8px]
+/// @param {string} $font-size - Betumeret [default: 0.875rem]
+/// @param {number} $font-weight - Betu vastagsag [default: 600]
+@mixin btn-primary(
+  $bg: var(--color-primary, #1e3a5f),
+  $hover-bg: var(--color-primary-dark, #152a45),
+  $color: #ffffff,
+  $padding: 10px 20px,
+  $radius: 8px,
+  $font-size: 0.875rem,
+  $font-weight: 600
+) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: $padding;
+  background: $bg;
+  color: $color;
+  border: none;
+  border-radius: $radius;
+  font-size: $font-size;
+  font-weight: $font-weight;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: $hover-bg;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================================================
+// BTN-SECONDARY MIXIN
+// ============================================================================
+
+/// Standard secondary button - feher/vilagos hatter, szurke border
+/// @param {string} $bg - Hatterszin [default: #ffffff]
+/// @param {string} $hover-bg - Hover hatterszin [default: #f8fafc]
+/// @param {string} $color - Szovegszin [default: #475569]
+/// @param {string} $border-color - Keret szin [default: #e2e8f0]
+/// @param {string} $hover-border - Hover keret szin [default: #cbd5e1]
+/// @param {string} $padding - Belteres [default: 10px 20px]
+/// @param {string} $radius - Sarok lekerekites [default: 8px]
+/// @param {string} $font-size - Betumeret [default: 0.875rem]
+/// @param {number} $font-weight - Betu vastagsag [default: 500]
+@mixin btn-secondary(
+  $bg: #ffffff,
+  $hover-bg: #f8fafc,
+  $color: #475569,
+  $border-color: #e2e8f0,
+  $hover-border: #cbd5e1,
+  $padding: 10px 20px,
+  $radius: 8px,
+  $font-size: 0.875rem,
+  $font-weight: 500
+) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: $padding;
+  background: $bg;
+  color: $color;
+  border: 1px solid $border-color;
+  border-radius: $radius;
+  font-size: $font-size;
+  font-weight: $font-weight;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: $hover-bg;
+    border-color: $hover-border;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================================================
+// BTN-PRIMARY-AUTH MIXIN (regisztracios oldalakhoz)
+// ============================================================================
+
+/// Auth oldal primary button - gradient, full width, nagyobb
+@mixin btn-primary-auth {
+  width: 100%;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================================================
+// BTN-SECONDARY-AUTH MIXIN (regisztracios oldalakhoz)
+// ============================================================================
+
+/// Auth oldal secondary button - szurke hatter, lekerekitett
+@mixin btn-secondary-auth {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #e5e7eb;
+  }
+}

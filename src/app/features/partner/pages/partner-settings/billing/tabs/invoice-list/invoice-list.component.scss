@@ -1,4 +1,5 @@
 @use '../../../../../../../shared/styles/list-page' as list;
+@use '../../../../../../../../styles/buttons' as *;
 
 // === STATS ===
 .stats-grid {
@@ -110,26 +111,12 @@
 }
 
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  padding: 9px 18px;
-  background: var(--color-primary, #1e3a5f);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s;
+  @include btn-primary($padding: 9px 18px, $font-weight: 500);
   white-space: nowrap;
   margin: 4px;
 
   lucide-icon {
     margin-right: 6px;
-  }
-
-  &:hover {
-    opacity: 0.9;
   }
 }
 

@@ -215,9 +215,11 @@
 // ============================================================================
 // BUTTON MIXIN-EK
 // ============================================================================
+// FONTOS: Komponensekhez a `@use 'styles/buttons' as *;` ajanlott!
+// Az alabbi mixinek a regi Design System feluletet tartjak meg.
 
 /**
- * Primary button style
+ * Primary button style (legacy - hasznald inkabb btn-primary-t a _buttons.scss-bol)
  */
 @mixin button-primary {
   background: var(--color-primary);
@@ -231,11 +233,11 @@
   @include transition-normal;
 
   &:hover:not(:disabled) {
-    background: #{get-get-color('primary', 700)};
+    background: get-color('primary', 700);
   }
 
   &:active:not(:disabled) {
-    background: #{get-get-color('primary', 800)};
+    background: get-color('primary', 800);
     transform: scale(0.98);
   }
 
@@ -248,7 +250,7 @@
 }
 
 /**
- * Secondary button style
+ * Secondary button style (legacy - hasznald inkabb btn-secondary-t a _buttons.scss-bol)
  */
 @mixin button-secondary {
   background: var(--bg-tertiary);
@@ -262,7 +264,6 @@
   @include transition-normal;
 
   &:hover:not(:disabled) {
-    background: rgba(#{get-get-color('primary', 600)}, 0.1);
     border-color: var(--color-primary);
     color: var(--color-primary);
   }
@@ -289,7 +290,7 @@
   @include transition-normal;
 
   &:hover:not(:disabled) {
-    background: #{get-get-color('error', 700)};
+    background: get-color('error', 700);
   }
 
   &:disabled {
@@ -329,7 +330,7 @@
 
   &:hover {
     border-color: var(--color-primary);
-    background: rgba(#{get-get-color('primary', 500)}, 0.05);
+    background: rgba(#{get-color('primary', 500)}, 0.05);
   }
 
   @include focus-ring;
@@ -381,7 +382,7 @@
   &:focus {
     outline: none;
     border-color: var(--input-focus);
-    box-shadow: 0 0 0 4px rgba(#{get-get-color('primary', 600)}, 0.1);
+    box-shadow: 0 0 0 4px rgba(#{get-color('primary', 600)}, 0.1);
   }
 
   &:disabled {
@@ -401,7 +402,7 @@
   border-color: var(--input-error);
 
   &:focus {
-    box-shadow: 0 0 0 4px rgba(#{get-get-color('error', 600)}, 0.1);
+    box-shadow: 0 0 0 4px rgba(#{get-color('error', 600)}, 0.1);
   }
 }
 
@@ -412,7 +413,7 @@
   border-color: var(--input-success);
 
   &:focus {
-    box-shadow: 0 0 0 4px rgba(#{get-get-color('success', 500)}, 0.1);
+    box-shadow: 0 0 0 4px rgba(#{get-color('success', 500)}, 0.1);
   }
 }
 

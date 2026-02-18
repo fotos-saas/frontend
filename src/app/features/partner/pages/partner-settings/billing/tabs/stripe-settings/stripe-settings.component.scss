@@ -1,3 +1,5 @@
+@use '../../../../../../../../styles/buttons' as *;
+
 .stripe-settings {
   padding-top: 8px;
 }
@@ -38,36 +40,19 @@
   display: flex;
   margin: -4px;
 
-  .btn { margin: 4px; }
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  lucide-icon { margin-right: 6px; }
-
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary, .btn-outline { margin: 4px; }
 }
 
 .btn-primary {
-  background: var(--color-primary, #1e3a5f);
-  color: white;
-  &:hover { opacity: 0.9; }
+  @include btn-primary($padding: 8px 16px, $font-size: 0.8125rem, $font-weight: 500);
+
+  lucide-icon { margin-right: 6px; }
 }
 
 .btn-outline {
-  background: white;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-  &:hover { background: #f8fafc; }
+  @include btn-secondary($padding: 8px 16px, $font-size: 0.8125rem);
+
+  lucide-icon { margin-right: 6px; }
 }
 
 .alert {

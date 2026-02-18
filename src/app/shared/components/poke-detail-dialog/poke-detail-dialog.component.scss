@@ -1,3 +1,5 @@
+@use '../../../../styles/buttons' as *;
+
 .dialog-overlay {
   position: fixed;
   top: 0;
@@ -222,19 +224,7 @@
 
 // Button
 .btn-secondary {
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #e5e7eb;
-  }
+  @include btn-secondary($bg: #f3f4f6, $hover-bg: #e5e7eb, $color: #374151, $border-color: #d1d5db, $hover-border: #d1d5db, $padding: 0.625rem 1.25rem);
 }
 
 // A11y

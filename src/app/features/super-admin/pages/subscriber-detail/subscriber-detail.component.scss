@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/list-page' as list;
+@use '../../../../../styles/buttons' as *;
 
 .subscriber-detail-page {
   max-width: 1200px;
@@ -634,42 +635,11 @@
 }
 
 .btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: #ffffff;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-  }
+  @include btn-secondary($padding: 12px 24px, $radius: 10px, $font-weight: 600);
 }
 
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: var(--color-primary, #1e3a5f);
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: var(--color-primary-dark, #152a45);
-  }
+  @include btn-primary($padding: 12px 24px, $radius: 10px);
 }
 
 // === RESPONSIVE ===

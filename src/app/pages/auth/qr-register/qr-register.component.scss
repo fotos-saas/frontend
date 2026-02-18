@@ -1,3 +1,5 @@
+@use '../../../../styles/buttons' as *;
+
 .auth-card {
   background: rgba(255, 255, 255, 0.95);
   -webkit-backdrop-filter: blur(20px);
@@ -138,50 +140,11 @@
 }
 
 .btn-primary {
-  width: 100%;
-  padding: 0.875rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-primary:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  @include btn-primary-auth;
 }
 
 .btn-secondary {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: #f3f4f6;
-  color: #374151;
-  border: none;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.btn-secondary:hover {
-  background: #e5e7eb;
+  @include btn-secondary-auth;
 }
 
 .spinner {

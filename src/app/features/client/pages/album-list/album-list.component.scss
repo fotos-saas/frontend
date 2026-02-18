@@ -1,3 +1,5 @@
+@use '../../../../../styles/buttons' as *;
+
 .album-list-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -292,26 +294,8 @@
 }
 
 /* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
 .btn-primary {
-  background: var(--primary-color);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--primary-hover);
+  @include btn-primary($bg: var(--primary-color), $hover-bg: var(--primary-hover));
 }
 
 /* Reduced motion */

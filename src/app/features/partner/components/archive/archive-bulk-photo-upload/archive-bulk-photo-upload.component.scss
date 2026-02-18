@@ -1,3 +1,5 @@
+@use '../../../../../../styles/buttons' as *;
+
 .step-indicator {
   display: flex;
   align-items: center;
@@ -436,41 +438,15 @@
 }
 
 // Buttons (consistent with project)
-.btn-primary,
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
 .btn-primary {
-  background: var(--color-primary, #6366f1);
-  color: #fff;
-
-  &:hover:not(:disabled) {
-    background: var(--color-primary-hover, #4f46e5);
-  }
+  @include btn-primary($bg: var(--color-primary, #6366f1), $hover-bg: var(--color-primary-hover, #4f46e5), $padding: 8px 16px, $font-size: 14px, $font-weight: 500);
+  gap: 6px;
 }
 
 .btn-secondary {
-  background: var(--bg-secondary, #f3f4f6);
-  color: var(--text-primary);
-
-  &:hover:not(:disabled) {
-    background: var(--bg-hover, #e5e7eb);
-  }
+  @include btn-secondary($bg: var(--bg-secondary, #f3f4f6), $hover-bg: var(--bg-hover, #e5e7eb), $color: var(--text-primary), $border-color: transparent, $hover-border: transparent, $padding: 8px 16px, $font-size: 14px);
+  border: none;
+  gap: 6px;
 }
 
 @media (prefers-reduced-motion: reduce) {

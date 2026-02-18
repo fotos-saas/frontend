@@ -1,4 +1,5 @@
 @use '../../../shared/styles/dialog-forms' as form;
+@use '../../../../styles/buttons' as *;
 
 .project-create-page { max-width: 600px; margin: 0 auto; }
 
@@ -153,26 +154,15 @@
   border-top: 1px solid #e2e8f0;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
+.btn-secondary {
+  @include btn-secondary($bg: #f1f5f9, $hover-bg: #e2e8f0, $border-color: transparent, $hover-border: transparent, $padding: 12px 24px, $radius: 10px, $font-size: 0.9375rem, $font-weight: 600);
   border: none;
 }
 
-.btn-secondary { background: #f1f5f9; color: #475569; &:hover { background: #e2e8f0; } }
-
 .btn-primary {
-  background: var(--color-primary, #2563eb);
-  color: #ffffff;
-  &:hover:not(:disabled) { background: var(--color-primary-dark, #1d4ed8); transform: translateY(-1px); }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  @include btn-primary($bg: var(--color-primary, #2563eb), $hover-bg: var(--color-primary-dark, #1d4ed8), $padding: 12px 24px, $radius: 10px, $font-size: 0.9375rem);
+  &:hover:not(:disabled) { transform: translateY(-1px); }
+  &:disabled { opacity: 0.6; }
 }
 
 .spinner {

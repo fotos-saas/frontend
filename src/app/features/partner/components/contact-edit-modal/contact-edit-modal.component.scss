@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/dialog-forms' as form;
+@use '../../../../../styles/buttons' as *;
 
 .modal-content { padding: 1.5rem; }
 
@@ -185,32 +186,11 @@
 }
 
 .btn-secondary {
-  padding: 10px 20px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  &:hover { background: #f8fafc; border-color: #cbd5e1; }
+  @include btn-secondary;
 }
 
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: var(--color-primary, #1e3a5f);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  &:hover:not(:disabled) { background: var(--color-primary-dark, #152a45); }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  @include btn-primary;
 }
 
 .spinner {

@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/list-page' as list;
+@use '../../../../../styles/buttons' as *;
 
 .page-header {
   display: flex;
@@ -23,20 +24,9 @@
 }
 
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  background: var(--color-primary, #1e3a5f);
-  color: white;
-  transition: opacity 0.2s;
+  @include btn-primary($padding: 8px 16px, $font-size: 0.8125rem, $font-weight: 500);
 
   lucide-icon { margin-right: 6px; }
-  &:hover { opacity: 0.9; }
 }
 
 .summary-row {

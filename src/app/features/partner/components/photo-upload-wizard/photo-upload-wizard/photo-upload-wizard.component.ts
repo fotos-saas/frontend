@@ -64,6 +64,7 @@ export class PhotoUploadWizardComponent implements OnInit {
 
   readonly projectId = input.required<number>();
   readonly projectName = input<string>('');
+  readonly initialAlbum = input<AlbumType | undefined>(undefined);
   readonly close = output<void>();
   readonly completed = output<{ assignedCount: number }>();
 
@@ -141,6 +142,10 @@ export class PhotoUploadWizardComponent implements OnInit {
   // === LIFECYCLE ===
   ngOnInit(): void {
     this.actions.loadAlbums(this.projectId(), this.albumsSummary, this.loadingAlbums);
+    const initial = this.initialAlbum();
+    if (initial) {
+      this.onAlbumSelected(initial);
+    }
   }
 
   // === NAVIGATION ===

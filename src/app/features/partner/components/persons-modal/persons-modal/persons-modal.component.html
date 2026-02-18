@@ -52,21 +52,23 @@
         </div>
       </div>
 
-      <!-- Type Filter Tabs -->
-      <div class="filter-tabs" [class.filter-tabs--hidden]="!!searchQuery()">
-        <button type="button" class="tab" [class.tab--active]="typeFilter() === 'student'" (click)="typeFilter.set('student')">
-          Diákok
-          @if (!loading()) {
-            <span class="tab-count">({{ studentCount() }})</span>
-          }
-        </button>
-        <button type="button" class="tab" [class.tab--active]="typeFilter() === 'teacher'" (click)="typeFilter.set('teacher')">
-          Tanárok
-          @if (!loading()) {
-            <span class="tab-count">({{ teacherCount() }})</span>
-          }
-        </button>
-      </div>
+      <!-- Type Filter Tabs (csak ha nincs initialTypeFilter) -->
+      @if (!hasInitialFilter()) {
+        <div class="filter-tabs" [class.filter-tabs--hidden]="!!searchQuery()">
+          <button type="button" class="tab" [class.tab--active]="typeFilter() === 'student'" (click)="typeFilter.set('student')">
+            Diákok
+            @if (!loading()) {
+              <span class="tab-count">({{ studentCount() }})</span>
+            }
+          </button>
+          <button type="button" class="tab" [class.tab--active]="typeFilter() === 'teacher'" (click)="typeFilter.set('teacher')">
+            Tanárok
+            @if (!loading()) {
+              <span class="tab-count">({{ teacherCount() }})</span>
+            }
+          </button>
+        </div>
+      }
     </div>
 
     <!-- Content -->
@@ -113,7 +115,7 @@
         </span>
       </div>
       @if (withoutPhotoCount() > 0) {
-        <button type="button" class="upload-btn" (click)="openUploadWizard.emit()">
+        <button type="button" class="upload-btn" (click)="openUploadWizard.emit(typeFilter())">
           <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
           Tovább a fényképek feltöltéséhez
         </button>

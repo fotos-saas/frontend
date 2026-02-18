@@ -269,13 +269,13 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     ref.instance.close.subscribe(() => {
       container.clear();
     });
-    ref.instance.openUploadWizard.subscribe(() => {
+    ref.instance.openUploadWizard.subscribe((personType) => {
       container.clear();
-      this.openUploadWizardDialog();
+      this.openUploadWizardDialog(personType === 'student' ? 'students' : 'teachers');
     });
   }
 
-  async openUploadWizardDialog(): Promise<void> {
+  async openUploadWizardDialog(initialAlbum?: 'students' | 'teachers'): Promise<void> {
     const container = this.uploadWizardContainer();
     if (!container || !this.projectData()) return;
 
@@ -285,6 +285,9 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     );
     const ref = container.createComponent(PhotoUploadWizardComponent);
     ref.setInput('projectId', this.projectData()!.id);
+    if (initialAlbum) {
+      ref.setInput('initialAlbum', initialAlbum);
+    }
     ref.instance.close.subscribe(() => {
       container.clear();
     });

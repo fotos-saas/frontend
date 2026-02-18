@@ -30,7 +30,7 @@ export class PersonsModalComponent implements OnInit {
   readonly initialTypeFilter = input<TypeFilter | undefined>(undefined);
 
   readonly close = output<void>();
-  readonly openUploadWizard = output<void>();
+  readonly openUploadWizard = output<TypeFilter>();
 
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);
@@ -49,6 +49,7 @@ export class PersonsModalComponent implements OnInit {
   lightboxPerson = signal<TabloPersonItem | null>(null);
 
 
+  readonly hasInitialFilter = computed(() => !!this.initialTypeFilter());
   readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
 
   /** Mobilon rövidített projektnév: iskola + osztály, évszámok nélkül */

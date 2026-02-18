@@ -151,6 +151,7 @@ export class PartnerProjectListComponent implements OnInit {
   showCreateModal = signal(false);
   showQrModal = signal(false);
   showUploadWizard = signal(false);
+  uploadWizardAlbum = signal<'students' | 'teachers' | undefined>(undefined);
   selectedProject = signal<PartnerProjectListItem | null>(null);
 
   // Delete Confirm
@@ -277,13 +278,15 @@ export class PartnerProjectListComponent implements OnInit {
     this.loadProjects();
   }
 
-  openUploadWizardFromMissing(): void {
+  openUploadWizardFromMissing(personType: 'student' | 'teacher'): void {
     this.showMissingModal.set(false);
+    this.uploadWizardAlbum.set(personType === 'student' ? 'students' : 'teachers');
     this.showUploadWizard.set(true);
   }
 
   closeUploadWizard(): void {
     this.showUploadWizard.set(false);
+    this.uploadWizardAlbum.set(undefined);
     this.selectedProject.set(null);
   }
 

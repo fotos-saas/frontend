@@ -108,7 +108,7 @@
     [projectId]="selectedProject()!.id"
     [projectName]="selectedProject()!.name"
     (close)="closeMissingModal()"
-    (openUploadWizard)="openUploadWizardFromMissing()"
+    (openUploadWizard)="openUploadWizardFromMissing($event)"
   />
 }
 
@@ -117,6 +117,7 @@
   <app-photo-upload-wizard
     [projectId]="selectedProject()!.id"
     [projectName]="selectedProject()!.name"
+    [initialAlbum]="uploadWizardAlbum()"
     (close)="closeUploadWizard()"
     (completed)="onUploadWizardCompleted($event)"
   />

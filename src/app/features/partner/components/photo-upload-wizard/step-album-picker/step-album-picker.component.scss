@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .album-picker {
   display: flex;
   flex-direction: column;
@@ -43,7 +45,7 @@
   border: 2px solid #e2e8f0;
   border-radius: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   min-height: 280px;
 }
 
@@ -178,7 +180,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
   margin-top: auto;
 }
 

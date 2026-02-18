@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .dialog-overlay {
   position: fixed;
   inset: 0;
@@ -52,7 +54,7 @@
     align-items: center;
     justify-content: center;
     color: #6b7280;
-    transition: all 0.15s ease;
+    @include transition-fast;
 
     &:hover {
       background: #f3f4f6;
@@ -151,7 +153,7 @@
   font-size: 0.9375rem;
   color: #111827;
   background: white;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &::placeholder {
     color: #9ca3af;
@@ -183,7 +185,7 @@
   padding: 1.5rem;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   background: #f9fafb;
 
   &:hover {
@@ -224,7 +226,7 @@
   align-items: center;
   justify-content: center;
   color: white;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover {
     background: rgba(220, 38, 38, 0.9);
@@ -295,7 +297,7 @@
   align-items: center;
   justify-content: center;
   color: #9ca3af;
-  transition: all 0.15s ease;
+  @include transition-fast;
   flex-shrink: 0;
 
   &:hover:not(:disabled) {
@@ -325,7 +327,7 @@
   color: #6b7280;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover:not(:disabled) {
     border-color: #3b82f6;
@@ -359,7 +361,7 @@
   font-size: 0.875rem;
   color: #374151;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover {
     border-color: #3b82f6;
@@ -459,7 +461,7 @@
   font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:disabled {
     opacity: 0.6;

@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .view-toggle {
   display: flex;
   border: 1px solid #e2e8f0;
@@ -18,7 +20,7 @@
   font-size: 0.8125rem;
   font-weight: 500;
   white-space: nowrap;
-  transition: all 0.15s;
+  @include transition-fast;
 
   &:hover {
     background: #f8fafc;

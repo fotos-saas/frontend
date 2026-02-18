@@ -1,5 +1,6 @@
 @use '../../../../shared/styles/list-page' as list;
 @use '../../../../../styles/buttons' as *;
+@use 'styles/mixins' as mix;
 
 .page-header {
   display: flex;
@@ -75,7 +76,7 @@
   background: white;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.2s;
+  @include mix.transition-normal;
 
   &:hover { background: #f8fafc; }
   &--active {

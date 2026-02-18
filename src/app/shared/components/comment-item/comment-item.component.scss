@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Colors - Default (blue/gray)
 $gray-100: #f8fafc;
 $gray-200: #e2e8f0;
@@ -87,7 +89,7 @@ $event-border: #c4b5fd;
     border-radius: 0.25rem;
     cursor: pointer;
     color: $gray-400;
-    transition: all 0.15s ease;
+    @include transition-fast;
 
     svg {
       width: 0.75rem;

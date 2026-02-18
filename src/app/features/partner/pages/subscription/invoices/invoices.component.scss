@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .invoices-page {
   max-width: 900px;
   margin: 0 auto;
@@ -175,7 +177,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  @include transition-normal;
 }
 
 .action-btn:hover {
@@ -212,7 +214,7 @@
   font-size: 0.875rem;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
 }
 
 .btn:disabled {

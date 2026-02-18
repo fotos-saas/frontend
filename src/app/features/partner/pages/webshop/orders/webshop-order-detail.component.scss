@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 :host {
   display: block;
 }
@@ -211,7 +213,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
 
   &:disabled {
     opacity: 0.6;

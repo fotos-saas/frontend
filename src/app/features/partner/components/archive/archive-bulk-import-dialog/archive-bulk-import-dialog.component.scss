@@ -1,5 +1,6 @@
 // Archive Bulk Import Dialog - tartalmi stílusok
 @use '../../../../../shared/styles/dialog-forms' as form;
+@use 'styles/mixins' as *;
 
 // --- FORM ---
 .form-label { @include form.label; display: block; font-weight: 600; margin-bottom: 0.5rem; }
@@ -14,7 +15,7 @@
 .file-upload-area {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 1.25rem; border: 2px dashed #e2e8f0; border-radius: 0.625rem;
-  cursor: pointer; color: #94a3b8; font-size: 0.875rem; transition: all 0.2s ease;
+  cursor: pointer; color: #94a3b8; font-size: 0.875rem; @include transition-normal;
   lucide-icon { margin-bottom: 0.5rem; }
   &:hover { border-color: var(--color-primary, #1e3a5f); color: var(--color-primary, #1e3a5f); background: #f8fafc; }
 }
@@ -30,7 +31,7 @@
 .file-remove {
   display: flex; align-items: center; justify-content: center;
   width: 24px; height: 24px; border: none; border-radius: 6px;
-  background: transparent; color: #94a3b8; cursor: pointer; transition: all 0.15s ease;
+  background: transparent; color: #94a3b8; cursor: pointer; @include transition-fast;
   &:hover { background: #fee2e2; color: #ef4444; }
 }
 
@@ -77,7 +78,7 @@
 .action-chip {
   padding: 0.25rem 0.625rem; font-size: 0.75rem; font-weight: 500;
   border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #64748b;
-  cursor: pointer; transition: all 0.15s ease;
+  cursor: pointer; @include transition-fast;
   &:hover { border-color: #94a3b8; }
   &--active { border-color: var(--color-primary, #1e3a5f); background: var(--color-primary, #1e3a5f); color: #fff; }
   &--skip.action-chip--active { border-color: #94a3b8; background: #94a3b8; color: #fff; }

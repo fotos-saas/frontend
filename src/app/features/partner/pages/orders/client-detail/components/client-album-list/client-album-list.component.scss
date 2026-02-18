@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /* Album thumbnail stílus */
 .album-thumb-single {
   width: 48px;
@@ -12,7 +14,7 @@
   background: #f9fafb;
   border-radius: 8px;
   overflow: hidden;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .album-card:hover {
@@ -134,7 +136,7 @@
   border: 1px solid #bfdbfe;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
   min-width: 60px;
   display: flex;
   align-items: center;
@@ -173,7 +175,7 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .album-activate-btn:hover:not(:disabled) {
@@ -196,7 +198,7 @@
   border: 1px solid #fde68a;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .album-deactivate-btn:hover:not(:disabled) {
@@ -232,7 +234,7 @@
   border: 1px solid #ddd6fe;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .album-reopen-btn-inline:hover:not(:disabled) {
@@ -268,7 +270,7 @@
   border-radius: 6px;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .album-download-toggle:hover:not(:disabled) {

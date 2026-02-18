@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 @keyframes float-animation {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
@@ -83,7 +85,7 @@
   border: none;
   border-radius: 2rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   font-size: 0.875rem;
   color: #4b5563;
 
@@ -152,7 +154,7 @@
     border-radius: 1rem;
     background: white;
     color: #1f2937;
-    transition: all 0.2s ease;
+    @include transition-normal;
     text-transform: lowercase;
 
     &::placeholder {
@@ -183,7 +185,7 @@
     cursor: pointer;
     color: #6b7280;
     font-size: 0.75rem;
-    transition: all 0.2s ease;
+    @include transition-normal;
 
     &:hover {
       background: #d1d5db;
@@ -212,7 +214,7 @@
   border: 2px solid transparent;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   flex: 1;
   justify-content: center;
 
@@ -311,7 +313,7 @@
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   position: relative;
   z-index: 1;
 
@@ -343,7 +345,7 @@
     font-size: 0.7rem;
     font-weight: 600;
     color: #6b7280;
-    transition: all 0.2s ease;
+    @include transition-normal;
     padding: 0 0.375rem;
   }
 
@@ -521,7 +523,7 @@
     font-size: 0.9rem;
     color: #4b5563;
     text-transform: lowercase;
-    transition: all 0.2s ease;
+    @include transition-normal;
 
     &:hover {
       background: #e5e7eb;

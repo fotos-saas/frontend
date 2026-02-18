@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .settings-section {
   max-width: 600px;
   margin-bottom: 24px;
@@ -93,7 +95,7 @@
   font-weight: 500;
   color: #475569;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
 
   &:hover:not(:disabled) {
     background: #e2e8f0;

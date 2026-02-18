@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Kompakt contact bar - telefonszámmal és email címmel
 .contact-bar {
   display: flex;
@@ -50,7 +52,7 @@
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: 500;
-    transition: all 0.2s ease;
+    @include transition-normal;
     cursor: pointer;
 
     svg {

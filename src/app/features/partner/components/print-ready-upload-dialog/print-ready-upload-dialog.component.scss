@@ -1,10 +1,12 @@
+@use 'styles/mixins' as *;
+
 .drop-zone {
   border: 2px dashed #cbd5e1;
   border-radius: 8px;
   padding: 24px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   margin-bottom: 16px;
 }
 
@@ -87,7 +89,7 @@
   background: transparent;
   color: #94a3b8;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
   flex-shrink: 0;
 }
 
@@ -138,7 +140,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .btn--primary {

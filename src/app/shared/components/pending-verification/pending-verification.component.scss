@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Amber theme (waiting/pending)
 $amber-500: #f59e0b;
 $amber-600: #d97706;
@@ -140,7 +142,7 @@ $amber-gradient-end: #fef3c7;
   border: none;
   border-radius: 0.625rem;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
 
   svg {
     width: 1.125rem;

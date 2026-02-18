@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /**
  * Lightbox Info Styles
  * Template information panel with selection button (simplified)
@@ -123,7 +125,7 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    @include transition-normal;
     border: none;
     white-space: nowrap;
     flex-shrink: 0;

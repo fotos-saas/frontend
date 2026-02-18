@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /**
  * Step Pills - Kompakt Inline Stepper
  *
@@ -59,7 +61,7 @@ $color-disabled-bg: #f1f5f9;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    @include transition-normal;
     white-space: nowrap;
 
     &:focus-visible {
@@ -171,7 +173,7 @@ $color-disabled-bg: #f1f5f9;
     font-weight: 700;
     color: white;
     cursor: pointer;
-    transition: all 0.2s ease;
+    @include transition-normal;
 
     &:hover {
       background: rgba(255, 255, 255, 0.5);

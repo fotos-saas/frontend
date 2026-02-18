@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .preset-selector {
   .label {
     font-size: 0.85rem;
@@ -22,7 +24,7 @@
   border: 2px solid transparent;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   text-align: left;
 
   &:hover {

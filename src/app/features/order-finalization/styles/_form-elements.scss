@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Shared Form Element Styles for Order Finalization Steps
 // Import this file in each step component
 
@@ -85,7 +87,7 @@ $green-600: #16a34a;
   background: #f8fafc;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
-  transition: all 0.15s;
+  @include transition-fast;
   font-family: inherit;
 
   &::placeholder {
@@ -230,7 +232,7 @@ $green-600: #16a34a;
   cursor: pointer;
   color: #dc2626;
   border-radius: 6px;
-  transition: all 0.15s;
+  @include transition-fast;
   flex-shrink: 0;
 
   svg {
@@ -283,7 +285,7 @@ $green-600: #16a34a;
   cursor: pointer;
   color: #dc2626;
   border-radius: 6px;
-  transition: all 0.15s;
+  @include transition-fast;
   flex-shrink: 0;
 
   svg {
@@ -331,7 +333,7 @@ $green-600: #16a34a;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  @include transition-fast;
   margin-top: 0.125rem;
 
   &::after {

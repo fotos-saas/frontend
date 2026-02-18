@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .super-admin-layout {
   min-height: 100vh;
   display: flex;
@@ -60,7 +62,7 @@
   color: var(--shell-nav-item-color);
   font-weight: 500;
   font-size: 0.875rem;
-  transition: all 0.2s ease;
+  @include transition-normal;
   white-space: nowrap;
   overflow: hidden;
 }

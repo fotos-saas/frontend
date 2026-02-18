@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Mobile Menu User Component Styles
 // Ezek a stílusok a navbar.component.scss-ből származnak
 
@@ -71,7 +73,7 @@
   border-radius: 0.5rem;
   color: #065f46;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   -webkit-tap-highlight-color: transparent;
 
   svg {

@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .post-edit-form {
   margin-top: 0.5rem;
 
@@ -60,7 +62,7 @@
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &--cancel {
       color: #6b7280;

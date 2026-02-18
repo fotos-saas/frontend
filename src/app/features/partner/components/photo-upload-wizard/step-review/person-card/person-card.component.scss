@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .person-card {
   display: flex;
   flex-direction: column;
@@ -5,7 +7,7 @@
   border: 2px dashed #e2e8f0;
   border-radius: 10px;
   overflow: hidden;
-  transition: all 0.2s ease;
+  @include transition-normal;
   animation: cardFadeIn 0.3s ease forwards;
   opacity: 0;
 }
@@ -122,7 +124,7 @@
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .action-btn--remove {

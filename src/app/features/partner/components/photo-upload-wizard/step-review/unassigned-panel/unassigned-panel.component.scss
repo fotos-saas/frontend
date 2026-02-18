@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .unassigned-section {
   position: sticky;
   bottom: -24px;
@@ -41,7 +43,7 @@
   font-weight: 500;
   color: #dc2626;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .delete-unassigned-btn:hover {
@@ -86,7 +88,7 @@
   border: 2px solid #fde68a;
   border-radius: 6px;
   cursor: grab;
-  transition: all 0.15s ease;
+  @include transition-fast;
   animation: unassignedFadeIn 0.3s ease forwards;
   opacity: 0;
 }

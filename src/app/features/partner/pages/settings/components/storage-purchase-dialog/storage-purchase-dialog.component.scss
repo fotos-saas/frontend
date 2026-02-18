@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /* ============ Slider ============ */
 .slider-section {
   display: flex;
@@ -165,7 +167,7 @@
   font-size: 0.875rem;
   cursor: pointer;
   border: none;
-  transition: all 0.2s ease;
+  @include transition-normal;
 }
 
 .btn:disabled {

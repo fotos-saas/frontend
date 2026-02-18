@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Colors
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
@@ -118,7 +120,7 @@ $purple-500: #a855f7;
     border-radius: 9999px;
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.2s;
+    @include transition-normal;
 
     svg {
       width: 1rem;

@@ -1,5 +1,6 @@
 @use '../../../../shared/styles/list-page' as list;
 @use '../../../../../styles/buttons' as *;
+@use 'styles/mixins' as mix;
 
 .contact-list-page {
 }
@@ -137,7 +138,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include mix.transition-fast;
   max-width: 100px;
 
   > span {
@@ -169,7 +170,7 @@
   font-size: 0.8125rem;
   font-weight: 500;
   max-width: 100%;
-  transition: all 0.15s ease;
+  @include mix.transition-fast;
 
   // Szöveg levágása span-nel belül
   > span {

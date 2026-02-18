@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .partner-layout {
   height: 100vh;
   display: flex;
@@ -154,7 +156,7 @@
   font-size: 0.875rem;
   line-height: 20px;
   min-height: 40px;
-  transition: all 0.2s ease;
+  @include transition-normal;
   white-space: nowrap;
   overflow: hidden;
   box-sizing: border-box;
@@ -216,7 +218,7 @@
   color: var(--shell-nav-item-color);
   font-size: 0.8125rem;
   line-height: 20px;
-  transition: all 0.2s ease;
+  @include transition-normal;
 }
 
 .nav-child:hover {
@@ -525,7 +527,7 @@
   color: #cbd5e1;
   text-decoration: none;
   border-radius: 6px;
-  transition: all 0.15s ease;
+  @include transition-fast;
   opacity: 0;
   animation: flyoutIn 0.15s ease-out forwards;
 

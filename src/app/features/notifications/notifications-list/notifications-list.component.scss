@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Notifications List Component Styles
 
 .notifications-page {
@@ -42,7 +44,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
@@ -106,7 +108,7 @@
   font-weight: 500;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
 
   &:hover {
     border-color: #cbd5e1;

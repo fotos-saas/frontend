@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .info-bar {
   display: flex;
   align-items: center;
@@ -93,7 +95,7 @@
     border: 1px solid #e5e7eb;
     border-radius: 5px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    @include transition-fast;
     white-space: nowrap;
 
     &:hover:not(:disabled) {
@@ -128,7 +130,7 @@
     background: transparent;
     color: #9ca3af;
     cursor: pointer;
-    transition: all 0.15s ease;
+    @include transition-fast;
 
     &:hover {
       color: #6b7280;

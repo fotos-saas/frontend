@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /* Access Denied - max-width → page-card--narrow kezeli */
 .access-denied {}
 
@@ -290,7 +292,7 @@
   font-size: 0.875rem;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
 }
 
 .btn--sm {

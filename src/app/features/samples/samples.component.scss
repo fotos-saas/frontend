@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // TablóStúdió kék színvilág (mint a login)
 $blue-50: #eff6ff;
 $blue-100: #dbeafe;
@@ -101,7 +103,7 @@ $blue-700: #1d4ed8;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
 
   &:hover {
     background: $blue-700;

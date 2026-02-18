@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Create Discussion Dialog - form field stílusok
 // Footer gombok → DialogWrapperComponent ::ng-deep
 
@@ -38,7 +40,7 @@ $purple-500: #8b5cf6;
     border: 2px solid #e5e7eb;
     border-radius: 0.625rem;
     outline: none;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &::placeholder {
       color: #9ca3af;

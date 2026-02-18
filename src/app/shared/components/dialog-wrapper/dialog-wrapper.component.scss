@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // ============================================================================
 // Dialog Wrapper - Egységes dialógus shell
 // ============================================================================
@@ -67,7 +69,7 @@ $gray-900: #111827;
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &:hover:not(:disabled) {
       color: $gray-600;
@@ -283,7 +285,7 @@ $gray-900: #111827;
     border: none;
     border-radius: 0.625rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &:disabled {
       opacity: 0.5;

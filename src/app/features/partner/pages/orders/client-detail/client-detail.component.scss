@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /**
  * Client Detail Component Styles
  *
@@ -33,7 +35,7 @@
   font-size: 0.875rem;
   cursor: pointer;
   border: none;
-  transition: all 0.2s ease;
+  @include transition-normal;
 }
 
 .btn:disabled {

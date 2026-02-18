@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 :host {
   display: contents;
 }
@@ -23,7 +25,7 @@
     background: none;
     border-radius: 8px;
     cursor: default;
-    transition: all 0.15s;
+    @include transition-fast;
 
     &.clickable {
       cursor: pointer;
@@ -60,7 +62,7 @@
     background: #e5e7eb;
     color: #6b7280;
     flex-shrink: 0;
-    transition: all 0.15s;
+    @include transition-fast;
   }
 
   &__label {

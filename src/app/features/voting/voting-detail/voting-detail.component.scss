@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Colors - improved contrast
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
@@ -361,7 +363,7 @@ $gray-700: #374151;
   border: 2px solid #e5e7eb;
   border-radius: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
   &:hover:not(&--disabled) {

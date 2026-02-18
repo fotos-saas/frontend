@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Colors - improved contrast
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
@@ -90,7 +92,7 @@ $gray-700: #374151;
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     svg {
       width: 1rem;
@@ -120,7 +122,7 @@ $gray-700: #374151;
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     svg {
       width: 1rem;
@@ -146,7 +148,7 @@ $gray-700: #374151;
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     svg {
       width: 1.25rem;
@@ -304,7 +306,7 @@ $gray-700: #374151;
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     svg {
       width: 1.25rem;

@@ -1,4 +1,5 @@
 @use '../../../../../styles/buttons' as *;
+@use 'styles/mixins' as mix;
 
 .album-list-page {
   max-width: 1200px;
@@ -123,7 +124,7 @@
   border: 1px solid var(--border-color);
   text-decoration: none;
   color: inherit;
-  transition: all 0.2s ease;
+  @include mix.transition-normal;
   animation: cardEntry 0.4s ease forwards;
   opacity: 0;
   transform: translateY(10px);

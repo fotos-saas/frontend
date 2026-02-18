@@ -1,4 +1,5 @@
 @use '../../../../../styles/buttons' as *;
+@use 'styles/mixins' as mix;
 
 .modal-content {
   padding: 1.5rem;
@@ -31,7 +32,7 @@
   border-radius: 6px;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include mix.transition-fast;
 }
 
 .close-btn:hover {
@@ -50,13 +51,13 @@
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 0.9375rem;
-  transition: all 0.2s ease;
+  @include mix.transition-normal;
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--color-primary, #1e3a5f);
-  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-textarea {

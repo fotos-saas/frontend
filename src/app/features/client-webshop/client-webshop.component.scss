@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 :host {
   display: block;
   min-height: 100vh;
@@ -71,7 +73,7 @@
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: all 0.2s;
+  @include transition-normal;
 
   &:hover {
     transform: translateY(-2px);
@@ -152,7 +154,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
 
   &:hover { background: #f9fafb; }
   &.selected {
@@ -347,7 +349,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
 
   &-primary {
     background: #3b82f6;

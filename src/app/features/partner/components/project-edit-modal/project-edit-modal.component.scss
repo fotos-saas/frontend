@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/dialog-forms' as form;
+@use 'styles/mixins' as *;
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
@@ -33,7 +34,7 @@
   width: 20px; height: 20px;
   display: flex; align-items: center; justify-content: center;
   background: #e5e7eb; border: none; border-radius: 50%;
-  color: #6b7280; cursor: pointer; transition: all 0.15s ease;
+  color: #6b7280; cursor: pointer; @include transition-fast;
   &:hover { background: #d1d5db; color: #374151; }
 }
 

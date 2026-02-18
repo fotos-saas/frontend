@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 :host {
   display: block;
 }
@@ -34,7 +36,7 @@
     border-radius: 8px;
     border: none;
     cursor: pointer;
-    transition: all 0.15s ease;
+    @include transition-fast;
 
     &--cancel {
       background: white;
@@ -88,7 +90,7 @@
     border: 1px solid #d1d5db;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    @include transition-fast;
 
     &:hover {
       background: #f0f4ff;
@@ -118,7 +120,7 @@
   border: 2px dashed #cbd5e1;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover {
     border-color: var(--color-primary, #1e3a5f);
@@ -155,7 +157,7 @@
     background: transparent;
     color: #9ca3af;
     cursor: pointer;
-    transition: all 0.15s ease;
+    @include transition-fast;
 
     &:hover {
       background: #e5e7eb;

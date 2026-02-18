@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .photo-list {
   &__toolbar {
     display: flex;
@@ -148,7 +150,7 @@
     background: transparent;
     color: #9ca3af;
     cursor: pointer;
-    transition: all 0.15s ease;
+    @include transition-fast;
 
     &:hover {
       background: #f3f4f6;
@@ -180,7 +182,7 @@
     background: white;
     color: #374151;
     cursor: pointer;
-    transition: all 0.15s ease;
+    @include transition-fast;
 
     &:hover:not(:disabled) {
       background: #f9fafb;

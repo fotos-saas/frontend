@@ -1,10 +1,12 @@
+@use 'styles/mixins' as *;
+
 .drop-zone {
   border: 2px dashed #cbd5e1;
   border-radius: 12px;
   padding: 48px 24px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   background: #fafafa;
 }
 
@@ -43,7 +45,7 @@
   background: #e2e8f0;
   border-radius: 50%;
   color: #64748b;
-  transition: all 0.2s ease;
+  @include transition-normal;
 }
 
 .drop-icon--active,

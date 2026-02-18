@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Order Finalization - Stepper Form Styles
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
@@ -120,7 +122,7 @@ $green-600: #16a34a;
   background: none;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
   min-width: 70px;
 
   &:disabled {
@@ -176,7 +178,7 @@ $green-600: #16a34a;
   font-size: 0.875rem;
   font-weight: 600;
   color: #64748b;
-  transition: all 0.2s;
+  @include transition-normal;
 
   svg {
     width: 18px;
@@ -188,7 +190,7 @@ $green-600: #16a34a;
   font-size: 0.75rem;
   color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
   text-align: center;
-  transition: all 0.2s;
+  @include transition-normal;
   white-space: nowrap;
 }
 
@@ -296,7 +298,7 @@ $green-600: #16a34a;
   background: #f8fafc;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
-  transition: all 0.15s;
+  @include transition-fast;
   font-family: inherit;
 
   &::placeholder {
@@ -410,7 +412,7 @@ $green-600: #16a34a;
   border: 2px dashed #e2e8f0;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
   color: #64748b;
   font-size: 0.875rem;
   font-weight: 500;
@@ -459,7 +461,7 @@ $green-600: #16a34a;
   cursor: pointer;
   color: #dc2626;
   border-radius: 6px;
-  transition: all 0.15s;
+  @include transition-fast;
   flex-shrink: 0;
 
   svg {
@@ -512,7 +514,7 @@ $green-600: #16a34a;
   cursor: pointer;
   color: #dc2626;
   border-radius: 6px;
-  transition: all 0.15s;
+  @include transition-fast;
   flex-shrink: 0;
 
   svg {
@@ -560,7 +562,7 @@ $green-600: #16a34a;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  @include transition-fast;
   margin-top: 0.125rem;
 
   &::after {
@@ -622,7 +624,7 @@ $green-600: #16a34a;
   padding: 0.5rem 0.75rem;
   background: #f8fafc;
   border-radius: 8px;
-  transition: all 0.2s;
+  @include transition-normal;
 
   svg {
     width: 14px;
@@ -686,7 +688,7 @@ $green-600: #16a34a;
   font-weight: 600;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
   border: 2px solid transparent;
   white-space: nowrap;
 

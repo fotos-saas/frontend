@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Contact Badge Component Styles
 // Ezek a stílusok a navbar.component.scss-ből származnak
 
@@ -10,7 +12,7 @@
   border-radius: 9999px;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   margin: 0;
 
   &:focus-visible {

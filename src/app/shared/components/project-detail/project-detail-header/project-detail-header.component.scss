@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .school-name {
   font-size: 1.5rem;
   font-weight: 700;
@@ -55,7 +57,7 @@
   &--clickable {
     border: none;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &:hover {
       transform: translateY(-1px);

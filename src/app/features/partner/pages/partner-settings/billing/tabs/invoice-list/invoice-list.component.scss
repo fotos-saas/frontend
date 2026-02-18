@@ -1,5 +1,6 @@
 @use '../../../../../../../shared/styles/list-page' as list;
 @use '../../../../../../../../styles/buttons' as *;
+@use 'styles/mixins' as mix;
 
 // === STATS ===
 .stats-grid {
@@ -191,7 +192,7 @@
   cursor: pointer;
   color: #64748b;
   margin: 4px;
-  transition: all 0.15s;
+  @include mix.transition-fast;
 
   &:hover:not(:disabled) {
     background: #f1f5f9;
@@ -228,7 +229,7 @@
   border-radius: 6px;
   cursor: pointer;
   color: #64748b;
-  transition: all 0.15s;
+  @include mix.transition-fast;
 
   &:hover:not(:disabled) {
     background: #f1f5f9;

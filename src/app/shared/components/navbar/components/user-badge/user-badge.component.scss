@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // User Badge Component Styles
 // Ezek a stílusok a navbar.component.scss-ből származnak
 
@@ -14,7 +16,7 @@
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   margin: 0;
 
   &:hover {

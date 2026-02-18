@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .persons-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -167,7 +169,7 @@
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s;
+    @include transition-fast;
 
     &:hover {
       background: var(--color-primary, #1e3a5f);

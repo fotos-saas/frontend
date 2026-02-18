@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // max-width → page-card default kezeli (1000→1200)
 .subscription-overview {}
 
@@ -354,7 +356,7 @@
   font-size: 0.875rem;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
 
   &:disabled {
     opacity: 0.6;

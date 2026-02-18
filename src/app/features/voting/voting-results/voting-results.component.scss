@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .voting-results {
   padding: 24px 16px;
   max-width: 800px;
@@ -14,7 +16,7 @@
     font-size: 14px;
     cursor: pointer;
     border-radius: 8px;
-    transition: all 0.2s ease;
+    @include transition-normal;
     margin-bottom: 24px;
 
     svg {
@@ -174,7 +176,7 @@
     background: #f9fafb;
     border-radius: 12px;
     padding: 16px;
-    transition: all 0.2s ease;
+    @include transition-normal;
 
     &--winner {
       background: #f0fdf4;
@@ -299,7 +301,7 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    @include transition-normal;
 
     svg {
       width: 18px;

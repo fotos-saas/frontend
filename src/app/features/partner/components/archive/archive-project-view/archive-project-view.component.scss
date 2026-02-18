@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .project-filters {
   display: flex;
   gap: 12px;
@@ -23,7 +25,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
   white-space: nowrap;
 
   &:hover { background: #f1f5f9; border-color: #94a3b8; color: #334155; }
@@ -78,7 +80,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
 
   &:hover { background: #f1f5f9; border-color: #cbd5e1; }
 }

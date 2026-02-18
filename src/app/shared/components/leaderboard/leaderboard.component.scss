@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .leaderboard {
   background: white;
   border-radius: 16px;
@@ -40,7 +42,7 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
 
   &:hover {
     background: #e5e7eb;

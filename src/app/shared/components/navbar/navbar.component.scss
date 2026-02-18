@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // ============================================================================
 // SCSS VÁLTOZÓK (Safari kompatibilitás)
 // ============================================================================
@@ -71,7 +73,7 @@ $mobile-breakpoint: 768px;
   justify-content: center;
   border-radius: 8px;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  @include transition-normal;
   -webkit-tap-highlight-color: transparent;
 
   svg {
@@ -281,7 +283,7 @@ $mobile-breakpoint: 768px;
   font-weight: 500;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: all 0.2s;
+  @include transition-normal;
 
   &:hover {
     background: rgba(37, 99, 235, 0.1);
@@ -391,7 +393,7 @@ $mobile-breakpoint: 768px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
 
   > * {
     margin: 0 0.2rem;
@@ -598,7 +600,7 @@ $mobile-breakpoint: 768px;
   border-radius: 0.5rem;
   color: #065f46;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   -webkit-tap-highlight-color: transparent;
 
   svg {
@@ -817,7 +819,7 @@ $mobile-breakpoint: 768px;
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   // Safari-safe: margin instead of gap
   margin: 0;
 

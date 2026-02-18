@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
 $gray-300: #d1d5db;
@@ -97,7 +99,7 @@ $gray-500: #6b7280;
   border-radius: 0.5rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s;
+  @include transition-normal;
 
   svg {
     width: 1rem;

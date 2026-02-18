@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // ============================================
 // MEDIA EDITOR COMPONENT STYLES
 // ============================================
@@ -192,7 +194,7 @@ $blue-500: #2563eb;
     border: 1px solid #bfdbfe;
     border-radius: 0.25rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &:hover:not(:disabled) {
       background: #eff6ff;
@@ -266,7 +268,7 @@ $blue-500: #2563eb;
     border-radius: 0.25rem;
     color: #9ca3af;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &:hover:not(:disabled) {
       color: $red-500;
@@ -311,7 +313,7 @@ $blue-500: #2563eb;
     border: 2px dashed #d1d5db;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     svg {
       width: 1.125rem;

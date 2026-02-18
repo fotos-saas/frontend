@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /* Child item staggered animation */
 @keyframes slideIn {
   from {
@@ -124,7 +126,7 @@
   color: #cbd5e1; /* slate-300 */
   text-decoration: none;
   border-radius: 6px;
-  transition: all 0.15s ease;
+  @include transition-fast;
   opacity: 0;
   animation: flyoutIn 0.15s ease-out forwards;
 

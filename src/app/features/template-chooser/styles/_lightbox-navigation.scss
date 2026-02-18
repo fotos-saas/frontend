@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /**
  * Lightbox Navigation Styles
  * Left and right arrow buttons for template navigation
@@ -18,7 +20,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    @include transition-normal;
     color: white;
     flex-shrink: 0;
     -webkit-user-select: none;

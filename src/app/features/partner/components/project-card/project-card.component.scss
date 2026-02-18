@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .project-row {
   display: grid;
   grid-template-columns: var(--table-cols, 48px 1fr 24px 110px 75px 56px);
@@ -8,7 +10,7 @@
   border: 1px solid #e2e8f0;
   padding: 8px 16px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .project-row:hover {
@@ -93,7 +95,7 @@
   white-space: nowrap;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .finalized-badge:hover {
@@ -232,7 +234,7 @@
   object-fit: cover;
   border-radius: 4px;
   border: 1px solid #e2e8f0;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .col-sample--clickable:hover .sample-thumb {

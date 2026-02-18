@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /**
  * Step Info Dialog Styles
  * A backdrop, header, icon, title, description → DialogWrapperComponent kezeli
@@ -29,7 +31,7 @@
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    @include transition-normal;
 
     &:hover {
       background: #2563eb;

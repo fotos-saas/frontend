@@ -1,5 +1,6 @@
 // Archive Edit Modal - tartalmi stílusok
 @use '../../../../../shared/styles/dialog-forms' as form;
+@use 'styles/mixins' as *;
 
 .loading-spinner { @include form.loading-spinner; }
 
@@ -86,7 +87,7 @@
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 12px; background: #f1f5f9; border: 1px solid #e2e8f0;
   border-radius: 6px; font-size: 0.8125rem; color: #475569;
-  cursor: pointer; transition: all 0.15s ease;
+  cursor: pointer; @include transition-fast;
   &:hover { background: #e2e8f0; color: #1e293b; }
 }
 

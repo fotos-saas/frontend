@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /**
  * Media Lightbox Styles - Newsfeed képek lightbox
  * Safari kompatibilis (no CSS gap in flexbox)
@@ -70,7 +72,7 @@ $primary-color: #6366f1;
     color: $text-light;
     cursor: pointer;
     z-index: 10;
-    transition: all 0.2s ease;
+    @include transition-normal;
 
     svg {
       width: 20px;
@@ -142,7 +144,7 @@ $primary-color: #6366f1;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    @include transition-normal;
     color: $text-light;
     flex-shrink: 0;
 
@@ -313,7 +315,7 @@ $primary-color: #6366f1;
     border-radius: 8px;
     cursor: pointer;
     overflow: hidden;
-    transition: all 0.2s ease;
+    @include transition-normal;
     opacity: 0.6;
 
     &:hover {

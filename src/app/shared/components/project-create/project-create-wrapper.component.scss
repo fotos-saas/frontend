@@ -1,5 +1,6 @@
 @use '../../../shared/styles/dialog-forms' as form;
 @use '../../../../styles/buttons' as *;
+@use 'styles/mixins' as mix;
 
 .project-create-page { max-width: 600px; margin: 0 auto; }
 
@@ -17,7 +18,7 @@
   padding: 8px 12px;
   margin: -8px -12px 16px;
   border-radius: 8px;
-  transition: all 0.15s ease;
+  @include mix.transition-fast;
   &:hover { background: #f1f5f9; color: #1e293b; }
 }
 
@@ -76,7 +77,7 @@
   justify-content: center;
   cursor: pointer;
   color: #64748b;
-  transition: all 0.15s ease;
+  @include mix.transition-fast;
   &:hover { background: #cbd5e1; color: #1e293b; }
 }
 

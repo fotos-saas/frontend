@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/list-page' as list;
+@use 'styles/mixins' as *;
 
 .school-detail-page {
 }
@@ -92,7 +93,7 @@
   border-radius: 8px;
   color: #94a3b8;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
 
   &:hover {
     background: #f1f5f9;
@@ -168,7 +169,7 @@
   color: #64748b;
   font-size: 0.6875rem;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
 
   &:hover { background: #f8fafc; }
 }
@@ -238,7 +239,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  @include transition-fast;
   text-align: left;
   margin-bottom: 4px;
 

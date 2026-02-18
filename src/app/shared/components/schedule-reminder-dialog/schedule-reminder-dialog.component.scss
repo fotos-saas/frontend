@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // ScheduleReminderDialog - content-specific styles only
 // Shell handled by DialogWrapperComponent
 // Dátum mező → ps-datepicker kezeli
@@ -19,7 +21,7 @@ $blue-600: #2563eb;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
 
   &:hover:not(:disabled) {
     background: $blue-600;
@@ -77,7 +79,7 @@ $blue-600: #2563eb;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
 
   &:hover {
     background: #f3f4f6;

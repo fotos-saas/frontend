@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // CreatePostDialog - content-specific styles only
 // Footer gombok → DialogWrapperComponent ::ng-deep
 
@@ -85,7 +87,7 @@ $blue-500: #3b82f6;
   border: 2px solid #e5e7eb;
   border-radius: 0.625rem;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
 
   &:hover:not(:disabled) {
     border-color: #d1d5db;

@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Host elem - grid cellában kell korlátozni
 :host {
   display: block;
@@ -14,7 +16,7 @@
   border-left: 3px solid #3b82f6; // Kék bal sáv - mint a voting-card
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  @include transition-normal;
 
   &:hover {
     border-color: #3b82f6;
@@ -279,7 +281,7 @@
   border: none;
   border-radius: 1.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   color: white;
   font-size: 0.85rem;
   font-weight: 500;

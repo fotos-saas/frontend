@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Colors
 $blue-500: #3b82f6;
 $gray-200: #e5e7eb;
@@ -52,7 +54,7 @@ $amber-500: #f59e0b;
       border-top: none;
       border-radius: 0 0 0.5rem 0.5rem;
       background: #f9fafb;
-      transition: all 0.2s;
+      @include transition-normal;
 
       &.ql-snow {
         border-color: $gray-200;
@@ -84,7 +86,7 @@ $amber-500: #f59e0b;
         height: 1.75rem;
         padding: 0.25rem;
         border-radius: 0.25rem;
-        transition: all 0.15s;
+        @include transition-fast;
 
         &:hover {
           background: #f3f4f6;

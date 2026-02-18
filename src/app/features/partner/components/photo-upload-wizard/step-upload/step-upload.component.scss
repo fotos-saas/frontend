@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .step-upload {
   display: flex;
   flex-direction: column;
@@ -45,7 +47,7 @@
   font-weight: 500;
   color: #dc2626;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
   white-space: nowrap;
 }
 
@@ -67,7 +69,7 @@
   font-weight: 500;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
   white-space: nowrap;
 }
 
@@ -126,7 +128,7 @@
   border-radius: 50%;
   color: #ffffff;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 }
 
 .remove-btn:hover {

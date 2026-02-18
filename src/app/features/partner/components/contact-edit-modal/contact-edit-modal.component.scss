@@ -1,5 +1,6 @@
 @use '../../../../shared/styles/dialog-forms' as form;
 @use '../../../../../styles/buttons' as *;
+@use 'styles/mixins' as mix;
 
 .modal-content { padding: 1.5rem; }
 
@@ -30,7 +31,7 @@
   border-radius: 6px;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include mix.transition-fast;
   &:hover { background: #f1f5f9; color: #1e293b; }
 }
 
@@ -83,7 +84,7 @@
   border-radius: 4px;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include mix.transition-fast;
   &:hover { background: #e2e8f0; color: #1e293b; }
 }
 

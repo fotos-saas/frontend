@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // TablóStúdió kék színvilág
 $blue-500: #3b82f6;
 $blue-600: #2563eb;
@@ -184,7 +186,7 @@ $blue-600: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  @include transition-normal;
 
   svg {
     width: 16px;
@@ -287,7 +289,7 @@ $blue-600: #2563eb;
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
   white-space: nowrap;
 
   &:hover {
@@ -360,7 +362,7 @@ $blue-600: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  @include transition-normal;
   color: white;
 
   svg {

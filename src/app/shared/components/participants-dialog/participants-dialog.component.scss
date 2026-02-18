@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Status colors
 $color-active: #10b981;
 $color-extra: #6b7280;
@@ -195,7 +197,7 @@ $green-600: #059669;
     border: 2px solid #e5e7eb;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &:hover:not(:disabled) {
       color: #6b7280;
@@ -239,7 +241,7 @@ $green-600: #059669;
     border: none;
     border-radius: 0.625rem;
     cursor: pointer;
-    transition: all 0.2s;
+    @include transition-normal;
 
     &--outline {
       color: #4b5563;

@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // PhotoSelectionReminderDialog - content-specific styles only
 // Shell handled by DialogWrapperComponent
 
@@ -18,7 +20,7 @@ $blue-600: #2563eb;
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
   box-shadow: 0 4px 14px -3px rgba(59, 130, 246, 0.4);
   margin-bottom: 0.75rem;
 
@@ -46,7 +48,7 @@ $blue-600: #2563eb;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s;
+  @include transition-normal;
 
   &:hover {
     background: #f3f4f6;

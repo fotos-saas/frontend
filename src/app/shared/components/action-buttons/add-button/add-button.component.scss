@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 // Add Button stílusok
 // Három variáns: primary (kitöltött), compact (kisebb), ghost (áttetsző)
 
@@ -10,7 +12,7 @@
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:disabled {
     opacity: 0.5;

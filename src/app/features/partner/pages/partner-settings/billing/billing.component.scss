@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .page-header {
   display: flex;
   align-items: center;
@@ -45,7 +47,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-normal;
   white-space: nowrap;
 
   lucide-icon {

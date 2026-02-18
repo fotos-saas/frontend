@@ -35,6 +35,7 @@
           <div
             class="photo-card"
             [style.animation-delay]="i * 0.03 + 's'"
+            (click)="photoClick.emit(i)"
           >
             <img
               [src]="photo.thumbUrl"

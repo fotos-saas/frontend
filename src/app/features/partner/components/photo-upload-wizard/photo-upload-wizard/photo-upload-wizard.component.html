@@ -42,6 +42,7 @@
             (removePhoto)="onRemovePhoto($event)"
             (removeAllPhotos)="onRemoveAllPhotos()"
             (continueToMatching)="goToChoice()"
+            (photoClick)="onPhotoClick($event)"
           />
         }
         @case ('choice') {
@@ -77,6 +78,16 @@
         confirmText="Törlés"
         confirmType="danger"
         (resultEvent)="onDeleteConfirmResult($event)"
+      />
+    }
+
+    <!-- Lightbox -->
+    @if (lightboxOpen()) {
+      <app-media-lightbox
+        [media]="lightboxMedia()"
+        [currentIndex]="lightboxIndex()"
+        (close)="lightboxOpen.set(false)"
+        (navigate)="onLightboxNavigate($event)"
       />
     }
 

@@ -37,6 +37,7 @@ export class StepUploadComponent {
   readonly removePhoto = output<number>();
   readonly removeAllPhotos = output<void>();
   readonly continueToMatching = output<void>();
+  readonly photoClick = output<number>();
 
   /** Manuális toggle: a user "Elrejt"/"További képek" gombbal állítja */
   private readonly userWantsDropZone = signal(true);

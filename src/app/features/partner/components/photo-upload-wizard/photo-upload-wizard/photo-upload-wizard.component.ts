@@ -18,6 +18,8 @@ import {
   AlbumsSummary,
   AlbumType
 } from '../../../services/partner.service';
+import { MediaLightboxComponent } from '../../../../../shared/components/media-lightbox/media-lightbox.component';
+import type { LightboxMediaItem } from '../../../../../shared/components/media-lightbox/media-lightbox.types';
 import type { FileUploadProgress } from '../../../../../core/models/upload-progress.models';
 import { StepUploadComponent } from '../step-upload/step-upload.component';
 import { StepChoiceComponent } from '../step-choice/step-choice.component';
@@ -48,6 +50,7 @@ import { PhotoUploadWizardActionsService } from './photo-upload-wizard-actions.s
     StepReviewComponent,
     StepAlbumPickerComponent,
     ConfirmDialogComponent,
+    MediaLightboxComponent,
     WizardHeaderComponent,
     WizardStepperComponent,
     WizardFooterComponent,
@@ -91,6 +94,9 @@ export class PhotoUploadWizardComponent implements OnInit {
   matching = signal(false);
   saving = signal(false);
 
+  lightboxOpen = signal(false);
+  lightboxIndex = signal(0);
+
   // === COMPUTED ===
   readonly unassignedPhotos = computed(() => {
     const assignedMediaIds = new Set(this.assignments().map(a => a.mediaId));
@@ -133,6 +139,14 @@ export class PhotoUploadWizardComponent implements OnInit {
     }
     return steps;
   });
+
+  readonly lightboxMedia = computed<LightboxMediaItem[]>(() =>
+    this.uploadedPhotos().map(p => ({
+      id: p.mediaId,
+      url: p.fullUrl || p.thumbUrl,
+      fileName: p.filename,
+    }))
+  );
 
   readonly deleteConfirmMessage = computed(() => {
     const data = this.deleteConfirmData();
@@ -257,6 +271,19 @@ export class PhotoUploadWizardComponent implements OnInit {
     } else {
       this.showDeleteConfirm.set(false);
       this.deleteConfirmData.set(null);
+    }
+  }
+
+  // === LIGHTBOX ===
+  onPhotoClick(index: number): void {
+    this.lightboxIndex.set(index);
+    this.lightboxOpen.set(true);
+  }
+
+  onLightboxNavigate(direction: number): void {
+    const newIndex = this.lightboxIndex() + direction;
+    if (newIndex >= 0 && newIndex < this.uploadedPhotos().length) {
+      this.lightboxIndex.set(newIndex);
     }
   }
 

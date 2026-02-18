@@ -10,12 +10,11 @@ import type {
   DiscussionDetail,
   DiscussionFilters,
   CreateDiscussionRequest,
-  DiscussionPost,
-  ReactionsSummary,
 } from './forum.service';
+import { type ApiForumPost, mapApiPostToDiscussionPost } from '../models/forum-api.types';
 
 /**
- * API válasz típusok (snake_case)
+ * API valasz tipusok (snake_case) - discussion specifikus
  */
 interface ApiDiscussion {
   id: number;
@@ -33,38 +32,9 @@ interface ApiDiscussion {
   created_at: string;
 }
 
-interface ApiPost {
-  id: number;
-  author_name: string;
-  is_author_contact: boolean;
-  content: string;
-  mentions: string[];
-  is_edited: boolean;
-  edited_at?: string;
-  likes_count: number;
-  is_liked: boolean;
-  user_reaction: string | null;
-  reactions: ReactionsSummary;
-  can_edit: boolean;
-  can_delete: boolean;
-  parent_id?: number;
-  replies: ApiPost[];
-  media: ApiMedia[];
-  created_at: string;
-}
-
-interface ApiMedia {
-  id: number;
-  url: string;
-  file_name?: string;
-  fileName?: string;
-  is_image?: boolean;
-  isImage?: boolean;
-}
-
 interface ApiPaginatedPosts {
   current_page: number;
-  data: ApiPost[];
+  data: ApiForumPost[];
   total: number;
 }
 
@@ -259,27 +229,7 @@ export class ForumDiscussionService {
       creatorType: d.is_creator_contact ? 'contact' : 'guest',
       creatorName: d.creator_name || 'Ismeretlen',
       createdAt: d.created_at,
-      posts: posts.map(post => this.mapPost(post))
-    };
-  }
-
-  mapPost(post: ApiPost): DiscussionPost {
-    return {
-      id: post.id, discussionId: 0, parentId: post.parent_id,
-      authorType: post.is_author_contact ? 'contact' : 'guest',
-      authorName: post.author_name || 'Ismeretlen',
-      content: post.content, mentions: post.mentions || [],
-      isEdited: post.is_edited, editedAt: post.edited_at,
-      likesCount: post.likes_count, hasLiked: post.is_liked,
-      userReaction: post.user_reaction || null, reactions: post.reactions || {},
-      canEdit: post.can_edit, canDelete: post.can_delete,
-      createdAt: post.created_at,
-      replies: (post.replies || []).map(r => this.mapPost(r)),
-      media: (post.media || []).map(m => ({
-        id: m.id, url: m.url,
-        fileName: m.file_name || m.fileName || 'file',
-        isImage: m.is_image || m.isImage || false
-      }))
+      posts: posts.map(post => mapApiPostToDiscussionPost(post))
     };
   }
 

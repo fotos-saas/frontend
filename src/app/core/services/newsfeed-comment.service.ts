@@ -7,31 +7,7 @@ import { GuestService } from './guest.service';
 import { handleHttpError } from '../../shared/utils/http-error.util';
 import { NewsfeedPostService } from './newsfeed-post.service';
 import type { NewsfeedComment, ReactionsSummary } from './newsfeed.service';
-
-/**
- * API comment (snake_case)
- */
-interface ApiNewsfeedComment {
-  id: number;
-  parent_id: number | null;
-  author_type: 'contact' | 'guest';
-  author_name: string;
-  content: string;
-  is_edited: boolean;
-  can_delete: boolean;
-  created_at: string;
-  reactions?: ReactionsSummary;
-  user_reaction?: string | null;
-  replies?: ApiNewsfeedComment[];
-}
-
-interface ApiPaginatedResponse<T> {
-  current_page: number;
-  data: T[];
-  total: number;
-  last_page: number;
-  per_page: number;
-}
+import { type ApiNewsfeedComment, type ApiPaginatedResponse, mapApiCommentToNewsfeedComment } from '../models/newsfeed-api.types';
 
 /**
  * Newsfeed Comment Service
@@ -87,7 +63,7 @@ export class NewsfeedCommentService {
       `${this.apiUrl}/newsfeed/${postId}/comments`,
       { headers: this.guestService.getGuestSessionHeader(), params: { per_page: perPage.toString() } }
     ).pipe(
-      map(response => response.data.data.map(c => this.mapComment(c))),
+      map(response => response.data.data.map(c => mapApiCommentToNewsfeedComment(c))),
       catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
   }
@@ -104,7 +80,7 @@ export class NewsfeedCommentService {
       body,
       { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
-      map(response => this.mapComment(response.data)),
+      map(response => mapApiCommentToNewsfeedComment(response.data)),
       tap(() => this.postService.incrementCommentsInCache(postId)),
       catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
@@ -121,24 +97,6 @@ export class NewsfeedCommentService {
       tap(() => this.postService.decrementCommentsInCache(postId)),
       catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A bejegyzés nem található' })))
     );
-  }
-
-  // === PRIVATE ===
-
-  private mapComment(comment: ApiNewsfeedComment): NewsfeedComment {
-    return {
-      id: comment.id,
-      parentId: comment.parent_id,
-      authorType: comment.author_type,
-      authorName: comment.author_name || 'Ismeretlen',
-      content: comment.content,
-      isEdited: comment.is_edited,
-      canDelete: comment.can_delete,
-      createdAt: comment.created_at,
-      reactions: comment.reactions || {},
-      userReaction: comment.user_reaction || null,
-      replies: comment.replies?.map(r => this.mapComment(r)) || []
-    };
   }
 
 }

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { handleClientError } from '../../../shared/utils/http-error.util';
 import { safeJsonParse } from '../../../shared/utils/safe-json-parse';
 import type { ClientInfo, ClientBranding, ClientProfile, RegisterResponse, LoginResponse, ClientAlbum } from './client.service';
 
@@ -150,7 +151,7 @@ export class ClientAuthService {
           sessionStorage.setItem('client_branding', JSON.stringify(response.data.branding));
         }
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleClientError(error, () => this.logout())))
     );
   }
 
@@ -179,7 +180,7 @@ export class ClientAuthService {
         sessionStorage.setItem('client_info', JSON.stringify(this._clientInfo()));
         this._canRegister.set(false);
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleClientError(error, () => this.logout())))
     );
   }
 
@@ -218,10 +219,7 @@ export class ClientAuthService {
           sessionStorage.setItem('client_branding', JSON.stringify(response.branding));
         }
       }),
-      catchError(err => {
-        const message = err.error?.message ?? 'Hiba történt. Kérlek próbáld újra.';
-        return throwError(() => new Error(message));
-      })
+      catchError(error => throwError(() => handleClientError(error)))
     );
   }
 
@@ -244,7 +242,7 @@ export class ClientAuthService {
           sessionStorage.setItem('client_info', JSON.stringify(this._clientInfo()));
         }
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleClientError(error, () => this.logout())))
     );
   }
 
@@ -261,21 +259,8 @@ export class ClientAuthService {
       },
       { headers: this.getHeaders() }
     ).pipe(
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleClientError(error, () => this.logout())))
     );
   }
 
-  /**
-   * Handle HTTP errors
-   */
-  private handleError(error: { status: number; error?: { message?: string; errors?: Record<string, string[]> } }): Observable<never> {
-    // 401 - unauthorized, redirect to login
-    if (error.status === 401) {
-      this.logout();
-      return throwError(() => new Error('A munkamenet lejárt. Kérlek jelentkezz be újra.'));
-    }
-
-    const message = error.error?.message ?? 'Hiba történt. Kérlek próbáld újra.';
-    return throwError(() => new Error(message));
-  }
 }

@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ClientAuthService } from './client-auth.service';
+import { handleClientError } from '../../../shared/utils/http-error.util';
 import type {
   ClientAlbum,
   ClientAlbumDetail,
@@ -46,7 +47,7 @@ export class ClientAlbumService {
         const hasDownloadable = response.data.some(album => album.canDownload);
         this._hasDownloadableAlbum.set(hasDownloadable);
       }),
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleClientError(error, () => this.auth.logout())))
     );
   }
 
@@ -58,7 +59,7 @@ export class ClientAlbumService {
       `${this.baseUrl}/albums/${id}`,
       { headers: this.auth.getHeaders() }
     ).pipe(
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleClientError(error, () => this.auth.logout())))
     );
   }
 
@@ -76,7 +77,7 @@ export class ClientAlbumService {
       body,
       { headers: this.auth.getHeaders() }
     ).pipe(
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleClientError(error, () => this.auth.logout())))
     );
   }
 
@@ -100,21 +101,8 @@ export class ClientAlbumService {
       body,
       { headers: this.auth.getHeaders() }
     ).pipe(
-      catchError(this.handleError.bind(this))
+      catchError(error => throwError(() => handleClientError(error, () => this.auth.logout())))
     );
   }
 
-  /**
-   * Handle HTTP errors
-   */
-  private handleError(error: { status: number; error?: { message?: string } }): Observable<never> {
-    // 401 - unauthorized, redirect to login
-    if (error.status === 401) {
-      this.auth.logout();
-      return throwError(() => new Error('A munkamenet lejárt. Kérlek jelentkezz be újra.'));
-    }
-
-    const message = error.error?.message ?? 'Hiba történt. Kérlek próbáld újra.';
-    return throwError(() => new Error(message));
-  }
 }

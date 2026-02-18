@@ -11,38 +11,7 @@ import type {
   PostMedia,
   ReactionsSummary,
 } from './forum.service';
-
-/**
- * API típusok (belső)
- */
-interface ApiPost {
-  id: number;
-  author_name: string;
-  is_author_contact: boolean;
-  content: string;
-  mentions: string[];
-  is_edited: boolean;
-  edited_at?: string;
-  likes_count: number;
-  is_liked: boolean;
-  user_reaction: string | null;
-  reactions: ReactionsSummary;
-  can_edit: boolean;
-  can_delete: boolean;
-  parent_id?: number;
-  replies: ApiPost[];
-  media: ApiMedia[];
-  created_at: string;
-}
-
-interface ApiMedia {
-  id: number;
-  url: string;
-  file_name?: string;
-  fileName?: string;
-  is_image?: boolean;
-  isImage?: boolean;
-}
+import { type ApiForumPost, type ApiForumMedia, mapApiPostToDiscussionPost, mapApiMediaToPostMedia } from '../models/forum-api.types';
 
 /**
  * Forum Post Service
@@ -68,20 +37,20 @@ export class ForumPostService {
       request.media.forEach(file => formData.append('media[]', file, file.name));
 
       const headers = this.guestService.getGuestSessionHeader();
-      return this.http.post<{ data: ApiPost }>(
+      return this.http.post<{ data: ApiForumPost }>(
         `${this.apiUrl}/discussions/${discussionId}/posts`, formData, { headers }
       ).pipe(
-        map(response => this.mapPost(response.data)),
+        map(response => mapApiPostToDiscussionPost(response.data)),
         catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
       );
     }
 
-    return this.http.post<{ data: ApiPost }>(
+    return this.http.post<{ data: ApiForumPost }>(
       `${this.apiUrl}/discussions/${discussionId}/posts`,
       { content: request.content, parent_id: request.parentId },
       { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
-      map(response => this.mapPost(response.data)),
+      map(response => mapApiPostToDiscussionPost(response.data)),
       catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
   }
@@ -104,30 +73,22 @@ export class ForumPostService {
       }
 
       const headers = this.guestService.getGuestSessionHeader();
-      return this.http.post<{ success: boolean; data: { media: ApiMedia[] }; message: string }>(
+      return this.http.post<{ success: boolean; data: { media: ApiForumMedia[] }; message: string }>(
         `${this.apiUrl}/posts/${postId}`, formData,
         { headers, params: { '_method': 'PUT' } }
       ).pipe(
         map(response => ({
-          media: (response.data?.media || []).map(m => ({
-            id: m.id, url: m.url,
-            fileName: m.file_name || m.fileName || 'file',
-            isImage: m.is_image || m.isImage || false
-          }))
+          media: (response.data?.media || []).map(m => mapApiMediaToPostMedia(m))
         })),
         catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
       );
     }
 
-    return this.http.put<{ success: boolean; data: { media: ApiMedia[] }; message: string }>(
+    return this.http.put<{ success: boolean; data: { media: ApiForumMedia[] }; message: string }>(
       `${this.apiUrl}/posts/${postId}`, { content }, { headers: this.guestService.getGuestSessionHeader() }
     ).pipe(
       map(response => ({
-        media: (response.data?.media || []).map(m => ({
-          id: m.id, url: m.url,
-          fileName: m.file_name || m.fileName || 'file',
-          isImage: m.is_image || m.isImage || false
-        }))
+        media: (response.data?.media || []).map(m => mapApiMediaToPostMedia(m))
       })),
       catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
@@ -159,28 +120,6 @@ export class ForumPostService {
       })),
       catchError(error => throwError(() => handleHttpError(error, { notFoundMessage: 'A beszélgetés nem található' })))
     );
-  }
-
-  // === PRIVATE ===
-
-  private mapPost(post: ApiPost): DiscussionPost {
-    return {
-      id: post.id, discussionId: 0, parentId: post.parent_id,
-      authorType: post.is_author_contact ? 'contact' : 'guest',
-      authorName: post.author_name || 'Ismeretlen',
-      content: post.content, mentions: post.mentions || [],
-      isEdited: post.is_edited, editedAt: post.edited_at,
-      likesCount: post.likes_count, hasLiked: post.is_liked,
-      userReaction: post.user_reaction || null, reactions: post.reactions || {},
-      canEdit: post.can_edit, canDelete: post.can_delete,
-      createdAt: post.created_at,
-      replies: (post.replies || []).map(r => this.mapPost(r)),
-      media: (post.media || []).map(m => ({
-        id: m.id, url: m.url,
-        fileName: m.file_name || m.fileName || 'file',
-        isImage: m.is_image || m.isImage || false
-      }))
-    };
   }
 
 }

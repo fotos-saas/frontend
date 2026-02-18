@@ -18,35 +18,11 @@ import type {
   UpdatePostRequest,
   ReactionsSummary,
 } from './newsfeed.service';
+import { type ApiNewsfeedComment, type ApiPaginatedResponse, mapApiCommentToNewsfeedComment } from '../models/newsfeed-api.types';
 
-/**
- * API válasz típusok (snake_case) - belső használatra
- */
-interface ApiNewsfeedComment {
-  id: number;
-  parent_id: number | null;
-  author_type: 'contact' | 'guest';
-  author_name: string;
-  content: string;
-  is_edited: boolean;
-  can_delete: boolean;
-  created_at: string;
-  reactions?: ReactionsSummary;
-  user_reaction?: string | null;
-  replies?: ApiNewsfeedComment[];
-}
-
-/** Kibővített API post típus kommentekkel (getPost részletekhez) */
+/** Kibovitett API post tipus kommentekkel (getPost reszletekhez) */
 interface ApiNewsfeedPost extends BaseApiNewsfeedPost {
   comments?: ApiNewsfeedComment[];
-}
-
-interface ApiPaginatedResponse<T> {
-  current_page: number;
-  data: T[];
-  total: number;
-  last_page: number;
-  per_page: number;
 }
 
 /**
@@ -242,17 +218,7 @@ export class NewsfeedPostService {
   private mapPostDetail(post: ApiNewsfeedPost): NewsfeedPostDetail {
     return {
       ...this.mapPost(post),
-      comments: (post.comments || []).map(c => this.mapComment(c))
-    };
-  }
-
-  private mapComment(comment: ApiNewsfeedComment): import('./newsfeed.service').NewsfeedComment {
-    return {
-      id: comment.id, parentId: comment.parent_id, authorType: comment.author_type,
-      authorName: comment.author_name || 'Ismeretlen', content: comment.content,
-      isEdited: comment.is_edited, canDelete: comment.can_delete, createdAt: comment.created_at,
-      reactions: comment.reactions || {}, userReaction: comment.user_reaction || null,
-      replies: comment.replies?.map(r => this.mapComment(r)) || []
+      comments: (post.comments || []).map(c => mapApiCommentToNewsfeedComment(c))
     };
   }
 

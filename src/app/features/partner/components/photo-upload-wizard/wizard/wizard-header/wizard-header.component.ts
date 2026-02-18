@@ -13,19 +13,21 @@ import type { AlbumType } from '../../../../services/partner.service';
   template: `
     <div class="wizard-header">
       <div class="header-content">
-        <h2>
-          {{ title() }}
+        <h2>{{ title() }}</h2>
+        <div class="subtitle-row">
+          @if (subtitle()) {
+            <span class="subtitle">{{ subtitle() }}</span>
+          }
+          @if (subtitle() && albumLabel()) {
+            <span class="subtitle-separator">·</span>
+          }
           @if (albumLabel()) {
-            <span class="album-separator">·</span>
             <span class="album-label">
-              <lucide-icon [name]="albumIcon()" [size]="18" />
+              <lucide-icon [name]="albumIcon()" [size]="14" />
               {{ albumLabel() }}
             </span>
           }
-        </h2>
-        @if (subtitle()) {
-          <p class="subtitle">{{ subtitle() }}</p>
-        }
+        </div>
       </div>
       <button type="button" class="close-btn" (click)="close.emit()">
         <lucide-icon [name]="ICONS.X" [size]="20" />
@@ -42,34 +44,37 @@ import type { AlbumType } from '../../../../services/partner.service';
     }
 
     .header-content h2 {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
       font-size: 1.25rem;
       font-weight: 600;
       color: #1e293b;
       margin: 0 0 4px 0;
     }
 
-    .album-separator {
-      margin: 0 8px;
-      color: #cbd5e1;
-      font-weight: 300;
-    }
-
-    .album-label {
-      display: inline-flex;
+    .subtitle-row {
+      display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 1.125rem;
-      font-weight: 500;
-      color: #475569;
+      flex-wrap: wrap;
     }
 
     .subtitle {
       font-size: 0.875rem;
       color: #64748b;
       margin: 0;
+    }
+
+    .subtitle-separator {
+      margin: 0 6px;
+      color: #cbd5e1;
+      font-size: 0.875rem;
+    }
+
+    .album-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #475569;
     }
 
     .close-btn {
@@ -90,16 +95,6 @@ import type { AlbumType } from '../../../../services/partner.service';
     .close-btn:hover {
       background: #e2e8f0;
       color: #1e293b;
-    }
-
-    @media (max-width: 480px) {
-      .header-content h2 {
-        font-size: 1.0625rem;
-      }
-
-      .album-label {
-        font-size: 1rem;
-      }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush

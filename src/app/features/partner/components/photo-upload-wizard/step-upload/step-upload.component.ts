@@ -10,6 +10,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { UploadedPhoto } from '../../../services/partner.service';
 import { DropZoneComponent } from '../../../../../shared/components/drop-zone/drop-zone.component';
+import type { FileUploadProgress } from '../../../../../core/models/upload-progress.models';
 
 /**
  * Step Upload - Drag & drop fájlfeltöltés + ZIP támogatás.
@@ -28,7 +29,7 @@ export class StepUploadComponent {
 
   readonly uploadedPhotos = input<UploadedPhoto[]>([]);
   readonly uploading = input<boolean>(false);
-  readonly uploadProgress = input<number>(0);
+  readonly uploadProgress = input<FileUploadProgress | null>(null);
 
   readonly filesSelected = output<File[]>();
   readonly removePhoto = output<number>();

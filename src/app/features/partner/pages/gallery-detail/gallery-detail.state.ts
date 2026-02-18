@@ -4,6 +4,7 @@ import { GalleryDetails, GalleryPhoto, GalleryProgress } from '../../models/gall
 import { WorkflowPhoto } from '../../../photo-selection/models/workflow.models';
 import { LightboxMediaItem } from '../../../../shared/components/media-lightbox/media-lightbox.types';
 import type { GalleryTab } from './components/gallery-tabs/gallery-tabs.component';
+import type { FileUploadProgress } from '../../../../core/models/upload-progress.models';
 
 /**
  * Gallery Detail State
@@ -30,6 +31,7 @@ export class GalleryDetailState {
 
   readonly uploading = signal<boolean>(false);
   readonly uploadProgress = signal<number>(0);
+  readonly detailedUploadProgress = signal<FileUploadProgress | null>(null);
   readonly dropZoneVisible = signal<boolean>(false);
 
   // === DEADLINE STATE ===
@@ -303,6 +305,7 @@ export class GalleryDetailState {
     this.uploading.set(false);
     this.dropZoneVisible.set(false);
     this.uploadProgress.set(0);
+    this.detailedUploadProgress.set(null);
     this.deleteSelectedIds.set([]);
     this.deletingPhotos.set(false);
     this.photoToDelete.set(null);

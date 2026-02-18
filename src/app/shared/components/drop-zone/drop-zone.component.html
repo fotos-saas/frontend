@@ -19,10 +19,13 @@
   @if (uploading()) {
     <div class="upload-progress">
       <div class="progress-spinner"></div>
-      <span class="progress-text">Feltöltés folyamatban...</span>
+      <span class="progress-text">{{ phaseText() }}</span>
       <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+        <div class="progress-fill" [style.width.%]="displayProgress()"></div>
       </div>
+      @if (detailText()) {
+        <span class="progress-detail">{{ detailText() }}</span>
+      }
     </div>
   } @else {
     <div class="drop-content">

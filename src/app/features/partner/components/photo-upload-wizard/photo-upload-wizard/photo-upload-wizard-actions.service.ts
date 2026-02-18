@@ -9,6 +9,9 @@ import {
   AlbumsSummary,
   AlbumType
 } from '../../../services/partner.service';
+import { UploadProgressService } from '../../../../../core/services/upload-progress.service';
+import { environment } from '../../../../../../environments/environment';
+import type { FileUploadProgress } from '../../../../../core/models/upload-progress.models';
 
 /**
  * Component-scoped service a PhotoUploadWizard HTTP hívásaihoz.
@@ -17,6 +20,7 @@ import {
 @Injectable()
 export class PhotoUploadWizardActionsService {
   private partnerService = inject(PartnerService);
+  private uploadService = inject(UploadProgressService);
   private destroyRef = inject(DestroyRef);
 
   // === DATA LOADING ===
@@ -69,25 +73,43 @@ export class PhotoUploadWizardActionsService {
     files: File[],
     uploadedPhotos: WritableSignal<UploadedPhoto[]>,
     uploading: WritableSignal<boolean>,
-    uploadProgress: WritableSignal<number>
+    uploadProgress: WritableSignal<FileUploadProgress | null>
   ): void {
     uploading.set(true);
-    uploadProgress.set(0);
+    uploadProgress.set(null);
 
     const isZip = files.length === 1 && files[0].name.toLowerCase().endsWith('.zip');
+    const uploadUrl = `${environment.apiUrl}/partner/projects/${projectId}/albums/${album}/upload`;
+
     const upload$ = isZip
-      ? this.partnerService.uploadZipToAlbum(projectId, album, files[0])
-      : this.partnerService.uploadToAlbum(projectId, album, files);
+      ? this.uploadService.uploadZipWithProgress(
+          uploadUrl,
+          files[0],
+          `${environment.apiUrl}/partner/upload-status/{batchId}`,
+        )
+      : this.uploadService.uploadFilesWithProgress(uploadUrl, files);
 
     upload$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
-          uploadedPhotos.update(current => [...response.photos, ...current]);
-          uploading.set(false);
-          uploadProgress.set(100);
+        next: (progress) => {
+          uploadProgress.set(progress);
+          if (progress.completed && progress.photos.length > 0) {
+            const newPhotos: UploadedPhoto[] = progress.photos.map(p => ({
+              mediaId: p.mediaId,
+              filename: p.filename,
+              iptcTitle: p.iptcTitle ?? null,
+              thumbUrl: p.thumbUrl,
+              fullUrl: p.fullUrl ?? '',
+            }));
+            uploadedPhotos.update(current => [...newPhotos, ...current]);
+            uploading.set(false);
+          }
         },
-        error: () => uploading.set(false)
+        error: () => {
+          uploading.set(false);
+          uploadProgress.set(null);
+        },
       });
   }
 

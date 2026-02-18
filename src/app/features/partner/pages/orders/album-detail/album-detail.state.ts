@@ -7,6 +7,7 @@ import {
 } from '../../../services/partner-orders.service';
 import { WorkflowPhoto } from '../../../../photo-selection/models/workflow.models';
 import { LightboxMediaItem } from '../../../../../shared/components/media-lightbox/media-lightbox.types';
+import type { FileUploadProgress } from '../../../../../core/models/upload-progress.models';
 
 /**
  * Album Detail State
@@ -33,6 +34,9 @@ export class AlbumDetailState {
 
   /** Feltöltési progress */
   readonly uploadProgress = signal<UploadProgress | null>(null);
+
+  /** Részletes feltöltési állapot (UploadProgressService) */
+  readonly detailedUploadProgress = signal<FileUploadProgress | null>(null);
 
   // === DELETE STATE ===
 
@@ -513,6 +517,7 @@ export class AlbumDetailState {
     this.viewMode.set('list');
     this.uploading.set(false);
     this.uploadProgress.set(null);
+    this.detailedUploadProgress.set(null);
     this.deleteSelectedIds.set([]);
     this.deletingPhotos.set(false);
     this.photoToDelete.set(null);

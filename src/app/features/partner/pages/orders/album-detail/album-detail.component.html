@@ -41,7 +41,7 @@
       <div class="mb-6">
         <app-drop-zone
           [uploading]="state.uploading()"
-          [uploadProgress]="state.uploadProgress()?.progress || 0"
+          [detailedProgress]="state.detailedUploadProgress()"
           accept=".jpg,.jpeg,.png,.webp,.zip"
           hint="JPG, PNG, WebP vagy ZIP"
           maxSize="max. 20MB/kép"

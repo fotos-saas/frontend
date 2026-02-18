@@ -3,10 +3,12 @@ import {
   input,
   output,
   signal,
+  computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../constants/icons.constants';
+import type { FileUploadProgress } from '../../../core/models/upload-progress.models';
 
 /**
  * Közös Drop Zone komponens fájlfeltöltéshez.
@@ -15,7 +17,7 @@ import { ICONS } from '../../constants/icons.constants';
  * ```html
  * <app-drop-zone
  *   [uploading]="uploading()"
- *   [uploadProgress]="uploadProgress()?.progress || 0"
+ *   [detailedProgress]="detailedProgress()"
  *   accept=".jpg,.jpeg,.png,.webp,.zip"
  *   hint="JPG, PNG, WebP vagy ZIP"
  *   maxSize="max. 50 kép"
@@ -41,8 +43,46 @@ export class DropZoneComponent {
   /** Feltöltés folyamatban van-e */
   readonly uploading = input<boolean>(false);
 
-  /** Feltöltési folyamat százalékban (0-100) */
+  /** Részletes feltöltési állapot (új, UploadProgressService-ből) */
+  readonly detailedProgress = input<FileUploadProgress | null>(null);
+
+  /** Feltöltési folyamat százalékban (0-100) - backward compat */
   readonly uploadProgress = input<number>(0);
+
+  /** Összesített progress: detailedProgress vagy uploadProgress */
+  readonly displayProgress = computed(() =>
+    this.detailedProgress()?.overallProgress ?? this.uploadProgress()
+  );
+
+  /** Fázis szöveg a UI-hoz */
+  readonly phaseText = computed(() => {
+    const d = this.detailedProgress();
+    if (!d) return 'Feltöltés folyamatban...';
+    if (d.phase === 'uploading') {
+      if (d.totalChunks > 1) {
+        return `Feltöltés... ${d.currentChunk}/${d.totalChunks} csomag`;
+      }
+      return 'Feltöltés folyamatban...';
+    }
+    if (d.phase === 'processing') return `ZIP feldolgozás... ${d.uploadedCount}/${d.totalCount} kép`;
+    if (d.phase === 'completed') return 'Kész!';
+    return d.errorMessage ?? 'Hiba történt';
+  });
+
+  /** Részletes info szöveg a progress bar alatt */
+  readonly detailText = computed(() => {
+    const d = this.detailedProgress();
+    if (!d || d.phase === 'completed') return '';
+    const parts: string[] = [];
+    if (d.uploadedCount > 0 || d.totalCount > 0) {
+      parts.push(`${d.uploadedCount}/${d.totalCount} kép`);
+    }
+    parts.push(`${this.displayProgress()}%`);
+    if (d.errorCount > 0) {
+      parts.push(`(${d.errorCount} hiba)`);
+    }
+    return parts.join(' · ');
+  });
 
   /** Elfogadott fájltípusok (file input accept attribútum) */
   readonly accept = input<string>('.jpg,.jpeg,.png,.webp');

@@ -3,7 +3,7 @@
   @if (showDropZone() || uploadedPhotos().length === 0) {
     <app-drop-zone
       [uploading]="uploading()"
-      [uploadProgress]="uploadProgress()"
+      [detailedProgress]="uploadProgress()"
       accept=".jpg,.jpeg,.png,.webp,.zip"
       hint="JPG, PNG, WebP vagy ZIP fájl"
       maxSize="max. 50 kép"

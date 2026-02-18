@@ -18,6 +18,7 @@ import {
   AlbumsSummary,
   AlbumType
 } from '../../../services/partner.service';
+import type { FileUploadProgress } from '../../../../../core/models/upload-progress.models';
 import { StepUploadComponent } from '../step-upload/step-upload.component';
 import { StepChoiceComponent } from '../step-choice/step-choice.component';
 import { StepReviewComponent } from '../step-review/step-review.component';
@@ -86,7 +87,7 @@ export class PhotoUploadWizardComponent implements OnInit {
   deleteConfirmData = signal<{ mediaIds: number[]; count: number } | null>(null);
 
   uploading = signal(false);
-  uploadProgress = signal(0);
+  uploadProgress = signal<FileUploadProgress | null>(null);
   matching = signal(false);
   saving = signal(false);
 

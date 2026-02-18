@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { PartnerService } from '../../services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { UploadProgressService } from '../../../../core/services/upload-progress.service';
+import { environment } from '../../../../../environments/environment';
 import { GalleryDetailState } from './gallery-detail.state';
 
 /**
@@ -16,6 +18,7 @@ export class GalleryDetailActionsService {
   private readonly partnerService = inject(PartnerService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly uploadService = inject(UploadProgressService);
   private readonly destroyRef = inject(DestroyRef);
 
   // === GALLERY LOADING ===
@@ -70,20 +73,25 @@ export class GalleryDetailActionsService {
 
     state.startUpload(validFiles.length);
 
-    this.partnerService.uploadGalleryPhotosChunked(projectId, validFiles)
+    const uploadUrl = `${environment.apiUrl}/partner/projects/${projectId}/gallery/photos`;
+
+    this.uploadService.uploadFilesWithProgress(uploadUrl, validFiles)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (progress) => {
-          state.updateUploadProgress(progress.progress);
+          state.detailedUploadProgress.set(progress);
+          state.updateUploadProgress(progress.overallProgress);
           if (progress.completed) {
             this.toast.success('Siker', `${progress.uploadedCount} kép sikeresen feltöltve`);
             state.uploadSuccess();
+            state.detailedUploadProgress.set(null);
             this.refreshGallery(state, projectId);
           }
         },
         error: (err: { error?: { message?: string } }) => {
           this.toast.error('Hiba', err.error?.message ?? 'Hiba történt a feltöltés során');
           state.uploadError();
+          state.detailedUploadProgress.set(null);
         },
       });
   }

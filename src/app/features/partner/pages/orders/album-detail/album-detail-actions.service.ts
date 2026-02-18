@@ -6,6 +6,8 @@ import { PartnerOrdersService } from '../../../services/partner-orders.service';
 import { PartnerWebshopService } from '../../../services/partner-webshop.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { ClipboardService } from '../../../../../core/services/clipboard.service';
+import { UploadProgressService } from '../../../../../core/services/upload-progress.service';
+import { environment } from '../../../../../../environments/environment';
 import { AlbumDetailState } from './album-detail.state';
 import { AlbumEditFormData } from './components/album-edit-modal/album-edit-modal.component';
 
@@ -21,6 +23,7 @@ export class AlbumDetailActionsService {
   private readonly webshopService = inject(PartnerWebshopService);
   private readonly toast = inject(ToastService);
   private readonly clipboardService = inject(ClipboardService);
+  private readonly uploadService = inject(UploadProgressService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -101,20 +104,26 @@ export class AlbumDetailActionsService {
 
     state.startUpload(validFiles.length);
 
-    this.ordersService.uploadPhotosChunked(album.id, validFiles).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (progress) => {
-        state.updateUploadProgress(progress);
-        if (progress.completed) {
-          this.toast.success('Siker', `${progress.uploadedCount} kép sikeresen feltöltve`);
-          this.loadAlbum(state, album.id);
-          state.uploadSuccess();
+    const uploadUrl = `${environment.apiUrl}/partner/orders/albums/${album.id}/photos`;
+
+    this.uploadService.uploadFilesWithProgress(uploadUrl, validFiles)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (progress) => {
+          state.detailedUploadProgress.set(progress);
+          if (progress.completed) {
+            this.toast.success('Siker', `${progress.uploadedCount} kép sikeresen feltöltve`);
+            this.loadAlbum(state, album.id);
+            state.uploadSuccess();
+            state.detailedUploadProgress.set(null);
+          }
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.toast.error('Hiba', err.error?.message || 'Hiba történt a feltöltés során');
+          state.uploadError();
+          state.detailedUploadProgress.set(null);
         }
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error('Hiba', err.error?.message || 'Hiba történt a feltöltés során');
-        state.uploadError();
-      }
-    });
+      });
   }
 
   // === DELETE PHOTO ===

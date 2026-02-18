@@ -9,6 +9,7 @@ import {
   ElementRef,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -26,6 +27,7 @@ type EditorTab = 'visual' | 'html';
   selector: 'app-email-template-edit',
   standalone: true,
   imports: [
+    NgTemplateOutlet,
     FormsModule,
     LucideAngularModule,
     MatTooltipModule,
@@ -59,6 +61,9 @@ export class EmailTemplateEditComponent {
   // Szerkesztett értékek
   protected editSubject = signal('');
   protected editBody = signal('');
+
+  // Mobil változók bottom sheet
+  protected variablesOpen = signal(false);
 
   // Előnézet
   protected previewOpen = signal(false);
@@ -114,6 +119,14 @@ export class EmailTemplateEditComponent {
       .subscribe({
         next: (res) => this.variables.set(res.data),
       });
+  }
+
+  protected toggleVariables(): void {
+    this.variablesOpen.update(v => !v);
+  }
+
+  protected closeVariables(): void {
+    this.variablesOpen.set(false);
   }
 
   protected setTab(tab: EditorTab): void {

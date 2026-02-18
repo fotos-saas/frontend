@@ -114,50 +114,86 @@
         }
       </div>
 
-      <!-- Jobb oszlop: változók -->
-      <aside class="variables-column">
-        <h3 class="variables-title">
-          <lucide-icon [name]="ICONS.CODE" [size]="16" />
-          Elérhető változók
-        </h3>
-        <p class="variables-hint">Kattints egy változóra a beszúráshoz</p>
-
-        @for (group of variables(); track group.group) {
-          <div class="variable-group">
-            <button
-              type="button"
-              class="variable-group-header"
-              (click)="toggleGroup(group.group)"
-            >
-              <lucide-icon
-                [name]="isGroupExpanded(group.group) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
-                [size]="14"
-              />
-              <span>{{ group.label }}</span>
-              <span class="variable-count">{{ group.variables.length }}</span>
-            </button>
-
-            @if (isGroupExpanded(group.group)) {
-              <div class="variable-list">
-                @for (v of group.variables; track v.key) {
-                  <button
-                    type="button"
-                    class="variable-item"
-                    [matTooltip]="'Beszúrás a tárgyba: Shift+klikk'"
-                    (click)="$event.shiftKey ? insertVariableToSubject(v.key) : insertVariable(v.key)"
-                  >
-                    <code class="variable-key">{{ '{' + v.key + '}' }}</code>
-                    <span class="variable-desc">{{ v.description }}</span>
-                  </button>
-                }
-              </div>
-            }
-          </div>
-        }
+      <!-- Jobb oszlop: változók (desktop) -->
+      <aside class="variables-column variables-column--desktop">
+        <ng-container *ngTemplateOutlet="variablesContent" />
       </aside>
     </div>
   }
 </div>
+
+<!-- Floating gomb: változók (mobil) -->
+@if (template() && !variablesOpen()) {
+  <button
+    type="button"
+    class="variables-fab"
+    (click)="toggleVariables()"
+    matTooltip="Változók beszúrása"
+  >
+    <lucide-icon [name]="ICONS.CODE" [size]="20" />
+  </button>
+}
+
+<!-- Bottom sheet: változók (mobil) -->
+@if (variablesOpen()) {
+  <div class="variables-sheet-backdrop" (click)="closeVariables()"></div>
+  <div class="variables-sheet">
+    <div class="variables-sheet-header">
+      <h3 class="variables-title">
+        <lucide-icon [name]="ICONS.CODE" [size]="16" />
+        Elérhető változók
+      </h3>
+      <button type="button" class="variables-sheet-close" (click)="closeVariables()">
+        <lucide-icon name="x" [size]="20" />
+      </button>
+    </div>
+    <div class="variables-sheet-body">
+      <ng-container *ngTemplateOutlet="variablesContent" />
+    </div>
+  </div>
+}
+
+<!-- Változók tartalom (újrahasználható) -->
+<ng-template #variablesContent>
+  <h3 class="variables-title variables-title--in-sidebar">
+    <lucide-icon [name]="ICONS.CODE" [size]="16" />
+    Elérhető változók
+  </h3>
+  <p class="variables-hint">Kattints egy változóra a beszúráshoz</p>
+
+  @for (group of variables(); track group.group) {
+    <div class="variable-group">
+      <button
+        type="button"
+        class="variable-group-header"
+        (click)="toggleGroup(group.group)"
+      >
+        <lucide-icon
+          [name]="isGroupExpanded(group.group) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
+          [size]="14"
+        />
+        <span>{{ group.label }}</span>
+        <span class="variable-count">{{ group.variables.length }}</span>
+      </button>
+
+      @if (isGroupExpanded(group.group)) {
+        <div class="variable-list">
+          @for (v of group.variables; track v.key) {
+            <button
+              type="button"
+              class="variable-item"
+              [matTooltip]="'Beszúrás a tárgyba: Shift+klikk'"
+              (click)="$event.shiftKey ? insertVariableToSubject(v.key) : insertVariable(v.key)"
+            >
+              <code class="variable-key">{{ '{' + v.key + '}' }}</code>
+              <span class="variable-desc">{{ v.description }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</ng-template>
 
 <!-- Előnézet dialógus -->
 @if (previewOpen()) {

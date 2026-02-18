@@ -186,8 +186,8 @@
   }
 }
 
-// Jobb oszlop: Változók
-.variables-column {
+// Jobb oszlop: Változók (desktop)
+.variables-column--desktop {
   position: sticky;
   top: 24px;
   align-self: start;
@@ -197,6 +197,22 @@
   background: var(--bg-muted, #f8fafc);
   border-radius: 12px;
   border: 1px solid var(--border-light, #e2e8f0);
+}
+
+// Desktop: title duplikáció elrejtése a sheet-ből
+.variables-title--in-sidebar {
+  display: flex;
+}
+
+// FAB gomb (változók) — desktop-on rejtett
+.variables-fab {
+  display: none;
+}
+
+// Bottom sheet — desktop-on rejtett
+.variables-sheet-backdrop,
+.variables-sheet {
+  display: none;
 }
 
 .variables-title {
@@ -311,9 +327,114 @@
     grid-template-columns: 1fr;
   }
 
-  .variables-column {
-    position: static;
-    max-height: none;
+  // Desktop sidebar eltűnik
+  .variables-column--desktop {
+    display: none;
+  }
+
+  // A template-ben levő title is eltűnik (a sheet headerben van)
+  .variables-title--in-sidebar {
+    display: none;
+  }
+
+  // FAB gomb megjelenik
+  .variables-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    border: none;
+    background: var(--primary, #1e7b34);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(30, 123, 52, 0.35);
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(30, 123, 52, 0.45);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  // Bottom sheet backdrop
+  .variables-sheet-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 200;
+    animation: fadeIn 0.2s ease;
+  }
+
+  // Bottom sheet
+  .variables-sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 70vh;
+    background: var(--bg-surface, #fff);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+    z-index: 201;
+    animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .variables-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border-light, #e2e8f0);
+    flex-shrink: 0;
+
+    // Kis "fogó" dekoráció
+    &::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border-light, #d1d5db);
+    }
+  }
+
+  .variables-sheet-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--bg-muted, #f1f5f9);
+    color: var(--text-secondary, #64748b);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--border-light, #e2e8f0);
+    }
+  }
+
+  .variables-sheet-body {
+    overflow-y: auto;
+    padding: 12px 20px 24px;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -331,5 +452,24 @@
     button {
       flex: 1;
     }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .variables-sheet-backdrop,
+  .variables-sheet,
+  .variables-fab {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

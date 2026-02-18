@@ -11,6 +11,17 @@
       </div>
     </div>
     <div class="header-right">
+      @if (photoCount() > 0) {
+        <button
+          class="download-school-btn"
+          [class.download-school-btn--loading]="isDownloading()"
+          [matTooltip]="isDownloading() ? 'Letöltés...' : photoCount() + ' fotó letöltése'"
+          [disabled]="isDownloading()"
+          (click)="onDownloadSchool($event)"
+        >
+          <lucide-icon [name]="ICONS.DOWNLOAD" [size]="12" />
+        </button>
+      }
       @if (config().isSyncable && school().syncAvailable) {
         <button
           class="sync-badge"

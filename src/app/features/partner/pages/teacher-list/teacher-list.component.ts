@@ -8,7 +8,7 @@ import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
 import { TeacherListItem, SyncResultItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
-import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool } from '../../models/archive.models';
+import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool, ArchiveSchoolGroup } from '../../models/archive.models';
 import { ArchiveEditModalComponent } from '../../components/archive/archive-edit-modal/archive-edit-modal.component';
 import { ArchiveBulkImportDialogComponent } from '../../components/archive/archive-bulk-import-dialog/archive-bulk-import-dialog.component';
 import { ArchiveBulkPhotoUploadComponent } from '../../components/archive/archive-bulk-photo-upload/archive-bulk-photo-upload.component';
@@ -159,6 +159,8 @@ export class PartnerTeacherListComponent implements OnInit {
   // Download dialog
   showDownloadDialog = signal(false);
   downloading = signal(false);
+  downloadingSchoolId = signal(0);
+  downloadSchoolTarget = signal<ArchiveSchoolGroup | null>(null);
 
   // More menu dropdown
   showMoreMenu = signal(false);
@@ -434,25 +436,45 @@ export class PartnerTeacherListComponent implements OnInit {
   }
 
   onDownloadAllRequest(): void {
+    this.downloadSchoolTarget.set(null);
+    this.showDownloadDialog.set(true);
+  }
+
+  onDownloadSchoolRequest(school: ArchiveSchoolGroup): void {
+    this.downloadSchoolTarget.set(school);
     this.showDownloadDialog.set(true);
   }
 
   onDownloadConfirm(options: ArchiveDownloadOptions): void {
     this.showDownloadDialog.set(false);
-    this.downloading.set(true);
+    const target = this.downloadSchoolTarget();
 
-    const classYear = this.projectView()?.selectedYear() || undefined;
+    if (target) {
+      this.downloadingSchoolId.set(target.schoolId);
+      this.schoolService.downloadTeacherPhotosZip(target.schoolId, options.fileNaming)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (blob) => {
+            saveFile(blob, `tanarok-${target.schoolId}.zip`);
+            this.downloadingSchoolId.set(0);
+          },
+          error: () => this.downloadingSchoolId.set(0),
+        });
+    } else {
+      this.downloading.set(true);
+      const classYear = this.projectView()?.selectedYear() || undefined;
 
-    this.teacherService.downloadArchiveZip(classYear, options.fileNaming)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => {
-          const yearLabel = classYear || 'osszes';
-          saveFile(blob, `tanarok-${yearLabel}.zip`);
-          this.downloading.set(false);
-        },
-        error: () => this.downloading.set(false),
-      });
+      this.teacherService.downloadArchiveZip(classYear, options.fileNaming)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (blob) => {
+            const yearLabel = classYear || 'osszes';
+            saveFile(blob, `tanarok-${yearLabel}.zip`);
+            this.downloading.set(false);
+          },
+          error: () => this.downloading.set(false),
+        });
+    }
   }
 
   onSyncSingleItem(item: ArchivePersonInSchool): void {

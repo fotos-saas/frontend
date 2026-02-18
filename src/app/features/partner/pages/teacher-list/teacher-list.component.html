@@ -47,6 +47,7 @@
       [schoolOptions]="schoolOptions()"
       [syncingSchoolId]="syncingSchoolId()"
       [downloading]="downloading()"
+      [downloadingSchoolId]="downloadingSchoolId()"
       (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
       (viewPhotoRequest)="onViewPhotoFromProject($event)"
       (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
@@ -54,6 +55,7 @@
       (syncPhotosRequest)="onSyncPhotosFromProject($event)"
       (syncSingleItemRequest)="onSyncSingleItem($event)"
       (downloadAllRequest)="onDownloadAllRequest()"
+      (downloadSchoolRequest)="onDownloadSchoolRequest($event)"
     />
   } @else if (viewMode() === 'history') {
     <app-teacher-upload-history />

@@ -32,6 +32,7 @@ export class ArchiveProjectViewComponent {
   schoolOptions = input<SelectOption[]>([]);
   syncingSchoolId = input(0);
   downloading = input(false);
+  downloadingSchoolId = input(0);
 
   private readonly archiveService = inject(ARCHIVE_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
@@ -59,6 +60,7 @@ export class ArchiveProjectViewComponent {
   markNoPhotoRequest = output<ArchivePersonInSchool>();
   undoNoPhotoRequest = output<ArchivePersonInSchool>();
   downloadAllRequest = output<void>();
+  downloadSchoolRequest = output<ArchiveSchoolGroup>();
 
   filteredSchoolGroups = computed(() => {
     const schoolId = this.selectedSchoolId();
@@ -187,6 +189,10 @@ export class ArchiveProjectViewComponent {
 
   onSyncSingleItem(item: ArchivePersonInSchool): void {
     this.syncSingleItemRequest.emit(item);
+  }
+
+  onDownloadSchool(school: ArchiveSchoolGroup): void {
+    this.downloadSchoolRequest.emit(school);
   }
 
   /** Lokálisan frissíti egy elem mezőjét újratöltés nélkül. */

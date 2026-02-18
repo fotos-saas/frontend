@@ -22,6 +22,8 @@ export class ArchiveProjectCardComponent {
     this.school().items.filter(t => t.hasSyncablePhoto).length
   );
 
+  isDownloading = input(false);
+
   toggle = output<void>();
   syncPhotos = output<void>();
   syncSingleItem = output<ArchivePersonInSchool>();
@@ -29,6 +31,11 @@ export class ArchiveProjectCardComponent {
   viewPhoto = output<ArchivePersonInSchool>();
   markNoPhoto = output<ArchivePersonInSchool>();
   undoNoPhoto = output<ArchivePersonInSchool>();
+  downloadSchool = output<void>();
+
+  photoCount = computed(() =>
+    this.school().items.filter(t => t.hasPhoto).length
+  );
 
   readonly ICONS = ICONS;
 
@@ -152,5 +159,10 @@ export class ArchiveProjectCardComponent {
 
   onSyncSingle(item: ArchivePersonInSchool): void {
     this.syncSingleItem.emit(item);
+  }
+
+  onDownloadSchool(event: MouseEvent): void {
+    event.stopPropagation();
+    this.downloadSchool.emit();
   }
 }

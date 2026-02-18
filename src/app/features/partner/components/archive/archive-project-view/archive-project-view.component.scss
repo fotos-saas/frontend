@@ -85,6 +85,8 @@
 
   &:hover:not(:disabled) { opacity: 0.9; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .spin { animation: spin 0.8s linear infinite; }
 }
 
 .expand-btn {

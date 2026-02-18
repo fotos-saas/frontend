@@ -57,8 +57,13 @@
           (click)="downloadAllRequest.emit()"
           [disabled]="downloading()"
         >
-          <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
-          {{ downloading() ? 'Letöltés...' : 'Letöltöm mind (' + summary().withPhoto + ')' }}
+          @if (downloading()) {
+            <lucide-icon [name]="ICONS.REFRESH" [size]="14" class="spin" />
+            Letöltés...
+          } @else {
+            <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+            Letöltöm mind ({{ summary().withPhoto }})
+          }
         </button>
       }
       <button class="expand-btn" (click)="expandAll()">

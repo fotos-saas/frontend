@@ -19,7 +19,7 @@
           [disabled]="isDownloading()"
           (click)="onDownloadSchool($event)"
         >
-          <lucide-icon [name]="ICONS.DOWNLOAD" [size]="12" />
+          <lucide-icon [name]="isDownloading() ? ICONS.REFRESH : ICONS.DOWNLOAD" [size]="12" [class.spin]="isDownloading()" />
         </button>
       }
       @if (config().isSyncable && school().syncAvailable) {

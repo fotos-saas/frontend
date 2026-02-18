@@ -52,15 +52,31 @@
 }
 
 @media (max-width: 640px) {
+  .pagination {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 8px;
+    margin-top: 16px;
+  }
+
   .btn-text {
     display: none;
   }
 
   .page-btn {
-    padding: 10px 12px;
+    padding: 8px 10px;
   }
 
-  .pagination {
-    gap: 8px;
+  .page-select-group {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .page-select {
+    min-width: 100px;
+  }
+
+  .page-context {
+    font-size: 0.75rem;
   }
 }

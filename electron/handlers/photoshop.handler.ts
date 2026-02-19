@@ -191,7 +191,10 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     dpi: number;
     mode: string;
     outputPath: string;
+    persons?: Array<{ id: number; name: string; type: string }>;
   }) => {
+    let personsJsonPath: string | null = null;
+
     try {
       // Input validacio
       if (typeof params.widthCm !== 'number' || typeof params.heightCm !== 'number') {
@@ -225,8 +228,21 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         '--output', params.outputPath,
       ];
 
+      // Szemelyek JSON temp fajlba irasa (ha vannak)
+      if (params.persons && params.persons.length > 0) {
+        personsJsonPath = path.join(app.getPath('temp'), `psd-persons-${Date.now()}.json`);
+        fs.writeFileSync(personsJsonPath, JSON.stringify(params.persons), 'utf-8');
+        args.push('--persons-json', personsJsonPath);
+        log.info(`Szemelyek JSON irva: ${personsJsonPath} (${params.persons.length} fo)`);
+      }
+
       return new Promise<{ success: boolean; error?: string }>((resolve) => {
         execFile('python3', args, { timeout: 30000 }, (error, stdout, stderr) => {
+          // Temp fajl torlese
+          if (personsJsonPath && fs.existsSync(personsJsonPath)) {
+            try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+          }
+
           if (error) {
             log.error('PSD generalas hiba:', error.message, stderr);
             resolve({ success: false, error: stderr || error.message });
@@ -237,6 +253,10 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         });
       });
     } catch (error) {
+      // Temp fajl torlese hiba eseten is
+      if (personsJsonPath && fs.existsSync(personsJsonPath)) {
+        try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+      }
       log.error('PSD generalasi hiba:', error);
       return { success: false, error: 'Nem sikerult a PSD generalasa' };
     }

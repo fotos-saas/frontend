@@ -9,7 +9,7 @@ import { ProjectDetailData } from '@shared/components/project-detail/project-det
 import { PartnerService, PartnerProjectDetails } from '../../services/partner.service';
 import { PhotoshopService } from '../../services/photoshop.service';
 import { BrandingService } from '../../services/branding.service';
-import { TabloSize } from '../../models/partner.models';
+import { TabloSize, TabloPersonItem } from '../../models/partner.models';
 
 type EditorTab = 'commands' | 'settings';
 
@@ -79,6 +79,9 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly loadingSizes = signal(false);
   readonly generating = signal(false);
 
+  /** Projekt személyei (diákok + tanárok) */
+  readonly persons = signal<TabloPersonItem[]>([]);
+
   /** Üzenetek */
   readonly error = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
@@ -102,8 +105,18 @@ export class ProjectTabloEditorComponent implements OnInit {
       next: (project) => {
         this.project.set(project);
         this.loading.set(false);
+        this.loadPersons(id);
       },
       error: () => this.loading.set(false),
+    });
+  }
+
+  private loadPersons(projectId: number): void {
+    this.partnerService.getProjectPersons(projectId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (res) => this.persons.set(res.data),
+      error: () => { /* Szemelyek betoltese nem kritikus */ },
     });
   }
 
@@ -167,10 +180,17 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.clearMessages();
     this.generating.set(true);
     try {
+      const personsData = this.persons().map(person => ({
+        id: person.id,
+        name: person.name,
+        type: person.type,
+      }));
+
       const result = await this.ps.generateAndOpenPsd(size, p ? {
         projectName: p.name,
         className: p.className,
         brandName: this.branding.brandName(),
+        persons: personsData.length > 0 ? personsData : undefined,
       } : undefined);
       if (result.success) {
         this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);

@@ -92,7 +92,7 @@ interface PhotoshopAPI {
   launch: () => Promise<{ success: boolean; error?: string }>;
   checkInstalled: () => Promise<{ found: boolean; path: string | null }>;
   browsePath: () => Promise<{ cancelled: boolean; path?: string }>;
-  generatePsd: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string }) => Promise<{ success: boolean; error?: string }>;
+  generatePsd: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string; persons?: Array<{ id: number; name: string; type: string }> }) => Promise<{ success: boolean; error?: string }>;
   getDownloadsPath: () => Promise<string>;
   openFile: (filePath: string) => Promise<{ success: boolean; error?: string }>;
   getWorkDir: () => Promise<string | null>;

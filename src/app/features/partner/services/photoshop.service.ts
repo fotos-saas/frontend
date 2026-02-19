@@ -211,7 +211,12 @@ export class PhotoshopService {
    */
   async generateAndOpenPsd(
     size: TabloSize,
-    context?: { projectName: string; className?: string | null; brandName?: string | null },
+    context?: {
+      projectName: string;
+      className?: string | null;
+      brandName?: string | null;
+      persons?: Array<{ id: number; name: string; type: string }>;
+    },
   ): Promise<{ success: boolean; error?: string; outputPath?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
@@ -244,6 +249,7 @@ export class PhotoshopService {
         dpi: 200,
         mode: 'RGB',
         outputPath,
+        persons: context?.persons,
       });
 
       if (!genResult.success) {

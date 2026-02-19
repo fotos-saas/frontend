@@ -38,9 +38,39 @@ function _cm2px(cm) {
   return Math.round((cm / 2.54) * _dpi);
 }
 
+// --- Layer bounds EFFEKTEK NELKUL (boundsNoEffects) ---
+// A layer.bounds tartalmazza a Layer Style effekteket (stroke, shadow, glow stb.)
+// ami elrontja a grid szamitast. Az ActionManager-rel lekerdezzuk az
+// effekt nelkuli meretet (boundsNoEffects), es ABBOL szamolunk.
+// Visszaad: { left, top, right, bottom } pixelben
+function _getBoundsNoEffects(layer) {
+  selectLayerById(layer.id);
+  var ref = new ActionReference();
+  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  var desc = executeActionGet(ref);
+
+  // boundsNoEffects — effekt nelkuli bounds
+  // Ha nincs ilyen (regi PS verzio), fallback a sima bounds-ra
+  var boundsKey = stringIDToTypeID("boundsNoEffects");
+  var b;
+  if (desc.hasKey(boundsKey)) {
+    b = desc.getObjectValue(boundsKey);
+  } else {
+    // Fallback: sima bounds
+    b = desc.getObjectValue(stringIDToTypeID("bounds"));
+  }
+
+  return {
+    left: b.getUnitDoubleValue(stringIDToTypeID("left")),
+    top: b.getUnitDoubleValue(stringIDToTypeID("top")),
+    right: b.getUnitDoubleValue(stringIDToTypeID("right")),
+    bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
+  };
+}
+
 // --- Egy csoport layer-einek racsba rendezese (PIXELBEN) ---
 // grp: LayerSet (pl. Images/Students)
-// photoWPx, photoHPx: kep merete pixelben
+// photoWPx, photoHPx: kep merete pixelben (effektek nelkul!)
 // marginPx, gapHPx, gapVPx: margo es gap pixelben
 // boardWPx: tablo szelessege pixelben
 // startTopPx: a racs indulasi pontja fentrol pixelben
@@ -82,10 +112,11 @@ function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, 
       selectLayerById(layer.id);
       _doc.activeLayer = layer;
 
-      // Origoba mozgatas
-      var bounds = layer.bounds;
-      var dx = -bounds[0].as("px");
-      var dy = -bounds[1].as("px");
+      // Origoba mozgatas — boundsNoEffects-bol szamolva!
+      // Igy a stroke/shadow nem befolyasolja a poziciot
+      var bnfe = _getBoundsNoEffects(layer);
+      var dx = -bnfe.left;
+      var dy = -bnfe.top;
       if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
         layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
       }
@@ -113,15 +144,15 @@ function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, 
   return topPx;
 }
 
-// --- Csoport elso layer-jenek tenyleges merete pixelben ---
-// A resize utan a Photoshop kerekithet, ezert a tenyleges bounds-bol
-// olvassuk ki a meretet, NEM a cm-bol szamoljuk ujra!
+// --- Csoport elso layer-jenek tenyleges merete pixelben (EFFEKTEK NELKUL) ---
+// A resize utan a Photoshop kerekithet, ezert a tenyleges bounds-bol olvassuk
+// ki a meretet. boundsNoEffects-t hasznalunk, igy stroke/shadow nem szamit!
 function _getActualLayerSize(grp) {
   if (!grp || grp.artLayers.length === 0) return null;
   var layer = grp.artLayers[grp.artLayers.length - 1]; // elso (hatul van)
-  var b = layer.bounds;
-  var w = Math.round(b[2].as("px") - b[0].as("px"));
-  var h = Math.round(b[3].as("px") - b[1].as("px"));
+  var bnfe = _getBoundsNoEffects(layer);
+  var w = Math.round(bnfe.right - bnfe.left);
+  var h = Math.round(bnfe.bottom - bnfe.top);
   if (w <= 0 || h <= 0) return null;
   return { w: w, h: h };
 }
@@ -139,7 +170,7 @@ function _doArrangeGrid() {
   var teacherWPxFallback = _cm2px(_data.teacherSizeCm);
   var teacherHPxFallback = _cm2px(_data.teacherSizeCm * 1.5);
 
-  log("[JSX] === GRID v4 ACTUAL BOUNDS ===");
+  log("[JSX] === GRID v5 BOUNDS_NO_EFFECTS ===");
   log("[JSX] DPI=" + _dpi + ", board=" + boardWPx + "px, margin=" + marginPx + "px, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px");
 
   var startTopPx = marginPx;

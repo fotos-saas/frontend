@@ -232,6 +232,10 @@
   border-radius: 12px;
   padding: 20px;
 
+  & + & {
+    margin-top: 16px;
+  }
+
   &__title {
     display: flex;
     align-items: center;
@@ -319,6 +323,20 @@
   }
 }
 
+// Közös mentés gomb
+.settings-save-bar {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn--save {
+  padding: 10px 28px;
+  font-size: 0.9375rem;
+}
+
 // Üzenetek
 .message {
   display: flex;
@@ -339,6 +357,116 @@
     background: var(--success-bg, #f0fdf4);
     color: var(--success-color, #16a34a);
     border: 1px solid var(--success-border, #86efac);
+  }
+}
+
+// Küszöbérték beállítások
+.threshold-toggle {
+  margin-bottom: 16px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.toggle-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color, #7c3aed);
+  cursor: pointer;
+}
+
+.toggle-text {
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+}
+
+.threshold-config {
+  animation: fadeIn 0.15s ease;
+}
+
+.threshold-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.threshold-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+  white-space: nowrap;
+}
+
+.threshold-input {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    border-color: var(--primary-color, #7c3aed);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+  }
+}
+
+.threshold-hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.threshold-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.threshold-rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary, #6b7280);
+    min-width: 140px;
+  }
+}
+
+.threshold-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  background: white;
+  min-width: 180px;
+  transition: border-color 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+
+  &:focus {
+    border-color: var(--primary-color, #7c3aed);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
   }
 }
 

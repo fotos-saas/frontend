@@ -144,6 +144,136 @@
   <!-- ============ Beállítások tab ============ -->
   @if (activeTab() === 'settings') {
     <div class="tab-content" role="tabpanel">
+      <!-- Munka mappa -->
+      <div class="settings-section">
+        <h3 class="settings-section__title">
+          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
+          Munka mappa
+        </h3>
+        <p class="settings-section__desc">
+          A mappa, ahová a tablók PSD fájljai kerülnek. Minden projekt egy almappát kap.
+        </p>
+
+        <div class="settings-path-row">
+          @if (workDir()) {
+            <div class="settings-path-row__current">
+              <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+              <span>{{ workDir() }}</span>
+            </div>
+          } @else {
+            <div class="settings-path-row__empty">Nincs beállítva</div>
+          }
+
+          <button class="btn btn--outline" (click)="selectWorkDir()">
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+            Tallózás
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabló margó -->
+      <div class="settings-section">
+        <h3 class="settings-section__title">
+          <lucide-icon [name]="ICONS.RULER" [size]="18" />
+          Tabló margó
+        </h3>
+        <p class="settings-section__desc">
+          A tablókép külső margója (alapértelmezetten 2 cm).
+        </p>
+
+        <div class="threshold-row">
+          <label class="threshold-label">Margó</label>
+          <input
+            type="number"
+            class="threshold-input"
+            [ngModel]="pendingMarginCm()"
+            (ngModelChange)="pendingMarginCm.set($event)"
+            min="0"
+            max="10"
+            step="0.5"
+          />
+          <span class="threshold-hint">cm</span>
+        </div>
+      </div>
+
+      <!-- Tablóméret küszöbérték -->
+      <div class="settings-section">
+        <h3 class="settings-section__title">
+          <lucide-icon [name]="ICONS.RULER" [size]="18" />
+          Automatikus tablóméret
+        </h3>
+        <p class="settings-section__desc">
+          Állítsd be, hogy a diáklétszám alapján melyik tablóméret legyen az alapértelmezett.
+        </p>
+
+        <div class="threshold-toggle">
+          <label class="toggle-label">
+            <input
+              type="checkbox"
+              class="toggle-checkbox"
+              [checked]="thresholdEnabled()"
+              (change)="toggleThreshold(!thresholdEnabled())"
+            />
+            <span class="toggle-text">Automatikus méretválasztás engedélyezése</span>
+          </label>
+        </div>
+
+        @if (thresholdEnabled()) {
+          <div class="threshold-config">
+            <div class="threshold-row">
+              <label class="threshold-label">Küszöbérték (diáklétszám)</label>
+              <input
+                type="number"
+                class="threshold-input"
+                [ngModel]="thresholdValue()"
+                (ngModelChange)="thresholdValue.set($event)"
+                min="1"
+                max="200"
+              />
+              <span class="threshold-hint">fő</span>
+            </div>
+
+            <div class="threshold-rules">
+              <div class="threshold-rule">
+                <div class="threshold-rule__label">
+                  <lucide-icon [name]="ICONS.USERS" [size]="14" />
+                  {{ thresholdValue() }} fő alatt
+                </div>
+                <select
+                  class="threshold-select"
+                  [ngModel]="sizeBelowThreshold()"
+                  (ngModelChange)="sizeBelowThreshold.set($event)"
+                >
+                  <option value="">— Válassz méretet —</option>
+                  @for (size of tabloSizes(); track size.value) {
+                    <option [value]="size.value">{{ size.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="threshold-rule">
+                <div class="threshold-rule__label">
+                  <lucide-icon [name]="ICONS.USERS" [size]="14" />
+                  {{ thresholdValue() }} főtől
+                </div>
+                <select
+                  class="threshold-select"
+                  [ngModel]="sizeAboveThreshold()"
+                  (ngModelChange)="sizeAboveThreshold.set($event)"
+                >
+                  <option value="">— Válassz méretet —</option>
+                  @for (size of tabloSizes(); track size.value) {
+                    <option [value]="size.value">{{ size.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+
+      <!-- Photoshop elérési út -->
       <div class="settings-section">
         <h3 class="settings-section__title">
           <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
@@ -168,6 +298,23 @@
             Tallózás
           </button>
         </div>
+      </div>
+
+      <!-- Közös mentés gomb -->
+      <div class="settings-save-bar">
+        <button
+          class="btn btn--primary btn--save"
+          [disabled]="savingAll()"
+          (click)="saveAllSettings()"
+        >
+          @if (savingAll()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            Mentés
+          }
+        </button>
       </div>
     </div>
   }

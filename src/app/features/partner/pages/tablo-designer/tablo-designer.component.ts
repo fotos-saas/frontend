@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PhotoshopService } from '../../services/photoshop.service';
@@ -11,7 +12,7 @@ type TabloTab = 'test' | 'settings';
 @Component({
   selector: 'app-tablo-designer',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, FormsModule],
   templateUrl: './tablo-designer.component.html',
   styleUrl: './tablo-designer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +28,7 @@ export class TabloDesignerComponent implements OnInit {
 
   /** PhotoshopService signal-ek */
   readonly psPath = this.ps.path;
+  readonly workDir = this.ps.workDir;
   readonly isConfigured = this.ps.isConfigured;
   readonly checking = this.ps.checking;
 
@@ -41,8 +43,21 @@ export class TabloDesignerComponent implements OnInit {
   readonly loadingSizes = signal(false);
   readonly generating = signal(false);
 
+  /** Tabló margó */
+  readonly marginCm = this.ps.marginCm;
+  readonly pendingMarginCm = signal<number>(2);
+
+  /** Küszöbérték beállítások */
+  readonly thresholdEnabled = signal(false);
+  readonly thresholdValue = signal<number>(18);
+  readonly sizeBelowThreshold = signal<string>('');
+  readonly sizeAboveThreshold = signal<string>('');
+  readonly savingAll = signal(false);
+
   ngOnInit(): void {
-    this.ps.detectPhotoshop();
+    this.ps.detectPhotoshop().then(() => {
+      this.pendingMarginCm.set(this.marginCm());
+    });
     this.loadTabloSizes();
   }
 
@@ -56,6 +71,13 @@ export class TabloDesignerComponent implements OnInit {
         if (res.sizes.length > 0) {
           this.selectedSize.set(res.sizes[0]);
         }
+        // Küszöbérték betöltése
+        if (res.threshold) {
+          this.thresholdEnabled.set(true);
+          this.thresholdValue.set(res.threshold.threshold);
+          this.sizeBelowThreshold.set(res.threshold.below);
+          this.sizeAboveThreshold.set(res.threshold.above);
+        }
         this.loadingSizes.set(false);
       },
       error: () => {
@@ -66,6 +88,21 @@ export class TabloDesignerComponent implements OnInit {
 
   selectSize(size: TabloSize): void {
     this.selectedSize.set(size);
+  }
+
+  async selectWorkDir(): Promise<void> {
+    this.error.set(null);
+    this.successMessage.set(null);
+
+    const dirPath = await this.ps.browseForWorkDir();
+    if (!dirPath) return;
+
+    const ok = await this.ps.setWorkDir(dirPath);
+    if (ok) {
+      this.successMessage.set('Munka mappa sikeresen beállítva!');
+    } else {
+      this.error.set('A kiválasztott mappa nem érvényes.');
+    }
   }
 
   async selectPsPath(): Promise<void> {
@@ -118,6 +155,73 @@ export class TabloDesignerComponent implements OnInit {
     } finally {
       this.generating.set(false);
     }
+  }
+
+  /** Küszöbérték toggle */
+  toggleThreshold(enabled: boolean): void {
+    this.thresholdEnabled.set(enabled);
+  }
+
+  /** Összes beállítás mentése (margó + küszöbérték) */
+  async saveAllSettings(): Promise<void> {
+    this.error.set(null);
+    this.successMessage.set(null);
+    this.savingAll.set(true);
+
+    try {
+      // 1. Margó mentése
+      const clampedMargin = Math.min(10, Math.max(0, this.pendingMarginCm()));
+      const marginOk = await this.ps.setMargin(clampedMargin);
+      if (!marginOk) {
+        this.error.set('Nem sikerült menteni a margó értéket.');
+        this.savingAll.set(false);
+        return;
+      }
+
+      // 2. Küszöbérték mentése
+      const data: {
+        sizes: TabloSize[];
+        threshold?: number | null;
+        size_below_threshold?: string | null;
+        size_above_threshold?: string | null;
+      } = {
+        sizes: this.tabloSizes(),
+      };
+
+      if (this.thresholdEnabled()) {
+        data.threshold = this.thresholdValue();
+        data.size_below_threshold = this.sizeBelowThreshold();
+        data.size_above_threshold = this.sizeAboveThreshold();
+      } else {
+        data.threshold = null;
+        data.size_below_threshold = null;
+        data.size_above_threshold = null;
+      }
+
+      this.partnerService.updateTabloSizes(data).pipe(
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.successMessage.set('Beállítások mentve!');
+          }
+          this.savingAll.set(false);
+        },
+        error: () => {
+          this.error.set('Nem sikerült menteni a beállításokat.');
+          this.savingAll.set(false);
+        },
+      });
+    } catch {
+      this.error.set('Nem sikerült menteni a beállításokat.');
+      this.savingAll.set(false);
+    }
+  }
+
+  /** Méret label keresése value alapján */
+  getSizeLabelByValue(value: string): string {
+    const size = this.tabloSizes().find(s => s.value === value);
+    return size?.label ?? value;
   }
 
   /** Meret szamitas megjelenitkeshez */

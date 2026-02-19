@@ -367,9 +367,6 @@ export class PartnerProjectService {
       default_zip_content: string;
       default_file_naming: string;
       export_always_ask: boolean;
-      email_dev_mode: boolean;
-      email_dev_master_address: string | null;
-      email_dev_whitelist: string[];
     };
   }> {
     return this.http.get<{
@@ -380,9 +377,6 @@ export class PartnerProjectService {
         default_zip_content: string;
         default_file_naming: string;
         export_always_ask: boolean;
-        email_dev_mode: boolean;
-        email_dev_master_address: string | null;
-        email_dev_whitelist: string[];
       };
     }>(`${this.baseUrl}/settings`);
   }
@@ -397,9 +391,6 @@ export class PartnerProjectService {
     default_zip_content?: string;
     default_file_naming?: string;
     export_always_ask?: boolean;
-    email_dev_mode?: boolean;
-    email_dev_master_address?: string | null;
-    email_dev_whitelist?: string[];
   }): Observable<{
     success: boolean;
     message: string;
@@ -410,9 +401,6 @@ export class PartnerProjectService {
       default_zip_content: string;
       default_file_naming: string;
       export_always_ask: boolean;
-      email_dev_mode: boolean;
-      email_dev_master_address: string | null;
-      email_dev_whitelist: string[];
     };
   }> {
     return this.http.put<{
@@ -425,9 +413,6 @@ export class PartnerProjectService {
         default_zip_content: string;
         default_file_naming: string;
         export_always_ask: boolean;
-        email_dev_mode: boolean;
-        email_dev_master_address: string | null;
-        email_dev_whitelist: string[];
       };
     }>(`${this.baseUrl}/settings`, data);
   }

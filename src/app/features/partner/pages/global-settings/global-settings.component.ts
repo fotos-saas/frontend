@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { PsInputComponent, PsSelectComponent, PsTagInputComponent, PsToggleComponent } from '@shared/components/form';
+import { PsInputComponent, PsSelectComponent, PsToggleComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerService } from '../../services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -12,7 +12,7 @@ import { TabloSize } from '../../models/partner.models';
 @Component({
   selector: 'app-global-settings',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTagInputComponent, PsToggleComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsToggleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './global-settings.component.html',
   styleUrl: './global-settings.component.scss',
@@ -45,10 +45,6 @@ export class GlobalSettingsComponent implements OnInit {
   defaultZipContent = signal('all');
   defaultFileNaming = signal('original');
   exportAlwaysAsk = signal(true);
-  emailDevMode = signal(false);
-  emailDevMasterAddress = signal('');
-  emailDevWhitelist = signal<string[]>([]);
-
   // Tablóméretek
   tabloSizes = signal<TabloSize[]>([]);
   defaultTabloSizes = signal<TabloSize[]>([]);
@@ -74,9 +70,6 @@ export class GlobalSettingsComponent implements OnInit {
         this.defaultZipContent.set(res.data.default_zip_content ?? 'all');
         this.defaultFileNaming.set(res.data.default_file_naming ?? 'original');
         this.exportAlwaysAsk.set(res.data.export_always_ask ?? true);
-        this.emailDevMode.set(res.data.email_dev_mode ?? false);
-        this.emailDevMasterAddress.set(res.data.email_dev_master_address ?? '');
-        this.emailDevWhitelist.set(res.data.email_dev_whitelist ?? []);
         this.loading.set(false);
       },
       error: () => {
@@ -169,9 +162,6 @@ export class GlobalSettingsComponent implements OnInit {
       default_zip_content: this.defaultZipContent(),
       default_file_naming: this.defaultFileNaming(),
       export_always_ask: this.exportAlwaysAsk(),
-      email_dev_mode: this.emailDevMode(),
-      email_dev_master_address: this.emailDevMasterAddress() || null,
-      email_dev_whitelist: this.emailDevWhitelist(),
     }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -183,9 +173,6 @@ export class GlobalSettingsComponent implements OnInit {
         this.defaultZipContent.set(res.data.default_zip_content ?? 'all');
         this.defaultFileNaming.set(res.data.default_file_naming ?? 'original');
         this.exportAlwaysAsk.set(res.data.export_always_ask ?? true);
-        this.emailDevMode.set(res.data.email_dev_mode ?? false);
-        this.emailDevMasterAddress.set(res.data.email_dev_master_address ?? '');
-        this.emailDevWhitelist.set(res.data.email_dev_whitelist ?? []);
         this.toast.success('Siker', 'Beállítások mentve');
       },
       error: () => {

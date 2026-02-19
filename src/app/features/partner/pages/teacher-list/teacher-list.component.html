@@ -2,7 +2,7 @@
   <header class="page-header">
     <div class="header-content">
       <h1>Tanárok</h1>
-      <p class="subtitle">{{ totalTeachers() }} tanár összesen</p>
+      <p class="subtitle">{{ state.totalTeachers() }} tanár összesen</p>
     </div>
     <div class="header-buttons">
       <app-view-mode-toggle
@@ -45,11 +45,11 @@
   @if (viewMode() === 'project') {
     <app-archive-project-view
       [config]="archiveConfig"
-      [classYears]="classYears()"
+      [classYears]="state.classYears()"
       [schoolOptions]="schoolOptions()"
-      [syncingSchoolId]="syncingSchoolId()"
-      [downloading]="downloading()"
-      [downloadingSchoolId]="downloadingSchoolId()"
+      [syncingSchoolId]="state.syncingSchoolId()"
+      [downloading]="state.downloading()"
+      [downloadingSchoolId]="state.downloadingSchoolId()"
       (uploadPhotoRequest)="onUploadPhotoFromProject($event)"
       (viewPhotoRequest)="onViewPhotoFromProject($event)"
       (markNoPhotoRequest)="onMarkNoPhotoFromProject($event)"
@@ -65,25 +65,25 @@
 
   <!-- Szűrők -->
   <app-smart-filter-bar
-    [filterState]="filterState"
+    [filterState]="state.filterState"
     [searchConfig]="{ placeholder: 'Keresés név, pozíció, iskola, fájlnév...' }"
     [searchableFilters]="teacherSearchableFilters()"
   />
 
   <!-- Lista -->
-  @if (filterState.loading()) {
+  @if (state.filterState.loading()) {
     <div class="loading-state">
       @for (i of [1, 2, 3, 4, 5, 6]; track i) {
         <div class="skeleton-row skeleton-shimmer"></div>
       }
     </div>
-  } @else if (teachers().length === 0) {
+  } @else if (state.teachers().length === 0) {
     <div class="empty-state">
       <div class="empty-icon">
         <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="48" />
       </div>
       <h3>Nincs találat</h3>
-      @if (filterState.search() || filterState.filters().school_id || filterState.filters().class_year) {
+      @if (state.filterState.search() || state.filterState.filters().school_id || state.filterState.filters().class_year) {
         <p>Próbálj más keresési feltételekkel!</p>
       } @else {
         <p>Még nincsenek tanárok hozzáadva.</p>
@@ -98,7 +98,7 @@
     <app-table-header [columns]="tableCols" />
 
     <div class="teacher-grid">
-      @for (teacher of teachers(); track teacher.id; let i = $index) {
+      @for (teacher of state.teachers(); track teacher.id; let i = $index) {
         <div
           class="teacher-row"
           [style.animation-delay]="i * 0.03 + 's'"
@@ -171,11 +171,11 @@
     </div>
 
     <app-list-pagination
-      [currentPage]="filterState.page()"
-      [totalPages]="totalPages()"
-      [totalItems]="totalTeachers()"
+      [currentPage]="state.filterState.page()"
+      [totalPages]="state.totalPages()"
+      [totalItems]="state.totalTeachers()"
       itemLabel="tanár"
-      (pageChange)="filterState.setPage($event)"
+      (pageChange)="state.filterState.setPage($event)"
     />
     </div>
   }
@@ -189,7 +189,7 @@
     [config]="archiveConfig"
     [archiveItem]="selectedTeacher()"
     [mode]="modalMode()"
-    [schools]="schools()"
+    [schools]="state.schools()"
     (close)="closeEditModal()"
     (saved)="onTeacherSaved()"
   />
@@ -211,7 +211,7 @@
 @if (showLinkDialog() && selectedTeacher()) {
   <app-teacher-link-dialog
     [teacher]="selectedTeacher()!"
-    [allTeachers]="teachers()"
+    [allTeachers]="state.teachers()"
     (closeEvent)="closeLinkDialog()"
     (savedEvent)="onTeacherLinked()"
   />
@@ -221,7 +221,7 @@
 @if (showBulkImport()) {
   <app-archive-bulk-import-dialog
     [config]="archiveConfig"
-    [schools]="schools()"
+    [schools]="state.schools()"
     (close)="closeBulkImport()"
     (imported)="onBulkImported()"
   />
@@ -230,7 +230,7 @@
 <!-- Bulk Photo Upload Dialog -->
 @if (showBulkPhotoUpload()) {
   <app-archive-bulk-photo-upload
-    [schools]="schools()"
+    [schools]="state.schools()"
     entityLabel="tanár"
     (close)="showBulkPhotoUpload.set(false)"
     (uploaded)="onBulkPhotoUploaded()"
@@ -264,7 +264,7 @@
     [config]="archiveConfig"
     [archiveItem]="null"
     mode="create"
-    [schools]="schools()"
+    [schools]="state.schools()"
     [prefillName]="createForTeacher()?.name ?? ''"
     [prefillSchoolId]="createForTeacher()?.schoolId ?? null"
     (close)="showCreateForProject.set(false); createForTeacher.set(null)"

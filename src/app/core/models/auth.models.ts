@@ -396,3 +396,32 @@ export interface AcceptInviteResponse {
   role: string;
   roleName: string;
 }
+
+export interface InviteValidationResponse {
+  valid: boolean;
+  message?: string;
+  invitation?: {
+    email: string;
+    role: string;
+    roleName: string;
+    partnerName: string;
+    expiresAt: string;
+  };
+  user_exists?: boolean;
+}
+
+export interface InviteRegisterData {
+  code: string;
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  accept_existing?: boolean;
+}
+
+export interface InviteRegisterResponse {
+  message: string;
+  user: { id: number; name: string; email: string };
+  token?: string;
+  accepted_existing?: boolean;
+}

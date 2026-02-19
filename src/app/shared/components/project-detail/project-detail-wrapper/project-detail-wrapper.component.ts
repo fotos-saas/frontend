@@ -340,21 +340,21 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     const project = this.projectData();
     if (!project || !this.finalizationService) return;
 
-    const tab = this.printTab();
-    tab?.uploading.set(true);
-    tab?.uploadError.set(null);
+    const tabState = this.printTab()?.state;
+    tabState?.uploading.set(true);
+    tabState?.uploadError.set(null);
 
     this.finalizationService.uploadPrintReady(project.id, event.file, event.type)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          tab?.uploading.set(false);
+          tabState?.uploading.set(false);
           this.toast.success('Siker', 'Nyomdakész fájl feltöltve.');
           this.facade.loadProject(project.id, this.mapToDetailData());
         },
         error: () => {
-          tab?.uploading.set(false);
-          tab?.uploadError.set('Hiba történt a feltöltés során.');
+          tabState?.uploading.set(false);
+          tabState?.uploadError.set('Hiba történt a feltöltés során.');
           this.toast.error('Hiba', 'Nem sikerült feltölteni a fájlt.');
         },
       });

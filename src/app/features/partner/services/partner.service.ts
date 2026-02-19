@@ -3,88 +3,26 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
-// Import MINDEN interface a models-ből (backward compatibility + lokális használat)
-import {
-  PartnerDashboardStats,
-  ProjectContact,
-  TabloStatus,
-  PartnerProjectListItem,
-  QrCodeHistory,
-  PartnerProjectDetails,
-  SampleItem,
-  TabloPersonItem,
-  MissingPersonItem,
-  UploadedPhoto,
-  DraftInfo,
-  DraftDetails,
-  MatchResult,
-  AlbumType,
-  AlbumSummaryItem,
-  AlbumsSummary,
-  AlbumMissingPerson,
-  AlbumDetails,
-  PhotoAssignment,
-  SchoolItem,
-  SchoolListItem,
-  SchoolLimits,
-  ContactListItem,
-  ContactLimits,
-  GuestSession,
-  SamplePackage,
-  SampleVersionImage,
-  SampleVersion,
-  ProjectAutocompleteItem,
-  CreateProjectRequest,
-  CreateSchoolRequest,
-  ProjectLimits,
-  PaginatedResponse,
-  ProjectListResponse,
-  UploadProgress,
-  TabloSize,
+// Backward compatibility re-exportok
+export type {
+  PartnerDashboardStats, ProjectContact, TabloStatus, PartnerProjectListItem, QrCodeHistory,
+  PartnerProjectDetails, SampleItem, TabloPersonItem, MissingPersonItem, UploadedPhoto,
+  DraftInfo, DraftDetails, MatchResult, AlbumType, AlbumSummaryItem, AlbumsSummary,
+  AlbumMissingPerson, AlbumDetails, PhotoAssignment, SchoolItem, SchoolListItem, SchoolLimits,
+  ContactListItem, ContactLimits, GuestSession, SamplePackage, SampleVersionImage, SampleVersion,
+  ProjectAutocompleteItem, CreateProjectRequest, CreateSchoolRequest, ProjectLimits,
+  PaginatedResponse, ProjectListResponse, UploadProgress, TabloSize,
+} from '../models/partner.models';
+export type { QrCode } from '../../../shared/interfaces/qr-code.interface';
+export type { ImportResult } from './partner-contact.service';
+
+import type {
+  PartnerDashboardStats, ProjectContact, PartnerProjectListItem, PartnerProjectDetails,
+  SampleItem, TabloPersonItem, UploadedPhoto, MatchResult, AlbumType, AlbumsSummary,
+  AlbumDetails, PhotoAssignment, SchoolItem, CreateProjectRequest, CreateSchoolRequest,
+  ProjectListResponse, UploadProgress, SamplePackage, ProjectAutocompleteItem, TabloSize,
 } from '../models/partner.models';
 import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
-
-// Re-export MINDEN interface (backward compatibility - meglévő importok ne törjenek)
-export {
-  PartnerDashboardStats,
-  ProjectContact,
-  TabloStatus,
-  PartnerProjectListItem,
-  QrCodeHistory,
-  PartnerProjectDetails,
-  SampleItem,
-  TabloPersonItem,
-  MissingPersonItem,
-  UploadedPhoto,
-  DraftInfo,
-  DraftDetails,
-  MatchResult,
-  AlbumType,
-  AlbumSummaryItem,
-  AlbumsSummary,
-  AlbumMissingPerson,
-  AlbumDetails,
-  PhotoAssignment,
-  SchoolItem,
-  SchoolListItem,
-  SchoolLimits,
-  ContactListItem,
-  ContactLimits,
-  GuestSession,
-  SamplePackage,
-  SampleVersionImage,
-  SampleVersion,
-  ProjectAutocompleteItem,
-  CreateProjectRequest,
-  CreateSchoolRequest,
-  ProjectLimits,
-  PaginatedResponse,
-  ProjectListResponse,
-  UploadProgress,
-  TabloSize,
-};
-export type { QrCode };
-export type { ImportResult };
 
 // Import sub-service-ek
 import { PartnerProjectService } from './partner-project.service';

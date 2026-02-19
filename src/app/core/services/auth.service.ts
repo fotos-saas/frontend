@@ -23,7 +23,10 @@ import type {
   QrRegistrationData,
   ActiveSession,
   TwoFactorSetupResponse,
-  AcceptInviteResponse
+  AcceptInviteResponse,
+  InviteValidationResponse,
+  InviteRegisterData,
+  InviteRegisterResponse,
 } from '../models/auth.models';
 
 // Re-export type-ok kompatibilitás miatt
@@ -49,7 +52,10 @@ export type {
   QrRegistrationData,
   ActiveSession,
   TwoFactorSetupResponse,
-  AcceptInviteResponse
+  AcceptInviteResponse,
+  InviteValidationResponse,
+  InviteRegisterData,
+  InviteRegisterResponse,
 } from '../models/auth.models';
 
 /**
@@ -245,225 +251,63 @@ export class AuthService {
   // TABLO AUTH METHODS (delegálva TabloAuthService-nek)
   // ==========================================
 
-  /**
-   * Bejelentkezés 6-jegyű kóddal
-   */
-  login(code: string): Observable<LoginResponse> {
-    return this.tabloAuth.login(code);
-  }
-
-  /**
-   * Bejelentkezés megosztási tokennel
-   */
-  loginWithShareToken(token: string, restoreToken?: string | null): Observable<LoginResponse> {
-    return this.tabloAuth.loginWithShareToken(token, restoreToken);
-  }
-
-  /**
-   * Bejelentkezés admin előnézeti tokennel
-   */
-  loginWithPreviewToken(token: string): Observable<LoginResponse> {
-    return this.tabloAuth.loginWithPreviewToken(token);
-  }
-
   // ==========================================
-  // PASSWORD AUTH METHODS (delegálva PasswordAuthService-nek)
+  // TABLO AUTH (delegálva TabloAuthService-nek)
   // ==========================================
 
-  /**
-   * Email/jelszó bejelentkezés
-   */
-  loginWithPassword(email: string, password: string): Observable<MarketerLoginResponse | LoginResponse> {
-    return this.passwordAuth.loginWithPassword(email, password);
-  }
-
-  /**
-   * Regisztráció
-   */
-  register(data: RegisterData): Observable<RegisterResponse> {
-    return this.passwordAuth.register(data);
-  }
-
-  /**
-   * Jelszó emlékezteto kérés
-   */
-  requestPasswordReset(email: string): Observable<{ message: string }> {
-    return this.passwordAuth.requestPasswordReset(email);
-  }
-
-  /**
-   * Jelszó visszaállítás tokennel
-   */
-  resetPassword(data: ResetPasswordData): Observable<{ message: string }> {
-    return this.passwordAuth.resetPassword(data);
-  }
-
-  /**
-   * Jelszó változtatás (bejelentkezett user)
-   */
-  changePassword(data: ChangePasswordData): Observable<{ message: string }> {
-    return this.passwordAuth.changePassword(data);
-  }
-
-  /**
-   * Jelszó beállítása (QR regisztráció után kötelező)
-   */
-  setPassword(password: string, password_confirmation: string): Observable<{ message: string; user: AuthUser }> {
-    return this.passwordAuth.setPassword(password, password_confirmation);
-  }
-
-  /**
-   * Email verifikáció
-   */
-  verifyEmail(id: number, hash: string): Observable<{ message: string; already_verified?: boolean }> {
-    return this.passwordAuth.verifyEmail(id, hash);
-  }
-
-  /**
-   * Verifikációs email újraküldés
-   */
-  resendVerification(email: string): Observable<{ message: string }> {
-    return this.passwordAuth.resendVerification(email);
-  }
-
-  /**
-   * QR kód validálás
-   */
-  validateQrCode(code: string): Observable<QrCodeValidationResponse> {
-    return this.passwordAuth.validateQrCode(code);
-  }
-
-  /**
-   * QR kódos regisztráció
-   */
-  registerFromQr(data: QrRegistrationData): Observable<LoginResponse> {
-    return this.passwordAuth.registerFromQr(data);
-  }
+  login(code: string): Observable<LoginResponse> { return this.tabloAuth.login(code); }
+  loginWithShareToken(token: string, restoreToken?: string | null): Observable<LoginResponse> { return this.tabloAuth.loginWithShareToken(token, restoreToken); }
+  loginWithPreviewToken(token: string): Observable<LoginResponse> { return this.tabloAuth.loginWithPreviewToken(token); }
 
   // ==========================================
-  // 2FA METHODS (delegálva PasswordAuthService-nek)
+  // PASSWORD AUTH (delegálva PasswordAuthService-nek)
   // ==========================================
 
-  enable2FA(): Observable<TwoFactorSetupResponse> {
-    return this.passwordAuth.enable2FA();
-  }
-
-  confirm2FA(code: string): Observable<{ message: string }> {
-    return this.passwordAuth.confirm2FA(code);
-  }
-
-  disable2FA(code: string): Observable<{ message: string }> {
-    return this.passwordAuth.disable2FA(code);
-  }
-
-  verify2FA(code: string): Observable<LoginResponse> {
-    return this.passwordAuth.verify2FA(code);
-  }
+  loginWithPassword(email: string, password: string): Observable<MarketerLoginResponse | LoginResponse> { return this.passwordAuth.loginWithPassword(email, password); }
+  register(data: RegisterData): Observable<RegisterResponse> { return this.passwordAuth.register(data); }
+  requestPasswordReset(email: string): Observable<{ message: string }> { return this.passwordAuth.requestPasswordReset(email); }
+  resetPassword(data: ResetPasswordData): Observable<{ message: string }> { return this.passwordAuth.resetPassword(data); }
+  changePassword(data: ChangePasswordData): Observable<{ message: string }> { return this.passwordAuth.changePassword(data); }
+  setPassword(password: string, password_confirmation: string): Observable<{ message: string; user: AuthUser }> { return this.passwordAuth.setPassword(password, password_confirmation); }
+  verifyEmail(id: number, hash: string): Observable<{ message: string; already_verified?: boolean }> { return this.passwordAuth.verifyEmail(id, hash); }
+  resendVerification(email: string): Observable<{ message: string }> { return this.passwordAuth.resendVerification(email); }
+  validateQrCode(code: string): Observable<QrCodeValidationResponse> { return this.passwordAuth.validateQrCode(code); }
+  registerFromQr(data: QrRegistrationData): Observable<LoginResponse> { return this.passwordAuth.registerFromQr(data); }
 
   // ==========================================
-  // SESSION METHODS (delegálva SessionService-nek)
+  // 2FA (delegálva PasswordAuthService-nek)
   // ==========================================
 
-  /**
-   * Session visszaállítása
-   */
-  restoreSession(projectId: number, sessionType: TokenType): boolean {
-    return this.sessionService.restoreSession(projectId, sessionType);
-  }
+  enable2FA(): Observable<TwoFactorSetupResponse> { return this.passwordAuth.enable2FA(); }
+  confirm2FA(code: string): Observable<{ message: string }> { return this.passwordAuth.confirm2FA(code); }
+  disable2FA(code: string): Observable<{ message: string }> { return this.passwordAuth.disable2FA(code); }
+  verify2FA(code: string): Observable<LoginResponse> { return this.passwordAuth.verify2FA(code); }
 
-  /**
-   * Session validálás a szerveren
-   */
-  validateSession(): Observable<ValidateSessionResponse> {
-    return this.sessionService.validateSession();
-  }
+  // ==========================================
+  // SESSION (delegálva SessionService-nek)
+  // ==========================================
 
-  /**
-   * Kijelentkezés
-   */
-  logout(): Observable<void> {
-    return this.sessionService.logout();
-  }
+  restoreSession(projectId: number, sessionType: TokenType): boolean { return this.sessionService.restoreSession(projectId, sessionType); }
+  validateSession(): Observable<ValidateSessionResponse> { return this.sessionService.validateSession(); }
+  logout(): Observable<void> { return this.sessionService.logout(); }
+  clearAuth(): void { this.sessionService.clearAuth(); }
+  logoutAdmin(): void { this.sessionService.logoutAdmin(); }
+  logoutMarketer(): void { this.logoutAdmin(); }
+  logoutPartner(): void { this.logoutAdmin(); }
+  logoutSuperAdmin(): void { this.logoutAdmin(); }
+  getActiveSessions(): Observable<{ sessions: ActiveSession[] }> { return this.sessionService.getActiveSessions(); }
+  revokeSession(tokenId: number): Observable<{ message: string }> { return this.sessionService.revokeSession(tokenId); }
+  revokeAllSessions(): Observable<{ message: string; revoked_count: number }> { return this.sessionService.revokeAllSessions(); }
+  getMarketerToken(): string | null { return this.sessionService.getMarketerToken(); }
 
-  /**
-   * Auth adatok törlése
-   */
-  clearAuth(): void {
-    this.sessionService.clearAuth();
-  }
-
-  /**
-   * Auth állapot törlése átirányítás és session törlés NÉLKÜL
-   */
   clearAuthState(): void {
     this._project.set(null);
     this._isAuthenticated.set(false);
   }
 
-  /**
-   * Admin kijelentkezés (marketer, partner, super_admin)
-   */
-  logoutAdmin(): void {
-    this.sessionService.logoutAdmin();
-  }
-
-  /**
-   * Marketer kijelentkezés (alias)
-   */
-  logoutMarketer(): void {
-    this.logoutAdmin();
-  }
-
-  /**
-   * Partner kijelentkezés (alias)
-   */
-  logoutPartner(): void {
-    this.logoutAdmin();
-  }
-
-  /**
-   * Super admin kijelentkezés (alias)
-   */
-  logoutSuperAdmin(): void {
-    this.logoutAdmin();
-  }
-
-  /**
-   * Aktív session-ök lekérése
-   */
-  getActiveSessions(): Observable<{ sessions: ActiveSession[] }> {
-    return this.sessionService.getActiveSessions();
-  }
-
-  /**
-   * Session visszavonás
-   */
-  revokeSession(tokenId: number): Observable<{ message: string }> {
-    return this.sessionService.revokeSession(tokenId);
-  }
-
-  /**
-   * Összes session visszavonása
-   */
-  revokeAllSessions(): Observable<{ message: string; revoked_count: number }> {
-    return this.sessionService.revokeAllSessions();
-  }
-
-  /**
-   * Marketer token lekérése
-   */
-  getMarketerToken(): string | null {
-    return this.sessionService.getMarketerToken();
-  }
-
-  /**
-   * Marketer felhasználó lekérése
-   */
   getCurrentUser(): AuthUser | null {
     const user = this._currentUser();
-    if (user) {
-      return user;
-    }
+    if (user) return user;
     const stored = this.sessionService.getStoredMarketerUser();
     if (stored) {
       this._currentUser.set(stored);
@@ -473,9 +317,6 @@ export class AuthService {
     return null;
   }
 
-  /**
-   * Marketer/Partner/Admin session inicializálása
-   */
   initializeMarketerSession(): boolean {
     const result = this.sessionService.initializeMarketerSession();
     if (result.success && result.user) {
@@ -487,24 +328,13 @@ export class AuthService {
   }
 
   // ==========================================
-  // TOKEN METHODS (delegálva TokenService-nek)
+  // TOKEN (delegálva TokenService-nek)
   // ==========================================
 
-  hasToken(): boolean {
-    return this.tokenService.hasToken();
-  }
-
-  getToken(): string | null {
-    return this.tokenService.getToken();
-  }
-
-  canFinalize(): boolean {
-    return this.tokenService.canFinalize();
-  }
-
-  getTokenType(): TokenType {
-    return this.tokenService.getTokenType();
-  }
+  hasToken(): boolean { return this.tokenService.hasToken(); }
+  getToken(): string | null { return this.tokenService.getToken(); }
+  canFinalize(): boolean { return this.tokenService.canFinalize(); }
+  getTokenType(): TokenType { return this.tokenService.getTokenType(); }
 
   // ==========================================
   // PROJECT METHODS
@@ -571,73 +401,17 @@ export class AuthService {
   }
 
   // ==========================================
-  // INVITE METHODS
+  // INVITE
   // ==========================================
 
-  /**
-   * Meghívó kód validálás
-   */
-  validateInviteCode(code: string): Observable<{
-    valid: boolean;
-    message?: string;
-    invitation?: {
-      email: string;
-      role: string;
-      roleName: string;
-      partnerName: string;
-      expiresAt: string;
-    };
-    user_exists?: boolean;
-  }> {
-    return this.http.post<{
-      valid: boolean;
-      message?: string;
-      invitation?: {
-        email: string;
-        role: string;
-        roleName: string;
-        partnerName: string;
-        expiresAt: string;
-      };
-      user_exists?: boolean;
-    }>(`${environment.apiUrl}/invite/validate`, { code });
+  validateInviteCode(code: string): Observable<InviteValidationResponse> {
+    return this.http.post<InviteValidationResponse>(`${environment.apiUrl}/invite/validate`, { code });
   }
 
-  /**
-   * Meghívó kóddal történő regisztráció
-   */
-  registerWithInvite(data: {
-    code: string;
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-    accept_existing?: boolean;
-  }): Observable<{
-    message: string;
-    user: {
-      id: number;
-      name: string;
-      email: string;
-    };
-    token?: string;
-    accepted_existing?: boolean;
-  }> {
-    return this.http.post<{
-      message: string;
-      user: {
-        id: number;
-        name: string;
-        email: string;
-      };
-      token?: string;
-      accepted_existing?: boolean;
-    }>(`${environment.apiUrl}/invite/register`, data);
+  registerWithInvite(data: InviteRegisterData): Observable<InviteRegisterResponse> {
+    return this.http.post<InviteRegisterResponse>(`${environment.apiUrl}/invite/register`, data);
   }
 
-  /**
-   * Meghívó elfogadása bejelentkezett userként (token rotáció + auto-switch)
-   */
   acceptInviteAsLoggedIn(code: string): Observable<AcceptInviteResponse> {
     return this.http.post<AcceptInviteResponse>(`${environment.apiUrl}/invite/accept`, { code });
   }

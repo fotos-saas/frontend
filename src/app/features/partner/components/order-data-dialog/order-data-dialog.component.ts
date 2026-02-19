@@ -59,7 +59,7 @@ export class OrderDataDialogComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.orderData = response.data;
+            this.orderData = response.data as OrderData;
           } else {
             this.error = response.message || 'Nem sikerult betolteni az adatokat';
           }

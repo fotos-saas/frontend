@@ -166,6 +166,14 @@
     font-size: 0.85rem;
     color: var(--text-secondary, #6b7280);
     margin: 0;
+
+    &--ok {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--success-color, #16a34a);
+      word-break: break-all;
+    }
   }
 }
 

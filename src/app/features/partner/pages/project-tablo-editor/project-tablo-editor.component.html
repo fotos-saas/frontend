@@ -149,25 +149,28 @@
             <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="20" />
             <div>
               <h3 class="settings-card__title">Photoshop elérési út</h3>
-              <p class="settings-card__desc">Add meg a Photoshop alkalmazás elérési útját a számítógépeden.</p>
+              @if (isConfigured()) {
+                <p class="settings-card__desc settings-card__desc--ok">
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                  {{ psPath() }}
+                </p>
+              } @else if (checking()) {
+                <p class="settings-card__desc">Keresés...</p>
+              } @else {
+                <p class="settings-card__desc">Add meg a Photoshop alkalmazás elérési útját a számítógépeden.</p>
+              }
             </div>
           </div>
 
-          <div class="settings-path">
-            @if (psPath()) {
-              <div class="settings-path__current">
-                <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
-                <span>{{ psPath() }}</span>
-              </div>
-            } @else {
+          @if (!isConfigured() && !checking()) {
+            <div class="settings-path">
               <div class="settings-path__empty">Nincs beállítva</div>
-            }
-
-            <button class="btn btn--outline" (click)="selectPsPath()">
-              <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
-              Tallózás
-            </button>
-          </div>
+              <button class="btn btn--outline" (click)="selectPsPath()">
+                <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+                Tallózás
+              </button>
+            </div>
+          }
         </div>
 
         <!-- Tabló margó -->

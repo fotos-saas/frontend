@@ -125,7 +125,9 @@ function _doArrangeGrid() {
   var teacherWPx = _cm2px(_data.teacherSizeCm);
   var teacherHPx = _cm2px(_data.teacherSizeCm * 1.5);
 
+  log("[JSX] === GRID v3 PIXEL MODE ===");
   log("[JSX] DPI=" + _dpi + ", board=" + boardWPx + "px, margin=" + marginPx + "px, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px");
+  log("[JSX] student=" + studentWPx + "x" + studentHPx + "px, teacher=" + teacherWPx + "x" + teacherHPx + "px");
 
   var startTopPx = marginPx;
 

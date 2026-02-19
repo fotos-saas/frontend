@@ -71,51 +71,61 @@ function _findImageLayer(nameLayerName) {
 }
 
 // --- Nev pozicionalasa a kep ala ---
+// FONTOS: A textItem.position a szoveg "anchor point"-ja (baseline bal szele),
+// NEM a bounding box! Igy az ekezetes nagybetuk (A, E) nem tolják feljebb a nevet.
+// Minden nev baseline-ja egyforma Y-ra kerul, fuggetlenul az ekezetek magassagatol.
 function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign) {
   var imgBnfe = _getBoundsNoEffects(imageLayer);
   var imgCenterX = (imgBnfe.left + imgBnfe.right) / 2;
   var imgBottom = imgBnfe.bottom;
 
-  // Nev layer kivalasztasa es bounds kiolvasas
+  // Nev layer kivalasztasa
   selectLayerById(nameLayer.id);
   _doc.activeLayer = nameLayer;
 
   // Text igazitas beallitasa
+  var textItem;
   try {
-    var textItem = nameLayer.textItem;
+    textItem = nameLayer.textItem;
     var alignMap = { left: Justification.LEFT, center: Justification.CENTER, right: Justification.RIGHT };
     if (alignMap[textAlign]) {
       textItem.justification = alignMap[textAlign];
     }
   } catch (e) {
     // nem text layer — skip
+    return;
   }
 
-  var nameBnfe = _getBoundsNoEffects(nameLayer);
-  var nameW = nameBnfe.right - nameBnfe.left;
+  // A textItem.position a baseline anchor pontja (px-ben, UnitValue)
+  // Ez STABIL referenciapont — az ekezet magassaga NEM befolyasolja!
+  // Ha minden nev baseline-jat azonos Y-ra allitjuk, egyvonalba kerulnek,
+  // fuggetlenul attol hogy van-e ekezetes nagybetu (A, E, O stb.) a nevben.
 
-  // Celpozicio kiszamitasa
-  var targetTop = imgBottom + gapPx;
-  var targetLeft;
+  // A gap a kep alja es a NAGYBETUS TETEJE kozott ertendo.
+  // Referencia ascent: a font merete * ~1.2 (heurisztika a cap-height + ekezet szamara)
+  // Igy a "latható szoveg teteje" kb. a gap-en lesz, es a baseline MINDENKINÉL azonos Y-on.
+  var fontSize = textItem.size.as("px");
+  var refAscentPx = Math.round(fontSize * 1.2);
 
+  // Cel baseline Y: kep alja + gap + referencia ascent
+  var targetBaselineY = imgBottom + gapPx + refAscentPx;
+
+  // Vizszintes pozicio: a textItem.position.x a justification-tol fugg:
+  //   LEFT: a szoveg bal szele
+  //   CENTER: a szoveg kozepe
+  //   RIGHT: a szoveg jobb szele
+  var targetX;
   if (textAlign === "left") {
-    targetLeft = imgBnfe.left;
+    targetX = imgBnfe.left;
   } else if (textAlign === "right") {
-    targetLeft = imgBnfe.right - nameW;
+    targetX = imgBnfe.right;
   } else {
-    // center (default)
-    targetLeft = imgCenterX - nameW / 2;
+    // center: a kep kozepere
+    targetX = imgCenterX;
   }
 
-  // Mozgatas
-  var dx = targetLeft - nameBnfe.left;
-  var dy = targetTop - nameBnfe.top;
-  if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-    nameLayer.translate(
-      new UnitValue(Math.round(dx), "px"),
-      new UnitValue(Math.round(dy), "px")
-    );
-  }
+  // Mozgatas: position-t allitjuk (nem translate!), igy pontos baseline igazitas
+  textItem.position = [new UnitValue(Math.round(targetX), "px"), new UnitValue(Math.round(targetBaselineY), "px")];
 }
 
 // --- Egy csoport nev layereinek rendezese ---

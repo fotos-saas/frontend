@@ -115,6 +115,10 @@ function createSmartObjectPlaceholder(doc, container, options) {
   // Layer atrakeasa a cel csoportba
   layer.move(container, ElementPlacement.INSIDE);
 
+  // Biztositjuk hogy a layer aktiv legyen a Convert to SO elott
+  // (a move() neha megvaltoztatja az aktiv layert)
+  doc.activeLayer = layer;
+
   // Smart Object-te alakitas ActionManager-rel
   // Ez a Photoshop belso "Convert to Smart Object" parancsa
   var desc = new ActionDescriptor();

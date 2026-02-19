@@ -35,6 +35,8 @@ function _doAddImageLayers() {
   var teacherSizeCm = _data.teacherSizeCm || 0;
   var dpi = _doc.resolution; // dokumentum DPI
 
+  log("[JSX] Meretezes parameterek: studentSizeCm=" + studentSizeCm + " teacherSizeCm=" + teacherSizeCm + " docDPI=" + dpi);
+
   for (var i = 0; i < _data.layers.length; i++) {
     var item = _data.layers[i];
 
@@ -54,6 +56,9 @@ function _doAddImageLayers() {
         heightPx: item.heightPx
       });
       _created++;
+
+      // Megjegyezzuk az SO layer nevet a resize-hoz
+      var soLayerName = _doc.activeLayer.name;
 
       // Foto behelyezese ha van photoPath
       // Flow: SO megnyitas → kep Place → cover meretezes → mentes → bezaras
@@ -80,20 +85,44 @@ function _doAddImageLayers() {
       var targetSizeCm = (item.group === "Teachers") ? teacherSizeCm : studentSizeCm;
       if (targetSizeCm > 0) {
         try {
+          // Biztositjuk hogy a megfelelo SO layer legyen aktiv
+          // (foto behelyezes utan az activeLayer elcsuszhat)
           var soLayer = _doc.activeLayer;
+          if (soLayer.name !== soLayerName) {
+            log("[JSX] FIGYELMEZTETES: activeLayer (" + soLayer.name + ") nem egyezik az SO-val (" + soLayerName + "), keresem...");
+            // Keressuk meg a layert nev alapjan a csoportban
+            try {
+              soLayer = targetGroup.artLayers.getByName(soLayerName);
+              _doc.activeLayer = soLayer;
+            } catch (findErr) {
+              log("[JSX] HIBA: SO layer nem talalhato nev alapjan: " + soLayerName);
+            }
+          }
+
           var bounds = soLayer.bounds;
           var currentHeightPx = bounds[3].as("px") - bounds[1].as("px");
 
           // Celmerete pixelben: (cm / 2.54) * docDpi
           var targetHeightPx = Math.round((targetSizeCm / 2.54) * dpi);
 
+          log("[JSX] Resize " + soLayerName + ": currentH=" + currentHeightPx + "px targetH=" + targetHeightPx + "px targetCm=" + targetSizeCm + " group=" + item.group);
+
           if (currentHeightPx > 0 && Math.abs(currentHeightPx - targetHeightPx) > 1) {
             var scalePercent = (targetHeightPx / currentHeightPx) * 100;
+            log("[JSX] Resize alkalmazas: " + scalePercent.toFixed(1) + "%");
             soLayer.resize(scalePercent, scalePercent, AnchorPosition.MIDDLECENTER);
+            // Ellenorzes: resize utan a bounds ujra
+            var newBounds = soLayer.bounds;
+            var newH = newBounds[3].as("px") - newBounds[1].as("px");
+            log("[JSX] Resize utani meret: " + newH + "px (elvart: " + targetHeightPx + "px)");
+          } else {
+            log("[JSX] Resize kihagyva: mar megfelelo meret (diff=" + Math.abs(currentHeightPx - targetHeightPx) + "px)");
           }
         } catch (resizeErr) {
           log("[JSX] FIGYELEM: layer atmeretezes sikertelen (" + item.layerName + "): " + resizeErr.message);
         }
+      } else {
+        log("[JSX] Resize kihagyva: targetSizeCm=" + targetSizeCm + " (0 vagy negativ)");
       }
     } catch (e) {
       log("[JSX] HIBA image layer (" + item.layerName + "): " + e.message);
@@ -128,6 +157,7 @@ function _doAddImageLayers() {
     var withPhotoCount = _data.stats.withPhoto || 0;
     log("[JSX] Image layerek szama: " + _data.layers.length + " (diak: " + _data.stats.students + ", tanar: " + _data.stats.teachers + ", fotoval: " + withPhotoCount + ")");
     log("[JSX] Kepmeret: " + _data.imageSizeCm.widthCm + " x " + _data.imageSizeCm.heightCm + " cm @ " + _data.imageSizeCm.dpi + " DPI");
+    log("[JSX] JSON studentSizeCm=" + _data.studentSizeCm + " teacherSizeCm=" + _data.teacherSizeCm);
 
     // --- 3. Smart Object layerek letrehozasa + foto behelyezes — egyetlen history lepes ---
     _doc.suspendHistory("Kep layerek hozzaadasa", "_doAddImageLayers()");

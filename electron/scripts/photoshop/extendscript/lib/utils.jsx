@@ -95,15 +95,9 @@ function createSmartObjectPlaceholder(doc, container, options) {
   layer.move(container, ElementPlacement.INSIDE);
 
   // Smart Object-te alakitas ActionManager-rel
-  // Ez a Photoshop belso "Convert to Smart Object" parancsa
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putClass(stringIDToTypeID("smartObject"));
-  desc.putReference(charIDToTypeID("null"), ref);
-  var refLayer = new ActionReference();
-  refLayer.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-  desc.putReference(charIDToTypeID("Usng"), refLayer);
-  executeAction(stringIDToTypeID("newPlacedLayer"), desc, DialogModes.NO);
+  // "Convert to Smart Object" — NEM nyitja meg szerkesztesre
+  var smDesc = new ActionDescriptor();
+  executeAction(stringIDToTypeID("convertToSmartObject"), smDesc, DialogModes.NO);
 
   return layer;
 }

@@ -238,6 +238,9 @@ export class PartnerService {
     default_zip_content?: string;
     default_file_naming?: string;
     export_always_ask?: boolean;
+    email_dev_mode?: boolean;
+    email_dev_master_address?: string | null;
+    email_dev_whitelist?: string[];
   }) {
     return this.projectService.updateGlobalSettings(data);
   }

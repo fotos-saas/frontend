@@ -169,13 +169,15 @@ export class TabloDesignerComponent implements OnInit {
     this.savingAll.set(true);
 
     try {
-      // 1. Margó mentése
+      // 1. Margó mentése (csak Electron-ban, böngészőben skip)
       const clampedMargin = Math.min(10, Math.max(0, this.pendingMarginCm()));
-      const marginOk = await this.ps.setMargin(clampedMargin);
-      if (!marginOk) {
-        this.error.set('Nem sikerült menteni a margó értéket.');
-        this.savingAll.set(false);
-        return;
+      if (window.electronAPI?.photoshop) {
+        const marginOk = await this.ps.setMargin(clampedMargin);
+        if (!marginOk) {
+          this.error.set('Nem sikerült menteni a margó értéket.');
+          this.savingAll.set(false);
+          return;
+        }
       }
 
       // 2. Küszöbérték mentése

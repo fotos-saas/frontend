@@ -287,6 +287,21 @@ input:checked + .toggle-slider::before {
   }
 }
 
+// Email dev section
+.email-dev-section {
+  margin-top: 16px;
+}
+
+.setting-item--vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+
+  ps-tag-input {
+    width: 100%;
+  }
+}
+
 // Actions
 .actions {
   margin-top: 24px;

@@ -6,7 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SystemSettings } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants';
 import { PlansService, PlanOption } from '../../../../shared/services/plans.service';
-import { PsToggleComponent, PsInputComponent, PsSelectComponent } from '@shared/components/form';
+import { PsToggleComponent, PsInputComponent, PsSelectComponent, PsTagInputComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 
 type TabId = 'system' | 'email' | 'stripe' | 'info';
@@ -25,6 +25,7 @@ type TabId = 'system' | 'email' | 'stripe' | 'info';
     PsToggleComponent,
     PsInputComponent,
     PsSelectComponent,
+    PsTagInputComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -54,6 +55,12 @@ export class SettingsComponent implements OnInit {
   registrationEnabled = signal(true);
   trialDays = signal(14);
   defaultPlan = signal<'alap' | 'iskola' | 'studio' | 'vip'>('alap');
+
+  // Email dev mode
+  emailDevMode = signal(false);
+  emailDevMasterAddress = signal('');
+  emailDevWhitelist = signal<string[]>([]);
+  savingEmailDev = signal(false);
 
   // Plan opciók - PlansService-ből töltve
   planOptions = signal<PlanOption[]>([]);
@@ -85,6 +92,9 @@ export class SettingsComponent implements OnInit {
           this.registrationEnabled.set(response.system.registrationEnabled);
           this.trialDays.set(response.system.trialDays);
           this.defaultPlan.set(response.system.defaultPlan);
+          this.emailDevMode.set(response.email.devMode ?? false);
+          this.emailDevMasterAddress.set(response.email.devMasterAddress ?? '');
+          this.emailDevWhitelist.set(response.email.devWhitelist ?? []);
           this.loading.set(false);
         },
         error: () => {
@@ -112,6 +122,25 @@ export class SettingsComponent implements OnInit {
         },
         error: () => {
           this.saving.set(false);
+        }
+      });
+  }
+
+  saveEmailDevSettings(): void {
+    this.savingEmailDev.set(true);
+
+    this.service.updateSettings({
+      emailDevMode: this.emailDevMode(),
+      emailDevMasterAddress: this.emailDevMasterAddress() || null,
+      emailDevWhitelist: this.emailDevWhitelist(),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.savingEmailDev.set(false);
+        },
+        error: () => {
+          this.savingEmailDev.set(false);
         }
       });
   }

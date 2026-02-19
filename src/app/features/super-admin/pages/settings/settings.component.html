@@ -113,6 +113,68 @@
             </div>
           </div>
         </div>
+
+        <!-- Email fejlesztési mód -->
+        <div class="settings-section email-dev-section">
+          <h2 class="section-title">Email fejlesztési mód</h2>
+          <p class="section-description">Ha aktív, az összes kimenő email a megadott master címre kerül átirányításra (kivéve a whitelist-en szereplők). Ez a beállítás az egész rendszerre hat — a partner saját dev módja felett áll.</p>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">Fejlesztési mód</label>
+              <span class="setting-description">Kimenő emailek átirányítása a master címre</span>
+            </div>
+            <ps-toggle
+              [ngModel]="emailDevMode()"
+              (ngModelChange)="emailDevMode.set($event)"
+            />
+          </div>
+
+          @if (emailDevMode()) {
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">Master email cím</label>
+                <span class="setting-description">Ide érkeznek az átirányított emailek</span>
+              </div>
+              <ps-input
+                type="email"
+                size="sm"
+                placeholder="dev@example.com"
+                [ngModel]="emailDevMasterAddress()"
+                (ngModelChange)="emailDevMasterAddress.set($event)"
+              />
+            </div>
+
+            <div class="setting-item setting-item--vertical">
+              <div class="setting-info">
+                <label class="setting-label">Whitelist</label>
+                <span class="setting-description">Ezekre a címekre továbbra is az eredeti címre megy az email</span>
+              </div>
+              <ps-tag-input
+                [ngModel]="emailDevWhitelist()"
+                (ngModelChange)="emailDevWhitelist.set($event)"
+                placeholder="Email cím hozzáadása..."
+              />
+            </div>
+          }
+
+          <div class="actions">
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="savingEmailDev()"
+              (click)="saveEmailDevSettings()"
+            >
+              @if (savingEmailDev()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+                Mentés...
+              } @else {
+                <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+                Mentés
+              }
+            </button>
+          </div>
+        </div>
       }
 
       <!-- Stripe beállítások -->

@@ -90,6 +90,9 @@ export interface SystemSettings {
     host: string | null;
     port: number | null;
     username: string | null;
+    devMode: boolean;
+    devMasterAddress: string | null;
+    devWhitelist: string[];
   };
   stripe: {
     publicKey: string | null;
@@ -179,7 +182,11 @@ export class SuperAdminService {
   /**
    * Rendszer beállítások mentése
    */
-  updateSettings(settings: Partial<SystemSettings['system']>): Observable<{ success: boolean; message: string }> {
+  updateSettings(settings: Partial<SystemSettings['system']> & {
+    emailDevMode?: boolean;
+    emailDevMasterAddress?: string | null;
+    emailDevWhitelist?: string[];
+  }): Observable<{ success: boolean; message: string }> {
     return this.http.put<{ success: boolean; message: string }>(`${this.baseUrl}/settings`, settings);
   }
 

@@ -7,12 +7,16 @@ import log from 'electron-log/main';
 
 interface PhotoshopSchema {
   photoshopPath: string | null;
+  workDirectory: string | null;
+  tabloMarginCm: number;
 }
 
 const psStore = new Store<PhotoshopSchema>({
   name: 'photostack-photoshop',
   defaults: {
     photoshopPath: null,
+    workDirectory: null,
+    tabloMarginCm: 2,
   },
 });
 
@@ -137,35 +141,38 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   // Browse for Photoshop
   ipcMain.handle('photoshop:browse-path', async () => {
     try {
-      const filters = process.platform === 'darwin'
-        ? [{ name: 'Alkalmazások', extensions: ['app'] }]
-        : [{ name: 'Futtatható fájlok', extensions: ['exe'] }];
+      if (process.platform === 'darwin') {
+        // macOS: nativ "Choose Application" dialogus osascript-tel
+        // Az Electron dialog nem tudja .app bundle-t kivalasztani (mappaként kezeli)
+        return new Promise<{ cancelled: boolean; path?: string }>((resolve) => {
+          execFile('osascript', [
+            '-e',
+            'POSIX path of (choose application with prompt "Válaszd ki a Photoshop alkalmazást" as alias)',
+          ], { timeout: 60000 }, (error, stdout) => {
+            if (error) {
+              // User Cancel = -128 error
+              resolve({ cancelled: true });
+              return;
+            }
+            const appPath = stdout.trim().replace(/\/$/, ''); // trailing slash eltavolitasa
+            resolve({ cancelled: false, path: appPath });
+          });
+        });
+      } else {
+        // Windows: exe fajlt valasztunk
+        const result = await dialog.showOpenDialog({
+          title: 'Photoshop kiválasztása',
+          properties: ['openFile'],
+          filters: [{ name: 'Futtatható fájlok', extensions: ['exe'] }],
+          defaultPath: 'C:\\Program Files\\Adobe',
+        });
 
-      const result = await dialog.showOpenDialog({
-        title: 'Photoshop kiválasztása',
-        properties: process.platform === 'darwin'
-          ? ['openFile', 'treatPackageAsDirectory'] as never
-          : ['openFile'],
-        filters,
-        defaultPath: process.platform === 'darwin' ? '/Applications' : 'C:\\Program Files\\Adobe',
-      });
-
-      if (result.canceled || !result.filePaths.length) {
-        return { cancelled: true };
-      }
-
-      const selectedPath = result.filePaths[0];
-
-      // macOS: ha .app-on beluli fajlt valasztott, keressuk meg a .app root-ot
-      let finalPath = selectedPath;
-      if (process.platform === 'darwin' && !selectedPath.endsWith('.app')) {
-        const appMatch = selectedPath.match(/^(.*?\.app)/);
-        if (appMatch) {
-          finalPath = appMatch[1];
+        if (result.canceled || !result.filePaths.length) {
+          return { cancelled: true };
         }
-      }
 
-      return { cancelled: false, path: finalPath };
+        return { cancelled: false, path: result.filePaths[0] };
+      }
     } catch (error) {
       log.error('Photoshop browse hiba:', error);
       return { cancelled: true };
@@ -200,7 +207,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       // Python script eleresi ut (extraResources-bol)
       const scriptPath = app.isPackaged
         ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'python', 'tasks', 'generate_psd.py')
-        : path.join(__dirname, '..', 'scripts', 'photoshop', 'python', 'tasks', 'generate_psd.py');
+        : path.join(__dirname, '..', '..', 'scripts', 'photoshop', 'python', 'tasks', 'generate_psd.py');
 
       const args = [
         scriptPath,
@@ -267,6 +274,74 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     } catch (error) {
       log.error('PSD megnyitasi hiba:', error);
       return { success: false, error: 'Nem sikerult megnyitni a fajlt' };
+    }
+  });
+
+  // Get work directory
+  ipcMain.handle('photoshop:get-work-dir', () => {
+    return psStore.get('workDirectory', null);
+  });
+
+  // Set work directory
+  ipcMain.handle('photoshop:set-work-dir', (_event, dirPath: string) => {
+    try {
+      if (typeof dirPath !== 'string' || dirPath.length > 500) {
+        return { success: false, error: 'Ervenytelen eleresi ut' };
+      }
+
+      if (!fs.existsSync(dirPath) || !fs.statSync(dirPath).isDirectory()) {
+        return { success: false, error: 'A megadott eleresi ut nem egy mappa' };
+      }
+
+      psStore.set('workDirectory', dirPath);
+      log.info(`Munka mappa beallitva: ${dirPath}`);
+      return { success: true };
+    } catch (error) {
+      log.error('Munka mappa beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni az eleresi utat' };
+    }
+  });
+
+  // Browse for work directory
+  ipcMain.handle('photoshop:browse-work-dir', async () => {
+    try {
+      const currentDir = psStore.get('workDirectory', null);
+
+      const result = await dialog.showOpenDialog({
+        title: 'Munka mappa kiválasztása',
+        properties: ['openDirectory', 'createDirectory'],
+        defaultPath: currentDir || app.getPath('documents'),
+      });
+
+      if (result.canceled || !result.filePaths.length) {
+        return { cancelled: true };
+      }
+
+      return { cancelled: false, path: result.filePaths[0] };
+    } catch (error) {
+      log.error('Munka mappa browse hiba:', error);
+      return { cancelled: true };
+    }
+  });
+
+  // Get tablo margin
+  ipcMain.handle('photoshop:get-margin', () => {
+    return psStore.get('tabloMarginCm', 2);
+  });
+
+  // Set tablo margin
+  ipcMain.handle('photoshop:set-margin', (_event, marginCm: number) => {
+    try {
+      if (typeof marginCm !== 'number' || marginCm < 0 || marginCm > 10) {
+        return { success: false, error: 'Ervenytelen margo ertek (0-10 cm)' };
+      }
+
+      psStore.set('tabloMarginCm', marginCm);
+      log.info(`Tablo margo beallitva: ${marginCm} cm`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo margo beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a margo erteket' };
     }
   });
 

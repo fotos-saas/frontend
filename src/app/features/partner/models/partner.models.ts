@@ -515,6 +515,18 @@ export interface TabloSize {
 }
 
 /**
+ * Tablóméret küszöbérték beállítás
+ * threshold: diáklétszám határ
+ * below: méret ha kevesebb diák van
+ * above: méret ha több vagy egyenlő diák van
+ */
+export interface TabloSizeThreshold {
+  threshold: number;
+  below: string;
+  above: string;
+}
+
+/**
  * Véglegesítés lista elem
  */
 export interface FinalizationListItem {

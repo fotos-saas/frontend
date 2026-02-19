@@ -127,7 +127,7 @@ export class GlobalSettingsComponent implements OnInit {
     }
 
     this.sizesSaving.set(true);
-    this.partnerService.updateTabloSizes(this.tabloSizes()).pipe(
+    this.partnerService.updateTabloSizes({ sizes: this.tabloSizes() }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (res) => {

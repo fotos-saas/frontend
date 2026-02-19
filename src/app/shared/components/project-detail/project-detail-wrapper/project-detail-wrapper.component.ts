@@ -15,6 +15,7 @@ import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ElectronService } from '../../../../core/services/electron.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { PartnerGalleryService } from '../../../../features/partner/services/partner-gallery.service';
@@ -93,6 +94,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly galleryService = inject(PartnerGalleryService, { optional: true });
   private readonly finalizationService = inject(PartnerFinalizationService, { optional: true });
   private readonly toast = inject(ToastService);
+  private readonly electronService = inject(ElectronService);
 
   readonly facade = inject(ProjectDetailWrapperFacadeService<T>);
 
@@ -108,6 +110,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   readonly ICONS = ICONS;
   readonly isMarketer = this.authService.isMarketer;
+  readonly showTabloEditorBtn = computed(() => this.electronService.isElectron && !this.isMarketer());
 
   activeTab = signal<ProjectDetailTab>('overview');
   hiddenTabs = computed<ProjectDetailTab[]>(() => {
@@ -174,6 +177,12 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   }
 
   goBack(): void { this.facade.goBack(); }
+
+  navigateToTabloEditor(): void {
+    const id = this.projectData()?.id;
+    if (!id) return;
+    this.router.navigate(['tablo-editor'], { relativeTo: this.route });
+  }
 
   onStatusChange(event: { value: string; label: string; color: string }): void {
     this.facade.updateProjectStatus(event);

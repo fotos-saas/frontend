@@ -268,6 +268,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:get-downloads-path') as Promise<string>,
     openFile: (filePath: string) =>
       ipcRenderer.invoke('photoshop:open-file', filePath) as Promise<{ success: boolean; error?: string }>,
+    getWorkDir: () =>
+      ipcRenderer.invoke('photoshop:get-work-dir') as Promise<string | null>,
+    setWorkDir: (dirPath: string) =>
+      ipcRenderer.invoke('photoshop:set-work-dir', dirPath) as Promise<{ success: boolean; error?: string }>,
+    browseWorkDir: () =>
+      ipcRenderer.invoke('photoshop:browse-work-dir') as Promise<{ cancelled: boolean; path?: string }>,
+    getMargin: () =>
+      ipcRenderer.invoke('photoshop:get-margin') as Promise<number>,
+    setMargin: (marginCm: number) =>
+      ipcRenderer.invoke('photoshop:set-margin', marginCm) as Promise<{ success: boolean; error?: string }>,
   },
 
   // ============ Touch Bar (MacBook Pro 2016-2020) ============

@@ -222,6 +222,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
       {
+        path: 'projects/:id/tablo-editor',
+        loadComponent: () => import('./features/partner/pages/project-tablo-editor/project-tablo-editor.component').then(m => m.ProjectTabloEditorComponent),
+        title: 'Tablószerkesztő'
+      },
+      {
         path: 'projects/:id/gallery',
         loadComponent: () => import('./features/partner/pages/gallery-detail/gallery-detail.component').then(m => m.GalleryDetailComponent)
       },
@@ -413,6 +418,11 @@ export const routes: Routes = [
       {
         path: 'projects/:id',
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
+      },
+      {
+        path: 'projects/:id/tablo-editor',
+        loadComponent: () => import('./features/partner/pages/project-tablo-editor/project-tablo-editor.component').then(m => m.ProjectTabloEditorComponent),
+        title: 'Tablószerkesztő'
       },
       {
         path: 'projects/:id/gallery',

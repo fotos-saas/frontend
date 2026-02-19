@@ -13,6 +13,7 @@ import {
   SampleItem,
   TabloPersonItem,
   TabloSize,
+  TabloSizeThreshold,
 } from '../models/partner.models';
 
 /**
@@ -257,27 +258,34 @@ export class PartnerProjectService {
     sizes: TabloSize[];
     defaults: TabloSize[];
     isDefault: boolean;
+    threshold: TabloSizeThreshold | null;
   }> {
     return this.http.get<{
       sizes: TabloSize[];
       defaults: TabloSize[];
       isDefault: boolean;
+      threshold: TabloSizeThreshold | null;
     }>(`${this.baseUrl}/tablo-sizes`);
   }
 
   /**
-   * Elérhető tablóméretek mentése
+   * Elérhető tablóméretek mentése (méretekkel és küszöbértékkel)
    */
-  updateTabloSizes(sizes: TabloSize[]): Observable<{
+  updateTabloSizes(data: {
+    sizes: TabloSize[];
+    threshold?: number | null;
+    size_below_threshold?: string | null;
+    size_above_threshold?: string | null;
+  }): Observable<{
     success: boolean;
     message: string;
-    data: { sizes: TabloSize[]; isDefault: boolean };
+    data: { sizes: TabloSize[]; isDefault: boolean; threshold: TabloSizeThreshold | null };
   }> {
     return this.http.put<{
       success: boolean;
       message: string;
-      data: { sizes: TabloSize[]; isDefault: boolean };
-    }>(`${this.baseUrl}/tablo-sizes`, { sizes });
+      data: { sizes: TabloSize[]; isDefault: boolean; threshold: TabloSizeThreshold | null };
+    }>(`${this.baseUrl}/tablo-sizes`, data);
   }
 
   // ============================================

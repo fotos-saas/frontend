@@ -95,6 +95,11 @@ interface PhotoshopAPI {
   generatePsd: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string }) => Promise<{ success: boolean; error?: string }>;
   getDownloadsPath: () => Promise<string>;
   openFile: (filePath: string) => Promise<{ success: boolean; error?: string }>;
+  getWorkDir: () => Promise<string | null>;
+  setWorkDir: (dirPath: string) => Promise<{ success: boolean; error?: string }>;
+  browseWorkDir: () => Promise<{ cancelled: boolean; path?: string }>;
+  getMargin: () => Promise<number>;
+  setMargin: (marginCm: number) => Promise<{ success: boolean; error?: string }>;
 }
 
 export interface ElectronAPI {

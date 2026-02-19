@@ -20,11 +20,13 @@ export class ProjectDetailHeaderComponent {
 
   readonly project = input<ProjectDetailData | null>(null);
   readonly isMarketer = input<boolean>(false);
+  readonly showTabloEditor = input<boolean>(false);
 
   readonly back = output<void>();
   readonly editProject = output<void>();
   readonly deleteProject = output<void>();
   readonly downloadSelections = output<void>();
+  readonly openTabloEditor = output<void>();
   readonly statusChange = output<{ value: string; label: string; color: string }>();
 
   readonly hasGallery = computed(() => !!this.project()?.tabloGalleryId);

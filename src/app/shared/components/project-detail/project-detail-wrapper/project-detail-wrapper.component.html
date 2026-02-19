@@ -10,10 +10,12 @@
     <app-project-detail-header
       [project]="projectData()"
       [isMarketer]="isMarketer()"
+      [showTabloEditor]="showTabloEditorBtn()"
       (back)="goBack()"
       (editProject)="openEditProjectModal()"
       (deleteProject)="confirmDeleteProject()"
       (downloadSelections)="openSelectionDownloadDialog()"
+      (openTabloEditor)="navigateToTabloEditor()"
       (statusChange)="onStatusChange($event)"
     />
 

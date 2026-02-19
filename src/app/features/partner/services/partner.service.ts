@@ -11,7 +11,7 @@ export type {
   AlbumMissingPerson, AlbumDetails, PhotoAssignment, SchoolItem, SchoolListItem, SchoolLimits,
   ContactListItem, ContactLimits, GuestSession, SamplePackage, SampleVersionImage, SampleVersion,
   ProjectAutocompleteItem, CreateProjectRequest, CreateSchoolRequest, ProjectLimits,
-  PaginatedResponse, ProjectListResponse, UploadProgress, TabloSize,
+  PaginatedResponse, ProjectListResponse, UploadProgress, TabloSize, TabloSizeThreshold,
 } from '../models/partner.models';
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';
 export type { ImportResult } from './partner-contact.service';
@@ -23,7 +23,6 @@ import type {
   ProjectListResponse, UploadProgress, SamplePackage, ProjectAutocompleteItem, TabloSize,
 } from '../models/partner.models';
 import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
-
 // Import sub-service-ek
 import { PartnerProjectService } from './partner-project.service';
 import { PartnerQrService } from './partner-qr.service';
@@ -161,8 +160,8 @@ export class PartnerService {
     return this.projectService.getTabloSizes();
   }
 
-  updateTabloSizes(sizes: Parameters<PartnerProjectService['updateTabloSizes']>[0]) {
-    return this.projectService.updateTabloSizes(sizes);
+  updateTabloSizes(data: Parameters<PartnerProjectService['updateTabloSizes']>[0]) {
+    return this.projectService.updateTabloSizes(data);
   }
 
   getGlobalSettings() {

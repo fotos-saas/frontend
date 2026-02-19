@@ -210,6 +210,57 @@ function placePhotoInSmartObject(doc, layer, photoPath) {
   soDoc.close(SaveOptions.DONOTSAVECHANGES); // mar mentettuk
 }
 
+// --- Layer kivalasztasa ID alapjan (ActionManager) ---
+// Megbizhato layer kivalasztas, fuggetlen az activeLayer allapottol.
+// A Photoshop DOM layer.id egyedi azonosito, ami nem valtozik move/rename utan sem.
+function selectLayerById(layerId) {
+  var desc = new ActionDescriptor();
+  var ref = new ActionReference();
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
+  desc.putReference(charIDToTypeID("null"), ref);
+  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+}
+
+// --- Csoport osszes artLayer-jenek atmeretezese ---
+// A regi tablokiraly set-image-size.jsx mintajara: vegigmegy a csoport layerein,
+// selectLayerById-vel kivalasztja, majd resize-olja a cel szelessegre.
+// targetWidthPx: cel szelesseg pixelben (aspect ratio megtartasaval)
+function resizeGroupLayers(doc, groupPath, targetWidthPx) {
+  var grp = getGroupByPath(doc, groupPath);
+  if (!grp) return 0;
+
+  var resized = 0;
+  for (var i = 0; i < grp.artLayers.length; i++) {
+    var layer = grp.artLayers[i];
+    try {
+      // Layer kivalasztasa ID alapjan (megbizhato)
+      selectLayerById(layer.id);
+      doc.activeLayer = layer;
+
+      var bounds = layer.bounds;
+      var currentW = bounds[2].as("px") - bounds[0].as("px");
+      var currentH = bounds[3].as("px") - bounds[1].as("px");
+
+      if (currentW <= 0) continue;
+
+      // Aranyos meretezes
+      var scaleW = (targetWidthPx / currentW) * 100;
+      var ratio = currentH / currentW;
+      var targetH = targetWidthPx * ratio;
+      var scaleH = (targetH / currentH) * 100;
+
+      // Csak ha tenyleg kell meretezni (1px tolerancia)
+      if (Math.abs(currentW - targetWidthPx) > 1) {
+        layer.resize(scaleW, scaleH, AnchorPosition.MIDDLECENTER);
+        resized++;
+      }
+    } catch (e) {
+      // skip — a hivo logol
+    }
+  }
+  return resized;
+}
+
 // --- JSON fajl beolvasasa ---
 // FONTOS: ExtendScript (ES3) kornyezetben NINCS JSON.parse() metodus!
 // Az egyetlen mod JSON deserializalasra az eval().

@@ -4,6 +4,9 @@
  * A tablokepek (diak + tanar) racsba rendezese a megadott parameterek alapjan.
  * Minden csoport kulon grid-et kap: elobb a diakok, alattuk a tanarok.
  *
+ * FONTOS: Minden szamitas PIXELBEN tortenik a kerekitesi hibak elkerulesehez!
+ * A cm ertekeket a dokumentum DPI-jevel konvertaljuk px-re az elejen.
+ *
  * JSON formatum (Electron handler kesziti):
  * {
  *   "boardWidthCm": 120,
@@ -14,13 +17,6 @@
  *   "gapHCm": 2,
  *   "gapVCm": 3
  * }
- *
- * Algoritmus:
- *   1. photoWidth = sizeCm, photoHeight = sizeCm * 1.5 (10:15 arany)
- *   2. availableWidth = boardWidthCm - 2 * marginCm
- *   3. columns = floor((availableWidth + gapHCm) / (photoWidth + gapHCm))
- *   4. Soronkent kozepre igazitas
- *   5. Diakok felulrol, tanarok a diakok alatt (gapVCm tavolsag)
  *
  * Futtatas: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
  */
@@ -37,97 +33,107 @@ function log(msg) {
 // --- Globalis valtozok (suspendHistory string-eval) ---
 var _doc, _data, _dpi;
 
-// --- Egy csoport layer-einek racsba rendezese ---
+// --- cm → px konverzio (lokalis, kerekitett) ---
+function _cm2px(cm) {
+  return Math.round((cm / 2.54) * _dpi);
+}
+
+// --- Egy csoport layer-einek racsba rendezese (PIXELBEN) ---
 // grp: LayerSet (pl. Images/Students)
-// sizeCm: a kep szelessege cm-ben
-// startTopCm: a racs indulasi pontja fentrol cm-ben
-// Visszaadja az utolso sor alja + gapCm erteket (kovetkezo csoport startja)
-function _arrangeGroupGrid(grp, sizeCm, startTopCm) {
-  if (!grp || grp.artLayers.length === 0) return startTopCm;
+// photoWPx, photoHPx: kep merete pixelben
+// marginPx, gapHPx, gapVPx: margo es gap pixelben
+// boardWPx: tablo szelessege pixelben
+// startTopPx: a racs indulasi pontja fentrol pixelben
+// Visszaadja a kovetkezo csoport start poziciojat pixelben
+function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, boardWPx, startTopPx) {
+  if (!grp || grp.artLayers.length === 0) return startTopPx;
 
-  var photoWidth = sizeCm;
-  var photoHeight = sizeCm * 1.5; // 10:15 arany
-  var marginCm = _data.marginCm || 0;
-  var gapH = _data.gapHCm || 2;  // vizszintes gap (kepek kozott egy sorban)
-  var gapV = _data.gapVCm || 3;  // fuggoleges gap (sorok kozott)
-  var boardWidthCm = _data.boardWidthCm;
-
-  var availableWidth = boardWidthCm - 2 * marginCm;
+  var availableW = boardWPx - 2 * marginPx;
 
   // Hany kep fer egy sorba
-  var columns = Math.floor((availableWidth + gapH) / (photoWidth + gapH));
+  var columns = Math.floor((availableW + gapHPx) / (photoWPx + gapHPx));
   if (columns < 1) columns = 1;
 
   var layerCount = grp.artLayers.length;
   var rows = Math.ceil(layerCount / columns);
 
-  log("[JSX] Grid: " + columns + " oszlop x " + rows + " sor, " + layerCount + " layer, gapH=" + gapH + " cm, gapV=" + gapV + " cm, kepmeret=" + sizeCm + " cm");
+  log("[JSX] Grid: " + columns + " oszlop x " + rows + " sor, " + layerCount + " layer, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px, kep=" + photoWPx + "x" + photoHPx + "px");
 
-  // Layer-ek vegigjarasa (hatulrol elore = felulrol lefele a Layers panelen)
   var currentRow = 0;
   var currentCol = 0;
-  var top = startTopCm;
+  var topPx = startTopPx;
 
   for (var i = grp.artLayers.length - 1; i >= 0; i--) {
     var layer = grp.artLayers[i];
 
     try {
       // Aktualis sor elemszama (utolso sor rovidebb lehet)
-      var itemsInThisRow;
       var remainingItems = layerCount - (currentRow * columns);
-      if (remainingItems >= columns) {
-        itemsInThisRow = columns;
-      } else {
-        itemsInThisRow = remainingItems;
-      }
+      var itemsInThisRow = (remainingItems >= columns) ? columns : remainingItems;
 
-      // Kozepre igazitas: az aktualis sor teljes szelessege
-      var totalRowWidth = itemsInThisRow * photoWidth + (itemsInThisRow - 1) * gapH;
-      var offsetX = marginCm + (availableWidth - totalRowWidth) / 2;
+      // Kozepre igazitas pixelben
+      var totalRowW = itemsInThisRow * photoWPx + (itemsInThisRow - 1) * gapHPx;
+      var offsetX = marginPx + Math.round((availableW - totalRowW) / 2);
 
-      // Celpozicio kiszamitasa
-      var leftCm = offsetX + currentCol * (photoWidth + gapH);
-      var topCm = top;
+      // Celpozicio pixelben
+      var leftPx = offsetX + currentCol * (photoWPx + gapHPx);
 
       // Layer kivalasztasa es pozicionalasa
       selectLayerById(layer.id);
       _doc.activeLayer = layer;
-      resetLayerPosition(layer);
-      positionLayerCm(layer, leftCm, topCm, _dpi);
+
+      // Origoba mozgatas
+      var bounds = layer.bounds;
+      var dx = -bounds[0].as("px");
+      var dy = -bounds[1].as("px");
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+        layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
+      }
+
+      // Celpozicioba mozgatas
+      layer.translate(new UnitValue(leftPx, "px"), new UnitValue(topPx, "px"));
 
       // Kovetkezo pozicio
       currentCol++;
       if (currentCol >= columns) {
         currentCol = 0;
         currentRow++;
-        top += photoHeight + gapV;
+        topPx += photoHPx + gapVPx;
       }
     } catch (e) {
       log("[JSX] WARN: Layer pozicionalas sikertelen (" + layer.name + "): " + e.message);
     }
   }
 
-  // Visszaadjuk a kovetkezo csoport start poziciojat
-  // (az utolso sor alja + fuggoleges gap)
-  var lastRowTop = startTopCm + currentRow * (photoHeight + gapV);
-  // Ha nem volt tobb sor (currentCol > 0 jelzi, hogy az utolso sor meg nem telt be)
+  // Kovetkezo csoport start pozicioja
   if (currentCol > 0) {
-    // Az utolso sor meg nem zarodott le, szoval a top erteke meg nem novekedett
-    lastRowTop = top + photoHeight + gapV;
+    // Utolso sor meg nem zarodott le
+    return topPx + photoHPx + gapVPx;
   }
-
-  return lastRowTop;
+  return topPx;
 }
 
 function _doArrangeGrid() {
-  var marginCm = _data.marginCm || 0;
-  var startTop = marginCm;
+  // Osszes cm ertek konvertalasa pixelre EGYSZER, az elejen
+  var marginPx = _cm2px(_data.marginCm || 0);
+  var gapHPx = _cm2px(_data.gapHCm || 2);
+  var gapVPx = _cm2px(_data.gapVCm || 3);
+  var boardWPx = _cm2px(_data.boardWidthCm);
+
+  var studentWPx = _cm2px(_data.studentSizeCm);
+  var studentHPx = _cm2px(_data.studentSizeCm * 1.5);
+  var teacherWPx = _cm2px(_data.teacherSizeCm);
+  var teacherHPx = _cm2px(_data.teacherSizeCm * 1.5);
+
+  log("[JSX] DPI=" + _dpi + ", board=" + boardWPx + "px, margin=" + marginPx + "px, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px");
+
+  var startTopPx = marginPx;
 
   // 1. Diak csoport
   var studentsGroup = getGroupByPath(_doc, ["Images", "Students"]);
   if (studentsGroup && studentsGroup.artLayers.length > 0) {
     log("[JSX] Diak csoport: " + studentsGroup.artLayers.length + " layer");
-    startTop = _arrangeGroupGrid(studentsGroup, _data.studentSizeCm, startTop);
+    startTopPx = _arrangeGroupGridPx(studentsGroup, studentWPx, studentHPx, marginPx, gapHPx, gapVPx, boardWPx, startTopPx);
   } else {
     log("[JSX] Diak csoport ures vagy nem talalhato");
   }
@@ -136,7 +142,7 @@ function _doArrangeGrid() {
   var teachersGroup = getGroupByPath(_doc, ["Images", "Teachers"]);
   if (teachersGroup && teachersGroup.artLayers.length > 0) {
     log("[JSX] Tanar csoport: " + teachersGroup.artLayers.length + " layer");
-    _arrangeGroupGrid(teachersGroup, _data.teacherSizeCm, startTop);
+    _arrangeGroupGridPx(teachersGroup, teacherWPx, teacherHPx, marginPx, gapHPx, gapVPx, boardWPx, startTopPx);
   } else {
     log("[JSX] Tanar csoport ures vagy nem talalhato");
   }
@@ -162,8 +168,8 @@ function _doArrangeGrid() {
       return;
     }
 
-    // DPI kiolvasas + ruler egyseg pixelre allitasa (pontos pozicionalas)
-    _dpi = _doc.resolution; // px/inch
+    // DPI kiolvasas + ruler PIXELS-re (minden szamitas pixelben!)
+    _dpi = _doc.resolution;
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
 

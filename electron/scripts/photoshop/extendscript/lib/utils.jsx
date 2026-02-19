@@ -91,15 +91,18 @@ function createSmartObjectPlaceholder(doc, container, options) {
   doc.selection.fill(fillColor);
   doc.selection.deselect();
 
-  // Layer atrakeasa a cel csoportba
-  layer.move(container, ElementPlacement.INSIDE);
-
-  // Smart Object-te alakitas ActionManager-rel
-  // "Convert to Smart Object" — NEM nyitja meg szerkesztesre
+  // Smart Object-te alakitas ELOBB (amig meg aktiv a layer!)
+  // Utana rakjuk at a cel csoportba — igy nem vesziti el az aktiv statuszt
   var smDesc = new ActionDescriptor();
   executeAction(stringIDToTypeID("convertToSmartObject"), smDesc, DialogModes.NO);
 
-  return layer;
+  // Layer atrakeasa a cel csoportba
+  // A convertToSmartObject uj layert hoz letre, az aktiv dokumentumbol kell kiolvasni
+  var smartLayer = doc.activeLayer;
+  smartLayer.name = options.name;
+  smartLayer.move(container, ElementPlacement.INSIDE);
+
+  return smartLayer;
 }
 
 // --- JSON fajl beolvasasa ---

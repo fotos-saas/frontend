@@ -11,10 +11,10 @@ Struktura:
   Subtitles/
   Names/
     Students/
-      kiss-janos---42   (1x1 px placeholder)
+      kiss-janos---42   (TypeLayer, Arial 25pt, szoveg: "Kiss Janos")
       ...
     Teachers/
-      szabo-anna---101  (1x1 px placeholder)
+      szabo-anna---101  (TypeLayer, Arial 25pt, szoveg: "Szabo Anna")
       ...
   Positions/
     Students/
@@ -26,16 +26,32 @@ Struktura:
 """
 
 import argparse
+import io
 import json
 import re
 import struct
 import sys
 from pathlib import Path
 
-from PIL import Image
 from psd_tools import PSDImage
-from psd_tools.constants import Resource
+from psd_tools.api.layers import TypeLayer
+from psd_tools.constants import (
+    BlendMode, ChannelID, Compression, Resource, Tag,
+)
+from psd_tools.psd.descriptor import (
+    DescriptorBlock, RawData, String as DescString,
+)
+from psd_tools.psd.engine_data import (
+    Bool, Dict as EDict, EngineData, Float, Integer,
+    List as EList, Property, String,
+)
 from psd_tools.psd.image_resources import ImageResource
+from psd_tools.psd.layer_and_mask import (
+    ChannelData, ChannelDataList, ChannelInfo, LayerRecord,
+)
+from psd_tools.psd.tagged_blocks import (
+    TaggedBlock, TaggedBlocks, TypeToolObjectSetting,
+)
 
 
 # Magyar ekezet-terkep az ASCII-re
@@ -45,6 +61,20 @@ ACCENT_MAP = {
     'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ö': 'O', 'Ő': 'O',
     'Ú': 'U', 'Ü': 'U', 'Ű': 'U',
 }
+
+
+# EngineData helper fuggvenyek
+def _prop(name):
+    return Property.frombytes(('/' + name).encode('ascii'))
+
+def _estr(value):
+    return String.frombytes(value.encode('utf-16-be'))
+
+def _efloat(value):
+    return Float(value)
+
+def _eint(value):
+    return Integer(value)
 
 
 def cm_to_px(cm: float, dpi: int) -> int:
@@ -66,45 +96,182 @@ def sanitize_name(name: str, person_id: int) -> str:
     return f'{slug}---{person_id}'
 
 
-def create_placeholder_layer(psd: PSDImage, layer_name: str):
-    """1x1 px atlatszo PixelLayer letrehozasa adott nevvel."""
-    img = Image.new('RGBA', (1, 1), (0, 0, 0, 0))
-    layer = psd.create_pixel_layer(
-        name=layer_name,
-        image=img,
+def _build_engine_data(text, font_name='ArialMT', font_size=25.0):
+    """Minimal EngineData feleptese TypeLayer-hez."""
+    text_cr = text + '\r'
+    text_len = len(text_cr)
+
+    ed = EngineData()
+
+    # ResourceDict (font informacio)
+    resource_dict = EDict()
+    font_entry = EDict()
+    font_entry[_prop('Name')] = _estr(font_name)
+    font_entry[_prop('Script')] = _eint(0)
+    font_entry[_prop('FontType')] = _eint(0)
+    font_entry[_prop('Synthetic')] = _eint(0)
+    fontset = EList()
+    fontset.append(font_entry)
+    resource_dict[_prop('FontSet')] = fontset
+    resource_dict[_prop('TheNormalStyleSheet')] = _eint(0)
+    resource_dict[_prop('TheNormalParagraphSheet')] = _eint(0)
+
+    # Editor
+    editor_dict = EDict()
+    editor_dict[_prop('Text')] = _estr(text_cr)
+
+    # StyleRun
+    style_data = EDict()
+    style_data[_prop('Font')] = _eint(0)
+    style_data[_prop('FontSize')] = _efloat(font_size)
+    style_data[_prop('AutoLeading')] = Bool(True)
+    fill_vals = EList()
+    for v in [1.0, 0.0, 0.0, 0.0]:
+        fill_vals.append(_efloat(v))
+    fill_color = EDict()
+    fill_color[_prop('Type')] = _eint(1)
+    fill_color[_prop('Values')] = fill_vals
+    style_data[_prop('FillColor')] = fill_color
+
+    stylesheet = EDict()
+    stylesheet[_prop('StyleSheetData')] = style_data
+    run_item = EDict()
+    run_item[_prop('StyleSheet')] = stylesheet
+    run_array = EList()
+    run_array.append(run_item)
+    style_run = EDict()
+    style_run[_prop('RunArray')] = run_array
+    run_lengths = EList()
+    run_lengths.append(_eint(text_len))
+    style_run[_prop('RunLengthArray')] = run_lengths
+
+    # ParagraphRun
+    para_props = EDict()
+    para_props[_prop('Justification')] = _eint(0)
+    para_sheet = EDict()
+    para_sheet[_prop('DefaultStyleSheet')] = _eint(0)
+    para_sheet[_prop('Properties')] = para_props
+    para_item = EDict()
+    para_item[_prop('ParagraphSheet')] = para_sheet
+    para_array = EList()
+    para_array.append(para_item)
+    para_run = EDict()
+    para_run[_prop('RunArray')] = para_array
+    para_lengths = EList()
+    para_lengths.append(_eint(text_len))
+    para_run[_prop('RunLengthArray')] = para_lengths
+
+    # EngineDict
+    engine_dict = EDict()
+    engine_dict[_prop('Editor')] = editor_dict
+    engine_dict[_prop('StyleRun')] = style_run
+    engine_dict[_prop('ParagraphRun')] = para_run
+    engine_dict[_prop('ResourceDict')] = resource_dict
+
+    ed[_prop('EngineDict')] = engine_dict
+    return ed
+
+
+def create_type_layer(psd, layer_name, display_text,
+                      font_name='ArialMT', font_size=25.0):
+    """
+    TypeLayer (szoveg layer) letrehozasa.
+    - layer_name: PSD layer nev (pl. 'kiss-janos---42')
+    - display_text: megjelenített szöveg (pl. 'Kiss János')
+    - font_name: betutipus (alapertelmezett: ArialMT)
+    - font_size: betumeret pt-ben (alapertelmezett: 25)
+    """
+    ed = _build_engine_data(display_text, font_name, font_size)
+    buf = io.BytesIO()
+    ed.write(buf)
+    ed_bytes = buf.getvalue()
+
+    # text_data descriptor (EngineData + Txt)
+    text_data = DescriptorBlock(name='', classID=b'TxLr', version=16)
+    text_data[b'EngineData'] = RawData(ed_bytes)
+    text_data[b'Txt '] = DescString(value=display_text + '\r')
+
+    # warp descriptor (ures)
+    warp_data = DescriptorBlock(name='warp', classID=b'warp', version=16)
+
+    # TypeToolObjectSetting
+    ttos = TypeToolObjectSetting(
+        version=1,
+        transform=(1.0, 0.0, 0.0, 1.0, 0.0, 0.0),
+        text_version=50,
+        text_data=text_data,
+        warp_version=1,
+        warp=warp_data,
+        left=0, top=0, right=0, bottom=0,
     )
-    return layer
+
+    # Tagged blocks
+    tagged = TaggedBlocks()
+    tagged[Tag.TYPE_TOOL_OBJECT_SETTING] = TaggedBlock(
+        key=Tag.TYPE_TOOL_OBJECT_SETTING,
+        data=ttos,
+    )
+
+    # Channel info (ures, TypeLayer-nek nincs pixel adata)
+    empty_channel = ChannelData(compression=Compression.RAW, data=b'')
+    channel_info = [
+        ChannelInfo(id=ChannelID.TRANSPARENCY_MASK, length=2),
+        ChannelInfo(id=ChannelID.CHANNEL_0, length=2),
+        ChannelInfo(id=ChannelID.CHANNEL_1, length=2),
+        ChannelInfo(id=ChannelID.CHANNEL_2, length=2),
+    ]
+
+    record = LayerRecord(
+        top=0, left=0, bottom=0, right=0,
+        channel_info=channel_info,
+        blend_mode=BlendMode.NORMAL,
+        opacity=255,
+        name=layer_name,
+        tagged_blocks=tagged,
+    )
+
+    channel_data = ChannelDataList([
+        empty_channel, empty_channel, empty_channel, empty_channel,
+    ])
+
+    return TypeLayer(psd, record, channel_data)
 
 
-def create_sub_pair(psd: PSDImage, persons=None):
-    """
-    Students + Teachers almappa par letrehozasa.
-    Ha vannak szemelyek, mindegyikhez placeholder layer-t tesz.
-    """
+def create_name_layers(psd, persons):
+    """Students + Teachers csoport TypeLayer-ekkel a Names/ szamara."""
     student_layers = []
     teacher_layers = []
 
-    if persons:
-        for p in persons:
-            slug = sanitize_name(p['name'], p['id'])
-            layer = create_placeholder_layer(psd, slug)
-            if p['type'] == 'teacher':
-                teacher_layers.append(layer)
-            else:
-                student_layers.append(layer)
+    for p in persons:
+        slug = sanitize_name(p['name'], p['id'])
+        layer = create_type_layer(psd, slug, p['name'])
+        if p['type'] == 'teacher':
+            teacher_layers.append(layer)
+        else:
+            student_layers.append(layer)
 
-    students = psd.create_group(name='Students', layer_list=student_layers or None)
-    teachers = psd.create_group(name='Teachers', layer_list=teacher_layers or None)
+    students = psd.create_group(
+        name='Students', layer_list=student_layers or None)
+    teachers = psd.create_group(
+        name='Teachers', layer_list=teacher_layers or None)
+    return [students, teachers]
+
+
+def create_empty_sub_pair(psd):
+    """Ures Students + Teachers almappa par."""
+    students = psd.create_group(name='Students')
+    teachers = psd.create_group(name='Teachers')
     return [students, teachers]
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='Ures PSD fajl generalasa tablohoz')
-    parser.add_argument('--width-cm', type=float, required=True, help='Szelesseg cm-ben')
-    parser.add_argument('--height-cm', type=float, required=True, help='Magassag cm-ben')
-    parser.add_argument('--dpi', type=int, default=200, help='Felbontas (alapertelmezett: 200)')
-    parser.add_argument('--mode', type=str, default='RGB', help='Szinmod (alapertelmezett: RGB)')
-    parser.add_argument('--output', type=str, required=True, help='Kimeneti fajl eleresi ut')
+    parser = argparse.ArgumentParser(
+        description='Ures PSD fajl generalasa tablohoz')
+    parser.add_argument('--width-cm', type=float, required=True)
+    parser.add_argument('--height-cm', type=float, required=True)
+    parser.add_argument('--dpi', type=int, default=200)
+    parser.add_argument('--mode', type=str, default='RGB')
+    parser.add_argument('--output', type=str, required=True)
     parser.add_argument('--persons-json', type=str, default=None,
                         help='JSON fajl a szemelyek listajával')
     args = parser.parse_args()
@@ -117,7 +284,8 @@ def main() -> None:
         sys.exit(1)
 
     if width_px > 300000 or height_px > 300000:
-        print(f'Tul nagy meret: {width_px}x{height_px}px (max 300000)', file=sys.stderr)
+        print(f'Tul nagy meret: {width_px}x{height_px}px (max 300000)',
+              file=sys.stderr)
         sys.exit(1)
 
     mode = args.mode.upper()
@@ -129,7 +297,8 @@ def main() -> None:
     if args.persons_json:
         json_path = Path(args.persons_json)
         if not json_path.exists():
-            print(f'Szemelyek JSON fajl nem talalhato: {json_path}', file=sys.stderr)
+            print(f'Szemelyek JSON fajl nem talalhato: {json_path}',
+                  file=sys.stderr)
             sys.exit(1)
         with open(json_path, 'r', encoding='utf-8') as f:
             persons = json.load(f)
@@ -151,14 +320,21 @@ def main() -> None:
     )
 
     # --- Mappastruktura ---
-    # Images/ (Students + Teachers almappakkal + szemelyek layer-jeivel)
-    images = psd.create_group(layer_list=create_sub_pair(psd, persons), name='Images')
+    # Images/ (ures Students + Teachers almappak)
+    images = psd.create_group(
+        layer_list=create_empty_sub_pair(psd), name='Images')
 
-    # Positions/ (Students + Teachers almappakkal + szemelyek layer-jeivel)
-    positions = psd.create_group(layer_list=create_sub_pair(psd, persons), name='Positions')
+    # Positions/ (ures Students + Teachers almappak)
+    positions = psd.create_group(
+        layer_list=create_empty_sub_pair(psd), name='Positions')
 
-    # Names/ (Students + Teachers almappakkal + szemelyek layer-jeivel)
-    names = psd.create_group(layer_list=create_sub_pair(psd, persons), name='Names')
+    # Names/ (TypeLayer-ekkel ha vannak szemelyek)
+    if persons:
+        names = psd.create_group(
+            layer_list=create_name_layers(psd, persons), name='Names')
+    else:
+        names = psd.create_group(
+            layer_list=create_empty_sub_pair(psd), name='Names')
 
     # Subtitles/ (almappak nelkul)
     subtitles = psd.create_group(name='Subtitles')
@@ -177,7 +353,8 @@ def main() -> None:
     psd.save(str(output_path))
 
     person_info = f', {len(persons)} szemely' if persons else ''
-    print(f'PSD letrehozva: {output_path} ({width_px}x{height_px}px, {args.dpi} DPI, {mode}{person_info})')
+    print(f'PSD letrehozva: {output_path} '
+          f'({width_px}x{height_px}px, {args.dpi} DPI, {mode}{person_info})')
 
 
 if __name__ == '__main__':

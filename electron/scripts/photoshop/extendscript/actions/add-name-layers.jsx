@@ -8,14 +8,24 @@
  * Input: JSON temp fájl (CONFIG.DATA_FILE_PATH — az Electron handler állítja be)
  * JSON formátum: [{ "id": 42, "name": "Kiss János", "type": "student" }, ...]
  *
- * Futtatás: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript ...'
+ * Futtatás: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
+ *
+ * FONTOS: Photoshop "do javascript file" módban a writeln() NEM elerheto!
+ * A log uzeneteket egy bufferbe gyujtjuk es a script vegen stringkent adjuk vissza.
+ * Az osascript stdout-ra az utolso kifejezes erteke kerul.
  */
 
 // A CONFIG.DATA_FILE_PATH-ot a hivo script dinamikusan allitja be
-// a #include elott (lasd: photoshop.handler.ts runJsxScript fuggveny)
+// a #include elott (lasd: photoshop.handler.ts buildJsxScript fuggveny)
 
 // #include "../lib/config.jsx"
 // #include "../lib/utils.jsx"
+
+// --- Log buffer (writeln() helyett) ---
+var _logLines = [];
+function log(msg) {
+  _logLines.push(msg);
+}
 
 (function () {
   // --- Eredmeny szamlalok ---
@@ -31,7 +41,7 @@
       throw new Error("Nincs megnyitott dokumentum! Elobb nyisd meg a PSD-t.");
     }
     var doc = app.activeDocument;
-    writeln("[JSX] Dokumentum: " + doc.name + " (" + doc.width + " x " + doc.height + ")");
+    log("[JSX] Dokumentum: " + doc.name + " (" + doc.width + " x " + doc.height + ")");
 
     // --- 2. JSON temp fajl beolvasasa ---
     var args = parseArgs();
@@ -39,16 +49,16 @@
       throw new Error("Nincs megadva DATA_FILE_PATH! A CONFIG.DATA_FILE_PATH beallitasa szukseges.");
     }
 
-    writeln("[JSX] JSON fajl: " + args.dataFilePath);
+    log("[JSX] JSON fajl: " + args.dataFilePath);
     var persons = readJsonFile(args.dataFilePath);
 
     if (!persons || persons.length === 0) {
-      writeln("[JSX] Nincs szemely adat — kilep.");
-      writeln("[JSX] KESZ: 0 diak, 0 tanar, 0 hiba");
-      return;
+      log("[JSX] Nincs szemely adat — kilep.");
+      log("[JSX] KESZ: 0 diak, 0 tanar, 0 hiba");
+      return _logLines.join("\n");
     }
 
-    writeln("[JSX] Szemelyek szama: " + persons.length);
+    log("[JSX] Szemelyek szama: " + persons.length);
 
     // --- 3. Szétválogatás: diákok és tanárok ---
     var students = [];
@@ -61,15 +71,15 @@
       }
     }
 
-    writeln("[JSX] Diakok: " + students.length + ", Tanarok: " + teachers.length);
+    log("[JSX] Diakok: " + students.length + ", Tanarok: " + teachers.length);
 
     // --- 4. Names/Students csoport keresese ---
     var studentsGroup = getGroupByPath(doc, ["Names", "Students"]);
     if (!studentsGroup) {
-      writeln("[JSX] HIBA: Names/Students csoport nem talalhato!");
+      log("[JSX] HIBA: Names/Students csoport nem talalhato!");
       stats.errors++;
     } else {
-      writeln("[JSX] Names/Students csoport megtalalva");
+      log("[JSX] Names/Students csoport megtalalva");
 
       // Diak text layerek letrehozasa
       for (var s = 0; s < students.length; s++) {
@@ -84,21 +94,21 @@
           });
           stats.students++;
         } catch (e) {
-          writeln("[JSX] HIBA diak layer (" + student.name + "): " + e.message);
+          log("[JSX] HIBA diak layer (" + student.name + "): " + e.message);
           stats.errors++;
         }
       }
 
-      writeln("[JSX] " + stats.students + "/" + students.length + " diak layer letrehozva");
+      log("[JSX] " + stats.students + "/" + students.length + " diak layer letrehozva");
     }
 
     // --- 5. Names/Teachers csoport keresese ---
     var teachersGroup = getGroupByPath(doc, ["Names", "Teachers"]);
     if (!teachersGroup) {
-      writeln("[JSX] HIBA: Names/Teachers csoport nem talalhato!");
+      log("[JSX] HIBA: Names/Teachers csoport nem talalhato!");
       stats.errors++;
     } else {
-      writeln("[JSX] Names/Teachers csoport megtalalva");
+      log("[JSX] Names/Teachers csoport megtalalva");
 
       // Tanar text layerek letrehozasa
       for (var t = 0; t < teachers.length; t++) {
@@ -113,19 +123,22 @@
           });
           stats.teachers++;
         } catch (e) {
-          writeln("[JSX] HIBA tanar layer (" + teacher.name + "): " + e.message);
+          log("[JSX] HIBA tanar layer (" + teacher.name + "): " + e.message);
           stats.errors++;
         }
       }
 
-      writeln("[JSX] " + stats.teachers + "/" + teachers.length + " tanar layer letrehozva");
+      log("[JSX] " + stats.teachers + "/" + teachers.length + " tanar layer letrehozva");
     }
 
     // --- 6. Eredmeny ---
-    writeln("[JSX] KESZ: " + stats.students + " diak, " + stats.teachers + " tanar, " + stats.errors + " hiba");
+    log("[JSX] KESZ: " + stats.students + " diak, " + stats.teachers + " tanar, " + stats.errors + " hiba");
 
   } catch (e) {
-    writeln("[JSX] HIBA: " + e.message);
-    writeln("[JSX] KESZ: " + stats.students + " diak, " + stats.teachers + " tanar, " + (stats.errors + 1) + " hiba");
+    log("[JSX] HIBA: " + e.message);
+    log("[JSX] KESZ: " + stats.students + " diak, " + stats.teachers + " tanar, " + (stats.errors + 1) + " hiba");
   }
 })();
+
+// Az utolso kifejezes erteke kerul az osascript stdout-ra
+_logLines.join("\n");

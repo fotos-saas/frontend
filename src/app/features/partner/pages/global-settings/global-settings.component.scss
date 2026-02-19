@@ -1,3 +1,5 @@
+@use '../../../../shared/styles/settings-page' as *;
+
 .page-header {
   display: flex;
   align-items: center;
@@ -22,120 +24,6 @@
   margin-bottom: 32px;
   max-width: 600px;
   line-height: 1.5;
-}
-
-.settings-section {
-  max-width: 600px;
-}
-
-.settings-section + .settings-section {
-  margin-top: 36px;
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-
-  lucide-icon {
-    margin-right: 8px;
-    color: var(--color-primary, #1e3a5f);
-  }
-
-  h2 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0;
-  }
-}
-
-.setting-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px;
-}
-
-.setting-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.setting-info {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  margin-right: 24px;
-}
-
-.setting-label {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.setting-description {
-  font-size: 0.8125rem;
-  color: #64748b;
-  margin-top: 4px;
-  line-height: 1.5;
-}
-
-.setting-control {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-// === SUB SETTING ===
-.sub-setting {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.setting-label--sub {
-  font-size: 0.875rem;
-}
-
-// === SETTING CARD spacing ===
-.setting-card + .setting-card {
-  margin-top: 12px;
-}
-
-.action-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-}
-
-.save-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 24px;
-  background: var(--color-primary, #1e3a5f);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s;
-
-  &:hover:not(:disabled) {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .animate-spin {
-    margin-right: 6px;
-  }
 }
 
 // === TABLO SIZES ===
@@ -284,15 +172,6 @@
 }
 
 @media (max-width: 640px) {
-  .setting-row {
-    flex-direction: column;
-  }
-
-  .setting-info {
-    margin-right: 0;
-    margin-bottom: 12px;
-  }
-
   .add-size-row {
     flex-direction: column;
 
@@ -307,12 +186,5 @@
     .reset-btn {
       margin-bottom: 8px;
     }
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
   }
 }

@@ -6,6 +6,7 @@ import * as https from 'https';
 import * as http from 'http';
 import Store from 'electron-store';
 import log from 'electron-log/main';
+import sharp from 'sharp';
 
 interface PhotoshopSchema {
   photoshopPath: string | null;
@@ -424,13 +425,15 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   }
 
-  // Magyar ékezet-mentes slug (layerName generáláshoz)
+  // Ekezetmentes slug (layerName generalashoz)
+  // Unicode NFD normalizacio: ekezetes → alap + combining mark, majd mark strip
+  // Univerzalis: magyar, nemet, francia, stb. mind mukodik
   function sanitizeNameForLayer(text: string, personId?: number): string {
-    const accents: Record<string, string> = {
-      á: 'a', é: 'e', í: 'i', ó: 'o', ö: 'o', ő: 'o', ú: 'u', ü: 'u', ű: 'u',
-      Á: 'A', É: 'E', Í: 'I', Ó: 'O', Ö: 'O', Ő: 'O', Ú: 'U', Ü: 'U', Ű: 'U',
-    };
-    let result = text.split('').map(c => accents[c] || c).join('')
+    let result = text
+      .normalize('NFD')                    // pl. "á" → "a" + combining acute
+      .replace(/[\u0300-\u036f]/g, '')     // combining diacritical marks torlese
+      .replace(/\u0150/g, 'O').replace(/\u0151/g, 'o')  // Ő/ő (kettős ékezet — NFD nem bontja)
+      .replace(/\u0170/g, 'U').replace(/\u0171/g, 'u')  // Ű/ű (kettős ékezet — NFD nem bontja)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
@@ -465,30 +468,33 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     };
   }
 
-  // Foto letoltese URL-rol temp mappaba
-  // Pattern: main.ts downloadFileForDrag() mintajara (https.get + pipe + redirect)
-  function downloadPhoto(url: string, fileName: string): Promise<string> {
+  // Foto letoltese URL-rol temp mappaba + opcionalis sharp elomeretezes
+  // targetSize megadasa eseten cover logika: kitolti a celmeretet (crop kozeprol)
+  function downloadPhoto(url: string, fileName: string, targetSize?: { width: number; height: number }): Promise<string> {
     return new Promise((resolve, reject) => {
       const tempDir = path.join(app.getPath('temp'), 'psd-photos');
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
 
-      const localPath = path.join(tempDir, fileName);
+      // Ha van targetSize, a vegso fajl a resized/ almappaba kerul
+      const resizedDir = path.join(tempDir, 'resized');
+      const rawPath = path.join(tempDir, fileName);
+      const finalPath = targetSize ? path.join(resizedDir, fileName) : rawPath;
 
-      // Ha a fajl mar letezik es friss (5 perc), hasznaljuk
-      if (fs.existsSync(localPath)) {
-        const stats = fs.statSync(localPath);
+      // Ha a vegso fajl mar letezik es friss (5 perc), hasznaljuk
+      if (fs.existsSync(finalPath)) {
+        const stats = fs.statSync(finalPath);
         const FIVE_MINUTES = 5 * 60 * 1000;
         if (Date.now() - stats.mtimeMs < FIVE_MINUTES && stats.size > 0) {
           log.info(`Cached foto: ${fileName}`);
-          resolve(localPath);
+          resolve(finalPath);
           return;
         }
       }
 
       const protocol = url.startsWith('https') ? https : http;
-      const file = fs.createWriteStream(localPath);
+      const file = fs.createWriteStream(rawPath);
 
       log.info(`Foto letoltese: ${url} → ${fileName}`);
 
@@ -498,15 +504,15 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
           const redirectUrl = response.headers.location;
           if (redirectUrl) {
             file.close();
-            fs.unlinkSync(localPath);
-            downloadPhoto(redirectUrl, fileName).then(resolve).catch(reject);
+            fs.unlinkSync(rawPath);
+            downloadPhoto(redirectUrl, fileName, targetSize).then(resolve).catch(reject);
             return;
           }
         }
 
         if (response.statusCode !== 200) {
           file.close();
-          fs.unlink(localPath, () => {});
+          fs.unlink(rawPath, () => {});
           reject(new Error(`Foto letoltes sikertelen: HTTP ${response.statusCode}`));
           return;
         }
@@ -515,11 +521,34 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
         file.on('finish', () => {
           file.close();
-          log.info(`Foto letoltve: ${fileName}`);
-          resolve(localPath);
+
+          // Ha nincs meretezes, kesz
+          if (!targetSize) {
+            log.info(`Foto letoltve: ${fileName}`);
+            resolve(rawPath);
+            return;
+          }
+
+          // Sharp cover resize: kitolti a celmeretet, kozeprol vagja
+          if (!fs.existsSync(resizedDir)) {
+            fs.mkdirSync(resizedDir, { recursive: true });
+          }
+
+          sharp(rawPath)
+            .resize(targetSize.width, targetSize.height, { fit: 'cover', position: 'centre' })
+            .jpeg({ quality: 95 })
+            .toFile(finalPath)
+            .then(() => {
+              log.info(`Foto meretezve: ${fileName} → ${targetSize.width}x${targetSize.height}`);
+              resolve(finalPath);
+            })
+            .catch((err: Error) => {
+              log.warn(`Sharp meretezes sikertelen (${fileName}), eredeti kep hasznalata:`, err.message);
+              resolve(rawPath); // fallback: eredeti kep
+            });
         });
       }).on('error', (err) => {
-        fs.unlink(localPath, () => {});
+        fs.unlink(rawPath, () => {});
         reject(err);
       });
     });
@@ -550,7 +579,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
           const layerName = sanitizeNameForLayer(p.name, p.id);
           const ext = p.photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
           const fileName = `${layerName}.${ext}`;
-          return await downloadPhoto(p.photoUrl, fileName);
+          return await downloadPhoto(p.photoUrl, fileName, { width: widthPx, height: heightPx });
         } catch (err) {
           log.warn(`Foto letoltes sikertelen (${p.name}):`, err);
           return null;

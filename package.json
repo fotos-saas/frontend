@@ -19,7 +19,8 @@
     "e2e:headed": "playwright test --headed",
     "e2e:debug": "playwright test --debug",
     "electron:compile": "tsc -p electron/tsconfig.json",
-    "electron:dev": "npm run electron:compile && concurrently \"npm run start\" \"wait-on http://localhost:4205 && NODE_ENV=development electron .\"",
+    "electron:compile:watch": "tsc -p electron/tsconfig.json --watch",
+    "electron:dev": "npm run electron:compile && concurrently \"npm run start\" \"npm run electron:compile:watch\" \"wait-on http://localhost:4205 && NODE_ENV=development electron .\"",
     "electron:build": "npm run build && npm run electron:compile && electron-builder --mac && npm run sentry:sourcemaps",
     "electron:build:win": "npm run build && npm run electron:compile && electron-builder --win && npm run sentry:sourcemaps",
     "electron:build:linux": "npm run build && npm run electron:compile && electron-builder --linux && npm run sentry:sourcemaps",
@@ -79,6 +80,7 @@
     "pusher-js": "^8.4.0",
     "quill": "^2.0.3",
     "rxjs": "~7.8.0",
+    "sharp": "^0.34.5",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.1"
   },
@@ -92,6 +94,7 @@
     "@testing-library/angular": "^19.0.0",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/user-event": "^14.5.0",
+    "@types/sharp": "^0.31.1",
     "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.1.0",
@@ -128,7 +131,10 @@
       {
         "from": "electron/scripts/photoshop",
         "to": "scripts/photoshop",
-        "filter": ["**/*", "!**/.gitkeep"]
+        "filter": [
+          "**/*",
+          "!**/.gitkeep"
+        ]
       }
     ],
     "mac": {

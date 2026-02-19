@@ -1,65 +1,125 @@
 <div class="tablo-designer page-card page-card--narrow">
   <h1 class="page-title">
     <lucide-icon [name]="ICONS.LAYERS" [size]="24" />
-    Tablokeszito
+    Tablókészítő
   </h1>
-  <p class="page-subtitle">Photoshop integracio a tablokep-kesziteshez.</p>
+  <p class="page-subtitle">Photoshop integráció a tablókép-készítéshez.</p>
 
-  <!-- Photoshop statusz kartya -->
-  <div class="ps-card" [class.ps-card--configured]="isConfigured()" [class.ps-card--unconfigured]="!isConfigured()">
-    <div class="ps-card__header">
-      <div class="ps-card__status-icon">
-        @if (checking()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
-        } @else if (isConfigured()) {
-          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
-        } @else {
-          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
+  <!-- Tab navigáció -->
+  <nav class="tab-nav" role="tablist">
+    <button
+      class="tab-nav__item"
+      [class.tab-nav__item--active]="activeTab() === 'test'"
+      (click)="activeTab.set('test')"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'test'"
+    >
+      <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+      Teszt
+    </button>
+    <button
+      class="tab-nav__item"
+      [class.tab-nav__item--active]="activeTab() === 'settings'"
+      (click)="activeTab.set('settings')"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'settings'"
+    >
+      <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
+      Beállítások
+    </button>
+  </nav>
+
+  <!-- ============ Teszt tab ============ -->
+  @if (activeTab() === 'test') {
+    <div class="tab-content" role="tabpanel">
+      <div class="ps-card" [class.ps-card--configured]="isConfigured()" [class.ps-card--unconfigured]="!isConfigured()">
+        <div class="ps-card__header">
+          <div class="ps-card__status-icon">
+            @if (checking()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+            } @else if (isConfigured()) {
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
+            } @else {
+              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
+            }
+          </div>
+          <div class="ps-card__title">
+            @if (checking()) {
+              Photoshop keresése...
+            } @else if (isConfigured()) {
+              Photoshop konfigurálva
+            } @else {
+              Photoshop nincs beállítva
+            }
+          </div>
+        </div>
+
+        @if (psPath()) {
+          <div class="ps-card__path">
+            <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+            <span>{{ psPath() }}</span>
+          </div>
         }
-      </div>
-      <div class="ps-card__title">
-        @if (checking()) {
-          Photoshop keresese...
-        } @else if (isConfigured()) {
-          Photoshop konfigurálva
-        } @else {
-          Photoshop nincs beallitva
-        }
-      </div>
-    </div>
 
-    @if (psPath()) {
-      <div class="ps-card__path">
-        <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
-        <span>{{ psPath() }}</span>
-      </div>
-    }
-
-    <div class="ps-card__actions">
-      <button class="btn btn--outline" (click)="selectPsPath()">
-        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
-        Tallozas
-      </button>
-
-      @if (isConfigured()) {
-        <button
-          class="btn btn--primary"
-          [disabled]="launching()"
-          (click)="launchPs()"
-        >
-          @if (launching()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-            Inditas...
+        <div class="ps-card__actions">
+          @if (isConfigured()) {
+            <button
+              class="btn btn--primary"
+              [disabled]="launching()"
+              (click)="launchPs()"
+            >
+              @if (launching()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                Indítás...
+              } @else {
+                <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+                Photoshop indítása
+              }
+            </button>
           } @else {
-            <lucide-icon [name]="ICONS.PLAY" [size]="16" />
-            Photoshop megnyitasa
+            <p class="ps-card__hint">
+              A Photoshop indításához először állítsd be az elérési utat a
+              <button class="link-btn" (click)="activeTab.set('settings')">Beállítások</button>
+              fülön.
+            </p>
           }
-        </button>
-      }
+        </div>
+      </div>
     </div>
-  </div>
+  }
 
-  <!-- Uzenetek -->
+  <!-- ============ Beállítások tab ============ -->
+  @if (activeTab() === 'settings') {
+    <div class="tab-content" role="tabpanel">
+      <div class="settings-section">
+        <h3 class="settings-section__title">
+          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
+          Photoshop elérési út
+        </h3>
+        <p class="settings-section__desc">
+          Add meg a Photoshop alkalmazás elérési útját a számítógépeden.
+        </p>
+
+        <div class="settings-path-row">
+          @if (psPath()) {
+            <div class="settings-path-row__current">
+              <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+              <span>{{ psPath() }}</span>
+            </div>
+          } @else {
+            <div class="settings-path-row__empty">Nincs beállítva</div>
+          }
+
+          <button class="btn btn--outline" (click)="selectPsPath()">
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+            Tallózás
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Üzenetek -->
   @if (error()) {
     <div class="message message--error">
       <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" />

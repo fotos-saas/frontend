@@ -3,6 +3,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PhotoshopService } from '../../services/photoshop.service';
 
+type TabloTab = 'test' | 'settings';
+
 @Component({
   selector: 'app-tablo-designer',
   standalone: true,
@@ -15,12 +17,15 @@ export class TabloDesignerComponent implements OnInit {
   private readonly ps = inject(PhotoshopService);
   protected readonly ICONS = ICONS;
 
+  /** Aktív tab */
+  readonly activeTab = signal<TabloTab>('test');
+
   /** PhotoshopService signal-ek */
   readonly psPath = this.ps.path;
   readonly isConfigured = this.ps.isConfigured;
   readonly checking = this.ps.checking;
 
-  /** Lokalis allapot */
+  /** Lokális állapot */
   readonly launching = signal(false);
   readonly error = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
@@ -38,9 +43,9 @@ export class TabloDesignerComponent implements OnInit {
 
     const ok = await this.ps.setPath(path);
     if (ok) {
-      this.successMessage.set('Photoshop sikeresen beallitva!');
+      this.successMessage.set('Photoshop sikeresen beállítva!');
     } else {
-      this.error.set('A kivalasztott fajl nem egy ervenyes Photoshop alkalmazas.');
+      this.error.set('A kiválasztott fájl nem egy érvényes Photoshop alkalmazás.');
     }
   }
 
@@ -52,9 +57,9 @@ export class TabloDesignerComponent implements OnInit {
     try {
       const result = await this.ps.launchPhotoshop();
       if (result.success) {
-        this.successMessage.set('Photoshop elinditva!');
+        this.successMessage.set('Photoshop elindítva!');
       } else {
-        this.error.set(result.error || 'Nem sikerult elinditani a Photoshop-ot.');
+        this.error.set(result.error || 'Nem sikerült elindítani a Photoshop-ot.');
       }
     } finally {
       this.launching.set(false);

@@ -16,7 +16,56 @@
   margin: 0 0 24px;
 }
 
-// Photoshop statusz kartya
+// Tab navigáció
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border-color, #e5e7eb);
+  margin-bottom: 24px;
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary, #6b7280);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 6px 6px 0 0;
+
+    &:hover {
+      color: var(--text-primary, #374151);
+      background: var(--hover-bg, #f9fafb);
+    }
+
+    &--active {
+      color: var(--primary-color, #7c3aed);
+      border-bottom-color: var(--primary-color, #7c3aed);
+
+      &:hover {
+        color: var(--primary-color, #7c3aed);
+      }
+    }
+  }
+}
+
+// Tab tartalom
+.tab-content {
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Photoshop státusz kártya
 .ps-card {
   border-radius: 12px;
   padding: 20px;
@@ -70,6 +119,81 @@
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    align-items: center;
+  }
+
+  &__hint {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 0;
+  }
+}
+
+// Link gomb (Beállítások hivatkozás)
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color, #7c3aed);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: var(--primary-hover, #6d28d9);
+  }
+}
+
+// Beállítások szekció
+.settings-section {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 12px;
+  padding: 20px;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  &__desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 0 0 16px;
+  }
+}
+
+.settings-path-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  &__current {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary, #6b7280);
+    background: var(--hover-bg, #f3f4f6);
+    padding: 8px 12px;
+    border-radius: 8px;
+    word-break: break-all;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__empty {
+    font-size: 0.875rem;
+    color: var(--text-tertiary, #9ca3af);
+    font-style: italic;
+    flex: 1;
   }
 }
 
@@ -112,7 +236,7 @@
   }
 }
 
-// Uzenetek
+// Üzenetek
 .message {
   display: flex;
   align-items: center;
@@ -135,7 +259,7 @@
   }
 }
 
-// Spinner animacio
+// Spinner animáció
 .spin {
   animation: spin 1s linear infinite;
 }
@@ -148,5 +272,9 @@
 @media (prefers-reduced-motion: reduce) {
   .spin {
     animation-duration: 0.01ms !important;
+  }
+
+  .tab-content {
+    animation: none;
   }
 }

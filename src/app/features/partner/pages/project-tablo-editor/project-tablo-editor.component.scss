@@ -95,6 +95,10 @@
 }
 
 // Parancs kártya
+.command-card + .command-card {
+  margin-top: 16px;
+}
+
 .command-card {
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--border-color, #e5e7eb);

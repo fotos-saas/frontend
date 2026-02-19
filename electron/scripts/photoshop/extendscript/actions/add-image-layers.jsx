@@ -57,51 +57,53 @@ function log(msg) {
     log("[JSX] Image layerek szama: " + data.layers.length + " (diak: " + data.stats.students + ", tanar: " + data.stats.teachers + ", fotoval: " + withPhotoCount + ")");
     log("[JSX] Kepmeret: " + data.imageSizeCm.widthCm + " x " + data.imageSizeCm.heightCm + " cm @ " + data.imageSizeCm.dpi + " DPI");
 
-    // --- 3. Smart Object layerek letrehozasa + foto behelyezes ---
-    for (var i = 0; i < data.layers.length; i++) {
-      var item = data.layers[i];
+    // --- 3. Smart Object layerek letrehozasa + foto behelyezes — egyetlen history lepes ---
+    doc.suspendHistory("Kep layerek hozzaadasa", function () {
+      for (var i = 0; i < data.layers.length; i++) {
+        var item = data.layers[i];
 
-      try {
-        // Cel csoport keresese: Images/{group}
-        var targetGroup = getGroupByPath(doc, ["Images", item.group]);
-        if (!targetGroup) {
-          log("[JSX] HIBA: Images/" + item.group + " csoport nem talalhato!");
-          errors++;
-          continue;
-        }
-
-        // Smart Object placeholder letrehozasa
-        createSmartObjectPlaceholder(doc, targetGroup, {
-          name: item.layerName,
-          widthPx: item.widthPx,
-          heightPx: item.heightPx
-        });
-        created++;
-
-        // Foto behelyezese ha van photoPath
-        // Flow: SO megnyitas → kep Place → cover meretezes → mentes → bezaras
-        if (item.photoPath) {
-          try {
-            placePhotoInSmartObject(doc, doc.activeLayer, item.photoPath);
-            photosPlaced++;
-            // Az SO bezarasa utan visszaterunk a cel dokumentumra (nev alapjan)
-            doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-          } catch (photoErr) {
-            log("[JSX] FIGYELEM: foto behelyezes sikertelen (" + item.layerName + "): " + photoErr.message);
-            // Ha az SO megnyitva maradt, probaljuk bezarni
-            try {
-              if (app.documents.length > 1) {
-                app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
-              }
-            } catch (closeErr) { /* ignore */ }
-            doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+        try {
+          // Cel csoport keresese: Images/{group}
+          var targetGroup = getGroupByPath(doc, ["Images", item.group]);
+          if (!targetGroup) {
+            log("[JSX] HIBA: Images/" + item.group + " csoport nem talalhato!");
+            errors++;
+            continue;
           }
+
+          // Smart Object placeholder letrehozasa
+          createSmartObjectPlaceholder(doc, targetGroup, {
+            name: item.layerName,
+            widthPx: item.widthPx,
+            heightPx: item.heightPx
+          });
+          created++;
+
+          // Foto behelyezese ha van photoPath
+          // Flow: SO megnyitas → kep Place → cover meretezes → mentes → bezaras
+          if (item.photoPath) {
+            try {
+              placePhotoInSmartObject(doc, doc.activeLayer, item.photoPath);
+              photosPlaced++;
+              // Az SO bezarasa utan visszaterunk a cel dokumentumra (nev alapjan)
+              doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+            } catch (photoErr) {
+              log("[JSX] FIGYELEM: foto behelyezes sikertelen (" + item.layerName + "): " + photoErr.message);
+              // Ha az SO megnyitva maradt, probaljuk bezarni
+              try {
+                if (app.documents.length > 1) {
+                  app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+                }
+              } catch (closeErr) { /* ignore */ }
+              doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+            }
+          }
+        } catch (e) {
+          log("[JSX] HIBA image layer (" + item.layerName + "): " + e.message);
+          errors++;
         }
-      } catch (e) {
-        log("[JSX] HIBA image layer (" + item.layerName + "): " + e.message);
-        errors++;
       }
-    }
+    });
 
     // --- 4. Eredmeny ---
     log("[JSX] KESZ: " + created + " image layer letrehozva, " + photosPlaced + " foto behelyezve, " + errors + " hiba");

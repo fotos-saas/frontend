@@ -53,32 +53,32 @@ function log(msg) {
 
     log("[JSX] Layerek szama: " + data.layers.length + " (diak: " + data.stats.students + ", tanar: " + data.stats.teachers + ")");
 
-    // --- 3. Layerek letrehozasa (a JSON-ban mar kesz adat van) ---
-    for (var i = 0; i < data.layers.length; i++) {
-      var item = data.layers[i];
+    // --- 3. Layerek letrehozasa — egyetlen history lepes ---
+    doc.suspendHistory("Nev layerek hozzaadasa", function () {
+      for (var i = 0; i < data.layers.length; i++) {
+        var item = data.layers[i];
 
-      try {
-        // Cel csoport keresese: Names/{group}
-        var targetGroup = getGroupByPath(doc, ["Names", item.group]);
-        if (!targetGroup) {
-          log("[JSX] HIBA: Names/" + item.group + " csoport nem talalhato!");
+        try {
+          var targetGroup = getGroupByPath(doc, ["Names", item.group]);
+          if (!targetGroup) {
+            log("[JSX] HIBA: Names/" + item.group + " csoport nem talalhato!");
+            errors++;
+            continue;
+          }
+
+          createTextLayer(targetGroup, item.displayText, {
+            name: item.layerName,
+            font: CONFIG.FONT_NAME,
+            size: CONFIG.FONT_SIZE,
+            color: CONFIG.TEXT_COLOR
+          });
+          created++;
+        } catch (e) {
+          log("[JSX] HIBA layer (" + item.displayText + "): " + e.message);
           errors++;
-          continue;
         }
-
-        // Text layer letrehozasa a kész adatokkal
-        createTextLayer(targetGroup, item.displayText, {
-          name: item.layerName,
-          font: CONFIG.FONT_NAME,
-          size: CONFIG.FONT_SIZE,
-          color: CONFIG.TEXT_COLOR
-        });
-        created++;
-      } catch (e) {
-        log("[JSX] HIBA layer (" + item.displayText + "): " + e.message);
-        errors++;
       }
-    }
+    });
 
     // --- 4. Eredmeny ---
     log("[JSX] KESZ: " + created + " layer letrehozva, " + errors + " hiba");

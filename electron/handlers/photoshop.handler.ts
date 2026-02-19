@@ -452,15 +452,19 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     // #include direktívák feloldása
     scriptContent = resolveIncludes(scriptContent, scriptDir);
 
-    // CONFIG.DATA_FILE_PATH beállítása a script elejére (ha van adat fájl)
+    // CONFIG.DATA_FILE_PATH beállítása (ha van adat fájl)
+    // A CONFIG objektum UTÁN, de a többi kód ELŐTT szúrjuk be
     if (dataFilePath) {
       const escapedPath = dataFilePath.replace(/\\/g, '/');
-      const configOverride = `CONFIG.DATA_FILE_PATH = "${escapedPath}";\n`;
-      // Keresuk a CONFIG definiciot es utana szurjuk be
-      const configEndIdx = scriptContent.indexOf('};');
-      if (configEndIdx > -1) {
-        // A CONFIG definicio utan szurjuk be
-        scriptContent = scriptContent.slice(0, configEndIdx + 2) + '\n' + configOverride + scriptContent.slice(configEndIdx + 2);
+      const configOverride = `\nCONFIG.DATA_FILE_PATH = "${escapedPath}";\n`;
+      // Keressük a "var CONFIG = {" blokkot és annak záró "};" -ját
+      const configStart = scriptContent.indexOf('var CONFIG');
+      if (configStart > -1) {
+        // A CONFIG blokk végét keressük a CONFIG kezdete UTÁN
+        const configEnd = scriptContent.indexOf('};', configStart);
+        if (configEnd > -1) {
+          scriptContent = scriptContent.slice(0, configEnd + 2) + configOverride + scriptContent.slice(configEnd + 2);
+        }
       }
     }
 

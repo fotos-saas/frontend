@@ -44,7 +44,26 @@ function log(msg) {
     }
 
     log("[JSX] JSON fajl: " + args.dataFilePath);
+
+    // Elobb a nyers fajl tartalmat olvassuk ki debug celbol
+    var debugFile = new File(args.dataFilePath);
+    debugFile.encoding = "UTF-8";
+    debugFile.open("r");
+    var rawContent = debugFile.read();
+    debugFile.close();
+    log("[JSX] JSON fajl meret: " + rawContent.length + " karakter");
+    log("[JSX] JSON eleje: " + rawContent.substring(0, 120));
+
     var data = readJsonFile(args.dataFilePath);
+
+    // Debug: nezzuk mit kaptunk
+    log("[JSX] data type: " + typeof data);
+    if (data) {
+      log("[JSX] data.layers type: " + typeof data.layers);
+      if (data.layers) {
+        log("[JSX] data.layers.length: " + data.layers.length);
+      }
+    }
 
     if (!data || !data.layers || data.layers.length === 0) {
       log("[JSX] Nincs layer adat — kilep.");

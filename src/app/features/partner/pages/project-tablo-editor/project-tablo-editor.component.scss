@@ -269,6 +269,53 @@
   letter-spacing: 0.03em;
 }
 
+.settings-hint {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #9ca3af);
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+
+// Igazítás toggle gombok
+.align-toggle {
+  display: flex;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  overflow: hidden;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--card-bg, #ffffff);
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary, #6b7280);
+    transition: all 0.15s ease;
+
+    & + & {
+      border-left: 1px solid var(--border-color, #d1d5db);
+    }
+
+    &:hover {
+      background: var(--hover-bg, #f9fafb);
+      color: var(--text-primary, #374151);
+    }
+
+    &--active {
+      background: var(--primary-color, #7c3aed);
+      color: white;
+
+      &:hover {
+        background: var(--primary-hover, #6d28d9);
+        color: white;
+      }
+    }
+  }
+}
+
 // Méretválasztó rács
 .size-grid {
   display: flex;

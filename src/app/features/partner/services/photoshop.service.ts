@@ -38,6 +38,18 @@ export class PhotoshopService {
   /** Függőleges gap — sorok közötti távolság (cm) */
   readonly gapVCm = signal<number>(3);
 
+  /** Név távolsága a kép aljától (cm) */
+  readonly nameGapCm = signal<number>(0.5);
+
+  /** Tördelés: hány valódi szó után sortörés (3+ szavas neveknél) */
+  readonly nameBreakAfter = signal<number>(1);
+
+  /** Nevek text igazítás (left/center/right) */
+  readonly textAlign = signal<string>('center');
+
+  /** Képek sor-igazítás a gridben (left/center/right) */
+  readonly gridAlign = signal<string>('center');
+
   /** Konfiguralt-e (van mentett path) */
   readonly isConfigured = computed(() => !!this.path());
 
@@ -57,7 +69,7 @@ export class PhotoshopService {
       const safe = <T>(fn: (() => Promise<T>) | undefined, fallback: T): Promise<T> =>
         typeof fn === 'function' ? fn().catch(() => fallback) : Promise.resolve(fallback);
 
-      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize, savedGapH, savedGapV] = await Promise.all([
+      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize, savedGapH, savedGapV, savedNameGap, savedNameBreak, savedTextAlign, savedGridAlign] = await Promise.all([
         this.api.checkInstalled(),
         safe(this.api.getWorkDir, null as string | null),
         safe(this.api.getMargin, undefined as number | undefined),
@@ -65,6 +77,10 @@ export class PhotoshopService {
         safe(this.api.getTeacherSize, undefined as number | undefined),
         safe(this.api.getGapH, undefined as number | undefined),
         safe(this.api.getGapV, undefined as number | undefined),
+        safe(this.api.getNameGap, undefined as number | undefined),
+        safe(this.api.getNameBreakAfter, undefined as number | undefined),
+        safe(this.api.getTextAlign, undefined as string | undefined),
+        safe(this.api.getGridAlign, undefined as string | undefined),
       ]);
       if (result.found && result.path) {
         this.path.set(result.path);
@@ -86,6 +102,18 @@ export class PhotoshopService {
       }
       if (savedGapV !== undefined) {
         this.gapVCm.set(savedGapV);
+      }
+      if (savedNameGap !== undefined) {
+        this.nameGapCm.set(savedNameGap);
+      }
+      if (savedNameBreak !== undefined) {
+        this.nameBreakAfter.set(savedNameBreak);
+      }
+      if (savedTextAlign !== undefined) {
+        this.textAlign.set(savedTextAlign);
+      }
+      if (savedGridAlign !== undefined) {
+        this.gridAlign.set(savedGridAlign);
       }
     } catch (err) {
       this.logger.error('Photoshop detektalasi hiba', err);
@@ -368,6 +396,62 @@ export class PhotoshopService {
     }
   }
 
+  /** Név gap beállítása (távolság kép aljától cm-ben) */
+  async setNameGap(gapCm: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setNameGap !== 'function') return false;
+    try {
+      const result = await this.api.setNameGap(Number(gapCm));
+      if (result.success) { this.nameGapCm.set(gapCm); return true; }
+      this.logger.warn('Név gap beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Név gap beállítási hiba', err);
+      return false;
+    }
+  }
+
+  /** Név tördelés beállítása */
+  async setNameBreakAfter(breakAfter: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setNameBreakAfter !== 'function') return false;
+    try {
+      const result = await this.api.setNameBreakAfter(Number(breakAfter));
+      if (result.success) { this.nameBreakAfter.set(breakAfter); return true; }
+      this.logger.warn('Név tördelés beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Név tördelés beállítási hiba', err);
+      return false;
+    }
+  }
+
+  /** Text igazítás beállítása */
+  async setTextAlign(align: string): Promise<boolean> {
+    if (!this.api || typeof this.api.setTextAlign !== 'function') return false;
+    try {
+      const result = await this.api.setTextAlign(align);
+      if (result.success) { this.textAlign.set(align); return true; }
+      this.logger.warn('Text igazítás beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Text igazítás beállítási hiba', err);
+      return false;
+    }
+  }
+
+  /** Grid igazítás beállítása */
+  async setGridAlign(align: string): Promise<boolean> {
+    if (!this.api || typeof this.api.setGridAlign !== 'function') return false;
+    try {
+      const result = await this.api.setGridAlign(align);
+      if (result.success) { this.gridAlign.set(align); return true; }
+      this.logger.warn('Grid igazítás beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Grid igazítás beállítási hiba', err);
+      return false;
+    }
+  }
+
   /**
    * Grid elrendezés: layerek rácsba pozícionálása a megadott paraméterek alapján.
    * boardSize: a tabló méretei cm-ben (widthCm, heightCm)
@@ -389,6 +473,7 @@ export class PhotoshopService {
           teacherSizeCm: this.teacherSizeCm(),
           gapHCm: this.gapHCm(),
           gapVCm: this.gapVCm(),
+          gridAlign: this.gridAlign(),
         },
         targetDocName,
       });
@@ -397,6 +482,32 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('JSX arrangeGrid hiba', err);
       return { success: false, error: 'Váratlan hiba a grid elrendezésnél' };
+    }
+  }
+
+  /**
+   * Nevek rendezése: név layerek pozícionálása a képek alá.
+   * A nameGapCm és textAlign beállítások alapján.
+   */
+  async arrangeNames(
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      const result = await this.api.runJsx({
+        scriptName: 'actions/arrange-names.jsx',
+        jsonData: {
+          nameGapCm: this.nameGapCm(),
+          textAlign: this.textAlign(),
+        },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX arrangeNames hiba', err);
+      return { success: false, error: 'Váratlan hiba a nevek rendezésénél' };
     }
   }
 

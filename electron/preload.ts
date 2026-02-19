@@ -301,6 +301,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:get-gap-v') as Promise<number>,
     setGapV: (gapCm: number) =>
       ipcRenderer.invoke('photoshop:set-gap-v', gapCm) as Promise<{ success: boolean; error?: string }>,
+    getNameGap: () =>
+      ipcRenderer.invoke('photoshop:get-name-gap') as Promise<number>,
+    setNameGap: (gapCm: number) =>
+      ipcRenderer.invoke('photoshop:set-name-gap', gapCm) as Promise<{ success: boolean; error?: string }>,
+    getNameBreakAfter: () =>
+      ipcRenderer.invoke('photoshop:get-name-break-after') as Promise<number>,
+    setNameBreakAfter: (breakAfter: number) =>
+      ipcRenderer.invoke('photoshop:set-name-break-after', breakAfter) as Promise<{ success: boolean; error?: string }>,
+    getTextAlign: () =>
+      ipcRenderer.invoke('photoshop:get-text-align') as Promise<string>,
+    setTextAlign: (align: string) =>
+      ipcRenderer.invoke('photoshop:set-text-align', align) as Promise<{ success: boolean; error?: string }>,
+    getGridAlign: () =>
+      ipcRenderer.invoke('photoshop:get-grid-align') as Promise<string>,
+    setGridAlign: (align: string) =>
+      ipcRenderer.invoke('photoshop:set-grid-align', align) as Promise<{ success: boolean; error?: string }>,
     runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) =>
       ipcRenderer.invoke('photoshop:run-jsx', params) as Promise<{ success: boolean; error?: string; output?: string }>,
     runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) =>

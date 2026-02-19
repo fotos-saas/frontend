@@ -44,7 +44,8 @@ function _doAddNameLayers() {
         name: item.layerName,
         font: CONFIG.FONT_NAME,
         size: CONFIG.FONT_SIZE,
-        color: CONFIG.TEXT_COLOR
+        color: CONFIG.TEXT_COLOR,
+        alignment: _data.textAlign || "center"
       });
       _created++;
     } catch (e) {

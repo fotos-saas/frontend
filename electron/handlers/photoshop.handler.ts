@@ -16,6 +16,10 @@ interface PhotoshopSchema {
   tabloTeacherSizeCm: number;
   tabloGapHCm: number;
   tabloGapVCm: number;
+  tabloNameGapCm: number;
+  tabloNameBreakAfter: number;
+  tabloTextAlign: string;
+  tabloGridAlign: string;
 }
 
 const psStore = new Store<PhotoshopSchema>({
@@ -28,6 +32,10 @@ const psStore = new Store<PhotoshopSchema>({
     tabloTeacherSizeCm: 6,
     tabloGapHCm: 2,
     tabloGapVCm: 3,
+    tabloNameGapCm: 0.5,
+    tabloNameBreakAfter: 1,
+    tabloTextAlign: 'center',
+    tabloGridAlign: 'center',
   },
 });
 
@@ -465,6 +473,86 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Get name gap (tav a kep aljabol)
+  ipcMain.handle('photoshop:get-name-gap', () => {
+    return psStore.get('tabloNameGapCm', 0.5);
+  });
+
+  // Set name gap
+  ipcMain.handle('photoshop:set-name-gap', (_event, gapCm: number) => {
+    try {
+      if (typeof gapCm !== 'number' || gapCm < 0 || gapCm > 5) {
+        return { success: false, error: 'Ervenytelen nev gap ertek (0-5 cm)' };
+      }
+      psStore.set('tabloNameGapCm', gapCm);
+      log.info(`Tablo nev gap beallitva: ${gapCm} cm`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo nev gap beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a gap erteket' };
+    }
+  });
+
+  // Get name break after (hany szo utan tordeljon)
+  ipcMain.handle('photoshop:get-name-break-after', () => {
+    return psStore.get('tabloNameBreakAfter', 1);
+  });
+
+  // Set name break after
+  ipcMain.handle('photoshop:set-name-break-after', (_event, breakAfter: number) => {
+    try {
+      if (typeof breakAfter !== 'number' || breakAfter < 0 || breakAfter > 5) {
+        return { success: false, error: 'Ervenytelen tordeles ertek (0-5)' };
+      }
+      psStore.set('tabloNameBreakAfter', breakAfter);
+      log.info(`Tablo nev tordeles beallitva: ${breakAfter} szo utan`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo nev tordeles beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a tordeles erteket' };
+    }
+  });
+
+  // Get text align (nevek igazitasa)
+  ipcMain.handle('photoshop:get-text-align', () => {
+    return psStore.get('tabloTextAlign', 'center');
+  });
+
+  // Set text align
+  ipcMain.handle('photoshop:set-text-align', (_event, align: string) => {
+    try {
+      if (!['left', 'center', 'right'].includes(align)) {
+        return { success: false, error: 'Ervenytelen igazitas (left/center/right)' };
+      }
+      psStore.set('tabloTextAlign', align);
+      log.info(`Tablo text igazitas beallitva: ${align}`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo text igazitas beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni az igazitas erteket' };
+    }
+  });
+
+  // Get grid align (kepek igazitasa a sorban)
+  ipcMain.handle('photoshop:get-grid-align', () => {
+    return psStore.get('tabloGridAlign', 'center');
+  });
+
+  // Set grid align
+  ipcMain.handle('photoshop:set-grid-align', (_event, align: string) => {
+    try {
+      if (!['left', 'center', 'right'].includes(align)) {
+        return { success: false, error: 'Ervenytelen grid igazitas (left/center/right)' };
+      }
+      psStore.set('tabloGridAlign', align);
+      log.info(`Tablo grid igazitas beallitva: ${align}`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo grid igazitas beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni az igazitas erteket' };
+    }
+  });
+
   // ============ JSX ExtendScript futtatás ============
 
   // JSX scriptek kihelyezese a workDir/scripts/ mappaba
@@ -533,27 +621,48 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     return result;
   }
 
+  // Nev tordelese: 3+ valos szavas neveknel N szo utan sortores
+  // Rovid prefixek (dr., id., ifj. stb. — max 2 betu pont nelkul) nem szamitanak szokent
+  // Photoshop \r-t hasznal sortoresnek (nem \n!)
+  function breakName(name: string, breakAfter: number): string {
+    if (breakAfter <= 0) return name;
+    const words = name.split(' ');
+    let realWordCount = 0;
+    let breakIndex = -1;
+    for (let i = 0; i < words.length; i++) {
+      if (words[i].replace('.', '').length > 2) realWordCount++;
+      if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
+    }
+    // Csak 3+ valodi szavas nevek tordelodnek
+    const totalReal = words.filter(w => w.replace('.', '').length > 2).length;
+    if (totalReal <= 2 || breakIndex === -1) return name;
+    return words.slice(0, breakIndex).join(' ') + '\r' + words.slice(breakIndex).join(' ');
+  }
+
   // PersonsData előkészítése a JSX számára
   // Python logika: számolás, szétválogatás, elnevezések — JSX csak végrehajtó
   function preparePersonsForJsx(personsData: Array<{ id: number; name: string; type: string }>) {
+    const breakAfter = psStore.get('tabloNameBreakAfter', 1);
+    const textAlign = psStore.get('tabloTextAlign', 'center');
     const students = personsData.filter(p => p.type !== 'teacher');
     const teachers = personsData.filter(p => p.type === 'teacher');
 
     const layers = [
       ...students.map(p => ({
         layerName: sanitizeNameForLayer(p.name, p.id),
-        displayText: p.name,
+        displayText: breakName(p.name, breakAfter),
         group: 'Students',
       })),
       ...teachers.map(p => ({
         layerName: sanitizeNameForLayer(p.name, p.id),
-        displayText: p.name,
+        displayText: breakName(p.name, breakAfter),
         group: 'Teachers',
       })),
     ];
 
     return {
       layers,
+      textAlign,
       stats: { students: students.length, teachers: teachers.length, total: personsData.length },
     };
   }

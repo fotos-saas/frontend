@@ -166,6 +166,10 @@ import {
   Code,
   // Tablókészítő
   Layers,
+  // Igazítás
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -328,4 +332,8 @@ export const LUCIDE_ICONS_MAP = {
   Code,
   // Tablókészítő
   Layers,
+  // Igazítás
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 };

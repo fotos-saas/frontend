@@ -110,6 +110,14 @@ interface PhotoshopAPI {
   setGapH: (gapCm: number) => Promise<{ success: boolean; error?: string }>;
   getGapV: () => Promise<number>;
   setGapV: (gapCm: number) => Promise<{ success: boolean; error?: string }>;
+  getNameGap: () => Promise<number>;
+  setNameGap: (gapCm: number) => Promise<{ success: boolean; error?: string }>;
+  getNameBreakAfter: () => Promise<number>;
+  setNameBreakAfter: (breakAfter: number) => Promise<{ success: boolean; error?: string }>;
+  getTextAlign: () => Promise<string>;
+  setTextAlign: (align: string) => Promise<{ success: boolean; error?: string }>;
+  getGridAlign: () => Promise<string>;
+  setGridAlign: (align: string) => Promise<{ success: boolean; error?: string }>;
   runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; output?: string }>;
   runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string }>;
   onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;

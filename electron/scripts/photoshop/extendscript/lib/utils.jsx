@@ -81,6 +81,14 @@ function createTextLayer(container, displayText, options) {
   solidColor.rgb.blue = col.b;
   textItem.color = solidColor;
 
+  // Igazitas (left/center/right)
+  if (options.alignment) {
+    var alignMap = { left: Justification.LEFT, center: Justification.CENTER, right: Justification.RIGHT };
+    if (alignMap[options.alignment]) {
+      textItem.justification = alignMap[options.alignment];
+    }
+  }
+
   // Atrakás a cél csoportba
   textLayer.move(container, ElementPlacement.INSIDE);
 

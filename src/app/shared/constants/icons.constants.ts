@@ -351,6 +351,11 @@ export const ICONS = {
 
   // Tablókészítő
   LAYERS: 'layers',
+
+  // Igazítás
+  ALIGN_LEFT: 'align-left',
+  ALIGN_CENTER: 'align-center',
+  ALIGN_RIGHT: 'align-right',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

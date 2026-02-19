@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ProjectDetailHeaderComponent } from '@shared/components/project-detail/project-detail-header/project-detail-header.component';
 import { ProjectDetailData } from '@shared/components/project-detail/project-detail.types';
@@ -17,7 +18,7 @@ type EditorTab = 'commands' | 'settings' | 'debug';
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
-  imports: [LucideAngularModule, ProjectDetailHeaderComponent],
+  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule],
   providers: [TabloEditorDebugService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
@@ -82,6 +83,10 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly teacherSizeCm = this.ps.teacherSizeCm;
   readonly gapHCm = this.ps.gapHCm;
   readonly gapVCm = this.ps.gapVCm;
+  readonly nameGapCm = this.ps.nameGapCm;
+  readonly nameBreakAfter = this.ps.nameBreakAfter;
+  readonly textAlign = this.ps.textAlign;
+  readonly gridAlign = this.ps.gridAlign;
 
   /** PSD generálás */
   readonly tabloSizes = signal<TabloSize[]>([]);
@@ -89,6 +94,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly loadingSizes = signal(false);
   readonly generating = signal(false);
   readonly arranging = signal(false);
+  readonly arrangingNames = signal(false);
 
   /** Projekt személyei (diákok + tanárok) */
   readonly persons = signal<TabloPersonItem[]>([]);
@@ -158,30 +164,22 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.selectedSize.set(size);
   }
 
-  async setMarginValue(event: Event): Promise<void> {
+  /** Input event → szám validáció → setter hívás */
+  private async setNumericValue(event: Event, min: number, max: number, setter: (v: number) => Promise<boolean>): Promise<void> {
     const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 0 && v <= 10) await this.ps.setMargin(v);
+    if (!isNaN(v) && v >= min && v <= max) await setter(v);
   }
 
-  async setStudentSizeValue(event: Event): Promise<void> {
-    const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 1 && v <= 30) await this.ps.setStudentSize(v);
-  }
+  setMarginValue(e: Event) { this.setNumericValue(e, 0, 10, v => this.ps.setMargin(v)); }
+  setStudentSizeValue(e: Event) { this.setNumericValue(e, 1, 30, v => this.ps.setStudentSize(v)); }
+  setTeacherSizeValue(e: Event) { this.setNumericValue(e, 1, 30, v => this.ps.setTeacherSize(v)); }
+  setGapHValue(e: Event) { this.setNumericValue(e, 0, 10, v => this.ps.setGapH(v)); }
+  setGapVValue(e: Event) { this.setNumericValue(e, 0, 10, v => this.ps.setGapV(v)); }
+  setNameGapValue(e: Event) { this.setNumericValue(e, 0, 5, v => this.ps.setNameGap(v)); }
+  setNameBreakAfterValue(e: Event) { this.setNumericValue(e, 0, 5, v => this.ps.setNameBreakAfter(v)); }
 
-  async setTeacherSizeValue(event: Event): Promise<void> {
-    const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 1 && v <= 30) await this.ps.setTeacherSize(v);
-  }
-
-  async setGapHValue(event: Event): Promise<void> {
-    const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 0 && v <= 10) await this.ps.setGapH(v);
-  }
-
-  async setGapVValue(event: Event): Promise<void> {
-    const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 0 && v <= 10) await this.ps.setGapV(v);
-  }
+  setTextAlignValue(align: string) { this.ps.setTextAlign(align); }
+  setGridAlignValue(align: string) { this.ps.setGridAlign(align); }
 
   async selectPsPath(): Promise<void> {
     this.clearMessages();
@@ -308,6 +306,21 @@ export class ProjectTabloEditorComponent implements OnInit {
       }
     } finally {
       this.arranging.set(false);
+    }
+  }
+
+  async arrangeNames(): Promise<void> {
+    this.clearMessages();
+    this.arrangingNames.set(true);
+    try {
+      const result = await this.ps.arrangeNames();
+      if (result.success) {
+        this.successMessage.set('Nevek rendezése kész!');
+      } else {
+        this.error.set(result.error || 'Nevek rendezése sikertelen.');
+      }
+    } finally {
+      this.arrangingNames.set(false);
     }
   }
 

@@ -101,9 +101,17 @@ function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, 
       var remainingItems = layerCount - (currentRow * columns);
       var itemsInThisRow = (remainingItems >= columns) ? columns : remainingItems;
 
-      // Kozepre igazitas pixelben
+      // Igazitas pixelben (left/center/right)
       var totalRowW = itemsInThisRow * photoWPx + (itemsInThisRow - 1) * gapHPx;
-      var offsetX = marginPx + Math.round((availableW - totalRowW) / 2);
+      var gridAlign = _data.gridAlign || "center";
+      var offsetX;
+      if (gridAlign === "left") {
+        offsetX = marginPx;
+      } else if (gridAlign === "right") {
+        offsetX = marginPx + Math.round(availableW - totalRowW);
+      } else {
+        offsetX = marginPx + Math.round((availableW - totalRowW) / 2);
+      }
 
       // Celpozicio pixelben
       var leftPx = offsetX + currentCol * (photoWPx + gapHPx);

@@ -25,17 +25,43 @@ function log(msg) {
   _logLines.push(msg);
 }
 
-(function () {
-  var created = 0;
-  var errors = 0;
+// --- Globalis valtozok (suspendHistory string-eval nem lat IIFE scope-ot) ---
+var _doc, _data, _created = 0, _errors = 0;
 
+function _doAddNameLayers() {
+  for (var i = 0; i < _data.layers.length; i++) {
+    var item = _data.layers[i];
+
+    try {
+      var targetGroup = getGroupByPath(_doc, ["Names", item.group]);
+      if (!targetGroup) {
+        log("[JSX] HIBA: Names/" + item.group + " csoport nem talalhato!");
+        _errors++;
+        continue;
+      }
+
+      createTextLayer(targetGroup, item.displayText, {
+        name: item.layerName,
+        font: CONFIG.FONT_NAME,
+        size: CONFIG.FONT_SIZE,
+        color: CONFIG.TEXT_COLOR
+      });
+      _created++;
+    } catch (e) {
+      log("[JSX] HIBA layer (" + item.displayText + "): " + e.message);
+      _errors++;
+    }
+  }
+}
+
+(function () {
   try {
     // --- 1. Cel dokumentum aktivalasa (nev alapjan, ha meg van adva) ---
     if (!app.documents.length) {
       throw new Error("Nincs megnyitott dokumentum! Elobb nyisd meg a PSD-t.");
     }
-    var doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-    log("[JSX] Dokumentum: " + doc.name + " (" + doc.width + " x " + doc.height + ")");
+    _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+    log("[JSX] Dokumentum: " + _doc.name + " (" + _doc.width + " x " + _doc.height + ")");
 
     // --- 2. JSON beolvasas (elokeszitett adat az Electron handlertol) ---
     var args = parseArgs();
@@ -43,49 +69,25 @@ function log(msg) {
       throw new Error("Nincs megadva DATA_FILE_PATH!");
     }
 
-    var data = readJsonFile(args.dataFilePath);
+    _data = readJsonFile(args.dataFilePath);
 
-    if (!data || !data.layers || data.layers.length === 0) {
+    if (!_data || !_data.layers || _data.layers.length === 0) {
       log("[JSX] Nincs layer adat — kilep.");
       log("[JSX] KESZ: 0 layer, 0 hiba");
       return;
     }
 
-    log("[JSX] Layerek szama: " + data.layers.length + " (diak: " + data.stats.students + ", tanar: " + data.stats.teachers + ")");
+    log("[JSX] Layerek szama: " + _data.layers.length + " (diak: " + _data.stats.students + ", tanar: " + _data.stats.teachers + ")");
 
     // --- 3. Layerek letrehozasa — egyetlen history lepes ---
-    doc.suspendHistory("Nev layerek hozzaadasa", function () {
-      for (var i = 0; i < data.layers.length; i++) {
-        var item = data.layers[i];
-
-        try {
-          var targetGroup = getGroupByPath(doc, ["Names", item.group]);
-          if (!targetGroup) {
-            log("[JSX] HIBA: Names/" + item.group + " csoport nem talalhato!");
-            errors++;
-            continue;
-          }
-
-          createTextLayer(targetGroup, item.displayText, {
-            name: item.layerName,
-            font: CONFIG.FONT_NAME,
-            size: CONFIG.FONT_SIZE,
-            color: CONFIG.TEXT_COLOR
-          });
-          created++;
-        } catch (e) {
-          log("[JSX] HIBA layer (" + item.displayText + "): " + e.message);
-          errors++;
-        }
-      }
-    });
+    _doc.suspendHistory("Nev layerek hozzaadasa", "_doAddNameLayers()");
 
     // --- 4. Eredmeny ---
-    log("[JSX] KESZ: " + created + " layer letrehozva, " + errors + " hiba");
+    log("[JSX] KESZ: " + _created + " layer letrehozva, " + _errors + " hiba");
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);
-    log("[JSX] KESZ: " + created + " layer, " + (errors + 1) + " hiba");
+    log("[JSX] KESZ: " + _created + " layer, " + (_errors + 1) + " hiba");
   }
 })();
 

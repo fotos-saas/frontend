@@ -26,18 +26,64 @@ function log(msg) {
   _logLines.push(msg);
 }
 
-(function () {
-  var created = 0;
-  var photosPlaced = 0;
-  var errors = 0;
+// --- Globalis valtozok (suspendHistory string-eval nem lat IIFE scope-ot) ---
+var _doc, _data, _created = 0, _photosPlaced = 0, _errors = 0;
 
+function _doAddImageLayers() {
+  for (var i = 0; i < _data.layers.length; i++) {
+    var item = _data.layers[i];
+
+    try {
+      // Cel csoport keresese: Images/{group}
+      var targetGroup = getGroupByPath(_doc, ["Images", item.group]);
+      if (!targetGroup) {
+        log("[JSX] HIBA: Images/" + item.group + " csoport nem talalhato!");
+        _errors++;
+        continue;
+      }
+
+      // Smart Object placeholder letrehozasa
+      createSmartObjectPlaceholder(_doc, targetGroup, {
+        name: item.layerName,
+        widthPx: item.widthPx,
+        heightPx: item.heightPx
+      });
+      _created++;
+
+      // Foto behelyezese ha van photoPath
+      // Flow: SO megnyitas → kep Place → cover meretezes → mentes → bezaras
+      if (item.photoPath) {
+        try {
+          placePhotoInSmartObject(_doc, _doc.activeLayer, item.photoPath);
+          _photosPlaced++;
+          // Az SO bezarasa utan visszaterunk a cel dokumentumra (nev alapjan)
+          _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+        } catch (photoErr) {
+          log("[JSX] FIGYELEM: foto behelyezes sikertelen (" + item.layerName + "): " + photoErr.message);
+          // Ha az SO megnyitva maradt, probaljuk bezarni
+          try {
+            if (app.documents.length > 1) {
+              app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+            }
+          } catch (closeErr) { /* ignore */ }
+          _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+        }
+      }
+    } catch (e) {
+      log("[JSX] HIBA image layer (" + item.layerName + "): " + e.message);
+      _errors++;
+    }
+  }
+}
+
+(function () {
   try {
     // --- 1. Cel dokumentum aktivalasa (nev alapjan, ha meg van adva) ---
     if (!app.documents.length) {
       throw new Error("Nincs megnyitott dokumentum! Elobb nyisd meg a PSD-t.");
     }
-    var doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-    log("[JSX] Dokumentum: " + doc.name + " (" + doc.width + " x " + doc.height + ")");
+    _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+    log("[JSX] Dokumentum: " + _doc.name + " (" + _doc.width + " x " + _doc.height + ")");
 
     // --- 2. JSON beolvasas (elokeszitett adat az Electron handlertol) ---
     var args = parseArgs();
@@ -45,72 +91,27 @@ function log(msg) {
       throw new Error("Nincs megadva DATA_FILE_PATH!");
     }
 
-    var data = readJsonFile(args.dataFilePath);
+    _data = readJsonFile(args.dataFilePath);
 
-    if (!data || !data.layers || data.layers.length === 0) {
+    if (!_data || !_data.layers || _data.layers.length === 0) {
       log("[JSX] Nincs layer adat — kilep.");
       log("[JSX] KESZ: 0 layer, 0 foto, 0 hiba");
       return;
     }
 
-    var withPhotoCount = data.stats.withPhoto || 0;
-    log("[JSX] Image layerek szama: " + data.layers.length + " (diak: " + data.stats.students + ", tanar: " + data.stats.teachers + ", fotoval: " + withPhotoCount + ")");
-    log("[JSX] Kepmeret: " + data.imageSizeCm.widthCm + " x " + data.imageSizeCm.heightCm + " cm @ " + data.imageSizeCm.dpi + " DPI");
+    var withPhotoCount = _data.stats.withPhoto || 0;
+    log("[JSX] Image layerek szama: " + _data.layers.length + " (diak: " + _data.stats.students + ", tanar: " + _data.stats.teachers + ", fotoval: " + withPhotoCount + ")");
+    log("[JSX] Kepmeret: " + _data.imageSizeCm.widthCm + " x " + _data.imageSizeCm.heightCm + " cm @ " + _data.imageSizeCm.dpi + " DPI");
 
     // --- 3. Smart Object layerek letrehozasa + foto behelyezes — egyetlen history lepes ---
-    doc.suspendHistory("Kep layerek hozzaadasa", function () {
-      for (var i = 0; i < data.layers.length; i++) {
-        var item = data.layers[i];
-
-        try {
-          // Cel csoport keresese: Images/{group}
-          var targetGroup = getGroupByPath(doc, ["Images", item.group]);
-          if (!targetGroup) {
-            log("[JSX] HIBA: Images/" + item.group + " csoport nem talalhato!");
-            errors++;
-            continue;
-          }
-
-          // Smart Object placeholder letrehozasa
-          createSmartObjectPlaceholder(doc, targetGroup, {
-            name: item.layerName,
-            widthPx: item.widthPx,
-            heightPx: item.heightPx
-          });
-          created++;
-
-          // Foto behelyezese ha van photoPath
-          // Flow: SO megnyitas → kep Place → cover meretezes → mentes → bezaras
-          if (item.photoPath) {
-            try {
-              placePhotoInSmartObject(doc, doc.activeLayer, item.photoPath);
-              photosPlaced++;
-              // Az SO bezarasa utan visszaterunk a cel dokumentumra (nev alapjan)
-              doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-            } catch (photoErr) {
-              log("[JSX] FIGYELEM: foto behelyezes sikertelen (" + item.layerName + "): " + photoErr.message);
-              // Ha az SO megnyitva maradt, probaljuk bezarni
-              try {
-                if (app.documents.length > 1) {
-                  app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
-                }
-              } catch (closeErr) { /* ignore */ }
-              doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-            }
-          }
-        } catch (e) {
-          log("[JSX] HIBA image layer (" + item.layerName + "): " + e.message);
-          errors++;
-        }
-      }
-    });
+    _doc.suspendHistory("Kep layerek hozzaadasa", "_doAddImageLayers()");
 
     // --- 4. Eredmeny ---
-    log("[JSX] KESZ: " + created + " image layer letrehozva, " + photosPlaced + " foto behelyezve, " + errors + " hiba");
+    log("[JSX] KESZ: " + _created + " image layer letrehozva, " + _photosPlaced + " foto behelyezve, " + _errors + " hiba");
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);
-    log("[JSX] KESZ: " + created + " layer, " + photosPlaced + " foto, " + (errors + 1) + " hiba");
+    log("[JSX] KESZ: " + _created + " layer, " + _photosPlaced + " foto, " + (_errors + 1) + " hiba");
   }
 })();
 

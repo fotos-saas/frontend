@@ -19,6 +19,7 @@ export class ProjectDetailHeaderComponent {
   readonly ICONS = ICONS;
 
   readonly project = input<ProjectDetailData | null>(null);
+  readonly loading = input<boolean>(false);
   readonly isMarketer = input<boolean>(false);
   readonly showTabloEditor = input<boolean>(false);
 

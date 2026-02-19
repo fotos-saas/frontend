@@ -1,9 +1,12 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
 // Colors
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$gray-400: #9ca3af;
-$gray-500: #6b7280;
-$amber-500: #f59e0b;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$gray-400: get-color('gray', 400);
+$gray-500: get-color('gray', 500);
+$amber-500: get-color('warning', 500);
 
 // ============================================
 // ANIMATIONS - Keyframes
@@ -37,7 +40,7 @@ $amber-500: #f59e0b;
     margin: 0 0 0.25rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #111827;
+    color: get-color('gray', 900);
 
     @media (min-width: 640px) {
       font-size: 1.75rem;
@@ -84,7 +87,7 @@ $amber-500: #f59e0b;
   &__skeleton-card {
     padding: 1rem 1.25rem;
     background: white;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 0.75rem;
   }
 
@@ -135,7 +138,7 @@ $amber-500: #f59e0b;
     justify-content: space-between;
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid get-color('gray', 100);
   }
 
   &__skeleton-author {
@@ -176,19 +179,19 @@ $amber-500: #f59e0b;
     align-items: center;
     padding: 3rem 2rem;
     text-align: center;
-    background: #fef2f2;
+    background: get-color('error', 50);
     border-radius: 1rem;
 
     svg {
       width: 3rem;
       height: 3rem;
-      color: #ef4444;
+      color: get-color('error', 500);
       margin-bottom: 1rem;
     }
 
     p {
       margin: 0 0 1.5rem;
-      color: #991b1b;
+      color: get-color('error', 800);
     }
 
     button {
@@ -196,13 +199,13 @@ $amber-500: #f59e0b;
       font-size: 0.875rem;
       font-weight: 500;
       color: white;
-      background: #ef4444;
+      background: get-color('error', 500);
       border: none;
       border-radius: 0.5rem;
       cursor: pointer;
 
       &:hover {
-        background: #dc2626;
+        background: get-color('error', 600);
       }
     }
   }
@@ -216,12 +219,12 @@ $amber-500: #f59e0b;
     text-align: center;
     background: white;
     border-radius: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    @include shadow-sm;
 
     svg {
       width: 4rem;
       height: 4rem;
-      color: #d1d5db;
+      color: get-color('gray', 300);
       margin-bottom: 1.5rem;
       animation: float 3s ease-in-out infinite;
     }
@@ -230,7 +233,7 @@ $amber-500: #f59e0b;
       margin: 0 0 0.5rem;
       font-size: 1.125rem;
       font-weight: 600;
-      color: #111827;
+      color: get-color('gray', 900);
     }
 
     p {
@@ -314,6 +317,6 @@ $amber-500: #f59e0b;
 
   .forum-list .skeleton-shimmer {
     animation: none;
-    background: #e5e7eb;
+    background: get-color('gray', 200);
   }
 }

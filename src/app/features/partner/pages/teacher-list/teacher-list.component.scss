@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/list-page' as list;
+@use 'styles/colors' as *;
 
 .teacher-list-page {
 }
@@ -34,13 +35,13 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #f1f5f9;
+  background: get-color('slate', 100);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
-  color: #64748b;
+  color: get-color('slate', 500);
   transition: box-shadow 0.15s;
 
   &--clickable {
@@ -77,14 +78,14 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #dbeafe;
-  color: #3b82f6;
+  background: get-color('primary', 100);
+  color: get-color('primary', 500);
   flex-shrink: 0;
 }
 
 .teacher-name {
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -98,7 +99,7 @@
 
 .school-name-text {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -106,7 +107,7 @@
 
 .teacher-position-label {
   font-size: 0.75rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -129,17 +130,17 @@
   justify-content: center;
   width: 41px;
   height: 41px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   background: #fff;
-  color: #475569;
+  color: get-color('slate', 600);
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
 
   &:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
+    background: get-color('slate', 100);
+    border-color: get-color('slate', 300);
   }
 }
 
@@ -155,7 +156,7 @@
   right: 0;
   white-space: nowrap;
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
   padding: 4px;
@@ -171,18 +172,18 @@
     border: none;
     border-radius: 6px;
     background: transparent;
-    color: #334155;
+    color: get-color('slate', 700);
     font-size: 0.875rem;
     cursor: pointer;
     transition: background 0.1s;
     text-align: left;
 
     &:hover {
-      background: #f1f5f9;
+      background: get-color('slate', 100);
     }
 
     lucide-icon {
-      color: #64748b;
+      color: get-color('slate', 500);
       flex-shrink: 0;
     }
   }
@@ -201,11 +202,11 @@
 
 // Action buttons
 .action-btn--linked {
-  color: #3b82f6;
+  color: get-color('primary', 500);
 
   &:hover {
-    color: #f59e0b;
-    background: #fffbeb;
+    color: get-color('warning', 500);
+    background: get-color('warning', 50);
   }
 }
 

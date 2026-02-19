@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .top-bar {
   display: flex;
@@ -11,7 +12,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
   text-decoration: none;
   transition: color 0.15s ease;
@@ -22,7 +23,7 @@
 }
 
 :host-context(.dark) .back-link:hover {
-  color: #f1f5f9;
+  color: get-color('slate', 100);
 }
 
 .top-actions {
@@ -37,34 +38,34 @@
   width: 40px;
   height: 40px;
   background: transparent;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
   @include transition-fast;
 }
 
 .action-btn:hover:not(:disabled) {
-  background: #f1f5f9;
+  background: get-color('slate', 100);
   color: var(--color-primary, #1e3a5f);
   border-color: var(--color-primary, #1e3a5f);
 }
 
 .action-btn:disabled {
-  color: #cbd5e1;
+  color: get-color('slate', 300);
   cursor: not-allowed;
 }
 
 .action-btn--danger:hover:not(:disabled) {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #fecaca;
+  background: get-color('error', 50);
+  color: get-color('error', 600);
+  border-color: get-color('error', 200);
 }
 
 .action-btn--warning:hover:not(:disabled) {
-  background: #fffbeb;
-  color: #d97706;
-  border-color: #fde68a;
+  background: get-color('warning', 50);
+  color: get-color('warning', 600);
+  border-color: get-color('warning', 200);
 }
 
 .detail-header {
@@ -80,7 +81,7 @@
 }
 
 :host-context(.dark) .detail-title {
-  color: #f8fafc;
+  color: get-color('slate', 50);
 }
 
 .registration-status-badges {
@@ -101,8 +102,8 @@
 }
 
 .status-badge--registered {
-  background: #dcfce7;
-  color: #15803d;
+  background: get-color('success', 100);
+  color: get-color('success', 700);
   border: 1px solid #86efac;
 }
 
@@ -113,26 +114,26 @@
 }
 
 .status-badge--allowed {
-  background: #dbeafe;
-  color: #1d4ed8;
-  border: 1px solid #93c5fd;
+  background: get-color('primary', 100);
+  color: get-color('primary', 700);
+  border: 1px solid get-color('primary', 300);
 }
 
 :host-context(.dark) .status-badge--allowed {
   background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
+  color: get-color('primary', 400);
   border-color: rgba(59, 130, 246, 0.3);
 }
 
 .status-badge--disabled {
-  background: #f1f5f9;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 100);
+  color: get-color('slate', 500);
+  border: 1px solid get-color('slate', 200);
 }
 
 :host-context(.dark) .status-badge--disabled {
   background: rgba(100, 116, 139, 0.15);
-  color: #94a3b8;
+  color: get-color('slate', 400);
   border-color: rgba(100, 116, 139, 0.3);
 }
 
@@ -141,7 +142,7 @@
   justify-content: center;
   align-items: center;
   gap: 8px;
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
 }
 
@@ -152,7 +153,7 @@
 }
 
 .meta-separator {
-  color: #cbd5e1;
+  color: get-color('slate', 300);
 }
 
 .note-box {
@@ -195,6 +196,6 @@
   gap: 32px;
   margin-top: 32px;
   padding-top: 24px;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   font-size: 0.8125rem;
 }

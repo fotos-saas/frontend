@@ -1,15 +1,16 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // Colors - improved contrast
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$blue-700: #1d4ed8;
-$green-500: #22c55e;
-$green-600: #16a34a;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$blue-700: get-color('primary', 700);
+$green-500: get-color('success', 500);
+$green-600: get-color('success', 600);
 $green-700: #15803d;
-$gray-500: #6b7280;
-$gray-600: #4b5563;
-$gray-700: #374151;
+$gray-500: get-color('gray', 500);
+$gray-600: get-color('gray', 600);
+$gray-700: get-color('gray', 700);
 
 // ============================================
 // ANIMATIONS - Keyframes
@@ -46,7 +47,7 @@ $gray-700: #374151;
     justify-content: center;
     width: 3rem;
     height: 3rem;
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    background: linear-gradient(135deg, get-color('primary', 100), get-color('primary', 200));
     border-radius: 0.75rem;
 
     svg {
@@ -60,7 +61,7 @@ $gray-700: #374151;
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #111827;
+    color: get-color('gray', 900);
 
     @media (min-width: 640px) {
       font-size: 1.75rem;
@@ -88,8 +89,8 @@ $gray-700: #374151;
     font-size: 0.875rem;
     font-weight: 500;
     color: $gray-700;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
+    background: get-color('gray', 100);
+    border: 1px solid get-color('gray', 200);
     border-radius: 0.5rem;
     cursor: pointer;
     @include transition-normal;
@@ -105,8 +106,8 @@ $gray-700: #374151;
     }
 
     &:hover {
-      background: #e5e7eb;
-      border-color: #d1d5db;
+      background: get-color('gray', 200);
+      border-color: get-color('gray', 300);
     }
   }
 
@@ -118,8 +119,8 @@ $gray-700: #374151;
     height: 2.5rem;
     padding: 0;
     color: $gray-600;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
+    background: get-color('gray', 100);
+    border: 1px solid get-color('gray', 200);
     border-radius: 0.5rem;
     cursor: pointer;
     @include transition-normal;
@@ -130,8 +131,8 @@ $gray-700: #374151;
     }
 
     &:hover {
-      background: #e5e7eb;
-      border-color: #d1d5db;
+      background: get-color('gray', 200);
+      border-color: get-color('gray', 300);
       color: $gray-700;
     }
   }
@@ -174,7 +175,7 @@ $gray-700: #374151;
   &__card {
     padding: 1.25rem;
     background: white;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 0.75rem;
   }
 
@@ -225,7 +226,7 @@ $gray-700: #374151;
     justify-content: space-between;
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid get-color('gray', 100);
   }
 
   &__meta {
@@ -258,7 +259,7 @@ $gray-700: #374151;
   text-align: center;
   background: #f9fafb;
   border-radius: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
 
   &__icon {
     display: flex;
@@ -283,7 +284,7 @@ $gray-700: #374151;
     margin: 0 0 0.5rem;
     font-size: 1.125rem;
     font-weight: 600;
-    color: #111827;
+    color: get-color('gray', 900);
   }
 
   &__description {
@@ -334,7 +335,7 @@ $gray-700: #374151;
     margin: 0 0 1rem;
     font-size: 1rem;
     font-weight: 600;
-    color: #374151;
+    color: get-color('gray', 700);
   }
 
   &__badge {
@@ -385,6 +386,6 @@ $gray-700: #374151;
 
   .skeleton-shimmer {
     animation: none;
-    background: #e5e7eb;
+    background: get-color('gray', 200);
   }
 }

@@ -1,3 +1,4 @@
+@use 'styles/colors' as *;
 .notification-bell {
   position: relative;
 }
@@ -29,7 +30,7 @@
 .notification-bell__icon {
   width: 24px;
   height: 24px;
-  color: #374151;
+  color: get-color('gray', 700);
 }
 
 .notification-bell__badge {
@@ -44,7 +45,7 @@
   line-height: 18px;
   text-align: center;
   color: white;
-  background: #ef4444;
+  background: get-color('error', 500);
   border-radius: 9px;
 }
 
@@ -70,14 +71,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid get-color('gray', 200);
 }
 
 .notification-bell__title {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: get-color('gray', 900);
 }
 
 .notification-bell__mark-all {
@@ -110,13 +111,13 @@
   justify-content: center;
   gap: 12px;
   padding: 48px 24px;
-  color: #6b7280;
+  color: get-color('gray', 500);
 }
 
 .notification-bell__spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid get-color('gray', 200);
   border-top-color: #6366f1;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -125,7 +126,7 @@
 .notification-bell__empty-icon {
   width: 48px;
   height: 48px;
-  color: #d1d5db;
+  color: get-color('gray', 300);
 }
 
 .notification-bell__list {
@@ -136,7 +137,7 @@
 
 .notification-bell__footer {
   flex-shrink: 0;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid get-color('gray', 200);
   padding: 12px 16px;
   text-align: center;
   background: white;

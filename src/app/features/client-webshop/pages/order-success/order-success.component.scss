@@ -1,3 +1,5 @@
+@use 'styles/colors' as *;
+
 :host {
   display: block;
   min-height: 100vh;
@@ -24,7 +26,7 @@
 }
 
 .success-icon {
-  color: #22c55e;
+  color: get-color('success', 500);
   margin-bottom: 20px;
 }
 
@@ -36,7 +38,7 @@ h1 {
 }
 
 .success-message {
-  color: #6b7280;
+  color: get-color('gray', 500);
   font-size: 0.9375rem;
   margin: 0 0 24px;
 }
@@ -45,15 +47,15 @@ h1 {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: get-color('success', 50);
+  border: 1px solid get-color('success', 200);
   border-radius: 10px;
   padding: 12px 24px;
   margin-bottom: 24px;
 
   .label {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -66,7 +68,7 @@ h1 {
 }
 
 .info-text {
-  color: #6b7280;
+  color: get-color('gray', 500);
   font-size: 0.875rem;
   line-height: 1.5;
   margin: 0 0 24px;
@@ -76,7 +78,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: get-color('gray', 400);
   font-size: 0.8125rem;
 
   lucide-icon { margin-right: 6px; }

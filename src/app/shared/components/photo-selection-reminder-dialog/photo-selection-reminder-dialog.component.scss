@@ -1,10 +1,8 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // PhotoSelectionReminderDialog - content-specific styles only
 // Shell handled by DialogWrapperComponent
-
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
 
 .primary-btn {
   width: 100%;
@@ -16,7 +14,7 @@ $blue-600: #2563eb;
   font-size: 1rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, $blue-500 0%, $blue-600 100%);
+  background: linear-gradient(135deg, get-color('primary', 500) 0%, get-color('primary', 600) 100%);
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
@@ -43,17 +41,17 @@ $blue-600: #2563eb;
   padding: 0.875rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #6b7280;
+  color: get-color('gray', 500);
   background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 0.75rem;
   cursor: pointer;
   @include transition-normal;
 
   &:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-    color: #4b5563;
+    background: get-color('gray', 100);
+    border-color: get-color('gray', 300);
+    color: get-color('gray', 600);
   }
 }
 

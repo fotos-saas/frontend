@@ -1,5 +1,6 @@
 @use '../../../../shared/styles/list-page' as list;
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // max-width → page-card--wide kezeli
 .project-list-page {}
@@ -12,7 +13,7 @@
 .sort-dir-btn {
   width: 44px;
   height: 44px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   background: #ffffff;
   cursor: pointer;
@@ -20,12 +21,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: get-color('slate', 500);
 
   &:hover {
-    background: #f8fafc;
-    color: #1e293b;
-    border-color: #cbd5e1;
+    background: get-color('slate', 50);
+    color: get-color('slate', 800);
+    border-color: get-color('slate', 300);
   }
 }
 
@@ -34,7 +35,7 @@
   background: #ffffff;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
 }
 
 .project-row {
@@ -42,7 +43,7 @@
   grid-template-columns: var(--table-cols);
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid get-color('slate', 100);
   cursor: pointer;
   @include transition-fast;
   animation: cardEntry 0.3s ease forwards;
@@ -50,11 +51,11 @@
 }
 
 .project-row:nth-child(even) {
-  background: #f8fafc;
+  background: get-color('slate', 50);
 }
 
 .project-row:hover {
-  background: #f1f5f9;
+  background: get-color('slate', 100);
 }
 
 .project-row:last-child {
@@ -70,20 +71,20 @@
 
 .school-name {
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   font-size: 0.9375rem;
 }
 
 .class-info {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .city-badge {
-  background: #e2e8f0;
+  background: get-color('slate', 200);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.6875rem;
@@ -91,17 +92,17 @@
 
 .contact-name {
   font-weight: 500;
-  color: #1e293b;
+  color: get-color('slate', 800);
   font-size: 0.875rem;
 }
 
 .contact-email {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .no-contact {
-  color: #94a3b8;
+  color: get-color('slate', 400);
   font-size: 0.875rem;
 }
 
@@ -115,7 +116,7 @@
 /* Loading State */
 .loading-state .project-row {
   height: 72px;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
   border-radius: 10px;
   animation: none;
   opacity: 1;
@@ -154,7 +155,7 @@
   .contact-name::after {
     content: '·';
     margin-left: 8px;
-    color: #94a3b8;
+    color: get-color('slate', 400);
   }
 
   .col-actions {
@@ -187,6 +188,6 @@
     justify-content: flex-end;
     margin-top: 6px;
     padding-top: 8px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid get-color('slate', 100);
   }
 }

@@ -1,6 +1,7 @@
 @use '../../../../shared/styles/dialog-forms' as form;
 @use '../../../../../styles/buttons' as *;
-@use 'styles/mixins' as mix;
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .modal-content { padding: 1.5rem; }
 
@@ -9,13 +10,13 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid get-color('slate', 200);
   margin-bottom: 20px;
 
   h2 {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0;
   }
 }
@@ -29,10 +30,10 @@
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
-  @include mix.transition-fast;
-  &:hover { background: #f1f5f9; color: #1e293b; }
+  @include transition-fast;
+  &:hover { background: get-color('slate', 100); color: get-color('slate', 800); }
 }
 
 .modal-form { @include form.form-layout; }
@@ -40,7 +41,7 @@
 
 .optional-label {
   font-weight: 400;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   font-size: 0.75rem;
 }
 
@@ -62,7 +63,7 @@
 .autocomplete-icon {
   position: absolute;
   left: 12px;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   pointer-events: none;
 }
 
@@ -79,13 +80,13 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  background: #f1f5f9;
+  background: get-color('slate', 100);
   border: none;
   border-radius: 4px;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
-  @include mix.transition-fast;
-  &:hover { background: #e2e8f0; color: #1e293b; }
+  @include transition-fast;
+  &:hover { background: get-color('slate', 200); color: get-color('slate', 800); }
 }
 
 .autocomplete-dropdown {
@@ -94,9 +95,9 @@
   left: 0;
   right: 0;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  @include shadow-lg;
   z-index: 100;
   max-height: 200px;
   overflow-y: auto;
@@ -113,7 +114,7 @@
   text-align: left;
   cursor: pointer;
   transition: background 0.1s ease;
-  &:hover { background: #f8fafc; }
+  &:hover { background: get-color('slate', 50); }
   &--selected { background: #e0f2fe; &:hover { background: #bae6fd; } }
 }
 
@@ -121,7 +122,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #1e293b;
+  color: get-color('slate', 800);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -135,7 +136,7 @@
 
 .option-school {
   font-size: 0.75rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   padding-left: 22px;
 }
 
@@ -146,7 +147,7 @@
   justify-content: center;
   gap: 8px;
   padding: 16px;
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
 }
 
@@ -156,24 +157,24 @@
   gap: 6px;
   margin-top: 8px;
   padding: 8px 12px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: get-color('success', 50);
+  border: 1px solid get-color('success', 200);
   border-radius: 6px;
-  color: #166534;
+  color: get-color('success', 800);
   font-size: 0.8125rem;
 }
 
-.selected-school { color: #22c55e; }
+.selected-school { color: get-color('success', 500); }
 
 .error-message {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: get-color('error', 50);
+  border: 1px solid get-color('error', 200);
   border-radius: 8px;
-  color: #dc2626;
+  color: get-color('error', 600);
   font-size: 0.875rem;
 }
 
@@ -183,7 +184,7 @@
   gap: 12px;
   margin-top: 8px;
   padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
 }
 
 .btn-secondary {
@@ -205,7 +206,7 @@
 
 .autocomplete-loading .spinner {
   border-color: rgba(100, 116, 139, 0.3);
-  border-top-color: #64748b;
+  border-top-color: get-color('slate', 500);
 }
 
 // ps-field__input stílus az autocomplete natív inputnak

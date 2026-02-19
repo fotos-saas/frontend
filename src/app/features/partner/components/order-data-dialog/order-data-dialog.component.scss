@@ -1,5 +1,6 @@
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
+@use 'styles/colors' as *;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
 
 // Loading
 .order-dialog__loading {
@@ -8,7 +9,7 @@ $blue-600: #2563eb;
   align-items: center;
   justify-content: center;
   padding: 3rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 
   p {
     margin-top: 1rem;
@@ -19,14 +20,14 @@ $blue-600: #2563eb;
 .order-dialog__error {
   text-align: center;
   padding: 2rem;
-  color: #dc2626;
+  color: get-color('error', 600);
 }
 
 // Empty
 .order-dialog__empty {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 
   p {
     margin-top: 0.75rem;
@@ -57,7 +58,7 @@ $blue-600: #2563eb;
 
 // Section
 .order-dialog__section {
-  background: #f8fafc;
+  background: get-color('slate', 50);
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 0.75rem;
@@ -90,14 +91,14 @@ $blue-600: #2563eb;
 .order-dialog__label {
   font-size: 0.65rem;
   font-weight: 600;
-  color: #64748b;
+  color: get-color('slate', 500);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .order-dialog__value {
   font-size: 0.9rem;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin-top: 0.125rem;
 
   &--color {
@@ -122,7 +123,7 @@ $blue-600: #2563eb;
 
 // Description
 .order-dialog__description {
-  color: #475569;
+  color: get-color('slate', 600);
   line-height: 1.6;
   font-size: 0.9rem;
   overflow-wrap: break-word;
@@ -139,8 +140,8 @@ $blue-600: #2563eb;
     align-items: center;
     gap: 4px;
     padding: 3px 12px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: get-color('primary', 100);
+    color: get-color('primary', 700);
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 700;
@@ -148,7 +149,7 @@ $blue-600: #2563eb;
     transition: background 0.15s;
 
     &:hover {
-      background: #bfdbfe;
+      background: get-color('primary', 200);
     }
 
     &::before {
@@ -161,7 +162,7 @@ $blue-600: #2563eb;
 // Quote
 .order-dialog__quote {
   font-style: italic;
-  color: #475569;
+  color: get-color('slate', 600);
   border-left: 3px solid $blue-500;
   padding-left: 0.75rem;
   margin: 0;
@@ -170,7 +171,7 @@ $blue-600: #2563eb;
 
 // Namelist
 .order-dialog__namelist {
-  color: #475569;
+  color: get-color('slate', 600);
   line-height: 1.6;
   margin: 0;
   font-family: inherit;
@@ -188,8 +189,8 @@ $blue-600: #2563eb;
     align-items: center;
     gap: 4px;
     padding: 3px 12px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: get-color('primary', 100);
+    color: get-color('primary', 700);
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 700;
@@ -197,7 +198,7 @@ $blue-600: #2563eb;
     transition: background 0.15s;
 
     &:hover {
-      background: #bfdbfe;
+      background: get-color('primary', 200);
     }
 
     &::before {
@@ -211,12 +212,12 @@ $blue-600: #2563eb;
   }
 
   &::-webkit-scrollbar-track {
-    background: #e2e8f0;
+    background: get-color('slate', 200);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #94a3b8;
+    background: get-color('slate', 400);
     border-radius: 3px;
   }
 }
@@ -240,7 +241,7 @@ $blue-600: #2563eb;
 
 // Summary
 .order-dialog__summary {
-  color: #475569;
+  color: get-color('slate', 600);
   line-height: 1.6;
   margin: 0;
   font-style: italic;

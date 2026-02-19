@@ -1,5 +1,6 @@
 @use '../../../../../styles/buttons' as *;
 @use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
 
 .album-list-page {
   max-width: 1200px;
@@ -68,7 +69,7 @@
 }
 
 .error-icon {
-  color: #dc2626;
+  color: get-color('error', 600);
   margin-bottom: 16px;
 }
 
@@ -139,16 +140,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, get-color('slate', 100) 0%, get-color('slate', 200) 100%);
   overflow: hidden;
 }
 
 .photo-stack--empty {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, get-color('slate', 50) 0%, get-color('slate', 100) 100%);
 }
 
 .stack-empty-icon {
-  color: #cbd5e1;
+  color: get-color('slate', 300);
 }
 
 .stack-photo {
@@ -228,11 +229,11 @@
 }
 
 .album-card--completed {
-  border-color: #22c55e;
+  border-color: get-color('success', 500);
 }
 
 .album-card--completed:hover {
-  border-color: #16a34a;
+  border-color: get-color('success', 600);
 }
 
 /* Card body */
@@ -270,8 +271,8 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #dcfce7;
-  color: #166534;
+  background: get-color('success', 100);
+  color: get-color('success', 800);
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;

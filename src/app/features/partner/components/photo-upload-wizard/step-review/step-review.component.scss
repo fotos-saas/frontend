@@ -1,3 +1,4 @@
+@use 'styles/colors' as *;
 .step-review {
   display: flex;
   flex-direction: column;
@@ -26,7 +27,7 @@
 
 .section-title--warning {
   background: #fef3c7;
-  color: #92400e;
+  color: get-color('warning', 800);
 }
 
 .section-hint {
@@ -50,7 +51,7 @@
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .empty-state p {

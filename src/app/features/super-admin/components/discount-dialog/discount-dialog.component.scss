@@ -1,7 +1,9 @@
+@use 'styles/colors' as *;
+
 // Discount dialog specific styles
 .dialog__icon--discount {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  color: #16a34a;
+  background: linear-gradient(135deg, get-color('success', 50) 0%, get-color('success', 100) 100%);
+  color: get-color('success', 600);
 }
 
 .form-textarea {
@@ -14,10 +16,10 @@
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 200);
   border-radius: 8px;
-  color: #1e40af;
+  color: get-color('primary', 800);
   font-size: 0.875rem;
   margin-top: 1rem;
 

@@ -1,11 +1,12 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // TablóStúdió kék színvilág (mint a login)
-$blue-50: #eff6ff;
-$blue-100: #dbeafe;
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$blue-700: #1d4ed8;
+$blue-50: get-color('primary', 50);
+$blue-100: get-color('primary', 100);
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$blue-700: get-color('primary', 700);
 
 // ============================================
 // ANIMATIONS - Keyframes
@@ -49,13 +50,13 @@ $blue-700: #1d4ed8;
 .samples__title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0;
 }
 
 .samples__subtitle {
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin: 0.25rem 0 0;
 }
 
@@ -91,7 +92,7 @@ $blue-700: #1d4ed8;
 .samples__error {
   text-align: center;
   padding: 3rem;
-  color: #dc2626;
+  color: get-color('error', 600);
 }
 
 .samples__retry-btn {
@@ -114,7 +115,7 @@ $blue-700: #1d4ed8;
 .samples__empty {
   text-align: center;
   padding: 4rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .samples__empty-icon {
@@ -251,7 +252,7 @@ $blue-700: #1d4ed8;
   .samples__skeleton-item,
   .skeleton-shimmer {
     animation: none;
-    background: #e5e7eb;
+    background: get-color('gray', 200);
   }
 
   .samples__item {

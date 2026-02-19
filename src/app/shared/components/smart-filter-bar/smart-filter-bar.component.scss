@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // === SMART FILTER BAR ===
 
@@ -19,12 +20,12 @@
 
   &--active {
     .search-box ::ng-deep .ps-field__wrapper {
-      border-color: #93c5fd;
+      border-color: get-color('primary', 300);
       background: #f0f7ff;
     }
 
     .search-box ::ng-deep .ps-field__prefix {
-      color: #3b82f6;
+      color: get-color('primary', 500);
     }
   }
 }
@@ -53,7 +54,7 @@
 
   &:hover {
     background: rgba(37, 99, 235, 0.22);
-    color: #1d4ed8;
+    color: get-color('primary', 700);
   }
 
   &:active {
@@ -80,18 +81,18 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 100);
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   cursor: pointer;
-  color: #64748b;
+  color: get-color('slate', 500);
   @include transition-fast;
   flex-shrink: 0;
   position: relative;
 
   &:hover {
-    background: #e2e8f0;
-    color: #334155;
+    background: get-color('slate', 200);
+    color: get-color('slate', 700);
   }
 
   &--active {
@@ -125,8 +126,8 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   margin-bottom: 12px;
   animation: sortFadeIn 0.15s ease;
@@ -136,10 +137,10 @@
 .mobile-sort-bar {
   display: none;
   padding: 12px;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   border-radius: 10px;
   margin-bottom: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
 }
 
 .mobile-sort-group {
@@ -151,7 +152,7 @@
 .mobile-sort-label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #64748b;
+  color: get-color('slate', 500);
   white-space: nowrap;
 }
 
@@ -167,7 +168,7 @@
   justify-content: space-between;
   gap: 8px;
   padding: 10px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.875rem;
   background: #ffffff;
@@ -175,7 +176,7 @@
   @include transition-fast;
 
   &:hover {
-    border-color: #cbd5e1;
+    border-color: get-color('slate', 300);
   }
 
   &:focus {
@@ -191,9 +192,9 @@
   left: 0;
   right: 0;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  @include shadow-lg;
   z-index: 100;
   overflow: hidden;
   animation: sortFadeIn 0.15s ease;
@@ -208,13 +209,13 @@
   border: none;
   background: transparent;
   font-size: 0.875rem;
-  color: #374151;
+  color: get-color('gray', 700);
   cursor: pointer;
   text-align: left;
   transition: background 0.1s ease;
 
   &:hover {
-    background: #f1f5f9;
+    background: get-color('slate', 100);
   }
 
   &--active {
@@ -235,14 +236,14 @@
   width: 40px;
   height: 40px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   cursor: pointer;
-  color: #64748b;
+  color: get-color('slate', 500);
   @include transition-fast;
 
   &:hover {
-    background: #f1f5f9;
+    background: get-color('slate', 100);
     border-color: var(--color-primary, #1e3a5f);
     color: var(--color-primary, #1e3a5f);
   }

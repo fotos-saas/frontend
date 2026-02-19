@@ -1,3 +1,4 @@
+@use 'styles/colors' as *;
 .form-showcase {
   padding: 2rem;
 }
@@ -73,10 +74,10 @@
   &__toast {
     padding: 8px 14px;
     margin-bottom: 12px;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
+    background: get-color('error', 50);
+    border: 1px solid get-color('error', 200);
     border-radius: 8px;
-    color: #dc2626;
+    color: get-color('error', 600);
     font-size: 0.8125rem;
     animation: toastIn 200ms ease;
   }

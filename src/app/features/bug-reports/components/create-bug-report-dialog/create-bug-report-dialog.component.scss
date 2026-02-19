@@ -1,15 +1,16 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // === FORM ===
 .required {
-  color: #dc2626;
+  color: get-color('error', 600);
 }
 
 .form-input,
 .form-select {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.9375rem;
   @include transition-normal;
@@ -38,7 +39,7 @@
 .btn-cancel {
   padding: 10px 20px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -46,7 +47,7 @@
   @include transition-fast;
 
   &:hover:not(:disabled) {
-    background: #f8fafc;
+    background: get-color('slate', 50);
   }
 
   &:disabled {

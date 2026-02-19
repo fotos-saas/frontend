@@ -1,4 +1,5 @@
 @use '../../../styles/settings-page' as *;
+@use 'styles/colors' as *;
 
 // === SECTION OVERRIDES ===
 .settings-section {
@@ -10,7 +11,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 16px;
-  color: #1e293b;
+  color: get-color('slate', 800);
 
   lucide-icon {
     margin-right: 8px;
@@ -61,9 +62,9 @@
   display: flex;
   align-items: center;
   padding: 10px 0;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 
   .info-icon {
     margin-right: 6px;
@@ -71,14 +72,14 @@
   }
 
   strong {
-    color: #334155;
+    color: get-color('slate', 700);
   }
 }
 
 // === ACTION ROW OVERRIDE ===
 .action-row {
   padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
   margin-top: 4px;
 }
 

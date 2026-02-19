@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .project-filters {
   display: flex;
@@ -20,15 +21,15 @@
   padding: 6px 12px;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #64748b;
+  color: get-color('slate', 500);
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 6px;
   cursor: pointer;
   @include transition-fast;
   white-space: nowrap;
 
-  &:hover { background: #f1f5f9; border-color: #94a3b8; color: #334155; }
+  &:hover { background: get-color('slate', 100); border-color: get-color('slate', 400); color: get-color('slate', 700); }
 
   &--active {
     color: #ffffff;
@@ -43,8 +44,8 @@
   align-items: center;
   gap: 16px;
   padding: 10px 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   margin-bottom: 16px;
   flex-wrap: wrap;
@@ -55,11 +56,11 @@
   align-items: center;
   gap: 6px;
   font-size: 0.8125rem;
-  color: #475569;
+  color: get-color('slate', 600);
   white-space: nowrap;
 
-  &--ok { color: #16a34a; }
-  &--warn { color: #d97706; }
+  &--ok { color: get-color('success', 600); }
+  &--warn { color: get-color('warning', 600); }
 }
 
 .summary-actions {
@@ -95,14 +96,14 @@
   gap: 4px;
   padding: 3px 8px;
   font-size: 0.75rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 4px;
   cursor: pointer;
   @include transition-fast;
 
-  &:hover { background: #f1f5f9; border-color: #cbd5e1; }
+  &:hover { background: get-color('slate', 100); border-color: get-color('slate', 300); }
 }
 
 .school-list {
@@ -120,11 +121,11 @@
 .skeleton-card {
   height: 52px;
   border-radius: 8px;
-  background: #f1f5f9;
+  background: get-color('slate', 100);
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, get-color('slate', 100) 25%, get-color('slate', 200) 50%, get-color('slate', 100) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -136,7 +137,7 @@
   justify-content: center;
   gap: 12px;
   padding: 48px 16px;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   text-align: center;
 
   p { font-size: 0.875rem; }

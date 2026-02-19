@@ -1,5 +1,6 @@
 @use '../../../../../styles/buttons' as *;
 @use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
 
 .source-school {
   display: flex;
@@ -39,13 +40,13 @@
     display: block;
     font-size: 0.8125rem;
     font-weight: 600;
-    color: #374151;
+    color: get-color('gray', 700);
     margin-bottom: 8px;
   }
 
   &__empty {
     font-size: 0.8125rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
     padding: 16px 0;
     text-align: center;
   }
@@ -56,20 +57,20 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 8px;
   cursor: pointer;
   @include mix.transition-fast;
   margin-bottom: 6px;
 
   &:hover:not(.school-item--disabled) {
-    border-color: #93c5fd;
-    background: #f8fafc;
+    border-color: get-color('primary', 300);
+    background: get-color('slate', 50);
   }
 
   &--selected {
-    border-color: #3b82f6;
-    background: #eff6ff;
+    border-color: get-color('primary', 500);
+    background: get-color('primary', 50);
   }
 
   &--disabled {
@@ -81,7 +82,7 @@
     flex-shrink: 0;
     width: 16px;
     height: 16px;
-    accent-color: #3b82f6;
+    accent-color: get-color('primary', 500);
     cursor: inherit;
   }
 
@@ -96,7 +97,7 @@
   &__name {
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #1e293b;
+    color: get-color('slate', 800);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -104,28 +105,28 @@
 
   &__city {
     font-size: 0.6875rem;
-    color: #64748b;
+    color: get-color('slate', 500);
   }
 
   &__linked-icon {
-    color: #f59e0b;
+    color: get-color('warning', 500);
     flex-shrink: 0;
   }
 }
 
 .max-notice {
   font-size: 0.75rem;
-  color: #f59e0b;
+  color: get-color('warning', 500);
   text-align: center;
   margin-top: 8px;
 }
 
 .btn-secondary {
-  @include btn-secondary($bg: #f3f4f6, $hover-bg: #e5e7eb, $color: #374151, $border-color: #d1d5db, $hover-border: #d1d5db, $padding: 8px 16px, $font-size: 0.8125rem);
+  @include btn-secondary($bg: get-color('gray', 100), $hover-bg: get-color('gray', 200), $color: get-color('gray', 700), $border-color: get-color('gray', 300), $hover-border: get-color('gray', 300), $padding: 8px 16px, $font-size: 0.8125rem);
 }
 
 .btn-primary {
-  @include btn-primary($bg: #3b82f6, $hover-bg: #2563eb, $padding: 8px 16px, $font-size: 0.8125rem);
+  @include btn-primary($bg: get-color('primary', 500), $hover-bg: get-color('primary', 600), $padding: 8px 16px, $font-size: 0.8125rem);
   gap: 6px;
 }
 

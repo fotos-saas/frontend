@@ -1,4 +1,5 @@
 // === DETAIL PANEL (kibontható sor alatti részletező) ===
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -6,8 +7,8 @@
 
 .detail-panel {
   padding: 12px 14px 12px 34px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-top: none;
   border-radius: 0 0 10px 10px;
   margin-top: -2px;
@@ -54,7 +55,7 @@
 .detail-panel__empty {
   display: flex;
   align-items: center;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   font-size: 0.8125rem;
   padding: 8px 0;
 

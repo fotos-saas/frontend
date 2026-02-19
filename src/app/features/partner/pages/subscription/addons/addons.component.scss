@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .addons-page {
   max-width: 800px;
@@ -11,7 +12,7 @@
   gap: 12px;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin-bottom: 24px;
 }
 
@@ -20,11 +21,11 @@
   display: flex;
   gap: 12px;
   padding: 16px;
-  background: #dbeafe;
-  border: 1px solid #93c5fd;
+  background: get-color('primary', 100);
+  border: 1px solid get-color('primary', 300);
   border-radius: 8px;
   margin-bottom: 24px;
-  color: #1e40af;
+  color: get-color('primary', 800);
 }
 
 .banner-content strong {
@@ -49,8 +50,8 @@
   gap: 10px;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e2e8f0;
-  color: #64748b;
+  border-bottom: 1px solid get-color('slate', 200);
+  color: get-color('slate', 500);
 }
 
 .section-title {
@@ -59,7 +60,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 /* Addons Grid */
@@ -71,23 +72,23 @@
 /* Addon Card - Compact */
 .addon-card {
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   padding: 16px;
   @include transition-normal;
 }
 
 .addon-card:hover {
-  border-color: #cbd5e1;
+  border-color: get-color('slate', 300);
 }
 
 .addon-card--active {
-  border-color: #22c55e;
+  border-color: get-color('success', 500);
   background: #fafff9;
 }
 
 .addon-card--included {
-  border-color: #3b82f6;
+  border-color: get-color('primary', 500);
   background: #fafbff;
 }
 
@@ -123,7 +124,7 @@
 .addon-name {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0;
 }
 
@@ -135,17 +136,17 @@
 }
 
 .status-tag--active {
-  background: #dcfce7;
-  color: #16a34a;
+  background: get-color('success', 100);
+  color: get-color('success', 600);
 }
 
 .status-tag--included {
-  background: #dbeafe;
-  color: #2563eb;
+  background: get-color('primary', 100);
+  color: get-color('primary', 600);
 }
 
 .addon-description {
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.8125rem;
   margin: 0 0 6px 0;
 }
@@ -160,14 +161,14 @@
 
 .feature-tag {
   font-size: 0.75rem;
-  color: #475569;
-  background: #f1f5f9;
+  color: get-color('slate', 600);
+  background: get-color('slate', 100);
   padding: 2px 8px;
   border-radius: 4px;
 }
 
 .feature-sep {
-  color: #94a3b8;
+  color: get-color('slate', 400);
   font-size: 0.75rem;
 }
 
@@ -178,7 +179,7 @@
   justify-content: space-between;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid get-color('slate', 100);
 }
 
 .addon-pricing-inline {
@@ -189,23 +190,23 @@
 
 .price-main {
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   font-size: 0.875rem;
 }
 
 .price-main--free {
-  color: #16a34a;
+  color: get-color('success', 600);
 }
 
 .price-alt {
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.8125rem;
 }
 
 .price-discount {
   font-size: 0.6875rem;
-  color: #16a34a;
-  background: #dcfce7;
+  color: get-color('success', 600);
+  background: get-color('success', 100);
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 600;
@@ -237,22 +238,22 @@
 }
 
 .btn--primary {
-  background: #3b82f6;
+  background: get-color('primary', 500);
   color: white;
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: get-color('primary', 600);
 }
 
 .btn--danger-outline {
   background: transparent;
-  border: 1px solid #ef4444;
-  color: #ef4444;
+  border: 1px solid get-color('error', 500);
+  color: get-color('error', 500);
 }
 
 .btn--danger-outline:hover:not(:disabled) {
-  background: #fef2f2;
+  background: get-color('error', 50);
 }
 
 /* Loading & Empty */
@@ -264,7 +265,7 @@
 
 .skeleton-card {
   height: 200px;
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, get-color('slate', 100) 25%, get-color('slate', 200) 50%, get-color('slate', 100) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 12px;
@@ -276,7 +277,7 @@
 
 .skeleton-bar {
   height: 12px;
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, get-color('slate', 100) 25%, get-color('slate', 200) 50%, get-color('slate', 100) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 6px;
@@ -292,16 +293,16 @@
   align-items: center;
   justify-content: center;
   padding: 48px;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   border-radius: 12px;
-  color: #64748b;
+  color: get-color('slate', 500);
   text-align: center;
 }
 
 .empty-state h3 {
   margin: 16px 0 8px;
   font-size: 1rem;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .empty-state p {

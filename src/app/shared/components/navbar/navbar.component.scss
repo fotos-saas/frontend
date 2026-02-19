@@ -1,12 +1,13 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // ============================================================================
 // SCSS VÁLTOZÓK (Safari kompatibilitás)
 // ============================================================================
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$blue-700: #1d4ed8;
-$blue-50: #eff6ff;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$blue-700: get-color('primary', 700);
+$blue-50: get-color('primary', 50);
 $mobile-breakpoint: 768px;
 
 // ============================================================================
@@ -329,7 +330,7 @@ $mobile-breakpoint: 768px;
   font-weight: 700;
   line-height: 1;
   color: white;
-  background: #ef4444;
+  background: get-color('error', 500);
   border-radius: 9px;
   vertical-align: middle;
 
@@ -376,7 +377,7 @@ $mobile-breakpoint: 768px;
   line-height: 18px;
   text-align: center;
   color: white;
-  background: #f59e0b;
+  background: get-color('warning', 500);
   border-radius: 9px;
 }
 
@@ -539,28 +540,28 @@ $mobile-breakpoint: 768px;
 
   // Contact variant (code token - kék szín)
   &--contact {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-    border-color: #3b82f6;
+    background: linear-gradient(135deg, get-color('primary', 100) 0%, get-color('primary', 200) 100%);
+    border-color: get-color('primary', 500);
 
     .navbar__mobile-menu-user-name {
-      color: #1e40af;
+      color: get-color('primary', 800);
     }
 
     .navbar__mobile-menu-user-label {
-      color: #2563eb;
+      color: get-color('primary', 600);
     }
 
     .navbar__mobile-menu-user-edit {
       background: rgba(255, 255, 255, 0.5);
-      border-color: #3b82f6;
-      color: #1e40af;
+      border-color: get-color('primary', 500);
+      color: get-color('primary', 800);
 
       &:hover {
         background: rgba(255, 255, 255, 0.8);
       }
 
       &:focus-visible {
-        outline-color: #3b82f6;
+        outline-color: get-color('primary', 500);
       }
     }
   }
@@ -732,7 +733,7 @@ $mobile-breakpoint: 768px;
   font-weight: 700;
   line-height: 1;
   color: white;
-  background: #ef4444;
+  background: get-color('error', 500);
   border-radius: 11px;
 
   .navbar__mobile-menu-link--active & {
@@ -765,7 +766,7 @@ $mobile-breakpoint: 768px;
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, get-color('error', 500) 0%, get-color('error', 600) 100%);
   color: white;
   font-size: 1rem;
   font-weight: 600;
@@ -855,18 +856,18 @@ $mobile-breakpoint: 768px;
 
 // Contact badge variant (code token - kék szín, ContactEditDialog-hoz illeszkedik)
 .navbar__user-badge--contact {
-  color: #1e40af;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border: 1px solid #3b82f6;
+  color: get-color('primary', 800);
+  background: linear-gradient(135deg, get-color('primary', 100) 0%, get-color('primary', 200) 100%);
+  border: 1px solid get-color('primary', 500);
   box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
 
   &:hover {
-    background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+    background: linear-gradient(135deg, get-color('primary', 200) 0%, get-color('primary', 300) 100%);
     box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
   }
 
   &:focus-visible {
-    outline: 3px solid #3b82f6;
+    outline: 3px solid get-color('primary', 500);
     outline-offset: 2px;
   }
 }
@@ -899,9 +900,9 @@ $mobile-breakpoint: 768px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #92400e;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 1px solid #f59e0b;
+  color: get-color('warning', 800);
+  background: linear-gradient(135deg, #fef3c7 0%, get-color('warning', 200) 100%);
+  border: 1px solid get-color('warning', 500);
   border-radius: 9999px;
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
@@ -931,9 +932,9 @@ $mobile-breakpoint: 768px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #1e40af;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border: 1px solid #3b82f6;
+  color: get-color('primary', 800);
+  background: linear-gradient(135deg, get-color('primary', 100) 0%, get-color('primary', 200) 100%);
+  border: 1px solid get-color('primary', 500);
   border-radius: 9999px;
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
@@ -992,21 +993,21 @@ $mobile-breakpoint: 768px;
 
   // Contact variant dark mode (code token - kék)
   .navbar__mobile-menu-user--contact {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-    border-color: #3b82f6;
+    background: linear-gradient(135deg, #1e3a8a 0%, get-color('primary', 800) 100%);
+    border-color: get-color('primary', 500);
 
     .navbar__mobile-menu-user-name {
-      color: #bfdbfe;
+      color: get-color('primary', 200);
     }
 
     .navbar__mobile-menu-user-label {
-      color: #93c5fd;
+      color: get-color('primary', 300);
     }
 
     .navbar__mobile-menu-user-edit {
       background: rgba(0, 0, 0, 0.2);
-      border-color: #3b82f6;
-      color: #bfdbfe;
+      border-color: get-color('primary', 500);
+      color: get-color('primary', 200);
 
       &:hover {
         background: rgba(0, 0, 0, 0.3);
@@ -1016,20 +1017,20 @@ $mobile-breakpoint: 768px;
 
   // Contact badge dark mode (code token)
   .navbar__user-badge--contact {
-    color: #bfdbfe;
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-    border-color: #3b82f6;
+    color: get-color('primary', 200);
+    background: linear-gradient(135deg, #1e3a8a 0%, get-color('primary', 800) 100%);
+    border-color: get-color('primary', 500);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 
     &:hover {
-      background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+      background: linear-gradient(135deg, get-color('primary', 800) 0%, get-color('primary', 600) 100%);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     }
   }
 
   .navbar__guest-badge {
     color: #fef3c7;
-    background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+    background: linear-gradient(135deg, #78350f 0%, get-color('warning', 800) 100%);
     border-color: #b45309;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 
@@ -1039,9 +1040,9 @@ $mobile-breakpoint: 768px;
   }
 
   .navbar__preview-badge {
-    color: #bfdbfe;
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-    border-color: #2563eb;
+    color: get-color('primary', 200);
+    background: linear-gradient(135deg, #1e3a8a 0%, get-color('primary', 800) 100%);
+    border-color: get-color('primary', 600);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 
     &:hover {
@@ -1069,7 +1070,7 @@ $mobile-breakpoint: 768px;
 // High contrast mode
 @media (prefers-contrast: high) {
   .navbar__mobile-menu-link {
-    border: 2px solid #374151;
+    border: 2px solid get-color('gray', 700);
   }
 
   .navbar__mobile-menu-link--active {
@@ -1077,6 +1078,6 @@ $mobile-breakpoint: 768px;
   }
 
   .navbar__mobile-menu-logout {
-    border: 2px solid #b91c1c;
+    border: 2px solid get-color('error', 700);
   }
 }

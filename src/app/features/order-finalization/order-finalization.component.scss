@@ -1,10 +1,11 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // Order Finalization - Stepper Form Styles
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$green-500: #22c55e;
-$green-600: #16a34a;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$green-500: get-color('success', 500);
+$green-600: get-color('success', 600);
 
 // ============================================
 // ANIMATIONS - Keyframes
@@ -91,14 +92,14 @@ $green-600: #16a34a;
 .order-finalization__title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 0.5rem;
   letter-spacing: -0.02em;
 }
 
 .order-finalization__subtitle {
   font-size: 1rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin: 0;
 }
 
@@ -135,7 +136,7 @@ $green-600: #16a34a;
 
     &:hover .stepper__number {
       border-color: $blue-500;
-      background: #eff6ff;
+      background: get-color('primary', 50);
       color: $blue-600; // Kontraszt javítása hover állapotban
     }
   }
@@ -171,13 +172,13 @@ $green-600: #16a34a;
   height: 36px;
   border-radius: 50%;
   background: white;
-  border: 2px solid #e2e8f0;
+  border: 2px solid get-color('slate', 200);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #64748b;
+  color: get-color('slate', 500);
   @include transition-normal;
 
   svg {
@@ -188,7 +189,7 @@ $green-600: #16a34a;
 
 .stepper__label {
   font-size: 0.75rem;
-  color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+  color: get-color('slate', 500); // WCAG AA: 4.6:1 kontraszt (slate-500)
   text-align: center;
   @include transition-normal;
   white-space: nowrap;
@@ -197,7 +198,7 @@ $green-600: #16a34a;
 .stepper__line {
   flex: 1;
   height: 2px;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
   margin: 0 0.25rem;
   max-width: 60px;
   margin-bottom: 1.5rem; // Align with number, not label
@@ -210,7 +211,7 @@ $green-600: #16a34a;
   }
 
   &--active {
-    background: linear-gradient(90deg, #e2e8f0 0%, $blue-500 100%);
+    background: linear-gradient(90deg, get-color('slate', 200) 0%, $blue-500 100%);
   }
 }
 
@@ -242,13 +243,13 @@ $green-600: #16a34a;
 .step-content__title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 0.5rem;
 }
 
 .step-content__description {
   font-size: 0.9375rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin: 0 0 1.5rem;
   line-height: 1.5;
 }
@@ -280,12 +281,12 @@ $green-600: #16a34a;
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #374151;
+  color: get-color('gray', 700);
   margin-bottom: 0.5rem;
 }
 
 .required {
-  color: #ef4444;
+  color: get-color('error', 500);
 }
 
 .form-input,
@@ -294,15 +295,15 @@ $green-600: #16a34a;
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  color: #1e293b;
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  color: get-color('slate', 800);
+  background: get-color('slate', 50);
+  border: 2px solid get-color('slate', 200);
   border-radius: 10px;
   @include transition-fast;
   font-family: inherit;
 
   &::placeholder {
-    color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+    color: get-color('slate', 500); // WCAG AA: 4.6:1 kontraszt (slate-500)
   }
 
   &:focus {
@@ -313,7 +314,7 @@ $green-600: #16a34a;
   }
 
   &--error {
-    border-color: #ef4444;
+    border-color: get-color('error', 500);
 
     &:focus {
       box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
@@ -343,14 +344,14 @@ $green-600: #16a34a;
 .form-error {
   display: block;
   font-size: 0.8125rem;
-  color: #ef4444;
+  color: get-color('error', 500);
   margin-top: 0.375rem;
 }
 
 .form-hint {
   display: block;
   font-size: 0.8125rem;
-  color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+  color: get-color('slate', 500); // WCAG AA: 4.6:1 kontraszt (slate-500)
   margin-top: 0.375rem;
 
   a {
@@ -408,24 +409,24 @@ $green-600: #16a34a;
   justify-content: center;
   gap: 0.5rem;
   padding: 1.5rem;
-  background: #f8fafc;
-  border: 2px dashed #e2e8f0;
+  background: get-color('slate', 50);
+  border: 2px dashed get-color('slate', 200);
   border-radius: 10px;
   cursor: pointer;
   @include transition-fast;
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
   font-weight: 500;
 
   svg {
     width: 32px;
     height: 32px;
-    color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+    color: get-color('slate', 500); // WCAG AA: 4.6:1 kontraszt (slate-500)
   }
 
   &:hover {
     border-color: $blue-500;
-    background: #eff6ff;
+    background: get-color('primary', 50);
     color: $blue-600;
 
     svg {
@@ -440,7 +441,7 @@ $green-600: #16a34a;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: #f0fdf4;
+  background: get-color('success', 50);
   border: 2px solid #86efac;
   border-radius: 10px;
 }
@@ -448,7 +449,7 @@ $green-600: #16a34a;
 .file-upload__filename {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #166534;
+  color: get-color('success', 800);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -457,9 +458,9 @@ $green-600: #16a34a;
 .file-upload__remove {
   padding: 0.375rem;
   background: white;
-  border: 1px solid #fecaca;
+  border: 1px solid get-color('error', 200);
   cursor: pointer;
-  color: #dc2626;
+  color: get-color('error', 600);
   border-radius: 6px;
   @include transition-fast;
   flex-shrink: 0;
@@ -471,7 +472,7 @@ $green-600: #16a34a;
   }
 
   &:hover {
-    background: #fee2e2;
+    background: get-color('error', 100);
     border-color: #fca5a5;
     transform: scale(1.05);
   }
@@ -495,13 +496,13 @@ $green-600: #16a34a;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.5rem 0.75rem;
-  background: #f0fdf4;
+  background: get-color('success', 50);
   border-radius: 8px;
 }
 
 .file-list__filename {
   font-size: 0.8125rem;
-  color: #166534;
+  color: get-color('success', 800);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -510,9 +511,9 @@ $green-600: #16a34a;
 .file-list__remove {
   padding: 0.25rem;
   background: white;
-  border: 1px solid #fecaca;
+  border: 1px solid get-color('error', 200);
   cursor: pointer;
-  color: #dc2626;
+  color: get-color('error', 600);
   border-radius: 6px;
   @include transition-fast;
   flex-shrink: 0;
@@ -524,7 +525,7 @@ $green-600: #16a34a;
   }
 
   &:hover {
-    background: #fee2e2;
+    background: get-color('error', 100);
     border-color: #fca5a5;
     transform: scale(1.05);
   }
@@ -541,7 +542,7 @@ $green-600: #16a34a;
   gap: 0.75rem;
   cursor: pointer;
   font-size: 0.9375rem;
-  color: #374151;
+  color: get-color('gray', 700);
   line-height: 1.5;
 
   input {
@@ -556,8 +557,8 @@ $green-600: #16a34a;
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 2px solid get-color('slate', 200);
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -620,9 +621,9 @@ $green-600: #16a34a;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   padding: 0.5rem 0.75rem;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   border-radius: 8px;
   @include transition-normal;
 
@@ -633,8 +634,8 @@ $green-600: #16a34a;
   }
 
   &--saving {
-    color: #1e40af; // WCAG AA compliant: 4.5:1+ kontraszt fehér háttéren
-    background: #eff6ff;
+    color: get-color('primary', 800); // WCAG AA compliant: 4.5:1+ kontraszt fehér háttéren
+    background: get-color('primary', 50);
 
     svg {
       animation: spin 1s linear infinite;
@@ -643,19 +644,19 @@ $green-600: #16a34a;
 
   &--saved {
     color: $green-600;
-    background: #f0fdf4;
+    background: get-color('success', 50);
   }
 
   &--error {
-    color: #dc2626;
-    background: #fef2f2;
+    color: get-color('error', 600);
+    background: get-color('error', 50);
   }
 }
 
 // Footer / Actions
 .order-finalization__footer {
   background: white;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
   padding: 1rem 1.5rem;
   position: sticky;
   bottom: 0;
@@ -719,13 +720,13 @@ $green-600: #16a34a;
   }
 
   &--secondary {
-    background: #f1f5f9;
-    border-color: #e2e8f0;
-    color: #64748b;
+    background: get-color('slate', 100);
+    border-color: get-color('slate', 200);
+    color: get-color('slate', 500);
 
     &:hover:not(:disabled) {
-      background: #e2e8f0;
-      color: #475569;
+      background: get-color('slate', 200);
+      color: get-color('slate', 600);
     }
   }
 
@@ -735,7 +736,7 @@ $green-600: #16a34a;
     color: $blue-500;
 
     &:hover:not(:disabled) {
-      background: #eff6ff;
+      background: get-color('primary', 50);
     }
   }
 }
@@ -744,7 +745,7 @@ $green-600: #16a34a;
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #e2e8f0;
+  border: 3px solid get-color('slate', 200);
   border-top-color: $blue-500;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -818,7 +819,7 @@ $green-600: #16a34a;
 
 // Rich Text Editor
 .editor-container {
-  border: 1px solid #d1d5db;
+  border: 1px solid get-color('gray', 300);
   border-radius: 0.5rem;
   overflow: hidden;
   background: #fff;
@@ -836,7 +837,7 @@ $green-600: #16a34a;
   }
 
   .NgxEditor__MenuBar {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid get-color('gray', 200);
     background: #f9fafb;
     padding: 0.5rem;
     gap: 0.25rem;
@@ -848,10 +849,10 @@ $green-600: #16a34a;
     padding: 0.375rem 0.5rem;
     border-radius: 0.25rem;
     cursor: pointer;
-    color: #374151;
+    color: get-color('gray', 700);
 
     &:hover {
-      background: #e5e7eb;
+      background: get-color('gray', 200);
     }
 
     &.NgxEditor__MenuItem--Active {
@@ -866,7 +867,7 @@ $green-600: #16a34a;
   }
 
   .NgxEditor__Seperator {
-    border-left: 1px solid #d1d5db;
+    border-left: 1px solid get-color('gray', 300);
     margin: 0 0.5rem;
     height: 1.5rem;
   }
@@ -876,10 +877,10 @@ $green-600: #16a34a;
     padding: 0.75rem 1rem;
     font-size: 0.9375rem;
     line-height: 1.6;
-    color: #1e293b;
+    color: get-color('slate', 800);
 
     &__Placeholder {
-      color: #6b7280; // WCAG AA: 4.6:1 kontraszt (gray-500)
+      color: get-color('gray', 500); // WCAG AA: 4.6:1 kontraszt (gray-500)
     }
 
     p {

@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 /**
  * Step Info Dialog Styles
@@ -34,7 +35,7 @@
     @include transition-normal;
 
     &:hover {
-      background: #2563eb;
+      background: get-color('primary', 600);
       transform: translateY(-1px);
     }
 
@@ -42,10 +43,7 @@
       transform: translateY(0);
     }
 
-    &:focus-visible {
-      outline: 2px solid var(--color-primary, #3b82f6);
-      outline-offset: 2px;
-    }
+    @include focus-ring;
   }
 }
 

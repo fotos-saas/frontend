@@ -1,10 +1,11 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // Status colors
 $color-active: #10b981;
-$color-extra: #6b7280;
-$color-banned: #ef4444;
-$color-me: #3b82f6;
+$color-extra: get-color('gray', 500);
+$color-banned: get-color('error', 500);
+$color-me: get-color('primary', 500);
 $green-500: #10b981;
 $green-600: #059669;
 
@@ -16,7 +17,7 @@ $green-600: #059669;
   margin-bottom: 0.75rem;
   padding: 0.5rem 0.75rem;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: get-color('gray', 500);
   background: rgba(0, 0, 0, 0.04);
   border-radius: 0.5rem;
 
@@ -35,7 +36,7 @@ $green-600: #059669;
   justify-content: center;
   gap: 1rem;
   padding: 2rem;
-  color: #6b7280;
+  color: get-color('gray', 500);
 
   lucide-icon {
     opacity: 0.5;
@@ -79,7 +80,7 @@ $green-600: #059669;
   transition: background 0.2s;
 
   &:hover {
-    background: #f3f4f6;
+    background: get-color('gray', 100);
   }
 
   &__status-dot {
@@ -127,7 +128,7 @@ $green-600: #059669;
     gap: 0.5rem;
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #111827;
+    color: get-color('gray', 900);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -141,18 +142,18 @@ $green-600: #059669;
     text-transform: uppercase;
     letter-spacing: 0.025em;
     border-radius: 0.25rem;
-    background: #e5e7eb;
-    color: #4b5563;
+    background: get-color('gray', 200);
+    color: get-color('gray', 600);
   }
 
   &--extra &__badge {
-    background: #f3f4f6;
-    color: #6b7280;
+    background: get-color('gray', 100);
+    color: get-color('gray', 500);
   }
 
   &--banned &__badge {
-    background: #fef2f2;
-    color: #991b1b;
+    background: get-color('error', 50);
+    color: get-color('error', 800);
   }
 
   &__meta {
@@ -161,7 +162,7 @@ $green-600: #059669;
     gap: 0.5rem;
     margin-top: 0.25rem;
     font-size: 0.8125rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
   }
 
   &__activity {
@@ -175,8 +176,8 @@ $green-600: #059669;
     padding: 0.375rem 0.625rem;
     font-size: 0.8125rem;
     font-weight: 600;
-    color: #6b7280;
-    background: #e5e7eb;
+    color: get-color('gray', 500);
+    background: get-color('gray', 200);
     border-radius: 0.5rem;
 
     lucide-icon {
@@ -192,16 +193,16 @@ $green-600: #059669;
     width: 2rem;
     height: 2rem;
     padding: 0;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     background: transparent;
-    border: 2px solid #e5e7eb;
+    border: 2px solid get-color('gray', 200);
     border-radius: 0.5rem;
     cursor: pointer;
     @include transition-normal;
 
     &:hover:not(:disabled) {
-      color: #6b7280;
-      border-color: #d1d5db;
+      color: get-color('gray', 500);
+      border-color: get-color('gray', 300);
       background: #f9fafb;
     }
 
@@ -244,11 +245,11 @@ $green-600: #059669;
     @include transition-normal;
 
     &--outline {
-      color: #4b5563;
-      background: #f3f4f6;
+      color: get-color('gray', 600);
+      background: get-color('gray', 100);
 
       &:hover:not(:disabled) {
-        background: #e5e7eb;
+        background: get-color('gray', 200);
       }
 
       &:disabled {

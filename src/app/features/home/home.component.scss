@@ -1,12 +1,13 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // ============================================================================
 // HOME KOMPONENS - DARK MODE SUPPORT
 // ============================================================================
 
 // SCSS változók (Safari kompatibilitás)
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
 
 // ============================================
 // ANIMATIONS - Keyframes
@@ -203,7 +204,7 @@ $blue-600: #2563eb;
   background: var(--gradient-yellow);
 
   svg {
-    color: #d97706;
+    color: get-color('warning', 600);
   }
 }
 
@@ -279,7 +280,7 @@ $blue-600: #2563eb;
   }
 
   &--empty {
-    border-color: #f59e0b;
+    border-color: get-color('warning', 500);
     background: var(--gradient-yellow);
   }
 }
@@ -304,7 +305,7 @@ $blue-600: #2563eb;
     background: var(--gradient-yellow);
 
     svg {
-      color: #d97706;
+      color: get-color('warning', 600);
     }
   }
 }
@@ -331,7 +332,7 @@ $blue-600: #2563eb;
   color: var(--text-primary);
 
   &--empty {
-    color: #d97706;
+    color: get-color('warning', 600);
     font-weight: 500;
     font-style: italic;
   }
@@ -372,10 +373,7 @@ $blue-600: #2563eb;
       color: $blue-500;
     }
 
-    &:focus-visible {
-      outline: 2px solid $blue-500;
-      outline-offset: 2px;
-    }
+    @include focus-ring;
   }
 }
 
@@ -479,24 +477,24 @@ $blue-600: #2563eb;
 
 // Warning variant for nav-card
 .nav-card--warning {
-  border-color: #f59e0b;
+  border-color: get-color('warning', 500);
 
   &:hover {
-    background: #fffbeb;
-    border-color: #d97706;
+    background: get-color('warning', 50);
+    border-color: get-color('warning', 600);
 
     .nav-card__icon--warning {
-      background: #d97706;
+      background: get-color('warning', 600);
     }
 
     .nav-card__arrow {
-      color: #d97706;
+      color: get-color('warning', 600);
     }
   }
 }
 
 .nav-card__icon--warning {
-  background: #f59e0b;
+  background: get-color('warning', 500);
 }
 
 // Primary variant for nav-card (Minta Választó)
@@ -532,7 +530,7 @@ $blue-600: #2563eb;
   align-items: center;
   gap: 0.75rem;
   background: var(--gradient-yellow);
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid get-color('warning', 500);
   border-radius: 12px;
   padding: 1rem 1.25rem;
   text-decoration: none;
@@ -560,7 +558,7 @@ $blue-600: #2563eb;
   svg {
     width: 22px;
     height: 22px;
-    color: #d97706;
+    color: get-color('warning', 600);
   }
 }
 
@@ -574,18 +572,18 @@ $blue-600: #2563eb;
 .missing-alert__title {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #d97706;
+  color: get-color('warning', 600);
 }
 
 .missing-alert__details {
   font-size: 0.8125rem;
-  color: #f59e0b;
+  color: get-color('warning', 500);
 }
 
 .missing-alert__arrow {
   width: 20px;
   height: 20px;
-  color: #d97706;
+  color: get-color('warning', 600);
   flex-shrink: 0;
   transition: transform 0.2s;
 }

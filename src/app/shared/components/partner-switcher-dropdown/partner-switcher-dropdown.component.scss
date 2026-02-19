@@ -1,5 +1,6 @@
 // Partner Switcher Dropdown
 
+@use 'styles/colors' as *;
 $transition-fast: 0.15s ease;
 
 @keyframes dropdownEntry {
@@ -100,7 +101,7 @@ $transition-fast: 0.15s ease;
     min-width: 240px;
     max-width: 320px;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 12px;
     box-shadow:
       0 4px 16px #0000001f,
@@ -113,7 +114,7 @@ $transition-fast: 0.15s ease;
   &__loading {
     padding: 0.75rem 1rem;
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     text-align: center;
   }
 
@@ -139,10 +140,10 @@ $transition-fast: 0.15s ease;
     }
 
     &--current {
-      background: #f0fdf4;
+      background: get-color('success', 50);
 
       &:hover {
-        background: #dcfce7;
+        background: get-color('success', 100);
       }
     }
   }
@@ -158,7 +159,7 @@ $transition-fast: 0.15s ease;
   &__option-name {
     font-size: 0.8rem;
     font-weight: 500;
-    color: #1f2937;
+    color: get-color('gray', 800);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -171,15 +172,15 @@ $transition-fast: 0.15s ease;
     letter-spacing: 0.03em;
 
     &--designer { color: #9333ea; }
-    &--marketer { color: #3b82f6; }
-    &--printer { color: #22c55e; }
-    &--assistant { color: #f59e0b; }
+    &--marketer { color: get-color('primary', 500); }
+    &--printer { color: get-color('success', 500); }
+    &--assistant { color: get-color('warning', 500); }
   }
 
   &__check {
     width: 16px;
     height: 16px;
-    color: #22c55e;
+    color: get-color('success', 500);
     flex-shrink: 0;
     margin-left: 0.5rem;
   }
@@ -210,8 +211,8 @@ $transition-fast: 0.15s ease;
     }
 
     &__dropdown {
-      background: #1e293b;
-      border-color: #334155;
+      background: get-color('slate', 800);
+      border-color: get-color('slate', 700);
       box-shadow:
         0 8px 24px #0000004d,
         0 16px 40px #00000033;
@@ -228,7 +229,7 @@ $transition-fast: 0.15s ease;
     }
 
     &__option-name {
-      color: #f1f5f9;
+      color: get-color('slate', 100);
     }
 
     &__check {

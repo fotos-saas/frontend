@@ -1,11 +1,12 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .unassigned-section {
   position: sticky;
   bottom: -24px;
   z-index: 10;
-  background: #fffbeb;
-  border-top: 2px solid #fde68a;
+  background: get-color('warning', 50);
+  border-top: 2px solid get-color('warning', 200);
   padding: 10px 24px;
   padding-top: 42px;
   margin: 0 -24px -24px -24px;
@@ -27,7 +28,7 @@
   gap: 8px;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #92400e;
+  color: get-color('warning', 800);
   margin: 0;
 }
 
@@ -36,18 +37,18 @@
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: get-color('error', 50);
+  border: 1px solid get-color('error', 200);
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #dc2626;
+  color: get-color('error', 600);
   cursor: pointer;
   @include transition-fast;
 }
 
 .delete-unassigned-btn:hover {
-  background: #fee2e2;
+  background: get-color('error', 100);
   border-color: #f87171;
 }
 
@@ -73,19 +74,19 @@
 }
 
 .unassigned-grid::-webkit-scrollbar-thumb {
-  background: #f59e0b;
+  background: get-color('warning', 500);
   border-radius: 3px;
 }
 
 .unassigned-grid::-webkit-scrollbar-thumb:hover {
-  background: #d97706;
+  background: get-color('warning', 600);
 }
 
 .unassigned-photo {
   flex-shrink: 0;
   width: 72px;
   background: #ffffff;
-  border: 2px solid #fde68a;
+  border: 2px solid get-color('warning', 200);
   border-radius: 6px;
   cursor: grab;
   @include transition-fast;
@@ -107,7 +108,7 @@
 .unassigned-photo:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  border-color: #f59e0b;
+  border-color: get-color('warning', 500);
 }
 
 .unassigned-photo:active {
@@ -126,7 +127,7 @@
 .unassigned-name {
   padding: 4px 6px;
   font-size: 0.625rem;
-  background: #1e293b;
+  background: get-color('slate', 800);
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;

@@ -65,10 +65,7 @@
         }
       }
 
-      &:focus-visible {
-        outline: 2px solid colors.get-color('primary', 500);
-        outline-offset: 2px;
-      }
+      @include focus-ring;
     }
 
     // Disabled state (nem kattintható)

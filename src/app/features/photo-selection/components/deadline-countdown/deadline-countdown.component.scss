@@ -1,9 +1,10 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
 /**
  * Deadline Countdown Styles
  * Urgency levels: calm → soon → urgent → critical → expired
  */
-
-$transition: 0.3s ease;
 
 .deadline-countdown {
   display: flex;
@@ -11,7 +12,7 @@ $transition: 0.3s ease;
   padding: 10px 16px;
   border-radius: 12px;
   margin-bottom: 12px;
-  transition: all $transition;
+  @include transition-slow;
   border: 1px solid transparent;
 
   // === URGENCY LEVELS ===
@@ -27,7 +28,7 @@ $transition: 0.3s ease;
 
   &--soon {
     background: #fefce8;
-    border-color: #fde68a;
+    border-color: get-color('warning', 200);
     color: #713f12;
 
     .deadline-countdown__icon { color: #ca8a04; }
@@ -45,26 +46,26 @@ $transition: 0.3s ease;
   }
 
   &--critical {
-    background: #fef2f2;
-    border-color: #fecaca;
+    background: get-color('error', 50);
+    border-color: get-color('error', 200);
     color: #7f1d1d;
     animation: deadlineShake 4s ease-in-out infinite;
 
     .deadline-countdown__icon {
-      color: #dc2626;
+      color: get-color('error', 600);
       animation: iconPulse 1.5s ease-in-out infinite;
     }
-    .deadline-countdown__timer-segment strong { color: #dc2626; }
+    .deadline-countdown__timer-segment strong { color: get-color('error', 600); }
   }
 
   &--expired {
-    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    background: linear-gradient(135deg, get-color('error', 50) 0%, get-color('error', 100) 100%);
     border-color: #f87171;
     color: #7f1d1d;
     animation: deadlineShake 3s ease-in-out infinite;
 
     .deadline-countdown__icon {
-      color: #dc2626;
+      color: get-color('error', 600);
       animation: iconBounce 1s ease-in-out infinite;
     }
   }
@@ -174,7 +175,7 @@ $transition: 0.3s ease;
     &--soon {
       background: rgba(202, 138, 4, 0.1);
       border-color: rgba(202, 138, 4, 0.3);
-      color: #fde68a;
+      color: get-color('warning', 200);
     }
     &--urgent {
       background: rgba(234, 88, 12, 0.1);
@@ -184,7 +185,7 @@ $transition: 0.3s ease;
     &--critical, &--expired {
       background: rgba(220, 38, 38, 0.1);
       border-color: rgba(220, 38, 38, 0.3);
-      color: #fecaca;
+      color: get-color('error', 200);
     }
   }
   .deadline-countdown__icon {

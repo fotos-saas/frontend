@@ -4,7 +4,7 @@
  * Safari kompatibilis
  */
 
-@import 'colors';
+@use 'colors' as *;
 
 // ============================================================================
 // TRANSITION MIXIN-EK (Standardizált animáció)

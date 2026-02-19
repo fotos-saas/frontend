@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .album-info-bar {
   display: flex;
@@ -8,14 +9,14 @@
   gap: 12px;
   padding: 12px 16px;
   margin-bottom: 16px;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
 }
 
 :host-context(.dark) .album-info-bar {
   background: rgba(30, 41, 59, 0.5);
-  border-color: #334155;
+  border-color: get-color('slate', 700);
 }
 
 .info-stats {
@@ -27,31 +28,31 @@
 
 .info-stat {
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .info-stat strong {
-  color: #1e293b;
+  color: get-color('slate', 800);
   font-weight: 600;
 }
 
 :host-context(.dark) .info-stat {
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 :host-context(.dark) .info-stat strong {
-  color: #f1f5f9;
+  color: get-color('slate', 100);
 }
 
 .info-stat--selection {
   padding: 4px 10px;
   background: #fef3c7;
   border-radius: 6px;
-  color: #92400e;
+  color: get-color('warning', 800);
 }
 
 .info-stat--selection strong {
-  color: #92400e;
+  color: get-color('warning', 800);
 }
 
 :host-context(.dark) .info-stat--selection {
@@ -64,12 +65,12 @@
 }
 
 .info-stat--complete {
-  background: #dcfce7;
-  color: #166534;
+  background: get-color('success', 100);
+  color: get-color('success', 800);
 }
 
 .info-stat--complete strong {
-  color: #166534;
+  color: get-color('success', 800);
 }
 
 :host-context(.dark) .info-stat--complete {
@@ -95,13 +96,13 @@
 
 .view-switcher {
   display: flex;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
   border-radius: 6px;
   padding: 2px;
 }
 
 :host-context(.dark) .view-switcher {
-  background: #334155;
+  background: get-color('slate', 700);
 }
 
 .view-switcher__btn {
@@ -113,17 +114,17 @@
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
   @include transition-fast;
 }
 
 .view-switcher__btn:hover {
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 :host-context(.dark) .view-switcher__btn:hover {
-  color: #f1f5f9;
+  color: get-color('slate', 100);
 }
 
 .view-switcher__btn--active {
@@ -133,49 +134,49 @@
 }
 
 :host-context(.dark) .view-switcher__btn--active {
-  background: #1e293b;
-  color: #60a5fa;
+  background: get-color('slate', 800);
+  color: get-color('primary', 400);
 }
 
 .info-expiry {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 :host-context(.dark) .info-expiry {
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .expiry-input-compact {
   padding: 4px 8px;
   font-size: 0.8125rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 4px;
   background: white;
-  color: #1e293b;
+  color: get-color('slate', 800);
   cursor: pointer;
   width: 130px;
 }
 
 .expiry-input-compact:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: get-color('primary', 500);
 }
 
 :host-context(.dark) .expiry-input-compact {
-  background: #0f172a;
-  border-color: #475569;
-  color: #f1f5f9;
+  background: get-color('slate', 900);
+  border-color: get-color('slate', 600);
+  color: get-color('slate', 100);
 }
 
 .expiry-badge-compact {
   padding: 2px 6px;
   font-size: 0.6875rem;
   font-weight: 600;
-  background: #fee2e2;
-  color: #dc2626;
+  background: get-color('error', 100);
+  color: get-color('error', 600);
   border-radius: 4px;
 }
 
@@ -188,16 +189,16 @@
   padding: 4px 8px;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #3b82f6;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  color: get-color('primary', 500);
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 200);
   border-radius: 4px;
   cursor: pointer;
   @include transition-fast;
 }
 
 .extend-btn-compact:hover:not(:disabled) {
-  background: #dbeafe;
+  background: get-color('primary', 100);
 }
 
 .extend-btn-compact:disabled {
@@ -207,6 +208,6 @@
 
 :host-context(.dark) .extend-btn-compact {
   background: #1e3a5f;
-  border-color: #1e40af;
-  color: #93c5fd;
+  border-color: get-color('primary', 800);
+  color: get-color('primary', 300);
 }

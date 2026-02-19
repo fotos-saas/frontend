@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 :host {
   display: block;
 }
@@ -36,7 +38,7 @@
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    @include transition-fast;
     border-radius: 6px 6px 0 0;
 
     &:hover {
@@ -187,7 +189,7 @@
   border-radius: 10px;
   background: var(--card-bg, #ffffff);
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
   min-width: 100px;
 
   &:hover {
@@ -290,7 +292,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
   border: none;
 
   &--outline {

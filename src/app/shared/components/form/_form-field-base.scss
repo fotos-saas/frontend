@@ -5,6 +5,7 @@
 
 @use 'form-tokens' as *;
 @use 'form-animations';
+@use 'styles/colors' as *;
 
 // .ps-field — Fő wrapper block
 .ps-field {
@@ -276,8 +277,8 @@
     position: absolute;
     top: calc(100% + 8px);
     right: -$ps-field-border-width;
-    background: #1e293b;
-    color: #f1f5f9;
+    background: get-color('slate', 800);
+    color: get-color('slate', 100);
     border-radius: $ps-field-border-radius;
     padding: 12px 16px;
     min-width: 240px;
@@ -291,7 +292,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.025em;
-    color: #94a3b8;
+    color: get-color('slate', 400);
     margin-bottom: 8px;
   }
 
@@ -312,7 +313,7 @@
     }
 
     span {
-      color: #cbd5e1;
+      color: get-color('slate', 300);
     }
   }
 }

@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // Create Discussion Dialog - form field stílusok
 // Footer gombok → DialogWrapperComponent ::ng-deep
@@ -16,16 +17,16 @@ $purple-500: #8b5cf6;
     margin-bottom: 0.5rem;
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #374151;
+    color: get-color('gray', 700);
   }
 
   &__required {
-    color: #ef4444;
+    color: get-color('error', 500);
   }
 
   &__optional {
     font-weight: 400;
-    color: #6b7280;
+    color: get-color('gray', 500);
   }
 
   &__input,
@@ -35,15 +36,15 @@ $purple-500: #8b5cf6;
     padding: 0.875rem 1rem;
     font-size: 1rem;
     font-family: inherit;
-    color: #374151;
+    color: get-color('gray', 700);
     background: #f9fafb;
-    border: 2px solid #e5e7eb;
+    border: 2px solid get-color('gray', 200);
     border-radius: 0.625rem;
     outline: none;
     @include transition-normal;
 
     &::placeholder {
-      color: #9ca3af;
+      color: get-color('gray', 400);
     }
 
     &:focus {
@@ -53,11 +54,11 @@ $purple-500: #8b5cf6;
     }
 
     &--error {
-      border-color: #ef4444;
-      background: #fef2f2;
+      border-color: get-color('error', 500);
+      background: get-color('error', 50);
 
       &:focus {
-        border-color: #ef4444;
+        border-color: get-color('error', 500);
         box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
       }
     }
@@ -94,20 +95,20 @@ $purple-500: #8b5cf6;
 
   &__error {
     font-size: 0.8125rem;
-    color: #ef4444;
+    color: get-color('error', 500);
   }
 
   &__char-count {
     margin-left: auto;
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
   }
 
   &__hint {
     display: block;
     margin-top: 0.375rem;
     font-size: 0.8125rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
   }
 }
 

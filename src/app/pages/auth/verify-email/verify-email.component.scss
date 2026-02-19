@@ -1,5 +1,6 @@
 // Verify Email Page - Animation Styles
 @use '../../../shared/styles/auth-page' as auth;
+@use 'styles/colors' as *;
 
 // Keyframes
 @include auth.auth-keyframes-base;
@@ -32,8 +33,8 @@
 
   &__spinner-large {
     @include auth.auth-spinner(3rem, 3px);
-    border-color: #e5e7eb;
-    border-top-color: #2563eb;
+    border-color: get-color('gray', 200);
+    border-top-color: get-color('primary', 600);
   }
 
   // ============================================

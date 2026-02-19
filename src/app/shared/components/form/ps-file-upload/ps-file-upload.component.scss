@@ -1,5 +1,6 @@
 @use '../form-field-base';
 @use '../form-tokens' as *;
+@use 'styles/colors' as *;
 
 :host { display: block; }
 
@@ -235,7 +236,7 @@
 
   &:hover:not(:disabled) {
     background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    color: get-color('error', 500);
   }
 
   &:disabled {
@@ -255,7 +256,7 @@
   padding: 6px 12px;
   border: 1px solid rgba(239, 68, 68, 0.25);
   background: rgba(239, 68, 68, 0.06);
-  color: #dc2626;
+  color: get-color('error', 600);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -267,7 +268,7 @@
     border-color $ps-transition-duration $ps-transition-easing;
 
   &:hover:not(:disabled) {
-    color: #b91c1c;
+    color: get-color('error', 700);
     background: rgba(239, 68, 68, 0.12);
     border-color: rgba(239, 68, 68, 0.4);
   }
@@ -443,7 +444,7 @@
 
   &:hover:not(:disabled) {
     opacity: 1;
-    color: #ef4444;
+    color: get-color('error', 500);
   }
 
   &:disabled {

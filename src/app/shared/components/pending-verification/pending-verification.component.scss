@@ -1,11 +1,12 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // Amber theme (waiting/pending)
-$amber-500: #f59e0b;
-$amber-600: #d97706;
-$amber-100: #fef3c7;
-$amber-gradient-start: #fffbeb;
-$amber-gradient-end: #fef3c7;
+$amber-500: get-color('warning', 500);
+$amber-600: get-color('warning', 600);
+$amber-100: get-color('warning', 100);
+$amber-gradient-start: get-color('warning', 50);
+$amber-gradient-end: get-color('warning', 100);
 
 .pending-overlay {
   position: fixed;
@@ -65,13 +66,13 @@ $amber-gradient-end: #fef3c7;
   margin: 0 0 0.75rem;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: get-color('gray', 900);
 }
 
 .pending-description {
   margin: 0 0 1.5rem;
   font-size: 0.9375rem;
-  color: #6b7280;
+  color: get-color('gray', 500);
   line-height: 1.6;
 }
 
@@ -80,7 +81,7 @@ $amber-gradient-end: #fef3c7;
   margin-bottom: 1.5rem;
   background: #f9fafb;
   border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
 }
 
 .pending-info-row {
@@ -90,19 +91,19 @@ $amber-gradient-end: #fef3c7;
   padding: 0.5rem 0;
 
   &:not(:last-child) {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid get-color('gray', 200);
   }
 }
 
 .pending-info-label {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: get-color('gray', 500);
 }
 
 .pending-info-value {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #111827;
+  color: get-color('gray', 900);
 }
 
 .pending-polling {
@@ -166,11 +167,11 @@ $amber-gradient-end: #fef3c7;
   }
 
   &--secondary {
-    color: #374151;
-    background: #f3f4f6;
+    color: get-color('gray', 700);
+    background: get-color('gray', 100);
 
     &:hover {
-      background: #e5e7eb;
+      background: get-color('gray', 200);
     }
   }
 
@@ -184,7 +185,7 @@ $amber-gradient-end: #fef3c7;
 .pending-help {
   margin: 1.25rem 0 0;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: get-color('gray', 400);
 }
 
 // Mobile responsive

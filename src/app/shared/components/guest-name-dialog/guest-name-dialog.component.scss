@@ -1,10 +1,11 @@
 // GuestNameDialog - content-specific styles only
 // Footer gombok → DialogWrapperComponent ::ng-deep
 // Form elemek → ps-input kezeli
+@use 'styles/colors' as *;
 
 .privacy-hint {
   margin: 1rem 0 0;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: get-color('gray', 400);
   text-align: center;
 }

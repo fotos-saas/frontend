@@ -1,4 +1,5 @@
 // Közös SCSS mixin az action button komponensekhez
+@use 'styles/colors' as *;
 
 @mixin action-button-base {
   display: inline-flex;
@@ -6,7 +7,7 @@
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: get-color('gray', 500);
   background: none;
   border: none;
   border-radius: 0.375rem;
@@ -29,8 +30,8 @@
   @include action-button-base;
 
   &:hover:not(:disabled) {
-    color: #ef4444;
-    background: #fef2f2;
+    color: get-color('error', 500);
+    background: get-color('error', 50);
   }
 }
 
@@ -39,8 +40,8 @@
   @include action-button-base;
 
   &:hover:not(:disabled) {
-    color: #111827;
-    background: #f3f4f6;
+    color: get-color('gray', 900);
+    background: get-color('gray', 100);
   }
 }
 
@@ -49,7 +50,7 @@
   @include action-button-base;
 
   &:hover:not(:disabled) {
-    color: #3b82f6;
-    background: #eff6ff;
+    color: get-color('primary', 500);
+    background: get-color('primary', 50);
   }
 }

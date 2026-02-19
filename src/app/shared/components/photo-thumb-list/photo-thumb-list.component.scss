@@ -1,3 +1,4 @@
+@use 'styles/colors' as *;
 // === Photo Thumb List ===
 // Újrahasználható thumbnail grid komponens.
 // Méretek: sm (48px), md (72px, default), lg (96px)
@@ -19,7 +20,7 @@ $sizes: (
     margin: 3px;
     border-radius: 6px;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
+    border: 1px solid get-color('slate', 200);
     background: #ffffff;
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -44,8 +45,8 @@ $sizes: (
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f1f5f9;
-    color: #94a3b8;
+    background: get-color('slate', 100);
+    color: get-color('slate', 400);
   }
 
   // === Méret variánsok ===
@@ -65,7 +66,7 @@ $sizes: (
   // === Kiemelés (pl. tablókép) ===
 
   &--highlight .thumb-list__item {
-    border-color: #3b82f6;
+    border-color: get-color('primary', 500);
     border-width: 2px;
   }
 }

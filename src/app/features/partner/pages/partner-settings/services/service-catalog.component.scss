@@ -1,5 +1,6 @@
 @use '../../../../../shared/styles/list-page' as list;
 @use '../../../../../../styles/buttons' as *;
+@use 'styles/colors' as *;
 
 .page-header {
   display: flex;
@@ -13,7 +14,7 @@
     align-items: center;
 
     lucide-icon { margin-right: 10px; color: var(--color-primary, #1e3a5f); }
-    h1 { font-size: 1.375rem; font-weight: 700; color: #1e293b; margin: 0; }
+    h1 { font-size: 1.375rem; font-weight: 700; color: get-color('slate', 800); margin: 0; }
   }
 
   .header-actions {
@@ -27,7 +28,7 @@
 
 .page-description {
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin-bottom: 24px;
   line-height: 1.5;
 }
@@ -48,8 +49,8 @@
   display: flex;
   flex-direction: column;
 
-  .service-name { font-weight: 500; color: #1e293b; }
-  .service-desc { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+  .service-name { font-weight: 500; color: get-color('slate', 800); }
+  .service-desc { font-size: 0.75rem; color: get-color('slate', 400); margin-top: 2px; }
 }
 
 .type-badge {
@@ -58,8 +59,8 @@
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: #f1f5f9;
-  color: #475569;
+  background: get-color('slate', 100);
+  color: get-color('slate', 600);
 }
 
 .cell-status {
@@ -72,22 +73,22 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #cbd5e1;
+  background: get-color('slate', 300);
   margin-right: 6px;
 
-  &--active { background: #22c55e; }
+  &--active { background: get-color('success', 500); }
 }
 
 .action-btn--danger:hover {
-  color: #ef4444 !important;
+  color: get-color('error', 500) !important;
 }
 
 .empty-state {
   text-align: center;
   padding: 48px 24px;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 
-  h3 { color: #475569; margin: 16px 0 8px; font-size: 1rem; }
+  h3 { color: get-color('slate', 600); margin: 16px 0 8px; font-size: 1rem; }
   p { font-size: 0.875rem; }
 }
 

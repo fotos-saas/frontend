@@ -1,5 +1,6 @@
 @use '../../../../shared/styles/list-page' as list;
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .school-list-page {
 }
@@ -56,7 +57,7 @@
 }
 
 .school-icon {
-  color: #64748b;
+  color: get-color('slate', 500);
   flex-shrink: 0;
 }
 
@@ -76,7 +77,7 @@
 
 .school-name {
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -88,12 +89,12 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  background: #dbeafe;
+  background: get-color('primary', 100);
   border-radius: 4px;
   flex-shrink: 0;
 
   lucide-icon {
-    color: #3b82f6;
+    color: get-color('primary', 500);
   }
 }
 
@@ -102,7 +103,7 @@
   align-items: center;
   gap: 4px;
   font-size: 0.75rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .school-projects {
@@ -117,8 +118,8 @@
   justify-content: center;
   min-width: 36px;
   padding: 4px 10px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: get-color('slate', 100);
+  color: get-color('slate', 500);
   border-radius: 8px;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -143,11 +144,11 @@
 // Action buttons - közös stílusok
 .action-btn--warning {
   @extend .action-btn;
-  color: #f59e0b;
+  color: get-color('warning', 500);
 
   &:hover {
-    color: #d97706;
-    background: #fffbeb;
+    color: get-color('warning', 600);
+    background: get-color('warning', 50);
   }
 }
 

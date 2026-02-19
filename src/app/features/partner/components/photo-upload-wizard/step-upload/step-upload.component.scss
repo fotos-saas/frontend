@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .step-upload {
   display: flex;
@@ -24,7 +25,7 @@
 .section-header h4 {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0;
   white-space: nowrap;
 }
@@ -40,21 +41,21 @@
   align-items: center;
   gap: 4px;
   padding: 6px 10px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: get-color('error', 50);
+  border: 1px solid get-color('error', 200);
   border-radius: 6px;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #dc2626;
+  color: get-color('error', 600);
   cursor: pointer;
   @include transition-fast;
   white-space: nowrap;
 }
 
 .delete-all-btn:hover {
-  background: #fee2e2;
+  background: get-color('error', 100);
   border-color: #fca5a5;
-  color: #b91c1c;
+  color: get-color('error', 700);
 }
 
 .add-more-btn {
@@ -62,20 +63,20 @@
   align-items: center;
   gap: 4px;
   padding: 6px 10px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 100);
+  border: 1px solid get-color('slate', 200);
   border-radius: 6px;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
   @include transition-fast;
   white-space: nowrap;
 }
 
 .add-more-btn:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: get-color('slate', 200);
+  color: get-color('slate', 800);
 }
 
 /* Photos Grid */
@@ -90,7 +91,7 @@
   aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
-  background: #f1f5f9;
+  background: get-color('slate', 100);
   animation: fadeIn 0.3s ease forwards;
   opacity: 0;
   cursor: pointer;
@@ -132,7 +133,7 @@
 }
 
 .remove-btn:hover {
-  background: #ef4444;
+  background: get-color('error', 500);
   transform: scale(1.1);
 }
 
@@ -184,8 +185,8 @@
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
 }
 
@@ -202,12 +203,12 @@
 .info-content strong {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .info-content span {
   font-size: 0.75rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 /* Responsive */

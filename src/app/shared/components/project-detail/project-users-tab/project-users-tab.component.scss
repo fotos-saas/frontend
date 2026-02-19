@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/list-page' as list;
+@use 'styles/colors' as *;
 
 :host ::ng-deep ps-input.search-box {
   flex: 1;
@@ -13,19 +14,19 @@
 .user-name {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .user-email {
   font-size: 0.75rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin-top: 2px;
 }
 
 .coordinator-badge {
   display: inline-flex;
   align-items: center;
-  color: #d97706;
+  color: get-color('warning', 600);
   margin-top: 2px;
 }
 
@@ -36,8 +37,8 @@
   border-radius: 4px;
   font-size: 0.625rem;
   font-weight: 600;
-  background: #eff6ff;
-  color: #3b82f6;
+  background: get-color('primary', 50);
+  color: get-color('primary', 500);
   margin-top: 2px;
 }
 
@@ -52,13 +53,13 @@
   letter-spacing: 0.025em;
 
   &--green {
-    background: #dcfce7;
-    color: #16a34a;
+    background: get-color('success', 100);
+    color: get-color('success', 600);
   }
 
   &--red {
-    background: #fef2f2;
-    color: #dc2626;
+    background: get-color('error', 50);
+    color: get-color('error', 600);
   }
 
   &--yellow {
@@ -67,8 +68,8 @@
   }
 
   &--gray {
-    background: #f1f5f9;
-    color: #64748b;
+    background: get-color('slate', 100);
+    color: get-color('slate', 500);
   }
 }
 
@@ -80,17 +81,17 @@
 .rank-level {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .rank-points {
   font-size: 0.6875rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .activity-date {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .actions {
@@ -111,7 +112,7 @@
     justify-content: flex-end;
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid get-color('slate', 200);
   }
 }
 

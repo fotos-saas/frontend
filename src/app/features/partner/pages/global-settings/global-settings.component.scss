@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/settings-page' as *;
+@use 'styles/colors' as *;
 
 .page-header {
   display: flex;
@@ -13,14 +14,14 @@
   h1 {
     font-size: 1.375rem;
     font-weight: 700;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0;
   }
 }
 
 .page-description {
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin-bottom: 32px;
   max-width: 600px;
   line-height: 1.5;
@@ -38,7 +39,7 @@
   display: inline-flex;
   align-items: center;
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   padding: 6px 10px;
   margin: 4px;
@@ -46,18 +47,18 @@
   transition: border-color 0.15s;
 
   &:hover {
-    border-color: #cbd5e1;
+    border-color: get-color('slate', 300);
   }
 }
 
 .size-label {
   font-weight: 500;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin-right: 6px;
 }
 
 .size-value {
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.75rem;
   margin-right: 6px;
 }
@@ -84,20 +85,20 @@
   height: 18px;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
 
   &:hover {
-    background: #fee2e2;
-    color: #dc2626;
+    background: get-color('error', 100);
+    color: get-color('error', 600);
   }
 }
 
 .no-sizes-text {
   font-size: 0.8125rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   font-style: italic;
   margin-bottom: 16px;
 }
@@ -145,7 +146,7 @@
   align-items: center;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
 }
 
 .reset-btn {
@@ -153,8 +154,8 @@
   align-items: center;
   padding: 8px 14px;
   background: transparent;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  color: get-color('slate', 500);
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.8125rem;
   font-weight: 500;
@@ -166,8 +167,8 @@
   }
 
   &:hover {
-    background: #f1f5f9;
-    color: #1e293b;
+    background: get-color('slate', 100);
+    color: get-color('slate', 800);
   }
 }
 

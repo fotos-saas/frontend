@@ -1,13 +1,15 @@
+@use 'styles/colors' as *;
+
 // Colors - WCAG AA compliant contrast ratios
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$green-500: #22c55e;
-$green-600: #16a34a;
-$amber-500: #f59e0b;
-$amber-600: #d97706; // Darker for better contrast
-$red-500: #ef4444;
-$gray-500: #6b7280;
-$gray-600: #4b5563; // Darker gray for better contrast (4.5:1 on white)
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$green-500: get-color('success', 500);
+$green-600: get-color('success', 600);
+$amber-500: get-color('warning', 500);
+$amber-600: get-color('warning', 600); // Darker for better contrast
+$red-500: get-color('error', 500);
+$gray-500: get-color('gray', 500);
+$gray-600: get-color('gray', 600); // Darker gray for better contrast (4.5:1 on white)
 $purple-500: #a855f7;
 $purple-600: #9333ea; // Darker purple for better contrast
 
@@ -58,7 +60,7 @@ $purple-600: #9333ea; // Darker purple for better contrast
   &__spinner {
     width: 2.5rem;
     height: 2.5rem;
-    border: 3px solid #e5e7eb;
+    border: 3px solid get-color('gray', 200);
     border-top-color: $blue-500;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -71,7 +73,7 @@ $purple-600: #9333ea; // Darker purple for better contrast
     align-items: center;
     padding: 3rem 2rem;
     text-align: center;
-    background: #fef2f2;
+    background: get-color('error', 50);
     border-radius: 1rem;
 
     svg {
@@ -83,7 +85,7 @@ $purple-600: #9333ea; // Darker purple for better contrast
 
     p {
       margin: 0 0 1.5rem;
-      color: #991b1b;
+      color: get-color('error', 800);
     }
 
     button {
@@ -97,7 +99,7 @@ $purple-600: #9333ea; // Darker purple for better contrast
       cursor: pointer;
 
       &:hover {
-        background: #dc2626;
+        background: get-color('error', 600);
       }
     }
   }
@@ -118,7 +120,7 @@ $purple-600: #9333ea; // Darker purple for better contrast
     margin: 0 0 0.75rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #111827;
+    color: get-color('gray', 900);
 
     @media (min-width: 640px) {
       font-size: 1.75rem;
@@ -150,7 +152,7 @@ $purple-600: #9333ea; // Darker purple for better contrast
     }
 
     &--success {
-      background: #dcfce7;
+      background: get-color('success', 100);
       color: $green-600;
     }
   }
@@ -209,7 +211,7 @@ $purple-600: #9333ea; // Darker purple for better contrast
     margin: 0 0 1rem;
     font-size: 1rem;
     font-weight: 600;
-    color: #111827;
+    color: get-color('gray', 900);
   }
 
   // Locked message
@@ -218,7 +220,7 @@ $purple-600: #9333ea; // Darker purple for better contrast
     align-items: center;
     gap: 0.75rem;
     padding: 1rem;
-    background: #f3f4f6;
+    background: get-color('gray', 100);
     border-radius: 0.75rem;
     font-size: 0.875rem;
     color: $gray-600; // Better contrast

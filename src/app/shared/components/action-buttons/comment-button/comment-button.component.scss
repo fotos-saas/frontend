@@ -1,10 +1,11 @@
 @use '../action-button.mixin' as btn;
+@use 'styles/colors' as *;
 
 .comment-button {
   @include btn.action-button-default;
 
   &--active {
-    color: #3b82f6;
-    background: #eff6ff;
+    color: get-color('primary', 500);
+    background: get-color('primary', 50);
   }
 }

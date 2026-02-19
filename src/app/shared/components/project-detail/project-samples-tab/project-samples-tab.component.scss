@@ -1,5 +1,6 @@
 @use '../../../../shared/styles/list-page' as list;
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .samples-header {
   display: flex;
@@ -54,7 +55,7 @@
 }
 
 .sample-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   overflow: hidden;
   animation: cardEntry 0.25s ease forwards;
@@ -66,18 +67,18 @@
   display: flex;
   align-items: center;
   padding: 8px 10px;
-  background: #f8fafc;
+  background: get-color('slate', 50);
 }
 
 .sample-date {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .sample-versions {
   font-size: 0.6875rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   margin-left: 10px;
 }
 
@@ -93,7 +94,7 @@
 // --- Verziók strip: mindig látható ---
 
 .versions-strip {
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
 }
 
 .version-item {
@@ -104,11 +105,11 @@
   transition: background 0.12s ease;
 
   &:hover {
-    background: #f8fafc;
+    background: get-color('slate', 50);
   }
 
   & + .version-item {
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid get-color('slate', 100);
   }
 }
 
@@ -147,8 +148,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: get-color('slate', 100);
+  color: get-color('slate', 400);
 }
 
 .version-detail {
@@ -177,12 +178,12 @@
 
 .version-date {
   font-size: 0.6875rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .version-desc {
   font-size: 0.75rem;
-  color: #475569;
+  color: get-color('slate', 600);
   margin: 2px 0 0 0;
   line-height: 1.4;
   display: -webkit-box;
@@ -203,14 +204,14 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 5px;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   cursor: pointer;
   transition: all 0.12s ease;
 
   &:hover {
-    background: #f1f5f9;
+    background: get-color('slate', 100);
     color: var(--color-primary, #1e3a5f);
-    border-color: #e2e8f0;
+    border-color: get-color('slate', 200);
   }
 }
 
@@ -228,9 +229,9 @@
 }
 
 .action-btn--danger:hover {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #fecaca;
+  background: get-color('error', 50);
+  color: get-color('error', 600);
+  border-color: get-color('error', 200);
 }
 
 // --- Skeleton ---
@@ -238,7 +239,7 @@
 .skeleton-row {
   height: 52px;
   border-radius: 8px;
-  background: #f1f5f9;
+  background: get-color('slate', 100);
 
   & + .skeleton-row {
     margin-top: 6px;
@@ -246,7 +247,7 @@
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, get-color('slate', 100) 25%, get-color('slate', 200) 50%, get-color('slate', 100) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease infinite;
 }

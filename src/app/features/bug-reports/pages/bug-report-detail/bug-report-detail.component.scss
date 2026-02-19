@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 :host { display: block; }
 
@@ -8,7 +9,7 @@
 
 .skeleton-bar {
   border-radius: 8px;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
 }
 
 .skeleton-shimmer {
@@ -28,15 +29,15 @@
   gap: 6px;
   padding: 8px 14px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.875rem;
   cursor: pointer;
-  color: #475569;
+  color: get-color('slate', 600);
   @include transition-fast;
 
   &:hover {
-    background: #f8fafc;
+    background: get-color('slate', 50);
     border-color: var(--color-primary, #1e3a5f);
     color: var(--color-primary, #1e3a5f);
   }
@@ -53,7 +54,7 @@
   h1 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0;
   }
 }
@@ -69,7 +70,7 @@
 .report-id {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   flex-shrink: 0;
 }
 
@@ -84,7 +85,7 @@
   align-items: center;
   gap: 6px;
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin: 0 0 24px;
 }
 
@@ -98,21 +99,21 @@
     gap: 8px;
     font-size: 1rem;
     font-weight: 600;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0 0 12px;
     padding-bottom: 8px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid get-color('slate', 200);
   }
 }
 
 .description-content {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   padding: 16px;
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: #334155;
+  color: get-color('slate', 700);
 
   :deep(p) { margin: 0 0 8px; }
   :deep(ul), :deep(ol) { margin: 0 0 8px; padding-left: 20px; }
@@ -126,7 +127,7 @@
 }
 
 .attachment-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
@@ -148,7 +149,7 @@
   display: block;
   padding: 6px 10px;
   font-size: 0.6875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -166,7 +167,7 @@
     top: 4px;
     bottom: 4px;
     width: 2px;
-    background: #e2e8f0;
+    background: get-color('slate', 200);
   }
 }
 
@@ -196,12 +197,12 @@
   font-size: 0.8125rem;
 }
 
-.timeline-actor { color: #475569; font-weight: 500; }
-.timeline-date { color: #94a3b8; }
+.timeline-actor { color: get-color('slate', 600); font-weight: 500; }
+.timeline-date { color: get-color('slate', 400); }
 .timeline-note {
   width: 100%;
   margin: 4px 0 0;
-  color: #64748b;
+  color: get-color('slate', 500);
   font-style: italic;
 }
 
@@ -214,8 +215,8 @@
 }
 
 .comment-item {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   padding: 12px 16px;
 }
@@ -230,17 +231,17 @@
 .comment-author {
   font-weight: 600;
   font-size: 0.8125rem;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .comment-date {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .comment-body {
   font-size: 0.875rem;
-  color: #334155;
+  color: get-color('slate', 700);
   line-height: 1.5;
 
   :deep(p) { margin: 0; }
@@ -285,11 +286,11 @@
   font-weight: 600;
   white-space: nowrap;
 
-  &--new { background: #dbeafe; color: #1d4ed8; }
+  &--new { background: get-color('primary', 100); color: get-color('primary', 700); }
   &--progress { background: #fef3c7; color: #b45309; }
   &--resolved { background: #d1fae5; color: #047857; }
-  &--closed { background: #f1f5f9; color: #64748b; }
-  &--critical { background: #fecaca; color: #b91c1c; }
+  &--closed { background: get-color('slate', 100); color: get-color('slate', 500); }
+  &--critical { background: get-color('error', 200); color: get-color('error', 700); }
   &--high { background: #fed7aa; color: #c2410c; }
   &--medium { background: #fef3c7; color: #b45309; }
   &--low { background: #e0f2fe; color: #0369a1; }

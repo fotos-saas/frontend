@@ -1,10 +1,11 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .client-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, get-color('slate', 50) 0%, get-color('slate', 200) 100%);
 }
 
 /* ============ Main Container ============ */
@@ -73,13 +74,13 @@
 }
 
 .nav-item--logout {
-  color: #dc2626;
+  color: get-color('error', 600);
   margin-top: 8px;
 }
 
 .nav-item--logout:hover {
   background: rgba(220, 38, 38, 0.1);
-  color: #b91c1c;
+  color: get-color('error', 700);
 }
 
 .nav-item--action {

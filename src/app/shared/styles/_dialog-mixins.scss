@@ -21,14 +21,15 @@
 // ============================================
 // COLOR VARIABLES
 // ============================================
-$blue-500: #3b82f6 !default;
-$blue-600: #2563eb !default;
-$green-500: #22c55e !default;
-$green-600: #16a34a !default;
+@use 'styles/colors' as *;
+$blue-500: get-color('primary', 500) !default;
+$blue-600: get-color('primary', 600) !default;
+$green-500: get-color('success', 500) !default;
+$green-600: get-color('success', 600) !default;
 $orange-500: #f97316 !default;
 $orange-600: #ea580c !default;
-$red-500: #ef4444 !default;
-$red-600: #dc2626 !default;
+$red-500: get-color('error', 500) !default;
+$red-600: get-color('error', 600) !default;
 
 // ============================================
 // BACKDROP MIXIN
@@ -70,7 +71,7 @@ $red-600: #dc2626 !default;
   right: 1rem;
   z-index: var(--z-dropdown);
   padding: 0.5rem;
-  color: #6b7280;
+  color: get-color('gray', 500);
   background: transparent;
   border: none;
   border-radius: 0.5rem;
@@ -78,8 +79,8 @@ $red-600: #dc2626 !default;
   transition: all 0.2s;
 
   &:hover:not(:disabled) {
-    color: #4b5563;
-    background: #f3f4f6;
+    color: get-color('gray', 600);
+    background: get-color('gray', 100);
   }
 
   &:disabled {
@@ -96,7 +97,7 @@ $red-600: #dc2626 !default;
 // ============================================
 // HEADER MIXIN
 // ============================================
-@mixin header($gradient-start: #eff6ff, $gradient-end: #dbeafe) {
+@mixin header($gradient-start: get-color('primary', 50), $gradient-end: get-color('primary', 100)) {
   padding: 2rem 1.5rem;
   text-align: center;
   background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
@@ -130,7 +131,7 @@ $red-600: #dc2626 !default;
   margin: 0 0 0.5rem;
   font-size: $font-size;
   font-weight: 600;
-  color: #111827;
+  color: get-color('gray', 900);
 }
 
 // ============================================
@@ -139,7 +140,7 @@ $red-600: #dc2626 !default;
 @mixin description($max-width: 18rem) {
   margin: 0 auto;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: get-color('gray', 500);
   max-width: $max-width;
 }
 
@@ -157,15 +158,15 @@ $red-600: #dc2626 !default;
   width: 100%;
   padding: 0.875rem 1rem;
   font-size: 1rem;
-  color: #374151;
+  color: get-color('gray', 700);
   background: #f9fafb;
-  border: 2px solid #e5e7eb;
+  border: 2px solid get-color('gray', 200);
   border-radius: 0.625rem;
   outline: none;
   transition: all 0.2s;
 
   &::placeholder {
-    color: #9ca3af;
+    color: get-color('gray', 400);
   }
 
   &:focus {
@@ -176,7 +177,7 @@ $red-600: #dc2626 !default;
 
   &--error {
     border-color: $red-500;
-    background: #fef2f2;
+    background: get-color('error', 50);
 
     &:focus {
       border-color: $red-500;
@@ -239,13 +240,13 @@ $red-600: #dc2626 !default;
 
 @mixin btn-secondary {
   @include btn-base;
-  color: #4b5563;
+  color: get-color('gray', 600);
   background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
 
   &:hover:not(:disabled) {
-    background: #f3f4f6;
-    border-color: #d1d5db;
+    background: get-color('gray', 100);
+    border-color: get-color('gray', 300);
   }
 }
 
@@ -295,28 +296,28 @@ $red-600: #dc2626 !default;
   }
 
   @if $type == 'error' {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
+    background: get-color('error', 50);
+    color: get-color('error', 800);
+    border: 1px solid get-color('error', 200);
 
     svg {
-      color: #dc2626;
+      color: get-color('error', 600);
     }
   } @else if $type == 'warning' {
-    background: #fffbeb;
-    color: #92400e;
+    background: get-color('warning', 50);
+    color: get-color('warning', 800);
     border: 1px solid #fed7aa;
 
     svg {
       color: #f97316;
     }
   } @else if $type == 'info' {
-    background: #eff6ff;
-    color: #1e40af;
-    border: 1px solid #bfdbfe;
+    background: get-color('primary', 50);
+    color: get-color('primary', 800);
+    border: 1px solid get-color('primary', 200);
 
     svg {
-      color: #3b82f6;
+      color: get-color('primary', 500);
     }
   }
 }

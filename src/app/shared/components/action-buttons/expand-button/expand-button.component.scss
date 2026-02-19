@@ -1,10 +1,11 @@
 @use '../action-button.mixin' as btn;
+@use 'styles/colors' as *;
 
 .expand-button {
   @include btn.action-button-primary;
 
   // Feltűnőbb stílus
-  color: #3b82f6; // primary-500
+  color: get-color('primary', 500);
   font-weight: 500;
 
   svg {
@@ -16,7 +17,7 @@
   }
 
   &:hover:not(:disabled) {
-    color: #2563eb; // primary-600
-    background: #eff6ff; // primary-50
+    color: get-color('primary', 600);
+    background: get-color('primary', 50);
   }
 }

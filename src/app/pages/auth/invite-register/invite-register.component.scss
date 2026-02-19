@@ -1,4 +1,5 @@
 @use '../../../../styles/buttons' as *;
+@use 'styles/colors' as *;
 
 .auth-card {
   background: rgba(255, 255, 255, 0.95);
@@ -25,13 +26,13 @@
 .error-state h2,
 .success-state h2 {
   font-size: 1.25rem;
-  color: #1f2937;
+  color: get-color('gray', 800);
   margin: 1rem 0 0.5rem 0;
 }
 
 .error-state p,
 .success-state p {
-  color: #6b7280;
+  color: get-color('gray', 500);
   margin: 0 0 1.5rem 0;
 }
 
@@ -51,21 +52,21 @@
 }
 
 .icon-circle.error {
-  background: #fef2f2;
-  color: #ef4444;
+  background: get-color('error', 50);
+  color: get-color('error', 500);
 }
 
 .icon-circle.success {
-  background: #f0fdf4;
-  color: #22c55e;
+  background: get-color('success', 50);
+  color: get-color('success', 500);
 }
 
 .spinner-large {
   display: block;
   width: 48px;
   height: 48px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #3b82f6;
+  border: 3px solid get-color('gray', 200);
+  border-top-color: get-color('primary', 500);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto;
@@ -79,12 +80,12 @@
 .auth-header h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1f2937;
+  color: get-color('gray', 800);
   margin: 0 0 0.75rem 0;
 }
 
 .auth-subtitle {
-  color: #6b7280;
+  color: get-color('gray', 500);
   margin: 0;
 }
 
@@ -97,8 +98,8 @@
 }
 
 .partner-badge {
-  background: #eff6ff;
-  color: #2563eb;
+  background: get-color('primary', 50);
+  color: get-color('primary', 600);
   padding: 0.375rem 0.75rem;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -106,8 +107,8 @@
 }
 
 .role-badge {
-  background: #f0fdf4;
-  color: #16a34a;
+  background: get-color('success', 50);
+  color: get-color('success', 600);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -115,14 +116,14 @@
 }
 
 .error-text {
-  color: #ef4444;
+  color: get-color('error', 500);
   font-size: 0.75rem;
   margin-top: 0.25rem;
   display: block;
 }
 
 .hint-text {
-  color: #6b7280;
+  color: get-color('gray', 500);
   font-size: 0.75rem;
   margin-top: 0.25rem;
   display: block;
@@ -144,8 +145,8 @@
 }
 
 .alert-error {
-  background: #fef2f2;
-  color: #991b1b;
+  background: get-color('error', 50);
+  color: get-color('error', 800);
 }
 
 .btn-primary {
@@ -155,7 +156,7 @@
 .btn-primary-link {
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, get-color('primary', 500) 0%, get-color('primary', 600) 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -179,8 +180,8 @@
 }
 
 .email-display {
-  background: #f3f4f6;
-  color: #1f2937;
+  background: get-color('gray', 100);
+  color: get-color('gray', 800);
   padding: 0.75rem 1rem;
   border-radius: 10px;
   font-size: 0.9375rem;
@@ -189,7 +190,7 @@
 }
 
 .accept-hint {
-  color: #6b7280;
+  color: get-color('gray', 500);
   font-size: 0.8125rem;
   margin: 0;
 }
@@ -207,16 +208,16 @@
   text-align: center;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid get-color('gray', 200);
 }
 
 .auth-footer p {
-  color: #6b7280;
+  color: get-color('gray', 500);
   margin: 0;
 }
 
 .auth-footer a {
-  color: #3b82f6;
+  color: get-color('primary', 500);
   text-decoration: none;
   font-weight: 500;
 }

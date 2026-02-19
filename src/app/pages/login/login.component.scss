@@ -1,4 +1,5 @@
 // Login Page - Animation Styles
+@use 'styles/colors' as *;
 @use '../../shared/styles/auth-page' as auth;
 
 // Keyframes
@@ -57,7 +58,7 @@
   }
 
   &__tab {
-    color: #6b7280;
+    color: get-color('gray', 500);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -65,12 +66,12 @@
     z-index: 1;
 
     &:hover:not(&--active) {
-      color: #374151;
+      color: get-color('gray', 700);
       background: rgba(0, 0, 0, 0.03);
     }
 
     &--active {
-      color: #1e40af;
+      color: get-color('primary', 800);
       background: white;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }

@@ -1,3 +1,5 @@
+@use 'styles/colors' as *;
+
 // ============================================================================
 // FORM DESIGN TOKENS
 // PhotoStack Form Component System
@@ -60,13 +62,13 @@ $ps-dropdown-z: 100;
 
   // Error colors
   --ps-error-border: var(--input-error, var(--color-error, #dc2626));
-  --ps-error-bg: #fef2f2;
+  --ps-error-bg: get-color('error', 50);
   --ps-error-text: var(--color-error, #dc2626);
   --ps-error-ring: rgba(220, 38, 38, #{$ps-focus-ring-opacity});
 
   // Success colors
   --ps-success-border: var(--input-success, var(--color-success, #22c55e));
-  --ps-success-bg: #f0fdf4;
+  --ps-success-bg: get-color('success', 50);
   --ps-success-text: var(--color-success, #22c55e);
   --ps-success-ring: rgba(34, 197, 94, #{$ps-focus-ring-opacity});
 
@@ -87,7 +89,7 @@ $ps-dropdown-z: 100;
   // Checkbox / Toggle / Radio
   --ps-check-bg: var(--color-primary, #2563eb);
   --ps-check-border: var(--border-color, #e5e7eb);
-  --ps-toggle-bg-off: #d1d5db;
+  --ps-toggle-bg-off: get-color('gray', 300);
   --ps-toggle-bg-on: var(--color-primary, #2563eb);
   --ps-toggle-knob: #ffffff;
 

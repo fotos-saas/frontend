@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -40,11 +41,11 @@
   vertical-align: middle;
 
   &-pending { background: var(--bg-secondary); color: var(--text-secondary); }
-  &-paid { background: #dbeafe; color: #1e40af; }
-  &-processing { background: #fef3c7; color: #92400e; }
+  &-paid { background: get-color('primary', 100); color: get-color('primary', 800); }
+  &-processing { background: #fef3c7; color: get-color('warning', 800); }
   &-shipped { background: #e0e7ff; color: #3730a3; }
   &-completed { background: #d1fae5; color: #065f46; }
-  &-cancelled { background: #fee2e2; color: #991b1b; }
+  &-cancelled { background: get-color('error', 100); color: get-color('error', 800); }
 }
 
 .detail-grid {

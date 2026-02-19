@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -26,7 +27,7 @@
   .mobile-desc {
     display: block;
     font-size: 0.8125rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
     margin-bottom: 8px;
     flex-shrink: 0;
     overflow: hidden;
@@ -67,14 +68,14 @@
 .search-icon {
   position: absolute;
   left: 12px;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
   padding: 10px 36px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.875rem;
   @include transition-fast;
@@ -91,7 +92,7 @@
   right: 8px;
   background: none;
   border: none;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
@@ -102,15 +103,15 @@
 }
 
 .clear-btn:hover {
-  color: #64748b;
-  background: #f1f5f9;
+  color: get-color('slate', 500);
+  background: get-color('slate', 100);
 }
 
 .filter-tabs {
   display: flex;
   gap: 8px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid get-color('slate', 200);
   @include transition-fast;
   flex-shrink: 0;
 }
@@ -121,19 +122,19 @@
 
 .tab {
   padding: 8px 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
   @include transition-fast;
 }
 
 .tab:hover:not(.tab--active) {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: get-color('slate', 100);
+  border-color: get-color('slate', 300);
 }
 
 .tab--active {
@@ -179,20 +180,20 @@ ps-toggle {
 
 .empty-state h3 {
   font-size: 1rem;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 8px 0;
 }
 
 .empty-state p {
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin: 0;
 }
 
 .skeleton-card {
   aspect-ratio: 0.8;
   border-radius: 8px;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
 }
 
 .skeleton-shimmer {
@@ -223,24 +224,24 @@ ps-toggle {
   align-items: center;
   gap: 8px;
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   flex-wrap: wrap;
 }
 
 .stat strong {
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .stat--danger {
-  color: #dc2626;
+  color: get-color('error', 600);
 }
 
 .stat--danger strong {
-  color: #dc2626;
+  color: get-color('error', 600);
 }
 
 .stat-separator {
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .upload-btn {
@@ -285,12 +286,12 @@ ps-toggle {
     gap: 6px;
     padding: 6px 12px;
     margin-bottom: 8px;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
+    background: get-color('slate', 100);
+    border: 1px solid get-color('slate', 200);
     border-radius: 8px;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #64748b;
+    color: get-color('slate', 500);
     cursor: pointer;
     flex-shrink: 0;
     position: relative;

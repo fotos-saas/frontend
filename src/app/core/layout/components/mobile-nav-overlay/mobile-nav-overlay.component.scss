@@ -1,3 +1,4 @@
+@use 'styles/colors' as *;
 @keyframes mobile-expand-down {
   from {
     opacity: 0;
@@ -51,11 +52,11 @@
   ::ng-deep .partner-switcher__name {
     max-width: none;
     flex: 1;
-    color: #e2e8f0;
+    color: get-color('slate', 200);
   }
 
   ::ng-deep .partner-switcher__chevron {
-    color: #94a3b8;
+    color: get-color('slate', 400);
   }
 
   ::ng-deep .partner-switcher__spinner {
@@ -69,8 +70,8 @@
     right: 0;
     min-width: auto;
     max-width: none;
-    background: #1e293b;
-    border-color: #334155;
+    background: get-color('slate', 800);
+    border-color: get-color('slate', 700);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   }
 
@@ -89,7 +90,7 @@
   }
 
   ::ng-deep .partner-switcher__option-name {
-    color: #e2e8f0;
+    color: get-color('slate', 200);
   }
 
   ::ng-deep .partner-switcher__check {
@@ -97,6 +98,6 @@
   }
 
   ::ng-deep .partner-switcher__loading {
-    color: #64748b;
+    color: get-color('slate', 500);
   }
 }

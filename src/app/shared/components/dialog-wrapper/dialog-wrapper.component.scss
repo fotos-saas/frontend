@@ -1,24 +1,25 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // ============================================================================
 // Dialog Wrapper - Egységes dialógus shell
 // ============================================================================
 
 // --- Variables ---
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$red-500: #ef4444;
-$red-600: #dc2626;
-$gray-50: #f9fafb;
-$gray-100: #f3f4f6;
-$gray-200: #e5e7eb;
-$gray-300: #d1d5db;
-$gray-400: #9ca3af;
-$gray-500: #6b7280;
-$gray-600: #4b5563;
-$gray-700: #374151;
-$gray-800: #1f2937;
-$gray-900: #111827;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$red-500: get-color('error', 500);
+$red-600: get-color('error', 600);
+$gray-50: get-color('gray', 50);
+$gray-100: get-color('gray', 100);
+$gray-200: get-color('gray', 200);
+$gray-300: get-color('gray', 300);
+$gray-400: get-color('gray', 400);
+$gray-500: get-color('gray', 500);
+$gray-600: get-color('gray', 600);
+$gray-700: get-color('gray', 700);
+$gray-800: get-color('gray', 800);
+$gray-900: get-color('gray', 900);
 
 // ============================================================================
 // BACKDROP
@@ -203,13 +204,13 @@ $gray-900: #111827;
     margin-bottom: 0;
     border-radius: 0.625rem;
     font-size: 0.875rem;
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
+    background: get-color('error', 50);
+    color: get-color('error', 800);
+    border: 1px solid get-color('error', 200);
 
     lucide-icon {
       flex-shrink: 0;
-      color: #dc2626;
+      color: get-color('error', 600);
     }
   }
 
@@ -346,10 +347,10 @@ $gray-900: #111827;
     // --- Warning (amber) ---
     &--warning {
       color: white;
-      background: #f59e0b;
+      background: get-color('warning', 500);
 
       &:hover:not(:disabled) {
-        background: #d97706;
+        background: get-color('warning', 600);
         transform: translateY(-1px);
       }
 
@@ -361,10 +362,10 @@ $gray-900: #111827;
     // --- Confirm (zöld) ---
     &--confirm {
       color: white;
-      background: #22c55e;
+      background: get-color('success', 500);
 
       &:hover:not(:disabled) {
-        background: #16a34a;
+        background: get-color('success', 600);
         transform: translateY(-1px);
       }
 

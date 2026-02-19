@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/list-page' as *;
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -10,7 +11,7 @@
 
 .cell-title {
   font-weight: 500;
-  color: #1e293b;
+  color: get-color('slate', 800);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -23,13 +24,13 @@
 .report-id {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   flex-shrink: 0;
 }
 
 .cell-date {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 // === BADGES ===
@@ -44,8 +45,8 @@
 
   // Státusz
   &--new {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: get-color('primary', 100);
+    color: get-color('primary', 700);
   }
   &--progress {
     background: #fef3c7;
@@ -56,14 +57,14 @@
     color: #047857;
   }
   &--closed {
-    background: #f1f5f9;
-    color: #64748b;
+    background: get-color('slate', 100);
+    color: get-color('slate', 500);
   }
 
   // Prioritás
   &--critical {
-    background: #fecaca;
-    color: #b91c1c;
+    background: get-color('error', 200);
+    color: get-color('error', 700);
   }
   &--high {
     background: #fed7aa;

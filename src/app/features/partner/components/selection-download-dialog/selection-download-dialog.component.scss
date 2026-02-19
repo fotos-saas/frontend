@@ -1,9 +1,10 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .section-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: get-color('slate', 500);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 6px 2px;
@@ -31,12 +32,12 @@
   }
 
   &--ghost {
-    color: #64748b;
+    color: get-color('slate', 500);
     background: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid get-color('slate', 200);
 
     &:hover {
-      background: #f8fafc;
+      background: get-color('slate', 50);
     }
   }
 

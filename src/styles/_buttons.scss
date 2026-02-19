@@ -1,3 +1,6 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
 /**
  * Design System - Centralizalt Gomb Stilusok
  * Egyseges .btn-primary es .btn-secondary mixinek
@@ -43,7 +46,7 @@
   font-size: $font-size;
   font-weight: $font-weight;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover:not(:disabled) {
     background: $hover-bg;
@@ -61,20 +64,20 @@
 
 /// Standard secondary button - feher/vilagos hatter, szurke border
 /// @param {string} $bg - Hatterszin [default: #ffffff]
-/// @param {string} $hover-bg - Hover hatterszin [default: #f8fafc]
-/// @param {string} $color - Szovegszin [default: #475569]
-/// @param {string} $border-color - Keret szin [default: #e2e8f0]
-/// @param {string} $hover-border - Hover keret szin [default: #cbd5e1]
+/// @param {string} $hover-bg - Hover hatterszin [default: get-color('slate', 50)]
+/// @param {string} $color - Szovegszin [default: get-color('slate', 600)]
+/// @param {string} $border-color - Keret szin [default: get-color('slate', 200)]
+/// @param {string} $hover-border - Hover keret szin [default: get-color('slate', 300)]
 /// @param {string} $padding - Belteres [default: 10px 20px]
 /// @param {string} $radius - Sarok lekerekites [default: 8px]
 /// @param {string} $font-size - Betumeret [default: 0.875rem]
 /// @param {number} $font-weight - Betu vastagsag [default: 500]
 @mixin btn-secondary(
   $bg: #ffffff,
-  $hover-bg: #f8fafc,
-  $color: #475569,
-  $border-color: #e2e8f0,
-  $hover-border: #cbd5e1,
+  $hover-bg: get-color('slate', 50),
+  $color: get-color('slate', 600),
+  $border-color: get-color('slate', 200),
+  $hover-border: get-color('slate', 300),
   $padding: 10px 20px,
   $radius: 8px,
   $font-size: 0.875rem,
@@ -91,7 +94,7 @@
   font-size: $font-size;
   font-weight: $font-weight;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover:not(:disabled) {
     background: $hover-bg;
@@ -112,7 +115,7 @@
 @mixin btn-primary-auth {
   width: 100%;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, get-color('primary', 500) 0%, get-color('primary', 600) 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -147,8 +150,8 @@
 @mixin btn-secondary-auth {
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  background: #f3f4f6;
-  color: #374151;
+  background: get-color('gray', 100);
+  color: get-color('gray', 700);
   border: none;
   border-radius: 12px;
   font-size: 0.875rem;
@@ -157,6 +160,6 @@
   transition: background 0.2s;
 
   &:hover {
-    background: #e5e7eb;
+    background: get-color('gray', 200);
   }
 }

@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .subscription-card {
   background: white;
@@ -33,12 +34,12 @@
 }
 
 .plan-badge--alap {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
+  background: linear-gradient(135deg, get-color('gray', 500), get-color('gray', 600));
   color: white;
 }
 
 .plan-badge--iskola {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, get-color('primary', 500), get-color('primary', 600));
   color: white;
 }
 
@@ -55,33 +56,33 @@
 }
 
 .status-badge--active {
-  background: #dcfce7;
-  color: #166534;
+  background: get-color('success', 100);
+  color: get-color('success', 800);
 }
 
 .status-badge--trial {
-  background: #dbeafe;
-  color: #1e40af;
+  background: get-color('primary', 100);
+  color: get-color('primary', 800);
 }
 
 .status-badge--paused {
   background: #fef3c7;
-  color: #92400e;
+  color: get-color('warning', 800);
 }
 
 .status-badge--canceling {
-  background: #fee2e2;
-  color: #991b1b;
+  background: get-color('error', 100);
+  color: get-color('error', 800);
 }
 
 .status-badge--canceled {
-  background: #f1f5f9;
-  color: #475569;
+  background: get-color('slate', 100);
+  color: get-color('slate', 600);
 }
 
 .status-badge--pending {
-  background: #f1f5f9;
-  color: #64748b;
+  background: get-color('slate', 100);
+  color: get-color('slate', 500);
 }
 
 .billing-cycle {
@@ -153,7 +154,7 @@
 }
 
 .check-icon {
-  color: #22c55e;
+  color: get-color('success', 500);
   flex-shrink: 0;
 }
 

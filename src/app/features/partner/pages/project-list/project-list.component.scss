@@ -1,4 +1,5 @@
 @use '../../../../shared/styles/list-page' as list;
+@use 'styles/colors' as *;
 
 // max-width → page-card--wide kezeli
 .project-list-page {}
@@ -17,7 +18,7 @@
 
 .skeleton-card {
   height: 72px;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
   border-radius: 10px;
 }
 

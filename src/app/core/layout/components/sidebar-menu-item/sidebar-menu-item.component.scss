@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 /* Child item staggered animation */
 @keyframes slideIn {
@@ -38,7 +39,7 @@
 
 /* Szülő szekció aktív jelölés (ha valamelyik gyerek route aktív) */
 .section-active {
-  color: #f1f5f9 !important; /* slate-100 */
+  color: get-color('slate', 100) !important; /* slate-100 */
   background: rgba(139, 92, 246, 0.1); /* purple-500/10 */
   border-left: 2px solid rgba(139, 92, 246, 0.5); /* purple-500/50 */
 }
@@ -57,7 +58,7 @@
   position: relative;
   overflow: hidden;
   /* Szöveg szín megőrzése */
-  color: #e2e8f0 !important; /* slate-200 */
+  color: get-color('slate', 200) !important; /* slate-200 */
   background: linear-gradient(90deg, rgba(139, 92, 246, 0.2) 0%, rgba(168, 85, 247, 0.25) 100%) !important;
   border-left: 2px solid #a855f7;
 }
@@ -98,8 +99,8 @@
   position: fixed;
   min-width: 180px;
   max-width: 240px;
-  background: #1e293b; /* slate-900 */
-  border: 1px solid #334155; /* slate-700 */
+  background: get-color('slate', 800); /* slate-800 */
+  border: 1px solid get-color('slate', 700); /* slate-700 */
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
   padding: 4px;
@@ -123,7 +124,7 @@
   align-items: center;
   padding: 8px 12px;
   font-size: 0.8125rem;
-  color: #cbd5e1; /* slate-300 */
+  color: get-color('slate', 300); /* slate-300 */
   text-decoration: none;
   border-radius: 6px;
   @include transition-fast;
@@ -132,7 +133,7 @@
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
-    color: #f1f5f9; /* slate-100 */
+    color: get-color('slate', 100); /* slate-100 */
   }
 
   &--active {

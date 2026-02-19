@@ -1,7 +1,8 @@
+@use 'styles/colors' as *;
 $bg: #ffffff;
-$border: #e5e7eb;
-$text: #1f2937;
-$text-secondary: #6b7280;
+$border: get-color('gray', 200);
+$text: get-color('gray', 800);
+$text-secondary: get-color('gray', 500);
 $primary: #8b5cf6;
 $primary-hover: #7c3aed;
 $radius: 12px;
@@ -156,11 +157,11 @@ $shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 
   &--secondary {
-    background: #f3f4f6;
+    background: get-color('gray', 100);
     color: $text;
 
     &:hover {
-      background: #e5e7eb;
+      background: get-color('gray', 200);
     }
   }
 

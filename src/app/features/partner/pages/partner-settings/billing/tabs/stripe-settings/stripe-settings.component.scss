@@ -1,4 +1,5 @@
 @use '../../../../../../../../styles/buttons' as *;
+@use 'styles/colors' as *;
 
 .stripe-settings {
   padding-top: 8px;
@@ -10,27 +11,27 @@
   h3 {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0 0 4px;
   }
 }
 
 .section-desc {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin-bottom: 16px;
   line-height: 1.5;
 }
 
 .webhook-url {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   padding: 8px 12px;
 
   code {
     font-size: 0.75rem;
-    color: #475569;
+    color: get-color('slate', 600);
     word-break: break-all;
   }
 }
@@ -65,8 +66,8 @@
 
   lucide-icon { margin-right: 8px; flex-shrink: 0; }
 
-  &--success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-  &--error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  &--success { background: get-color('success', 50); color: get-color('success', 800); border: 1px solid get-color('success', 200); }
+  &--error { background: get-color('error', 50); color: get-color('error', 800); border: 1px solid get-color('error', 200); }
 }
 
 @media (prefers-reduced-motion: reduce) {

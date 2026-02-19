@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // Purple accent (onboarding theme)
 $purple-500: #8b5cf6;
@@ -7,12 +8,12 @@ $purple-gradient-start: #f5f3ff;
 $purple-gradient-end: #ede9fe;
 
 // Success colors
-$green-500: #22c55e;
-$green-100: #dcfce7;
+$green-500: get-color('success', 500);
+$green-100: get-color('success', 100);
 
 // Warning colors
-$amber-500: #f59e0b;
-$amber-100: #fef3c7;
+$amber-500: get-color('warning', 500);
+$amber-100: get-color('warning', 100);
 
 // Backdrop
 .dialog-backdrop {
@@ -56,8 +57,8 @@ $amber-100: #fef3c7;
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
-    background: #e5e7eb;
-    transition: all 0.3s ease;
+    background: get-color('gray', 200);
+    @include transition-slow;
 
     &--active {
       background: $purple-500;
@@ -75,14 +76,14 @@ $amber-100: #fef3c7;
   &__progress-number {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #6b7280;
+    color: get-color('gray', 500);
   }
 
   &__progress-line {
     width: 3rem;
     height: 3px;
-    background: #e5e7eb;
-    transition: all 0.3s ease;
+    background: get-color('gray', 200);
+    @include transition-slow;
 
     &--active {
       background: $purple-500;
@@ -117,13 +118,13 @@ $amber-100: #fef3c7;
     margin: 0 0 0.5rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #111827;
+    color: get-color('gray', 900);
   }
 
   &__description {
     margin: 0;
     font-size: 0.9375rem;
-    color: #4b5563;
+    color: get-color('gray', 600);
     line-height: 1.5;
     max-width: 22rem;
     margin-left: auto;
@@ -155,12 +156,12 @@ $amber-100: #fef3c7;
     }
 
     &--error {
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
+      background: get-color('error', 50);
+      color: get-color('error', 800);
+      border: 1px solid get-color('error', 200);
 
       svg {
-        color: #dc2626;
+        color: get-color('error', 600);
       }
     }
   }
@@ -185,7 +186,7 @@ $amber-100: #fef3c7;
     margin-top: 0.75rem;
     max-height: 200px;
     overflow-y: auto;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 0.625rem;
     background: white;
   }
@@ -198,7 +199,7 @@ $amber-100: #fef3c7;
     text-align: left;
     background: transparent;
     border: none;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid get-color('gray', 100);
     cursor: pointer;
     @include transition-normal;
 
@@ -221,14 +222,14 @@ $amber-100: #fef3c7;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f3f4f6;
+    background: get-color('gray', 100);
     border-radius: 50%;
     margin-right: 0.75rem;
 
     svg {
       width: 1.25rem;
       height: 1.25rem;
-      color: #9ca3af;
+      color: get-color('gray', 400);
     }
 
     &--has-photo {
@@ -248,14 +249,14 @@ $amber-100: #fef3c7;
   &__result-name {
     display: block;
     font-weight: 600;
-    color: #111827;
+    color: get-color('gray', 900);
     font-size: 0.9375rem;
   }
 
   &__result-type {
     display: block;
     font-size: 0.75rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
   }
 
   &__result-badge {
@@ -277,7 +278,7 @@ $amber-100: #fef3c7;
     background: $green-100;
     border-radius: 0.625rem;
     font-size: 0.875rem;
-    color: #166534;
+    color: get-color('success', 800);
 
     svg {
       width: 1.25rem;
@@ -291,7 +292,7 @@ $amber-100: #fef3c7;
 
     &--not-found {
       background: $amber-100;
-      color: #92400e;
+      color: get-color('warning', 800);
     }
   }
 
@@ -326,17 +327,17 @@ $amber-100: #fef3c7;
     width: 100%;
     padding: 0.75rem 1rem;
     font-size: 0.875rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
     background: #f9fafb;
-    border: 1px dashed #d1d5db;
+    border: 1px dashed get-color('gray', 300);
     border-radius: 0.625rem;
     cursor: pointer;
     @include transition-normal;
 
     &:hover {
-      background: #f3f4f6;
-      border-color: #9ca3af;
-      color: #374151;
+      background: get-color('gray', 100);
+      border-color: get-color('gray', 400);
+      color: get-color('gray', 700);
     }
 
     svg {
@@ -396,11 +397,11 @@ $amber-100: #fef3c7;
     }
 
     &--secondary {
-      color: #374151;
-      background: #f3f4f6;
+      color: get-color('gray', 700);
+      background: get-color('gray', 100);
 
       &:hover:not(:disabled) {
-        background: #e5e7eb;
+        background: get-color('gray', 200);
       }
 
       &:disabled {
@@ -422,14 +423,14 @@ $amber-100: #fef3c7;
     margin-top: 0.75rem;
     padding: 0.75rem;
     font-size: 0.875rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
     background: transparent;
     border: none;
     cursor: pointer;
     transition: color 0.2s;
 
     &:hover:not(:disabled) {
-      color: #374151;
+      color: get-color('gray', 700);
       text-decoration: underline;
     }
 
@@ -442,7 +443,7 @@ $amber-100: #fef3c7;
   &__privacy {
     margin: 1rem 0 0;
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     text-align: center;
   }
 
@@ -492,18 +493,18 @@ $amber-100: #fef3c7;
     margin: 0.75rem 0 0.5rem;
     font-size: 1.25rem;
     font-weight: 700;
-    color: #111827;
+    color: get-color('gray', 900);
   }
 
   &__restore-description {
     margin: 0;
     font-size: 0.9375rem;
-    color: #4b5563;
+    color: get-color('gray', 600);
     line-height: 1.5;
   }
 
   &__icon--restore {
-    background: #3b82f6;
+    background: get-color('primary', 500);
     box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
   }
 
@@ -527,13 +528,13 @@ $amber-100: #fef3c7;
     span {
       font-size: 1rem;
       font-weight: 600;
-      color: #166534;
+      color: get-color('success', 800);
     }
 
     &-hint {
       margin: 0.5rem 0 0;
       font-size: 0.875rem;
-      color: #166534;
+      color: get-color('success', 800);
       opacity: 0.8;
     }
   }

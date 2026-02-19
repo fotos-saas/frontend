@@ -1,11 +1,9 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // ScheduleReminderDialog - content-specific styles only
 // Shell handled by DialogWrapperComponent
 // Dátum mező → ps-datepicker kezeli
-
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
 
 .date-save-row {
   margin-top: 0.75rem;
@@ -17,14 +15,14 @@ $blue-600: #2563eb;
   font-size: 0.875rem;
   font-weight: 600;
   color: white;
-  background: $blue-500;
+  background: get-color('primary', 500);
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
   @include transition-normal;
 
   &:hover:not(:disabled) {
-    background: $blue-600;
+    background: get-color('primary', 600);
   }
 
   &:disabled {
@@ -44,7 +42,7 @@ $blue-600: #2563eb;
     right: 0;
     top: 50%;
     height: 1px;
-    background: #e5e7eb;
+    background: get-color('gray', 200);
   }
 
   span {
@@ -54,7 +52,7 @@ $blue-600: #2563eb;
     background: white;
     font-size: 0.75rem;
     font-weight: 500;
-    color: #6b7280;
+    color: get-color('gray', 500);
     left: 50%;
     transform: translateX(-50%);
   }
@@ -74,16 +72,16 @@ $blue-600: #2563eb;
   padding: 0.875rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #4b5563;
+  color: get-color('gray', 600);
   background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 0.75rem;
   cursor: pointer;
   @include transition-normal;
 
   &:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
+    background: get-color('gray', 100);
+    border-color: get-color('gray', 300);
   }
 }
 

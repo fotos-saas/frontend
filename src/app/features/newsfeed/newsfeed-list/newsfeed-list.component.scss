@@ -1,12 +1,13 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // Colors
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$gray-400: #9ca3af;
-$gray-500: #6b7280;
-$amber-500: #f59e0b;
-$green-500: #22c55e;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$gray-400: get-color('gray', 400);
+$gray-500: get-color('gray', 500);
+$amber-500: get-color('warning', 500);
+$green-500: get-color('success', 500);
 $purple-500: #a855f7;
 
 // ============================================
@@ -40,7 +41,7 @@ $purple-500: #a855f7;
     margin: 0 0 0.25rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #111827;
+    color: get-color('gray', 900);
 
     @media (min-width: 640px) {
       font-size: 1.75rem;
@@ -73,7 +74,7 @@ $purple-500: #a855f7;
     }
 
     &:hover {
-      background: #16a34a;
+      background: get-color('success', 600);
     }
   }
 
@@ -84,7 +85,7 @@ $purple-500: #a855f7;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid get-color('gray', 200);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 
@@ -116,7 +117,7 @@ $purple-500: #a855f7;
     font-weight: 500;
     color: $gray-500;
     background: white;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 9999px;
     cursor: pointer;
     white-space: nowrap;
@@ -128,8 +129,8 @@ $purple-500: #a855f7;
     }
 
     &:hover {
-      color: #111827;
-      border-color: #d1d5db;
+      color: get-color('gray', 900);
+      border-color: get-color('gray', 300);
     }
 
     &--active {
@@ -163,7 +164,7 @@ $purple-500: #a855f7;
   &__spinner {
     width: 2.5rem;
     height: 2.5rem;
-    border: 3px solid #e5e7eb;
+    border: 3px solid get-color('gray', 200);
     border-top-color: $blue-500;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -179,7 +180,7 @@ $purple-500: #a855f7;
   &__skeleton-card {
     padding: 1.25rem;
     background: white;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 0.75rem;
   }
 
@@ -219,7 +220,7 @@ $purple-500: #a855f7;
     justify-content: space-between;
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid get-color('gray', 100);
   }
 
   &__skeleton-meta {
@@ -253,19 +254,19 @@ $purple-500: #a855f7;
     align-items: center;
     padding: 3rem 2rem;
     text-align: center;
-    background: #fef2f2;
+    background: get-color('error', 50);
     border-radius: 1rem;
 
     svg {
       width: 3rem;
       height: 3rem;
-      color: #ef4444;
+      color: get-color('error', 500);
       margin-bottom: 1rem;
     }
 
     p {
       margin: 0 0 1.5rem;
-      color: #991b1b;
+      color: get-color('error', 800);
     }
 
     button {
@@ -273,13 +274,13 @@ $purple-500: #a855f7;
       font-size: 0.875rem;
       font-weight: 500;
       color: white;
-      background: #ef4444;
+      background: get-color('error', 500);
       border: none;
       border-radius: 0.5rem;
       cursor: pointer;
 
       &:hover {
-        background: #dc2626;
+        background: get-color('error', 600);
       }
     }
   }
@@ -293,12 +294,12 @@ $purple-500: #a855f7;
     text-align: center;
     background: white;
     border-radius: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    @include shadow-sm;
 
     svg {
       width: 4rem;
       height: 4rem;
-      color: #d1d5db;
+      color: get-color('gray', 300);
       margin-bottom: 1.5rem;
       animation: float 3s ease-in-out infinite;
     }
@@ -307,7 +308,7 @@ $purple-500: #a855f7;
       margin: 0 0 0.5rem;
       font-size: 1.125rem;
       font-weight: 600;
-      color: #111827;
+      color: get-color('gray', 900);
     }
 
     p {
@@ -326,7 +327,7 @@ $purple-500: #a855f7;
       cursor: pointer;
 
       &:hover {
-        background: #16a34a;
+        background: get-color('success', 600);
       }
     }
   }
@@ -396,7 +397,7 @@ $purple-500: #a855f7;
 
     .skeleton-shimmer {
       animation: none;
-      background: #e5e7eb;
+      background: get-color('gray', 200);
     }
   }
 }

@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 /* Album thumbnail stílus */
 .album-thumb-single {
@@ -6,7 +7,7 @@
   height: 48px;
   object-fit: cover;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  @include shadow-sm;
 }
 
 /* Album kártya stílusok */
@@ -18,7 +19,7 @@
 }
 
 .album-card:hover {
-  background: #f3f4f6;
+  background: get-color('gray', 100);
 }
 
 :host-context(.dark) .album-card {
@@ -26,7 +27,7 @@
 }
 
 :host-context(.dark) .album-card:hover {
-  background: #374151;
+  background: get-color('gray', 700);
 }
 
 .album-card__main {
@@ -43,8 +44,8 @@
   align-items: center;
   justify-content: flex-end;
   padding: 8px 16px;
-  background: #f1f5f9;
-  border-top: 1px solid #e2e8f0;
+  background: get-color('slate', 100);
+  border-top: 1px solid get-color('slate', 200);
 }
 
 .album-card__expiry {
@@ -54,7 +55,7 @@
 :host-context(.dark) .album-card__expiry,
 :host-context(.dark) .album-card__actions {
   background: rgba(30, 41, 59, 0.5);
-  border-color: #334155;
+  border-color: get-color('slate', 700);
 }
 
 .album-expiry-info {
@@ -62,11 +63,11 @@
   align-items: center;
   gap: 6px;
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 :host-context(.dark) .album-expiry-info {
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .album-expiry-badge {
@@ -77,8 +78,8 @@
 }
 
 .album-expiry-badge--expired {
-  background: #fee2e2;
-  color: #dc2626;
+  background: get-color('error', 100);
+  color: get-color('error', 600);
 }
 
 :host-context(.dark) .album-expiry-badge--expired {
@@ -131,9 +132,9 @@
   padding: 4px 10px;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #3b82f6;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  color: get-color('primary', 500);
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 200);
   border-radius: 6px;
   cursor: pointer;
   @include transition-fast;
@@ -144,8 +145,8 @@
 }
 
 .album-extend-btn:hover:not(:disabled) {
-  background: #dbeafe;
-  border-color: #93c5fd;
+  background: get-color('primary', 100);
+  border-color: get-color('primary', 300);
 }
 
 .album-extend-btn:disabled {
@@ -155,12 +156,12 @@
 
 :host-context(.dark) .album-extend-btn {
   background: #1e3a5f;
-  border-color: #1e40af;
-  color: #93c5fd;
+  border-color: get-color('primary', 800);
+  color: get-color('primary', 300);
 }
 
 :host-context(.dark) .album-extend-btn:hover:not(:disabled) {
-  background: #1e40af;
+  background: get-color('primary', 800);
 }
 
 .album-activate-btn {
@@ -171,7 +172,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   color: white;
-  background: #16a34a;
+  background: get-color('success', 600);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -179,7 +180,7 @@
 }
 
 .album-activate-btn:hover:not(:disabled) {
-  background: #15803d;
+  background: get-color('success', 700);
 }
 
 .album-activate-btn:disabled {
@@ -193,9 +194,9 @@
   justify-content: center;
   padding: 4px 8px;
   font-size: 0.75rem;
-  color: #d97706;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  color: get-color('warning', 600);
+  background: get-color('warning', 50);
+  border: 1px solid get-color('warning', 200);
   border-radius: 6px;
   cursor: pointer;
   @include transition-fast;
@@ -265,27 +266,27 @@
   padding: 4px 10px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 100);
+  border: 1px solid get-color('slate', 200);
   border-radius: 6px;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
   @include transition-fast;
 }
 
 .album-download-toggle:hover:not(:disabled) {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  background: get-color('slate', 200);
+  border-color: get-color('slate', 300);
 }
 
 .album-download-toggle--active {
-  background: #dcfce7;
+  background: get-color('success', 100);
   border-color: #86efac;
-  color: #16a34a;
+  color: get-color('success', 600);
 }
 
 .album-download-toggle--active:hover:not(:disabled) {
-  background: #bbf7d0;
+  background: get-color('success', 200);
   border-color: #4ade80;
 }
 
@@ -295,13 +296,13 @@
 }
 
 :host-context(.dark) .album-download-toggle {
-  background: #334155;
-  border-color: #475569;
-  color: #94a3b8;
+  background: get-color('slate', 700);
+  border-color: get-color('slate', 600);
+  color: get-color('slate', 400);
 }
 
 :host-context(.dark) .album-download-toggle:hover:not(:disabled) {
-  background: #475569;
+  background: get-color('slate', 600);
 }
 
 :host-context(.dark) .album-download-toggle--active {
@@ -318,7 +319,7 @@
   width: 12px;
   height: 12px;
   border: 2px solid rgba(100, 116, 139, 0.3);
-  border-top-color: #64748b;
+  border-top-color: get-color('slate', 500);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -342,13 +343,13 @@
   width: 14px;
   height: 14px;
   border: 2px solid rgba(59, 130, 246, 0.3);
-  border-top-color: #3b82f6;
+  border-top-color: get-color('primary', 500);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 :host-context(.dark) .btn-spinner {
   border-color: rgba(147, 197, 253, 0.3);
-  border-top-color: #93c5fd;
+  border-top-color: get-color('primary', 300);
 }
 

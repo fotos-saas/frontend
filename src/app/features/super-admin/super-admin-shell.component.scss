@@ -1,10 +1,11 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .super-admin-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, get-color('slate', 50) 0%, get-color('slate', 200) 100%);
 }
 
 /* ============ Main Container ============ */
@@ -151,7 +152,7 @@
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  background: #dc2626;
+  background: get-color('error', 600);
   color: #ffffff;
   border-radius: 9px;
   font-size: 0.6875rem;

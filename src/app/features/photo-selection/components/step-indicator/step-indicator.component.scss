@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 /**
  * Step Pills - Kompakt Inline Stepper
@@ -8,11 +9,11 @@
  */
 
 // Colors
-$color-active: #3b82f6;
-$color-active-dark: #2563eb;
+$color-active: get-color('primary', 500);
+$color-active-dark: get-color('primary', 600);
 $color-completed: #10b981;
-$color-disabled: #94a3b8;
-$color-disabled-bg: #f1f5f9;
+$color-disabled: get-color('slate', 400);
+$color-disabled-bg: get-color('slate', 100);
 
 .step-pills {
   display: flex;
@@ -64,10 +65,7 @@ $color-disabled-bg: #f1f5f9;
     @include transition-normal;
     white-space: nowrap;
 
-    &:focus-visible {
-      outline: 2px solid $color-active;
-      outline-offset: 2px;
-    }
+    @include focus-ring;
 
     // === ACTIVE STATE ===
     &--active {
@@ -239,9 +237,9 @@ $color-disabled-bg: #f1f5f9;
 :host-context(.dark) {
   .step-pills {
     &__pill {
-      background: #1e293b;
-      border-color: #475569;
-      color: #94a3b8;
+      background: get-color('slate', 800);
+      border-color: get-color('slate', 600);
+      color: get-color('slate', 400);
 
       &--active {
         background: $color-active;
@@ -260,12 +258,12 @@ $color-disabled-bg: #f1f5f9;
     }
 
     &__indicator {
-      background: #334155;
-      color: #94a3b8;
+      background: get-color('slate', 700);
+      color: get-color('slate', 400);
     }
 
     &__arrow {
-      color: #475569;
+      color: get-color('slate', 600);
     }
   }
 }

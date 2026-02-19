@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 /**
  * Lightbox Gallery Styles
  * Thumbnail gallery for template selection
@@ -65,10 +67,7 @@
     }
 
     // Keyboard navigation outline (accessibility)
-    &:focus-visible {
-      outline: 2px solid #6366f1;
-      outline-offset: 2px;
-    }
+    @include focus-ring(#6366f1);
 
     // Modifier: active state (aktuálisan nézett)
     &--active {

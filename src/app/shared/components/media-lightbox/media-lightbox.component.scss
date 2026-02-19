@@ -88,10 +88,7 @@ $primary-color: #6366f1;
       outline: none;
     }
 
-    &:focus-visible {
-      outline: 2px solid $primary-color;
-      outline-offset: 2px;
-    }
+    @include focus-ring;
   }
 
   // Számláló
@@ -162,10 +159,7 @@ $primary-color: #6366f1;
       outline: none;
     }
 
-    &:focus-visible {
-      outline: 2px solid $primary-color;
-      outline-offset: 2px;
-    }
+    @include focus-ring;
 
     &--disabled {
       opacity: 0.3;
@@ -262,10 +256,7 @@ $primary-color: #6366f1;
       outline: none;
     }
 
-    &:focus-visible {
-      outline: 2px solid $primary-color;
-      outline-offset: 2px;
-    }
+    @include focus-ring;
 
     &--reset {
       width: 40px;
@@ -333,10 +324,7 @@ $primary-color: #6366f1;
       outline: none;
     }
 
-    &:focus-visible {
-      outline: 2px solid $primary-color;
-      outline-offset: 2px;
-    }
+    @include focus-ring;
   }
 
   &__thumbnail-image {

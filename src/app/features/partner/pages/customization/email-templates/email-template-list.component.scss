@@ -1,4 +1,5 @@
 @use '../../../../../shared/styles/list-page' as list;
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -62,13 +63,13 @@
   white-space: nowrap;
 
   &--green {
-    background: #dcfce7;
-    color: #166534;
+    background: get-color('success', 100);
+    color: get-color('success', 800);
   }
 
   &--gray {
-    background: #f1f5f9;
-    color: #64748b;
+    background: get-color('slate', 100);
+    color: get-color('slate', 500);
   }
 }
 

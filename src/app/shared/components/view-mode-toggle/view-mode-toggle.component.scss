@@ -1,8 +1,9 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .view-toggle {
   display: flex;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -15,7 +16,7 @@
   height: 34px;
   border: none;
   background: #ffffff;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   cursor: pointer;
   font-size: 0.8125rem;
   font-weight: 500;
@@ -23,8 +24,8 @@
   @include transition-fast;
 
   &:hover {
-    background: #f8fafc;
-    color: #64748b;
+    background: get-color('slate', 50);
+    color: get-color('slate', 500);
   }
 
   &--active {
@@ -39,7 +40,7 @@
   }
 
   & + & {
-    border-left: 1px solid #e2e8f0;
+    border-left: 1px solid get-color('slate', 200);
   }
 }
 
@@ -47,11 +48,11 @@
 .view-select {
   display: none;
   padding: 8px 32px 8px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #334155;
+  color: get-color('slate', 700);
   background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
   -webkit-appearance: none;
   appearance: none;

@@ -1,3 +1,6 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
 /**
  * Photo Selection Component Styles
  * Optimized version - consolidated duplicates
@@ -5,11 +8,10 @@
 
 // Variables
 $max-width: 1200px;
-$color-primary: #3b82f6;
-$color-primary-dark: #2563eb;
-$color-error: #ef4444;
-$color-error-light: #fef2f2;
-$transition: 0.2s ease;
+$color-primary: get-color('primary', 500);
+$color-primary-dark: get-color('primary', 600);
+$color-error: get-color('error', 500);
+$color-error-light: get-color('error', 50);
 
 // CSS Custom Properties for shimmer (dark mode support)
 :host {
@@ -32,12 +34,12 @@ $transition: 0.2s ease;
 .photo-selection__title {
   font-size: 24px;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 8px;
   @media (min-width: 768px) { font-size: 28px; }
 }
 
-.photo-selection__description { font-size: 15px; color: #64748b; margin: 0; }
+.photo-selection__description { font-size: 15px; color: get-color('slate', 500); margin: 0; }
 
 // Error message
 .photo-selection__error {
@@ -51,7 +53,7 @@ $transition: 0.2s ease;
   animation: slideIn 0.3s ease;
 
   svg { width: 20px; height: 20px; color: $color-error; flex-shrink: 0; margin-right: 12px; }
-  span { flex: 1; color: #991b1b; font-size: 14px; }
+  span { flex: 1; color: get-color('error', 800); font-size: 14px; }
 }
 
 .photo-selection__error-close {
@@ -65,9 +67,9 @@ $transition: 0.2s ease;
   align-items: center;
   justify-content: center;
   margin-left: 8px;
-  transition: background $transition;
+  transition: background 0.2s ease;
 
-  svg { width: 16px; height: 16px; color: #991b1b; margin: 0; }
+  svg { width: 16px; height: 16px; color: get-color('error', 800); margin: 0; }
   &:hover { background: rgba($color-error, 0.1); }
 }
 
@@ -117,7 +119,7 @@ $transition: 0.2s ease;
   margin: 6px;
   aspect-ratio: 1;
   border-radius: 12px;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
 }
 
 // Footer
@@ -151,7 +153,7 @@ $transition: 0.2s ease;
   border-radius: 10px;
   border: none;
   cursor: pointer;
-  transition: all $transition;
+  @include transition-normal;
   min-width: 120px;
 
   svg { width: 18px; height: 18px; flex-shrink: 0; }
@@ -166,10 +168,10 @@ $transition: 0.2s ease;
   }
 
   &--secondary {
-    background: #f1f5f9;
-    color: #475569;
+    background: get-color('slate', 100);
+    color: get-color('slate', 600);
     svg { margin-right: 6px; }
-    &:hover:not(:disabled) { background: #e2e8f0; }
+    &:hover:not(:disabled) { background: get-color('slate', 200); }
   }
 
   &--loading { pointer-events: none; }
@@ -228,21 +230,21 @@ $transition: 0.2s ease;
 .photo-selection__inactive-title {
   font-size: 24px;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 16px;
   @media (min-width: 768px) { font-size: 28px; }
 }
 
 .photo-selection__inactive-message {
   font-size: 16px;
-  color: #475569;
+  color: get-color('slate', 600);
   margin: 0 0 24px;
   max-width: 400px;
   line-height: 1.6;
-  strong { color: #1e293b; }
+  strong { color: get-color('slate', 800); }
 }
 
-.photo-selection__inactive-sub { display: block; margin-top: 8px; font-size: 14px; color: #64748b; }
+.photo-selection__inactive-sub { display: block; margin-top: 8px; font-size: 14px; color: get-color('slate', 500); }
 
 .photo-selection__inactive-waiting {
   display: flex;
@@ -270,9 +272,9 @@ $transition: 0.2s ease;
 .photo-selection__preview-steps {
   margin-top: 32px;
   padding: 24px;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   width: 100%;
   max-width: 360px;
 }
@@ -280,7 +282,7 @@ $transition: 0.2s ease;
 .photo-selection__preview-title {
   font-size: 14px;
   font-weight: 600;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin: 0 0 16px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -293,7 +295,7 @@ $transition: 0.2s ease;
   > *:last-child { margin-bottom: 0; }
 }
 
-.photo-selection__preview-step { display: flex; align-items: center; font-size: 15px; color: #475569; }
+.photo-selection__preview-step { display: flex; align-items: center; font-size: 15px; color: get-color('slate', 600); }
 
 .photo-selection__preview-num {
   width: 28px;
@@ -322,17 +324,17 @@ $transition: 0.2s ease;
 .photo-selection__gallery-title {
   font-size: 24px;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 8px;
   @media (min-width: 768px) { font-size: 28px; }
 }
 
-.photo-selection__gallery-count { font-size: 15px; color: #64748b; margin: 0; }
+.photo-selection__gallery-count { font-size: 15px; color: get-color('slate', 500); margin: 0; }
 .photo-selection__gallery-error { text-align: center; padding: 48px 24px; color: $color-error; p { margin: 0; font-size: 15px; } }
 
 .photo-selection__gallery-empty {
   @include centered-state(300px);
-  p { font-size: 16px; color: #475569; margin: 0 0 8px; }
+  p { font-size: 16px; color: get-color('slate', 600); margin: 0 0 8px; }
 }
 
 .photo-selection__gallery-empty-icon {
@@ -340,10 +342,10 @@ $transition: 0.2s ease;
   height: 64px;
   margin-bottom: 16px;
   animation: float 2s ease-in-out infinite;
-  svg { width: 100%; height: 100%; color: #cbd5e1; }
+  svg { width: 100%; height: 100%; color: get-color('slate', 300); }
 }
 
-.photo-selection__gallery-empty-sub { display: block; font-size: 14px; color: #94a3b8; }
+.photo-selection__gallery-empty-sub { display: block; font-size: 14px; color: get-color('slate', 400); }
 
 // Gallery grid (uses shared mixin)
 .photo-selection__gallery-grid { @include responsive-grid; }
@@ -355,12 +357,12 @@ $transition: 0.2s ease;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  background: #f1f5f9;
+  background: get-color('slate', 100);
   aspect-ratio: 1;
   animation: cardEntry 0.4s ease-out forwards;
   opacity: 0;
   outline: none;
-  transition: transform $transition, box-shadow $transition;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
 
@@ -371,7 +373,7 @@ $transition: 0.2s ease;
     .photo-selection__gallery-item-overlay { opacity: 1; }
   }
 
-  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+  @include focus-ring;
 }
 
 .photo-selection__gallery-item-overlay {
@@ -382,7 +384,7 @@ $transition: 0.2s ease;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity $transition;
+  transition: opacity 0.2s ease;
   svg { width: 32px; height: 32px; color: white; }
 }
 

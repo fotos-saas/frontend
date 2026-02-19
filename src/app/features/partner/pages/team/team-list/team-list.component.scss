@@ -1,6 +1,7 @@
 @use '../../../../../shared/styles/list-page' as list;
 @use '../../../../../../styles/buttons' as *;
 @use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
 
 .team-list {
   padding: 24px;
@@ -67,7 +68,7 @@
 
   &-pending {
     background: #fef3c7;
-    color: #92400e;
+    color: get-color('warning', 800);
   }
 }
 
@@ -163,8 +164,8 @@
   }
 
   &--danger:hover {
-    background: #fee2e2;
-    color: #dc2626;
+    background: get-color('error', 100);
+    color: get-color('error', 600);
   }
 }
 
@@ -193,7 +194,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #d97706;
+  color: get-color('warning', 600);
   flex-shrink: 0;
 }
 

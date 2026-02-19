@@ -1,10 +1,11 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$gray-300: #d1d5db;
-$gray-400: #9ca3af;
-$gray-500: #6b7280;
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$gray-300: get-color('gray', 300);
+$gray-400: get-color('gray', 400);
+$gray-500: get-color('gray', 500);
 
 .forum-search {
   margin-bottom: 1.5rem;
@@ -41,7 +42,7 @@ $gray-500: #6b7280;
   width: 100%;
   padding: 0.625rem 2.25rem;
   font-size: 0.875rem;
-  color: #111827;
+  color: get-color('gray', 900);
   background: white;
   border: 1px solid $gray-300;
   border-radius: 0.5rem;
@@ -82,8 +83,8 @@ $gray-500: #6b7280;
   }
 
   &:hover {
-    color: #111827;
-    background: #f3f4f6;
+    color: get-color('gray', 900);
+    background: get-color('gray', 100);
   }
 }
 
@@ -118,16 +119,16 @@ $gray-500: #6b7280;
   &--secondary {
     position: relative;
     color: $gray-500;
-    background: #f3f4f6;
+    background: get-color('gray', 100);
     border: 1px solid $gray-300;
 
     &:hover {
-      background: #e5e7eb;
+      background: get-color('gray', 200);
     }
 
     &--active {
       color: $blue-600;
-      background: #eff6ff;
+      background: get-color('primary', 50);
       border-color: $blue-500;
     }
   }
@@ -156,7 +157,7 @@ $gray-500: #6b7280;
   margin-top: 1rem;
   padding: 1rem;
   background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 0.5rem;
 }
 
@@ -178,7 +179,7 @@ $gray-500: #6b7280;
 .forum-search__select {
   padding: 0.5rem 2rem 0.5rem 0.75rem;
   font-size: 0.875rem;
-  color: #111827;
+  color: get-color('gray', 900);
   background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0.5rem center;
   background-size: 1rem;
   border: 1px solid $gray-300;
@@ -201,7 +202,7 @@ $gray-500: #6b7280;
   margin-top: auto;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #dc2626;
+  color: get-color('error', 600);
   background: none;
   border: none;
   border-radius: 0.375rem;
@@ -214,6 +215,6 @@ $gray-500: #6b7280;
   }
 
   &:hover {
-    background: #fef2f2;
+    background: get-color('error', 50);
   }
 }

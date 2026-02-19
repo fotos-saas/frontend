@@ -5,6 +5,7 @@
  */
 
 // === LAYOUT ===
+@use 'styles/colors' as *;
 .settings-section {
   max-width: 600px;
 }
@@ -26,15 +27,15 @@
   h2, h3 {
     font-size: 1rem;
     font-weight: 600;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0;
   }
 }
 
 // === CARD ===
 .setting-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 12px;
   padding: 20px;
 }
@@ -60,7 +61,7 @@
 .setting-label {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
 
   &--sub {
     font-size: 0.875rem;
@@ -69,7 +70,7 @@
 
 .setting-description {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin-top: 4px;
   line-height: 1.5;
 }
@@ -84,7 +85,7 @@
 .sub-setting {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
 }
 
 // === ACTION ROW ===

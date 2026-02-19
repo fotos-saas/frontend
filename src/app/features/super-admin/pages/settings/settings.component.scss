@@ -1,5 +1,6 @@
 @use '../../../../../styles/buttons' as *;
 @use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
 
 .settings-page {
   max-width: 900px;
@@ -13,13 +14,13 @@
   h1 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0 0 4px 0;
   }
 }
 
 .subtitle {
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -30,7 +31,7 @@
   gap: 4px;
   margin-bottom: 24px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid get-color('slate', 200);
   overflow-x: auto;
 }
 
@@ -44,14 +45,14 @@
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
   @include mix.transition-fast;
   white-space: nowrap;
 
   &:hover {
-    background: #f1f5f9;
-    color: #475569;
+    background: get-color('slate', 100);
+    color: get-color('slate', 600);
   }
 
   &--active {
@@ -73,7 +74,7 @@
 // Settings section
 .settings-section {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 12px;
   padding: 24px;
 
@@ -85,12 +86,12 @@
 .section-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 8px 0;
 }
 
 .section-description {
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
   margin: 0 0 20px 0;
 }
@@ -101,7 +102,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid get-color('slate', 100);
 
   &:last-of-type {
     border-bottom: none;
@@ -117,17 +118,17 @@
 .setting-label {
   font-size: 0.9375rem;
   font-weight: 500;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .setting-description {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .setting-input {
   padding: 10px 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.9375rem;
   @include mix.transition-normal;
@@ -146,7 +147,7 @@
 
 .setting-select {
   padding: 10px 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.9375rem;
   background: #ffffff;
@@ -182,7 +183,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #cbd5e1;
+  background-color: get-color('slate', 300);
   transition: 0.2s;
   border-radius: 26px;
 
@@ -223,26 +224,26 @@ input:checked + .toggle-slider::before {
   flex-direction: column;
   gap: 4px;
   padding: 12px;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   border-radius: 8px;
 }
 
 .info-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: get-color('slate', 500);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
 
 .info-value {
   font-size: 0.9375rem;
-  color: #1e293b;
+  color: get-color('slate', 800);
   font-weight: 500;
 
   &--masked {
     font-family: monospace;
-    color: #64748b;
+    color: get-color('slate', 500);
   }
 }
 
@@ -256,13 +257,13 @@ input:checked + .toggle-slider::before {
   font-weight: 600;
 
   &--green {
-    background: #dcfce7;
-    color: #15803d;
+    background: get-color('success', 100);
+    color: get-color('success', 700);
   }
 
   &--red {
-    background: #fee2e2;
-    color: #dc2626;
+    background: get-color('error', 100);
+    color: get-color('error', 600);
   }
 }
 
@@ -276,8 +277,8 @@ input:checked + .toggle-slider::before {
   text-transform: uppercase;
 
   &--production {
-    background: #dcfce7;
-    color: #15803d;
+    background: get-color('success', 100);
+    color: get-color('success', 700);
   }
 
   &--staging {
@@ -286,8 +287,8 @@ input:checked + .toggle-slider::before {
   }
 
   &--local {
-    background: #dbeafe;
-    color: #1e40af;
+    background: get-color('primary', 100);
+    color: get-color('primary', 800);
   }
 }
 
@@ -310,12 +311,12 @@ input:checked + .toggle-slider::before {
   align-items: flex-start;
   gap: 8px;
   padding: 12px 16px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 200);
   border-radius: 8px;
   margin-bottom: 8px;
   font-size: 0.8125rem;
-  color: #1e40af;
+  color: get-color('primary', 800);
   line-height: 1.5;
 
   lucide-icon {
@@ -328,7 +329,7 @@ input:checked + .toggle-slider::before {
 .actions {
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid get-color('slate', 100);
 }
 
 .btn-primary {
@@ -349,7 +350,7 @@ input:checked + .toggle-slider::before {
 
 .skeleton-card {
   height: 200px;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
   border-radius: 12px;
 }
 

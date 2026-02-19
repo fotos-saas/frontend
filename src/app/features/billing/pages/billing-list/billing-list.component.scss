@@ -1,5 +1,6 @@
 @use '../../../../shared/styles/list-page' as list;
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .billing-page {
   max-width: 1000px;
@@ -12,13 +13,13 @@
   h1 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0 0 4px 0;
   }
 }
 
 .subtitle {
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -34,17 +35,17 @@
 .filter-btn {
   padding: 7px 16px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 20px;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
   @include transition-fast;
 
   &:hover {
-    border-color: #cbd5e1;
-    color: #1e293b;
+    border-color: get-color('slate', 300);
+    color: get-color('slate', 800);
   }
 
   &--active {
@@ -73,15 +74,15 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #f1f5f9;
-  color: #475569;
+  background: get-color('slate', 100);
+  color: get-color('slate', 600);
   flex-shrink: 0;
 }
 
 .type-label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .cell-desc {
@@ -92,7 +93,7 @@
 
 .charge-desc {
   font-size: 0.8125rem;
-  color: #334155;
+  color: get-color('slate', 700);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -100,7 +101,7 @@
 
 .charge-number {
   font-size: 0.6875rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   font-family: monospace;
 }
 
@@ -111,7 +112,7 @@
 .amount {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
 
   &--pending {
     color: #c2410c;
@@ -131,12 +132,12 @@
 
 .date-label {
   font-size: 0.6875rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .date-value {
   font-size: 0.8125rem;
-  color: #475569;
+  color: get-color('slate', 600);
 }
 
 // === ERROR STATE ===
@@ -145,10 +146,10 @@
   align-items: center;
   gap: 8px;
   padding: 14px 18px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: get-color('error', 50);
+  border: 1px solid get-color('error', 200);
   border-radius: 10px;
-  color: #dc2626;
+  color: get-color('error', 600);
   font-size: 0.875rem;
   margin-top: 16px;
 }
@@ -226,8 +227,8 @@
 }
 
 .invoice-btn {
-  background: #f1f5f9;
-  color: #475569;
+  background: get-color('slate', 100);
+  color: get-color('slate', 600);
 
-  &:hover { background: #e2e8f0; }
+  &:hover { background: get-color('slate', 200); }
 }

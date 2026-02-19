@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .page-header {
   display: flex;
@@ -13,14 +14,14 @@
   h1 {
     font-size: 1.375rem;
     font-weight: 700;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0;
   }
 }
 
 .page-description {
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin-bottom: 24px;
   max-width: 600px;
   line-height: 1.5;
@@ -28,7 +29,7 @@
 
 .tabs-nav {
   display: flex;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid get-color('slate', 200);
   margin: -4px;
   margin-bottom: 24px;
 }
@@ -43,7 +44,7 @@
   border: none;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -59,7 +60,7 @@
   }
 
   &:hover {
-    color: #1e293b;
+    color: get-color('slate', 800);
   }
 
   &--active {

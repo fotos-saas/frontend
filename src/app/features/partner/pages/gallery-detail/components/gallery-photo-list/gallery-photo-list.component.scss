@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .photo-list {
   &__toolbar {
@@ -20,14 +21,14 @@
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: get-color('gray', 400);
   }
 
   &__search-input {
     width: 100%;
     padding: 8px 12px 8px 34px;
     font-size: 13px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 8px;
     background: white;
     transition: border-color 0.15s ease;
@@ -41,12 +42,12 @@
 
   &__count {
     font-size: 12px;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     white-space: nowrap;
   }
 
   &__table {
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 12px;
     overflow: hidden;
   }
@@ -57,13 +58,13 @@
     gap: 8px;
     padding: 10px 16px;
     background: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid get-color('gray', 200);
   }
 
   &__th {
     font-size: 11px;
     font-weight: 600;
-    color: #6b7280;
+    color: get-color('gray', 500);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -74,7 +75,7 @@
     gap: 8px;
     padding: 8px 16px;
     align-items: center;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid get-color('gray', 100);
     cursor: pointer;
     transition: background-color 0.1s ease;
     animation: fadeInUp 0.3s ease both;
@@ -88,10 +89,10 @@
     }
 
     &--delete-selected {
-      background: #fef2f2;
+      background: get-color('error', 50);
 
       &:hover {
-        background: #fee2e2;
+        background: get-color('error', 100);
       }
     }
   }
@@ -117,7 +118,7 @@
   &__filename {
     font-size: 13px;
     font-weight: 500;
-    color: #111827;
+    color: get-color('gray', 900);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -126,7 +127,7 @@
 
   &__iptc-title {
     font-size: 13px;
-    color: #6b7280;
+    color: get-color('gray', 500);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -135,7 +136,7 @@
 
   &__size {
     font-size: 12px;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     font-variant-numeric: tabular-nums;
   }
 
@@ -148,18 +149,18 @@
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     cursor: pointer;
     @include transition-fast;
 
     &:hover {
-      background: #f3f4f6;
-      color: #374151;
+      background: get-color('gray', 100);
+      color: get-color('gray', 700);
     }
 
     &--danger:hover {
-      background: #fef2f2;
-      color: #dc2626;
+      background: get-color('error', 50);
+      color: get-color('error', 600);
     }
   }
 
@@ -177,16 +178,16 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 8px;
     background: white;
-    color: #374151;
+    color: get-color('gray', 700);
     cursor: pointer;
     @include transition-fast;
 
     &:hover:not(:disabled) {
       background: #f9fafb;
-      border-color: #d1d5db;
+      border-color: get-color('gray', 300);
     }
 
     &:disabled {
@@ -197,7 +198,7 @@
 
   &__page-info {
     font-size: 13px;
-    color: #6b7280;
+    color: get-color('gray', 500);
   }
 }
 

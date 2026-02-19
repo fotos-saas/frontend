@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .form-fields > * + * {
   margin-top: 16px;
@@ -19,11 +20,11 @@
   border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   transition: border-color 0.15s ease;
 
   &:hover {
-    border-color: #3b82f6;
+    border-color: get-color('primary', 500);
   }
 
   img {
@@ -35,7 +36,7 @@
 
 .thumb-item--new {
   border-style: dashed;
-  border-color: #93c5fd;
+  border-color: get-color('primary', 300);
 }
 
 .thumb-new-badge {
@@ -43,7 +44,7 @@
   bottom: 2px;
   left: 2px;
   padding: 1px 4px;
-  background: #3b82f6;
+  background: get-color('primary', 500);
   color: #fff;
   font-size: 0.625rem;
   font-weight: 600;
@@ -113,8 +114,8 @@
 
 .summary-preview {
   padding: 12px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 200);
   border-radius: 8px;
 }
 

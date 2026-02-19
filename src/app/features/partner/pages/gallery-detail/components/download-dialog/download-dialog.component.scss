@@ -1,5 +1,6 @@
 @use '../../../../../../../styles/buttons' as *;
 @use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
 
 .dialog-backdrop {
   position: fixed;
@@ -32,7 +33,7 @@
   h3 {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #1e293b;
+    color: get-color('slate', 800);
     margin: 0;
   }
 }
@@ -46,13 +47,13 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #94a3b8;
+  color: get-color('slate', 400);
   cursor: pointer;
   @include mix.transition-fast;
 
   &:hover {
-    background: #f1f5f9;
-    color: #475569;
+    background: get-color('slate', 100);
+    color: get-color('slate', 600);
   }
 }
 
@@ -74,15 +75,15 @@
   padding: 10px 18px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
+  color: get-color('slate', 500);
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   cursor: pointer;
   @include mix.transition-fast;
 
   &:hover {
-    background: #f8fafc;
+    background: get-color('slate', 50);
   }
 }
 

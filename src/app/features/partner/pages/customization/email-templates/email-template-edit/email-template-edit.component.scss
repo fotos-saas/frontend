@@ -1,4 +1,6 @@
+@use 'styles/mixins' as *;
 @use '../../../../../../shared/styles/list-page' as list;
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -15,7 +17,7 @@
   background: var(--bg-surface, #fff);
   color: var(--text-secondary, #64748b);
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
   margin-right: 12px;
   flex-shrink: 0;
 
@@ -47,8 +49,8 @@
   margin-left: 8px;
 
   &--green {
-    background: #dcfce7;
-    color: #166534;
+    background: get-color('success', 100);
+    color: get-color('success', 800);
   }
 }
 
@@ -116,7 +118,7 @@
   color: var(--text-secondary, #64748b);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all 0.15s ease;
+  @include transition-fast;
   margin-bottom: -1px;
 
   &:hover {

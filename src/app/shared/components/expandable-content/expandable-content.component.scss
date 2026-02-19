@@ -1,4 +1,5 @@
 @use '../../../../styles/colors' as colors;
+@use 'styles/colors' as *;
 
 // ViewEncapsulation.None - minden selektor prefixelve van .expandable-content-tel
 // hogy ne ütközzön más komponensekkel
@@ -154,7 +155,7 @@
   }
 
   .expandable-content__fade {
-    background: linear-gradient(to bottom, transparent, #1f2937);
+    background: linear-gradient(to bottom, transparent, get-color('gray', 800));
   }
 }
 

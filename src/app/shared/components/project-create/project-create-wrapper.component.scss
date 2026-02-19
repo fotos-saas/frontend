@@ -1,6 +1,7 @@
 @use '../../../shared/styles/dialog-forms' as form;
 @use '../../../../styles/buttons' as *;
 @use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
 
 .project-create-page { max-width: 600px; margin: 0 auto; }
 
@@ -12,24 +13,24 @@
   gap: 6px;
   background: none;
   border: none;
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
   cursor: pointer;
   padding: 8px 12px;
   margin: -8px -12px 16px;
   border-radius: 8px;
   @include mix.transition-fast;
-  &:hover { background: #f1f5f9; color: #1e293b; }
+  &:hover { background: get-color('slate', 100); color: get-color('slate', 800); }
 }
 
 .page-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 4px 0;
 }
 
-.subtitle { color: #64748b; font-size: 0.875rem; margin: 0; }
+.subtitle { color: get-color('slate', 500); font-size: 0.875rem; margin: 0; }
 
 .create-form { @include form.form-layout(24px); }
 
@@ -54,12 +55,12 @@
   @include form.label;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #374151;
+  color: get-color('gray', 700);
 }
 
 .ps-field__hint {
   font-size: 0.8125rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .clear-selection {
@@ -67,7 +68,7 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  background: #e2e8f0;
+  background: get-color('slate', 200);
   border: none;
   border-radius: 50%;
   width: 24px;
@@ -76,9 +77,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #64748b;
+  color: get-color('slate', 500);
   @include mix.transition-fast;
-  &:hover { background: #cbd5e1; color: #1e293b; }
+  &:hover { background: get-color('slate', 300); color: get-color('slate', 800); }
 }
 
 .autocomplete-dropdown {
@@ -87,7 +88,7 @@
   left: 0;
   right: 0;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
   margin-top: 4px;
@@ -113,17 +114,17 @@
   border: none;
   cursor: pointer;
   transition: background 0.1s ease;
-  &:hover, &.highlighted { background: #f1f5f9; }
+  &:hover, &.highlighted { background: get-color('slate', 100); }
 
-  .school-name { font-weight: 500; color: #1e293b; font-size: 0.9375rem; }
-  .school-city { font-size: 0.8125rem; color: #64748b; }
+  .school-name { font-weight: 500; color: get-color('slate', 800); font-size: 0.9375rem; }
+  .school-city { font-size: 0.8125rem; color: get-color('slate', 500); }
 }
 
 .dropdown-loading,
 .dropdown-empty {
   padding: 16px;
   text-align: center;
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
 }
 
@@ -139,10 +140,10 @@
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: get-color('error', 50);
+  border: 1px solid get-color('error', 200);
   border-radius: 10px;
-  color: #dc2626;
+  color: get-color('error', 600);
   font-size: 0.875rem;
 }
 
@@ -152,11 +153,11 @@
   justify-content: flex-end;
   margin-top: 8px;
   padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
 }
 
 .btn-secondary {
-  @include btn-secondary($bg: #f1f5f9, $hover-bg: #e2e8f0, $border-color: transparent, $hover-border: transparent, $padding: 12px 24px, $radius: 10px, $font-size: 0.9375rem, $font-weight: 600);
+  @include btn-secondary($bg: get-color('slate', 100), $hover-bg: get-color('slate', 200), $border-color: transparent, $hover-border: transparent, $padding: 12px 24px, $radius: 10px, $font-size: 0.9375rem, $font-weight: 600);
   border: none;
 }
 
@@ -177,7 +178,7 @@
 
 .dropdown-loading .spinner {
   border-color: rgba(100, 116, 139, 0.3);
-  border-top-color: #64748b;
+  border-top-color: get-color('slate', 500);
 }
 
 @media (max-width: 640px) {

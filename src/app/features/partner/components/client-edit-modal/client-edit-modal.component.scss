@@ -1,5 +1,6 @@
 @use '../../../../../styles/buttons' as *;
 @use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
 
 .modal-content {
   padding: 1.5rem;
@@ -10,14 +11,14 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid get-color('slate', 200);
   margin-bottom: 20px;
 }
 
 .modal-header h2 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0;
 }
 
@@ -30,14 +31,14 @@
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: #64748b;
+  color: get-color('slate', 500);
   cursor: pointer;
   @include mix.transition-fast;
 }
 
 .close-btn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: get-color('slate', 100);
+  color: get-color('slate', 800);
 }
 
 .modal-form {
@@ -48,7 +49,7 @@
 
 .form-input {
   padding: 10px 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.9375rem;
   @include mix.transition-normal;
@@ -70,10 +71,10 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: get-color('error', 50);
+  border: 1px solid get-color('error', 200);
   border-radius: 8px;
-  color: #dc2626;
+  color: get-color('error', 600);
   font-size: 0.875rem;
 }
 
@@ -83,7 +84,7 @@
   gap: 12px;
   margin-top: 8px;
   padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid get-color('slate', 200);
 }
 
 .btn-secondary {

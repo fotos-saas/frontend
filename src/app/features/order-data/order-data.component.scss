@@ -1,11 +1,12 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // TablóStúdió kék színvilág (mint a login)
-$blue-50: #eff6ff;
-$blue-100: #dbeafe;
-$blue-500: #3b82f6;
-$blue-600: #2563eb;
-$blue-700: #1d4ed8;
+$blue-50: get-color('primary', 50);
+$blue-100: get-color('primary', 100);
+$blue-500: get-color('primary', 500);
+$blue-600: get-color('primary', 600);
+$blue-700: get-color('primary', 700);
 
 .order-data {
   min-height: 100vh;
@@ -23,13 +24,13 @@ $blue-700: #1d4ed8;
 .order-data__title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0;
 }
 
 .order-data__subtitle {
   font-size: 1rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin: 0.5rem 0 0;
 }
 
@@ -50,7 +51,7 @@ $blue-700: #1d4ed8;
   align-items: center;
   justify-content: center;
   padding: 4rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .order-data__spinner {
@@ -67,7 +68,7 @@ $blue-700: #1d4ed8;
 .order-data__error {
   text-align: center;
   padding: 3rem;
-  color: #dc2626;
+  color: get-color('error', 600);
 }
 
 .order-data__retry-btn {
@@ -90,7 +91,7 @@ $blue-700: #1d4ed8;
 .order-data__empty {
   text-align: center;
   padding: 4rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .order-data__empty-icon {
@@ -173,14 +174,14 @@ $blue-700: #1d4ed8;
 .order-data__label {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+  color: get-color('slate', 500); // WCAG AA: 4.6:1 kontraszt (slate-500)
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .order-data__value {
   font-size: 0.95rem;
-  color: #1e293b;
+  color: get-color('slate', 800);
 
   &--color {
     display: flex;
@@ -198,7 +199,7 @@ $blue-700: #1d4ed8;
 
 // Description (rich text content from TinyMCE)
 .order-data__description {
-  color: #475569;
+  color: get-color('slate', 600);
   line-height: 1.6;
   font-size: 0.95rem;
   overflow-wrap: break-word;
@@ -223,8 +224,8 @@ $blue-700: #1d4ed8;
     align-items: center;
     gap: 4px;
     padding: 3px 12px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: get-color('primary', 100);
+    color: get-color('primary', 700);
     border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 700;
@@ -232,7 +233,7 @@ $blue-700: #1d4ed8;
     transition: background 0.15s;
 
     &:hover {
-      background: #bfdbfe;
+      background: get-color('primary', 200);
     }
 
     &::before {
@@ -245,7 +246,7 @@ $blue-700: #1d4ed8;
 // Quote
 .order-data__quote {
   font-style: italic;
-  color: #475569;
+  color: get-color('slate', 600);
   border-left: 4px solid $blue-500;
   padding-left: 1rem;
   margin: 0;
@@ -253,11 +254,11 @@ $blue-700: #1d4ed8;
 
 // Namelist - scrollbar mindig látható
 .order-data__namelist {
-  color: #475569;
+  color: get-color('slate', 600);
   line-height: 1.6;
   margin: 0;
   font-family: inherit;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   padding: 1rem;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -271,8 +272,8 @@ $blue-700: #1d4ed8;
     align-items: center;
     gap: 4px;
     padding: 3px 12px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: get-color('primary', 100);
+    color: get-color('primary', 700);
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 700;
@@ -280,7 +281,7 @@ $blue-700: #1d4ed8;
     transition: background 0.15s;
 
     &:hover {
-      background: #bfdbfe;
+      background: get-color('primary', 200);
     }
 
     &::before {
@@ -295,16 +296,16 @@ $blue-700: #1d4ed8;
   }
 
   &::-webkit-scrollbar-track {
-    background: #e2e8f0;
+    background: get-color('slate', 200);
     border-radius: 4px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #64748b; // WCAG AA: 4.6:1 kontraszt (slate-500)
+    background: get-color('slate', 500); // WCAG AA: 4.6:1 kontraszt (slate-500)
     border-radius: 4px;
 
     &:hover {
-      background: #475569; // slate-600 hover esetén
+      background: get-color('slate', 600); // slate-600 hover esetén
     }
   }
 }
@@ -327,11 +328,11 @@ $blue-700: #1d4ed8;
 
 // Summary
 .order-data__summary {
-  color: #475569;
+  color: get-color('slate', 600);
   line-height: 1.6;
   margin: 0;
   font-style: italic;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   padding: 1rem;
   border-radius: 8px;
   border-left: 4px solid $blue-500;
@@ -370,12 +371,12 @@ $blue-700: #1d4ed8;
   }
 
   &--loading {
-    background: #64748b;
+    background: get-color('slate', 500);
   }
 }
 
 .order-data__date {
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 0.875rem;
   margin: 0;
 }

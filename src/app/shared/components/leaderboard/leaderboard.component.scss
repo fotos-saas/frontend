@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .leaderboard {
   background: white;
@@ -9,7 +10,7 @@
 
 .leaderboard__header {
   padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid get-color('gray', 200);
 }
 
 .leaderboard__title {
@@ -19,13 +20,13 @@
   margin: 0 0 16px;
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: get-color('gray', 900);
 }
 
 .leaderboard__icon {
   width: 24px;
   height: 24px;
-  color: #f59e0b;
+  color: get-color('warning', 500);
 }
 
 .leaderboard__tabs {
@@ -37,15 +38,15 @@
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #6b7280;
-  background: #f3f4f6;
+  color: get-color('gray', 500);
+  background: get-color('gray', 100);
   border: none;
   border-radius: 8px;
   cursor: pointer;
   @include transition-normal;
 
   &:hover {
-    background: #e5e7eb;
+    background: get-color('gray', 200);
   }
 
   &--active {
@@ -72,7 +73,7 @@
 .leaderboard__spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #e5e7eb;
+  border: 3px solid get-color('gray', 200);
   border-top-color: #6366f1;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -81,7 +82,7 @@
 .leaderboard__empty {
   padding: 48px 24px;
   text-align: center;
-  color: #9ca3af;
+  color: get-color('gray', 400);
 }
 
 .leaderboard__list {
@@ -95,7 +96,7 @@
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid get-color('gray', 100);
   transition: background-color 0.2s ease;
 
   &:last-child {
@@ -110,7 +111,7 @@
     background: linear-gradient(90deg, #fef3c7 0%, transparent 100%);
 
     &:hover {
-      background: linear-gradient(90deg, #fde68a 0%, #f9fafb 100%);
+      background: linear-gradient(90deg, get-color('warning', 200) 0%, #f9fafb 100%);
     }
   }
 
@@ -138,7 +139,7 @@
 .leaderboard__rank-number {
   font-size: 16px;
   font-weight: 600;
-  color: #6b7280;
+  color: get-color('gray', 500);
 }
 
 .leaderboard__user {
@@ -150,7 +151,7 @@
   display: block;
   font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: get-color('gray', 900);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -159,7 +160,7 @@
 .leaderboard__rank-name {
   display: block;
   font-size: 12px;
-  color: #9ca3af;
+  color: get-color('gray', 400);
   margin-top: 2px;
 }
 
@@ -178,7 +179,7 @@
 .leaderboard__label {
   display: block;
   font-size: 11px;
-  color: #9ca3af;
+  color: get-color('gray', 400);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -188,13 +189,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #f3f4f6;
-  border-top: 1px solid #e5e7eb;
+  background: get-color('gray', 100);
+  border-top: 1px solid get-color('gray', 200);
 }
 
 .leaderboard__current-label {
   font-size: 13px;
-  color: #6b7280;
+  color: get-color('gray', 500);
 }
 
 .leaderboard__current-rank {
@@ -206,7 +207,7 @@
 .leaderboard__current-position {
   font-size: 16px;
   font-weight: 700;
-  color: #111827;
+  color: get-color('gray', 900);
 }
 
 .leaderboard__current-points {

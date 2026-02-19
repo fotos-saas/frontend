@@ -1,4 +1,5 @@
 // === DETAIL GROUP (egy csoport a panelen belül) ===
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -15,12 +16,12 @@
     align-items: center;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #475569;
+    color: get-color('slate', 600);
     margin-bottom: 8px;
 
     lucide-icon {
       margin-right: 6px;
-      color: #64748b;
+      color: get-color('slate', 500);
       flex-shrink: 0;
     }
   }
@@ -28,7 +29,7 @@
   &__count {
     margin-left: 6px;
     font-weight: 400;
-    color: #94a3b8;
+    color: get-color('slate', 400);
   }
 
   &__content {

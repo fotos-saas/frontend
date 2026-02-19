@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .finalization-row {
   display: grid;
@@ -7,15 +8,15 @@
   gap: 8px;
   background: #ffffff;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   padding: 8px 16px;
   cursor: pointer;
   @include transition-fast;
 }
 
 .finalization-row:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: get-color('slate', 300);
+  background: get-color('slate', 50);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -35,7 +36,7 @@
 .school-name {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -45,7 +46,7 @@
 
 .school-meta {
   font-size: 0.6875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -60,13 +61,13 @@
 
 .date-value {
   font-size: 0.75rem;
-  color: #475569;
+  color: get-color('slate', 600);
   white-space: nowrap;
 }
 
 .date-empty {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 /* Col: Méret */
@@ -76,7 +77,7 @@
 
 .size-empty {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 /* Col: Fájl státusz */
@@ -96,7 +97,7 @@
 }
 
 .file-status--ready {
-  color: #16a34a;
+  color: get-color('success', 600);
   font-weight: 500;
 }
 
@@ -106,7 +107,7 @@
 }
 
 .file-status--empty {
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .file-badges {
@@ -126,8 +127,8 @@
 }
 
 .file-badge--ready {
-  background: #dcfce7;
-  color: #16a34a;
+  background: get-color('success', 100);
+  color: get-color('success', 600);
 }
 
 /* Col: Sample thumbnail */
@@ -140,7 +141,7 @@
   height: 40px;
   object-fit: cover;
   border-radius: 4px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -151,7 +152,7 @@
 .sample-thumb--clickable:hover {
   transform: scale(1.08);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  border-color: #94a3b8;
+  border-color: get-color('slate', 400);
 }
 
 .sample-placeholder {
@@ -160,10 +161,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
+  background: get-color('slate', 100);
   border-radius: 4px;
-  border: 1px dashed #cbd5e1;
-  color: #94a3b8;
+  border: 1px dashed get-color('slate', 300);
+  color: get-color('slate', 400);
 }
 
 /* Col: Actions */
@@ -208,21 +209,21 @@
 }
 
 .action-btn--upload {
-  background: #3b82f6;
+  background: get-color('primary', 500);
   color: #ffffff;
 }
 
 .action-btn--upload:hover {
-  background: #2563eb;
+  background: get-color('primary', 600);
 }
 
 .action-btn--done {
-  background: #f59e0b;
+  background: get-color('warning', 500);
   color: #ffffff;
 }
 
 .action-btn--done:hover {
-  background: #d97706;
+  background: get-color('warning', 600);
 }
 
 /* Responsive */

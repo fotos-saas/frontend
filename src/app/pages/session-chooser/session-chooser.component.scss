@@ -1,18 +1,19 @@
 // Session Chooser - Glassmorphism UI/UX Redesign
 // Netflix/Google inspired design with session type colors
+@use 'styles/colors' as *;
 
 // ============================================
 // VARIABLES
 // ============================================
 
 // Session Type Colors
-$color-code: #3b82f6;       // Blue - Kapcsolattartó
-$color-code-light: #dbeafe;
-$color-code-gradient: linear-gradient(135deg, #dbeafe, #bfdbfe);
+$color-code: get-color('primary', 500);       // Blue - Kapcsolattartó
+$color-code-light: get-color('primary', 100);
+$color-code-gradient: linear-gradient(135deg, get-color('primary', 100), get-color('primary', 200));
 
-$color-share: #22c55e;      // Green - Vendég
-$color-share-light: #dcfce7;
-$color-share-gradient: linear-gradient(135deg, #dcfce7, #bbf7d0);
+$color-share: get-color('success', 500);      // Green - Vendég
+$color-share-light: get-color('success', 100);
+$color-share-gradient: linear-gradient(135deg, get-color('success', 100), get-color('success', 200));
 
 $color-preview: #9333ea;    // Purple - Előnézet
 $color-preview-light: #f3e8ff;
@@ -51,7 +52,7 @@ $transition-fast: 0.2s ease;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, get-color('primary', 50) 0%, #e0e7ff 100%);
   padding: 3rem 1rem 2rem;
 
   @media (min-width: 768px) {
@@ -94,7 +95,7 @@ $transition-fast: 0.2s ease;
   &__title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1f2937;
+    color: get-color('gray', 800);
     margin: 0;
 
     @media (min-width: 768px) {
@@ -104,7 +105,7 @@ $transition-fast: 0.2s ease;
 
   &__subtitle {
     font-size: 0.9rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     margin: 0;
   }
 
@@ -272,7 +273,7 @@ $transition-fast: 0.2s ease;
         rgba(240, 249, 255, 0.95) 0%,
         rgba(224, 242, 254, 0.9) 100%
       );
-      border-left: $card-status-border-width dashed #93c5fd;
+      border-left: $card-status-border-width dashed get-color('primary', 300);
       border-top: 1px dashed rgba(147, 197, 253, 0.5);
       border-right: 1px dashed rgba(147, 197, 253, 0.5);
       border-bottom: 1px dashed rgba(147, 197, 253, 0.5);
@@ -333,14 +334,14 @@ $transition-fast: 0.2s ease;
     }
 
     &--new {
-      background: linear-gradient(135deg, #e0f2fe, #bfdbfe);
+      background: linear-gradient(135deg, #e0f2fe, get-color('primary', 200));
     }
   }
 
   &__icon-svg {
     width: 22px;
     height: 22px;
-    color: #1f2937;
+    color: get-color('gray', 800);
   }
 
   // ============================================
@@ -350,7 +351,7 @@ $transition-fast: 0.2s ease;
   &__card-title {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #1f2937;
+    color: get-color('gray', 800);
     margin: 0;
     line-height: 1.25;
     width: 100%;
@@ -380,7 +381,7 @@ $transition-fast: 0.2s ease;
 
   &__card-username {
     font-size: 0.8rem;
-    color: #4b5563;
+    color: get-color('gray', 600);
     font-weight: 500;
   }
 
@@ -400,7 +401,7 @@ $transition-fast: 0.2s ease;
 
     &--code {
       background: $color-code-light;
-      color: #1d4ed8;
+      color: get-color('primary', 700);
     }
 
     &--share {
@@ -420,7 +421,7 @@ $transition-fast: 0.2s ease;
 
   &__card-meta {
     font-size: 0.65rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
     display: flex;
     gap: 0.2rem;
     margin-top: auto;
@@ -428,12 +429,12 @@ $transition-fast: 0.2s ease;
   }
 
   &__card-meta-label {
-    color: #9ca3af;
+    color: get-color('gray', 400);
   }
 
   &__card-meta-value {
     font-weight: 500;
-    color: #6b7280;
+    color: get-color('gray', 500);
   }
 
   // ============================================
@@ -442,7 +443,7 @@ $transition-fast: 0.2s ease;
 
   &__card-hint {
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     margin: 0.25rem 0 0;
     line-height: 1.3;
   }
@@ -462,7 +463,7 @@ $transition-fast: 0.2s ease;
     align-items: center;
     justify-content: center;
     background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    color: get-color('error', 500);
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -498,7 +499,7 @@ $transition-fast: 0.2s ease;
     margin-top: 2rem;
     text-align: center;
     font-size: 0.875rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     animation: fadeInUp 0.4s ease forwards;
     animation-delay: 0.8s;
     opacity: 0;
@@ -513,18 +514,18 @@ $transition-fast: 0.2s ease;
 
 @media (prefers-color-scheme: dark) {
   .session-chooser {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, get-color('slate', 800) 0%, get-color('slate', 900) 100%);
 
     &__logo-icon {
-      color: #93c5fd;
+      color: get-color('primary', 300);
     }
 
     &__title {
-      color: #f1f5f9;
+      color: get-color('slate', 100);
     }
 
     &__subtitle {
-      color: #64748b;
+      color: get-color('slate', 500);
     }
 
     &__card {
@@ -567,43 +568,43 @@ $transition-fast: 0.2s ease;
     }
 
     &__card-title {
-      color: #f1f5f9;
+      color: get-color('slate', 100);
 
       &--new {
-        color: #93c5fd;
+        color: get-color('primary', 300);
       }
     }
 
     &__card-username {
-      color: #cbd5e1;
+      color: get-color('slate', 300);
     }
 
     &__card-meta-label {
-      color: #64748b;
+      color: get-color('slate', 500);
     }
 
     &__card-meta-value {
-      color: #94a3b8;
+      color: get-color('slate', 400);
     }
 
     &__card-hint {
-      color: #94a3b8;
+      color: get-color('slate', 400);
     }
 
     &__icon-svg {
-      color: #f1f5f9;
+      color: get-color('slate', 100);
     }
 
     &__card-arrow {
-      color: #64748b;
+      color: get-color('slate', 500);
 
       &--new {
-        color: #93c5fd;
+        color: get-color('primary', 300);
       }
     }
 
     &__hint {
-      color: #64748b;
+      color: get-color('slate', 500);
     }
   }
 

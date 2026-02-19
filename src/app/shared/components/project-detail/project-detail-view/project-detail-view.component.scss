@@ -1,5 +1,6 @@
 /* A detail-badge stílusok a header komponensbe kerültek */
 
+@use 'styles/colors' as *;
 .overview-header {
   display: flex;
   justify-content: flex-end;
@@ -35,7 +36,7 @@
     display: flex;
     flex-direction: column;
     background: #fff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid get-color('gray', 200);
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 24px;
@@ -57,7 +58,7 @@
     font-size: inherit;
 
     &:not(:last-child):not(.quick-action__wrapper .quick-action) {
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid get-color('gray', 100);
     }
 
     &:hover,
@@ -80,13 +81,13 @@
       }
 
       &--green {
-        background-color: #dcfce7;
-        color: #16a34a;
+        background-color: get-color('success', 100);
+        color: get-color('success', 600);
       }
 
       &--amber {
         background-color: #fef3c7;
-        color: #d97706;
+        color: get-color('warning', 600);
       }
 
       &--indigo {
@@ -95,8 +96,8 @@
       }
 
       &--gray {
-        background-color: #f3f4f6;
-        color: #9ca3af;
+        background-color: get-color('gray', 100);
+        color: get-color('gray', 400);
       }
     }
 
@@ -111,16 +112,16 @@
     &__title {
       font-size: 0.875rem;
       font-weight: 600;
-      color: #1f2937;
+      color: get-color('gray', 800);
     }
 
     &__desc {
       font-size: 0.75rem;
-      color: #9ca3af;
+      color: get-color('gray', 400);
     }
 
     &__arrow {
-      color: #d1d5db;
+      color: get-color('gray', 300);
       flex-shrink: 0;
     }
 
@@ -129,7 +130,7 @@
       align-items: stretch;
 
       &:not(:last-child) {
-        border-bottom: 1px solid #f3f4f6;
+        border-bottom: 1px solid get-color('gray', 100);
       }
 
       .quick-action {
@@ -145,15 +146,15 @@
       padding: 0 14px;
       background: none;
       border: none;
-      border-left: 1px solid #f3f4f6;
-      color: #9ca3af;
+      border-left: 1px solid get-color('gray', 100);
+      color: get-color('gray', 400);
       cursor: pointer;
       transition: background-color 0.15s, color 0.15s;
 
       &:hover,
       &:active {
-        background-color: #f3f4f6;
-        color: #16a34a;
+        background-color: get-color('gray', 100);
+        color: get-color('success', 600);
       }
     }
   }
@@ -166,13 +167,13 @@
 // === Kapcsolattartók szekció ===
 .contacts-section {
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 12px;
   overflow: hidden;
 
   &__header {
     padding: 16px 20px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid get-color('gray', 100);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -193,7 +194,7 @@
 
   p {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
     margin: 0;
   }
 }
@@ -247,7 +248,7 @@
   &__name {
     font-weight: 500;
     font-size: 0.9375rem;
-    color: #111827;
+    color: get-color('gray', 900);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -292,22 +293,22 @@
   align-items: center;
   gap: 5px;
   padding: 4px 10px;
-  background: #f3f4f6;
+  background: get-color('gray', 100);
   border-radius: 6px;
   font-size: 0.8125rem;
-  color: #4b5563;
+  color: get-color('gray', 600);
   text-decoration: none;
   transition: background-color 0.15s, color 0.15s;
   max-width: 100%;
   overflow: hidden;
 
   &:hover {
-    background: #e5e7eb;
+    background: get-color('gray', 200);
     color: var(--color-primary, #6366f1);
   }
 
   &:active {
-    background: #d1d5db;
+    background: get-color('gray', 300);
   }
 
   lucide-icon {
@@ -371,7 +372,7 @@
 .meta-footer {
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid get-color('gray', 100);
 
   &__row {
     display: flex;
@@ -379,7 +380,7 @@
     justify-content: center;
     gap: 24px;
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
   }
 
   &__item {

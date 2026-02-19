@@ -1,4 +1,5 @@
 @use '../../../../../shared/styles/list-page' as list;
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -106,13 +107,13 @@
   }
 
   &-info {
-    background: #dbeafe;
-    color: #1e40af;
+    background: get-color('primary', 100);
+    color: get-color('primary', 800);
   }
 
   &-warning {
     background: #fef3c7;
-    color: #92400e;
+    color: get-color('warning', 800);
   }
 
   &-primary {
@@ -126,8 +127,8 @@
   }
 
   &-danger {
-    background: #fee2e2;
-    color: #991b1b;
+    background: get-color('error', 100);
+    color: get-color('error', 800);
   }
 }
 

@@ -1,4 +1,5 @@
 // Partner Select - Glassmorphism UI (Session Chooser mintára)
+@use 'styles/colors' as *;
 
 // ============================================
 // VARIABLES
@@ -9,17 +10,17 @@ $color-purple: #9333ea;
 $color-purple-light: #f3e8ff;
 $color-purple-gradient: linear-gradient(135deg, #f3e8ff, #e9d5ff);
 
-$color-blue: #3b82f6;
-$color-blue-light: #dbeafe;
-$color-blue-gradient: linear-gradient(135deg, #dbeafe, #bfdbfe);
+$color-blue: get-color('primary', 500);
+$color-blue-light: get-color('primary', 100);
+$color-blue-gradient: linear-gradient(135deg, get-color('primary', 100), get-color('primary', 200));
 
-$color-green: #22c55e;
-$color-green-light: #dcfce7;
-$color-green-gradient: linear-gradient(135deg, #dcfce7, #bbf7d0);
+$color-green: get-color('success', 500);
+$color-green-light: get-color('success', 100);
+$color-green-gradient: linear-gradient(135deg, get-color('success', 100), get-color('success', 200));
 
-$color-amber: #f59e0b;
+$color-amber: get-color('warning', 500);
 $color-amber-light: #fef3c7;
-$color-amber-gradient: linear-gradient(135deg, #fef3c7, #fde68a);
+$color-amber-gradient: linear-gradient(135deg, #fef3c7, get-color('warning', 200));
 
 // Card styling
 $card-border-radius: 16px;
@@ -74,7 +75,7 @@ $transition-fast: 0.2s ease;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, get-color('primary', 50) 0%, #e0e7ff 100%);
   padding: 3rem 1rem 2rem;
   position: relative;
 
@@ -118,7 +119,7 @@ $transition-fast: 0.2s ease;
   &__title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1f2937;
+    color: get-color('gray', 800);
     margin: 0;
 
     @media (min-width: 768px) {
@@ -128,7 +129,7 @@ $transition-fast: 0.2s ease;
 
   &__subtitle {
     font-size: 0.9rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     margin: 0;
   }
 
@@ -282,7 +283,7 @@ $transition-fast: 0.2s ease;
       pointer-events: none;
       animation: none;
       opacity: 1;
-      border-left-color: #e5e7eb;
+      border-left-color: get-color('gray', 200);
     }
   }
 
@@ -345,7 +346,7 @@ $transition-fast: 0.2s ease;
   &__icon-svg {
     width: 24px;
     height: 24px;
-    color: #1f2937;
+    color: get-color('gray', 800);
   }
 
   // ============================================
@@ -355,7 +356,7 @@ $transition-fast: 0.2s ease;
   &__card-title {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #1f2937;
+    color: get-color('gray', 800);
     margin: 0;
     line-height: 1.3;
     width: 100%;
@@ -387,7 +388,7 @@ $transition-fast: 0.2s ease;
 
     &--blue {
       background: $color-blue-light;
-      color: #1d4ed8;
+      color: get-color('primary', 700);
     }
 
     &--green {
@@ -409,7 +410,7 @@ $transition-fast: 0.2s ease;
     margin-top: 2rem;
     text-align: center;
     font-size: 0.875rem;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     animation: fadeInUp 0.4s ease forwards;
     animation-delay: 0.8s;
     opacity: 0;
@@ -421,7 +422,7 @@ $transition-fast: 0.2s ease;
 
   &__error {
     text-align: center;
-    color: #ef4444;
+    color: get-color('error', 500);
     animation: fadeInUp 0.4s ease forwards;
 
     p {
@@ -433,7 +434,7 @@ $transition-fast: 0.2s ease;
   &__error-icon {
     width: 2.5rem;
     height: 2.5rem;
-    color: #ef4444;
+    color: get-color('error', 500);
   }
 
   &__retry-btn {
@@ -487,7 +488,7 @@ $transition-fast: 0.2s ease;
 // ============================================
 
 .skeleton {
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background: linear-gradient(90deg, get-color('gray', 200) 25%, get-color('gray', 100) 50%, get-color('gray', 200) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease infinite;
   border-radius: 6px;
@@ -517,18 +518,18 @@ $transition-fast: 0.2s ease;
 
 @media (prefers-color-scheme: dark) {
   .partner-select {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, get-color('slate', 800) 0%, get-color('slate', 900) 100%);
 
     &__logo-icon {
       color: #c084fc;
     }
 
     &__title {
-      color: #f1f5f9;
+      color: get-color('slate', 100);
     }
 
     &__subtitle {
-      color: #64748b;
+      color: get-color('slate', 500);
     }
 
     &__card {
@@ -562,15 +563,15 @@ $transition-fast: 0.2s ease;
     }
 
     &__card-title {
-      color: #f1f5f9;
+      color: get-color('slate', 100);
     }
 
     &__icon-svg {
-      color: #f1f5f9;
+      color: get-color('slate', 100);
     }
 
     &__hint {
-      color: #64748b;
+      color: get-color('slate', 500);
     }
 
     &__current-badge {
@@ -580,7 +581,7 @@ $transition-fast: 0.2s ease;
   }
 
   .skeleton {
-    background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+    background: linear-gradient(90deg, get-color('slate', 700) 25%, get-color('slate', 600) 50%, get-color('slate', 700) 75%);
     background-size: 200% 100%;
   }
 }

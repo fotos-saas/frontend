@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 :host {
   display: block;
@@ -20,7 +21,7 @@
 .shop-header {
   padding: 24px 32px;
   background: white;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid get-color('gray', 200);
 
   h1 {
     display: flex;
@@ -34,7 +35,7 @@
 
   .welcome-msg {
     margin: 8px 0 0;
-    color: #6b7280;
+    color: get-color('gray', 500);
     font-size: 0.875rem;
   }
 }
@@ -77,11 +78,11 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    @include shadow-lg;
   }
 
   &.selected {
-    border-color: #3b82f6;
+    border-color: get-color('primary', 500);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
   }
 
@@ -96,7 +97,7 @@
     display: block;
     padding: 6px 8px;
     font-size: 0.75rem;
-    color: #374151;
+    color: get-color('gray', 700);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -108,7 +109,7 @@
   margin-top: 20px;
   padding: 20px;
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 12px;
 
   .selector-header {
@@ -125,17 +126,17 @@
     }
 
     h3 { margin: 0; font-size: 1rem; }
-    p { margin: 4px 0 0; color: #6b7280; font-size: 0.875rem; }
+    p { margin: 4px 0 0; color: get-color('gray', 500); font-size: 0.875rem; }
 
     .close-btn {
       margin-left: auto;
       background: none;
       border: none;
-      color: #9ca3af;
+      color: get-color('gray', 400);
       cursor: pointer;
       padding: 4px;
 
-      &:hover { color: #374151; }
+      &:hover { color: get-color('gray', 700); }
     }
   }
 }
@@ -151,15 +152,15 @@
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 8px;
   cursor: pointer;
   @include transition-fast;
 
   &:hover { background: #f9fafb; }
   &.selected {
-    border-color: #3b82f6;
-    background: #eff6ff;
+    border-color: get-color('primary', 500);
+    background: get-color('primary', 50);
   }
 
   .product-name {
@@ -168,7 +169,7 @@
   }
 
   .product-dims {
-    color: #9ca3af;
+    color: get-color('gray', 400);
     font-size: 0.75rem;
   }
 
@@ -186,14 +187,14 @@
   gap: 12px;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid get-color('gray', 200);
 }
 
 .qty-control {
   display: flex;
   align-items: center;
   gap: 0;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 8px;
   overflow: hidden;
 
@@ -204,9 +205,9 @@
     background: #f9fafb;
     cursor: pointer;
     font-size: 1rem;
-    color: #374151;
+    color: get-color('gray', 700);
 
-    &:hover { background: #e5e7eb; }
+    &:hover { background: get-color('gray', 200); }
   }
 
   span {
@@ -225,7 +226,7 @@
 // Cart Sidebar
 .cart-sidebar {
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid get-color('gray', 200);
   border-radius: 12px;
   padding: 20px;
   height: fit-content;
@@ -245,7 +246,7 @@
 
   .empty-cart {
     text-align: center;
-    color: #9ca3af;
+    color: get-color('gray', 400);
     padding: 24px 0;
     font-size: 0.875rem;
   }
@@ -263,7 +264,7 @@
   display: flex;
   gap: 10px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid get-color('gray', 100);
 
   .cart-thumb {
     width: 48px;
@@ -288,7 +289,7 @@
 
     .cart-item-spec {
       font-size: 0.75rem;
-      color: #9ca3af;
+      color: get-color('gray', 400);
     }
 
     .cart-item-row {
@@ -308,7 +309,7 @@
   .remove-btn {
     background: none;
     border: none;
-    color: #ef4444;
+    color: get-color('error', 500);
     cursor: pointer;
     padding: 4px;
     flex-shrink: 0;
@@ -320,10 +321,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 0 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid get-color('gray', 200);
   margin-top: 12px;
 
-  span { font-size: 0.875rem; color: #6b7280; }
+  span { font-size: 0.875rem; color: get-color('gray', 500); }
   strong { font-size: 1.125rem; color: #111; }
 }
 
@@ -352,10 +353,10 @@
   @include transition-fast;
 
   &-primary {
-    background: #3b82f6;
+    background: get-color('primary', 500);
     color: white;
 
-    &:hover { background: #2563eb; }
+    &:hover { background: get-color('primary', 600); }
   }
 
   &-full {

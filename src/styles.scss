@@ -3,6 +3,7 @@
 
 // Form Design System — CSS custom properties (globálisan kell!)
 @use 'app/shared/components/form/form-tokens';
+@use 'styles/colors' as *;
 
 // Checkbox label linkek (ng-content projected → globális scope kell)
 .ps-checkbox__label a {
@@ -24,7 +25,7 @@
 
 // Material tooltip custom stílus - fekete buborék, fehér betű
 .mat-mdc-tooltip .mdc-tooltip__surface {
-  background-color: #1e293b !important;
+  background-color: get-color('slate', 800) !important;
   color: #ffffff !important;
   font-size: 0.8125rem !important;
   font-weight: 500 !important;
@@ -616,13 +617,13 @@ body.dialog-open {
 // Dark mode dialog
 @media (prefers-color-scheme: dark) {
   .dialog-panel {
-    background: #1e293b;
+    background: get-color('slate', 800);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   }
 }
 
 .dark .dialog-panel {
-  background: #1e293b;
+  background: get-color('slate', 800);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -706,17 +707,17 @@ body.dialog-open {
 @media (prefers-reduced-motion: reduce) {
   .skeleton-shimmer {
     animation: none;
-    background: #e5e7eb;
+    background: get-color('gray', 200);
   }
 
   @media (prefers-color-scheme: dark) {
     .skeleton-shimmer {
-      background: #4b5563;
+      background: get-color('gray', 600);
     }
   }
 
   .dark .skeleton-shimmer {
-    background: #4b5563;
+    background: get-color('gray', 600);
   }
 }
 
@@ -786,7 +787,7 @@ body.dialog-open {
   left: 50%;
   transform: translateX(-50%);
   padding: 6px 10px;
-  background: #1e293b;
+  background: get-color('slate', 800);
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 500;
@@ -811,7 +812,7 @@ body.dialog-open {
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: #1e293b;
+  border-top-color: get-color('slate', 800);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.1s ease, visibility 0.1s ease;
@@ -836,7 +837,7 @@ body.dialog-open {
   bottom: auto;
   top: calc(100% + 1px);
   border-top-color: transparent;
-  border-bottom-color: #1e293b;
+  border-bottom-color: get-color('slate', 800);
 }
 
 // Balra: data-tooltip-pos="left"
@@ -855,7 +856,7 @@ body.dialog-open {
   right: calc(100% + 1px);
   transform: translateY(-50%);
   border-top-color: transparent;
-  border-left-color: #1e293b;
+  border-left-color: get-color('slate', 800);
 }
 
 // Jobbra: data-tooltip-pos="right"
@@ -872,7 +873,7 @@ body.dialog-open {
   left: calc(100% + 1px);
   transform: translateY(-50%);
   border-top-color: transparent;
-  border-right-color: #1e293b;
+  border-right-color: get-color('slate', 800);
 }
 
 // Reduced motion

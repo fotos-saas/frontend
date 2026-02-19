@@ -45,7 +45,7 @@
     &:hover {
       opacity: 1;
       border-color: colors.get-color('gray', 400);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      @include shadow-md;
       transform: none;
     }
   }

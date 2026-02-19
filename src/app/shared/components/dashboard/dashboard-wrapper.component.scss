@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // max-width → page-card default kezeli
 .dashboard {}
@@ -10,12 +11,12 @@
 .dashboard-header h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
-  color: #64748b;
+  color: get-color('slate', 500);
   font-size: 1rem;
   margin: 0;
 }
@@ -51,7 +52,7 @@
 .stat-icon {
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  background: linear-gradient(135deg, get-color('primary', 50) 0%, get-color('primary', 100) 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -68,13 +69,13 @@
 .stat-value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1e293b;
+  color: get-color('slate', 800);
   line-height: 1.2;
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 /* Sections */
@@ -91,7 +92,7 @@
 .recent-section h2 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 16px 0;
 }
 
@@ -129,16 +130,16 @@
 }
 
 .action-btn--secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: get-color('slate', 100);
+  color: get-color('slate', 600);
 }
 
 .action-btn--secondary:hover {
-  background: #e2e8f0;
+  background: get-color('slate', 200);
 }
 
 .action-btn--secondary .action-icon {
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .action-btn--primary .action-icon {
@@ -157,14 +158,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #f8fafc;
+  background: get-color('slate', 50);
   border-radius: 10px;
   cursor: pointer;
   @include transition-fast;
 }
 
 .recent-item:hover {
-  background: #f1f5f9;
+  background: get-color('slate', 100);
 }
 
 .recent-info {
@@ -174,13 +175,13 @@
 
 .recent-name {
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   font-size: 0.9375rem;
 }
 
 .recent-school {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .recent-meta {
@@ -190,8 +191,8 @@
 }
 
 .qr-badge {
-  background: #dcfce7;
-  color: #16a34a;
+  background: get-color('success', 100);
+  color: get-color('success', 600);
   font-size: 0.6875rem;
   padding: 2px 6px;
   border-radius: 4px;
@@ -216,7 +217,7 @@
 /* Skeleton Loading */
 .skeleton .stat-card {
   height: 100px;
-  background: #e2e8f0;
+  background: get-color('slate', 200);
 }
 
 .skeleton-shimmer {

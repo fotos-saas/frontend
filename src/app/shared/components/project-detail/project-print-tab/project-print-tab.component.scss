@@ -1,3 +1,6 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
 .print-tab {
   display: flex;
   gap: 32px;
@@ -21,7 +24,7 @@
   gap: 8px;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 16px;
 }
 
@@ -47,7 +50,7 @@
     top: 30px;
     bottom: -6px;
     width: 2px;
-    background: #e2e8f0;
+    background: get-color('slate', 200);
   }
 }
 
@@ -64,13 +67,13 @@
   }
 
   &--green {
-    background: #22c55e;
+    background: get-color('success', 500);
     box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
   }
 
   &--gray {
-    background: #cbd5e1;
-    border: 2px dashed #94a3b8;
+    background: get-color('slate', 300);
+    border: 2px dashed get-color('slate', 400);
     box-sizing: border-box;
   }
 }
@@ -84,15 +87,15 @@
 .timeline-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
 }
 
 .timeline-date {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 
   &--pending {
-    color: #94a3b8;
+    color: get-color('slate', 400);
     font-style: italic;
   }
 }
@@ -103,8 +106,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
   border-radius: 10px;
 }
 
@@ -131,7 +134,7 @@
 .file-name {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -139,7 +142,7 @@
 
 .file-meta {
   font-size: 0.75rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .file-actions {
@@ -172,18 +175,18 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: get-color('slate', 100);
+  color: get-color('slate', 600);
+  border: 1px solid get-color('slate', 200);
   border-radius: 8px;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover {
-    background: #e2e8f0;
-    border-color: #cbd5e1;
+    background: get-color('slate', 200);
+    border-color: get-color('slate', 300);
   }
 }
 
@@ -193,15 +196,15 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: #fef2f2;
-  color: #ef4444;
-  border: 1px solid #fecaca;
+  background: get-color('error', 50);
+  color: get-color('error', 500);
+  border: 1px solid get-color('error', 200);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover {
-    background: #fee2e2;
+    background: get-color('error', 100);
     border-color: #fca5a5;
   }
 }
@@ -213,16 +216,16 @@
   align-items: center;
   gap: 8px;
   padding: 40px 24px;
-  background: #f8fafc;
-  border: 2px dashed #cbd5e1;
+  background: get-color('slate', 50);
+  border: 2px dashed get-color('slate', 300);
   border-radius: 10px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  @include transition-fast;
 
   &:hover {
-    border-color: #94a3b8;
-    background: #f1f5f9;
+    border-color: get-color('slate', 400);
+    background: get-color('slate', 100);
   }
 
   &--drag {
@@ -236,20 +239,20 @@
 }
 
 .drop-icon {
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .drop-text {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #475569;
+  color: get-color('slate', 600);
 }
 
 .drop-hint {
   margin: 0;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: get-color('slate', 400);
 }
 
 .hidden-input {
@@ -259,7 +262,7 @@
 .upload-error {
   margin: 8px 0 0;
   font-size: 0.8125rem;
-  color: #ef4444;
+  color: get-color('error', 500);
 }
 
 .upload-progress {
@@ -268,13 +271,13 @@
   gap: 8px;
   margin-top: 12px;
   font-size: 0.8125rem;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid get-color('slate', 200);
   border-top-color: #8b5cf6;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;

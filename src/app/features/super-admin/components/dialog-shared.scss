@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 // ============================================
 // BACKDROP
@@ -49,20 +50,20 @@
     align-items: center;
     justify-content: center;
     margin: 0 auto 1rem;
-    background: #eff6ff;
-    color: #2563eb;
+    background: get-color('primary', 50);
+    color: get-color('primary', 600);
   }
 
   &__title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #111827;
+    color: get-color('gray', 900);
     margin: 0;
   }
 
   &__subtitle {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: get-color('gray', 500);
     margin: 0.5rem 0 0;
   }
 
@@ -74,7 +75,7 @@
     display: flex;
     gap: 0.75rem;
     padding: 1rem 1.5rem 1.5rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid get-color('gray', 200);
 
     .btn {
       flex: 1;
@@ -88,7 +89,7 @@
 .form-hint {
   display: block;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: get-color('gray', 500);
   margin-top: 0.25rem;
 }
 
@@ -106,10 +107,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: get-color('error', 50);
+  border: 1px solid get-color('error', 200);
   border-radius: 8px;
-  color: #dc2626;
+  color: get-color('error', 600);
   font-size: 0.875rem;
   margin-top: 1rem;
 }
@@ -126,7 +127,7 @@
   &__label {
     font-size: 0.75rem;
     font-weight: 500;
-    color: #6b7280;
+    color: get-color('gray', 500);
     text-transform: uppercase;
     letter-spacing: 0.025em;
     margin-bottom: 0.25rem;
@@ -135,7 +136,7 @@
   &__value {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #111827;
+    color: get-color('gray', 900);
   }
 }
 
@@ -161,29 +162,29 @@
   }
 
   &--primary {
-    background: #2563eb;
+    background: get-color('primary', 600);
     color: white;
 
     &:hover:not(:disabled) {
-      background: #1d4ed8;
+      background: get-color('primary', 700);
     }
   }
 
   &--secondary {
-    background: #f3f4f6;
-    color: #374151;
+    background: get-color('gray', 100);
+    color: get-color('gray', 700);
 
     &:hover:not(:disabled) {
-      background: #e5e7eb;
+      background: get-color('gray', 200);
     }
   }
 
   &--danger {
-    background: #dc2626;
+    background: get-color('error', 600);
     color: white;
 
     &:hover:not(:disabled) {
-      background: #b91c1c;
+      background: get-color('error', 700);
     }
   }
 

@@ -1,4 +1,5 @@
 @use 'styles/mixins' as *;
+@use 'styles/colors' as *;
 
 .album-picker {
   display: flex;
@@ -13,13 +14,13 @@
 .picker-header h3 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0 0 8px 0;
 }
 
 .picker-subtitle {
   font-size: 0.875rem;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin: 0;
 }
 
@@ -41,8 +42,8 @@
   align-items: center;
   gap: 12px;
   padding: 24px;
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  background: get-color('slate', 50);
+  border: 2px solid get-color('slate', 200);
   border-radius: 16px;
   cursor: pointer;
   @include transition-normal;
@@ -57,12 +58,12 @@
 }
 
 .album-card--has-photos {
-  border-color: #f59e0b;
-  background: #fffbeb;
+  border-color: get-color('warning', 500);
+  background: get-color('warning', 50);
 }
 
 .album-card--has-photos:hover {
-  border-color: #d97706;
+  border-color: get-color('warning', 600);
   background: #fef3c7;
 }
 
@@ -84,7 +85,7 @@
 .album-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: get-color('slate', 800);
   margin: 0;
 }
 
@@ -189,9 +190,9 @@
 }
 
 .album-card--has-photos .album-btn {
-  background: #f59e0b;
+  background: get-color('warning', 500);
 }
 
 .album-card--has-photos .album-btn:hover {
-  background: #d97706;
+  background: get-color('warning', 600);
 }

@@ -7,10 +7,10 @@
  * JSON formatum (elokeszitett):
  * {
  *   "layers": [
- *     { "layerName": "kiss-janos---42", "group": "Students", "widthPx": 1228, "heightPx": 1819 },
- *     { "layerName": "szabo-anna---101", "group": "Teachers", "widthPx": 1228, "heightPx": 1819 }
+ *     { "layerName": "kiss-janos---42", "group": "Students", "widthPx": 1228, "heightPx": 1819, "photoPath": null },
+ *     { "layerName": "szabo-anna---101", "group": "Teachers", "widthPx": 1228, "heightPx": 1819, "photoPath": "/tmp/psd-photos/szabo-anna---101.jpg" }
  *   ],
- *   "stats": { "students": 25, "teachers": 3, "total": 28 },
+ *   "stats": { "students": 25, "teachers": 3, "total": 28, "withPhoto": 3 },
  *   "imageSizeCm": { "widthCm": 10.4, "heightCm": 15.4, "dpi": 300 }
  * }
  *
@@ -28,6 +28,7 @@ function log(msg) {
 
 (function () {
   var created = 0;
+  var photosPlaced = 0;
   var errors = 0;
 
   try {
@@ -48,14 +49,15 @@ function log(msg) {
 
     if (!data || !data.layers || data.layers.length === 0) {
       log("[JSX] Nincs layer adat — kilep.");
-      log("[JSX] KESZ: 0 layer, 0 hiba");
+      log("[JSX] KESZ: 0 layer, 0 foto, 0 hiba");
       return;
     }
 
-    log("[JSX] Image layerek szama: " + data.layers.length + " (diak: " + data.stats.students + ", tanar: " + data.stats.teachers + ")");
+    var withPhotoCount = data.stats.withPhoto || 0;
+    log("[JSX] Image layerek szama: " + data.layers.length + " (diak: " + data.stats.students + ", tanar: " + data.stats.teachers + ", fotoval: " + withPhotoCount + ")");
     log("[JSX] Kepmeret: " + data.imageSizeCm.widthCm + " x " + data.imageSizeCm.heightCm + " cm @ " + data.imageSizeCm.dpi + " DPI");
 
-    // --- 3. Smart Object layerek letrehozasa ---
+    // --- 3. Smart Object layerek letrehozasa + foto behelyezes ---
     for (var i = 0; i < data.layers.length; i++) {
       var item = data.layers[i];
 
@@ -75,6 +77,18 @@ function log(msg) {
           heightPx: item.heightPx
         });
         created++;
+
+        // Foto behelyezese ha van photoPath
+        if (item.photoPath) {
+          try {
+            // Az activeLayer most a placeholder SO (createSmartObjectPlaceholder allitja)
+            replaceSmartObjectContents(doc, doc.activeLayer, item.photoPath);
+            photosPlaced++;
+          } catch (photoErr) {
+            log("[JSX] FIGYELEM: foto behelyezes sikertelen (" + item.layerName + "): " + photoErr.message);
+            // Nem noveljuk az errors-t — a placeholder megmaradt
+          }
+        }
       } catch (e) {
         log("[JSX] HIBA image layer (" + item.layerName + "): " + e.message);
         errors++;
@@ -82,11 +96,11 @@ function log(msg) {
     }
 
     // --- 4. Eredmeny ---
-    log("[JSX] KESZ: " + created + " image layer letrehozva, " + errors + " hiba");
+    log("[JSX] KESZ: " + created + " image layer letrehozva, " + photosPlaced + " foto behelyezve, " + errors + " hiba");
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);
-    log("[JSX] KESZ: " + created + " layer, " + (errors + 1) + " hiba");
+    log("[JSX] KESZ: " + created + " layer, " + photosPlaced + " foto, " + (errors + 1) + " hiba");
   }
 })();
 

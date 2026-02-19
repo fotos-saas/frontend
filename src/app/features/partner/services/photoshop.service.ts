@@ -232,7 +232,7 @@ export class PhotoshopService {
    * Méret: 10.4 x 15.4 cm @ 300 DPI
    */
   async addImageLayers(
-    persons: Array<{ id: number; name: string; type: string }>,
+    persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
     imageSizeCm: { widthCm: number; heightCm: number; dpi: number } = { widthCm: 10.4, heightCm: 15.4, dpi: 300 },
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

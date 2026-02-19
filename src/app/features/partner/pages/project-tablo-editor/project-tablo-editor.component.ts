@@ -190,6 +190,7 @@ export class ProjectTabloEditorComponent implements OnInit {
         id: person.id,
         name: person.name,
         type: person.type,
+        photoUrl: person.photoUrl,
       }));
 
       const result = await this.ps.generateAndOpenPsd(size, p ? {

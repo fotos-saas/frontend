@@ -2,6 +2,8 @@ import { ipcMain, dialog, BrowserWindow, app } from 'electron';
 import { execFile, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as https from 'https';
+import * as http from 'http';
 import Store from 'electron-store';
 import log from 'electron-log/main';
 
@@ -415,12 +417,72 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     };
   }
 
+  // Foto letoltese URL-rol temp mappaba
+  // Pattern: main.ts downloadFileForDrag() mintajara (https.get + pipe + redirect)
+  function downloadPhoto(url: string, fileName: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const tempDir = path.join(app.getPath('temp'), 'psd-photos');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+
+      const localPath = path.join(tempDir, fileName);
+
+      // Ha a fajl mar letezik es friss (5 perc), hasznaljuk
+      if (fs.existsSync(localPath)) {
+        const stats = fs.statSync(localPath);
+        const FIVE_MINUTES = 5 * 60 * 1000;
+        if (Date.now() - stats.mtimeMs < FIVE_MINUTES && stats.size > 0) {
+          log.info(`Cached foto: ${fileName}`);
+          resolve(localPath);
+          return;
+        }
+      }
+
+      const protocol = url.startsWith('https') ? https : http;
+      const file = fs.createWriteStream(localPath);
+
+      log.info(`Foto letoltese: ${url} → ${fileName}`);
+
+      protocol.get(url, (response) => {
+        // Redirect kezeles
+        if (response.statusCode === 301 || response.statusCode === 302) {
+          const redirectUrl = response.headers.location;
+          if (redirectUrl) {
+            file.close();
+            fs.unlinkSync(localPath);
+            downloadPhoto(redirectUrl, fileName).then(resolve).catch(reject);
+            return;
+          }
+        }
+
+        if (response.statusCode !== 200) {
+          file.close();
+          fs.unlink(localPath, () => {});
+          reject(new Error(`Foto letoltes sikertelen: HTTP ${response.statusCode}`));
+          return;
+        }
+
+        response.pipe(file);
+
+        file.on('finish', () => {
+          file.close();
+          log.info(`Foto letoltve: ${fileName}`);
+          resolve(localPath);
+        });
+      }).on('error', (err) => {
+        fs.unlink(localPath, () => {});
+        reject(err);
+      });
+    });
+  }
+
   // Image layerek előkészítése a JSX számára
-  // Méretek cm → px átszámítása, elnevezések, csoportosítás
+  // Méretek cm → px átszámítása, elnevezések, csoportosítás, fotó letöltés
   // FONTOS: a pixelszámítás a DOKUMENTUM DPI-jével történik (200),
   // nem a kép DPI-jével (300), mert a placeholder a PSD-ben lesz!
-  function prepareImageLayersForJsx(
-    personsData: Array<{ id: number; name: string; type: string }>,
+  async function prepareImageLayersForJsx(
+    personsData: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
     imageSizeCm: { widthCm: number; heightCm: number; dpi: number },
     docDpi: number = 200,
   ) {
@@ -431,24 +493,37 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     const widthPx = Math.round((imageSizeCm.widthCm / 2.54) * docDpi);
     const heightPx = Math.round((imageSizeCm.heightCm / 2.54) * docDpi);
 
-    const layers = [
-      ...students.map(p => ({
-        layerName: sanitizeNameForLayer(p.name, p.id),
-        group: 'Students',
-        widthPx,
-        heightPx,
-      })),
-      ...teachers.map(p => ({
-        layerName: sanitizeNameForLayer(p.name, p.id),
-        group: 'Teachers',
-        widthPx,
-        heightPx,
-      })),
-    ];
+    // Fotok parhuzamos letoltese (csak ahol van photoUrl)
+    const allPersons = [...students, ...teachers];
+    const downloadResults = await Promise.all(
+      allPersons.map(async (p) => {
+        if (!p.photoUrl) return null;
+        try {
+          const layerName = sanitizeNameForLayer(p.name, p.id);
+          const ext = p.photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
+          const fileName = `${layerName}.${ext}`;
+          return await downloadPhoto(p.photoUrl, fileName);
+        } catch (err) {
+          log.warn(`Foto letoltes sikertelen (${p.name}):`, err);
+          return null;
+        }
+      }),
+    );
+
+    // Layers felepitese a letoltesi eredmenyekkel
+    const layers = allPersons.map((p, idx) => ({
+      layerName: sanitizeNameForLayer(p.name, p.id),
+      group: p.type === 'teacher' ? 'Teachers' : 'Students',
+      widthPx,
+      heightPx,
+      photoPath: downloadResults[idx] || null,
+    }));
+
+    const withPhoto = downloadResults.filter(r => r !== null).length;
 
     return {
       layers,
-      stats: { students: students.length, teachers: teachers.length, total: personsData.length },
+      stats: { students: students.length, teachers: teachers.length, total: personsData.length, withPhoto },
       imageSizeCm,
     };
   }
@@ -514,7 +589,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     scriptName: string;
     dataFilePath?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
-    imageData?: { persons: Array<{ id: number; name: string; type: string }>; widthCm: number; heightCm: number; dpi: number };
+    imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number };
   }) => {
     let tempJsonPath: string | null = null;
 
@@ -538,9 +613,9 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         log.info(`JSX persons JSON irva: ${tempJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`);
       }
 
-      // Ha imageData-t kaptunk, image layerek előkészítése
+      // Ha imageData-t kaptunk, image layerek előkészítése (async — fotó letöltéssel)
       if (!dataFilePath && params.imageData && params.imageData.persons.length > 0) {
-        const prepared = prepareImageLayersForJsx(params.imageData.persons, {
+        const prepared = await prepareImageLayersForJsx(params.imageData.persons, {
           widthCm: params.imageData.widthCm,
           heightCm: params.imageData.heightCm,
           dpi: params.imageData.dpi,
@@ -548,7 +623,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         tempJsonPath = path.join(app.getPath('temp'), `jsx-images-${Date.now()}.json`);
         fs.writeFileSync(tempJsonPath, JSON.stringify(prepared), 'utf-8');
         dataFilePath = tempJsonPath;
-        log.info(`JSX images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`);
+        log.info(`JSX images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.stats.withPhoto} fotoval, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`);
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath);
@@ -596,7 +671,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     scriptName: string;
     dataFilePath?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
-    imageData?: { persons: Array<{ id: number; name: string; type: string }>; widthCm: number; heightCm: number; dpi: number };
+    imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number };
   }) => {
     const win = _mainWindow;
     let tempJsonPath: string | null = null;
@@ -625,9 +700,10 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         sendLog(`[DEBUG] Persons JSON irva: ${tempJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`, 'stdout');
       }
 
-      // Ha imageData-t kaptunk, image layerek előkészítése
+      // Ha imageData-t kaptunk, image layerek előkészítése (async — fotó letöltéssel)
       if (!dataFilePath && params.imageData && params.imageData.persons.length > 0) {
-        const prepared = prepareImageLayersForJsx(params.imageData.persons, {
+        sendLog(`[DEBUG] Fotok letoltese...`, 'stdout');
+        const prepared = await prepareImageLayersForJsx(params.imageData.persons, {
           widthCm: params.imageData.widthCm,
           heightCm: params.imageData.heightCm,
           dpi: params.imageData.dpi,
@@ -636,7 +712,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         const jsonStr = JSON.stringify(prepared);
         fs.writeFileSync(tempJsonPath, jsonStr, 'utf-8');
         dataFilePath = tempJsonPath;
-        sendLog(`[DEBUG] Images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`, 'stdout');
+        sendLog(`[DEBUG] Images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.stats.withPhoto} fotoval, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`, 'stdout');
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath);

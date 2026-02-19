@@ -108,6 +108,23 @@ function createSmartObjectPlaceholder(doc, container, options) {
   return layer;
 }
 
+// --- Smart Object tartalom csereje kepfajlra ---
+// A layer-t elobb aktivva kell tenni, majd ActionManager-rel
+// a placedLayerReplaceContents parancsot futtatjuk.
+// photoPath: a lokalis kepfajl TELJES utvonala (a handler tolti le)
+function replaceSmartObjectContents(doc, layer, photoPath) {
+  // Layer aktiv legyen
+  doc.activeLayer = layer;
+
+  // ActionManager: placedLayerReplaceContents
+  var desc = new ActionDescriptor();
+  var idPlacedLayerReplaceContents = stringIDToTypeID("placedLayerReplaceContents");
+  var fileRef = new ActionDescriptor();
+  fileRef.putPath(charIDToTypeID("null"), new File(photoPath));
+  desc.putPath(charIDToTypeID("null"), new File(photoPath));
+  executeAction(idPlacedLayerReplaceContents, desc, DialogModes.NO);
+}
+
 // --- JSON fajl beolvasasa ---
 // FONTOS: ExtendScript (ES3) kornyezetben NINCS JSON.parse() metodus!
 // Az egyetlen mod JSON deserializalasra az eval().

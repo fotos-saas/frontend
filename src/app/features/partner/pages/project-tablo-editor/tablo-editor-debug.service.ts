@@ -78,13 +78,15 @@ export class TabloEditorDebugService {
       this.addLog('Személyek betöltve', '0 fő — ÜRES!', 'warn');
     }
 
-    // 5. Persons tömb
+    // 5. Persons tömb (photoUrl-lel a fotó letöltéshez)
     const personsData = allPersons.map(person => ({
       id: person.id,
       name: person.name,
       type: person.type,
+      photoUrl: person.photoUrl,
     }));
-    this.addLog('Persons tömb', `length=${personsData.length} | ${JSON.stringify(personsData.slice(0, 2))}${personsData.length > 2 ? '…' : ''}`, 'info');
+    const withPhoto = allPersons.filter(p => p.photoUrl).length;
+    this.addLog('Persons tömb', `length=${personsData.length}, fotóval: ${withPhoto} | ${JSON.stringify(personsData.slice(0, 2))}${personsData.length > 2 ? '…' : ''}`, 'info');
 
     // 6. Output path kiszámítása
     const brandName = this.branding.brandName();
@@ -163,7 +165,7 @@ export class TabloEditorDebugService {
   private async runJsxDebugPhase(
     api: any,
     outputPath: string,
-    personsData: Array<{ id: number; name: string; type: string }>,
+    personsData: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
   ): Promise<void> {
     this.addLog('PSD megnyitás', 'Fájl megnyitása Photoshopban...', 'info');
     try {

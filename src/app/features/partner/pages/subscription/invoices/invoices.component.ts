@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SubscriptionService, Invoice } from '../../../services/subscription.service';
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { ICONS, getInvoiceStatusLabel } from '../../../../../shared/constants';
+import { openSecureUrl } from '@core/utils/url-validator.util';
 import { formatAmount as sharedFormatAmount } from '@shared/utils/formatters.util';
 import { TableHeaderComponent, TableColumn } from '../../../../../shared/components/table-header';
 import { PsSelectComponent, PsSelectOption } from '@shared/components/form';
@@ -118,7 +119,7 @@ export class InvoicesComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          window.open(res.portal_url, '_blank');
+          openSecureUrl(res.portal_url);
           this.portalLoading.set(false);
         },
         error: (err) => {

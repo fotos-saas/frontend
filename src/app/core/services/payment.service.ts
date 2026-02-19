@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Observable, Subject, firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ElectronService } from './electron.service';
+import { isSecureUrl } from '../utils/url-validator.util';
 
 /**
  * Checkout Session valasz a backend-tol
@@ -167,6 +168,9 @@ export class PaymentService {
       }
     } else {
       // Web: redirect a Stripe Checkout-ra
+      if (!isSecureUrl(response.checkout_url)) {
+        throw new Error('Érvénytelen fizetési URL');
+      }
       window.location.href = response.checkout_url;
     }
 
@@ -197,6 +201,9 @@ export class PaymentService {
       }
     } else {
       // Web: redirect a Stripe Portal-ra
+      if (!isSecureUrl(response.portal_url)) {
+        throw new Error('Érvénytelen portál URL');
+      }
       window.location.href = response.portal_url;
     }
   }

@@ -10,6 +10,7 @@ import { StorageService, StorageUsage } from '../../../services/storage.service'
 import { PlansService } from '../../../../../shared/services/plans.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../../../../shared/constants';
 import { forkJoin, of, catchError } from 'rxjs';
+import { openSecureUrl } from '@core/utils/url-validator.util';
 
 @Component({
   selector: 'app-subscription-overview',
@@ -135,7 +136,7 @@ export class SubscriptionOverviewComponent implements OnInit {
     this.portalLoading.set(true);
     this.subscriptionService.openPortal().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
-        window.open(res.portal_url, '_blank');
+        openSecureUrl(res.portal_url);
         this.portalLoading.set(false);
       },
       error: (err) => {

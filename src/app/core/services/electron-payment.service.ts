@@ -1,5 +1,6 @@
 import { Injectable, NgZone, DestroyRef, inject } from '@angular/core';
 import { LoggerService } from './logger.service';
+import { isSecureUrl } from '../utils/url-validator.util';
 
 type CleanupFn = () => void;
 
@@ -34,6 +35,9 @@ export class ElectronPaymentService {
 
   /** Stripe Checkout megnyitasa (desktop: kulso bongeszo, web: redirect) */
   async openStripeCheckout(checkoutUrl: string): Promise<{ success: boolean; error?: string }> {
+    if (!isSecureUrl(checkoutUrl)) {
+      return { success: false, error: 'Érvénytelen fizetési URL' };
+    }
     if (!this.isElectron) {
       window.location.href = checkoutUrl;
       return { success: true };
@@ -43,6 +47,9 @@ export class ElectronPaymentService {
 
   /** Stripe Customer Portal megnyitasa */
   async openStripePortal(portalUrl: string): Promise<{ success: boolean; error?: string }> {
+    if (!isSecureUrl(portalUrl)) {
+      return { success: false, error: 'Érvénytelen portál URL' };
+    }
     if (!this.isElectron) {
       window.location.href = portalUrl;
       return { success: true };

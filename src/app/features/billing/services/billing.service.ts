@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { BillingCharge, BillingChargeStatus, BillingSummary } from '../models/billing.models';
+import { isSecureUrl, openSecureUrl } from '@core/utils/url-validator.util';
 
 interface ApiChargesResponse {
   success: boolean;
@@ -68,7 +69,11 @@ export class BillingService {
     ).subscribe({
       next: (res) => {
         this.paymentLoadingId.set(null);
-        window.location.href = res.data.checkout_url;
+        if (isSecureUrl(res.data.checkout_url)) {
+          window.location.href = res.data.checkout_url;
+        } else {
+          this.error.set('Érvénytelen fizetési URL.');
+        }
       },
       error: () => {
         this.paymentLoadingId.set(null);
@@ -78,7 +83,7 @@ export class BillingService {
   }
 
   downloadInvoice(invoiceUrl: string): void {
-    window.open(invoiceUrl, '_blank');
+    openSecureUrl(invoiceUrl);
   }
 
   handlePaymentReturn(): void {

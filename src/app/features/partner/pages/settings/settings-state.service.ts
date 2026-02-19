@@ -5,6 +5,7 @@ import { SubscriptionService, SubscriptionInfo } from '../../services/subscripti
 import { StorageService, StorageUsage } from '../../services/storage.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
+import { openSecureUrl } from '@core/utils/url-validator.util';
 
 /**
  * Settings State Service
@@ -73,7 +74,7 @@ export class SettingsStateService {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          window.open(response.portal_url, '_blank');
+          openSecureUrl(response.portal_url);
           this.isActionLoading.set(false);
         },
         error: (err) => {

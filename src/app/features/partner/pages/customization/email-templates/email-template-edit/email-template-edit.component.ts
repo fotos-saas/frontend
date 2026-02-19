@@ -16,6 +16,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { QuillEditorComponent, QuillModule } from 'ngx-quill';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PartnerEmailTemplateService } from '../../../../services/partner-email-template.service';
@@ -230,7 +231,7 @@ export class EmailTemplateEditComponent {
       .subscribe({
         next: (res) => {
           this.previewSubject.set(res.data.subject);
-          this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(res.data.body_html));
+          this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(DOMPurify.sanitize(res.data.body_html)));
           this.previewOpen.set(true);
           this.previewing.set(false);
         },

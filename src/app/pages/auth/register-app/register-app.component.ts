@@ -10,6 +10,7 @@ import { ICONS } from '../../../shared/constants';
 import { PlansService, PricingPlan } from '../../../shared/services/plans.service';
 import { SubscriptionService } from '../../../features/partner/services/subscription.service';
 import { PsInputComponent, PsSelectComponent, PsCheckboxComponent, PsSelectOption } from '@shared/components/form';
+import { isSecureUrl } from '@core/utils/url-validator.util';
 
 @Component({
   selector: 'app-register-app',
@@ -238,7 +239,7 @@ export class RegisterAppComponent implements OnInit {
         this.successMessage.set('Átirányítás a fizetési oldalra...');
 
         // Redirect to Stripe Checkout
-        if (response.checkout_url) {
+        if (response.checkout_url && isSecureUrl(response.checkout_url)) {
           window.location.href = response.checkout_url;
         }
       },

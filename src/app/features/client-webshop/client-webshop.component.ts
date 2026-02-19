@@ -8,6 +8,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { ClientWebshopService, ShopConfig, ShopProductPublic, ShopPhoto } from './client-webshop.service';
 import { cartItems, cartTotal, cartItemCount, addToCart, removeFromCart, updateQuantity, clearCart } from './client-webshop.state';
 import { CheckoutDialogComponent } from './components/checkout-dialog/checkout-dialog.component';
+import { isSecureUrl } from '@core/utils/url-validator.util';
 
 @Component({
   selector: 'app-client-webshop',
@@ -143,6 +144,8 @@ export class ClientWebshopComponent implements OnInit {
 
   onCheckoutSuccess(checkoutUrl: string): void {
     clearCart();
-    window.location.href = checkoutUrl;
+    if (isSecureUrl(checkoutUrl)) {
+      window.location.href = checkoutUrl;
+    }
   }
 }

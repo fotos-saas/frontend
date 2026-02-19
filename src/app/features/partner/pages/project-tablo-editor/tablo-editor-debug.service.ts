@@ -177,6 +177,25 @@ export class TabloEditorDebugService {
       this.addLog('JSX', 'Várakozás Photoshop-ra (2s)...', 'info');
       await new Promise(resolve => setTimeout(resolve, 2000));
 
+      // PSD fajlnev a cel dokumentum aktivalasahoz
+      const psdFileName = outputPath.split('/').pop() || undefined;
+
+      // Margó guide-ok hozzáadása
+      const marginCm = this.ps.marginCm();
+      if (marginCm > 0) {
+        this.addLog('Guide-ok', `Margó guide-ok hozzáadása (${marginCm} cm)...`, 'info');
+        try {
+          const guideResult = await api.runJsxDebug({
+            scriptName: 'actions/add-guides.jsx',
+            jsonData: { marginCm },
+            targetDocName: psdFileName,
+          });
+          this.addLog('Guide-ok', guideResult.success ? '4 guide hozzáadva' : `HIBA: ${guideResult.error}`, guideResult.success ? 'ok' : 'error');
+        } catch (guideErr) {
+          this.addLog('Guide-ok', `EXCEPTION: ${String(guideErr)}`, 'error');
+        }
+      }
+
       const jsxUnsubscribe = api.onJsxDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
         if (data.stream === 'stderr') {
           this.addLog('JSX stderr', data.line, 'error');
@@ -196,6 +215,7 @@ export class TabloEditorDebugService {
         jsxResult = await api.runJsxDebug({
           scriptName: 'actions/add-name-layers.jsx',
           personsData,
+          targetDocName: psdFileName,
         });
       } catch (jsxErr) {
         this.addLog('JSX', `EXCEPTION: ${String(jsxErr)}`, 'error');
@@ -231,6 +251,7 @@ export class TabloEditorDebugService {
               heightCm: 15.4,
               dpi: 300,
             },
+            targetDocName: psdFileName,
           });
         } catch (imgErr) {
           this.addLog('JSX Image', `EXCEPTION: ${String(imgErr)}`, 'error');

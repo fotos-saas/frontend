@@ -213,7 +213,10 @@ export class ProjectTabloEditorComponent implements OnInit {
         : undefined;
 
       // 0. Margó guide-ok (mindig, ha van margó beállítva)
-      await this.ps.addGuides(psdFileName);
+      const guideResult = await this.ps.addGuides(psdFileName);
+      if (!guideResult.success) {
+        this.error.set(`Guide-ok: ${guideResult.error}`);
+      }
 
       // PSD megnyitás után: JSX layerek hozzáadása (ha vannak személyek)
       if (personsData.length > 0) {

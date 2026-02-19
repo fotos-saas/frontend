@@ -80,7 +80,8 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly marginCm = this.ps.marginCm;
   readonly studentSizeCm = this.ps.studentSizeCm;
   readonly teacherSizeCm = this.ps.teacherSizeCm;
-  readonly gapCm = this.ps.gapCm;
+  readonly gapHCm = this.ps.gapHCm;
+  readonly gapVCm = this.ps.gapVCm;
 
   /** PSD generálás */
   readonly tabloSizes = signal<TabloSize[]>([]);
@@ -171,9 +172,14 @@ export class ProjectTabloEditorComponent implements OnInit {
     if (!isNaN(v) && v >= 1 && v <= 30) await this.ps.setTeacherSize(v);
   }
 
-  async setGapValue(event: Event): Promise<void> {
+  async setGapHValue(event: Event): Promise<void> {
     const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 0 && v <= 10) await this.ps.setGap(v);
+    if (!isNaN(v) && v >= 0 && v <= 10) await this.ps.setGapH(v);
+  }
+
+  async setGapVValue(event: Event): Promise<void> {
+    const v = Number((event.target as HTMLInputElement).value);
+    if (!isNaN(v) && v >= 0 && v <= 10) await this.ps.setGapV(v);
   }
 
   async selectPsPath(): Promise<void> {

@@ -106,8 +106,10 @@ interface PhotoshopAPI {
   setStudentSize: (sizeCm: number) => Promise<{ success: boolean; error?: string }>;
   getTeacherSize: () => Promise<number>;
   setTeacherSize: (sizeCm: number) => Promise<{ success: boolean; error?: string }>;
-  getGap: () => Promise<number>;
-  setGap: (gapCm: number) => Promise<{ success: boolean; error?: string }>;
+  getGapH: () => Promise<number>;
+  setGapH: (gapCm: number) => Promise<{ success: boolean; error?: string }>;
+  getGapV: () => Promise<number>;
+  setGapV: (gapCm: number) => Promise<{ success: boolean; error?: string }>;
   runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; output?: string }>;
   runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string }>;
   onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;

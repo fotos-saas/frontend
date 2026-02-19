@@ -11,15 +11,16 @@
  *   "marginCm": 2,
  *   "studentSizeCm": 6,
  *   "teacherSizeCm": 6,
- *   "gapCm": 2
+ *   "gapHCm": 2,
+ *   "gapVCm": 3
  * }
  *
  * Algoritmus:
  *   1. photoWidth = sizeCm, photoHeight = sizeCm * 1.5 (10:15 arany)
  *   2. availableWidth = boardWidthCm - 2 * marginCm
- *   3. columns = floor((availableWidth + gapCm) / (photoWidth + gapCm))
+ *   3. columns = floor((availableWidth + gapHCm) / (photoWidth + gapHCm))
  *   4. Soronkent kozepre igazitas
- *   5. Diakok felulrol, tanarok a diakok alatt (1 sor gap-nyi tavolsag)
+ *   5. Diakok felulrol, tanarok a diakok alatt (gapVCm tavolsag)
  *
  * Futtatas: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
  */
@@ -47,19 +48,20 @@ function _arrangeGroupGrid(grp, sizeCm, startTopCm) {
   var photoWidth = sizeCm;
   var photoHeight = sizeCm * 1.5; // 10:15 arany
   var marginCm = _data.marginCm || 0;
-  var gapCm = _data.gapCm || 2;
+  var gapH = _data.gapHCm || 2;  // vizszintes gap (kepek kozott egy sorban)
+  var gapV = _data.gapVCm || 3;  // fuggoleges gap (sorok kozott)
   var boardWidthCm = _data.boardWidthCm;
 
   var availableWidth = boardWidthCm - 2 * marginCm;
 
   // Hany kep fer egy sorba
-  var columns = Math.floor((availableWidth + gapCm) / (photoWidth + gapCm));
+  var columns = Math.floor((availableWidth + gapH) / (photoWidth + gapH));
   if (columns < 1) columns = 1;
 
   var layerCount = grp.artLayers.length;
   var rows = Math.ceil(layerCount / columns);
 
-  log("[JSX] Grid: " + columns + " oszlop x " + rows + " sor, " + layerCount + " layer, gap=" + gapCm + " cm, kepmeret=" + sizeCm + " cm");
+  log("[JSX] Grid: " + columns + " oszlop x " + rows + " sor, " + layerCount + " layer, gapH=" + gapH + " cm, gapV=" + gapV + " cm, kepmeret=" + sizeCm + " cm");
 
   // Layer-ek vegigjarasa (hatulrol elore = felulrol lefele a Layers panelen)
   var currentRow = 0;
@@ -80,11 +82,11 @@ function _arrangeGroupGrid(grp, sizeCm, startTopCm) {
       }
 
       // Kozepre igazitas: az aktualis sor teljes szelessege
-      var totalRowWidth = itemsInThisRow * photoWidth + (itemsInThisRow - 1) * gapCm;
+      var totalRowWidth = itemsInThisRow * photoWidth + (itemsInThisRow - 1) * gapH;
       var offsetX = marginCm + (availableWidth - totalRowWidth) / 2;
 
       // Celpozicio kiszamitasa
-      var leftCm = offsetX + currentCol * (photoWidth + gapCm);
+      var leftCm = offsetX + currentCol * (photoWidth + gapH);
       var topCm = top;
 
       // Layer kivalasztasa es pozicionalasa
@@ -98,7 +100,7 @@ function _arrangeGroupGrid(grp, sizeCm, startTopCm) {
       if (currentCol >= columns) {
         currentCol = 0;
         currentRow++;
-        top += photoHeight + gapCm;
+        top += photoHeight + gapV;
       }
     } catch (e) {
       log("[JSX] WARN: Layer pozicionalas sikertelen (" + layer.name + "): " + e.message);
@@ -106,12 +108,12 @@ function _arrangeGroupGrid(grp, sizeCm, startTopCm) {
   }
 
   // Visszaadjuk a kovetkezo csoport start poziciojat
-  // (az utolso sor alja + gap)
-  var lastRowTop = startTopCm + currentRow * (photoHeight + gapCm);
+  // (az utolso sor alja + fuggoleges gap)
+  var lastRowTop = startTopCm + currentRow * (photoHeight + gapV);
   // Ha nem volt tobb sor (currentCol > 0 jelzi, hogy az utolso sor meg nem telt be)
   if (currentCol > 0) {
     // Az utolso sor meg nem zarodott le, szoval a top erteke meg nem novekedett
-    lastRowTop = top + photoHeight + gapCm;
+    lastRowTop = top + photoHeight + gapV;
   }
 
   return lastRowTop;

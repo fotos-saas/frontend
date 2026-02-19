@@ -289,7 +289,8 @@ export class TabloEditorDebugService {
                   marginCm: this.ps.marginCm(),
                   studentSizeCm: this.ps.studentSizeCm(),
                   teacherSizeCm: this.ps.teacherSizeCm(),
-                  gapCm: this.ps.gapCm(),
+                  gapHCm: this.ps.gapHCm(),
+                  gapVCm: this.ps.gapVCm(),
                 },
                 targetDocName: psdFileName,
               });

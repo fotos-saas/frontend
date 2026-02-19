@@ -32,8 +32,11 @@ export class PhotoshopService {
   /** Tanár fotó layer mérete (cm) */
   readonly teacherSizeCm = signal<number>(6);
 
-  /** Képek közötti távolság (cm) */
-  readonly gapCm = signal<number>(2);
+  /** Vízszintes gap — képek közötti távolság egy soron belül (cm) */
+  readonly gapHCm = signal<number>(2);
+
+  /** Függőleges gap — sorok közötti távolság (cm) */
+  readonly gapVCm = signal<number>(3);
 
   /** Konfiguralt-e (van mentett path) */
   readonly isConfigured = computed(() => !!this.path());
@@ -54,13 +57,14 @@ export class PhotoshopService {
       const safe = <T>(fn: (() => Promise<T>) | undefined, fallback: T): Promise<T> =>
         typeof fn === 'function' ? fn().catch(() => fallback) : Promise.resolve(fallback);
 
-      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize, savedGap] = await Promise.all([
+      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize, savedGapH, savedGapV] = await Promise.all([
         this.api.checkInstalled(),
         safe(this.api.getWorkDir, null as string | null),
         safe(this.api.getMargin, undefined as number | undefined),
         safe(this.api.getStudentSize, undefined as number | undefined),
         safe(this.api.getTeacherSize, undefined as number | undefined),
-        safe(this.api.getGap, undefined as number | undefined),
+        safe(this.api.getGapH, undefined as number | undefined),
+        safe(this.api.getGapV, undefined as number | undefined),
       ]);
       if (result.found && result.path) {
         this.path.set(result.path);
@@ -77,8 +81,11 @@ export class PhotoshopService {
       if (savedTeacherSize !== undefined) {
         this.teacherSizeCm.set(savedTeacherSize);
       }
-      if (savedGap !== undefined) {
-        this.gapCm.set(savedGap);
+      if (savedGapH !== undefined) {
+        this.gapHCm.set(savedGapH);
+      }
+      if (savedGapV !== undefined) {
+        this.gapVCm.set(savedGapV);
       }
     } catch (err) {
       this.logger.error('Photoshop detektalasi hiba', err);
@@ -333,20 +340,30 @@ export class PhotoshopService {
     }
   }
 
-  /** Gap (képek közötti távolság) beállítása */
-  async setGap(gapCm: number): Promise<boolean> {
-    if (!this.api || typeof this.api.setGap !== 'function') return false;
-
+  /** Vízszintes gap beállítása */
+  async setGapH(gapCm: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setGapH !== 'function') return false;
     try {
-      const result = await this.api.setGap(Number(gapCm));
-      if (result.success) {
-        this.gapCm.set(gapCm);
-        return true;
-      }
-      this.logger.warn('Gap beállítás sikertelen:', result.error);
+      const result = await this.api.setGapH(Number(gapCm));
+      if (result.success) { this.gapHCm.set(gapCm); return true; }
+      this.logger.warn('Vízszintes gap beállítás sikertelen:', result.error);
       return false;
     } catch (err) {
-      this.logger.error('Gap beállítási hiba', err);
+      this.logger.error('Vízszintes gap beállítási hiba', err);
+      return false;
+    }
+  }
+
+  /** Függőleges gap beállítása */
+  async setGapV(gapCm: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setGapV !== 'function') return false;
+    try {
+      const result = await this.api.setGapV(Number(gapCm));
+      if (result.success) { this.gapVCm.set(gapCm); return true; }
+      this.logger.warn('Függőleges gap beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Függőleges gap beállítási hiba', err);
       return false;
     }
   }
@@ -370,7 +387,8 @@ export class PhotoshopService {
           marginCm: this.marginCm(),
           studentSizeCm: this.studentSizeCm(),
           teacherSizeCm: this.teacherSizeCm(),
-          gapCm: this.gapCm(),
+          gapHCm: this.gapHCm(),
+          gapVCm: this.gapVCm(),
         },
         targetDocName,
       });

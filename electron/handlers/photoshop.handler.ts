@@ -14,7 +14,8 @@ interface PhotoshopSchema {
   tabloMarginCm: number;
   tabloStudentSizeCm: number;
   tabloTeacherSizeCm: number;
-  tabloGapCm: number;
+  tabloGapHCm: number;
+  tabloGapVCm: number;
 }
 
 const psStore = new Store<PhotoshopSchema>({
@@ -25,7 +26,8 @@ const psStore = new Store<PhotoshopSchema>({
     tabloMarginCm: 2,
     tabloStudentSizeCm: 6,
     tabloTeacherSizeCm: 6,
-    tabloGapCm: 2,
+    tabloGapHCm: 2,
+    tabloGapVCm: 3,
   },
 });
 
@@ -421,23 +423,44 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
-  // Get tablo gap (kepek kozotti tavolsag)
-  ipcMain.handle('photoshop:get-gap', () => {
-    return psStore.get('tabloGapCm', 2);
+  // Get tablo gap vizszintes (kepek kozotti tavolsag)
+  ipcMain.handle('photoshop:get-gap-h', () => {
+    return psStore.get('tabloGapHCm', 2);
   });
 
-  // Set tablo gap
-  ipcMain.handle('photoshop:set-gap', (_event, gapCm: number) => {
+  // Set tablo gap vizszintes
+  ipcMain.handle('photoshop:set-gap-h', (_event, gapCm: number) => {
     try {
       if (typeof gapCm !== 'number' || gapCm < 0 || gapCm > 10) {
-        return { success: false, error: 'Ervenytelen gap ertek (0-10 cm)' };
+        return { success: false, error: 'Ervenytelen vizszintes gap ertek (0-10 cm)' };
       }
 
-      psStore.set('tabloGapCm', gapCm);
-      log.info(`Tablo gap beallitva: ${gapCm} cm`);
+      psStore.set('tabloGapHCm', gapCm);
+      log.info(`Tablo vizszintes gap beallitva: ${gapCm} cm`);
       return { success: true };
     } catch (error) {
-      log.error('Tablo gap beallitasi hiba:', error);
+      log.error('Tablo vizszintes gap beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a gap erteket' };
+    }
+  });
+
+  // Get tablo gap fuggoleges (sorok kozotti tavolsag)
+  ipcMain.handle('photoshop:get-gap-v', () => {
+    return psStore.get('tabloGapVCm', 3);
+  });
+
+  // Set tablo gap fuggoleges
+  ipcMain.handle('photoshop:set-gap-v', (_event, gapCm: number) => {
+    try {
+      if (typeof gapCm !== 'number' || gapCm < 0 || gapCm > 10) {
+        return { success: false, error: 'Ervenytelen fuggoleges gap ertek (0-10 cm)' };
+      }
+
+      psStore.set('tabloGapVCm', gapCm);
+      log.info(`Tablo fuggoleges gap beallitva: ${gapCm} cm`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo fuggoleges gap beallitasi hiba:', error);
       return { success: false, error: 'Nem sikerult menteni a gap erteket' };
     }
   });

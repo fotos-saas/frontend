@@ -91,18 +91,21 @@ function createSmartObjectPlaceholder(doc, container, options) {
   doc.selection.fill(fillColor);
   doc.selection.deselect();
 
-  // Smart Object-te alakitas ELOBB (amig meg aktiv a layer!)
-  // Utana rakjuk at a cel csoportba — igy nem vesziti el az aktiv statuszt
-  var smDesc = new ActionDescriptor();
-  executeAction(stringIDToTypeID("convertToSmartObject"), smDesc, DialogModes.NO);
-
   // Layer atrakeasa a cel csoportba
-  // A convertToSmartObject uj layert hoz letre, az aktiv dokumentumbol kell kiolvasni
-  var smartLayer = doc.activeLayer;
-  smartLayer.name = options.name;
-  smartLayer.move(container, ElementPlacement.INSIDE);
+  layer.move(container, ElementPlacement.INSIDE);
 
-  return smartLayer;
+  // Smart Object-te alakitas ActionManager-rel
+  // Ez a Photoshop belso "Convert to Smart Object" parancsa
+  var desc = new ActionDescriptor();
+  var ref = new ActionReference();
+  ref.putClass(stringIDToTypeID("smartObject"));
+  desc.putReference(charIDToTypeID("null"), ref);
+  var refLayer = new ActionReference();
+  refLayer.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  desc.putReference(charIDToTypeID("Usng"), refLayer);
+  executeAction(stringIDToTypeID("newPlacedLayer"), desc, DialogModes.NO);
+
+  return layer;
 }
 
 // --- JSON fajl beolvasasa ---

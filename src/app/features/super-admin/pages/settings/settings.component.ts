@@ -6,7 +6,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService, SystemSettings } from '../../services/super-admin.service';
 import { ICONS } from '../../../../shared/constants';
 import { PlansService, PlanOption } from '../../../../shared/services/plans.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { PsToggleComponent, PsInputComponent, PsSelectComponent, PsTagInputComponent } from '@shared/components/form';
+import { PsTextareaComponent } from '@shared/components/form/ps-textarea/ps-textarea.component';
 import { PsSelectOption } from '@shared/components/form/form.types';
 
 type TabId = 'system' | 'email' | 'stripe' | 'info';
@@ -26,6 +28,7 @@ type TabId = 'system' | 'email' | 'stripe' | 'info';
     PsInputComponent,
     PsSelectComponent,
     PsTagInputComponent,
+    PsTextareaComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -35,6 +38,7 @@ export class SettingsComponent implements OnInit {
   private readonly service = inject(SuperAdminService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly plansService = inject(PlansService);
+  private readonly toast = inject(ToastService);
 
   readonly ICONS = ICONS;
 
@@ -61,6 +65,12 @@ export class SettingsComponent implements OnInit {
   emailDevMasterAddress = signal('');
   emailDevWhitelist = signal<string[]>([]);
   savingEmailDev = signal(false);
+
+  // Test email
+  testRecipient = signal('');
+  testSubject = signal('');
+  testBody = signal('');
+  sendingTest = signal(false);
 
   // Plan opciók - PlansService-ből töltve
   planOptions = signal<PlanOption[]>([]);
@@ -141,6 +151,26 @@ export class SettingsComponent implements OnInit {
         },
         error: () => {
           this.savingEmailDev.set(false);
+        }
+      });
+  }
+
+  sendTestEmail(): void {
+    this.sendingTest.set(true);
+
+    this.service.sendTestEmail({
+      recipient: this.testRecipient(),
+      subject: this.testSubject(),
+      body: this.testBody(),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.sendingTest.set(false);
+          this.toast.success(res.message);
+        },
+        error: () => {
+          this.sendingTest.set(false);
         }
       });
   }

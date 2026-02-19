@@ -175,6 +175,78 @@
             </button>
           </div>
         </div>
+
+        <!-- Teszt email küldése -->
+        <div class="settings-section">
+          <h2 class="section-title">Teszt email küldése</h2>
+          <p class="section-description">Tetszőleges email küldése az SMTP beállítások teszteléséhez.</p>
+
+          @if (emailDevMode()) {
+            <div class="dev-mode-notice">
+              <lucide-icon [name]="ICONS.INFO" [size]="16" />
+              <span>A dev mód aktív — az email a master címre ({{ emailDevMasterAddress() }}) fog érkezni, kivéve ha a címzett a whitelist-en van.</span>
+            </div>
+          }
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">Címzett</label>
+              <span class="setting-description">Az email címzettje</span>
+            </div>
+            <ps-input
+              type="email"
+              size="sm"
+              placeholder="valaki@example.com"
+              [ngModel]="testRecipient()"
+              (ngModelChange)="testRecipient.set($event)"
+            />
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">Tárgy</label>
+              <span class="setting-description">Az email tárgya</span>
+            </div>
+            <ps-input
+              type="text"
+              size="sm"
+              placeholder="Teszt email"
+              [ngModel]="testSubject()"
+              (ngModelChange)="testSubject.set($event)"
+            />
+          </div>
+
+          <div class="setting-item setting-item--vertical">
+            <div class="setting-info">
+              <label class="setting-label">Üzenet</label>
+              <span class="setting-description">Az email szövegtörzse</span>
+            </div>
+            <ps-textarea
+              [rows]="4"
+              [maxLength]="10000"
+              placeholder="Üzenet szövege..."
+              [ngModel]="testBody()"
+              (ngModelChange)="testBody.set($event)"
+            />
+          </div>
+
+          <div class="actions">
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="sendingTest() || !testRecipient() || !testSubject() || !testBody()"
+              (click)="sendTestEmail()"
+            >
+              @if (sendingTest()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+                Küldés...
+              } @else {
+                <lucide-icon [name]="ICONS.SEND" [size]="18" />
+                Teszt email küldése
+              }
+            </button>
+          </div>
+        </div>
       }
 
       <!-- Stripe beállítások -->

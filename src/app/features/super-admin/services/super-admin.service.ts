@@ -265,4 +265,18 @@ export class SuperAdminService {
       `${this.baseUrl}/subscribers/${id}/discount`
     );
   }
+
+  /**
+   * Teszt email küldése
+   */
+  sendTestEmail(data: {
+    recipient: string;
+    subject: string;
+    body: string;
+  }): Observable<{ success: boolean; message: string; actualRecipient: string }> {
+    return this.http.post<{ success: boolean; message: string; actualRecipient: string }>(
+      `${this.baseUrl}/email/send-test`,
+      data
+    );
+  }
 }

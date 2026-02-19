@@ -32,7 +32,7 @@ import struct
 import sys
 from pathlib import Path
 
-import numpy as np
+from PIL import Image
 from psd_tools import PSDImage
 from psd_tools.constants import Resource
 from psd_tools.psd.image_resources import ImageResource
@@ -68,11 +68,10 @@ def sanitize_name(name: str, person_id: int) -> str:
 
 def create_placeholder_layer(psd: PSDImage, layer_name: str):
     """1x1 px atlatszo PixelLayer letrehozasa adott nevvel."""
-    channels = 4 if psd.mode == 'RGB' else 5  # RGBA vs CMYKA
-    pixel_data = np.zeros((1, 1, channels), dtype=np.uint8)
+    img = Image.new('RGBA', (1, 1), (0, 0, 0, 0))
     layer = psd.create_pixel_layer(
         name=layer_name,
-        image=pixel_data,
+        image=img,
     )
     return layer
 

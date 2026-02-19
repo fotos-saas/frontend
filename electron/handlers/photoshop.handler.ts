@@ -376,6 +376,54 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
   // ============ JSX ExtendScript futtatás ============
 
+  // JSX scriptek kihelyezese a workDir/scripts/ mappaba
+  // Ha a mappa nem letezik → friss masolas
+  // Ha a forrasfajl ujabb mint a cel → feluliras
+  function deployJsxScripts(workDir: string): void {
+    const sourceBase = app.isPackaged
+      ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'extendscript')
+      : path.join(__dirname, '..', '..', 'scripts', 'photoshop', 'extendscript');
+
+    const targetBase = path.join(workDir, 'scripts');
+
+    // Rekurzivan masol egy mappat, csak ujabb fajlokat irja felul
+    function syncDir(srcDir: string, dstDir: string): void {
+      if (!fs.existsSync(dstDir)) {
+        fs.mkdirSync(dstDir, { recursive: true });
+      }
+
+      const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+      for (const entry of entries) {
+        const srcPath = path.join(srcDir, entry.name);
+        const dstPath = path.join(dstDir, entry.name);
+
+        if (entry.isDirectory()) {
+          syncDir(srcPath, dstPath);
+        } else if (entry.isFile() && entry.name.endsWith('.jsx')) {
+          let needsCopy = true;
+          if (fs.existsSync(dstPath)) {
+            const srcMtime = fs.statSync(srcPath).mtimeMs;
+            const dstMtime = fs.statSync(dstPath).mtimeMs;
+            if (srcMtime <= dstMtime) {
+              needsCopy = false;
+            }
+          }
+          if (needsCopy) {
+            fs.copyFileSync(srcPath, dstPath);
+            log.info(`JSX deploy: ${path.relative(targetBase, dstPath)}`);
+          }
+        }
+      }
+    }
+
+    try {
+      syncDir(sourceBase, targetBase);
+      log.info(`JSX scriptek kihelyezve: ${targetBase}`);
+    } catch (error) {
+      log.error('JSX deploy hiba:', error);
+    }
+  }
+
   // Magyar ékezet-mentes slug (layerName generáláshoz)
   function sanitizeNameForLayer(text: string, personId?: number): string {
     const accents: Record<string, string> = {
@@ -528,8 +576,18 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     };
   }
 
-  // JSX script útvonal feloldása (dev vs packaged)
+  // JSX script utvonal feloldasa: workDir/scripts/ elsodleges, Electron fallback
   function resolveJsxPath(scriptName: string): string {
+    // 1. Ha van workDir es a fajl letezik benne → onnan olvassuk
+    const workDir = psStore.get('workDirectory', null);
+    if (workDir) {
+      const workDirPath = path.join(workDir, 'scripts', scriptName);
+      if (fs.existsSync(workDirPath)) {
+        return workDirPath;
+      }
+    }
+
+    // 2. Fallback: eredeti Electron scripts/ hely
     return app.isPackaged
       ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'extendscript', scriptName)
       : path.join(__dirname, '..', '..', 'scripts', 'photoshop', 'extendscript', scriptName);
@@ -552,8 +610,14 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     );
   }
 
-  // JSX script összeállítása: CONFIG.DATA_FILE_PATH beállítás + #include feloldás + action kód
+  // JSX script osszeallitasa: deploy + CONFIG.DATA_FILE_PATH beallitas + #include feloldas + action kod
   function buildJsxScript(scriptName: string, dataFilePath?: string): string {
+    // Scriptek kihelyezese a workDir-be (ha van beallitva)
+    const workDir = psStore.get('workDirectory', null);
+    if (workDir) {
+      deployJsxScripts(workDir);
+    }
+
     const scriptPath = resolveJsxPath(scriptName);
     if (!fs.existsSync(scriptPath)) {
       throw new Error(`JSX script nem talalhato: ${scriptPath}`);

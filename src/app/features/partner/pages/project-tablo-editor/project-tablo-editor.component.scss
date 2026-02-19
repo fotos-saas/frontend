@@ -2,156 +2,421 @@
   display: block;
 }
 
-.editor-content {
-  padding: 1.5rem;
+// Tablószerkesztő mód jelző
+.editor-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  margin-bottom: 20px;
 }
 
-.loading-spinner,
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-secondary, #6b7280);
-}
-
-.tab-bar {
+// Tab navigáció
+.tab-nav {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-  padding-bottom: 0.5rem;
+  gap: 4px;
+  border-bottom: 2px solid var(--border-color, #e5e7eb);
+  margin-bottom: 24px;
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary, #6b7280);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 6px 6px 0 0;
+
+    &:hover {
+      color: var(--text-primary, #374151);
+      background: var(--hover-bg, #f9fafb);
+    }
+
+    &--active {
+      color: var(--primary-color, #7c3aed);
+      border-bottom-color: var(--primary-color, #7c3aed);
+
+      &:hover {
+        color: var(--primary-color, #7c3aed);
+      }
+    }
+  }
 }
 
-.tab-btn {
+// Tab tartalom
+.tab-content {
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Photoshop státusz sor (Parancsok tab tetején)
+.ps-status {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary, #6b7280);
-  transition: all 0.15s ease;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 20px;
 
-  &:hover {
-    background: var(--bg-hover, #f3f4f6);
+  &--ok {
+    background: var(--success-bg, #f0fdf4);
+    color: var(--success-color, #16a34a);
+    border: 1px solid var(--success-border, #86efac);
   }
 
-  &.active {
-    color: var(--primary, #6366f1);
-    background: var(--primary-light, #eef2ff);
-    font-weight: 500;
-  }
-}
-
-.message {
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-
-  &--error {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
+  &--warn {
+    background: var(--warning-bg, #fffbeb);
+    color: var(--warning-color, #92400e);
+    border: 1px solid var(--warning-border, #fcd34d);
   }
 
-  &--success {
-    background: #f0fdf4;
-    color: #16a34a;
-    border: 1px solid #bbf7d0;
+  span {
+    flex: 1;
   }
 }
 
-.section {
-  margin-bottom: 2rem;
+// Parancs kártya
+.command-card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 12px;
+  padding: 20px;
 
-  h3 {
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+    color: var(--text-primary, #1f2937);
+  }
+
+  &__title {
     font-size: 1rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin: 0 0 2px;
+  }
+
+  &__desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 0;
+  }
+
+  &__disabled,
+  &__loading,
+  &__empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #6b7280);
+    padding: 8px 0;
+  }
+
+  &__disabled {
+    font-style: italic;
   }
 }
 
+// Beállítások kártya
+.settings-card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 12px;
+  padding: 20px;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+    color: var(--text-primary, #1f2937);
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+
+  &__desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 0;
+  }
+}
+
+.settings-path {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  &__current {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary, #6b7280);
+    background: var(--hover-bg, #f3f4f6);
+    padding: 8px 12px;
+    border-radius: 8px;
+    word-break: break-all;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__empty {
+    font-size: 0.875rem;
+    color: var(--text-tertiary, #9ca3af);
+    font-style: italic;
+    flex: 1;
+  }
+}
+
+// Méretválasztó rács
 .size-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .size-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.75rem;
+  padding: 10px 16px;
   border: 2px solid var(--border-color, #e5e7eb);
-  border-radius: 0.5rem;
-  background: white;
+  border-radius: 10px;
+  background: var(--card-bg, #ffffff);
   cursor: pointer;
   transition: all 0.15s ease;
+  min-width: 100px;
 
   &:hover {
-    border-color: var(--primary, #6366f1);
+    border-color: var(--primary-light, #c4b5fd);
+    background: var(--hover-bg, #faf5ff);
   }
 
-  &.selected {
-    border-color: var(--primary, #6366f1);
-    background: var(--primary-light, #eef2ff);
+  &--selected {
+    border-color: var(--primary-color, #7c3aed);
+    background: var(--primary-bg, #f5f3ff);
+    box-shadow: 0 0 0 1px var(--primary-color, #7c3aed);
+  }
+
+  &__label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary, #1f2937);
+  }
+
+  &__pixels {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #6b7280);
+    margin-top: 2px;
   }
 }
 
-.size-label {
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.size-pixels {
-  font-size: 0.75rem;
-  color: var(--text-secondary, #6b7280);
-  margin-top: 0.25rem;
-}
-
+// Gombok
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
+  border: none;
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  &--sm {
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+
+  &--outline {
+    background: white;
+    border: 1px solid var(--border-color, #d1d5db);
+    color: var(--text-primary, #374151);
+
+    &:hover {
+      background: var(--hover-bg, #f9fafb);
+      border-color: var(--border-hover, #9ca3af);
+    }
+  }
+
+  &--primary {
+    background: var(--primary-color, #7c3aed);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: var(--primary-hover, #6d28d9);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &--generate {
+    padding: 10px 20px;
   }
 }
 
-.btn-primary {
-  background: var(--primary, #6366f1);
-  color: white;
+// Üzenetek
+.message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-top: 16px;
 
-  &:hover:not(:disabled) {
-    opacity: 0.9;
+  &--error {
+    background: var(--error-bg, #fef2f2);
+    color: var(--error-color, #dc2626);
+    border: 1px solid var(--error-border, #fecaca);
+  }
+
+  &--success {
+    background: var(--success-bg, #f0fdf4);
+    color: var(--success-color, #16a34a);
+    border: 1px solid var(--success-border, #86efac);
   }
 }
 
-.btn-secondary {
-  background: var(--bg-hover, #f3f4f6);
-  color: var(--text-primary, #111827);
+// Debug tab
+.debug-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
 
-  &:hover:not(:disabled) {
-    background: var(--border-color, #e5e7eb);
+.debug-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-tertiary, #9ca3af);
+  text-align: center;
+
+  p {
+    margin: 8px 0 0;
+    font-size: 0.875rem;
   }
 }
 
-.ps-path {
-  font-size: 0.8125rem;
-  color: var(--text-secondary, #6b7280);
-  margin-bottom: 0.75rem;
-  font-family: monospace;
+.debug-log-list {
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+  font-size: 0.8rem;
+  background: var(--card-bg-alt, #f9fafb);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.debug-log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border-left: 3px solid transparent;
+
+  & + & {
+    border-top: 1px solid var(--border-color, #f3f4f6);
+  }
+
+  &--ok {
+    border-left-color: #22c55e;
+  }
+
+  &--warn {
+    border-left-color: #eab308;
+    background: rgba(234, 179, 8, 0.04);
+  }
+
+  &--error {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.04);
+  }
+
+  &--info {
+    border-left-color: #94a3b8;
+  }
+
+  &__time {
+    flex-shrink: 0;
+    width: 72px;
+    color: var(--text-tertiary, #9ca3af);
+    font-size: 0.75rem;
+    padding-top: 1px;
+  }
+
+  &__status {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding-top: 1px;
+  }
+
+  &__step {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--text-primary, #1f2937);
+    min-width: 120px;
+  }
+
+  &__detail {
+    flex: 1;
+    min-width: 0;
+    color: var(--text-secondary, #6b7280);
+    word-break: break-all;
+  }
+}
+
+// Spinner
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation-duration: 0.01ms !important;
+  }
+
+  .tab-content {
+    animation: none;
+  }
 }

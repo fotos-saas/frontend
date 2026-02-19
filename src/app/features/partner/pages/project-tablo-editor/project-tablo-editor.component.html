@@ -1,116 +1,258 @@
-<div class="project-tablo-editor page-card">
-<app-project-detail-header
-  [project]="projectData()"
-  (back)="goBack()"
-/>
-
-<div class="editor-content">
+<div class="project-tablo-editor page-card page-card--narrow">
+  <!-- Loading -->
   @if (loading()) {
-    <div class="loading-spinner">Betöltés...</div>
-  } @else if (!projectData()) {
-    <div class="empty-state">Projekt nem található</div>
-  } @else {
-    <!-- Tabs -->
-    <div class="tab-bar">
+    <div class="flex flex-col items-center justify-center py-16">
+      <div class="w-10 h-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+      <p class="mt-4 text-gray-500">Betöltés...</p>
+    </div>
+  } @else if (projectData()) {
+    <!-- Fejléc -->
+    <app-project-detail-header
+      [project]="projectData()"
+      (back)="goBack()"
+    />
+
+    <!-- Tablószerkesztő mód jelző -->
+    <div class="editor-mode-badge">
+      <lucide-icon [name]="ICONS.LAYERS" [size]="16" />
+      Tablószerkesztő mód
+    </div>
+
+    <!-- Tab navigáció -->
+    <nav class="tab-nav" role="tablist">
       <button
-        class="tab-btn"
-        [class.active]="activeTab() === 'commands'"
+        class="tab-nav__item"
+        [class.tab-nav__item--active]="activeTab() === 'commands'"
         (click)="activeTab.set('commands')"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'commands'"
       >
         <lucide-icon [name]="ICONS.PLAY" [size]="16" />
         Parancsok
       </button>
       <button
-        class="tab-btn"
-        [class.active]="activeTab() === 'settings'"
+        class="tab-nav__item"
+        [class.tab-nav__item--active]="activeTab() === 'settings'"
         (click)="activeTab.set('settings')"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'settings'"
       >
         <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
         Beállítások
       </button>
-    </div>
+      <button
+        class="tab-nav__item"
+        [class.tab-nav__item--active]="activeTab() === 'debug'"
+        (click)="activeTab.set('debug')"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'debug'"
+      >
+        <lucide-icon [name]="ICONS.BUG" [size]="16" />
+        Debug
+      </button>
+    </nav>
 
-    <!-- Messages -->
-    @if (error()) {
-      <div class="message message--error">{{ error() }}</div>
-    }
-    @if (successMessage()) {
-      <div class="message message--success">{{ successMessage() }}</div>
-    }
-
-    <!-- Commands tab -->
+    <!-- ============ Parancsok tab ============ -->
     @if (activeTab() === 'commands') {
-      <div class="section">
-        <h3>PSD generálás</h3>
+      <div class="tab-content" role="tabpanel">
+        <!-- Photoshop státusz (rövid) -->
+        <div class="ps-status" [class.ps-status--ok]="isConfigured()" [class.ps-status--warn]="!isConfigured()">
+          @if (checking()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            <span>Photoshop keresése...</span>
+          } @else if (isConfigured()) {
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+            <span>Photoshop konfigurálva</span>
+            <button
+              class="btn btn--sm btn--primary"
+              [disabled]="launching()"
+              (click)="launchPs()"
+            >
+              @if (launching()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+              } @else {
+                <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+              }
+              Indítás
+            </button>
+          } @else {
+            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+            <span>Photoshop nincs beállítva</span>
+            <button class="btn btn--sm btn--outline" (click)="activeTab.set('settings')">
+              Beállítás
+            </button>
+          }
+        </div>
 
-        @if (loadingSizes()) {
-          <p>Méretek betöltése...</p>
-        } @else if (tabloSizes().length === 0) {
-          <p>Nincsenek elérhető méretek.</p>
-        } @else {
-          <div class="size-grid">
-            @for (size of tabloSizes(); track size.value) {
-              <button
-                class="size-card"
-                [class.selected]="selectedSize()?.value === size.value"
-                (click)="selectSize(size)"
-              >
-                <span class="size-label">{{ size.label }}</span>
-                <span class="size-pixels">{{ getSizePixels(size) }}</span>
-              </button>
-            }
+        <!-- Tabló generálása -->
+        <div class="command-card">
+          <div class="command-card__header">
+            <lucide-icon [name]="ICONS.FILE_PLUS" [size]="20" />
+            <div>
+              <h3 class="command-card__title">Tabló generálása</h3>
+              <p class="command-card__desc">Üres PSD fájl generálása mappastruktúrával (200 DPI, RGB).</p>
+            </div>
           </div>
 
+          @if (!isConfigured()) {
+            <div class="command-card__disabled">
+              Először állítsd be a Photoshop-ot a Beállítások fülön.
+            </div>
+          } @else if (loadingSizes()) {
+            <div class="command-card__loading">
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              Méretek betöltése...
+            </div>
+          } @else if (tabloSizes().length === 0) {
+            <div class="command-card__empty">
+              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+              Nincsenek beállított tablóméretek.
+            </div>
+          } @else {
+            <div class="size-grid">
+              @for (size of tabloSizes(); track size.value) {
+                <button
+                  class="size-card"
+                  [class.size-card--selected]="selectedSize()?.value === size.value"
+                  (click)="selectSize(size)"
+                >
+                  <span class="size-card__label">{{ size.label }}</span>
+                  <span class="size-card__pixels">{{ getSizePixels(size) }}</span>
+                </button>
+              }
+            </div>
+
+            <button
+              class="btn btn--primary btn--generate"
+              [disabled]="!selectedSize() || generating()"
+              (click)="generatePsd()"
+            >
+              @if (generating()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                Generálás...
+              } @else {
+                <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
+                PSD generálás és megnyitás
+              }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ============ Beállítások tab ============ -->
+    @if (activeTab() === 'settings') {
+      <div class="tab-content" role="tabpanel">
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="20" />
+            <div>
+              <h3 class="settings-card__title">Photoshop elérési út</h3>
+              <p class="settings-card__desc">Add meg a Photoshop alkalmazás elérési útját a számítógépeden.</p>
+            </div>
+          </div>
+
+          <div class="settings-path">
+            @if (psPath()) {
+              <div class="settings-path__current">
+                <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+                <span>{{ psPath() }}</span>
+              </div>
+            } @else {
+              <div class="settings-path__empty">Nincs beállítva</div>
+            }
+
+            <button class="btn btn--outline" (click)="selectPsPath()">
+              <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+              Tallózás
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ============ Debug tab ============ -->
+    @if (activeTab() === 'debug') {
+      <div class="tab-content" role="tabpanel">
+        <div class="debug-actions">
           <button
-            class="btn btn-primary"
-            [disabled]="!selectedSize() || generating()"
-            (click)="generatePsd()"
+            class="btn btn--primary"
+            [disabled]="generating() || !selectedSize()"
+            (click)="generatePsdDebug()"
           >
             @if (generating()) {
-              Generálás...
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              Futtatás...
             } @else {
-              <lucide-icon [name]="ICONS.FILE" [size]="16" />
-              PSD generálás
+              <lucide-icon [name]="ICONS.BUG" [size]="16" />
+              Debug futtatás
             }
           </button>
-        }
-      </div>
-
-      <div class="section">
-        <h3>Photoshop</h3>
-        @if (checking()) {
-          <p>Photoshop keresése...</p>
-        } @else if (isConfigured()) {
-          <p class="ps-path">{{ psPath() }}</p>
           <button
-            class="btn btn-secondary"
-            [disabled]="launching()"
-            (click)="launchPs()"
+            class="btn btn--outline"
+            [disabled]="debugLogs().length === 0"
+            (click)="clearDebugLogs()"
           >
-            @if (launching()) {
-              Indítás...
-            } @else {
-              <lucide-icon [name]="ICONS.PLAY" [size]="16" />
-              Photoshop indítása
-            }
+            <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            Törlés
           </button>
+        </div>
+
+        @if (debugLogs().length === 0) {
+          <div class="debug-empty">
+            <lucide-icon [name]="ICONS.BUG" [size]="24" />
+            <p>Nyomd meg a "Debug futtatás" gombot a PSD generálás diagnosztikájához.</p>
+          </div>
         } @else {
-          <p>Photoshop nincs beállítva.</p>
-          <button class="btn btn-secondary" (click)="selectPsPath()">
-            <lucide-icon [name]="ICONS.FOLDER" [size]="16" />
-            Photoshop kiválasztása
-          </button>
+          <div class="debug-log-list">
+            @for (log of debugLogs(); track $index) {
+              <div class="debug-log-entry" [class]="'debug-log-entry--' + log.status">
+                <span class="debug-log-entry__time">{{ log.time }}</span>
+                <span class="debug-log-entry__status">
+                  @switch (log.status) {
+                    @case ('ok') { <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" /> }
+                    @case ('warn') { <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" /> }
+                    @case ('error') { <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" /> }
+                    @case ('info') { <lucide-icon [name]="ICONS.INFO" [size]="14" /> }
+                  }
+                </span>
+                <span class="debug-log-entry__step">{{ log.step }}</span>
+                <span class="debug-log-entry__detail">{{ log.detail }}</span>
+              </div>
+            }
+          </div>
         }
       </div>
     }
 
-    <!-- Settings tab -->
-    @if (activeTab() === 'settings') {
-      <div class="section">
-        <h3>Beállítások</h3>
-        <p>Tablószerkesztő beállítások hamarosan...</p>
+    <!-- Üzenetek -->
+    @if (error()) {
+      <div class="message message--error">
+        <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" />
+        {{ error() }}
       </div>
     }
+
+    @if (successMessage()) {
+      <div class="message message--success">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+        {{ successMessage() }}
+      </div>
+    }
+  } @else {
+    <div class="text-center py-16">
+      <div class="w-16 h-16 mx-auto mb-3 bg-red-100 rounded-full flex items-center justify-center">
+        <lucide-icon [name]="ICONS.X_CIRCLE" [size]="32" class="text-red-500" />
+      </div>
+      <h3 class="mt-3 text-lg font-medium text-gray-900">Projekt nem található</h3>
+      <div class="mt-4">
+        <button
+          class="px-4 py-2 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors"
+          (click)="goBack()"
+        >
+          Vissza
+        </button>
+      </div>
+    </div>
   }
-</div>
 </div>

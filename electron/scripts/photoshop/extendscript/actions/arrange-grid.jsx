@@ -113,29 +113,46 @@ function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, 
   return topPx;
 }
 
+// --- Csoport elso layer-jenek tenyleges merete pixelben ---
+// A resize utan a Photoshop kerekithet, ezert a tenyleges bounds-bol
+// olvassuk ki a meretet, NEM a cm-bol szamoljuk ujra!
+function _getActualLayerSize(grp) {
+  if (!grp || grp.artLayers.length === 0) return null;
+  var layer = grp.artLayers[grp.artLayers.length - 1]; // elso (hatul van)
+  var b = layer.bounds;
+  var w = Math.round(b[2].as("px") - b[0].as("px"));
+  var h = Math.round(b[3].as("px") - b[1].as("px"));
+  if (w <= 0 || h <= 0) return null;
+  return { w: w, h: h };
+}
+
 function _doArrangeGrid() {
-  // Osszes cm ertek konvertalasa pixelre EGYSZER, az elejen
+  // Margin, gap, board → cm-bol px-re (ezek nem layerek, nincs kerekitesi hiba)
   var marginPx = _cm2px(_data.marginCm || 0);
   var gapHPx = _cm2px(_data.gapHCm || 2);
   var gapVPx = _cm2px(_data.gapVCm || 3);
   var boardWPx = _cm2px(_data.boardWidthCm);
 
-  var studentWPx = _cm2px(_data.studentSizeCm);
-  var studentHPx = _cm2px(_data.studentSizeCm * 1.5);
-  var teacherWPx = _cm2px(_data.teacherSizeCm);
-  var teacherHPx = _cm2px(_data.teacherSizeCm * 1.5);
+  // Fallback cm → px (ha nincs layer)
+  var studentWPxFallback = _cm2px(_data.studentSizeCm);
+  var studentHPxFallback = _cm2px(_data.studentSizeCm * 1.5);
+  var teacherWPxFallback = _cm2px(_data.teacherSizeCm);
+  var teacherHPxFallback = _cm2px(_data.teacherSizeCm * 1.5);
 
-  log("[JSX] === GRID v3 PIXEL MODE ===");
+  log("[JSX] === GRID v4 ACTUAL BOUNDS ===");
   log("[JSX] DPI=" + _dpi + ", board=" + boardWPx + "px, margin=" + marginPx + "px, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px");
-  log("[JSX] student=" + studentWPx + "x" + studentHPx + "px, teacher=" + teacherWPx + "x" + teacherHPx + "px");
 
   var startTopPx = marginPx;
 
   // 1. Diak csoport
   var studentsGroup = getGroupByPath(_doc, ["Images", "Students"]);
   if (studentsGroup && studentsGroup.artLayers.length > 0) {
-    log("[JSX] Diak csoport: " + studentsGroup.artLayers.length + " layer");
-    startTopPx = _arrangeGroupGridPx(studentsGroup, studentWPx, studentHPx, marginPx, gapHPx, gapVPx, boardWPx, startTopPx);
+    // Tenyleges kepmeret kiolvasasa az elso layerbol
+    var studentActual = _getActualLayerSize(studentsGroup);
+    var sW = studentActual ? studentActual.w : studentWPxFallback;
+    var sH = studentActual ? studentActual.h : studentHPxFallback;
+    log("[JSX] Diak csoport: " + studentsGroup.artLayers.length + " layer, tenyleges meret: " + sW + "x" + sH + "px" + (studentActual ? " (bounds)" : " (fallback)"));
+    startTopPx = _arrangeGroupGridPx(studentsGroup, sW, sH, marginPx, gapHPx, gapVPx, boardWPx, startTopPx);
   } else {
     log("[JSX] Diak csoport ures vagy nem talalhato");
   }
@@ -143,8 +160,11 @@ function _doArrangeGrid() {
   // 2. Tanar csoport (a diakok alatt)
   var teachersGroup = getGroupByPath(_doc, ["Images", "Teachers"]);
   if (teachersGroup && teachersGroup.artLayers.length > 0) {
-    log("[JSX] Tanar csoport: " + teachersGroup.artLayers.length + " layer");
-    _arrangeGroupGridPx(teachersGroup, teacherWPx, teacherHPx, marginPx, gapHPx, gapVPx, boardWPx, startTopPx);
+    var teacherActual = _getActualLayerSize(teachersGroup);
+    var tW = teacherActual ? teacherActual.w : teacherWPxFallback;
+    var tH = teacherActual ? teacherActual.h : teacherHPxFallback;
+    log("[JSX] Tanar csoport: " + teachersGroup.artLayers.length + " layer, tenyleges meret: " + tW + "x" + tH + "px" + (teacherActual ? " (bounds)" : " (fallback)"));
+    _arrangeGroupGridPx(teachersGroup, tW, tH, marginPx, gapHPx, gapVPx, boardWPx, startTopPx);
   } else {
     log("[JSX] Tanar csoport ures vagy nem talalhato");
   }

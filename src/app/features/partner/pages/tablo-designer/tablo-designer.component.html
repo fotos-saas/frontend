@@ -85,6 +85,59 @@
           }
         </div>
       </div>
+
+      <!-- PSD generálás szekció -->
+      @if (isConfigured()) {
+        <div class="psd-section">
+          <h3 class="psd-section__title">
+            <lucide-icon [name]="ICONS.FILE_PLUS" [size]="18" />
+            PSD generálás
+          </h3>
+          <p class="psd-section__desc">
+            Válaszd ki a tablóméretet, és generálj egy üres PSD fájlt (200 DPI, RGB).
+          </p>
+
+          @if (loadingSizes()) {
+            <div class="size-loading">
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              Méretek betöltése...
+            </div>
+          } @else if (tabloSizes().length === 0) {
+            <div class="size-empty">
+              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+              Nincsenek beállított tablóméretek. Állíts be méreteket a
+              <a href="/partner/settings" class="link-btn">Beállítások</a> oldalon.
+            </div>
+          } @else {
+            <div class="size-grid">
+              @for (size of tabloSizes(); track size.value) {
+                <button
+                  class="size-card"
+                  [class.size-card--selected]="selectedSize()?.value === size.value"
+                  (click)="selectSize(size)"
+                >
+                  <span class="size-card__label">{{ size.label }}</span>
+                  <span class="size-card__pixels">{{ getSizePixels(size) }}</span>
+                </button>
+              }
+            </div>
+
+            <button
+              class="btn btn--primary btn--generate"
+              [disabled]="!selectedSize() || generating()"
+              (click)="generatePsd()"
+            >
+              @if (generating()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                Generálás...
+              } @else {
+                <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
+                PSD generálás és megnyitás
+              }
+            </button>
+          }
+        </div>
+      }
     </div>
   }
 

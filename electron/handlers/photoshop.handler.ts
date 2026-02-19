@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow } from 'electron';
+import { ipcMain, dialog, BrowserWindow, app } from 'electron';
 import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -169,6 +169,104 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     } catch (error) {
       log.error('Photoshop browse hiba:', error);
       return { cancelled: true };
+    }
+  });
+
+  // Get Downloads path
+  ipcMain.handle('photoshop:get-downloads-path', () => {
+    return app.getPath('downloads');
+  });
+
+  // Generate PSD file
+  ipcMain.handle('photoshop:generate-psd', async (_event, params: {
+    widthCm: number;
+    heightCm: number;
+    dpi: number;
+    mode: string;
+    outputPath: string;
+  }) => {
+    try {
+      // Input validacio
+      if (typeof params.widthCm !== 'number' || typeof params.heightCm !== 'number') {
+        return { success: false, error: 'Ervenytelen meret parameterek' };
+      }
+      if (params.widthCm <= 0 || params.heightCm <= 0) {
+        return { success: false, error: 'A mereteknek pozitivnak kell lenniuk' };
+      }
+      if (typeof params.outputPath !== 'string' || params.outputPath.length > 500) {
+        return { success: false, error: 'Ervenytelen kimeneti eleresi ut' };
+      }
+
+      // Python script eleresi ut (extraResources-bol)
+      const scriptPath = app.isPackaged
+        ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'python', 'tasks', 'generate_psd.py')
+        : path.join(__dirname, '..', 'scripts', 'photoshop', 'python', 'tasks', 'generate_psd.py');
+
+      const args = [
+        scriptPath,
+        '--width-cm', String(params.widthCm),
+        '--height-cm', String(params.heightCm),
+        '--dpi', String(params.dpi || 200),
+        '--mode', params.mode || 'RGB',
+        '--output', params.outputPath,
+      ];
+
+      return new Promise<{ success: boolean; error?: string }>((resolve) => {
+        execFile('python3', args, { timeout: 30000 }, (error, stdout, stderr) => {
+          if (error) {
+            log.error('PSD generalas hiba:', error.message, stderr);
+            resolve({ success: false, error: stderr || error.message });
+            return;
+          }
+          log.info('PSD generalva:', stdout.trim());
+          resolve({ success: true });
+        });
+      });
+    } catch (error) {
+      log.error('PSD generalasi hiba:', error);
+      return { success: false, error: 'Nem sikerult a PSD generalasa' };
+    }
+  });
+
+  // Open file with default application (Photoshop)
+  ipcMain.handle('photoshop:open-file', async (_event, filePath: string) => {
+    try {
+      if (typeof filePath !== 'string' || filePath.length > 500) {
+        return { success: false, error: 'Ervenytelen fajl eleresi ut' };
+      }
+
+      if (!fs.existsSync(filePath)) {
+        return { success: false, error: 'A fajl nem talalhato' };
+      }
+
+      const psPath = psStore.get('photoshopPath', null);
+
+      if (process.platform === 'darwin') {
+        if (psPath) {
+          // macOS: open -a Photoshop file.psd
+          const child = execFile('open', ['-a', psPath, filePath]);
+          child.unref();
+        } else {
+          // Nincs PS beallitva, megnyitas alapertelmezett alkalmazassal
+          const child = execFile('open', [filePath]);
+          child.unref();
+        }
+      } else {
+        if (psPath) {
+          // Windows: Photoshop.exe file.psd
+          const child = execFile(psPath, [filePath], { detached: true, stdio: 'ignore' } as never);
+          child.unref();
+        } else {
+          const child = execFile('start', ['""', filePath], { shell: true, detached: true, stdio: 'ignore' } as never);
+          child.unref();
+        }
+      }
+
+      log.info(`PSD megnyitva: ${filePath}`);
+      return { success: true };
+    } catch (error) {
+      log.error('PSD megnyitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult megnyitni a fajlt' };
     }
   });
 

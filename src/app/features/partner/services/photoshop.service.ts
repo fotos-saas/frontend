@@ -1,5 +1,9 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
+import { TabloSize } from '../models/partner.models';
+
+/** Kistablo alias merete */
+const KISTABLO_ALIAS = { widthCm: 100, heightCm: 70 };
 
 /**
  * PhotoshopService - Photoshop eleresi ut es inditas kezelese
@@ -86,6 +90,71 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('Photoshop browse hiba', err);
       return null;
+    }
+  }
+
+  /**
+   * Meret ertek parszolasa (pl. "80x120" → {heightCm: 80, widthCm: 120})
+   * Formatum: HxW (magassag x szelesseg) cm-ben
+   */
+  parseSizeValue(value: string): { widthCm: number; heightCm: number } | null {
+    if (value === 'kistablo') {
+      return KISTABLO_ALIAS;
+    }
+
+    const match = value.match(/^(\d+)x(\d+)$/);
+    if (!match) return null;
+
+    return {
+      heightCm: parseInt(match[1], 10),
+      widthCm: parseInt(match[2], 10),
+    };
+  }
+
+  /**
+   * PSD generalas es megnyitas Photoshopban
+   * 1. Meret parszolas + kistablo alias
+   * 2. Downloads/PhotoStack/ mappa keszites
+   * 3. Python script futtatasa IPC-n keresztul
+   * 4. PSD megnyitasa Photoshopban
+   */
+  async generateAndOpenPsd(size: TabloSize): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    const dimensions = this.parseSizeValue(size.value);
+    if (!dimensions) {
+      return { success: false, error: `Érvénytelen méret formátum: ${size.value}` };
+    }
+
+    try {
+      // Downloads path lekerdezese
+      const downloadsPath = await this.api.getDownloadsPath();
+      const outputDir = `${downloadsPath}/PhotoStack`;
+      const outputPath = `${outputDir}/${size.value}.psd`;
+
+      // PSD generalas
+      const genResult = await this.api.generatePsd({
+        widthCm: dimensions.widthCm,
+        heightCm: dimensions.heightCm,
+        dpi: 200,
+        mode: 'RGB',
+        outputPath,
+      });
+
+      if (!genResult.success) {
+        return { success: false, error: genResult.error || 'PSD generálás sikertelen' };
+      }
+
+      // Megnyitas Photoshopban
+      const openResult = await this.api.openFile(outputPath);
+      if (!openResult.success) {
+        return { success: false, error: openResult.error || 'Nem sikerült megnyitni a PSD-t' };
+      }
+
+      return { success: true };
+    } catch (err) {
+      this.logger.error('PSD generalas hiba', err);
+      return { success: false, error: 'Váratlan hiba történt a PSD generálás során' };
     }
   }
 }

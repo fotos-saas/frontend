@@ -112,6 +112,7 @@ import {
   PauseCircle,
   PlayCircle,
   FileText,
+  FilePlus,
   Puzzle,
   // Audit log toggle
   Eye,
@@ -273,6 +274,7 @@ export const LUCIDE_ICONS_MAP = {
   PauseCircle,
   PlayCircle,
   FileText,
+  FilePlus,
   Puzzle,
   // Audit log toggle
   Eye,

@@ -1,2 +1,3 @@
 # PhotoStack Photoshop Python dependencies
 # pip install -r requirements.txt
+psd-tools>=1.12.0

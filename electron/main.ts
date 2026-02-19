@@ -303,8 +303,8 @@ function createWindow(): void {
     height: 900,
     minWidth: 1024,
     minHeight: 768,
-    titleBarStyle: 'hiddenInset', // Mac native title bar style
-    trafficLightPosition: { x: 20, y: 24 },
+    titleBarStyle: 'hidden', // Mac: traffic lights always visible
+    trafficLightPosition: { x: 20, y: 18 },
     vibrancy: 'under-window', // Mac frosted glass effect
     visualEffectState: 'active',
     backgroundColor: '#00000000', // Transparent for vibrancy
@@ -329,8 +329,9 @@ function createWindow(): void {
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
 
-    // Initialize default Touch Bar on macOS
+    // macOS: ensure traffic light buttons are always visible
     if (process.platform === 'darwin') {
+      mainWindow?.setWindowButtonVisibility(true);
       setTouchBarContext('dashboard');
     }
   });

@@ -352,29 +352,12 @@ export class ProjectTabloEditorComponent implements OnInit {
 
       this.addLog('IPC generatePsd', genResult.success ? 'Sikeres' : `HIBA: ${genResult.error}`, genResult.success ? 'ok' : 'error');
 
-      if (!genResult.success) {
-        this.addLog('Végeredmény', 'PSD generálás sikertelen — lásd fenti hibákat', 'error');
-        return;
-      }
-
-      // 10. PSD megnyitás Photoshopban
-      this.addLog('PSD megnyitás', `openFile(${outputPath})`, 'info');
-      let openResult: any;
-      try {
-        openResult = await api.openFile(outputPath);
-      } catch (openErr) {
-        this.addLog('PSD megnyitás', `EXCEPTION: ${String(openErr)}`, 'error');
-        return;
-      }
-
-      if (openResult.success) {
-        this.addLog('PSD megnyitás', 'Sikeres', 'ok');
+      // 10. Végeredmény (Debug mód NEM nyitja meg a PS-t — csak generál)
+      if (genResult.success) {
+        this.addLog('Végeredmény', `PSD sikeresen generálva: ${outputPath}`, 'ok');
       } else {
-        this.addLog('PSD megnyitás', `HIBA: ${openResult.error}`, 'error');
+        this.addLog('Végeredmény', 'PSD generálás sikertelen — lásd fenti hibákat', 'error');
       }
-
-      // 11. Végeredmény
-      this.addLog('Végeredmény', openResult.success ? 'PSD generálva és megnyitva!' : 'PSD generálva, de megnyitás sikertelen', openResult.success ? 'ok' : 'warn');
     } catch (err) {
       this.addLog('Váratlan hiba', String(err), 'error');
     } finally {

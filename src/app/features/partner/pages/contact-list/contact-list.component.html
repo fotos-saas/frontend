@@ -125,7 +125,7 @@
                   @if (first || contact.projectNames.length <= 2) {
                     <span
                       class="project-chip"
-                      [matTooltip]="contact.schoolNames[$index] ?? ''"
+                      [matTooltip]="contact.schoolNames[$index]"
                       (click)="viewProject(contact)"
                     >
                       <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="12" />

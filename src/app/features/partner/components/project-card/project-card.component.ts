@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
-import { NgClass, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerProjectListItem } from '../../services/partner.service';
@@ -14,7 +14,7 @@ import { StatusDropdownComponent } from '../../../../shared/components/status-dr
 @Component({
   selector: 'app-partner-project-card',
   standalone: true,
-  imports: [LucideAngularModule, NgClass, DatePipe, MatTooltipModule, StatusDropdownComponent],
+  imports: [LucideAngularModule, DatePipe, MatTooltipModule, StatusDropdownComponent],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

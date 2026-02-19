@@ -16,7 +16,7 @@ import { ArchiveProjectViewComponent } from '../../components/archive/archive-pr
 import { TeacherUploadHistoryComponent } from '../../components/teacher-upload-history/teacher-upload-history.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
-import { PsSearchableSelectComponent, SelectOption } from '@shared/components/form';
+import { SelectOption } from '@shared/components/form';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
@@ -32,7 +32,7 @@ import { TeacherListStateService } from './teacher-list-state.service';
     ArchiveEditModalComponent, ArchiveBulkImportDialogComponent, ArchiveBulkPhotoUploadComponent,
     TeacherLinkDialogComponent, ArchivePhotoUploadComponent, ArchiveDownloadDialogComponent,
     ArchiveProjectViewComponent, TeacherUploadHistoryComponent, ConfirmDialogComponent,
-    MediaLightboxComponent, PsSearchableSelectComponent, SmartFilterBarComponent,
+    MediaLightboxComponent, SmartFilterBarComponent,
     ListPaginationComponent, TableHeaderComponent, ViewModeToggleComponent,
   ],
   providers: [

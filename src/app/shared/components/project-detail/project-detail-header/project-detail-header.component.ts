@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
-import { NgClass, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData } from '../project-detail.types';
@@ -10,7 +10,7 @@ import { StatusDropdownComponent } from '../../status-dropdown/status-dropdown.c
 @Component({
   selector: 'app-project-detail-header',
   standalone: true,
-  imports: [NgClass, DatePipe, LucideAngularModule, MatTooltipModule, BackButtonComponent, StatusDropdownComponent],
+  imports: [DatePipe, LucideAngularModule, MatTooltipModule, BackButtonComponent, StatusDropdownComponent],
   templateUrl: './project-detail-header.component.html',
   styleUrl: './project-detail-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

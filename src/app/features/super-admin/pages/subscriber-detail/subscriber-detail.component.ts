@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
@@ -24,7 +24,6 @@ import { SubscriberDetailStateService } from './subscriber-detail-state.service'
   standalone: true,
   imports: [
     FormsModule,
-    RouterLink,
     LucideAngularModule,
     MatTooltipModule,
     ConfirmDialogComponent,

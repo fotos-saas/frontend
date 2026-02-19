@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, signal, output, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -25,7 +24,7 @@ interface PersonOption {
 @Component({
   selector: 'app-create-charge-dialog',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsDatepickerComponent, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsTextareaComponent, PsDatepickerComponent, DialogWrapperComponent],
   templateUrl: './create-charge-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

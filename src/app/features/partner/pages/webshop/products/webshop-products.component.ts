@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, signal, ChangeDetectionStrategy, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -11,7 +10,7 @@ import { PartnerWebshopService, ShopProduct, PaperSize, PaperType, PricingUpdate
 @Component({
   selector: 'app-webshop-products',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, LucideAngularModule, MatTooltipModule, PsInputComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent],
   templateUrl: './webshop-products.component.html',
   styleUrl: './webshop-products.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

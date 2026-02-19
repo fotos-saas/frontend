@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SamplesService, Sample, ProjectInfo } from './services/samples.service';
 import { forkJoin } from 'rxjs';
@@ -19,7 +19,6 @@ import { SamplesLightboxComponent, SampleLightboxItem } from '../../shared/compo
     standalone: true,
     imports: [
         SamplesLightboxComponent,
-        AsyncPipe,
         DatePipe,
     ],
     templateUrl: './samples.component.html',

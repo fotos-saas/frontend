@@ -16,7 +16,7 @@ import { ArchivePhotoUploadComponent } from '../../components/archive/archive-ph
 import { ArchiveProjectViewComponent } from '../../components/archive/archive-project-view/archive-project-view.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MediaLightboxComponent, LightboxMediaItem } from '../../../../shared/components/media-lightbox';
-import { PsSearchableSelectComponent, SelectOption } from '@shared/components/form';
+import { SelectOption } from '@shared/components/form';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared/components/smart-filter-bar';
@@ -38,7 +38,6 @@ import { ViewModeToggleComponent, ViewModeOption } from '../../../../shared/comp
     ArchiveProjectViewComponent,
     ConfirmDialogComponent,
     MediaLightboxComponent,
-    PsSearchableSelectComponent,
     SmartFilterBarComponent,
     ListPaginationComponent,
     TableHeaderComponent,

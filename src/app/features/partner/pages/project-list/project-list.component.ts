@@ -14,13 +14,13 @@ import { SharedQrCodeModalComponent } from '../../../../shared/components/qr-cod
 import { IQrCodeService } from '../../../../shared/interfaces/qr-code.interface';
 import { PhotoUploadWizardComponent } from '../../components/photo-upload-wizard/photo-upload-wizard/photo-upload-wizard.component';
 import { SamplesLightboxComponent, SampleLightboxItem } from '../../../../shared/components/samples-lightbox';
-import { ExpandableFiltersComponent, FilterConfig, FilterChangeEvent } from '../../../../shared/components/expandable-filters';
+import { FilterConfig, FilterChangeEvent } from '../../../../shared/components/expandable-filters';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent, SearchConfig, SortDef } from '../../../../shared/components/smart-filter-bar';
 import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
-import { ProjectMobileSortComponent, SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
+import { SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
 
@@ -40,11 +40,9 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     SharedQrCodeModalComponent,
     PhotoUploadWizardComponent,
     SamplesLightboxComponent,
-    ExpandableFiltersComponent,
     ConfirmDialogComponent,
     SmartFilterBarComponent,
     TableHeaderComponent,
-    ProjectMobileSortComponent,
     ListPaginationComponent,
   ],
   templateUrl: './project-list.component.html',

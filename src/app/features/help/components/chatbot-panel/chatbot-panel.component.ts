@@ -5,7 +5,6 @@ import {
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter, Subject, takeUntil } from 'rxjs';
-import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -26,7 +25,7 @@ interface DisplayMessage {
 @Component({
   selector: 'app-chatbot-panel',
   standalone: true,
-  imports: [NgClass, FormsModule, LucideAngularModule, MatTooltipModule, ChatbotMessageComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, ChatbotMessageComponent],
   templateUrl: './chatbot-panel.component.html',
   styleUrl: './chatbot-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

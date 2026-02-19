@@ -163,6 +163,8 @@ import {
   MoreVertical,
   // Code editor
   Code,
+  // Tablókészítő
+  Layers,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -322,4 +324,6 @@ export const LUCIDE_ICONS_MAP = {
   MoreVertical,
   // Code editor
   Code,
+  // Tablókészítő
+  Layers,
 };

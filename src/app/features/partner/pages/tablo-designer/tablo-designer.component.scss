@@ -1,0 +1,152 @@
+:host {
+  display: block;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 24px;
+}
+
+// Photoshop statusz kartya
+.ps-card {
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border-color, #e5e7eb);
+
+  &--configured {
+    background: var(--success-bg, #f0fdf4);
+    border-color: var(--success-border, #86efac);
+  }
+
+  &--unconfigured {
+    background: var(--warning-bg, #fffbeb);
+    border-color: var(--warning-border, #fcd34d);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  &__status-icon {
+    display: flex;
+
+    .ps-card--configured & {
+      color: var(--success-color, #16a34a);
+    }
+
+    .ps-card--unconfigured & {
+      color: var(--warning-color, #d97706);
+    }
+  }
+
+  &__title {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  &__path {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary, #6b7280);
+    margin-bottom: 16px;
+    word-break: break-all;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+// Gombok
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+
+  &--outline {
+    background: white;
+    border: 1px solid var(--border-color, #d1d5db);
+    color: var(--text-primary, #374151);
+
+    &:hover {
+      background: var(--hover-bg, #f9fafb);
+      border-color: var(--border-hover, #9ca3af);
+    }
+  }
+
+  &--primary {
+    background: var(--primary-color, #7c3aed);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: var(--primary-hover, #6d28d9);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Uzenetek
+.message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-top: 16px;
+
+  &--error {
+    background: var(--error-bg, #fef2f2);
+    color: var(--error-color, #dc2626);
+    border: 1px solid var(--error-border, #fecaca);
+  }
+
+  &--success {
+    background: var(--success-bg, #f0fdf4);
+    color: var(--success-color, #16a34a);
+    border: 1px solid var(--success-border, #86efac);
+  }
+}
+
+// Spinner animacio
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation-duration: 0.01ms !important;
+  }
+}

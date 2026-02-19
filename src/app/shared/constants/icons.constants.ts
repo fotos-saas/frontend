@@ -347,6 +347,9 @@ export const ICONS = {
 
   // Tablóméretek
   RULER: 'ruler',
+
+  // Tablókészítő
+  LAYERS: 'layers',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

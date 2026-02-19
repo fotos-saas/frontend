@@ -86,6 +86,14 @@ export interface NotificationResultData {
   id: string | null;
 }
 
+interface PhotoshopAPI {
+  setPath: (path: string) => Promise<{ success: boolean; error?: string }>;
+  getPath: () => Promise<string | null>;
+  launch: () => Promise<{ success: boolean; error?: string }>;
+  checkInstalled: () => Promise<{ found: boolean; path: string | null }>;
+  browsePath: () => Promise<{ cancelled: boolean; path?: string }>;
+}
+
 export interface ElectronAPI {
   showNotification: (options: unknown, body?: string) => Promise<NotificationResultData | boolean>;
   onNotificationClicked: (callback: (data: { id: string }) => void) => CleanupFn;
@@ -124,6 +132,7 @@ export interface ElectronAPI {
   nativeDrag: NativeDragAPI;
   touchBar: TouchBarAPI;
   autoUpdate: AutoUpdateAPI;
+  photoshop: PhotoshopAPI;
 }
 
 declare global {

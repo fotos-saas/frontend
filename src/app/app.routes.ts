@@ -225,6 +225,12 @@ export const routes: Routes = [
         path: 'projects/:id/gallery',
         loadComponent: () => import('./features/partner/pages/gallery-detail/gallery-detail.component').then(m => m.GalleryDetailComponent)
       },
+      // Tablókészítő (Electron only - menüben visible callback szűri)
+      {
+        path: 'tablo-designer',
+        loadComponent: () => import('./features/partner/pages/tablo-designer/tablo-designer.component').then(m => m.TabloDesignerComponent),
+        title: 'Tablókészítő'
+      },
       {
         path: 'contacts',
         loadComponent: () => import('./features/partner/pages/contact-list/contact-list.component').then(m => m.PartnerContactListComponent)
@@ -411,6 +417,12 @@ export const routes: Routes = [
       {
         path: 'projects/:id/gallery',
         loadComponent: () => import('./features/partner/pages/gallery-detail/gallery-detail.component').then(m => m.GalleryDetailComponent)
+      },
+      // Tablókészítő (Electron only)
+      {
+        path: 'tablo-designer',
+        loadComponent: () => import('./features/partner/pages/tablo-designer/tablo-designer.component').then(m => m.TabloDesignerComponent),
+        title: 'Tablókészítő'
       },
       {
         path: 'contacts',

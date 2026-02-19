@@ -1,0 +1,76 @@
+<div class="tablo-designer page-card page-card--narrow">
+  <h1 class="page-title">
+    <lucide-icon [name]="ICONS.LAYERS" [size]="24" />
+    Tablokeszito
+  </h1>
+  <p class="page-subtitle">Photoshop integracio a tablokep-kesziteshez.</p>
+
+  <!-- Photoshop statusz kartya -->
+  <div class="ps-card" [class.ps-card--configured]="isConfigured()" [class.ps-card--unconfigured]="!isConfigured()">
+    <div class="ps-card__header">
+      <div class="ps-card__status-icon">
+        @if (checking()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+        } @else if (isConfigured()) {
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
+        } @else {
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
+        }
+      </div>
+      <div class="ps-card__title">
+        @if (checking()) {
+          Photoshop keresese...
+        } @else if (isConfigured()) {
+          Photoshop konfigurálva
+        } @else {
+          Photoshop nincs beallitva
+        }
+      </div>
+    </div>
+
+    @if (psPath()) {
+      <div class="ps-card__path">
+        <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+        <span>{{ psPath() }}</span>
+      </div>
+    }
+
+    <div class="ps-card__actions">
+      <button class="btn btn--outline" (click)="selectPsPath()">
+        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+        Tallozas
+      </button>
+
+      @if (isConfigured()) {
+        <button
+          class="btn btn--primary"
+          [disabled]="launching()"
+          (click)="launchPs()"
+        >
+          @if (launching()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            Inditas...
+          } @else {
+            <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+            Photoshop megnyitasa
+          }
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Uzenetek -->
+  @if (error()) {
+    <div class="message message--error">
+      <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" />
+      {{ error() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="message message--success">
+      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+      {{ successMessage() }}
+    </div>
+  }
+</div>

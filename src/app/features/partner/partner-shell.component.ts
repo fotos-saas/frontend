@@ -16,6 +16,7 @@ import { PartnerFinalizationService } from './services/partner-finalization.serv
 import { BrandingService } from './services/branding.service';
 import { ICONS, TEAM_MEMBER_ROLES, getSubscriptionStatusLabel } from '../../shared/constants';
 import { environment } from '../../../environments/environment';
+import { ElectronService } from '../../core/services/electron.service';
 import { HelpFabComponent } from '../help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-panel.component';
 import { InviteBannerComponent } from '../../shared/components/invite-banner/invite-banner.component';
@@ -65,6 +66,7 @@ const ROLE_BADGES: Record<string, string> = {
 })
 export class PartnerShellComponent implements OnInit {
   private readonly logger = inject(LoggerService);
+  private readonly electronService = inject(ElectronService);
   private authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
   private finalizationService = inject(PartnerFinalizationService);
@@ -154,6 +156,7 @@ export class PartnerShellComponent implements OnInit {
           { id: 'teachers', route: `${base}/projects/teachers`, label: 'Tanárok' },
           { id: 'students', route: `${base}/projects/students`, label: 'Diákok' },
           { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
+          { id: 'tablo-designer', route: `${base}/tablo-designer`, label: 'Tablókészítő', visible: () => this.electronService.isElectron },
         ]
       },
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
@@ -227,6 +230,18 @@ export class PartnerShellComponent implements OnInit {
         })
         .filter((item): item is MenuItem => item !== null);
     }
+
+    // visible callback szures (pl. Electron-only menupontok)
+    items = items
+      .filter(item => !item.visible || item.visible())
+      .map(item => {
+        if (item.children) {
+          const filtered = item.children.filter(c => !c.visible || c.visible());
+          return filtered.length ? { ...item, children: filtered } : null;
+        }
+        return item;
+      })
+      .filter((item): item is MenuItem => item !== null);
 
     return items;
   });

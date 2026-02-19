@@ -124,6 +124,13 @@
       "dist/**/*",
       "electron/dist/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "electron/scripts/photoshop",
+        "to": "scripts/photoshop",
+        "filter": ["**/*", "!**/.gitkeep"]
+      }
+    ],
     "mac": {
       "category": "public.app-category.photography",
       "icon": "electron/assets/icon.icns",

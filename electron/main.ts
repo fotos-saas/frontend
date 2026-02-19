@@ -12,6 +12,9 @@ import Store from 'electron-store';
 import { initSentryMain, setSentryUser, captureMainException, addMainBreadcrumb } from './sentry';
 initSentryMain();
 
+// Modularis IPC handlerek
+import { registerPhotoshopHandlers } from './handlers/photoshop.handler';
+
 const { TouchBarButton, TouchBarLabel, TouchBarSpacer, TouchBarSegmentedControl, TouchBarSlider } = TouchBar;
 
 // ============ Logging Setup ============
@@ -577,6 +580,11 @@ app.whenReady().then(() => {
   }
 
   createWindow();
+
+  // Photoshop IPC handlerek regisztralasa
+  if (mainWindow) {
+    registerPhotoshopHandlers(mainWindow);
+  }
 
   // macOS: recreate window when dock icon is clicked
   app.on('activate', () => {

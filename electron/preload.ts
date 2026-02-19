@@ -250,6 +250,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('cleanup-drag-files', filePaths) as Promise<boolean>,
   },
 
+  // ============ Photoshop Integration ============
+  photoshop: {
+    setPath: (psPath: string) =>
+      ipcRenderer.invoke('photoshop:set-path', psPath) as Promise<{ success: boolean; error?: string }>,
+    getPath: () =>
+      ipcRenderer.invoke('photoshop:get-path') as Promise<string | null>,
+    launch: () =>
+      ipcRenderer.invoke('photoshop:launch') as Promise<{ success: boolean; error?: string }>,
+    checkInstalled: () =>
+      ipcRenderer.invoke('photoshop:check-installed') as Promise<{ found: boolean; path: string | null }>,
+    browsePath: () =>
+      ipcRenderer.invoke('photoshop:browse-path') as Promise<{ cancelled: boolean; path?: string }>,
+  },
+
   // ============ Touch Bar (MacBook Pro 2016-2020) ============
   touchBar: {
     /**

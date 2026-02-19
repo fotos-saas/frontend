@@ -372,6 +372,227 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // ============ JSX ExtendScript futtatás ============
+
+  // JSX script útvonal feloldása (dev vs packaged)
+  function resolveJsxPath(scriptName: string): string {
+    return app.isPackaged
+      ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'extendscript', scriptName)
+      : path.join(__dirname, '..', '..', 'scripts', 'photoshop', 'extendscript', scriptName);
+  }
+
+  // JSX #include direktívák feloldása (inline-olja a fájl tartalmát)
+  function resolveIncludes(scriptContent: string, scriptDir: string): string {
+    return scriptContent.replace(
+      /\/\/\s*#include\s+"([^"]+)"/g,
+      (_match, includePath) => {
+        const fullPath = path.resolve(scriptDir, includePath);
+        if (!fs.existsSync(fullPath)) {
+          log.warn(`JSX #include fajl nem talalhato: ${fullPath}`);
+          return `// HIBA: #include fajl nem talalhato: ${includePath}`;
+        }
+        const includeContent = fs.readFileSync(fullPath, 'utf-8');
+        // Rekurzív #include feloldás
+        return resolveIncludes(includeContent, path.dirname(fullPath));
+      },
+    );
+  }
+
+  // JSX script összeállítása: CONFIG.DATA_FILE_PATH beállítás + #include feloldás + action kód
+  function buildJsxScript(scriptName: string, dataFilePath?: string): string {
+    const scriptPath = resolveJsxPath(scriptName);
+    if (!fs.existsSync(scriptPath)) {
+      throw new Error(`JSX script nem talalhato: ${scriptPath}`);
+    }
+
+    let scriptContent = fs.readFileSync(scriptPath, 'utf-8');
+    const scriptDir = path.dirname(scriptPath);
+
+    // #include direktívák feloldása
+    scriptContent = resolveIncludes(scriptContent, scriptDir);
+
+    // CONFIG.DATA_FILE_PATH beállítása a script elejére (ha van adat fájl)
+    if (dataFilePath) {
+      const escapedPath = dataFilePath.replace(/\\/g, '/');
+      const configOverride = `CONFIG.DATA_FILE_PATH = "${escapedPath}";\n`;
+      // Keresuk a CONFIG definiciot es utana szurjuk be
+      const configEndIdx = scriptContent.indexOf('};');
+      if (configEndIdx > -1) {
+        // A CONFIG definicio utan szurjuk be
+        scriptContent = scriptContent.slice(0, configEndIdx + 2) + '\n' + configOverride + scriptContent.slice(configEndIdx + 2);
+      }
+    }
+
+    return scriptContent;
+  }
+
+  // Run JSX script (non-streaming) via osascript
+  ipcMain.handle('photoshop:run-jsx', async (_event, params: {
+    scriptName: string;
+    dataFilePath?: string;
+    personsData?: Array<{ id: number; name: string; type: string }>;
+  }) => {
+    let personsJsonPath: string | null = null;
+
+    try {
+      if (typeof params.scriptName !== 'string' || params.scriptName.length > 200) {
+        return { success: false, error: 'Ervenytelen script nev' };
+      }
+
+      // Biztonsag: script nev nem tartalmazhat path traversal-t
+      if (params.scriptName.includes('..') || params.scriptName.startsWith('/')) {
+        return { success: false, error: 'Ervenytelen script utvonal' };
+      }
+
+      // Ha personsData-t kaptunk, temp JSON fajlba irjuk
+      let dataFilePath = params.dataFilePath;
+      if (!dataFilePath && params.personsData && params.personsData.length > 0) {
+        personsJsonPath = path.join(app.getPath('temp'), `jsx-persons-${Date.now()}.json`);
+        fs.writeFileSync(personsJsonPath, JSON.stringify(params.personsData), 'utf-8');
+        dataFilePath = personsJsonPath;
+        log.info(`JSX persons JSON irva: ${personsJsonPath} (${params.personsData.length} fo)`);
+      }
+
+      const jsxCode = buildJsxScript(params.scriptName, dataFilePath);
+      log.info(`JSX script futtatasa: ${params.scriptName} (${jsxCode.length} karakter)`);
+
+      if (process.platform !== 'darwin') {
+        return { success: false, error: 'JSX futtatás csak macOS-en támogatott (osascript)' };
+      }
+
+      // A JSX kodot temp fajlba irjuk, mert tul hosszu lenne a parancssorba
+      const tempJsxPath = path.join(app.getPath('temp'), `jsx-script-${Date.now()}.jsx`);
+      fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
+
+      const appleScript = `tell application id "com.adobe.Photoshop" to do javascript file "${tempJsxPath}"`;
+
+      return new Promise<{ success: boolean; error?: string; output?: string }>((resolve) => {
+        execFile('osascript', ['-e', appleScript], { timeout: 60000 }, (error, stdout, stderr) => {
+          // Temp fajlok torlese
+          try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
+          if (personsJsonPath && fs.existsSync(personsJsonPath)) {
+            try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+          }
+
+          if (error) {
+            log.error('JSX futtatasi hiba:', error.message, stderr);
+            resolve({ success: false, error: stderr || error.message });
+            return;
+          }
+          log.info('JSX sikeresen lefutott:', stdout.trim().slice(0, 200));
+          resolve({ success: true, output: stdout || '' });
+        });
+      });
+    } catch (error) {
+      if (personsJsonPath && fs.existsSync(personsJsonPath)) {
+        try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+      }
+      log.error('JSX futtatasi hiba:', error);
+      const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
+      return { success: false, error: errMsg };
+    }
+  });
+
+  // Run JSX script with streaming debug logs
+  ipcMain.handle('photoshop:run-jsx-debug', async (_event, params: {
+    scriptName: string;
+    dataFilePath?: string;
+    personsData?: Array<{ id: number; name: string; type: string }>;
+  }) => {
+    const win = _mainWindow;
+    let personsJsonPath: string | null = null;
+
+    const sendLog = (line: string, stream: 'stdout' | 'stderr') => {
+      try { win.webContents.send('jsx-debug-log', { line, stream }); } catch (_) { /* ignore */ }
+    };
+
+    try {
+      if (typeof params.scriptName !== 'string' || params.scriptName.length > 200) {
+        return { success: false, error: 'Ervenytelen script nev' };
+      }
+
+      if (params.scriptName.includes('..') || params.scriptName.startsWith('/')) {
+        return { success: false, error: 'Ervenytelen script utvonal' };
+      }
+
+      // Ha personsData-t kaptunk, temp JSON fajlba irjuk
+      let dataFilePath = params.dataFilePath;
+      if (!dataFilePath && params.personsData && params.personsData.length > 0) {
+        personsJsonPath = path.join(app.getPath('temp'), `jsx-persons-debug-${Date.now()}.json`);
+        fs.writeFileSync(personsJsonPath, JSON.stringify(params.personsData), 'utf-8');
+        dataFilePath = personsJsonPath;
+        sendLog(`[DEBUG] Persons JSON irva: ${personsJsonPath} (${params.personsData.length} fo)`, 'stdout');
+      }
+
+      const jsxCode = buildJsxScript(params.scriptName, dataFilePath);
+      sendLog(`[DEBUG] JSX script: ${params.scriptName} (${jsxCode.length} karakter)`, 'stdout');
+
+      if (process.platform !== 'darwin') {
+        return { success: false, error: 'JSX futtatás csak macOS-en támogatott (osascript)' };
+      }
+
+      // Temp JSX fajl
+      const tempJsxPath = path.join(app.getPath('temp'), `jsx-debug-${Date.now()}.jsx`);
+      fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
+      sendLog(`[DEBUG] Temp JSX irva: ${tempJsxPath}`, 'stdout');
+
+      const appleScript = `tell application id "com.adobe.Photoshop" to do javascript file "${tempJsxPath}"`;
+
+      return new Promise<{ success: boolean; error?: string }>((resolve) => {
+        const child = spawn('osascript', ['-e', appleScript], { timeout: 60000 });
+        let stderrBuf = '';
+
+        child.stdout.on('data', (data: Buffer) => {
+          const text = data.toString('utf-8');
+          for (const line of text.split('\n')) {
+            if (line.trim()) sendLog(line, 'stdout');
+          }
+        });
+
+        child.stderr.on('data', (data: Buffer) => {
+          const text = data.toString('utf-8');
+          stderrBuf += text;
+          for (const line of text.split('\n')) {
+            if (line.trim()) sendLog(line, 'stderr');
+          }
+        });
+
+        child.on('close', (code) => {
+          // Temp fajlok torlese
+          try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
+          if (personsJsonPath && fs.existsSync(personsJsonPath)) {
+            try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+          }
+
+          if (code !== 0) {
+            log.error(`JSX debug hiba (exit ${code}):`, stderrBuf);
+            resolve({ success: false, error: stderrBuf || `Exit code: ${code}` });
+          } else {
+            log.info('JSX debug sikeresen lefutott');
+            resolve({ success: true });
+          }
+        });
+
+        child.on('error', (err) => {
+          try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
+          if (personsJsonPath && fs.existsSync(personsJsonPath)) {
+            try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+          }
+          sendLog(`[DEBUG] HIBA: ${err.message}`, 'stderr');
+          log.error('JSX debug spawn hiba:', err);
+          resolve({ success: false, error: err.message });
+        });
+      });
+    } catch (error) {
+      if (personsJsonPath && fs.existsSync(personsJsonPath)) {
+        try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+      }
+      log.error('JSX debug futtatasi hiba:', error);
+      const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
+      return { success: false, error: errMsg };
+    }
+  });
+
   // Generate PSD with streaming debug logs (soronkent kuldi a logokat a renderernek)
   ipcMain.handle('photoshop:generate-psd-debug', async (_event, params: {
     widthCm: number;

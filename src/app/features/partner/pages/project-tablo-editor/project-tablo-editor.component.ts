@@ -10,20 +10,15 @@ import { PartnerService, PartnerProjectDetails } from '../../services/partner.se
 import { PhotoshopService } from '../../services/photoshop.service';
 import { BrandingService } from '../../services/branding.service';
 import { TabloSize, TabloPersonItem } from '../../models/partner.models';
+import { TabloEditorDebugService, DebugLogEntry } from './tablo-editor-debug.service';
 
 type EditorTab = 'commands' | 'settings' | 'debug';
-
-interface DebugLogEntry {
-  time: string;
-  step: string;
-  detail: string;
-  status: 'ok' | 'warn' | 'error' | 'info';
-}
 
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
   imports: [LucideAngularModule, ProjectDetailHeaderComponent],
+  providers: [TabloEditorDebugService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +29,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   private readonly partnerService = inject(PartnerService);
   private readonly ps = inject(PhotoshopService);
   private readonly branding = inject(BrandingService);
+  private readonly debugService = inject(TabloEditorDebugService);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
@@ -89,8 +85,8 @@ export class ProjectTabloEditorComponent implements OnInit {
   /** Projekt személyei (diákok + tanárok) */
   readonly persons = signal<TabloPersonItem[]>([]);
 
-  /** Debug log */
-  readonly debugLogs = signal<DebugLogEntry[]>([]);
+  /** Debug log (delegálva a debug service-nek) */
+  readonly debugLogs = this.debugService.debugLogs;
 
   /** Üzenetek */
   readonly error = signal<string | null>(null);
@@ -202,10 +198,23 @@ export class ProjectTabloEditorComponent implements OnInit {
         brandName: this.branding.brandName(),
         persons: personsData.length > 0 ? personsData : undefined,
       } : undefined);
-      if (result.success) {
-        this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
-      } else {
+      if (!result.success) {
         this.error.set(result.error || 'PSD generálás sikertelen.');
+        return;
+      }
+
+      // PSD megnyitás után: JSX text layerek hozzáadása (ha vannak személyek)
+      if (personsData.length > 0) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const jsxResult = await this.ps.addNameLayers(personsData);
+        if (jsxResult.success) {
+          this.successMessage.set(`PSD generálva, megnyitva és ${personsData.length} név hozzáadva: ${size.label}`);
+        } else {
+          this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
+          this.error.set(`Név layerek hiba: ${jsxResult.error}`);
+        }
+      } else {
+        this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
       }
     } finally {
       this.generating.set(false);
@@ -226,138 +235,27 @@ export class ProjectTabloEditorComponent implements OnInit {
   }
 
   addLog(step: string, detail: string, status: DebugLogEntry['status'] = 'info'): void {
-    const time = new Date().toLocaleTimeString('hu-HU', { hour12: false });
-    this.debugLogs.update(logs => [...logs, { time, step, detail, status }]);
+    this.debugService.addLog(step, detail, status);
   }
 
   clearDebugLogs(): void {
-    this.debugLogs.set([]);
+    this.debugService.clearLogs();
   }
 
   async generatePsdDebug(): Promise<void> {
-    this.clearDebugLogs();
-    this.generating.set(true);
-
     const size = this.selectedSize();
     if (!size) {
       this.addLog('Méret', 'Nincs méret kiválasztva!', 'error');
-      this.generating.set(false);
       return;
     }
 
+    this.generating.set(true);
     try {
-      // 1. Méret
-      const dims = this.ps.parseSizeValue(size.value);
-      if (dims) {
-        this.addLog('Méret', `${size.label} (${size.value}) → ${dims.widthCm}×${dims.heightCm} cm`, 'ok');
-      } else {
-        this.addLog('Méret', `Érvénytelen: ${size.value}`, 'error');
-        return;
-      }
-
-      // 2. Projekt
-      const p = this.project();
-      if (p) {
-        this.addLog('Projekt', `${p.name} / ${p.className || '–'}  (id: ${p.id})`, 'ok');
-      } else {
-        this.addLog('Projekt', 'Nincs projekt betöltve!', 'error');
-      }
-
-      // 3. WorkDir
-      const workDir = this.ps.workDir();
-      if (workDir) {
-        this.addLog('WorkDir', workDir, 'ok');
-      } else {
-        this.addLog('WorkDir', 'Nincs beállítva — Downloads mappába generál', 'warn');
-      }
-
-      // 4. Személyek
-      const allPersons = this.persons();
-      const students = allPersons.filter(pe => pe.type === 'student');
-      const teachers = allPersons.filter(pe => pe.type === 'teacher');
-      if (allPersons.length > 0) {
-        const names = allPersons.slice(0, 3).map(pe => pe.name).join(', ');
-        const suffix = allPersons.length > 3 ? ` …+${allPersons.length - 3}` : '';
-        this.addLog('Személyek betöltve', `${allPersons.length} fő (${students.length} diák, ${teachers.length} tanár) — ${names}${suffix}`, 'ok');
-      } else {
-        this.addLog('Személyek betöltve', '0 fő — ÜRES!', 'warn');
-      }
-
-      // 5. Persons tömb
-      const personsData = allPersons.map(person => ({
-        id: person.id,
-        name: person.name,
-        type: person.type,
-      }));
-      this.addLog('Persons tömb', `length=${personsData.length} | ${JSON.stringify(personsData.slice(0, 2))}${personsData.length > 2 ? '…' : ''}`, 'info');
-
-      // 6. Output path kiszámítása
-      const brandName = this.branding.brandName();
-      const partnerDir = brandName ? this.ps.sanitizeName(brandName) : 'photostack';
-      const year = new Date().getFullYear().toString();
-      let outputPath: string;
-      const api = (window as any).electronAPI?.photoshop;
-      if (!api) {
-        this.addLog('Electron API', 'Nem elérhető! (böngészőben futunk?)', 'error');
-        return;
-      }
-      this.addLog('Electron API', 'Elérhető', 'ok');
-
-      if (p && workDir) {
-        const folderName = this.ps.sanitizeName(
-          p.className ? `${p.name}-${p.className}` : p.name,
-        );
-        outputPath = `${workDir}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
-      } else {
-        const dl = await api.getDownloadsPath();
-        outputPath = `${dl}/PhotoStack/${size.value}.psd`;
-      }
-      this.addLog('Output path', outputPath, 'info');
-
-      // 7. IPC params
-      const ipcParams: any = {
-        widthCm: dims.widthCm,
-        heightCm: dims.heightCm,
-        dpi: 200,
-        mode: 'RGB',
-        outputPath,
-        persons: personsData.length > 0 ? personsData : undefined,
-      };
-      this.addLog('IPC params', `widthCm=${ipcParams.widthCm}, heightCm=${ipcParams.heightCm}, dpi=${ipcParams.dpi}, persons=${personsData.length}`, 'info');
-
-      // 8. Streaming debug listener regisztrálása
-      const unsubscribe = api.onPsdDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
-        if (data.stream === 'stderr') {
-          this.addLog('Python stderr', data.line, 'error');
-        } else if (data.line.startsWith('[DEBUG]')) {
-          const msg = data.line.replace('[DEBUG] ', '');
-          const isError = msg.startsWith('HIBA');
-          this.addLog('Python', msg, isError ? 'error' : 'info');
-        } else {
-          this.addLog('Python', data.line, 'info');
-        }
+      await this.debugService.runDebugGeneration({
+        size,
+        project: this.project(),
+        persons: this.persons(),
       });
-
-      // 9. generatePsdDebug IPC hívás (streaming — soronként jönnek a logok)
-      this.addLog('IPC generatePsd', 'Hívás indítva...', 'info');
-      let genResult: any;
-      try {
-        genResult = await api.generatePsdDebug(ipcParams);
-      } catch (ipcErr) {
-        this.addLog('IPC generatePsd', `EXCEPTION: ${String(ipcErr)}`, 'error');
-        unsubscribe?.();
-        return;
-      }
-      unsubscribe?.();
-
-      this.addLog('IPC generatePsd', genResult.success ? 'Sikeres' : `HIBA: ${genResult.error}`, genResult.success ? 'ok' : 'error');
-
-      // 10. Végeredmény (Debug mód NEM nyitja meg a PS-t — csak generál)
-      if (genResult.success) {
-        this.addLog('Végeredmény', `PSD sikeresen generálva: ${outputPath}`, 'ok');
-      } else {
-        this.addLog('Végeredmény', 'PSD generálás sikertelen — lásd fenti hibákat', 'error');
-      }
     } catch (err) {
       this.addLog('Váratlan hiba', String(err), 'error');
     } finally {

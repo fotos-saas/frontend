@@ -285,6 +285,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:get-margin') as Promise<number>,
     setMargin: (marginCm: number) =>
       ipcRenderer.invoke('photoshop:set-margin', marginCm) as Promise<{ success: boolean; error?: string }>,
+    runJsx: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }> }) =>
+      ipcRenderer.invoke('photoshop:run-jsx', params) as Promise<{ success: boolean; error?: string; output?: string }>,
+    runJsxDebug: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }> }) =>
+      ipcRenderer.invoke('photoshop:run-jsx-debug', params) as Promise<{ success: boolean; error?: string }>,
+    onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => {
+      const handler = (_event: any, data: { line: string; stream: 'stdout' | 'stderr' }) => callback(data);
+      ipcRenderer.on('jsx-debug-log', handler);
+      return () => { ipcRenderer.removeListener('jsx-debug-log', handler); };
+    },
   },
 
   // ============ Touch Bar (MacBook Pro 2016-2020) ============

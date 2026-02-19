@@ -201,6 +201,32 @@ export class PhotoshopService {
   }
 
   /**
+   * JSX script futtatása a megnyitott Photoshop dokumentumon.
+   * Személynevek text layerként hozzáadása a Names/Students és Names/Teachers csoportba.
+   */
+  async addNameLayers(
+    persons: Array<{ id: number; name: string; type: string }>,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    if (!persons || persons.length === 0) {
+      return { success: true };
+    }
+
+    try {
+      const result = await this.api.runJsx({
+        scriptName: 'actions/add-name-layers.jsx',
+        personsData: persons,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX addNameLayers hiba', err);
+      return { success: false, error: 'Váratlan hiba a név layerek hozzáadásakor' };
+    }
+  }
+
+  /**
    * PSD generálás és megnyitás Photoshopban.
    *
    * Ha van projekt kontextus + workDir:

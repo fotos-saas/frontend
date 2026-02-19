@@ -102,6 +102,9 @@ interface PhotoshopAPI {
   browseWorkDir: () => Promise<{ cancelled: boolean; path?: string }>;
   getMargin: () => Promise<number>;
   setMargin: (marginCm: number) => Promise<{ success: boolean; error?: string }>;
+  runJsx: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }> }) => Promise<{ success: boolean; error?: string; output?: string }>;
+  runJsxDebug: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }> }) => Promise<{ success: boolean; error?: string }>;
+  onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;
 }
 
 export interface ElectronAPI {

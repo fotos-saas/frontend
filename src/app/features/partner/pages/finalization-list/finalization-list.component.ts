@@ -132,12 +132,12 @@ export class FinalizationListComponent implements OnInit {
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response: any) => {
+        next: (response) => {
           this.items.set(response.data);
           this.totalPages.set(response.last_page);
           this.totalItems.set(response.total);
-          if (response.available_tablo_sizes) {
-            this.availableTabloSizes.set(response.available_tablo_sizes);
+          if ('available_tablo_sizes' in response) {
+            this.availableTabloSizes.set((response as { available_tablo_sizes: TabloSize[] }).available_tablo_sizes);
           }
           this.filterState.loading.set(false);
         },

@@ -130,7 +130,7 @@ export class InviteRegisterComponent implements OnInit {
     this.authService.acceptInviteAsLoggedIn(this.code)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response: any) => {
+        next: (response) => {
           this.isLoading.set(false);
           if (response.token && response.user) {
             // Token + user frissítés sessionStorage-ban

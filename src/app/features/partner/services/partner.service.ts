@@ -197,7 +197,7 @@ export class PartnerService {
     return this.projectService.getProjectsAutocomplete(search);
   }
 
-  getProjectOrderData(projectId: number): Observable<{ success: boolean; data: any; message?: string }> {
+  getProjectOrderData(projectId: number): Observable<{ success: boolean; data: unknown; message?: string }> {
     return this.projectService.getProjectOrderData(projectId);
   }
 

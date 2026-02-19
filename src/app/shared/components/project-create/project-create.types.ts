@@ -27,7 +27,7 @@ export interface CreateProjectResponse {
   data: {
     id: number;
     name: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

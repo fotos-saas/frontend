@@ -68,7 +68,11 @@
       </button>
     } @else if (suffix()) {
       <span class="ps-field__suffix">
-        <lucide-icon [name]="suffix()" [size]="18" />
+        @if (isIconSuffix()) {
+          <lucide-icon [name]="suffix()" [size]="18" />
+        } @else {
+          {{ suffix() }}
+        }
       </span>
     }
 

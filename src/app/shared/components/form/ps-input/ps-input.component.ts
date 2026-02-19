@@ -65,6 +65,9 @@ export class PsInputComponent extends PsFormFieldBase<string> {
     this.computedState() === 'success' && !this.suffix() && !this.hasHelp()
   );
 
+  /** Suffix ikon-e (lucide ikon név = csak kisbetűs ASCII + kötőjel) */
+  readonly isIconSuffix = computed(() => /^[a-z][a-z0-9-]*$/.test(this.suffix()));
+
   writeValue(val: string): void {
     let v = val ?? '';
     if (this.type() === 'tel' && v) {

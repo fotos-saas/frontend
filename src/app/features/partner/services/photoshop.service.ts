@@ -48,20 +48,16 @@ export class PhotoshopService {
 
     this.checking.set(true);
     try {
-      const promises: [
-        Promise<{ found: boolean; path: string | null }>,
-        Promise<string | null>,
-        Promise<number | undefined>,
-        Promise<number | undefined>,
-        Promise<number | undefined>,
-      ] = [
+      const safe = <T>(fn: (() => Promise<T>) | undefined, fallback: T): Promise<T> =>
+        typeof fn === 'function' ? fn().catch(() => fallback) : Promise.resolve(fallback);
+
+      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize] = await Promise.all([
         this.api.checkInstalled(),
-        typeof this.api.getWorkDir === 'function' ? this.api.getWorkDir() : Promise.resolve(null),
-        typeof this.api.getMargin === 'function' ? this.api.getMargin() : Promise.resolve(undefined),
-        typeof this.api.getStudentSize === 'function' ? this.api.getStudentSize() : Promise.resolve(undefined),
-        typeof this.api.getTeacherSize === 'function' ? this.api.getTeacherSize() : Promise.resolve(undefined),
-      ];
-      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize] = await Promise.all(promises);
+        safe(this.api.getWorkDir, null as string | null),
+        safe(this.api.getMargin, undefined as number | undefined),
+        safe(this.api.getStudentSize, undefined as number | undefined),
+        safe(this.api.getTeacherSize, undefined as number | undefined),
+      ]);
       if (result.found && result.path) {
         this.path.set(result.path);
       }

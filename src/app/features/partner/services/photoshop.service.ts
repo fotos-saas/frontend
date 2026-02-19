@@ -42,11 +42,16 @@ export class PhotoshopService {
 
     this.checking.set(true);
     try {
-      const [result, savedWorkDir, savedMargin] = await Promise.all([
+      const promises: [
+        Promise<{ found: boolean; path: string | null }>,
+        Promise<string | null>,
+        Promise<number | undefined>,
+      ] = [
         this.api.checkInstalled(),
-        this.api.getWorkDir(),
-        this.api.getMargin(),
-      ]);
+        typeof this.api.getWorkDir === 'function' ? this.api.getWorkDir() : Promise.resolve(null),
+        typeof this.api.getMargin === 'function' ? this.api.getMargin() : Promise.resolve(undefined),
+      ];
+      const [result, savedWorkDir, savedMargin] = await Promise.all(promises);
       if (result.found && result.path) {
         this.path.set(result.path);
       }
@@ -129,7 +134,7 @@ export class PhotoshopService {
 
   /** Margó beállítása */
   async setMargin(marginCm: number): Promise<boolean> {
-    if (!this.api) return false;
+    if (!this.api || typeof this.api.setMargin !== 'function') return false;
 
     try {
       const result = await this.api.setMargin(Number(marginCm));

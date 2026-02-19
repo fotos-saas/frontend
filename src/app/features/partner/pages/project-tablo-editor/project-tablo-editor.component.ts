@@ -11,7 +11,14 @@ import { PhotoshopService } from '../../services/photoshop.service';
 import { BrandingService } from '../../services/branding.service';
 import { TabloSize, TabloPersonItem } from '../../models/partner.models';
 
-type EditorTab = 'commands' | 'settings';
+type EditorTab = 'commands' | 'settings' | 'debug';
+
+interface DebugLogEntry {
+  time: string;
+  step: string;
+  detail: string;
+  status: 'ok' | 'warn' | 'error' | 'info';
+}
 
 @Component({
   selector: 'app-project-tablo-editor',
@@ -81,6 +88,9 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   /** Projekt személyei (diákok + tanárok) */
   readonly persons = signal<TabloPersonItem[]>([]);
+
+  /** Debug log */
+  readonly debugLogs = signal<DebugLogEntry[]>([]);
 
   /** Üzenetek */
   readonly error = signal<string | null>(null);
@@ -213,5 +223,117 @@ export class ProjectTabloEditorComponent implements OnInit {
   private clearMessages(): void {
     this.error.set(null);
     this.successMessage.set(null);
+  }
+
+  addLog(step: string, detail: string, status: DebugLogEntry['status'] = 'info'): void {
+    const time = new Date().toLocaleTimeString('hu-HU', { hour12: false });
+    this.debugLogs.update(logs => [...logs, { time, step, detail, status }]);
+  }
+
+  clearDebugLogs(): void {
+    this.debugLogs.set([]);
+  }
+
+  async generatePsdDebug(): Promise<void> {
+    this.clearDebugLogs();
+    this.generating.set(true);
+
+    const size = this.selectedSize();
+    if (!size) {
+      this.addLog('Méret', 'Nincs méret kiválasztva!', 'error');
+      this.generating.set(false);
+      return;
+    }
+
+    try {
+      // 1. Méret
+      const dims = this.ps.parseSizeValue(size.value);
+      if (dims) {
+        this.addLog('Méret', `${size.label} (${size.value}) → ${dims.widthCm}×${dims.heightCm} cm`, 'ok');
+      } else {
+        this.addLog('Méret', `Érvénytelen: ${size.value}`, 'error');
+        return;
+      }
+
+      // 2. Projekt
+      const p = this.project();
+      if (p) {
+        this.addLog('Projekt', `${p.name} / ${p.className || '–'}  (id: ${p.id})`, 'ok');
+      } else {
+        this.addLog('Projekt', 'Nincs projekt betöltve!', 'error');
+      }
+
+      // 3. WorkDir
+      const workDir = this.ps.workDir();
+      if (workDir) {
+        this.addLog('WorkDir', workDir, 'ok');
+      } else {
+        this.addLog('WorkDir', 'Nincs beállítva — Downloads mappába generál', 'warn');
+      }
+
+      // 4. Személyek
+      const allPersons = this.persons();
+      const students = allPersons.filter(pe => pe.type === 'student');
+      const teachers = allPersons.filter(pe => pe.type === 'teacher');
+      if (allPersons.length > 0) {
+        const names = allPersons.slice(0, 3).map(pe => pe.name).join(', ');
+        const suffix = allPersons.length > 3 ? ` …+${allPersons.length - 3}` : '';
+        this.addLog('Személyek betöltve', `${allPersons.length} fő (${students.length} diák, ${teachers.length} tanár) — ${names}${suffix}`, 'ok');
+      } else {
+        this.addLog('Személyek betöltve', '0 fő — ÜRES!', 'warn');
+      }
+
+      // 5. Persons tömb
+      const personsData = allPersons.map(person => ({
+        id: person.id,
+        name: person.name,
+        type: person.type,
+      }));
+      this.addLog('Persons tömb', `length=${personsData.length} | ${JSON.stringify(personsData.slice(0, 2))}${personsData.length > 2 ? '…' : ''}`, 'info');
+
+      // 6. IPC paraméterek
+      const brandName = this.branding.brandName();
+      const partnerDir = brandName ? this.ps.sanitizeName(brandName) : 'photostack';
+      const year = new Date().getFullYear().toString();
+      let outputPath: string;
+      if (p && workDir) {
+        const folderName = this.ps.sanitizeName(
+          p.className ? `${p.name}-${p.className}` : p.name,
+        );
+        outputPath = `${workDir}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
+      } else {
+        outputPath = `(Downloads)/PhotoStack/${size.value}.psd`;
+      }
+      this.addLog('IPC params', `widthCm=${dims.widthCm}, heightCm=${dims.heightCm}, dpi=200, persons=${personsData.length}, outputPath=${outputPath}`, 'info');
+
+      // 7. IPC generatePsd hívás
+      this.addLog('IPC generatePsd', 'Hívás indítva...', 'info');
+      const context = p ? {
+        projectName: p.name,
+        className: p.className,
+        brandName,
+        persons: personsData.length > 0 ? personsData : undefined,
+      } : undefined;
+
+      const result = await this.ps.generateAndOpenPsd(size, context);
+
+      // 8. IPC eredmény
+      if (result.success) {
+        this.addLog('IPC eredmény', `Sikeres! outputPath=${result.outputPath}`, 'ok');
+      } else {
+        this.addLog('IPC eredmény', `HIBA: ${result.error}`, 'error');
+      }
+
+      // 9. Végeredmény
+      if (result.success) {
+        this.addLog('Végeredmény', 'PSD generálva és megnyitva!', 'ok');
+      } else {
+        this.addLog('Végeredmény', 'Sikertelen — lásd fenti hibát', 'error');
+      }
+    } catch (err) {
+      this.addLog('Váratlan hiba', String(err), 'error');
+    } finally {
+      this.generating.set(false);
+    }
   }
 }

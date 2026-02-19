@@ -25,9 +25,9 @@
       </button>
 
       <!-- Logo -->
-      <a [routerLink]="homeRoute()" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+      <a [routerLink]="homeRoute()" class="flex items-center gap-2 hover:opacity-80 transition-opacity overflow-hidden max-h-14 md:max-h-16">
         @if (brandLogoUrl()) {
-          <img [src]="brandLogoUrl()!" alt="Logó" class="h-7 md:h-8 w-auto object-contain" />
+          <img [src]="brandLogoUrl()!" alt="Logó" class="h-7 md:h-8 max-w-[120px] w-auto object-contain flex-shrink-0" />
         } @else if (logoIcon()) {
           <span class="text-xl md:text-2xl">{{ logoIcon() }}</span>
         }

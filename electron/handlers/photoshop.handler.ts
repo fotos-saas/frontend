@@ -761,7 +761,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
             resolve({ success: false, error: stderr || error.message });
             return;
           }
-          log.info('JSX sikeresen lefutott:', stdout.trim().slice(0, 200));
+          log.info('JSX sikeresen lefutott:', stdout.trim().slice(0, 1000));
           resolve({ success: true, output: stdout || '' });
         });
       });

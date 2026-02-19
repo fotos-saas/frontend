@@ -44,7 +44,7 @@ function _doAddGuides() {
   var docWidthPx = _doc.width.as("px");
   var docHeightPx = _doc.height.as("px");
 
-  log("[JSX] Dokumentum: " + docWidthPx + " x " + docHeightPx + " px, DPI: " + dpi + ", margo: " + marginCm + " cm = " + marginPx + " px");
+  log("[JSX] Guide calc: " + docWidthPx + "x" + docHeightPx + " px, DPI=" + dpi + ", margo=" + marginCm + "cm=" + marginPx + "px");
 
   // Letezo guide-ok torlese (tiszta allapotbol indulunk)
   while (_doc.guides.length > 0) {
@@ -52,19 +52,15 @@ function _doAddGuides() {
   }
 
   // 4 guide hozzaadasa PIXELBEN (sima szam — ruler PIXELS-re van allitva)
-  // Bal
   _doc.guides.add(Direction.VERTICAL, marginPx);
-  // Jobb
   _doc.guides.add(Direction.VERTICAL, docWidthPx - marginPx);
-  // Felso
   _doc.guides.add(Direction.HORIZONTAL, marginPx);
-  // Also
   _doc.guides.add(Direction.HORIZONTAL, docHeightPx - marginPx);
 
   // Ruler visszaallitasa az eredeti egysegre
   app.preferences.rulerUnits = oldRulerUnits;
 
-  log("[JSX] 4 guide hozzaadva (" + marginCm + " cm = " + marginPx + " px margo)");
+  log("[JSX] 4 guide hozzaadva, guides.length=" + _doc.guides.length);
 }
 
 (function () {
@@ -73,15 +69,23 @@ function _doAddGuides() {
       throw new Error("Nincs megnyitott dokumentum!");
     }
     _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-    log("[JSX] Dokumentum: " + _doc.name + " (" + _doc.width + " x " + _doc.height + ")");
+    log("[JSX] Doc: " + _doc.name + " (" + _doc.width + " x " + _doc.height + ")");
+
+    // CONFIG debug
+    log("[JSX] CONFIG.DATA_FILE_PATH: " + CONFIG.DATA_FILE_PATH);
+    log("[JSX] CONFIG.TARGET_DOC_NAME: " + CONFIG.TARGET_DOC_NAME);
 
     // JSON beolvasas
     var args = parseArgs();
+    log("[JSX] args.dataFilePath: " + args.dataFilePath);
+
     if (!args.dataFilePath) {
-      throw new Error("Nincs megadva DATA_FILE_PATH!");
+      log("[JSX] HIBA: Nincs DATA_FILE_PATH!");
+      return;
     }
 
     _data = readJsonFile(args.dataFilePath);
+    log("[JSX] _data: marginCm=" + (_data ? _data.marginCm : "NULL"));
 
     if (!_data || typeof _data.marginCm === "undefined") {
       log("[JSX] Nincs margin adat — kilep.");
@@ -91,7 +95,7 @@ function _doAddGuides() {
     // Guide-ok hozzaadasa — egyetlen history lepes
     _doc.suspendHistory("Tablo margo guide-ok", "_doAddGuides()");
 
-    log("[JSX] KESZ");
+    log("[JSX] KESZ, guides.length=" + _doc.guides.length);
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);

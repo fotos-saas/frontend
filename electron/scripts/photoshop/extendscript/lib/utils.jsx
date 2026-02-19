@@ -1,6 +1,7 @@
 /**
  * utils.jsx — Kozos utility fuggvenyek ExtendScript-hez
  *
+ * activateDocByName()           — Dokumentum aktivalasa nev alapjan (tobb PSD vedelem)
  * getGroupByPath()              — Csoport keresese utvonal alapjan
  * createTextLayer()             — Szoveg layer letrehozasa
  * createSmartObjectPlaceholder() — Smart Object placeholder layer letrehozasa
@@ -14,6 +15,25 @@
  * FONTOS: Szamolasok, elnevezesek, sanitizeName → MINDIG az Electron handler
  * (Node.js) kesziti elo! A JSX CSAK a Photoshop DOM-ot manipulalja.
  */
+
+// --- Dokumentum aktivalasa nev alapjan ---
+// Tobb nyitott PSD eseten a CONFIG.TARGET_DOC_NAME alapjan
+// kivalasztja a megfelelo dokumentumot.
+// Ha nincs TARGET_DOC_NAME → az aktualis aktiv dokumentumot hasznalja.
+// FONTOS: az SO megnyitas/bezaras megvaltoztatja az activeDocument-et,
+// ezert minden muvelet elott es az SO bezarasa utan is hivni kell!
+function activateDocByName(targetName) {
+  if (!targetName) return app.activeDocument;
+
+  for (var i = 0; i < app.documents.length; i++) {
+    if (app.documents[i].name === targetName) {
+      app.activeDocument = app.documents[i];
+      return app.documents[i];
+    }
+  }
+  // Ha nem talaljuk, marad az aktiv — ne dobjunk hibat
+  return app.activeDocument;
+}
 
 // --- Csoport (LayerSet) keresese utvonal alapjan ---
 // pl. getGroupByPath(doc, ["Names", "Students"]) → LayerSet vagy null

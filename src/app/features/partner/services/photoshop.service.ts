@@ -206,6 +206,7 @@ export class PhotoshopService {
    */
   async addNameLayers(
     persons: Array<{ id: number; name: string; type: string }>,
+    targetDocName?: string,
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
@@ -217,6 +218,7 @@ export class PhotoshopService {
       const result = await this.api.runJsx({
         scriptName: 'actions/add-name-layers.jsx',
         personsData: persons,
+        targetDocName,
       });
 
       return { success: result.success, error: result.error };
@@ -234,6 +236,7 @@ export class PhotoshopService {
   async addImageLayers(
     persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
     imageSizeCm: { widthCm: number; heightCm: number; dpi: number } = { widthCm: 10.4, heightCm: 15.4, dpi: 300 },
+    targetDocName?: string,
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
@@ -245,6 +248,7 @@ export class PhotoshopService {
       const result = await this.api.runJsx({
         scriptName: 'actions/add-image-layers.jsx',
         imageData: { persons, ...imageSizeCm },
+        targetDocName,
       });
 
       return { success: result.success, error: result.error };

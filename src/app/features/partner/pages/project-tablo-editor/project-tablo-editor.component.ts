@@ -208,11 +208,16 @@ export class ProjectTabloEditorComponent implements OnInit {
       if (personsData.length > 0) {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
+        // PSD fajlnev kiszamitasa a cel dokumentum nev-alapu aktivalasahoz
+        const psdFileName = result.outputPath
+          ? result.outputPath.split('/').pop() || undefined
+          : undefined;
+
         // 1. Név layerek (text)
-        const nameResult = await this.ps.addNameLayers(personsData);
+        const nameResult = await this.ps.addNameLayers(personsData, psdFileName);
 
         // 2. Image layerek (Smart Object placeholder-ek)
-        const imageResult = await this.ps.addImageLayers(personsData);
+        const imageResult = await this.ps.addImageLayers(personsData, undefined, psdFileName);
 
         const nameOk = nameResult.success;
         const imageOk = imageResult.success;

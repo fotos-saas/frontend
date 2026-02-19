@@ -30,11 +30,11 @@ function log(msg) {
   var errors = 0;
 
   try {
-    // --- 1. Aktiv dokumentum ellenorzes ---
+    // --- 1. Cel dokumentum aktivalasa (nev alapjan, ha meg van adva) ---
     if (!app.documents.length) {
       throw new Error("Nincs megnyitott dokumentum! Elobb nyisd meg a PSD-t.");
     }
-    var doc = app.activeDocument;
+    var doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
     log("[JSX] Dokumentum: " + doc.name + " (" + doc.width + " x " + doc.height + ")");
 
     // --- 2. JSON beolvasas (elokeszitett adat az Electron handlertol) ---

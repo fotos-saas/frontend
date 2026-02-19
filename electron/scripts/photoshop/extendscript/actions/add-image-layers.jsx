@@ -32,11 +32,11 @@ function log(msg) {
   var errors = 0;
 
   try {
-    // --- 1. Aktiv dokumentum ellenorzes ---
+    // --- 1. Cel dokumentum aktivalasa (nev alapjan, ha meg van adva) ---
     if (!app.documents.length) {
       throw new Error("Nincs megnyitott dokumentum! Elobb nyisd meg a PSD-t.");
     }
-    var doc = app.activeDocument;
+    var doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
     log("[JSX] Dokumentum: " + doc.name + " (" + doc.width + " x " + doc.height + ")");
 
     // --- 2. JSON beolvasas (elokeszitett adat az Electron handlertol) ---
@@ -84,8 +84,8 @@ function log(msg) {
           try {
             placePhotoInSmartObject(doc, doc.activeLayer, item.photoPath);
             photosPlaced++;
-            // A placePhotoInSmartObject bezarja az SO-t, tehat a fo doc ujra aktiv
-            doc = app.activeDocument; // biztonsagi ujraolvasas
+            // Az SO bezarasa utan visszaterunk a cel dokumentumra (nev alapjan)
+            doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
           } catch (photoErr) {
             log("[JSX] FIGYELEM: foto behelyezes sikertelen (" + item.layerName + "): " + photoErr.message);
             // Ha az SO megnyitva maradt, probaljuk bezarni
@@ -94,7 +94,7 @@ function log(msg) {
                 app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
               }
             } catch (closeErr) { /* ignore */ }
-            doc = app.activeDocument;
+            doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
           }
         }
       } catch (e) {

@@ -639,8 +639,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     );
   }
 
-  // JSX script osszeallitasa: deploy + CONFIG.DATA_FILE_PATH beallitas + #include feloldas + action kod
-  function buildJsxScript(scriptName: string, dataFilePath?: string): string {
+  // JSX script osszeallitasa: deploy + CONFIG beallitasok + #include feloldas + action kod
+  function buildJsxScript(scriptName: string, dataFilePath?: string, targetDocName?: string): string {
     // Scriptek kihelyezese a workDir-be (ha van beallitva)
     const workDir = psStore.get('workDirectory', null);
     if (workDir) {
@@ -658,18 +658,24 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     // #include direktívák feloldása
     scriptContent = resolveIncludes(scriptContent, scriptDir);
 
-    // CONFIG.DATA_FILE_PATH beállítása (ha van adat fájl)
-    // A CONFIG objektum UTÁN, de a többi kód ELŐTT szúrjuk be
+    // CONFIG override-ok beallitasa a CONFIG blokk UTAN
+    const configOverrides: string[] = [];
     if (dataFilePath) {
       const escapedPath = dataFilePath.replace(/\\/g, '/');
-      const configOverride = `\nCONFIG.DATA_FILE_PATH = "${escapedPath}";\n`;
-      // Keressük a "var CONFIG = {" blokkot és annak záró "};" -ját
+      configOverrides.push(`CONFIG.DATA_FILE_PATH = "${escapedPath}";`);
+    }
+    if (targetDocName) {
+      const escapedName = targetDocName.replace(/"/g, '\\"');
+      configOverrides.push(`CONFIG.TARGET_DOC_NAME = "${escapedName}";`);
+    }
+
+    if (configOverrides.length > 0) {
+      const overrideBlock = '\n' + configOverrides.join('\n') + '\n';
       const configStart = scriptContent.indexOf('var CONFIG');
       if (configStart > -1) {
-        // A CONFIG blokk végét keressük a CONFIG kezdete UTÁN
         const configEnd = scriptContent.indexOf('};', configStart);
         if (configEnd > -1) {
-          scriptContent = scriptContent.slice(0, configEnd + 2) + configOverride + scriptContent.slice(configEnd + 2);
+          scriptContent = scriptContent.slice(0, configEnd + 2) + overrideBlock + scriptContent.slice(configEnd + 2);
         }
       }
     }
@@ -681,6 +687,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   ipcMain.handle('photoshop:run-jsx', async (_event, params: {
     scriptName: string;
     dataFilePath?: string;
+    targetDocName?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
     imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number };
   }) => {
@@ -719,7 +726,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         log.info(`JSX images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.stats.withPhoto} fotoval, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`);
       }
 
-      const jsxCode = buildJsxScript(params.scriptName, dataFilePath);
+      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName);
       log.info(`JSX script futtatasa: ${params.scriptName} (${jsxCode.length} karakter)`);
 
       if (process.platform !== 'darwin') {
@@ -763,6 +770,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   ipcMain.handle('photoshop:run-jsx-debug', async (_event, params: {
     scriptName: string;
     dataFilePath?: string;
+    targetDocName?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
     imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number };
   }) => {
@@ -808,7 +816,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         sendLog(`[DEBUG] Images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.stats.withPhoto} fotoval, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`, 'stdout');
       }
 
-      const jsxCode = buildJsxScript(params.scriptName, dataFilePath);
+      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName);
       sendLog(`[DEBUG] JSX script: ${params.scriptName} (${jsxCode.length} karakter)`, 'stdout');
 
       if (process.platform !== 'darwin') {

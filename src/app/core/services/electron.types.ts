@@ -102,8 +102,8 @@ interface PhotoshopAPI {
   browseWorkDir: () => Promise<{ cancelled: boolean; path?: string }>;
   getMargin: () => Promise<number>;
   setMargin: (marginCm: number) => Promise<{ success: boolean; error?: string }>;
-  runJsx: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number } }) => Promise<{ success: boolean; error?: string; output?: string }>;
-  runJsxDebug: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number } }) => Promise<{ success: boolean; error?: string }>;
+  runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number } }) => Promise<{ success: boolean; error?: string; output?: string }>;
+  runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number } }) => Promise<{ success: boolean; error?: string }>;
   onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;
 }
 

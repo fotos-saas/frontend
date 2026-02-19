@@ -106,7 +106,9 @@ export class SentryService {
     }
 
     if (!this.dsn) {
-      console.log('[Sentry] No DSN configured, skipping initialization');
+      if (!environment.production) {
+        console.log('[Sentry] No DSN configured, skipping initialization');
+      }
       return;
     }
 
@@ -190,7 +192,9 @@ export class SentryService {
     Sentry.setTag('renderer', 'angular');
 
     this.initialized = true;
-    console.log(`[Sentry] Initialized for ${isProduction ? 'production' : 'development'} environment`);
+    if (!isProduction) {
+      console.log(`[Sentry] Initialized for development environment`);
+    }
   }
 
   /**
@@ -250,7 +254,9 @@ export class SentryService {
    */
   captureException(error: Error | unknown, context?: Record<string, unknown>): string | undefined {
     if (!this.initialized) {
-      console.error('[Sentry] Error (not sent - not initialized):', error);
+      if (!environment.production) {
+        console.error('[Sentry] Error (not sent - not initialized):', error);
+      }
       return undefined;
     }
 
@@ -268,7 +274,9 @@ export class SentryService {
     context?: Record<string, unknown>
   ): string | undefined {
     if (!this.initialized) {
-      console.log(`[Sentry] Message (not sent - not initialized): [${level}] ${message}`);
+      if (!environment.production) {
+        console.log(`[Sentry] Message (not sent - not initialized): [${level}] ${message}`);
+      }
       return undefined;
     }
 

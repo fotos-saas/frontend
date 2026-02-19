@@ -95,8 +95,7 @@ export class SessionService {
 
     // Share session speciális kezelés: guest_session elegendő az autentikációhoz
     if (sessionType === 'share') {
-      const guestSessionKey = `tablo:${projectId}:share:guest_session`;
-      const hasGuestSession = !!localStorage.getItem(guestSessionKey);
+      const hasGuestSession = !!this.storage.getGuestSession(projectId, 'share');
 
       if (hasGuestSession) {
         return {

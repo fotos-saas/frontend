@@ -15,8 +15,7 @@ export function safeJsonParse<T>(json: string | null, fallback: T): T {
 
   try {
     return JSON.parse(json) as T;
-  } catch (e) {
-    console.error('[SafeJsonParse] Invalid JSON:', e);
+  } catch {
     return fallback;
   }
 }

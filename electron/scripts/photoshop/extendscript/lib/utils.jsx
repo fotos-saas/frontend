@@ -4,44 +4,14 @@
  * getGroupByPath()  — Csoport keresese utvonal alapjan
  * createTextLayer() — Szoveg layer letrehozasa
  * readJsonFile()    — JSON fajl beolvasasa (ExtendScript ES3 — nincs JSON.parse!)
- * sanitizeName()    — Magyar ekezetmentes slug
  * parseArgs()       — Script argumentumok felolvasasa
  *
  * MEGJEGYZES: ExtendScript ES3 kornyezet — nincs JSON.parse(),
  * nincs Array.forEach(), nincs let/const. Minden var-ral es for ciklussal!
+ *
+ * FONTOS: Szamolasok, elnevezesek, sanitizeName → MINDIG az Electron handler
+ * (Node.js) kesziti elo! A JSX CSAK a Photoshop DOM-ot manipulalja.
  */
-
-// --- Magyar ekezetmentes slug ---
-// pl. "Kiss János" + 42 → "kiss-janos---42"
-function sanitizeName(name, personId) {
-  var accents = {
-    "\u00e1": "a", "\u00e9": "e", "\u00ed": "i", "\u00f3": "o", "\u00f6": "o", "\u0151": "o",
-    "\u00fa": "u", "\u00fc": "u", "\u0171": "u",
-    "\u00c1": "A", "\u00c9": "E", "\u00cd": "I", "\u00d3": "O", "\u00d6": "O", "\u0150": "O",
-    "\u00da": "U", "\u00dc": "U", "\u0170": "U"
-  };
-
-  var result = "";
-  for (var i = 0; i < name.length; i++) {
-    var ch = name.charAt(i);
-    result += accents[ch] ? accents[ch] : ch;
-  }
-
-  // Kisbetusites
-  result = result.toLowerCase();
-
-  // Nem alfanumerikus → kotojelre
-  result = result.replace(/[^a-z0-9]+/g, "-");
-
-  // Eleji/vegi kotojel eltavolitasa
-  result = result.replace(/^-+|-+$/g, "");
-
-  if (personId !== undefined && personId !== null) {
-    result += "---" + String(personId);
-  }
-
-  return result;
-}
 
 // --- Csoport (LayerSet) keresese utvonal alapjan ---
 // pl. getGroupByPath(doc, ["Names", "Students"]) → LayerSet vagy null
@@ -100,7 +70,7 @@ function createTextLayer(container, displayText, options) {
 // Az egyetlen mod JSON deserializalasra az eval().
 // Ez BIZTONSAGOS ebben a kontextusban, mert:
 //   1. A fajlt kizarolag az Electron main process generalja (temp fajl)
-//   2. A tartalom mindig strukturalt szemely-adat (id, name, type)
+//   2. A tartalom strukturalt, elokeszitett adat (layerName, displayText, group)
 //   3. A fajl soha nem szarmazik user inputbol kozvetlenul
 //   4. A fajl a rendszer temp mappajaban van, nem publikus helyen
 function readJsonFile(filePath) {

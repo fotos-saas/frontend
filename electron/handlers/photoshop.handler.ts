@@ -374,6 +374,47 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
   // ============ JSX ExtendScript futtatás ============
 
+  // Magyar ékezet-mentes slug (layerName generáláshoz)
+  function sanitizeNameForLayer(text: string, personId?: number): string {
+    const accents: Record<string, string> = {
+      á: 'a', é: 'e', í: 'i', ó: 'o', ö: 'o', ő: 'o', ú: 'u', ü: 'u', ű: 'u',
+      Á: 'A', É: 'E', Í: 'I', Ó: 'O', Ö: 'O', Ő: 'O', Ú: 'U', Ü: 'U', Ű: 'U',
+    };
+    let result = text.split('').map(c => accents[c] || c).join('')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (personId !== undefined) {
+      result += `---${personId}`;
+    }
+    return result;
+  }
+
+  // PersonsData előkészítése a JSX számára
+  // Python logika: számolás, szétválogatás, elnevezések — JSX csak végrehajtó
+  function preparePersonsForJsx(personsData: Array<{ id: number; name: string; type: string }>) {
+    const students = personsData.filter(p => p.type !== 'teacher');
+    const teachers = personsData.filter(p => p.type === 'teacher');
+
+    const layers = [
+      ...students.map(p => ({
+        layerName: sanitizeNameForLayer(p.name, p.id),
+        displayText: p.name,
+        group: 'Students',
+      })),
+      ...teachers.map(p => ({
+        layerName: sanitizeNameForLayer(p.name, p.id),
+        displayText: p.name,
+        group: 'Teachers',
+      })),
+    ];
+
+    return {
+      layers,
+      stats: { students: students.length, teachers: teachers.length, total: personsData.length },
+    };
+  }
+
   // JSX script útvonal feloldása (dev vs packaged)
   function resolveJsxPath(scriptName: string): string {
     return app.isPackaged
@@ -444,13 +485,14 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         return { success: false, error: 'Ervenytelen script utvonal' };
       }
 
-      // Ha personsData-t kaptunk, temp JSON fajlba irjuk
+      // Ha personsData-t kaptunk, előkészítjük és temp JSON fajlba irjuk
       let dataFilePath = params.dataFilePath;
       if (!dataFilePath && params.personsData && params.personsData.length > 0) {
+        const prepared = preparePersonsForJsx(params.personsData);
         personsJsonPath = path.join(app.getPath('temp'), `jsx-persons-${Date.now()}.json`);
-        fs.writeFileSync(personsJsonPath, JSON.stringify(params.personsData), 'utf-8');
+        fs.writeFileSync(personsJsonPath, JSON.stringify(prepared), 'utf-8');
         dataFilePath = personsJsonPath;
-        log.info(`JSX persons JSON irva: ${personsJsonPath} (${params.personsData.length} fo)`);
+        log.info(`JSX persons JSON irva: ${personsJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`);
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath);
@@ -515,13 +557,14 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         return { success: false, error: 'Ervenytelen script utvonal' };
       }
 
-      // Ha personsData-t kaptunk, temp JSON fajlba irjuk
+      // Ha personsData-t kaptunk, előkészítjük és temp JSON fajlba irjuk
       let dataFilePath = params.dataFilePath;
       if (!dataFilePath && params.personsData && params.personsData.length > 0) {
+        const prepared = preparePersonsForJsx(params.personsData);
         personsJsonPath = path.join(app.getPath('temp'), `jsx-persons-debug-${Date.now()}.json`);
-        fs.writeFileSync(personsJsonPath, JSON.stringify(params.personsData), 'utf-8');
+        fs.writeFileSync(personsJsonPath, JSON.stringify(prepared), 'utf-8');
         dataFilePath = personsJsonPath;
-        sendLog(`[DEBUG] Persons JSON irva: ${personsJsonPath} (${params.personsData.length} fo)`, 'stdout');
+        sendLog(`[DEBUG] Persons JSON irva: ${personsJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`, 'stdout');
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath);

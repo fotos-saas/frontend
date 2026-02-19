@@ -1,39 +1,33 @@
 /**
  * add-name-layers.jsx — Személynevek text layerek hozzáadása a megnyitott PSD-hez
  *
- * Elvárt mappastruktúra a PSD-ben (Python generálja):
- *   Names/Students/  — diákok text layerei
- *   Names/Teachers/  — tanárok text layerei
+ * A JSON-t az Electron handler készíti elő (számolás, elnevezés, szétválogatás).
+ * Ez a script CSAK a Photoshop DOM-ot manipulálja — layer létrehozás.
  *
- * Input: JSON temp fájl (CONFIG.DATA_FILE_PATH — az Electron handler állítja be)
- * JSON formátum: [{ "id": 42, "name": "Kiss János", "type": "student" }, ...]
+ * JSON formátum (előkészített):
+ * {
+ *   "layers": [
+ *     { "layerName": "kiss-janos---42", "displayText": "Kiss János", "group": "Students" },
+ *     { "layerName": "szabo-anna---101", "displayText": "Szabó Anna", "group": "Teachers" }
+ *   ],
+ *   "stats": { "students": 25, "teachers": 3, "total": 28 }
+ * }
  *
  * Futtatás: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
- *
- * FONTOS: Photoshop "do javascript file" módban a writeln() NEM elerheto!
- * A log uzeneteket egy bufferbe gyujtjuk es a script vegen stringkent adjuk vissza.
- * Az osascript stdout-ra az utolso kifejezes erteke kerul.
  */
-
-// A CONFIG.DATA_FILE_PATH-ot a hivo script dinamikusan allitja be
-// a #include elott (lasd: photoshop.handler.ts buildJsxScript fuggveny)
 
 // #include "../lib/config.jsx"
 // #include "../lib/utils.jsx"
 
-// --- Log buffer (writeln() helyett) ---
+// --- Log buffer (writeln() nem elerheto do javascript modban) ---
 var _logLines = [];
 function log(msg) {
   _logLines.push(msg);
 }
 
 (function () {
-  // --- Eredmeny szamlalok ---
-  var stats = {
-    students: 0,
-    teachers: 0,
-    errors: 0
-  };
+  var created = 0;
+  var errors = 0;
 
   try {
     // --- 1. Aktiv dokumentum ellenorzes ---
@@ -43,100 +37,56 @@ function log(msg) {
     var doc = app.activeDocument;
     log("[JSX] Dokumentum: " + doc.name + " (" + doc.width + " x " + doc.height + ")");
 
-    // --- 2. JSON temp fajl beolvasasa ---
+    // --- 2. JSON beolvasas (elokeszitett adat az Electron handlertol) ---
     var args = parseArgs();
     if (!args.dataFilePath) {
-      throw new Error("Nincs megadva DATA_FILE_PATH! A CONFIG.DATA_FILE_PATH beallitasa szukseges.");
+      throw new Error("Nincs megadva DATA_FILE_PATH!");
     }
 
     log("[JSX] JSON fajl: " + args.dataFilePath);
-    var persons = readJsonFile(args.dataFilePath);
+    var data = readJsonFile(args.dataFilePath);
 
-    if (!persons || persons.length === 0) {
-      log("[JSX] Nincs szemely adat — kilep.");
-      log("[JSX] KESZ: 0 diak, 0 tanar, 0 hiba");
-      return _logLines.join("\n");
+    if (!data || !data.layers || data.layers.length === 0) {
+      log("[JSX] Nincs layer adat — kilep.");
+      log("[JSX] KESZ: 0 layer, 0 hiba");
+      return;
     }
 
-    log("[JSX] Szemelyek szama: " + persons.length);
+    log("[JSX] Layerek szama: " + data.layers.length + " (diak: " + data.stats.students + ", tanar: " + data.stats.teachers + ")");
 
-    // --- 3. Szétválogatás: diákok és tanárok ---
-    var students = [];
-    var teachers = [];
-    for (var i = 0; i < persons.length; i++) {
-      if (persons[i].type === "teacher") {
-        teachers.push(persons[i]);
-      } else {
-        students.push(persons[i]);
-      }
-    }
+    // --- 3. Layerek letrehozasa (a JSON-ban mar kesz adat van) ---
+    for (var i = 0; i < data.layers.length; i++) {
+      var item = data.layers[i];
 
-    log("[JSX] Diakok: " + students.length + ", Tanarok: " + teachers.length);
-
-    // --- 4. Names/Students csoport keresese ---
-    var studentsGroup = getGroupByPath(doc, ["Names", "Students"]);
-    if (!studentsGroup) {
-      log("[JSX] HIBA: Names/Students csoport nem talalhato!");
-      stats.errors++;
-    } else {
-      log("[JSX] Names/Students csoport megtalalva");
-
-      // Diak text layerek letrehozasa
-      for (var s = 0; s < students.length; s++) {
-        try {
-          var student = students[s];
-          var layerName = sanitizeName(student.name, student.id);
-          createTextLayer(studentsGroup, student.name, {
-            name: layerName,
-            font: CONFIG.FONT_NAME,
-            size: CONFIG.FONT_SIZE,
-            color: CONFIG.TEXT_COLOR
-          });
-          stats.students++;
-        } catch (e) {
-          log("[JSX] HIBA diak layer (" + student.name + "): " + e.message);
-          stats.errors++;
+      try {
+        // Cel csoport keresese: Names/{group}
+        var targetGroup = getGroupByPath(doc, ["Names", item.group]);
+        if (!targetGroup) {
+          log("[JSX] HIBA: Names/" + item.group + " csoport nem talalhato!");
+          errors++;
+          continue;
         }
-      }
 
-      log("[JSX] " + stats.students + "/" + students.length + " diak layer letrehozva");
+        // Text layer letrehozasa a kész adatokkal
+        createTextLayer(targetGroup, item.displayText, {
+          name: item.layerName,
+          font: CONFIG.FONT_NAME,
+          size: CONFIG.FONT_SIZE,
+          color: CONFIG.TEXT_COLOR
+        });
+        created++;
+      } catch (e) {
+        log("[JSX] HIBA layer (" + item.displayText + "): " + e.message);
+        errors++;
+      }
     }
 
-    // --- 5. Names/Teachers csoport keresese ---
-    var teachersGroup = getGroupByPath(doc, ["Names", "Teachers"]);
-    if (!teachersGroup) {
-      log("[JSX] HIBA: Names/Teachers csoport nem talalhato!");
-      stats.errors++;
-    } else {
-      log("[JSX] Names/Teachers csoport megtalalva");
-
-      // Tanar text layerek letrehozasa
-      for (var t = 0; t < teachers.length; t++) {
-        try {
-          var teacher = teachers[t];
-          var tLayerName = sanitizeName(teacher.name, teacher.id);
-          createTextLayer(teachersGroup, teacher.name, {
-            name: tLayerName,
-            font: CONFIG.FONT_NAME,
-            size: CONFIG.FONT_SIZE,
-            color: CONFIG.TEXT_COLOR
-          });
-          stats.teachers++;
-        } catch (e) {
-          log("[JSX] HIBA tanar layer (" + teacher.name + "): " + e.message);
-          stats.errors++;
-        }
-      }
-
-      log("[JSX] " + stats.teachers + "/" + teachers.length + " tanar layer letrehozva");
-    }
-
-    // --- 6. Eredmeny ---
-    log("[JSX] KESZ: " + stats.students + " diak, " + stats.teachers + " tanar, " + stats.errors + " hiba");
+    // --- 4. Eredmeny ---
+    log("[JSX] KESZ: " + created + " layer letrehozva, " + errors + " hiba");
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);
-    log("[JSX] KESZ: " + stats.students + " diak, " + stats.teachers + " tanar, " + (stats.errors + 1) + " hiba");
+    log("[JSX] KESZ: " + created + " layer, " + (errors + 1) + " hiba");
   }
 })();
 

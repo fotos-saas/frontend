@@ -78,7 +78,8 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   /** Beállítások */
   readonly marginCm = this.ps.marginCm;
-  readonly photoSizeCm = this.ps.photoSizeCm;
+  readonly studentSizeCm = this.ps.studentSizeCm;
+  readonly teacherSizeCm = this.ps.teacherSizeCm;
 
   /** PSD generálás */
   readonly tabloSizes = signal<TabloSize[]>([]);
@@ -159,9 +160,14 @@ export class ProjectTabloEditorComponent implements OnInit {
     if (!isNaN(v) && v >= 0 && v <= 10) await this.ps.setMargin(v);
   }
 
-  async setPhotoSizeValue(event: Event): Promise<void> {
+  async setStudentSizeValue(event: Event): Promise<void> {
     const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 1 && v <= 30) await this.ps.setPhotoSize(v);
+    if (!isNaN(v) && v >= 1 && v <= 30) await this.ps.setStudentSize(v);
+  }
+
+  async setTeacherSizeValue(event: Event): Promise<void> {
+    const v = Number((event.target as HTMLInputElement).value);
+    if (!isNaN(v) && v >= 1 && v <= 30) await this.ps.setTeacherSize(v);
   }
 
   async selectPsPath(): Promise<void> {

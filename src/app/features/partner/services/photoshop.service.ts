@@ -26,8 +26,11 @@ export class PhotoshopService {
   /** Tabló margó (cm) */
   readonly marginCm = signal<number>(2);
 
-  /** Tabló képméret (cm) — diák/tanár fotó layer mérete */
-  readonly photoSizeCm = signal<number>(6);
+  /** Diák fotó layer mérete (cm) */
+  readonly studentSizeCm = signal<number>(6);
+
+  /** Tanár fotó layer mérete (cm) */
+  readonly teacherSizeCm = signal<number>(6);
 
   /** Konfiguralt-e (van mentett path) */
   readonly isConfigured = computed(() => !!this.path());
@@ -50,13 +53,15 @@ export class PhotoshopService {
         Promise<string | null>,
         Promise<number | undefined>,
         Promise<number | undefined>,
+        Promise<number | undefined>,
       ] = [
         this.api.checkInstalled(),
         typeof this.api.getWorkDir === 'function' ? this.api.getWorkDir() : Promise.resolve(null),
         typeof this.api.getMargin === 'function' ? this.api.getMargin() : Promise.resolve(undefined),
-        typeof this.api.getPhotoSize === 'function' ? this.api.getPhotoSize() : Promise.resolve(undefined),
+        typeof this.api.getStudentSize === 'function' ? this.api.getStudentSize() : Promise.resolve(undefined),
+        typeof this.api.getTeacherSize === 'function' ? this.api.getTeacherSize() : Promise.resolve(undefined),
       ];
-      const [result, savedWorkDir, savedMargin, savedPhotoSize] = await Promise.all(promises);
+      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize] = await Promise.all(promises);
       if (result.found && result.path) {
         this.path.set(result.path);
       }
@@ -66,8 +71,11 @@ export class PhotoshopService {
       if (savedMargin !== undefined) {
         this.marginCm.set(savedMargin);
       }
-      if (savedPhotoSize !== undefined) {
-        this.photoSizeCm.set(savedPhotoSize);
+      if (savedStudentSize !== undefined) {
+        this.studentSizeCm.set(savedStudentSize);
+      }
+      if (savedTeacherSize !== undefined) {
+        this.teacherSizeCm.set(savedTeacherSize);
       }
     } catch (err) {
       this.logger.error('Photoshop detektalasi hiba', err);
@@ -158,20 +166,30 @@ export class PhotoshopService {
     }
   }
 
-  /** Képméret beállítása */
-  async setPhotoSize(sizeCm: number): Promise<boolean> {
-    if (!this.api || typeof this.api.setPhotoSize !== 'function') return false;
-
+  /** Diák képméret beállítása */
+  async setStudentSize(sizeCm: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setStudentSize !== 'function') return false;
     try {
-      const result = await this.api.setPhotoSize(Number(sizeCm));
-      if (result.success) {
-        this.photoSizeCm.set(sizeCm);
-        return true;
-      }
-      this.logger.warn('Képméret beállítás sikertelen:', result.error);
+      const result = await this.api.setStudentSize(Number(sizeCm));
+      if (result.success) { this.studentSizeCm.set(sizeCm); return true; }
+      this.logger.warn('Diák képméret beállítás sikertelen:', result.error);
       return false;
     } catch (err) {
-      this.logger.error('Képméret beállítási hiba', err);
+      this.logger.error('Diák képméret beállítási hiba', err);
+      return false;
+    }
+  }
+
+  /** Tanár képméret beállítása */
+  async setTeacherSize(sizeCm: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setTeacherSize !== 'function') return false;
+    try {
+      const result = await this.api.setTeacherSize(Number(sizeCm));
+      if (result.success) { this.teacherSizeCm.set(sizeCm); return true; }
+      this.logger.warn('Tanár képméret beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Tanár képméret beállítási hiba', err);
       return false;
     }
   }
@@ -301,7 +319,7 @@ export class PhotoshopService {
     try {
       const result = await this.api.runJsx({
         scriptName: 'actions/add-image-layers.jsx',
-        imageData: { persons, ...imageSizeCm, photoSizeCm: this.photoSizeCm() },
+        imageData: { persons, ...imageSizeCm, studentSizeCm: this.studentSizeCm(), teacherSizeCm: this.teacherSizeCm() },
         targetDocName,
       });
 

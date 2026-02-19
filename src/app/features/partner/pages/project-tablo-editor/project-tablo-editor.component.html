@@ -194,27 +194,47 @@
           </div>
         </div>
 
-        <!-- Képméret -->
+        <!-- Képméretek -->
         <div class="settings-card">
           <div class="settings-card__header">
             <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
             <div>
-              <h3 class="settings-card__title">Képméret</h3>
-              <p class="settings-card__desc">Diák/tanár fotó layer mérete a tablón (cm). A Smart Object belső mérete változatlan marad.</p>
+              <h3 class="settings-card__title">Képméretek</h3>
+              <p class="settings-card__desc">Diák és tanár fotó layer mérete a tablón (cm). A Smart Object belső mérete változatlan marad.</p>
             </div>
           </div>
 
-          <div class="settings-input-row">
-            <input
-              type="number"
-              class="settings-input"
-              [value]="photoSizeCm()"
-              min="1"
-              max="30"
-              step="0.5"
-              (change)="setPhotoSizeValue($event)"
-            />
-            <span class="settings-input-unit">cm</span>
+          <div class="settings-size-row">
+            <div class="settings-size-field">
+              <label class="settings-size-label">Diák</label>
+              <div class="settings-input-row">
+                <input
+                  type="number"
+                  class="settings-input"
+                  [value]="studentSizeCm()"
+                  min="1"
+                  max="30"
+                  step="0.5"
+                  (change)="setStudentSizeValue($event)"
+                />
+                <span class="settings-input-unit">cm</span>
+              </div>
+            </div>
+            <div class="settings-size-field">
+              <label class="settings-size-label">Tanár</label>
+              <div class="settings-input-row">
+                <input
+                  type="number"
+                  class="settings-input"
+                  [value]="teacherSizeCm()"
+                  min="1"
+                  max="30"
+                  step="0.5"
+                  (change)="setTeacherSizeValue($event)"
+                />
+                <span class="settings-input-unit">cm</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

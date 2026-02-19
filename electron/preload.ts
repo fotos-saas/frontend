@@ -285,13 +285,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:get-margin') as Promise<number>,
     setMargin: (marginCm: number) =>
       ipcRenderer.invoke('photoshop:set-margin', marginCm) as Promise<{ success: boolean; error?: string }>,
-    getPhotoSize: () =>
-      ipcRenderer.invoke('photoshop:get-photo-size') as Promise<number>,
-    setPhotoSize: (sizeCm: number) =>
-      ipcRenderer.invoke('photoshop:set-photo-size', sizeCm) as Promise<{ success: boolean; error?: string }>,
-    runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; photoSizeCm?: number }; jsonData?: Record<string, unknown> }) =>
+    getStudentSize: () =>
+      ipcRenderer.invoke('photoshop:get-student-size') as Promise<number>,
+    setStudentSize: (sizeCm: number) =>
+      ipcRenderer.invoke('photoshop:set-student-size', sizeCm) as Promise<{ success: boolean; error?: string }>,
+    getTeacherSize: () =>
+      ipcRenderer.invoke('photoshop:get-teacher-size') as Promise<number>,
+    setTeacherSize: (sizeCm: number) =>
+      ipcRenderer.invoke('photoshop:set-teacher-size', sizeCm) as Promise<{ success: boolean; error?: string }>,
+    runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) =>
       ipcRenderer.invoke('photoshop:run-jsx', params) as Promise<{ success: boolean; error?: string; output?: string }>,
-    runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; photoSizeCm?: number }; jsonData?: Record<string, unknown> }) =>
+    runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) =>
       ipcRenderer.invoke('photoshop:run-jsx-debug', params) as Promise<{ success: boolean; error?: string }>,
     onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => {
       const handler = (_event: any, data: { line: string; stream: 'stdout' | 'stderr' }) => callback(data);

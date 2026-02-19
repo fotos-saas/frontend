@@ -236,6 +236,27 @@
   font-weight: 500;
 }
 
+// Képméret sor (diák + tanár egymás mellett)
+.settings-size-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.settings-size-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-size-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 // Méretválasztó rács
 .size-grid {
   display: flex;

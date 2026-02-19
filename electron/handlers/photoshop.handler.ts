@@ -12,7 +12,8 @@ interface PhotoshopSchema {
   photoshopPath: string | null;
   workDirectory: string | null;
   tabloMarginCm: number;
-  tabloPhotoSizeCm: number;
+  tabloStudentSizeCm: number;
+  tabloTeacherSizeCm: number;
 }
 
 const psStore = new Store<PhotoshopSchema>({
@@ -21,7 +22,8 @@ const psStore = new Store<PhotoshopSchema>({
     photoshopPath: null,
     workDirectory: null,
     tabloMarginCm: 2,
-    tabloPhotoSizeCm: 6,
+    tabloStudentSizeCm: 6,
+    tabloTeacherSizeCm: 6,
   },
 });
 
@@ -377,23 +379,42 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
-  // Get tablo photo size
-  ipcMain.handle('photoshop:get-photo-size', () => {
-    return psStore.get('tabloPhotoSizeCm', 6);
+  // Get tablo student photo size
+  ipcMain.handle('photoshop:get-student-size', () => {
+    return psStore.get('tabloStudentSizeCm', 6);
   });
 
-  // Set tablo photo size
-  ipcMain.handle('photoshop:set-photo-size', (_event, sizeCm: number) => {
+  // Set tablo student photo size
+  ipcMain.handle('photoshop:set-student-size', (_event, sizeCm: number) => {
     try {
       if (typeof sizeCm !== 'number' || sizeCm < 1 || sizeCm > 30) {
         return { success: false, error: 'Ervenytelen kepmeret ertek (1-30 cm)' };
       }
-
-      psStore.set('tabloPhotoSizeCm', sizeCm);
-      log.info(`Tablo kepmeret beallitva: ${sizeCm} cm`);
+      psStore.set('tabloStudentSizeCm', sizeCm);
+      log.info(`Tablo diak kepmeret beallitva: ${sizeCm} cm`);
       return { success: true };
     } catch (error) {
-      log.error('Tablo kepmeret beallitasi hiba:', error);
+      log.error('Tablo diak kepmeret beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a kepmeret erteket' };
+    }
+  });
+
+  // Get tablo teacher photo size
+  ipcMain.handle('photoshop:get-teacher-size', () => {
+    return psStore.get('tabloTeacherSizeCm', 6);
+  });
+
+  // Set tablo teacher photo size
+  ipcMain.handle('photoshop:set-teacher-size', (_event, sizeCm: number) => {
+    try {
+      if (typeof sizeCm !== 'number' || sizeCm < 1 || sizeCm > 30) {
+        return { success: false, error: 'Ervenytelen kepmeret ertek (1-30 cm)' };
+      }
+      psStore.set('tabloTeacherSizeCm', sizeCm);
+      log.info(`Tablo tanar kepmeret beallitva: ${sizeCm} cm`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo tanar kepmeret beallitasi hiba:', error);
       return { success: false, error: 'Nem sikerult menteni a kepmeret erteket' };
     }
   });
@@ -583,7 +604,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   // nem a kép DPI-jével (300), mert a placeholder a PSD-ben lesz!
   async function prepareImageLayersForJsx(
     personsData: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
-    imageSizeCm: { widthCm: number; heightCm: number; dpi: number; photoSizeCm?: number },
+    imageSizeCm: { widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number },
     docDpi: number = 200,
   ) {
     const students = personsData.filter(p => p.type !== 'teacher');
@@ -625,7 +646,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       layers,
       stats: { students: students.length, teachers: teachers.length, total: personsData.length, withPhoto },
       imageSizeCm,
-      photoSizeCm: imageSizeCm.photoSizeCm || 0,
+      studentSizeCm: imageSizeCm.studentSizeCm || 0,
+      teacherSizeCm: imageSizeCm.teacherSizeCm || 0,
     };
   }
 
@@ -713,7 +735,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     dataFilePath?: string;
     targetDocName?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
-    imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; photoSizeCm?: number };
+    imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number };
     jsonData?: Record<string, unknown>;
   }) => {
     let tempJsonPath: string | null = null;
@@ -744,7 +766,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
           widthCm: params.imageData.widthCm,
           heightCm: params.imageData.heightCm,
           dpi: params.imageData.dpi,
-          photoSizeCm: params.imageData.photoSizeCm,
+          studentSizeCm: params.imageData.studentSizeCm,
+          teacherSizeCm: params.imageData.teacherSizeCm,
         });
         tempJsonPath = path.join(app.getPath('temp'), `jsx-images-${Date.now()}.json`);
         fs.writeFileSync(tempJsonPath, JSON.stringify(prepared), 'utf-8');
@@ -806,7 +829,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     dataFilePath?: string;
     targetDocName?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
-    imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; photoSizeCm?: number };
+    imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number };
     jsonData?: Record<string, unknown>;
   }) => {
     const win = _mainWindow;
@@ -843,7 +866,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
           widthCm: params.imageData.widthCm,
           heightCm: params.imageData.heightCm,
           dpi: params.imageData.dpi,
-          photoSizeCm: params.imageData.photoSizeCm,
+          studentSizeCm: params.imageData.studentSizeCm,
+          teacherSizeCm: params.imageData.teacherSizeCm,
         });
         tempJsonPath = path.join(app.getPath('temp'), `jsx-images-debug-${Date.now()}.json`);
         const jsonStr = JSON.stringify(prepared);

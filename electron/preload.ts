@@ -264,6 +264,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:browse-path') as Promise<{ cancelled: boolean; path?: string }>,
     generatePsd: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string; persons?: Array<{ id: number; name: string; type: string }> }) =>
       ipcRenderer.invoke('photoshop:generate-psd', params) as Promise<{ success: boolean; error?: string; stdout?: string; stderr?: string }>,
+    generatePsdDebug: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string; persons?: Array<{ id: number; name: string; type: string }> }) =>
+      ipcRenderer.invoke('photoshop:generate-psd-debug', params) as Promise<{ success: boolean; error?: string }>,
+    onPsdDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => {
+      const handler = (_event: any, data: { line: string; stream: 'stdout' | 'stderr' }) => callback(data);
+      ipcRenderer.on('psd-debug-log', handler);
+      return () => { ipcRenderer.removeListener('psd-debug-log', handler); };
+    },
     getDownloadsPath: () =>
       ipcRenderer.invoke('photoshop:get-downloads-path') as Promise<string>,
     openFile: (filePath: string) =>

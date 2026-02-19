@@ -291,65 +291,90 @@ export class ProjectTabloEditorComponent implements OnInit {
       }));
       this.addLog('Persons tömb', `length=${personsData.length} | ${JSON.stringify(personsData.slice(0, 2))}${personsData.length > 2 ? '…' : ''}`, 'info');
 
-      // 6. IPC paraméterek
+      // 6. Output path kiszámítása
       const brandName = this.branding.brandName();
       const partnerDir = brandName ? this.ps.sanitizeName(brandName) : 'photostack';
       const year = new Date().getFullYear().toString();
       let outputPath: string;
+      const api = (window as any).electronAPI?.photoshop;
+      if (!api) {
+        this.addLog('Electron API', 'Nem elérhető! (böngészőben futunk?)', 'error');
+        return;
+      }
+      this.addLog('Electron API', 'Elérhető', 'ok');
+
       if (p && workDir) {
         const folderName = this.ps.sanitizeName(
           p.className ? `${p.name}-${p.className}` : p.name,
         );
         outputPath = `${workDir}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
       } else {
-        outputPath = `(Downloads)/PhotoStack/${size.value}.psd`;
+        const dl = await api.getDownloadsPath();
+        outputPath = `${dl}/PhotoStack/${size.value}.psd`;
       }
-      this.addLog('IPC params', `widthCm=${dims.widthCm}, heightCm=${dims.heightCm}, dpi=200, persons=${personsData.length}, outputPath=${outputPath}`, 'info');
+      this.addLog('Output path', outputPath, 'info');
 
-      // 7. IPC generatePsd hívás
-      this.addLog('IPC generatePsd', 'Hívás indítva...', 'info');
-      const context = p ? {
-        projectName: p.name,
-        className: p.className,
-        brandName,
+      // 7. IPC params
+      const ipcParams: any = {
+        widthCm: dims.widthCm,
+        heightCm: dims.heightCm,
+        dpi: 200,
+        mode: 'RGB',
+        outputPath,
         persons: personsData.length > 0 ? personsData : undefined,
-      } : undefined;
+      };
+      this.addLog('IPC params', `widthCm=${ipcParams.widthCm}, heightCm=${ipcParams.heightCm}, dpi=${ipcParams.dpi}, persons=${personsData.length}`, 'info');
 
-      const result = await this.ps.generateAndOpenPsd(size, context);
-
-      // 8. Python stdout logok feldolgozása
-      if (result.stdout) {
-        const lines = result.stdout.split('\n').filter(l => l.trim());
-        for (const line of lines) {
-          if (line.startsWith('[DEBUG]')) {
-            const msg = line.replace('[DEBUG] ', '');
-            const isError = msg.startsWith('HIBA');
-            this.addLog('Python', msg, isError ? 'error' : 'info');
-          } else {
-            this.addLog('Python stdout', line, 'info');
-          }
+      // 8. Streaming debug listener regisztrálása
+      const unsubscribe = api.onPsdDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
+        if (data.stream === 'stderr') {
+          this.addLog('Python stderr', data.line, 'error');
+        } else if (data.line.startsWith('[DEBUG]')) {
+          const msg = data.line.replace('[DEBUG] ', '');
+          const isError = msg.startsWith('HIBA');
+          this.addLog('Python', msg, isError ? 'error' : 'info');
+        } else {
+          this.addLog('Python', data.line, 'info');
         }
+      });
+
+      // 9. generatePsdDebug IPC hívás (streaming — soronként jönnek a logok)
+      this.addLog('IPC generatePsd', 'Hívás indítva...', 'info');
+      let genResult: any;
+      try {
+        genResult = await api.generatePsdDebug(ipcParams);
+      } catch (ipcErr) {
+        this.addLog('IPC generatePsd', `EXCEPTION: ${String(ipcErr)}`, 'error');
+        unsubscribe?.();
+        return;
       }
-      if (result.stderr) {
-        const lines = result.stderr.split('\n').filter(l => l.trim());
-        for (const line of lines) {
-          this.addLog('Python stderr', line, 'error');
-        }
+      unsubscribe?.();
+
+      this.addLog('IPC generatePsd', genResult.success ? 'Sikeres' : `HIBA: ${genResult.error}`, genResult.success ? 'ok' : 'error');
+
+      if (!genResult.success) {
+        this.addLog('Végeredmény', 'PSD generálás sikertelen — lásd fenti hibákat', 'error');
+        return;
       }
 
-      // 9. IPC eredmény
-      if (result.success) {
-        this.addLog('IPC eredmény', `Sikeres! outputPath=${result.outputPath}`, 'ok');
-      } else {
-        this.addLog('IPC eredmény', `HIBA: ${result.error}`, 'error');
+      // 10. PSD megnyitás Photoshopban
+      this.addLog('PSD megnyitás', `openFile(${outputPath})`, 'info');
+      let openResult: any;
+      try {
+        openResult = await api.openFile(outputPath);
+      } catch (openErr) {
+        this.addLog('PSD megnyitás', `EXCEPTION: ${String(openErr)}`, 'error');
+        return;
       }
 
-      // 10. Végeredmény
-      if (result.success) {
-        this.addLog('Végeredmény', 'PSD generálva és megnyitva!', 'ok');
+      if (openResult.success) {
+        this.addLog('PSD megnyitás', 'Sikeres', 'ok');
       } else {
-        this.addLog('Végeredmény', 'Sikertelen — lásd fenti hibát', 'error');
+        this.addLog('PSD megnyitás', `HIBA: ${openResult.error}`, 'error');
       }
+
+      // 11. Végeredmény
+      this.addLog('Végeredmény', openResult.success ? 'PSD generálva és megnyitva!' : 'PSD generálva, de megnyitás sikertelen', openResult.success ? 'ok' : 'warn');
     } catch (err) {
       this.addLog('Váratlan hiba', String(err), 'error');
     } finally {

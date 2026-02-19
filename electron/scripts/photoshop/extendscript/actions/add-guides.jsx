@@ -44,8 +44,6 @@ function _doAddGuides() {
   var docWidthPx = _doc.width.as("px");
   var docHeightPx = _doc.height.as("px");
 
-  log("[JSX] Guide calc: " + docWidthPx + "x" + docHeightPx + " px, DPI=" + dpi + ", margo=" + marginCm + "cm=" + marginPx + "px");
-
   // Letezo guide-ok torlese (tiszta allapotbol indulunk)
   while (_doc.guides.length > 0) {
     _doc.guides[0].remove();
@@ -60,7 +58,7 @@ function _doAddGuides() {
   // Ruler visszaallitasa az eredeti egysegre
   app.preferences.rulerUnits = oldRulerUnits;
 
-  log("[JSX] 4 guide hozzaadva, guides.length=" + _doc.guides.length);
+  log("[JSX] 4 guide hozzaadva (" + marginCm + " cm = " + marginPx + " px margo)");
 }
 
 (function () {
@@ -69,23 +67,14 @@ function _doAddGuides() {
       throw new Error("Nincs megnyitott dokumentum!");
     }
     _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-    log("[JSX] Doc: " + _doc.name + " (" + _doc.width + " x " + _doc.height + ")");
+    log("[JSX] Dokumentum: " + _doc.name + " (" + _doc.width + " x " + _doc.height + ")");
 
-    // CONFIG debug
-    log("[JSX] CONFIG.DATA_FILE_PATH: " + CONFIG.DATA_FILE_PATH);
-    log("[JSX] CONFIG.TARGET_DOC_NAME: " + CONFIG.TARGET_DOC_NAME);
-
-    // JSON beolvasas
     var args = parseArgs();
-    log("[JSX] args.dataFilePath: " + args.dataFilePath);
-
     if (!args.dataFilePath) {
-      log("[JSX] HIBA: Nincs DATA_FILE_PATH!");
-      return;
+      throw new Error("Nincs megadva DATA_FILE_PATH!");
     }
 
     _data = readJsonFile(args.dataFilePath);
-    log("[JSX] _data: marginCm=" + (_data ? _data.marginCm : "NULL"));
 
     if (!_data || typeof _data.marginCm === "undefined") {
       log("[JSX] Nincs margin adat — kilep.");
@@ -95,7 +84,7 @@ function _doAddGuides() {
     // Guide-ok hozzaadasa — egyetlen history lepes
     _doc.suspendHistory("Tablo margo guide-ok", "_doAddGuides()");
 
-    log("[JSX] KESZ, guides.length=" + _doc.guides.length);
+    log("[JSX] KESZ");
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);

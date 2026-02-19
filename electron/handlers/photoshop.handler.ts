@@ -690,6 +690,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     targetDocName?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
     imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number };
+    jsonData?: Record<string, unknown>;
   }) => {
     let tempJsonPath: string | null = null;
 
@@ -724,6 +725,14 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         fs.writeFileSync(tempJsonPath, JSON.stringify(prepared), 'utf-8');
         dataFilePath = tempJsonPath;
         log.info(`JSX images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.stats.withPhoto} fotoval, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`);
+      }
+
+      // Ha jsonData-t kaptunk (altalanos JSON adat, pl. guide margo), temp fajlba irjuk
+      if (!dataFilePath && params.jsonData) {
+        tempJsonPath = path.join(app.getPath('temp'), `jsx-data-${Date.now()}.json`);
+        fs.writeFileSync(tempJsonPath, JSON.stringify(params.jsonData), 'utf-8');
+        dataFilePath = tempJsonPath;
+        log.info(`JSX jsonData irva: ${tempJsonPath}`);
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName);
@@ -773,6 +782,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     targetDocName?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
     imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number };
+    jsonData?: Record<string, unknown>;
   }) => {
     const win = _mainWindow;
     let tempJsonPath: string | null = null;
@@ -814,6 +824,14 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         fs.writeFileSync(tempJsonPath, jsonStr, 'utf-8');
         dataFilePath = tempJsonPath;
         sendLog(`[DEBUG] Images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.stats.withPhoto} fotoval, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`, 'stdout');
+      }
+
+      // Ha jsonData-t kaptunk, temp fajlba irjuk
+      if (!dataFilePath && params.jsonData) {
+        tempJsonPath = path.join(app.getPath('temp'), `jsx-data-debug-${Date.now()}.json`);
+        fs.writeFileSync(tempJsonPath, JSON.stringify(params.jsonData), 'utf-8');
+        dataFilePath = tempJsonPath;
+        sendLog(`[DEBUG] JSON data irva: ${tempJsonPath}`, 'stdout');
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName);

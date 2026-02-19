@@ -202,6 +202,34 @@ export class PhotoshopService {
 
   /**
    * JSX script futtatása a megnyitott Photoshop dokumentumon.
+   * 4 guide hozzáadása a beállított margó (cm) értékkel.
+   */
+  async addGuides(
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    const marginCm = this.marginCm();
+    if (marginCm <= 0) {
+      return { success: true }; // 0 margó = nincs guide
+    }
+
+    try {
+      const result = await this.api.runJsx({
+        scriptName: 'actions/add-guides.jsx',
+        jsonData: { marginCm },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX addGuides hiba', err);
+      return { success: false, error: 'Váratlan hiba a guide-ok hozzáadásakor' };
+    }
+  }
+
+  /**
+   * JSX script futtatása a megnyitott Photoshop dokumentumon.
    * Személynevek text layerként hozzáadása a Names/Students és Names/Teachers csoportba.
    */
   async addNameLayers(

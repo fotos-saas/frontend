@@ -204,15 +204,19 @@ export class ProjectTabloEditorComponent implements OnInit {
         return;
       }
 
+      // Varunk hogy a Photoshop megnyissa a PSD-t
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // PSD fajlnev kiszamitasa a cel dokumentum nev-alapu aktivalasahoz
+      const psdFileName = result.outputPath
+        ? result.outputPath.split('/').pop() || undefined
+        : undefined;
+
+      // 0. Margó guide-ok (mindig, ha van margó beállítva)
+      await this.ps.addGuides(psdFileName);
+
       // PSD megnyitás után: JSX layerek hozzáadása (ha vannak személyek)
       if (personsData.length > 0) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // PSD fajlnev kiszamitasa a cel dokumentum nev-alapu aktivalasahoz
-        const psdFileName = result.outputPath
-          ? result.outputPath.split('/').pop() || undefined
-          : undefined;
-
         // 1. Név layerek (text)
         const nameResult = await this.ps.addNameLayers(personsData, psdFileName);
 

@@ -53,6 +53,7 @@
 
 .setting-description {
   margin-top: 2px;
+  line-height: normal;
 }
 
 // === INFO ROW ===
@@ -90,6 +91,9 @@
 .sub-settings {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   padding: 12px 0;
+
+  > * + * {
+    margin-top: 12px;
+  }
 }

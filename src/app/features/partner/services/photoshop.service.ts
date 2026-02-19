@@ -185,13 +185,34 @@ export class PhotoshopService {
   }
 
   /**
-   * PSD generalas es megnyitas Photoshopban
-   * 1. Meret parszolas + kistablo alias
-   * 2. Downloads/PhotoStack/ mappa keszites
-   * 3. Python script futtatasa IPC-n keresztul
-   * 4. PSD megnyitasa Photoshopban
+   * Szöveget fájlrendszer-biztos névre alakít.
+   * Ékezetek eltávolítása, kisbetűsítés, nem alfanumerikus → kötőjel.
    */
-  async generateAndOpenPsd(size: TabloSize): Promise<{ success: boolean; error?: string }> {
+  sanitizeName(text: string): string {
+    const accents: Record<string, string> = {
+      á: 'a', é: 'e', í: 'i', ó: 'o', ö: 'o', ő: 'o', ú: 'u', ü: 'u', ű: 'u',
+      Á: 'A', É: 'E', Í: 'I', Ó: 'O', Ö: 'O', Ő: 'O', Ú: 'U', Ü: 'U', Ű: 'U',
+    };
+    return text
+      .split('').map(c => accents[c] || c).join('')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  /**
+   * PSD generálás és megnyitás Photoshopban.
+   *
+   * Ha van projekt kontextus + workDir:
+   *   workDir/partner-slug/2026/projekt-nev-12a/projekt-nev-12a.psd
+   *
+   * Ha nincs kontextus (globális designer):
+   *   Downloads/PhotoStack/80x120.psd
+   */
+  async generateAndOpenPsd(
+    size: TabloSize,
+    context?: { projectName: string; className?: string | null; brandName?: string | null },
+  ): Promise<{ success: boolean; error?: string; outputPath?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
     const dimensions = this.parseSizeValue(size.value);
@@ -200,12 +221,23 @@ export class PhotoshopService {
     }
 
     try {
-      // Downloads path lekerdezese
-      const downloadsPath = await this.api.getDownloadsPath();
-      const outputDir = `${downloadsPath}/PhotoStack`;
-      const outputPath = `${outputDir}/${size.value}.psd`;
+      let outputPath: string;
 
-      // PSD generalas
+      if (context && this.workDir()) {
+        // Projekt kontextus → workDir/partner/év/projekt-osztály/projekt-osztály.psd
+        const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
+        const year = new Date().getFullYear().toString();
+        const folderName = this.sanitizeName(
+          context.className ? `${context.projectName}-${context.className}` : context.projectName,
+        );
+        outputPath = `${this.workDir()}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
+      } else {
+        // Nincs kontextus → Downloads/PhotoStack/méret.psd
+        const downloadsPath = await this.api.getDownloadsPath();
+        outputPath = `${downloadsPath}/PhotoStack/${size.value}.psd`;
+      }
+
+      // PSD generálás
       const genResult = await this.api.generatePsd({
         widthCm: dimensions.widthCm,
         heightCm: dimensions.heightCm,
@@ -218,13 +250,13 @@ export class PhotoshopService {
         return { success: false, error: genResult.error || 'PSD generálás sikertelen' };
       }
 
-      // Megnyitas Photoshopban
+      // Megnyitás Photoshopban
       const openResult = await this.api.openFile(outputPath);
       if (!openResult.success) {
         return { success: false, error: openResult.error || 'Nem sikerült megnyitni a PSD-t' };
       }
 
-      return { success: true };
+      return { success: true, outputPath };
     } catch (err) {
       this.logger.error('PSD generalas hiba', err);
       return { success: false, error: 'Váratlan hiba történt a PSD generálás során' };

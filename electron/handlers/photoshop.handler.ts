@@ -204,6 +204,13 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         return { success: false, error: 'Ervenytelen kimeneti eleresi ut' };
       }
 
+      // Kimeneti mappa letrehozasa (rekurziv)
+      const outputDir = path.dirname(params.outputPath);
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+        log.info(`Mappa letrehozva: ${outputDir}`);
+      }
+
       // Python script eleresi ut (extraResources-bol)
       const scriptPath = app.isPackaged
         ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'python', 'tasks', 'generate_psd.py')

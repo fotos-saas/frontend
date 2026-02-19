@@ -417,16 +417,19 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
   // Image layerek előkészítése a JSX számára
   // Méretek cm → px átszámítása, elnevezések, csoportosítás
+  // FONTOS: a pixelszámítás a DOKUMENTUM DPI-jével történik (200),
+  // nem a kép DPI-jével (300), mert a placeholder a PSD-ben lesz!
   function prepareImageLayersForJsx(
     personsData: Array<{ id: number; name: string; type: string }>,
     imageSizeCm: { widthCm: number; heightCm: number; dpi: number },
+    docDpi: number = 200,
   ) {
     const students = personsData.filter(p => p.type !== 'teacher');
     const teachers = personsData.filter(p => p.type === 'teacher');
 
-    // cm → px: (cm / 2.54) * dpi
-    const widthPx = Math.round((imageSizeCm.widthCm / 2.54) * imageSizeCm.dpi);
-    const heightPx = Math.round((imageSizeCm.heightCm / 2.54) * imageSizeCm.dpi);
+    // cm → px: a DOKUMENTUM DPI-jével szamolunk, hogy a PSD-ben helyes meretu legyen
+    const widthPx = Math.round((imageSizeCm.widthCm / 2.54) * docDpi);
+    const heightPx = Math.round((imageSizeCm.heightCm / 2.54) * docDpi);
 
     const layers = [
       ...students.map(p => ({

@@ -4,6 +4,7 @@
  * getGroupByPath()              — Csoport keresese utvonal alapjan
  * createTextLayer()             — Szoveg layer letrehozasa
  * createSmartObjectPlaceholder() — Smart Object placeholder layer letrehozasa
+ * placePhotoInSmartObject()     — SO megnyitas → kep Place → cover → mentes → bezaras
  * readJsonFile()                — JSON fajl beolvasasa (ExtendScript ES3 — nincs JSON.parse!)
  * parseArgs()                   — Script argumentumok felolvasasa
  *
@@ -108,21 +109,81 @@ function createSmartObjectPlaceholder(doc, container, options) {
   return layer;
 }
 
-// --- Smart Object tartalom csereje kepfajlra ---
-// A layer-t elobb aktivva kell tenni, majd ActionManager-rel
-// a placedLayerReplaceContents parancsot futtatjuk.
+// --- Smart Object megnyitasa, kep behelyezese, mentes + bezaras ---
+// A helyes flow:
+//   1. SO megnyitasa (editContents) → kulon dokumentum nyilik az SO meretevel
+//   2. Kep Place-elese az SO dokumentumba (File > Place Embedded)
+//   3. Kep atmeretezese hogy kitoltse az SO-t (cover logika)
+//   4. Mentes + Bezaras → visszakerul a fo PSD-be
 // photoPath: a lokalis kepfajl TELJES utvonala (a handler tolti le)
-function replaceSmartObjectContents(doc, layer, photoPath) {
+function placePhotoInSmartObject(doc, layer, photoPath) {
   // Layer aktiv legyen
   doc.activeLayer = layer;
 
-  // ActionManager: placedLayerReplaceContents
-  var desc = new ActionDescriptor();
-  var idPlacedLayerReplaceContents = stringIDToTypeID("placedLayerReplaceContents");
-  var fileRef = new ActionDescriptor();
-  fileRef.putPath(charIDToTypeID("null"), new File(photoPath));
-  desc.putPath(charIDToTypeID("null"), new File(photoPath));
-  executeAction(idPlacedLayerReplaceContents, desc, DialogModes.NO);
+  // 1. Smart Object megnyitasa szerkesztesre
+  //    ActionManager: editContents (dupla klikk az SO-ra)
+  var descEdit = new ActionDescriptor();
+  var refEdit = new ActionReference();
+  refEdit.putEnumerated(
+    stringIDToTypeID("smartObject"),
+    stringIDToTypeID("ordinal"),
+    stringIDToTypeID("targetEnum")
+  );
+  descEdit.putReference(charIDToTypeID("null"), refEdit);
+  executeAction(stringIDToTypeID("placedLayerEditContents"), descEdit, DialogModes.NO);
+
+  // Most az SO belso dokumentuma az aktiv
+  var soDoc = app.activeDocument;
+  var soWidth = soDoc.width.as("px");
+  var soHeight = soDoc.height.as("px");
+
+  // 2. Kep behelyezese Place Embedded-del
+  var descPlace = new ActionDescriptor();
+  descPlace.putPath(charIDToTypeID("null"), new File(photoPath));
+  descPlace.putEnumerated(
+    charIDToTypeID("FTcs"),
+    charIDToTypeID("QCSt"),
+    charIDToTypeID("Qcsa")  // Fit
+  );
+  // Offset nullazas (kozepre kerul)
+  descPlace.putUnitDouble(charIDToTypeID("Ofst"), charIDToTypeID("#Pxl"), 0);
+  descPlace.putUnitDouble(charIDToTypeID("OfsY"), charIDToTypeID("#Pxl"), 0);
+  executeAction(stringIDToTypeID("placeEvent"), descPlace, DialogModes.NO);
+
+  // A Place utan a kep meg transform modban van — commit-oljuk
+  // A behelyezett layer most az activeLayer
+  var placedLayer = soDoc.activeLayer;
+
+  // 3. Cover logika: atmeretezni hogy kitoltse az SO-t (nincs ures terulet)
+  //    A Place "Fit" modban a kisebb oldalra illeszti, nekunk a nagyobbra kell
+  var placedBounds = placedLayer.bounds;
+  var placedW = placedBounds[2].as("px") - placedBounds[0].as("px");
+  var placedH = placedBounds[3].as("px") - placedBounds[1].as("px");
+
+  if (placedW > 0 && placedH > 0) {
+    var scaleX = (soWidth / placedW) * 100;
+    var scaleY = (soHeight / placedH) * 100;
+    var scaleFactor = Math.max(scaleX, scaleY); // cover = nagyobb skala
+
+    if (Math.abs(scaleFactor - 100) > 0.5) {
+      placedLayer.resize(scaleFactor, scaleFactor, AnchorPosition.MIDDLECENTER);
+    }
+
+    // Kozepre igazitas
+    var newBounds = placedLayer.bounds;
+    var newW = newBounds[2].as("px") - newBounds[0].as("px");
+    var newH = newBounds[3].as("px") - newBounds[1].as("px");
+    var offsetX = (soWidth - newW) / 2 - newBounds[0].as("px");
+    var offsetY = (soHeight - newH) / 2 - newBounds[1].as("px");
+    placedLayer.translate(new UnitValue(offsetX, "px"), new UnitValue(offsetY, "px"));
+  }
+
+  // 4. Flatten (egyetlen layer legyen az SO-ban)
+  soDoc.flatten();
+
+  // 5. Mentes + Bezaras (Ctrl+S, Ctrl+W)
+  soDoc.save();
+  soDoc.close(SaveOptions.DONOTSAVECHANGES); // mar mentettuk
 }
 
 // --- JSON fajl beolvasasa ---

@@ -79,14 +79,22 @@ function log(msg) {
         created++;
 
         // Foto behelyezese ha van photoPath
+        // Flow: SO megnyitas → kep Place → cover meretezes → mentes → bezaras
         if (item.photoPath) {
           try {
-            // Az activeLayer most a placeholder SO (createSmartObjectPlaceholder allitja)
-            replaceSmartObjectContents(doc, doc.activeLayer, item.photoPath);
+            placePhotoInSmartObject(doc, doc.activeLayer, item.photoPath);
             photosPlaced++;
+            // A placePhotoInSmartObject bezarja az SO-t, tehat a fo doc ujra aktiv
+            doc = app.activeDocument; // biztonsagi ujraolvasas
           } catch (photoErr) {
             log("[JSX] FIGYELEM: foto behelyezes sikertelen (" + item.layerName + "): " + photoErr.message);
-            // Nem noveljuk az errors-t — a placeholder megmaradt
+            // Ha az SO megnyitva maradt, probaljuk bezarni
+            try {
+              if (app.documents.length > 1) {
+                app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+              }
+            } catch (closeErr) { /* ignore */ }
+            doc = app.activeDocument;
           }
         }
       } catch (e) {

@@ -88,6 +88,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly selectedSize = signal<TabloSize | null>(null);
   readonly loadingSizes = signal(false);
   readonly generating = signal(false);
+  readonly arranging = signal(false);
 
   /** Projekt személyei (diákok + tanárok) */
   readonly persons = signal<TabloPersonItem[]>([]);
@@ -286,6 +287,27 @@ export class ProjectTabloEditorComponent implements OnInit {
       }
     } finally {
       this.generating.set(false);
+    }
+  }
+
+  async arrangeGrid(): Promise<void> {
+    const size = this.selectedSize();
+    if (!size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    this.clearMessages();
+    this.arranging.set(true);
+    try {
+      const result = await this.ps.arrangeGrid(boardSize);
+      if (result.success) {
+        this.successMessage.set('Rácsba rendezés kész!');
+      } else {
+        this.error.set(result.error || 'Rácsba rendezés sikertelen.');
+      }
+    } finally {
+      this.arranging.set(false);
     }
   }
 

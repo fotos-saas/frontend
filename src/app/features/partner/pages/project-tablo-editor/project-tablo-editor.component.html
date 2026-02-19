@@ -137,6 +137,41 @@
             </button>
           }
         </div>
+
+        <!-- Rácsba rendezés (meglévő PSD-n) -->
+        <div class="command-card">
+          <div class="command-card__header">
+            <lucide-icon [name]="ICONS.GRID" [size]="20" />
+            <div>
+              <h3 class="command-card__title">Rácsba rendezés</h3>
+              <p class="command-card__desc">A megnyitott PSD képeit rendezi rácsba a beállított gap és margó értékek alapján.</p>
+            </div>
+          </div>
+
+          @if (!isConfigured()) {
+            <div class="command-card__disabled">
+              Először állítsd be a Photoshop-ot a Beállítások fülön.
+            </div>
+          } @else if (!selectedSize()) {
+            <div class="command-card__disabled">
+              Válassz méretet a fenti szekciónál.
+            </div>
+          } @else {
+            <button
+              class="btn btn--primary btn--generate"
+              [disabled]="arranging()"
+              (click)="arrangeGrid()"
+            >
+              @if (arranging()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                Rendezés...
+              } @else {
+                <lucide-icon [name]="ICONS.GRID" [size]="16" />
+                Rácsba rendezés
+              }
+            </button>
+          }
+        </div>
       </div>
     }
 

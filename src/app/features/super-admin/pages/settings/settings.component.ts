@@ -167,7 +167,7 @@ export class SettingsComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.sendingTest.set(false);
-          this.toast.success(res.message);
+          this.toast.success('Email elküldve', res.message);
         },
         error: () => {
           this.sendingTest.set(false);

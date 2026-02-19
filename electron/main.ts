@@ -549,7 +549,7 @@ app.whenReady().then(() => {
           "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.tablostudio.hu; " +
           "style-src 'self' 'unsafe-inline' https://app.tablostudio.hu https://fonts.googleapis.com; " +
           "font-src 'self' https://fonts.gstatic.com; " +
-          "img-src 'self' data: blob: https:; " +
+          `img-src 'self' data: blob: https:${isDev ? ' http://localhost:*' : ''}; ` +
           `connect-src ${connectSrc}; ` +
           "media-src 'self' blob:; " +
           "frame-src 'none';"

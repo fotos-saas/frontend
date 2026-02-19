@@ -1,8 +1,11 @@
 /**
  * add-guides.jsx — Tabló margó guide-ok hozzáadása (4 oldal)
  *
- * A CONFIG.MARGIN_CM értéke alapján 4 guide-ot helyez el:
+ * A JSON marginCm értéke alapján 4 guide-ot helyez el pixelben:
  *   - bal, jobb, felső, alsó
+ *
+ * A cm → px átszámítás a dokumentum DPI-jével történik.
+ * A ruler-t PIXELS-re állítja a pontos guide elhelyezéshez.
  *
  * JSON formátum (Electron handler készíti):
  * {
@@ -27,28 +30,41 @@ var _doc, _data;
 function _doAddGuides() {
   var marginCm = _data.marginCm;
 
-  // Dokumentum meretei cm-ben
-  var docWidthCm = _doc.width.as("cm");
-  var docHeightCm = _doc.height.as("cm");
+  // Ruler egyseg pixelre allitasa (guide-ok pixelben lesznek megadva)
+  var oldRulerUnits = app.preferences.rulerUnits;
+  app.preferences.rulerUnits = Units.PIXELS;
 
-  log("[JSX] Dokumentum: " + docWidthCm.toFixed(1) + " x " + docHeightCm.toFixed(1) + " cm, margo: " + marginCm + " cm");
+  // Dokumentum DPI kiolvasasa
+  var dpi = _doc.resolution; // px/inch
+
+  // cm → px: (cm / 2.54) * dpi
+  var marginPx = Math.round((marginCm / 2.54) * dpi);
+
+  // Dokumentum meretei pixelben
+  var docWidthPx = _doc.width.as("px");
+  var docHeightPx = _doc.height.as("px");
+
+  log("[JSX] Dokumentum: " + docWidthPx + " x " + docHeightPx + " px, DPI: " + dpi + ", margo: " + marginCm + " cm = " + marginPx + " px");
 
   // Letezo guide-ok torlese (tiszta allapotbol indulunk)
   while (_doc.guides.length > 0) {
     _doc.guides[0].remove();
   }
 
-  // 4 guide hozzaadasa (cm ertekek, Photoshop UnitValue-val)
+  // 4 guide hozzaadasa PIXELBEN
   // Bal
-  _doc.guides.add(Direction.VERTICAL, new UnitValue(marginCm, "cm"));
+  _doc.guides.add(Direction.VERTICAL, new UnitValue(marginPx, "px"));
   // Jobb
-  _doc.guides.add(Direction.VERTICAL, new UnitValue(docWidthCm - marginCm, "cm"));
+  _doc.guides.add(Direction.VERTICAL, new UnitValue(docWidthPx - marginPx, "px"));
   // Felso
-  _doc.guides.add(Direction.HORIZONTAL, new UnitValue(marginCm, "cm"));
+  _doc.guides.add(Direction.HORIZONTAL, new UnitValue(marginPx, "px"));
   // Also
-  _doc.guides.add(Direction.HORIZONTAL, new UnitValue(docHeightCm - marginCm, "cm"));
+  _doc.guides.add(Direction.HORIZONTAL, new UnitValue(docHeightPx - marginPx, "px"));
 
-  log("[JSX] 4 guide hozzaadva (" + marginCm + " cm margo)");
+  // Ruler visszaallitasa az eredeti egysegre
+  app.preferences.rulerUnits = oldRulerUnits;
+
+  log("[JSX] 4 guide hozzaadva (" + marginCm + " cm = " + marginPx + " px margo)");
 }
 
 (function () {

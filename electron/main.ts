@@ -531,32 +531,26 @@ app.whenReady().then(() => {
   // Start network monitoring
   startNetworkMonitoring();
 
-  // Set Content Security Policy
-  const connectSrc = isDev
-    ? "'self' http://localhost:* ws://localhost:* https://api.tablostudio.hu wss://api.tablostudio.hu https://app.tablostudio.hu https://*.ingest.de.sentry.io"
-    : "'self' https://api.tablostudio.hu wss://api.tablostudio.hu https://app.tablostudio.hu https://*.ingest.de.sentry.io";
-
-  const defaultSrc = isDev
-    ? "'self' http://localhost:* https://app.tablostudio.hu https://api.tablostudio.hu"
-    : "'self' https://app.tablostudio.hu https://api.tablostudio.hu";
-
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Content-Security-Policy': [
-          `default-src ${defaultSrc}; ` +
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.tablostudio.hu; " +
-          "style-src 'self' 'unsafe-inline' https://app.tablostudio.hu https://fonts.googleapis.com; " +
-          "font-src 'self' https://fonts.gstatic.com; " +
-          `img-src 'self' data: blob: https:${isDev ? ' http://localhost:*' : ''}; ` +
-          `connect-src ${connectSrc}; ` +
-          "media-src 'self' blob:; " +
-          "frame-src 'none';"
-        ]
-      }
+  // Set Content Security Policy (csak production-ben — dev-ben az index.html meta CSP eleg)
+  if (!isDev) {
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Content-Security-Policy': [
+            "default-src 'self' https://app.tablostudio.hu https://api.tablostudio.hu; " +
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.tablostudio.hu; " +
+            "style-src 'self' 'unsafe-inline' https://app.tablostudio.hu https://fonts.googleapis.com; " +
+            "font-src 'self' https://fonts.gstatic.com; " +
+            "img-src 'self' data: blob: https:; " +
+            "connect-src 'self' https://api.tablostudio.hu wss://api.tablostudio.hu https://app.tablostudio.hu https://*.ingest.de.sentry.io; " +
+            "media-src 'self' blob:; " +
+            "frame-src 'none';"
+          ]
+        }
+      });
     });
-  });
+  }
 
   // Setup macOS Dock Menu
   if (process.platform === 'darwin') {

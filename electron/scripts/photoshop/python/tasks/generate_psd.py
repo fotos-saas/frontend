@@ -276,8 +276,14 @@ def main() -> None:
                         help='JSON fajl a szemelyek listajával')
     args = parser.parse_args()
 
+    print(f'[DEBUG] Script indulas: width={args.width_cm}cm, '
+          f'height={args.height_cm}cm, dpi={args.dpi}, mode={args.mode}')
+    print(f'[DEBUG] Output: {args.output}')
+    print(f'[DEBUG] Persons JSON: {args.persons_json or "NINCS"}')
+
     width_px = cm_to_px(args.width_cm, args.dpi)
     height_px = cm_to_px(args.height_cm, args.dpi)
+    print(f'[DEBUG] Pixel meret: {width_px}x{height_px}px')
 
     if width_px <= 0 or height_px <= 0:
         print(f'Hibas meret: {width_px}x{height_px}px', file=sys.stderr)
@@ -291,20 +297,32 @@ def main() -> None:
     mode = args.mode.upper()
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    print(f'[DEBUG] Output mappa letezik: {output_path.parent}')
 
     # Szemelyek betoltese JSON-bol (ha megadtak)
     persons = None
     if args.persons_json:
         json_path = Path(args.persons_json)
         if not json_path.exists():
+            print(f'[DEBUG] HIBA: Persons JSON nem letezik: {json_path}')
             print(f'Szemelyek JSON fajl nem talalhato: {json_path}',
                   file=sys.stderr)
             sys.exit(1)
         with open(json_path, 'r', encoding='utf-8') as f:
-            persons = json.load(f)
-        print(f'Szemelyek betoltve: {len(persons)} fo')
+            raw = f.read()
+            persons = json.loads(raw)
+        students = [p for p in persons if p.get('type') != 'teacher']
+        teachers = [p for p in persons if p.get('type') == 'teacher']
+        print(f'[DEBUG] Persons JSON beolvasva: {len(persons)} fo '
+              f'({len(students)} diak, {len(teachers)} tanar)')
+        if persons:
+            print(f'[DEBUG] Elso 3 szemely: '
+                  f'{[p["name"] for p in persons[:3]]}')
+    else:
+        print('[DEBUG] Nincs persons-json parameter — ures Names/ mappastruktura')
 
     # --- PSD letrehozasa ---
+    print(f'[DEBUG] PSD letrehozasa: {width_px}x{height_px}px, {mode}')
     psd = PSDImage.new(mode=mode, size=(width_px, height_px))
 
     # DPI beallitas (ResolutionInfo resource)
@@ -318,41 +336,59 @@ def main() -> None:
         key=Resource.RESOLUTION_INFO.value,
         data=res_data,
     )
+    print(f'[DEBUG] DPI beallitva: {args.dpi}')
 
     # --- Mappastruktura ---
-    # Images/ (ures Students + Teachers almappak)
+    print('[DEBUG] Backgrounds/ csoport letrehozasa')
+    backgrounds = psd.create_group(name='Backgrounds')
+
+    print('[DEBUG] Images/ csoport letrehozasa (Students + Teachers)')
     images = psd.create_group(
         layer_list=create_empty_sub_pair(psd), name='Images')
 
-    # Positions/ (ures Students + Teachers almappak)
+    print('[DEBUG] Positions/ csoport letrehozasa (Students + Teachers)')
     positions = psd.create_group(
         layer_list=create_empty_sub_pair(psd), name='Positions')
 
     # Names/ (TypeLayer-ekkel ha vannak szemelyek)
     if persons:
-        names = psd.create_group(
-            layer_list=create_name_layers(psd, persons), name='Names')
+        print(f'[DEBUG] Names/ csoport letrehozasa TypeLayer-ekkel '
+              f'({len(persons)} szemely)')
+        try:
+            name_layers = create_name_layers(psd, persons)
+            print(f'[DEBUG] Name layerek elkeszultek: '
+                  f'{len(name_layers)} alcsoport')
+            names = psd.create_group(
+                layer_list=name_layers, name='Names')
+            print('[DEBUG] Names/ csoport hozzaadva')
+        except Exception as e:
+            print(f'[DEBUG] HIBA Names/ letrehozasanal: {e}',
+                  flush=True)
+            raise
     else:
+        print('[DEBUG] Names/ csoport letrehozasa (ures, nincs szemely)')
         names = psd.create_group(
             layer_list=create_empty_sub_pair(psd), name='Names')
 
-    # Subtitles/ (almappak nelkul)
+    print('[DEBUG] Subtitles/ csoport letrehozasa')
     subtitles = psd.create_group(name='Subtitles')
 
-    # Backgrounds/ (legalul)
-    backgrounds = psd.create_group(name='Backgrounds')
-
     # Csoportok hozzaadasa (Photoshop-ban alulrol felfele jelenik meg)
+    print('[DEBUG] Csoportok hozzaadasa a PSD-hez...')
     psd.append(backgrounds)
     psd.append(images)
     psd.append(positions)
     psd.append(names)
     psd.append(subtitles)
+    print('[DEBUG] Minden csoport hozzaadva')
 
     # --- Mentes ---
+    print(f'[DEBUG] PSD mentes: {output_path}')
     psd.save(str(output_path))
 
+    file_size = output_path.stat().st_size
     person_info = f', {len(persons)} szemely' if persons else ''
+    print(f'[DEBUG] PSD mentve! Meret: {file_size} byte')
     print(f'PSD letrehozva: {output_path} '
           f'({width_px}x{height_px}px, {args.dpi} DPI, {mode}{person_info})')
 

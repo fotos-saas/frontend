@@ -217,7 +217,7 @@ export class PhotoshopService {
       brandName?: string | null;
       persons?: Array<{ id: number; name: string; type: string }>;
     },
-  ): Promise<{ success: boolean; error?: string; outputPath?: string }> {
+  ): Promise<{ success: boolean; error?: string; outputPath?: string; stdout?: string; stderr?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
     const dimensions = this.parseSizeValue(size.value);
@@ -253,16 +253,16 @@ export class PhotoshopService {
       });
 
       if (!genResult.success) {
-        return { success: false, error: genResult.error || 'PSD generálás sikertelen' };
+        return { success: false, error: genResult.error || 'PSD generálás sikertelen', stdout: genResult.stdout, stderr: genResult.stderr };
       }
 
       // Megnyitás Photoshopban
       const openResult = await this.api.openFile(outputPath);
       if (!openResult.success) {
-        return { success: false, error: openResult.error || 'Nem sikerült megnyitni a PSD-t' };
+        return { success: false, error: openResult.error || 'Nem sikerült megnyitni a PSD-t', stdout: genResult.stdout, stderr: genResult.stderr };
       }
 
-      return { success: true, outputPath };
+      return { success: true, outputPath, stdout: genResult.stdout, stderr: genResult.stderr };
     } catch (err) {
       this.logger.error('PSD generalas hiba', err);
       return { success: false, error: 'Váratlan hiba történt a PSD generálás során' };

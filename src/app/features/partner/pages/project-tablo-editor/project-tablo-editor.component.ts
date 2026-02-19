@@ -317,14 +317,34 @@ export class ProjectTabloEditorComponent implements OnInit {
 
       const result = await this.ps.generateAndOpenPsd(size, context);
 
-      // 8. IPC eredmény
+      // 8. Python stdout logok feldolgozása
+      if (result.stdout) {
+        const lines = result.stdout.split('\n').filter(l => l.trim());
+        for (const line of lines) {
+          if (line.startsWith('[DEBUG]')) {
+            const msg = line.replace('[DEBUG] ', '');
+            const isError = msg.startsWith('HIBA');
+            this.addLog('Python', msg, isError ? 'error' : 'info');
+          } else {
+            this.addLog('Python stdout', line, 'info');
+          }
+        }
+      }
+      if (result.stderr) {
+        const lines = result.stderr.split('\n').filter(l => l.trim());
+        for (const line of lines) {
+          this.addLog('Python stderr', line, 'error');
+        }
+      }
+
+      // 9. IPC eredmény
       if (result.success) {
         this.addLog('IPC eredmény', `Sikeres! outputPath=${result.outputPath}`, 'ok');
       } else {
         this.addLog('IPC eredmény', `HIBA: ${result.error}`, 'error');
       }
 
-      // 9. Végeredmény
+      // 10. Végeredmény
       if (result.success) {
         this.addLog('Végeredmény', 'PSD generálva és megnyitva!', 'ok');
       } else {

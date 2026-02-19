@@ -236,7 +236,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         log.info(`Szemelyek JSON irva: ${personsJsonPath} (${params.persons.length} fo)`);
       }
 
-      return new Promise<{ success: boolean; error?: string }>((resolve) => {
+      return new Promise<{ success: boolean; error?: string; stdout?: string; stderr?: string }>((resolve) => {
         execFile('python3', args, { timeout: 30000 }, (error, stdout, stderr) => {
           // Temp fajl torlese
           if (personsJsonPath && fs.existsSync(personsJsonPath)) {
@@ -245,11 +245,11 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
           if (error) {
             log.error('PSD generalas hiba:', error.message, stderr);
-            resolve({ success: false, error: stderr || error.message });
+            resolve({ success: false, error: stderr || error.message, stdout: stdout || '', stderr: stderr || '' });
             return;
           }
           log.info('PSD generalva:', stdout.trim());
-          resolve({ success: true });
+          resolve({ success: true, stdout: stdout || '', stderr: stderr || '' });
         });
       });
     } catch (error) {

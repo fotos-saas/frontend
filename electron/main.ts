@@ -576,7 +576,7 @@ app.whenReady().then(() => {
         }
       }
     ]);
-    app.dock.setMenu(dockMenu);
+    app.dock?.setMenu(dockMenu);
   }
 
   createWindow();
@@ -714,7 +714,7 @@ ipcMain.handle('set-badge-string', async (_event, text: string) => {
 
   try {
     // app.dock.setBadge allows string badges like "99+" or "!"
-    app.dock.setBadge(text.slice(0, 10));
+    app.dock?.setBadge(text.slice(0, 10));
     return true;
   } catch (error) {
     console.error('Failed to set badge string:', error);
@@ -727,7 +727,7 @@ ipcMain.handle('clear-badge', async () => {
   try {
     app.setBadgeCount(0);
     if (process.platform === 'darwin') {
-      app.dock.setBadge('');
+      app.dock?.setBadge('');
     }
     return true;
   } catch (error) {
@@ -746,7 +746,7 @@ ipcMain.handle('dock-bounce', async (_event, type: 'critical' | 'informational' 
 
   try {
     // Returns bounce request id, or -1 if bouncing is not supported
-    const bounceId = app.dock.bounce(type);
+    const bounceId = app.dock?.bounce(type) ?? -1;
     return bounceId;
   } catch (error) {
     console.error('Failed to bounce dock:', error);
@@ -761,7 +761,7 @@ ipcMain.handle('dock-cancel-bounce', async (_event, bounceId: number) => {
   }
 
   try {
-    app.dock.cancelBounce(bounceId);
+    app.dock?.cancelBounce(bounceId);
     return true;
   } catch (error) {
     console.error('Failed to cancel dock bounce:', error);

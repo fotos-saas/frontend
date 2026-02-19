@@ -143,6 +143,7 @@
     <!-- ============ Beállítások tab ============ -->
     @if (activeTab() === 'settings') {
       <div class="tab-content" role="tabpanel">
+        <!-- Photoshop elérési út -->
         <div class="settings-card">
           <div class="settings-card__header">
             <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="20" />
@@ -166,6 +167,54 @@
               <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
               Tallózás
             </button>
+          </div>
+        </div>
+
+        <!-- Tabló margó -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <lucide-icon [name]="ICONS.RULER" [size]="20" />
+            <div>
+              <h3 class="settings-card__title">Tabló margó</h3>
+              <p class="settings-card__desc">Guide-ok távolsága a PSD szélétől (cm). 0 = nincs guide.</p>
+            </div>
+          </div>
+
+          <div class="settings-input-row">
+            <input
+              type="number"
+              class="settings-input"
+              [value]="marginCm()"
+              min="0"
+              max="10"
+              step="0.5"
+              (change)="setMarginValue($event)"
+            />
+            <span class="settings-input-unit">cm</span>
+          </div>
+        </div>
+
+        <!-- Képméret -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
+            <div>
+              <h3 class="settings-card__title">Képméret</h3>
+              <p class="settings-card__desc">Diák/tanár fotó layer mérete a tablón (cm). A Smart Object belső mérete változatlan marad.</p>
+            </div>
+          </div>
+
+          <div class="settings-input-row">
+            <input
+              type="number"
+              class="settings-input"
+              [value]="photoSizeCm()"
+              min="1"
+              max="30"
+              step="0.5"
+              (change)="setPhotoSizeValue($event)"
+            />
+            <span class="settings-input-unit">cm</span>
           </div>
         </div>
       </div>

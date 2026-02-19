@@ -137,7 +137,11 @@
   }
 }
 
-// Beállítások kártya
+// Beállítások kártya (egymás után, kis térközzel)
+.settings-card + .settings-card {
+  margin-top: 16px;
+}
+
 .settings-card {
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--border-color, #e5e7eb);
@@ -191,6 +195,45 @@
     font-style: italic;
     flex: 1;
   }
+}
+
+// Beállítások input sor (szám + mértékegység)
+.settings-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-input {
+  width: 80px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  background: var(--card-bg, #ffffff);
+  color: var(--text-primary, #1f2937);
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color, #7c3aed);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  }
+
+  // Spinnerek eltavolitasa Webkit + Firefox
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  -moz-appearance: textfield;
+}
+
+.settings-input-unit {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #6b7280);
+  font-weight: 500;
 }
 
 // Méretválasztó rács

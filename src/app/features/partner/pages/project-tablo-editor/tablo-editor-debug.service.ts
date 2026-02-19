@@ -250,6 +250,7 @@ export class TabloEditorDebugService {
               widthCm: 10.4,
               heightCm: 15.4,
               dpi: 300,
+              photoSizeCm: this.ps.photoSizeCm(),
             },
             targetDocName: psdFileName,
           });

@@ -30,6 +30,10 @@ function log(msg) {
 var _doc, _data, _created = 0, _photosPlaced = 0, _errors = 0;
 
 function _doAddImageLayers() {
+  // photoSizeCm: ha megvan, a layer-t atmeretezzuk erre (a SO belso merete marad)
+  var photoSizeCm = _data.photoSizeCm || 0;
+  var dpi = _doc.resolution; // dokumentum DPI
+
   for (var i = 0; i < _data.layers.length; i++) {
     var item = _data.layers[i];
 
@@ -67,6 +71,27 @@ function _doAddImageLayers() {
             }
           } catch (closeErr) { /* ignore */ }
           _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+        }
+      }
+
+      // Layer atmeretezese a photoSizeCm-re (ha be van allitva)
+      // A SO belso merete valtozatlan marad, csak a layer transform valtozik
+      if (photoSizeCm > 0) {
+        try {
+          // Az aktualis layer a frissen letrehozott SO
+          var soLayer = _doc.activeLayer;
+          var bounds = soLayer.bounds;
+          var currentHeightPx = bounds[3].as("px") - bounds[1].as("px");
+
+          // Celmerete pixelben: (photoSizeCm / 2.54) * docDpi
+          var targetHeightPx = Math.round((photoSizeCm / 2.54) * dpi);
+
+          if (currentHeightPx > 0 && Math.abs(currentHeightPx - targetHeightPx) > 1) {
+            var scalePercent = (targetHeightPx / currentHeightPx) * 100;
+            soLayer.resize(scalePercent, scalePercent, AnchorPosition.MIDDLECENTER);
+          }
+        } catch (resizeErr) {
+          log("[JSX] FIGYELEM: layer atmeretezes sikertelen (" + item.layerName + "): " + resizeErr.message);
         }
       }
     } catch (e) {

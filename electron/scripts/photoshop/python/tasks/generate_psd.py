@@ -350,25 +350,13 @@ def main() -> None:
     positions = psd.create_group(
         layer_list=create_empty_sub_pair(psd), name='Positions')
 
-    # Names/ (TypeLayer-ekkel ha vannak szemelyek)
+    # Names/ (ures mappastruktura — TypeLayer-ek kesobb JSX-szel)
     if persons:
-        print(f'[DEBUG] Names/ csoport letrehozasa TypeLayer-ekkel '
-              f'({len(persons)} szemely)')
-        try:
-            name_layers = create_name_layers(psd, persons)
-            print(f'[DEBUG] Name layerek elkeszultek: '
-                  f'{len(name_layers)} alcsoport')
-            names = psd.create_group(
-                layer_list=name_layers, name='Names')
-            print('[DEBUG] Names/ csoport hozzaadva')
-        except Exception as e:
-            print(f'[DEBUG] HIBA Names/ letrehozasanal: {e}',
-                  flush=True)
-            raise
+        print(f'[DEBUG] Names/ csoport letrehozasa (ures, {len(persons)} szemely kesobb JSX-bol)')
     else:
         print('[DEBUG] Names/ csoport letrehozasa (ures, nincs szemely)')
-        names = psd.create_group(
-            layer_list=create_empty_sub_pair(psd), name='Names')
+    names = psd.create_group(
+        layer_list=create_empty_sub_pair(psd), name='Names')
 
     print('[DEBUG] Subtitles/ csoport letrehozasa')
     subtitles = psd.create_group(name='Subtitles')

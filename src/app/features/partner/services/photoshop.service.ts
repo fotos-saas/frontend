@@ -20,6 +20,12 @@ export class PhotoshopService {
   /** Photoshop eleresi ut */
   readonly path = signal<string | null>(null);
 
+  /** Munka mappa */
+  readonly workDir = signal<string | null>(null);
+
+  /** Tabló margó (cm) */
+  readonly marginCm = signal<number>(2);
+
   /** Konfiguralt-e (van mentett path) */
   readonly isConfigured = computed(() => !!this.path());
 
@@ -36,9 +42,19 @@ export class PhotoshopService {
 
     this.checking.set(true);
     try {
-      const result = await this.api.checkInstalled();
+      const [result, savedWorkDir, savedMargin] = await Promise.all([
+        this.api.checkInstalled(),
+        this.api.getWorkDir(),
+        this.api.getMargin(),
+      ]);
       if (result.found && result.path) {
         this.path.set(result.path);
+      }
+      if (savedWorkDir) {
+        this.workDir.set(savedWorkDir);
+      }
+      if (savedMargin !== undefined) {
+        this.marginCm.set(savedMargin);
       }
     } catch (err) {
       this.logger.error('Photoshop detektalasi hiba', err);
@@ -74,6 +90,58 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('Photoshop inditasi hiba', err);
       return { success: false, error: 'Nem sikerult elinditani' };
+    }
+  }
+
+  /** Munka mappa beallitasa */
+  async setWorkDir(dirPath: string): Promise<boolean> {
+    if (!this.api) return false;
+
+    try {
+      const result = await this.api.setWorkDir(dirPath);
+      if (result.success) {
+        this.workDir.set(dirPath);
+        return true;
+      }
+      this.logger.warn('Munka mappa beallitas sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Munka mappa beallitasi hiba', err);
+      return false;
+    }
+  }
+
+  /** Munka mappa tallozas */
+  async browseForWorkDir(): Promise<string | null> {
+    if (!this.api) return null;
+
+    try {
+      const result = await this.api.browseWorkDir();
+      if (!result.cancelled && result.path) {
+        return result.path;
+      }
+      return null;
+    } catch (err) {
+      this.logger.error('Munka mappa browse hiba', err);
+      return null;
+    }
+  }
+
+  /** Margó beállítása */
+  async setMargin(marginCm: number): Promise<boolean> {
+    if (!this.api) return false;
+
+    try {
+      const result = await this.api.setMargin(Number(marginCm));
+      if (result.success) {
+        this.marginCm.set(marginCm);
+        return true;
+      }
+      this.logger.warn('Margó beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Margó beállítási hiba', err);
+      return false;
     }
   }
 

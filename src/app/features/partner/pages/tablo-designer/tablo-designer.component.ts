@@ -170,7 +170,7 @@ export class TabloDesignerComponent implements OnInit {
 
     try {
       // 1. Margó mentése (csak Electron-ban, böngészőben skip)
-      const clampedMargin = Math.min(10, Math.max(0, this.pendingMarginCm()));
+      const clampedMargin = Math.min(10, Math.max(0, Number(this.pendingMarginCm())));
       if (window.electronAPI?.photoshop) {
         const marginOk = await this.ps.setMargin(clampedMargin);
         if (!marginOk) {

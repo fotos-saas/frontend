@@ -51,15 +51,15 @@ function _doAddGuides() {
     _doc.guides[0].remove();
   }
 
-  // 4 guide hozzaadasa PIXELBEN
+  // 4 guide hozzaadasa PIXELBEN (sima szam — ruler PIXELS-re van allitva)
   // Bal
-  _doc.guides.add(Direction.VERTICAL, new UnitValue(marginPx, "px"));
+  _doc.guides.add(Direction.VERTICAL, marginPx);
   // Jobb
-  _doc.guides.add(Direction.VERTICAL, new UnitValue(docWidthPx - marginPx, "px"));
+  _doc.guides.add(Direction.VERTICAL, docWidthPx - marginPx);
   // Felso
-  _doc.guides.add(Direction.HORIZONTAL, new UnitValue(marginPx, "px"));
+  _doc.guides.add(Direction.HORIZONTAL, marginPx);
   // Also
-  _doc.guides.add(Direction.HORIZONTAL, new UnitValue(docHeightPx - marginPx, "px"));
+  _doc.guides.add(Direction.HORIZONTAL, docHeightPx - marginPx);
 
   // Ruler visszaallitasa az eredeti egysegre
   app.preferences.rulerUnits = oldRulerUnits;

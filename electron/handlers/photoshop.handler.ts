@@ -566,9 +566,11 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       if (!dataFilePath && params.personsData && params.personsData.length > 0) {
         const prepared = preparePersonsForJsx(params.personsData);
         personsJsonPath = path.join(app.getPath('temp'), `jsx-persons-debug-${Date.now()}.json`);
-        fs.writeFileSync(personsJsonPath, JSON.stringify(prepared), 'utf-8');
+        const jsonStr = JSON.stringify(prepared);
+        fs.writeFileSync(personsJsonPath, jsonStr, 'utf-8');
         dataFilePath = personsJsonPath;
         sendLog(`[DEBUG] Persons JSON irva: ${personsJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`, 'stdout');
+        sendLog(`[DEBUG] JSON eleje (handler): ${jsonStr.substring(0, 100)}`, 'stdout');
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath);

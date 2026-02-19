@@ -150,7 +150,7 @@ export class TabloEditorDebugService {
 
     // 10. PSD megnyitás + JSX text layerek + image layerek
     if (genResult.success && personsData.length > 0) {
-      await this.runJsxDebugPhase(api, outputPath, personsData);
+      await this.runJsxDebugPhase(api, outputPath, personsData, size);
     }
 
     // 11. Végeredmény
@@ -166,6 +166,7 @@ export class TabloEditorDebugService {
     api: any,
     outputPath: string,
     personsData: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
+    size?: TabloSize,
   ): Promise<void> {
     this.addLog('PSD megnyitás', 'Fájl megnyitása Photoshopban...', 'info');
     try {
@@ -263,6 +264,47 @@ export class TabloEditorDebugService {
         imgUnsubscribe?.();
 
         this.addLog('JSX Image', imgResult.success ? 'Image layerek sikeresen hozzáadva' : `HIBA: ${imgResult.error}`, imgResult.success ? 'ok' : 'error');
+
+        // Grid elrendezés (image layerek pozícionálása rácsba)
+        if (imgResult.success) {
+          this.addLog('Grid', 'Rácsba rendezés indítása...', 'info');
+
+          const dims = size ? this.ps.parseSizeValue(size.value) : null;
+          if (dims) {
+            const gridUnsubscribe = api.onJsxDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
+              if (data.stream === 'stderr') {
+                this.addLog('Grid stderr', data.line, 'error');
+              } else {
+                this.addLog('Grid', data.line.replace('[JSX] ', ''), 'info');
+              }
+            });
+
+            let gridResult: any;
+            try {
+              gridResult = await api.runJsxDebug({
+                scriptName: 'actions/arrange-grid.jsx',
+                jsonData: {
+                  boardWidthCm: dims.widthCm,
+                  boardHeightCm: dims.heightCm,
+                  marginCm: this.ps.marginCm(),
+                  studentSizeCm: this.ps.studentSizeCm(),
+                  teacherSizeCm: this.ps.teacherSizeCm(),
+                  gapCm: this.ps.gapCm(),
+                },
+                targetDocName: psdFileName,
+              });
+            } catch (gridErr) {
+              this.addLog('Grid', `EXCEPTION: ${String(gridErr)}`, 'error');
+              gridUnsubscribe?.();
+              return;
+            }
+            gridUnsubscribe?.();
+
+            this.addLog('Grid', gridResult.success ? 'Rácsba rendezés sikeres' : `HIBA: ${gridResult.error}`, gridResult.success ? 'ok' : 'error');
+          } else {
+            this.addLog('Grid', 'Méret nem parszolható — grid kihagyva', 'warn');
+          }
+        }
       }
     } catch (openErr) {
       this.addLog('PSD megnyitás', `EXCEPTION: ${String(openErr)}`, 'error');

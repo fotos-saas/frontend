@@ -14,6 +14,7 @@ interface PhotoshopSchema {
   tabloMarginCm: number;
   tabloStudentSizeCm: number;
   tabloTeacherSizeCm: number;
+  tabloGapCm: number;
 }
 
 const psStore = new Store<PhotoshopSchema>({
@@ -24,6 +25,7 @@ const psStore = new Store<PhotoshopSchema>({
     tabloMarginCm: 2,
     tabloStudentSizeCm: 6,
     tabloTeacherSizeCm: 6,
+    tabloGapCm: 2,
   },
 });
 
@@ -416,6 +418,27 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     } catch (error) {
       log.error('Tablo tanar kepmeret beallitasi hiba:', error);
       return { success: false, error: 'Nem sikerult menteni a kepmeret erteket' };
+    }
+  });
+
+  // Get tablo gap (kepek kozotti tavolsag)
+  ipcMain.handle('photoshop:get-gap', () => {
+    return psStore.get('tabloGapCm', 2);
+  });
+
+  // Set tablo gap
+  ipcMain.handle('photoshop:set-gap', (_event, gapCm: number) => {
+    try {
+      if (typeof gapCm !== 'number' || gapCm < 0 || gapCm > 10) {
+        return { success: false, error: 'Ervenytelen gap ertek (0-10 cm)' };
+      }
+
+      psStore.set('tabloGapCm', gapCm);
+      log.info(`Tablo gap beallitva: ${gapCm} cm`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo gap beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a gap erteket' };
     }
   });
 

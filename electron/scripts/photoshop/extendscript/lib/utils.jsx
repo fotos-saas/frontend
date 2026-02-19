@@ -261,6 +261,25 @@ function resizeGroupLayers(doc, groupPath, targetWidthPx) {
   return resized;
 }
 
+// --- Layer pozicio nullazasa (origoba mozgatas) ---
+// A layer bounds alapjan kiszamolja mennyit kell mozditani,
+// hogy a bal felso sarka a dokumentum origojaba (0,0) keruljon.
+function resetLayerPosition(layer) {
+  var bounds = layer.bounds;
+  var dx = -bounds[0].as("cm");
+  var dy = -bounds[1].as("cm");
+  if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
+    layer.translate(new UnitValue(dx, "cm"), new UnitValue(dy, "cm"));
+  }
+}
+
+// --- Layer pozicionalasa cm-ben ---
+// Elobb resetLayerPosition()-nel nullazzuk, majd ide mozgatjuk.
+// leftCm, topCm: cel pozicio a dokumentum bal felso sarkatol cm-ben.
+function positionLayerCm(layer, leftCm, topCm) {
+  layer.translate(new UnitValue(leftCm, "cm"), new UnitValue(topCm, "cm"));
+}
+
 // --- JSON fajl beolvasasa ---
 // FONTOS: ExtendScript (ES3) kornyezetben NINCS JSON.parse() metodus!
 // Az egyetlen mod JSON deserializalasra az eval().

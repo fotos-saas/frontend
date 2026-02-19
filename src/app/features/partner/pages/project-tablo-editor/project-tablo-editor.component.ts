@@ -80,6 +80,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly marginCm = this.ps.marginCm;
   readonly studentSizeCm = this.ps.studentSizeCm;
   readonly teacherSizeCm = this.ps.teacherSizeCm;
+  readonly gapCm = this.ps.gapCm;
 
   /** PSD generálás */
   readonly tabloSizes = signal<TabloSize[]>([]);
@@ -170,6 +171,11 @@ export class ProjectTabloEditorComponent implements OnInit {
     if (!isNaN(v) && v >= 1 && v <= 30) await this.ps.setTeacherSize(v);
   }
 
+  async setGapValue(event: Event): Promise<void> {
+    const v = Number((event.target as HTMLInputElement).value);
+    if (!isNaN(v) && v >= 0 && v <= 10) await this.ps.setGap(v);
+  }
+
   async selectPsPath(): Promise<void> {
     this.clearMessages();
     const path = await this.ps.browseForPhotoshop();
@@ -248,6 +254,17 @@ export class ProjectTabloEditorComponent implements OnInit {
 
         const nameOk = nameResult.success;
         const imageOk = imageResult.success;
+
+        // 3. Grid elrendezés (image layerek pozícionálása rácsba)
+        if (imageOk) {
+          const boardSize = this.ps.parseSizeValue(size.value);
+          if (boardSize) {
+            const gridResult = await this.ps.arrangeGrid(boardSize, psdFileName);
+            if (!gridResult.success) {
+              this.error.set(`Grid elrendezés: ${gridResult.error}`);
+            }
+          }
+        }
 
         if (nameOk && imageOk) {
           this.successMessage.set(`PSD generálva: ${personsData.length} név + kép layer: ${size.label}`);

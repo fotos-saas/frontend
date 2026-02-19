@@ -293,6 +293,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:get-teacher-size') as Promise<number>,
     setTeacherSize: (sizeCm: number) =>
       ipcRenderer.invoke('photoshop:set-teacher-size', sizeCm) as Promise<{ success: boolean; error?: string }>,
+    getGap: () =>
+      ipcRenderer.invoke('photoshop:get-gap') as Promise<number>,
+    setGap: (gapCm: number) =>
+      ipcRenderer.invoke('photoshop:set-gap', gapCm) as Promise<{ success: boolean; error?: string }>,
     runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) =>
       ipcRenderer.invoke('photoshop:run-jsx', params) as Promise<{ success: boolean; error?: string; output?: string }>,
     runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) =>

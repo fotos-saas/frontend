@@ -32,6 +32,9 @@ export class PhotoshopService {
   /** Tanár fotó layer mérete (cm) */
   readonly teacherSizeCm = signal<number>(6);
 
+  /** Képek közötti távolság (cm) */
+  readonly gapCm = signal<number>(2);
+
   /** Konfiguralt-e (van mentett path) */
   readonly isConfigured = computed(() => !!this.path());
 
@@ -51,12 +54,13 @@ export class PhotoshopService {
       const safe = <T>(fn: (() => Promise<T>) | undefined, fallback: T): Promise<T> =>
         typeof fn === 'function' ? fn().catch(() => fallback) : Promise.resolve(fallback);
 
-      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize] = await Promise.all([
+      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize, savedGap] = await Promise.all([
         this.api.checkInstalled(),
         safe(this.api.getWorkDir, null as string | null),
         safe(this.api.getMargin, undefined as number | undefined),
         safe(this.api.getStudentSize, undefined as number | undefined),
         safe(this.api.getTeacherSize, undefined as number | undefined),
+        safe(this.api.getGap, undefined as number | undefined),
       ]);
       if (result.found && result.path) {
         this.path.set(result.path);
@@ -72,6 +76,9 @@ export class PhotoshopService {
       }
       if (savedTeacherSize !== undefined) {
         this.teacherSizeCm.set(savedTeacherSize);
+      }
+      if (savedGap !== undefined) {
+        this.gapCm.set(savedGap);
       }
     } catch (err) {
       this.logger.error('Photoshop detektalasi hiba', err);
@@ -323,6 +330,55 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('JSX addImageLayers hiba', err);
       return { success: false, error: 'Váratlan hiba az image layerek hozzáadásakor' };
+    }
+  }
+
+  /** Gap (képek közötti távolság) beállítása */
+  async setGap(gapCm: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setGap !== 'function') return false;
+
+    try {
+      const result = await this.api.setGap(Number(gapCm));
+      if (result.success) {
+        this.gapCm.set(gapCm);
+        return true;
+      }
+      this.logger.warn('Gap beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Gap beállítási hiba', err);
+      return false;
+    }
+  }
+
+  /**
+   * Grid elrendezés: layerek rácsba pozícionálása a megadott paraméterek alapján.
+   * boardSize: a tabló méretei cm-ben (widthCm, heightCm)
+   */
+  async arrangeGrid(
+    boardSize: { widthCm: number; heightCm: number },
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      const result = await this.api.runJsx({
+        scriptName: 'actions/arrange-grid.jsx',
+        jsonData: {
+          boardWidthCm: boardSize.widthCm,
+          boardHeightCm: boardSize.heightCm,
+          marginCm: this.marginCm(),
+          studentSizeCm: this.studentSizeCm(),
+          teacherSizeCm: this.teacherSizeCm(),
+          gapCm: this.gapCm(),
+        },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX arrangeGrid hiba', err);
+      return { success: false, error: 'Váratlan hiba a grid elrendezésnél' };
     }
   }
 

@@ -415,6 +415,41 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     };
   }
 
+  // Image layerek előkészítése a JSX számára
+  // Méretek cm → px átszámítása, elnevezések, csoportosítás
+  function prepareImageLayersForJsx(
+    personsData: Array<{ id: number; name: string; type: string }>,
+    imageSizeCm: { widthCm: number; heightCm: number; dpi: number },
+  ) {
+    const students = personsData.filter(p => p.type !== 'teacher');
+    const teachers = personsData.filter(p => p.type === 'teacher');
+
+    // cm → px: (cm / 2.54) * dpi
+    const widthPx = Math.round((imageSizeCm.widthCm / 2.54) * imageSizeCm.dpi);
+    const heightPx = Math.round((imageSizeCm.heightCm / 2.54) * imageSizeCm.dpi);
+
+    const layers = [
+      ...students.map(p => ({
+        layerName: sanitizeNameForLayer(p.name, p.id),
+        group: 'Students',
+        widthPx,
+        heightPx,
+      })),
+      ...teachers.map(p => ({
+        layerName: sanitizeNameForLayer(p.name, p.id),
+        group: 'Teachers',
+        widthPx,
+        heightPx,
+      })),
+    ];
+
+    return {
+      layers,
+      stats: { students: students.length, teachers: teachers.length, total: personsData.length },
+      imageSizeCm,
+    };
+  }
+
   // JSX script útvonal feloldása (dev vs packaged)
   function resolveJsxPath(scriptName: string): string {
     return app.isPackaged
@@ -476,8 +511,9 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     scriptName: string;
     dataFilePath?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
+    imageData?: { persons: Array<{ id: number; name: string; type: string }>; widthCm: number; heightCm: number; dpi: number };
   }) => {
-    let personsJsonPath: string | null = null;
+    let tempJsonPath: string | null = null;
 
     try {
       if (typeof params.scriptName !== 'string' || params.scriptName.length > 200) {
@@ -493,10 +529,23 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       let dataFilePath = params.dataFilePath;
       if (!dataFilePath && params.personsData && params.personsData.length > 0) {
         const prepared = preparePersonsForJsx(params.personsData);
-        personsJsonPath = path.join(app.getPath('temp'), `jsx-persons-${Date.now()}.json`);
-        fs.writeFileSync(personsJsonPath, JSON.stringify(prepared), 'utf-8');
-        dataFilePath = personsJsonPath;
-        log.info(`JSX persons JSON irva: ${personsJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`);
+        tempJsonPath = path.join(app.getPath('temp'), `jsx-persons-${Date.now()}.json`);
+        fs.writeFileSync(tempJsonPath, JSON.stringify(prepared), 'utf-8');
+        dataFilePath = tempJsonPath;
+        log.info(`JSX persons JSON irva: ${tempJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`);
+      }
+
+      // Ha imageData-t kaptunk, image layerek előkészítése
+      if (!dataFilePath && params.imageData && params.imageData.persons.length > 0) {
+        const prepared = prepareImageLayersForJsx(params.imageData.persons, {
+          widthCm: params.imageData.widthCm,
+          heightCm: params.imageData.heightCm,
+          dpi: params.imageData.dpi,
+        });
+        tempJsonPath = path.join(app.getPath('temp'), `jsx-images-${Date.now()}.json`);
+        fs.writeFileSync(tempJsonPath, JSON.stringify(prepared), 'utf-8');
+        dataFilePath = tempJsonPath;
+        log.info(`JSX images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`);
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath);
@@ -516,8 +565,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         execFile('osascript', ['-e', appleScript], { timeout: 60000 }, (error, stdout, stderr) => {
           // Temp fajlok torlese
           try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
-          if (personsJsonPath && fs.existsSync(personsJsonPath)) {
-            try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+          if (tempJsonPath && fs.existsSync(tempJsonPath)) {
+            try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
           }
 
           if (error) {
@@ -530,8 +579,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         });
       });
     } catch (error) {
-      if (personsJsonPath && fs.existsSync(personsJsonPath)) {
-        try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+      if (tempJsonPath && fs.existsSync(tempJsonPath)) {
+        try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
       }
       log.error('JSX futtatasi hiba:', error);
       const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
@@ -544,9 +593,10 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     scriptName: string;
     dataFilePath?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
+    imageData?: { persons: Array<{ id: number; name: string; type: string }>; widthCm: number; heightCm: number; dpi: number };
   }) => {
     const win = _mainWindow;
-    let personsJsonPath: string | null = null;
+    let tempJsonPath: string | null = null;
 
     const sendLog = (line: string, stream: 'stdout' | 'stderr') => {
       try { win.webContents.send('jsx-debug-log', { line, stream }); } catch (_) { /* ignore */ }
@@ -565,12 +615,25 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       let dataFilePath = params.dataFilePath;
       if (!dataFilePath && params.personsData && params.personsData.length > 0) {
         const prepared = preparePersonsForJsx(params.personsData);
-        personsJsonPath = path.join(app.getPath('temp'), `jsx-persons-debug-${Date.now()}.json`);
+        tempJsonPath = path.join(app.getPath('temp'), `jsx-persons-debug-${Date.now()}.json`);
         const jsonStr = JSON.stringify(prepared);
-        fs.writeFileSync(personsJsonPath, jsonStr, 'utf-8');
-        dataFilePath = personsJsonPath;
-        sendLog(`[DEBUG] Persons JSON irva: ${personsJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`, 'stdout');
-        sendLog(`[DEBUG] JSON eleje (handler): ${jsonStr.substring(0, 100)}`, 'stdout');
+        fs.writeFileSync(tempJsonPath, jsonStr, 'utf-8');
+        dataFilePath = tempJsonPath;
+        sendLog(`[DEBUG] Persons JSON irva: ${tempJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`, 'stdout');
+      }
+
+      // Ha imageData-t kaptunk, image layerek előkészítése
+      if (!dataFilePath && params.imageData && params.imageData.persons.length > 0) {
+        const prepared = prepareImageLayersForJsx(params.imageData.persons, {
+          widthCm: params.imageData.widthCm,
+          heightCm: params.imageData.heightCm,
+          dpi: params.imageData.dpi,
+        });
+        tempJsonPath = path.join(app.getPath('temp'), `jsx-images-debug-${Date.now()}.json`);
+        const jsonStr = JSON.stringify(prepared);
+        fs.writeFileSync(tempJsonPath, jsonStr, 'utf-8');
+        dataFilePath = tempJsonPath;
+        sendLog(`[DEBUG] Images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`, 'stdout');
       }
 
       const jsxCode = buildJsxScript(params.scriptName, dataFilePath);
@@ -609,8 +672,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         child.on('close', (code) => {
           // Temp fajlok torlese
           try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
-          if (personsJsonPath && fs.existsSync(personsJsonPath)) {
-            try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+          if (tempJsonPath && fs.existsSync(tempJsonPath)) {
+            try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
           }
 
           if (code !== 0) {
@@ -624,8 +687,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
         child.on('error', (err) => {
           try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
-          if (personsJsonPath && fs.existsSync(personsJsonPath)) {
-            try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+          if (tempJsonPath && fs.existsSync(tempJsonPath)) {
+            try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
           }
           sendLog(`[DEBUG] HIBA: ${err.message}`, 'stderr');
           log.error('JSX debug spawn hiba:', err);
@@ -633,8 +696,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         });
       });
     } catch (error) {
-      if (personsJsonPath && fs.existsSync(personsJsonPath)) {
-        try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+      if (tempJsonPath && fs.existsSync(tempJsonPath)) {
+        try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
       }
       log.error('JSX debug futtatasi hiba:', error);
       const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';

@@ -1,10 +1,11 @@
 /**
  * utils.jsx — Kozos utility fuggvenyek ExtendScript-hez
  *
- * getGroupByPath()  — Csoport keresese utvonal alapjan
- * createTextLayer() — Szoveg layer letrehozasa
- * readJsonFile()    — JSON fajl beolvasasa (ExtendScript ES3 — nincs JSON.parse!)
- * parseArgs()       — Script argumentumok felolvasasa
+ * getGroupByPath()              — Csoport keresese utvonal alapjan
+ * createTextLayer()             — Szoveg layer letrehozasa
+ * createSmartObjectPlaceholder() — Smart Object placeholder layer letrehozasa
+ * readJsonFile()                — JSON fajl beolvasasa (ExtendScript ES3 — nincs JSON.parse!)
+ * parseArgs()                   — Script argumentumok felolvasasa
  *
  * MEGJEGYZES: ExtendScript ES3 kornyezet — nincs JSON.parse(),
  * nincs Array.forEach(), nincs let/const. Minden var-ral es for ciklussal!
@@ -63,6 +64,48 @@ function createTextLayer(container, displayText, options) {
   textLayer.move(container, ElementPlacement.INSIDE);
 
   return textLayer;
+}
+
+// --- Smart Object placeholder layer letrehozasa ---
+// Letrehoz egy ures layert, majd ActionManager-rel Smart Object-te alakitja.
+// container: LayerSet, options: {name, widthPx, heightPx}
+function createSmartObjectPlaceholder(doc, container, options) {
+  // Ures layer letrehozasa
+  var layer = doc.artLayers.add();
+  layer.name = options.name;
+
+  // Kitoltes szurke szinnel (placeholder kep — lathatova teszi a layert)
+  var fillColor = new SolidColor();
+  fillColor.rgb.red = 200;
+  fillColor.rgb.green = 200;
+  fillColor.rgb.blue = 200;
+
+  // Szelekcioval toltjuk ki a megadott meretre (bal felso sarok)
+  var selRegion = [
+    [0, 0],
+    [options.widthPx, 0],
+    [options.widthPx, options.heightPx],
+    [0, options.heightPx]
+  ];
+  doc.selection.select(selRegion);
+  doc.selection.fill(fillColor);
+  doc.selection.deselect();
+
+  // Layer atrakeasa a cel csoportba
+  layer.move(container, ElementPlacement.INSIDE);
+
+  // Smart Object-te alakitas ActionManager-rel
+  // Ez a Photoshop belso "Convert to Smart Object" parancsa
+  var desc = new ActionDescriptor();
+  var ref = new ActionReference();
+  ref.putClass(stringIDToTypeID("smartObject"));
+  desc.putReference(charIDToTypeID("null"), ref);
+  var refLayer = new ActionReference();
+  refLayer.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  desc.putReference(charIDToTypeID("Usng"), refLayer);
+  executeAction(stringIDToTypeID("newPlacedLayer"), desc, DialogModes.NO);
+
+  return layer;
 }
 
 // --- JSON fajl beolvasasa ---

@@ -146,7 +146,7 @@ export class TabloEditorDebugService {
 
     this.addLog('IPC generatePsd', genResult.success ? 'Sikeres' : `HIBA: ${genResult.error}`, genResult.success ? 'ok' : 'error');
 
-    // 10. PSD megnyitás + JSX text layerek
+    // 10. PSD megnyitás + JSX text layerek + image layerek
     if (genResult.success && personsData.length > 0) {
       await this.runJsxDebugPhase(api, outputPath, personsData);
     }
@@ -203,6 +203,42 @@ export class TabloEditorDebugService {
       jsxUnsubscribe?.();
 
       this.addLog('JSX', jsxResult.success ? 'Név layerek sikeresen hozzáadva' : `HIBA: ${jsxResult.error}`, jsxResult.success ? 'ok' : 'error');
+
+      // Image layerek (Smart Object placeholder-ek)
+      if (jsxResult.success) {
+        this.addLog('JSX', 'Image layerek hozzáadása (Smart Object)...', 'info');
+
+        const imgUnsubscribe = api.onJsxDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
+          if (data.stream === 'stderr') {
+            this.addLog('JSX Image stderr', data.line, 'error');
+          } else if (data.line.startsWith('[JSX]')) {
+            const msg = data.line.replace('[JSX] ', '');
+            this.addLog('JSX Image', msg, msg.startsWith('HIBA') ? 'error' : 'info');
+          } else {
+            this.addLog('JSX Image', data.line, 'info');
+          }
+        });
+
+        let imgResult: any;
+        try {
+          imgResult = await api.runJsxDebug({
+            scriptName: 'actions/add-image-layers.jsx',
+            imageData: {
+              persons: personsData,
+              widthCm: 10.4,
+              heightCm: 15.4,
+              dpi: 300,
+            },
+          });
+        } catch (imgErr) {
+          this.addLog('JSX Image', `EXCEPTION: ${String(imgErr)}`, 'error');
+          imgUnsubscribe?.();
+          return;
+        }
+        imgUnsubscribe?.();
+
+        this.addLog('JSX Image', imgResult.success ? 'Image layerek sikeresen hozzáadva' : `HIBA: ${imgResult.error}`, imgResult.success ? 'ok' : 'error');
+      }
     } catch (openErr) {
       this.addLog('PSD megnyitás', `EXCEPTION: ${String(openErr)}`, 'error');
     }

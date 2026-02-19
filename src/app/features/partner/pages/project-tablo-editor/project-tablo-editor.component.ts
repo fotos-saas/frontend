@@ -203,15 +203,27 @@ export class ProjectTabloEditorComponent implements OnInit {
         return;
       }
 
-      // PSD megnyitás után: JSX text layerek hozzáadása (ha vannak személyek)
+      // PSD megnyitás után: JSX layerek hozzáadása (ha vannak személyek)
       if (personsData.length > 0) {
         await new Promise(resolve => setTimeout(resolve, 2000));
-        const jsxResult = await this.ps.addNameLayers(personsData);
-        if (jsxResult.success) {
-          this.successMessage.set(`PSD generálva, megnyitva és ${personsData.length} név hozzáadva: ${size.label}`);
+
+        // 1. Név layerek (text)
+        const nameResult = await this.ps.addNameLayers(personsData);
+
+        // 2. Image layerek (Smart Object placeholder-ek)
+        const imageResult = await this.ps.addImageLayers(personsData);
+
+        const nameOk = nameResult.success;
+        const imageOk = imageResult.success;
+
+        if (nameOk && imageOk) {
+          this.successMessage.set(`PSD generálva: ${personsData.length} név + kép layer: ${size.label}`);
         } else {
           this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
-          this.error.set(`Név layerek hiba: ${jsxResult.error}`);
+          const errors: string[] = [];
+          if (!nameOk) errors.push(`Név layerek: ${nameResult.error}`);
+          if (!imageOk) errors.push(`Image layerek: ${imageResult.error}`);
+          this.error.set(errors.join(' | '));
         }
       } else {
         this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);

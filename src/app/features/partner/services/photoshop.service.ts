@@ -227,6 +227,34 @@ export class PhotoshopService {
   }
 
   /**
+   * JSX script futtatása a megnyitott Photoshop dokumentumon.
+   * Smart Object placeholder layerek hozzáadása az Images/Students és Images/Teachers csoportba.
+   * Méret: 10.4 x 15.4 cm @ 300 DPI
+   */
+  async addImageLayers(
+    persons: Array<{ id: number; name: string; type: string }>,
+    imageSizeCm: { widthCm: number; heightCm: number; dpi: number } = { widthCm: 10.4, heightCm: 15.4, dpi: 300 },
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    if (!persons || persons.length === 0) {
+      return { success: true };
+    }
+
+    try {
+      const result = await this.api.runJsx({
+        scriptName: 'actions/add-image-layers.jsx',
+        imageData: { persons, ...imageSizeCm },
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX addImageLayers hiba', err);
+      return { success: false, error: 'Váratlan hiba az image layerek hozzáadásakor' };
+    }
+  }
+
+  /**
    * PSD generálás és megnyitás Photoshopban.
    *
    * Ha van projekt kontextus + workDir:

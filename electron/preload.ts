@@ -285,9 +285,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:get-margin') as Promise<number>,
     setMargin: (marginCm: number) =>
       ipcRenderer.invoke('photoshop:set-margin', marginCm) as Promise<{ success: boolean; error?: string }>,
-    runJsx: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }> }) =>
+    runJsx: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string }>; widthCm: number; heightCm: number; dpi: number } }) =>
       ipcRenderer.invoke('photoshop:run-jsx', params) as Promise<{ success: boolean; error?: string; output?: string }>,
-    runJsxDebug: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }> }) =>
+    runJsxDebug: (params: { scriptName: string; dataFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string }>; widthCm: number; heightCm: number; dpi: number } }) =>
       ipcRenderer.invoke('photoshop:run-jsx-debug', params) as Promise<{ success: boolean; error?: string }>,
     onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => {
       const handler = (_event: any, data: { line: string; stream: 'stdout' | 'stderr' }) => callback(data);

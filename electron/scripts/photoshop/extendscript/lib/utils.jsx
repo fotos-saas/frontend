@@ -261,23 +261,33 @@ function resizeGroupLayers(doc, groupPath, targetWidthPx) {
   return resized;
 }
 
+// --- cm → px konverzio a dokumentum DPI-jevel ---
+// Kerekites NELKUL, hogy a hivo donthessen a kerekitesrol.
+function cmToPx(cm, dpi) {
+  return (cm / 2.54) * dpi;
+}
+
 // --- Layer pozicio nullazasa (origoba mozgatas) ---
 // A layer bounds alapjan kiszamolja mennyit kell mozditani,
 // hogy a bal felso sarka a dokumentum origojaba (0,0) keruljon.
+// FONTOS: pixelben dolgozunk a kerekitesi hibak elkerulesehez!
 function resetLayerPosition(layer) {
   var bounds = layer.bounds;
-  var dx = -bounds[0].as("cm");
-  var dy = -bounds[1].as("cm");
-  if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
-    layer.translate(new UnitValue(dx, "cm"), new UnitValue(dy, "cm"));
+  var dx = -bounds[0].as("px");
+  var dy = -bounds[1].as("px");
+  if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+    layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
   }
 }
 
-// --- Layer pozicionalasa cm-ben ---
+// --- Layer pozicionalasa cm-ben (pixelre kerekitve) ---
 // Elobb resetLayerPosition()-nel nullazzuk, majd ide mozgatjuk.
 // leftCm, topCm: cel pozicio a dokumentum bal felso sarkatol cm-ben.
-function positionLayerCm(layer, leftCm, topCm) {
-  layer.translate(new UnitValue(leftCm, "cm"), new UnitValue(topCm, "cm"));
+// dpi: a dokumentum DPI-je (app.activeDocument.resolution)
+function positionLayerCm(layer, leftCm, topCm, dpi) {
+  var dx = Math.round(cmToPx(leftCm, dpi));
+  var dy = Math.round(cmToPx(topCm, dpi));
+  layer.translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
 }
 
 // --- JSON fajl beolvasasa ---

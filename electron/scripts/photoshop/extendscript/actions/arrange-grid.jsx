@@ -35,7 +35,7 @@ function log(msg) {
 }
 
 // --- Globalis valtozok (suspendHistory string-eval) ---
-var _doc, _data;
+var _doc, _data, _dpi;
 
 // --- Egy csoport layer-einek racsba rendezese ---
 // grp: LayerSet (pl. Images/Students)
@@ -93,7 +93,7 @@ function _arrangeGroupGrid(grp, sizeCm, startTopCm) {
       selectLayerById(layer.id);
       _doc.activeLayer = layer;
       resetLayerPosition(layer);
-      positionLayerCm(layer, leftCm, topCm);
+      positionLayerCm(layer, leftCm, topCm, _dpi);
 
       // Kovetkezo pozicio
       currentCol++;
@@ -162,9 +162,10 @@ function _doArrangeGrid() {
       return;
     }
 
-    // Ruler egyseg cm-re allitasa a pozicionalashoz
+    // DPI kiolvasas + ruler egyseg pixelre allitasa (pontos pozicionalas)
+    _dpi = _doc.resolution; // px/inch
     var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.CM;
+    app.preferences.rulerUnits = Units.PIXELS;
 
     // Grid elrendezes — egyetlen history lepes
     _doc.suspendHistory("Tablo grid elrendezes", "_doArrangeGrid()");

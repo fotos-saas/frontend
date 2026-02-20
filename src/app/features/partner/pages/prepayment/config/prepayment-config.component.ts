@@ -5,6 +5,7 @@ import {
   signal,
   computed,
   DestroyRef,
+  ElementRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -51,6 +52,7 @@ interface ModeCard {
 export class PrepaymentConfigComponent implements OnInit {
   private readonly prepaymentService = inject(PartnerPrepaymentService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly el = inject(ElementRef);
 
   readonly ICONS = ICONS;
   readonly PREPAYMENT_MODE_LABELS = PREPAYMENT_MODE_LABELS;
@@ -175,7 +177,13 @@ export class PrepaymentConfigComponent implements OnInit {
 
   save(): void {
     this.attempted.set(true);
-    if (this.hasErrors()) return;
+    if (this.hasErrors()) {
+      setTimeout(() => {
+        const firstError = this.el.nativeElement.querySelector('.field-error');
+        firstError?.closest('.field-wrap, .settings-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      return;
+    }
     this.saving.set(true);
     const methods = Object.entries(this.paymentMethods())
       .filter(([, v]) => v)

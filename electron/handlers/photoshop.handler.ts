@@ -621,22 +621,28 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     return result;
   }
 
-  // Nev tordelese: breakAfter "valodi" szo utan sortores
-  // Rovid prefixek (dr., id., ifj. stb. — max 2 betu pont nelkul) nem szamitanak szokent
-  // Kotojelesen neveknel (3+ szo): breakAfter minimum 2 (2 szo utan tordeles)
+  // Nev tordelese:
+  // - 2 szavas nevek NEM tordelodnek (pl. "Bodó Ádám" → marad)
+  // - 3+ szavas: breakAfter "valodi" szo utan sortores (default 1)
+  // - Kotojeles 3+ szavas: a kotojeles szo UTAN tor (pl. "Hajnal-Tóth\rÁdám Péter")
+  // - Rovid prefixek (dr., id., ifj.) nem szamitanak szokent
   // Photoshop \r-t hasznal sortoresnek (nem \n!)
   function breakName(name: string, breakAfter: number): string {
     if (breakAfter <= 0) return name;
     const words = name.split(' ');
-    if (words.length < 2) return name;
-    // Kotojeles nev + 3+ szo → minimum 2 szo utan tordeles
-    const hasHyphen = name.indexOf('-') !== -1;
-    const effectiveBreakAfter = (hasHyphen && words.length >= 3) ? Math.max(breakAfter, 2) : breakAfter;
+    // Minimum 3 szo kell a tordeleshez (2 szavas nevek nem tordelodnek)
+    if (words.length < 3) return name;
+    // Kotojeles nev: a kotojeles szo utan torjuk
+    const hyphenIndex = words.findIndex(w => w.indexOf('-') !== -1);
+    if (hyphenIndex !== -1 && hyphenIndex < words.length - 1) {
+      return words.slice(0, hyphenIndex + 1).join(' ') + '\r' + words.slice(hyphenIndex + 1).join(' ');
+    }
+    // Normal nev: breakAfter "valodi" szo utan
     let realWordCount = 0;
     let breakIndex = -1;
     for (let i = 0; i < words.length; i++) {
       if (words[i].replace('.', '').length > 2) realWordCount++;
-      if (realWordCount > effectiveBreakAfter && breakIndex === -1) breakIndex = i;
+      if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
     }
     if (breakIndex === -1) return name;
     return words.slice(0, breakIndex).join(' ') + '\r' + words.slice(breakIndex).join(' ');

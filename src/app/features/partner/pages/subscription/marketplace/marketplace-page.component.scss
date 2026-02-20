@@ -653,40 +653,148 @@
 // ============================================================================
 
 @media (max-width: 640px) {
+  .page-header {
+    margin-bottom: 16px;
+
+    &__icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+    }
+
+    h1 { font-size: 1.25rem; }
+    .page-subtitle { font-size: 0.8125rem; }
+  }
+
   .summary-bar {
     flex-direction: column;
     align-items: flex-start;
-    padding: 16px;
-    gap: 12px;
+    padding: 12px;
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
   .summary-item {
     padding: 0;
+    gap: 8px;
   }
+
+  .summary-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+
+  .summary-label { font-size: 0.625rem; }
+  .summary-value { font-size: 0.9375rem; }
 
   .summary-divider {
     width: 100%;
     height: 1px;
   }
 
+  .packages-section { margin-bottom: 20px; }
+
   .packages-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
-  .modules-grid {
-    grid-template-columns: 1fr;
+  .package-card {
+    padding: 16px 14px;
+    border-radius: 10px;
   }
+
+  .package-name { font-size: 1rem; margin-bottom: 6px; }
+  .package-price__amount { font-size: 1.5rem; }
+  .package-price__currency { font-size: 0.875rem; }
+  .package-modules { font-size: 0.75rem; margin-bottom: 10px; }
+
+  .popular-badge { font-size: 0.625rem; padding: 2px 10px; top: -9px; }
 
   .category-filter {
     overflow-x: auto;
     flex-wrap: nowrap;
     padding-bottom: 4px;
+    margin-bottom: 16px;
+    gap: 6px;
     -webkit-overflow-scrolling: touch;
   }
 
   .category-pill {
     white-space: nowrap;
     flex-shrink: 0;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+
+  .modules-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .module-card {
+    padding: 14px;
+    border-radius: 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .module-header {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .module-icon-wrapper {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+
+  .module-badge {
+    font-size: 0.625rem;
+    padding: 2px 8px;
+  }
+
+  .module-name {
+    font-size: 0.9375rem;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .module-tagline {
+    font-size: 0.75rem;
+    width: 100%;
+    padding-bottom: 8px;
+    line-height: 1.35;
+  }
+
+  .module-price {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .price-tag {
+    font-size: 0.8125rem;
+    padding: 3px 8px;
+  }
+
+  .module-actions {
+    width: 100%;
+  }
+
+  .btn--sm {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+
+  .popular-dot {
+    width: 6px;
+    height: 6px;
+    top: 8px;
+    right: 8px;
   }
 }
 

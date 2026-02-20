@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { SnapshotListItem } from '@core/services/electron.types';
 import { LoggerService } from '@core/services/logger.service';
 import { PhotoshopService } from '../../services/photoshop.service';
@@ -14,17 +14,24 @@ export class TabloEditorSnapshotService {
   private readonly ps = inject(PhotoshopService);
   private readonly logger = inject(LoggerService);
 
-  /** Snapshot lista */
+  /** Snapshot lista (legujabb elol) */
   readonly snapshots = signal<SnapshotListItem[]>([]);
 
   /** Loading allapotok */
   readonly loadingSnapshots = signal(false);
   readonly savingSnapshot = signal(false);
+  readonly updatingSnapshot = signal(false);
   readonly restoringSnapshot = signal(false);
 
-  /** Mentes dialog */
+  /** Mentes dialog (uj pillanatkep nevvel) */
   readonly showSaveDialog = signal(false);
   readonly snapshotName = signal('');
+
+  /** Frissites valaszto dialog (ha tobb snapshot van) */
+  readonly showUpdatePicker = signal(false);
+
+  /** Legutolso snapshot (lista elso eleme — legujabb) */
+  readonly latestSnapshot = computed(() => this.snapshots()[0] ?? null);
 
   /** Snapshot lista betoltese a layouts/ mappabol */
   async loadSnapshots(psdPath: string): Promise<void> {
@@ -37,7 +44,7 @@ export class TabloEditorSnapshotService {
     }
   }
 
-  /** Uj pillanatkep mentese */
+  /** Uj pillanatkep mentese (uj fajl, uj nev) */
   async saveSnapshot(
     name: string,
     boardConfig: { widthCm: number; heightCm: number },
@@ -58,6 +65,37 @@ export class TabloEditorSnapshotService {
       return result;
     } finally {
       this.savingSnapshot.set(false);
+    }
+  }
+
+  /**
+   * Meglevo snapshot frissitese (torles + ujra mentes azonos nevvel).
+   * Ha nincs snapshot → letrehoz egyet "Automatikus mentés" nevvel.
+   */
+  async updateSnapshot(
+    snapshot: SnapshotListItem | null,
+    boardConfig: { widthCm: number; heightCm: number },
+    psdPath: string,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    this.updatingSnapshot.set(true);
+    try {
+      const name = snapshot?.snapshotName || 'Automatikus mentés';
+
+      // Ha van meglevo snapshot, toroljuk elobb
+      if (snapshot) {
+        await this.ps.deleteSnapshot(snapshot.filePath);
+      }
+
+      // Uj snapshot mentese az eredeti nevvel
+      const result = await this.ps.saveSnapshot(name, boardConfig, psdPath, targetDocName);
+      if (result.success) {
+        this.showUpdatePicker.set(false);
+        await this.loadSnapshots(psdPath);
+      }
+      return result;
+    } finally {
+      this.updatingSnapshot.set(false);
     }
   }
 
@@ -108,7 +146,17 @@ export class TabloEditorSnapshotService {
     this.snapshotName.set('');
   }
 
-  /** Datum formázás a listaban */
+  /** Frissites valaszto megnyitasa */
+  openUpdatePicker(): void {
+    this.showUpdatePicker.set(true);
+  }
+
+  /** Frissites valaszto bezarasa */
+  closeUpdatePicker(): void {
+    this.showUpdatePicker.set(false);
+  }
+
+  /** Datum formazas a listaban */
   formatDate(isoDate: string | null): string {
     if (!isoDate) return '';
     try {

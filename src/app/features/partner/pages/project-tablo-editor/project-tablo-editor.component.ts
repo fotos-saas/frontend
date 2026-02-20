@@ -99,7 +99,6 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly generating = signal(false);
   readonly arranging = signal(false);
   readonly arrangingNames = signal(false);
-  readonly savingLayout = signal(false);
 
   /** Aktuális PSD fájl útvonala (generáláskor mentjük) */
   readonly currentPsdPath = signal<string | null>(null);
@@ -285,7 +284,7 @@ export class ProjectTabloEditorComponent implements OnInit {
             }
 
             // 4. Layout JSON automatikus mentése a PSD mellé
-            await this.autoSaveLayout(result.outputPath);
+            await this.autoSaveSnapshot(result.outputPath);
           }
         }
 
@@ -321,7 +320,7 @@ export class ProjectTabloEditorComponent implements OnInit {
         this.successMessage.set('Rácsba rendezés kész!');
 
         // Layout JSON automatikus mentése
-        await this.autoSaveLayout();
+        await this.autoSaveSnapshot();
       } else {
         this.error.set(result.error || 'Rácsba rendezés sikertelen.');
       }
@@ -339,7 +338,7 @@ export class ProjectTabloEditorComponent implements OnInit {
         this.successMessage.set('Nevek rendezése kész!');
 
         // Layout JSON automatikus mentése
-        await this.autoSaveLayout();
+        await this.autoSaveSnapshot();
       } else {
         this.error.set(result.error || 'Nevek rendezése sikertelen.');
       }
@@ -348,8 +347,44 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
   }
 
-  /** Manuális layout frissítés — az aktuális Photoshop állapot mentése JSON-be */
-  async saveLayout(): Promise<void> {
+  /**
+   * Elrendezés frissítése (smart snapshot update):
+   * - 0 snapshot → automatikusan létrehoz egyet "Automatikus mentés" névvel
+   * - 1 snapshot → azt frissíti
+   * - több snapshot → picker dialógus, alapból a legutolsót ajánlja
+   */
+  async updateSnapshot(): Promise<void> {
+    const size = this.selectedSize();
+    if (!size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    const psdPath = await this.resolvePsdPath(size);
+    if (!psdPath) return;
+
+    const snapshots = this.snapshotService.snapshots();
+
+    // Több snapshot → picker dialog
+    if (snapshots.length > 1) {
+      this.snapshotService.openUpdatePicker();
+      return;
+    }
+
+    // 0 vagy 1 snapshot → közvetlen frissítés
+    this.clearMessages();
+    const target = snapshots.length === 1 ? snapshots[0] : null;
+    const result = await this.snapshotService.updateSnapshot(target, boardSize, psdPath);
+
+    if (result.success) {
+      this.successMessage.set('Elrendezés frissítve!');
+    } else {
+      this.error.set(result.error || 'Elrendezés frissítése sikertelen.');
+    }
+  }
+
+  /** Frissítés picker-ből kiválasztott snapshot felülírása */
+  async updateSnapshotWithPick(snapshot: SnapshotListItem): Promise<void> {
     const size = this.selectedSize();
     if (!size) return;
 
@@ -360,16 +395,12 @@ export class ProjectTabloEditorComponent implements OnInit {
     if (!psdPath) return;
 
     this.clearMessages();
-    this.savingLayout.set(true);
-    try {
-      const result = await this.ps.readAndSaveLayout(boardSize, psdPath);
-      if (result.success) {
-        this.successMessage.set('Elrendezés frissítve!');
-      } else {
-        this.error.set(result.error || 'Elrendezés frissítése sikertelen.');
-      }
-    } finally {
-      this.savingLayout.set(false);
+    const result = await this.snapshotService.updateSnapshot(snapshot, boardSize, psdPath);
+
+    if (result.success) {
+      this.successMessage.set(`Pillanatkép frissítve: ${snapshot.snapshotName}`);
+    } else {
+      this.error.set(result.error || 'Pillanatkép frissítése sikertelen.');
     }
   }
 
@@ -396,8 +427,8 @@ export class ProjectTabloEditorComponent implements OnInit {
     } : undefined);
   }
 
-  /** Layout JSON automatikus mentése (csendes — nem jelenít meg hibaüzenetet) */
-  private async autoSaveLayout(psdPath?: string | null): Promise<void> {
+  /** Automatikus snapshot frissítés (csendes — nem jelenít meg hibaüzenetet) */
+  private async autoSaveSnapshot(psdPath?: string | null): Promise<void> {
     const size = this.selectedSize();
     const path = psdPath ?? await this.resolvePsdPath();
     if (!path || !size) return;
@@ -405,7 +436,8 @@ export class ProjectTabloEditorComponent implements OnInit {
     const boardSize = this.ps.parseSizeValue(size.value);
     if (!boardSize) return;
 
-    await this.ps.readAndSaveLayout(boardSize, path);
+    const latest = this.snapshotService.latestSnapshot();
+    await this.snapshotService.updateSnapshot(latest, boardSize, path);
   }
 
   private clearMessages(): void {

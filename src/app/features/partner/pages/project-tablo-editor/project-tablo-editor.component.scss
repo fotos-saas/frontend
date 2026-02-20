@@ -612,6 +612,59 @@
   }
 }
 
+// Snapshot frissítés picker (dialógusban)
+.snapshot-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.snapshot-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  background: var(--card-bg, #ffffff);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    border-color: var(--primary-light, #c4b5fd);
+    background: var(--primary-bg, #f5f3ff);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #1f2937);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    font-size: 0.75rem;
+    color: var(--text-tertiary, #9ca3af);
+  }
+}
+
 // Snapshot mentés dialógus input
 .snapshot-dialog__input {
   width: 100%;

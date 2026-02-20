@@ -204,42 +204,7 @@
           }
         </div>
 
-        <!-- Elrendezés frissítése (manuális layout mentés) -->
-        <div class="command-card">
-          <div class="command-card__header">
-            <lucide-icon [name]="ICONS.SAVE" [size]="20" />
-            <div>
-              <h3 class="command-card__title">Elrendezés frissítése</h3>
-              <p class="command-card__desc">Az aktuális Photoshop elrendezés mentése JSON fájlba a PSD mellé (pozíciók, méretek).</p>
-            </div>
-          </div>
-
-          @if (!isConfigured()) {
-            <div class="command-card__disabled">
-              Először állítsd be a Photoshop-ot a Beállítások fülön.
-            </div>
-          } @else if (!selectedSize()) {
-            <div class="command-card__disabled">
-              Válassz méretet a fenti szekciónál.
-            </div>
-          } @else {
-            <button
-              class="btn btn--primary btn--generate"
-              [disabled]="savingLayout()"
-              (click)="saveLayout()"
-            >
-              @if (savingLayout()) {
-                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-                Mentés...
-              } @else {
-                <lucide-icon [name]="ICONS.SAVE" [size]="16" />
-                Elrendezés frissítése
-              }
-            </button>
-          }
-        </div>
-
-        <!-- Pillanatképek -->
+        <!-- Pillanatképek (elrendezés mentés + visszaállítás) -->
         <div class="command-card">
           <div class="command-card__header">
             <lucide-icon [name]="ICONS.HISTORY" [size]="20" />
@@ -261,6 +226,19 @@
             <div class="snapshot-actions">
               <button
                 class="btn btn--primary"
+                [disabled]="snapshotService.updatingSnapshot() || snapshotService.savingSnapshot()"
+                (click)="updateSnapshot()"
+              >
+                @if (snapshotService.updatingSnapshot()) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                  Frissítés...
+                } @else {
+                  <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+                  Elrendezés frissítése
+                }
+              </button>
+              <button
+                class="btn btn--outline"
                 [disabled]="snapshotService.savingSnapshot()"
                 (click)="snapshotService.openSaveDialog()"
               >
@@ -271,9 +249,9 @@
                 class="btn btn--outline btn--sm"
                 [disabled]="snapshotService.loadingSnapshots()"
                 (click)="loadSnapshots()"
+                matTooltip="Lista frissítése"
               >
                 <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
-                Frissítés
               </button>
             </div>
 
@@ -286,7 +264,7 @@
               <div class="snapshot-empty">
                 <lucide-icon [name]="ICONS.HISTORY" [size]="20" />
                 <p>Még nincsenek pillanatképek.</p>
-                <p class="snapshot-empty__hint">Mentsd el az aktuális elrendezést az "Új pillanatkép" gombbal.</p>
+                <p class="snapshot-empty__hint">Az "Elrendezés frissítése" gomb automatikusan létrehoz egyet.</p>
               </div>
             } @else {
               <div class="snapshot-list">
@@ -678,6 +656,51 @@
     </div>
   }
 </div>
+
+<!-- Pillanatkép frissítés választó dialógus (page-card KÍVÜL) -->
+@if (snapshotService.showUpdatePicker()) {
+  <app-dialog-wrapper
+    headerStyle="flat"
+    theme="purple"
+    [icon]="ICONS.SAVE"
+    title="Melyik pillanatképet frissítsem?"
+    description="Válaszd ki, melyik pillanatképet szeretnéd felülírni az aktuális elrendezéssel."
+    size="sm"
+    [isSubmitting]="snapshotService.updatingSnapshot()"
+    (closeEvent)="snapshotService.closeUpdatePicker()"
+  >
+    <div dialogBody>
+      <div class="snapshot-picker-list">
+        @for (snap of snapshotService.snapshots(); track snap.fileName) {
+          <button
+            class="snapshot-picker-item"
+            [disabled]="snapshotService.updatingSnapshot()"
+            (click)="updateSnapshotWithPick(snap)"
+          >
+            <div class="snapshot-picker-item__info">
+              <span class="snapshot-picker-item__name">{{ snap.snapshotName }}</span>
+              <span class="snapshot-picker-item__meta">
+                {{ snapshotService.formatDate(snap.createdAt) }}
+                · {{ snap.personCount }} személy
+              </span>
+            </div>
+            @if (snapshotService.updatingSnapshot()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            } @else {
+              <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <div dialogFooter>
+      <button class="btn btn--outline" (click)="snapshotService.closeUpdatePicker()">
+        Mégse
+      </button>
+    </div>
+  </app-dialog-wrapper>
+}
 
 <!-- Pillanatkép mentés dialógus (page-card KÍVÜL) -->
 @if (snapshotService.showSaveDialog()) {

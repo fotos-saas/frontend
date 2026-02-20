@@ -81,6 +81,54 @@
   flex-shrink: 0;
 }
 
+/* Preliminary badge */
+.preliminary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, get-color('warning', 400) 0%, get-color('warning', 500) 100%);
+  color: #ffffff;
+  white-space: nowrap;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+/* Linked badge */
+.linked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: get-color('slate', 200);
+  color: get-color('slate', 600);
+  white-space: nowrap;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+/* Preliminary project row */
+.project-row--preliminary {
+  border-left: 3px solid get-color('warning', 400);
+}
+
+/* Link action button */
+.action-btn--link {
+  background: get-color('primary', 100);
+  color: get-color('primary', 600);
+}
+
+.action-btn--link:hover {
+  background: get-color('primary', 200);
+  color: get-color('primary', 700);
+}
+
 /* Finalized badge (clickable - opens order data) */
 .finalized-badge {
   display: inline-flex;

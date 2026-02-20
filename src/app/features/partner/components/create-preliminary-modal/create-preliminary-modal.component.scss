@@ -1,0 +1,135 @@
+@use 'styles/colors' as *;
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field__label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: get-color('slate', 700);
+  margin-bottom: 4px;
+}
+
+.field__input,
+.field__textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid get-color('slate', 300);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: get-color('slate', 800);
+  background: #ffffff;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.field__input:focus,
+.field__textarea:focus {
+  outline: none;
+  border-color: get-color('warning', 500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.field__textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.field__autocomplete {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.8125rem;
+  transition: background 0.1s ease;
+}
+
+.autocomplete-item:hover {
+  background: get-color('slate', 50);
+}
+
+.autocomplete-name {
+  font-weight: 500;
+  color: get-color('slate', 800);
+}
+
+.autocomplete-city {
+  font-size: 0.75rem;
+  color: get-color('slate', 500);
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background: get-color('warning', 500);
+  color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: get-color('warning', 600);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: get-color('slate', 100);
+  color: get-color('slate', 700);
+  border: 1px solid get-color('slate', 300);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: get-color('slate', 200);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -8,16 +8,26 @@
         <p class="subtitle">{{ totalProjects() }} projekt összesen</p>
       }
     </div>
-    <button
-      type="button"
-      class="btn-primary"
-      [disabled]="projectLimits() && !projectLimits()!.can_create"
-      [matTooltip]="projectLimits() && !projectLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum projektszámot' : ''"
-      (click)="openCreateModal()"
-    >
-      <lucide-icon [name]="ICONS.PLUS" [size]="18" />
-      Új projekt
-    </button>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="openCreatePreliminaryModal()"
+      >
+        <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
+        Új előzetes
+      </button>
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="projectLimits() && !projectLimits()!.can_create"
+        [matTooltip]="projectLimits() && !projectLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum projektszámot' : ''"
+        (click)="openCreateModal()"
+      >
+        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        Új projekt
+      </button>
+    </div>
   </header>
 
   <!-- Keresés, szűrők és mobil rendezés -->
@@ -74,6 +84,7 @@
           (qrClick)="openQrModal($event)"
           (awareClick)="toggleAware($event)"
           (orderDataClick)="openOrderDataDialog($event)"
+          (linkClick)="openLinkDialog($event)"
           (deleteClick)="confirmDeleteProject($event)"
           (statusChangeClick)="onStatusChange($event)"
         />
@@ -153,5 +164,22 @@
     confirmText="Végleges törlés"
     [isSubmitting]="isDeleting()"
     (resultEvent)="onDeleteResult($event)"
+  />
+}
+
+<!-- Create Preliminary Modal -->
+@if (showCreatePreliminaryModal()) {
+  <app-create-preliminary-modal
+    (close)="closeCreatePreliminaryModal()"
+    (created)="onPreliminaryCreated()"
+  />
+}
+
+<!-- Link Preliminary Dialog -->
+@if (showLinkDialog() && linkingProject()) {
+  <app-link-preliminary-dialog
+    [project]="linkingProject()!"
+    (close)="closeLinkDialog()"
+    (linked)="onPreliminaryLinked()"
   />
 }

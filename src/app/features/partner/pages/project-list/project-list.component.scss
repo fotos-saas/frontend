@@ -4,6 +4,12 @@
 // max-width → page-card--wide kezeli
 .project-list-page {}
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .filter-controls {
   display: flex;
   align-items: center;

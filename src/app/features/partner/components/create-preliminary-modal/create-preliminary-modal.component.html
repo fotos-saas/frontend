@@ -1,0 +1,106 @@
+<app-dialog-wrapper
+  headerStyle="hero"
+  theme="amber"
+  [icon]="ICONS.CLOCK"
+  title="Új előzetes projekt"
+  description="Hozz létre előzetes projektet a fotók előzetes feltöltéséhez."
+  size="md"
+  [isSubmitting]="isSubmitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+>
+  <div dialogBody>
+    <!-- Iskola neve -->
+    <div class="field">
+      <label class="field__label">Iskola neve *</label>
+      <div class="field__autocomplete">
+        <input
+          type="text"
+          class="field__input"
+          placeholder="Kezdj el gépelni..."
+          [value]="schoolName()"
+          (input)="onSchoolNameInput($any($event.target).value)"
+          (blur)="hideSchoolSuggestions()"
+        />
+        @if (showSuggestions()) {
+          <div class="autocomplete-dropdown">
+            @for (school of schoolSuggestions(); track school.id) {
+              <button
+                type="button"
+                class="autocomplete-item"
+                (mousedown)="selectSchool(school)"
+              >
+                <span class="autocomplete-name">{{ school.name }}</span>
+                @if (school.city) {
+                  <span class="autocomplete-city">{{ school.city }}</span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Osztály neve -->
+    <div class="field">
+      <label class="field__label">Osztály neve</label>
+      <input
+        type="text"
+        class="field__input"
+        placeholder="pl. 12.A"
+        [ngModel]="className()"
+        (ngModelChange)="className.set($event)"
+      />
+    </div>
+
+    <!-- Évfolyam -->
+    <div class="field">
+      <label class="field__label">Évfolyam</label>
+      <input
+        type="text"
+        class="field__input"
+        placeholder="pl. 2025/2026"
+        [ngModel]="classYear()"
+        (ngModelChange)="classYear.set($event)"
+      />
+    </div>
+
+    <!-- Várható létszám -->
+    <div class="field">
+      <label class="field__label">Várható létszám</label>
+      <input
+        type="number"
+        class="field__input"
+        placeholder="pl. 30"
+        min="1"
+        max="500"
+        [ngModel]="expectedClassSize()"
+        (ngModelChange)="expectedClassSize.set($event)"
+      />
+    </div>
+
+    <!-- Megjegyzés -->
+    <div class="field">
+      <label class="field__label">Megjegyzés</label>
+      <textarea
+        class="field__textarea"
+        rows="3"
+        placeholder="Megjegyzés az előzetes projekthez..."
+        [ngModel]="note()"
+        (ngModelChange)="note.set($event)"
+      ></textarea>
+    </div>
+  </div>
+
+  <div dialogFooter>
+    <button type="button" class="btn-secondary" (click)="close.emit()" [disabled]="isSubmitting()">
+      Mégse
+    </button>
+    <button type="button" class="btn-primary" (click)="submit()" [disabled]="isSubmitting() || !schoolName().trim()">
+      @if (isSubmitting()) {
+        <span class="spinner"></span>
+      }
+      Létrehozás
+    </button>
+  </div>
+</app-dialog-wrapper>

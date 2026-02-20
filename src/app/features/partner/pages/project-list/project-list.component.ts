@@ -7,6 +7,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../../services/partner.service';
+import { PartnerPreliminaryService } from '../../services/partner-preliminary.service';
+import { CreatePreliminaryModalComponent } from '../../components/create-preliminary-modal/create-preliminary-modal.component';
+import { LinkPreliminaryDialogComponent } from '../../components/link-preliminary-dialog/link-preliminary-dialog.component';
 import { ProjectCardComponent } from '../../components/project-card/project-card.component';
 import { PersonsModalComponent } from '../../components/persons-modal';
 import { CreateProjectModalComponent } from '../../components/create-project-modal/create-project-modal.component';
@@ -45,6 +48,8 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     SmartFilterBarComponent,
     TableHeaderComponent,
     ListPaginationComponent,
+    CreatePreliminaryModalComponent,
+    LinkPreliminaryDialogComponent,
   ],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss',
@@ -54,6 +59,7 @@ export class PartnerProjectListComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private readonly toast = inject(ToastService);
   private readonly partnerService = inject(PartnerService);
+  private readonly preliminaryService = inject(PartnerPreliminaryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
@@ -80,7 +86,7 @@ export class PartnerProjectListComponent implements OnInit {
   // Filter state
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'projects' },
-    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: getCurrentGraduationYear().toString() },
+    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: getCurrentGraduationYear().toString(), is_preliminary: '' },
     defaultSortBy: 'created_at',
     defaultSortDir: 'desc',
     validation: {
@@ -119,6 +125,10 @@ export class PartnerProjectListComponent implements OnInit {
   readonly filterConfigs: FilterConfig[] = [
     { id: 'graduation_year', label: 'Tanév', icon: 'calendar', options: this.yearOptions },
     { id: 'status', label: 'Összes státusz', icon: 'filter', options: this.statusOptions },
+    { id: 'is_preliminary', label: 'Típus', options: [
+      { value: 'false', label: 'Rendes projektek' },
+      { value: 'true', label: 'Előzetes projektek' },
+    ]},
     { id: 'draft', label: 'Draft képek?', options: [
       { value: 'true', label: 'Van draft' },
       { value: 'false', label: 'Nincs draft' }
@@ -153,6 +163,11 @@ export class PartnerProjectListComponent implements OnInit {
   deletingProjectName = signal('');
   isDeleting = signal(false);
   private deletingProjectId = signal<number | null>(null);
+
+  // Preliminary Project Modals
+  showCreatePreliminaryModal = signal(false);
+  showLinkDialog = signal(false);
+  linkingProject = signal<PartnerProjectListItem | null>(null);
 
   // Order Data Dialog
   private orderDataContainer = viewChild('orderDataContainer', { read: ViewContainerRef });
@@ -190,7 +205,8 @@ export class PartnerProjectListComponent implements OnInit {
       is_aware: filters['aware'] ? filters['aware'] === 'true' : undefined,
       has_draft: filters['draft'] ? filters['draft'] === 'true' : undefined,
       school_id: filters['school_id'] ? parseInt(filters['school_id'], 10) : undefined,
-      graduation_year: filters['graduation_year'] ? parseInt(filters['graduation_year'], 10) : undefined
+      graduation_year: filters['graduation_year'] ? parseInt(filters['graduation_year'], 10) : undefined,
+      is_preliminary: filters['is_preliminary'] || undefined,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -376,5 +392,36 @@ export class PartnerProjectListComponent implements OnInit {
           this.toast.error('Hiba', 'Nem sikerült törölni a projektet.');
         }
       });
+  }
+
+  // Preliminary Project handlers
+  openCreatePreliminaryModal(): void {
+    this.showCreatePreliminaryModal.set(true);
+  }
+
+  closeCreatePreliminaryModal(): void {
+    this.showCreatePreliminaryModal.set(false);
+  }
+
+  onPreliminaryCreated(): void {
+    this.closeCreatePreliminaryModal();
+    this.loadProjects();
+    this.toast.success('Létrehozva', 'Előzetes projekt sikeresen létrehozva.');
+  }
+
+  openLinkDialog(project: PartnerProjectListItem): void {
+    this.linkingProject.set(project);
+    this.showLinkDialog.set(true);
+  }
+
+  closeLinkDialog(): void {
+    this.showLinkDialog.set(false);
+    this.linkingProject.set(null);
+  }
+
+  onPreliminaryLinked(): void {
+    this.closeLinkDialog();
+    this.loadProjects();
+    this.toast.success('Összekapcsolva', 'Az előzetes projekt sikeresen összekapcsolva.');
   }
 }

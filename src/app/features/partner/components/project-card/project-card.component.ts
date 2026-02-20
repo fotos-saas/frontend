@@ -33,6 +33,7 @@ export class ProjectCardComponent {
   readonly awareClick = output<PartnerProjectListItem>();
   readonly orderDataClick = output<PartnerProjectListItem>();
   readonly deleteClick = output<PartnerProjectListItem>();
+  readonly linkClick = output<PartnerProjectListItem>();
   readonly statusChangeClick = output<{ projectId: number; status: string; label: string; color: string }>();
 
   /**
@@ -119,6 +120,11 @@ export class ProjectCardComponent {
   onDeleteClick(event: MouseEvent): void {
     event.stopPropagation();
     this.deleteClick.emit(this.project());
+  }
+
+  onLinkClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.linkClick.emit(this.project());
   }
 
   onStatusChange(event: { value: string; label: string; color: string }): void {

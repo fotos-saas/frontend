@@ -1,4 +1,4 @@
-<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" (click)="cardClick.emit(project())">
+<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" (click)="cardClick.emit(project())">
   <!-- Col 1: Minta kép -->
   <div
     class="col col-sample"
@@ -22,6 +22,19 @@
   <div class="col col-school">
     <div class="school-name-row">
       <span class="school-name">{{ project().schoolName ?? 'Ismeretlen iskola' }}</span>
+      @if (project().isPreliminary) {
+        @if (project().linkedProjectId) {
+          <span class="linked-badge" title="Összekapcsolva">
+            <lucide-icon [name]="ICONS.LINK" [size]="10" />
+            Összekapcsolva
+          </span>
+        } @else {
+          <span class="preliminary-badge" title="Előzetes projekt">
+            <lucide-icon [name]="ICONS.CLOCK" [size]="10" />
+            Előzetes
+          </span>
+        }
+      }
       @if (project().draftPhotoCount > 0) {
         <span class="draft-badge" [title]="'Véglegesítésre vár: ' + project().draftPhotoCount + ' kép'">
           <lucide-icon [name]="ICONS.UPLOAD" [size]="10" />
@@ -84,6 +97,16 @@
 
   <!-- Col 6: Műveletek -->
   <div class="col col-actions">
+    @if (project().isPreliminary && !project().linkedProjectId) {
+      <button
+        type="button"
+        class="action-btn action-btn--link"
+        (click)="onLinkClick($event)"
+        matTooltip="Összekapcsolás"
+      >
+        <lucide-icon [name]="ICONS.LINK" [size]="14" />
+      </button>
+    }
     @if (project().hasActiveQrCode) {
       <button
         type="button"

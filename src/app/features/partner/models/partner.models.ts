@@ -69,6 +69,10 @@ export interface PartnerProjectListItem {
   createdAt: string;
   finalizedAt: string | null;
   orderSubmittedAt: string | null;
+  isPreliminary: boolean;
+  linkedProjectId: number | null;
+  linkedAt: string | null;
+  preliminaryNote: string | null;
 }
 
 /**
@@ -557,6 +561,81 @@ export interface PrintReadyFile {
   size: number;
   mimeType: string;
   uploadedAt: string;
+}
+
+/**
+ * Előzetes projekt létrehozás request
+ */
+export interface CreatePreliminaryRequest {
+  school_name: string;
+  school_id?: number | null;
+  class_name?: string | null;
+  class_year?: string | null;
+  note?: string | null;
+  expected_class_size?: number | null;
+}
+
+/**
+ * Link jelölt projekt (valós projektek lista)
+ */
+export interface LinkCandidate {
+  id: number;
+  name: string;
+  schoolName: string | null;
+  className: string | null;
+  classYear: string | null;
+}
+
+/**
+ * Link előnézet válasz
+ */
+export interface LinkPreview {
+  conflicts: LinkConflict[];
+  transferable: TransferablePerson[];
+  photosCount: number;
+}
+
+/**
+ * Link ütközés
+ */
+export interface LinkConflict {
+  sourcePersonId: number;
+  sourcePersonName: string;
+  sourcePersonType: 'student' | 'teacher';
+  sourceHasPhoto: boolean;
+  targetPersonId: number;
+  targetPersonName: string;
+  targetHasPhoto: boolean;
+}
+
+/**
+ * Átvihető személy
+ */
+export interface TransferablePerson {
+  personId: number;
+  name: string;
+  type: 'student' | 'teacher';
+  hasPhoto: boolean;
+}
+
+/**
+ * Link request
+ */
+export interface LinkPreliminaryRequest {
+  target_project_id: number;
+  conflict_resolution: Array<{ person_id: number; action: 'skip' | 'transfer_photo' }>;
+}
+
+/**
+ * Link eredmény
+ */
+export interface LinkPreliminaryResult {
+  stats: {
+    students_transferred: number;
+    teachers_transferred: number;
+    photos_transferred: number;
+    conflicts_skipped: number;
+  };
 }
 
 // Re-export QrCode from shared

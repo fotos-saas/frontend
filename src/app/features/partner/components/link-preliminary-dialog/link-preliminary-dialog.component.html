@@ -1,0 +1,172 @@
+<app-dialog-wrapper
+  headerStyle="hero"
+  theme="blue"
+  [icon]="ICONS.LINK"
+  [title]="stepTitle()"
+  description="Előzetes projekt összekapcsolása egy valódi projekttel."
+  size="lg"
+  [isSubmitting]="isSubmitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+>
+  <div dialogBody>
+    <!-- STEP 1: Cél projekt kiválasztása -->
+    @if (step() === 'select') {
+      <div class="search-bar">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Keresés projekt, iskola neve alapján..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          (keydown.enter)="searchCandidates()"
+        />
+        <button type="button" class="search-btn" (click)="searchCandidates()">
+          <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+        </button>
+      </div>
+
+      @if (isLoading()) {
+        <div class="loading-text">Betöltés...</div>
+      } @else if (candidates().length === 0) {
+        <div class="empty-text">Nem található megfelelő projekt.</div>
+      } @else {
+        <div class="candidate-list">
+          @for (candidate of candidates(); track candidate.id) {
+            <button
+              type="button"
+              class="candidate-item"
+              [class.candidate-item--selected]="selectedTarget()?.id === candidate.id"
+              (click)="selectTarget(candidate)"
+            >
+              <div class="candidate-name">{{ candidate.name }}</div>
+              <div class="candidate-meta">
+                {{ candidate.schoolName ?? 'Ismeretlen iskola' }}
+                @if (candidate.className) { · {{ candidate.className }} }
+                @if (candidate.classYear) { ({{ candidate.classYear }}) }
+              </div>
+            </button>
+          }
+        </div>
+      }
+    }
+
+    <!-- STEP 2: Előnézet + ütközések kezelése -->
+    @if (step() === 'preview') {
+      @if (preview(); as prev) {
+        <!-- Összegzés -->
+        @if (transferSummary(); as summary) {
+          <div class="summary-bar">
+            <span class="summary-item">
+              <lucide-icon [name]="ICONS.USERS" [size]="14" />
+              {{ summary.students }} diák
+            </span>
+            <span class="summary-item">
+              <lucide-icon [name]="ICONS.USER" [size]="14" />
+              {{ summary.teachers }} tanár
+            </span>
+            <span class="summary-item">
+              <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+              {{ summary.photos }} fotó
+            </span>
+            @if (summary.conflicts > 0) {
+              <span class="summary-item summary-item--warning">
+                <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+                {{ summary.conflicts }} ütközés
+              </span>
+            }
+          </div>
+        }
+
+        <!-- Átvihető személyek -->
+        @if (prev.transferable.length > 0) {
+          <h4 class="section-title">Átvihető személyek</h4>
+          <div class="person-list">
+            @for (person of prev.transferable; track person.personId) {
+              <div class="person-row">
+                <span class="person-name">{{ person.name }}</span>
+                <span class="person-type" [class.person-type--teacher]="person.type === 'teacher'">
+                  {{ person.type === 'student' ? 'Diák' : 'Tanár' }}
+                </span>
+                @if (person.hasPhoto) {
+                  <lucide-icon [name]="ICONS.IMAGE" [size]="12" class="person-photo-icon" />
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Ütközések -->
+        @if (prev.conflicts.length > 0) {
+          <h4 class="section-title section-title--warning">Ütközések</h4>
+          <div class="conflict-list">
+            @for (conflict of prev.conflicts; track conflict.sourcePersonId) {
+              <div class="conflict-row">
+                <div class="conflict-info">
+                  <span class="conflict-name">{{ conflict.sourcePersonName }}</span>
+                  <span class="conflict-hint">Már létezik a cél projektben</span>
+                </div>
+                <select
+                  class="conflict-select"
+                  [ngModel]="conflictActions()[conflict.sourcePersonId]"
+                  (ngModelChange)="setConflictAction(conflict.sourcePersonId, $event)"
+                >
+                  <option value="skip">Kihagyás</option>
+                  @if (conflict.sourceHasPhoto && !conflict.targetHasPhoto) {
+                    <option value="transfer_photo">Fotó átvétele</option>
+                  }
+                </select>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+
+    <!-- STEP 3: Megerősítés -->
+    @if (step() === 'confirm') {
+      <div class="confirm-box">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="32" class="confirm-icon" />
+        <p class="confirm-text">
+          Biztosan össze szeretnéd kapcsolni az előzetes projektet
+          <strong>{{ selectedTarget()?.name }}</strong> projekttel?
+        </p>
+        <p class="confirm-hint">
+          Ez a művelet nem visszavonható. A személyek és fotók átkerülnek a cél projektbe.
+        </p>
+      </div>
+    }
+  </div>
+
+  <div dialogFooter>
+    @if (step() !== 'select') {
+      <button type="button" class="btn-secondary" (click)="goBack()" [disabled]="isSubmitting()">
+        <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="14" />
+        Vissza
+      </button>
+    }
+
+    @if (step() === 'select') {
+      <button type="button" class="btn-secondary" (click)="close.emit()">
+        Mégse
+      </button>
+    }
+
+    @if (step() === 'preview') {
+      <button type="button" class="btn-primary" (click)="goToConfirm()">
+        Tovább
+        <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="14" />
+      </button>
+    }
+
+    @if (step() === 'confirm') {
+      <button type="button" class="btn-primary btn-primary--confirm" (click)="submitLink()" [disabled]="isSubmitting()">
+        @if (isSubmitting()) {
+          <span class="spinner"></span>
+        }
+        <lucide-icon [name]="ICONS.LINK" [size]="14" />
+        Összekapcsolás
+      </button>
+    }
+  </div>
+</app-dialog-wrapper>

@@ -21,7 +21,7 @@ export class TabloEditorSnapshotService {
   readonly loadingSnapshots = signal(false);
   readonly savingSnapshot = signal(false);
   readonly updatingSnapshot = signal(false);
-  readonly restoringSnapshot = signal(false);
+  readonly restoringSnapshotPath = signal<string | null>(null);
 
   /** Mentes dialog (uj pillanatkep nevvel) */
   readonly showSaveDialog = signal(false);
@@ -110,7 +110,7 @@ export class TabloEditorSnapshotService {
     psdPath: string,
     targetDocName?: string,
   ): Promise<{ success: boolean; error?: string }> {
-    this.restoringSnapshot.set(true);
+    this.restoringSnapshotPath.set(snapshotPath);
     try {
       const result = await this.ps.restoreSnapshot(snapshotPath, targetDocName);
       if (result.success) {
@@ -118,7 +118,7 @@ export class TabloEditorSnapshotService {
       }
       return result;
     } finally {
-      this.restoringSnapshot.set(false);
+      this.restoringSnapshotPath.set(null);
     }
   }
 

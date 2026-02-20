@@ -296,11 +296,11 @@
                     <div class="snapshot-item__actions">
                       <button
                         class="btn btn--sm btn--primary"
-                        [disabled]="snapshotService.restoringSnapshot()"
+                        [disabled]="snapshotService.restoringSnapshotPath() !== null"
                         (click)="restoreSnapshot(snap)"
                         matTooltip="Visszaállítás"
                       >
-                        @if (snapshotService.restoringSnapshot()) {
+                        @if (snapshotService.restoringSnapshotPath() === snap.filePath) {
                           <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
                         } @else {
                           <lucide-icon [name]="ICONS.UNDO" [size]="14" />

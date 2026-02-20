@@ -76,7 +76,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
-            (click)="onAlignTop()"
+            (click)="actions.alignTop()"
             matTooltip="Tetejére igazítás"
           >
             <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="16" />
@@ -151,6 +151,8 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       background: #1e1e38;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       flex-shrink: 0;
+      position: relative;
+      z-index: 20;
     }
 
     .layout-toolbar__left {
@@ -296,8 +298,4 @@ export class LayoutToolbarComponent {
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
 
-  onAlignTop(): void {
-    console.log('[toolbar] alignTop clicked, selectionCount:', this.state.selectionCount());
-    this.actions.alignTop();
-  }
 }

@@ -17,11 +17,9 @@ export class LayoutDesignerActionsService {
   /** Felsők igazítása: kijelölt elemek Y → min(Y) */
   alignTop(): void {
     const selected = this.state.selectedLayers();
-    console.log('[alignTop] selected:', selected.length, 'ids:', [...this.state.selectedLayerIds()]);
     if (selected.length < 2) return;
 
     const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
-    console.log('[alignTop] minY:', minY, 'layers:', selected.map(l => ({ id: l.layerId, y: l.editedY ?? l.y, cat: l.category })));
     this.applyAlignmentWithCoupled(selected, (l) => ({
       x: l.editedX ?? l.x,
       y: minY,

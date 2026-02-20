@@ -156,12 +156,25 @@ export class LayoutLayerComponent {
     return this.layer().personMatch?.name ?? this.layer().layerName;
   }
 
-  /** Szöveg sorok: 3+ szavas neveknél a 2. szó után tör */
+  /** Szöveg sorok: 3+ névrésznél (kötőjel is számít) a 2. névrész után tör */
   get textLines(): string[] {
     const name = this.displayName;
     const words = name.split(' ');
-    if (words.length <= 2) return [name];
-    return [words.slice(0, 2).join(' '), words.slice(2).join(' ')];
+
+    // Összes névrész: szóköz ÉS kötőjel mentén
+    const totalParts = words.reduce((sum, w) => sum + w.split('-').length, 0);
+    if (totalParts < 3) return [name];
+
+    // Törés: az első szóköz-szó után ahol a futó névrész-szám eléri a 2-t
+    let running = 0;
+    for (let i = 0; i < words.length; i++) {
+      running += words[i].split('-').length;
+      if (running >= 2) {
+        return [words.slice(0, i + 1).join(' '), words.slice(i + 1).join(' ')];
+      }
+    }
+
+    return [name];
   }
 
   get isImage(): boolean {

@@ -833,6 +833,18 @@ export class PhotoshopService {
     }
   }
 
+  /** PSD fájl megnyitása Photoshopban */
+  async openPsdFile(psdPath: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      return await this.api.openFile(psdPath);
+    } catch (err) {
+      this.logger.error('PSD megnyitás hiba', err);
+      return { success: false, error: 'Váratlan hiba a PSD megnyitásnál' };
+    }
+  }
+
   /** Snapshot betöltése (JSON tartalom visszaadása) */
   async loadSnapshot(snapshotPath: string): Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

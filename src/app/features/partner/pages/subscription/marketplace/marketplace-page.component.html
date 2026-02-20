@@ -1,44 +1,92 @@
 <div class="marketplace-page page-card">
+  <!-- Fejléc -->
   <div class="page-header">
-    <h1>Marketplace</h1>
-    <p class="page-subtitle">Válaszd ki a számodra szükséges modulokat, vagy válassz egy kész csomagot.</p>
+    <div class="page-header__top">
+      <div class="page-header__title-group">
+        <div class="page-header__icon">
+          <lucide-icon [name]="ICONS.PUZZLE" [size]="24" />
+        </div>
+        <div>
+          <h1>Marketplace</h1>
+          <p class="page-subtitle">Válaszd ki a számodra szükséges modulokat, vagy válassz egy kész csomagot.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Összesítő -->
+  <!-- Összesítő sáv -->
   <div class="summary-bar">
     <div class="summary-item">
-      <span class="summary-label">Aktív modulok</span>
-      <span class="summary-value">{{ activeModulesCount() }}</span>
+      <div class="summary-icon">
+        <lucide-icon [name]="ICONS.PUZZLE" [size]="18" />
+      </div>
+      <div class="summary-content">
+        <span class="summary-label">Aktív modulok</span>
+        <span class="summary-value">{{ activeModulesCount() }}</span>
+      </div>
     </div>
+    <div class="summary-divider"></div>
     <div class="summary-item">
-      <span class="summary-label">Havi modul költség</span>
-      <span class="summary-value">{{ formatPrice(monthlyModuleCost()) }}</span>
+      <div class="summary-icon">
+        <lucide-icon [name]="ICONS.WALLET" [size]="18" />
+      </div>
+      <div class="summary-content">
+        <span class="summary-label">Havi modul költség</span>
+        <span class="summary-value">{{ formatPrice(monthlyModuleCost()) }}</span>
+      </div>
     </div>
     @if (activePackage(); as pkg) {
+      <div class="summary-divider"></div>
       <div class="summary-item">
-        <span class="summary-label">Aktív csomag</span>
-        <span class="summary-value summary-value--package">{{ pkg }}</span>
+        <div class="summary-icon">
+          <lucide-icon [name]="ICONS.PACKAGE_CHECK" [size]="18" />
+        </div>
+        <div class="summary-content">
+          <span class="summary-label">Aktív csomag</span>
+          <span class="summary-value summary-value--package">{{ pkg }}</span>
+        </div>
       </div>
     }
   </div>
 
-  <!-- Csomagok -->
+  <!-- Csomagok szekció -->
   @if (packages().length > 0) {
     <section class="packages-section">
-      <h2>Kész csomagok</h2>
+      <div class="section-header">
+        <lucide-icon [name]="ICONS.PACKAGE" [size]="20" />
+        <h2>Kész csomagok</h2>
+      </div>
       <div class="packages-grid">
         @for (pkg of packages(); track pkg.key) {
-          <div class="package-card" [class.package-card--active]="pkg.is_active" [class.package-card--popular]="pkg.popular">
+          <div class="package-card"
+               [class.package-card--active]="pkg.is_active"
+               [class.package-card--popular]="pkg.popular">
             @if (pkg.popular) {
-              <div class="popular-badge">Legnépszerűbb</div>
+              <div class="popular-badge">
+                <lucide-icon [name]="ICONS.SPARKLES" [size]="12" />
+                Legnépszerűbb
+              </div>
             }
-            <h3>{{ pkg.name }}</h3>
-            <div class="package-price">{{ pkg.monthly_price | number:'1.0-0':'hu' }} Ft<span>/hó</span></div>
-            <div class="package-modules">{{ pkg.included_modules.length }} modul</div>
+            <h3 class="package-name">{{ pkg.name }}</h3>
+            <div class="package-price">
+              <span class="package-price__amount">{{ pkg.monthly_price | number:'1.0-0':'hu' }}</span>
+              <span class="package-price__currency">Ft</span>
+              <span class="package-price__period">/hó</span>
+            </div>
+            <div class="package-modules">
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+              {{ pkg.included_modules.length }} modul tartalmazza
+            </div>
             @if (pkg.is_active) {
-              <button class="btn btn--outline btn--danger" (click)="cancelPackage(pkg.key)">Lemondás</button>
+              <button class="btn btn--outline btn--danger" (click)="cancelPackage(pkg.key)">
+                <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" />
+                Lemondás
+              </button>
             } @else {
-              <button class="btn btn--primary" (click)="activatePackage(pkg.key)">{{ pkg.cta_button }}</button>
+              <button class="btn btn--primary" (click)="activatePackage(pkg.key)">
+                <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+                {{ pkg.cta_button }}
+              </button>
             }
           </div>
         }
@@ -50,9 +98,10 @@
   <div class="category-filter">
     @for (cat of categories; track cat.key) {
       <button
-        class="category-btn"
-        [class.category-btn--active]="selectedCategory() === cat.key"
+        class="category-pill"
+        [class.category-pill--active]="selectedCategory() === cat.key"
         (click)="selectCategory(cat.key)">
+        <lucide-icon [name]="cat.icon" [size]="14" />
         {{ cat.label }}
       </button>
     }
@@ -60,18 +109,24 @@
 
   <!-- Modulok grid -->
   @if (loading()) {
-    <div class="loading-grid">
+    <div class="modules-grid">
       @for (i of [1,2,3,4,5,6]; track i) {
         <div class="skeleton-card"></div>
       }
     </div>
   } @else {
     <div class="modules-grid">
-      @for (module of filteredModules(); track module.key) {
-        <div class="module-card" [class.module-card--active]="['active', 'package', 'trial', 'free'].includes(module.partner_status)">
+      @for (module of filteredModules(); track module.key; let i = $index) {
+        <div class="module-card"
+             [class.module-card--active]="isModuleActive(module.partner_status)"
+             [style.animation-delay]="i * 0.04 + 's'">
+
           <div class="module-header">
-            <lucide-icon [name]="module.icon" [size]="24" />
-            <span class="module-status {{ getStatusClass(module.partner_status) }}">
+            <div class="module-icon-wrapper"
+                 [class.module-icon-wrapper--active]="isModuleActive(module.partner_status)">
+              <lucide-icon [name]="module.icon" [size]="20" />
+            </div>
+            <span class="module-badge {{ getStatusClass(module.partner_status) }}">
               {{ getStatusLabel(module.partner_status) }}
             </span>
           </div>
@@ -81,11 +136,15 @@
 
           <div class="module-price">
             @if (module.type === 'free') {
-              <span class="price-free">Ingyenes</span>
+              <span class="price-tag price-tag--free">Ingyenes</span>
             } @else if (module.type === 'per_use') {
-              <span class="price-per-use">{{ module.per_use_price }} Ft/{{ module.per_use_unit }}</span>
+              <span class="price-tag price-tag--per-use">
+                {{ module.per_use_price | number:'1.0-0':'hu' }} Ft/{{ module.per_use_unit }}
+              </span>
             } @else {
-              <span class="price-monthly">{{ formatPrice(module.monthly_price) }}</span>
+              <span class="price-tag price-tag--monthly">
+                {{ module.monthly_price | number:'1.0-0':'hu' }} Ft/hó
+              </span>
             }
           </div>
 
@@ -93,22 +152,38 @@
             @switch (module.partner_status) {
               @case ('inactive') {
                 @if (module.type !== 'free') {
-                  <button class="btn btn--primary btn--sm" (click)="activateModule(module.key)">Aktiválás</button>
+                  <button class="btn btn--primary btn--sm" (click)="activateModule(module.key)">
+                    <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+                    Aktiválás
+                  </button>
                 }
               }
               @case ('active') {
-                <button class="btn btn--outline btn--sm" (click)="pauseModule(module.key)">Szünet</button>
-                <button class="btn btn--outline btn--danger btn--sm" (click)="cancelModule(module.key)">Lemondás</button>
+                <button class="btn btn--outline btn--sm" (click)="pauseModule(module.key)">
+                  <lucide-icon [name]="ICONS.PAUSE_CIRCLE" [size]="14" />
+                  Szünet
+                </button>
+                <button class="btn btn--outline btn--danger btn--sm" (click)="cancelModule(module.key)">
+                  Lemondás
+                </button>
               }
               @case ('paused') {
-                <button class="btn btn--primary btn--sm" (click)="resumeModule(module.key)">Folytatás</button>
-                <button class="btn btn--outline btn--danger btn--sm" (click)="cancelModule(module.key)">Lemondás</button>
+                <button class="btn btn--primary btn--sm" (click)="resumeModule(module.key)">
+                  <lucide-icon [name]="ICONS.PLAY_CIRCLE" [size]="14" />
+                  Folytatás
+                </button>
+                <button class="btn btn--outline btn--danger btn--sm" (click)="cancelModule(module.key)">
+                  Lemondás
+                </button>
               }
               @case ('canceling') {
-                <span class="canceling-text">Lejár: {{ module.cancels_at | date:'yyyy. MMM d.' }}</span>
+                <span class="canceling-text">
+                  <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                  Lejár: {{ module.cancels_at | date:'yyyy. MMM d.' }}
+                </span>
               }
               @default {
-                <!-- free, package, trial → nincs művelet -->
+                <!-- free, package, trial — nincs művelet -->
               }
             }
           </div>

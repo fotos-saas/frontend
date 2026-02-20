@@ -26,14 +26,14 @@ export class MarketplacePageComponent implements OnInit {
 
   readonly selectedCategory = signal<ModuleCategory | 'all'>('all');
 
-  readonly categories: Array<{ key: ModuleCategory | 'all'; label: string }> = [
-    { key: 'all', label: 'Összes' },
-    { key: 'core', label: 'Alapvető' },
-    { key: 'communication', label: 'Kommunikáció' },
-    { key: 'ai', label: 'AI' },
-    { key: 'content', label: 'Tartalom' },
-    { key: 'business', label: 'Üzleti' },
-    { key: 'management', label: 'Menedzsment' },
+  readonly categories: Array<{ key: ModuleCategory | 'all'; label: string; icon: string }> = [
+    { key: 'all', label: 'Összes', icon: ICONS.GRID },
+    { key: 'core', label: 'Alapvető', icon: ICONS.PACKAGE },
+    { key: 'communication', label: 'Kommunikáció', icon: ICONS.MESSAGE_CIRCLE },
+    { key: 'ai', label: 'AI', icon: ICONS.SPARKLES },
+    { key: 'content', label: 'Tartalom', icon: ICONS.IMAGE },
+    { key: 'business', label: 'Üzleti', icon: ICONS.BRIEFCASE },
+    { key: 'management', label: 'Menedzsment', icon: ICONS.SETTINGS },
   ];
 
   readonly filteredModules = computed(() => {
@@ -103,7 +103,11 @@ export class MarketplacePageComponent implements OnInit {
   }
 
   formatPrice(price: number | null): string {
-    if (price === null) return 'Ingyenes';
+    if (price === null || price === 0) return 'Ingyenes';
     return `${price.toLocaleString('hu-HU')} Ft/hó`;
+  }
+
+  isModuleActive(status: string): boolean {
+    return ['active', 'package', 'trial', 'free'].includes(status);
   }
 }

@@ -693,33 +693,50 @@
     height: 1px;
   }
 
-  .packages-section { margin-bottom: 16px; }
+  .packages-section { margin-bottom: 12px; }
+  .section-header { margin-bottom: 8px; }
 
   .packages-grid {
     display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    gap: 10px;
-    padding-bottom: 4px;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .package-card {
-    min-width: 160px;
-    flex-shrink: 0;
-    scroll-snap-align: start;
-    padding: 14px 12px;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
     border-radius: 10px;
+    gap: 8px;
+    text-align: left;
   }
 
-  .package-name { font-size: 0.875rem; margin-bottom: 4px; }
-  .package-price { margin-bottom: 4px; }
-  .package-price__amount { font-size: 1.25rem; }
-  .package-price__currency { font-size: 0.75rem; }
-  .package-price__period { font-size: 0.6875rem; }
-  .package-modules { font-size: 0.6875rem; margin-bottom: 8px; }
+  .package-name {
+    font-size: 0.875rem;
+    margin: 0;
+    white-space: nowrap;
+  }
 
-  .popular-badge { font-size: 0.5625rem; padding: 2px 8px; top: -8px; }
+  .package-price {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    margin-left: auto;
+  }
+
+  .package-price__amount { font-size: 0.9375rem; font-weight: 700; letter-spacing: 0; }
+  .package-price__currency { font-size: 0.6875rem; margin-left: 1px; }
+  .package-price__period { font-size: 0.625rem; }
+
+  .package-modules { display: none; }
+  .popular-badge { display: none; }
+
+  .package-card .btn {
+    padding: 5px 10px;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 
   .category-filter {
     overflow-x: auto;

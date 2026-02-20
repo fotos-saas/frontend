@@ -123,7 +123,6 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.loadProject(id);
     this.ps.detectPhotoshop();
     this.loadTabloSizes();
-    this.loadSnapshots();
   }
 
   private loadProject(id: number): void {
@@ -134,6 +133,7 @@ export class ProjectTabloEditorComponent implements OnInit {
         this.project.set(project);
         this.loading.set(false);
         this.loadPersons(id);
+        this.tryLoadSnapshots();
       },
       error: () => this.loading.set(false),
     });
@@ -159,6 +159,7 @@ export class ProjectTabloEditorComponent implements OnInit {
           this.selectedSize.set(res.sizes[0]);
         }
         this.loadingSizes.set(false);
+        this.tryLoadSnapshots();
       },
       error: () => this.loadingSizes.set(false),
     });
@@ -472,6 +473,15 @@ export class ProjectTabloEditorComponent implements OnInit {
     } finally {
       this.generating.set(false);
     }
+  }
+
+  /** Snapshot lista betöltés próba (projekt + méret kész után) */
+  private snapshotsInitLoaded = false;
+  private async tryLoadSnapshots(): Promise<void> {
+    if (this.snapshotsInitLoaded) return;
+    if (!this.project() || !this.selectedSize()) return;
+    this.snapshotsInitLoaded = true;
+    await this.loadSnapshots();
   }
 
   /** Snapshot lista betöltése (ha van PSD path) */

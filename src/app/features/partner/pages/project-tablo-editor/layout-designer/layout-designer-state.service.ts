@@ -98,6 +98,9 @@ export class LayoutDesignerStateService {
     // Image layerek szélességének normalizálása kategórián belül.
     this.normalizeLayerSizes(designerLayers);
 
+    // Text layerek pozícionálása a párosított kép layer alapján.
+    this.alignTextToImageLayers(designerLayers);
+
     this.layers.set(designerLayers);
     this.selectedLayerIds.set(new Set());
   }
@@ -192,6 +195,44 @@ export class LayoutDesignerStateService {
       }
     }
 
+  }
+
+  /**
+   * Text layerek pozícionálása a párosított kép layer alapján.
+   * Person ID-vel párosítjuk a kép és szöveg layereket, majd a szöveget
+   * a kép közepéhez igazítjuk (X) és a kép alja alá helyezzük (Y).
+   */
+  private alignTextToImageLayers(layers: DesignerLayer[]): void {
+    const pairs: Array<[LayerCategory, LayerCategory]> = [
+      ['student-image', 'student-name'],
+      ['teacher-image', 'teacher-name'],
+    ];
+
+    /** Kis gap a kép alja és a név teteje között (PSD px) */
+    const GAP = 8;
+
+    for (const [imageCat, textCat] of pairs) {
+      const imageMap = new Map<number, DesignerLayer>();
+      for (const l of layers) {
+        if (l.category === imageCat && l.personMatch) {
+          imageMap.set(l.personMatch.id, l);
+        }
+      }
+
+      for (const textLayer of layers) {
+        if (textLayer.category !== textCat || !textLayer.personMatch) continue;
+
+        const imageLayer = imageMap.get(textLayer.personMatch.id);
+        if (!imageLayer) continue;
+
+        // X: kép közepéhez igazítás
+        const imageCenterX = imageLayer.x + imageLayer.width / 2;
+        textLayer.x = Math.round(imageCenterX - textLayer.width / 2);
+
+        // Y: kép alja + gap
+        textLayer.y = imageLayer.y + imageLayer.height + GAP;
+      }
+    }
   }
 
   /** Layer kategorizálása a groupPath alapján */

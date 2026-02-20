@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { LayoutDesignerStateService } from '../../layout-designer-state.service';
 import { LayoutLayerComponent } from '../layout-layer/layout-layer.component';
+import { LayoutGridOverlayComponent } from '../layout-grid-overlay/layout-grid-overlay.component';
 
 /**
  * Layout Canvas — arányos konténer, benne a layerek.
@@ -9,7 +10,7 @@ import { LayoutLayerComponent } from '../layout-layer/layout-layer.component';
 @Component({
   selector: 'app-layout-canvas',
   standalone: true,
-  imports: [LayoutLayerComponent],
+  imports: [LayoutLayerComponent, LayoutGridOverlayComponent],
   template: `
     <div
       class="layout-canvas-wrapper"
@@ -22,12 +23,12 @@ import { LayoutLayerComponent } from '../layout-layer/layout-layer.component';
         [style.left.px]="scaleInfo().offsetX"
         [style.top.px]="canvasTop()"
       >
+        <app-layout-grid-overlay />
         @for (layer of state.layers(); track layer.layerId) {
           <app-layout-layer
             [layer]="layer"
             [scale]="scaleInfo().scale"
             [isSelected]="isLayerSelected(layer.layerId)"
-            (layerClicked)="onLayerClicked($event)"
           />
         }
       </div>
@@ -65,8 +66,6 @@ export class LayoutCanvasComponent {
   /** Canvas top pozíció (toolbar nélkül — a toolbar a parent-ben van) */
   readonly canvasTop = computed(() => {
     const si = this.scaleInfo();
-    // offsetY tartalmazza a toolbar height-et, de itt a canvas wrapper
-    // a toolbar ALATT van, ezért ki kell vonni
     return si.offsetY - 56;
   });
 
@@ -74,12 +73,7 @@ export class LayoutCanvasComponent {
     return this.state.selectedLayerIds().has(layerId);
   }
 
-  onLayerClicked(event: { layerId: number; additive: boolean }): void {
-    this.state.toggleSelection(event.layerId, event.additive);
-  }
-
   onCanvasClick(event: MouseEvent): void {
-    // Csak a canvas háttérre kattintás → kijelölés törlése
     if (event.target === event.currentTarget || (event.target as HTMLElement).classList.contains('layout-canvas')) {
       this.state.clearSelection();
     }

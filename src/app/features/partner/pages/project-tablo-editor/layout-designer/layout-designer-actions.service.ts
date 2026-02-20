@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
 import { DesignerLayer } from './layout-designer.types';
+import { expandWithCoupledLayers } from './layout-designer.utils';
 
 /** Sorok Y-threshold: ezen belüli Y-ú elemek egy sorba tartoznak */
 const ROW_THRESHOLD_PX = 20;
@@ -113,6 +114,120 @@ export class LayoutDesignerActionsService {
         const newY = updates.get(l.layerId);
         if (newY == null) return l;
         return { ...l, editedY: newY };
+      }),
+    );
+  }
+
+  /** Balra igazítás: kijelölt elemek X → min(X), coupled párokkal */
+  alignLeft(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+
+    const expandedIds = expandWithCoupledLayers(
+      this.state.selectedLayerIds(), this.state.layers(),
+    );
+
+    const minX = Math.min(...selected.map(l => l.editedX ?? l.x));
+    const updates = new Map<number, { x: number }>();
+
+    // Kijelölt elemek X → minX, coupled párok delta-val követik
+    for (const sel of selected) {
+      const selX = sel.editedX ?? sel.x;
+      const deltaX = minX - selX;
+      updates.set(sel.layerId, { x: minX });
+
+      // Coupled pár is kapja a delta-t
+      for (const id of expandedIds) {
+        if (updates.has(id)) continue;
+        const layer = this.state.layers().find(l => l.layerId === id);
+        if (layer && !this.state.selectedLayerIds().has(id)) {
+          const isLinked = layer.personMatch && sel.personMatch
+            && layer.personMatch.id === sel.personMatch.id;
+          if (isLinked) {
+            updates.set(id, { x: (layer.editedX ?? layer.x) + deltaX });
+          }
+        }
+      }
+    }
+
+    this.state.updateLayers(
+      this.state.layers().map(l => {
+        const u = updates.get(l.layerId);
+        if (!u) return l;
+        return { ...l, editedX: u.x };
+      }),
+    );
+  }
+
+  /** Vízszintes középre igazítás: X középpont → átlag(X középpont) */
+  alignCenterHorizontal(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+
+    const avgCenterX = selected.reduce((sum, l) => {
+      return sum + (l.editedX ?? l.x) + l.width / 2;
+    }, 0) / selected.length;
+
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: Math.round(avgCenterX - l.width / 2),
+      y: l.editedY ?? l.y,
+    }));
+  }
+
+  /** Függőleges középre igazítás: Y középpont → átlag(Y középpont) */
+  alignCenterVertical(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+
+    const avgCenterY = selected.reduce((sum, l) => {
+      return sum + (l.editedY ?? l.y) + l.height / 2;
+    }, 0) / selected.length;
+
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: l.editedX ?? l.x,
+      y: Math.round(avgCenterY - l.height / 2),
+    }));
+  }
+
+  /** Igazítás végrehajtása coupled párokkal */
+  private applyAlignmentWithCoupled(
+    selected: DesignerLayer[],
+    positionFn: (l: DesignerLayer) => { x: number; y: number },
+  ): void {
+    const expandedIds = expandWithCoupledLayers(
+      this.state.selectedLayerIds(), this.state.layers(),
+    );
+
+    const updates = new Map<number, { x: number; y: number }>();
+
+    for (const sel of selected) {
+      const newPos = positionFn(sel);
+      const deltaX = newPos.x - (sel.editedX ?? sel.x);
+      const deltaY = newPos.y - (sel.editedY ?? sel.y);
+      updates.set(sel.layerId, newPos);
+
+      // Coupled párok delta-val követik
+      for (const id of expandedIds) {
+        if (updates.has(id)) continue;
+        const layer = this.state.layers().find(l => l.layerId === id);
+        if (layer && !this.state.selectedLayerIds().has(id)) {
+          const isLinked = layer.personMatch && sel.personMatch
+            && layer.personMatch.id === sel.personMatch.id;
+          if (isLinked) {
+            updates.set(id, {
+              x: (layer.editedX ?? layer.x) + deltaX,
+              y: (layer.editedY ?? layer.y) + deltaY,
+            });
+          }
+        }
+      }
+    }
+
+    this.state.updateLayers(
+      this.state.layers().map(l => {
+        const u = updates.get(l.layerId);
+        if (!u) return l;
+        return { ...l, editedX: u.x, editedY: u.y };
       }),
     );
   }

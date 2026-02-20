@@ -4,10 +4,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { LayoutDesignerStateService } from '../../layout-designer-state.service';
 import { LayoutDesignerActionsService } from '../../layout-designer-actions.service';
+import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
 
 /**
  * Layout Toolbar — eszköztár a vizuális szerkesztő tetején.
- * Dokumentum info, igazítás gombok, mentés + bezárás.
+ * Dokumentum info, grid toggle, igazítás gombok, mentés + bezárás.
  */
 @Component({
   selector: 'app-layout-toolbar',
@@ -15,13 +16,24 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
   imports: [LucideAngularModule, MatTooltipModule],
   template: `
     <div class="layout-toolbar">
-      <!-- Bal: dokumentum info -->
+      <!-- Bal: dokumentum info + grid toggle -->
       <div class="layout-toolbar__left">
         @if (state.documentSizeCm(); as size) {
           <span class="layout-toolbar__doc-info">
             {{ size.widthCm }} &times; {{ size.heightCm }} cm
           </span>
         }
+
+        <div class="layout-toolbar__separator"></div>
+
+        <button
+          class="toolbar-btn"
+          [class.toolbar-btn--active]="gridService.gridEnabled()"
+          (click)="gridService.toggleGrid()"
+          matTooltip="Rács megjelenítése"
+        >
+          <lucide-icon [name]="ICONS.GRID" [size]="16" />
+        </button>
       </div>
 
       <!-- Közép: kijelölés info + igazítás gombok -->
@@ -36,11 +48,30 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignTop()"
-            matTooltip="Felsők igazítása"
+            (click)="actions.alignLeft()"
+            matTooltip="Balra igazítás"
           >
             <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="16" />
           </button>
+          <button
+            class="toolbar-btn"
+            [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignCenterHorizontal()"
+            matTooltip="Vízszintes középre igazítás"
+          >
+            <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="16" />
+          </button>
+          <button
+            class="toolbar-btn"
+            [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignTop()"
+            matTooltip="Felsők igazítása"
+          >
+            <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="16" />
+          </button>
+
+          <div class="layout-toolbar__divider"></div>
+
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 3"
@@ -114,12 +145,19 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
       flex: 1;
       display: flex;
       align-items: center;
+      gap: 12px;
     }
 
     .layout-toolbar__doc-info {
       font-size: 0.8rem;
       color: rgba(255, 255, 255, 0.6);
       font-weight: 500;
+    }
+
+    .layout-toolbar__separator {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.12);
     }
 
     .layout-toolbar__center {
@@ -137,7 +175,15 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
 
     .layout-toolbar__actions {
       display: flex;
+      align-items: center;
       gap: 4px;
+    }
+
+    .layout-toolbar__divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 0 4px;
     }
 
     .layout-toolbar__right {
@@ -173,6 +219,12 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
       &:disabled {
         opacity: 0.3;
         cursor: not-allowed;
+      }
+
+      &--active {
+        background: rgba(124, 58, 237, 0.3) !important;
+        color: #a78bfa !important;
+        border: 1px solid rgba(124, 58, 237, 0.4);
       }
 
       &--refresh {
@@ -213,6 +265,7 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
 export class LayoutToolbarComponent {
   readonly state = inject(LayoutDesignerStateService);
   readonly actions = inject(LayoutDesignerActionsService);
+  readonly gridService = inject(LayoutDesignerGridService);
   protected readonly ICONS = ICONS;
 
   readonly refreshing = input<boolean>(false);

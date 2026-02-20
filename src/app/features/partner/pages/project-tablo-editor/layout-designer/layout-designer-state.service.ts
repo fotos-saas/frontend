@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { SnapshotLayer } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
 import { DesignerLayer, DesignerDocument, ScaleInfo, LayerCategory } from './layout-designer.types';
+import { expandWithCoupledLayers } from './layout-designer.utils';
 
 /** Toolbar magassága px-ben */
 const TOOLBAR_HEIGHT = 56;
@@ -132,13 +133,16 @@ export class LayoutDesignerStateService {
     this.selectedLayerIds.set(new Set());
   }
 
-  /** Kijelölt elemek mozgatása (PSD koordinátákban) */
+  /** Kijelölt elemek mozgatása (PSD koordinátákban) — coupled párokkal együtt */
   moveSelectedLayers(deltaXPsd: number, deltaYPsd: number): void {
     const ids = this.selectedLayerIds();
     if (ids.size === 0) return;
 
+    // Coupled párok bővítése (kép → név, név → kép)
+    const expandedIds = expandWithCoupledLayers(ids, this.layers());
+
     this.layers.update(layers => layers.map(l => {
-      if (!ids.has(l.layerId)) return l;
+      if (!expandedIds.has(l.layerId)) return l;
 
       const currentX = l.editedX ?? l.x;
       const currentY = l.editedY ?? l.y;

@@ -1,16 +1,17 @@
 import {
-  Component, ChangeDetectionStrategy, input, output, inject,
+  Component, ChangeDetectionStrategy, input, inject, computed,
+  ElementRef, AfterViewInit, DestroyRef,
 } from '@angular/core';
-import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DesignerLayer } from '../../layout-designer.types';
-import { LayoutDesignerStateService } from '../../layout-designer-state.service';
+import { LayoutDesignerDragService } from '../../layout-designer-drag.service';
+import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
 
 @Component({
   selector: 'app-layout-layer',
   standalone: true,
-  imports: [CdkDrag, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     <div
       class="designer-layer"
@@ -18,14 +19,13 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       [class.designer-layer--image]="isImage"
       [class.designer-layer--text]="isText"
       [class.designer-layer--fixed]="layer().category === 'fixed'"
+      [class.designer-layer--swap-target]="isSwapTarget()"
+      [class.designer-layer--dragging]="isDragging()"
       [style.left.px]="displayX"
       [style.top.px]="displayY"
       [style.width.px]="displayWidth"
       [style.height.px]="isText ? null : displayHeight"
-      cdkDrag
-      [cdkDragFreeDragPosition]="{ x: 0, y: 0 }"
-      (cdkDragEnded)="onDragEnd($event)"
-      (click)="onClick($event)"
+      (mousedown)="onMouseDown($event)"
     >
       @if (isImage) {
         @if (layer().personMatch?.photoThumbUrl) {
@@ -95,6 +95,16 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
         border-color: rgba(156, 163, 175, 0.3);
       }
 
+      &--swap-target {
+        border-color: #eab308 !important;
+        box-shadow: 0 0 0 2px #eab308, 0 0 12px rgba(234, 179, 8, 0.4);
+        z-index: 50;
+      }
+
+      &--dragging {
+        z-index: 100;
+      }
+
       &:active { cursor: grabbing; }
     }
 
@@ -143,15 +153,28 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LayoutLayerComponent {
-  private readonly state = inject(LayoutDesignerStateService);
+export class LayoutLayerComponent implements AfterViewInit {
+  private readonly dragService = inject(LayoutDesignerDragService);
+  private readonly swapService = inject(LayoutDesignerSwapService);
+  private readonly el = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
   readonly layer = input.required<DesignerLayer>();
   readonly scale = input.required<number>();
   readonly isSelected = input<boolean>(false);
 
-  readonly layerClicked = output<{ layerId: number; additive: boolean }>();
+  /** Swap cél: sárga kerettel jelölt elem */
+  readonly isSwapTarget = computed(() => {
+    const candidate = this.swapService.swapCandidate();
+    return candidate?.targetLayerId === this.layer().layerId;
+  });
+
+  /** Drag közben: az elem vizuálisan a fogott csoportban van */
+  readonly isDragging = computed(() => {
+    const ds = this.dragService.dragState();
+    return ds?.active === true && this.isSelected();
+  });
 
   /** Megjelenítendő név: person match neve, vagy layerName fallback */
   get displayName(): string {
@@ -163,11 +186,9 @@ export class LayoutLayerComponent {
     const name = this.displayName;
     const words = name.split(' ');
 
-    // Összes névrész: szóköz ÉS kötőjel mentén
     const totalParts = words.reduce((sum, w) => sum + w.split('-').length, 0);
     if (totalParts < 3) return [name];
 
-    // Törés: az első szóköz-szó után ahol a futó névrész-szám eléri a 2-t
     let running = 0;
     for (let i = 0; i < words.length; i++) {
       running += words[i].split('-').length;
@@ -211,26 +232,23 @@ export class LayoutLayerComponent {
     return Math.max(12, Math.min(24, this.displayWidth * 0.4));
   }
 
-  onClick(event: MouseEvent): void {
-    event.stopPropagation();
-    this.layerClicked.emit({
-      layerId: this.layer().layerId,
-      additive: event.metaKey || event.ctrlKey,
+  ngAfterViewInit(): void {
+    // DOM elem regisztrálása a drag service-ben
+    const hostEl = this.el.nativeElement as HTMLElement;
+    const layerEl = hostEl.firstElementChild as HTMLElement;
+    if (layerEl) {
+      this.dragService.registerLayerElement(this.layer().layerId, layerEl);
+    }
+
+    this.destroyRef.onDestroy(() => {
+      this.dragService.unregisterLayerElement(this.layer().layerId);
     });
   }
 
-  onDragEnd(event: CdkDragEnd): void {
-    const s = this.scale();
-    if (s === 0) return;
+  onMouseDown(event: MouseEvent): void {
+    // Fixed layerek nem mozgathatók
+    if (this.layer().category === 'fixed') return;
 
-    const deltaXPsd = Math.round(event.distance.x / s);
-    const deltaYPsd = Math.round(event.distance.y / s);
-
-    if (deltaXPsd !== 0 || deltaYPsd !== 0) {
-      this.state.moveSelectedLayers(deltaXPsd, deltaYPsd);
-    }
-
-    // CDK transform reset — a pozíciót a signal vezérli
-    event.source.reset();
+    this.dragService.startDrag(this.layer().layerId, event, this.scale());
   }
 }

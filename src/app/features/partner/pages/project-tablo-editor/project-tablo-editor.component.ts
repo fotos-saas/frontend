@@ -6,6 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ProjectDetailHeaderComponent } from '@shared/components/project-detail/project-detail-header/project-detail-header.component';
+import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ProjectDetailData } from '@shared/components/project-detail/project-detail.types';
 import { PartnerService, PartnerProjectDetails } from '../../services/partner.service';
 import { PhotoshopService } from '../../services/photoshop.service';
@@ -20,7 +21,7 @@ type EditorTab = 'commands' | 'settings' | 'debug';
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
-  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule],
+  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent],
   providers: [TabloEditorDebugService, TabloEditorSnapshotService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',

@@ -612,50 +612,25 @@
   }
 }
 
-// Snapshot mentés dialógus
-.snapshot-dialog {
-  &__title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--text-primary, #1f2937);
-    margin: 0 0 8px;
+// Snapshot mentés dialógus input
+.snapshot-dialog__input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: var(--card-bg, #ffffff);
+  color: var(--text-primary, #1f2937);
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color, #7c3aed);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
   }
 
-  &__desc {
-    font-size: 0.85rem;
-    color: var(--text-secondary, #6b7280);
-    margin: 0 0 16px;
-  }
-
-  &__input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border-color, #d1d5db);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: var(--card-bg, #ffffff);
-    color: var(--text-primary, #1f2937);
-    margin-bottom: 16px;
-    box-sizing: border-box;
-
-    &:focus {
-      outline: none;
-      border-color: var(--primary-color, #7c3aed);
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-    }
-
-    &::placeholder {
-      color: var(--text-tertiary, #9ca3af);
-    }
-  }
-
-  &__footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+  &::placeholder {
+    color: var(--text-tertiary, #9ca3af);
   }
 }
 

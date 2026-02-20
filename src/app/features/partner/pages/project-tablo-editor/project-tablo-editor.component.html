@@ -681,45 +681,45 @@
 
 <!-- Pillanatkép mentés dialógus (page-card KÍVÜL) -->
 @if (snapshotService.showSaveDialog()) {
-  <div class="dialog-backdrop" (mousedown)="snapshotService.closeSaveDialog()">
-    <div class="dialog-panel" (mousedown)="$event.stopPropagation()">
-      <div class="snapshot-dialog">
-        <h3 class="snapshot-dialog__title">
-          <lucide-icon [name]="ICONS.SAVE" [size]="20" />
-          Új pillanatkép
-        </h3>
-        <p class="snapshot-dialog__desc">
-          Add meg a pillanatkép nevét. Az aktuális Photoshop elrendezés kerül mentésre.
-        </p>
-        <input
-          type="text"
-          class="snapshot-dialog__input"
-          placeholder="pl. Első tervezet"
-          [value]="snapshotService.snapshotName()"
-          (input)="snapshotService.snapshotName.set($any($event.target).value)"
-          (keydown.enter)="snapshotService.snapshotName() ? saveSnapshotFromDialog() : null"
-          (keydown.escape)="snapshotService.closeSaveDialog()"
-          autofocus
-        />
-        <div class="snapshot-dialog__footer">
-          <button class="btn btn--outline" (click)="snapshotService.closeSaveDialog()">
-            Mégse
-          </button>
-          <button
-            class="btn btn--primary"
-            [disabled]="!snapshotService.snapshotName().trim() || snapshotService.savingSnapshot()"
-            (click)="saveSnapshotFromDialog()"
-          >
-            @if (snapshotService.savingSnapshot()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              Mentés...
-            } @else {
-              <lucide-icon [name]="ICONS.SAVE" [size]="16" />
-              Mentés
-            }
-          </button>
-        </div>
-      </div>
+  <app-dialog-wrapper
+    headerStyle="flat"
+    theme="purple"
+    [icon]="ICONS.SAVE"
+    title="Új pillanatkép"
+    description="Add meg a pillanatkép nevét. Az aktuális Photoshop elrendezés kerül mentésre."
+    size="sm"
+    variant="create"
+    [isSubmitting]="snapshotService.savingSnapshot()"
+    (closeEvent)="snapshotService.closeSaveDialog()"
+    (submitEvent)="snapshotService.snapshotName().trim() ? saveSnapshotFromDialog() : null"
+  >
+    <div dialogBody>
+      <input
+        type="text"
+        class="snapshot-dialog__input"
+        placeholder="pl. Első tervezet"
+        [value]="snapshotService.snapshotName()"
+        (input)="snapshotService.snapshotName.set($any($event.target).value)"
+      />
     </div>
-  </div>
+
+    <div dialogFooter>
+      <button class="btn btn--outline" (click)="snapshotService.closeSaveDialog()">
+        Mégse
+      </button>
+      <button
+        class="btn btn--primary"
+        [disabled]="!snapshotService.snapshotName().trim() || snapshotService.savingSnapshot()"
+        (click)="saveSnapshotFromDialog()"
+      >
+        @if (snapshotService.savingSnapshot()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Mentés...
+        } @else {
+          <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+          Mentés
+        }
+      </button>
+    </div>
+  </app-dialog-wrapper>
 }

@@ -1,8 +1,9 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { SnapshotLayer } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
 import { DesignerLayer, DesignerDocument, ScaleInfo, LayerCategory } from './layout-designer.types';
 import { expandWithCoupledLayers } from './layout-designer.utils';
+import { LayoutDesignerHistoryService } from './layout-designer-history.service';
 
 /** Toolbar magassága px-ben */
 const TOOLBAR_HEIGHT = 56;
@@ -15,6 +16,8 @@ const CANVAS_PADDING = 40;
  */
 @Injectable()
 export class LayoutDesignerStateService {
+
+  private readonly history = inject(LayoutDesignerHistoryService);
 
   /** Dokumentum adatok */
   readonly document = signal<DesignerDocument | null>(null);
@@ -104,6 +107,9 @@ export class LayoutDesignerStateService {
 
     this.layers.set(designerLayers);
     this.selectedLayerIds.set(new Set());
+
+    this.history.clear();
+    this.history.pushState(designerLayers);
   }
 
   /** Kijelölés toggle (klikk/Cmd+klikk) */
@@ -153,11 +159,32 @@ export class LayoutDesignerStateService {
         editedY: currentY + deltaYPsd,
       };
     }));
+
+    this.history.pushState(this.layers());
   }
 
   /** Layerek frissítése (igazítás utáni állapot) */
   updateLayers(updatedLayers: DesignerLayer[]): void {
     this.layers.set(updatedLayers);
+    this.history.pushState(updatedLayers);
+  }
+
+  /** Van-e visszavonható lépés */
+  readonly canUndo = computed(() => this.history.canUndo());
+
+  /** Van-e újra végrehajtható lépés */
+  readonly canRedo = computed(() => this.history.canRedo());
+
+  /** Visszavonás */
+  undo(): void {
+    const snapshot = this.history.undo();
+    if (snapshot) this.layers.set(snapshot);
+  }
+
+  /** Újra végrehajtás */
+  redo(): void {
+    const snapshot = this.history.redo();
+    if (snapshot) this.layers.set(snapshot);
   }
 
   /** Módosított SnapshotLayer[] exportálása (mentéshez) */

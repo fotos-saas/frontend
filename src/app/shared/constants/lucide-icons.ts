@@ -154,8 +154,9 @@ import {
   Truck,
   // Tablóméretek
   Ruler,
-  // Undo
+  // Undo/Redo
   Undo2,
+  Redo2,
   // Tags
   Tag,
   // File
@@ -332,8 +333,9 @@ export const LUCIDE_ICONS_MAP = {
   Truck,
   // Tablóméretek
   Ruler,
-  // Undo
+  // Undo/Redo
   Undo2,
+  Redo2,
   // Tags
   Tag,
   // File

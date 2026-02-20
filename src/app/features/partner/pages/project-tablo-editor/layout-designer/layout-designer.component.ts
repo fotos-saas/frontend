@@ -10,6 +10,7 @@ import { LayoutDesignerActionsService } from './layout-designer-actions.service'
 import { LayoutDesignerGridService } from './layout-designer-grid.service';
 import { LayoutDesignerDragService } from './layout-designer-drag.service';
 import { LayoutDesignerSwapService } from './layout-designer-swap.service';
+import { LayoutDesignerHistoryService } from './layout-designer-history.service';
 import { LayoutToolbarComponent } from './components/layout-toolbar/layout-toolbar.component';
 import { LayoutCanvasComponent } from './components/layout-canvas/layout-canvas.component';
 import { LucideAngularModule } from 'lucide-angular';
@@ -30,12 +31,13 @@ import { DesignerDocument } from './layout-designer.types';
     LayoutDesignerGridService,
     LayoutDesignerDragService,
     LayoutDesignerSwapService,
+    LayoutDesignerHistoryService,
   ],
   template: `
     <div
       class="layout-designer-overlay"
       #overlayEl
-      (keydown.escape)="close()"
+      (keydown)="onKeyDown($event)"
       tabindex="0"
     >
       @if (loading()) {
@@ -165,6 +167,21 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
   close(): void {
     this.closeEvent.emit();
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') { this.close(); return; }
+
+    const isMod = event.metaKey || event.ctrlKey;
+    if (!isMod) return;
+
+    if (event.key === 'z' && !event.shiftKey) {
+      event.preventDefault();
+      this.state.undo();
+    } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {
+      event.preventDefault();
+      this.state.redo();
+    }
   }
 
   save(): void {

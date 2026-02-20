@@ -369,6 +369,9 @@ export const ICONS = {
   ALIGN_H_DISTRIBUTE: 'align-horizontal-distribute-center',
   ALIGN_V_DISTRIBUTE: 'align-vertical-distribute-center',
   MAXIMIZE_2: 'maximize-2',
+
+  // Undo/Redo
+  REDO: 'redo-2',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

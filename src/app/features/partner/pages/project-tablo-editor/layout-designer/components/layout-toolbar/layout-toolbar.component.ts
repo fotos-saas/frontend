@@ -47,6 +47,25 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           <lucide-icon [name]="ICONS.WAND" [size]="16" />
         </button>
 
+        <div class="layout-toolbar__separator"></div>
+
+        <button
+          class="toolbar-btn"
+          [disabled]="!state.canUndo()"
+          (click)="state.undo()"
+          matTooltip="Visszavonás (⌘Z)"
+        >
+          <lucide-icon [name]="ICONS.UNDO" [size]="16" />
+        </button>
+        <button
+          class="toolbar-btn"
+          [disabled]="!state.canRedo()"
+          (click)="state.redo()"
+          matTooltip="Újra (⌘⇧Z)"
+        >
+          <lucide-icon [name]="ICONS.REDO" [size]="16" />
+        </button>
+
         @if (state.hasSelection()) {
           <div class="layout-toolbar__separator"></div>
 

@@ -210,6 +210,17 @@ export class PartnerAlbumService {
   }
 
   /**
+   * Pending fotók letöltése ZIP-ben (opcionális album szűrővel)
+   */
+  downloadPendingZip(projectId: number, album?: string): Observable<Blob> {
+    const params = album ? `?album=${album}` : '';
+    return this.http.get(
+      `${this.baseUrl}/projects/${projectId}/photos/pending/download-zip${params}`,
+      { responseType: 'blob' },
+    );
+  }
+
+  /**
    * Pending képek törlése mediaId-k alapján
    */
   deletePendingPhotos(projectId: number, mediaIds: number[]): Observable<{

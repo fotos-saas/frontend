@@ -48,6 +48,7 @@ export class ProjectDetailViewComponent {
 
   readonly openPersonsModal = output<'student' | 'teacher' | undefined>();
   readonly openUploadWizard = output<'students' | 'teachers'>();
+  readonly downloadPendingZip = output<void>();
   readonly openQrModal = output<void>();
   readonly openContactModal = output<ProjectContact | null>();
   readonly deleteContact = output<ProjectContact>();

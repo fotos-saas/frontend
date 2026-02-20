@@ -19,6 +19,7 @@ import { ElectronService } from '../../../../core/services/electron.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { PartnerGalleryService } from '../../../../features/partner/services/partner-gallery.service';
+import { PartnerAlbumService } from '../../../../features/partner/services/partner-album.service';
 import { SelectionDownloadResult } from '../../../../features/partner/components/selection-download-dialog/selection-download-dialog.component';
 import { saveFile } from '../../../utils/file.util';
 import { projectShortName } from '../../../utils/string.util';
@@ -92,6 +93,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly location = inject(Location);
   private readonly partnerService = inject(PartnerService, { optional: true });
   private readonly galleryService = inject(PartnerGalleryService, { optional: true });
+  private readonly albumService = inject(PartnerAlbumService, { optional: true });
   private readonly finalizationService = inject(PartnerFinalizationService, { optional: true });
   private readonly toast = inject(ToastService);
   private readonly electronService = inject(ElectronService);
@@ -395,6 +397,24 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     }
     this.facade.showDeletePrintFileConfirm.set(false);
     this.facade.deletingPrintFileType.set(null);
+  }
+
+  // === PENDING ZIP DOWNLOAD ===
+
+  downloadPendingPhotosZip(): void {
+    const projectId = this.projectData()?.id;
+    if (!projectId || !this.albumService) return;
+
+    this.albumService.downloadPendingZip(projectId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          const name = projectShortName(this.projectData()?.name ?? '', projectId);
+          saveFile(blob, `${name}_elozetes.zip`);
+          this.toast.success('Siker', 'ZIP letöltve');
+        },
+        error: () => this.toast.error('Hiba', 'A letöltés nem sikerült'),
+      });
   }
 
   // === GALLERY ===

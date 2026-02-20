@@ -170,6 +170,11 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  // Vizuális szerkesztő
+  Move,
+  AlignHorizontalDistributeCenter,
+  AlignVerticalDistributeCenter,
+  Maximize2,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -336,4 +341,9 @@ export const LUCIDE_ICONS_MAP = {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  // Vizuális szerkesztő
+  Move,
+  AlignHorizontalDistributeCenter,
+  AlignVerticalDistributeCenter,
+  Maximize2,
 };

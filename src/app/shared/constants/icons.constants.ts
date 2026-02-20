@@ -356,6 +356,12 @@ export const ICONS = {
   ALIGN_LEFT: 'align-left',
   ALIGN_CENTER: 'align-center',
   ALIGN_RIGHT: 'align-right',
+
+  // Vizuális szerkesztő
+  MOVE: 'move',
+  ALIGN_H_DISTRIBUTE: 'align-horizontal-distribute-center',
+  ALIGN_V_DISTRIBUTE: 'align-vertical-distribute-center',
+  MAXIMIZE_2: 'maximize-2',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

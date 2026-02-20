@@ -845,6 +845,30 @@ export class PhotoshopService {
     }
   }
 
+  /**
+   * Snapshot közvetlen mentése (módosított adatokkal, Photoshop nélkül).
+   * A vizuális szerkesztőből használjuk: a meglévő snapshot layereit felülírjuk.
+   */
+  async saveSnapshotData(
+    psdPath: string,
+    snapshotData: Record<string, unknown>,
+    fileName: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      const result = await this.api.saveSnapshot({ psdPath, snapshotData, fileName });
+      if (!result.success) {
+        return { success: false, error: result.error || 'Snapshot mentés sikertelen' };
+      }
+      this.logger.info(`Snapshot mentve (vizuális szerkesztő): ${fileName}`);
+      return { success: true };
+    } catch (err) {
+      this.logger.error('Snapshot közvetlen mentés hiba', err);
+      return { success: false, error: 'Váratlan hiba a snapshot mentésnél' };
+    }
+  }
+
   /** Snapshot átnevezése (a JSON fájlban a snapshotName mező módosítása) */
   async renameSnapshot(snapshotPath: string, newName: string): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

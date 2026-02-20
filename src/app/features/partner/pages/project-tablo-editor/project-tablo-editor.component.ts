@@ -19,13 +19,14 @@ import { SnapshotListItem, SnapshotLayer, TemplateListItem } from '@core/service
 import { SnapshotRestoreDialogComponent } from './snapshot-restore-dialog.component';
 import { TemplateSaveDialogComponent } from './template-save-dialog.component';
 import { TemplateApplyDialogComponent } from './template-apply-dialog.component';
+import { LayoutDesignerComponent } from './layout-designer/layout-designer.component';
 
 type EditorTab = 'commands' | 'settings' | 'debug';
 
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
-  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent],
+  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent, LayoutDesignerComponent],
   providers: [TabloEditorDebugService, TabloEditorSnapshotService, TabloEditorTemplateService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
@@ -113,6 +114,11 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   /** Debug log (delegálva a debug service-nek) */
   readonly debugLogs = this.debugService.debugLogs;
+
+  /** Vizuális szerkesztő */
+  readonly showLayoutDesigner = signal(false);
+  readonly designerSnapshotPath = signal<string | null>(null);
+  readonly designerBoardConfig = signal<{ widthCm: number; heightCm: number } | null>(null);
 
   /** Üzenetek */
   readonly error = signal<string | null>(null);
@@ -640,5 +646,64 @@ export class ProjectTabloEditorComponent implements OnInit {
   /** Személyek számának getter-je a template alkalmazás összehasonlításhoz */
   get currentStudentCount(): number {
     return this.persons().filter(p => p.type !== 'teacher').length;
+  }
+
+  // ============ Vizuális szerkesztő ============
+
+  /** Vizuális szerkesztő megnyitása a legutolsó snapshot-tal */
+  openLayoutDesigner(): void {
+    const latest = this.snapshotService.latestSnapshot();
+    if (!latest) return;
+
+    const size = this.selectedSize();
+    if (!size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    this.designerSnapshotPath.set(latest.filePath);
+    this.designerBoardConfig.set(boardSize);
+    this.showLayoutDesigner.set(true);
+  }
+
+  /** Vizuális szerkesztő mentés: módosított layerek visszaírása a snapshot-ba */
+  async onDesignerSave(layers: SnapshotLayer[]): Promise<void> {
+    const latest = this.snapshotService.latestSnapshot();
+    const psdPath = await this.resolvePsdPath();
+    if (!latest || !psdPath) {
+      this.showLayoutDesigner.set(false);
+      return;
+    }
+
+    this.clearMessages();
+
+    // Snapshot betöltése → layers felülírása → visszamentés
+    const loadResult = await this.ps.loadSnapshot(latest.filePath);
+    if (!loadResult.success || !loadResult.data) {
+      this.error.set('Nem sikerült betölteni a pillanatképet a mentéshez.');
+      this.showLayoutDesigner.set(false);
+      return;
+    }
+
+    const snapshotData = loadResult.data as Record<string, unknown>;
+    snapshotData['layers'] = layers;
+
+    // Régi snapshot törlés + új mentés azonos névvel
+    await this.ps.deleteSnapshot(latest.filePath);
+    const saveResult = await this.ps.saveSnapshotData(psdPath, snapshotData, latest.fileName);
+
+    this.showLayoutDesigner.set(false);
+
+    if (saveResult.success) {
+      this.successMessage.set('Elrendezés mentve a vizuális szerkesztőből!');
+      await this.loadSnapshots();
+    } else {
+      this.error.set(saveResult.error || 'Pillanatkép mentés sikertelen.');
+    }
+  }
+
+  /** Vizuális szerkesztő bezárása */
+  closeLayoutDesigner(): void {
+    this.showLayoutDesigner.set(false);
   }
 }

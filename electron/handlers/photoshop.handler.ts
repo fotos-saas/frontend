@@ -621,20 +621,22 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     return result;
   }
 
-  // Nev tordelese: N "valodi" szo utan sortores
+  // Nev tordelese: breakAfter "valodi" szo utan sortores
   // Rovid prefixek (dr., id., ifj. stb. — max 2 betu pont nelkul) nem szamitanak szokent
+  // Kotojelesen neveknel (3+ szo): breakAfter minimum 2 (2 szo utan tordeles)
   // Photoshop \r-t hasznal sortoresnek (nem \n!)
-  // Pl. breakAfter=1: "Kiss Janos" → "Kiss\rJanos", "Dr. Kiss Janos" → "Dr. Kiss\rJanos"
   function breakName(name: string, breakAfter: number): string {
     if (breakAfter <= 0) return name;
     const words = name.split(' ');
-    if (words.length < 2) return name; // 1 szavas nev nem tordelodik
+    if (words.length < 2) return name;
+    // Kotojeles nev + 3+ szo → minimum 2 szo utan tordeles
+    const hasHyphen = name.indexOf('-') !== -1;
+    const effectiveBreakAfter = (hasHyphen && words.length >= 3) ? Math.max(breakAfter, 2) : breakAfter;
     let realWordCount = 0;
     let breakIndex = -1;
     for (let i = 0; i < words.length; i++) {
-      // Rovid prefix (max 2 betu pont nelkul, pl. "Dr.", "id.", "ifj.") nem szamit
       if (words[i].replace('.', '').length > 2) realWordCount++;
-      if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
+      if (realWordCount > effectiveBreakAfter && breakIndex === -1) breakIndex = i;
     }
     if (breakIndex === -1) return name;
     return words.slice(0, breakIndex).join(' ') + '\r' + words.slice(breakIndex).join(' ');

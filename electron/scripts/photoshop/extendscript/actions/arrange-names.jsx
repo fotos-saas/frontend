@@ -29,17 +29,21 @@ var _doc, _data, _dpi, _moved = 0, _errors = 0;
 
 // --- Nev tordeles (breakAfter) ---
 // Rovid prefixek (dr., id., ifj. — max 2 betu pont nelkul) nem szamitanak szokent
+// Kotojeles nevek (3+ szo): minimum 2 szo utan tordeles
 // Photoshop \r-t hasznal sortoresnek
 function _breakName(name, breakAfter) {
   if (breakAfter <= 0) return name;
   var words = name.split(" ");
   if (words.length < 2) return name;
+  // Kotojeles nev + 3+ szo → minimum 2 szo utan tordeles
+  var hasHyphen = name.indexOf("-") !== -1;
+  var effBreak = (hasHyphen && words.length >= 3) ? Math.max(breakAfter, 2) : breakAfter;
   var realWordCount = 0;
   var breakIndex = -1;
   for (var i = 0; i < words.length; i++) {
     var cleaned = words[i].replace(/\./g, "");
     if (cleaned.length > 2) realWordCount++;
-    if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
+    if (realWordCount > effBreak && breakIndex === -1) breakIndex = i;
   }
   if (breakIndex === -1) return name;
   return words.slice(0, breakIndex).join(" ") + "\r" + words.slice(breakIndex).join(" ");
@@ -164,18 +168,18 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakA
   var initialBaselineY = imgBottom + gapPx + fontSize;
   textItem.position = [new UnitValue(Math.round(targetX), "px"), new UnitValue(Math.round(initialBaselineY), "px")];
 
-  // 2. Bounding box top lekerdezes a tényleges pozícióból
+  // 2. Bounding box top lekerdezes a tenyleges poziciobol
   var textBounds = _getBoundsNoEffects(nameLayer);
   var actualTextTop = textBounds.top;
 
   // 3. A kivant textTop = imgBottom + gapPx
   var desiredTextTop = imgBottom + gapPx;
 
-  // 4. Delta korrekció: mennyit kell tolni a baseline-on
-  var deltaY = desiredTextTop - actualTextTop;
-  var correctedBaselineY = initialBaselineY + deltaY;
-
-  textItem.position = [new UnitValue(Math.round(targetX), "px"), new UnitValue(Math.round(correctedBaselineY), "px")];
+  // 4. Delta korrekció translate-tel (biztosabb mint ujra position setter)
+  var deltaY = Math.round(desiredTextTop - actualTextTop);
+  if (Math.abs(deltaY) > 0) {
+    nameLayer.translate(new UnitValue(0, "px"), new UnitValue(deltaY, "px"));
+  }
 }
 
 // --- Egy csoport nev layereinek rendezese ---

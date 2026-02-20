@@ -177,24 +177,33 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakA
     targetX = imgCenterX;
   }
 
-  // --- Gap korrekció: a gap a kep alja es a szoveg VIZUALIS teteje kozott ---
-  // 1. Elso pozicionalas: baseline = imgBottom + gapPx + fontSize (becsles)
-  var fontSize = textItem.size.as("px");
-  var initialBaselineY = imgBottom + gapPx + fontSize;
-  textItem.position = [new UnitValue(Math.round(targetX), "px"), new UnitValue(Math.round(initialBaselineY), "px")];
+  // --- Pozicionalas: translate a tenyleges bounds alapjan ---
+  // A textItem.position nem mindig frissiti a bounds-ot azonnal,
+  // ezert CSAK translate-et hasznalunk (az MINDIG frissit).
+  // Elobb origora mozgatjuk, aztan celba.
 
-  // 2. Bounding box top lekerdezes a tenyleges poziciobol
-  var textBounds = _getBoundsNoEffects(nameLayer);
-  var actualTextTop = textBounds.top;
+  // 1. Origora mozgatas (bounds alapjan)
+  var b1 = _getBoundsNoEffects(nameLayer);
+  nameLayer.translate(new UnitValue(Math.round(-b1.left), "px"), new UnitValue(Math.round(-b1.top), "px"));
 
-  // 3. A kivant textTop = imgBottom + gapPx
-  var desiredTextTop = imgBottom + gapPx;
-
-  // 4. Delta korrekció translate-tel (biztosabb mint ujra position setter)
-  var deltaY = Math.round(desiredTextTop - actualTextTop);
-  if (Math.abs(deltaY) > 0) {
-    nameLayer.translate(new UnitValue(0, "px"), new UnitValue(deltaY, "px"));
+  // 2. Celba mozgatas
+  var desiredTop = imgBottom + gapPx;
+  var desiredLeft;
+  if (textAlign === "left") {
+    desiredLeft = imgBounds.left;
+  } else if (textAlign === "right") {
+    // Jobb igazitas: bounds jobb szele = kep jobb szele
+    var b2 = _getBoundsNoEffects(nameLayer);
+    var textW = b2.right - b2.left;
+    desiredLeft = imgBounds.right - textW;
+  } else {
+    // Kozep igazitas: bounds kozepe = kep kozepe
+    var b2c = _getBoundsNoEffects(nameLayer);
+    var textW2 = b2c.right - b2c.left;
+    desiredLeft = imgCenterX - textW2 / 2;
   }
+
+  nameLayer.translate(new UnitValue(Math.round(desiredLeft), "px"), new UnitValue(Math.round(desiredTop), "px"));
 }
 
 // --- Egy csoport nev layereinek rendezese ---

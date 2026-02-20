@@ -3,6 +3,7 @@ import {
   OnInit,
   inject,
   signal,
+  computed,
   DestroyRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -99,6 +100,24 @@ export class PrepaymentConfigComponent implements OnInit {
   reminderDays = signal('3,1');
   sendInvoice = signal(false);
   customTerms = signal('');
+  attempted = signal(false);
+
+  readonly errors = computed(() => {
+    const errs: Record<string, string> = {};
+    if (this.selectedMode() !== 'package' && (!this.amountHuf() || this.amountHuf()! < 100)) {
+      errs['amount_huf'] = 'Az összeg megadása kötelező (min. 100 Ft).';
+    }
+    if (!this.label().trim()) {
+      errs['label'] = 'A megnevezés kitöltése kötelező.';
+    }
+    const methods = Object.values(this.paymentMethods()).filter(Boolean);
+    if (methods.length === 0) {
+      errs['payment_methods'] = 'Legalább egy fizetési mód kiválasztása kötelező.';
+    }
+    return errs;
+  });
+
+  readonly hasErrors = computed(() => Object.keys(this.errors()).length > 0);
 
   ngOnInit(): void {
     this.loadConfig();
@@ -155,6 +174,8 @@ export class PrepaymentConfigComponent implements OnInit {
   }
 
   save(): void {
+    this.attempted.set(true);
+    if (this.hasErrors()) return;
     this.saving.set(true);
     const methods = Object.entries(this.paymentMethods())
       .filter(([, v]) => v)

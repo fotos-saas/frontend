@@ -58,22 +58,32 @@
       <h2>{{ PREPAYMENT_MODE_LABELS[selectedMode()] }} beállítások</h2>
 
       @if (selectedMode() === 'fixed_fee' || selectedMode() === 'deposit') {
-        <ps-input
-          label="Összeg (Ft)"
-          type="number"
-          [min]="0"
-          placeholder="pl. 5000"
-          [ngModel]="amountHuf()"
-          (ngModelChange)="amountHuf.set($event)"
-        />
+        <div class="field-wrap" [class.has-error]="attempted() && errors()['amount_huf']">
+          <ps-input
+            label="Összeg (Ft) *"
+            type="number"
+            [min]="100"
+            placeholder="pl. 5000"
+            [ngModel]="amountHuf()"
+            (ngModelChange)="amountHuf.set($event)"
+          />
+          @if (attempted() && errors()['amount_huf']) {
+            <span class="field-error">{{ errors()['amount_huf'] }}</span>
+          }
+        </div>
       }
 
-      <ps-input
-        label="Megnevezés"
-        placeholder="pl. Iskolai fotózás előleg"
-        [ngModel]="label()"
-        (ngModelChange)="label.set($event)"
-      />
+      <div class="field-wrap" [class.has-error]="attempted() && errors()['label']">
+        <ps-input
+          label="Megnevezés *"
+          placeholder="pl. Iskolai fotózás előleg"
+          [ngModel]="label()"
+          (ngModelChange)="label.set($event)"
+        />
+        @if (attempted() && errors()['label']) {
+          <span class="field-error">{{ errors()['label'] }}</span>
+        }
+      </div>
 
       <ps-textarea
         label="Leírás (opcionális)"
@@ -135,6 +145,9 @@
           </label>
         }
       </div>
+      @if (attempted() && errors()['payment_methods']) {
+        <span class="field-error">{{ errors()['payment_methods'] }}</span>
+      }
     </section>
 
     <!-- Határidők és értesítések -->
@@ -182,7 +195,7 @@
       <button class="btn btn--outline" (click)="cancel()" [disabled]="saving()">
         Mégse
       </button>
-      <button class="btn btn--primary" (click)="save()" [disabled]="saving()">
+      <button class="btn btn--primary" (click)="save()" [disabled]="saving() || (attempted() && hasErrors())">
         @if (saving()) {
           <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
           Mentés...

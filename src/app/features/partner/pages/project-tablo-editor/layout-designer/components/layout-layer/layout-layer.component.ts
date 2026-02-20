@@ -1,6 +1,5 @@
 import {
   Component, ChangeDetectionStrategy, input, output, inject,
-  ElementRef, viewChild, AfterViewInit,
 } from '@angular/core';
 import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -22,7 +21,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       [style.left.px]="displayX"
       [style.top.px]="displayY"
       [style.width.px]="displayWidth"
-      [style.height.px]="displayHeight"
+      [style.height.px]="isText ? null : displayHeight"
       cdkDrag
       [cdkDragFreeDragPosition]="{ x: 0, y: 0 }"
       (cdkDragEnded)="onDragEnd($event)"
@@ -42,12 +41,11 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
           </div>
         }
       } @else if (isText) {
-        <span class="designer-layer__text">
+        <div class="designer-layer__text">
           @for (line of textLines; track $index) {
-            @if ($index > 0) { <br /> }
-            {{ line }}
+            <div class="designer-layer__text-line">{{ line }}</div>
           }
-        </span>
+        </div>
       } @else {
         <div class="designer-layer__fixed">
           <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
@@ -120,12 +118,16 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
     }
 
     .designer-layer__text {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       color: #1e293b;
       font-size: 10px;
       line-height: 1.2;
+    }
+
+    .designer-layer__text-line {
       white-space: nowrap;
-      text-align: center;
     }
 
     .designer-layer__fixed {

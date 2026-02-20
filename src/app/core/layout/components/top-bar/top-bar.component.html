@@ -3,6 +3,7 @@
   [class.fixed]="position() === 'fixed'"
   [class.sticky]="position() === 'sticky'"
   [class.top-0]="true"
+  [class.electron-titlebar-drag]="isElectron"
   [style.background]="'var(--shell-topbar-bg, rgba(255, 255, 255, 1))'"
 >
   <div class="h-full flex items-center justify-between px-3 md:px-4 lg:px-6">

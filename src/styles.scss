@@ -883,3 +883,20 @@ body.dialog-open {
     transition: none;
   }
 }
+
+// ==============================================
+// ELECTRON - Titlebar drag region
+// ==============================================
+// Az Electron app fejlécét húzhatóvá teszi (ablak mozgatás).
+// Az interaktív elemek (gombok, linkek, inputok) no-drag maradnak.
+
+.electron-titlebar-drag {
+  -webkit-app-region: drag;
+
+  a, button, input, select, textarea,
+  [role="button"], [role="link"],
+  app-top-bar-actions, app-top-bar-user-badges,
+  app-partner-switcher-dropdown, app-notification-bell {
+    -webkit-app-region: no-drag;
+  }
+}

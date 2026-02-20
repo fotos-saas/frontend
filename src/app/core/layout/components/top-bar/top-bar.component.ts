@@ -59,8 +59,9 @@ export class TopBarComponent {
   private readonly router = inject(Router);
   private readonly electronService = inject(ElectronService);
 
-  /** Electron macOS */
+  /** Electron */
   readonly isElectronMac = computed(() => this.electronService.isElectron && this.electronService.isMac);
+  readonly isElectron = this.electronService.isElectron;
 
   // ============ Konfigurálható Input-ok ============
 

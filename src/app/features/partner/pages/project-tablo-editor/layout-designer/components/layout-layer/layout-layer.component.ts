@@ -200,10 +200,6 @@ export class LayoutLayerComponent {
   }
 
   get displayHeight(): number {
-    if (this.isImage) {
-      // Fotó layerek 10.4×15.4 cm arányban (Smart Object belső méret)
-      return this.displayWidth * (15.4 / 10.4);
-    }
     return this.layer().height * this.scale();
   }
 

@@ -143,8 +143,8 @@ export class LayoutCanvasComponent {
     const target = event.target as HTMLElement;
     if (this.isLayerElement(target)) return;
 
-    // Cmd/Ctrl nélkül → kijelölés törlése
-    const additive = event.metaKey || event.ctrlKey;
+    // Cmd/Ctrl/Shift nélkül → kijelölés törlése
+    const additive = event.metaKey || event.ctrlKey || event.shiftKey;
     if (!additive) {
       this.state.clearSelection();
     }

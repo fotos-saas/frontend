@@ -8,8 +8,8 @@
       (close)="onClose()"
     />
 
-    <!-- Stepper -->
-    @if (currentStep() !== 'albums') {
+    <!-- Stepper (előzetes projektnél nincs párosítás/ellenőrzés) -->
+    @if (currentStep() !== 'albums' && !isPreliminary()) {
       <app-wizard-stepper
         [currentStep]="currentStep()"
         [completedSteps]="completedSteps()"
@@ -96,8 +96,9 @@
       <app-wizard-footer
         [backLabel]="currentStep() === 'upload' ? 'Albumok' : 'Vissza'"
         [continueLabel]="continueButtonLabel()"
+        [showBack]="!(isPreliminary() && currentStep() === 'upload')"
         [showContinue]="currentStep() !== 'choice'"
-        [showArrow]="currentStep() !== 'review'"
+        [showArrow]="currentStep() !== 'review' && !(isPreliminary() && currentStep() === 'upload')"
         [canContinue]="canContinue()"
         [processing]="processing()"
         (back)="goBack()"

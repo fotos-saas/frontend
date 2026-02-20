@@ -69,6 +69,7 @@ export class PhotoUploadWizardComponent implements OnInit {
   readonly projectId = input.required<number>();
   readonly projectName = input<string>('');
   readonly initialAlbum = input<AlbumType | undefined>(undefined);
+  readonly isPreliminary = input<boolean>(false);
   readonly close = output<void>();
   readonly completed = output<{ assignedCount: number }>();
 
@@ -119,6 +120,9 @@ export class PhotoUploadWizardComponent implements OnInit {
   });
 
   readonly continueButtonLabel = computed(() => {
+    if (this.isPreliminary() && this.currentStep() === 'upload') {
+      return 'Kész';
+    }
     switch (this.currentStep()) {
       case 'upload':
         return 'Tovább a párosításhoz';
@@ -180,8 +184,15 @@ export class PhotoUploadWizardComponent implements OnInit {
   }
 
   onContinue(): void {
-    if (this.currentStep() === 'upload') this.goToChoice();
-    else if (this.currentStep() === 'review') this.onFinalize();
+    if (this.currentStep() === 'upload') {
+      if (this.isPreliminary()) {
+        this.completed.emit({ assignedCount: 0 });
+        return;
+      }
+      this.goToChoice();
+    } else if (this.currentStep() === 'review') {
+      this.onFinalize();
+    }
   }
 
   // === CHOICE HANDLERS ===

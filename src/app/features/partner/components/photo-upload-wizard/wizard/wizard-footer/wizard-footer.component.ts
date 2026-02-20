@@ -12,15 +12,17 @@ import { WizardStep } from '../wizard.types';
   imports: [LucideAngularModule],
   template: `
     <div class="wizard-footer">
-      <button
-        type="button"
-        class="btn btn--secondary"
-        [disabled]="processing()"
-        (click)="back.emit()"
-      >
-        <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-        {{ backLabel() }}
-      </button>
+      @if (showBack()) {
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="processing()"
+          (click)="back.emit()"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          {{ backLabel() }}
+        </button>
+      }
 
       <div class="footer-spacer"></div>
 
@@ -130,6 +132,7 @@ export class WizardFooterComponent {
 
   readonly backLabel = input<string>('Vissza');
   readonly continueLabel = input<string>('Tovább');
+  readonly showBack = input<boolean>(true);
   readonly showContinue = input<boolean>(true);
   readonly showArrow = input<boolean>(true);
   readonly canContinue = input<boolean>(true);

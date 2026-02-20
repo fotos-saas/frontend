@@ -297,6 +297,9 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     if (initialAlbum) {
       ref.setInput('initialAlbum', initialAlbum);
     }
+    if (this.projectData()?.isPreliminary) {
+      ref.setInput('isPreliminary', true);
+    }
     ref.instance.close.subscribe(() => {
       container.clear();
     });

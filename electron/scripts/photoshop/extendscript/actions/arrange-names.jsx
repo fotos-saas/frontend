@@ -28,16 +28,23 @@ function log(msg) {
 var _doc, _data, _dpi, _moved = 0, _errors = 0;
 
 // --- Nev tordeles (breakAfter) ---
-// - 2 szavas nevek NEM tordelodnek
-// - 3+ szavas: breakAfter "valodi" szo utan sortores
-// - Kotojeles 3+ szavas: a kotojeles szo UTAN tor
-// - Rovid prefixek (dr., id., ifj.) nem szamitanak szokent
+// Rovid prefix (Dr., Cs., Id., Ifj. — max 2 betu pont nelkul) a kovetkezo szohoz tartozik,
+// NEM onallo nevresz. A "valodi" nevreszek szama dont: <3 → nem tor.
+// Kotojeles szo utan torjuk ha 3+ valodi nevresz van.
 // Photoshop \r-t hasznal sortoresnek
 function _breakName(name, breakAfter) {
   if (breakAfter <= 0) return name;
   var words = name.split(" ");
-  // Minimum 3 szo kell a tordeleshez
-  if (words.length < 3) return name;
+  if (words.length < 2) return name;
+  // Rovid prefix vizsgalat (max 2 betu pont nelkul)
+  function isPrefix(w) { return w.replace(/\./g, "").length <= 2; }
+  // Valodi nevreszek szamolasa
+  var realCount = 0;
+  for (var c = 0; c < words.length; c++) {
+    if (!isPrefix(words[c])) realCount++;
+  }
+  // Kevesebb mint 3 valodi nevresz → nem tordelunk
+  if (realCount < 3) return name;
   // Kotojeles nev: a kotojeles szo utan torjuk
   var hyphenIndex = -1;
   for (var h = 0; h < words.length; h++) {
@@ -46,12 +53,11 @@ function _breakName(name, breakAfter) {
   if (hyphenIndex !== -1 && hyphenIndex < words.length - 1) {
     return words.slice(0, hyphenIndex + 1).join(" ") + "\r" + words.slice(hyphenIndex + 1).join(" ");
   }
-  // Normal nev: breakAfter "valodi" szo utan
+  // Normal nev: breakAfter valodi szo utan
   var realWordCount = 0;
   var breakIndex = -1;
   for (var i = 0; i < words.length; i++) {
-    var cleaned = words[i].replace(/\./g, "");
-    if (cleaned.length > 2) realWordCount++;
+    if (!isPrefix(words[i])) realWordCount++;
     if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
   }
   if (breakIndex === -1) return name;

@@ -1,0 +1,149 @@
+@if (loading() && !module()) {
+  <div class="detail-page page-card">
+    <div class="skeleton-hero"></div>
+    <div class="skeleton-section"></div>
+    <div class="skeleton-section"></div>
+  </div>
+} @else if (module(); as mod) {
+  @if (content(); as c) {
+    <div class="detail-page page-card">
+      <!-- 1. Hero -->
+      <div #heroSection>
+        <app-detail-hero
+          [module]="mod"
+          [heroGradient]="c.heroGradient"
+          [badge]="c.badge"
+          (ctaClick)="activateModule()"
+        />
+      </div>
+
+      <!-- 2. Előnyök -->
+      @if (c.benefits.length) {
+        <section appScrollReveal class="detail-section">
+          <app-detail-benefits [benefits]="c.benefits" />
+        </section>
+      }
+
+      <!-- 3. Hogyan működik -->
+      @if (c.steps.length) {
+        <section appScrollReveal [revealDelay]="100" class="detail-section">
+          <app-detail-how-it-works [steps]="c.steps" />
+        </section>
+      }
+
+      <!-- 4. Funkciók (inline) -->
+      @if (c.features.length) {
+        <section appScrollReveal [revealDelay]="150" class="detail-section">
+          <h2 class="section-title">Funkciók</h2>
+          <div class="features-grid">
+            @for (feature of c.features; track feature.text) {
+              <div class="feature-item">
+                <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+                <span>{{ feature.text }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- 5. Képernyőképek -->
+      @if (c.screenshots.length) {
+        <section appScrollReveal [revealDelay]="200" class="detail-section">
+          <app-detail-screenshots [screenshots]="c.screenshots" />
+        </section>
+      }
+
+      <!-- 6. Ki használja? (inline) -->
+      @if (c.useCases.length) {
+        <section appScrollReveal [revealDelay]="200" class="detail-section">
+          <h2 class="section-title">Ki használja?</h2>
+          <div class="usecases-grid">
+            @for (uc of c.useCases; track uc.persona) {
+              <div class="usecase-card">
+                <div class="usecase-icon">
+                  <lucide-icon [name]="uc.icon" [size]="22" />
+                </div>
+                <h3>{{ uc.persona }}</h3>
+                <p>{{ uc.description }}</p>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- 7. Árazás -->
+      <section appScrollReveal [revealDelay]="100" class="detail-section">
+        <app-detail-pricing [module]="mod" (ctaClick)="activateModule()" />
+      </section>
+
+      <!-- 8. Kapcsolódó modulok (inline) -->
+      @if (dependsOnModules().length || relatedModules().length) {
+        <section appScrollReveal [revealDelay]="100" class="detail-section">
+          <h2 class="section-title">Kapcsolódó modulok</h2>
+
+          @if (dependsOnModules().length) {
+            <p class="related-label">Ehhez szükséges:</p>
+            <div class="related-grid">
+              @for (dep of dependsOnModules(); track dep.key) {
+                <a class="related-card related-card--dependency"
+                   [routerLink]="['/partner/subscription/marketplace', dep.key]">
+                  <div class="related-icon">
+                    <lucide-icon [name]="dep.icon" [size]="18" />
+                  </div>
+                  <div class="related-text">
+                    <span class="related-name">{{ dep.name }}</span>
+                    <span class="related-tagline">{{ dep.tagline }}</span>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+
+          @if (relatedModules().length) {
+            <p class="related-label">Ezekkel jól működik:</p>
+            <div class="related-grid">
+              @for (rel of relatedModules(); track rel.key) {
+                <a class="related-card"
+                   [routerLink]="['/partner/subscription/marketplace', rel.key]">
+                  <div class="related-icon">
+                    <lucide-icon [name]="rel.icon" [size]="18" />
+                  </div>
+                  <div class="related-text">
+                    <span class="related-name">{{ rel.name }}</span>
+                    <span class="related-tagline">{{ rel.tagline }}</span>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      <!-- 9. GYIK -->
+      @if (c.faq.length) {
+        <section appScrollReveal [revealDelay]="100" class="detail-section">
+          <app-detail-faq [faq]="c.faq" />
+        </section>
+      }
+    </div>
+
+    <!-- Sticky CTA (mobilon) -->
+    @if (showStickyCta()) {
+      <div class="sticky-cta">
+        <div class="sticky-cta__content">
+          <span class="sticky-cta__name">{{ mod.name }}</span>
+          @if (!(['active', 'package', 'trial', 'free'].includes(mod.partner_status))) {
+            <button class="sticky-cta__btn" (click)="activateModule()">
+              {{ mod.cta_button || 'Feliratkozás' }}
+            </button>
+          } @else {
+            <span class="sticky-cta__active">
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+              Aktív
+            </span>
+          }
+        </div>
+      </div>
+    }
+  }
+}

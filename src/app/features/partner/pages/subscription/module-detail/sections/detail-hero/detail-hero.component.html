@@ -1,0 +1,39 @@
+<section class="hero" [class]="'hero hero--' + heroGradient()">
+  <div class="hero__nav">
+    <a routerLink="/partner/subscription/marketplace" class="hero__back">
+      <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+      Marketplace
+    </a>
+  </div>
+
+  <div class="hero__content">
+    <div class="hero__icon-wrapper">
+      <lucide-icon [name]="module().icon" [size]="32" />
+    </div>
+
+    <div class="hero__text">
+      <div class="hero__title-row">
+        <h1>{{ module().name }}</h1>
+        @if (badge(); as b) {
+          <span class="hero__badge">{{ b }}</span>
+        }
+      </div>
+      <p class="hero__tagline">{{ module().tagline }}</p>
+    </div>
+
+    <div class="hero__actions">
+      <div class="hero__price">{{ priceDisplay }}</div>
+      @if (!isActive) {
+        <button class="hero__cta" (click)="ctaClick.emit()">
+          <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+          {{ ctaLabel }}
+        </button>
+      } @else {
+        <span class="hero__active-badge">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+          {{ statusLabel }}
+        </span>
+      }
+    </div>
+  </div>
+</section>

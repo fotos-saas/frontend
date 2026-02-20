@@ -1,0 +1,48 @@
+<div class="screenshots-section">
+  <h2 class="section-title">Képernyőképek</h2>
+  <div class="screenshots-grid">
+    @for (screenshot of screenshots(); track screenshot.alt; let i = $index) {
+      <div class="screenshot-card" (click)="openLightbox(i)">
+        @if (screenshot.src) {
+          <img [src]="screenshot.src" [alt]="screenshot.alt" loading="lazy" />
+        } @else {
+          <div class="screenshot-placeholder">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="32" />
+            <span>Képernyőkép hamarosan</span>
+          </div>
+        }
+        <p class="screenshot-caption">{{ screenshot.caption }}</p>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Lightbox -->
+@if (lightboxIndex() !== null) {
+  <div class="lightbox-overlay" (click)="closeLightbox()">
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <button class="lightbox-close" (click)="closeLightbox()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+      @if (screenshots().length > 1) {
+        <button class="lightbox-nav lightbox-nav--prev" (click)="prevImage()">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="24" />
+        </button>
+        <button class="lightbox-nav lightbox-nav--next" (click)="nextImage()">
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="24" />
+        </button>
+      }
+      @if (screenshots()[lightboxIndex()!]; as shot) {
+        @if (shot.src) {
+          <img [src]="shot.src" [alt]="shot.alt" />
+        } @else {
+          <div class="lightbox-placeholder">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="48" />
+            <span>Képernyőkép hamarosan</span>
+          </div>
+        }
+        <p class="lightbox-caption">{{ shot.caption }}</p>
+      }
+    </div>
+  </div>
+}

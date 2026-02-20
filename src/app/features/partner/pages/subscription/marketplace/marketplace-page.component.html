@@ -118,6 +118,7 @@
     <div class="modules-grid">
       @for (module of filteredModules(); track module.key; let i = $index) {
         <div class="module-card"
+             [routerLink]="['/partner/subscription/marketplace', module.key]"
              [class.module-card--active]="isModuleActive(module.partner_status)"
              [style.animation-delay]="i * 0.04 + 's'">
 

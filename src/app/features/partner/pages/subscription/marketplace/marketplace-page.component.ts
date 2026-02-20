@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MarketplaceService } from '../../../services/marketplace.service';
 import { ModuleCategory } from '../../../models/marketplace.models';
 import { LucideAngularModule } from 'lucide-angular';
@@ -8,7 +9,7 @@ import { DecimalPipe, DatePipe } from '@angular/common';
 @Component({
   selector: 'app-marketplace-page',
   standalone: true,
-  imports: [LucideAngularModule, DecimalPipe, DatePipe],
+  imports: [LucideAngularModule, DecimalPipe, DatePipe, RouterLink],
   templateUrl: './marketplace-page.component.html',
   styleUrl: './marketplace-page.component.scss',
 })

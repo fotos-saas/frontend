@@ -1,0 +1,17 @@
+<div class="how-section">
+  <h2 class="section-title">Hogyan működik?</h2>
+  <div class="timeline">
+    @for (step of steps(); track step.step) {
+      <div class="timeline-step">
+        <div class="timeline-step__marker">
+          <span class="timeline-step__number">{{ step.step }}</span>
+          <div class="timeline-step__line"></div>
+        </div>
+        <div class="timeline-step__content">
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.description }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

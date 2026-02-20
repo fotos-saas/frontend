@@ -1,0 +1,204 @@
+@use 'styles/colors' as *;
+@use 'styles/mixins' as *;
+
+.hero {
+  position: relative;
+  padding: 32px;
+  border-radius: 16px;
+  color: white;
+  overflow: hidden;
+  background: linear-gradient(135deg, get-color('primary', 500), get-color('primary', 700));
+
+  // Gradient variánsok
+  &--from-indigo-500 { background: linear-gradient(135deg, #6366f1, #7c3aed); }
+  &--from-blue-500 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  &--from-emerald-500 { background: linear-gradient(135deg, #10b981, #059669); }
+  &--from-orange-500 { background: linear-gradient(135deg, #f97316, #ea580c); }
+  &--from-pink-500 { background: linear-gradient(135deg, #ec4899, #db2777); }
+  &--from-cyan-500 { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+  &--from-violet-500 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+  &--from-rose-500 { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+  &--from-amber-500 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  &--from-teal-500 { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+  &--from-lime-500 { background: linear-gradient(135deg, #84cc16, #65a30d); }
+  &--from-sky-500 { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+  &--from-fuchsia-500 { background: linear-gradient(135deg, #d946ef, #c026d3); }
+  &--from-red-500 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+  &--from-slate-500 { background: linear-gradient(135deg, #64748b, #475569); }
+
+  &__nav {
+    margin-bottom: 20px;
+  }
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    @include transition-fast;
+
+    &:hover {
+      color: white;
+    }
+  }
+
+  &__content {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  &__icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    flex-shrink: 0;
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.25px;
+    }
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.25);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+
+  &__tagline {
+    font-size: 0.9375rem;
+    margin: 4px 0 0;
+    opacity: 0.9;
+    line-height: 1.5;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  &__price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  &__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: none;
+    background: white;
+    color: get-color('slate', 800);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    @include transition-fast;
+    white-space: nowrap;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  &__active-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .hero {
+    &__cta {
+      background: rgba(255, 255, 255, 0.95);
+      color: get-color('slate', 900);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 640px) {
+  .hero {
+    padding: 20px;
+
+    &__content {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    &__icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+    }
+
+    &__title-row h1 {
+      font-size: 1.25rem;
+    }
+
+    &__actions {
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+    }
+
+    &__price {
+      font-size: 1.125rem;
+    }
+
+    &__cta {
+      margin-left: auto;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta:hover {
+    transform: none;
+  }
+}

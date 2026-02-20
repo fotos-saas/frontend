@@ -1,0 +1,56 @@
+<div class="pricing-section">
+  <h2 class="section-title">Árazás</h2>
+  <div class="pricing-card" [class.pricing-card--free]="module().type === 'free'">
+    @if (module().type === 'free') {
+      <div class="pricing-badge pricing-badge--free">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+        Ingyenes
+      </div>
+      <p class="pricing-description">Ez a modul minden felhasználó számára ingyenesen elérhető.</p>
+    } @else if (module().type === 'per_use') {
+      <div class="pricing-amount">
+        <span class="pricing-amount__value">{{ module().per_use_price | number:'1.0-0':'hu' }}</span>
+        <span class="pricing-amount__unit">Ft/{{ module().per_use_unit }}</span>
+      </div>
+      <p class="pricing-description">Használat alapú díjazás. Csak azért fizetsz, amit tényleg használsz.</p>
+    } @else {
+      <div class="pricing-plans">
+        <div class="pricing-plan">
+          <span class="pricing-plan__label">Havi</span>
+          <div class="pricing-amount">
+            <span class="pricing-amount__value">{{ module().monthly_price! | number:'1.0-0':'hu' }}</span>
+            <span class="pricing-amount__unit">Ft/hó</span>
+          </div>
+        </div>
+        @if (module().yearly_price) {
+          <div class="pricing-plan pricing-plan--yearly">
+            <span class="pricing-plan__label">
+              Éves
+              @if (yearlySavingPercent; as saving) {
+                <span class="pricing-plan__save">-{{ saving }}%</span>
+              }
+            </span>
+            <div class="pricing-amount">
+              <span class="pricing-amount__value">{{ module().yearly_price! | number:'1.0-0':'hu' }}</span>
+              <span class="pricing-amount__unit">Ft/év</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="pricing-cta">
+      @if (!isActive) {
+        <button class="pricing-btn" (click)="ctaClick.emit()">
+          <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+          {{ module().cta_button || 'Feliratkozás' }}
+        </button>
+      } @else {
+        <span class="pricing-active">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+          Aktív
+        </span>
+      }
+    </div>
+  </div>
+</div>

@@ -305,6 +305,11 @@ export const routes: Routes = [
             title: 'Használat'
           },
           {
+            path: 'marketplace/:moduleKey',
+            loadComponent: () => import('./features/partner/pages/subscription/module-detail/module-detail-page.component').then(m => m.ModuleDetailPageComponent),
+            title: 'Modul részletek'
+          },
+          {
             path: 'account',
             loadComponent: () => import('./features/partner/pages/subscription/account-delete/account-delete.component').then(m => m.AccountDeleteComponent),
             title: 'Fiók törlése'

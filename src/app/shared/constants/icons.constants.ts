@@ -274,6 +274,7 @@ export const ICONS = {
   // Partner Orders
   KEY: 'key',
   GRID: 'grid-3x3',
+  LAYOUT_GRID: 'layout-grid',
   FRAME: 'frame',
   SHOPPING_BAG: 'shopping-bag',
   LIST: 'list',

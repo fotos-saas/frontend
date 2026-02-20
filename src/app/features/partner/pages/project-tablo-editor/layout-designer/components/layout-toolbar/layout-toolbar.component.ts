@@ -154,6 +154,14 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           >
             <lucide-icon [name]="ICONS.ROWS_3" [size]="16" />
           </button>
+          <button
+            class="toolbar-btn"
+            [disabled]="state.selectionCount() < 2"
+            (click)="actions.arrangeToGrid()"
+            matTooltip="Rácsba rendezés"
+          >
+            <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
+          </button>
         }
       </div>
 

@@ -144,6 +144,56 @@ export class LayoutDesignerActionsService {
     }));
   }
 
+  /**
+   * Kijelölt elemek rácsba rendezése: a bal felső elemtől indulva
+   * egyforma gap-pel sorokba és oszlopokba rendezi a kijelölteket.
+   * Az oszlopszámot a grid konfigból veszi, a gap-et szintén.
+   */
+  arrangeToGrid(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+
+    const images = selected.filter(l =>
+      l.category === 'student-image' || l.category === 'teacher-image',
+    );
+    if (images.length === 0) return;
+
+    const hasStudent = images.some(l => l.category === 'student-image');
+    const grid = hasStudent
+      ? this.gridService.studentGrid()
+      : this.gridService.teacherGrid();
+
+    const gapH = grid ? Math.max(0, grid.cellWidth - grid.imageWidth) : DEFAULT_GAP_PX;
+    const gapV = grid ? Math.max(0, grid.cellHeight - grid.imageHeight) : DEFAULT_GAP_PX;
+    const cols = grid ? grid.cols : Math.ceil(Math.sqrt(images.length));
+
+    // Rendezés: sor → oszlop (bal felülről jobbra-lefele)
+    const sorted = [...images].sort((a, b) => {
+      const dy = (a.editedY ?? a.y) - (b.editedY ?? b.y);
+      if (Math.abs(dy) > (images[0]?.height ?? 100) / 2) return dy;
+      return (a.editedX ?? a.x) - (b.editedX ?? b.x);
+    });
+
+    // Kiindulópont: a legbalra-feljebb lévő elem pozíciója
+    const originX = Math.min(...images.map(l => l.editedX ?? l.x));
+    const originY = Math.min(...images.map(l => l.editedY ?? l.y));
+
+    const posMap = new Map<number, { x: number; y: number }>();
+    for (let i = 0; i < sorted.length; i++) {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const img = sorted[i];
+      posMap.set(img.layerId, {
+        x: Math.round(originX + col * (img.width + gapH)),
+        y: Math.round(originY + row * (img.height + gapV)),
+      });
+    }
+
+    this.applyAlignmentWithCoupled(images, (l) =>
+      posMap.get(l.layerId) ?? { x: l.editedX ?? l.x, y: l.editedY ?? l.y },
+    );
+  }
+
   /** Sorok automatikus igazítása: hasonló Y-ú elemek → min(Y) */
   alignRows(): void {
     const selected = this.state.selectedLayers();

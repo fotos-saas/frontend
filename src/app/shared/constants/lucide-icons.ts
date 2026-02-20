@@ -183,6 +183,7 @@ import {
   AlignHorizontalDistributeCenter,
   AlignVerticalDistributeCenter,
   Maximize2,
+  LayoutGrid,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -362,4 +363,5 @@ export const LUCIDE_ICONS_MAP = {
   AlignHorizontalDistributeCenter,
   AlignVerticalDistributeCenter,
   Maximize2,
+  LayoutGrid,
 };

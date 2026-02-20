@@ -69,12 +69,21 @@ export interface DragState {
   active: boolean;
 }
 
-/** Swap jelölt a drag-and-swap rendszerhez */
+/** Egy swap pár: forrás → cél */
+export interface SwapPair {
+  sourceLayerId: number;
+  targetLayerId: number;
+  overlapPercent: number;
+}
+
+/** Swap jelöltek a drag-and-swap rendszerhez (multi-select támogatás) */
 export interface SwapCandidate {
-  /** Cél layer ID */
+  /** Cél layer ID (az origin image swap partnere — preview-hoz) */
   targetLayerId: number;
   /** Átfedési százalék (0-1) */
   overlapPercent: number;
+  /** Összes swap pár (multi-select) */
+  pairs: SwapPair[];
 }
 
 /** Grid cella pozíció */

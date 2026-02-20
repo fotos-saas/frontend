@@ -177,7 +177,7 @@ export class LayoutDesignerDragService {
       const swap = this.swapService.swapCandidate();
 
       if (swap && ds) {
-        this.swapService.executeSwap(ds.originLayerId, swap.targetLayerId);
+        this.swapService.executeSwaps(swap.pairs);
       } else if (ds && (ds.deltaXPsd !== 0 || ds.deltaYPsd !== 0)) {
         if (this.gridService.gridEnabled()) {
           this.snapAndMove(ds.deltaXPsd, ds.deltaYPsd);

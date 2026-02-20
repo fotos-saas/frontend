@@ -164,10 +164,12 @@ export class LayoutLayerComponent implements AfterViewInit {
   readonly scale = input.required<number>();
   readonly isSelected = input<boolean>(false);
 
-  /** Swap cél: sárga kerettel jelölt elem */
+  /** Swap cél: sárga kerettel jelölt elem (bármely swap pár target-je) */
   readonly isSwapTarget = computed(() => {
     const candidate = this.swapService.swapCandidate();
-    return candidate?.targetLayerId === this.layer().layerId;
+    if (!candidate) return false;
+    const id = this.layer().layerId;
+    return candidate.pairs.some(p => p.targetLayerId === id);
   });
 
   /** Drag közben: az elem vizuálisan a fogott csoportban van */

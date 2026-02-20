@@ -76,7 +76,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignTop()"
+            (click)="onAlignTop()"
             matTooltip="Tetejére igazítás"
           >
             <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="16" />
@@ -295,4 +295,9 @@ export class LayoutToolbarComponent {
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
+
+  onAlignTop(): void {
+    console.log('[toolbar] alignTop clicked, selectionCount:', this.state.selectionCount());
+    this.actions.alignTop();
+  }
 }

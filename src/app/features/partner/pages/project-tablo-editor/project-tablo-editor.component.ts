@@ -524,6 +524,22 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
   }
 
+  /** Pillanatkép átnevezése (inline szerkesztésből) */
+  async commitSnapshotRename(): Promise<void> {
+    const psdPath = await this.resolvePsdPath();
+    if (!psdPath) {
+      this.snapshotService.cancelEditing();
+      return;
+    }
+
+    const result = await this.snapshotService.commitEditing(psdPath);
+    if (result.success) {
+      this.successMessage.set('Pillanatkép átnevezve.');
+    } else if (result.error) {
+      this.error.set(result.error);
+    }
+  }
+
   /** Pillanatkép törlése */
   async deleteSnapshot(snapshot: SnapshotListItem): Promise<void> {
     const psdPath = await this.resolvePsdPath();

@@ -271,7 +271,23 @@
                 @for (snap of snapshotService.snapshots(); track snap.fileName) {
                   <div class="snapshot-item">
                     <div class="snapshot-item__info">
-                      <span class="snapshot-item__name">{{ snap.snapshotName }}</span>
+                      @if (snapshotService.editingSnapshotPath() === snap.filePath) {
+                        <input
+                          type="text"
+                          class="snapshot-item__edit-input"
+                          [value]="snapshotService.editingName()"
+                          (input)="snapshotService.editingName.set($any($event.target).value)"
+                          (keydown.enter)="commitSnapshotRename()"
+                          (keydown.escape)="snapshotService.cancelEditing()"
+                          (blur)="commitSnapshotRename()"
+                        />
+                      } @else {
+                        <span
+                          class="snapshot-item__name snapshot-item__name--editable"
+                          (dblclick)="snapshotService.startEditing(snap)"
+                          matTooltip="Dupla kattintás az átnevezéshez"
+                        >{{ snap.snapshotName }}</span>
+                      }
                       <span class="snapshot-item__meta">
                         {{ snapshotService.formatDate(snap.createdAt) }}
                         · {{ snap.personCount }} személy

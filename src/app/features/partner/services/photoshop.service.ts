@@ -839,6 +839,18 @@ export class PhotoshopService {
     }
   }
 
+  /** Snapshot átnevezése (a JSON fájlban a snapshotName mező módosítása) */
+  async renameSnapshot(snapshotPath: string, newName: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      return await this.api.renameSnapshot({ snapshotPath, newName });
+    } catch (err) {
+      this.logger.error('Snapshot átnevezés hiba', err);
+      return { success: false, error: 'Váratlan hiba a snapshot átnevezésnél' };
+    }
+  }
+
   /**
    * PSD generálás és megnyitás Photoshopban.
    *

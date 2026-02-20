@@ -30,6 +30,10 @@ export class TabloEditorSnapshotService {
   /** Frissites valaszto dialog (ha tobb snapshot van) */
   readonly showUpdatePicker = signal(false);
 
+  /** Inline atnevezes allapot (melyik snapshot szerkesztes alatt) */
+  readonly editingSnapshotPath = signal<string | null>(null);
+  readonly editingName = signal('');
+
   /** Legutolso snapshot (lista elso eleme — legujabb) */
   readonly latestSnapshot = computed(() => this.snapshots()[0] ?? null);
 
@@ -144,6 +148,39 @@ export class TabloEditorSnapshotService {
   closeSaveDialog(): void {
     this.showSaveDialog.set(false);
     this.snapshotName.set('');
+  }
+
+  /** Inline szerkesztes inditasa */
+  startEditing(snapshot: SnapshotListItem): void {
+    this.editingSnapshotPath.set(snapshot.filePath);
+    this.editingName.set(snapshot.snapshotName);
+  }
+
+  /** Inline szerkesztes mentese */
+  async commitEditing(psdPath: string): Promise<{ success: boolean; error?: string }> {
+    const snapshotPath = this.editingSnapshotPath();
+    const newName = this.editingName().trim();
+
+    if (!snapshotPath || !newName) {
+      this.cancelEditing();
+      return { success: false, error: 'Hiányzó adatok' };
+    }
+
+    try {
+      const result = await this.ps.renameSnapshot(snapshotPath, newName);
+      if (result.success) {
+        await this.loadSnapshots(psdPath);
+      }
+      return result;
+    } finally {
+      this.cancelEditing();
+    }
+  }
+
+  /** Inline szerkesztes megszakitasa */
+  cancelEditing(): void {
+    this.editingSnapshotPath.set(null);
+    this.editingName.set('');
   }
 
   /** Frissites valaszto megnyitasa */

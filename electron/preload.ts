@@ -336,6 +336,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:load-snapshot', params) as Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }>,
     deleteSnapshot: (params: { snapshotPath: string }) =>
       ipcRenderer.invoke('photoshop:delete-snapshot', params) as Promise<{ success: boolean; error?: string }>,
+    renameSnapshot: (params: { snapshotPath: string; newName: string }) =>
+      ipcRenderer.invoke('photoshop:rename-snapshot', params) as Promise<{ success: boolean; error?: string }>,
   },
 
   // ============ Touch Bar (MacBook Pro 2016-2020) ============

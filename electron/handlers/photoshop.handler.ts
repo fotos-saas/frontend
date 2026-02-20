@@ -1388,6 +1388,46 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Rename snapshot (snapshotName mezo frissitese a JSON-ben)
+  ipcMain.handle('photoshop:rename-snapshot', (_event, params: { snapshotPath: string; newName: string }) => {
+    try {
+      if (typeof params.snapshotPath !== 'string' || params.snapshotPath.length > 500) {
+        return { success: false, error: 'Ervenytelen snapshot eleresi ut' };
+      }
+      if (typeof params.newName !== 'string' || params.newName.trim().length === 0 || params.newName.length > 200) {
+        return { success: false, error: 'Ervenytelen nev' };
+      }
+      if (params.snapshotPath.includes('..')) {
+        return { success: false, error: 'Ervenytelen utvonal' };
+      }
+      if (!params.snapshotPath.endsWith('.json')) {
+        return { success: false, error: 'Csak JSON fajlok modosithatoak' };
+      }
+
+      // Biztonsag: csak layouts/ mappaban levo fajlokat modositunk
+      const dirName = path.basename(path.dirname(params.snapshotPath));
+      if (dirName !== 'layouts') {
+        return { success: false, error: 'Csak a layouts/ mappaban levo fajlok modosithatoak' };
+      }
+
+      if (!fs.existsSync(params.snapshotPath)) {
+        return { success: false, error: 'A snapshot fajl nem talalhato' };
+      }
+
+      const content = fs.readFileSync(params.snapshotPath, 'utf-8');
+      const data = JSON.parse(content);
+      data.snapshotName = params.newName.trim();
+
+      fs.writeFileSync(params.snapshotPath, JSON.stringify(data, null, 2), 'utf-8');
+      log.info(`Snapshot atnevezve: ${params.snapshotPath} → "${params.newName.trim()}"`);
+
+      return { success: true };
+    } catch (error) {
+      log.error('Snapshot atnevezesi hiba:', error);
+      return { success: false, error: 'Nem sikerult atnevezni a snapshot-ot' };
+    }
+  });
+
   // Delete snapshot from layouts/ folder
   ipcMain.handle('photoshop:delete-snapshot', (_event, params: { snapshotPath: string }) => {
     try {

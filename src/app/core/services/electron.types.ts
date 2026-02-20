@@ -134,6 +134,7 @@ interface PhotoshopAPI {
   listSnapshots: (params: { psdPath: string }) => Promise<{ success: boolean; error?: string; snapshots: SnapshotListItem[] }>;
   loadSnapshot: (params: { snapshotPath: string }) => Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }>;
   deleteSnapshot: (params: { snapshotPath: string }) => Promise<{ success: boolean; error?: string }>;
+  renameSnapshot: (params: { snapshotPath: string; newName: string }) => Promise<{ success: boolean; error?: string }>;
 }
 
 export interface ElectronAPI {

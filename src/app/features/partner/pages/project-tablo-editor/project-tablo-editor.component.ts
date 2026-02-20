@@ -95,6 +95,10 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly generating = signal(false);
   readonly arranging = signal(false);
   readonly arrangingNames = signal(false);
+  readonly savingLayout = signal(false);
+
+  /** Aktuális PSD fájl útvonala (generáláskor mentjük) */
+  readonly currentPsdPath = signal<string | null>(null);
 
   /** Projekt személyei (diákok + tanárok) */
   readonly persons = signal<TabloPersonItem[]>([]);
@@ -235,6 +239,11 @@ export class ProjectTabloEditorComponent implements OnInit {
         return;
       }
 
+      // PSD path mentése a layout funkciókhoz
+      if (result.outputPath) {
+        this.currentPsdPath.set(result.outputPath);
+      }
+
       // Varunk hogy a Photoshop megnyissa a PSD-t
       await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -268,6 +277,9 @@ export class ProjectTabloEditorComponent implements OnInit {
             if (!gridResult.success) {
               this.error.set(`Grid elrendezés: ${gridResult.error}`);
             }
+
+            // 4. Layout JSON automatikus mentése a PSD mellé
+            await this.autoSaveLayout(result.outputPath);
           }
         }
 
@@ -301,6 +313,9 @@ export class ProjectTabloEditorComponent implements OnInit {
       const result = await this.ps.arrangeGrid(boardSize);
       if (result.success) {
         this.successMessage.set('Rácsba rendezés kész!');
+
+        // Layout JSON automatikus mentése
+        await this.autoSaveLayout();
       } else {
         this.error.set(result.error || 'Rácsba rendezés sikertelen.');
       }
@@ -316,11 +331,37 @@ export class ProjectTabloEditorComponent implements OnInit {
       const result = await this.ps.arrangeNames();
       if (result.success) {
         this.successMessage.set('Nevek rendezése kész!');
+
+        // Layout JSON automatikus mentése
+        await this.autoSaveLayout();
       } else {
         this.error.set(result.error || 'Nevek rendezése sikertelen.');
       }
     } finally {
       this.arrangingNames.set(false);
+    }
+  }
+
+  /** Manuális layout frissítés — az aktuális Photoshop állapot mentése JSON-be */
+  async saveLayout(): Promise<void> {
+    const size = this.selectedSize();
+    const psdPath = this.currentPsdPath();
+    if (!size || !psdPath) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    this.clearMessages();
+    this.savingLayout.set(true);
+    try {
+      const result = await this.ps.readAndSaveLayout(boardSize, psdPath);
+      if (result.success) {
+        this.successMessage.set('Elrendezés frissítve!');
+      } else {
+        this.error.set(result.error || 'Elrendezés frissítése sikertelen.');
+      }
+    } finally {
+      this.savingLayout.set(false);
     }
   }
 
@@ -330,6 +371,18 @@ export class ProjectTabloEditorComponent implements OnInit {
     const w = Math.round(dims.widthCm * 200 / 2.54);
     const h = Math.round(dims.heightCm * 200 / 2.54);
     return `${w}×${h} px`;
+  }
+
+  /** Layout JSON automatikus mentése (csendes — nem jelenít meg hibaüzenetet) */
+  private async autoSaveLayout(psdPath?: string | null): Promise<void> {
+    const size = this.selectedSize();
+    const path = psdPath ?? this.currentPsdPath();
+    if (!path || !size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    await this.ps.readAndSaveLayout(boardSize, path);
   }
 
   private clearMessages(): void {

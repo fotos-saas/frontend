@@ -513,6 +513,85 @@ export class PhotoshopService {
   }
 
   /**
+   * Layout pozíció-regiszter kiolvasása a Photoshopból és mentése JSON fájlba a PSD mellé.
+   *
+   * 1. Futtatja a read-layout.jsx-et → kinyeri a layer pozíciókat
+   * 2. Kiegészíti a board config-gal (cm méretek, gap-ek)
+   * 3. Elmenti a PSD mellé (.json kiterjesztéssel)
+   */
+  async readAndSaveLayout(
+    boardConfig: { widthCm: number; heightCm: number },
+    psdPath: string,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      // 1. JSX futtatása — layout adatok kiolvasása a Photoshopból
+      const jsxResult = await this.api.runJsx({
+        scriptName: 'actions/read-layout.jsx',
+        targetDocName,
+      });
+
+      if (!jsxResult.success || !jsxResult.output) {
+        return { success: false, error: jsxResult.error || 'Layout kiolvasás sikertelen' };
+      }
+
+      // 2. Parse: a JSX __LAYOUT_JSON__ prefix után JSON string-et ad vissza
+      const output = jsxResult.output;
+      const jsonPrefix = '__LAYOUT_JSON__';
+      const jsonStart = output.indexOf(jsonPrefix);
+      if (jsonStart === -1) {
+        return { success: false, error: 'A JSX nem adott vissza layout adatot' };
+      }
+
+      const jsonStr = output.substring(jsonStart + jsonPrefix.length).trim();
+      let layoutResult: {
+        document: { name: string; widthPx: number; heightPx: number; dpi: number };
+        persons: Array<{ personId: number | null; name: string; type: string; layerName: string; x: number; y: number; width: number; height: number }>;
+      };
+
+      try {
+        layoutResult = JSON.parse(jsonStr);
+      } catch {
+        return { success: false, error: 'Layout JSON parse hiba' };
+      }
+
+      // 3. Teljes layout objektum összeállítása
+      const layoutData = {
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        document: layoutResult.document,
+        board: {
+          widthCm: boardConfig.widthCm,
+          heightCm: boardConfig.heightCm,
+          marginCm: this.marginCm(),
+          gapHCm: this.gapHCm(),
+          gapVCm: this.gapVCm(),
+          gridAlign: this.gridAlign(),
+        },
+        persons: layoutResult.persons,
+      };
+
+      // 4. Mentés a PSD mellé
+      const saveResult = await this.api.saveLayoutJson({
+        psdPath,
+        layoutData,
+      });
+
+      if (!saveResult.success) {
+        return { success: false, error: saveResult.error || 'Layout JSON mentés sikertelen' };
+      }
+
+      this.logger.info(`Layout JSON mentve: ${layoutResult.persons.length} személy`);
+      return { success: true };
+    } catch (err) {
+      this.logger.error('Layout kiolvasás/mentés hiba', err);
+      return { success: false, error: 'Váratlan hiba a layout mentésnél' };
+    }
+  }
+
+  /**
    * PSD generálás és megnyitás Photoshopban.
    *
    * Ha van projekt kontextus + workDir:

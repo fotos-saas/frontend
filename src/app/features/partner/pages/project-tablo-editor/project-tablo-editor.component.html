@@ -203,6 +203,45 @@
             </button>
           }
         </div>
+
+        <!-- Elrendezés frissítése (manuális layout mentés) -->
+        <div class="command-card">
+          <div class="command-card__header">
+            <lucide-icon [name]="ICONS.SAVE" [size]="20" />
+            <div>
+              <h3 class="command-card__title">Elrendezés frissítése</h3>
+              <p class="command-card__desc">Az aktuális Photoshop elrendezés mentése JSON fájlba a PSD mellé (pozíciók, méretek).</p>
+            </div>
+          </div>
+
+          @if (!isConfigured()) {
+            <div class="command-card__disabled">
+              Először állítsd be a Photoshop-ot a Beállítások fülön.
+            </div>
+          } @else if (!currentPsdPath()) {
+            <div class="command-card__disabled">
+              Először generálj egy PSD-t a fenti szekciónál.
+            </div>
+          } @else if (!selectedSize()) {
+            <div class="command-card__disabled">
+              Válassz méretet a fenti szekciónál.
+            </div>
+          } @else {
+            <button
+              class="btn btn--primary btn--generate"
+              [disabled]="savingLayout()"
+              (click)="saveLayout()"
+            >
+              @if (savingLayout()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                Mentés...
+              } @else {
+                <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+                Elrendezés frissítése
+              }
+            </button>
+          }
+        </div>
       </div>
     }
 

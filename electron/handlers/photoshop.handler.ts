@@ -1232,5 +1232,37 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Save layout JSON file next to PSD
+  ipcMain.handle('photoshop:save-layout-json', (_event, params: {
+    psdPath: string;
+    layoutData: Record<string, unknown>;
+  }) => {
+    try {
+      if (typeof params.psdPath !== 'string' || params.psdPath.length > 500) {
+        return { success: false, error: 'Ervenytelen PSD eleresi ut' };
+      }
+
+      if (!params.psdPath.endsWith('.psd')) {
+        return { success: false, error: 'A fajlnak .psd kiterjesztesunek kell lennie' };
+      }
+
+      // Biztonsag: path traversal vedelem
+      if (params.psdPath.includes('..')) {
+        return { success: false, error: 'Ervenytelen fajl utvonal' };
+      }
+
+      const jsonPath = params.psdPath.replace(/\.psd$/i, '.json');
+      const jsonContent = JSON.stringify(params.layoutData, null, 2);
+
+      fs.writeFileSync(jsonPath, jsonContent, 'utf-8');
+      log.info(`Layout JSON mentve: ${jsonPath} (${jsonContent.length} byte)`);
+
+      return { success: true, jsonPath };
+    } catch (error) {
+      log.error('Layout JSON mentesi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a layout JSON-t' };
+    }
+  });
+
   log.info('Photoshop IPC handlerek regisztralva');
 }

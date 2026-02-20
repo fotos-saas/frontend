@@ -326,6 +326,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('jsx-debug-log', handler);
       return () => { ipcRenderer.removeListener('jsx-debug-log', handler); };
     },
+    saveLayoutJson: (params: { psdPath: string; layoutData: Record<string, unknown> }) =>
+      ipcRenderer.invoke('photoshop:save-layout-json', params) as Promise<{ success: boolean; error?: string; jsonPath?: string }>,
   },
 
   // ============ Touch Bar (MacBook Pro 2016-2020) ============

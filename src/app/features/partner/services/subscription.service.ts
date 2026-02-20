@@ -72,7 +72,11 @@ export interface SubscriptionInfo {
   active_modules_count?: number;
   monthly_cost_breakdown?: {
     base_plan: number;
+    base_or_package: number;
     package_or_modules: number;
+    extra_modules: number;
+    per_use_estimate: number;
+    estimated_total: number;
     total: number;
   };
 }

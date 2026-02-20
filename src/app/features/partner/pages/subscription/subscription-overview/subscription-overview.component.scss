@@ -177,6 +177,46 @@
   margin-top: 8px;
 }
 
+/* Marketplace-specifikus */
+.trial-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 200);
+  border-radius: 8px;
+  color: get-color('primary', 700);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.marketplace-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: get-color('slate', 800);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: get-color('slate', 500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* Storage Card */
 .storage-info {
   margin-bottom: 8px;

@@ -10,8 +10,162 @@
       <div class="skeleton-row"></div>
       <div class="skeleton-row"></div>
     </div>
+  } @else if (subscription()?.is_marketplace) {
+    <!-- MARKETPLACE NÉZET -->
+    <div class="billing-summary">
+      <div class="billing-main">
+        <span class="billing-label">Becsült havi költség</span>
+        <span class="billing-amount">{{ formatPrice(subscription()!.monthly_cost_breakdown?.estimated_total ?? 0) }}</span>
+      </div>
+      <div class="billing-breakdown">
+        <div class="breakdown-item">
+          <span>{{ subscription()!.active_package?.name ? subscription()!.active_package!.name + ' csomag' : 'Alap terv' }}</span>
+          <span>{{ formatPrice(subscription()!.monthly_cost_breakdown?.base_or_package ?? 0) }}</span>
+        </div>
+        @if (subscription()!.monthly_cost_breakdown?.extra_modules) {
+          <div class="breakdown-item extra">
+            <span>Extra modulok</span>
+            <span>+{{ formatPrice(subscription()!.monthly_cost_breakdown!.extra_modules) }}</span>
+          </div>
+        }
+        @if (subscription()!.monthly_cost_breakdown?.per_use_estimate) {
+          <div class="breakdown-item extra">
+            <span>Per-use becsült</span>
+            <span>~{{ formatPrice(subscription()!.monthly_cost_breakdown!.per_use_estimate) }}</span>
+          </div>
+        }
+      </div>
+      <div class="billing-cycle-info">
+        <lucide-icon [name]="ICONS.CALENDAR" [size]="14" />
+        {{ subscription()!.billing_cycle === 'yearly' ? 'Éves számlázás' : 'Havi számlázás' }}
+        @if (subscription()!.current_period_end) {
+          · Következő fizetés: {{ subscription()!.current_period_end | date:'yyyy. MMMM d.':'':'hu-HU' }}
+        }
+      </div>
+    </div>
+
+    <div class="subscription-grid">
+      <!-- Csomag + státusz -->
+      <div class="info-card plan-card">
+        <div class="card-header">
+          <h2 class="card-title">Előfizetés</h2>
+          <span class="status-badge" [class]="'status-badge--' + subscription()!.status">
+            {{ getStatusLabel(subscription()!.status) }}
+          </span>
+        </div>
+
+        <div class="plan-info">
+          <span class="plan-name">{{ subscription()!.active_package?.name ?? 'Alap terv' }}</span>
+        </div>
+
+        @if (subscription()!.trial) {
+          <div class="trial-banner">
+            <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+            <span>Próbaidő: {{ subscription()!.trial!.days_remaining }} nap van hátra</span>
+          </div>
+        }
+
+        <div class="marketplace-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{ subscription()!.active_modules_count ?? 0 }}</span>
+            <span class="stat-label">Aktív modul</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <a routerLink="/partner/subscription/marketplace" class="btn btn--primary">
+            <lucide-icon [name]="ICONS.PUZZLE" [size]="18" />
+            Modulok kezelése
+          </a>
+        </div>
+      </div>
+
+      <!-- Tárhely -->
+      <div class="info-card storage-card">
+        <div class="card-header">
+          <h2 class="card-title">Tárhely</h2>
+        </div>
+
+        <div class="storage-info">
+          <div class="storage-bar">
+            <div
+              class="storage-used"
+              [style.width.%]="storagePercent()"
+              [class.storage-used--warning]="storagePercent() > 80"
+              [class.storage-used--danger]="storagePercent() > 95"
+            ></div>
+          </div>
+          <div class="storage-text">
+            <span class="storage-current">{{ formatStorage(storageUsage()?.used_gb ?? 0) }} GB</span>
+            <span class="storage-separator">/</span>
+            <span class="storage-limit">{{ formatStorage(storageUsage()?.total_limit_gb ?? 5) }} GB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Limitek (dinamikus marketplace limitekből) -->
+      <div class="info-card limits-card">
+        <div class="card-header">
+          <h2 class="card-title">Használat</h2>
+          <a routerLink="/partner/subscription/marketplace/usage" class="card-link">
+            Részletek
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+          </a>
+        </div>
+
+        <div class="limits-list">
+          <div class="limit-item">
+            <div class="limit-header">
+              <lucide-icon [name]="ICONS.BUILDING" [size]="18" class="limit-icon" />
+              <span class="limit-label">Iskolák</span>
+            </div>
+            <div class="limit-value">
+              <span class="limit-current">{{ subscription()!.usage?.schools ?? 0 }}</span>
+              <span class="limit-separator">/</span>
+              <span class="limit-max">{{ subscription()!.limits?.['max_schools'] ?? '∞' }}</span>
+            </div>
+            <div class="limit-bar">
+              <div class="limit-progress" [style.width.%]="getLimitPercent('schools')"></div>
+            </div>
+          </div>
+
+          <div class="limit-item">
+            <div class="limit-header">
+              <lucide-icon [name]="ICONS.USERS" [size]="18" class="limit-icon" />
+              <span class="limit-label">Osztályok</span>
+            </div>
+            <div class="limit-value">
+              <span class="limit-current">{{ subscription()!.usage?.classes ?? 0 }}</span>
+              <span class="limit-separator">/</span>
+              <span class="limit-max">{{ subscription()!.limits?.['max_classes'] ?? '∞' }}</span>
+            </div>
+            <div class="limit-bar">
+              <div class="limit-progress" [style.width.%]="getLimitPercent('classes')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stripe portal -->
+      <div class="info-card">
+        <div class="card-header">
+          <h2 class="card-title">Számlázás</h2>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn--secondary" (click)="openPortal()" [disabled]="portalLoading()">
+            @if (portalLoading()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+            } @else {
+              <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="18" />
+            }
+            Stripe fizetési portal
+          </button>
+        </div>
+      </div>
+    </div>
+
   } @else if (subscription()) {
-    <!-- Költség összesítő banner -->
+    <!-- LEGACY NÉZET -->
     <div class="billing-summary">
       <div class="billing-main">
         <span class="billing-label">Havi költség</span>

@@ -87,7 +87,8 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
 
       &--text {
         background: transparent;
-        border-color: transparent;
+        border: none !important;
+        box-shadow: none !important;
         overflow: visible;
       }
 

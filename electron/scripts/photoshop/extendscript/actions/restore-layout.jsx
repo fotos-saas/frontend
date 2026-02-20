@@ -31,6 +31,7 @@ function log(msg) {
 var _doc;
 var _skipped = 0;
 var _restored = 0;
+var _snapshotData = null;
 
 // --- Layer keresese nev alapjan a teljes dokumentumban (rekurziv) ---
 function _findLayerByName(container, layerName) {
@@ -194,14 +195,15 @@ function _doRestore(data) {
       throw new Error("Nincs megadva DATA_FILE_PATH!");
     }
 
-    var data = readJsonFile(args.dataFilePath);
+    // Globalis valtozoba mentjuk — suspendHistory eval a globalis scope-ban fut!
+    _snapshotData = readJsonFile(args.dataFilePath);
 
     // Ruler PIXELS-re
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
 
     // Egy Undo lepes: suspendHistory egyetlen history bejegyzes
-    _doc.suspendHistory("Snapshot visszaállítás", "_doRestore(data)");
+    _doc.suspendHistory("Snapshot visszaállítás", "_doRestore(_snapshotData)");
 
     // Ruler visszaallitasa
     app.preferences.rulerUnits = oldRulerUnits;

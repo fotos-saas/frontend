@@ -386,6 +386,16 @@ export const ICONS = {
 
   // Undo/Redo
   REDO: 'redo-2',
+
+  // Booking Calendar
+  CALENDAR_DAYS: 'calendar-days',
+  CALENDAR_CLOCK: 'calendar-clock',
+  CALENDAR_CHECK: 'calendar-check',
+  CLOCK_3: 'clock-3',
+  MAP: 'map',
+  USERS_ROUND: 'users-round',
+  FILE_DOWN: 'file-down',
+  REPEAT: 'repeat',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

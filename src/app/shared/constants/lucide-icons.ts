@@ -196,6 +196,15 @@ import {
   MessageSquare,
   Vote,
   Contact,
+  // Booking Calendar
+  CalendarDays,
+  CalendarClock,
+  CalendarCheck,
+  Clock3,
+  Map,
+  UsersRound,
+  FileDown,
+  Repeat,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -388,4 +397,13 @@ export const LUCIDE_ICONS_MAP = {
   MessageSquare,
   Vote,
   Contact,
+  // Booking Calendar
+  CalendarDays,
+  CalendarClock,
+  CalendarCheck,
+  Clock3,
+  Map,
+  UsersRound,
+  FileDown,
+  Repeat,
 };

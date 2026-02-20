@@ -160,6 +160,20 @@ export class PartnerShellComponent implements OnInit {
         ]
       },
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
+      {
+        id: 'booking',
+        label: 'Naptar',
+        icon: 'calendar',
+        children: [
+          { id: 'booking-calendar', route: `${base}/booking/calendar`, label: 'Naptar' },
+          { id: 'booking-list', route: `${base}/booking/bookings`, label: 'Foglalasok' },
+          { id: 'booking-types', route: `${base}/booking/session-types`, label: 'Fotozasi tipusok' },
+          { id: 'booking-availability', route: `${base}/booking/availability`, label: 'Elerhetoseg' },
+          { id: 'booking-import', route: `${base}/booking/batch-import`, label: 'CSV Import' },
+          { id: 'booking-page', route: `${base}/booking/page-settings`, label: 'Foglalasi oldal' },
+          { id: 'booking-stats', route: `${base}/booking/stats`, label: 'Statisztikak' },
+        ]
+      },
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
       { id: 'orders', route: `${base}/orders/clients`, label: 'Megrendelések', icon: 'shopping-bag', devBadge: true },
       {
@@ -271,6 +285,7 @@ export class PartnerShellComponent implements OnInit {
     '/settings': 'partner-settings',
     '/webshop': 'webshop',
     '/prepayment': 'prepayment',
+    '/booking': 'booking',
   };
 
   // Mobile menü items (desktop + hibajelentés)

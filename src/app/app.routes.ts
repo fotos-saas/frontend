@@ -388,7 +388,49 @@ export const routes: Routes = [
       {
         path: 'bugs/:id',
         loadComponent: () => import('./features/bug-reports/pages/bug-report-detail/bug-report-detail.component').then(m => m.BugReportDetailComponent)
-      }
+      },
+      // Foglalasi Naptar
+      {
+        path: 'booking',
+        children: [
+          { path: '', redirectTo: 'calendar', pathMatch: 'full' },
+          {
+            path: 'calendar',
+            loadComponent: () => import('./features/partner/pages/booking/calendar/booking-calendar.component').then(m => m.BookingCalendarComponent),
+            title: 'Naptar'
+          },
+          {
+            path: 'bookings',
+            loadComponent: () => import('./features/partner/pages/booking/bookings/booking-list.component').then(m => m.BookingListComponent),
+            title: 'Foglalasok'
+          },
+          {
+            path: 'session-types',
+            loadComponent: () => import('./features/partner/pages/booking/session-types/session-types.component').then(m => m.SessionTypesComponent),
+            title: 'Fotozasi tipusok'
+          },
+          {
+            path: 'availability',
+            loadComponent: () => import('./features/partner/pages/booking/availability/availability.component').then(m => m.AvailabilityComponent),
+            title: 'Elerhetoseg'
+          },
+          {
+            path: 'batch-import',
+            loadComponent: () => import('./features/partner/pages/booking/batch-import/batch-import.component').then(m => m.BatchImportComponent),
+            title: 'CSV Import'
+          },
+          {
+            path: 'page-settings',
+            loadComponent: () => import('./features/partner/pages/booking/page-settings/booking-page-settings.component').then(m => m.BookingPageSettingsComponent),
+            title: 'Foglalasi oldal'
+          },
+          {
+            path: 'stats',
+            loadComponent: () => import('./features/partner/pages/booking/stats/booking-stats.component').then(m => m.BookingStatsComponent),
+            title: 'Statisztikak'
+          },
+        ]
+      },
     ]
   },
 
@@ -495,7 +537,49 @@ export const routes: Routes = [
       {
         path: 'bugs/:id',
         loadComponent: () => import('./features/bug-reports/pages/bug-report-detail/bug-report-detail.component').then(m => m.BugReportDetailComponent)
-      }
+      },
+      // Foglalasi Naptar
+      {
+        path: 'booking',
+        children: [
+          { path: '', redirectTo: 'calendar', pathMatch: 'full' },
+          {
+            path: 'calendar',
+            loadComponent: () => import('./features/partner/pages/booking/calendar/booking-calendar.component').then(m => m.BookingCalendarComponent),
+            title: 'Naptar'
+          },
+          {
+            path: 'bookings',
+            loadComponent: () => import('./features/partner/pages/booking/bookings/booking-list.component').then(m => m.BookingListComponent),
+            title: 'Foglalasok'
+          },
+          {
+            path: 'session-types',
+            loadComponent: () => import('./features/partner/pages/booking/session-types/session-types.component').then(m => m.SessionTypesComponent),
+            title: 'Fotozasi tipusok'
+          },
+          {
+            path: 'availability',
+            loadComponent: () => import('./features/partner/pages/booking/availability/availability.component').then(m => m.AvailabilityComponent),
+            title: 'Elerhetoseg'
+          },
+          {
+            path: 'batch-import',
+            loadComponent: () => import('./features/partner/pages/booking/batch-import/batch-import.component').then(m => m.BatchImportComponent),
+            title: 'CSV Import'
+          },
+          {
+            path: 'page-settings',
+            loadComponent: () => import('./features/partner/pages/booking/page-settings/booking-page-settings.component').then(m => m.BookingPageSettingsComponent),
+            title: 'Foglalasi oldal'
+          },
+          {
+            path: 'stats',
+            loadComponent: () => import('./features/partner/pages/booking/stats/booking-stats.component').then(m => m.BookingStatsComponent),
+            title: 'Statisztikak'
+          },
+        ]
+      },
     ]
   },
 
@@ -646,6 +730,23 @@ export const routes: Routes = [
     path: 'shop/:token/success',
     loadComponent: () => import('./features/client-webshop/pages/order-success/order-success.component').then(m => m.OrderSuccessComponent),
     title: 'Sikeres rendelés'
+  },
+
+  // Publikus foglalás
+  {
+    path: 'booking/:slug',
+    loadComponent: () => import('./features/public-booking/public-booking.component').then(m => m.PublicBookingComponent),
+    title: 'Idopont foglalas'
+  },
+  {
+    path: 'booking/:slug/reschedule/:bookingUuid',
+    loadComponent: () => import('./features/public-booking/public-booking-reschedule.component').then(m => m.PublicBookingRescheduleComponent),
+    title: 'Foglalas atutemezese'
+  },
+  {
+    path: 'booking/:slug/cancel/:bookingUuid',
+    loadComponent: () => import('./features/public-booking/public-booking-cancel.component').then(m => m.PublicBookingCancelComponent),
+    title: 'Foglalas lemondasa'
   },
 
   // Dev - Form showcase (no auth)

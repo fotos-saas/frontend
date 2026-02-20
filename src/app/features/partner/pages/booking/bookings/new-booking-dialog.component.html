@@ -1,0 +1,103 @@
+<div class="dialog-backdrop side-panel-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="side-panel">
+    <div class="panel-header">
+      <h2>Új foglalás</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </div>
+
+    <div class="panel-body">
+      <div class="field">
+        <label for="nb-type">Fotózási típus *</label>
+        <select id="nb-type" [(ngModel)]="sessionTypeId" (ngModelChange)="onTypeChange()" class="input">
+          <option [ngValue]="null">Válassz típust...</option>
+          @for (type of sessionTypes(); track type.id) {
+            <option [ngValue]="type.id">{{ type.name }} ({{ type.duration_minutes }} perc)</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="nb-date">Dátum *</label>
+        <input id="nb-date" type="date" [(ngModel)]="date" (ngModelChange)="loadSlots()" class="input" />
+      </div>
+      <div class="field">
+        <label>Időpont *</label>
+        @if (loadingSlots()) {
+          <div class="slots-loading">Időpontok betöltése...</div>
+        } @else if (availableSlots().length === 0 && date && sessionTypeId) {
+          <div class="slots-empty">Nincs elérhető időpont erre a napra.</div>
+        } @else {
+          <div class="slot-grid">
+            @for (slot of availableSlots(); track slot.start_time) {
+              <button type="button" class="slot-btn" [class.selected]="startTime === slot.start_time"
+                (click)="startTime = slot.start_time">{{ slot.start_time }}</button>
+            }
+          </div>
+        }
+      </div>
+      <hr class="divider" />
+      <div class="field">
+        <label for="nb-name">Kapcsolattartó neve *</label>
+        <input id="nb-name" type="text" [(ngModel)]="contactName" class="input" placeholder="Név" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="nb-email">Email *</label>
+          <input id="nb-email" type="email" [(ngModel)]="contactEmail" class="input" placeholder="email&#64;pelda.hu" />
+        </div>
+        <div class="field">
+          <label for="nb-phone">Telefon</label>
+          <input id="nb-phone" type="tel" [(ngModel)]="contactPhone" class="input" placeholder="+36..." />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="nb-school">Iskola</label>
+          <input id="nb-school" type="text" [(ngModel)]="schoolName" class="input" placeholder="Iskola neve" />
+        </div>
+        <div class="field">
+          <label for="nb-class">Osztály</label>
+          <input id="nb-class" type="text" [(ngModel)]="className" class="input" placeholder="pl. 12.A" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="nb-count">Diákok száma</label>
+        <input id="nb-count" type="number" [(ngModel)]="studentCount" min="1" class="input" />
+      </div>
+      <div class="field">
+        <label for="nb-notes">Megjegyzés</label>
+        <textarea id="nb-notes" [(ngModel)]="notes" rows="2" class="input" placeholder="Megjegyzés az ügyfélnek..."></textarea>
+      </div>
+      <div class="field">
+        <label for="nb-internal">Belső megjegyzés</label>
+        <textarea id="nb-internal" [(ngModel)]="internalNotes" rows="2" class="input" placeholder="Csak belső használatra..."></textarea>
+      </div>
+
+      @if (conflicts().length > 0) {
+        <div class="conflict-list">
+          @for (conflict of conflicts(); track $index) {
+            <div class="conflict-item">
+              <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+              <span>{{ conflict.message }}</span>
+            </div>
+          }
+        </div>
+      }
+      @if (errorMsg()) {
+        <div class="error-msg">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" /> {{ errorMsg() }}
+        </div>
+      }
+    </div>
+
+    <div class="panel-footer">
+      <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+      <button class="btn btn--primary" [disabled]="saving() || !isValid()" (click)="onSave()">
+        @if (saving()) { <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" /> }
+        Foglalás létrehozása
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,139 @@
+<div class="dialog-backdrop side-panel-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="side-panel">
+    <div class="panel-header">
+      <div class="header-info">
+        <span class="booking-number">{{ booking().booking_number }}</span>
+        <span class="status-badge status-badge--{{ STATUS_CONFIG[booking().status].color }}">
+          {{ STATUS_CONFIG[booking().status].label }}
+        </span>
+      </div>
+      <button class="close-btn" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </div>
+
+    <div class="panel-body">
+      <section class="detail-section">
+        <h3 class="section-label">Fotózás</h3>
+        <div class="detail-row">
+          <span class="type-dot" [style.background]="booking().session_type.color"></span>
+          <strong>{{ booking().session_type.name }}</strong>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <lucide-icon [name]="ICONS.CALENDAR" [size]="14" /> <span>{{ booking().date }}</span>
+          </div>
+          <div class="detail-item">
+            <lucide-icon [name]="ICONS.CLOCK" [size]="14" /> <span>{{ booking().start_time }} - {{ booking().end_time }}</span>
+          </div>
+          @if (booking().location) {
+            <div class="detail-item">
+              <lucide-icon [name]="ICONS.MAP_PIN" [size]="14" /> <span>{{ booking().location }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="detail-section">
+        <h3 class="section-label">Kapcsolattartó</h3>
+        <div class="detail-grid">
+          <div class="detail-item"><lucide-icon [name]="ICONS.USER" [size]="14" /> <span>{{ booking().contact_name }}</span></div>
+          <div class="detail-item"><lucide-icon [name]="ICONS.MAIL" [size]="14" /> <span>{{ booking().contact_email }}</span></div>
+          @if (booking().contact_phone) {
+            <div class="detail-item"><lucide-icon [name]="ICONS.PHONE" [size]="14" /> <span>{{ booking().contact_phone }}</span></div>
+          }
+        </div>
+      </section>
+
+      @if (booking().school_name || booking().class_name) {
+        <section class="detail-section">
+          <h3 class="section-label">Iskola</h3>
+          <div class="detail-grid">
+            @if (booking().school_name) {
+              <div class="detail-item"><lucide-icon [name]="ICONS.BUILDING" [size]="14" /> <span>{{ booking().school_name }}</span></div>
+            }
+            @if (booking().class_name) {
+              <div class="detail-item">
+                <lucide-icon [name]="ICONS.USERS" [size]="14" /> <span>{{ booking().class_name }}</span>
+                @if (booking().student_count) { <span class="count-badge">{{ booking().student_count }} fő</span> }
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (booking().notes || booking().internal_notes) {
+        <section class="detail-section">
+          <h3 class="section-label">Megjegyzések</h3>
+          @if (booking().notes) { <div class="note-box">{{ booking().notes }}</div> }
+          @if (booking().internal_notes) {
+            <div class="note-box note-box--internal">
+              <span class="note-label">Belső</span> {{ booking().internal_notes }}
+            </div>
+          }
+        </section>
+      }
+
+      @if (booking().questionnaire_answers?.length) {
+        <section class="detail-section">
+          <h3 class="section-label">Kérdőív válaszok</h3>
+          @for (answer of booking().questionnaire_answers; track answer.field_key) {
+            <div class="qa-item">
+              <span class="qa-label">{{ answer.label }}</span>
+              <span class="qa-value">{{ answer.value ?? '-' }}</span>
+            </div>
+          }
+        </section>
+      }
+
+      @if (booking().notifications?.length) {
+        <section class="detail-section">
+          <h3 class="section-label">Értesítések</h3>
+          @for (notif of booking().notifications; track notif.id) {
+            <div class="notif-item">
+              <span class="notif-type">{{ notif.type }}</span>
+              <span class="notif-channel">{{ notif.channel }}</span>
+              <span class="notif-status notif-status--{{ notif.status }}">{{ notif.status }}</span>
+            </div>
+          }
+        </section>
+      }
+    </div>
+
+    <div class="panel-footer">
+      @switch (booking().status) {
+        @case ('requested') {
+          <button class="btn btn--green" (click)="confirm()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" /> Visszaigazolás
+          </button>
+          <button class="btn btn--red-outline" (click)="showCancel.set(true)">
+            <lucide-icon [name]="ICONS.X" [size]="16" /> Elutasítás
+          </button>
+        }
+        @case ('confirmed') {
+          <button class="btn btn--primary" (click)="complete()">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" /> Teljesítés
+          </button>
+          <button class="btn btn--outline" (click)="showReschedule.set(true)">
+            <lucide-icon [name]="ICONS.CALENDAR" [size]="16" /> Átütemezés
+          </button>
+          <button class="btn btn--red-outline" (click)="showCancel.set(true)">
+            <lucide-icon [name]="ICONS.X" [size]="16" /> Lemondás
+          </button>
+          <button class="btn btn--outline" matTooltip="Nem jelent meg" (click)="markNoShow()">
+            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+          </button>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@if (showCancel()) {
+  <app-cancel-dialog (close)="showCancel.set(false)" (confirmed)="onCancel($event)" />
+}
+@if (showReschedule()) {
+  <app-reschedule-dialog [bookingId]="booking().id" [sessionTypeId]="booking().session_type.id"
+    (close)="showReschedule.set(false)" (confirmed)="onReschedule($event)" />
+}

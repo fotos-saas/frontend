@@ -1,0 +1,122 @@
+<app-dialog-wrapper
+  [variant]="type() ? 'edit' : 'create'"
+  headerStyle="flat" theme="purple" [icon]="ICONS.CALENDAR"
+  [title]="type() ? 'Típus szerkesztése' : 'Új fotózási típus'"
+  size="lg" [isSubmitting]="saving()" [errorMessage]="errorMsg()"
+  (closeEvent)="close.emit()" (submitEvent)="onSave()" (backdropClickEvent)="close.emit()">
+  <div dialogBody>
+    <div class="form-grid">
+      <div class="field">
+        <label for="st-name">Megnevezés *</label>
+        <input id="st-name" type="text" [(ngModel)]="name" placeholder="pl. Osztályfotó" class="input" (input)="generateKey()" />
+      </div>
+      <div class="field">
+        <label for="st-key">Kulcs *</label>
+        <input id="st-key" type="text" [(ngModel)]="key" placeholder="osztalyfoto" class="input" />
+      </div>
+      <div class="field field--full">
+        <label for="st-desc">Leírás</label>
+        <textarea id="st-desc" [(ngModel)]="description" rows="2" class="input" placeholder="Rövid leírás..."></textarea>
+      </div>
+      <div class="field">
+        <label for="st-dur">Időtartam (perc) *</label>
+        <input id="st-dur" type="number" [(ngModel)]="durationMinutes" min="5" step="5" class="input" />
+      </div>
+      <div class="field">
+        <label for="st-buf">Puffer idő (perc)</label>
+        <input id="st-buf" type="number" [(ngModel)]="bufferAfterMinutes" min="0" step="5" class="input" />
+      </div>
+      <div class="field">
+        <label for="st-price">Ár (Ft)</label>
+        <input id="st-price" type="number" [(ngModel)]="price" min="0" class="input" />
+      </div>
+      <div class="field">
+        <label for="st-max">Max. résztvevők</label>
+        <input id="st-max" type="number" [(ngModel)]="maxParticipants" min="1" class="input" />
+      </div>
+      <div class="field">
+        <label for="st-loc">Helyszín típus</label>
+        <select id="st-loc" [(ngModel)]="locationType" class="input">
+          @for (opt of locationOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="st-defloc">Alapértelmezett helyszín</label>
+        <input id="st-defloc" type="text" [(ngModel)]="defaultLocation" class="input" placeholder="pl. Budapest, stúdió" />
+      </div>
+      <div class="field">
+        <label>Szín</label>
+        <div class="color-picker">
+          @for (c of COLORS; track c) {
+            <button type="button" class="color-swatch" [style.background]="c"
+              [class.selected]="color === c" (click)="color = c">
+              @if (color === c) { <lucide-icon [name]="ICONS.CHECK" [size]="14" /> }
+            </button>
+          }
+        </div>
+      </div>
+      <div class="field">
+        <label for="st-notice">Min. értesítés (óra)</label>
+        <input id="st-notice" type="number" [(ngModel)]="minNoticeHours" min="0" class="input" />
+      </div>
+      <div class="field">
+        <label for="st-advance">Max. előrefoglalás (nap)</label>
+        <input id="st-advance" type="number" [(ngModel)]="maxAdvanceDays" min="1" class="input" />
+      </div>
+    </div>
+
+    <div class="toggle-group">
+      <label class="toggle-item">
+        <input type="checkbox" [(ngModel)]="requiresApproval" /> <span>Jóváhagyás szükséges</span>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" [(ngModel)]="autoConfirm" /> <span>Automatikus visszaigazolás</span>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" [(ngModel)]="isPublic" /> <span>Nyilvános (foglalási oldalon látható)</span>
+      </label>
+    </div>
+
+    <div class="field field--full">
+      <label for="st-prep">Előkészületi útmutató</label>
+      <textarea id="st-prep" [(ngModel)]="prepGuide" rows="3" class="input" placeholder="Útmutató a felkészüléshez..."></textarea>
+    </div>
+
+    <div class="questionnaire-section">
+      <div class="section-header">
+        <h3>Kérdőív mezők</h3>
+        <button type="button" class="btn btn--outline btn--sm" (click)="addField()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" /> Mező hozzáadása
+        </button>
+      </div>
+      @for (field of questionnaireFields; track $index; let i = $index) {
+        <div class="q-field-row">
+          <input type="text" [(ngModel)]="field.label" placeholder="Mező címe" class="input input--sm" />
+          <select [(ngModel)]="field.field_type" class="input input--sm">
+            <option value="text">Szöveg</option>
+            <option value="textarea">Hosszú szöveg</option>
+            <option value="number">Szám</option>
+            <option value="select">Legördülő</option>
+            <option value="checkbox">Jelölőnégyzet</option>
+          </select>
+          <label class="toggle-item toggle-item--sm">
+            <input type="checkbox" [(ngModel)]="field.is_required" /> <span>Kötelező</span>
+          </label>
+          <button type="button" class="action-btn action-btn--danger" (click)="removeField(i)">
+            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <ng-container dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+    <button class="btn btn--purple" [disabled]="saving() || !isValid()" (click)="onSave()">
+      @if (saving()) { <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" /> }
+      {{ type() ? 'Mentés' : 'Létrehozás' }}
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

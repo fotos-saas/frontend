@@ -1,0 +1,118 @@
+<div class="session-types page-card">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Fotózási típusok</h1>
+      <p class="subtitle">Különböző fotózási típusok kezelése és beállításai</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn--outline" (click)="loadTemplates(); showTemplates.set(true)">
+        <lucide-icon [name]="ICONS.SPARKLES" [size]="16" /> Sablonból
+      </button>
+      <button class="btn btn--primary" (click)="openForm()">
+        <lucide-icon [name]="ICONS.PLUS" [size]="16" /> Új típus
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-card skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (sessionTypes().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.CALENDAR" [size]="48" class="empty-icon" />
+      <h3>Még nincs fotózási típus</h3>
+      <p>Hozz létre egy újat, vagy válassz a sablonok közül.</p>
+    </div>
+  } @else {
+    <div class="type-grid">
+      @for (type of sessionTypes(); track type.id) {
+        <div class="type-card" [style.border-left-color]="type.color">
+          <div class="type-card__header">
+            <div class="type-card__name">{{ type.name }}</div>
+            <div class="type-card__actions">
+              <button class="action-btn" matTooltip="Szerkesztés" (click)="editType(type)">
+                <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+              </button>
+              <button class="action-btn action-btn--danger" matTooltip="Törlés"
+                [disabled]="(type.bookings_count ?? 0) > 0" (click)="confirmDelete(type)">
+                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+              </button>
+            </div>
+          </div>
+          @if (type.description) {
+            <p class="type-card__desc">{{ type.description }}</p>
+          }
+          <div class="type-card__meta">
+            <span class="meta-item">
+              <lucide-icon [name]="ICONS.CLOCK" [size]="14" /> {{ type.duration_minutes }} perc
+            </span>
+            @if (type.price != null) {
+              <span class="meta-item">
+                <lucide-icon [name]="ICONS.BANKNOTE" [size]="14" /> {{ type.price | number:'1.0-0' }} Ft
+              </span>
+            }
+            <span class="meta-item">
+              <lucide-icon [name]="ICONS.MAP_PIN" [size]="14" /> {{ LOCATION_TYPE_LABELS[type.location_type] }}
+            </span>
+          </div>
+          <div class="type-card__footer">
+            <span class="status-badge" [class.active]="type.is_active" [class.inactive]="!type.is_active">
+              {{ type.is_active ? 'Aktív' : 'Inaktív' }}
+            </span>
+            @if (type.bookings_count != null) {
+              <span class="booking-count">{{ type.bookings_count }} foglalás</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showTemplates()) {
+  <div class="template-overlay dialog-backdrop"
+    (mousedown)="onTemplateBackdropDown($event)" (click)="onTemplateBackdropClick($event)">
+    <div class="template-panel">
+      <div class="template-panel__header">
+        <h2>Sablon választása</h2>
+        <button class="action-btn" (click)="showTemplates.set(false)">
+          <lucide-icon [name]="ICONS.X" [size]="20" />
+        </button>
+      </div>
+      @if (templates().length === 0) {
+        <p class="template-empty">Sablonok betöltése...</p>
+      } @else {
+        <div class="template-list">
+          @for (tpl of templates(); track tpl.key) {
+            <button class="template-item" (click)="useTemplate(tpl.key)">
+              <div class="template-color" [style.background]="tpl.color"></div>
+              <div class="template-info">
+                <strong>{{ tpl.name }}</strong>
+                <span>{{ tpl.description }}</span>
+                <span class="template-meta">{{ tpl.duration_minutes }} perc</span>
+              </div>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (editingType() !== undefined) {
+  <app-session-type-form
+    [type]="editingType() ?? null"
+    (close)="editingType.set(undefined)"
+    (saved)="onTypeSaved()" />
+}
+
+@if (deletingType()) {
+  <app-confirm-dialog
+    title="Típus törlése"
+    [message]="'Biztosan törölni szeretnéd a(z) &quot;' + deletingType()!.name + '&quot; típust?'"
+    confirmText="Törlés" confirmColor="red"
+    (confirmed)="deleteType()" (canceled)="deletingType.set(null)" />
+}

@@ -1,0 +1,132 @@
+<div class="availability page-card">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Elérhetőség</h1>
+      <p class="subtitle">Heti munkaidő, tiltott napok és speciális időpontok kezelése</p>
+    </div>
+    <button class="btn btn--primary" [disabled]="saving()" (click)="saveAll()">
+      @if (saving()) { <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" /> }
+      @else { <lucide-icon [name]="ICONS.SAVE" [size]="16" /> }
+      Mentés
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3,4,5,6,7]; track i) { <div class="skeleton-row skeleton-shimmer"></div> }
+    </div>
+  } @else {
+    <section class="section">
+      <h2 class="section-title"><lucide-icon [name]="ICONS.CALENDAR" [size]="20" /> Heti beosztás</h2>
+      <div class="pattern-list">
+        @for (pattern of patterns(); track pattern.day_of_week) {
+          <div class="pattern-row" [class.disabled]="!pattern.is_enabled">
+            <label class="pattern-toggle">
+              <input type="checkbox" [(ngModel)]="pattern.is_enabled" />
+              <span class="day-name">{{ DAY_NAMES[pattern.day_of_week] }}</span>
+            </label>
+            @if (pattern.is_enabled) {
+              <div class="time-range">
+                <input type="time" [(ngModel)]="pattern.start_time" class="input input--time" />
+                <span class="time-sep">-</span>
+                <input type="time" [(ngModel)]="pattern.end_time" class="input input--time" />
+              </div>
+            } @else { <span class="day-off">Szabadnap</span> }
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title"><lucide-icon [name]="ICONS.SETTINGS" [size]="20" /> Általános beállítások</h2>
+      <div class="settings-grid">
+        <div class="field">
+          <label for="av-buf">Puffer foglalások között (perc)</label>
+          <input id="av-buf" type="number" [(ngModel)]="settings().buffer_minutes" min="0" step="5" class="input" />
+        </div>
+        <div class="field">
+          <label for="av-max">Max. napi foglalás</label>
+          <input id="av-max" type="number" [(ngModel)]="settings().max_daily" min="1" class="input" />
+        </div>
+        <div class="field">
+          <label for="av-notice">Min. értesítési idő (óra)</label>
+          <input id="av-notice" type="number" [(ngModel)]="settings().min_notice_hours" min="0" class="input" />
+        </div>
+        <div class="field">
+          <label for="av-advance">Max. előrefoglalás (nap)</label>
+          <input id="av-advance" type="number" [(ngModel)]="settings().max_advance_days" min="1" class="input" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title"><lucide-icon [name]="ICONS.BAN" [size]="20" /> Tiltott napok</h2>
+        <button class="btn btn--outline btn--sm" (click)="showBlockedDialog.set(true)">
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" /> Hozzáadás
+        </button>
+      </div>
+      @if (blockedDates().length === 0) {
+        <p class="empty-text">Nincs tiltott nap beállítva.</p>
+      } @else {
+        <div class="blocked-list">
+          @for (bd of blockedDates(); track bd.id) {
+            <div class="blocked-item">
+              <div class="blocked-info">
+                <span class="blocked-dates">{{ bd.start_date }} - {{ bd.end_date }}</span>
+                @if (bd.reason) { <span class="blocked-reason">{{ bd.reason }}</span> }
+                <span class="blocked-source">{{ bd.source === 'manual' ? 'Kézi' : bd.source === 'hungarian_holidays' ? 'Ünnepnap' : 'Google' }}</span>
+              </div>
+              <button class="action-btn action-btn--danger" matTooltip="Törlés"
+                [disabled]="bd.source !== 'manual'" (click)="confirmDeleteBlocked(bd)">
+                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title"><lucide-icon [name]="ICONS.CLOCK" [size]="20" /> Speciális időpontok</h2>
+        <button class="btn btn--outline btn--sm" (click)="showOverrideDialog.set(true)">
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" /> Hozzáadás
+        </button>
+      </div>
+      @if (overrides().length === 0) {
+        <p class="empty-text">Nincs speciális időpont beállítva.</p>
+      } @else {
+        <div class="override-list">
+          @for (ov of overrides(); track ov.id) {
+            <div class="override-item">
+              <div class="override-info">
+                <span class="override-date">{{ ov.date }}</span>
+                <span class="override-time">{{ ov.start_time }} - {{ ov.end_time }}</span>
+                @if (ov.note) { <span class="override-note">{{ ov.note }}</span> }
+              </div>
+              <button class="action-btn action-btn--danger" matTooltip="Törlés" (click)="confirmDeleteOverride(ov)">
+                <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>
+
+@if (showBlockedDialog()) {
+  <app-blocked-date-dialog (close)="showBlockedDialog.set(false)" (saved)="onBlockedDateSaved($event)" />
+}
+@if (showOverrideDialog()) {
+  <app-override-dialog (close)="showOverrideDialog.set(false)" (saved)="onOverrideSaved($event)" />
+}
+@if (deletingBlocked()) {
+  <app-confirm-dialog title="Tiltott nap törlése" message="Biztosan törölni szeretnéd ezt a tiltott napot?"
+    confirmText="Törlés" confirmColor="red" (confirmed)="deleteBlocked()" (canceled)="deletingBlocked.set(null)" />
+}
+@if (deletingOverride()) {
+  <app-confirm-dialog title="Speciális időpont törlése" message="Biztosan törölni szeretnéd ezt a speciális időpontot?"
+    confirmText="Törlés" confirmColor="red" (confirmed)="deleteOverride()" (canceled)="deletingOverride.set(null)" />
+}

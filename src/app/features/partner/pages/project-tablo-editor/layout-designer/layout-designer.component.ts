@@ -71,6 +71,7 @@ import { DesignerDocument } from './layout-designer.types';
       display: flex;
       flex-direction: column;
       outline: none;
+      -webkit-app-region: no-drag;
     }
 
     .layout-designer__loading,

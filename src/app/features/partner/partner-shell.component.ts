@@ -174,6 +174,16 @@ export class PartnerShellComponent implements OnInit {
         ]
       },
       {
+        id: 'prepayment',
+        label: 'Előlegfizetés',
+        icon: 'banknote',
+        children: [
+          { id: 'prepayment-list', route: `${base}/prepayment`, label: 'Előlegek' },
+          { id: 'prepayment-settings', route: `${base}/prepayment/settings`, label: 'Beállítások' },
+          { id: 'prepayment-stats', route: `${base}/prepayment/stats`, label: 'Statisztikák' },
+        ]
+      },
+      {
         id: 'customization',
         label: 'Testreszabás',
         icon: 'palette',
@@ -260,6 +270,7 @@ export class PartnerShellComponent implements OnInit {
     '/customization': 'customization',
     '/settings': 'partner-settings',
     '/webshop': 'webshop',
+    '/prepayment': 'prepayment',
   };
 
   // Mobile menü items (desktop + hibajelentés)

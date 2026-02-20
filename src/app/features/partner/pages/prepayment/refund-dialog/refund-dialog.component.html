@@ -1,0 +1,67 @@
+<app-dialog-wrapper
+  variant="confirm"
+  headerStyle="hero"
+  theme="red"
+  [icon]="ICONS.UNDO"
+  title="Előleg visszatérítése"
+  [description]="prepayment().child_name || prepayment().parent_name"
+  size="sm"
+  [isSubmitting]="submitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <!-- Összeg megjelenítés -->
+    <div class="amount-display">
+      <span class="amount-label">Visszatérítendő összeg</span>
+      <span class="amount-value">{{ formatCurrency(prepayment().amount_huf) }}</span>
+    </div>
+
+    <!-- Információs kártya -->
+    <div class="info-card">
+      <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+      <span>A visszatérítés nem vonható vissza. Kérjük, add meg az indoklást.</span>
+    </div>
+
+    <!-- Részletek -->
+    <div class="detail-rows">
+      <div class="detail-row">
+        <span class="detail-label">Szülő neve</span>
+        <span class="detail-value">{{ prepayment().parent_name }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Email</span>
+        <span class="detail-value">{{ prepayment().parent_email }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Fizetési mód</span>
+        <span class="detail-value">{{ prepayment().payment_method === 'cash' ? 'Készpénz' : 'Banki utalás' }}</span>
+      </div>
+    </div>
+
+    <!-- Indoklás (kötelező) -->
+    <ps-textarea
+      label="Visszatérítés indoklása *"
+      [rows]="3"
+      placeholder="Pl. Szülő kérésére, elírt összeg, stb..."
+      [ngModel]="reason()"
+      (ngModelChange)="reason.set($event)"
+    />
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()" [disabled]="submitting()">
+      Mégse
+    </button>
+    <button class="btn btn--danger" (click)="onSubmit()" [disabled]="submitting() || !reason().trim()">
+      @if (submitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Feldolgozás...
+      } @else {
+        <lucide-icon [name]="ICONS.UNDO" [size]="16" />
+        Visszatérítés
+      }
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

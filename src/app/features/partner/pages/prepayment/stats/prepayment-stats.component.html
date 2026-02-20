@@ -1,0 +1,137 @@
+<div class="prepayment-stats page-card">
+  <!-- Fejléc -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <lucide-icon [name]="ICONS.BAR_CHART" [size]="24" />
+        Előleg statisztikák
+      </h1>
+      <p class="subtitle">Előlegek összesített adatai és elemzése</p>
+    </div>
+  </div>
+
+  <!-- Szűrők -->
+  <div class="stats-filters">
+    <ps-select
+      placeholder="Összes projekt"
+      [options]="projects()"
+      [ngModel]="selectedProjectId()"
+      (ngModelChange)="selectedProjectId.set($event); onFilterChange()"
+    />
+    <div class="date-filters">
+      <div class="date-field">
+        <label>Kezdő dátum</label>
+        <input
+          type="date"
+          class="date-input"
+          [ngModel]="dateFrom()"
+          (ngModelChange)="dateFrom.set($event); onFilterChange()"
+        />
+      </div>
+      <div class="date-field">
+        <label>Záró dátum</label>
+        <input
+          type="date"
+          class="date-input"
+          [ngModel]="dateTo()"
+          (ngModelChange)="dateTo.set($event); onFilterChange()"
+        />
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-container">
+      <div class="skeleton-cards">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="skeleton-card"></div>
+        }
+      </div>
+      <div class="skeleton-row tall"></div>
+      <div class="skeleton-row tall"></div>
+    </div>
+  } @else if (stats(); as s) {
+    <!-- Összegző kártyák -->
+    <div class="stat-cards">
+      @for (card of statCards(); track card.label) {
+        <div class="stat-card" [attr.data-color]="card.color">
+          <div class="stat-card__icon">
+            <lucide-icon [name]="card.icon" [size]="22" />
+          </div>
+          <div class="stat-card__data">
+            <span class="stat-card__value">{{ formatCurrency(card.value) }}</span>
+            <span class="stat-card__label">{{ card.label }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Konverziós ráta -->
+    <div class="section">
+      <h2>Konverzió</h2>
+      <div class="conversion-card">
+        <div class="conversion-header">
+          <span class="conversion-label">Fizetési arány</span>
+          <span class="conversion-value">{{ conversionPercent() }}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width]="conversionPercent() + '%'"></div>
+        </div>
+        <span class="conversion-detail">
+          {{ s.total_count }} előlegből {{ s.total_collected | number }} Ft beszedve
+        </span>
+      </div>
+    </div>
+
+    <!-- Mód szerinti bontás -->
+    @if (modeBreakdown().length > 0) {
+      <div class="section">
+        <h2>Mód szerinti bontás</h2>
+        <div class="mode-breakdown">
+          @for (mode of modeBreakdown(); track mode.mode) {
+            <div class="mode-row">
+              <div class="mode-info">
+                <span class="mode-label">{{ mode.label }}</span>
+                <span class="mode-count">{{ mode.count }} db</span>
+              </div>
+              <div class="mode-bar-container">
+                <div class="mode-bar" [style.width]="getBarWidth(mode.total)">
+                  <span class="mode-bar-text">{{ formatCurrency(mode.total) }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Összesítés -->
+    <div class="section">
+      <h2>Összesítés</h2>
+      <div class="totals-grid">
+        <div class="total-item">
+          <span class="total-label">Összes előleg</span>
+          <span class="total-value">{{ s.total_count }} db</span>
+        </div>
+        <div class="total-item">
+          <span class="total-label">Összes beszedett</span>
+          <span class="total-value">{{ formatCurrency(s.total_collected) }}</span>
+        </div>
+        <div class="total-item">
+          <span class="total-label">Felhasználva</span>
+          <span class="total-value">{{ formatCurrency(s.total_used) }}</span>
+        </div>
+        <div class="total-item">
+          <span class="total-label">Visszatérítve</span>
+          <span class="total-value">{{ formatCurrency(s.total_refunded) }}</span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.BAR_CHART" [size]="48" />
+      <h3>Nincsenek statisztikai adatok</h3>
+      <p>Hozz létre előlegeket a statisztikák megjelenítéséhez.</p>
+    </div>
+  }
+</div>

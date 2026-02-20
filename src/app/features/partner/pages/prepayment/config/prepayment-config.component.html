@@ -1,0 +1,196 @@
+<div class="prepayment-config page-card page-card--narrow">
+  <!-- Fejléc -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <lucide-icon [name]="ICONS.WALLET" [size]="24" />
+        Előlegfizetés beállítások
+      </h1>
+      <p class="subtitle">Előlegfizetési mód és feltételek konfigurálása</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-container">
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  } @else {
+    <!-- Engedélyezés -->
+    <section class="settings-section">
+      <ps-toggle
+        label="Előlegfizetés engedélyezve"
+        [ngModel]="isEnabled()"
+        (ngModelChange)="isEnabled.set($event)"
+      />
+      <p class="help-text">Ha be van kapcsolva, a szülők előleget fizethetnek az iskolai fotózásra.</p>
+    </section>
+
+    <!-- Mód kiválasztása -->
+    <section class="settings-section">
+      <h2>Fizetési mód</h2>
+      <div class="mode-cards">
+        @for (card of modeCards; track card.mode) {
+          <button
+            type="button"
+            class="mode-card"
+            [class.active]="selectedMode() === card.mode"
+            (click)="selectMode(card.mode)"
+          >
+            <div class="mode-card__icon" [class.active]="selectedMode() === card.mode">
+              <lucide-icon [name]="card.icon" [size]="24" />
+            </div>
+            <div class="mode-card__text">
+              <span class="mode-card__label">{{ card.label }}</span>
+              <span class="mode-card__desc">{{ card.description }}</span>
+            </div>
+            <div class="mode-card__radio">
+              <span class="radio-dot" [class.active]="selectedMode() === card.mode"></span>
+            </div>
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- Mód-specifikus beállítások -->
+    <section class="settings-section">
+      <h2>{{ PREPAYMENT_MODE_LABELS[selectedMode()] }} beállítások</h2>
+
+      @if (selectedMode() === 'fixed_fee' || selectedMode() === 'deposit') {
+        <ps-input
+          label="Összeg (Ft)"
+          type="number"
+          [min]="0"
+          placeholder="pl. 5000"
+          [ngModel]="amountHuf()"
+          (ngModelChange)="amountHuf.set($event)"
+        />
+      }
+
+      <ps-input
+        label="Megnevezés"
+        placeholder="pl. Iskolai fotózás előleg"
+        [ngModel]="label()"
+        (ngModelChange)="label.set($event)"
+      />
+
+      <ps-textarea
+        label="Leírás (opcionális)"
+        [rows]="3"
+        placeholder="A szülők számára megjelenő leírás..."
+        [ngModel]="description()"
+        (ngModelChange)="description.set($event)"
+      />
+    </section>
+
+    <!-- Visszatérítés -->
+    <section class="settings-section">
+      <h2>Visszatérítés</h2>
+
+      <ps-toggle
+        label="Visszatérítés engedélyezve"
+        [ngModel]="isRefundable()"
+        (ngModelChange)="isRefundable.set($event)"
+      />
+
+      @if (isRefundable()) {
+        <ps-input
+          label="Visszatérítési határidő (óra)"
+          type="number"
+          [min]="0"
+          [ngModel]="refundDeadlineHours()"
+          (ngModelChange)="refundDeadlineHours.set($event)"
+        />
+      }
+
+      <ps-input
+        label="Minimum rendelési összeg az érvényesítéshez (Ft)"
+        type="number"
+        [min]="0"
+        [ngModel]="minOrderToApply()"
+        (ngModelChange)="minOrderToApply.set($event)"
+      />
+
+      <ps-toggle
+        label="Elvesztés rendelés hiányában"
+        [ngModel]="forfeitIfNoOrder()"
+        (ngModelChange)="forfeitIfNoOrder.set($event)"
+      />
+      <p class="help-text">Ha be van kapcsolva, az előleg elvész, ha a szülő nem rendel.</p>
+    </section>
+
+    <!-- Fizetési módok -->
+    <section class="settings-section">
+      <h2>Fizetési módok</h2>
+      <div class="checkbox-group">
+        @for (method of ['bank_transfer', 'cash', 'card']; track method) {
+          <label class="checkbox-item">
+            <input
+              type="checkbox"
+              [checked]="paymentMethods()[method]"
+              (change)="togglePaymentMethod(method)"
+            />
+            <span>{{ getPaymentMethodLabel(method) }}</span>
+          </label>
+        }
+      </div>
+    </section>
+
+    <!-- Határidők és értesítések -->
+    <section class="settings-section">
+      <h2>Határidő és emlékeztetők</h2>
+
+      <ps-input
+        label="Fizetési határidő (nap)"
+        type="number"
+        [min]="1"
+        [ngModel]="paymentDeadlineDays()"
+        (ngModelChange)="paymentDeadlineDays.set($event)"
+      />
+
+      <ps-input
+        label="Emlékeztető napok (vesszővel elválasztva)"
+        placeholder="pl. 3,1"
+        [ngModel]="reminderDays()"
+        (ngModelChange)="reminderDays.set($event)"
+      />
+      <p class="help-text">A lejárat előtt ennyi nappal kap emlékeztetőt a szülő.</p>
+    </section>
+
+    <!-- Számlázás és feltételek -->
+    <section class="settings-section">
+      <h2>Számlázás és feltételek</h2>
+
+      <ps-toggle
+        label="Számla kiállítása"
+        [ngModel]="sendInvoice()"
+        (ngModelChange)="sendInvoice.set($event)"
+      />
+
+      <ps-textarea
+        label="Egyedi feltételek (opcionális)"
+        [rows]="4"
+        placeholder="Az előlegfizetésre vonatkozó egyedi feltételek szövege..."
+        [ngModel]="customTerms()"
+        (ngModelChange)="customTerms.set($event)"
+      />
+    </section>
+
+    <!-- Mentés / Mégse -->
+    <div class="save-bar">
+      <button class="btn btn--outline" (click)="cancel()" [disabled]="saving()">
+        Mégse
+      </button>
+      <button class="btn btn--primary" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Mentés...
+        } @else {
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+          Beállítások mentése
+        }
+      </button>
+    </div>
+  }
+</div>

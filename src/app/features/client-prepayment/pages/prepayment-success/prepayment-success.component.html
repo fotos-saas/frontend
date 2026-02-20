@@ -1,0 +1,94 @@
+<!-- Betöltés -->
+@if (state() === 'loading') {
+  <div class="success-page">
+    <div class="success-card">
+      <div class="loading-state">
+        <lucide-icon [name]="ICONS.LOADER" [size]="32" class="spinner" />
+        <p>Betöltés...</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Hiba -->
+@if (state() === 'error') {
+  <div class="success-page">
+    <div class="success-card">
+      <div class="error-state">
+        <lucide-icon [name]="ICONS.X_CIRCLE" [size]="56" />
+        <h1>Hiba történt</h1>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Sikeres befizetés -->
+@if (state() === 'success' && data()) {
+  <div class="success-page">
+    <div class="success-card">
+      <!-- Partner logó -->
+      @if (data()!.branding.logo_url) {
+        <img [src]="data()!.branding.logo_url!" alt="Logó" class="partner-logo" />
+      }
+
+      <!-- Siker ikon -->
+      <div class="success-icon">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="56" />
+      </div>
+
+      <h1>Köszönjük a befizetését!</h1>
+      <p class="success-message">A fizetés sikeresen megtörtént. Köszönjük a bizalmat!</p>
+
+      <!-- Befizetés adatai -->
+      <div class="detail-box">
+        <div class="detail-row">
+          <span class="detail-label">Előleg szám</span>
+          <strong>{{ data()!.prepayment_number }}</strong>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Befizetett összeg</span>
+          <strong class="amount">{{ data()!.amount_huf | number:'1.0-0' }} Ft</strong>
+        </div>
+        @if (data()!.child_name) {
+          <div class="detail-row">
+            <span class="detail-label">Gyermek neve</span>
+            <strong>{{ data()!.child_name }}</strong>
+          </div>
+        }
+        @if (data()!.paid_at) {
+          <div class="detail-row">
+            <span class="detail-label">Fizetés dátuma</span>
+            <strong>{{ data()!.paid_at }}</strong>
+          </div>
+        }
+      </div>
+
+      <!-- Csomag tartalom -->
+      @if (data()!.package) {
+        <div class="package-box">
+          <div class="package-header">
+            <lucide-icon [name]="ICONS.PACKAGE" [size]="18" />
+            <h3>{{ data()!.package!.name }}</h3>
+          </div>
+          @if (data()!.package!.included_items.length > 0) {
+            <ul class="package-items">
+              @for (item of data()!.package!.included_items; track item.product_name) {
+                <li>
+                  <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  {{ item.quantity }}x {{ item.product_name }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+
+      <!-- Lábléc info -->
+      <div class="success-footer">
+        <lucide-icon [name]="ICONS.MAIL" [size]="16" />
+        <span>A visszaigazolást e-mailben is elküldtük</span>
+      </div>
+    </div>
+  </div>
+}

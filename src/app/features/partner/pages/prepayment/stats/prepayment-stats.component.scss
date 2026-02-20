@@ -1,0 +1,351 @@
+@use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
+
+:host {
+  display: block;
+}
+
+.page-header {
+  margin-bottom: 24px;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .subtitle {
+    color: var(--text-secondary);
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+  }
+}
+
+// === SZŰRŐK ===
+.stats-filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.date-filters {
+  display: flex;
+  gap: 12px;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: get-color('slate', 500);
+  }
+}
+
+.date-input {
+  padding: 8px 12px;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  @include mix.transition-normal;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+// === STAT KÁRTYÁK ===
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid get-color('slate', 200);
+  @include mix.transition-normal;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__data {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: get-color('slate', 800);
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: get-color('slate', 500);
+    margin-top: 2px;
+  }
+
+  // Szín variánsok
+  &[data-color='green'] .stat-card__icon { background: #dcfce7; color: #16a34a; }
+  &[data-color='blue'] .stat-card__icon { background: #dbeafe; color: #2563eb; }
+  &[data-color='amber'] .stat-card__icon { background: #fef3c7; color: #d97706; }
+  &[data-color='red'] .stat-card__icon { background: #fee2e2; color: #dc2626; }
+  &[data-color='orange'] .stat-card__icon { background: #ffedd5; color: #ea580c; }
+}
+
+// === SZEKCIÓK ===
+.section {
+  margin-bottom: 32px;
+
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: get-color('slate', 700);
+    margin: 0 0 16px;
+  }
+}
+
+// === KONVERZIÓ ===
+.conversion-card {
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 12px;
+}
+
+.conversion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.conversion-label {
+  font-size: 0.875rem;
+  color: get-color('slate', 600);
+}
+
+.conversion-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.progress-bar {
+  height: 8px;
+  background: get-color('slate', 100);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.conversion-detail {
+  font-size: 0.75rem;
+  color: get-color('slate', 500);
+}
+
+// === MÓD BONTÁS ===
+.mode-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mode-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mode-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mode-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: get-color('slate', 700);
+}
+
+.mode-count {
+  font-size: 0.75rem;
+  color: get-color('slate', 500);
+}
+
+.mode-bar-container {
+  height: 28px;
+  background: get-color('slate', 100);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.mode-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  min-width: fit-content;
+  transition: width 0.5s ease;
+}
+
+.mode-bar-text {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+// === ÖSSZESÍTÉS ===
+.totals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.total-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: get-color('slate', 50);
+  border-radius: 8px;
+}
+
+.total-label {
+  font-size: 0.8125rem;
+  color: get-color('slate', 600);
+}
+
+.total-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: get-color('slate', 800);
+}
+
+// === ÜRES ÁLLAPOT ===
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: get-color('slate', 500);
+
+  lucide-icon {
+    opacity: 0.4;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    color: get-color('slate', 700);
+    margin: 0 0 8px;
+  }
+
+  p {
+    font-size: 0.875rem;
+    margin: 0;
+  }
+}
+
+// === SKELETON ===
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.skeleton-card {
+  height: 80px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, get-color('slate', 100) 25%, get-color('slate', 200) 50%, get-color('slate', 100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-row {
+  height: 48px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, get-color('slate', 100) 25%, get-color('slate', 200) 50%, get-color('slate', 100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+
+  &.tall {
+    height: 120px;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// === RESPONSIVE ===
+@media (max-width: 640px) {
+  .stats-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-filters {
+    flex-direction: column;
+  }
+
+  .stat-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .totals-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

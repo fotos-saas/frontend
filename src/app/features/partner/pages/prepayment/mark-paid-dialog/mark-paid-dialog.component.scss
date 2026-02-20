@@ -1,0 +1,120 @@
+@use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
+
+// === ÖSSZEG MEGJELENÍTÉS ===
+.amount-display {
+  text-align: center;
+  padding: 16px;
+  background: #f0fdf4;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.amount-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: get-color('slate', 500);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 4px;
+}
+
+.amount-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+// === MEZŐ CSOPORT ===
+.field-group {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: get-color('slate', 700);
+  margin-bottom: 8px;
+}
+
+// === FIZETÉSI MÓD ===
+.method-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.method-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  background: #ffffff;
+  border: 2px solid get-color('slate', 200);
+  border-radius: 10px;
+  cursor: pointer;
+  color: get-color('slate', 600);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  @include mix.transition-fast;
+
+  &:hover {
+    border-color: get-color('slate', 300);
+    background: get-color('slate', 50);
+  }
+
+  &.active {
+    border-color: #22c55e;
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+}
+
+// === GOMBOK ===
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  @include mix.transition-fast;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--success {
+    background: #22c55e;
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      background: #16a34a;
+    }
+  }
+
+  &--outline {
+    background: #ffffff;
+    border: 1px solid get-color('slate', 200);
+    color: get-color('slate', 600);
+
+    &:hover:not(:disabled) {
+      background: get-color('slate', 50);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

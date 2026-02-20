@@ -1,0 +1,70 @@
+<app-dialog-wrapper
+  variant="confirm"
+  headerStyle="hero"
+  theme="green"
+  [icon]="ICONS.CHECK_CIRCLE"
+  title="Előleg fizetettnek jelölése"
+  [description]="prepayment().child_name || prepayment().parent_name"
+  size="sm"
+  [isSubmitting]="submitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <!-- Összeg megjelenítés -->
+    <div class="amount-display">
+      <span class="amount-label">Fizetendő összeg</span>
+      <span class="amount-value">{{ formatCurrency(prepayment().amount_huf) }}</span>
+    </div>
+
+    <!-- Fizetési mód -->
+    <div class="field-group">
+      <label class="field-label">Fizetési mód</label>
+      <div class="method-options">
+        <button
+          type="button"
+          class="method-card"
+          [class.active]="paymentMethod() === 'bank_transfer'"
+          (click)="selectMethod('bank_transfer')"
+        >
+          <lucide-icon [name]="ICONS.BANKNOTE" [size]="20" />
+          <span>Banki utalás</span>
+        </button>
+        <button
+          type="button"
+          class="method-card"
+          [class.active]="paymentMethod() === 'cash'"
+          (click)="selectMethod('cash')"
+        >
+          <lucide-icon [name]="ICONS.WALLET" [size]="20" />
+          <span>Készpénz</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Megjegyzés -->
+    <ps-textarea
+      label="Megjegyzés (opcionális)"
+      [rows]="2"
+      placeholder="pl. Utalási azonosító, dátum..."
+      [ngModel]="notes()"
+      (ngModelChange)="notes.set($event)"
+    />
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()" [disabled]="submitting()">
+      Mégse
+    </button>
+    <button class="btn btn--success" (click)="onSubmit()" [disabled]="submitting()">
+      @if (submitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Feldolgozás...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        Fizetettnek jelölés
+      }
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

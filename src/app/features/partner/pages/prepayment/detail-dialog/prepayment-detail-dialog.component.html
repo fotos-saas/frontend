@@ -1,0 +1,158 @@
+<app-dialog-wrapper
+  variant="info"
+  headerStyle="flat"
+  theme="purple"
+  [icon]="ICONS.EYE"
+  title="Előleg részletei"
+  [description]="prepayment().prepayment_number"
+  size="md"
+  (closeEvent)="close.emit()"
+>
+  <ng-container dialogBody>
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+      </div>
+    } @else if (detail(); as d) {
+      <!-- Összeg kártyák -->
+      <div class="data-cards">
+        <div class="data-card">
+          <span class="data-card__label">Összeg</span>
+          <span class="data-card__value">{{ formatCurrency(d.amount_huf) }}</span>
+        </div>
+        <div class="data-card">
+          <span class="data-card__label">Felhasználva</span>
+          <span class="data-card__value">{{ formatCurrency(d.amount_used) }}</span>
+        </div>
+        <div class="data-card">
+          <span class="data-card__label">Fennmaradó</span>
+          <span class="data-card__value highlight">{{ formatCurrency(d.amount_remaining) }}</span>
+        </div>
+      </div>
+
+      <!-- Státusz és mód -->
+      <div class="info-row">
+        <span class="info-label">Státusz</span>
+        <span class="status-badge" [attr.data-status]="d.status">
+          {{ STATUS_LABELS[d.status] }}
+        </span>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">Mód</span>
+        <span class="mode-badge" [attr.data-mode]="d.mode">
+          {{ MODE_LABELS[d.mode] }}
+        </span>
+      </div>
+
+      <!-- Szülő adatai -->
+      <div class="info-section">
+        <h3>
+          <lucide-icon [name]="ICONS.USER" [size]="16" />
+          Szülő adatai
+        </h3>
+        <div class="info-row">
+          <span class="info-label">Név</span>
+          <span class="info-value">{{ d.parent_name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ d.parent_email }}</span>
+        </div>
+        @if (d.parent_phone) {
+          <div class="info-row">
+            <span class="info-label">Telefon</span>
+            <span class="info-value">{{ d.parent_phone }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Dátumok -->
+      <div class="info-section">
+        <h3>
+          <lucide-icon [name]="ICONS.CALENDAR" [size]="16" />
+          Dátumok
+        </h3>
+        <div class="info-row">
+          <span class="info-label">Létrehozva</span>
+          <span class="info-value">{{ formatDate(d.created_at) }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Fizetési határidő</span>
+          <span class="info-value">{{ formatDate(d.payment_deadline) }}</span>
+        </div>
+        @if (d.paid_at) {
+          <div class="info-row">
+            <span class="info-label">Fizetve</span>
+            <span class="info-value">{{ formatDate(d.paid_at) }}</span>
+          </div>
+        }
+        @if (d.applied_at) {
+          <div class="info-row">
+            <span class="info-label">Érvényesítve</span>
+            <span class="info-value">{{ formatDate(d.applied_at) }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Számla -->
+      @if (d.invoice_number) {
+        <div class="info-section">
+          <h3>
+            <lucide-icon [name]="ICONS.RECEIPT" [size]="16" />
+            Számla
+          </h3>
+          <div class="info-row">
+            <span class="info-label">Számlaszám</span>
+            <span class="info-value">{{ d.invoice_number }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- Megjegyzés -->
+      @if (d.notes) {
+        <div class="info-section">
+          <h3>
+            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+            Megjegyzés
+          </h3>
+          <p class="notes-text">{{ d.notes }}</p>
+        </div>
+      }
+
+      <!-- Események idővonalon -->
+      @if (d.events && d.events.length > 0) {
+        <div class="info-section">
+          <h3>
+            <lucide-icon [name]="ICONS.ACTIVITY" [size]="16" />
+            Események
+          </h3>
+          <div class="timeline">
+            @for (event of d.events; track event.id) {
+              <div class="timeline-item">
+                <div class="timeline-dot">
+                  <lucide-icon [name]="getEventIcon(event.event_type)" [size]="14" />
+                </div>
+                <div class="timeline-content">
+                  <span class="timeline-label">{{ getEventLabel(event.event_type) }}</span>
+                  @if (event.amount) {
+                    <span class="timeline-amount">{{ formatCurrency(event.amount) }}</span>
+                  }
+                  <span class="timeline-date">{{ formatDateTime(event.created_at) }}</span>
+                  @if (event.creator) {
+                    <span class="timeline-creator">{{ event.creator.name }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">Bezárás</button>
+  </ng-container>
+</app-dialog-wrapper>

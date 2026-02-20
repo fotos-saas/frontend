@@ -1,0 +1,221 @@
+<div class="prepayment-list page-card">
+  <!-- Fejléc -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Előlegek</h1>
+      <p class="subtitle">Előlegek kezelése és nyomon követése</p>
+    </div>
+    <div class="header-buttons">
+      <button class="btn-secondary" (click)="showBulkDialog.set(true)">
+        <lucide-icon [name]="ICONS.USERS" [size]="16" />
+        Csoportos
+      </button>
+      <button class="btn-primary" (click)="showCreateDialog.set(true)">
+        <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        Új előleg
+      </button>
+    </div>
+  </div>
+
+  <!-- Összegző kártyák -->
+  @if (summary()) {
+    <div class="summary-cards">
+      @for (card of summaryCards(); track card.label) {
+        <div class="summary-card" [attr.data-color]="card.color">
+          <div class="summary-card__icon">
+            <lucide-icon [name]="card.icon" [size]="20" />
+          </div>
+          <div class="summary-card__data">
+            <span class="summary-card__value">
+              {{ card.isCurrency ? formatCurrency(card.value) : card.value }}
+            </span>
+            <span class="summary-card__label">{{ card.label }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="18" class="search-icon" />
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Keresés név, email alapján..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        (keyup.enter)="onSearch()"
+      />
+      @if (searchQuery()) {
+        <button class="clear-btn" (click)="clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="16" />
+        </button>
+      }
+    </div>
+    <select
+      class="filter-select"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="onStatusChange($event)"
+    >
+      @for (opt of statusOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Betöltés -->
+  @if (loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (prepayments().length === 0) {
+    <!-- Üres állapot -->
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.WALLET" [size]="48" class="empty-icon" />
+      <h3>Nincsenek előlegek</h3>
+      <p>Hozd létre az első előleget a fenti gombbal.</p>
+    </div>
+  } @else {
+    <!-- Táblázat fejléc -->
+    <div class="table-header">
+      <span class="th">Gyermek neve</span>
+      <span class="th">Szülő</span>
+      <span class="th">Összeg</span>
+      <span class="th">Mód</span>
+      <span class="th">Státusz</span>
+      <span class="th">Fizetve</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <!-- Sorok -->
+    <div class="row-grid">
+      @for (p of prepayments(); track p.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+          <!-- Gyermek neve -->
+          <div class="cell-name">
+            <span class="name-text">{{ p.child_name || '-' }}</span>
+            @if (p.class_name) {
+              <span class="class-text">{{ p.class_name }}</span>
+            }
+          </div>
+
+          <!-- Szülő -->
+          <div class="cell-parent">
+            <span>{{ p.parent_name }}</span>
+            <span class="email-text">{{ p.parent_email }}</span>
+          </div>
+
+          <!-- Összeg -->
+          <span class="cell-amount">{{ formatCurrency(p.amount_huf) }}</span>
+
+          <!-- Mód -->
+          <span class="mode-badge" [attr.data-mode]="p.mode">
+            {{ MODE_LABELS[p.mode] }}
+          </span>
+
+          <!-- Státusz -->
+          <span class="status-badge" [attr.data-status]="p.status">
+            {{ STATUS_LABELS[p.status] }}
+          </span>
+
+          <!-- Fizetve dátum -->
+          <span class="cell-date">{{ formatDate(p.paid_at) }}</span>
+
+          <!-- Műveletek -->
+          <div class="cell-actions">
+            <button class="action-btn" matTooltip="Részletek" (click)="openDetail(p)">
+              <lucide-icon [name]="ICONS.EYE" [size]="16" />
+            </button>
+            @if (p.status === 'pending') {
+              <button class="action-btn" matTooltip="Fizetve jelölés" (click)="openMarkPaid(p)">
+                <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+              </button>
+              <button class="action-btn" matTooltip="Emlékeztető újraküldése" (click)="resend(p)">
+                <lucide-icon [name]="ICONS.FORWARD" [size]="16" />
+              </button>
+              <button class="action-btn action-btn--danger" matTooltip="Sztornó" (click)="confirmCancel(p)">
+                <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" />
+              </button>
+            }
+            @if (p.status === 'paid') {
+              <button class="action-btn action-btn--danger" matTooltip="Visszatérítés" (click)="openRefund(p)">
+                <lucide-icon [name]="ICONS.UNDO" [size]="16" />
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Lapozás -->
+    @if (lastPage() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="currentPage() <= 1" (click)="goToPage(currentPage() - 1)">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+        <span class="page-info">
+          {{ currentPage() }} / {{ lastPage() }}
+          <span class="total-count">({{ total() }} tétel)</span>
+        </span>
+        <button class="page-btn" [disabled]="currentPage() >= lastPage()" (click)="goToPage(currentPage() + 1)">
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Dialógusok -->
+@if (showCreateDialog()) {
+  <app-create-prepayment-dialog
+    (close)="onDialogClose()"
+    (saved)="onDialogSaved()"
+  />
+}
+
+@if (showDetailDialog() && selectedPrepayment()) {
+  <app-prepayment-detail-dialog
+    [prepayment]="selectedPrepayment()!"
+    (close)="onDialogClose()"
+  />
+}
+
+@if (showMarkPaidDialog() && selectedPrepayment()) {
+  <app-mark-paid-dialog
+    [prepayment]="selectedPrepayment()!"
+    (close)="onDialogClose()"
+    (saved)="onDialogSaved()"
+  />
+}
+
+@if (showRefundDialog() && selectedPrepayment()) {
+  <app-refund-dialog
+    [prepayment]="selectedPrepayment()!"
+    (close)="onDialogClose()"
+    (saved)="onDialogSaved()"
+  />
+}
+
+@if (showBulkDialog()) {
+  <app-bulk-prepayment-dialog
+    (close)="onDialogClose()"
+    (saved)="onDialogSaved()"
+  />
+}
+
+@if (showCancelConfirm()) {
+  <app-confirm-dialog
+    title="Előleg sztornózása"
+    [message]="'Biztosan sztornózod az előleget? (' + (selectedPrepayment()?.child_name || selectedPrepayment()?.parent_name) + ')'"
+    confirmText="Sztornó"
+    cancelText="Mégse"
+    confirmType="danger"
+    (resultEvent)="$event.action === 'confirm' ? cancelPrepayment() : onDialogClose()"
+  />
+}

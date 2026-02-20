@@ -1,0 +1,310 @@
+<!-- Betöltés -->
+@if (state() === 'loading') {
+  <div class="prepayment-page">
+    <div class="prepayment-card">
+      <div class="loading-state">
+        <lucide-icon [name]="ICONS.LOADER" [size]="32" class="spinner" />
+        <p>Betöltés...</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Hibás / nem található -->
+@if (state() === 'invalid') {
+  <div class="prepayment-page">
+    <div class="prepayment-card">
+      <div class="status-state status-state--error">
+        <lucide-icon [name]="ICONS.X_CIRCLE" [size]="56" />
+        <h1>Érvénytelen hivatkozás</h1>
+        <p>{{ errorMessage() || 'Az előleg nem található vagy a hivatkozás érvénytelen.' }}</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Már kifizetve -->
+@if (state() === 'already_paid') {
+  <div class="prepayment-page">
+    <div class="prepayment-card">
+      @if (branding()?.logo_url) {
+        <img [src]="branding()!.logo_url!" alt="Logó" class="partner-logo" />
+      }
+      <div class="status-state status-state--success">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="56" />
+        <h1>Már kifizetve!</h1>
+        <p>Ez az előleg ({{ prepayment()!.prepayment_number }}) már befizetésre került. Nincs további teendő.</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Lejárt -->
+@if (state() === 'expired') {
+  <div class="prepayment-page">
+    <div class="prepayment-card">
+      @if (branding()?.logo_url) {
+        <img [src]="branding()!.logo_url!" alt="Logó" class="partner-logo" />
+      }
+      <div class="status-state status-state--warning">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="56" />
+        <h1>A fizetési határidő lejárt</h1>
+        <p>Ennek az előlegnek a fizetési határideje lejárt. Kérjük, vedd fel a kapcsolatot a fotóssal.</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Fizetendő (normál és csomag mód) -->
+@if (state() === 'payable' || state() === 'package_select') {
+  <div class="prepayment-page">
+    <div class="prepayment-card">
+      <!-- Partner logó -->
+      @if (branding()?.logo_url) {
+        <img [src]="branding()!.logo_url!" alt="Logó" class="partner-logo" />
+      }
+
+      <!-- Partner neve -->
+      <h1 class="partner-name">{{ branding()?.name }}</h1>
+
+      <h2 class="page-title">Előleg befizetése</h2>
+
+      <!-- Előleg adatok -->
+      <div class="info-row">
+        <span class="info-label">Előleg szám</span>
+        <span class="info-value">{{ prepayment()!.prepayment_number }}</span>
+      </div>
+
+      @if (prepayment()!.child_name) {
+        <div class="info-row">
+          <span class="info-label">Gyermek neve</span>
+          <span class="info-value">{{ prepayment()!.child_name }}</span>
+        </div>
+      }
+
+      @if (prepayment()!.class_name) {
+        <div class="info-row">
+          <span class="info-label">Osztály</span>
+          <span class="info-value">{{ prepayment()!.class_name }}</span>
+        </div>
+      }
+
+      @if (prepayment()!.payment_deadline) {
+        <div class="info-row">
+          <span class="info-label">Határidő</span>
+          <span class="info-value">{{ prepayment()!.payment_deadline }}</span>
+        </div>
+      }
+
+      <!-- Összeg megjelenítés (nem csomag mód) -->
+      @if (!isPackageMode()) {
+        <div class="amount-display">
+          <span class="amount-label">Fizetendő összeg</span>
+          <span class="amount-value">{{ displayAmount() | number:'1.0-0' }} Ft</span>
+        </div>
+      }
+
+      <!-- Csomag választás (package mód) -->
+      @if (isPackageMode()) {
+        <div class="section-title">Válassz csomagot</div>
+        <div class="package-list">
+          @for (pkg of packages(); track pkg.id) {
+            <div
+              class="package-card"
+              [class.package-card--selected]="selectedPackageKey() === pkg.key"
+              (click)="selectPackage(pkg.key)"
+            >
+              <div class="package-header">
+                <span class="package-name">{{ pkg.name }}</span>
+                <span class="package-price">{{ pkg.price_huf | number:'1.0-0' }} Ft</span>
+              </div>
+              @if (pkg.description) {
+                <p class="package-description">{{ pkg.description }}</p>
+              }
+              @if (pkg.included_items.length > 0) {
+                <ul class="package-items">
+                  @for (item of pkg.included_items; track item.product_name) {
+                    <li>
+                      <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                      {{ item.quantity }}x {{ item.product_name }}
+                    </li>
+                  }
+                </ul>
+              }
+              @if (selectedPackageKey() === pkg.key) {
+                <div class="package-selected-badge">
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+                  Kiválasztva
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Kiválasztott csomag összege -->
+        @if (selectedPackageKey()) {
+          <div class="amount-display">
+            <span class="amount-label">Fizetendő összeg</span>
+            <span class="amount-value">{{ displayAmount() | number:'1.0-0' }} Ft</span>
+          </div>
+        }
+      }
+
+      <!-- Banki utalás részletek (ha már elindítva) -->
+      @if (showBankDetails() && bankDetails()) {
+        <div class="bank-details-card">
+          <div class="bank-details-header">
+            <lucide-icon [name]="ICONS.BANKNOTE" [size]="20" />
+            <h3>Utalási adatok</h3>
+          </div>
+          <div class="bank-detail-row">
+            <span>Kedvezményezett</span>
+            <strong>{{ bankDetails()!.account_name }}</strong>
+          </div>
+          <div class="bank-detail-row">
+            <span>Bankszámlaszám</span>
+            <strong>{{ bankDetails()!.account_number }}</strong>
+          </div>
+          <div class="bank-detail-row">
+            <span>Közlemény</span>
+            <strong>{{ bankDetails()!.reference }}</strong>
+          </div>
+          <div class="bank-detail-row">
+            <span>Összeg</span>
+            <strong>{{ bankDetails()!.amount_huf | number:'1.0-0' }} Ft</strong>
+          </div>
+          <p class="bank-note">
+            Kérjük, a közleményt pontosan add meg az utalásnál, hogy azonosítani tudjuk a befizetést!
+          </p>
+        </div>
+      } @else {
+        <!-- Szülő adatai form -->
+        <div class="form-section">
+          <div class="section-title">Szülő adatai</div>
+
+          <div class="form-field">
+            <label for="parentName">Név <span class="required">*</span></label>
+            <input
+              id="parentName"
+              type="text"
+              [ngModel]="parentName()"
+              (ngModelChange)="parentName.set($event)"
+              placeholder="Szülő teljes neve"
+              autocomplete="name"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="parentEmail">E-mail cím <span class="required">*</span></label>
+            <input
+              id="parentEmail"
+              type="email"
+              [ngModel]="parentEmail()"
+              (ngModelChange)="parentEmail.set($event)"
+              placeholder="pelda@email.hu"
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="parentPhone">Telefonszám</label>
+            <input
+              id="parentPhone"
+              type="tel"
+              [ngModel]="parentPhone()"
+              (ngModelChange)="parentPhone.set($event)"
+              placeholder="+36 30 123 4567"
+              autocomplete="tel"
+            />
+          </div>
+        </div>
+
+        <!-- Fizetési mód -->
+        @if (paymentMethods().length > 1) {
+          <div class="form-section">
+            <div class="section-title">Fizetési mód</div>
+            <div class="payment-methods">
+              @if (paymentMethods().includes('stripe')) {
+                <label class="payment-option" [class.payment-option--selected]="paymentMethod() === 'stripe'">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="stripe"
+                    [ngModel]="paymentMethod()"
+                    (ngModelChange)="paymentMethod.set($event)"
+                  />
+                  <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="20" />
+                  <div>
+                    <strong>Bankkártyás fizetés</strong>
+                    <span>Biztonságos online fizetés</span>
+                  </div>
+                </label>
+              }
+              @if (paymentMethods().includes('bank_transfer')) {
+                <label class="payment-option" [class.payment-option--selected]="paymentMethod() === 'bank_transfer'">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="bank_transfer"
+                    [ngModel]="paymentMethod()"
+                    (ngModelChange)="paymentMethod.set($event)"
+                  />
+                  <lucide-icon [name]="ICONS.BANKNOTE" [size]="20" />
+                  <div>
+                    <strong>Banki átutalás</strong>
+                    <span>Utalás bankszámlaszámra</span>
+                  </div>
+                </label>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Feltételek elfogadása -->
+        <label class="terms-checkbox">
+          <input
+            type="checkbox"
+            [ngModel]="acceptTerms()"
+            (ngModelChange)="acceptTerms.set($event)"
+          />
+          <span>
+            Elfogadom az általános szerződési feltételeket
+            @if (prepayment()!.custom_terms) {
+              és a <a [href]="prepayment()!.custom_terms!" target="_blank" rel="noopener noreferrer">fizetési feltételeket</a>
+            }
+          </span>
+        </label>
+
+        <!-- Hibaüzenet -->
+        @if (errorMessage()) {
+          <div class="error-message">
+            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <!-- Fizetés gomb -->
+        <button
+          class="submit-btn"
+          [disabled]="!canSubmit()"
+          (click)="submit()"
+          [style.--brand-color]="branding()?.primary_color || '#3b82f6'"
+        >
+          @if (submitting()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spinner" />
+            Feldolgozás...
+          } @else {
+            <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="20" />
+            Fizetek — {{ displayAmount() | number:'1.0-0' }} Ft
+          }
+        </button>
+      }
+
+      <!-- Lábléc -->
+      <div class="page-footer">
+        <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="14" />
+        <span>Biztonságos fizetés</span>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,118 @@
+@use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
+
+// === ÖSSZEG MEGJELENÍTÉS ===
+.amount-display {
+  text-align: center;
+  padding: 16px;
+  background: #fef2f2;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.amount-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: get-color('slate', 500);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 4px;
+}
+
+.amount-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+// === FIGYELMEZTETÉS ===
+.info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fef3c7;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: #92400e;
+  margin-bottom: 16px;
+
+  lucide-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// === RÉSZLETEK ===
+.detail-rows {
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid get-color('slate', 100);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.detail-label {
+  font-size: 0.8125rem;
+  color: get-color('slate', 500);
+}
+
+.detail-value {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: get-color('slate', 800);
+}
+
+// === GOMBOK ===
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  @include mix.transition-fast;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--danger {
+    background: #ef4444;
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      background: #dc2626;
+    }
+  }
+
+  &--outline {
+    background: #ffffff;
+    border: 1px solid get-color('slate', 200);
+    color: get-color('slate', 600);
+
+    &:hover:not(:disabled) {
+      background: get-color('slate', 50);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

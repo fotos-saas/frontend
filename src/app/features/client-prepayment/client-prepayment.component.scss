@@ -1,0 +1,609 @@
+@use 'styles/colors' as *;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: get-color('gray', 50);
+}
+
+.prepayment-page {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+  min-height: 100vh;
+}
+
+.prepayment-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 40px 32px;
+  max-width: 540px;
+  width: 100%;
+  margin-top: 32px;
+  align-self: flex-start;
+  animation: fadeUp 0.4s ease;
+}
+
+// ==================
+// Partner logó
+// ==================
+.partner-logo {
+  display: block;
+  max-height: 56px;
+  max-width: 200px;
+  margin: 0 auto 16px;
+  object-fit: contain;
+}
+
+.partner-name {
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: get-color('gray', 700);
+  margin: 0 0 4px;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: get-color('gray', 900);
+  margin: 0 0 24px;
+}
+
+// ==================
+// Betöltés
+// ==================
+.loading-state {
+  text-align: center;
+  padding: 48px 0;
+
+  p {
+    color: get-color('gray', 500);
+    margin: 12px 0 0;
+    font-size: 0.9375rem;
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+    color: get-color('primary', 500);
+  }
+}
+
+// ==================
+// Állapot kijelzők
+// ==================
+.status-state {
+  text-align: center;
+  padding: 24px 0;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: get-color('gray', 900);
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: get-color('gray', 500);
+    font-size: 0.9375rem;
+    margin: 0;
+    line-height: 1.5;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  &--success {
+    color: get-color('success', 500);
+  }
+
+  &--warning {
+    color: get-color('warning', 500);
+  }
+
+  &--error {
+    color: get-color('error', 500);
+  }
+}
+
+// ==================
+// Info sorok
+// ==================
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid get-color('gray', 100);
+
+  .info-label {
+    font-size: 0.875rem;
+    color: get-color('gray', 500);
+  }
+
+  .info-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: get-color('gray', 800);
+  }
+}
+
+// ==================
+// Összeg kijelző
+// ==================
+.amount-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 200);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 24px 0;
+  text-align: center;
+
+  .amount-label {
+    font-size: 0.75rem;
+    color: get-color('gray', 500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .amount-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: get-color('primary', 700);
+  }
+}
+
+// ==================
+// Szekció cím
+// ==================
+.section-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: get-color('gray', 800);
+  margin: 24px 0 12px;
+}
+
+// ==================
+// Csomagválasztó kártyák
+// ==================
+.package-list {
+  display: flex;
+  flex-direction: column;
+  // Safari-kompatibilis gap alternatíva
+  margin: -6px;
+
+  .package-card {
+    margin: 6px;
+  }
+}
+
+.package-card {
+  border: 2px solid get-color('gray', 200);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+
+  &:hover {
+    border-color: get-color('primary', 300);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+  }
+
+  &--selected {
+    border-color: get-color('primary', 500);
+    background: get-color('primary', 50);
+    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.15);
+  }
+}
+
+.package-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+
+  .package-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: get-color('gray', 900);
+  }
+
+  .package-price {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: get-color('primary', 600);
+  }
+}
+
+.package-description {
+  font-size: 0.8125rem;
+  color: get-color('gray', 500);
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.package-items {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    font-size: 0.8125rem;
+    color: get-color('gray', 700);
+    padding: 3px 0;
+
+    lucide-icon {
+      color: get-color('success', 500);
+      flex-shrink: 0;
+      margin-right: 6px;
+    }
+  }
+}
+
+.package-selected-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: get-color('primary', 600);
+  margin-top: 8px;
+
+  lucide-icon {
+    margin-right: 4px;
+  }
+}
+
+// ==================
+// Űrlap
+// ==================
+.form-section {
+  margin-bottom: 8px;
+}
+
+.form-field {
+  margin-bottom: 16px;
+
+  label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: get-color('gray', 700);
+    margin-bottom: 6px;
+  }
+
+  .required {
+    color: get-color('error', 500);
+  }
+
+  input[type='text'],
+  input[type='email'],
+  input[type='tel'] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid get-color('gray', 300);
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    color: get-color('gray', 900);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+
+    &::placeholder {
+      color: get-color('gray', 400);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: get-color('primary', 500);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+  }
+}
+
+// ==================
+// Fizetési mód
+// ==================
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  // Safari-kompatibilis gap alternatíva
+  margin: -6px;
+
+  .payment-option {
+    margin: 6px;
+  }
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  border: 2px solid get-color('gray', 200);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+
+  input[type='radio'] {
+    display: none;
+  }
+
+  lucide-icon {
+    flex-shrink: 0;
+    color: get-color('gray', 500);
+    margin-right: 12px;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      font-size: 0.9375rem;
+      color: get-color('gray', 900);
+    }
+
+    span {
+      font-size: 0.75rem;
+      color: get-color('gray', 500);
+      margin-top: 2px;
+    }
+  }
+
+  &:hover {
+    border-color: get-color('primary', 300);
+  }
+
+  &--selected {
+    border-color: get-color('primary', 500);
+    background: get-color('primary', 50);
+
+    lucide-icon {
+      color: get-color('primary', 600);
+    }
+  }
+}
+
+// ==================
+// Feltételek
+// ==================
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  margin: 20px 0;
+  font-size: 0.8125rem;
+  color: get-color('gray', 600);
+  line-height: 1.4;
+
+  input[type='checkbox'] {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    margin-top: 1px;
+    accent-color: get-color('primary', 600);
+  }
+
+  a {
+    color: get-color('primary', 600);
+    text-decoration: underline;
+
+    &:hover {
+      color: get-color('primary', 700);
+    }
+  }
+}
+
+// ==================
+// Hibaüzenet
+// ==================
+.error-message {
+  display: flex;
+  align-items: center;
+  background: get-color('error', 50);
+  border: 1px solid get-color('error', 200);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.8125rem;
+  color: get-color('error', 700);
+
+  lucide-icon {
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+}
+
+// ==================
+// Fizet gomb
+// ==================
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--brand-color, get-color('primary', 600));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+
+  lucide-icon {
+    margin-right: 8px;
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ==================
+// Banki utalás részletek
+// ==================
+.bank-details-card {
+  background: get-color('success', 50);
+  border: 1px solid get-color('success', 200);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 24px 0;
+}
+
+.bank-details-header {
+  display: flex;
+  align-items: center;
+  color: get-color('success', 700);
+  margin-bottom: 16px;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    margin-left: 8px;
+  }
+}
+
+.bank-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid get-color('success', 100);
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+
+  span {
+    font-size: 0.8125rem;
+    color: get-color('gray', 600);
+  }
+
+  strong {
+    font-size: 0.9375rem;
+    color: get-color('gray', 900);
+    text-align: right;
+    word-break: break-all;
+  }
+}
+
+.bank-note {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  color: get-color('success', 700);
+  line-height: 1.4;
+  background: get-color('success', 100);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+// ==================
+// Lábléc
+// ==================
+.page-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid get-color('gray', 100);
+  font-size: 0.75rem;
+  color: get-color('gray', 400);
+
+  lucide-icon {
+    margin-right: 6px;
+  }
+}
+
+// ==================
+// Spinner animáció
+// ==================
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+// ==================
+// Animációk
+// ==================
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ==================
+// Responsive
+// ==================
+@media (max-width: 480px) {
+  .prepayment-card {
+    padding: 28px 20px;
+    margin-top: 16px;
+    border-radius: 12px;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  .amount-display .amount-value {
+    font-size: 1.5rem;
+  }
+
+  .bank-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+
+    strong {
+      text-align: left;
+      margin-top: 2px;
+    }
+  }
+}
+
+// ==================
+// Mozgáscsökkentés
+// ==================
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

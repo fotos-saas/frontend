@@ -1,0 +1,181 @@
+@use 'styles/mixins' as mix;
+@use 'styles/colors' as *;
+
+// === MEZŐ CSOPORTOK ===
+.field-group {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: get-color('slate', 700);
+  margin-bottom: 6px;
+}
+
+.field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.field-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: #ffffff;
+  color: get-color('slate', 700);
+  @include mix.transition-normal;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+// === KIJELÖLÉS GOMBOK ===
+.select-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.separator {
+  color: get-color('slate', 300);
+  font-size: 0.75rem;
+}
+
+// === DIÁK LISTA ===
+.person-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.person-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  @include mix.transition-fast;
+
+  &:hover {
+    background: get-color('slate', 50);
+  }
+
+  &.selected {
+    background: rgba(59, 130, 246, 0.06);
+  }
+
+  input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #3b82f6;
+    flex-shrink: 0;
+  }
+}
+
+.person-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: get-color('slate', 800);
+}
+
+.person-class {
+  font-size: 0.75rem;
+  color: get-color('slate', 500);
+  margin-left: auto;
+}
+
+.selection-count {
+  display: block;
+  font-size: 0.75rem;
+  color: get-color('slate', 500);
+  margin-top: 6px;
+  text-align: right;
+}
+
+// === LOADING & EMPTY ===
+.loading-persons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: get-color('slate', 500);
+  font-size: 0.875rem;
+}
+
+.empty-text {
+  color: get-color('slate', 500);
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 16px;
+}
+
+// === GOMBOK ===
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  @include mix.transition-fast;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: #3b82f6;
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      background: #2563eb;
+    }
+  }
+
+  &--outline {
+    background: #ffffff;
+    border: 1px solid get-color('slate', 200);
+    color: get-color('slate', 600);
+
+    &:hover:not(:disabled) {
+      background: get-color('slate', 50);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -327,6 +327,27 @@ export const routes: Routes = [
           }
         ]
       },
+      // AdvancePay (Előrefizetés)
+      {
+        path: 'prepayment',
+        children: [
+          {
+            path: 'settings',
+            loadComponent: () => import('./features/partner/pages/prepayment/config/prepayment-config.component').then(m => m.PrepaymentConfigComponent),
+            title: 'Előlegfizetés beállítások'
+          },
+          {
+            path: 'stats',
+            loadComponent: () => import('./features/partner/pages/prepayment/stats/prepayment-stats.component').then(m => m.PrepaymentStatsComponent),
+            title: 'Előleg statisztikák'
+          },
+          {
+            path: '',
+            loadComponent: () => import('./features/partner/pages/prepayment/list/prepayment-list.component').then(m => m.PrepaymentListComponent),
+            title: 'Előlegek'
+          }
+        ]
+      },
       // Webshop
       {
         path: 'webshop',
@@ -601,6 +622,18 @@ export const routes: Routes = [
         data: { page: 'photo-selection' }
       }
     ]
+  },
+
+  // Publikus Előlegfizetés (nincs auth)
+  {
+    path: 'pay/:token',
+    loadComponent: () => import('./features/client-prepayment/client-prepayment.component').then(m => m.ClientPrepaymentComponent),
+    title: 'Előleg befizetés'
+  },
+  {
+    path: 'pay/:token/success',
+    loadComponent: () => import('./features/client-prepayment/pages/prepayment-success/prepayment-success.component').then(m => m.PrepaymentSuccessComponent),
+    title: 'Sikeres befizetés'
   },
 
   // Publikus Webshop (kliens felület, nincs auth)

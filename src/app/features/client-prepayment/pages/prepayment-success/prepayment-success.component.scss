@@ -1,0 +1,255 @@
+@use 'styles/colors' as *;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: get-color('gray', 50);
+}
+
+.success-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 24px 16px;
+}
+
+.success-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 48px 40px;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  animation: fadeUp 0.4s ease;
+}
+
+// ==================
+// Partner logó
+// ==================
+.partner-logo {
+  display: block;
+  max-height: 48px;
+  max-width: 180px;
+  margin: 0 auto 20px;
+  object-fit: contain;
+}
+
+// ==================
+// Siker ikon
+// ==================
+.success-icon {
+  color: get-color('success', 500);
+  margin-bottom: 16px;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: get-color('gray', 900);
+  margin: 0 0 8px;
+}
+
+.success-message {
+  color: get-color('gray', 500);
+  font-size: 0.9375rem;
+  margin: 0 0 28px;
+  line-height: 1.5;
+}
+
+// ==================
+// Betöltés
+// ==================
+.loading-state {
+  padding: 48px 0;
+  text-align: center;
+
+  p {
+    color: get-color('gray', 500);
+    margin: 12px 0 0;
+    font-size: 0.9375rem;
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+    color: get-color('primary', 500);
+  }
+}
+
+// ==================
+// Hiba
+// ==================
+.error-state {
+  padding: 24px 0;
+  color: get-color('error', 500);
+
+  h1 {
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: get-color('gray', 500);
+    font-size: 0.9375rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// ==================
+// Részletek
+// ==================
+.detail-box {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: get-color('success', 50);
+  border: 1px solid get-color('success', 200);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid get-color('success', 100);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .detail-label {
+    font-size: 0.8125rem;
+    color: get-color('gray', 500);
+  }
+
+  strong {
+    font-size: 0.9375rem;
+    color: get-color('gray', 900);
+  }
+
+  .amount {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: get-color('success', 700);
+  }
+}
+
+// ==================
+// Csomag tartalom
+// ==================
+.package-box {
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 200);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.package-header {
+  display: flex;
+  align-items: center;
+  color: get-color('primary', 700);
+  margin-bottom: 10px;
+
+  h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0;
+    margin-left: 8px;
+  }
+}
+
+.package-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    font-size: 0.8125rem;
+    color: get-color('gray', 700);
+    padding: 4px 0;
+
+    lucide-icon {
+      color: get-color('success', 500);
+      flex-shrink: 0;
+      margin-right: 6px;
+    }
+  }
+}
+
+// ==================
+// Lábléc
+// ==================
+.success-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: get-color('gray', 400);
+  font-size: 0.8125rem;
+  margin-top: 8px;
+
+  lucide-icon {
+    margin-right: 6px;
+  }
+}
+
+// ==================
+// Animációk
+// ==================
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ==================
+// Responsive
+// ==================
+@media (max-width: 480px) {
+  .success-card {
+    padding: 32px 20px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+
+    strong {
+      margin-top: 2px;
+    }
+  }
+}
+
+// ==================
+// Mozgáscsökkentés
+// ==================
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

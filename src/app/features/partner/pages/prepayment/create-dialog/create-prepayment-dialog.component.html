@@ -1,0 +1,134 @@
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.PLUS"
+  title="Új előleg létrehozása"
+  description="Válaszd ki a projektet és a diákokat, akiknek előleget szeretnél kiállítani."
+  size="md"
+  [isSubmitting]="submitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <!-- Projekt kiválasztása -->
+    <div class="field-group">
+      <label class="field-label">Projekt</label>
+      <ps-select
+        placeholder="Válassz projektet..."
+        [options]="projects()"
+        [ngModel]="selectedProjectId()"
+        (ngModelChange)="onProjectChange($event)"
+      />
+    </div>
+
+    <!-- Diák kiválasztása -->
+    @if (selectedProjectId()) {
+      <div class="field-group">
+        <div class="field-header">
+          <label class="field-label">Diákok</label>
+          <div class="select-actions">
+            <button type="button" class="link-btn" (click)="selectAllPersons()">Mindet kijelöl</button>
+            <span class="separator">|</span>
+            <button type="button" class="link-btn" (click)="deselectAllPersons()">Kijelölés törlése</button>
+          </div>
+        </div>
+
+        @if (loadingPersons()) {
+          <div class="loading-persons">
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+            <span>Diákok betöltése...</span>
+          </div>
+        } @else if (persons().length === 0) {
+          <p class="empty-text">Nincs diák a projektben.</p>
+        } @else {
+          <div class="person-list">
+            @for (person of persons(); track person.id) {
+              <label class="person-item" [class.selected]="isPersonSelected(person.id)">
+                <input
+                  type="checkbox"
+                  [checked]="isPersonSelected(person.id)"
+                  (change)="togglePerson(person.id)"
+                />
+                <span class="person-name">{{ person.name }}</span>
+                @if (person.class_name) {
+                  <span class="person-class">{{ person.class_name }}</span>
+                }
+              </label>
+            }
+          </div>
+          <span class="selection-count">{{ selectedPersonIds().length }} / {{ persons().length }} kiválasztva</span>
+        }
+      </div>
+
+      <!-- Csomag választás (ha csomag mód) -->
+      @if (effectiveConfig()?.mode === 'package' && packages().length > 0) {
+        <div class="field-group">
+          <label class="field-label">Csomag</label>
+          <select
+            class="field-select"
+            [ngModel]="selectedPackageKey()"
+            (ngModelChange)="selectedPackageKey.set($event)"
+          >
+            <option value="">Válassz csomagot...</option>
+            @for (pkg of packages(); track pkg.id) {
+              <option [value]="pkg.key">{{ pkg.name }} - {{ pkg.price_huf | number }} Ft</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Összeg felülírás -->
+      @if (effectiveConfig()?.mode !== 'package') {
+        <ps-input
+          label="Összeg felülírás (Ft, opcionális)"
+          type="number"
+          [min]="0"
+          placeholder="Alapértelmezett összeg használata"
+          [ngModel]="amountOverride()"
+          (ngModelChange)="amountOverride.set($event)"
+        />
+      }
+
+      <!-- Határidő -->
+      <ps-input
+        label="Fizetési határidő (opcionális)"
+        type="date"
+        [ngModel]="deadline()"
+        (ngModelChange)="deadline.set($event)"
+      />
+
+      <!-- Fizetési link küldése -->
+      <ps-toggle
+        label="Fizetési link küldése emailben"
+        [ngModel]="sendPaymentLink()"
+        (ngModelChange)="sendPaymentLink.set($event)"
+      />
+
+      <!-- Megjegyzés -->
+      <ps-textarea
+        label="Megjegyzés (opcionális)"
+        [rows]="2"
+        placeholder="Belső megjegyzés..."
+        [ngModel]="notes()"
+        (ngModelChange)="notes.set($event)"
+      />
+    }
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()" [disabled]="submitting()">
+      Mégse
+    </button>
+    <button class="btn btn--primary" (click)="onSubmit()" [disabled]="submitting() || selectedPersonIds().length === 0">
+      @if (submitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Létrehozás...
+      } @else {
+        <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        Előlegek létrehozása ({{ selectedPersonIds().length }})
+      }
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

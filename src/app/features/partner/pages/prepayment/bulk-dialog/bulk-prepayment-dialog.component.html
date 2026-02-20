@@ -1,0 +1,163 @@
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.USERS"
+  title="Csoportos előleg létrehozás"
+  description="Több osztály diákjainak egyszerre készíthetsz előleget."
+  size="lg"
+  [isSubmitting]="submitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    <div class="bulk-layout">
+      <!-- Bal oldal: Projekt és osztályok -->
+      <div class="bulk-left">
+        <!-- Projekt kiválasztása -->
+        <div class="field-group">
+          <label class="field-label">Projekt</label>
+          <ps-select
+            placeholder="Válassz projektet..."
+            [options]="projects()"
+            [ngModel]="selectedProjectId()"
+            (ngModelChange)="onProjectChange($event)"
+          />
+        </div>
+
+        <!-- Osztályok -->
+        @if (selectedProjectId()) {
+          <div class="field-group">
+            <div class="field-header">
+              <label class="field-label">Osztályok</label>
+              <div class="select-actions">
+                <button type="button" class="link-btn" (click)="selectAllClasses()">Mind</button>
+                <span class="sep">|</span>
+                <button type="button" class="link-btn" (click)="deselectAllClasses()">Egyik sem</button>
+              </div>
+            </div>
+
+            @if (loadingClasses()) {
+              <div class="loading-text">
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                Osztályok betöltése...
+              </div>
+            } @else if (classGroups().length === 0) {
+              <p class="empty-text">Nincs diák a projektben.</p>
+            } @else {
+              <div class="class-list">
+                @for (group of classGroups(); track group.name; let i = $index) {
+                  <label class="class-item" [class.selected]="group.selected">
+                    <input
+                      type="checkbox"
+                      [checked]="group.selected"
+                      (change)="toggleClass(i)"
+                    />
+                    <div class="class-info">
+                      <span class="class-name">{{ group.name }}</span>
+                      <span class="class-count">{{ group.persons.length }} diák</span>
+                    </div>
+                  </label>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Jobb oldal: Beállítások -->
+      <div class="bulk-right">
+        @if (selectedProjectId()) {
+          <!-- Mód info -->
+          @if (effectiveConfig(); as cfg) {
+            <div class="config-info">
+              <lucide-icon [name]="ICONS.INFO" [size]="16" />
+              <span>Aktív mód: <strong>{{ MODE_LABELS[cfg.mode] }}</strong></span>
+            </div>
+          }
+
+          <!-- Csomag választás -->
+          @if (effectiveConfig()?.mode === 'package' && packages().length > 0) {
+            <div class="field-group">
+              <label class="field-label">Csomag</label>
+              <select
+                class="field-select"
+                [ngModel]="selectedPackageKey()"
+                (ngModelChange)="selectedPackageKey.set($event)"
+              >
+                <option value="">Válassz csomagot...</option>
+                @for (pkg of packages(); track pkg.id) {
+                  <option [value]="pkg.key">{{ pkg.name }} - {{ pkg.price_huf | number }} Ft</option>
+                }
+              </select>
+            </div>
+          }
+
+          <!-- Összeg felülírás -->
+          @if (effectiveConfig()?.mode !== 'package') {
+            <ps-input
+              label="Összeg felülírás (Ft, opcionális)"
+              type="number"
+              [min]="0"
+              placeholder="Konfig alapértelmezett"
+              [ngModel]="amountOverride()"
+              (ngModelChange)="amountOverride.set($event)"
+            />
+          }
+
+          <!-- Fizetési határidő -->
+          <ps-input
+            label="Fizetési határidő (nap)"
+            type="number"
+            [min]="1"
+            [ngModel]="paymentDeadlineDays()"
+            (ngModelChange)="paymentDeadlineDays.set($event)"
+          />
+
+          <!-- Linkek küldése -->
+          <ps-toggle
+            label="Fizetési linkek küldése emailben"
+            [ngModel]="sendLinks()"
+            (ngModelChange)="sendLinks.set($event)"
+          />
+
+          <!-- Megjegyzés -->
+          <ps-textarea
+            label="Megjegyzés (opcionális)"
+            [rows]="2"
+            placeholder="Belső megjegyzés..."
+            [ngModel]="notes()"
+            (ngModelChange)="notes.set($event)"
+          />
+
+          <!-- Összegzés -->
+          <div class="summary-box">
+            <lucide-icon [name]="ICONS.INFO" [size]="16" />
+            <span>{{ summaryText() }}</span>
+          </div>
+        } @else {
+          <div class="placeholder-text">
+            <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="20" />
+            <span>Válassz projektet a beállítások megjelenítéséhez</span>
+          </div>
+        }
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()" [disabled]="submitting()">
+      Mégse
+    </button>
+    <button class="btn btn--primary" (click)="onSubmit()" [disabled]="submitting() || totalSelected() === 0">
+      @if (submitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Létrehozás...
+      } @else {
+        <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        {{ totalSelected() }} előleg létrehozása
+      }
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

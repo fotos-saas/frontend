@@ -16,18 +16,18 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
     <div
       class="designer-layer"
       [class.designer-layer--selected]="isSelected()"
-      [class.designer-layer--image]="isImage"
-      [class.designer-layer--text]="isText"
+      [class.designer-layer--image]="isImage()"
+      [class.designer-layer--text]="isText()"
       [class.designer-layer--fixed]="layer().category === 'fixed'"
       [class.designer-layer--swap-target]="isSwapTarget()"
       [class.designer-layer--dragging]="isDragging()"
-      [style.left.px]="displayX"
-      [style.top.px]="displayY"
-      [style.width.px]="displayWidth"
-      [style.height.px]="isText ? null : displayHeight"
+      [style.left.px]="displayX()"
+      [style.top.px]="displayY()"
+      [style.width.px]="displayWidth()"
+      [style.height.px]="isText() ? null : displayHeight()"
       (mousedown)="onMouseDown($event)"
     >
-      @if (isImage) {
+      @if (isImage()) {
         @if (layer().personMatch?.photoThumbUrl) {
           <img
             class="designer-layer__thumb"
@@ -37,12 +37,12 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
           />
         } @else {
           <div class="designer-layer__placeholder">
-            <lucide-icon [name]="ICONS.USER" [size]="placeholderIconSize" />
+            <lucide-icon [name]="ICONS.USER" [size]="placeholderIconSize()" />
           </div>
         }
-      } @else if (isText) {
+      } @else if (isText()) {
         <div class="designer-layer__text">
-          @for (line of textLines; track $index) {
+          @for (line of textLines(); track $index) {
             <div class="designer-layer__text-line">{{ line }}</div>
           }
         </div>
@@ -179,13 +179,13 @@ export class LayoutLayerComponent implements AfterViewInit {
   });
 
   /** Megjelenítendő név: person match neve, vagy layerName fallback */
-  get displayName(): string {
-    return this.layer().personMatch?.name ?? this.layer().layerName;
-  }
+  readonly displayName = computed(() =>
+    this.layer().personMatch?.name ?? this.layer().layerName,
+  );
 
   /** Szöveg sorok: 3+ névrésznél (kötőjel is számít) a 2. névrész után tör */
-  get textLines(): string[] {
-    const name = this.displayName;
+  readonly textLines = computed(() => {
+    const name = this.displayName();
     const words = name.split(' ');
 
     const totalParts = words.reduce((sum, w) => sum + w.split('-').length, 0);
@@ -200,39 +200,39 @@ export class LayoutLayerComponent implements AfterViewInit {
     }
 
     return [name];
-  }
+  });
 
-  get isImage(): boolean {
+  readonly isImage = computed(() => {
     const cat = this.layer().category;
     return cat === 'student-image' || cat === 'teacher-image';
-  }
+  });
 
-  get isText(): boolean {
+  readonly isText = computed(() => {
     const cat = this.layer().category;
     return cat === 'student-name' || cat === 'teacher-name';
-  }
+  });
 
-  get displayX(): number {
+  readonly displayX = computed(() => {
     const l = this.layer();
     return (l.editedX ?? l.x) * this.scale();
-  }
+  });
 
-  get displayY(): number {
+  readonly displayY = computed(() => {
     const l = this.layer();
     return (l.editedY ?? l.y) * this.scale();
-  }
+  });
 
-  get displayWidth(): number {
-    return this.layer().width * this.scale();
-  }
+  readonly displayWidth = computed(() =>
+    this.layer().width * this.scale(),
+  );
 
-  get displayHeight(): number {
-    return this.layer().height * this.scale();
-  }
+  readonly displayHeight = computed(() =>
+    this.layer().height * this.scale(),
+  );
 
-  get placeholderIconSize(): number {
-    return Math.max(12, Math.min(24, this.displayWidth * 0.4));
-  }
+  readonly placeholderIconSize = computed(() =>
+    Math.max(12, Math.min(24, this.displayWidth() * 0.4)),
+  );
 
   ngAfterViewInit(): void {
     // DOM elem regisztrálása a drag service-ben

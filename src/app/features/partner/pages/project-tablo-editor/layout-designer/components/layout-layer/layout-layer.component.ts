@@ -103,15 +103,17 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
 
     .designer-layer__thumb {
       width: 100%;
-      height: calc(100% - 16px);
-      object-fit: contain;
+      flex: 1;
+      min-height: 0;
+      object-fit: cover;
       border-radius: 2px;
       pointer-events: none;
     }
 
     .designer-layer__placeholder {
       width: 100%;
-      height: calc(100% - 16px);
+      flex: 1;
+      min-height: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -201,9 +203,9 @@ export class LayoutLayerComponent {
 
   get displayHeight(): number {
     if (this.isImage) {
-      // A snapshot bounds négyzetes lehet (SO keret), de a fotó 10.4:15.4 arányú.
-      // A megjelenítési magasságot a szélességből és a fotó arányból számoljuk.
-      return this.displayWidth * (15.4 / 10.4);
+      // Fotó arány (10.4:15.4) + 16px label magasság
+      const photoHeight = this.displayWidth * (15.4 / 10.4);
+      return photoHeight + 16;
     }
     return this.layer().height * this.scale();
   }

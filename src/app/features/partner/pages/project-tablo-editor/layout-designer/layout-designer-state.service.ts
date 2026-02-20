@@ -194,23 +194,6 @@ export class LayoutDesignerStateService {
       }
     }
 
-    // Text layerek: magasság normalizálás (a font méret ebből számolódik)
-    for (const cat of ['student-name', 'teacher-name'] as const) {
-      const group = layers.filter(l => l.category === cat);
-      if (group.length < 2) continue;
-
-      const heights = group.map(l => l.height).sort((a, b) => a - b);
-      const medianH = heights[Math.floor(heights.length / 2)];
-
-      for (const layer of group) {
-        if (layer.height !== medianH) {
-          // Y pozíció korrekció: alsó élhez igazítás megtartása
-          const diff = layer.height - medianH;
-          layer.y = Math.round(layer.y + diff);
-          layer.height = medianH;
-        }
-      }
-    }
   }
 
   /** Layer kategorizálása a groupPath alapján */

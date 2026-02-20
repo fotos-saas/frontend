@@ -56,11 +56,11 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, get-color('primary', 500) 0%, get-color('primary', 700) 100%);
-  border-radius: 14px;
+  padding: 16px 20px;
+  background: get-color('primary', 50);
+  border: 1px solid get-color('primary', 100);
+  border-radius: 12px;
   margin-bottom: 28px;
-  color: white;
   gap: 0;
 }
 
@@ -79,12 +79,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.15);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: get-color('primary', 100);
+  color: get-color('primary', 600);
   flex-shrink: 0;
 }
 
@@ -98,23 +97,24 @@
   font-size: 0.6875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  opacity: 0.85;
+  color: get-color('slate', 500);
   font-weight: 500;
 }
 
 .summary-value {
   font-size: 1.125rem;
   font-weight: 700;
+  color: get-color('slate', 800);
 
   &--package {
-    color: #fef08a; // sárga kiemelés a kék gradiensen
+    color: get-color('primary', 600);
   }
 }
 
 .summary-divider {
   width: 1px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.2);
+  height: 28px;
+  background: get-color('primary', 200);
   flex-shrink: 0;
 }
 
@@ -522,6 +522,20 @@
   .page-header h1 { color: get-color('slate', 100); }
   .page-header .page-subtitle { color: get-color('slate', 400); }
   .section-header { color: get-color('slate', 300); }
+
+  .summary-bar {
+    background: get-color('slate', 800);
+    border-color: get-color('slate', 700);
+  }
+
+  .summary-icon {
+    background: get-color('slate', 700);
+    color: get-color('primary', 400);
+  }
+
+  .summary-label { color: get-color('slate', 400); }
+  .summary-value { color: get-color('slate', 100); &--package { color: get-color('primary', 400); } }
+  .summary-divider { background: get-color('slate', 600); }
 
   .package-card {
     background: get-color('slate', 800);

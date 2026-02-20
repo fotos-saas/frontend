@@ -222,8 +222,9 @@ function _doRestore(data) {
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
 
-    // Egy Undo lepes: suspendHistory egyetlen history bejegyzes
-    _doc.suspendHistory("Snapshot visszaállítás", "_doRestore(_snapshotData)");
+    // Kozvetlen hivas (suspendHistory nelkul — debug)
+    // Kesobb visszaallitjuk suspendHistory-vel ha mukodik
+    _doRestore(_snapshotData);
 
     // Ruler visszaallitasa
     app.preferences.rulerUnits = oldRulerUnits;

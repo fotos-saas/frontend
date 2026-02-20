@@ -274,6 +274,13 @@ $gray-900: get-color('gray', 900);
 // ezért ::ng-deep szükséges a wrapper-ből való stílus alkalmazáshoz.
 
 :host ::ng-deep {
+  // --- Projected wrapper div-ek (dialogFooter, dialogBody stb.) ---
+  // Az ng-content projected <div dialogFooter> elem egyetlen flex item lenne,
+  // display: contents-szel a gyerekei (gombok) kozvetlenul a flex containerbe kerulnek.
+  .dw__footer > [dialogFooter] {
+    display: contents;
+  }
+
   // --- Footer gombok (minden dialógusban egységes) ---
   .dw__footer .btn {
     display: inline-flex;

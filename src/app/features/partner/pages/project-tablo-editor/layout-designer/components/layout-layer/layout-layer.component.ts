@@ -47,7 +47,6 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
           [class.text-left]="layer().justification === 'left'"
           [class.text-center]="layer().justification === 'center' || !layer().justification"
           [class.text-right]="layer().justification === 'right'"
-          [style.font-size.px]="textFontSize"
         >{{ displayName }}</span>
       } @else {
         <div class="designer-layer__fixed">
@@ -123,14 +122,16 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
 
     .designer-layer__text {
       color: #1e293b;
-      padding: 0;
+      font-size: 10px;
+      padding: 0 1px;
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
-      white-space: nowrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
       overflow: visible;
-      line-height: 1.15;
+      line-height: 1.2;
 
       &.text-left { text-align: left; justify-content: flex-start; }
       &.text-center { text-align: center; justify-content: center; }
@@ -195,11 +196,6 @@ export class LayoutLayerComponent {
       return this.displayWidth * (15.4 / 10.4);
     }
     return this.layer().height * this.scale();
-  }
-
-  /** Szöveg layer betűmérete — a layer magasságából, max 14px */
-  get textFontSize(): number {
-    return Math.min(14, Math.max(7, this.displayHeight * 0.65));
   }
 
   get placeholderIconSize(): number {

@@ -124,7 +124,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       color: #1e293b;
       font-size: 10px;
       line-height: 1.2;
-      white-space: pre-line;
+      white-space: pre;
       padding: 1px 4px;
       background: rgba(59, 130, 246, 0.08);
       border-radius: 3px;

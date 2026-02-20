@@ -1,9 +1,16 @@
 @use 'styles/mixins' as mix;
 @use 'styles/colors' as *;
 
+// === DIALOG BODY SPACING ===
+.dialog-body-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 // === MEZŐ CSOPORTOK ===
 .field-group {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .field-label {

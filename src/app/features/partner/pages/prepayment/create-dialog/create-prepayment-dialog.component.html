@@ -11,7 +11,7 @@
   (closeEvent)="close.emit()"
   (submitEvent)="onSubmit()"
 >
-  <ng-container dialogBody>
+  <div dialogBody class="dialog-body-fields">
     <!-- Projekt kiválasztása -->
     <div class="field-group">
       <label class="field-label">Projekt</label>
@@ -115,7 +115,7 @@
         (ngModelChange)="notes.set($event)"
       />
     }
-  </ng-container>
+  </div>
 
   <ng-container dialogFooter>
     <button class="btn btn--outline" (click)="close.emit()" [disabled]="submitting()">

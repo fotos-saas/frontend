@@ -156,11 +156,12 @@ export class LayoutLayerComponent {
     return this.layer().personMatch?.name ?? this.layer().layerName;
   }
 
-  /** Szöveg sorok a PSD tördeléssel (\r split) */
+  /** Szöveg sorok: 3+ szavas neveknél a 2. szó után tör */
   get textLines(): string[] {
-    const text = this.layer().text;
-    if (text) return text.split(/\r/);
-    return [this.displayName];
+    const name = this.displayName;
+    const words = name.split(' ');
+    if (words.length <= 2) return [name];
+    return [words.slice(0, 2).join(' '), words.slice(2).join(' ')];
   }
 
   get isImage(): boolean {

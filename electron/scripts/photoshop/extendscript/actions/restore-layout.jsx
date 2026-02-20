@@ -87,6 +87,12 @@ function _restoreLayerPosition(layer, targetX, targetY) {
   var dx = targetX - currentX;
   var dy = targetY - currentY;
 
+  // Elso 5 layerre reszletes debug log
+  if (_restored + _skipped < 5) {
+    log("[JSX] DEBUG " + layer.name + ": current=" + currentX + "," + currentY +
+        " target=" + targetX + "," + targetY + " dx=" + dx + " dy=" + dy);
+  }
+
   if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
     layer.translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
   }

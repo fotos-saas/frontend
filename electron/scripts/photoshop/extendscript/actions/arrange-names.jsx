@@ -1,13 +1,15 @@
 /**
- * arrange-names.jsx — Nev layerek pozicionalasa a kepek ala
+ * arrange-names.jsx — Nev layerek szovegenek frissitese (tordeles) es pozicionalasa a kepek ala
  *
- * Minden nev layert a hozza tartozo kep ala pozicional,
- * a beallitott gap es text igazitas alapjan.
+ * Minden nev layert:
+ * 1. Szoveg frissites: breakAfter alapjan sortores (\r) hozzaadas
+ * 2. Pozicionalas: a hozza tartozo kep ala, a beallitott gap es text igazitas alapjan
  *
  * JSON formatum (Electron handler kesziti):
  * {
  *   "nameGapCm": 0.5,
- *   "textAlign": "center"
+ *   "textAlign": "center",
+ *   "nameBreakAfter": 1
  * }
  *
  * Futtatas: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
@@ -24,6 +26,67 @@ function log(msg) {
 
 // --- Globalis valtozok (suspendHistory string-eval) ---
 var _doc, _data, _dpi, _moved = 0, _errors = 0;
+
+// --- Nev tordeles (breakAfter) ---
+// Rovid prefixek (dr., id., ifj. — max 2 betu pont nelkul) nem szamitanak szokent
+// Photoshop \r-t hasznal sortoresnek
+function _breakName(name, breakAfter) {
+  if (breakAfter <= 0) return name;
+  var words = name.split(" ");
+  if (words.length < 2) return name;
+  var realWordCount = 0;
+  var breakIndex = -1;
+  for (var i = 0; i < words.length; i++) {
+    var cleaned = words[i].replace(/\./g, "");
+    if (cleaned.length > 2) realWordCount++;
+    if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
+  }
+  if (breakIndex === -1) return name;
+  return words.slice(0, breakIndex).join(" ") + "\r" + words.slice(breakIndex).join(" ");
+}
+
+// --- Nev kiolvasasa a text layer-bol (sortoresek nelkul) ---
+function _getPlainName(textItem) {
+  var raw = textItem.contents;
+  // \r es \n eltavolitasa — eredeti sima nev visszaallitasa
+  return raw.replace(/[\r\n]/g, " ").replace(/  +/g, " ");
+}
+
+// --- cm → px konverzio (lokalis, kerekitett) ---
+function _cm2px(cm) {
+  return Math.round((cm / 2.54) * _dpi);
+}
+
+// --- Kep layer keresese nev alapjan (layerName egyezes) ---
+function _findImageLayer(nameLayerName) {
+  var groups = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var g = 0; g < groups.length; g++) {
+    var grp = getGroupByPath(_doc, groups[g]);
+    if (!grp) continue;
+    for (var i = 0; i < grp.artLayers.length; i++) {
+      if (grp.artLayers[i].name === nameLayerName) {
+        return grp.artLayers[i];
+      }
+    }
+  }
+  return null;
+}
+
+// --- Layer bounds EFFEKTEKKEL (sima bounds — stroke-ot is tartalmazza) ---
+function _getBoundsWithEffects(layer) {
+  selectLayerById(layer.id);
+  var ref = new ActionReference();
+  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  var desc = executeActionGet(ref);
+
+  var b = desc.getObjectValue(stringIDToTypeID("bounds"));
+  return {
+    left: b.getUnitDoubleValue(stringIDToTypeID("left")),
+    top: b.getUnitDoubleValue(stringIDToTypeID("top")),
+    right: b.getUnitDoubleValue(stringIDToTypeID("right")),
+    bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
+  };
+}
 
 // --- Layer bounds EFFEKTEK NELKUL (boundsNoEffects) ---
 function _getBoundsNoEffects(layer) {
@@ -48,53 +111,15 @@ function _getBoundsNoEffects(layer) {
   };
 }
 
-// --- cm → px konverzio (lokalis, kerekitett) ---
-function _cm2px(cm) {
-  return Math.round((cm / 2.54) * _dpi);
-}
-
-// --- Kep layer keresese nev alapjan (layerName egyezes) ---
-// A Names es Images csoportok layerei azonos nevet kapjak (pl. kiss-janos---42)
-function _findImageLayer(nameLayerName) {
-  // Keresunk Students es Teachers csoportban is
-  var groups = [["Images", "Students"], ["Images", "Teachers"]];
-  for (var g = 0; g < groups.length; g++) {
-    var grp = getGroupByPath(_doc, groups[g]);
-    if (!grp) continue;
-    for (var i = 0; i < grp.artLayers.length; i++) {
-      if (grp.artLayers[i].name === nameLayerName) {
-        return grp.artLayers[i];
-      }
-    }
-  }
-  return null;
-}
-
-// --- Layer bounds EFFEKTEKKEL (sima bounds — stroke-ot is tartalmazza) ---
-// A nev gap-nek a VIZUALIS kep aljabol kell szamolnia, ami a stroke-ot is
-// tartalmazza. Ezert a kep layer-nel a sima bounds-ot hasznaljuk (nem boundsNoEffects!).
-function _getBoundsWithEffects(layer) {
-  selectLayerById(layer.id);
-  var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-  var desc = executeActionGet(ref);
-
-  var b = desc.getObjectValue(stringIDToTypeID("bounds"));
-  return {
-    left: b.getUnitDoubleValue(stringIDToTypeID("left")),
-    top: b.getUnitDoubleValue(stringIDToTypeID("top")),
-    right: b.getUnitDoubleValue(stringIDToTypeID("right")),
-    bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
-  };
-}
-
-// --- Nev pozicionalasa a kep ala ---
-// FONTOS: A textItem.position a szoveg "anchor point"-ja (baseline),
-// NEM a bounding box! Igy az ekezetes nagybetuk (A, E) nem tolják feljebb a nevet.
-// Minden nev baseline-ja egyforma Y-ra kerul, fuggetlenul az ekezetek magassagatol.
-// A kep bounds-at EFFEKTEKKEL egyutt kerdezzuk le (stroke szamit a gap-nel!).
-function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign) {
-  // Kep bounds EFFEKTEKKEL (stroke szamit!) — a vizualis also szel
+// --- Nev szovegenek frissitese + pozicionalasa a kep ala ---
+// A gap a kep vizualis alja (stroke-kal!) es a szoveg vizualis teteje kozott ertendo.
+// Eljarás:
+//   1. Szoveg frissites (tordeles)
+//   2. Baseline pozicionalas: imgBottom + gapPx (ez a szoveg TETEJE lesz kb.)
+//   3. Bounding box top lekerdezes → korrekcios delta szamitas
+//   4. Ujra pozicionalas a korrekciobol
+function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakAfter) {
+  // Kep bounds EFFEKTEKKEL (stroke szamit!)
   var imgBounds = _getBoundsWithEffects(imageLayer);
   var imgCenterX = (imgBounds.left + imgBounds.right) / 2;
   var imgBottom = imgBounds.bottom;
@@ -103,7 +128,7 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign) {
   selectLayerById(nameLayer.id);
   _doc.activeLayer = nameLayer;
 
-  // Text igazitas beallitasa
+  // Text igazitas beallitasa + szoveg frissites
   var textItem;
   try {
     textItem = nameLayer.textItem;
@@ -111,41 +136,46 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign) {
     if (alignMap[textAlign]) {
       textItem.justification = alignMap[textAlign];
     }
+
+    // Szoveg frissites: eredeti nev kiolvasas (sortoresek nelkul) → ujra tordeles
+    var plainName = _getPlainName(textItem);
+    var newText = _breakName(plainName, breakAfter);
+    if (textItem.contents !== newText) {
+      textItem.contents = newText;
+    }
   } catch (e) {
     // nem text layer — skip
     return;
   }
 
-  // A textItem.position a baseline anchor pontja (px-ben, UnitValue)
-  // Ez STABIL referenciapont — az ekezet magassaga NEM befolyasolja!
-  // Ha minden nev baseline-jat azonos Y-ra allitjuk, egyvonalba kerulnek,
-  // fuggetlenul attol hogy van-e ekezetes nagybetu (A, E, O stb.) a nevben.
-
-  // A gap a kep alja es a NAGYBETUS TETEJE kozott ertendo.
-  // Referencia ascent: a font merete * ~1.2 (heurisztika a cap-height + ekezet szamara)
-  // Igy a "latható szoveg teteje" kb. a gap-en lesz, es a baseline MINDENKINÉL azonos Y-on.
-  var fontSize = textItem.size.as("px");
-  var refAscentPx = Math.round(fontSize * 1.2);
-
-  // Cel baseline Y: kep alja + gap + referencia ascent
-  var targetBaselineY = imgBottom + gapPx + refAscentPx;
-
-  // Vizszintes pozicio: a textItem.position.x a justification-tol fugg:
-  //   LEFT: a szoveg bal szele
-  //   CENTER: a szoveg kozepe
-  //   RIGHT: a szoveg jobb szele
+  // Vizszintes pozicio
   var targetX;
   if (textAlign === "left") {
     targetX = imgBounds.left;
   } else if (textAlign === "right") {
     targetX = imgBounds.right;
   } else {
-    // center: a kep kozepere
     targetX = imgCenterX;
   }
 
-  // Mozgatas: position-t allitjuk (nem translate!), igy pontos baseline igazitas
-  textItem.position = [new UnitValue(Math.round(targetX), "px"), new UnitValue(Math.round(targetBaselineY), "px")];
+  // --- Gap korrekció: a gap a kep alja es a szoveg VIZUALIS teteje kozott ---
+  // 1. Elso pozicionalas: baseline = imgBottom + gapPx + fontSize (becsles)
+  var fontSize = textItem.size.as("px");
+  var initialBaselineY = imgBottom + gapPx + fontSize;
+  textItem.position = [new UnitValue(Math.round(targetX), "px"), new UnitValue(Math.round(initialBaselineY), "px")];
+
+  // 2. Bounding box top lekerdezes a tényleges pozícióból
+  var textBounds = _getBoundsNoEffects(nameLayer);
+  var actualTextTop = textBounds.top;
+
+  // 3. A kivant textTop = imgBottom + gapPx
+  var desiredTextTop = imgBottom + gapPx;
+
+  // 4. Delta korrekció: mennyit kell tolni a baseline-on
+  var deltaY = desiredTextTop - actualTextTop;
+  var correctedBaselineY = initialBaselineY + deltaY;
+
+  textItem.position = [new UnitValue(Math.round(targetX), "px"), new UnitValue(Math.round(correctedBaselineY), "px")];
 }
 
 // --- Egy csoport nev layereinek rendezese ---
@@ -155,14 +185,14 @@ function _arrangeNameGroup(nameGroupPath) {
 
   var gapPx = _cm2px(_data.nameGapCm || 0.5);
   var textAlign = _data.textAlign || "center";
+  var breakAfter = _data.nameBreakAfter || 0;
 
-  log("[JSX] Csoport: " + nameGroupPath.join("/") + " (" + grp.artLayers.length + " layer, gap=" + gapPx + "px, align=" + textAlign + ")");
+  log("[JSX] Csoport: " + nameGroupPath.join("/") + " (" + grp.artLayers.length + " layer, gap=" + gapPx + "px, align=" + textAlign + ", breakAfter=" + breakAfter + ")");
 
   for (var i = grp.artLayers.length - 1; i >= 0; i--) {
     var nameLayer = grp.artLayers[i];
 
     try {
-      // Megkeressuk a parjat az Images csoportban (azonos layerName)
       var imageLayer = _findImageLayer(nameLayer.name);
       if (!imageLayer) {
         log("[JSX] WARN: Nincs par kep: " + nameLayer.name);
@@ -170,7 +200,7 @@ function _arrangeNameGroup(nameGroupPath) {
         continue;
       }
 
-      _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign);
+      _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakAfter);
       _moved++;
     } catch (e) {
       log("[JSX] WARN: Nev pozicionalas sikertelen (" + nameLayer.name + "): " + e.message);

@@ -500,6 +500,7 @@ export class PhotoshopService {
         jsonData: {
           nameGapCm: this.nameGapCm(),
           textAlign: this.textAlign(),
+          nameBreakAfter: this.nameBreakAfter(),
         },
         targetDocName,
       });

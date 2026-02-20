@@ -20,14 +20,10 @@ export class LayoutDesignerActionsService {
     if (selected.length < 2) return;
 
     const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
-    const ids = new Set(selected.map(l => l.layerId));
-
-    this.state.updateLayers(
-      this.state.layers().map(l => {
-        if (!ids.has(l.layerId)) return l;
-        return { ...l, editedY: minY };
-      }),
-    );
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: l.editedX ?? l.x,
+      y: minY,
+    }));
   }
 
   /** Vízszintes elosztás: egyenletes gap a kijelölt elemek között (X tengely) */
@@ -36,26 +32,17 @@ export class LayoutDesignerActionsService {
     if (selected.length < 3) return;
 
     const sorted = [...selected].sort((a, b) => (a.editedX ?? a.x) - (b.editedX ?? b.x));
-    const first = sorted[0];
-    const last = sorted[sorted.length - 1];
+    const firstX = sorted[0].editedX ?? sorted[0].x;
+    const lastX = sorted[sorted.length - 1].editedX ?? sorted[sorted.length - 1].x;
+    const step = (lastX - firstX) / (sorted.length - 1);
 
-    const firstX = first.editedX ?? first.x;
-    const lastX = last.editedX ?? last.x;
-    const totalSpan = lastX - firstX;
-    const step = totalSpan / (sorted.length - 1);
+    const posMap = new Map<number, number>();
+    sorted.forEach((l, i) => posMap.set(l.layerId, Math.round(firstX + step * i)));
 
-    const updates = new Map<number, number>();
-    sorted.forEach((l, i) => {
-      updates.set(l.layerId, firstX + step * i);
-    });
-
-    this.state.updateLayers(
-      this.state.layers().map(l => {
-        const newX = updates.get(l.layerId);
-        if (newX == null) return l;
-        return { ...l, editedX: Math.round(newX) };
-      }),
-    );
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: posMap.get(l.layerId) ?? (l.editedX ?? l.x),
+      y: l.editedY ?? l.y,
+    }));
   }
 
   /** Függőleges elosztás: egyenletes gap a kijelölt elemek között (Y tengely) */
@@ -64,26 +51,17 @@ export class LayoutDesignerActionsService {
     if (selected.length < 3) return;
 
     const sorted = [...selected].sort((a, b) => (a.editedY ?? a.y) - (b.editedY ?? b.y));
-    const first = sorted[0];
-    const last = sorted[sorted.length - 1];
+    const firstY = sorted[0].editedY ?? sorted[0].y;
+    const lastY = sorted[sorted.length - 1].editedY ?? sorted[sorted.length - 1].y;
+    const step = (lastY - firstY) / (sorted.length - 1);
 
-    const firstY = first.editedY ?? first.y;
-    const lastY = last.editedY ?? last.y;
-    const totalSpan = lastY - firstY;
-    const step = totalSpan / (sorted.length - 1);
+    const posMap = new Map<number, number>();
+    sorted.forEach((l, i) => posMap.set(l.layerId, Math.round(firstY + step * i)));
 
-    const updates = new Map<number, number>();
-    sorted.forEach((l, i) => {
-      updates.set(l.layerId, firstY + step * i);
-    });
-
-    this.state.updateLayers(
-      this.state.layers().map(l => {
-        const newY = updates.get(l.layerId);
-        if (newY == null) return l;
-        return { ...l, editedY: Math.round(newY) };
-      }),
-    );
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: l.editedX ?? l.x,
+      y: posMap.get(l.layerId) ?? (l.editedY ?? l.y),
+    }));
   }
 
   /**
@@ -95,27 +73,24 @@ export class LayoutDesignerActionsService {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
 
-    // Csoportosítás hasonló Y alapján
     const rows = this.groupIntoRows(selected);
-
-    const updates = new Map<number, number>();
+    const rowYMap = new Map<number, number>();
     for (const row of rows) {
       if (row.length < 2) continue;
       const minY = Math.min(...row.map(l => l.editedY ?? l.y));
       for (const l of row) {
-        updates.set(l.layerId, minY);
+        rowYMap.set(l.layerId, minY);
       }
     }
 
-    if (updates.size === 0) return;
+    if (rowYMap.size === 0) return;
 
-    this.state.updateLayers(
-      this.state.layers().map(l => {
-        const newY = updates.get(l.layerId);
-        if (newY == null) return l;
-        return { ...l, editedY: newY };
-      }),
-    );
+    // Csak azokat az elemeket igazítjuk, amelyeknek van sor-társa
+    const affectedSelected = selected.filter(l => rowYMap.has(l.layerId));
+    this.applyAlignmentWithCoupled(affectedSelected, (l) => ({
+      x: l.editedX ?? l.x,
+      y: rowYMap.get(l.layerId) ?? (l.editedY ?? l.y),
+    }));
   }
 
   /** Balra igazítás: kijelölt elemek X → min(X), coupled párokkal */

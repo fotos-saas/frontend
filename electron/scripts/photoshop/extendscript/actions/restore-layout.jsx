@@ -4,7 +4,7 @@
  * JSON temp fajlbol olvassa a persons tombot es visszaallitja
  * a layerek pozicioit + nev layerek text tartalmat es igazitasat.
  *
- * Egy Undo lepes: suspendHistory()-vel egybefogva.
+ * Kozvetlen hivas (suspendHistory nem hasznalhato osascript kontextusban).
  *
  * JSON formatum (Electron handler kesziti):
  * {
@@ -87,12 +87,6 @@ function _restoreLayerPosition(layer, targetX, targetY) {
   var dx = targetX - currentX;
   var dy = targetY - currentY;
 
-  // Elso 5 layerre reszletes debug log
-  if (_restored + _skipped < 5) {
-    log("[JSX] DEBUG " + layer.name + ": current=" + currentX + "," + currentY +
-        " target=" + targetX + "," + targetY + " dx=" + dx + " dy=" + dy);
-  }
-
   if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
     layer.translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
   }
@@ -136,20 +130,22 @@ function _doRestore(data) {
 
   log("[JSX] Snapshot visszaallitas indul: " + persons.length + " szemely");
 
+  // Csoportok lekerdezese EGYSZER (nem minden iteracioban)
+  var imgStudents = getGroupByPath(_doc, ["Images", "Students"]);
+  var imgTeachers = getGroupByPath(_doc, ["Images", "Teachers"]);
+  var nameStudents = getGroupByPath(_doc, ["Names", "Students"]);
+  var nameTeachers = getGroupByPath(_doc, ["Names", "Teachers"]);
+
   for (var i = 0; i < persons.length; i++) {
     var p = persons[i];
     var layerName = p.layerName;
 
-    // Elso 3 szemelyre reszletes log
-    if (i < 3) {
-      log("[JSX] Person[" + i + "]: layerName=" + layerName +
-          ", image=" + (p.image ? p.image.x + "," + p.image.y : "null") +
-          ", nameLayer=" + (p.nameLayer ? "yes" : "no"));
-    }
-
-    // Image layer visszaallitasa
+    // Image layer visszaallitasa — CSAK Images/ csoportokban keresunk!
     if (p.image) {
-      var imgLayer = _findLayerByName(_doc, layerName);
+      var imgLayer = null;
+      if (imgStudents) imgLayer = _findLayerByName(imgStudents, layerName);
+      if (!imgLayer && imgTeachers) imgLayer = _findLayerByName(imgTeachers, layerName);
+
       if (imgLayer) {
         try {
           _restoreLayerPosition(imgLayer, p.image.x, p.image.y);
@@ -164,21 +160,11 @@ function _doRestore(data) {
       }
     }
 
-    // Name layer visszaallitasa
+    // Name layer visszaallitasa — CSAK Names/ csoportokban keresunk!
     if (p.nameLayer) {
-      // Nev layer neve azonos a kep layer nevevel (Names/ csoportban)
       var nameLayer = null;
-
-      // Keresese a Names csoportokban
-      var nameStudents = getGroupByPath(_doc, ["Names", "Students"]);
-      var nameTeachers = getGroupByPath(_doc, ["Names", "Teachers"]);
-
-      if (nameStudents) {
-        nameLayer = _findLayerByName(nameStudents, layerName);
-      }
-      if (!nameLayer && nameTeachers) {
-        nameLayer = _findLayerByName(nameTeachers, layerName);
-      }
+      if (nameStudents) nameLayer = _findLayerByName(nameStudents, layerName);
+      if (!nameLayer && nameTeachers) nameLayer = _findLayerByName(nameTeachers, layerName);
 
       if (nameLayer) {
         try {
@@ -215,15 +201,15 @@ function _doRestore(data) {
     // Globalis valtozoba mentjuk — suspendHistory eval a globalis scope-ban fut!
     _snapshotData = readJsonFile(args.dataFilePath);
 
-    log("[JSX] Snapshot data betoltve: version=" + (_snapshotData.version || "?") +
-        ", persons=" + (_snapshotData.persons ? _snapshotData.persons.length : 0));
-
     // Ruler PIXELS-re
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
 
-    // Kozvetlen hivas (suspendHistory nelkul — debug)
-    // Kesobb visszaallitjuk suspendHistory-vel ha mukodik
+    // Snapshot visszaallitas vegrehajtasa
+    // MEGJEGYZES: suspendHistory (egyetlen Undo lepes) itt NEM hasznalhato,
+    // mert a Photoshop osascript + do javascript kontextusban a string-eval
+    // nem lát globalisan deklaralt valtozokat/fuggvenyeket megbizhatoan.
+    // A kozvetlen hivas viszont mukodik.
     _doRestore(_snapshotData);
 
     // Ruler visszaallitasa

@@ -187,17 +187,32 @@ export class LayoutDesignerStateService {
     return 'fixed';
   }
 
-  /** Személy párosítása layer név alapján */
+  /**
+   * Személy párosítása layer név alapján.
+   * A layerName formátum: "slug---personId" (pl. "kiss-janos---42").
+   * Először a person ID-vel próbálunk, ha nincs --- szeparátor, akkor név egyezés.
+   */
   private matchPerson(layer: SnapshotLayer, category: LayerCategory, persons: TabloPersonItem[]): { id: number; name: string; photoThumbUrl: string | null } | null {
     if (category === 'fixed') return null;
 
-    const match = persons.find(p => p.name === layer.layerName);
-    if (!match) return null;
+    // 1. Person ID kinyerése a layerName-ből (slug---personId formátum)
+    const triDashIdx = layer.layerName.lastIndexOf('---');
+    if (triDashIdx !== -1) {
+      const personId = parseInt(layer.layerName.substring(triDashIdx + 3), 10);
+      if (!isNaN(personId)) {
+        const match = persons.find(p => p.id === personId);
+        if (match) {
+          return { id: match.id, name: match.name, photoThumbUrl: match.photoThumbUrl };
+        }
+      }
+    }
 
-    return {
-      id: match.id,
-      name: match.name,
-      photoThumbUrl: match.photoThumbUrl,
-    };
+    // 2. Fallback: pontos név egyezés
+    const nameMatch = persons.find(p => p.name === layer.layerName);
+    if (nameMatch) {
+      return { id: nameMatch.id, name: nameMatch.name, photoThumbUrl: nameMatch.photoThumbUrl };
+    }
+
+    return null;
   }
 }

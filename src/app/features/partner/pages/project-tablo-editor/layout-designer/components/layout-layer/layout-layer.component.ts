@@ -41,14 +41,14 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
             <lucide-icon [name]="ICONS.USER" [size]="placeholderIconSize" />
           </div>
         }
-        <span class="designer-layer__label">{{ layer().layerName }}</span>
+        <span class="designer-layer__label">{{ displayName }}</span>
       } @else if (isText) {
         <span
           class="designer-layer__text"
           [class.text-left]="layer().justification === 'left'"
           [class.text-center]="layer().justification === 'center' || !layer().justification"
           [class.text-right]="layer().justification === 'right'"
-        >{{ layer().layerName }}</span>
+        >{{ displayName }}</span>
       } @else {
         <div class="designer-layer__fixed">
           <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
@@ -169,6 +169,11 @@ export class LayoutLayerComponent {
   readonly isSelected = input<boolean>(false);
 
   readonly layerClicked = output<{ layerId: number; additive: boolean }>();
+
+  /** Megjelenítendő név: person match neve, vagy layerName fallback */
+  get displayName(): string {
+    return this.layer().personMatch?.name ?? this.layer().layerName;
+  }
 
   get isImage(): boolean {
     const cat = this.layer().category;

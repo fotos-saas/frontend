@@ -42,7 +42,12 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
           </div>
         }
       } @else if (isText) {
-        <span class="designer-layer__text">{{ textContent }}</span>
+        <span class="designer-layer__text">
+          @for (line of textLines; track $index) {
+            @if ($index > 0) { <br /> }
+            {{ line }}
+          }
+        </span>
       } @else {
         <div class="designer-layer__fixed">
           <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
@@ -119,7 +124,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       color: #1e293b;
       font-size: 10px;
       line-height: 1.2;
-      white-space: pre-line;
+      white-space: nowrap;
       text-align: center;
     }
 
@@ -151,11 +156,11 @@ export class LayoutLayerComponent {
     return this.layer().personMatch?.name ?? this.layer().layerName;
   }
 
-  /** Szöveg tartalom a PSD tördeléssel (\r → \n) */
-  get textContent(): string {
+  /** Szöveg sorok a PSD tördeléssel (\r split) */
+  get textLines(): string[] {
     const text = this.layer().text;
-    if (text) return text.replace(/\r/g, '\n');
-    return this.displayName;
+    if (text) return text.split(/\r/);
+    return [this.displayName];
   }
 
   get isImage(): boolean {

@@ -320,6 +320,46 @@
             }
           }
         </div>
+
+        <!-- Sablonok (globális elrendezés mentés + alkalmazás) -->
+        <div class="command-card">
+          <div class="command-card__header">
+            <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="20" />
+            <div>
+              <h3 class="command-card__title">Sablonok</h3>
+              <p class="command-card__desc">Elrendezés mentése újrafelhasználható sablonként, vagy meglévő sablon alkalmazása.</p>
+            </div>
+          </div>
+
+          @if (!isConfigured()) {
+            <div class="command-card__disabled">
+              Először állítsd be a Photoshop-ot a Beállítások fülön.
+            </div>
+          } @else if (!selectedSize()) {
+            <div class="command-card__disabled">
+              Válassz méretet a fenti szekciónál.
+            </div>
+          } @else {
+            <div class="snapshot-actions">
+              <button
+                class="btn btn--outline"
+                [disabled]="templateService.savingTemplate()"
+                (click)="templateService.openSaveDialog()"
+              >
+                <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+                Sablon mentése
+              </button>
+              <button
+                class="btn btn--primary"
+                [disabled]="templateService.applyingTemplate()"
+                (click)="templateService.openApplyDialog()"
+              >
+                <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="16" />
+                Sablon alkalmazása
+              </button>
+            </div>
+          }
+        </div>
       </div>
     }
 
@@ -770,5 +810,35 @@
     [isRestoring]="snapshotService.restoringSnapshotPath() !== null"
     (closeEvent)="snapshotService.closeRestoreDialog()"
     (restoreEvent)="restoreWithGroups($event)"
+  />
+}
+
+<!-- Sablon mentés dialógus (page-card KÍVÜL) -->
+@if (templateService.showSaveDialog()) {
+  <app-template-save-dialog
+    [name]="templateService.templateName()"
+    [isSaving]="templateService.savingTemplate()"
+    (nameChange)="templateService.templateName.set($event)"
+    (closeEvent)="templateService.closeSaveDialog()"
+    (submitEvent)="saveTemplateFromDialog()"
+  />
+}
+
+<!-- Sablon alkalmazás dialógus (page-card KÍVÜL) -->
+@if (templateService.showApplyDialog()) {
+  <app-template-apply-dialog
+    [templates]="templateService.templates()"
+    [isLoading]="templateService.loadingTemplates()"
+    [isApplying]="templateService.applyingTemplate()"
+    [currentPersonCount]="currentStudentCount"
+    [editingId]="templateService.editingTemplateId()"
+    [editingNameValue]="templateService.editingName()"
+    (closeEvent)="templateService.closeApplyDialog()"
+    (applyEvent)="applyTemplate($event)"
+    (deleteTemplate)="deleteTemplate($event)"
+    (startRename)="templateService.startEditing($event)"
+    (commitRename)="commitTemplateRename()"
+    (cancelRename)="templateService.cancelEditing()"
+    (editingNameChange)="templateService.editingName.set($event)"
   />
 }

@@ -338,6 +338,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:delete-snapshot', params) as Promise<{ success: boolean; error?: string }>,
     renameSnapshot: (params: { snapshotPath: string; newName: string }) =>
       ipcRenderer.invoke('photoshop:rename-snapshot', params) as Promise<{ success: boolean; error?: string }>,
+    saveTemplate: (params: { templateData: any }) =>
+      ipcRenderer.invoke('photoshop:save-template', params) as Promise<{ success: boolean; error?: string }>,
+    listTemplates: () =>
+      ipcRenderer.invoke('photoshop:list-templates') as Promise<{ success: boolean; error?: string; templates: any[] }>,
+    loadTemplate: (params: { templateId: string }) =>
+      ipcRenderer.invoke('photoshop:load-template', params) as Promise<{ success: boolean; error?: string; data?: any }>,
+    deleteTemplate: (params: { templateId: string }) =>
+      ipcRenderer.invoke('photoshop:delete-template', params) as Promise<{ success: boolean; error?: string }>,
+    renameTemplate: (params: { templateId: string; newName: string }) =>
+      ipcRenderer.invoke('photoshop:rename-template', params) as Promise<{ success: boolean; error?: string }>,
+    applyTemplate: (params: { templateId: string; targetDocName?: string }) =>
+      ipcRenderer.invoke('photoshop:apply-template', params) as Promise<{ success: boolean; error?: string; output?: string }>,
   },
 
   // ============ Touch Bar (MacBook Pro 2016-2020) ============

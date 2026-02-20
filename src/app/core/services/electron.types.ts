@@ -110,6 +110,48 @@ export interface SnapshotLayer {
   justification?: 'left' | 'center' | 'right';
 }
 
+/** Sablon slot — egy szemely pozicioja (kep + nev) */
+export interface TemplateSlot {
+  index: number;
+  image: { x: number; y: number; width: number; height: number };
+  name: { x: number; y: number; width: number; height: number; justification: 'left' | 'center' | 'right' } | null;
+}
+
+/** Sablon fix layer (hatter, diszites, cim — nem slot) */
+export interface TemplateFixedLayer {
+  layerName: string;
+  groupPath: string[];
+  x: number; y: number; width: number; height: number;
+  kind: 'normal' | 'text';
+}
+
+/** Sablon lista elem (rovid osszefoglalo) */
+export interface TemplateListItem {
+  id: string;
+  templateName: string;
+  createdAt: string;
+  studentSlotCount: number;
+  teacherSlotCount: number;
+  boardWidthCm: number;
+  boardHeightCm: number;
+  sourceDocName: string;
+}
+
+/** Teljes sablon JSON */
+export interface GlobalTemplate {
+  version: number;
+  type: 'template';
+  id: string;
+  templateName: string;
+  createdAt: string;
+  source: { documentName: string; widthPx: number; heightPx: number; dpi: number };
+  board: { widthCm: number; heightCm: number; marginCm: number; gapHCm: number; gapVCm: number; gridAlign: string };
+  nameSettings: { nameGapCm: number; textAlign: string; nameBreakAfter: number };
+  studentSlots: TemplateSlot[];
+  teacherSlots: TemplateSlot[];
+  fixedLayers: TemplateFixedLayer[];
+}
+
 interface PhotoshopAPI {
   setPath: (path: string) => Promise<{ success: boolean; error?: string }>;
   getPath: () => Promise<string | null>;
@@ -151,6 +193,12 @@ interface PhotoshopAPI {
   loadSnapshot: (params: { snapshotPath: string }) => Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }>;
   deleteSnapshot: (params: { snapshotPath: string }) => Promise<{ success: boolean; error?: string }>;
   renameSnapshot: (params: { snapshotPath: string; newName: string }) => Promise<{ success: boolean; error?: string }>;
+  saveTemplate: (params: { templateData: GlobalTemplate }) => Promise<{ success: boolean; error?: string }>;
+  listTemplates: () => Promise<{ success: boolean; error?: string; templates: TemplateListItem[] }>;
+  loadTemplate: (params: { templateId: string }) => Promise<{ success: boolean; error?: string; data?: GlobalTemplate }>;
+  deleteTemplate: (params: { templateId: string }) => Promise<{ success: boolean; error?: string }>;
+  renameTemplate: (params: { templateId: string; newName: string }) => Promise<{ success: boolean; error?: string }>;
+  applyTemplate: (params: { templateId: string; targetDocName?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
 }
 
 export interface ElectronAPI {

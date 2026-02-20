@@ -14,16 +14,19 @@ import { BrandingService } from '../../services/branding.service';
 import { TabloSize, TabloPersonItem } from '../../models/partner.models';
 import { TabloEditorDebugService, DebugLogEntry } from './tablo-editor-debug.service';
 import { TabloEditorSnapshotService } from './tablo-editor-snapshot.service';
-import { SnapshotListItem, SnapshotLayer } from '@core/services/electron.types';
+import { TabloEditorTemplateService } from './tablo-editor-template.service';
+import { SnapshotListItem, SnapshotLayer, TemplateListItem } from '@core/services/electron.types';
 import { SnapshotRestoreDialogComponent } from './snapshot-restore-dialog.component';
+import { TemplateSaveDialogComponent } from './template-save-dialog.component';
+import { TemplateApplyDialogComponent } from './template-apply-dialog.component';
 
 type EditorTab = 'commands' | 'settings' | 'debug';
 
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
-  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent],
-  providers: [TabloEditorDebugService, TabloEditorSnapshotService],
+  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent],
+  providers: [TabloEditorDebugService, TabloEditorSnapshotService, TabloEditorTemplateService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +39,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   private readonly branding = inject(BrandingService);
   private readonly debugService = inject(TabloEditorDebugService);
   readonly snapshotService = inject(TabloEditorSnapshotService);
+  readonly templateService = inject(TabloEditorTemplateService);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
@@ -579,5 +583,62 @@ export class ProjectTabloEditorComponent implements OnInit {
     } else {
       this.error.set(result.error || 'Törlés sikertelen.');
     }
+  }
+
+  // ============ Sablon rendszer ============
+
+  /** Sablon mentése dialógusból */
+  async saveTemplateFromDialog(): Promise<void> {
+    const size = this.selectedSize();
+    if (!size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    this.clearMessages();
+    const result = await this.templateService.saveTemplate(boardSize);
+
+    if (result.success) {
+      this.successMessage.set('Sablon mentve!');
+    } else {
+      this.error.set(result.error || 'Sablon mentés sikertelen.');
+    }
+  }
+
+  /** Sablon alkalmazása */
+  async applyTemplate(templateId: string): Promise<void> {
+    this.clearMessages();
+    const result = await this.templateService.applyTemplate(templateId);
+
+    if (result.success) {
+      this.successMessage.set('Sablon alkalmazva!');
+    } else {
+      this.error.set(result.error || 'Sablon alkalmazás sikertelen.');
+    }
+  }
+
+  /** Sablon törlése */
+  async deleteTemplate(templateId: string): Promise<void> {
+    this.clearMessages();
+    const result = await this.templateService.deleteTemplate(templateId);
+
+    if (result.success) {
+      this.successMessage.set('Sablon törölve.');
+    } else {
+      this.error.set(result.error || 'Sablon törlés sikertelen.');
+    }
+  }
+
+  /** Sablon átnevezés commit */
+  async commitTemplateRename(): Promise<void> {
+    const result = await this.templateService.commitEditing();
+    if (result.success && result.error) {
+      this.error.set(result.error);
+    }
+  }
+
+  /** Személyek számának getter-je a template alkalmazás összehasonlításhoz */
+  get currentStudentCount(): number {
+    return this.persons().filter(p => p.type !== 'teacher').length;
   }
 }

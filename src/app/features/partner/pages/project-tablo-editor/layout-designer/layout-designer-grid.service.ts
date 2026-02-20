@@ -4,6 +4,20 @@ import { LayoutDesignerStateService } from './layout-designer-state.service';
 import { GroupGridConfig, GridCell, LayerCategory, DesignerLayer } from './layout-designer.types';
 import { cmToPx } from './layout-designer.utils';
 
+/** Grid megjelenítési mód */
+export type GridMode = 'off' | 'auto' | 'student' | 'teacher';
+
+/** Mód ciklus: off → auto → student → teacher → off */
+const MODE_CYCLE: GridMode[] = ['off', 'auto', 'student', 'teacher'];
+
+/** Mód megjelenítési nevek */
+const MODE_LABELS: Record<GridMode, string> = {
+  off: 'Rács ki',
+  auto: 'Mind',
+  student: 'Diák',
+  teacher: 'Tanár',
+};
+
 /**
  * Grid konfig számítás és snap-to-grid logika.
  * Komponens-szintű injectable — a layout-designer providers-ben.
@@ -13,8 +27,14 @@ export class LayoutDesignerGridService {
   private readonly ps = inject(PhotoshopService);
   private readonly state = inject(LayoutDesignerStateService);
 
-  /** Grid megjelenítés be/ki */
-  readonly gridEnabled = signal(false);
+  /** Grid mód: off / auto (mindkettő) / student / teacher */
+  readonly gridMode = signal<GridMode>('off');
+
+  /** Grid engedélyezve-e (bármely mód ami nem 'off') */
+  readonly gridEnabled = computed(() => this.gridMode() !== 'off');
+
+  /** Aktuális mód címkéje */
+  readonly gridModeLabel = computed(() => MODE_LABELS[this.gridMode()]);
 
   /** Diák grid konfiguráció */
   readonly studentGrid = computed<GroupGridConfig | null>(() => {
@@ -30,9 +50,137 @@ export class LayoutDesignerGridService {
     return this.buildGrid('teacher', doc.dpi, doc.widthPx, doc.heightPx);
   });
 
-  /** Grid toggle */
+  /** Diák grid látható-e az aktuális módban */
+  readonly showStudentGrid = computed(() => {
+    const mode = this.gridMode();
+    return mode === 'auto' || mode === 'student';
+  });
+
+  /** Tanár grid látható-e az aktuális módban */
+  readonly showTeacherGrid = computed(() => {
+    const mode = this.gridMode();
+    return mode === 'auto' || mode === 'teacher';
+  });
+
+  /** Grid mód váltás (ciklikus: off → auto → student → teacher → off) */
+  cycleGridMode(): void {
+    const current = this.gridMode();
+    const idx = MODE_CYCLE.indexOf(current);
+    const next = MODE_CYCLE[(idx + 1) % MODE_CYCLE.length];
+    this.gridMode.set(next);
+  }
+
+  /** Grid toggle (backward compat) */
   toggleGrid(): void {
-    this.gridEnabled.update(v => !v);
+    this.cycleGridMode();
+  }
+
+  /**
+   * Összes image layer gridbe igazítása.
+   * Minden image → legközelebbi grid cella, name → image alá.
+   * Egy cellát csak 1 image foglalhat (greedy: sor-fő sorrendben).
+   */
+  snapAllToGrid(): void {
+    const layers = this.state.layers();
+    const GAP = 8;
+
+    // Image layerek kategóriánként
+    const studentImages = layers.filter(l => l.category === 'student-image');
+    const teacherImages = layers.filter(l => l.category === 'teacher-image');
+
+    // Snap image-ek a grid-hez
+    const updates = new Map<number, { x: number; y: number }>();
+
+    this.snapGroupToGrid(studentImages, this.studentGrid(), updates);
+    this.snapGroupToGrid(teacherImages, this.teacherGrid(), updates);
+
+    if (updates.size === 0) return;
+
+    // Name layerek igazítása a snap-elt image-ek alá
+    const updatedLayers = layers.map(l => {
+      const u = updates.get(l.layerId);
+      if (u) return { ...l, editedX: u.x, editedY: u.y };
+      return l;
+    });
+
+    // Name igazítás
+    const pairs: Array<[string, string]> = [
+      ['student-image', 'student-name'],
+      ['teacher-image', 'teacher-name'],
+    ];
+
+    for (const [imageCat, nameCat] of pairs) {
+      const imageMap = new Map<number, DesignerLayer>();
+      for (const l of updatedLayers) {
+        if (l.category === imageCat && l.personMatch) {
+          imageMap.set(l.personMatch.id, l);
+        }
+      }
+
+      for (const nameLayer of updatedLayers) {
+        if (nameLayer.category !== nameCat || !nameLayer.personMatch) continue;
+        const imgLayer = imageMap.get(nameLayer.personMatch.id);
+        if (!imgLayer) continue;
+
+        const imgX = imgLayer.editedX ?? imgLayer.x;
+        const imgY = imgLayer.editedY ?? imgLayer.y;
+        nameLayer.editedX = imgX;
+        nameLayer.editedY = imgY + imgLayer.height + GAP;
+      }
+    }
+
+    this.state.updateLayers(updatedLayers);
+  }
+
+  /** Csoport image-ek snap-elése a gridhez (greedy, foglalt cellák kihagyása) */
+  private snapGroupToGrid(
+    images: DesignerLayer[],
+    grid: GroupGridConfig | null,
+    updates: Map<number, { x: number; y: number }>,
+  ): void {
+    if (!grid || images.length === 0) return;
+
+    const cells = this.generateCells(grid);
+    const usedCells = new Set<string>();
+
+    // Rendezés: sor → oszlop sorrend (bal-felülről jobb-alulra)
+    const sorted = [...images].sort((a, b) => {
+      const ay = a.editedY ?? a.y;
+      const by = b.editedY ?? b.y;
+      const dy = ay - by;
+      if (Math.abs(dy) > grid.cellHeight / 2) return dy;
+      return (a.editedX ?? a.x) - (b.editedX ?? b.x);
+    });
+
+    for (const img of sorted) {
+      const imgX = img.editedX ?? img.x;
+      const imgY = img.editedY ?? img.y;
+      const cx = imgX + img.width / 2;
+      const cy = imgY + img.height / 2;
+
+      // Legközelebbi szabad cella
+      let bestCell: GridCell | null = null;
+      let bestDist = Infinity;
+
+      for (const cell of cells) {
+        const key = `${cell.col},${cell.row}`;
+        if (usedCells.has(key)) continue;
+
+        const cellCx = cell.x + grid.imageWidth / 2;
+        const cellCy = cell.y + grid.imageHeight / 2;
+        const dist = Math.hypot(cx - cellCx, cy - cellCy);
+
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestCell = cell;
+        }
+      }
+
+      if (bestCell) {
+        usedCells.add(`${bestCell.col},${bestCell.row}`);
+        updates.set(img.layerId, { x: bestCell.x, y: bestCell.y });
+      }
+    }
   }
 
   /**

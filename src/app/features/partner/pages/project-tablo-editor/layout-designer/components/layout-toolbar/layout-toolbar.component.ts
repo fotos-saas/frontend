@@ -27,12 +27,24 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         <div class="layout-toolbar__separator"></div>
 
         <button
-          class="toolbar-btn"
+          class="toolbar-btn toolbar-btn--grid"
           [class.toolbar-btn--active]="gridService.gridEnabled()"
-          (click)="gridService.toggleGrid()"
-          matTooltip="Rács megjelenítése"
+          (click)="gridService.cycleGridMode()"
+          matTooltip="Rács mód: {{ gridService.gridModeLabel() }}"
         >
           <lucide-icon [name]="ICONS.GRID" [size]="16" />
+          @if (gridService.gridEnabled()) {
+            <span class="toolbar-btn__label">{{ gridService.gridModeLabel() }}</span>
+          }
+        </button>
+
+        <button
+          class="toolbar-btn"
+          [disabled]="!gridService.gridEnabled()"
+          (click)="gridService.snapAllToGrid()"
+          matTooltip="Mindenkit rácsba igazít"
+        >
+          <lucide-icon [name]="ICONS.WAND" [size]="16" />
         </button>
       </div>
 
@@ -225,6 +237,16 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         background: rgba(124, 58, 237, 0.3) !important;
         color: #a78bfa !important;
         border: 1px solid rgba(124, 58, 237, 0.4);
+      }
+
+      &--grid {
+        padding: 0 10px;
+      }
+
+      &__label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
       }
 
       &--refresh {

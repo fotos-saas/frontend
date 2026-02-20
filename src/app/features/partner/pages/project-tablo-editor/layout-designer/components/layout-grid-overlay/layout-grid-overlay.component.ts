@@ -92,14 +92,19 @@ export class LayoutGridOverlayComponent {
     return this.gridService.gridEnabled() || this.dragService.dragState()?.active === true;
   });
 
-  /** Diák cellák display koordinátákban */
+  /** Drag közben mindkét grid látható (ideiglenesen) */
+  private readonly isDragging = computed(() => this.dragService.dragState()?.active === true);
+
+  /** Diák cellák display koordinátákban (mód vagy drag alapján) */
   readonly studentRects = computed(() => {
+    if (!this.gridService.showStudentGrid() && !this.isDragging()) return [];
     const grid = this.gridService.studentGrid();
     return grid ? this.gridToRects(grid) : [];
   });
 
-  /** Tanár cellák display koordinátákban */
+  /** Tanár cellák display koordinátákban (mód vagy drag alapján) */
   readonly teacherRects = computed(() => {
+    if (!this.gridService.showTeacherGrid() && !this.isDragging()) return [];
     const grid = this.gridService.teacherGrid();
     return grid ? this.gridToRects(grid) : [];
   });

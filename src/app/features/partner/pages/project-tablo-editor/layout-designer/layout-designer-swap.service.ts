@@ -4,7 +4,7 @@ import { DesignerLayer, SwapCandidate } from './layout-designer.types';
 import { overlapPercent } from './layout-designer.utils';
 
 /** Minimális overlap százalék a swap aktiválásához */
-const SWAP_THRESHOLD = 0.4;
+const SWAP_THRESHOLD = 0.3;
 
 /**
  * Swap jelölt keresés és végrehajtás.

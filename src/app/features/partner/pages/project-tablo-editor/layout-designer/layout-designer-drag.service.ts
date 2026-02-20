@@ -167,8 +167,13 @@ export class LayoutDesignerDragService {
 
     // Zone-ba lépés a state update-ekhez
     this.zone.run(() => {
-      const swap = this.swapService.swapCandidate();
       const ds = this.dragState();
+
+      // Végső swap keresés az utolsó pozícióra
+      if (ds) {
+        this.swapService.findSwapCandidate(this.draggedIds, ds.deltaXPsd, ds.deltaYPsd);
+      }
+      const swap = this.swapService.swapCandidate();
 
       if (swap && ds) {
         // Swap végrehajtás

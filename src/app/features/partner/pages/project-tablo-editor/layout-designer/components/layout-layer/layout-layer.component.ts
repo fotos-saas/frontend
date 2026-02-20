@@ -47,7 +47,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
           [class.text-left]="layer().justification === 'left'"
           [class.text-center]="layer().justification === 'center' || !layer().justification"
           [class.text-right]="layer().justification === 'right'"
-        >{{ textContent }}</span>
+        >{{ displayName }}</span>
       } @else {
         <div class="designer-layer__fixed">
           <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
@@ -86,11 +86,8 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       }
 
       &--text {
-        display: flex;
-        align-items: flex-start;
-        justify-content: center;
-        background: rgba(59, 130, 246, 0.06);
-        border-color: rgba(59, 130, 246, 0.2);
+        background: transparent;
+        border-color: transparent;
         overflow: visible;
       }
 
@@ -122,11 +119,14 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
     }
 
     .designer-layer__text {
+      display: inline-block;
       color: #1e293b;
       font-size: 10px;
-      padding: 1px 3px;
-      white-space: pre-line;
       line-height: 1.2;
+      white-space: nowrap;
+      padding: 1px 4px;
+      background: rgba(59, 130, 246, 0.08);
+      border-radius: 3px;
 
       &.text-left { text-align: left; }
       &.text-center { text-align: center; }
@@ -159,13 +159,6 @@ export class LayoutLayerComponent {
   /** Megjelenítendő név: person match neve, vagy layerName fallback */
   get displayName(): string {
     return this.layer().personMatch?.name ?? this.layer().layerName;
-  }
-
-  /** Szöveg tartalom a PSD tördeléssel (\r → \n) */
-  get textContent(): string {
-    const text = this.layer().text;
-    if (text) return text.replace(/\r/g, '\n');
-    return this.displayName;
   }
 
   get isImage(): boolean {

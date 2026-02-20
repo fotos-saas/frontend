@@ -345,11 +345,13 @@ export class ProjectTabloEditorComponent implements OnInit {
   /** Manuális layout frissítés — az aktuális Photoshop állapot mentése JSON-be */
   async saveLayout(): Promise<void> {
     const size = this.selectedSize();
-    const psdPath = this.currentPsdPath();
-    if (!size || !psdPath) return;
+    if (!size) return;
 
     const boardSize = this.ps.parseSizeValue(size.value);
     if (!boardSize) return;
+
+    const psdPath = await this.resolvePsdPath(size);
+    if (!psdPath) return;
 
     this.clearMessages();
     this.savingLayout.set(true);
@@ -373,10 +375,25 @@ export class ProjectTabloEditorComponent implements OnInit {
     return `${w}×${h} px`;
   }
 
+  /** PSD path feloldása: explicit path > computePsdPath (projekt kontextusból) */
+  private async resolvePsdPath(size?: TabloSize | null): Promise<string | null> {
+    if (this.currentPsdPath()) return this.currentPsdPath();
+
+    const s = size ?? this.selectedSize();
+    const p = this.project();
+    if (!s) return null;
+
+    return this.ps.computePsdPath(s.value, p ? {
+      projectName: p.name,
+      className: p.className,
+      brandName: this.branding.brandName(),
+    } : undefined);
+  }
+
   /** Layout JSON automatikus mentése (csendes — nem jelenít meg hibaüzenetet) */
   private async autoSaveLayout(psdPath?: string | null): Promise<void> {
     const size = this.selectedSize();
-    const path = psdPath ?? this.currentPsdPath();
+    const path = psdPath ?? await this.resolvePsdPath();
     if (!path || !size) return;
 
     const boardSize = this.ps.parseSizeValue(size.value);

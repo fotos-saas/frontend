@@ -513,6 +513,33 @@ export class PhotoshopService {
   }
 
   /**
+   * PSD elérési út kiszámítása a projekt kontextus alapján.
+   * Ugyanazt a logikát követi mint a generateAndOpenPsd().
+   */
+  async computePsdPath(
+    sizeValue: string,
+    context?: { projectName: string; className?: string | null; brandName?: string | null },
+  ): Promise<string | null> {
+    if (!this.api) return null;
+
+    try {
+      if (context && this.workDir()) {
+        const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
+        const year = new Date().getFullYear().toString();
+        const folderName = this.sanitizeName(
+          context.className ? `${context.projectName}-${context.className}` : context.projectName,
+        );
+        return `${this.workDir()}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
+      }
+
+      const downloadsPath = await this.api.getDownloadsPath();
+      return `${downloadsPath}/PhotoStack/${sizeValue}.psd`;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Layout pozíció-regiszter kiolvasása a Photoshopból és mentése JSON fájlba a PSD mellé.
    *
    * 1. Futtatja a read-layout.jsx-et → kinyeri a layer pozíciókat

@@ -95,13 +95,8 @@ export class LayoutDesignerStateService {
       };
     });
 
-    // Layerek méretének normalizálása kategórián belül.
+    // Image layerek szélességének normalizálása kategórián belül.
     this.normalizeLayerSizes(designerLayers);
-
-    // Szöveg layerek Y pozíció korrekció: a képek displayHeight < PSD height,
-    // mert 15.4/10.4 arányt használunk a négyzetes SO keret helyett.
-    // A text layereket feljebb húzzuk a különbséggel.
-    this.adjustTextLayerPositions(designerLayers);
 
     this.layers.set(designerLayers);
     this.selectedLayerIds.set(new Set());
@@ -197,37 +192,6 @@ export class LayoutDesignerStateService {
       }
     }
 
-  }
-
-  /**
-   * Szöveg layerek Y pozíciójának korrekciója.
-   * A képek megjelenítési magassága (width * 15.4/10.4) kisebb mint a PSD height
-   * (négyzetes SO keret boundsNoEffects). A text layerek a PSD image aljához
-   * igazodnak, ezért a különbséggel feljebb kell húzni őket.
-   */
-  private adjustTextLayerPositions(layers: DesignerLayer[]): void {
-    const pairs: Array<{ imageCategory: LayerCategory; textCategory: LayerCategory }> = [
-      { imageCategory: 'student-image', textCategory: 'student-name' },
-      { imageCategory: 'teacher-image', textCategory: 'teacher-name' },
-    ];
-
-    for (const { imageCategory, textCategory } of pairs) {
-      const imageLayers = layers.filter(l => l.category === imageCategory);
-      if (imageLayers.length === 0) continue;
-
-      // Az image layerek közös jellemzői: a PSD height és a tényleges displayHeight arány
-      const sampleImage = imageLayers[0];
-      const actualImageHeight = sampleImage.width * (15.4 / 10.4);
-      const psdImageHeight = sampleImage.height;
-      const heightDiff = psdImageHeight - actualImageHeight;
-
-      if (heightDiff <= 0) continue;
-
-      const textLayers = layers.filter(l => l.category === textCategory);
-      for (const textLayer of textLayers) {
-        textLayer.y = Math.round(textLayer.y - heightDiff);
-      }
-    }
   }
 
   /** Layer kategorizálása a groupPath alapján */

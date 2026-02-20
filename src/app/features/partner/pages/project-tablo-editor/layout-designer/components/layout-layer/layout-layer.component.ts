@@ -186,10 +186,6 @@ export class LayoutLayerComponent {
   }
 
   get displayHeight(): number {
-    if (this.isImage) {
-      // Fotó arány (10.4:15.4) — a nevet a külön szöveg layer mutatja
-      return this.displayWidth * (15.4 / 10.4);
-    }
     return this.layer().height * this.scale();
   }
 

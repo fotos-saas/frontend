@@ -96,38 +96,38 @@ export class LayoutDesignerGridService {
 
     if (updates.size === 0) return;
 
-    // Name layerek igazítása a snap-elt image-ek alá
-    const updatedLayers = layers.map(l => {
+    // Image map: personMatch.id → snap-elt pozíció
+    const imageByPerson = new Map<string, { personId: number; x: number; y: number; height: number }>();
+    for (const l of layers) {
       const u = updates.get(l.layerId);
-      if (u) return { ...l, editedX: u.x, editedY: u.y };
-      return l;
-    });
+      if (u && l.personMatch) {
+        const catPrefix = l.category === 'student-image' ? 's' : 't';
+        imageByPerson.set(`${catPrefix}:${l.personMatch.id}`, {
+          personId: l.personMatch.id,
+          x: u.x,
+          y: u.y,
+          height: l.height,
+        });
+      }
+    }
 
-    // Name igazítás
-    const pairs: Array<[string, string]> = [
-      ['student-image', 'student-name'],
-      ['teacher-image', 'teacher-name'],
-    ];
+    // Összes layer frissítés egy menetben
+    const updatedLayers = layers.map(l => {
+      // Image snap
+      const imgUpdate = updates.get(l.layerId);
+      if (imgUpdate) return { ...l, editedX: imgUpdate.x, editedY: imgUpdate.y };
 
-    for (const [imageCat, nameCat] of pairs) {
-      const imageMap = new Map<number, DesignerLayer>();
-      for (const l of updatedLayers) {
-        if (l.category === imageCat && l.personMatch) {
-          imageMap.set(l.personMatch.id, l);
+      // Name igazítás a snap-elt image alá
+      if (l.personMatch && (l.category === 'student-name' || l.category === 'teacher-name')) {
+        const catPrefix = l.category === 'student-name' ? 's' : 't';
+        const img = imageByPerson.get(`${catPrefix}:${l.personMatch.id}`);
+        if (img) {
+          return { ...l, editedX: img.x, editedY: img.y + img.height + GAP };
         }
       }
 
-      for (const nameLayer of updatedLayers) {
-        if (nameLayer.category !== nameCat || !nameLayer.personMatch) continue;
-        const imgLayer = imageMap.get(nameLayer.personMatch.id);
-        if (!imgLayer) continue;
-
-        const imgX = imgLayer.editedX ?? imgLayer.x;
-        const imgY = imgLayer.editedY ?? imgLayer.y;
-        nameLayer.editedX = imgX;
-        nameLayer.editedY = imgY + imgLayer.height + GAP;
-      }
-    }
+      return l;
+    });
 
     this.state.updateLayers(updatedLayers);
   }

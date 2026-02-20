@@ -69,17 +69,17 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
             (click)="actions.alignCenterHorizontal()"
-            matTooltip="Vízszintes középre igazítás"
+            matTooltip="Vízszintes középre"
           >
-            <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="16" />
+            <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="16" />
           </button>
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
             (click)="actions.alignTop()"
-            matTooltip="Felsők igazítása"
+            matTooltip="Tetejére igazítás"
           >
-            <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="16" />
+            <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="16" />
           </button>
 
           <div class="layout-toolbar__divider"></div>
@@ -104,9 +104,9 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
             (click)="actions.alignRows()"
-            matTooltip="Sorok automatikus igazítása"
+            matTooltip="Sorok igazítása"
           >
-            <lucide-icon [name]="ICONS.GRID" [size]="16" />
+            <lucide-icon [name]="ICONS.ROWS_3" [size]="16" />
           </button>
         </div>
       </div>

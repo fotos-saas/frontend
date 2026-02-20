@@ -356,6 +356,9 @@ export const ICONS = {
   ALIGN_LEFT: 'align-left',
   ALIGN_CENTER: 'align-center',
   ALIGN_RIGHT: 'align-right',
+  ALIGN_START_V: 'align-start-vertical',
+  ALIGN_CENTER_V: 'align-center-vertical',
+  ROWS_3: 'rows-3',
 
   // Vizuális szerkesztő
   MOVE: 'move',

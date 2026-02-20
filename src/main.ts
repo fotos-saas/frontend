@@ -5,6 +5,7 @@ import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
 
 registerLocaleData(localeHu, 'hu-HU');
+registerLocaleData(localeHu, 'hu');
 
 bootstrapApplication(AppComponent, appConfig)
   .catch(err => console.error(err));

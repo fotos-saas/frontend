@@ -4,7 +4,7 @@
  * JSON temp fajlbol olvassa a persons tombot es visszaallitja
  * a layerek pozicioit + nev layerek text tartalmat es igazitasat.
  *
- * Kozvetlen hivas (suspendHistory nem hasznalhato osascript kontextusban).
+ * Egy Undo lepes: suspendHistory()-vel egybefogva.
  *
  * JSON formatum (Electron handler kesziti):
  * {
@@ -117,12 +117,14 @@ function _restoreTextContent(layer, text, justification) {
 }
 
 // --- Fo visszaallitasi logika ---
-function _doRestore(data) {
-  if (!data) {
-    log("[JSX] HIBA: data null/undefined — suspendHistory scope hiba?");
+// _snapshotData globalis valtozot olvassa (mint a tobbi JSX _data-t)
+// → suspendHistory string-eval igy lata
+function _doRestore() {
+  if (!_snapshotData) {
+    log("[JSX] HIBA: _snapshotData null/undefined");
     return;
   }
-  var persons = data.persons;
+  var persons = _snapshotData.persons;
   if (!persons || persons.length === 0) {
     log("[JSX] Nincs szemely a snapshot-ban");
     return;
@@ -198,19 +200,15 @@ function _doRestore(data) {
       throw new Error("Nincs megadva DATA_FILE_PATH!");
     }
 
-    // Globalis valtozoba mentjuk — suspendHistory eval a globalis scope-ban fut!
+    // Globalis valtozoba mentjuk — suspendHistory string-eval innen olvassa
     _snapshotData = readJsonFile(args.dataFilePath);
 
     // Ruler PIXELS-re
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
 
-    // Snapshot visszaallitas vegrehajtasa
-    // MEGJEGYZES: suspendHistory (egyetlen Undo lepes) itt NEM hasznalhato,
-    // mert a Photoshop osascript + do javascript kontextusban a string-eval
-    // nem lát globalisan deklaralt valtozokat/fuggvenyeket megbizhatoan.
-    // A kozvetlen hivas viszont mukodik.
-    _doRestore(_snapshotData);
+    // Egyetlen Undo lepes — parameter nelkuli hivas (a tobbi JSX mintajara)
+    _doc.suspendHistory("Snapshot visszaállítás", "_doRestore()");
 
     // Ruler visszaallitasa
     app.preferences.rulerUnits = oldRulerUnits;

@@ -162,7 +162,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.saveEvent.emit(layers);
   }
 
-  /** Frissítés Photoshopból: PSD megnyitás → JSX kiolvasás → snapshot mentés → újratöltés */
+  /** Frissítés Photoshopból: PSD megnyitás → JSX kiolvasás → state közvetlen frissítés */
   async refresh(): Promise<void> {
     this.refreshing.set(true);
     this.loadError.set(null);
@@ -179,20 +179,20 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       // 2. Várakozás hogy a Photoshop teljesen betöltse a dokumentumot
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // 3. Layout kiolvasás JSX-szel + JSON mentés
-      const readResult = await this.ps.readAndSaveLayout(
-        this.boardConfig(),
-        this.psdPath(),
-      );
+      // 3. Layout kiolvasás JSX-szel (mentés nélkül)
+      const readResult = await this.ps.readFullLayout(this.boardConfig());
 
-      if (!readResult.success) {
+      if (!readResult.success || !readResult.data) {
         this.loadError.set(readResult.error || 'Photoshop kiolvasás sikertelen.');
         this.refreshing.set(false);
         return;
       }
 
-      // 4. Friss snapshot betöltése
-      await this.loadSnapshotData();
+      // 4. State közvetlen frissítés a friss adatokkal
+      this.state.loadSnapshot(
+        { document: readResult.data.document, layers: readResult.data.layers },
+        this.persons(),
+      );
     } catch {
       this.loadError.set('Váratlan hiba a frissítéskor.');
     }

@@ -178,21 +178,51 @@ export class LayoutDesignerActionsService {
     }));
   }
 
-  /** Oszlopok automatikus igazítása: hasonló X-ű elemek → min(X) */
+  /**
+   * Oszlopok automatikus igazítása: egymás alatti elemek X → legközelebbi grid oszlop X.
+   * Minden kijelölt elemet a legközelebbi grid oszlop X pozíciójára snap-el.
+   */
   alignColumns(): void {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
-    const cols = this.groupIntoColumns(selected);
-    const colXMap = new Map<number, number>();
-    for (const col of cols) {
-      if (col.length < 2) continue;
-      const minX = Math.min(...col.map(l => l.editedX ?? l.x));
-      for (const l of col) colXMap.set(l.layerId, minX);
+
+    const images = selected.filter(l =>
+      l.category === 'student-image' || l.category === 'teacher-image',
+    );
+    if (images.length === 0) return;
+
+    const hasStudent = images.some(l => l.category === 'student-image');
+    const grid = hasStudent
+      ? this.gridService.studentGrid()
+      : this.gridService.teacherGrid();
+
+    if (!grid) return;
+
+    // Oszlop X pozíciók a gridből
+    const colPositions: number[] = [];
+    for (let c = 0; c < grid.cols; c++) {
+      colPositions.push(grid.originX + c * grid.cellWidth);
     }
-    if (colXMap.size === 0) return;
-    const affected = selected.filter(l => colXMap.has(l.layerId));
-    this.applyAlignmentWithCoupled(affected, (l) => ({
-      x: colXMap.get(l.layerId) ?? (l.editedX ?? l.x), y: l.editedY ?? l.y,
+
+    // Minden image-et a legközelebbi oszlop X-re snap-elünk
+    const posMap = new Map<number, number>();
+    for (const img of images) {
+      const imgX = img.editedX ?? img.x;
+      let bestX = colPositions[0];
+      let bestDist = Math.abs(imgX - bestX);
+      for (const cx of colPositions) {
+        const dist = Math.abs(imgX - cx);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestX = cx;
+        }
+      }
+      posMap.set(img.layerId, bestX);
+    }
+
+    this.applyAlignmentWithCoupled(images, (l) => ({
+      x: posMap.get(l.layerId) ?? (l.editedX ?? l.x),
+      y: l.editedY ?? l.y,
     }));
   }
 
@@ -258,26 +288,4 @@ export class LayoutDesignerActionsService {
     return rows;
   }
 
-  /** Elemek csoportosítása oszlopokba hasonló X pozíció alapján */
-  private groupIntoColumns(layers: DesignerLayer[]): DesignerLayer[][] {
-    // Threshold: elemszélesség fele, de min ROW_THRESHOLD_PX
-    const threshold = Math.max(ROW_THRESHOLD_PX, (layers[0]?.width ?? 100) / 2);
-    const sorted = [...layers].sort((a, b) => (a.editedX ?? a.x) - (b.editedX ?? b.x));
-    const cols: DesignerLayer[][] = [];
-    let currentCol: DesignerLayer[] = [];
-    let currentColX = -Infinity;
-    for (const layer of sorted) {
-      const x = layer.editedX ?? layer.x;
-      if (currentCol.length === 0 || Math.abs(x - currentColX) <= threshold) {
-        currentCol.push(layer);
-        if (currentCol.length === 1) currentColX = x;
-      } else {
-        cols.push(currentCol);
-        currentCol = [layer];
-        currentColX = x;
-      }
-    }
-    if (currentCol.length > 0) cols.push(currentCol);
-    return cols;
-  }
 }

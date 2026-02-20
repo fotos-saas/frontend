@@ -1,10 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
+import { LayoutDesignerGridService } from './layout-designer-grid.service';
 import { DesignerLayer } from './layout-designer.types';
 import { expandWithCoupledLayers } from './layout-designer.utils';
 
 /** Sorok Y-threshold: ezen belüli Y-ú elemek egy sorba tartoznak */
 const ROW_THRESHOLD_PX = 20;
+/** Fallback gap ha nincs grid konfig (PSD px) */
+const DEFAULT_GAP_PX = 10;
 
 /**
  * Layout Designer igazítás algoritmusok.
@@ -13,6 +16,7 @@ const ROW_THRESHOLD_PX = 20;
 @Injectable()
 export class LayoutDesignerActionsService {
   private readonly state = inject(LayoutDesignerStateService);
+  private readonly gridService = inject(LayoutDesignerGridService);
 
   /** Balra igazítás: X → min(X) */
   alignLeft(): void {
@@ -161,13 +165,14 @@ export class LayoutDesignerActionsService {
   /**
    * Ütközésmentes pozíciók kiszámítása: X szerint rendez,
    * balról jobbra haladva tolja jobbra az átfedő elemeket.
+   * A gap-et a grid konfigurációból veszi (cellWidth - imageWidth).
    */
   private resolveCollisions(
     images: DesignerLayer[],
     fixedY?: number,
     yFn?: (l: DesignerLayer) => number,
   ): Map<number, { x: number; y: number }> {
-    const MIN_GAP_PX = 10;
+    const gapPx = this.getGridGap(images);
     const sorted = [...images].sort((a, b) =>
       (a.editedX ?? a.x) - (b.editedX ?? b.x),
     );
@@ -176,8 +181,8 @@ export class LayoutDesignerActionsService {
 
     for (const layer of sorted) {
       let newX = layer.editedX ?? layer.x;
-      if (newX < rightEdge + MIN_GAP_PX) {
-        newX = rightEdge + MIN_GAP_PX;
+      if (newX < rightEdge + gapPx) {
+        newX = rightEdge + gapPx;
       }
       const y = yFn ? yFn(layer) : fixedY!;
       posMap.set(layer.layerId, { x: Math.round(newX), y });
@@ -185,6 +190,16 @@ export class LayoutDesignerActionsService {
     }
 
     return posMap;
+  }
+
+  /** Grid gap kiolvasása a grid konfigból (cellWidth - imageWidth) */
+  private getGridGap(images: DesignerLayer[]): number {
+    const hasStudent = images.some(l => l.category === 'student-image');
+    const grid = hasStudent
+      ? this.gridService.studentGrid()
+      : this.gridService.teacherGrid();
+    if (!grid) return DEFAULT_GAP_PX;
+    return Math.max(0, grid.cellWidth - grid.imageWidth);
   }
 
   /** Igazítás végrehajtása coupled párokkal */

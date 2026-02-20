@@ -91,22 +91,6 @@ function _findImageLayer(nameLayerName) {
   return null;
 }
 
-// --- Layer bounds EFFEKTEKKEL (sima bounds — stroke-ot is tartalmazza) ---
-function _getBoundsWithEffects(layer) {
-  selectLayerById(layer.id);
-  var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-  var desc = executeActionGet(ref);
-
-  var b = desc.getObjectValue(stringIDToTypeID("bounds"));
-  return {
-    left: b.getUnitDoubleValue(stringIDToTypeID("left")),
-    top: b.getUnitDoubleValue(stringIDToTypeID("top")),
-    right: b.getUnitDoubleValue(stringIDToTypeID("right")),
-    bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
-  };
-}
-
 // --- Layer bounds EFFEKTEK NELKUL (boundsNoEffects) ---
 function _getBoundsNoEffects(layer) {
   selectLayerById(layer.id);
@@ -131,15 +115,10 @@ function _getBoundsNoEffects(layer) {
 }
 
 // --- Nev szovegenek frissitese + pozicionalasa a kep ala ---
-// A gap a kep vizualis alja (stroke-kal!) es a szoveg vizualis teteje kozott ertendo.
-// Eljarás:
-//   1. Szoveg frissites (tordeles)
-//   2. Baseline pozicionalas: imgBottom + gapPx (ez a szoveg TETEJE lesz kb.)
-//   3. Bounding box top lekerdezes → korrekcios delta szamitas
-//   4. Ujra pozicionalas a korrekciobol
+// A gap a kep alja (EFFEKTEK NELKUL — stroke nem szamit!) es a szoveg teteje kozott.
 function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakAfter) {
-  // Kep bounds EFFEKTEKKEL (stroke szamit!)
-  var imgBounds = _getBoundsWithEffects(imageLayer);
+  // Kep bounds EFFEKTEK NELKUL — a gap a kep szelétől indul, NEM a stroke-tol
+  var imgBounds = _getBoundsNoEffects(imageLayer);
   var imgCenterX = (imgBounds.left + imgBounds.right) / 2;
   var imgBottom = imgBounds.bottom;
 

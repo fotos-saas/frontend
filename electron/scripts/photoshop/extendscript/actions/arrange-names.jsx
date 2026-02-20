@@ -70,14 +70,34 @@ function _findImageLayer(nameLayerName) {
   return null;
 }
 
+// --- Layer bounds EFFEKTEKKEL (sima bounds — stroke-ot is tartalmazza) ---
+// A nev gap-nek a VIZUALIS kep aljabol kell szamolnia, ami a stroke-ot is
+// tartalmazza. Ezert a kep layer-nel a sima bounds-ot hasznaljuk (nem boundsNoEffects!).
+function _getBoundsWithEffects(layer) {
+  selectLayerById(layer.id);
+  var ref = new ActionReference();
+  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  var desc = executeActionGet(ref);
+
+  var b = desc.getObjectValue(stringIDToTypeID("bounds"));
+  return {
+    left: b.getUnitDoubleValue(stringIDToTypeID("left")),
+    top: b.getUnitDoubleValue(stringIDToTypeID("top")),
+    right: b.getUnitDoubleValue(stringIDToTypeID("right")),
+    bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
+  };
+}
+
 // --- Nev pozicionalasa a kep ala ---
-// FONTOS: A textItem.position a szoveg "anchor point"-ja (baseline bal szele),
+// FONTOS: A textItem.position a szoveg "anchor point"-ja (baseline),
 // NEM a bounding box! Igy az ekezetes nagybetuk (A, E) nem tolják feljebb a nevet.
 // Minden nev baseline-ja egyforma Y-ra kerul, fuggetlenul az ekezetek magassagatol.
+// A kep bounds-at EFFEKTEKKEL egyutt kerdezzuk le (stroke szamit a gap-nel!).
 function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign) {
-  var imgBnfe = _getBoundsNoEffects(imageLayer);
-  var imgCenterX = (imgBnfe.left + imgBnfe.right) / 2;
-  var imgBottom = imgBnfe.bottom;
+  // Kep bounds EFFEKTEKKEL (stroke szamit!) — a vizualis also szel
+  var imgBounds = _getBoundsWithEffects(imageLayer);
+  var imgCenterX = (imgBounds.left + imgBounds.right) / 2;
+  var imgBottom = imgBounds.bottom;
 
   // Nev layer kivalasztasa
   selectLayerById(nameLayer.id);
@@ -116,9 +136,9 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign) {
   //   RIGHT: a szoveg jobb szele
   var targetX;
   if (textAlign === "left") {
-    targetX = imgBnfe.left;
+    targetX = imgBounds.left;
   } else if (textAlign === "right") {
-    targetX = imgBnfe.right;
+    targetX = imgBounds.right;
   } else {
     // center: a kep kozepere
     targetX = imgCenterX;

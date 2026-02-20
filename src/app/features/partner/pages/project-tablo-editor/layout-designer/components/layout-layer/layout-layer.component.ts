@@ -47,7 +47,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
           [class.text-left]="layer().justification === 'left'"
           [class.text-center]="layer().justification === 'center' || !layer().justification"
           [class.text-right]="layer().justification === 'right'"
-        >{{ displayName }}</span>
+        >{{ textContent }}</span>
       } @else {
         <div class="designer-layer__fixed">
           <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
@@ -88,9 +88,11 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       &--text {
         display: flex;
         align-items: center;
-        background: transparent;
-        border-color: rgba(59, 130, 246, 0.15);
+        background: rgba(59, 130, 246, 0.06);
+        border-color: rgba(59, 130, 246, 0.2);
         overflow: visible;
+        width: auto !important;
+        height: auto !important;
       }
 
       &--fixed {
@@ -123,19 +125,13 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
     .designer-layer__text {
       color: #1e293b;
       font-size: 10px;
-      padding: 0 1px;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      overflow: visible;
+      padding: 1px 3px;
+      white-space: pre-line;
       line-height: 1.2;
 
-      &.text-left { text-align: left; justify-content: flex-start; }
-      &.text-center { text-align: center; justify-content: center; }
-      &.text-right { text-align: right; justify-content: flex-end; }
+      &.text-left { text-align: left; }
+      &.text-center { text-align: center; }
+      &.text-right { text-align: right; }
     }
 
     .designer-layer__fixed {
@@ -164,6 +160,13 @@ export class LayoutLayerComponent {
   /** Megjelenítendő név: person match neve, vagy layerName fallback */
   get displayName(): string {
     return this.layer().personMatch?.name ?? this.layer().layerName;
+  }
+
+  /** Szöveg tartalom a PSD tördeléssel (\r → \n) */
+  get textContent(): string {
+    const text = this.layer().text;
+    if (text) return text.replace(/\r/g, '\n');
+    return this.displayName;
   }
 
   get isImage(): boolean {

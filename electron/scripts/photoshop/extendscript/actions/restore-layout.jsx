@@ -118,6 +118,10 @@ function _restoreTextContent(layer, text, justification) {
 
 // --- Fo visszaallitasi logika ---
 function _doRestore(data) {
+  if (!data) {
+    log("[JSX] HIBA: data null/undefined — suspendHistory scope hiba?");
+    return;
+  }
   var persons = data.persons;
   if (!persons || persons.length === 0) {
     log("[JSX] Nincs szemely a snapshot-ban");
@@ -129,6 +133,13 @@ function _doRestore(data) {
   for (var i = 0; i < persons.length; i++) {
     var p = persons[i];
     var layerName = p.layerName;
+
+    // Elso 3 szemelyre reszletes log
+    if (i < 3) {
+      log("[JSX] Person[" + i + "]: layerName=" + layerName +
+          ", image=" + (p.image ? p.image.x + "," + p.image.y : "null") +
+          ", nameLayer=" + (p.nameLayer ? "yes" : "no"));
+    }
 
     // Image layer visszaallitasa
     if (p.image) {
@@ -197,6 +208,9 @@ function _doRestore(data) {
 
     // Globalis valtozoba mentjuk — suspendHistory eval a globalis scope-ban fut!
     _snapshotData = readJsonFile(args.dataFilePath);
+
+    log("[JSX] Snapshot data betoltve: version=" + (_snapshotData.version || "?") +
+        ", persons=" + (_snapshotData.persons ? _snapshotData.persons.length : 0));
 
     // Ruler PIXELS-re
     var oldRulerUnits = app.preferences.rulerUnits;

@@ -809,14 +809,26 @@ export class PhotoshopService {
       }
 
       // 2. restore-layout.jsx futtatása a snapshot adatokkal
+      const snapshotData = loadResult.data as Record<string, unknown>;
+      this.logger.info('Snapshot restore indul:', {
+        personCount: Array.isArray(snapshotData['persons']) ? (snapshotData['persons'] as unknown[]).length : 0,
+        version: snapshotData['version'],
+      });
+
       const jsxResult = await this.api.runJsx({
         scriptName: 'actions/restore-layout.jsx',
-        jsonData: loadResult.data as Record<string, unknown>,
+        jsonData: snapshotData,
         targetDocName,
       });
 
       if (!jsxResult.success) {
+        this.logger.error('Snapshot restore JSX hiba:', jsxResult.error);
         return { success: false, error: jsxResult.error || 'Snapshot visszaállítás sikertelen' };
+      }
+
+      // JSX log output kiírása (debug)
+      if (jsxResult.output) {
+        this.logger.info('Snapshot restore JSX output:', jsxResult.output);
       }
 
       this.logger.info('Snapshot visszaállítva');

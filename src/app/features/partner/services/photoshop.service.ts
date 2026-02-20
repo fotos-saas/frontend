@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
-import { SnapshotListItem } from '@core/services/electron.types';
+import { SnapshotListItem, SnapshotLayer } from '@core/services/electron.types';
 import { TabloSize } from '../models/partner.models';
 
 /** Kistablo alias merete */
@@ -576,7 +576,7 @@ export class PhotoshopService {
       const jsonStr = output.substring(jsonStart + jsonPrefix.length).trim();
       let layoutResult: {
         document: { name: string; widthPx: number; heightPx: number; dpi: number };
-        persons: Array<{ personId: number | null; name: string; type: string; layerName: string; x: number; y: number; width: number; height: number }>;
+        layers: SnapshotLayer[];
       };
 
       try {
@@ -587,7 +587,7 @@ export class PhotoshopService {
 
       // 3. Teljes layout objektum összeállítása
       const layoutData = {
-        version: 1,
+        version: 3,
         updatedAt: new Date().toISOString(),
         document: layoutResult.document,
         board: {
@@ -598,7 +598,7 @@ export class PhotoshopService {
           gapVCm: this.gapVCm(),
           gridAlign: this.gridAlign(),
         },
-        persons: layoutResult.persons,
+        layers: layoutResult.layers || [],
       };
 
       // 4. Mentés a PSD mellé
@@ -611,7 +611,7 @@ export class PhotoshopService {
         return { success: false, error: saveResult.error || 'Layout JSON mentés sikertelen' };
       }
 
-      this.logger.info(`Layout JSON mentve: ${layoutResult.persons.length} személy`);
+      this.logger.info(`Layout JSON mentve: ${(layoutResult.layers || []).length} layer`);
       return { success: true };
     } catch (err) {
       this.logger.error('Layout kiolvasás/mentés hiba', err);
@@ -620,8 +620,8 @@ export class PhotoshopService {
   }
 
   /**
-   * Teljes layout kiolvasás v2 formátumban: images + names összefésülés layerName alapján.
-   * A read-layout.jsx v2 kimenetét (persons + namePersons) egyetlen persons tömbbé egyesíti.
+   * Teljes layout kiolvasás v3 formátumban: layers[] pass-through.
+   * A read-layout.jsx v3 kimenetét (layers[]) közvetlenül visszaadja.
    */
   async readFullLayout(
     boardConfig: { widthCm: number; heightCm: number },
@@ -631,14 +631,7 @@ export class PhotoshopService {
     error?: string;
     data?: {
       document: { name: string; widthPx: number; heightPx: number; dpi: number };
-      persons: Array<{
-        personId: number | null;
-        name: string;
-        type: string;
-        layerName: string;
-        image: { x: number; y: number; width: number; height: number };
-        nameLayer?: { x: number; y: number; width: number; height: number; text: string; justification: string };
-      }>;
+      layers: SnapshotLayer[];
       board: Record<string, unknown>;
       nameSettings: Record<string, unknown>;
     };
@@ -665,8 +658,7 @@ export class PhotoshopService {
       const jsonStr = output.substring(jsonStart + jsonPrefix.length).trim();
       let layoutResult: {
         document: { name: string; widthPx: number; heightPx: number; dpi: number };
-        persons: Array<{ personId: number | null; name: string; type: string; layerName: string; x: number; y: number; width: number; height: number }>;
-        namePersons: Array<{ personId: number | null; name: string; type: string; layerName: string; x: number; y: number; width: number; height: number; text: string; justification: string }>;
+        layers: SnapshotLayer[];
       };
 
       try {
@@ -675,38 +667,11 @@ export class PhotoshopService {
         return { success: false, error: 'Layout JSON parse hiba' };
       }
 
-      // Images + names összefésülés layerName alapján
-      const nameMap = new Map<string, typeof layoutResult.namePersons[0]>();
-      for (const np of (layoutResult.namePersons || [])) {
-        nameMap.set(np.layerName, np);
-      }
-
-      const persons = layoutResult.persons.map(p => {
-        const nameData = nameMap.get(p.layerName);
-        return {
-          personId: p.personId,
-          name: p.name,
-          type: p.type,
-          layerName: p.layerName,
-          image: { x: p.x, y: p.y, width: p.width, height: p.height },
-          ...(nameData ? {
-            nameLayer: {
-              x: nameData.x,
-              y: nameData.y,
-              width: nameData.width,
-              height: nameData.height,
-              text: nameData.text,
-              justification: nameData.justification,
-            },
-          } : {}),
-        };
-      });
-
       return {
         success: true,
         data: {
           document: layoutResult.document,
-          persons,
+          layers: layoutResult.layers || [],
           board: {
             widthCm: boardConfig.widthCm,
             heightCm: boardConfig.heightCm,
@@ -751,13 +716,13 @@ export class PhotoshopService {
     const fileName = `${dateStr}_${slugName}.json`;
 
     const snapshotData = {
-      version: 2,
+      version: 3,
       snapshotName: name,
       createdAt: now.toISOString(),
       document: layoutResult.data.document,
       board: layoutResult.data.board,
       nameSettings: layoutResult.data.nameSettings,
-      persons: layoutResult.data.persons,
+      layers: layoutResult.data.layers,
     };
 
     try {
@@ -771,7 +736,7 @@ export class PhotoshopService {
         return { success: false, error: result.error || 'Snapshot mentés sikertelen' };
       }
 
-      this.logger.info(`Snapshot mentve: ${name} (${layoutResult.data.persons.length} személy)`);
+      this.logger.info(`Snapshot mentve: ${name} (${layoutResult.data.layers.length} layer)`);
       return { success: true };
     } catch (err) {
       this.logger.error('Snapshot mentés hiba', err);
@@ -794,10 +759,13 @@ export class PhotoshopService {
 
   /**
    * Snapshot visszaállítás: beolvassa a JSON-t + futtatja a restore-layout.jsx-et.
+   * restoreGroups: opcionális — ha megadva, csak a megadott csoport prefixek layereit állítja vissza.
+   * Pl. [["Images"], ["Names"]] → csak Images/* és Names/* layerek.
    */
   async restoreSnapshot(
     snapshotPath: string,
     targetDocName?: string,
+    restoreGroups?: string[][],
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
@@ -810,10 +778,24 @@ export class PhotoshopService {
 
       // 2. restore-layout.jsx futtatása a snapshot adatokkal
       const snapshotData = loadResult.data as Record<string, unknown>;
+
+      // v3: layers[], v2: persons[]
+      const layerCount = Array.isArray(snapshotData['layers'])
+        ? (snapshotData['layers'] as unknown[]).length
+        : Array.isArray(snapshotData['persons'])
+          ? (snapshotData['persons'] as unknown[]).length
+          : 0;
+
       this.logger.info('Snapshot restore indul:', {
-        personCount: Array.isArray(snapshotData['persons']) ? (snapshotData['persons'] as unknown[]).length : 0,
+        layerCount,
         version: snapshotData['version'],
+        restoreGroups: restoreGroups?.length ?? 'all',
       });
+
+      // restoreGroups szűrő hozzáadása a snapshot adatokhoz
+      if (restoreGroups && restoreGroups.length > 0) {
+        snapshotData['restoreGroups'] = restoreGroups;
+      }
 
       const jsxResult = await this.api.runJsx({
         scriptName: 'actions/restore-layout.jsx',
@@ -848,6 +830,18 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('Snapshot törlés hiba', err);
       return { success: false, error: 'Váratlan hiba a snapshot törlésnél' };
+    }
+  }
+
+  /** Snapshot betöltése (JSON tartalom visszaadása) */
+  async loadSnapshot(snapshotPath: string): Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      return await this.api.loadSnapshot({ snapshotPath });
+    } catch (err) {
+      this.logger.error('Snapshot betöltés hiba', err);
+      return { success: false, error: 'Váratlan hiba a snapshot betöltésnél' };
     }
   }
 

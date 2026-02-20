@@ -14,14 +14,15 @@ import { BrandingService } from '../../services/branding.service';
 import { TabloSize, TabloPersonItem } from '../../models/partner.models';
 import { TabloEditorDebugService, DebugLogEntry } from './tablo-editor-debug.service';
 import { TabloEditorSnapshotService } from './tablo-editor-snapshot.service';
-import { SnapshotListItem } from '@core/services/electron.types';
+import { SnapshotListItem, SnapshotLayer } from '@core/services/electron.types';
+import { SnapshotRestoreDialogComponent } from './snapshot-restore-dialog.component';
 
 type EditorTab = 'commands' | 'settings' | 'debug';
 
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
-  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent],
+  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent],
   providers: [TabloEditorDebugService, TabloEditorSnapshotService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
@@ -516,8 +517,16 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
   }
 
-  /** Pillanatkép visszaállítása */
+  /** Pillanatkép visszaállítása — dialógust nyit a csoport-választóval */
   async restoreSnapshot(snapshot: SnapshotListItem): Promise<void> {
+    await this.snapshotService.openRestoreDialog(snapshot);
+  }
+
+  /** Visszaállítás a dialógusból kiválasztott csoportokkal */
+  async restoreWithGroups(groups: string[][]): Promise<void> {
+    const snapshot = this.snapshotService.restoreDialogSnapshot();
+    if (!snapshot) return;
+
     const psdPath = await this.resolvePsdPath();
     if (!psdPath) return;
 
@@ -525,7 +534,11 @@ export class ProjectTabloEditorComponent implements OnInit {
     const result = await this.snapshotService.restoreSnapshot(
       snapshot.filePath,
       psdPath,
+      undefined,
+      groups,
     );
+
+    this.snapshotService.closeRestoreDialog();
 
     if (result.success) {
       this.successMessage.set(`Pillanatkép visszaállítva: ${snapshot.snapshotName}`);

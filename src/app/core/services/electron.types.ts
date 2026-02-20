@@ -92,6 +92,22 @@ export interface SnapshotListItem {
   snapshotName: string;
   createdAt: string | null;
   personCount: number;
+  layerCount: number;
+  version: number;
+}
+
+/** Snapshot v3 layer adat — egyetlen layer a dokumentumbol */
+export interface SnapshotLayer {
+  layerId: number;
+  layerName: string;
+  groupPath: string[];
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  kind: 'normal' | 'text';
+  text?: string;
+  justification?: 'left' | 'center' | 'right';
 }
 
 interface PhotoshopAPI {

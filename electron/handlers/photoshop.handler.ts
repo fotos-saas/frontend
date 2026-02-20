@@ -1329,12 +1329,20 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         try {
           const content = fs.readFileSync(filePath, 'utf-8');
           const data = JSON.parse(content);
+          const version = data.version || 1;
+
+          // v3: layers[] tömb, v2: persons[] tömb
+          const layerCount = Array.isArray(data.layers) ? data.layers.length : 0;
+          const personCount = Array.isArray(data.persons) ? data.persons.length : 0;
+
           return {
             fileName,
             filePath,
             snapshotName: data.snapshotName || fileName.replace('.json', ''),
             createdAt: data.createdAt || null,
-            personCount: Array.isArray(data.persons) ? data.persons.length : 0,
+            personCount: version >= 3 ? layerCount : personCount,
+            layerCount,
+            version,
           };
         } catch {
           return {
@@ -1343,6 +1351,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
             snapshotName: fileName.replace('.json', ''),
             createdAt: null,
             personCount: 0,
+            layerCount: 0,
+            version: 1,
           };
         }
       });

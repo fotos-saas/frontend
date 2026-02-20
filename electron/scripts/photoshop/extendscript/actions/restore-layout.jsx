@@ -1,20 +1,31 @@
 /**
- * restore-layout.jsx — Snapshot visszaallitas
+ * restore-layout.jsx — Snapshot visszaallitas (v3)
  *
- * JSON temp fajlbol olvassa a persons tombot es visszaallitja
- * a layerek pozicioit + nev layerek text tartalmat es igazitasat.
+ * JSON temp fajlbol olvassa a layers tombot es visszaallitja
+ * a layerek pozicioit. Text layereknel text tartalom + igazitas is.
+ *
+ * Layer keresesi logika:
+ *   1. Elsodleges: layerId — Photoshop layer.id egyedi azonosito
+ *   2. Fallback: layerName + groupPath — ha az ID nem letezik
+ *
+ * Opcionalis: restoreGroups — csak megadott csoport prefixek layereit allitja vissza
+ *
+ * v2 backward compat: persons[] → automatikus v3 layers[] konverzio
  *
  * Egy Undo lepes: suspendHistory()-vel egybefogva.
  *
  * JSON formatum (Electron handler kesziti):
  * {
- *   "persons": [
+ *   "layers": [
  *     {
+ *       "layerId": 142,
  *       "layerName": "kiss-janos---42",
- *       "image": { "x": 100, "y": 200, "width": 472, "height": 708 },
- *       "nameLayer": { "x": 85, "y": 920, "text": "Kiss\rJanos", "justification": "center" }
+ *       "groupPath": ["Images", "Students"],
+ *       "x": 100, "y": 200, "width": 472, "height": 708,
+ *       "kind": "normal"
  *     }
- *   ]
+ *   ],
+ *   "restoreGroups": [["Images"], ["Names"]]  // opcionalis
  * }
  */
 
@@ -32,28 +43,6 @@ var _doc;
 var _skipped = 0;
 var _restored = 0;
 var _snapshotData = null;
-
-// --- Layer keresese nev alapjan a teljes dokumentumban (rekurziv) ---
-function _findLayerByName(container, layerName) {
-  // artLayers keresese
-  try {
-    for (var i = 0; i < container.artLayers.length; i++) {
-      if (container.artLayers[i].name === layerName) {
-        return container.artLayers[i];
-      }
-    }
-  } catch (e) { /* nincs artLayers */ }
-
-  // Rekurziv keresese layerSets-ben
-  try {
-    for (var j = 0; j < container.layerSets.length; j++) {
-      var found = _findLayerByName(container.layerSets[j], layerName);
-      if (found) return found;
-    }
-  } catch (e) { /* nincs layerSets */ }
-
-  return null;
-}
 
 // --- Layer bounds EFFEKTEK NELKUL (boundsNoEffects) ---
 function _getBoundsNoEffects(layer) {
@@ -116,71 +105,206 @@ function _restoreTextContent(layer, text, justification) {
   }
 }
 
+// --- Layer keresese nev alapjan egy containerben (rekurziv) ---
+function _findLayerByName(container, layerName) {
+  try {
+    for (var i = 0; i < container.artLayers.length; i++) {
+      if (container.artLayers[i].name === layerName) {
+        return container.artLayers[i];
+      }
+    }
+  } catch (e) { /* nincs artLayers */ }
+
+  try {
+    for (var j = 0; j < container.layerSets.length; j++) {
+      var found = _findLayerByName(container.layerSets[j], layerName);
+      if (found) return found;
+    }
+  } catch (e) { /* nincs layerSets */ }
+
+  return null;
+}
+
+// --- Layer keresese layerId alapjan (ActionManager) ---
+// Visszaadja a layert ha letezik, vagy null ha nem
+function _findLayerById(doc, layerId) {
+  try {
+    var ref = new ActionReference();
+    ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
+    var desc = executeActionGet(ref);
+    // Ha nem dob hibat → a layer letezik, kivalasztjuk
+    selectLayerById(layerId);
+    return doc.activeLayer;
+  } catch (e) {
+    return null;
+  }
+}
+
+// --- Csoport cache (ES3 — parhuzamos tombok) ---
+// A getGroupByPath eredmenyeit cache-eljuk, hogy ne keressuk ujra
+var _groupCacheKeys = [];
+var _groupCacheValues = [];
+
+function _getCachedGroup(doc, groupPath) {
+  // Path → string kulcs (ES3: nincs Array.join sajnos... de van)
+  var key = groupPath.join("/");
+
+  // Cache kereses
+  for (var i = 0; i < _groupCacheKeys.length; i++) {
+    if (_groupCacheKeys[i] === key) return _groupCacheValues[i];
+  }
+
+  // Uj kereses + cache-eles
+  var grp = getGroupByPath(doc, groupPath);
+  _groupCacheKeys.push(key);
+  _groupCacheValues.push(grp);
+  return grp;
+}
+
+// --- Ellenorzes: a layer groupPath megfelel-e a restoreGroups szuronek ---
+// restoreGroups: tomb tombje — pl. [["Images"], ["Names"]]
+// groupPath: string tomb — pl. ["Images", "Students"]
+// Igaz ha a groupPath VALAMELYIK restoreGroups prefixszel kezdodik,
+// VAGY ha a groupPath ures (root layer) es a restoreGroups tartalmaz ures tombot
+function _matchesRestoreGroups(groupPath, restoreGroups) {
+  for (var i = 0; i < restoreGroups.length; i++) {
+    var prefix = restoreGroups[i];
+
+    // Ures prefix → root layerek
+    if (prefix.length === 0 && groupPath.length === 0) return true;
+
+    // Prefix match: a groupPath elso N eleme megegyezik
+    if (prefix.length <= groupPath.length) {
+      var match = true;
+      for (var j = 0; j < prefix.length; j++) {
+        if (prefix[j] !== groupPath[j]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return true;
+    }
+  }
+  return false;
+}
+
+// --- v2 → v3 konverzio (backward compat) ---
+// v2 formatum: persons[{layerName, image:{x,y,w,h}, nameLayer?:{x,y,text,justification}}]
+// v3 formatum: layers[{layerId, layerName, groupPath, x, y, width, height, kind, text?, justification?}]
+function _convertV2ToLayers(persons) {
+  var layers = [];
+  for (var i = 0; i < persons.length; i++) {
+    var p = persons[i];
+    var personType = p.type || "student";
+
+    // Image layer (ha van image adat)
+    if (p.image) {
+      layers.push({
+        layerId: 0, // v2-nek nincs layerId → fallback keresest fog hasznalni
+        layerName: p.layerName,
+        groupPath: ["Images", personType === "teacher" ? "Teachers" : "Students"],
+        x: p.image.x,
+        y: p.image.y,
+        width: p.image.width,
+        height: p.image.height,
+        kind: "normal"
+      });
+    }
+
+    // Name layer (ha van nameLayer adat)
+    if (p.nameLayer) {
+      layers.push({
+        layerId: 0,
+        layerName: p.layerName,
+        groupPath: ["Names", personType === "teacher" ? "Teachers" : "Students"],
+        x: p.nameLayer.x,
+        y: p.nameLayer.y,
+        width: p.nameLayer.width || 0,
+        height: p.nameLayer.height || 0,
+        kind: "text",
+        text: p.nameLayer.text,
+        justification: p.nameLayer.justification
+      });
+    }
+  }
+  return layers;
+}
+
 // --- Fo visszaallitasi logika ---
-// _snapshotData globalis valtozot olvassa (mint a tobbi JSX _data-t)
-// → suspendHistory string-eval igy lata
 function _doRestore() {
   if (!_snapshotData) {
     log("[JSX] HIBA: _snapshotData null/undefined");
     return;
   }
-  var persons = _snapshotData.persons;
-  if (!persons || persons.length === 0) {
-    log("[JSX] Nincs szemely a snapshot-ban");
+
+  // v2 backward compat: persons → layers konverzio
+  var layers = _snapshotData.layers;
+  if (!layers && _snapshotData.persons) {
+    log("[JSX] v2 snapshot detektalva — konverzio v3 formátumra");
+    layers = _convertV2ToLayers(_snapshotData.persons);
+  }
+
+  if (!layers || layers.length === 0) {
+    log("[JSX] Nincs layer a snapshot-ban");
     return;
   }
 
-  log("[JSX] Snapshot visszaallitas indul: " + persons.length + " szemely");
+  // Opcionalis restoreGroups szuro
+  var restoreGroups = _snapshotData.restoreGroups || null;
+  var hasFilter = restoreGroups && restoreGroups.length > 0;
 
-  // Csoportok lekerdezese EGYSZER (nem minden iteracioban)
-  var imgStudents = getGroupByPath(_doc, ["Images", "Students"]);
-  var imgTeachers = getGroupByPath(_doc, ["Images", "Teachers"]);
-  var nameStudents = getGroupByPath(_doc, ["Names", "Students"]);
-  var nameTeachers = getGroupByPath(_doc, ["Names", "Teachers"]);
+  log("[JSX] Snapshot visszaallitas indul: " + layers.length + " layer" +
+    (hasFilter ? " (szurt: " + restoreGroups.length + " csoport prefix)" : ""));
 
-  for (var i = 0; i < persons.length; i++) {
-    var p = persons[i];
-    var layerName = p.layerName;
+  // Group cache reset
+  _groupCacheKeys = [];
+  _groupCacheValues = [];
 
-    // Image layer visszaallitasa — CSAK Images/ csoportokban keresunk!
-    if (p.image) {
-      var imgLayer = null;
-      if (imgStudents) imgLayer = _findLayerByName(imgStudents, layerName);
-      if (!imgLayer && imgTeachers) imgLayer = _findLayerByName(imgTeachers, layerName);
+  for (var i = 0; i < layers.length; i++) {
+    var layerData = layers[i];
+    var groupPath = layerData.groupPath || [];
 
-      if (imgLayer) {
-        try {
-          _restoreLayerPosition(imgLayer, p.image.x, p.image.y);
-          _restored++;
-        } catch (e) {
-          log("[JSX] WARN: Image layer visszaallitas sikertelen (" + layerName + "): " + e.message);
-          _skipped++;
-        }
-      } else {
-        log("[JSX] WARN: Image layer nem talalhato: " + layerName);
-        _skipped++;
-      }
+    // restoreGroups szuro — ha megadva, csak matching layerek
+    if (hasFilter && !_matchesRestoreGroups(groupPath, restoreGroups)) {
+      continue;
     }
 
-    // Name layer visszaallitasa — CSAK Names/ csoportokban keresunk!
-    if (p.nameLayer) {
-      var nameLayer = null;
-      if (nameStudents) nameLayer = _findLayerByName(nameStudents, layerName);
-      if (!nameLayer && nameTeachers) nameLayer = _findLayerByName(nameTeachers, layerName);
+    // 1. Layer keresese layerId alapjan (elsodleges)
+    var layer = null;
+    if (layerData.layerId && layerData.layerId > 0) {
+      layer = _findLayerById(_doc, layerData.layerId);
+    }
 
-      if (nameLayer) {
-        try {
-          _restoreLayerPosition(nameLayer, p.nameLayer.x, p.nameLayer.y);
-          _restoreTextContent(nameLayer, p.nameLayer.text, p.nameLayer.justification);
-          _restored++;
-        } catch (e) {
-          log("[JSX] WARN: Name layer visszaallitas sikertelen (" + layerName + "): " + e.message);
-          _skipped++;
-        }
-      } else {
-        log("[JSX] WARN: Name layer nem talalhato: " + layerName);
-        _skipped++;
+    // 2. Fallback: layerName + groupPath alapjan
+    if (!layer && layerData.layerName) {
+      var searchContainer = _doc;
+      if (groupPath.length > 0) {
+        var grp = _getCachedGroup(_doc, groupPath);
+        if (grp) searchContainer = grp;
       }
+      layer = _findLayerByName(searchContainer, layerData.layerName);
+    }
+
+    if (!layer) {
+      log("[JSX] WARN: Layer nem talalhato: " + layerData.layerName +
+        " (id:" + (layerData.layerId || "?") + ", path:" + groupPath.join("/") + ")");
+      _skipped++;
+      continue;
+    }
+
+    // Pozicio visszaallitasa
+    try {
+      _restoreLayerPosition(layer, layerData.x, layerData.y);
+
+      // Text layerek: text + justification visszaallitasa
+      if (layerData.kind === "text") {
+        _restoreTextContent(layer, layerData.text, layerData.justification);
+      }
+
+      _restored++;
+    } catch (e) {
+      log("[JSX] WARN: Layer visszaallitas sikertelen (" + layerData.layerName + "): " + e.message);
+      _skipped++;
     }
   }
 

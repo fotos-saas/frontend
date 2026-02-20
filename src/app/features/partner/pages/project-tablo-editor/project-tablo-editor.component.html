@@ -290,7 +290,7 @@
                       }
                       <span class="snapshot-item__meta">
                         {{ snapshotService.formatDate(snap.createdAt) }}
-                        · {{ snap.personCount }} személy
+                        · {{ snap.personCount }} layer
                       </span>
                     </div>
                     <div class="snapshot-item__actions">
@@ -697,7 +697,7 @@
               <span class="snapshot-picker-item__name">{{ snap.snapshotName }}</span>
               <span class="snapshot-picker-item__meta">
                 {{ snapshotService.formatDate(snap.createdAt) }}
-                · {{ snap.personCount }} személy
+                · {{ snap.personCount }} layer
               </span>
             </div>
             @if (snapshotService.updatingSnapshot()) {
@@ -761,4 +761,14 @@
       </button>
     </div>
   </app-dialog-wrapper>
+}
+
+<!-- Visszaállítás csoport-választó dialógus (page-card KÍVÜL) -->
+@if (snapshotService.showRestoreDialog()) {
+  <app-snapshot-restore-dialog
+    [layers]="snapshotService.restoreDialogLayers()"
+    [isRestoring]="snapshotService.restoringSnapshotPath() !== null"
+    (closeEvent)="snapshotService.closeRestoreDialog()"
+    (restoreEvent)="restoreWithGroups($event)"
+  />
 }

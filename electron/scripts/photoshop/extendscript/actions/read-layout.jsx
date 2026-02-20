@@ -1,9 +1,9 @@
 /**
- * read-layout.jsx — Tablo layout pozicio-regiszter kiolvasasa
+ * read-layout.jsx — Tablo layout pozicio-regiszter kiolvasasa (v3)
  *
- * Bejarje az Images/Students + Images/Teachers csoportokat,
- * es minden layerhoz kinyeri a poziciot (boundsNoEffects) es a personId-t.
- * A dokumentum meretet es DPI-t is visszaadja.
+ * Rekurzivan bejarje a TELJES dokumentumot es minden layerhez
+ * kinyeri a poziciot (boundsNoEffects), layerId-t es groupPath-ot.
+ * Text layereknel extra text + justification mezok.
  *
  * Az eredmeny JSON string-kent a _logLines-ban kerul vissza
  * (osascript stdout → Electron handler parse-olja).
@@ -50,118 +50,6 @@ function _getBoundsNoEffects(layer) {
   };
 }
 
-// --- PersonId kinyerese a layer nevbol ---
-// Layer nev formatum: "kiss-janos---42" → personId = 42
-// A "---" elvalaszto utan jon az ID szam
-function _extractPersonId(layerName) {
-  var idx = layerName.lastIndexOf("---");
-  if (idx === -1) return null;
-  var idStr = layerName.substring(idx + 3);
-  var id = parseInt(idStr, 10);
-  if (isNaN(id)) return null;
-  return id;
-}
-
-// --- Nev visszafejtese a layer nevbol ---
-// "kiss-janos---42" → "kiss-janos" (kotojeles slug, nem az eredeti nev)
-function _extractSlugName(layerName) {
-  var idx = layerName.lastIndexOf("---");
-  if (idx === -1) return layerName;
-  return layerName.substring(0, idx);
-}
-
-// --- Name csoport layer-einek kiolvasasa (text layerek) ---
-// Visszaad egy tombot: [{personId, layerName, x, y, width, height, text, justification}, ...]
-// A textItem.contents tartalmazza a sortoreseket (\r Photoshopban)
-function _readNameGroupLayers(grp, personType) {
-  var result = [];
-  if (!grp) return result;
-
-  for (var i = grp.artLayers.length - 1; i >= 0; i--) {
-    var layer = grp.artLayers[i];
-    try {
-      // Csak text layereket olvassuk
-      if (layer.kind !== LayerKind.TEXT) continue;
-
-      var bnfe = _getBoundsNoEffects(layer);
-      var x = Math.round(bnfe.left);
-      var y = Math.round(bnfe.top);
-      var w = Math.round(bnfe.right - bnfe.left);
-      var h = Math.round(bnfe.bottom - bnfe.top);
-
-      var personId = _extractPersonId(layer.name);
-      var slugName = _extractSlugName(layer.name);
-
-      // Text tartalom es igazitas kiolvasasa
-      var textContent = "";
-      var justification = "center";
-      try {
-        textContent = layer.textItem.contents;
-        var j = layer.textItem.justification;
-        if (j === Justification.LEFT) justification = "left";
-        else if (j === Justification.RIGHT) justification = "right";
-        else justification = "center";
-      } catch (te) {
-        // textItem nem elerheto — skip
-      }
-
-      result.push({
-        personId: personId,
-        name: slugName,
-        type: personType,
-        layerName: layer.name,
-        x: x,
-        y: y,
-        width: w,
-        height: h,
-        text: textContent,
-        justification: justification
-      });
-    } catch (e) {
-      log("[JSX] WARN: Name layer olvasas sikertelen (" + layer.name + "): " + e.message);
-    }
-  }
-
-  return result;
-}
-
-// --- Egy csoport layer-einek kiolvasasa ---
-// Visszaad egy tombot: [{personId, layerName, x, y, width, height}, ...]
-function _readGroupLayers(grp, personType) {
-  var result = [];
-  if (!grp) return result;
-
-  // artLayers: Photoshop forditott sorrendben tarolja (utolso = elso hozzaadott)
-  for (var i = grp.artLayers.length - 1; i >= 0; i--) {
-    var layer = grp.artLayers[i];
-    try {
-      var bnfe = _getBoundsNoEffects(layer);
-      var x = Math.round(bnfe.left);
-      var y = Math.round(bnfe.top);
-      var w = Math.round(bnfe.right - bnfe.left);
-      var h = Math.round(bnfe.bottom - bnfe.top);
-
-      var personId = _extractPersonId(layer.name);
-      var slugName = _extractSlugName(layer.name);
-
-      result.push({
-        personId: personId,
-        name: slugName,
-        type: personType,
-        layerName: layer.name,
-        x: x,
-        y: y,
-        width: w,
-        height: h
-      });
-    } catch (e) {
-      log("[JSX] WARN: Layer olvasas sikertelen (" + layer.name + "): " + e.message);
-    }
-  }
-
-  return result;
-}
-
 // --- JSON string epites (ES3 — nincs JSON.stringify!) ---
 // Egyszeru JSON serializer objektumokhoz es tombokhoz
 function _jsonStringify(obj) {
@@ -198,6 +86,71 @@ function _jsonStringify(obj) {
   return String(obj);
 }
 
+// --- Rekurziv layer bejaras — MINDEN layer a dokumentumbol ---
+// container: LayerSet vagy Document
+// pathSoFar: string tomb — aktualis csoport utvonal (pl. ["Images", "Students"])
+// result: tomb — ide gyujtjuk a layer adatokat
+function _readAllLayers(container, pathSoFar, result) {
+  // 1. artLayerek feldolgozasa (fordított sorrend — Photoshop igy tarolja)
+  try {
+    for (var i = container.artLayers.length - 1; i >= 0; i--) {
+      var layer = container.artLayers[i];
+      try {
+        var bnfe = _getBoundsNoEffects(layer);
+        var x = Math.round(bnfe.left);
+        var y = Math.round(bnfe.top);
+        var w = Math.round(bnfe.right - bnfe.left);
+        var h = Math.round(bnfe.bottom - bnfe.top);
+
+        var layerData = {
+          layerId: layer.id,
+          layerName: layer.name,
+          groupPath: pathSoFar,
+          x: x,
+          y: y,
+          width: w,
+          height: h,
+          kind: "normal"
+        };
+
+        // Text layerek extra adatai
+        if (layer.kind === LayerKind.TEXT) {
+          layerData.kind = "text";
+          try {
+            layerData.text = layer.textItem.contents;
+            var j = layer.textItem.justification;
+            if (j === Justification.LEFT) layerData.justification = "left";
+            else if (j === Justification.RIGHT) layerData.justification = "right";
+            else layerData.justification = "center";
+          } catch (te) {
+            layerData.text = "";
+            layerData.justification = "center";
+          }
+        }
+
+        result.push(layerData);
+      } catch (e) {
+        log("[JSX] WARN: Layer olvasas sikertelen (" + layer.name + "): " + e.message);
+      }
+    }
+  } catch (e) { /* nincs artLayers */ }
+
+  // 2. LayerSet-ek rekurziv bejara (fordított sorrend)
+  try {
+    for (var j = container.layerSets.length - 1; j >= 0; j--) {
+      var grp = container.layerSets[j];
+      // Uj groupPath — ES3: concat nem mutál
+      var childPath = [];
+      for (var k = 0; k < pathSoFar.length; k++) {
+        childPath.push(pathSoFar[k]);
+      }
+      childPath.push(grp.name);
+
+      _readAllLayers(grp, childPath, result);
+    }
+  } catch (e) { /* nincs layerSets */ }
+}
+
 (function () {
   try {
     if (!app.documents.length) {
@@ -216,37 +169,9 @@ function _jsonStringify(obj) {
     var docWidthPx = Math.round(_doc.width.as("px"));
     var docHeightPx = Math.round(_doc.height.as("px"));
 
-    // Diak csoport kiolvasasa
-    var studentsGroup = getGroupByPath(_doc, ["Images", "Students"]);
-    var studentLayers = _readGroupLayers(studentsGroup, "student");
-
-    // Tanar csoport kiolvasasa
-    var teachersGroup = getGroupByPath(_doc, ["Images", "Teachers"]);
-    var teacherLayers = _readGroupLayers(teachersGroup, "teacher");
-
-    // Osszes szemely egybeolvasztasa
-    var allPersons = [];
-    for (var si = 0; si < studentLayers.length; si++) {
-      allPersons.push(studentLayers[si]);
-    }
-    for (var ti = 0; ti < teacherLayers.length; ti++) {
-      allPersons.push(teacherLayers[ti]);
-    }
-
-    // Nev layerek kiolvasasa (Names/Students + Names/Teachers)
-    var nameStudentsGroup = getGroupByPath(_doc, ["Names", "Students"]);
-    var nameStudentLayers = _readNameGroupLayers(nameStudentsGroup, "student");
-
-    var nameTeachersGroup = getGroupByPath(_doc, ["Names", "Teachers"]);
-    var nameTeacherLayers = _readNameGroupLayers(nameTeachersGroup, "teacher");
-
-    var allNamePersons = [];
-    for (var nsi = 0; nsi < nameStudentLayers.length; nsi++) {
-      allNamePersons.push(nameStudentLayers[nsi]);
-    }
-    for (var nti = 0; nti < nameTeacherLayers.length; nti++) {
-      allNamePersons.push(nameTeacherLayers[nti]);
-    }
+    // Rekurziv bejara — MINDEN layer
+    var allLayers = [];
+    _readAllLayers(_doc, [], allLayers);
 
     // Eredmeny objektum
     var result = {
@@ -256,8 +181,7 @@ function _jsonStringify(obj) {
         heightPx: docHeightPx,
         dpi: dpi
       },
-      persons: allPersons,
-      namePersons: allNamePersons
+      layers: allLayers
     };
 
     // Ruler visszaallitasa

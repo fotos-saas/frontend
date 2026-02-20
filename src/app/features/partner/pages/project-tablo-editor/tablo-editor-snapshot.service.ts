@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { SnapshotListItem } from '@core/services/electron.types';
+import { SnapshotListItem, SnapshotLayer } from '@core/services/electron.types';
 import { LoggerService } from '@core/services/logger.service';
 import { PhotoshopService } from '../../services/photoshop.service';
 
@@ -29,6 +29,11 @@ export class TabloEditorSnapshotService {
 
   /** Frissites valaszto dialog (ha tobb snapshot van) */
   readonly showUpdatePicker = signal(false);
+
+  /** Visszaállítás dialógus (csoport-választó) */
+  readonly showRestoreDialog = signal(false);
+  readonly restoreDialogSnapshot = signal<SnapshotListItem | null>(null);
+  readonly restoreDialogLayers = signal<SnapshotLayer[]>([]);
 
   /** Inline atnevezes allapot (melyik snapshot szerkesztes alatt) */
   readonly editingSnapshotPath = signal<string | null>(null);
@@ -104,15 +109,16 @@ export class TabloEditorSnapshotService {
     }
   }
 
-  /** Pillanatkep visszaallitasa */
+  /** Pillanatkep visszaallitasa (teljes vagy szelektiv) */
   async restoreSnapshot(
     snapshotPath: string,
     psdPath: string,
     targetDocName?: string,
+    restoreGroups?: string[][],
   ): Promise<{ success: boolean; error?: string }> {
     this.restoringSnapshotPath.set(snapshotPath);
     try {
-      const result = await this.ps.restoreSnapshot(snapshotPath, targetDocName);
+      const result = await this.ps.restoreSnapshot(snapshotPath, targetDocName, restoreGroups);
       if (result.success) {
         await this.loadSnapshots(psdPath);
       }
@@ -120,6 +126,67 @@ export class TabloEditorSnapshotService {
     } finally {
       this.restoringSnapshotPath.set(null);
     }
+  }
+
+  /** Visszaállítás dialógus megnyitása — snapshot betöltése és layers kinyerése */
+  async openRestoreDialog(snapshot: SnapshotListItem): Promise<void> {
+    try {
+      const loadResult = await this.ps.loadSnapshot(snapshot.filePath);
+      if (!loadResult.success || !loadResult.data) {
+        this.logger.error('Snapshot betöltés sikertelen a restore dialógushoz');
+        return;
+      }
+
+      const data = loadResult.data as Record<string, unknown>;
+      let layers: SnapshotLayer[] = [];
+
+      if (Array.isArray(data['layers'])) {
+        layers = data['layers'] as SnapshotLayer[];
+      } else if (Array.isArray(data['persons'])) {
+        // v2 compat: persons → szintetikus layers
+        const persons = data['persons'] as Array<Record<string, unknown>>;
+        for (const p of persons) {
+          const personType = (p['type'] as string) || 'student';
+          const imgGroup = personType === 'teacher' ? 'Teachers' : 'Students';
+          if (p['image']) {
+            const img = p['image'] as Record<string, number>;
+            layers.push({
+              layerId: 0,
+              layerName: p['layerName'] as string,
+              groupPath: ['Images', imgGroup],
+              x: img['x'], y: img['y'], width: img['width'], height: img['height'],
+              kind: 'normal',
+            });
+          }
+          if (p['nameLayer']) {
+            const nl = p['nameLayer'] as Record<string, unknown>;
+            layers.push({
+              layerId: 0,
+              layerName: p['layerName'] as string,
+              groupPath: ['Names', imgGroup],
+              x: nl['x'] as number, y: nl['y'] as number,
+              width: (nl['width'] as number) || 0, height: (nl['height'] as number) || 0,
+              kind: 'text',
+              text: nl['text'] as string,
+              justification: nl['justification'] as 'left' | 'center' | 'right',
+            });
+          }
+        }
+      }
+
+      this.restoreDialogSnapshot.set(snapshot);
+      this.restoreDialogLayers.set(layers);
+      this.showRestoreDialog.set(true);
+    } catch (err) {
+      this.logger.error('Restore dialógus megnyitás hiba', err);
+    }
+  }
+
+  /** Visszaállítás dialógus bezárása */
+  closeRestoreDialog(): void {
+    this.showRestoreDialog.set(false);
+    this.restoreDialogSnapshot.set(null);
+    this.restoreDialogLayers.set([]);
   }
 
   /** Pillanatkep torlese */

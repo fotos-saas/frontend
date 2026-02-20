@@ -48,7 +48,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
           [class.text-center]="layer().justification === 'center' || !layer().justification"
           [class.text-right]="layer().justification === 'right'"
           [style.font-size.px]="textFontSize"
-        >{{ layer().text ?? displayName }}</span>
+        >{{ displayName }}</span>
       } @else {
         <div class="designer-layer__fixed">
           <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
@@ -91,6 +91,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
         align-items: center;
         background: transparent;
         border-color: rgba(59, 130, 246, 0.15);
+        overflow: visible;
       }
 
       &--fixed {
@@ -127,8 +128,8 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       height: 100%;
       display: flex;
       align-items: center;
-      word-break: break-word;
-      overflow: hidden;
+      white-space: nowrap;
+      overflow: visible;
       line-height: 1.15;
 
       &.text-left { text-align: left; justify-content: flex-start; }
@@ -196,9 +197,9 @@ export class LayoutLayerComponent {
     return this.layer().height * this.scale();
   }
 
-  /** Szöveg layer betűmérete — a layer magasságából becsüljük */
+  /** Szöveg layer betűmérete — a layer magasságából, max 14px */
   get textFontSize(): number {
-    return Math.max(8, this.displayHeight * 0.7);
+    return Math.min(14, Math.max(7, this.displayHeight * 0.65));
   }
 
   get placeholderIconSize(): number {

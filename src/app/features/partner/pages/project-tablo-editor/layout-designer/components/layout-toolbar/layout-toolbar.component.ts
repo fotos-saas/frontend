@@ -160,6 +160,8 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       display: flex;
       align-items: center;
       gap: 12px;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .layout-toolbar__doc-info {
@@ -178,6 +180,8 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-shrink: 0;
+      z-index: 1;
     }
 
     .layout-toolbar__selection {
@@ -206,6 +210,8 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       align-items: center;
       justify-content: flex-end;
       gap: 8px;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .toolbar-btn {

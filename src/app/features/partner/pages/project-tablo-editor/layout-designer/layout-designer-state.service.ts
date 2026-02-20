@@ -139,6 +139,18 @@ export class LayoutDesignerStateService {
     this.selectedLayerIds.set(new Set());
   }
 
+  /** Layerek kijelölése (marquee) */
+  selectLayers(ids: Set<number>): void {
+    this.selectedLayerIds.set(ids);
+  }
+
+  /** Meglévő kijelöléshez hozzáadás (Cmd+marquee) */
+  addToSelection(ids: Set<number>): void {
+    const current = new Set(this.selectedLayerIds());
+    for (const id of ids) current.add(id);
+    this.selectedLayerIds.set(current);
+  }
+
   /** Kijelölt elemek mozgatása (PSD koordinátákban) — coupled párokkal együtt */
   moveSelectedLayers(deltaXPsd: number, deltaYPsd: number): void {
     const ids = this.selectedLayerIds();

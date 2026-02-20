@@ -125,6 +125,8 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
     hasPhoto: boolean;
     photoThumbUrl: string | null;
   }>;
+  pendingStudentPhotos?: number;
+  pendingTeacherPhotos?: number;
   inPrintAt?: string | null;
   doneAt?: string | null;
   printSmallTablo?: PrintReadyFile | null;

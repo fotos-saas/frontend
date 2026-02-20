@@ -353,6 +353,11 @@ body.dialog-open {
   max-width: none;
 }
 
+// Preliminary variant (előzetes projekt — sárga top border)
+.page-card--preliminary {
+  border-top: 3px solid #f59e0b;
+}
+
 // Sticky page-header: scrollozásnál a tetején marad
 // A .content (partner-shell/app-shell) overflow-y: auto → ez a scroll container
 // A negatív margin + padding trükk kompenzálja a .page-card 2rem paddingjét

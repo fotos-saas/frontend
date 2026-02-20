@@ -1,5 +1,11 @@
 @if (project(); as p) {
   <header class="relative mb-4">
+    @if (p.isPreliminary) {
+      <div class="preliminary-banner">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+        <span>Előzetes projekt</span>
+      </div>
+    }
     <!-- Top Bar -->
     <div class="flex items-center justify-between mb-6">
       <app-back-button

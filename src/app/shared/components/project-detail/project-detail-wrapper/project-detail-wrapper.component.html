@@ -1,4 +1,4 @@
-<div class="max-w-3xl mx-auto page-card">
+<div class="max-w-3xl mx-auto page-card" [class.page-card--preliminary]="projectData()?.isPreliminary">
   <!-- Loading -->
   @if (loading()) {
     <div class="flex flex-col items-center justify-center py-16">

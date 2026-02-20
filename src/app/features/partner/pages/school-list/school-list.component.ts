@@ -22,7 +22,7 @@ import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-fil
 import { SmartFilterBarComponent, SearchConfig, FilterConfig } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
-import { generateYearOptions } from '../../../../shared/utils/year-options.util';
+import { generateYearOptions, getCurrentGraduationYear } from '../../../../shared/utils/year-options.util';
 
 /**
  * Partner School List - Iskolák listája a partner felületen.
@@ -72,16 +72,14 @@ export class PartnerSchoolListComponent implements OnInit {
     features: { id: true, exact: true },
   };
 
-  private readonly currentYear = new Date().getFullYear();
-
   readonly schoolFilterConfigs: FilterConfig[] = [
-    { id: 'graduation_year', label: 'Tanév', icon: 'calendar', options: generateYearOptions(10) },
+    { id: 'graduation_year', label: 'Tanév', icon: 'calendar', options: generateYearOptions() },
   ];
 
   // Filter state - központosított perzisztencia rendszerrel
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'schools' },
-    defaultFilters: { graduation_year: this.currentYear.toString() },
+    defaultFilters: { graduation_year: getCurrentGraduationYear().toString() },
     defaultSortBy: 'name',
     defaultSortDir: 'asc',
     onStateChange: () => this.loadSchools(),

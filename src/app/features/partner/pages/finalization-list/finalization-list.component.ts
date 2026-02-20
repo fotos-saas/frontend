@@ -13,6 +13,7 @@ import { SmartFilterBarComponent, SearchConfig, SortDef, FilterConfig } from '..
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
+import { generateYearOptions, getCurrentGraduationYear } from '../../../../shared/utils/year-options.util';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { saveFile } from '../../../../shared/utils/file.util';
 import { MediaLightboxComponent } from '../../../../shared/components/media-lightbox/media-lightbox.component';
@@ -59,11 +60,7 @@ export class FinalizationListComponent implements OnInit {
     features: { id: true, exact: true },
   };
 
-  private readonly currentYear = new Date().getFullYear();
-  readonly yearOptions = Array.from({ length: 10 }, (_, i) => {
-    const year = this.currentYear - i;
-    return { value: year.toString(), label: `${year}` };
-  });
+  readonly yearOptions = generateYearOptions();
 
   readonly filterConfigs: FilterConfig[] = [
     { id: 'graduation_year', label: 'Tanév', icon: 'calendar', options: this.yearOptions },
@@ -80,7 +77,7 @@ export class FinalizationListComponent implements OnInit {
 
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'finalizations' },
-    defaultFilters: { graduation_year: this.currentYear.toString() },
+    defaultFilters: { graduation_year: getCurrentGraduationYear().toString() },
     defaultSortBy: 'finalized_at',
     defaultSortDir: 'desc',
     validation: {

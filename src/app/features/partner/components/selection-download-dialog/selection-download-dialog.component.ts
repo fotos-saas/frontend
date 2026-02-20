@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, output, signal, input, computed } f
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { getCurrentGraduationYear } from '../../../../shared/utils/year-options.util';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsRadioGroupComponent } from '@shared/components/form';
 import { PsRadioOption } from '@shared/components/form/form.types';
@@ -49,10 +50,8 @@ export class SelectionDownloadDialogComponent {
 
   /** Aktuális tanév: szept-től új tanév (pl. "2025-2026") */
   readonly currentSchoolYear = computed(() => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const startYear = now.getMonth() >= 8 ? year : year - 1;
-    return `${startYear}-${startYear + 1}`;
+    const gradYear = getCurrentGraduationYear();
+    return `${gradYear - 1}-${gradYear}`;
   });
 
   readonly scopeOptions = computed<PsRadioOption[]>(() => [

@@ -18,6 +18,7 @@ import { FilterConfig, FilterChangeEvent } from '../../../../shared/components/e
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
+import { generateYearOptions, getCurrentGraduationYear } from '../../../../shared/utils/year-options.util';
 import { SmartFilterBarComponent, SearchConfig, SortDef } from '../../../../shared/components/smart-filter-bar';
 import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
@@ -74,17 +75,12 @@ export class PartnerProjectListComponent implements OnInit {
     features: { id: true, assignee: true, exact: true },
   };
 
-  // Tanév opciók generálása (aktuális évtől visszafelé)
-  private readonly currentYear = new Date().getFullYear();
-  readonly yearOptions = Array.from({ length: 10 }, (_, i) => {
-    const year = this.currentYear - i;
-    return { value: year.toString(), label: `${year}` };
-  });
+  readonly yearOptions = generateYearOptions();
 
   // Filter state
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'projects' },
-    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: this.currentYear.toString() },
+    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: getCurrentGraduationYear().toString() },
     defaultSortBy: 'created_at',
     defaultSortDir: 'desc',
     validation: {

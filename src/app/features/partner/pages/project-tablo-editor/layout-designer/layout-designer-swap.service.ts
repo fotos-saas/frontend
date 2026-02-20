@@ -18,33 +18,34 @@ export class LayoutDesignerSwapService {
   readonly swapCandidate = signal<SwapCandidate | null>(null);
 
   /**
-   * Swap jelölt keresése a fogott layer eltolt pozíciója alapján.
-   * Csak single image drag-nél működik.
+   * Swap jelölt keresése az origin layer eltolt pozíciója alapján.
+   * Az originLayerId a mousedown-nál fogott layer — erre keresünk swap partner-t.
    */
-  findSwapCandidate(draggedLayerIds: Set<number>, deltaXPsd: number, deltaYPsd: number): void {
+  findSwapCandidate(
+    originLayerId: number,
+    draggedLayerIds: Set<number>,
+    deltaXPsd: number,
+    deltaYPsd: number,
+  ): void {
     const layers = this.state.layers();
 
-    // Csak single image a fogottak között
-    const draggedImages = layers.filter(
-      l => draggedLayerIds.has(l.layerId) && this.isImageLayer(l),
-    );
-    if (draggedImages.length !== 1) {
+    // Az origin layer-t keressük meg
+    const originLayer = layers.find(l => l.layerId === originLayerId);
+    if (!originLayer || !this.isImageLayer(originLayer)) {
       this.swapCandidate.set(null);
       return;
     }
 
-    const draggedImage = draggedImages[0];
     const draggedRect = {
-      x: (draggedImage.editedX ?? draggedImage.x) + deltaXPsd,
-      y: (draggedImage.editedY ?? draggedImage.y) + deltaYPsd,
-      width: draggedImage.width,
-      height: draggedImage.height,
+      x: (originLayer.editedX ?? originLayer.x) + deltaXPsd,
+      y: (originLayer.editedY ?? originLayer.y) + deltaYPsd,
+      width: originLayer.width,
+      height: originLayer.height,
     };
 
     let best: SwapCandidate | null = null;
 
     for (const layer of layers) {
-      // Nem saját maga, és image layer
       if (draggedLayerIds.has(layer.layerId)) continue;
       if (!this.isImageLayer(layer)) continue;
 
@@ -56,6 +57,7 @@ export class LayoutDesignerSwapService {
       };
 
       const overlap = overlapPercent(draggedRect, targetRect);
+
       if (overlap >= SWAP_THRESHOLD && (!best || overlap > best.overlapPercent)) {
         best = { targetLayerId: layer.layerId, overlapPercent: overlap };
       }

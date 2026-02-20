@@ -134,8 +134,9 @@ export class LayoutDesignerDragService {
       active: true,
     });
 
-    // Swap preview keresés
-    this.swapService.findSwapCandidate(this.draggedIds, deltaXPsd, deltaYPsd);
+    // Swap preview keresés az origin layer alapján
+    const originId = this.dragState()?.originLayerId ?? 0;
+    this.swapService.findSwapCandidate(originId, this.draggedIds, deltaXPsd, deltaYPsd);
   }
 
   private onMouseUp(e: MouseEvent): void {
@@ -171,15 +172,13 @@ export class LayoutDesignerDragService {
 
       // Végső swap keresés az utolsó pozícióra
       if (ds) {
-        this.swapService.findSwapCandidate(this.draggedIds, ds.deltaXPsd, ds.deltaYPsd);
+        this.swapService.findSwapCandidate(ds.originLayerId, this.draggedIds, ds.deltaXPsd, ds.deltaYPsd);
       }
       const swap = this.swapService.swapCandidate();
 
       if (swap && ds) {
-        // Swap végrehajtás
         this.swapService.executeSwap(ds.originLayerId, swap.targetLayerId);
       } else if (ds && (ds.deltaXPsd !== 0 || ds.deltaYPsd !== 0)) {
-        // Normál mozgatás
         if (this.gridService.gridEnabled()) {
           this.snapAndMove(ds.deltaXPsd, ds.deltaYPsd);
         } else {

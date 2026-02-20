@@ -42,12 +42,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
           </div>
         }
       } @else if (isText) {
-        <span
-          class="designer-layer__text"
-          [class.text-left]="layer().justification === 'left'"
-          [class.text-center]="layer().justification === 'center' || !layer().justification"
-          [class.text-right]="layer().justification === 'right'"
-        >{{ textContent }}</span>
+        <span class="designer-layer__text">{{ textContent }}</span>
       } @else {
         <div class="designer-layer__fixed">
           <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
@@ -120,19 +115,12 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
     }
 
     .designer-layer__text {
-      display: inline-block;
-      vertical-align: top;
+      display: block;
       color: #1e293b;
       font-size: 10px;
       line-height: 1.2;
       white-space: pre;
-      padding: 1px 4px;
-      background: rgba(59, 130, 246, 0.08);
-      border-radius: 3px;
-
-      &.text-left { text-align: left; }
-      &.text-center { text-align: center; }
-      &.text-right { text-align: right; }
+      text-align: center;
     }
 
     .designer-layer__fixed {

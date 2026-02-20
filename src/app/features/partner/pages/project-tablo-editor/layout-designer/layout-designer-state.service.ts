@@ -225,9 +225,10 @@ export class LayoutDesignerStateService {
         const imageLayer = imageMap.get(textLayer.personMatch.id);
         if (!imageLayer) continue;
 
-        // X: kép közepéhez igazítás
-        const imageCenterX = imageLayer.x + imageLayer.width / 2;
-        textLayer.x = Math.round(imageCenterX - textLayer.width / 2);
+        // X és width: kép pozíciójára és szélességére igazítás
+        // A text-align: center a span-on a kép közepéhez centrázza a szöveget
+        textLayer.x = imageLayer.x;
+        textLayer.width = imageLayer.width;
 
         // Y: kép alja + gap
         textLayer.y = imageLayer.y + imageLayer.height + GAP;

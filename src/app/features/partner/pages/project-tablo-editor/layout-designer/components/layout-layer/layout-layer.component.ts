@@ -41,7 +41,6 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
             <lucide-icon [name]="ICONS.USER" [size]="placeholderIconSize" />
           </div>
         }
-        <span class="designer-layer__label">{{ displayName }}</span>
       } @else if (isText) {
         <span
           class="designer-layer__text"
@@ -103,8 +102,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
 
     .designer-layer__thumb {
       width: 100%;
-      flex: 1;
-      min-height: 0;
+      height: 100%;
       object-fit: cover;
       border-radius: 2px;
       pointer-events: none;
@@ -112,27 +110,13 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
 
     .designer-layer__placeholder {
       width: 100%;
-      flex: 1;
-      min-height: 0;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       background: #f3f4f6;
       color: #9ca3af;
       border-radius: 2px;
-    }
-
-    .designer-layer__label {
-      font-size: 9px;
-      line-height: 16px;
-      color: #374151;
-      text-align: center;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      width: 100%;
-      padding: 0 2px;
-      box-sizing: border-box;
     }
 
     .designer-layer__text {
@@ -203,9 +187,8 @@ export class LayoutLayerComponent {
 
   get displayHeight(): number {
     if (this.isImage) {
-      // Fotó arány (10.4:15.4) + 16px label magasság
-      const photoHeight = this.displayWidth * (15.4 / 10.4);
-      return photoHeight + 16;
+      // Fotó arány (10.4:15.4) — a nevet a külön szöveg layer mutatja
+      return this.displayWidth * (15.4 / 10.4);
     }
     return this.layer().height * this.scale();
   }

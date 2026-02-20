@@ -86,6 +86,14 @@ export interface NotificationResultData {
   id: string | null;
 }
 
+export interface SnapshotListItem {
+  fileName: string;
+  filePath: string;
+  snapshotName: string;
+  createdAt: string | null;
+  personCount: number;
+}
+
 interface PhotoshopAPI {
   setPath: (path: string) => Promise<{ success: boolean; error?: string }>;
   getPath: () => Promise<string | null>;
@@ -122,6 +130,10 @@ interface PhotoshopAPI {
   runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string }>;
   onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;
   saveLayoutJson: (params: { psdPath: string; layoutData: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; jsonPath?: string }>;
+  saveSnapshot: (params: { psdPath: string; snapshotData: Record<string, unknown>; fileName: string }) => Promise<{ success: boolean; error?: string; snapshotPath?: string }>;
+  listSnapshots: (params: { psdPath: string }) => Promise<{ success: boolean; error?: string; snapshots: SnapshotListItem[] }>;
+  loadSnapshot: (params: { snapshotPath: string }) => Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }>;
+  deleteSnapshot: (params: { snapshotPath: string }) => Promise<{ success: boolean; error?: string }>;
 }
 
 export interface ElectronAPI {

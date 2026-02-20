@@ -70,6 +70,61 @@ function _extractSlugName(layerName) {
   return layerName.substring(0, idx);
 }
 
+// --- Name csoport layer-einek kiolvasasa (text layerek) ---
+// Visszaad egy tombot: [{personId, layerName, x, y, width, height, text, justification}, ...]
+// A textItem.contents tartalmazza a sortoreseket (\r Photoshopban)
+function _readNameGroupLayers(grp, personType) {
+  var result = [];
+  if (!grp) return result;
+
+  for (var i = grp.artLayers.length - 1; i >= 0; i--) {
+    var layer = grp.artLayers[i];
+    try {
+      // Csak text layereket olvassuk
+      if (layer.kind !== LayerKind.TEXT) continue;
+
+      var bnfe = _getBoundsNoEffects(layer);
+      var x = Math.round(bnfe.left);
+      var y = Math.round(bnfe.top);
+      var w = Math.round(bnfe.right - bnfe.left);
+      var h = Math.round(bnfe.bottom - bnfe.top);
+
+      var personId = _extractPersonId(layer.name);
+      var slugName = _extractSlugName(layer.name);
+
+      // Text tartalom es igazitas kiolvasasa
+      var textContent = "";
+      var justification = "center";
+      try {
+        textContent = layer.textItem.contents;
+        var j = layer.textItem.justification;
+        if (j === Justification.LEFT) justification = "left";
+        else if (j === Justification.RIGHT) justification = "right";
+        else justification = "center";
+      } catch (te) {
+        // textItem nem elerheto — skip
+      }
+
+      result.push({
+        personId: personId,
+        name: slugName,
+        type: personType,
+        layerName: layer.name,
+        x: x,
+        y: y,
+        width: w,
+        height: h,
+        text: textContent,
+        justification: justification
+      });
+    } catch (e) {
+      log("[JSX] WARN: Name layer olvasas sikertelen (" + layer.name + "): " + e.message);
+    }
+  }
+
+  return result;
+}
+
 // --- Egy csoport layer-einek kiolvasasa ---
 // Visszaad egy tombot: [{personId, layerName, x, y, width, height}, ...]
 function _readGroupLayers(grp, personType) {
@@ -178,6 +233,21 @@ function _jsonStringify(obj) {
       allPersons.push(teacherLayers[ti]);
     }
 
+    // Nev layerek kiolvasasa (Names/Students + Names/Teachers)
+    var nameStudentsGroup = getGroupByPath(_doc, ["Names", "Students"]);
+    var nameStudentLayers = _readNameGroupLayers(nameStudentsGroup, "student");
+
+    var nameTeachersGroup = getGroupByPath(_doc, ["Names", "Teachers"]);
+    var nameTeacherLayers = _readNameGroupLayers(nameTeachersGroup, "teacher");
+
+    var allNamePersons = [];
+    for (var nsi = 0; nsi < nameStudentLayers.length; nsi++) {
+      allNamePersons.push(nameStudentLayers[nsi]);
+    }
+    for (var nti = 0; nti < nameTeacherLayers.length; nti++) {
+      allNamePersons.push(nameTeacherLayers[nti]);
+    }
+
     // Eredmeny objektum
     var result = {
       document: {
@@ -186,7 +256,8 @@ function _jsonStringify(obj) {
         heightPx: docHeightPx,
         dpi: dpi
       },
-      persons: allPersons
+      persons: allPersons,
+      namePersons: allNamePersons
     };
 
     // Ruler visszaallitasa

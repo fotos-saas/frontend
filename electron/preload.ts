@@ -328,6 +328,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     saveLayoutJson: (params: { psdPath: string; layoutData: Record<string, unknown> }) =>
       ipcRenderer.invoke('photoshop:save-layout-json', params) as Promise<{ success: boolean; error?: string; jsonPath?: string }>,
+    saveSnapshot: (params: { psdPath: string; snapshotData: Record<string, unknown>; fileName: string }) =>
+      ipcRenderer.invoke('photoshop:save-snapshot', params) as Promise<{ success: boolean; error?: string; snapshotPath?: string }>,
+    listSnapshots: (params: { psdPath: string }) =>
+      ipcRenderer.invoke('photoshop:list-snapshots', params) as Promise<{ success: boolean; error?: string; snapshots: Array<{ fileName: string; filePath: string; snapshotName: string; createdAt: string | null; personCount: number }> }>,
+    loadSnapshot: (params: { snapshotPath: string }) =>
+      ipcRenderer.invoke('photoshop:load-snapshot', params) as Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }>,
+    deleteSnapshot: (params: { snapshotPath: string }) =>
+      ipcRenderer.invoke('photoshop:delete-snapshot', params) as Promise<{ success: boolean; error?: string }>,
   },
 
   // ============ Touch Bar (MacBook Pro 2016-2020) ============

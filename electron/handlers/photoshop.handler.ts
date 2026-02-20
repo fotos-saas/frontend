@@ -1264,5 +1264,162 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // ============ Snapshot rendszer (layouts/ mappa) ============
+
+  // Save snapshot JSON to layouts/ folder next to PSD
+  ipcMain.handle('photoshop:save-snapshot', (_event, params: {
+    psdPath: string;
+    snapshotData: Record<string, unknown>;
+    fileName: string;
+  }) => {
+    try {
+      if (typeof params.psdPath !== 'string' || params.psdPath.length > 500) {
+        return { success: false, error: 'Ervenytelen PSD eleresi ut' };
+      }
+      if (!params.psdPath.endsWith('.psd')) {
+        return { success: false, error: 'A fajlnak .psd kiterjesztesunek kell lennie' };
+      }
+      if (params.psdPath.includes('..') || params.fileName.includes('..') || params.fileName.includes('/')) {
+        return { success: false, error: 'Ervenytelen fajl utvonal' };
+      }
+
+      const psdDir = path.dirname(params.psdPath);
+      const layoutsDir = path.join(psdDir, 'layouts');
+
+      if (!fs.existsSync(layoutsDir)) {
+        fs.mkdirSync(layoutsDir, { recursive: true });
+      }
+
+      const snapshotPath = path.join(layoutsDir, params.fileName);
+      const jsonContent = JSON.stringify(params.snapshotData, null, 2);
+      fs.writeFileSync(snapshotPath, jsonContent, 'utf-8');
+      log.info(`Snapshot mentve: ${snapshotPath} (${jsonContent.length} byte)`);
+
+      return { success: true, snapshotPath };
+    } catch (error) {
+      log.error('Snapshot mentesi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a snapshot-ot' };
+    }
+  });
+
+  // List snapshots from layouts/ folder
+  ipcMain.handle('photoshop:list-snapshots', (_event, params: { psdPath: string }) => {
+    try {
+      if (typeof params.psdPath !== 'string' || params.psdPath.length > 500) {
+        return { success: false, error: 'Ervenytelen PSD eleresi ut', snapshots: [] };
+      }
+      if (params.psdPath.includes('..')) {
+        return { success: false, error: 'Ervenytelen utvonal', snapshots: [] };
+      }
+
+      const psdDir = path.dirname(params.psdPath);
+      const layoutsDir = path.join(psdDir, 'layouts');
+
+      if (!fs.existsSync(layoutsDir)) {
+        return { success: true, snapshots: [] };
+      }
+
+      const files = fs.readdirSync(layoutsDir)
+        .filter(f => f.endsWith('.json'))
+        .sort()
+        .reverse(); // Legujabb elol
+
+      const snapshots = files.map(fileName => {
+        const filePath = path.join(layoutsDir, fileName);
+        try {
+          const content = fs.readFileSync(filePath, 'utf-8');
+          const data = JSON.parse(content);
+          return {
+            fileName,
+            filePath,
+            snapshotName: data.snapshotName || fileName.replace('.json', ''),
+            createdAt: data.createdAt || null,
+            personCount: Array.isArray(data.persons) ? data.persons.length : 0,
+          };
+        } catch {
+          return {
+            fileName,
+            filePath,
+            snapshotName: fileName.replace('.json', ''),
+            createdAt: null,
+            personCount: 0,
+          };
+        }
+      });
+
+      return { success: true, snapshots };
+    } catch (error) {
+      log.error('Snapshot lista hiba:', error);
+      return { success: false, error: 'Nem sikerult beolvasni a snapshot listat', snapshots: [] };
+    }
+  });
+
+  // Load snapshot JSON content
+  ipcMain.handle('photoshop:load-snapshot', (_event, params: { snapshotPath: string }) => {
+    try {
+      if (typeof params.snapshotPath !== 'string' || params.snapshotPath.length > 500) {
+        return { success: false, error: 'Ervenytelen snapshot eleresi ut' };
+      }
+      if (params.snapshotPath.includes('..')) {
+        return { success: false, error: 'Ervenytelen utvonal' };
+      }
+      if (!params.snapshotPath.endsWith('.json')) {
+        return { success: false, error: 'Csak JSON fajlok olvashatoak' };
+      }
+
+      // Biztonsag: csak layouts/ mappaban levo fajlokat olvasunk
+      const dirName = path.basename(path.dirname(params.snapshotPath));
+      if (dirName !== 'layouts') {
+        return { success: false, error: 'Csak a layouts/ mappaban levo fajlok olvashatoak' };
+      }
+
+      if (!fs.existsSync(params.snapshotPath)) {
+        return { success: false, error: 'A snapshot fajl nem talalhato' };
+      }
+
+      const content = fs.readFileSync(params.snapshotPath, 'utf-8');
+      const data = JSON.parse(content);
+      log.info(`Snapshot betoltve: ${params.snapshotPath}`);
+
+      return { success: true, data };
+    } catch (error) {
+      log.error('Snapshot betoltesi hiba:', error);
+      return { success: false, error: 'Nem sikerult beolvasni a snapshot-ot' };
+    }
+  });
+
+  // Delete snapshot from layouts/ folder
+  ipcMain.handle('photoshop:delete-snapshot', (_event, params: { snapshotPath: string }) => {
+    try {
+      if (typeof params.snapshotPath !== 'string' || params.snapshotPath.length > 500) {
+        return { success: false, error: 'Ervenytelen snapshot eleresi ut' };
+      }
+      if (params.snapshotPath.includes('..')) {
+        return { success: false, error: 'Ervenytelen utvonal' };
+      }
+      if (!params.snapshotPath.endsWith('.json')) {
+        return { success: false, error: 'Csak JSON fajlok torolhetok' };
+      }
+
+      // Biztonsag: csak layouts/ mappaban levo fajlokat torlunk
+      const dirName = path.basename(path.dirname(params.snapshotPath));
+      if (dirName !== 'layouts') {
+        return { success: false, error: 'Csak a layouts/ mappaban levo fajlok torolhetok' };
+      }
+
+      if (!fs.existsSync(params.snapshotPath)) {
+        return { success: false, error: 'A snapshot fajl nem talalhato' };
+      }
+
+      fs.unlinkSync(params.snapshotPath);
+      log.info(`Snapshot torolve: ${params.snapshotPath}`);
+
+      return { success: true };
+    } catch (error) {
+      log.error('Snapshot torlesi hiba:', error);
+      return { success: false, error: 'Nem sikerult torolni a snapshot-ot' };
+    }
+  });
+
   log.info('Photoshop IPC handlerek regisztralva');
 }

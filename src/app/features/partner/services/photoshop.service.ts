@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
+import { SnapshotListItem } from '@core/services/electron.types';
 import { TabloSize } from '../models/partner.models';
 
 /** Kistablo alias merete */
@@ -615,6 +616,226 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('Layout kiolvasás/mentés hiba', err);
       return { success: false, error: 'Váratlan hiba a layout mentésnél' };
+    }
+  }
+
+  /**
+   * Teljes layout kiolvasás v2 formátumban: images + names összefésülés layerName alapján.
+   * A read-layout.jsx v2 kimenetét (persons + namePersons) egyetlen persons tömbbé egyesíti.
+   */
+  async readFullLayout(
+    boardConfig: { widthCm: number; heightCm: number },
+    targetDocName?: string,
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    data?: {
+      document: { name: string; widthPx: number; heightPx: number; dpi: number };
+      persons: Array<{
+        personId: number | null;
+        name: string;
+        type: string;
+        layerName: string;
+        image: { x: number; y: number; width: number; height: number };
+        nameLayer?: { x: number; y: number; width: number; height: number; text: string; justification: string };
+      }>;
+      board: Record<string, unknown>;
+      nameSettings: Record<string, unknown>;
+    };
+  }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      const jsxResult = await this.api.runJsx({
+        scriptName: 'actions/read-layout.jsx',
+        targetDocName,
+      });
+
+      if (!jsxResult.success || !jsxResult.output) {
+        return { success: false, error: jsxResult.error || 'Layout kiolvasás sikertelen' };
+      }
+
+      const output = jsxResult.output;
+      const jsonPrefix = '__LAYOUT_JSON__';
+      const jsonStart = output.indexOf(jsonPrefix);
+      if (jsonStart === -1) {
+        return { success: false, error: 'A JSX nem adott vissza layout adatot' };
+      }
+
+      const jsonStr = output.substring(jsonStart + jsonPrefix.length).trim();
+      let layoutResult: {
+        document: { name: string; widthPx: number; heightPx: number; dpi: number };
+        persons: Array<{ personId: number | null; name: string; type: string; layerName: string; x: number; y: number; width: number; height: number }>;
+        namePersons: Array<{ personId: number | null; name: string; type: string; layerName: string; x: number; y: number; width: number; height: number; text: string; justification: string }>;
+      };
+
+      try {
+        layoutResult = JSON.parse(jsonStr);
+      } catch {
+        return { success: false, error: 'Layout JSON parse hiba' };
+      }
+
+      // Images + names összefésülés layerName alapján
+      const nameMap = new Map<string, typeof layoutResult.namePersons[0]>();
+      for (const np of (layoutResult.namePersons || [])) {
+        nameMap.set(np.layerName, np);
+      }
+
+      const persons = layoutResult.persons.map(p => {
+        const nameData = nameMap.get(p.layerName);
+        return {
+          personId: p.personId,
+          name: p.name,
+          type: p.type,
+          layerName: p.layerName,
+          image: { x: p.x, y: p.y, width: p.width, height: p.height },
+          ...(nameData ? {
+            nameLayer: {
+              x: nameData.x,
+              y: nameData.y,
+              width: nameData.width,
+              height: nameData.height,
+              text: nameData.text,
+              justification: nameData.justification,
+            },
+          } : {}),
+        };
+      });
+
+      return {
+        success: true,
+        data: {
+          document: layoutResult.document,
+          persons,
+          board: {
+            widthCm: boardConfig.widthCm,
+            heightCm: boardConfig.heightCm,
+            marginCm: this.marginCm(),
+            gapHCm: this.gapHCm(),
+            gapVCm: this.gapVCm(),
+            gridAlign: this.gridAlign(),
+          },
+          nameSettings: {
+            nameGapCm: this.nameGapCm(),
+            textAlign: this.textAlign(),
+            nameBreakAfter: this.nameBreakAfter(),
+          },
+        },
+      };
+    } catch (err) {
+      this.logger.error('readFullLayout hiba', err);
+      return { success: false, error: 'Váratlan hiba a layout olvasásnál' };
+    }
+  }
+
+  /**
+   * Snapshot mentés: kiolvas a Photoshopból (v2) + elmenti a layouts/ mappába.
+   */
+  async saveSnapshot(
+    name: string,
+    boardConfig: { widthCm: number; heightCm: number },
+    psdPath: string,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    const layoutResult = await this.readFullLayout(boardConfig, targetDocName);
+    if (!layoutResult.success || !layoutResult.data) {
+      return { success: false, error: layoutResult.error || 'Layout kiolvasás sikertelen' };
+    }
+
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+    const slugName = this.sanitizeName(name);
+    const fileName = `${dateStr}_${slugName}.json`;
+
+    const snapshotData = {
+      version: 2,
+      snapshotName: name,
+      createdAt: now.toISOString(),
+      document: layoutResult.data.document,
+      board: layoutResult.data.board,
+      nameSettings: layoutResult.data.nameSettings,
+      persons: layoutResult.data.persons,
+    };
+
+    try {
+      const result = await this.api.saveSnapshot({
+        psdPath,
+        snapshotData,
+        fileName,
+      });
+
+      if (!result.success) {
+        return { success: false, error: result.error || 'Snapshot mentés sikertelen' };
+      }
+
+      this.logger.info(`Snapshot mentve: ${name} (${layoutResult.data.persons.length} személy)`);
+      return { success: true };
+    } catch (err) {
+      this.logger.error('Snapshot mentés hiba', err);
+      return { success: false, error: 'Váratlan hiba a snapshot mentésnél' };
+    }
+  }
+
+  /** Snapshot lista lekérés */
+  async listSnapshots(psdPath: string): Promise<SnapshotListItem[]> {
+    if (!this.api) return [];
+
+    try {
+      const result = await this.api.listSnapshots({ psdPath });
+      return result.success ? result.snapshots : [];
+    } catch (err) {
+      this.logger.error('Snapshot lista hiba', err);
+      return [];
+    }
+  }
+
+  /**
+   * Snapshot visszaállítás: beolvassa a JSON-t + futtatja a restore-layout.jsx-et.
+   */
+  async restoreSnapshot(
+    snapshotPath: string,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      // 1. Snapshot JSON betöltése
+      const loadResult = await this.api.loadSnapshot({ snapshotPath });
+      if (!loadResult.success || !loadResult.data) {
+        return { success: false, error: loadResult.error || 'Snapshot betöltés sikertelen' };
+      }
+
+      // 2. restore-layout.jsx futtatása a snapshot adatokkal
+      const jsxResult = await this.api.runJsx({
+        scriptName: 'actions/restore-layout.jsx',
+        jsonData: loadResult.data as Record<string, unknown>,
+        targetDocName,
+      });
+
+      if (!jsxResult.success) {
+        return { success: false, error: jsxResult.error || 'Snapshot visszaállítás sikertelen' };
+      }
+
+      this.logger.info('Snapshot visszaállítva');
+      return { success: true };
+    } catch (err) {
+      this.logger.error('Snapshot visszaállítás hiba', err);
+      return { success: false, error: 'Váratlan hiba a snapshot visszaállításnál' };
+    }
+  }
+
+  /** Snapshot törlés */
+  async deleteSnapshot(snapshotPath: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      return await this.api.deleteSnapshot({ snapshotPath });
+    } catch (err) {
+      this.logger.error('Snapshot törlés hiba', err);
+      return { success: false, error: 'Váratlan hiba a snapshot törlésnél' };
     }
   }
 

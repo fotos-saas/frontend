@@ -12,6 +12,8 @@ import { PhotoshopService } from '../../services/photoshop.service';
 import { BrandingService } from '../../services/branding.service';
 import { TabloSize, TabloPersonItem } from '../../models/partner.models';
 import { TabloEditorDebugService, DebugLogEntry } from './tablo-editor-debug.service';
+import { TabloEditorSnapshotService } from './tablo-editor-snapshot.service';
+import { SnapshotListItem } from '@core/services/electron.types';
 
 type EditorTab = 'commands' | 'settings' | 'debug';
 
@@ -19,7 +21,7 @@ type EditorTab = 'commands' | 'settings' | 'debug';
   selector: 'app-project-tablo-editor',
   standalone: true,
   imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule],
-  providers: [TabloEditorDebugService],
+  providers: [TabloEditorDebugService, TabloEditorSnapshotService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +33,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   private readonly ps = inject(PhotoshopService);
   private readonly branding = inject(BrandingService);
   private readonly debugService = inject(TabloEditorDebugService);
+  readonly snapshotService = inject(TabloEditorSnapshotService);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
@@ -120,6 +123,7 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.loadProject(id);
     this.ps.detectPhotoshop();
     this.loadTabloSizes();
+    this.loadSnapshots();
   }
 
   private loadProject(id: number): void {
@@ -239,9 +243,10 @@ export class ProjectTabloEditorComponent implements OnInit {
         return;
       }
 
-      // PSD path mentése a layout funkciókhoz
+      // PSD path mentése a layout funkciókhoz + snapshot lista frissítés
       if (result.outputPath) {
         this.currentPsdPath.set(result.outputPath);
+        this.snapshotService.loadSnapshots(result.outputPath);
       }
 
       // Varunk hogy a Photoshop megnyissa a PSD-t
@@ -433,6 +438,74 @@ export class ProjectTabloEditorComponent implements OnInit {
       this.addLog('Váratlan hiba', String(err), 'error');
     } finally {
       this.generating.set(false);
+    }
+  }
+
+  /** Snapshot lista betöltése (ha van PSD path) */
+  async loadSnapshots(): Promise<void> {
+    const psdPath = await this.resolvePsdPath();
+    if (!psdPath) return;
+    await this.snapshotService.loadSnapshots(psdPath);
+  }
+
+  /** Új pillanatkép mentése */
+  async saveSnapshotFromDialog(): Promise<void> {
+    const size = this.selectedSize();
+    if (!size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    const psdPath = await this.resolvePsdPath(size);
+    if (!psdPath) return;
+
+    this.clearMessages();
+    const result = await this.snapshotService.saveSnapshot(
+      this.snapshotService.snapshotName(),
+      boardSize,
+      psdPath,
+    );
+
+    if (result.success) {
+      this.successMessage.set('Pillanatkép mentve!');
+    } else {
+      this.error.set(result.error || 'Pillanatkép mentés sikertelen.');
+    }
+  }
+
+  /** Pillanatkép visszaállítása */
+  async restoreSnapshot(snapshot: SnapshotListItem): Promise<void> {
+    const psdPath = await this.resolvePsdPath();
+    if (!psdPath) return;
+
+    this.clearMessages();
+    const result = await this.snapshotService.restoreSnapshot(
+      snapshot.filePath,
+      psdPath,
+    );
+
+    if (result.success) {
+      this.successMessage.set(`Pillanatkép visszaállítva: ${snapshot.snapshotName}`);
+    } else {
+      this.error.set(result.error || 'Visszaállítás sikertelen.');
+    }
+  }
+
+  /** Pillanatkép törlése */
+  async deleteSnapshot(snapshot: SnapshotListItem): Promise<void> {
+    const psdPath = await this.resolvePsdPath();
+    if (!psdPath) return;
+
+    this.clearMessages();
+    const result = await this.snapshotService.deleteSnapshot(
+      snapshot.filePath,
+      psdPath,
+    );
+
+    if (result.success) {
+      this.successMessage.set('Pillanatkép törölve.');
+    } else {
+      this.error.set(result.error || 'Törlés sikertelen.');
     }
   }
 }

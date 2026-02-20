@@ -534,6 +534,131 @@
   to { transform: rotate(360deg); }
 }
 
+// Snapshot akciók (gombok sor)
+.snapshot-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+// Snapshot üres állapot
+.snapshot-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  color: var(--text-tertiary, #9ca3af);
+  text-align: center;
+
+  p {
+    margin: 6px 0 0;
+    font-size: 0.875rem;
+  }
+
+  &__hint {
+    font-size: 0.8rem !important;
+    color: var(--text-tertiary, #9ca3af);
+  }
+}
+
+// Snapshot lista
+.snapshot-list {
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.snapshot-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  transition: background 0.1s ease;
+
+  & + & {
+    border-top: 1px solid var(--border-color, #f3f4f6);
+  }
+
+  &:hover {
+    background: var(--hover-bg, #f9fafb);
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #1f2937);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    font-size: 0.75rem;
+    color: var(--text-tertiary, #9ca3af);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+}
+
+// Snapshot mentés dialógus
+.snapshot-dialog {
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary, #1f2937);
+    margin: 0 0 8px;
+  }
+
+  &__desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 0 0 16px;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--card-bg, #ffffff);
+    color: var(--text-primary, #1f2937);
+    margin-bottom: 16px;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color, #7c3aed);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    &::placeholder {
+      color: var(--text-tertiary, #9ca3af);
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .spin {
     animation-duration: 0.01ms !important;

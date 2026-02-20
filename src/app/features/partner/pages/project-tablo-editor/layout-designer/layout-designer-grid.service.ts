@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { PhotoshopService } from '../../../services/photoshop.service';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
-import { GroupGridConfig, GridCell, LayerCategory } from './layout-designer.types';
+import { GroupGridConfig, GridCell, LayerCategory, DesignerLayer } from './layout-designer.types';
 import { cmToPx } from './layout-designer.utils';
 
 /**
@@ -98,9 +98,22 @@ export class LayoutDesignerGridService {
   }
 
   /**
+   * Tényleges image magasság kiolvasása a layerekből.
+   * A képek nem mindig négyzetesek — a medián magasságot használjuk.
+   */
+  private getActualImageHeight(category: 'student-image' | 'teacher-image'): number | null {
+    const layers = this.state.layers();
+    const group = layers.filter(l => l.category === category);
+    if (group.length === 0) return null;
+
+    const heights = group.map(l => l.height).sort((a, b) => a - b);
+    return heights[Math.floor(heights.length / 2)];
+  }
+
+  /**
    * Grid építése a PhotoshopService signal-okból.
-   * A grid a margó + képméret + gap alapján számol,
-   * figyelembe véve a gridAlign beállítást (left/center/right).
+   * Szélesség: cm konfig alapján, magasság: tényleges layer méretekből.
+   * GridAlign (left/center/right) figyelembevételével.
    */
   private buildGrid(
     type: 'student' | 'teacher',
@@ -110,12 +123,17 @@ export class LayoutDesignerGridService {
   ): GroupGridConfig | null {
     const marginPx = cmToPx(this.ps.marginCm(), dpi);
     const sizeCm = type === 'student' ? this.ps.studentSizeCm() : this.ps.teacherSizeCm();
-    const imageSizePx = cmToPx(sizeCm, dpi);
+    const imageWidthPx = cmToPx(sizeCm, dpi);
     const gapHPx = cmToPx(this.ps.gapHCm(), dpi);
     const gapVPx = cmToPx(this.ps.gapVCm(), dpi);
     const gridAlign = this.ps.gridAlign();
 
-    if (imageSizePx <= 0) return null;
+    if (imageWidthPx <= 0) return null;
+
+    // Tényleges image magasság a layerekből (nem négyzetes!)
+    const imageCat = type === 'student' ? 'student-image' : 'teacher-image' as const;
+    const actualHeight = this.getActualImageHeight(imageCat);
+    const imageHeightPx = actualHeight ?? imageWidthPx;
 
     // Elérhető terület a margókon belül
     const availW = docWidth - marginPx * 2;
@@ -124,14 +142,14 @@ export class LayoutDesignerGridService {
     if (availW <= 0 || availH <= 0) return null;
 
     // Oszlopok és sorok számítása
-    const cellWidth = imageSizePx + gapHPx;
-    const cellHeight = imageSizePx + gapVPx;
+    const cellWidth = imageWidthPx + gapHPx;
+    const cellHeight = imageHeightPx + gapVPx;
 
     const cols = Math.max(1, Math.floor((availW + gapHPx) / cellWidth));
     const rows = Math.max(1, Math.floor((availH + gapVPx) / cellHeight));
 
     // Grid teljes szélessége (gap nélkül a végén)
-    const gridTotalW = cols * imageSizePx + (cols - 1) * gapHPx;
+    const gridTotalW = cols * imageWidthPx + (cols - 1) * gapHPx;
 
     // Origin X a gridAlign alapján
     let originX: number;
@@ -155,8 +173,8 @@ export class LayoutDesignerGridService {
       originY: Math.round(originY),
       cellWidth: Math.round(cellWidth),
       cellHeight: Math.round(cellHeight),
-      imageWidth: Math.round(imageSizePx),
-      imageHeight: Math.round(imageSizePx),
+      imageWidth: Math.round(imageWidthPx),
+      imageHeight: Math.round(imageHeightPx),
       cols,
       rows,
     };

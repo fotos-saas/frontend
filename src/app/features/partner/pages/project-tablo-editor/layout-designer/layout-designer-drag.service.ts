@@ -59,14 +59,17 @@ export class LayoutDesignerDragService {
     event.preventDefault();
 
     const currentSelection = this.state.selectedLayerIds();
+    const isAdditive = event.metaKey || event.ctrlKey;
 
-    // Ha a fogott elem nincs kijelölve → kijelölés cserélése rá
+    // Cmd+klikk már kijelölt elemre → kijelölés levétele, NEM drag
+    if (isAdditive && currentSelection.has(layerId)) {
+      this.state.toggleSelection(layerId, true);
+      return;
+    }
+
+    // Ha a fogott elem nincs kijelölve → kijelölés cserélése/hozzáadása
     if (!currentSelection.has(layerId)) {
-      if (event.metaKey || event.ctrlKey) {
-        this.state.toggleSelection(layerId, true);
-      } else {
-        this.state.toggleSelection(layerId, false);
-      }
+      this.state.toggleSelection(layerId, isAdditive);
     }
 
     // Kijelölt ID-k bővítése coupled párokkal

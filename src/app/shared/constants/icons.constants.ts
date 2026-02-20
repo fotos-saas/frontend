@@ -358,6 +358,10 @@ export const ICONS = {
   ALIGN_RIGHT: 'align-right',
   ALIGN_START_V: 'align-start-vertical',
   ALIGN_CENTER_V: 'align-center-vertical',
+  ALIGN_END_V: 'align-end-vertical',
+  ALIGN_START_H: 'align-start-horizontal',
+  ALIGN_CENTER_H: 'align-center-horizontal',
+  ALIGN_END_H: 'align-end-horizontal',
   ROWS_3: 'rows-3',
 
   // Vizuális szerkesztő

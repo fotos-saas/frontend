@@ -14,153 +14,113 @@ const ROW_THRESHOLD_PX = 20;
 export class LayoutDesignerActionsService {
   private readonly state = inject(LayoutDesignerStateService);
 
-  /** Felsők igazítása: kijelölt elemek Y → min(Y) */
-  alignTop(): void {
+  /** Balra igazítás: X → min(X) */
+  alignLeft(): void {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
-
-    const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
+    const minX = Math.min(...selected.map(l => l.editedX ?? l.x));
     this.applyAlignmentWithCoupled(selected, (l) => ({
-      x: l.editedX ?? l.x,
-      y: minY,
+      x: minX, y: l.editedY ?? l.y,
     }));
   }
 
-  /** Vízszintes elosztás: egyenletes gap a kijelölt elemek között (X tengely) */
+  /** Jobbra igazítás: jobb szél → max(X + width) */
+  alignRight(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+    const maxRight = Math.max(...selected.map(l => (l.editedX ?? l.x) + l.width));
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: maxRight - l.width, y: l.editedY ?? l.y,
+    }));
+  }
+
+  /** Tetejére igazítás: Y → min(Y) */
+  alignTop(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+    const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: l.editedX ?? l.x, y: minY,
+    }));
+  }
+
+  /** Aljára igazítás: alsó szél → max(Y + height) */
+  alignBottom(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+    const maxBottom = Math.max(...selected.map(l => (l.editedY ?? l.y) + l.height));
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: l.editedX ?? l.x, y: maxBottom - l.height,
+    }));
+  }
+
+  /** Vízszintes középre: X középpont → átlag(X középpont) */
+  alignCenterHorizontal(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+    const avgCx = selected.reduce((s, l) =>
+      s + (l.editedX ?? l.x) + l.width / 2, 0) / selected.length;
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: Math.round(avgCx - l.width / 2), y: l.editedY ?? l.y,
+    }));
+  }
+
+  /** Függőleges középre: Y középpont → átlag(Y középpont) */
+  alignCenterVertical(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+    const avgCy = selected.reduce((s, l) =>
+      s + (l.editedY ?? l.y) + l.height / 2, 0) / selected.length;
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: l.editedX ?? l.x, y: Math.round(avgCy - l.height / 2),
+    }));
+  }
+
+  /** Vízszintes elosztás: egyenletes X gap (≥3 elem) */
   distributeHorizontal(): void {
     const selected = this.state.selectedLayers();
     if (selected.length < 3) return;
-
     const sorted = [...selected].sort((a, b) => (a.editedX ?? a.x) - (b.editedX ?? b.x));
     const firstX = sorted[0].editedX ?? sorted[0].x;
     const lastX = sorted[sorted.length - 1].editedX ?? sorted[sorted.length - 1].x;
     const step = (lastX - firstX) / (sorted.length - 1);
-
     const posMap = new Map<number, number>();
     sorted.forEach((l, i) => posMap.set(l.layerId, Math.round(firstX + step * i)));
-
     this.applyAlignmentWithCoupled(selected, (l) => ({
-      x: posMap.get(l.layerId) ?? (l.editedX ?? l.x),
-      y: l.editedY ?? l.y,
+      x: posMap.get(l.layerId) ?? (l.editedX ?? l.x), y: l.editedY ?? l.y,
     }));
   }
 
-  /** Függőleges elosztás: egyenletes gap a kijelölt elemek között (Y tengely) */
+  /** Függőleges elosztás: egyenletes Y gap (≥3 elem) */
   distributeVertical(): void {
     const selected = this.state.selectedLayers();
     if (selected.length < 3) return;
-
     const sorted = [...selected].sort((a, b) => (a.editedY ?? a.y) - (b.editedY ?? b.y));
     const firstY = sorted[0].editedY ?? sorted[0].y;
     const lastY = sorted[sorted.length - 1].editedY ?? sorted[sorted.length - 1].y;
     const step = (lastY - firstY) / (sorted.length - 1);
-
     const posMap = new Map<number, number>();
     sorted.forEach((l, i) => posMap.set(l.layerId, Math.round(firstY + step * i)));
-
     this.applyAlignmentWithCoupled(selected, (l) => ({
-      x: l.editedX ?? l.x,
-      y: posMap.get(l.layerId) ?? (l.editedY ?? l.y),
+      x: l.editedX ?? l.x, y: posMap.get(l.layerId) ?? (l.editedY ?? l.y),
     }));
   }
 
-  /**
-   * Sorok automatikus igazítása:
-   * Hasonló Y-ú elemeket csoportosítja (threshold alapján),
-   * és soron belül min(Y)-ra igazít.
-   */
+  /** Sorok automatikus igazítása: hasonló Y-ú elemek → min(Y) */
   alignRows(): void {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
-
     const rows = this.groupIntoRows(selected);
     const rowYMap = new Map<number, number>();
     for (const row of rows) {
       if (row.length < 2) continue;
       const minY = Math.min(...row.map(l => l.editedY ?? l.y));
-      for (const l of row) {
-        rowYMap.set(l.layerId, minY);
-      }
+      for (const l of row) rowYMap.set(l.layerId, minY);
     }
-
     if (rowYMap.size === 0) return;
-
-    // Csak azokat az elemeket igazítjuk, amelyeknek van sor-társa
-    const affectedSelected = selected.filter(l => rowYMap.has(l.layerId));
-    this.applyAlignmentWithCoupled(affectedSelected, (l) => ({
-      x: l.editedX ?? l.x,
-      y: rowYMap.get(l.layerId) ?? (l.editedY ?? l.y),
-    }));
-  }
-
-  /** Balra igazítás: kijelölt elemek X → min(X), coupled párokkal */
-  alignLeft(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-
-    const expandedIds = expandWithCoupledLayers(
-      this.state.selectedLayerIds(), this.state.layers(),
-    );
-
-    const minX = Math.min(...selected.map(l => l.editedX ?? l.x));
-    const updates = new Map<number, { x: number }>();
-
-    // Kijelölt elemek X → minX, coupled párok delta-val követik
-    for (const sel of selected) {
-      const selX = sel.editedX ?? sel.x;
-      const deltaX = minX - selX;
-      updates.set(sel.layerId, { x: minX });
-
-      // Coupled pár is kapja a delta-t
-      for (const id of expandedIds) {
-        if (updates.has(id)) continue;
-        const layer = this.state.layers().find(l => l.layerId === id);
-        if (layer && !this.state.selectedLayerIds().has(id)) {
-          const isLinked = layer.personMatch && sel.personMatch
-            && layer.personMatch.id === sel.personMatch.id;
-          if (isLinked) {
-            updates.set(id, { x: (layer.editedX ?? layer.x) + deltaX });
-          }
-        }
-      }
-    }
-
-    this.state.updateLayers(
-      this.state.layers().map(l => {
-        const u = updates.get(l.layerId);
-        if (!u) return l;
-        return { ...l, editedX: u.x };
-      }),
-    );
-  }
-
-  /** Vízszintes középre igazítás: X középpont → átlag(X középpont) */
-  alignCenterHorizontal(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-
-    const avgCenterX = selected.reduce((sum, l) => {
-      return sum + (l.editedX ?? l.x) + l.width / 2;
-    }, 0) / selected.length;
-
-    this.applyAlignmentWithCoupled(selected, (l) => ({
-      x: Math.round(avgCenterX - l.width / 2),
-      y: l.editedY ?? l.y,
-    }));
-  }
-
-  /** Függőleges középre igazítás: Y középpont → átlag(Y középpont) */
-  alignCenterVertical(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-
-    const avgCenterY = selected.reduce((sum, l) => {
-      return sum + (l.editedY ?? l.y) + l.height / 2;
-    }, 0) / selected.length;
-
-    this.applyAlignmentWithCoupled(selected, (l) => ({
-      x: l.editedX ?? l.x,
-      y: Math.round(avgCenterY - l.height / 2),
+    const affected = selected.filter(l => rowYMap.has(l.layerId));
+    this.applyAlignmentWithCoupled(affected, (l) => ({
+      x: l.editedX ?? l.x, y: rowYMap.get(l.layerId) ?? (l.editedY ?? l.y),
     }));
   }
 
@@ -172,7 +132,6 @@ export class LayoutDesignerActionsService {
     const expandedIds = expandWithCoupledLayers(
       this.state.selectedLayerIds(), this.state.layers(),
     );
-
     const updates = new Map<number, { x: number; y: number }>();
 
     for (const sel of selected) {
@@ -181,7 +140,6 @@ export class LayoutDesignerActionsService {
       const deltaY = newPos.y - (sel.editedY ?? sel.y);
       updates.set(sel.layerId, newPos);
 
-      // Coupled párok delta-val követik
       for (const id of expandedIds) {
         if (updates.has(id)) continue;
         const layer = this.state.layers().find(l => l.layerId === id);
@@ -213,7 +171,6 @@ export class LayoutDesignerActionsService {
     const rows: DesignerLayer[][] = [];
     let currentRow: DesignerLayer[] = [];
     let currentRowY = -Infinity;
-
     for (const layer of sorted) {
       const y = layer.editedY ?? layer.y;
       if (currentRow.length === 0 || Math.abs(y - currentRowY) <= ROW_THRESHOLD_PX) {
@@ -225,11 +182,7 @@ export class LayoutDesignerActionsService {
         currentRowY = y;
       }
     }
-
-    if (currentRow.length > 0) {
-      rows.push(currentRow);
-    }
-
+    if (currentRow.length > 0) rows.push(currentRow);
     return rows;
   }
 }

@@ -172,6 +172,10 @@ import {
   AlignRight,
   AlignStartVertical,
   AlignCenterVertical,
+  AlignEndVertical,
+  AlignStartHorizontal,
+  AlignCenterHorizontal,
+  AlignEndHorizontal,
   Rows3,
   // Vizuális szerkesztő
   Move,
@@ -346,6 +350,10 @@ export const LUCIDE_ICONS_MAP = {
   AlignRight,
   AlignStartVertical,
   AlignCenterVertical,
+  AlignEndVertical,
+  AlignStartHorizontal,
+  AlignCenterHorizontal,
+  AlignEndHorizontal,
   Rows3,
   // Vizuális szerkesztő
   Move,

@@ -54,13 +54,14 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             {{ state.selectionCount() }} kijelölve
           </span>
 
+          <!-- Vízszintes igazítás -->
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
             (click)="actions.alignLeft()"
             matTooltip="Balra igazítás"
           >
-            <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="16" />
+            <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="16" />
           </button>
           <button
             class="toolbar-btn"
@@ -73,14 +74,43 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignTop()"
-            matTooltip="Tetejére igazítás"
+            (click)="actions.alignRight()"
+            matTooltip="Jobbra igazítás"
           >
-            <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="16" />
+            <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="16" />
           </button>
 
           <div class="layout-toolbar__divider"></div>
 
+          <!-- Függőleges igazítás -->
+          <button
+            class="toolbar-btn"
+            [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignTop()"
+            matTooltip="Tetejére igazítás"
+          >
+            <lucide-icon [name]="ICONS.ALIGN_START_H" [size]="16" />
+          </button>
+          <button
+            class="toolbar-btn"
+            [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignCenterVertical()"
+            matTooltip="Függőleges középre"
+          >
+            <lucide-icon [name]="ICONS.ALIGN_CENTER_H" [size]="16" />
+          </button>
+          <button
+            class="toolbar-btn"
+            [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignBottom()"
+            matTooltip="Aljára igazítás"
+          >
+            <lucide-icon [name]="ICONS.ALIGN_END_H" [size]="16" />
+          </button>
+
+          <div class="layout-toolbar__divider"></div>
+
+          <!-- Elosztás + sorok -->
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 3"

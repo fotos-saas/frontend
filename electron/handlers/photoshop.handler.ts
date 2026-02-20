@@ -1696,14 +1696,18 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       // 5. Mozgatasok osszeallitasa
       const moves: Array<{ layerName: string; groupPath: string[]; targetX: number; targetY: number; justification?: string }> = [];
 
+      // Referencia a tmpl-re (mar ellenorizve hogy nem undefined)
+      const templateRef = tmpl;
+      const nameSettings = templateRef.nameSettings;
+
       // Diak slotok parositas index alapjan
       function buildMoves(
-        slots: typeof tmpl.studentSlots,
+        slots: GlobalTemplate['studentSlots'],
         images: typeof currentStudentImages,
         names: typeof currentStudentNames,
         imgGroupPath: string[],
         nameGroupPath: string[],
-        boardConfig: typeof tmpl.board,
+        boardConfig: GlobalTemplate['board'],
       ) {
         for (let i = 0; i < images.length; i++) {
           if (i < slots.length) {
@@ -1744,7 +1748,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
             // Az utolso slot sor utani pozicio
             const lastSlot = slots[slots.length - 1];
             const lastRowY = Math.round(lastSlot.image.y * dpiScale);
-            const nameGapPx = Math.round((tmpl.nameSettings.nameGapCm / 2.54) * docDpi);
+            const nameGapPx = Math.round((nameSettings.nameGapCm / 2.54) * docDpi);
             const nameHeight = lastSlot.name ? Math.round(lastSlot.name.height * dpiScale) : 0;
             const startY = lastRowY + photoH + nameGapPx + nameHeight + gapVPx;
 
@@ -1767,15 +1771,15 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
                 groupPath: nameGroupPath,
                 targetX: overflowX,
                 targetY: overflowY + photoH + nameGapPx,
-                justification: tmpl.nameSettings.textAlign || 'center',
+                justification: nameSettings.textAlign || 'center',
               });
             }
           }
         }
       }
 
-      buildMoves(tmpl.studentSlots, currentStudentImages, currentStudentNames, ['Images', 'Students'], ['Names', 'Students'], tmpl.board);
-      buildMoves(tmpl.teacherSlots, currentTeacherImages, currentTeacherNames, ['Images', 'Teachers'], ['Names', 'Teachers'], tmpl.board);
+      buildMoves(templateRef.studentSlots, currentStudentImages, currentStudentNames, ['Images', 'Students'], ['Names', 'Students'], templateRef.board);
+      buildMoves(templateRef.teacherSlots, currentTeacherImages, currentTeacherNames, ['Images', 'Teachers'], ['Names', 'Teachers'], templateRef.board);
 
       if (moves.length === 0) {
         return { success: true, output: 'Nincs mozgatando layer' };

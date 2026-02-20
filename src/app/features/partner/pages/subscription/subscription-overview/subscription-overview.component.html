@@ -274,7 +274,7 @@
           <div class="storage-text">
             <span class="storage-current">{{ formatStorage(storageUsage()?.used_gb ?? 0) }} GB</span>
             <span class="storage-separator">/</span>
-            <span class="storage-limit">{{ formatStorage(storageUsage()?.total_limit_gb ?? subscription()!.limits.storage_gb) }} GB</span>
+            <span class="storage-limit">{{ formatStorage(storageUsage()?.total_limit_gb ?? subscription()!.limits['storage_gb'] ?? 5) }} GB</span>
           </div>
           @if (storageUsage()?.additional_gb) {
             <div class="storage-detail">

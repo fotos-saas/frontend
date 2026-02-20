@@ -47,7 +47,8 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
           [class.text-left]="layer().justification === 'left'"
           [class.text-center]="layer().justification === 'center' || !layer().justification"
           [class.text-right]="layer().justification === 'right'"
-        >{{ displayName }}</span>
+          [style.font-size.px]="textFontSize"
+        >{{ layer().text ?? displayName }}</span>
       } @else {
         <div class="designer-layer__fixed">
           <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
@@ -88,8 +89,8 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       &--text {
         display: flex;
         align-items: center;
-        background: rgba(59, 130, 246, 0.08);
-        border-color: rgba(59, 130, 246, 0.2);
+        background: transparent;
+        border-color: rgba(59, 130, 246, 0.15);
       }
 
       &--fixed {
@@ -120,17 +121,19 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
     }
 
     .designer-layer__text {
-      font-size: 10px;
-      color: #1e40af;
-      padding: 2px 4px;
+      color: #1e293b;
+      padding: 0;
       width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      word-break: break-word;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      line-height: 1.15;
 
-      &.text-left { text-align: left; }
-      &.text-center { text-align: center; }
-      &.text-right { text-align: right; }
+      &.text-left { text-align: left; justify-content: flex-start; }
+      &.text-center { text-align: center; justify-content: center; }
+      &.text-right { text-align: right; justify-content: flex-end; }
     }
 
     .designer-layer__fixed {
@@ -191,6 +194,11 @@ export class LayoutLayerComponent {
       return this.displayWidth * (15.4 / 10.4);
     }
     return this.layer().height * this.scale();
+  }
+
+  /** Szöveg layer betűmérete — a layer magasságából becsüljük */
+  get textFontSize(): number {
+    return Math.max(8, this.displayHeight * 0.7);
   }
 
   get placeholderIconSize(): number {

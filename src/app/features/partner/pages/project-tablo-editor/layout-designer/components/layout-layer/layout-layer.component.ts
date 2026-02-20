@@ -121,6 +121,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
 
     .designer-layer__text {
       display: inline-block;
+      vertical-align: top;
       color: #1e293b;
       font-size: 10px;
       line-height: 1.2;

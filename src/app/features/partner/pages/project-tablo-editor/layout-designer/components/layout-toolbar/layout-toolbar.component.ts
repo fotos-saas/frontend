@@ -16,7 +16,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
   imports: [LucideAngularModule, MatTooltipModule],
   template: `
     <div class="layout-toolbar">
-      <!-- Bal: dokumentum info + grid toggle -->
+      <!-- Bal: dokumentum info + grid + igazítás -->
       <div class="layout-toolbar__left">
         @if (state.documentSizeCm(); as size) {
           <span class="layout-toolbar__doc-info">
@@ -46,17 +46,14 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         >
           <lucide-icon [name]="ICONS.WAND" [size]="16" />
         </button>
-      </div>
 
-      <!-- Közép: kijelölés info + igazítás gombok -->
-      <div class="layout-toolbar__center">
         @if (state.hasSelection()) {
+          <div class="layout-toolbar__separator"></div>
+
           <span class="layout-toolbar__selection">
             {{ state.selectionCount() }} kijelölve
           </span>
-        }
 
-        <div class="layout-toolbar__actions">
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
@@ -108,7 +105,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           >
             <lucide-icon [name]="ICONS.ROWS_3" [size]="16" />
           </button>
-        </div>
+        }
       </div>
 
       <!-- Jobb: frissítés + mentés + bezárás -->
@@ -159,9 +156,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       flex: 1;
       display: flex;
       align-items: center;
-      gap: 12px;
-      min-width: 0;
-      overflow: hidden;
+      gap: 8px;
     }
 
     .layout-toolbar__doc-info {
@@ -176,25 +171,11 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       background: rgba(255, 255, 255, 0.12);
     }
 
-    .layout-toolbar__center {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-      z-index: 1;
-    }
-
     .layout-toolbar__selection {
       font-size: 0.8rem;
       color: #a78bfa;
       font-weight: 600;
       white-space: nowrap;
-    }
-
-    .layout-toolbar__actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
     .layout-toolbar__divider {
@@ -205,13 +186,11 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
     }
 
     .layout-toolbar__right {
-      flex: 1;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
       gap: 8px;
-      min-width: 0;
-      overflow: hidden;
+      flex-shrink: 0;
+      margin-left: auto;
     }
 
     .toolbar-btn {

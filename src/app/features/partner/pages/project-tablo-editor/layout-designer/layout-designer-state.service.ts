@@ -95,10 +95,10 @@ export class LayoutDesignerStateService {
       };
     });
 
-    // Képes layerek szélességének normalizálása kategórián belül.
-    // Az üres SO (placeholder) más boundsNoEffects méretet kaphat mint a fotós SO,
-    // ezért a medián szélességet alkalmazzuk mindegyikre.
-    this.normalizeImageWidths(designerLayers);
+    // Layerek méretének normalizálása kategórián belül.
+    // A boundsNoEffects eltérő méretet adhat (üres SO, eltérő szöveghossz),
+    // ezért kategórián belül medián értékre egységesítünk.
+    this.normalizeLayerSizes(designerLayers);
 
     this.layers.set(designerLayers);
     this.selectedLayerIds.set(new Set());
@@ -172,24 +172,42 @@ export class LayoutDesignerStateService {
   }
 
   /**
-   * Képes layerek szélességének normalizálása kategórián belül.
-   * Az üres Smart Object (fotó nélküli) más boundsNoEffects méretet kaphat,
-   * ezért a medián szélességet alkalmazzuk az összes azonos kategóriájú layerre.
+   * Layer méretek normalizálása kategórián belül.
+   * A boundsNoEffects eltérő méretet adhat (üres SO, eltérő szöveghossz),
+   * ezért kategórián belül medián értékre egységesítünk.
    */
-  private normalizeImageWidths(layers: DesignerLayer[]): void {
+  private normalizeLayerSizes(layers: DesignerLayer[]): void {
+    // Image layerek: szélesség normalizálás
     for (const cat of ['student-image', 'teacher-image'] as const) {
-      const imageLayers = layers.filter(l => l.category === cat);
-      if (imageLayers.length < 2) continue;
+      const group = layers.filter(l => l.category === cat);
+      if (group.length < 2) continue;
 
-      const widths = imageLayers.map(l => l.width).sort((a, b) => a - b);
-      const medianWidth = widths[Math.floor(widths.length / 2)];
+      const widths = group.map(l => l.width).sort((a, b) => a - b);
+      const medianW = widths[Math.floor(widths.length / 2)];
 
-      for (const layer of imageLayers) {
-        if (layer.width !== medianWidth) {
-          // Középre igazítás: az X pozíciót is korrigáljuk
-          const diff = layer.width - medianWidth;
+      for (const layer of group) {
+        if (layer.width !== medianW) {
+          const diff = layer.width - medianW;
           layer.x = Math.round(layer.x + diff / 2);
-          layer.width = medianWidth;
+          layer.width = medianW;
+        }
+      }
+    }
+
+    // Text layerek: magasság normalizálás (a font méret ebből számolódik)
+    for (const cat of ['student-name', 'teacher-name'] as const) {
+      const group = layers.filter(l => l.category === cat);
+      if (group.length < 2) continue;
+
+      const heights = group.map(l => l.height).sort((a, b) => a - b);
+      const medianH = heights[Math.floor(heights.length / 2)];
+
+      for (const layer of group) {
+        if (layer.height !== medianH) {
+          // Y pozíció korrekció: alsó élhez igazítás megtartása
+          const diff = layer.height - medianH;
+          layer.y = Math.round(layer.y + diff);
+          layer.height = medianH;
         }
       }
     }

@@ -200,6 +200,10 @@ export class LayoutLayerComponent {
   }
 
   get displayHeight(): number {
+    if (this.isImage) {
+      // Fotó layerek 10×15 arányban (álló, 2:3)
+      return this.displayWidth * 1.5;
+    }
     return this.layer().height * this.scale();
   }
 

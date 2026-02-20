@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -68,8 +68,18 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
         </div>
       </div>
 
-      <!-- Jobb: mentés + bezárás -->
+      <!-- Jobb: frissítés + mentés + bezárás -->
       <div class="layout-toolbar__right">
+        <button
+          class="toolbar-btn toolbar-btn--refresh"
+          [disabled]="refreshing()"
+          [class.is-refreshing]="refreshing()"
+          (click)="refreshClicked.emit()"
+          matTooltip="Frissítés Photoshopból"
+        >
+          <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
+          <span>{{ refreshing() ? 'Frissítés...' : 'Frissítés' }}</span>
+        </button>
         <button
           class="toolbar-btn toolbar-btn--save"
           [disabled]="!state.hasChanges()"
@@ -165,6 +175,18 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
         cursor: not-allowed;
       }
 
+      &--refresh {
+        padding: 0 14px;
+
+        &:hover:not(:disabled) {
+          color: #a78bfa;
+        }
+
+        &.is-refreshing lucide-icon {
+          animation: spin 1s linear infinite;
+        }
+      }
+
       &--save {
         background: #7c3aed;
         color: #ffffff;
@@ -180,6 +202,11 @@ import { LayoutDesignerActionsService } from '../../layout-designer-actions.serv
         &:hover { background: rgba(239, 68, 68, 0.3); color: #fca5a5; }
       }
     }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -188,6 +215,9 @@ export class LayoutToolbarComponent {
   readonly actions = inject(LayoutDesignerActionsService);
   protected readonly ICONS = ICONS;
 
+  readonly refreshing = input<boolean>(false);
+
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
+  readonly refreshClicked = output<void>();
 }

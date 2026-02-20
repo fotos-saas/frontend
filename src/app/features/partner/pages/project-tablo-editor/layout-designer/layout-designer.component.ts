@@ -1,6 +1,6 @@
 import {
   Component, ChangeDetectionStrategy, input, output, inject,
-  OnInit, OnDestroy, ElementRef, viewChild, signal, effect,
+  OnInit, OnDestroy, ElementRef, viewChild, signal,
 } from '@angular/core';
 import { SnapshotLayer } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
@@ -42,6 +42,8 @@ import { DesignerDocument } from './layout-designer.types';
         </div>
       } @else {
         <app-layout-toolbar
+          [refreshing]="refreshing()"
+          (refreshClicked)="refresh()"
           (saveClicked)="save()"
           (closeClicked)="close()"
         />
@@ -114,6 +116,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Betöltendő snapshot fájl útvonala */
   readonly snapshotPath = input.required<string>();
 
+  /** PSD fájl útvonala (frissítéshez szükséges) */
+  readonly psdPath = input.required<string>();
+
   /** Projekt személyei */
   readonly persons = input.required<TabloPersonItem[]>();
 
@@ -129,6 +134,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly overlayEl = viewChild.required<ElementRef<HTMLElement>>('overlayEl');
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
+  readonly refreshing = signal(false);
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
@@ -154,6 +160,33 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   save(): void {
     const layers = this.state.exportChanges();
     this.saveEvent.emit(layers);
+  }
+
+  /** Frissítés Photoshopból: JSX futtatás → friss snapshot mentés → újratöltés */
+  async refresh(): Promise<void> {
+    this.refreshing.set(true);
+    this.loadError.set(null);
+
+    try {
+      // 1. Photoshopból kiolvasás + JSON mentés
+      const readResult = await this.ps.readAndSaveLayout(
+        this.boardConfig(),
+        this.psdPath(),
+      );
+
+      if (!readResult.success) {
+        this.loadError.set(readResult.error || 'Photoshop kiolvasás sikertelen.');
+        this.refreshing.set(false);
+        return;
+      }
+
+      // 2. Friss snapshot betöltése
+      await this.loadSnapshotData();
+    } catch {
+      this.loadError.set('Váratlan hiba a frissítéskor.');
+    }
+
+    this.refreshing.set(false);
   }
 
   private async loadSnapshotData(): Promise<void> {

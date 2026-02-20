@@ -858,9 +858,10 @@
 }
 
 <!-- Vizuális szerkesztő (page-card KÍVÜL) -->
-@if (showLayoutDesigner() && designerSnapshotPath() && designerBoardConfig()) {
+@if (showLayoutDesigner() && designerSnapshotPath() && designerPsdPath() && designerBoardConfig()) {
   <app-layout-designer
     [snapshotPath]="designerSnapshotPath()!"
+    [psdPath]="designerPsdPath()!"
     [persons]="persons()"
     [boardConfig]="designerBoardConfig()!"
     (closeEvent)="closeLayoutDesigner()"

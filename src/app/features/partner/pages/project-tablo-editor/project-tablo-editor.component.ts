@@ -118,6 +118,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   /** Vizuális szerkesztő */
   readonly showLayoutDesigner = signal(false);
   readonly designerSnapshotPath = signal<string | null>(null);
+  readonly designerPsdPath = signal<string | null>(null);
   readonly designerBoardConfig = signal<{ widthCm: number; heightCm: number } | null>(null);
 
   /** Üzenetek */
@@ -651,7 +652,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   // ============ Vizuális szerkesztő ============
 
   /** Vizuális szerkesztő megnyitása a legutolsó snapshot-tal */
-  openLayoutDesigner(): void {
+  async openLayoutDesigner(): Promise<void> {
     const latest = this.snapshotService.latestSnapshot();
     if (!latest) return;
 
@@ -661,7 +662,11 @@ export class ProjectTabloEditorComponent implements OnInit {
     const boardSize = this.ps.parseSizeValue(size.value);
     if (!boardSize) return;
 
+    const psdPath = await this.resolvePsdPath(size);
+    if (!psdPath) return;
+
     this.designerSnapshotPath.set(latest.filePath);
+    this.designerPsdPath.set(psdPath);
     this.designerBoardConfig.set(boardSize);
     this.showLayoutDesigner.set(true);
   }

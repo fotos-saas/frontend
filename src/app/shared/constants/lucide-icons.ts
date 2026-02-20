@@ -105,6 +105,7 @@ import {
   // Payment & Billing
   CreditCard,
   Package,
+  PackageCheck,
   Wallet,
   Percent,
   // Subscription & Settings
@@ -296,6 +297,7 @@ export const LUCIDE_ICONS_MAP = {
   // Payment & Billing
   CreditCard,
   Package,
+  PackageCheck,
   Wallet,
   Percent,
   // Subscription & Settings

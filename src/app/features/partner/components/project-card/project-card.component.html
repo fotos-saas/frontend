@@ -70,7 +70,21 @@
     />
   </div>
 
-  <!-- Col 4: Státusz -->
+  <!-- Col 4: Feltöltve -->
+  <div
+    class="col col-aware col-aware--clickable"
+    (click)="onPhotosUploadedClick($event)"
+    [attr.title]="project().photosUploaded ? 'Feltöltve - kattints a módosításhoz' : 'Nincs feltöltve - kattints a módosításhoz'"
+  >
+    <lucide-icon
+      [name]="project().photosUploaded ? ICONS.PACKAGE_CHECK : ICONS.PACKAGE"
+      [size]="16"
+      [class.aware--yes]="project().photosUploaded"
+      [class.aware--no]="!project().photosUploaded"
+    />
+  </div>
+
+  <!-- Col 5: Státusz -->
   <div class="col col-status" (click)="$event.stopPropagation()">
     @if (project().statusLabel) {
       <app-status-dropdown

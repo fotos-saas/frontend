@@ -31,6 +31,7 @@ export class ProjectCardComponent {
   readonly missingClick = output<PartnerProjectListItem>();
   readonly qrClick = output<PartnerProjectListItem>();
   readonly awareClick = output<PartnerProjectListItem>();
+  readonly photosUploadedClick = output<PartnerProjectListItem>();
   readonly orderDataClick = output<PartnerProjectListItem>();
   readonly deleteClick = output<PartnerProjectListItem>();
   readonly linkClick = output<PartnerProjectListItem>();
@@ -110,6 +111,11 @@ export class ProjectCardComponent {
   onAwareClick(event: MouseEvent): void {
     event.stopPropagation();
     this.awareClick.emit(this.project());
+  }
+
+  onPhotosUploadedClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.photosUploadedClick.emit(this.project());
   }
 
   onOrderDataClick(event: MouseEvent): void {

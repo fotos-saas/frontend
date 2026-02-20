@@ -292,6 +292,7 @@ export const ICONS = {
   // Payment & Billing
   CREDIT_CARD: 'credit-card',
   PACKAGE: 'package',
+  PACKAGE_CHECK: 'package-check',
   WALLET: 'wallet',
   PERCENT: 'percent',
 

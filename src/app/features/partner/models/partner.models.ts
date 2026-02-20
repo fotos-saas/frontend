@@ -66,6 +66,7 @@ export interface PartnerProjectListItem {
   contact: ProjectContact | null;
   hasActiveQrCode: boolean;
   isAware: boolean;
+  photosUploaded: boolean;
   createdAt: string;
   finalizedAt: string | null;
   orderSubmittedAt: string | null;

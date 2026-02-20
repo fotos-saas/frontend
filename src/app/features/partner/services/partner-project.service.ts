@@ -57,6 +57,7 @@ export class PartnerProjectService {
     school_id?: number;
     graduation_year?: number;
     is_preliminary?: string;
+    photos_uploaded?: string;
   }): Observable<ProjectListResponse> {
     const httpParams = buildHttpParams({
       page: params?.page,
@@ -70,6 +71,7 @@ export class PartnerProjectService {
       school_id: params?.school_id,
       graduation_year: params?.graduation_year,
       is_preliminary: params?.is_preliminary,
+      photos_uploaded: params?.photos_uploaded,
     });
 
     return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });
@@ -122,6 +124,21 @@ export class PartnerProjectService {
     return this.http.delete<{ success: boolean; message: string }>(
       `${this.baseUrl}/projects/${projectId}`,
     );
+  }
+
+  /**
+   * Feltöltve státusz toggle
+   */
+  togglePhotosUploaded(projectId: number): Observable<{
+    success: boolean;
+    message: string;
+    photosUploaded: boolean;
+  }> {
+    return this.http.patch<{
+      success: boolean;
+      message: string;
+      photosUploaded: boolean;
+    }>(`${this.baseUrl}/projects/${projectId}/toggle-photos-uploaded`, {});
   }
 
   /**

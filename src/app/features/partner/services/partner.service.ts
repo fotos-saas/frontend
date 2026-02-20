@@ -110,6 +110,10 @@ export class PartnerService {
     return this.projectService.toggleProjectAware(projectId);
   }
 
+  togglePhotosUploaded(projectId: number): Observable<{ success: boolean; message: string; photosUploaded: boolean }> {
+    return this.projectService.togglePhotosUploaded(projectId);
+  }
+
   getProjectSamples(projectId: number): Observable<{ data: SampleItem[] }> {
     return this.projectService.getProjectSamples(projectId);
   }

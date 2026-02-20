@@ -69,6 +69,7 @@ export class PartnerProjectListComponent implements OnInit {
     { key: 'sample', label: '', width: '48px' },
     { key: 'school_name', label: 'Iskola / Osztály', sortable: true },
     { key: 'aware', label: '', width: '24px', align: 'center', icon: 'check-circle', tooltip: 'Tudnak róla' },
+    { key: 'photos_uploaded', label: '', width: '24px', align: 'center', icon: 'package-check', tooltip: 'Feltöltve' },
     { key: 'tablo_status', label: 'Státusz', width: '110px', align: 'center', sortable: true },
     { key: 'missing_count', label: 'Hiányzó', width: '75px', align: 'center', sortable: true },
     { key: 'actions', label: '', width: '56px' },
@@ -86,7 +87,7 @@ export class PartnerProjectListComponent implements OnInit {
   // Filter state
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'projects' },
-    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: getCurrentGraduationYear().toString(), is_preliminary: '' },
+    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: getCurrentGraduationYear().toString(), is_preliminary: '', photos_uploaded: '' },
     defaultSortBy: 'created_at',
     defaultSortDir: 'desc',
     validation: {
@@ -94,6 +95,7 @@ export class PartnerProjectListComponent implements OnInit {
       filterOptions: {
         aware: ['true', 'false'],
         draft: ['true', 'false'],
+        photos_uploaded: ['true', 'false'],
       }
     },
     onStateChange: () => this.loadProjects(),
@@ -136,6 +138,10 @@ export class PartnerProjectListComponent implements OnInit {
     { id: 'aware', label: 'Tudnak róla?', options: [
       { value: 'true', label: 'Tudnak róla' },
       { value: 'false', label: 'Nem tudnak róla' }
+    ]},
+    { id: 'photos_uploaded', label: 'Feltöltve?', options: [
+      { value: 'true', label: 'Feltöltve' },
+      { value: 'false', label: 'Nincs feltöltve' }
     ]}
   ];
 
@@ -207,6 +213,7 @@ export class PartnerProjectListComponent implements OnInit {
       school_id: filters['school_id'] ? parseInt(filters['school_id'], 10) : undefined,
       graduation_year: filters['graduation_year'] ? parseInt(filters['graduation_year'], 10) : undefined,
       is_preliminary: filters['is_preliminary'] || undefined,
+      photos_uploaded: filters['photos_uploaded'] || undefined,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -334,6 +341,22 @@ export class PartnerProjectListComponent implements OnInit {
           );
         },
         error: (err) => this.logger.error('Failed to toggle aware', err)
+      });
+  }
+
+  togglePhotosUploaded(project: PartnerProjectListItem): void {
+    const prev = project.photosUploaded;
+    this.projects.update(projects =>
+      projects.map(p => p.id === project.id ? { ...p, photosUploaded: !prev } : p)
+    );
+    this.partnerService.togglePhotosUploaded(project.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: () => {
+          this.projects.update(projects =>
+            projects.map(p => p.id === project.id ? { ...p, photosUploaded: prev } : p)
+          );
+        }
       });
   }
 

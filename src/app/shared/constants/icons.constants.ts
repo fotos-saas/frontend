@@ -364,6 +364,7 @@ export const ICONS = {
   ALIGN_CENTER_H: 'align-center-horizontal',
   ALIGN_END_H: 'align-end-horizontal',
   ROWS_3: 'rows-3',
+  COLUMNS_3: 'columns-3',
 
   // Vizuális szerkesztő
   MOVE: 'move',

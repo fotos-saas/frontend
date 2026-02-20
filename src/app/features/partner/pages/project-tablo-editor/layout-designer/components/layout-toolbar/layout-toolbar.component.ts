@@ -157,6 +157,14 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           <button
             class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignColumns()"
+            matTooltip="Oszlopok igazítása"
+          >
+            <lucide-icon [name]="ICONS.COLUMNS_3" [size]="16" />
+          </button>
+          <button
+            class="toolbar-btn"
+            [disabled]="state.selectionCount() < 2"
             (click)="actions.arrangeToGrid()"
             matTooltip="Rácsba rendezés"
           >

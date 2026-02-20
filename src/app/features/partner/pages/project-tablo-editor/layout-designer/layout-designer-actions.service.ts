@@ -212,6 +212,24 @@ export class LayoutDesignerActionsService {
     }));
   }
 
+  /** Oszlopok automatikus igazítása: hasonló X-ű elemek → min(X) */
+  alignColumns(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length < 2) return;
+    const cols = this.groupIntoColumns(selected);
+    const colXMap = new Map<number, number>();
+    for (const col of cols) {
+      if (col.length < 2) continue;
+      const minX = Math.min(...col.map(l => l.editedX ?? l.x));
+      for (const l of col) colXMap.set(l.layerId, minX);
+    }
+    if (colXMap.size === 0) return;
+    const affected = selected.filter(l => colXMap.has(l.layerId));
+    this.applyAlignmentWithCoupled(affected, (l) => ({
+      x: colXMap.get(l.layerId) ?? (l.editedX ?? l.x), y: l.editedY ?? l.y,
+    }));
+  }
+
   /**
    * Ütközésmentes pozíciók kiszámítása: X szerint rendez,
    * balról jobbra haladva tolja jobbra az átfedő elemeket.
@@ -312,5 +330,28 @@ export class LayoutDesignerActionsService {
     }
     if (currentRow.length > 0) rows.push(currentRow);
     return rows;
+  }
+
+  /** Elemek csoportosítása oszlopokba hasonló X pozíció alapján */
+  private groupIntoColumns(layers: DesignerLayer[]): DesignerLayer[][] {
+    // Threshold: elemszélesség fele, de min ROW_THRESHOLD_PX
+    const threshold = Math.max(ROW_THRESHOLD_PX, (layers[0]?.width ?? 100) / 2);
+    const sorted = [...layers].sort((a, b) => (a.editedX ?? a.x) - (b.editedX ?? b.x));
+    const cols: DesignerLayer[][] = [];
+    let currentCol: DesignerLayer[] = [];
+    let currentColX = -Infinity;
+    for (const layer of sorted) {
+      const x = layer.editedX ?? layer.x;
+      if (currentCol.length === 0 || Math.abs(x - currentColX) <= threshold) {
+        currentCol.push(layer);
+        if (currentCol.length === 1) currentColX = x;
+      } else {
+        cols.push(currentCol);
+        currentCol = [layer];
+        currentColX = x;
+      }
+    }
+    if (currentCol.length > 0) cols.push(currentCol);
+    return cols;
   }
 }

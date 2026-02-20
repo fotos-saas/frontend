@@ -95,6 +95,11 @@ export class LayoutDesignerStateService {
       };
     });
 
+    // Képes layerek szélességének normalizálása kategórián belül.
+    // Az üres SO (placeholder) más boundsNoEffects méretet kaphat mint a fotós SO,
+    // ezért a medián szélességet alkalmazzuk mindegyikre.
+    this.normalizeImageWidths(designerLayers);
+
     this.layers.set(designerLayers);
     this.selectedLayerIds.set(new Set());
   }
@@ -164,6 +169,30 @@ export class LayoutDesignerStateService {
       ...(l.text != null ? { text: l.text } : {}),
       ...(l.justification != null ? { justification: l.justification } : {}),
     }));
+  }
+
+  /**
+   * Képes layerek szélességének normalizálása kategórián belül.
+   * Az üres Smart Object (fotó nélküli) más boundsNoEffects méretet kaphat,
+   * ezért a medián szélességet alkalmazzuk az összes azonos kategóriájú layerre.
+   */
+  private normalizeImageWidths(layers: DesignerLayer[]): void {
+    for (const cat of ['student-image', 'teacher-image'] as const) {
+      const imageLayers = layers.filter(l => l.category === cat);
+      if (imageLayers.length < 2) continue;
+
+      const widths = imageLayers.map(l => l.width).sort((a, b) => a - b);
+      const medianWidth = widths[Math.floor(widths.length / 2)];
+
+      for (const layer of imageLayers) {
+        if (layer.width !== medianWidth) {
+          // Középre igazítás: az X pozíciót is korrigáljuk
+          const diff = layer.width - medianWidth;
+          layer.x = Math.round(layer.x + diff / 2);
+          layer.width = medianWidth;
+        }
+      }
+    }
   }
 
   /** Layer kategorizálása a groupPath alapján */

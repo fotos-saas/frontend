@@ -34,24 +34,58 @@ export class LayoutDesignerActionsService {
     }));
   }
 
-  /** Tetejére igazítás: Y → min(Y) */
+  /** Tetejére igazítás: Y → min(Y), ütközésmentes X elosztással */
   alignTop(): void {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
-    const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
-    this.applyAlignmentWithCoupled(selected, (l) => ({
-      x: l.editedX ?? l.x, y: minY,
-    }));
+
+    const images = selected.filter(l =>
+      l.category === 'student-image' || l.category === 'teacher-image',
+    );
+
+    // Ha nincs image layer, eredeti viselkedés
+    if (images.length === 0) {
+      const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
+      this.applyAlignmentWithCoupled(selected, (l) => ({
+        x: l.editedX ?? l.x, y: minY,
+      }));
+      return;
+    }
+
+    const minY = Math.min(...images.map(l => l.editedY ?? l.y));
+    const posMap = this.resolveCollisions(images, minY);
+
+    this.applyAlignmentWithCoupled(images, (l) =>
+      posMap.get(l.layerId) ?? { x: l.editedX ?? l.x, y: minY },
+    );
   }
 
-  /** Aljára igazítás: alsó szél → max(Y + height) */
+  /** Aljára igazítás: alsó szél → max(Y + height), ütközésmentes X elosztással */
   alignBottom(): void {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
-    const maxBottom = Math.max(...selected.map(l => (l.editedY ?? l.y) + l.height));
-    this.applyAlignmentWithCoupled(selected, (l) => ({
-      x: l.editedX ?? l.x, y: maxBottom - l.height,
-    }));
+
+    const images = selected.filter(l =>
+      l.category === 'student-image' || l.category === 'teacher-image',
+    );
+
+    // Ha nincs image layer, eredeti viselkedés
+    if (images.length === 0) {
+      const maxBottom = Math.max(...selected.map(l => (l.editedY ?? l.y) + l.height));
+      this.applyAlignmentWithCoupled(selected, (l) => ({
+        x: l.editedX ?? l.x, y: maxBottom - l.height,
+      }));
+      return;
+    }
+
+    const maxBottom = Math.max(...images.map(l => (l.editedY ?? l.y) + l.height));
+    const posMap = this.resolveCollisions(
+      images, undefined, (l) => maxBottom - l.height,
+    );
+
+    this.applyAlignmentWithCoupled(images, (l) =>
+      posMap.get(l.layerId) ?? { x: l.editedX ?? l.x, y: maxBottom - l.height },
+    );
   }
 
   /** Vízszintes középre: X középpont → átlag(X középpont) */
@@ -122,6 +156,35 @@ export class LayoutDesignerActionsService {
     this.applyAlignmentWithCoupled(affected, (l) => ({
       x: l.editedX ?? l.x, y: rowYMap.get(l.layerId) ?? (l.editedY ?? l.y),
     }));
+  }
+
+  /**
+   * Ütközésmentes pozíciók kiszámítása: X szerint rendez,
+   * balról jobbra haladva tolja jobbra az átfedő elemeket.
+   */
+  private resolveCollisions(
+    images: DesignerLayer[],
+    fixedY?: number,
+    yFn?: (l: DesignerLayer) => number,
+  ): Map<number, { x: number; y: number }> {
+    const MIN_GAP_PX = 10;
+    const sorted = [...images].sort((a, b) =>
+      (a.editedX ?? a.x) - (b.editedX ?? b.x),
+    );
+    const posMap = new Map<number, { x: number; y: number }>();
+    let rightEdge = -Infinity;
+
+    for (const layer of sorted) {
+      let newX = layer.editedX ?? layer.x;
+      if (newX < rightEdge + MIN_GAP_PX) {
+        newX = rightEdge + MIN_GAP_PX;
+      }
+      const y = yFn ? yFn(layer) : fixedY!;
+      posMap.set(layer.layerId, { x: Math.round(newX), y });
+      rightEdge = newX + layer.width;
+    }
+
+    return posMap;
   }
 
   /** Igazítás végrehajtása coupled párokkal */

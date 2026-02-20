@@ -295,6 +295,16 @@ export const routes: Routes = [
             title: 'Kiegészítők'
           },
           {
+            path: 'marketplace',
+            loadComponent: () => import('./features/partner/pages/subscription/marketplace/marketplace-page.component').then(m => m.MarketplacePageComponent),
+            title: 'Marketplace'
+          },
+          {
+            path: 'marketplace/usage',
+            loadComponent: () => import('./features/partner/pages/subscription/marketplace-usage/marketplace-usage-page.component').then(m => m.MarketplaceUsagePageComponent),
+            title: 'Használat'
+          },
+          {
             path: 'account',
             loadComponent: () => import('./features/partner/pages/subscription/account-delete/account-delete.component').then(m => m.AccountDeleteComponent),
             title: 'Fiók törlése'

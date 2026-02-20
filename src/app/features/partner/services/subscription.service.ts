@@ -8,18 +8,20 @@ import { environment } from '../../../../environments/environment';
  */
 export interface SubscriptionInfo {
   partner_name: string; // Partner (főnök) neve
-  plan: 'alap' | 'iskola' | 'studio' | 'vip';
+  plan: 'alap' | 'iskola' | 'studio' | 'vip' | 'marketplace';
   plan_name: string;
   billing_cycle: 'monthly' | 'yearly';
-  status: 'active' | 'paused' | 'canceling' | 'trial' | 'canceled' | 'pending';
+  status: 'active' | 'paused' | 'canceling' | 'trial' | 'canceled' | 'pending' | 'trialing';
   started_at: string | null;
   ends_at: string | null;
   features: string[];
-  limits: {
-    storage_gb: number;
-    max_classes: number | null;
-    max_schools: number | null;
-    max_templates: number | null;
+  limits: Record<string, number | null> & {
+    storage_gb?: number;
+    max_classes?: number | null;
+    max_schools?: number | null;
+    max_templates?: number | null;
+    storage_used_gb?: number;
+    storage_percent?: number;
   };
   usage?: {
     schools: number;
@@ -46,6 +48,32 @@ export interface SubscriptionInfo {
     storage_monthly: number;
     storage_yearly: number;
     addons: Record<string, { monthly: number; yearly: number }>;
+  };
+  // Marketplace mezők
+  is_marketplace?: boolean;
+  active_package?: {
+    key: string;
+    name: string;
+    monthly_price: number;
+  } | null;
+  trial?: {
+    is_active: boolean;
+    has_trial: boolean;
+    days_remaining: number;
+    started_at: string | null;
+    ends_at: string | null;
+  } | null;
+  limits_detail?: Record<string, {
+    limit: number | null;
+    usage: number;
+    remaining: number | null;
+    exceeded: boolean;
+  }>;
+  active_modules_count?: number;
+  monthly_cost_breakdown?: {
+    base_plan: number;
+    package_or_modules: number;
+    total: number;
   };
 }
 

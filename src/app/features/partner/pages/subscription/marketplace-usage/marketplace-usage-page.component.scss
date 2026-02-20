@@ -1,0 +1,165 @@
+.usage-page {
+  padding: 24px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  .page-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+  }
+}
+
+// Hónap választó
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.month-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--surface-secondary);
+  }
+}
+
+.month-label {
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
+}
+
+// Összesítő kártyák
+.overview-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.overview-card {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-primary);
+
+  &--total {
+    border-color: var(--color-primary);
+    background: var(--color-primary-bg);
+  }
+}
+
+.overview-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.overview-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+
+  &--highlight {
+    color: var(--color-primary);
+  }
+}
+
+// Táblázat
+.usage-table {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.usage-header {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 120px;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--surface-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+}
+
+.usage-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 120px;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color);
+
+  &:hover {
+    background: var(--surface-secondary);
+  }
+}
+
+.td-name {
+  font-weight: 500;
+}
+
+.td-total {
+  font-weight: 600;
+}
+
+// Üres állapot
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-tertiary);
+
+  p {
+    margin-top: 12px;
+  }
+}
+
+// Loading
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-bar {
+  height: 48px;
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

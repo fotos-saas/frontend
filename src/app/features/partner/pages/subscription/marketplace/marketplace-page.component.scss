@@ -1,0 +1,319 @@
+.marketplace-page {
+  padding: 24px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  .page-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+  }
+}
+
+// Összesítő sáv
+.summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface-secondary);
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+
+  &--package {
+    color: var(--color-primary);
+  }
+}
+
+// Csomagok
+.packages-section {
+  margin-bottom: 32px;
+
+  h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 16px;
+  }
+}
+
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.package-card {
+  position: relative;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  background: var(--surface-primary);
+  text-align: center;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: var(--color-primary-light);
+  }
+
+  &--active {
+    border-color: var(--color-primary);
+    background: var(--color-primary-bg);
+  }
+
+  &--popular {
+    border-color: var(--color-primary);
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+}
+
+.popular-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.package-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+
+  span {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+}
+
+.package-modules {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+// Kategória szűrő
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.category-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: var(--surface-secondary);
+  }
+
+  &--active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+  }
+}
+
+// Modulok grid
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.module-card {
+  position: relative;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-primary);
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  &--active {
+    border-color: var(--color-success);
+    background: var(--color-success-bg, rgba(16, 185, 129, 0.05));
+  }
+}
+
+.module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.module-status {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+
+  &.status--active { background: #d1fae5; color: #065f46; }
+  &.status--trial { background: #dbeafe; color: #1e40af; }
+  &.status--free { background: #f3f4f6; color: #374151; }
+  &.status--package { background: #ede9fe; color: #5b21b6; }
+  &.status--inactive { background: #f3f4f6; color: #9ca3af; }
+  &.status--paused { background: #fef3c7; color: #92400e; }
+  &.status--canceling { background: #fee2e2; color: #991b1b; }
+}
+
+.module-name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.module-tagline {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.module-price {
+  margin-bottom: 12px;
+
+  .price-free {
+    color: var(--color-success);
+    font-weight: 500;
+  }
+
+  .price-per-use {
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+
+  .price-monthly {
+    font-weight: 600;
+  }
+}
+
+.module-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.canceling-text {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+}
+
+.popular-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+}
+
+// Loading
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.skeleton-card {
+  height: 180px;
+  border-radius: 12px;
+  background: var(--surface-secondary);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+// Buttons (reuse project btn patterns)
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &--primary {
+    background: var(--color-primary);
+    color: white;
+
+    &:hover { opacity: 0.9; }
+  }
+
+  &--outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+
+    &:hover { background: var(--surface-secondary); }
+  }
+
+  &--danger {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+
+    &:hover { background: var(--color-danger-bg, rgba(239, 68, 68, 0.05)); }
+  }
+
+  &--sm {
+    padding: 4px 12px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

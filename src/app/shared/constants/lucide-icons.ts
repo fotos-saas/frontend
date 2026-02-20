@@ -185,6 +185,16 @@ import {
   AlignVerticalDistributeCenter,
   Maximize2,
   LayoutGrid,
+  // Marketplace modulok
+  BarChart3,
+  Monitor,
+  Globe,
+  Eraser,
+  Crop,
+  Bot,
+  MessageSquare,
+  Vote,
+  Contact,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -366,4 +376,14 @@ export const LUCIDE_ICONS_MAP = {
   AlignVerticalDistributeCenter,
   Maximize2,
   LayoutGrid,
+  // Marketplace modulok
+  BarChart3,
+  Monitor,
+  Globe,
+  Eraser,
+  Crop,
+  Bot,
+  MessageSquare,
+  Vote,
+  Contact,
 };

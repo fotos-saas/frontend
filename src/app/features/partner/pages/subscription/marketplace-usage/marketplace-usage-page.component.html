@@ -1,0 +1,71 @@
+<div class="usage-page page-card">
+  <div class="page-header">
+    <h1>Használat</h1>
+    <p class="page-subtitle">Per-use modulok fogyasztása és költségei.</p>
+  </div>
+
+  <!-- Hónap választó -->
+  <div class="month-selector">
+    <button class="month-btn" (click)="changeMonth(-1)">
+      <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="18" />
+    </button>
+    <span class="month-label">{{ formatMonth() }}</span>
+    <button class="month-btn" (click)="changeMonth(1)">
+      <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="18" />
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="skeleton-bar"></div>
+      <div class="skeleton-bar"></div>
+      <div class="skeleton-bar"></div>
+    </div>
+  } @else if (usage(); as data) {
+    <!-- Összesítő -->
+    <div class="overview-cards">
+      <div class="overview-card">
+        <span class="overview-label">Alap/Csomag</span>
+        <span class="overview-value">{{ data.monthly_overview.base_or_package | number:'1.0-0':'hu' }} Ft</span>
+      </div>
+      <div class="overview-card">
+        <span class="overview-label">Extra modulok</span>
+        <span class="overview-value">{{ data.monthly_overview.extra_modules | number:'1.0-0':'hu' }} Ft</span>
+      </div>
+      <div class="overview-card">
+        <span class="overview-label">Per-use költség</span>
+        <span class="overview-value overview-value--highlight">{{ data.total_per_use_cost | number:'1.0-0':'hu' }} Ft</span>
+      </div>
+      <div class="overview-card overview-card--total">
+        <span class="overview-label">Becsült összesen</span>
+        <span class="overview-value">{{ data.monthly_overview.estimated_total | number:'1.0-0':'hu' }} Ft</span>
+      </div>
+    </div>
+
+    <!-- Részletes modul lista -->
+    @if (data.modules.length > 0) {
+      <div class="usage-table">
+        <div class="usage-header">
+          <span class="th th-name">Modul</span>
+          <span class="th th-qty">Mennyiség</span>
+          <span class="th th-price">Egységár</span>
+          <span class="th th-total">Összesen</span>
+        </div>
+
+        @for (mod of data.modules; track mod.module_key) {
+          <div class="usage-row">
+            <span class="td td-name">{{ mod.module_name }}</span>
+            <span class="td td-qty">{{ mod.total_quantity }} {{ mod.unit }}</span>
+            <span class="td td-price">{{ mod.unit_price }} Ft/{{ mod.unit }}</span>
+            <span class="td td-total">{{ mod.total_cost | number:'1.0-0':'hu' }} Ft</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <lucide-icon [name]="ICONS.BAR_CHART" [size]="48" />
+        <p>Ebben a hónapban nincs per-use használat.</p>
+      </div>
+    }
+  }
+</div>

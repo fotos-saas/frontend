@@ -343,6 +343,17 @@ export const ICONS = {
   RECEIPT: 'receipt',
   BANKNOTE: 'banknote',
 
+  // Marketplace modulok (backend config ikonok)
+  BAR_CHART: 'bar-chart-3',
+  MONITOR: 'monitor',
+  GLOBE: 'globe',
+  ERASER: 'eraser',
+  CROP: 'crop',
+  BOT: 'bot',
+  MESSAGE_SQUARE: 'message-square',
+  VOTE: 'vote',
+  CONTACT: 'contact',
+
   // Webshop
   STORE: 'store',
   TRUCK: 'truck',

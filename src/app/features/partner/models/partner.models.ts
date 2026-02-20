@@ -430,6 +430,7 @@ export interface ProjectLimits {
   max: number | null;
   can_create: boolean;
   plan_id: string;
+  preliminary_count: number;
 }
 
 /**

@@ -11,11 +11,14 @@
     <div class="header-actions">
       <button
         type="button"
-        class="btn-secondary"
+        class="btn-secondary btn-with-badge"
         (click)="openCreatePreliminaryModal()"
       >
         <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
         Új előzetes
+        @if (projectLimits()?.preliminary_count) {
+          <span class="btn-badge">{{ projectLimits()!.preliminary_count }}</span>
+        }
       </button>
       <button
         type="button"
@@ -35,7 +38,7 @@
     [filterState]="filterState"
     [searchConfig]="searchConfig"
     [filterConfigs]="filterConfigs"
-    [visibleFilterCount]="3"
+    [visibleFilterCount]="2"
     [sortConfig]="sortDef"
   />
 

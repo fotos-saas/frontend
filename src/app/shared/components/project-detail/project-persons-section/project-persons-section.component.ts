@@ -16,6 +16,11 @@ export class ProjectPersonsSectionComponent {
 
   readonly project = input.required<ProjectDetailData>();
   readonly openPersonsModal = output<'student' | 'teacher' | undefined>();
+  readonly openUploadWizard = output<'students' | 'teachers'>();
+
+  readonly isPreliminary = computed(() => this.project().isPreliminary ?? false);
+  readonly pendingStudentPhotos = computed(() => this.project().pendingStudentPhotos ?? 0);
+  readonly pendingTeacherPhotos = computed(() => this.project().pendingTeacherPhotos ?? 0);
 
   readonly studentsPreview = computed(() =>
     (this.project().personsPreview ?? []).filter(p => p.type === 'student')

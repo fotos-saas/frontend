@@ -1,4 +1,30 @@
-@if (hasPersons()) {
+@if (isPreliminary()) {
+  <!-- Előzetes projekt: fotó feltöltés kártyák -->
+  <section class="mb-6">
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="section-header px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+        <lucide-icon [name]="ICONS.CAMERA" [size]="16" class="text-gray-500" />
+        <span class="text-sm font-semibold text-gray-900">Fotók feltöltése</span>
+      </div>
+      <div class="upload-grid">
+        <button class="upload-card" (click)="openUploadWizard.emit('students')">
+          <lucide-icon [name]="ICONS.CAMERA" [size]="28" class="upload-card__icon upload-card__icon--blue" />
+          <span class="upload-card__title">Diák fotók feltöltése</span>
+          @if (pendingStudentPhotos() > 0) {
+            <span class="upload-card__count">{{ pendingStudentPhotos() }} feltöltve</span>
+          }
+        </button>
+        <button class="upload-card" (click)="openUploadWizard.emit('teachers')">
+          <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="28" class="upload-card__icon upload-card__icon--amber" />
+          <span class="upload-card__title">Tanár fotók feltöltése</span>
+          @if (pendingTeacherPhotos() > 0) {
+            <span class="upload-card__count">{{ pendingTeacherPhotos() }} feltöltve</span>
+          }
+        </button>
+      </div>
+    </div>
+  </section>
+} @else if (hasPersons()) {
   <section class="mb-6">
     <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
       <!-- Header (desktopon) -->

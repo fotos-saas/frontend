@@ -104,6 +104,9 @@ export interface ProjectDetailData {
   finalizedAt?: string | null;
   orderSubmittedAt?: string | null;
   draftPhotoCount?: number;
+  isPreliminary?: boolean;
+  pendingStudentPhotos?: number;
+  pendingTeacherPhotos?: number;
   contact: ProjectContact | null;
   contacts: ProjectContact[];
   qrCode: QrCode | null;

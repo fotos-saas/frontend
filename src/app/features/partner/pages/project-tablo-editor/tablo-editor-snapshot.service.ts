@@ -33,6 +33,7 @@ export class TabloEditorSnapshotService {
   /** Inline atnevezes allapot (melyik snapshot szerkesztes alatt) */
   readonly editingSnapshotPath = signal<string | null>(null);
   readonly editingName = signal('');
+  private originalEditingName = '';
 
   /** Legutolso snapshot (lista elso eleme — legujabb) */
   readonly latestSnapshot = computed(() => this.snapshots()[0] ?? null);
@@ -154,6 +155,7 @@ export class TabloEditorSnapshotService {
   startEditing(snapshot: SnapshotListItem): void {
     this.editingSnapshotPath.set(snapshot.filePath);
     this.editingName.set(snapshot.snapshotName);
+    this.originalEditingName = snapshot.snapshotName;
   }
 
   /** Inline szerkesztes mentese */
@@ -161,9 +163,15 @@ export class TabloEditorSnapshotService {
     const snapshotPath = this.editingSnapshotPath();
     const newName = this.editingName().trim();
 
-    if (!snapshotPath || !newName) {
+    // Nincs aktív szerkesztés
+    if (!snapshotPath) {
+      return { success: true };
+    }
+
+    // Üres név vagy nem változott → cancel
+    if (!newName || newName === this.originalEditingName) {
       this.cancelEditing();
-      return { success: false, error: 'Hiányzó adatok' };
+      return { success: true };
     }
 
     try {
@@ -181,6 +189,7 @@ export class TabloEditorSnapshotService {
   cancelEditing(): void {
     this.editingSnapshotPath.set(null);
     this.editingName.set('');
+    this.originalEditingName = '';
   }
 
   /** Frissites valaszto megnyitasa */

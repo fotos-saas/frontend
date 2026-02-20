@@ -87,12 +87,11 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
 
       &--text {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
+        justify-content: center;
         background: rgba(59, 130, 246, 0.06);
         border-color: rgba(59, 130, 246, 0.2);
         overflow: visible;
-        width: auto !important;
-        height: auto !important;
       }
 
       &--fixed {

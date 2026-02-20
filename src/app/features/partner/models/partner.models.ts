@@ -572,7 +572,6 @@ export interface CreatePreliminaryRequest {
   class_name?: string | null;
   class_year?: string | null;
   note?: string | null;
-  expected_class_size?: number | null;
 }
 
 /**

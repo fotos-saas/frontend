@@ -30,7 +30,6 @@ export class CreatePreliminaryModalComponent {
   className = signal('');
   classYear = signal('');
   note = signal('');
-  expectedClassSize = signal<number | null>(null);
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -82,7 +81,6 @@ export class CreatePreliminaryModalComponent {
       class_name: this.className().trim() || null,
       class_year: this.classYear().trim() || null,
       note: this.note().trim() || null,
-      expected_class_size: this.expectedClassSize(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

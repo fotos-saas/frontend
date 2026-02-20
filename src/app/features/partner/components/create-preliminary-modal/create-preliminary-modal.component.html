@@ -65,20 +65,6 @@
       />
     </div>
 
-    <!-- Várható létszám -->
-    <div class="field">
-      <label class="field__label">Várható létszám</label>
-      <input
-        type="number"
-        class="field__input"
-        placeholder="pl. 30"
-        min="1"
-        max="500"
-        [ngModel]="expectedClassSize()"
-        (ngModelChange)="expectedClassSize.set($event)"
-      />
-    </div>
-
     <!-- Megjegyzés -->
     <div class="field">
       <label class="field__label">Megjegyzés</label>

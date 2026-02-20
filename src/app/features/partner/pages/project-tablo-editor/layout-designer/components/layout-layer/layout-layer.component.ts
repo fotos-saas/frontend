@@ -119,7 +119,7 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
       color: #1e293b;
       font-size: 10px;
       line-height: 1.2;
-      white-space: pre;
+      white-space: pre-line;
       text-align: center;
     }
 

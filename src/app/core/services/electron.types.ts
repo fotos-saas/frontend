@@ -201,6 +201,7 @@ interface PhotoshopAPI {
   deleteTemplate: (params: { templateId: string }) => Promise<{ success: boolean; error?: string }>;
   renameTemplate: (params: { templateId: string; newName: string }) => Promise<{ success: boolean; error?: string }>;
   applyTemplate: (params: { templateId: string; targetDocName?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
+  placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
 }
 
 export interface ElectronAPI {

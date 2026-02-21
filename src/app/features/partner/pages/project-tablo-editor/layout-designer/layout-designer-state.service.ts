@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { SnapshotLayer } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
-import { DesignerLayer, DesignerDocument, ScaleInfo, LayerCategory } from './layout-designer.types';
+import { DesignerLayer, DesignerDocument, ScaleInfo, LayerCategory, PersonMatch } from './layout-designer.types';
 import { expandWithCoupledLayers } from './layout-designer.utils';
 import { LayoutDesignerHistoryService } from './layout-designer-history.service';
 
@@ -359,7 +359,7 @@ export class LayoutDesignerStateService {
    * A layerName formátum: "slug---personId" (pl. "kiss-janos---42").
    * Először a person ID-vel próbálunk, ha nincs --- szeparátor, akkor név egyezés.
    */
-  private matchPerson(layer: SnapshotLayer, category: LayerCategory, persons: TabloPersonItem[]): { id: number; name: string; photoThumbUrl: string | null } | null {
+  private matchPerson(layer: SnapshotLayer, category: LayerCategory, persons: TabloPersonItem[]): PersonMatch | null {
     if (category === 'fixed') return null;
 
     // 1. Person ID kinyerése a layerName-ből (slug---personId formátum)
@@ -369,7 +369,7 @@ export class LayoutDesignerStateService {
       if (!isNaN(personId)) {
         const match = persons.find(p => p.id === personId);
         if (match) {
-          return { id: match.id, name: match.name, photoThumbUrl: match.photoThumbUrl };
+          return { id: match.id, name: match.name, photoThumbUrl: match.photoThumbUrl, photoUrl: match.photoUrl };
         }
       }
     }
@@ -377,7 +377,7 @@ export class LayoutDesignerStateService {
     // 2. Fallback: pontos név egyezés
     const nameMatch = persons.find(p => p.name === layer.layerName);
     if (nameMatch) {
-      return { id: nameMatch.id, name: nameMatch.name, photoThumbUrl: nameMatch.photoThumbUrl };
+      return { id: nameMatch.id, name: nameMatch.name, photoThumbUrl: nameMatch.photoThumbUrl, photoUrl: nameMatch.photoUrl };
     }
 
     return null;

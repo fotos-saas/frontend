@@ -59,12 +59,14 @@ import { DesignerDocument } from './layout-designer.types';
           [snapshots]="snapshots()"
           [switchingSnapshot]="switchingSnapshot()"
           [linking]="linking()"
+          [placingPhotos]="placingPhotos()"
           (refreshClicked)="refresh()"
           (snapshotSelected)="switchSnapshot($event)"
           (saveClicked)="save()"
           (closeClicked)="close()"
           (linkLayersClicked)="linkLayers($event)"
           (unlinkLayersClicked)="unlinkLayers($event)"
+          (placePhotosClicked)="placePhotos($event)"
         />
         <div class="layout-designer__content">
           <app-layout-sort-panel (openCustomDialog)="showCustomDialog.set(true)" />
@@ -190,6 +192,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly snapshots = signal<SnapshotListItem[]>([]);
   readonly switchingSnapshot = signal(false);
   readonly linking = signal(false);
+  readonly placingPhotos = signal(false);
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
@@ -308,6 +311,16 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       this.loadError.set('Váratlan hiba a pillanatkép váltásakor.');
     } finally {
       this.switchingSnapshot.set(false);
+    }
+  }
+
+  /** Fotók behelyezése a kijelölt Smart Object layerekbe */
+  async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>): Promise<void> {
+    this.placingPhotos.set(true);
+    try {
+      await this.ps.placePhotos(layers);
+    } finally {
+      this.placingPhotos.set(false);
     }
   }
 

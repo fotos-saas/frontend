@@ -8,6 +8,7 @@ export interface PersonMatch {
   id: number;
   name: string;
   photoThumbUrl: string | null;
+  photoUrl: string | null;
 }
 
 /** Kiterjesztett layer adat a vizuális szerkesztőhöz */

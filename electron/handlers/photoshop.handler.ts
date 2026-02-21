@@ -1818,5 +1818,84 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Fotok behelyezese meglevo Smart Object layerekbe
+  // A kijelolt layerek fotoihoz letolti a kepeket es a JSX csereli az SO tartalmAt
+  ipcMain.handle('photoshop:place-photos', async (_event, params: {
+    layers: Array<{ layerName: string; photoUrl: string }>;
+    targetDocName?: string;
+  }) => {
+    let tempJsonPath: string | null = null;
+
+    try {
+      if (!params.layers || params.layers.length === 0) {
+        return { success: false, error: 'Nincs layer adat' };
+      }
+
+      log.info(`Place photos: ${params.layers.length} layer fotojanak letoltese...`);
+
+      // Fotok parhuzamos letoltese
+      const downloadResults = await Promise.all(
+        params.layers.map(async (item) => {
+          try {
+            const ext = item.photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
+            const fileName = `${item.layerName}.${ext}`;
+            const localPath = await downloadPhoto(item.photoUrl, fileName);
+            return { layerName: item.layerName, photoPath: localPath };
+          } catch (err) {
+            log.warn(`Foto letoltes sikertelen (${item.layerName}):`, err);
+            return null;
+          }
+        }),
+      );
+
+      // Sikeres letoltesek szurese
+      const validLayers = downloadResults.filter(
+        (r): r is { layerName: string; photoPath: string } => r !== null,
+      );
+
+      if (validLayers.length === 0) {
+        return { success: false, error: 'Egy foto sem sikerult letolteni' };
+      }
+
+      // JSON temp fajl irasa a JSX szamara
+      tempJsonPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.json`);
+      fs.writeFileSync(tempJsonPath, JSON.stringify({ layers: validLayers }), 'utf-8');
+
+      log.info(`Place photos JSON irva: ${tempJsonPath} (${validLayers.length}/${params.layers.length} fotoval)`);
+
+      // JSX futtatasa
+      const jsxCode = buildJsxScript('actions/place-photos.jsx', tempJsonPath, params.targetDocName);
+      const tempJsxPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.jsx`);
+      fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
+
+      const appleScript = `tell application id "com.adobe.Photoshop" to do javascript file "${tempJsxPath}"`;
+
+      return new Promise<{ success: boolean; error?: string; output?: string }>((resolve) => {
+        execFile('osascript', ['-e', appleScript], { timeout: 120000 }, (error, stdout, stderr) => {
+          // Temp fajlok torlese
+          try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
+          if (tempJsonPath && fs.existsSync(tempJsonPath)) {
+            try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
+          }
+
+          if (error) {
+            log.error('Place photos JSX hiba:', error.message, stderr);
+            resolve({ success: false, error: stderr || error.message });
+            return;
+          }
+          log.info('Place photos kesz:', stdout.trim().slice(0, 500));
+          resolve({ success: true, output: stdout || '' });
+        });
+      });
+    } catch (error) {
+      if (tempJsonPath && fs.existsSync(tempJsonPath)) {
+        try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
+      }
+      log.error('Place photos hiba:', error);
+      const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
+      return { success: false, error: errMsg };
+    }
+  });
+
   log.info('Photoshop IPC handlerek regisztralva');
 }

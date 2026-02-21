@@ -350,6 +350,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:rename-template', params) as Promise<{ success: boolean; error?: string }>,
     applyTemplate: (params: { templateId: string; targetDocName?: string }) =>
       ipcRenderer.invoke('photoshop:apply-template', params) as Promise<{ success: boolean; error?: string; output?: string }>,
+    placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string }) =>
+      ipcRenderer.invoke('photoshop:place-photos', params) as Promise<{ success: boolean; error?: string; output?: string }>,
   },
 
   // ============ Touch Bar (MacBook Pro 2016-2020) ============

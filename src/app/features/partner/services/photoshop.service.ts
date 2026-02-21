@@ -1179,6 +1179,30 @@ export class PhotoshopService {
   }
 
   /**
+   * Fotók behelyezése meglévő Smart Object layerekbe.
+   * A megadott layerName + photoUrl párok alapján letölti a fotókat
+   * és az SO tartalmát cseréli (placedLayerReplaceContents).
+   */
+  async placePhotos(
+    layers: Array<{ layerName: string; photoUrl: string }>,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    if (!layers || layers.length === 0) {
+      return { success: true };
+    }
+
+    try {
+      const result = await this.api.placePhotos({ layers, targetDocName });
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX placePhotos hiba', err);
+      return { success: false, error: 'Váratlan hiba a fotók behelyezésekor' };
+    }
+  }
+
+  /**
    * Layerek összelinkelése a Photoshopban név alapján.
    * A megadott layerName-ek MINDEN előfordulását megkeresi a teljes dokumentumban
    * (Images + Names csoportokban is), majd összelinkeli őket.

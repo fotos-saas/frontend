@@ -27,6 +27,9 @@ export class LayoutDesignerStateService {
   /** Forrás címke: snapshot név vagy "Friss PSD beolvasás" */
   readonly sourceLabel = signal<string>('');
 
+  /** Forrás dátum (ISO string) */
+  readonly sourceDate = signal<string | null>(null);
+
   /** Az összes layer */
   readonly layers = signal<DesignerLayer[]>([]);
 

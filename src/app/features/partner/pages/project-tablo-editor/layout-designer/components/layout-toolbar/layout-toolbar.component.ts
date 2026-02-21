@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, inject, input, output, signal } fro
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { SnapshotListItem } from '@core/services/electron.types';
 import { LayoutDesignerStateService } from '../../layout-designer-state.service';
 import { LayoutDesignerActionsService } from '../../layout-designer-actions.service';
 import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
@@ -25,14 +26,71 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         }
 
         @if (state.sourceLabel(); as label) {
-          <div class="source-badge" [class.source-badge--live]="label === 'Friss PSD beolvasás'">
-            @if (label === 'Friss PSD beolvasás') {
-              <lucide-icon [name]="ICONS.MONITOR" [size]="13" />
-              <span class="source-badge__type">Élő PSD</span>
-            } @else {
-              <lucide-icon [name]="ICONS.HISTORY" [size]="13" />
-              <span class="source-badge__type">Pillanatkép:</span>
-              <span class="source-badge__name">{{ label }}</span>
+          <div class="source-picker">
+            <button
+              class="source-badge"
+              [class.source-badge--live]="label === 'Friss PSD beolvasás'"
+              (click)="pickerOpen.set(!pickerOpen())"
+            >
+              @if (label === 'Friss PSD beolvasás') {
+                <lucide-icon [name]="ICONS.MONITOR" [size]="13" />
+                <span class="source-badge__type">Élő PSD</span>
+              } @else {
+                <lucide-icon [name]="ICONS.HISTORY" [size]="13" />
+                <span class="source-badge__type">Pillanatkép:</span>
+                <span class="source-badge__name">{{ label }}</span>
+              }
+              @if (state.sourceDate()) {
+                <span class="source-badge__date">{{ formatDate(state.sourceDate()) }}</span>
+              }
+              <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="11" class="source-badge__chevron" />
+            </button>
+
+            @if (pickerOpen()) {
+              <div class="source-picker__backdrop" (click)="pickerOpen.set(false)"></div>
+              <div class="source-picker__panel">
+                <div class="source-picker__header">Forrás váltása</div>
+
+                <!-- Élő PSD opció -->
+                <button
+                  class="source-picker__item"
+                  [class.source-picker__item--active]="label === 'Friss PSD beolvasás'"
+                  (click)="onPickLivePsd()"
+                >
+                  <lucide-icon [name]="ICONS.MONITOR" [size]="14" class="source-picker__icon--live" />
+                  <div class="source-picker__item-info">
+                    <span class="source-picker__item-name">Friss PSD beolvasás</span>
+                    <span class="source-picker__item-desc">Photoshop aktuális állapota</span>
+                  </div>
+                </button>
+
+                <div class="source-picker__sep"></div>
+
+                <!-- Snapshot-ok -->
+                @for (snap of snapshots(); track snap.fileName) {
+                  <button
+                    class="source-picker__item"
+                    [class.source-picker__item--active]="label === snap.snapshotName"
+                    [disabled]="switchingSnapshot()"
+                    (click)="onPickSnapshot(snap)"
+                  >
+                    <lucide-icon [name]="ICONS.HISTORY" [size]="14" />
+                    <div class="source-picker__item-info">
+                      <span class="source-picker__item-name">{{ snap.snapshotName }}</span>
+                      <span class="source-picker__item-meta">
+                        {{ formatDate(snap.createdAt) }} · {{ snap.personCount }} layer
+                      </span>
+                    </div>
+                    @if (label === snap.snapshotName) {
+                      <lucide-icon [name]="ICONS.CHECK" [size]="14" class="source-picker__check" />
+                    }
+                  </button>
+                }
+
+                @if (snapshots().length === 0) {
+                  <div class="source-picker__empty">Nincs elérhető pillanatkép</div>
+                }
+              </div>
             }
           </div>
         }
@@ -226,6 +284,10 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       white-space: nowrap;
     }
 
+    .source-picker {
+      position: relative;
+    }
+
     .source-badge {
       display: flex;
       align-items: center;
@@ -235,7 +297,14 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       background: rgba(167, 139, 250, 0.12);
       border: 1px solid rgba(167, 139, 250, 0.25);
       white-space: nowrap;
-      max-width: 260px;
+      max-width: 320px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+
+      &:hover {
+        background: rgba(167, 139, 250, 0.2);
+        border-color: rgba(167, 139, 250, 0.4);
+      }
 
       &__type {
         font-size: 0.72rem;
@@ -251,7 +320,19 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         text-overflow: ellipsis;
       }
 
-      lucide-icon {
+      &__date {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-left: 2px;
+      }
+
+      &__chevron {
+        color: rgba(255, 255, 255, 0.4);
+        flex-shrink: 0;
+        margin-left: 2px;
+      }
+
+      lucide-icon:not(.source-badge__chevron) {
         color: #a78bfa;
         flex-shrink: 0;
       }
@@ -260,9 +341,134 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         background: rgba(52, 211, 153, 0.12);
         border-color: rgba(52, 211, 153, 0.3);
 
+        &:hover {
+          background: rgba(52, 211, 153, 0.2);
+          border-color: rgba(52, 211, 153, 0.4);
+        }
+
         .source-badge__type { color: #34d399; }
-        lucide-icon { color: #34d399; }
+        lucide-icon:not(.source-badge__chevron) { color: #34d399; }
       }
+    }
+
+    .source-picker__backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 199;
+    }
+
+    .source-picker__panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background: #2a2a4a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 6px;
+      min-width: 300px;
+      max-width: 380px;
+      max-height: 320px;
+      overflow-y: auto;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .source-picker__header {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 6px 10px 4px;
+    }
+
+    .source-picker__sep {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 4px 8px;
+    }
+
+    .source-picker__item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 7px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.1s ease;
+      color: rgba(255, 255, 255, 0.7);
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      &--active {
+        background: rgba(124, 58, 237, 0.15);
+
+        &:hover:not(:disabled) {
+          background: rgba(124, 58, 237, 0.2);
+        }
+      }
+
+      lucide-icon {
+        color: rgba(255, 255, 255, 0.5);
+        flex-shrink: 0;
+      }
+    }
+
+    .source-picker__icon--live {
+      color: #34d399 !important;
+    }
+
+    .source-picker__check {
+      color: #a78bfa !important;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .source-picker__item-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .source-picker__item-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .source-picker__item-desc {
+      font-size: 0.68rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .source-picker__item-meta {
+      font-size: 0.68rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .source-picker__empty {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.35);
+      padding: 12px 10px;
+      text-align: center;
     }
 
     .layout-toolbar__separator {
@@ -422,9 +628,34 @@ export class LayoutToolbarComponent {
   protected readonly ICONS = ICONS;
 
   readonly refreshing = input<boolean>(false);
+  readonly snapshots = input<SnapshotListItem[]>([]);
+  readonly switchingSnapshot = input<boolean>(false);
   readonly moreOpen = signal(false);
+  readonly pickerOpen = signal(false);
 
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
+  readonly snapshotSelected = output<SnapshotListItem>();
+
+  formatDate(isoDate: string | null): string {
+    if (!isoDate) return '';
+    try {
+      const d = new Date(isoDate);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch {
+      return '';
+    }
+  }
+
+  onPickLivePsd(): void {
+    this.pickerOpen.set(false);
+    this.refreshClicked.emit();
+  }
+
+  onPickSnapshot(snap: SnapshotListItem): void {
+    this.pickerOpen.set(false);
+    this.snapshotSelected.emit(snap);
+  }
 }

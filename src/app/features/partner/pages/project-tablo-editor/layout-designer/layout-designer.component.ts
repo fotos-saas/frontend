@@ -2,7 +2,7 @@ import {
   Component, ChangeDetectionStrategy, input, output, inject,
   OnInit, OnDestroy, ElementRef, viewChild, signal, HostListener,
 } from '@angular/core';
-import { SnapshotLayer } from '@core/services/electron.types';
+import { SnapshotLayer, SnapshotListItem } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
 import { PhotoshopService } from '../../../services/photoshop.service';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
@@ -56,7 +56,10 @@ import { DesignerDocument } from './layout-designer.types';
       } @else {
         <app-layout-toolbar
           [refreshing]="refreshing()"
+          [snapshots]="snapshots()"
+          [switchingSnapshot]="switchingSnapshot()"
           (refreshClicked)="refresh()"
+          (snapshotSelected)="switchSnapshot($event)"
           (saveClicked)="save()"
           (closeClicked)="close()"
         />
@@ -180,6 +183,10 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly loadError = signal<string | null>(null);
   readonly refreshing = signal(false);
 
+  /** Elérhető snapshotok a picker-hez */
+  readonly snapshots = signal<SnapshotListItem[]>([]);
+  readonly switchingSnapshot = signal(false);
+
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
 
@@ -189,6 +196,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     document.body.style.overflow = 'hidden';
 
     this.loadSnapshotData();
+    this.loadSnapshotList();
     this.setupResize();
   }
 
@@ -255,6 +263,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
       // 4. State közvetlen frissítés a friss adatokkal
       this.state.sourceLabel.set('Friss PSD beolvasás');
+      this.state.sourceDate.set(new Date().toISOString());
       this.state.loadSnapshot(
         { document: readResult.data.document, layers: readResult.data.layers },
         this.persons(),
@@ -264,6 +273,40 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     }
 
     this.refreshing.set(false);
+  }
+
+  /** Snapshot váltás a picker-ből */
+  async switchSnapshot(snapshot: SnapshotListItem): Promise<void> {
+    this.switchingSnapshot.set(true);
+    try {
+      const result = await this.ps.loadSnapshot(snapshot.filePath);
+      if (!result.success || !result.data) {
+        this.loadError.set(result.error || 'Nem sikerült betölteni a pillanatképet.');
+        return;
+      }
+
+      const data = result.data as Record<string, unknown>;
+      const doc = data['document'] as DesignerDocument | undefined;
+      const layers = (data['layers'] as SnapshotLayer[] | undefined) ?? [];
+
+      if (!doc) {
+        this.loadError.set('Érvénytelen pillanatkép formátum.');
+        return;
+      }
+
+      this.state.sourceLabel.set(snapshot.snapshotName);
+      this.state.sourceDate.set(snapshot.createdAt);
+      this.state.loadSnapshot({ document: doc, layers }, this.persons());
+    } catch {
+      this.loadError.set('Váratlan hiba a pillanatkép váltásakor.');
+    } finally {
+      this.switchingSnapshot.set(false);
+    }
+  }
+
+  private async loadSnapshotList(): Promise<void> {
+    const list = await this.ps.listSnapshots(this.psdPath());
+    this.snapshots.set(list);
   }
 
   private async loadSnapshotData(): Promise<void> {
@@ -286,7 +329,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       }
 
       const snapshotName = data['snapshotName'] as string | undefined;
+      const createdAt = data['createdAt'] as string | undefined;
       this.state.sourceLabel.set(snapshotName || 'Pillanatkép');
+      this.state.sourceDate.set(createdAt || null);
       this.state.loadSnapshot({ document: doc, layers }, this.persons());
       this.loading.set(false);
     } catch {

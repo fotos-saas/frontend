@@ -372,3 +372,131 @@ function parseArgs() {
     dataFilePath: dataFilePath
   };
 }
+
+// --- Link csoportok mentes + unlink + visszaallitas ---
+// A rendezesek (arrange-names, arrange-grid) elott kell, mert a translate
+// a linkelt tarsakat is elmozditja.
+//
+// Hasznalat:
+//   var saved = saveLinkGroups(doc);   // kiolvas + unlink mindent
+//   ... rendezes ...
+//   restoreLinkGroups(doc, saved);     // ujra link-eli az eredeti csoportokat
+
+// Rekurzivan vegigmegy minden layeren, ActionManager-rel kinyeri a linkedLayerIDs-t.
+// Visszaad link csoport tombokbol allo tombot (pl. [[id1,id2], [id3,id4,id5]])
+// ES unlink-el minden layert.
+function saveLinkGroups(doc) {
+  var linkMap = {};   // linkGroupKey → [layerId, ...]
+  var allLinkedIds = [];
+
+  // Rekurziv bejaras
+  function walk(container) {
+    try {
+      for (var i = 0; i < container.artLayers.length; i++) {
+        _checkLayerLinks(container.artLayers[i], linkMap);
+      }
+    } catch (e) { /* */ }
+    try {
+      for (var j = 0; j < container.layerSets.length; j++) {
+        walk(container.layerSets[j]);
+      }
+    } catch (e) { /* */ }
+  }
+
+  walk(doc);
+
+  // Egyedi link csoportok kinyerese
+  var groups = [];
+  var seen = {};
+  for (var key in linkMap) {
+    if (!linkMap.hasOwnProperty(key)) continue;
+    if (seen[key]) continue;
+    seen[key] = true;
+    if (linkMap[key].length >= 2) {
+      groups.push(linkMap[key]);
+      for (var g = 0; g < linkMap[key].length; g++) {
+        allLinkedIds.push(linkMap[key][g]);
+      }
+    }
+  }
+
+  // Unlink minden linkelt layert
+  for (var u = 0; u < allLinkedIds.length; u++) {
+    try {
+      selectLayerById(allLinkedIds[u]);
+      var ulDesc = new ActionDescriptor();
+      var ulRef = new ActionReference();
+      ulRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+      ulDesc.putReference(charIDToTypeID("null"), ulRef);
+      executeAction(stringIDToTypeID("unlinkSelectedLayers"), ulDesc, DialogModes.NO);
+    } catch (e) { /* mar nincs linkelve */ }
+  }
+
+  return groups;
+}
+
+// Egy layer link csoportjanak kiolvasasa ActionManager-rel
+function _checkLayerLinks(layer, linkMap) {
+  try {
+    selectLayerById(layer.id);
+    var ref = new ActionReference();
+    ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+    var desc = executeActionGet(ref);
+
+    var linkedKey = stringIDToTypeID("linkedLayerIDs");
+    if (!desc.hasKey(linkedKey)) return;
+
+    var idList = desc.getList(linkedKey);
+    if (idList.count < 2) return;
+
+    // Rendezett ID lista → kulcs
+    var ids = [];
+    for (var i = 0; i < idList.count; i++) {
+      ids.push(idList.getInteger(i));
+    }
+    ids.sort();
+    var key = ids.join(",");
+
+    if (!linkMap[key]) {
+      linkMap[key] = ids;
+    }
+  } catch (e) { /* */ }
+}
+
+// Eredeti link csoportok visszaallitasa
+function restoreLinkGroups(doc, groups) {
+  for (var g = 0; g < groups.length; g++) {
+    var ids = groups[g];
+    if (ids.length < 2) continue;
+
+    try {
+      // Elso layer kivalasztasa
+      var desc = new ActionDescriptor();
+      var ref = new ActionReference();
+      ref.putIdentifier(charIDToTypeID("Lyr "), ids[0]);
+      desc.putReference(charIDToTypeID("null"), ref);
+      executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+
+      // Tobbi hozzaadasa a kivalasztashoz
+      for (var i = 1; i < ids.length; i++) {
+        var addDesc = new ActionDescriptor();
+        var addRef = new ActionReference();
+        addRef.putIdentifier(charIDToTypeID("Lyr "), ids[i]);
+        addDesc.putReference(charIDToTypeID("null"), addRef);
+        addDesc.putEnumerated(
+          stringIDToTypeID("selectionModifier"),
+          stringIDToTypeID("selectionModifierType"),
+          stringIDToTypeID("addToSelection")
+        );
+        executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+      }
+
+      // Linkeles
+      var linkDesc = new ActionDescriptor();
+      var linkRef = new ActionReference();
+      linkRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+      linkDesc.putReference(charIDToTypeID("null"), linkRef);
+      executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
+    } catch (e) { /* link visszaallitas sikertelen */ }
+  }
+}

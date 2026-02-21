@@ -217,10 +217,22 @@ function _arrangeNameGroup(nameGroupPath) {
 }
 
 function _doArrangeNames() {
+  // Linkelesek leszedese — a translate linkelt tarsakat is mozgatna
+  var savedLinks = saveLinkGroups(_doc);
+  if (savedLinks.length > 0) {
+    log("[JSX] " + savedLinks.length + " link csoport lementve es unlinkelve");
+  }
+
   // 1. Diak nevek
   _arrangeNameGroup(["Names", "Students"]);
   // 2. Tanar nevek
   _arrangeNameGroup(["Names", "Teachers"]);
+
+  // Linkelesek visszaallitasa
+  if (savedLinks.length > 0) {
+    restoreLinkGroups(_doc, savedLinks);
+    log("[JSX] Link csoportok visszaallitva");
+  }
 }
 
 (function () {

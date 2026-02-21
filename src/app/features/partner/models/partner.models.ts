@@ -649,9 +649,10 @@ export interface PersonPhoto {
   mediaId: number;
   url: string;
   thumbUrl: string;
-  year: number;
+  year: number | null;
   isActive: boolean;
   fileName: string;
+  isOverrideOnly: boolean;
 }
 
 /**
@@ -659,6 +660,7 @@ export interface PersonPhoto {
  */
 export interface PersonPhotosResponse {
   photos: PersonPhoto[];
+  overridePhoto: PersonPhoto | null;
   overridePhotoId: number | null;
   hasOverride: boolean;
 }

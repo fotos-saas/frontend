@@ -32,10 +32,10 @@
           </div>
 
           <div class="photo-grid">
-            @for (photo of existingPhotos(); track photo.id) {
+            @for (photo of existingPhotos(); track photo.mediaId) {
               <div
                 class="photo-card"
-                [class.photo-card--selected]="selectedExistingPhoto()?.id === photo.id"
+                [class.photo-card--selected]="selectedExistingPhoto()?.mediaId === photo.mediaId"
                 [class.photo-card--active]="photo.isActive"
                 [class.photo-card--override]="overridePhotoId() === photo.mediaId"
                 (click)="selectExistingPhoto(photo)"
@@ -54,15 +54,17 @@
                   }
                 </div>
 
-                <button
-                  class="photo-card__delete"
-                  (click)="requestDeletePhoto(photo, $event)"
-                  title="Fotó törlése"
-                >
-                  <lucide-icon [name]="ICONS.DELETE" [size]="14" />
-                </button>
+                @if (!photo.isOverrideOnly) {
+                  <button
+                    class="photo-card__delete"
+                    (click)="requestDeletePhoto(photo, $event)"
+                    title="Fotó törlése"
+                  >
+                    <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                  </button>
+                }
 
-                @if (selectedExistingPhoto()?.id === photo.id) {
+                @if (selectedExistingPhoto()?.mediaId === photo.mediaId) {
                   <div class="photo-card__check">
                     <lucide-icon [name]="ICONS.CHECK" [size]="16" />
                   </div>

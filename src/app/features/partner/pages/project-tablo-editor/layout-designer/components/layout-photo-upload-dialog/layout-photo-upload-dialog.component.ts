@@ -81,10 +81,15 @@ export class LayoutPhotoUploadDialogComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.existingPhotos.set(res.photos);
+          // Override fotó hozzáadása a lista elejére ha nem az archívból jön
+          const photos = [...res.photos];
+          if (res.overridePhoto) {
+            photos.unshift(res.overridePhoto);
+          }
+          this.existingPhotos.set(photos);
           this.overridePhotoId.set(res.overridePhotoId);
           // Ha nincs meglévő fotó, rögtön upload nézet
-          if (res.photos.length === 0) {
+          if (photos.length === 0) {
             this.viewMode.set('upload');
           }
           this.loadingPhotos.set(false);
@@ -98,7 +103,7 @@ export class LayoutPhotoUploadDialogComponent implements OnInit {
 
   selectExistingPhoto(photo: PersonPhoto): void {
     this.selectedExistingPhoto.set(
-      this.selectedExistingPhoto()?.id === photo.id ? null : photo,
+      this.selectedExistingPhoto()?.mediaId === photo.mediaId ? null : photo,
     );
   }
 

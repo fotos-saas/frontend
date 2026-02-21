@@ -86,18 +86,12 @@ export class LayoutDesignerSortService {
         .filter(l => genderMap.get(l.personMatch?.name ?? '') === 'girl')
         .sort((a, b) => collator.compare(a.personMatch?.name ?? '', b.personMatch?.name ?? ''));
 
-      // Felváltva: fiú-lány-fiú-lány (interleave)
-      const ordered: typeof images = [];
-      const maxLen = Math.max(boys.length, girls.length);
-      for (let i = 0; i < maxLen; i++) {
-        if (i < boys.length) ordered.push(boys[i]);
-        if (i < girls.length) ordered.push(girls[i]);
-      }
-
-      const orderedNames = ordered.map(l => l.personMatch?.name ?? '');
+      // Soronkénti szimmetrikus elosztás
+      const rowSizes = this.getRowSizes(images);
+      const orderedNames = this.distributeSymmetric(boys, girls, rowSizes);
       this.applySort(images, orderedNames);
 
-      this.lastResult.set(`Felváltva rendezve: ${boys.length} fiú, ${girls.length} lány`);
+      this.lastResult.set(`Szimmetrikusan rendezve: ${boys.length} fiú, ${girls.length} lány`);
     } catch {
       this.lastResult.set('Hiba történt a nevek besorolásakor.');
     } finally {
@@ -256,6 +250,128 @@ export class LayoutDesignerSortService {
     }
 
     return slots;
+  }
+
+  /** Soronkénti elemszámok kiolvasása (sor-csoportosítás Y alapján) */
+  private getRowSizes(images: DesignerLayer[]): number[] {
+    const sorted = [...images].sort((a, b) =>
+      (a.editedY ?? a.y) - (b.editedY ?? b.y),
+    );
+
+    const rowSizes: number[] = [];
+    let currentCount = 0;
+    let currentRowY = -Infinity;
+
+    for (const layer of sorted) {
+      const y = layer.editedY ?? layer.y;
+      if (currentCount === 0 || Math.abs(y - currentRowY) <= ROW_THRESHOLD_PX) {
+        currentCount++;
+        if (currentCount === 1) currentRowY = y;
+      } else {
+        rowSizes.push(currentCount);
+        currentCount = 1;
+        currentRowY = y;
+      }
+    }
+    if (currentCount > 0) rowSizes.push(currentCount);
+
+    return rowSizes;
+  }
+
+  /**
+   * Szimmetrikus nemek szerinti elosztás soronként.
+   * A kisebbségi nemet (kevesebb darab) a sorok szélein helyezi el szimmetrikusan,
+   * a többségi nem pedig a belső helyekre kerül. Mindkét nem ABC sorrendben.
+   *
+   * Pl. 14 hely = [14], 5 lány, 9 fiú → L F F L F F F F L F F L F L
+   * (széleken + egyenletesen elosztva a belső tükörpontokon)
+   */
+  private distributeSymmetric(
+    boys: DesignerLayer[],
+    girls: DesignerLayer[],
+    rowSizes: number[],
+  ): string[] {
+    // Kisebbségi nem = amit szimmetrikusan szórunk, többségi = aki a maradék helyre kerül
+    const minority = boys.length <= girls.length ? boys : girls;
+    const majority = boys.length <= girls.length ? girls : boys;
+
+    let mIdx = 0; // minority index
+    let jIdx = 0; // majority index
+    const result: string[] = [];
+
+    for (let ri = 0; ri < rowSizes.length; ri++) {
+      const rowSize = rowSizes[ri];
+      // Mennyi minority jut erre a sorra arányosan
+      let remainingSlots = 0;
+      for (let rj = ri; rj < rowSizes.length; rj++) remainingSlots += rowSizes[rj];
+      const remainingMinority = minority.length - mIdx;
+
+      // Arányos elosztás: erre a sorra jutó minority szám
+      let minInRow = Math.round((remainingMinority / remainingSlots) * rowSize);
+      minInRow = Math.min(minInRow, rowSize, minority.length - mIdx);
+      const majInRow = Math.min(rowSize - minInRow, majority.length - jIdx);
+
+      // Ha nem elég majority, töltsük minority-vel
+      const actualMin = Math.min(minInRow + Math.max(0, rowSize - minInRow - (majority.length - jIdx)), minority.length - mIdx);
+      const actualMaj = rowSize - actualMin;
+
+      // Szimmetrikus pozíciók: minority a szélekről befelé
+      const rowSlots: (string | null)[] = new Array(rowSize).fill(null);
+      const minPositions = this.getSymmetricPositions(rowSize, actualMin);
+
+      // Minority a szimmetrikus pozíciókra
+      for (const pos of minPositions) {
+        if (mIdx < minority.length) {
+          rowSlots[pos] = minority[mIdx].personMatch?.name ?? '';
+          mIdx++;
+        }
+      }
+
+      // Majority a maradék (null) helyekre
+      for (let k = 0; k < rowSize; k++) {
+        if (rowSlots[k] === null && jIdx < majority.length) {
+          rowSlots[k] = majority[jIdx].personMatch?.name ?? '';
+          jIdx++;
+        }
+      }
+
+      // Null maradékok feltöltése (ha van még minority/majority)
+      for (let k = 0; k < rowSize; k++) {
+        if (rowSlots[k] === null) {
+          if (mIdx < minority.length) {
+            rowSlots[k] = minority[mIdx++].personMatch?.name ?? '';
+          } else if (jIdx < majority.length) {
+            rowSlots[k] = majority[jIdx++].personMatch?.name ?? '';
+          }
+        }
+      }
+
+      result.push(...(rowSlots as string[]));
+    }
+
+    return result;
+  }
+
+  /**
+   * Szimmetrikus pozíciók generálása egy soron belül.
+   * N slot-ból count darab helyet ad vissza, a szélekről befelé haladva tükrözve.
+   * Pl. N=8, count=3 → [0, 7, 4] (bal szél, jobb szél, közép)
+   * Pl. N=8, count=4 → [0, 7, 1, 6]
+   */
+  private getSymmetricPositions(slotCount: number, count: number): number[] {
+    if (count === 0) return [];
+    if (count >= slotCount) return Array.from({ length: slotCount }, (_, i) => i);
+
+    const positions: number[] = [];
+    let left = 0;
+    let right = slotCount - 1;
+
+    while (positions.length < count) {
+      if (positions.length < count) positions.push(left++);
+      if (positions.length < count) positions.push(right--);
+    }
+
+    return positions;
   }
 
   /** U-shape: utolsó sor slot-jainak megfordítása */

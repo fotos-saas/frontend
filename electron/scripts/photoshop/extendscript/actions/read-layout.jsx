@@ -113,6 +113,32 @@ function _readAllLayers(container, pathSoFar, result) {
           kind: "normal"
         };
 
+        // Smart Object linked/embedded allapot kiolvasas
+        if (layer.kind === LayerKind.SMARTOBJECT) {
+          try {
+            selectLayerById(layer.id);
+            var soRef = new ActionReference();
+            soRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+            var soDesc = executeActionGet(soRef);
+            var soKey = stringIDToTypeID("smartObject");
+            if (soDesc.hasKey(soKey)) {
+              var soObj = soDesc.getObjectValue(soKey);
+              var placedKey = stringIDToTypeID("placed");
+              if (soObj.hasKey(placedKey)) {
+                var placedType = soObj.getEnumerationValue(placedKey);
+                // "linked" = linkelt, barmely mas = embedded
+                layerData.linked = (typeIDToStringID(placedType) === "linked");
+              } else {
+                layerData.linked = false;
+              }
+            } else {
+              layerData.linked = false;
+            }
+          } catch (soErr) {
+            layerData.linked = false;
+          }
+        }
+
         // Text layerek extra adatai
         if (layer.kind === LayerKind.TEXT) {
           layerData.kind = "text";

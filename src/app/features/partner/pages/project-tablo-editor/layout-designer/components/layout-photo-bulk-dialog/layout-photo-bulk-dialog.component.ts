@@ -17,6 +17,7 @@ interface MatchRow {
   confidence: 'high' | 'medium' | null;
   mediaId: number | null;
   status: 'matched' | 'unmatched';
+  manuallyAssigned?: boolean;
 }
 
 /**
@@ -63,8 +64,18 @@ export class LayoutPhotoBulkDialogComponent {
   /** Párosítási eredmény sorok */
   readonly matchRows = signal<MatchRow[]>([]);
 
-  /** Párosítatlan fájlok */
+  /** Párosítatlan fájlok (még nem kézzel hozzárendelt) */
   readonly unmatchedFiles = signal<string[]>([]);
+
+  /** Kézzel hozzárendelhető fájlok (unmatchedFiles - már kézzel párosítottak) */
+  readonly availableFiles = computed(() => {
+    const manuallyAssigned = new Set(
+      this.matchRows()
+        .filter(r => r.status === 'matched' && r.manuallyAssigned)
+        .map(r => r.filename),
+    );
+    return this.unmatchedFiles().filter(f => !manuallyAssigned.has(f));
+  });
 
   /** Dialógus cím */
   readonly title = computed(() => {
@@ -174,6 +185,46 @@ export class LayoutPhotoBulkDialogComponent {
     }
 
     this.saving.set(false);
+  }
+
+  /** Kézi párosítás: fájl hozzárendelése személyhez */
+  manualAssign(personId: number, filename: string): void {
+    if (!filename) return;
+
+    // Fájlnév alapján megkeressük a mediaId-t
+    const photo = this.uploadedPhotos().find(p => p.filename === filename);
+    if (!photo) return;
+
+    this.matchRows.update(rows => rows.map(r => {
+      if (r.person.id === personId) {
+        return {
+          ...r,
+          filename,
+          mediaId: photo.mediaId,
+          status: 'matched' as const,
+          confidence: null,
+          manuallyAssigned: true,
+        };
+      }
+      return r;
+    }));
+  }
+
+  /** Kézi párosítás visszavonása */
+  clearManualAssign(personId: number): void {
+    this.matchRows.update(rows => rows.map(r => {
+      if (r.person.id === personId && r.manuallyAssigned) {
+        return {
+          ...r,
+          filename: null,
+          mediaId: null,
+          status: 'unmatched' as const,
+          confidence: null,
+          manuallyAssigned: false,
+        };
+      }
+      return r;
+    }));
   }
 
   /** Match eredmény → MatchRow[] (szűrve a kijelölt személyekre) */

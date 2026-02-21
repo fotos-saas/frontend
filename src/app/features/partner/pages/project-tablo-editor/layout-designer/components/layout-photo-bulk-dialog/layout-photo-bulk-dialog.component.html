@@ -67,7 +67,9 @@
           <div class="match-row" [class.match-row--unmatched]="row.status === 'unmatched'">
             <div class="match-row__status">
               @if (row.status === 'matched') {
-                @if (row.confidence === 'high') {
+                @if (row.manuallyAssigned) {
+                  <lucide-icon [name]="ICONS.USER_CHECK" [size]="16" class="match-icon--manual" />
+                } @else if (row.confidence === 'high') {
                   <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" class="match-icon--ok" />
                 } @else {
                   <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" class="match-icon--warn" />
@@ -83,9 +85,14 @@
               }
             </span>
             <span class="match-row__file">
-              @if (row.filename) {
+              @if (row.status === 'matched' && row.filename) {
                 {{ row.filename }}
-                @if (row.confidence) {
+                @if (row.manuallyAssigned) {
+                  <span class="match-confidence match-confidence--manual">kézi</span>
+                  <button class="match-row__clear" (click)="clearManualAssign(row.person.id)">
+                    <lucide-icon [name]="ICONS.X" [size]="11" />
+                  </button>
+                } @else if (row.confidence) {
                   <span class="match-confidence"
                     [class.match-confidence--high]="row.confidence === 'high'"
                     [class.match-confidence--medium]="row.confidence === 'medium'"
@@ -94,7 +101,19 @@
                   </span>
                 }
               } @else {
-                <span class="match-row__empty">nincs párosítás</span>
+                @if (availableFiles().length > 0) {
+                  <select
+                    class="match-row__select"
+                    (change)="manualAssign(row.person.id, $any($event.target).value); $any($event.target).value = ''"
+                  >
+                    <option value="">— válassz képet —</option>
+                    @for (file of availableFiles(); track file) {
+                      <option [value]="file">{{ file }}</option>
+                    }
+                  </select>
+                } @else {
+                  <span class="match-row__empty">nincs elérhető kép</span>
+                }
               }
             </span>
           </div>

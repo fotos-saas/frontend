@@ -152,6 +152,43 @@
     font-style: italic;
     color: #d1d5db;
   }
+
+  &__select {
+    padding: 3px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: #374151;
+    background: #fff;
+    cursor: pointer;
+    max-width: 220px;
+    -webkit-appearance: menulist;
+
+    &:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+    }
+  }
+
+  &__clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+  }
 }
 
 .match-icon {
@@ -165,6 +202,10 @@
 
   &--fail {
     color: #dc2626;
+  }
+
+  &--manual {
+    color: #7c3aed;
   }
 }
 
@@ -183,6 +224,11 @@
   &--medium {
     background: rgba(217, 119, 6, 0.1);
     color: #d97706;
+  }
+
+  &--manual {
+    background: rgba(124, 58, 237, 0.1);
+    color: #7c3aed;
   }
 }
 

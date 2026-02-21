@@ -463,7 +463,7 @@
               <button
                 class="sample-split-btn__toggle"
                 [class.sample-split-btn__toggle--active]="sampleLargeSize()"
-                (click)="sampleLargeSize.set(!sampleLargeSize())"
+                (click)="toggleLargeSize()"
                 [matTooltip]="sampleLargeSize() ? sampleSizeLarge() + 'px — kattints a kis mérethez' : sampleSizeSmall() + 'px — kattints a nagy mérethez'"
               >
                 {{ sampleLargeSize() ? 'HD' : 'SD' }}

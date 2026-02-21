@@ -90,7 +90,7 @@ import { firstValueFrom } from 'rxjs';
             [sampleError]="sampleError()"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
-            (sampleLargeSizeChange)="sampleLargeSize.set($event)"
+            (sampleLargeSizeChange)="onLargeSizeChange($event)"
             (watermarkColorChange)="onWatermarkColorChange($event)"
             (openProject)="onOpenProject()"
             (openWorkDir)="onOpenWorkDir()"
@@ -264,7 +264,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly syncingPhotos = signal(false);
   readonly arrangingNames = signal(false);
   readonly generatingSample = signal(false);
-  readonly sampleLargeSize = signal(false);
+  readonly sampleLargeSize = this.ps.sampleUseLargeSize;
   readonly sampleSuccess = signal<string | null>(null);
   readonly sampleError = signal<string | null>(null);
 
@@ -497,6 +497,11 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     if (psd) {
       this.ps.revealInFinder(psd);
     }
+  }
+
+  onLargeSizeChange(value: boolean): void {
+    this.sampleLargeSize.set(value);
+    this.ps.setSampleSettings({ useLargeSize: value });
   }
 
   onWatermarkColorChange(color: 'white' | 'black'): void {

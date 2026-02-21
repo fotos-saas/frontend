@@ -61,6 +61,7 @@ export class PhotoshopService {
   readonly sampleWatermarkText = signal('MINTA');
   readonly sampleWatermarkColor = signal<'white' | 'black'>('white');
   readonly sampleWatermarkOpacity = signal(0.15);
+  readonly sampleUseLargeSize = signal(false);
 
   /** Konfiguralt-e (van mentett path) */
   readonly isConfigured = computed(() => !!this.path());
@@ -147,6 +148,9 @@ export class PhotoshopService {
             this.sampleWatermarkText.set(sampleResult.settings.watermarkText);
             this.sampleWatermarkColor.set(sampleResult.settings.watermarkColor);
             this.sampleWatermarkOpacity.set(sampleResult.settings.watermarkOpacity);
+            if (sampleResult.settings.useLargeSize !== undefined) {
+              this.sampleUseLargeSize.set(sampleResult.settings.useLargeSize);
+            }
           }
         } catch (_) { /* Minta beallitasok nem kritikus */ }
       }
@@ -1353,6 +1357,7 @@ export class PhotoshopService {
     watermarkText: string;
     watermarkColor: 'white' | 'black';
     watermarkOpacity: number;
+    useLargeSize: boolean;
   }>): Promise<boolean> {
     if (!this.sampleApi) return false;
     try {
@@ -1363,6 +1368,7 @@ export class PhotoshopService {
         if (settings.watermarkText !== undefined) this.sampleWatermarkText.set(settings.watermarkText);
         if (settings.watermarkColor !== undefined) this.sampleWatermarkColor.set(settings.watermarkColor);
         if (settings.watermarkOpacity !== undefined) this.sampleWatermarkOpacity.set(settings.watermarkOpacity);
+        if (settings.useLargeSize !== undefined) this.sampleUseLargeSize.set(settings.useLargeSize);
         return true;
       }
       return false;

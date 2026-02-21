@@ -27,6 +27,7 @@ interface SampleSchema {
   sampleWatermarkText: string;
   sampleWatermarkColor: 'white' | 'black';
   sampleWatermarkOpacity: number;
+  sampleUseLargeSize: boolean;
 }
 
 const sampleStore = new Store<SampleSchema>({
@@ -37,6 +38,7 @@ const sampleStore = new Store<SampleSchema>({
     sampleWatermarkText: 'MINTA',
     sampleWatermarkColor: 'white',
     sampleWatermarkOpacity: 0.15,
+    sampleUseLargeSize: false,
   },
 });
 
@@ -198,6 +200,7 @@ export function registerSampleGeneratorHandlers(): void {
           watermarkText: sampleStore.get('sampleWatermarkText', 'MINTA'),
           watermarkColor: sampleStore.get('sampleWatermarkColor', 'white'),
           watermarkOpacity: sampleStore.get('sampleWatermarkOpacity', 0.15),
+          useLargeSize: sampleStore.get('sampleUseLargeSize', false),
         },
       };
     } catch (error) {
@@ -213,6 +216,7 @@ export function registerSampleGeneratorHandlers(): void {
     watermarkText: string;
     watermarkColor: 'white' | 'black';
     watermarkOpacity: number;
+    useLargeSize: boolean;
   }>) => {
     try {
       if (settings.sizeLarge !== undefined) {
@@ -235,6 +239,9 @@ export function registerSampleGeneratorHandlers(): void {
       if (settings.watermarkOpacity !== undefined) {
         const o = Number(settings.watermarkOpacity);
         if (o >= 0.05 && o <= 0.50) sampleStore.set('sampleWatermarkOpacity', o);
+      }
+      if (settings.useLargeSize !== undefined) {
+        sampleStore.set('sampleUseLargeSize', !!settings.useLargeSize);
       }
 
       log.info('Minta beallitasok frissitve');

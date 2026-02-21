@@ -108,12 +108,12 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   /** Minta generálás */
   readonly generatingSample = signal(false);
-  readonly sampleLargeSize = signal(false);
   readonly sampleResult = signal<{ localPaths: string[]; uploadedCount: number; generatedAt: string } | null>(null);
 
   /** Minta beállítások (signal referenciák a ps service-ből) */
   readonly sampleSizeLarge = this.ps.sampleSizeLarge;
   readonly sampleSizeSmall = this.ps.sampleSizeSmall;
+  readonly sampleLargeSize = this.ps.sampleUseLargeSize;
   readonly sampleWatermarkText = this.ps.sampleWatermarkText;
   readonly sampleWatermarkColor = this.ps.sampleWatermarkColor;
   readonly sampleWatermarkOpacity = this.ps.sampleWatermarkOpacity;
@@ -730,6 +730,12 @@ export class ProjectTabloEditorComponent implements OnInit {
   }
 
   // ============ Minta generálás ============
+
+  toggleLargeSize(): void {
+    const next = !this.sampleLargeSize();
+    this.sampleLargeSize.set(next);
+    this.ps.setSampleSettings({ useLargeSize: next });
+  }
 
   toggleWatermarkColor(): void {
     const next = this.sampleWatermarkColor() === 'white' ? 'black' : 'white';

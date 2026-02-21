@@ -16,13 +16,16 @@ import {
 import {
   UploadIndividualFormComponent,
 } from './actions/upload-individual-form.component';
+import {
+  ResizeFormComponent,
+} from './actions/resize-form.component';
 
 @Component({
   selector: 'app-layout-actions-dialog',
   standalone: true,
   imports: [
     FormsModule, LucideAngularModule, PsSelectComponent,
-    UploadToEveryoneFormComponent, UploadIndividualFormComponent,
+    UploadToEveryoneFormComponent, UploadIndividualFormComponent, ResizeFormComponent,
   ],
   templateUrl: './layout-actions-dialog.component.html',
   styleUrl: './layout-actions-dialog.component.scss',
@@ -42,6 +45,7 @@ export class LayoutActionsDialogComponent {
   readonly actionOptions: PsSelectOption[] = [
     { id: 'upload-to-everyone', label: 'Kepek feltoltese mindenkihez' },
     { id: 'upload-individual', label: 'Kepfeltoltes kulon-kulon' },
+    { id: 'resize', label: 'Atmeretezes' },
   ];
 
   readonly selectedAction = signal<string>('upload-to-everyone');
@@ -51,6 +55,7 @@ export class LayoutActionsDialogComponent {
 
   readonly uploadForm = viewChild<UploadToEveryoneFormComponent>('uploadForm');
   readonly individualForm = viewChild<UploadIndividualFormComponent>('individualForm');
+  readonly resizeForm = viewChild<ResizeFormComponent>('resizeForm');
 
   readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
@@ -87,6 +92,12 @@ export class LayoutActionsDialogComponent {
     if (action === 'upload-individual') {
       if (this.selectedPersonIds().size === 0) return false;
       const form = this.individualForm();
+      return form ? form.formData() !== null : false;
+    }
+
+    if (action === 'resize') {
+      if (this.selectedPersonIds().size === 0) return false;
+      const form = this.resizeForm();
       return form ? form.formData() !== null : false;
     }
 
@@ -152,6 +163,8 @@ export class LayoutActionsDialogComponent {
         await this.executeUploadToEveryone();
       } else if (action === 'upload-individual') {
         await this.executeUploadIndividual();
+      } else if (action === 'resize') {
+        await this.executeResize();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -201,6 +214,30 @@ export class LayoutActionsDialogComponent {
 
     if (!result.success) {
       throw new Error(result.error || 'Ismeretlen hiba tortent');
+    }
+
+    this.executed.emit();
+  }
+
+  private async executeResize(): Promise<void> {
+    const form = this.resizeForm();
+    if (!form) return;
+
+    const formData = form.formData();
+    if (!formData) return;
+
+    const selectedIds = this.selectedPersonIds();
+    const layerNames = this.persons()
+      .filter(p => selectedIds.has(p.id))
+      .map(p => p.layerName);
+
+    const result = await this.ps.resizeLayers({
+      layerNames,
+      ...formData,
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Atmeretezes sikertelen');
     }
 
     this.executed.emit();

@@ -101,6 +101,9 @@
           @case ('upload-individual') {
             <app-upload-individual-form #individualForm [persons]="selectedPersons()" />
           }
+          @case ('resize') {
+            <app-resize-form #resizeForm />
+          }
         }
       </div>
 

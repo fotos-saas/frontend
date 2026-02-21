@@ -1335,6 +1335,39 @@ export class PhotoshopService {
   }
 
   /**
+   * Layerek atmeretezese nev alapjan.
+   * width/height kozul legalabb az egyik kitoltve (a masik null → aranyos).
+   * unit: "cm" vagy "px"
+   */
+  async resizeLayers(params: {
+    layerNames: string[];
+    width: number | null;
+    height: number | null;
+    unit: 'cm' | 'px';
+  }): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };
+
+    if (!params.layerNames || params.layerNames.length === 0) {
+      return { success: true };
+    }
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/resize-layers.jsx',
+        jsonData: params,
+      });
+
+      if (!result.success) {
+        this.logger.error('resizeLayers JSX error:', result.error);
+      }
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX resizeLayers hiba', err);
+      return { success: false, error: 'Varatlan hiba az atmeretezeskor' };
+    }
+  }
+
+  /**
    * Csoport + SO layerek hozzaadasa a megnyitott dokumentumhoz.
    * Forraskepekbol Smart Object duplicate-ot keszit minden szemelyhez,
    * es a megadott poziciokra helyezi oket.

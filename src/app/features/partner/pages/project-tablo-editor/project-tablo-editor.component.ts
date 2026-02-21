@@ -117,6 +117,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly sampleWatermarkText = this.ps.sampleWatermarkText;
   readonly sampleWatermarkColor = this.ps.sampleWatermarkColor;
   readonly sampleWatermarkOpacity = this.ps.sampleWatermarkOpacity;
+  readonly opacityPercent = computed(() => Math.round(this.sampleWatermarkOpacity() * 100));
 
   /** Aktuális PSD fájl útvonala (generáláskor mentjük) */
   readonly currentPsdPath = signal<string | null>(null);
@@ -741,6 +742,16 @@ export class ProjectTabloEditorComponent implements OnInit {
     const next = this.sampleWatermarkColor() === 'white' ? 'black' : 'white';
     this.sampleWatermarkColor.set(next);
     this.ps.setSampleSettings({ watermarkColor: next });
+  }
+
+  private readonly opacitySteps = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50];
+
+  cycleWatermarkOpacity(): void {
+    const current = this.sampleWatermarkOpacity();
+    const idx = this.opacitySteps.findIndex(v => v >= current - 0.001);
+    const next = this.opacitySteps[(idx + 1) % this.opacitySteps.length];
+    this.sampleWatermarkOpacity.set(next);
+    this.ps.setSampleSettings({ watermarkOpacity: next });
   }
 
   async generateSample(): Promise<void> {

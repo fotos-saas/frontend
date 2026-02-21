@@ -86,12 +86,14 @@ import { firstValueFrom } from 'rxjs';
             [generatingSample]="generatingSample()"
             [sampleLargeSize]="sampleLargeSize()"
             [sampleWatermarkColor]="ps.sampleWatermarkColor()"
+            [sampleWatermarkOpacity]="ps.sampleWatermarkOpacity()"
             [sampleSuccess]="sampleSuccess()"
             [sampleError]="sampleError()"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
             (sampleLargeSizeChange)="onLargeSizeChange($event)"
             (watermarkColorChange)="onWatermarkColorChange($event)"
+            (opacityChange)="onCycleOpacity()"
             (openProject)="onOpenProject()"
             (openWorkDir)="onOpenWorkDir()"
           />
@@ -502,6 +504,16 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   onLargeSizeChange(value: boolean): void {
     this.sampleLargeSize.set(value);
     this.ps.setSampleSettings({ useLargeSize: value });
+  }
+
+  private readonly opacitySteps = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50];
+
+  onCycleOpacity(): void {
+    const current = this.ps.sampleWatermarkOpacity();
+    const idx = this.opacitySteps.findIndex(v => v >= current - 0.001);
+    const next = this.opacitySteps[(idx + 1) % this.opacitySteps.length];
+    this.ps.sampleWatermarkOpacity.set(next);
+    this.ps.setSampleSettings({ watermarkOpacity: next });
   }
 
   onWatermarkColorChange(color: 'white' | 'black'): void {

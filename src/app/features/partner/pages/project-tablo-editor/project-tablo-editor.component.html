@@ -480,6 +480,13 @@
                   <lucide-icon [name]="ICONS.MOON" [size]="12" />
                 }
               </button>
+              <button
+                class="sample-split-btn__toggle sample-split-btn__opacity"
+                (click)="cycleWatermarkOpacity()"
+                [matTooltip]="'Vízjel átlátszóság: ' + (sampleWatermarkOpacity() * 100) + '% — kattints a váltáshoz'"
+              >
+                {{ opacityPercent() }}%
+              </button>
             </div>
 
             @if (sampleResult()) {

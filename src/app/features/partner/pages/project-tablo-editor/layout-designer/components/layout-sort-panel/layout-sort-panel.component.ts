@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -105,6 +105,11 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
               } @else {
                 <lucide-icon [name]="ICONS.MOON" [size]="11" />
               }
+            </button>
+            <button class="sidebar__split-toggle sidebar__split-opacity"
+              (click)="opacityChange.emit()"
+              [matTooltip]="'Átlátszóság: ' + opacityPercent() + '% — kattints a váltáshoz'">
+              {{ opacityPercent() }}%
             </button>
           </div>
           <button class="action-btn"
@@ -298,6 +303,12 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       }
     }
 
+    .sidebar__split-opacity {
+      width: 32px;
+      font-size: 0.55rem;
+      font-weight: 600;
+    }
+
     .sidebar__section--separator {
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
@@ -329,6 +340,9 @@ export class LayoutSortPanelComponent {
   readonly sampleLargeSizeChange = output<boolean>();
   readonly sampleWatermarkColor = input<'white' | 'black'>('white');
   readonly watermarkColorChange = output<'white' | 'black'>();
+  readonly sampleWatermarkOpacity = input(0.15);
+  readonly opacityChange = output<void>();
+  readonly opacityPercent = computed(() => Math.round(this.sampleWatermarkOpacity() * 100));
   readonly sampleSuccess = input<string | null>(null);
   readonly sampleError = input<string | null>(null);
 }

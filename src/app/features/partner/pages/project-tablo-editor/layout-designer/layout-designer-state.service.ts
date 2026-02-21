@@ -5,6 +5,10 @@ import { DesignerLayer, DesignerDocument, ScaleInfo, LayerCategory } from './lay
 import { expandWithCoupledLayers } from './layout-designer.utils';
 import { LayoutDesignerHistoryService } from './layout-designer-history.service';
 
+/** Toolbar magassága px-ben */
+const TOOLBAR_HEIGHT = 56;
+/** Sidebar szélessége px-ben */
+const SIDEBAR_WIDTH = 220;
 /** Belső padding a canvas körül */
 const CANVAS_PADDING = 40;
 
@@ -40,13 +44,14 @@ export class LayoutDesignerStateService {
       return { scale: 1, offsetX: 0, offsetY: 0, displayWidth: 0, displayHeight: 0 };
     }
 
-    const availW = cw - CANVAS_PADDING * 2;
-    const availH = ch - CANVAS_PADDING * 2;
+    // cw/ch = overlay contentRect (padding-on belül, tehát electron padding-top már le van vonva)
+    const availW = cw - SIDEBAR_WIDTH - CANVAS_PADDING * 2;
+    const availH = ch - TOOLBAR_HEIGHT - CANVAS_PADDING * 2;
     const scale = Math.min(availW / doc.widthPx, availH / doc.heightPx);
     const displayWidth = doc.widthPx * scale;
     const displayHeight = doc.heightPx * scale;
-    const offsetX = (cw - displayWidth) / 2;
-    const offsetY = (ch - displayHeight) / 2;
+    const offsetX = SIDEBAR_WIDTH + (cw - SIDEBAR_WIDTH - displayWidth) / 2;
+    const offsetY = TOOLBAR_HEIGHT + (ch - TOOLBAR_HEIGHT - displayHeight) / 2;
 
     return { scale, offsetX, offsetY, displayWidth, displayHeight };
   });

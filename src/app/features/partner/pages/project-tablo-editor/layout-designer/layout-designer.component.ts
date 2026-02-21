@@ -179,7 +179,6 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly saveEvent = output<SnapshotLayer[]>();
 
   readonly overlayEl = viewChild.required<ElementRef<HTMLElement>>('overlayEl');
-  private readonly canvasAreaEl = viewChild<ElementRef<HTMLElement>>('canvasArea');
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
   readonly refreshing = signal(false);
@@ -304,14 +303,12 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Canvas area-t figyeljük (sidebar nélküli terület)
+    // Overlay-t figyeljük (mindig elérhető, nem feltételes renderelés)
     requestAnimationFrame(() => {
-      const el = this.canvasAreaEl()?.nativeElement;
-      if (el) {
-        this.resizeObserver!.observe(el);
-        this.state.containerWidth.set(el.clientWidth);
-        this.state.containerHeight.set(el.clientHeight);
-      }
+      const el = this.overlayEl().nativeElement;
+      this.resizeObserver!.observe(el);
+      this.state.containerWidth.set(el.clientWidth);
+      this.state.containerHeight.set(el.clientHeight);
     });
   }
 }

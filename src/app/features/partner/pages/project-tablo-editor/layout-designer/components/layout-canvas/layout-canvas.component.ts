@@ -27,7 +27,7 @@ const MARQUEE_THRESHOLD = 3;
         class="layout-canvas"
         [style.width.px]="scaleInfo().displayWidth"
         [style.height.px]="scaleInfo().displayHeight"
-        [style.left.px]="scaleInfo().offsetX"
+        [style.left.px]="canvasLeft()"
         [style.top.px]="canvasTop()"
       >
         <app-layout-grid-overlay />
@@ -91,11 +91,13 @@ export class LayoutCanvasComponent {
 
   readonly scaleInfo = this.state.scaleInfo;
 
-  /** Canvas top pozíció (a canvas area-n belül) */
-  readonly canvasTop = computed(() => {
-    const si = this.scaleInfo();
-    return si.offsetY;
-  });
+  /** Overlay → canvas-area konverziós konstansok */
+  private static readonly TOOLBAR_HEIGHT = 56;
+  private static readonly SIDEBAR_WIDTH = 220;
+
+  /** Canvas pozíció (overlay contentRect-hez képest → canvas-area-ra konvertálva) */
+  readonly canvasLeft = computed(() => this.scaleInfo().offsetX - LayoutCanvasComponent.SIDEBAR_WIDTH);
+  readonly canvasTop = computed(() => this.scaleInfo().offsetY - LayoutCanvasComponent.TOOLBAR_HEIGHT);
 
   /** Marquee kiindulási pont (wrapper-hez relatív px) */
   readonly marqueeStart = signal<{ x: number; y: number } | null>(null);
@@ -233,8 +235,10 @@ export class LayoutCanvasComponent {
     const layers = this.state.layers();
 
     // Marquee screen px → PSD koordináta konverzió
-    const canvasLeft = si.offsetX;
-    const canvasTopPx = si.offsetY;
+    // A marquee koordináták a canvas-wrapper-hez (canvasArea) relatívak.
+    // Az offsetX/Y az overlay-hez relatív → le kell vonni a sidebar és toolbar+padding offsetet.
+    const canvasLeft = si.offsetX - LayoutCanvasComponent.SIDEBAR_WIDTH;
+    const canvasTopPx = si.offsetY - LayoutCanvasComponent.TOOLBAR_HEIGHT;
 
     const psdLeft = (rect.left - canvasLeft) / si.scale;
     const psdTop = (rect.top - canvasTopPx) / si.scale;

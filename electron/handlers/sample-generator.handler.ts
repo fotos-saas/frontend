@@ -134,13 +134,13 @@ async function uploadSampleToBackend(
       // Multipart form-data osszeallitasa
       const header = Buffer.from(
         `--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="samples[]"; filename="${fileName}"\r\n` +
+        `Content-Disposition: form-data; name="images[]"; filename="${fileName}"\r\n` +
         `Content-Type: image/jpeg\r\n\r\n`,
       );
       const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
       const body = Buffer.concat([header, fileBuffer, footer]);
 
-      const url = new URL(`${apiBaseUrl}/tablo-management/projects/${projectId}/samples`);
+      const url = new URL(`${apiBaseUrl}/partner/projects/${projectId}/sample-packages/upload-from-editor`);
       const isHttps = url.protocol === 'https:';
       const options = {
         hostname: url.hostname,

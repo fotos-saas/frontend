@@ -430,6 +430,9 @@ function saveLinkGroups(doc) {
 }
 
 // Egy layer link csoportjanak kiolvasasa ActionManager-rel
+// FONTOS: linkedLayerIDs NEM feltetlenul egyezik a layer.id-vel!
+// Ezert a linkedLayerIDs-t csak csoport kulcskent hasznaljuk,
+// az erteket (layer.id) magunk gyujtjuk.
 function _checkLayerLinks(layer, linkMap) {
   try {
     selectLayerById(layer.id);
@@ -443,16 +446,25 @@ function _checkLayerLinks(layer, linkMap) {
     var idList = desc.getList(linkedKey);
     if (idList.count < 2) return;
 
-    // Rendezett ID lista → kulcs
-    var ids = [];
+    // linkedLayerIDs rendezett lista → csoport kulcs
+    var linkedIds = [];
     for (var i = 0; i < idList.count; i++) {
-      ids.push(idList.getInteger(i));
+      linkedIds.push(idList.getInteger(i));
     }
-    ids.sort();
-    var key = ids.join(",");
+    linkedIds.sort();
+    var key = linkedIds.join(",");
 
+    // A csoporthoz a layer.id-t adjuk hozza (NEM a linkedLayerIDs ertekeket!)
     if (!linkMap[key]) {
-      linkMap[key] = ids;
+      linkMap[key] = [];
+    }
+    // Duplikat ellenorzes (ES3 — nincs indexOf)
+    var found = false;
+    for (var d = 0; d < linkMap[key].length; d++) {
+      if (linkMap[key][d] === layer.id) { found = true; break; }
+    }
+    if (!found) {
+      linkMap[key].push(layer.id);
     }
   } catch (e) { /* */ }
 }

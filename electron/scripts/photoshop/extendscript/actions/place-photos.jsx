@@ -10,13 +10,10 @@
  * }
  *
  * Mukodes:
- * 1. Minden megadott layerName-hez megkeresi a layert a dokumentumban (rekurziv)
- * 2. A layert kivalasztja (selectLayerById)
- * 3. placedLayerReplaceContents — SO tartalom csere a megadott fotoval
- *
- * Ez a leggyorsabb modszer: NEM nyitja meg az SO-t szerkesztesre,
- * hanem kozvetlenul csereli a tartalmAt. A Photoshop automatikusan
- * atmeretezi a kepet az SO meret aranyaihoz.
+ * 1. Minden megadott layerName-hez megkeresi a layert (Images csoportban eloszor)
+ * 2. Elmenti az eredeti SO meretet es poziciot
+ * 3. placedLayerReplaceContents — SO tartalom csere
+ * 4. Az uj kepet aranyosan atmeretezi es pozicionalja az eredeti keretbe (cover mod)
  *
  * Futtatas: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
  */
@@ -53,10 +50,54 @@ function _findLayerByName(container, targetName) {
   return null;
 }
 
-// --- Smart Object tartalom csere (placedLayerReplaceContents) ---
-// A leggyorsabb es legegyszerubb mod: nem nyitja meg az SO-t,
-// hanem kozvetlenul csereli a tartalmAt. A Photoshop automatikusan
-// illeszti a kep aranyait.
+// --- Layer bounds kiolvasasa pixelben ---
+function _getLayerBounds(layer) {
+  var b = layer.bounds;
+  var left = b[0].as("px");
+  var top = b[1].as("px");
+  var right = b[2].as("px");
+  var bottom = b[3].as("px");
+  return {
+    left: left,
+    top: top,
+    right: right,
+    bottom: bottom,
+    width: right - left,
+    height: bottom - top,
+    centerX: (left + right) / 2,
+    centerY: (top + bottom) / 2
+  };
+}
+
+// --- Layer transzformalasa: aranyos meretezés + kozepre igazitas ---
+// Az uj kepet ugy meretezi, hogy KITOLTSE az eredeti keretet (cover mod),
+// majd kozepre igazitja az eredeti keret kozepehez.
+function _fitLayerToFrame(layer, origBounds) {
+  var newBounds = _getLayerBounds(layer);
+
+  if (newBounds.width <= 0 || newBounds.height <= 0) return;
+
+  // Aranyos cover meretezés: a NAGYOBB skala kell (kitolti a keretet)
+  var scaleX = (origBounds.width / newBounds.width) * 100;
+  var scaleY = (origBounds.height / newBounds.height) * 100;
+  var scale = Math.max(scaleX, scaleY);
+
+  // Resize a layer kozeppont korul
+  layer.resize(scale, scale, AnchorPosition.MIDDLECENTER);
+
+  // Uj bounds a resize utan
+  var afterBounds = _getLayerBounds(layer);
+
+  // Translate: az uj kozeppont az eredeti kozeppontra
+  var dx = origBounds.centerX - afterBounds.centerX;
+  var dy = origBounds.centerY - afterBounds.centerY;
+
+  if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+    layer.translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
+  }
+}
+
+// --- Smart Object tartalom csere ---
 function _replaceSmartObjectContents(photoPath) {
   var desc = new ActionDescriptor();
   desc.putPath(charIDToTypeID("null"), new File(photoPath));
@@ -103,16 +144,26 @@ function _doPlacePhotos() {
         continue;
       }
 
+      // Eredeti meret es pozicio mentese a csere elott
+      var origBounds = _getLayerBounds(layer);
+
       // Layer kivalasztasa
       selectLayerById(layer.id);
       _doc.activeLayer = layer;
 
       // SO tartalom csere
       _replaceSmartObjectContents(item.photoPath);
-      _placed++;
 
       // Dokumentum ujra aktivalasa (a replace neha valt)
       _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+
+      // Layer ujra lekerdezese (a replace utan frissulhetett)
+      layer = _doc.activeLayer;
+
+      // Aranyos meretezés az eredeti keretbe + kozepre igazitas
+      _fitLayerToFrame(layer, origBounds);
+
+      _placed++;
 
     } catch (e) {
       log("[JSX] HIBA (" + item.layerName + "): " + e.message);

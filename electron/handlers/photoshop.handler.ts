@@ -971,6 +971,11 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
             try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
           }
 
+          // Electron ablak visszahozasa fokuszba (PS eloterbe hozta magat)
+          if (_mainWindow && !_mainWindow.isDestroyed()) {
+            _mainWindow.focus();
+          }
+
           if (error) {
             log.error('JSX futtatasi hiba:', error.message, stderr);
             resolve({ success: false, error: stderr || error.message });
@@ -1089,6 +1094,11 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
           try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
           if (tempJsonPath && fs.existsSync(tempJsonPath)) {
             try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
+          }
+
+          // Electron ablak visszahozasa fokuszba
+          if (win && !win.isDestroyed()) {
+            win.focus();
           }
 
           if (code !== 0) {

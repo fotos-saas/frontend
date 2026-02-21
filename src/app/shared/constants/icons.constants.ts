@@ -395,6 +395,7 @@ export const ICONS = {
   CALENDAR_DAYS: 'calendar-days',
   CALENDAR_CLOCK: 'calendar-clock',
   CALENDAR_CHECK: 'calendar-check',
+  CALENDAR_PLUS: 'calendar-plus',
   CLOCK_3: 'clock-3',
   MAP: 'map',
   USERS_ROUND: 'users-round',

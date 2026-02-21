@@ -5,14 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
-import { createBackdropHandler } from '../../../../../shared/utils/dialog.util';
+import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PartnerBookingService } from '../../../services/partner-booking.service';
 import { SessionType, TimeSlot, BookingConflict, BookingForm } from '../../../models/booking.models';
 
 @Component({
   selector: 'app-new-booking-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './new-booking-dialog.component.html',
   styleUrl: './new-booking-dialog.component.scss',
@@ -26,7 +26,6 @@ export class NewBookingDialogComponent implements OnInit {
   private readonly bookingService = inject(PartnerBookingService);
   private readonly destroyRef = inject(DestroyRef);
   readonly ICONS = ICONS;
-  readonly backdropHandler = createBackdropHandler(() => this.close.emit(), 'dialog-backdrop');
 
   sessionTypes = signal<SessionType[]>([]);
   availableSlots = signal<TimeSlot[]>([]);

@@ -384,6 +384,10 @@ export const ICONS = {
   ALIGN_V_DISTRIBUTE: 'align-vertical-distribute-center',
   MAXIMIZE_2: 'maximize-2',
 
+  // Rendezés
+  ARROW_DOWN_AZ: 'arrow-down-a-z',
+  LIST_ORDERED: 'list-ordered',
+
   // Undo/Redo
   REDO: 'redo-2',
 

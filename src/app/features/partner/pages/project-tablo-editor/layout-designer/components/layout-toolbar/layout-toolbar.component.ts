@@ -5,6 +5,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { LayoutDesignerStateService } from '../../layout-designer-state.service';
 import { LayoutDesignerActionsService } from '../../layout-designer-actions.service';
 import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
+import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
 
 /**
  * Layout Toolbar — eszköztár a vizuális szerkesztő tetején.
@@ -101,6 +102,16 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
             (click)="actions.alignBottom()" matTooltip="Aljára igazítás">
             <lucide-icon [name]="ICONS.ALIGN_END_H" [size]="16" />
+          </button>
+
+          <div class="layout-toolbar__divider"></div>
+
+          <button class="toolbar-btn"
+            [disabled]="state.selectionCount() < 2"
+            [class.toolbar-btn--active]="sortService.panelOpen()"
+            (click)="sortService.panelOpen.update(v => !v)"
+            matTooltip="Rendezés panel">
+            <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="16" />
           </button>
 
         }
@@ -366,6 +377,7 @@ export class LayoutToolbarComponent {
   readonly state = inject(LayoutDesignerStateService);
   readonly actions = inject(LayoutDesignerActionsService);
   readonly gridService = inject(LayoutDesignerGridService);
+  readonly sortService = inject(LayoutDesignerSortService);
   protected readonly ICONS = ICONS;
 
   readonly refreshing = input<boolean>(false);

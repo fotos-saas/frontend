@@ -11,8 +11,11 @@ import { LayoutDesignerGridService } from './layout-designer-grid.service';
 import { LayoutDesignerDragService } from './layout-designer-drag.service';
 import { LayoutDesignerSwapService } from './layout-designer-swap.service';
 import { LayoutDesignerHistoryService } from './layout-designer-history.service';
+import { LayoutDesignerSortService } from './layout-designer-sort.service';
 import { LayoutToolbarComponent } from './components/layout-toolbar/layout-toolbar.component';
 import { LayoutCanvasComponent } from './components/layout-canvas/layout-canvas.component';
+import { LayoutSortPanelComponent } from './components/layout-sort-panel/layout-sort-panel.component';
+import { LayoutSortCustomDialogComponent } from './components/layout-sort-custom-dialog/layout-sort-custom-dialog.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DesignerDocument } from './layout-designer.types';
@@ -24,7 +27,7 @@ import { DesignerDocument } from './layout-designer.types';
 @Component({
   selector: 'app-layout-designer',
   standalone: true,
-  imports: [LayoutToolbarComponent, LayoutCanvasComponent, LucideAngularModule],
+  imports: [LayoutToolbarComponent, LayoutCanvasComponent, LayoutSortPanelComponent, LayoutSortCustomDialogComponent, LucideAngularModule],
   providers: [
     LayoutDesignerStateService,
     LayoutDesignerActionsService,
@@ -32,6 +35,7 @@ import { DesignerDocument } from './layout-designer.types';
     LayoutDesignerDragService,
     LayoutDesignerSwapService,
     LayoutDesignerHistoryService,
+    LayoutDesignerSortService,
   ],
   template: `
     <div
@@ -58,7 +62,13 @@ import { DesignerDocument } from './layout-designer.types';
           (saveClicked)="save()"
           (closeClicked)="close()"
         />
-        <app-layout-canvas />
+        <div class="layout-designer__content">
+          <app-layout-canvas />
+          <app-layout-sort-panel (openCustomDialog)="showCustomDialog.set(true)" />
+        </div>
+        @if (showCustomDialog()) {
+          <app-layout-sort-custom-dialog (close)="showCustomDialog.set(false)" />
+        }
       }
     </div>
   `,
@@ -94,6 +104,18 @@ import { DesignerDocument } from './layout-designer.types';
       color: #fca5a5;
     }
 
+    .layout-designer__content {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .layout-designer__content app-layout-canvas {
+      flex: 1;
+      min-width: 0;
+    }
+
     .designer-btn {
       margin-top: 8px;
       padding: 8px 20px;
@@ -126,6 +148,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   private readonly state = inject(LayoutDesignerStateService);
   private readonly ps = inject(PhotoshopService);
   protected readonly ICONS = ICONS;
+  readonly showCustomDialog = signal(false);
 
   /** Betöltendő snapshot fájl útvonala */
   readonly snapshotPath = input.required<string>();

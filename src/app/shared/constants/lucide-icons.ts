@@ -180,6 +180,9 @@ import {
   AlignEndHorizontal,
   Rows3,
   Columns3,
+  // Rendezés
+  ArrowDownAZ,
+  ListOrdered,
   // Vizuális szerkesztő
   Move,
   AlignHorizontalDistributeCenter,
@@ -381,6 +384,9 @@ export const LUCIDE_ICONS_MAP = {
   AlignEndHorizontal,
   Rows3,
   Columns3,
+  // Rendezés
+  ArrowDownAZ,
+  ListOrdered,
   // Vizuális szerkesztő
   Move,
   AlignHorizontalDistributeCenter,

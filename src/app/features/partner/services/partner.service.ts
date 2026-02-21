@@ -449,4 +449,26 @@ export class PartnerService {
       { text },
     );
   }
+
+  classifyNameGenders(names: string[]): Observable<{
+    success: boolean;
+    classifications: Array<{ name: string; gender: 'boy' | 'girl' }>;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      classifications: Array<{ name: string; gender: 'boy' | 'girl' }>;
+    }>(`${this.baseUrl}/ai/classify-name-genders`, { names });
+  }
+
+  matchCustomNameOrder(layerNames: string[], customOrder: string): Observable<{
+    success: boolean;
+    ordered_names: string[];
+    unmatched: string[];
+  }> {
+    return this.http.post<{
+      success: boolean;
+      ordered_names: string[];
+      unmatched: string[];
+    }>(`${this.baseUrl}/ai/match-custom-order`, { layer_names: layerNames, custom_order: customOrder });
+  }
 }

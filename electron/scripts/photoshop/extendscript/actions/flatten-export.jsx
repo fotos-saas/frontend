@@ -30,17 +30,24 @@ var _doc;
 
 function _doFlattenExport() {
   var args = parseArgs();
-  if (!args.dataFilePath) {
-    throw new Error("Nincs megadva DATA_FILE_PATH!");
-  }
-  var data = readJsonFile(args.dataFilePath);
+  var quality = 90;
+  var outputPath = null;
 
-  if (!data || !data.outputPath) {
-    throw new Error("Nincs megadva outputPath a JSON-ban!");
+  // JSON parameterek olvasasa (opcionalis — ha nincs, auto temp path)
+  if (args.dataFilePath) {
+    try {
+      var data = readJsonFile(args.dataFilePath);
+      if (data.quality) quality = data.quality;
+      if (data.outputPath) outputPath = data.outputPath;
+    } catch (e) {
+      log("[JSX] JSON olvasas kihagyva: " + e.message);
+    }
   }
 
-  var outputPath = data.outputPath;
-  var quality = data.quality || 90;
+  // Ha nincs explicit outputPath, Photoshop temp mappajat hasznaljuk
+  if (!outputPath) {
+    outputPath = Folder.temp.fsName + "/photostack-flatten-" + new Date().getTime() + ".jpg";
+  }
 
   log("[JSX] Flatten export indul: " + outputPath);
 
@@ -77,7 +84,7 @@ function _doFlattenExport() {
   dupDoc.close(SaveOptions.DONOTSAVECHANGES);
   log("[JSX] Duplikatum bezarva");
 
-  log("__FLATTEN_RESULT__OK");
+  log("__FLATTEN_RESULT__OK:" + outputPath);
 }
 
 (function () {

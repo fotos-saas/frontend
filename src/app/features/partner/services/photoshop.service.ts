@@ -1394,22 +1394,24 @@ export class PhotoshopService {
 
     try {
       // 1. Flatten export JSX futtatás → temp JPG
-      const tempJpgPath = `${psdFilePath.replace(/\.psd$/i, '')}_flatten_temp_${Date.now()}.jpg`;
-
+      // A JSX maga hatarozza meg a temp utat (Folder.temp), az outputban adja vissza
       const flattenResult = await this.runJsx({
         scriptName: 'actions/flatten-export.jsx',
-        jsonData: { outputPath: tempJpgPath, quality: 95 },
+        jsonData: { quality: 95 },
       });
 
       if (!flattenResult.success) {
         return { success: false, error: flattenResult.error || 'Flatten export sikertelen' };
       }
 
-      // Ellenőrizzük hogy a flatten tényleg OK volt
+      // Az OK marker tartalmazza a tényleges temp JPG útvonalat
       const output = flattenResult.output || '';
-      if (!output.includes('__FLATTEN_RESULT__OK')) {
-        return { success: false, error: 'A flatten export nem adott vissza OK eredményt' };
+      const okMatch = output.match(/__FLATTEN_RESULT__OK:(.+)/);
+      if (!okMatch) {
+        return { success: false, error: `A flatten export nem adott vissza OK eredményt. Output: ${output.slice(-200)}` };
       }
+
+      const tempJpgPath = okMatch[1].trim();
 
       // 2. Sample generálás (resize + watermark + upload)
       const authToken = sessionStorage.getItem('marketer_token') || '';

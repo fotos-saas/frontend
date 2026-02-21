@@ -89,6 +89,12 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
               <span>Minta készítés</span>
             }
           </button>
+          <button class="action-btn"
+            (click)="openWorkDir.emit()"
+            matTooltip="A PSD munkamappa megnyitása Finderben">
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+            <span>Munkamappa</span>
+          </button>
         </div>
 
         @if (sampleSuccess()) {
@@ -207,6 +213,7 @@ export class LayoutSortPanelComponent {
 
   readonly openCustomDialog = output<void>();
   readonly generateSample = output<void>();
+  readonly openWorkDir = output<void>();
 
   /** Minta generálás állapotok (a szülő kezeli) */
   readonly generatingSample = input(false);

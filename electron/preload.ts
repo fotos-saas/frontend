@@ -281,6 +281,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:set-work-dir', dirPath) as Promise<{ success: boolean; error?: string }>,
     browseWorkDir: () =>
       ipcRenderer.invoke('photoshop:browse-work-dir') as Promise<{ cancelled: boolean; path?: string }>,
+    revealInFinder: (filePath: string) =>
+      ipcRenderer.invoke('photoshop:reveal-in-finder', filePath) as Promise<{ success: boolean; error?: string }>,
     getMargin: () =>
       ipcRenderer.invoke('photoshop:get-margin') as Promise<number>,
     setMargin: (marginCm: number) =>

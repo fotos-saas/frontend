@@ -907,6 +907,11 @@ export class PhotoshopService {
     }
   }
 
+  /** Fájl megmutatása a Finderben / Explorerben */
+  revealInFinder(filePath: string): void {
+    this.api?.revealInFinder(filePath);
+  }
+
   /** Snapshot betöltése (JSON tartalom visszaadása) */
   async loadSnapshot(snapshotPath: string): Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

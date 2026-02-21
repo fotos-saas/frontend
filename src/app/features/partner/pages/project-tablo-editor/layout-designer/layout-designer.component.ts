@@ -88,6 +88,7 @@ import { firstValueFrom } from 'rxjs';
             [sampleError]="sampleError()"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
+            (openWorkDir)="onOpenWorkDir()"
           />
           <div class="layout-designer__canvas-area" #canvasArea>
             <app-layout-canvas
@@ -473,6 +474,14 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       await this.ps.arrangeNames(undefined, this.getLinkedLayerNames());
     } finally {
       this.arrangingNames.set(false);
+    }
+  }
+
+  /** Munkamappa megnyitása Finderben — a PSD mappáját nyitja meg */
+  onOpenWorkDir(): void {
+    const psd = this.psdPath();
+    if (psd) {
+      this.ps.revealInFinder(psd);
     }
   }
 

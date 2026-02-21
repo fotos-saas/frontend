@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow, app } from 'electron';
+import { ipcMain, dialog, BrowserWindow, app, shell } from 'electron';
 import { execFile, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -278,6 +278,20 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       }
       log.error('PSD generalasi hiba:', error);
       return { success: false, error: 'Nem sikerult a PSD generalasa' };
+    }
+  });
+
+  // Megmutatja a fajlt a Finderben / Explorerben
+  ipcMain.handle('photoshop:reveal-in-finder', (_event, filePath: string) => {
+    try {
+      if (typeof filePath !== 'string' || filePath.length > 500) {
+        return { success: false, error: 'Ervenytelen eleresi ut' };
+      }
+      shell.showItemInFolder(path.resolve(filePath));
+      return { success: true };
+    } catch (error) {
+      log.error('Reveal in finder hiba:', error);
+      return { success: false, error: 'Nem sikerult megnyitni' };
     }
   });
 

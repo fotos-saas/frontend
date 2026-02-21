@@ -24,11 +24,17 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           </span>
         }
 
-        @if (state.sourceLabel()) {
-          <span class="layout-toolbar__source-label"
-            [class.layout-toolbar__source-label--live]="state.sourceLabel() === 'Friss PSD beolvasás'">
-            {{ state.sourceLabel() }}
-          </span>
+        @if (state.sourceLabel(); as label) {
+          <div class="source-badge" [class.source-badge--live]="label === 'Friss PSD beolvasás'">
+            @if (label === 'Friss PSD beolvasás') {
+              <lucide-icon [name]="ICONS.MONITOR" [size]="13" />
+              <span class="source-badge__type">Élő PSD</span>
+            } @else {
+              <lucide-icon [name]="ICONS.HISTORY" [size]="13" />
+              <span class="source-badge__type">Pillanatkép:</span>
+              <span class="source-badge__name">{{ label }}</span>
+            }
+          </div>
         }
 
         <div class="layout-toolbar__separator"></div>
@@ -220,21 +226,42 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       white-space: nowrap;
     }
 
-    .layout-toolbar__source-label {
-      font-size: 0.7rem;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.5);
-      background: rgba(255, 255, 255, 0.06);
-      padding: 2px 8px;
-      border-radius: 4px;
+    .source-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(167, 139, 250, 0.12);
+      border: 1px solid rgba(167, 139, 250, 0.25);
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
+      max-width: 260px;
+
+      &__type {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #a78bfa;
+      }
+
+      &__name {
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.75);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      lucide-icon {
+        color: #a78bfa;
+        flex-shrink: 0;
+      }
 
       &--live {
-        color: #34d399;
         background: rgba(52, 211, 153, 0.12);
+        border-color: rgba(52, 211, 153, 0.3);
+
+        .source-badge__type { color: #34d399; }
+        lucide-icon { color: #34d399; }
       }
     }
 

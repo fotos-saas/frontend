@@ -1,18 +1,20 @@
 import {
-  Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy, output, input,
+  Component, inject, signal, computed, OnInit, DestroyRef, ChangeDetectionStrategy, output, input,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { PsSelectComponent } from '../../../../../shared/components/form/ps-select/ps-select.component';
+import { PsSelectOption } from '../../../../../shared/components/form/form.types';
 import { PartnerBookingService } from '../../../services/partner-booking.service';
 import { SessionType, TimeSlot, BookingConflict, BookingForm } from '../../../models/booking.models';
 
 @Component({
   selector: 'app-new-booking-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './new-booking-dialog.component.html',
   styleUrl: './new-booking-dialog.component.scss',
@@ -34,7 +36,15 @@ export class NewBookingDialogComponent implements OnInit {
   saving = signal(false);
   errorMsg = signal<string | null>(null);
 
+  readonly sessionTypeOptions = computed((): PsSelectOption[] =>
+    this.sessionTypes().map(t => ({
+      id: t.id,
+      label: `${t.name} (${t.duration_minutes} perc)`,
+    }))
+  );
+
   sessionTypeId: number | null = null;
+  sessionTypeIdStr = '';
   date = '';
   startTime = '';
   contactName = '';
@@ -64,13 +74,15 @@ export class NewBookingDialogComponent implements OnInit {
         // Ha van prefill dátum, auto-select első típus + slot betöltés
         if (prefillDate && active.length > 0 && !this.sessionTypeId) {
           this.sessionTypeId = active[0].id;
+          this.sessionTypeIdStr = String(active[0].id);
           this.loadSlots();
         }
       },
     });
   }
 
-  onTypeChange(): void {
+  onTypeSelectChange(val: string | number): void {
+    this.sessionTypeId = val ? Number(val) : null;
     this.startTime = '';
     this.availableSlots.set([]);
     if (this.date && this.sessionTypeId) this.loadSlots();

@@ -17,13 +17,13 @@
     <h3 class="section-title">Foglalás részletei</h3>
 
     <div class="field">
-      <label for="nb-type">Fotózási típus *</label>
-      <select id="nb-type" [(ngModel)]="sessionTypeId" (ngModelChange)="onTypeChange()" class="input">
-        <option [ngValue]="null">Válassz típust...</option>
-        @for (type of sessionTypes(); track type.id) {
-          <option [ngValue]="type.id">{{ type.name }} ({{ type.duration_minutes }} perc)</option>
-        }
-      </select>
+      <label>Fotózási típus *</label>
+      <ps-select
+        [options]="sessionTypeOptions()"
+        emptyLabel="Válassz típust..."
+        [(ngModel)]="sessionTypeIdStr"
+        (ngModelChange)="onTypeSelectChange($event)"
+      />
     </div>
 
     <div class="field">

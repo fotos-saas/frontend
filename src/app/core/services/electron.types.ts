@@ -108,8 +108,8 @@ export interface SnapshotLayer {
   kind: 'normal' | 'text';
   text?: string;
   justification?: 'left' | 'center' | 'right';
-  /** Smart Object linkelt-e (true = linked, false = embedded, undefined = nem SO) */
-  linked?: boolean;
+  /** Smart Object documentID — azonos ID = összekapcsolt SO-k (undefined = nem SO) */
+  soDocId?: string;
 }
 
 /** Sablon slot — egy szemely pozicioja (kep + nev) */

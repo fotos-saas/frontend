@@ -50,25 +50,22 @@ function _getLayerDescriptor(layer) {
     bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
   };
 
-  // Smart Object linked/embedded allapot
-  // A descriptor "linked" BOOLEAN kulcsa jelzi (true = linked file, false = embedded)
-  var linked = null; // null = nem SO
+  // Smart Object allapot: documentID kiolvasas (osszekapcsolt SO-k azonositasa)
+  var soDocId = null; // null = nem SO
   var soKey = stringIDToTypeID("smartObject");
   if (desc.hasKey(soKey)) {
     try {
       var soObj = desc.getObjectValue(soKey);
-      var linkedKey = stringIDToTypeID("linked");
-      if (soObj.hasKey(linkedKey)) {
-        linked = soObj.getBoolean(linkedKey);
-      } else {
-        linked = false;
+      var docIdKey = stringIDToTypeID("documentID");
+      if (soObj.hasKey(docIdKey)) {
+        soDocId = soObj.getString(docIdKey);
       }
     } catch (soErr) {
-      linked = false;
+      // nem SO vagy kiolvasasi hiba
     }
   }
 
-  return { bounds: bounds, linked: linked };
+  return { bounds: bounds, soDocId: soDocId };
 }
 
 // --- JSON string epites (ES3 — nincs JSON.stringify!) ---
@@ -134,9 +131,9 @@ function _readAllLayers(container, pathSoFar, result) {
           kind: "normal"
         };
 
-        // Smart Object linked/embedded jelzes (null = nem SO)
-        if (info.linked !== null) {
-          layerData.linked = info.linked;
+        // Smart Object documentID (osszekapcsolt SO-k azonositasahoz)
+        if (info.soDocId !== null) {
+          layerData.soDocId = info.soDocId;
         }
 
         // Text layerek extra adatai

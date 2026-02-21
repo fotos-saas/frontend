@@ -18,6 +18,8 @@ export interface DesignerLayer extends SnapshotLayer {
   editedX: number | null;
   /** Szerkesztett Y pozíció (PSD koordináta) — null ha nem módosult */
   editedY: number | null;
+  /** Összekapcsolt SO: >1 layer ugyanazzal a documentID-vel */
+  linked?: boolean;
 }
 
 /** Méretarány és pozíció információ a canvas-hez */

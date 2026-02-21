@@ -122,7 +122,7 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           <button class="action-btn action-btn--final"
             [disabled]="generatingFinal()"
             (click)="generateFinal.emit()"
-            matTooltip="Vízjel és átméretezés nélküli véglegesített tablókép feltöltése"
+            matTooltip="Teljes méretű tablókép (vízjel és átméretezés nélkül)"
             matTooltipPosition="right">
             @if (generatingFinal()) {
               <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
@@ -130,6 +130,19 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
             } @else {
               <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
               <span>Véglegesítés</span>
+            }
+          </button>
+          <button class="action-btn action-btn--final"
+            [disabled]="generatingSmallTablo()"
+            (click)="generateSmallTablo.emit()"
+            matTooltip="Kistabló (3000px, vízjel nélkül)"
+            matTooltipPosition="right">
+            @if (generatingSmallTablo()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              <span>Kistabló...</span>
+            } @else {
+              <lucide-icon [name]="ICONS.FRAME" [size]="16" />
+              <span>Kistabló</span>
             }
           </button>
           <button class="action-btn"
@@ -365,12 +378,14 @@ export class LayoutSortPanelComponent {
   readonly openCustomDialog = output<void>();
   readonly generateSample = output<void>();
   readonly generateFinal = output<void>();
+  readonly generateSmallTablo = output<void>();
   readonly openProject = output<void>();
   readonly openWorkDir = output<void>();
 
   /** Minta generálás állapotok (a szülő kezeli) */
   readonly generatingSample = input(false);
   readonly generatingFinal = input(false);
+  readonly generatingSmallTablo = input(false);
   readonly sampleLargeSize = input(false);
   readonly sampleLargeSizeChange = output<boolean>();
   readonly sampleWatermarkColor = input<'white' | 'black'>('white');

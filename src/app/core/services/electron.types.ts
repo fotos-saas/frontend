@@ -254,6 +254,8 @@ interface FinalizerAPI {
     projectName: string;
     apiBaseUrl: string;
     authToken: string;
+    type?: 'flat' | 'small_tablo';
+    maxSize?: number;
   }) => Promise<{
     success: boolean;
     error?: string;

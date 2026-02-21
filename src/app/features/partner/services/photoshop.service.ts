@@ -1481,10 +1481,10 @@ export class PhotoshopService {
     }
 
     try {
-      // 1. Flatten export JSX futtatás → temp JPG
+      // 1. Flatten export JSX futtatás → temp JPG (eredeti színprofil megtartva)
       const flattenResult = await this.runJsx({
         scriptName: 'actions/flatten-export.jsx',
-        jsonData: { quality: 95 },
+        jsonData: { quality: 12, keepProfile: true },
       });
 
       if (!flattenResult.success) {
@@ -1510,12 +1510,77 @@ export class PhotoshopService {
         projectName,
         apiBaseUrl: environment.apiUrl,
         authToken,
+        type: 'flat',
       });
 
       return result;
     } catch (err) {
       this.logger.error('Véglegesítés hiba', err);
       return { success: false, error: 'Váratlan hiba a véglegesítésnél' };
+    }
+  }
+
+  /**
+   * Kistabló generálása és feltöltése.
+   * Flatten export → 3000px resize (leghosszabb oldal) → feltöltés.
+   * Eredeti színprofil megtartva, nincs watermark.
+   */
+  async generateSmallTablo(
+    projectId: number,
+    projectName: string,
+  ): Promise<{
+    success: boolean;
+    localPath?: string;
+    uploadedCount?: number;
+    error?: string;
+  }> {
+    if (!this.api || !this.finalizerApi) {
+      return { success: false, error: 'Nem Electron környezet' };
+    }
+
+    const psdFilePath = this.psdPath();
+    if (!psdFilePath) {
+      return { success: false, error: 'Nincs megnyitott PSD fájl' };
+    }
+
+    try {
+      // 1. Flatten export (eredeti színprofil megtartva)
+      const flattenResult = await this.runJsx({
+        scriptName: 'actions/flatten-export.jsx',
+        jsonData: { quality: 12, keepProfile: true },
+      });
+
+      if (!flattenResult.success) {
+        return { success: false, error: flattenResult.error || 'Flatten export sikertelen' };
+      }
+
+      const output = flattenResult.output || '';
+      const okMatch = output.match(/__FLATTEN_RESULT__OK:(.+)/);
+      if (!okMatch) {
+        return { success: false, error: `A flatten export nem adott vissza OK eredményt.` };
+      }
+
+      const tempJpgPath = okMatch[1].trim();
+
+      // 2. Feltöltés (3000px resize-szal)
+      const authToken = sessionStorage.getItem('marketer_token') || '';
+      const psdDirPath = psdFilePath.replace(/[/\\][^/\\]+$/, '');
+
+      const result = await this.finalizerApi.upload({
+        flattenedJpgPath: tempJpgPath,
+        outputDir: psdDirPath,
+        projectId,
+        projectName,
+        apiBaseUrl: environment.apiUrl,
+        authToken,
+        type: 'small_tablo',
+        maxSize: 3000,
+      });
+
+      return result;
+    } catch (err) {
+      this.logger.error('Kistabló generálás hiba', err);
+      return { success: false, error: 'Váratlan hiba a kistabló generálásnál' };
     }
   }
 }

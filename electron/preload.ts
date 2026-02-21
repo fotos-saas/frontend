@@ -410,6 +410,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       projectName: string;
       apiBaseUrl: string;
       authToken: string;
+      type?: 'flat' | 'small_tablo';
+      maxSize?: number;
     }) =>
       ipcRenderer.invoke('finalizer:upload', params) as Promise<{
         success: boolean;

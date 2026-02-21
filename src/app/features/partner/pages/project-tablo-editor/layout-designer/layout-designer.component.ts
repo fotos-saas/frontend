@@ -85,6 +85,7 @@ import { firstValueFrom } from 'rxjs';
           <app-layout-sort-panel
             [generatingSample]="generatingSample()"
             [generatingFinal]="generatingFinal()"
+            [generatingSmallTablo]="generatingSmallTablo()"
             [sampleLargeSize]="sampleLargeSize()"
             [sampleWatermarkColor]="ps.sampleWatermarkColor()"
             [sampleWatermarkOpacity]="ps.sampleWatermarkOpacity()"
@@ -93,6 +94,7 @@ import { firstValueFrom } from 'rxjs';
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
             (generateFinal)="onGenerateFinal()"
+            (generateSmallTablo)="onGenerateSmallTablo()"
             (sampleLargeSizeChange)="onLargeSizeChange($event)"
             (watermarkColorChange)="onWatermarkColorChange($event)"
             (opacityChange)="onCycleOpacity()"
@@ -269,6 +271,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly arrangingNames = signal(false);
   readonly generatingSample = signal(false);
   readonly generatingFinal = signal(false);
+  readonly generatingSmallTablo = signal(false);
   readonly sampleLargeSize = this.ps.sampleUseLargeSize;
   readonly sampleSuccess = signal<string | null>(null);
   readonly sampleError = signal<string | null>(null);
@@ -562,6 +565,30 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       this.sampleError.set(`Véglegesítés hiba: ${msg}`);
     } finally {
       this.generatingFinal.set(false);
+    }
+  }
+
+  /** Kistabló — flatten + 3000px resize + upload */
+  async onGenerateSmallTablo(): Promise<void> {
+    if (this.generatingSmallTablo()) return;
+    this.generatingSmallTablo.set(true);
+    this.sampleSuccess.set(null);
+    this.sampleError.set(null);
+    try {
+      const result = await this.ps.generateSmallTablo(this.projectId(), this.projectName());
+      if (result.success && result.uploadedCount && result.uploadedCount > 0) {
+        this.sampleSuccess.set('Kistabló sikeresen feltöltve');
+      } else if (result.success && (!result.uploadedCount || result.uploadedCount === 0)) {
+        this.sampleError.set(result.error || 'Lokálisan mentve, de a feltöltés nem sikerült');
+      } else {
+        this.sampleError.set(result.error || 'Kistabló generálás sikertelen');
+      }
+    } catch (err) {
+      console.error('Kistabló hiba:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      this.sampleError.set(`Kistabló hiba: ${msg}`);
+    } finally {
+      this.generatingSmallTablo.set(false);
     }
   }
 

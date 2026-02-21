@@ -309,9 +309,26 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const psPath = psStore.get('photoshopPath', null);
 
       if (process.platform === 'darwin') {
-        // macOS: open file.psd — ha mar nyitva van PS-ben, csak fokuszal ra (nem duplikálja)
-        // NEM hasznalunk -a flag-et, mert az uj peldanykent nyitja meg
-        const child = execFile('open', [filePath]);
+        // macOS: AppleScript-tel ellenorizzuk hogy a fajl mar nyitva van-e PS-ben
+        // Ha igen, csak aktivaljuk — ha nem, megnyitjuk
+        const fileName = path.basename(filePath);
+        const script = `
+          tell application id "com.adobe.Photoshop"
+            activate
+            set isOpen to false
+            repeat with d in documents
+              if name of d is "${fileName.replace(/"/g, '\\"')}" then
+                set isOpen to true
+                set current document to d
+                exit repeat
+              end if
+            end repeat
+            if not isOpen then
+              open POSIX file "${filePath.replace(/"/g, '\\"')}"
+            end if
+          end tell
+        `;
+        const child = execFile('osascript', ['-e', script]);
         child.unref();
       } else {
         if (psPath) {

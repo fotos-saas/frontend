@@ -139,14 +139,14 @@
                       [value]="a.file ? form.getFileKey(a.file) : ''"
                       (change)="form.onFileSelect(a.personId, $event)">
                       <option value="">(nincs kep)</option>
-                      @for (f of form.files(); track form.getFileKey(f)) {
+                      @for (f of form.files(); track f.name) {
                         <option [value]="form.getFileKey(f)">{{ f.name }}</option>
                       }
                     </select>
                   </div>
                 }
 
-                @for (f of form.unassignedFiles(); track form.getFileKey(f)) {
+                @for (f of form.unassignedFiles(); track f.name) {
                   <div class="match-row match-row--extra">
                     <span class="match-row__status">
                       <lucide-icon [name]="ICONS.IMAGE" [size]="14" />

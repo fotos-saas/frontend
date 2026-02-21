@@ -118,6 +118,8 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   hiddenTabs = computed<ProjectDetailTab[]>(() => {
     const hidden: ProjectDetailTab[] = [];
     if (this.isMarketer()) hidden.push('settings');
+    const status = this.projectData()?.status;
+    if (status !== 'in_print' && status !== 'done') hidden.push('print');
     return hidden;
   });
 

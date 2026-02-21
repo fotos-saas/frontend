@@ -69,11 +69,11 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
         }
       </div>
 
-      <!-- Minta készítés szekció -->
+      <!-- Műveletek szekció -->
       <div class="sidebar__section sidebar__section--separator">
         <div class="sidebar__section-header">
-          <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
-          <span>Minta</span>
+          <lucide-icon [name]="ICONS.SETTINGS" [size]="14" />
+          <span>Műveletek</span>
         </div>
 
         <div class="sidebar__actions">
@@ -88,6 +88,12 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
               <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
               <span>Minta készítés</span>
             }
+          </button>
+          <button class="action-btn"
+            (click)="openProject.emit()"
+            matTooltip="A PSD megnyitása Photoshopban">
+            <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
+            <span>Projekt megnyitása</span>
           </button>
           <button class="action-btn"
             (click)="openWorkDir.emit()"
@@ -213,6 +219,7 @@ export class LayoutSortPanelComponent {
 
   readonly openCustomDialog = output<void>();
   readonly generateSample = output<void>();
+  readonly openProject = output<void>();
   readonly openWorkDir = output<void>();
 
   /** Minta generálás állapotok (a szülő kezeli) */

@@ -88,6 +88,7 @@ import { firstValueFrom } from 'rxjs';
             [sampleError]="sampleError()"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
+            (openProject)="onOpenProject()"
             (openWorkDir)="onOpenWorkDir()"
           />
           <div class="layout-designer__canvas-area" #canvasArea>
@@ -474,6 +475,14 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       await this.ps.arrangeNames(undefined, this.getLinkedLayerNames());
     } finally {
       this.arrangingNames.set(false);
+    }
+  }
+
+  /** Projekt megnyitása Photoshopban */
+  onOpenProject(): void {
+    const psd = this.psdPath();
+    if (psd) {
+      this.ps.openPsdFile(psd);
     }
   }
 

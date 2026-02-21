@@ -140,11 +140,19 @@
               <span class="price-tag price-tag--free">Ingyenes</span>
             } @else if (module.type === 'per_use') {
               <span class="price-tag price-tag--per-use">
-                {{ module.per_use_price | number:'1.0-0':'hu' }} Ft/{{ module.per_use_unit }}
+                @if (module.per_use_price != null) {
+                  {{ module.per_use_price | number:'1.0-0':'hu' }} Ft/{{ module.per_use_unit ?? 'db' }}
+                } @else {
+                  Egyedi árazás
+                }
               </span>
             } @else {
               <span class="price-tag price-tag--monthly">
-                {{ module.monthly_price | number:'1.0-0':'hu' }} Ft/hó
+                @if (module.monthly_price != null) {
+                  {{ module.monthly_price | number:'1.0-0':'hu' }} Ft/hó
+                } @else {
+                  Egyedi árazás
+                }
               </span>
             }
           </div>

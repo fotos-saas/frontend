@@ -9,8 +9,13 @@
       <p class="pricing-description">Ez a modul minden felhasználó számára ingyenesen elérhető.</p>
     } @else if (module().type === 'per_use') {
       <div class="pricing-amount">
-        <span class="pricing-amount__value">{{ module().per_use_price | number:'1.0-0':'hu' }}</span>
-        <span class="pricing-amount__unit">Ft/{{ module().per_use_unit }}</span>
+        @if (module().per_use_price != null) {
+          <span class="pricing-amount__value">{{ module().per_use_price | number:'1.0-0':'hu' }}</span>
+          <span class="pricing-amount__unit">Ft/{{ module().per_use_unit ?? 'db' }}</span>
+        } @else {
+          <span class="pricing-amount__value">Egyedi</span>
+          <span class="pricing-amount__unit">árazás</span>
+        }
       </div>
       <p class="pricing-description">Használat alapú díjazás. Csak azért fizetsz, amit tényleg használsz.</p>
     } @else {

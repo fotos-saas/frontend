@@ -40,8 +40,12 @@ export class DetailHeroComponent {
   get priceDisplay(): string {
     const mod = this.module();
     if (mod.type === 'free') return 'Ingyenes';
-    if (mod.type === 'per_use') return `${mod.per_use_price} Ft/${mod.per_use_unit}`;
-    return `${mod.monthly_price?.toLocaleString('hu-HU')} Ft/hó`;
+    if (mod.type === 'per_use') {
+      if (mod.per_use_price == null) return 'Egyedi árazás';
+      return `${mod.per_use_price.toLocaleString('hu-HU')} Ft/${mod.per_use_unit ?? 'db'}`;
+    }
+    if (mod.monthly_price == null) return 'Egyedi árazás';
+    return `${mod.monthly_price.toLocaleString('hu-HU')} Ft/hó`;
   }
 
   get ctaLabel(): string {

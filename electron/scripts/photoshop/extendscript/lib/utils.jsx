@@ -378,22 +378,24 @@ function parseArgs() {
 // a linkelt tarsakat is elmozditja.
 //
 // Hasznalat:
-//   var saved = saveLinkGroups(doc);   // kiolvas + unlink mindent
+//   var saved = saveLinkGroups(doc);   // kiolvas + DOM unlink mindent
 //   ... rendezes ...
 //   restoreLinkGroups(doc, saved);     // ujra link-eli az eredeti csoportokat
 
 // Rekurzivan vegigmegy minden layeren, ActionManager-rel kinyeri a linkedLayerIDs-t.
 // Visszaad link csoport tombokbol allo tombot (pl. [[id1,id2], [id3,id4,id5]])
-// ES unlink-el minden layert.
+// ES DOM unlink()-kel minden layert.
 function saveLinkGroups(doc) {
   var linkMap = {};   // linkGroupKey → [layerId, ...]
-  var allLinkedIds = [];
+  var allLayers = []; // minden layer referenciaval (DOM unlink-hez)
 
-  // Rekurziv bejaras
+  // Rekurziv bejaras — osszegyujti a layereket + link info-t
   function walk(container) {
     try {
       for (var i = 0; i < container.artLayers.length; i++) {
-        _checkLayerLinks(container.artLayers[i], linkMap);
+        var layer = container.artLayers[i];
+        allLayers.push(layer);
+        _checkLayerLinks(layer, linkMap);
       }
     } catch (e) { /* */ }
     try {
@@ -414,22 +416,14 @@ function saveLinkGroups(doc) {
     seen[key] = true;
     if (linkMap[key].length >= 2) {
       groups.push(linkMap[key]);
-      for (var g = 0; g < linkMap[key].length; g++) {
-        allLinkedIds.push(linkMap[key][g]);
-      }
     }
   }
 
-  // Unlink minden linkelt layert
-  for (var u = 0; u < allLinkedIds.length; u++) {
+  // DOM unlink() minden layeren — ez a legmegbizhatobb mod
+  for (var u = 0; u < allLayers.length; u++) {
     try {
-      selectLayerById(allLinkedIds[u]);
-      var ulDesc = new ActionDescriptor();
-      var ulRef = new ActionReference();
-      ulRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-      ulDesc.putReference(charIDToTypeID("null"), ulRef);
-      executeAction(stringIDToTypeID("unlinkSelectedLayers"), ulDesc, DialogModes.NO);
-    } catch (e) { /* mar nincs linkelve */ }
+      allLayers[u].unlink();
+    } catch (e) { /* nem linkelt layer — OK */ }
   }
 
   return groups;

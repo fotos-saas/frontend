@@ -435,6 +435,29 @@
   color: get-color('slate', 500);
 }
 
+.view-detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: get-color('primary', 500);
+  @include transition-fast;
+
+  lucide-icon {
+    @include transition-fast;
+    transform: translateX(0);
+  }
+
+  .module-card:hover & {
+    color: get-color('primary', 600);
+
+    lucide-icon {
+      transform: translateX(3px);
+    }
+  }
+}
+
 .popular-dot {
   position: absolute;
   top: 10px;
@@ -565,6 +588,14 @@
     &--free { background: rgba(get-color('success', 900), 0.4); color: get-color('success', 400); }
     &--per-use { background: rgba(get-color('primary', 900), 0.4); color: get-color('primary', 300); }
     &--monthly { background: get-color('slate', 700); color: get-color('slate', 200); }
+  }
+
+  .view-detail-link {
+    color: get-color('primary', 400);
+
+    .module-card:hover & {
+      color: get-color('primary', 300);
+    }
   }
 
   .skeleton-card {

@@ -19,6 +19,11 @@
   border-radius: 12px;
   overflow: hidden;
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &--wide {
+    width: 960px;
+  }
 }
 
 // ============================================================================

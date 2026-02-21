@@ -1,7 +1,7 @@
 <div class="dialog-backdrop"
   (mousedown)="backdropHandler.onMouseDown($event)"
   (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel dark">
+  <div class="dialog-panel dark" [class.dialog-panel--wide]="selectedAction() === 'upload-individual'">
     <!-- Header -->
     <div class="dialog__header">
       <lucide-icon [name]="ICONS.WAND" [size]="18" />

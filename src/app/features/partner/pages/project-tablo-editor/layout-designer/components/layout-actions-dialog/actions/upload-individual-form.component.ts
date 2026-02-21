@@ -25,48 +25,49 @@ export interface UploadIndividualFormData {
   standalone: true,
   imports: [FormsModule, LucideAngularModule],
   template: `
-    <div class="form">
-      <!-- Csoport neve -->
-      <div class="form__field">
-        <label class="form__label">
-          <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
-          Csoport neve *
-        </label>
-        <input
-          type="text"
-          class="form__input"
-          placeholder="pl. Portre"
-          [ngModel]="groupName()"
-          (ngModelChange)="groupName.set($event)"
-        />
-      </div>
+    <div class="form-columns">
+      <!-- Bal oszlop: csoport neve + kepek -->
+      <div class="form-col">
+        <div class="form__field">
+          <label class="form__label">
+            <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+            Csoport neve *
+          </label>
+          <input
+            type="text"
+            class="form__input"
+            placeholder="pl. Portre"
+            [ngModel]="groupName()"
+            (ngModelChange)="groupName.set($event)"
+          />
+        </div>
 
-      <!-- Kepek -->
-      <div class="form__field">
-        <label class="form__label">
-          <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
-          Kepek *
-        </label>
-        <div class="mini-drop"
-          [class.mini-drop--active]="isDragging()"
-          (dragover)="onDragOver($event)"
-          (dragleave)="isDragging.set(false)"
-          (drop)="onDrop($event)"
-          (click)="fileInput.click()">
-          <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp"
-            (change)="onFileInput($event)" class="sr-only" />
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-          <span>{{ files().length > 0 ? 'Tovabbi kepek...' : 'Kepek valasztasa' }}</span>
+        <div class="form__field">
+          <label class="form__label">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+            Kepek *
+          </label>
+          <div class="mini-drop"
+            [class.mini-drop--active]="isDragging()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="isDragging.set(false)"
+            (drop)="onDrop($event)"
+            (click)="fileInput.click()">
+            <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp"
+              (change)="onFileInput($event)" class="sr-only" />
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+            <span>{{ files().length > 0 ? 'Tovabbi kepek...' : 'Kepek valasztasa' }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Parositas lista -->
-      @if (assignments().length > 0) {
-        <div class="form__field">
+      <!-- Jobb oszlop: parositas -->
+      <div class="form-col form-col--match">
+        @if (assignments().length > 0) {
           <div class="match-header">
             <label class="form__label">
               <lucide-icon [name]="ICONS.LINK" [size]="14" />
-              Parositas ({{ assignedCount() }}/{{ persons().length }} kiosztva)
+              Parositas ({{ assignedCount() }}/{{ persons().length }})
             </label>
             <button class="match-header__reset" (click)="runMatching()">
               <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
@@ -101,7 +102,6 @@ export interface UploadIndividualFormData {
               </div>
             }
 
-            <!-- Nem parosított fajlok -->
             @for (f of unassignedFiles(); track getFileKey(f)) {
               <div class="match-row match-row--extra">
                 <span class="match-row__status">
@@ -112,15 +112,47 @@ export interface UploadIndividualFormData {
               </div>
             }
           </div>
-        </div>
-      }
+        } @else {
+          <div class="match-empty">
+            <lucide-icon [name]="ICONS.LINK" [size]="20" />
+            <span>Tolts fel kepeket a parosításhoz</span>
+          </div>
+        }
+      </div>
     </div>
   `,
   styles: [`
-    .form {
+    .form-columns {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-col {
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 12px;
+
+      &--match {
+        border-left: 1px solid rgba(255, 255, 255, 0.06);
+        padding-left: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+
+    .match-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 0.75rem;
+      min-height: 100px;
     }
 
     .form__field {
@@ -206,10 +238,11 @@ export interface UploadIndividualFormData {
     }
 
     .match-list {
+      flex: 1;
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 8px;
       overflow: hidden;
-      max-height: 280px;
+      max-height: 320px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }

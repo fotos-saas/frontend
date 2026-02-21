@@ -119,15 +119,29 @@ $ps-dropdown-z: 100;
   }
 }
 
-.dark {
+.dark,
+.ps-overlay--dark {
   --ps-field-bg: var(--bg-secondary, #111827);
   --ps-field-bg-focus: var(--bg-secondary, #111827);
   --ps-field-bg-disabled: var(--bg-tertiary, #374151);
+  --ps-field-border: rgba(255, 255, 255, 0.15);
+  --ps-field-border-hover: rgba(255, 255, 255, 0.3);
+  --ps-text-color: rgba(255, 255, 255, 0.9);
+  --ps-placeholder-color: rgba(255, 255, 255, 0.4);
+  --ps-focus-border: rgba(167, 139, 250, 0.6);
+  --ps-focus-ring: rgba(167, 139, 250, 0.15);
+  --ps-dropdown-bg: #1e1e38;
+  --ps-dropdown-border: rgba(255, 255, 255, 0.1);
+  --ps-dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --ps-option-hover-bg: rgba(255, 255, 255, 0.06);
+  --ps-option-selected-bg: rgba(167, 139, 250, 0.12);
+  --ps-option-selected-text: #a78bfa;
   --ps-error-bg: rgba(220, 38, 38, 0.1);
   --ps-success-bg: rgba(34, 197, 94, 0.1);
-  --ps-dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --ps-option-hover-bg: var(--bg-tertiary, #374151);
   --ps-tag-bg: rgba(37, 99, 235, 0.15);
   --ps-autofill-bg: rgba(37, 99, 235, 0.1);
   --ps-autofill-border: rgba(37, 99, 235, 0.25);
+  --ps-hint-color: rgba(255, 255, 255, 0.4);
+  --ps-check-bg: #a78bfa;
+  --ps-check-border: rgba(255, 255, 255, 0.15);
 }

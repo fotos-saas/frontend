@@ -1,7 +1,7 @@
 <div class="dialog-backdrop"
   (mousedown)="backdropHandler.onMouseDown($event)"
   (click)="backdropHandler.onClick($event)">
-  <div class="dialog-panel">
+  <div class="dialog-panel dark">
     <!-- Header -->
     <div class="dialog__header">
       <lucide-icon [name]="ICONS.WAND" [size]="18" />
@@ -21,6 +21,7 @@
           [options]="actionOptions"
           [ngModel]="selectedAction()"
           (ngModelChange)="selectedAction.set($event)"
+          overlayClass="ps-overlay--dark"
         />
       </div>
 

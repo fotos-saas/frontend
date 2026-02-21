@@ -48,6 +48,7 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
   readonly emptyLabel = input('Válassz...');
   readonly variant = input<'dropdown' | 'cards'>('dropdown');
   readonly direction = input<'horizontal' | 'vertical'>('horizontal');
+  readonly overlayClass = input<string>('');
 
   private readonly hostEl = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
@@ -201,6 +202,10 @@ export class PsSelectComponent extends PsFormFieldBase<string | number> {
     // Create overlay container
     this.overlayEl = this.renderer.createElement('div');
     this.renderer.addClass(this.overlayEl, 'ps-select-overlay');
+    const extraClass = this.overlayClass();
+    if (extraClass) {
+      this.renderer.addClass(this.overlayEl, extraClass);
+    }
     this.renderer.setStyle(this.overlayEl, 'position', 'fixed');
     this.renderer.setStyle(this.overlayEl, 'z-index', '10000');
     this.renderer.setStyle(this.overlayEl, 'pointer-events', 'auto');

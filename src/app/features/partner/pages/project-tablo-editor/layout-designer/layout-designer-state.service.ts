@@ -79,6 +79,41 @@ export class LayoutDesignerStateService {
     return this.layers().some(l => l.editedX !== null || l.editedY !== null);
   });
 
+  /**
+   * Kijelölt layerek bounding box-a screen px-ben (canvas wrapper-hez relatív).
+   * A floating toolbar pozícionálásához használjuk.
+   */
+  readonly selectionScreenBounds = computed(() => {
+    const selected = this.selectedLayers();
+    const si = this.scaleInfo();
+    if (selected.length === 0 || si.displayWidth === 0) return null;
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const l of selected) {
+      if (l.category === 'student-name' || l.category === 'teacher-name') continue;
+      const lx = l.editedX ?? l.x;
+      const ly = l.editedY ?? l.y;
+      minX = Math.min(minX, lx);
+      minY = Math.min(minY, ly);
+      maxX = Math.max(maxX, lx + l.width);
+      maxY = Math.max(maxY, ly + l.height);
+    }
+
+    if (minX === Infinity) return null;
+
+    // PSD → screen px konverzió (canvas wrapper-hez relatív)
+    const canvasLeft = si.offsetX - SIDEBAR_WIDTH;
+    const canvasTopPx = si.offsetY - TOOLBAR_HEIGHT;
+
+    return {
+      left: minX * si.scale + canvasLeft,
+      top: minY * si.scale + canvasTopPx,
+      right: maxX * si.scale + canvasLeft,
+      bottom: maxY * si.scale + canvasTopPx,
+      centerX: ((minX + maxX) / 2) * si.scale + canvasLeft,
+    };
+  });
+
   /** Dokumentum méret cm-ben (DPI alapján) */
   readonly documentSizeCm = computed(() => {
     const doc = this.document();

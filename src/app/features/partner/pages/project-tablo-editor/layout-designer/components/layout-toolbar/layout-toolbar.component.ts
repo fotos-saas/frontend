@@ -4,12 +4,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { SnapshotListItem } from '@core/services/electron.types';
 import { LayoutDesignerStateService } from '../../layout-designer-state.service';
-import { LayoutDesignerActionsService } from '../../layout-designer-actions.service';
 import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
 
 /**
  * Layout Toolbar — eszköztár a vizuális szerkesztő tetején.
- * Dokumentum info, grid toggle, igazítás gombok, mentés + bezárás.
+ * Dokumentum info, grid toggle, fotó behelyezés, link/unlink, mentés + bezárás.
+ * Az igazítás gombok a floating toolbar-ban vannak (LayoutFloatingToolbarComponent).
  */
 @Component({
   selector: 'app-layout-toolbar',
@@ -93,50 +93,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         @if (state.hasSelection()) {
           <div class="layout-toolbar__separator"></div>
 
-          <span class="layout-toolbar__selection">
-            {{ state.selectionCount() }} kijelölve
-          </span>
-
-          <!-- Igazítás: bal/közép/jobb -->
-          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignLeft()" matTooltip="Balra igazítás">
-            <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="16" />
-          </button>
-          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignCenterHorizontal()" matTooltip="Vízszintes középre">
-            <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="16" />
-          </button>
-          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignRight()" matTooltip="Jobbra igazítás">
-            <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="16" />
-          </button>
-
-          <div class="layout-toolbar__divider"></div>
-
-          <!-- Igazítás: fent/közép/lent -->
-          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignTop()" matTooltip="Tetejére igazítás">
-            <lucide-icon [name]="ICONS.ALIGN_START_H" [size]="16" />
-          </button>
-          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignCenterVertical()" matTooltip="Függőleges középre">
-            <lucide-icon [name]="ICONS.ALIGN_CENTER_H" [size]="16" />
-          </button>
-          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignBottom()" matTooltip="Aljára igazítás">
-            <lucide-icon [name]="ICONS.ALIGN_END_H" [size]="16" />
-          </button>
-
-          <div class="layout-toolbar__divider"></div>
-
-          <!-- Dokumentum középre -->
-          <button class="toolbar-btn"
-            (click)="actions.centerOnDocument()" matTooltip="Dokumentum középre">
-            <lucide-icon [name]="ICONS.MOVE" [size]="16" />
-          </button>
-
-          <div class="layout-toolbar__divider"></div>
-
           <!-- Fotók behelyezése a PSD-be -->
           <button class="toolbar-btn toolbar-btn--place-photos" [disabled]="placingPhotos()"
             (click)="onPlacePhotos()" matTooltip="Fotók behelyezése a PSD-be">
@@ -152,7 +108,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             (click)="onUnlinkLayers()" matTooltip="Linkelés megszüntetése a PSD-ben">
             <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
           </button>
-
         }
       </div>
 
@@ -200,53 +155,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
 
           @if (snapshots().length === 0) {
             <div class="source-picker__empty">Nincs elérhető pillanatkép</div>
-          }
-        </div>
-      }
-
-      <!-- Dropdown: elosztás + sorok/oszlopok/rács (toolbar szintjén, overflow miatt) -->
-      @if (state.hasSelection()) {
-        <div class="toolbar-dropdown">
-          <button class="toolbar-btn" (click)="moreOpen.set(!moreOpen())"
-            matTooltip="Elosztás és rendezés">
-            <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
-            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="12" />
-          </button>
-          @if (moreOpen()) {
-            <div class="toolbar-dropdown__panel" (click)="moreOpen.set(false)">
-              <button class="toolbar-dropdown__item"
-                [disabled]="state.selectionCount() < 3"
-                (click)="actions.distributeHorizontal()">
-                <lucide-icon [name]="ICONS.ALIGN_H_DISTRIBUTE" [size]="16" />
-                Vízszintes elosztás
-              </button>
-              <button class="toolbar-dropdown__item"
-                [disabled]="state.selectionCount() < 3"
-                (click)="actions.distributeVertical()">
-                <lucide-icon [name]="ICONS.ALIGN_V_DISTRIBUTE" [size]="16" />
-                Függőleges elosztás
-              </button>
-              <div class="toolbar-dropdown__sep"></div>
-              <button class="toolbar-dropdown__item"
-                [disabled]="state.selectionCount() < 2"
-                (click)="actions.alignRows()">
-                <lucide-icon [name]="ICONS.ROWS_3" [size]="16" />
-                Sorok igazítása
-              </button>
-              <button class="toolbar-dropdown__item"
-                [disabled]="state.selectionCount() < 2"
-                (click)="actions.alignColumns()">
-                <lucide-icon [name]="ICONS.COLUMNS_3" [size]="16" />
-                Oszlopok igazítása
-              </button>
-              <div class="toolbar-dropdown__sep"></div>
-              <button class="toolbar-dropdown__item"
-                [disabled]="state.selectionCount() < 2"
-                (click)="actions.arrangeToGrid()">
-                <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
-                Rácsba rendezés
-              </button>
-            </div>
           }
         </div>
       }
@@ -505,21 +413,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       flex-shrink: 0;
     }
 
-    .layout-toolbar__selection {
-      font-size: 0.75rem;
-      color: #a78bfa;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .layout-toolbar__divider {
-      width: 1px;
-      height: 18px;
-      background: rgba(255, 255, 255, 0.1);
-      margin: 0 2px;
-      flex-shrink: 0;
-    }
-
     .layout-toolbar__right {
       display: flex;
       align-items: center;
@@ -598,56 +491,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       }
     }
 
-    /* Dropdown menü */
-    .toolbar-dropdown {
-      position: relative;
-    }
-
-    .toolbar-dropdown__panel {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      margin-top: 4px;
-      background: #2a2a4a;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      padding: 4px;
-      min-width: 200px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      z-index: 100;
-    }
-
-    .toolbar-dropdown__item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      background: transparent;
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.8rem;
-      cursor: pointer;
-      text-align: left;
-
-      &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.1);
-        color: #ffffff;
-      }
-
-      &:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-      }
-    }
-
-    .toolbar-dropdown__sep {
-      height: 1px;
-      background: rgba(255, 255, 255, 0.08);
-      margin: 4px 8px;
-    }
-
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -657,14 +500,12 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
 })
 export class LayoutToolbarComponent {
   readonly state = inject(LayoutDesignerStateService);
-  readonly actions = inject(LayoutDesignerActionsService);
   readonly gridService = inject(LayoutDesignerGridService);
   protected readonly ICONS = ICONS;
 
   readonly refreshing = input<boolean>(false);
   readonly snapshots = input<SnapshotListItem[]>([]);
   readonly switchingSnapshot = input<boolean>(false);
-  readonly moreOpen = signal(false);
   readonly pickerOpen = signal(false);
 
   readonly linking = input<boolean>(false);

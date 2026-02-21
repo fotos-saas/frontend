@@ -5,6 +5,7 @@ import {
 import { LayoutDesignerStateService } from '../../layout-designer-state.service';
 import { LayoutLayerComponent } from '../layout-layer/layout-layer.component';
 import { LayoutGridOverlayComponent } from '../layout-grid-overlay/layout-grid-overlay.component';
+import { LayoutFloatingToolbarComponent } from '../layout-floating-toolbar/layout-floating-toolbar.component';
 
 /** Minimális mozgás (px) hogy marquee induljon — nem indul el véletlenül */
 const MARQUEE_THRESHOLD = 3;
@@ -17,7 +18,7 @@ const MARQUEE_THRESHOLD = 3;
 @Component({
   selector: 'app-layout-canvas',
   standalone: true,
-  imports: [LayoutLayerComponent, LayoutGridOverlayComponent],
+  imports: [LayoutLayerComponent, LayoutGridOverlayComponent, LayoutFloatingToolbarComponent],
   template: `
     <div
       class="layout-canvas-wrapper"
@@ -49,6 +50,8 @@ const MARQUEE_THRESHOLD = 3;
           [style.height.px]="rect.height"
         ></div>
       }
+
+      <app-layout-floating-toolbar />
     </div>
   `,
   styles: [`

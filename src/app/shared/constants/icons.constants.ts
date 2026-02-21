@@ -246,6 +246,7 @@ export const ICONS = {
   LINK: 'link',
   UNLINK: 'unlink',
   IMAGE: 'image',
+  IMAGE_DOWN: 'image-down',
   EXPAND: 'expand',
   FOLDER_PLUS: 'folder-plus',
   LAYOUT_TEMPLATE: 'layout-template',

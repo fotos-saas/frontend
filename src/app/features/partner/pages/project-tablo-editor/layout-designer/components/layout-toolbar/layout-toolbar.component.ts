@@ -140,8 +140,22 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         </div>
       }
 
-      <!-- Jobb: frissítés + mentés + bezárás -->
+      <!-- Jobb: szinkronizálás + frissítés + mentés + bezárás -->
       <div class="layout-toolbar__right">
+        <button
+          class="toolbar-btn toolbar-btn--sync"
+          [disabled]="syncing()"
+          [class.is-syncing]="syncing()"
+          (click)="syncClicked.emit()"
+          matTooltip="Fotók szinkronizálása a Photoshopba"
+        >
+          <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="16" />
+          @if (!syncing()) {
+            <span>Szinkron</span>
+          } @else {
+            <span>Szinkronizálás...</span>
+          }
+        </button>
         <button
           class="toolbar-btn toolbar-btn--refresh"
           [disabled]="refreshing()"
@@ -445,6 +459,15 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         letter-spacing: 0.03em;
       }
 
+      &--sync {
+        padding: 0 10px;
+        background: rgba(52, 211, 153, 0.15);
+        color: #34d399;
+        &:hover:not(:disabled) { background: rgba(52, 211, 153, 0.25); color: #6ee7b7; }
+        &:disabled { opacity: 0.4; }
+        &.is-syncing lucide-icon { animation: spin 1s linear infinite; }
+      }
+
       &--refresh {
         padding: 0 10px;
         &:hover:not(:disabled) { color: #a78bfa; }
@@ -478,6 +501,7 @@ export class LayoutToolbarComponent {
   protected readonly ICONS = ICONS;
 
   readonly refreshing = input<boolean>(false);
+  readonly syncing = input<boolean>(false);
   readonly snapshots = input<SnapshotListItem[]>([]);
   readonly switchingSnapshot = input<boolean>(false);
   readonly pickerOpen = signal(false);
@@ -485,6 +509,7 @@ export class LayoutToolbarComponent {
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
+  readonly syncClicked = output<void>();
   readonly snapshotSelected = output<SnapshotListItem>();
 
   formatDate(isoDate: string | null): string {

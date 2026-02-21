@@ -64,9 +64,11 @@ import { firstValueFrom } from 'rxjs';
       } @else {
         <app-layout-toolbar
           [refreshing]="refreshing()"
+          [syncing]="syncingPhotos()"
           [snapshots]="snapshots()"
           [switchingSnapshot]="switchingSnapshot()"
           (refreshClicked)="refresh()"
+          (syncClicked)="syncAllPhotos()"
           (snapshotSelected)="switchSnapshot($event)"
           (saveClicked)="save()"
           (closeClicked)="close()"
@@ -233,6 +235,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly switchingSnapshot = signal(false);
   readonly linking = signal(false);
   readonly placingPhotos = signal(false);
+  readonly syncingPhotos = signal(false);
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
@@ -419,6 +422,27 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       await this.ps.placePhotos(layers);
     } finally {
       this.placingPhotos.set(false);
+    }
+  }
+
+  /** Összes fotó szinkronizálása a Photoshopba — minden személy akinek van fotója */
+  async syncAllPhotos(): Promise<void> {
+    const layers = this.state.layers();
+    const photosToSync: Array<{ layerName: string; photoUrl: string }> = [];
+
+    for (const l of layers) {
+      if ((l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch?.photoUrl) {
+        photosToSync.push({ layerName: l.layerName, photoUrl: l.personMatch.photoUrl });
+      }
+    }
+
+    if (photosToSync.length === 0) return;
+
+    this.syncingPhotos.set(true);
+    try {
+      await this.ps.placePhotos(photosToSync);
+    } finally {
+      this.syncingPhotos.set(false);
     }
   }
 

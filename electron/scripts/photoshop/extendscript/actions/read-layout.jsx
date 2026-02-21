@@ -50,22 +50,19 @@ function _getLayerDescriptor(layer) {
     bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
   };
 
-  // Smart Object allapot: documentID kiolvasas (osszekapcsolt SO-k azonositasa)
-  var soDocId = null; // null = nem SO
-  var soKey = stringIDToTypeID("smartObject");
-  if (desc.hasKey(soKey)) {
+  // Linked Layers: a linkedLayerIDs lista nem ures → layer ossze van linkelve masokkal
+  var linked = false;
+  var linkedKey = stringIDToTypeID("linkedLayerIDs");
+  if (desc.hasKey(linkedKey)) {
     try {
-      var soObj = desc.getObjectValue(soKey);
-      var docIdKey = stringIDToTypeID("documentID");
-      if (soObj.hasKey(docIdKey)) {
-        soDocId = soObj.getString(docIdKey);
-      }
-    } catch (soErr) {
-      // nem SO vagy kiolvasasi hiba
+      var idList = desc.getList(linkedKey);
+      linked = (idList.count > 0);
+    } catch (e) {
+      // nem lista vagy kiolvasasi hiba
     }
   }
 
-  return { bounds: bounds, soDocId: soDocId };
+  return { bounds: bounds, linked: linked };
 }
 
 // --- JSON string epites (ES3 — nincs JSON.stringify!) ---
@@ -131,9 +128,9 @@ function _readAllLayers(container, pathSoFar, result) {
           kind: "normal"
         };
 
-        // Smart Object documentID (osszekapcsolt SO-k azonositasahoz)
-        if (info.soDocId !== null) {
-          layerData.soDocId = info.soDocId;
+        // Linked Layers jelzes (lánc ikon a PS Layers panelen)
+        if (info.linked) {
+          layerData.linked = true;
         }
 
         // Text layerek extra adatai

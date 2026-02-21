@@ -95,18 +95,9 @@ export class LayoutDesignerStateService {
   loadSnapshot(data: { document: DesignerDocument; layers: SnapshotLayer[] }, persons: TabloPersonItem[]): void {
     this.document.set(data.document);
 
-    // Összekapcsolt SO-k: >1 layer ugyanazzal a soDocId-val
-    const docIdCount = new Map<string, number>();
-    for (const layer of data.layers) {
-      if (layer.soDocId) {
-        docIdCount.set(layer.soDocId, (docIdCount.get(layer.soDocId) || 0) + 1);
-      }
-    }
-
     const designerLayers: DesignerLayer[] = data.layers.map(layer => {
       const category = this.categorizeLayer(layer);
       const personMatch = this.matchPerson(layer, category, persons);
-      const linked = layer.soDocId ? (docIdCount.get(layer.soDocId) || 0) > 1 : undefined;
 
       return {
         ...layer,
@@ -114,7 +105,6 @@ export class LayoutDesignerStateService {
         personMatch: personMatch ?? undefined,
         editedX: null,
         editedY: null,
-        linked,
       };
     });
 

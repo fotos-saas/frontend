@@ -19,62 +19,62 @@ export class LayoutDesignerActionsService {
 
   /** Balra igazítás: X → min(X) */
   alignLeft(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-    const minX = Math.min(...selected.map(l => l.editedX ?? l.x));
-    this.applyAlignment(selected, (l) => ({
+    const images = this.getSelectedImages();
+    if (images.length < 2) return;
+    const minX = Math.min(...images.map(l => l.editedX ?? l.x));
+    this.applyAlignment(images, (l) => ({
       x: minX, y: l.editedY ?? l.y,
     }));
   }
 
   /** Jobbra igazítás: jobb szél → max(X + width) */
   alignRight(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-    const maxRight = Math.max(...selected.map(l => (l.editedX ?? l.x) + l.width));
-    this.applyAlignment(selected, (l) => ({
+    const images = this.getSelectedImages();
+    if (images.length < 2) return;
+    const maxRight = Math.max(...images.map(l => (l.editedX ?? l.x) + l.width));
+    this.applyAlignment(images, (l) => ({
       x: maxRight - l.width, y: l.editedY ?? l.y,
     }));
   }
 
   /** Tetejére igazítás: Y → min(Y) */
   alignTop(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-    const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
-    this.applyAlignment(selected, (l) => ({
+    const images = this.getSelectedImages();
+    if (images.length < 2) return;
+    const minY = Math.min(...images.map(l => l.editedY ?? l.y));
+    this.applyAlignment(images, (l) => ({
       x: l.editedX ?? l.x, y: minY,
     }));
   }
 
   /** Aljára igazítás: alsó szél → max(Y + height) */
   alignBottom(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-    const maxBottom = Math.max(...selected.map(l => (l.editedY ?? l.y) + l.height));
-    this.applyAlignment(selected, (l) => ({
+    const images = this.getSelectedImages();
+    if (images.length < 2) return;
+    const maxBottom = Math.max(...images.map(l => (l.editedY ?? l.y) + l.height));
+    this.applyAlignment(images, (l) => ({
       x: l.editedX ?? l.x, y: maxBottom - l.height,
     }));
   }
 
   /** Vízszintes középre: X középpont → átlag(X középpont) */
   alignCenterHorizontal(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-    const avgCx = selected.reduce((s, l) =>
-      s + (l.editedX ?? l.x) + l.width / 2, 0) / selected.length;
-    this.applyAlignment(selected, (l) => ({
+    const images = this.getSelectedImages();
+    if (images.length < 2) return;
+    const avgCx = images.reduce((s, l) =>
+      s + (l.editedX ?? l.x) + l.width / 2, 0) / images.length;
+    this.applyAlignment(images, (l) => ({
       x: Math.round(avgCx - l.width / 2), y: l.editedY ?? l.y,
     }));
   }
 
   /** Függőleges középre: Y középpont → átlag(Y középpont) */
   alignCenterVertical(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-    const avgCy = selected.reduce((s, l) =>
-      s + (l.editedY ?? l.y) + l.height / 2, 0) / selected.length;
-    this.applyAlignment(selected, (l) => ({
+    const images = this.getSelectedImages();
+    if (images.length < 2) return;
+    const avgCy = images.reduce((s, l) =>
+      s + (l.editedY ?? l.y) + l.height / 2, 0) / images.length;
+    this.applyAlignment(images, (l) => ({
       x: l.editedX ?? l.x, y: Math.round(avgCy - l.height / 2),
     }));
   }
@@ -115,30 +115,30 @@ export class LayoutDesignerActionsService {
 
   /** Vízszintes elosztás: egyenletes X gap (≥3 elem) */
   distributeHorizontal(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 3) return;
-    const sorted = [...selected].sort((a, b) => (a.editedX ?? a.x) - (b.editedX ?? b.x));
+    const images = this.getSelectedImages();
+    if (images.length < 3) return;
+    const sorted = [...images].sort((a, b) => (a.editedX ?? a.x) - (b.editedX ?? b.x));
     const firstX = sorted[0].editedX ?? sorted[0].x;
     const lastX = sorted[sorted.length - 1].editedX ?? sorted[sorted.length - 1].x;
     const step = (lastX - firstX) / (sorted.length - 1);
     const posMap = new Map<number, number>();
     sorted.forEach((l, i) => posMap.set(l.layerId, Math.round(firstX + step * i)));
-    this.applyAlignment(selected, (l) => ({
+    this.applyAlignment(images, (l) => ({
       x: posMap.get(l.layerId) ?? (l.editedX ?? l.x), y: l.editedY ?? l.y,
     }));
   }
 
   /** Függőleges elosztás: egyenletes Y gap (≥3 elem) */
   distributeVertical(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 3) return;
-    const sorted = [...selected].sort((a, b) => (a.editedY ?? a.y) - (b.editedY ?? b.y));
+    const images = this.getSelectedImages();
+    if (images.length < 3) return;
+    const sorted = [...images].sort((a, b) => (a.editedY ?? a.y) - (b.editedY ?? b.y));
     const firstY = sorted[0].editedY ?? sorted[0].y;
     const lastY = sorted[sorted.length - 1].editedY ?? sorted[sorted.length - 1].y;
     const step = (lastY - firstY) / (sorted.length - 1);
     const posMap = new Map<number, number>();
     sorted.forEach((l, i) => posMap.set(l.layerId, Math.round(firstY + step * i)));
-    this.applyAlignment(selected, (l) => ({
+    this.applyAlignment(images, (l) => ({
       x: l.editedX ?? l.x, y: posMap.get(l.layerId) ?? (l.editedY ?? l.y),
     }));
   }
@@ -195,9 +195,9 @@ export class LayoutDesignerActionsService {
 
   /** Sorok automatikus igazítása: hasonló Y-ú elemek → min(Y) */
   alignRows(): void {
-    const selected = this.state.selectedLayers();
-    if (selected.length < 2) return;
-    const rows = this.groupIntoRows(selected);
+    const images = this.getSelectedImages();
+    if (images.length < 2) return;
+    const rows = this.groupIntoRows(images);
     const rowYMap = new Map<number, number>();
     for (const row of rows) {
       if (row.length < 2) continue;
@@ -205,7 +205,7 @@ export class LayoutDesignerActionsService {
       for (const l of row) rowYMap.set(l.layerId, minY);
     }
     if (rowYMap.size === 0) return;
-    const affected = selected.filter(l => rowYMap.has(l.layerId));
+    const affected = images.filter(l => rowYMap.has(l.layerId));
     this.applyAlignment(affected, (l) => ({
       x: l.editedX ?? l.x, y: rowYMap.get(l.layerId) ?? (l.editedY ?? l.y),
     }));
@@ -257,6 +257,13 @@ export class LayoutDesignerActionsService {
       x: posMap.get(l.layerId) ?? (l.editedX ?? l.x),
       y: l.editedY ?? l.y,
     }));
+  }
+
+  /** Kijelölt image/fixed layerek (name layerek nélkül) */
+  private getSelectedImages(): DesignerLayer[] {
+    return this.state.selectedLayers().filter(l =>
+      l.category !== 'student-name' && l.category !== 'teacher-name',
+    );
   }
 
   /**

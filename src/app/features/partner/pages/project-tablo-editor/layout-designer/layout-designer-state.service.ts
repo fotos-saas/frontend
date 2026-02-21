@@ -189,44 +189,40 @@ export class LayoutDesignerStateService {
 
   /** Layerek frissítése (igazítás utáni állapot) — automatikus név igazítással */
   updateLayers(updatedLayers: DesignerLayer[]): void {
-    this.realignNamesToImages(updatedLayers);
-    this.layers.set(updatedLayers);
-    this.history.pushState(updatedLayers);
+    const aligned = this.realignNamesToImages(updatedLayers);
+    this.layers.set(aligned);
+    this.history.pushState(aligned);
   }
 
   /**
    * Name layerek pozícióinak igazítása a párosított image alá.
    * MINDEN pozíció-módosítás után automatikusan fut az updateLayers()-en keresztül.
-   * Mutálja az átadott tömb elemeit (performance).
+   * Klónozza a name layereket (új objektum referencia) → OnPush change detection működik.
    */
-  realignNamesToImages(layers: DesignerLayer[]): void {
+  realignNamesToImages(layers: DesignerLayer[]): DesignerLayer[] {
     const GAP = 8;
     const pairs: Array<[LayerCategory, LayerCategory]> = [
       ['student-image', 'student-name'],
       ['teacher-image', 'teacher-name'],
     ];
 
-    for (const [imageCat, textCat] of pairs) {
-      const imageMap = new Map<number, DesignerLayer>();
-      for (const l of layers) {
-        if (l.category === imageCat && l.personMatch) {
-          imageMap.set(l.personMatch.id, l);
-        }
-      }
+    return layers.map(l => {
+      for (const [imageCat, textCat] of pairs) {
+        if (l.category !== textCat || !l.personMatch) continue;
 
-      for (const textLayer of layers) {
-        if (textLayer.category !== textCat || !textLayer.personMatch) continue;
-
-        const imageLayer = imageMap.get(textLayer.personMatch.id);
+        // Párosított image keresése
+        const imageLayer = layers.find(
+          img => img.category === imageCat && img.personMatch?.id === l.personMatch!.id,
+        );
         if (!imageLayer) continue;
 
         const imgX = imageLayer.editedX ?? imageLayer.x;
         const imgY = imageLayer.editedY ?? imageLayer.y;
 
-        textLayer.editedX = imgX;
-        textLayer.editedY = imgY + imageLayer.height + GAP;
+        return { ...l, editedX: imgX, editedY: imgY + imageLayer.height + GAP };
       }
-    }
+      return l;
+    });
   }
 
   /** Van-e visszavonható lépés */

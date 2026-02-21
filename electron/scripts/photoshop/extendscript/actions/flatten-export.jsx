@@ -32,7 +32,6 @@ function _doFlattenExport() {
   var args = parseArgs();
   var quality = 90;
   var outputPath = null;
-  var keepProfile = false;
 
   // JSON parameterek olvasasa (opcionalis — ha nincs, auto temp path)
   if (args.dataFilePath) {
@@ -40,7 +39,6 @@ function _doFlattenExport() {
       var data = readJsonFile(args.dataFilePath);
       if (data.quality) quality = data.quality;
       if (data.outputPath) outputPath = data.outputPath;
-      if (data.keepProfile) keepProfile = true;
     } catch (e) {
       log("[JSX] JSON olvasas kihagyva: " + e.message);
     }
@@ -63,19 +61,7 @@ function _doFlattenExport() {
   dupDoc.flatten();
   log("[JSX] Flatten kesz");
 
-  // 3. Szinprofil konvertalas sRGB-re (webes hasznalatra) — CSAK minta eseten
-  if (!keepProfile) {
-    try {
-      dupDoc.convertProfile("sRGB IEC61966-2.1", Intent.RELATIVECOLORIMETRIC, true, true);
-      log("[JSX] sRGB konverzio kesz");
-    } catch (e) {
-      log("[JSX] sRGB konverzio kihagyva: " + e.message);
-    }
-  } else {
-    log("[JSX] Eredeti szinprofil megtartva (keepProfile)");
-  }
-
-  // 4. SaveAs JPEG (quality: Photoshop 0-12 skala, nem 0-100!)
+  // 3. SaveAs JPEG (quality: Photoshop 0-12 skala, nem 0-100!)
   var jpegOptions = new JPEGSaveOptions();
   jpegOptions.quality = (quality > 12) ? Math.round(quality * 12 / 100) : quality;
   jpegOptions.formatOptions = FormatOptions.PROGRESSIVE;

@@ -1484,7 +1484,7 @@ export class PhotoshopService {
       // 1. Flatten export JSX futtatás → temp JPG (eredeti színprofil megtartva)
       const flattenResult = await this.runJsx({
         scriptName: 'actions/flatten-export.jsx',
-        jsonData: { quality: 12, keepProfile: true },
+        jsonData: { quality: 12 },
       });
 
       if (!flattenResult.success) {
@@ -1547,7 +1547,7 @@ export class PhotoshopService {
       // 1. Flatten export (eredeti színprofil megtartva)
       const flattenResult = await this.runJsx({
         scriptName: 'actions/flatten-export.jsx',
-        jsonData: { quality: 12, keepProfile: true },
+        jsonData: { quality: 12 },
       });
 
       if (!flattenResult.success) {

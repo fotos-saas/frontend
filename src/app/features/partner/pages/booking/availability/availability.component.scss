@@ -1,4 +1,4 @@
-@use '../../../../../../shared/styles/list-page' as list;
+@use '../../../../../shared/styles/list-page' as list;
 
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
 .header-content h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 4px; }

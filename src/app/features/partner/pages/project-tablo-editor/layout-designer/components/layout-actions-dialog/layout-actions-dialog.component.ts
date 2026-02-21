@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { LoggerService } from '@core/services/logger.service';
 import { PhotoshopService } from '../../../../../services/photoshop.service';
 import { ActionPersonItem } from './layout-actions.types';
 import {
@@ -22,6 +23,7 @@ import {
 export class LayoutActionsDialogComponent {
   protected readonly ICONS = ICONS;
   private readonly ps = inject(PhotoshopService);
+  private readonly logger = inject(LoggerService);
 
   readonly persons = input.required<ActionPersonItem[]>();
   readonly preSelectedPersonIds = input<number[]>([]);
@@ -140,9 +142,11 @@ export class LayoutActionsDialogComponent {
     const selectedPersons = this.persons().filter(p => selectedIds.has(p.id));
     if (selectedPersons.length === 0) return;
 
-    const sourceFiles = formData.files.map(f => ({
-      filePath: (f as File & { path?: string }).path || f.name,
-    }));
+    const sourceFiles = formData.files.map(f => {
+      const elPath = (f as File & { path?: string }).path;
+      this.logger.info('File:', f.name, 'path:', elPath, 'size:', f.size);
+      return { filePath: elPath || f.name };
+    });
 
     // Shuffle indexek
     const indices = Array.from({ length: sourceFiles.length }, (_, i) => i);

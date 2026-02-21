@@ -1353,10 +1353,19 @@ export class PhotoshopService {
     if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };
 
     try {
+      this.logger.info('addGroupLayers params:', {
+        groupName: params.groupName,
+        sourceFiles: params.sourceFiles,
+        layerCount: params.layers.length,
+      });
       const result = await this.runJsx({
         scriptName: 'actions/add-group-layers.jsx',
         jsonData: params,
       });
+      this.logger.info('addGroupLayers JSX output:', result.output);
+      if (!result.success) {
+        this.logger.error('addGroupLayers JSX error:', result.error);
+      }
       return { success: result.success, error: result.error };
     } catch (err) {
       this.logger.error('JSX addGroupLayers hiba', err);

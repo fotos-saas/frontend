@@ -146,6 +146,14 @@ export function registerFinalizerHandlers(): void {
       let uploadedCount = 0;
       let uploadError: string | undefined;
 
+      if (!params.apiBaseUrl) {
+        uploadError = 'Nincs API URL beállítva';
+        log.warn('Véglegesítés: nincs apiBaseUrl');
+      } else if (!params.authToken) {
+        uploadError = 'Nincs bejelentkezési token (marketer_token)';
+        log.warn('Véglegesítés: nincs authToken');
+      }
+
       if (params.apiBaseUrl && params.authToken) {
         const uploadResult = await uploadFinalToBackend(
           resolvedPath,

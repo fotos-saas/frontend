@@ -549,8 +549,10 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.sampleError.set(null);
     try {
       const result = await this.ps.generateFinal(this.projectId(), this.projectName());
-      if (result.success) {
-        this.sampleSuccess.set(`Véglegesítés feltöltve (${result.uploadedCount || 0} fájl)`);
+      if (result.success && result.uploadedCount && result.uploadedCount > 0) {
+        this.sampleSuccess.set('Véglegesítés sikeresen feltöltve');
+      } else if (result.success && (!result.uploadedCount || result.uploadedCount === 0)) {
+        this.sampleError.set(result.error || 'Lokálisan mentve, de a feltöltés nem sikerült');
       } else {
         this.sampleError.set(result.error || 'Véglegesítés sikertelen');
       }

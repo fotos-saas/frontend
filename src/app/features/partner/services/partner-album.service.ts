@@ -252,7 +252,7 @@ export class PartnerAlbumService {
   /**
    * Képek hozzárendelése személyekhez (véglegesítés)
    */
-  assignPhotos(projectId: number, assignments: PhotoAssignment[]): Observable<{
+  assignPhotos(projectId: number, assignments: PhotoAssignment[], setOverride = false): Observable<{
     success: boolean;
     assignedCount: number;
     message: string;
@@ -261,7 +261,7 @@ export class PartnerAlbumService {
       success: boolean;
       assignedCount: number;
       message: string;
-    }>(`${this.baseUrl}/projects/${projectId}/photos/assign`, { assignments });
+    }>(`${this.baseUrl}/projects/${projectId}/photos/assign`, { assignments, setOverride });
   }
 
   /**

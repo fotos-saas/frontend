@@ -6,7 +6,6 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper';
 import { DropZoneComponent } from '@shared/components/drop-zone/drop-zone.component';
 import { PartnerAlbumService } from '../../../../../services/partner-album.service';
-import { PartnerProjectService } from '../../../../../services/partner-project.service';
 import { firstValueFrom } from 'rxjs';
 import type { AlbumType, MatchResult, PhotoAssignment, UploadedPhoto } from '../../../../../models/partner.models';
 import type { PhotoUploadPerson } from '../layout-photo-upload-dialog/layout-photo-upload-dialog.component';
@@ -34,7 +33,6 @@ interface MatchRow {
 })
 export class LayoutPhotoBulkDialogComponent {
   private readonly albumService = inject(PartnerAlbumService);
-  private readonly projectService = inject(PartnerProjectService);
   protected readonly ICONS = ICONS;
 
   readonly persons = input.required<PhotoUploadPerson[]>();
@@ -165,19 +163,10 @@ export class LayoutPhotoBulkDialogComponent {
         mediaId: r.mediaId!,
       }));
 
-      // Hozzárendelés
+      // Hozzárendelés (override mód esetén a backend is beállítja az override_photo_id-t)
       const result = await firstValueFrom(
-        this.albumService.assignPhotos(this.projectId(), assignments),
+        this.albumService.assignPhotos(this.projectId(), assignments, this.uploadMode() === 'override'),
       );
-
-      // Ha override mód, minden párosítotthoz override-ot is beállítunk
-      if (this.uploadMode() === 'override') {
-        for (const row of rows) {
-          await firstValueFrom(
-            this.projectService.overridePersonPhoto(this.projectId(), row.person.id, row.mediaId!),
-          );
-        }
-      }
 
       this.photosAssigned.emit({ assignedCount: result.assignedCount });
     } catch {

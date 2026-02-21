@@ -24,6 +24,13 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           </span>
         }
 
+        @if (state.sourceLabel()) {
+          <span class="layout-toolbar__source-label"
+            [class.layout-toolbar__source-label--live]="state.sourceLabel() === 'Friss PSD beolvasás'">
+            {{ state.sourceLabel() }}
+          </span>
+        }
+
         <div class="layout-toolbar__separator"></div>
 
         <button
@@ -211,6 +218,24 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       color: rgba(255, 255, 255, 0.6);
       font-weight: 500;
       white-space: nowrap;
+    }
+
+    .layout-toolbar__source-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+
+      &--live {
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.12);
+      }
     }
 
     .layout-toolbar__separator {

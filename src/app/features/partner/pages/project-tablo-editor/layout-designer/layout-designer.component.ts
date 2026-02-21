@@ -253,6 +253,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       }
 
       // 4. State közvetlen frissítés a friss adatokkal
+      this.state.sourceLabel.set('Friss PSD beolvasás');
       this.state.loadSnapshot(
         { document: readResult.data.document, layers: readResult.data.layers },
         this.persons(),
@@ -283,6 +284,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
         return;
       }
 
+      const snapshotName = data['snapshotName'] as string | undefined;
+      this.state.sourceLabel.set(snapshotName || 'Pillanatkép');
       this.state.loadSnapshot({ document: doc, layers }, this.persons());
       this.loading.set(false);
     } catch {

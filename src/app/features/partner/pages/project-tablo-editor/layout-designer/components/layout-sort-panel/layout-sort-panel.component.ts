@@ -87,7 +87,7 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
                 <span>Generálás...</span>
               } @else {
                 <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
-                <span>Minta készítés</span>
+                <span>Minta</span>
               }
             </button>
             <button class="sidebar__split-toggle"

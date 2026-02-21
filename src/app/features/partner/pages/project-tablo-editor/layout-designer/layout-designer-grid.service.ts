@@ -82,7 +82,6 @@ export class LayoutDesignerGridService {
    */
   snapAllToGrid(): void {
     const layers = this.state.layers();
-    const GAP = 8;
 
     // Image layerek kategóriánként
     const studentImages = layers.filter(l => l.category === 'student-image');
@@ -96,36 +95,10 @@ export class LayoutDesignerGridService {
 
     if (updates.size === 0) return;
 
-    // Image map: personMatch.id → snap-elt pozíció
-    const imageByPerson = new Map<string, { personId: number; x: number; y: number; height: number }>();
-    for (const l of layers) {
-      const u = updates.get(l.layerId);
-      if (u && l.personMatch) {
-        const catPrefix = l.category === 'student-image' ? 's' : 't';
-        imageByPerson.set(`${catPrefix}:${l.personMatch.id}`, {
-          personId: l.personMatch.id,
-          x: u.x,
-          y: u.y,
-          height: l.height,
-        });
-      }
-    }
-
-    // Összes layer frissítés egy menetben
+    // Csak image layerek frissítése — a name-eket az updateLayers automatikusan igazítja
     const updatedLayers = layers.map(l => {
-      // Image snap
       const imgUpdate = updates.get(l.layerId);
       if (imgUpdate) return { ...l, editedX: imgUpdate.x, editedY: imgUpdate.y };
-
-      // Name igazítás a snap-elt image alá
-      if (l.personMatch && (l.category === 'student-name' || l.category === 'teacher-name')) {
-        const catPrefix = l.category === 'student-name' ? 's' : 't';
-        const img = imageByPerson.get(`${catPrefix}:${l.personMatch.id}`);
-        if (img) {
-          return { ...l, editedX: img.x, editedY: img.y + img.height + GAP };
-        }
-      }
-
       return l;
     });
 

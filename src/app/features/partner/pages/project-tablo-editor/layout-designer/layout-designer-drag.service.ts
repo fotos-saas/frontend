@@ -2,7 +2,7 @@ import { Injectable, inject, signal, NgZone } from '@angular/core';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
 import { LayoutDesignerGridService } from './layout-designer-grid.service';
 import { LayoutDesignerSwapService } from './layout-designer-swap.service';
-import { DesignerLayer, DragState } from './layout-designer.types';
+import { DragState } from './layout-designer.types';
 import { expandWithCoupledLayers } from './layout-designer.utils';
 
 /** Minimális pixel mozgás, ami drag-nek számít (nem click) */
@@ -191,16 +191,18 @@ export class LayoutDesignerDragService {
   }
 
   /**
-   * Snap-to-grid mozgatás: az image layereket a legközelebbi grid cellába snap-eli,
-   * majd a coupled name layereket a state service igazítja.
+   * Snap-to-grid mozgatás: az image layereket a legközelebbi grid cellába snap-eli.
+   * A name layereket az updateLayers() automatikusan igazítja a képek alá.
    */
   private snapAndMove(deltaXPsd: number, deltaYPsd: number): void {
     const layers = this.state.layers();
     const ids = this.draggedIds;
 
-    // Először a normál delta-t alkalmazzuk, majd az image layereket snap-eljük
     const updatedLayers = layers.map(l => {
       if (!ids.has(l.layerId)) return l;
+
+      // Name layereket kihagyjuk — realignNamesToImages kezeli
+      if (l.category === 'student-name' || l.category === 'teacher-name') return l;
 
       const currentX = l.editedX ?? l.x;
       const currentY = l.editedY ?? l.y;
@@ -219,41 +221,7 @@ export class LayoutDesignerDragService {
       return { ...l, editedX: newX, editedY: newY };
     });
 
-    // Name layerek igazítása a snap-elt image alá
-    this.alignNamesToImages(updatedLayers);
     this.state.updateLayers(updatedLayers);
-  }
-
-  /** Name layerek X/Y igazítása a coupled image layerhez */
-  private alignNamesToImages(layers: DesignerLayer[]): void {
-    const GAP = 8;
-    const pairs: Array<[string, string]> = [
-      ['student-image', 'student-name'],
-      ['teacher-image', 'teacher-name'],
-    ];
-
-    for (const [imageCat, nameCat] of pairs) {
-      const imageMap = new Map<number, typeof layers[0]>();
-      for (const l of layers) {
-        if (l.category === imageCat && l.personMatch) {
-          imageMap.set(l.personMatch.id, l);
-        }
-      }
-
-      for (const nameLayer of layers) {
-        if (nameLayer.category !== nameCat || !nameLayer.personMatch) continue;
-        if (!this.draggedIds.has(nameLayer.layerId)) continue;
-
-        const imageLayer = imageMap.get(nameLayer.personMatch.id);
-        if (!imageLayer) continue;
-
-        const imgX = imageLayer.editedX ?? imageLayer.x;
-        const imgY = imageLayer.editedY ?? imageLayer.y;
-
-        nameLayer.editedX = imgX;
-        nameLayer.editedY = imgY + imageLayer.height + GAP;
-      }
-    }
   }
 
   private cleanup(): void {

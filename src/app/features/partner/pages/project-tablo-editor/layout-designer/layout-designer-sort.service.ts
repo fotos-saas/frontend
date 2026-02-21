@@ -163,42 +163,18 @@ export class LayoutDesignerSortService {
       }
     }
 
-    // 4. Person ID → coupled név layer map (kép melletti név keresése)
+    // 4. orderedNames[i] → slots[i] pozíció hozzárendelés (csak image layerek)
     const allLayers = this.state.layers();
-    const personIdToNameLayer = new Map<number, DesignerLayer>();
-    for (const l of allLayers) {
-      if ((l.category === 'student-name' || l.category === 'teacher-name') && l.personMatch) {
-        personIdToNameLayer.set(l.personMatch.id, l);
-      }
-    }
-
-    // 5. orderedNames[i] → slots[i] pozíció hozzárendelés
     const updates = new Map<number, { x: number; y: number }>();
 
     for (let i = 0; i < Math.min(orderedNames.length, slots.length); i++) {
       const layer = nameToLayer.get(orderedNames[i]);
       if (!layer) continue;
-
-      const slot = slots[i];
-      const deltaX = slot.x - (layer.editedX ?? layer.x);
-      const deltaY = slot.y - (layer.editedY ?? layer.y);
-
-      // Kép pozíció frissítése
-      updates.set(layer.layerId, { x: slot.x, y: slot.y });
-
-      // Coupled név layer: ugyanazzal a delta-val követi
-      if (layer.personMatch) {
-        const nameLayer = personIdToNameLayer.get(layer.personMatch.id);
-        if (nameLayer) {
-          updates.set(nameLayer.layerId, {
-            x: (nameLayer.editedX ?? nameLayer.x) + deltaX,
-            y: (nameLayer.editedY ?? nameLayer.y) + deltaY,
-          });
-        }
-      }
+      // Kép pozíció frissítése — a name layereket az updateLayers automatikusan igazítja
+      updates.set(layer.layerId, { x: slots[i].x, y: slots[i].y });
     }
 
-    // 6. State frissítés
+    // 5. State frissítés (updateLayers automatikusan realign-olja a neveket)
     this.state.updateLayers(
       allLayers.map(l => {
         const u = updates.get(l.layerId);

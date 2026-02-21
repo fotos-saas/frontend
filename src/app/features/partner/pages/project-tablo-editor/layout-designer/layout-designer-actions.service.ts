@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
 import { LayoutDesignerGridService } from './layout-designer-grid.service';
 import { DesignerLayer } from './layout-designer.types';
-import { expandWithCoupledLayers } from './layout-designer.utils';
 
 /** Sorok Y-threshold: ezen belüli Y-ú elemek egy sorba tartoznak */
 const ROW_THRESHOLD_PX = 20;
@@ -23,7 +22,7 @@ export class LayoutDesignerActionsService {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
     const minX = Math.min(...selected.map(l => l.editedX ?? l.x));
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: minX, y: l.editedY ?? l.y,
     }));
   }
@@ -33,7 +32,7 @@ export class LayoutDesignerActionsService {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
     const maxRight = Math.max(...selected.map(l => (l.editedX ?? l.x) + l.width));
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: maxRight - l.width, y: l.editedY ?? l.y,
     }));
   }
@@ -43,7 +42,7 @@ export class LayoutDesignerActionsService {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
     const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: l.editedX ?? l.x, y: minY,
     }));
   }
@@ -53,7 +52,7 @@ export class LayoutDesignerActionsService {
     const selected = this.state.selectedLayers();
     if (selected.length < 2) return;
     const maxBottom = Math.max(...selected.map(l => (l.editedY ?? l.y) + l.height));
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: l.editedX ?? l.x, y: maxBottom - l.height,
     }));
   }
@@ -64,7 +63,7 @@ export class LayoutDesignerActionsService {
     if (selected.length < 2) return;
     const avgCx = selected.reduce((s, l) =>
       s + (l.editedX ?? l.x) + l.width / 2, 0) / selected.length;
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: Math.round(avgCx - l.width / 2), y: l.editedY ?? l.y,
     }));
   }
@@ -75,12 +74,12 @@ export class LayoutDesignerActionsService {
     if (selected.length < 2) return;
     const avgCy = selected.reduce((s, l) =>
       s + (l.editedY ?? l.y) + l.height / 2, 0) / selected.length;
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: l.editedX ?? l.x, y: Math.round(avgCy - l.height / 2),
     }));
   }
 
-  /** Dokumentum közepére igazítás: a kijelölt elemek bounding box-a a dokumentum közepére kerül */
+  /** Dokumentum közepére igazítás: a kijelölt image-ek bounding box-a a dokumentum közepére kerül */
   centerOnDocument(): void {
     const selected = this.state.selectedLayers();
     if (selected.length === 0) return;
@@ -88,15 +87,19 @@ export class LayoutDesignerActionsService {
     const doc = this.state.document();
     if (!doc) return;
 
-    // Bounding box kiszámítása
-    const minX = Math.min(...selected.map(l => l.editedX ?? l.x));
-    const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
-    const maxX = Math.max(...selected.map(l => (l.editedX ?? l.x) + l.width));
-    const maxY = Math.max(...selected.map(l => (l.editedY ?? l.y) + l.height));
+    // Csak image/fixed layerek alapján számolunk bounding box-ot
+    const images = selected.filter(l =>
+      l.category !== 'student-name' && l.category !== 'teacher-name',
+    );
+    if (images.length === 0) return;
+
+    const minX = Math.min(...images.map(l => l.editedX ?? l.x));
+    const minY = Math.min(...images.map(l => l.editedY ?? l.y));
+    const maxX = Math.max(...images.map(l => (l.editedX ?? l.x) + l.width));
+    const maxY = Math.max(...images.map(l => (l.editedY ?? l.y) + l.height));
     const bbWidth = maxX - minX;
     const bbHeight = maxY - minY;
 
-    // Dokumentum közepe → bounding box közepe
     const targetX = Math.round((doc.widthPx - bbWidth) / 2);
     const targetY = Math.round((doc.heightPx - bbHeight) / 2);
     const deltaX = targetX - minX;
@@ -104,8 +107,7 @@ export class LayoutDesignerActionsService {
 
     if (deltaX === 0 && deltaY === 0) return;
 
-    // Minden kijelölt elemet eltolunk + coupled párokat is
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: (l.editedX ?? l.x) + deltaX,
       y: (l.editedY ?? l.y) + deltaY,
     }));
@@ -121,7 +123,7 @@ export class LayoutDesignerActionsService {
     const step = (lastX - firstX) / (sorted.length - 1);
     const posMap = new Map<number, number>();
     sorted.forEach((l, i) => posMap.set(l.layerId, Math.round(firstX + step * i)));
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: posMap.get(l.layerId) ?? (l.editedX ?? l.x), y: l.editedY ?? l.y,
     }));
   }
@@ -136,7 +138,7 @@ export class LayoutDesignerActionsService {
     const step = (lastY - firstY) / (sorted.length - 1);
     const posMap = new Map<number, number>();
     sorted.forEach((l, i) => posMap.set(l.layerId, Math.round(firstY + step * i)));
-    this.applyAlignmentWithCoupled(selected, (l) => ({
+    this.applyAlignment(selected, (l) => ({
       x: l.editedX ?? l.x, y: posMap.get(l.layerId) ?? (l.editedY ?? l.y),
     }));
   }
@@ -186,60 +188,8 @@ export class LayoutDesignerActionsService {
       });
     }
 
-    this.applyAlignmentWithCoupled(images, (l) =>
+    this.applyAlignment(images, (l) =>
       posMap.get(l.layerId) ?? { x: l.editedX ?? l.x, y: l.editedY ?? l.y },
-    );
-
-    // Nevek újra-igazítása a képek alá (a coupled mozgatás csak deltaX/deltaY-t ad,
-    // de ha a nevek eredetileg nem voltak a képek alatt, az nem elég)
-    this.realignNamesToImages();
-  }
-
-  /**
-   * Nevek újra-igazítása a párosított képek alá.
-   * Minden name layert a hozzá tartozó image layer alá pozícionál.
-   */
-  private realignNamesToImages(): void {
-    const layers = this.state.layers();
-    const GAP = 8;
-    const updates = new Map<number, { x: number; y: number }>();
-
-    const pairs: Array<[string, string]> = [
-      ['student-image', 'student-name'],
-      ['teacher-image', 'teacher-name'],
-    ];
-
-    for (const [imageCat, textCat] of pairs) {
-      const imageMap = new Map<number, DesignerLayer>();
-      for (const l of layers) {
-        if (l.category === imageCat && l.personMatch) {
-          imageMap.set(l.personMatch.id, l);
-        }
-      }
-
-      for (const textLayer of layers) {
-        if (textLayer.category !== textCat || !textLayer.personMatch) continue;
-        const imageLayer = imageMap.get(textLayer.personMatch.id);
-        if (!imageLayer) continue;
-
-        const imgX = imageLayer.editedX ?? imageLayer.x;
-        const imgY = imageLayer.editedY ?? imageLayer.y;
-
-        updates.set(textLayer.layerId, {
-          x: imgX,
-          y: imgY + imageLayer.height + GAP,
-        });
-      }
-    }
-
-    if (updates.size === 0) return;
-
-    this.state.updateLayers(
-      layers.map(l => {
-        const u = updates.get(l.layerId);
-        if (!u) return l;
-        return { ...l, editedX: u.x, editedY: u.y };
-      }),
     );
   }
 
@@ -256,7 +206,7 @@ export class LayoutDesignerActionsService {
     }
     if (rowYMap.size === 0) return;
     const affected = selected.filter(l => rowYMap.has(l.layerId));
-    this.applyAlignmentWithCoupled(affected, (l) => ({
+    this.applyAlignment(affected, (l) => ({
       x: l.editedX ?? l.x, y: rowYMap.get(l.layerId) ?? (l.editedY ?? l.y),
     }));
   }
@@ -303,42 +253,26 @@ export class LayoutDesignerActionsService {
       posMap.set(img.layerId, bestX);
     }
 
-    this.applyAlignmentWithCoupled(images, (l) => ({
+    this.applyAlignment(images, (l) => ({
       x: posMap.get(l.layerId) ?? (l.editedX ?? l.x),
       y: l.editedY ?? l.y,
     }));
   }
 
-  /** Igazítás végrehajtása coupled párokkal */
-  private applyAlignmentWithCoupled(
+  /**
+   * Igazítás végrehajtása — csak image/fixed layerekre.
+   * A name layerek pozícióit az updateLayers() automatikusan a képek alá igazítja.
+   */
+  private applyAlignment(
     selected: DesignerLayer[],
     positionFn: (l: DesignerLayer) => { x: number; y: number },
   ): void {
-    const expandedIds = expandWithCoupledLayers(
-      this.state.selectedLayerIds(), this.state.layers(),
-    );
     const updates = new Map<number, { x: number; y: number }>();
 
     for (const sel of selected) {
-      const newPos = positionFn(sel);
-      const deltaX = newPos.x - (sel.editedX ?? sel.x);
-      const deltaY = newPos.y - (sel.editedY ?? sel.y);
-      updates.set(sel.layerId, newPos);
-
-      for (const id of expandedIds) {
-        if (updates.has(id)) continue;
-        const layer = this.state.layers().find(l => l.layerId === id);
-        if (layer && !this.state.selectedLayerIds().has(id)) {
-          const isLinked = layer.personMatch && sel.personMatch
-            && layer.personMatch.id === sel.personMatch.id;
-          if (isLinked) {
-            updates.set(id, {
-              x: (layer.editedX ?? layer.x) + deltaX,
-              y: (layer.editedY ?? layer.y) + deltaY,
-            });
-          }
-        }
-      }
+      // Name layereket kihagyjuk — realignNamesToImages kezeli
+      if (sel.category === 'student-name' || sel.category === 'teacher-name') continue;
+      updates.set(sel.layerId, positionFn(sel));
     }
 
     this.state.updateLayers(

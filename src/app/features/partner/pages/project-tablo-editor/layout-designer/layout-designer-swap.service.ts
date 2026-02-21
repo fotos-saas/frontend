@@ -126,7 +126,7 @@ export class LayoutDesignerSwapService {
     this.swapCandidate.set(null);
   }
 
-  /** Két image pozíciójának cseréje (+ coupled name-ek) egy layers tömbön */
+  /** Két image pozíciójának cseréje — name-eket az updateLayers automatikusan igazítja */
   private swapTwo(layerIdA: number, layerIdB: number, layers: DesignerLayer[]): DesignerLayer[] {
     const layerA = layers.find(l => l.layerId === layerIdA);
     const layerB = layers.find(l => l.layerId === layerIdB);
@@ -135,38 +135,12 @@ export class LayoutDesignerSwapService {
     const posA = { x: layerA.editedX ?? layerA.x, y: layerA.editedY ?? layerA.y };
     const posB = { x: layerB.editedX ?? layerB.x, y: layerB.editedY ?? layerB.y };
 
-    const nameA = this.findCoupledName(layerA, layers);
-    const nameB = this.findCoupledName(layerB, layers);
-    const namePosA = nameA ? { x: nameA.editedX ?? nameA.x, y: nameA.editedY ?? nameA.y } : null;
-    const namePosB = nameB ? { x: nameB.editedX ?? nameB.x, y: nameB.editedY ?? nameB.y } : null;
-
     return layers.map(l => {
-      // Image pozíció csere
       if (l.layerId === layerIdA) {
         return { ...l, editedX: posB.x, editedY: posB.y };
       }
       if (l.layerId === layerIdB) {
         return { ...l, editedX: posA.x, editedY: posA.y };
-      }
-      // Name pozíció csere (mindkettőnek van)
-      if (nameA && nameB) {
-        if (l.layerId === nameA.layerId) {
-          return { ...l, editedX: namePosB!.x, editedY: namePosB!.y };
-        }
-        if (l.layerId === nameB.layerId) {
-          return { ...l, editedX: namePosA!.x, editedY: namePosA!.y };
-        }
-      }
-      // Csak az egyiknek van name
-      if (nameA && !nameB && l.layerId === nameA.layerId) {
-        const dx = posB.x - posA.x;
-        const dy = posB.y - posA.y;
-        return { ...l, editedX: namePosA!.x + dx, editedY: namePosA!.y + dy };
-      }
-      if (!nameA && nameB && l.layerId === nameB.layerId) {
-        const dx = posA.x - posB.x;
-        const dy = posA.y - posB.y;
-        return { ...l, editedX: namePosB!.x + dx, editedY: namePosB!.y + dy };
       }
       return l;
     });
@@ -174,13 +148,5 @@ export class LayoutDesignerSwapService {
 
   private isImageLayer(layer: DesignerLayer): boolean {
     return layer.category === 'student-image' || layer.category === 'teacher-image';
-  }
-
-  private findCoupledName(imageLayer: DesignerLayer, layers: DesignerLayer[]): DesignerLayer | null {
-    if (!imageLayer.personMatch) return null;
-    const nameCat = imageLayer.category === 'student-image' ? 'student-name' : 'teacher-name';
-    return layers.find(
-      l => l.category === nameCat && l.personMatch?.id === imageLayer.personMatch!.id,
-    ) ?? null;
   }
 }

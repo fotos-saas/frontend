@@ -160,16 +160,19 @@ export class LayoutDesignerStateService {
     this.selectedLayerIds.set(current);
   }
 
-  /** Kijelölt elemek mozgatása (PSD koordinátákban) — coupled párokkal együtt */
+  /** Kijelölt elemek mozgatása (PSD koordinátákban) — csak image/fixed layerek, nevek automatikusan követik */
   moveSelectedLayers(deltaXPsd: number, deltaYPsd: number): void {
     const ids = this.selectedLayerIds();
     if (ids.size === 0) return;
 
-    // Coupled párok bővítése (kép → név, név → kép)
+    // Coupled párok bővítése (kép → név, név → kép) — a kijelölésben legyen benne
     const expandedIds = expandWithCoupledLayers(ids, this.layers());
 
-    this.layers.update(layers => layers.map(l => {
+    const updatedLayers = this.layers().map(l => {
       if (!expandedIds.has(l.layerId)) return l;
+
+      // Name layereket kihagyjuk — az updateLayers/realignNamesToImages kezeli
+      if (l.category === 'student-name' || l.category === 'teacher-name') return l;
 
       const currentX = l.editedX ?? l.x;
       const currentY = l.editedY ?? l.y;
@@ -179,15 +182,51 @@ export class LayoutDesignerStateService {
         editedX: currentX + deltaXPsd,
         editedY: currentY + deltaYPsd,
       };
-    }));
+    });
 
-    this.history.pushState(this.layers());
+    this.updateLayers(updatedLayers);
   }
 
-  /** Layerek frissítése (igazítás utáni állapot) */
+  /** Layerek frissítése (igazítás utáni állapot) — automatikus név igazítással */
   updateLayers(updatedLayers: DesignerLayer[]): void {
+    this.realignNamesToImages(updatedLayers);
     this.layers.set(updatedLayers);
     this.history.pushState(updatedLayers);
+  }
+
+  /**
+   * Name layerek pozícióinak igazítása a párosított image alá.
+   * MINDEN pozíció-módosítás után automatikusan fut az updateLayers()-en keresztül.
+   * Mutálja az átadott tömb elemeit (performance).
+   */
+  realignNamesToImages(layers: DesignerLayer[]): void {
+    const GAP = 8;
+    const pairs: Array<[LayerCategory, LayerCategory]> = [
+      ['student-image', 'student-name'],
+      ['teacher-image', 'teacher-name'],
+    ];
+
+    for (const [imageCat, textCat] of pairs) {
+      const imageMap = new Map<number, DesignerLayer>();
+      for (const l of layers) {
+        if (l.category === imageCat && l.personMatch) {
+          imageMap.set(l.personMatch.id, l);
+        }
+      }
+
+      for (const textLayer of layers) {
+        if (textLayer.category !== textCat || !textLayer.personMatch) continue;
+
+        const imageLayer = imageMap.get(textLayer.personMatch.id);
+        if (!imageLayer) continue;
+
+        const imgX = imageLayer.editedX ?? imageLayer.x;
+        const imgY = imageLayer.editedY ?? imageLayer.y;
+
+        textLayer.editedX = imgX;
+        textLayer.editedY = imgY + imageLayer.height + GAP;
+      }
+    }
   }
 
   /** Van-e visszavonható lépés */

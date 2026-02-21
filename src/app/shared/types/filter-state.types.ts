@@ -21,7 +21,7 @@ export type SortDirection = 'asc' | 'desc';
  */
 export interface PartnerFilterContext {
   type: 'partner';
-  page: 'projects' | 'contacts' | 'schools' | 'clients' | 'teachers' | 'students' | 'finalizations';
+  page: 'projects' | 'contacts' | 'schools' | 'clients' | 'teachers' | 'students' | 'finalizations' | 'bookings';
 }
 
 export interface MarketerFilterContext {

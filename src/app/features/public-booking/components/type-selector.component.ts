@@ -1,6 +1,7 @@
 import {
   Component, input, output, ChangeDetectionStrategy,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { SessionType, LOCATION_TYPE_LABELS } from '../../partner/models/booking.models';
@@ -9,7 +10,7 @@ import { SessionType, LOCATION_TYPE_LABELS } from '../../partner/models/booking.
   selector: 'app-type-selector',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, DecimalPipe],
   template: `
     <h2 class="section-title">Valasszon szolgaltatas tipust</h2>
     <div class="type-grid">

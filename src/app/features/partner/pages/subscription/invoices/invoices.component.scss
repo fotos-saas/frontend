@@ -1,5 +1,6 @@
 @use 'styles/mixins' as *;
 @use 'styles/colors' as *;
+@use '../subscription-buttons';
 
 .invoices-page {
   max-width: 900px;
@@ -204,44 +205,7 @@
   border-top: 1px solid get-color('slate', 200);
 }
 
-/* Button */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 0.875rem;
-  border: none;
-  cursor: pointer;
-  @include transition-normal;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn--primary {
-  background: get-color('primary', 500);
-  color: white;
-}
-
-.btn--primary:hover:not(:disabled) {
-  background: get-color('primary', 600);
-}
-
-.btn--secondary {
-  background: white;
-  color: get-color('slate', 800);
-  border: 1px solid get-color('slate', 200);
-}
-
-.btn--secondary:hover:not(:disabled) {
-  background: get-color('slate', 50);
-  border-color: get-color('slate', 300);
-}
+/* Buttons — @use '../subscription-buttons' */
 
 /* Loading & Empty */
 .loading-state {

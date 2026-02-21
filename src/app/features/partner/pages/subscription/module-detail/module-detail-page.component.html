@@ -49,7 +49,7 @@
       <!-- 5. Képernyőképek -->
       @if (c.screenshots.length) {
         <section appScrollReveal [revealDelay]="200" class="detail-section">
-          <app-detail-screenshots [screenshots]="c.screenshots" />
+          <app-detail-screenshots [screenshots]="c.screenshots" (openLightbox)="screenshotLightboxIndex.set($event)" />
         </section>
       }
 
@@ -142,6 +142,34 @@
               Aktív
             </span>
           }
+        </div>
+      </div>
+    }
+
+    <!-- Képernyőkép lightbox — page-card-on KÍVÜL (backdrop-filter stacking context) -->
+    @if (screenshotLightboxIndex() !== null && c.screenshots[screenshotLightboxIndex()!]; as shot) {
+      <div class="lightbox-overlay" (click)="screenshotLightboxIndex.set(null)">
+        <div class="lightbox-content" (click)="$event.stopPropagation()">
+          <button class="lightbox-close" (click)="screenshotLightboxIndex.set(null)">
+            <lucide-icon [name]="ICONS.X" [size]="20" />
+          </button>
+          @if (c.screenshots.length > 1) {
+            <button class="lightbox-nav lightbox-nav--prev" (click)="prevScreenshot(c.screenshots.length)">
+              <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="24" />
+            </button>
+            <button class="lightbox-nav lightbox-nav--next" (click)="nextScreenshot(c.screenshots.length)">
+              <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="24" />
+            </button>
+          }
+          @if (shot.src) {
+            <img [src]="shot.src" [alt]="shot.alt" />
+          } @else {
+            <div class="lightbox-placeholder">
+              <lucide-icon [name]="ICONS.IMAGE" [size]="48" />
+              <span>Képernyőkép hamarosan</span>
+            </div>
+          }
+          <p class="lightbox-caption">{{ shot.caption }}</p>
         </div>
       </div>
     }

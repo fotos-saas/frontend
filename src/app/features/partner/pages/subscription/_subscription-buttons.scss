@@ -1,0 +1,112 @@
+@use 'styles/colors' as *;
+@use 'styles/mixins' as *;
+
+// ============================================================================
+// Közös gomb stílusok a subscription oldalakhoz
+// Használat: @use '../subscription-buttons' as *; VAGY a fájl elején importáld
+// ============================================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  @include transition-fast;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: get-color('primary', 500);
+    color: white;
+
+    &:hover:not(:disabled) { background: get-color('primary', 600); }
+  }
+
+  &--secondary {
+    background: get-color('slate', 100);
+    color: get-color('slate', 600);
+
+    &:hover:not(:disabled) { background: get-color('slate', 200); }
+  }
+
+  &--outline {
+    background: transparent;
+    border: 1px solid get-color('slate', 200);
+    color: get-color('slate', 600);
+
+    &:hover:not(:disabled) {
+      background: get-color('slate', 50);
+      border-color: get-color('slate', 300);
+    }
+  }
+
+  &--danger {
+    background: get-color('error', 600);
+    color: white;
+
+    &:hover:not(:disabled) { background: get-color('error', 700); }
+  }
+
+  &--danger-outline {
+    background: transparent;
+    border: 1px solid get-color('error', 200);
+    color: get-color('error', 600);
+
+    &:hover:not(:disabled) {
+      background: get-color('error', 50);
+      border-color: get-color('error', 300);
+    }
+  }
+
+  &--success {
+    background: get-color('success', 600);
+    color: white;
+
+    &:hover:not(:disabled) { background: get-color('success', 700); }
+  }
+
+  &--sm {
+    padding: 5px 12px;
+    font-size: 0.8125rem;
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .btn {
+    &--secondary {
+      background: get-color('slate', 700);
+      color: get-color('slate', 300);
+
+      &:hover:not(:disabled) { background: get-color('slate', 600); }
+    }
+
+    &--outline {
+      border-color: get-color('slate', 600);
+      color: get-color('slate', 300);
+
+      &:hover:not(:disabled) {
+        background: get-color('slate', 700);
+        border-color: get-color('slate', 500);
+      }
+    }
+
+    &--danger-outline {
+      color: get-color('error', 400);
+      border-color: get-color('error', 800);
+
+      &:hover:not(:disabled) {
+        background: rgba(get-color('error', 900), 0.4);
+      }
+    }
+  }
+}

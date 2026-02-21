@@ -80,6 +80,9 @@ export class ModuleDetailPageComponent implements OnInit {
 
   readonly loading = this.marketplaceService.loading;
 
+  /** Lightbox — page-card-on kívül renderelve */
+  readonly screenshotLightboxIndex = signal<number | null>(null);
+
   private heroObserver: IntersectionObserver | null = null;
 
   ngOnInit(): void {
@@ -111,6 +114,18 @@ export class ModuleDetailPageComponent implements OnInit {
     if (key) {
       this.marketplaceService.activateModule(key).subscribe();
     }
+  }
+
+  nextScreenshot(total: number): void {
+    const current = this.screenshotLightboxIndex();
+    if (current === null) return;
+    this.screenshotLightboxIndex.set((current + 1) % total);
+  }
+
+  prevScreenshot(total: number): void {
+    const current = this.screenshotLightboxIndex();
+    if (current === null) return;
+    this.screenshotLightboxIndex.set((current - 1 + total) % total);
   }
 
   private setupHeroObserver(): void {

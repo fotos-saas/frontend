@@ -1,5 +1,6 @@
 @use 'styles/mixins' as *;
 @use 'styles/colors' as *;
+@use '../subscription-buttons';
 
 .addons-page {
   max-width: 800px;
@@ -212,49 +213,7 @@
   font-weight: 600;
 }
 
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.8125rem;
-  border: none;
-  cursor: pointer;
-  @include transition-normal;
-}
-
-.btn--sm {
-  padding: 6px 12px;
-  font-size: 0.75rem;
-  border-radius: 6px;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn--primary {
-  background: get-color('primary', 500);
-  color: white;
-}
-
-.btn--primary:hover:not(:disabled) {
-  background: get-color('primary', 600);
-}
-
-.btn--danger-outline {
-  background: transparent;
-  border: 1px solid get-color('error', 500);
-  color: get-color('error', 500);
-}
-
-.btn--danger-outline:hover:not(:disabled) {
-  background: get-color('error', 50);
-}
+/* Buttons — @use '../subscription-buttons' */
 
 /* Loading & Empty */
 .loading-state {

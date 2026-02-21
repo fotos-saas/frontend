@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ModuleScreenshot } from '../../module-detail.types';
@@ -13,29 +13,7 @@ import { ModuleScreenshot } from '../../module-detail.types';
 })
 export class DetailScreenshotsComponent {
   readonly screenshots = input.required<ModuleScreenshot[]>();
-  readonly lightboxIndex = signal<number | null>(null);
+  readonly openLightbox = output<number>();
 
   readonly ICONS = ICONS;
-
-  openLightbox(index: number): void {
-    this.lightboxIndex.set(index);
-  }
-
-  closeLightbox(): void {
-    this.lightboxIndex.set(null);
-  }
-
-  nextImage(): void {
-    const current = this.lightboxIndex();
-    if (current === null) return;
-    const len = this.screenshots().length;
-    this.lightboxIndex.set((current + 1) % len);
-  }
-
-  prevImage(): void {
-    const current = this.lightboxIndex();
-    if (current === null) return;
-    const len = this.screenshots().length;
-    this.lightboxIndex.set((current - 1 + len) % len);
-  }
 }

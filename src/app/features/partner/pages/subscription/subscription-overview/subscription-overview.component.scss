@@ -1,5 +1,6 @@
 @use 'styles/mixins' as *;
 @use 'styles/colors' as *;
+@use '../subscription-buttons';
 
 // max-width → page-card default kezeli (1000→1200)
 .subscription-overview {}
@@ -386,42 +387,7 @@
   }
 }
 
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 0.875rem;
-  border: none;
-  cursor: pointer;
-  @include transition-normal;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &--primary {
-    background: get-color('primary', 500);
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: get-color('primary', 600);
-    }
-  }
-
-  &--secondary {
-    background: get-color('slate', 100);
-    color: get-color('slate', 600);
-
-    &:hover:not(:disabled) {
-      background: get-color('slate', 200);
-    }
-  }
-}
+/* Buttons — @use '../subscription-buttons' */
 
 /* Loading & Error */
 .loading-state {

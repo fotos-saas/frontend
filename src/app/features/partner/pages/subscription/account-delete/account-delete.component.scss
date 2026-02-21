@@ -1,5 +1,6 @@
 @use 'styles/mixins' as *;
 @use 'styles/colors' as *;
+@use '../subscription-buttons';
 
 .account-delete-page {
   max-width: 700px;
@@ -161,41 +162,10 @@
   justify-content: center;
 }
 
-/* Buttons */
+/* Buttons — @use '../subscription-buttons' */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 500;
   font-size: 0.9375rem;
-  border: none;
-  cursor: pointer;
-  @include transition-normal;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn--danger {
-  background: get-color('error', 600);
-  color: white;
-}
-
-.btn--danger:hover:not(:disabled) {
-  background: get-color('error', 700);
-}
-
-.btn--success {
-  background: get-color('success', 600);
-  color: white;
-}
-
-.btn--success:hover:not(:disabled) {
-  background: get-color('success', 700);
 }
 
 /* Loading */

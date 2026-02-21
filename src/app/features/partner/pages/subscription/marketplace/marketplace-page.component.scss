@@ -1,5 +1,6 @@
 @use 'styles/mixins' as *;
 @use 'styles/colors' as *;
+@use '../subscription-buttons';
 
 // ============================================================================
 // Fejléc
@@ -467,56 +468,6 @@
   100% { background-position: -200% 0; }
 }
 
-// ============================================================================
-// Gombok
-// ============================================================================
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  @include transition-fast;
-
-  &--primary {
-    background: get-color('primary', 500);
-    color: white;
-
-    &:hover { background: get-color('primary', 600); }
-  }
-
-  &--outline {
-    background: transparent;
-    border: 1px solid get-color('slate', 200);
-    color: get-color('slate', 600);
-
-    &:hover {
-      background: get-color('slate', 50);
-      border-color: get-color('slate', 300);
-    }
-  }
-
-  &--danger {
-    color: get-color('error', 600);
-    border-color: get-color('error', 200);
-
-    &:hover {
-      background: get-color('error', 50);
-      border-color: get-color('error', 300);
-    }
-  }
-
-  &--sm {
-    padding: 5px 12px;
-    font-size: 0.8125rem;
-  }
-}
 
 // ============================================================================
 // Dark mode
@@ -614,27 +565,6 @@
     &--free { background: rgba(get-color('success', 900), 0.4); color: get-color('success', 400); }
     &--per-use { background: rgba(get-color('primary', 900), 0.4); color: get-color('primary', 300); }
     &--monthly { background: get-color('slate', 700); color: get-color('slate', 200); }
-  }
-
-  .btn {
-    &--outline {
-      border-color: get-color('slate', 600);
-      color: get-color('slate', 300);
-
-      &:hover {
-        background: get-color('slate', 700);
-        border-color: get-color('slate', 500);
-      }
-    }
-
-    &--danger {
-      color: get-color('error', 400);
-      border-color: get-color('error', 800);
-
-      &:hover {
-        background: rgba(get-color('error', 900), 0.4);
-      }
-    }
   }
 
   .skeleton-card {

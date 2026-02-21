@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -7,7 +7,7 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
 
 /**
  * Fix bal oldali sidebar a Layout Designerben.
- * Rendezési szekció — később bővíthető más szekciókkal.
+ * Rendezési szekció + Minta készítés szekció.
  */
 @Component({
   selector: 'app-layout-sort-panel',
@@ -65,6 +65,42 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           <div class="sidebar__status sidebar__status--success">
             <lucide-icon [name]="ICONS.CHECK" [size]="14" />
             {{ result }}
+          </div>
+        }
+      </div>
+
+      <!-- Minta készítés szekció -->
+      <div class="sidebar__section sidebar__section--separator">
+        <div class="sidebar__section-header">
+          <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+          <span>Minta</span>
+        </div>
+
+        <div class="sidebar__actions">
+          <button class="action-btn"
+            [disabled]="generatingSample()"
+            (click)="generateSample.emit()"
+            matTooltip="Vízjeles mintakép generálás 2 méretben">
+            @if (generatingSample()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              <span>Generálás...</span>
+            } @else {
+              <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+              <span>Minta készítés</span>
+            }
+          </button>
+        </div>
+
+        @if (sampleSuccess()) {
+          <div class="sidebar__status sidebar__status--success">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            {{ sampleSuccess() }}
+          </div>
+        }
+        @if (sampleError()) {
+          <div class="sidebar__status sidebar__status--error">
+            <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
+            {{ sampleError() }}
           </div>
         }
       </div>
@@ -146,6 +182,11 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
 
       &--loading { color: #a78bfa; }
       &--success { color: #4ade80; }
+      &--error { color: #fca5a5; }
+    }
+
+    .sidebar__section--separator {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .spin {
@@ -165,4 +206,10 @@ export class LayoutSortPanelComponent {
   protected readonly ICONS = ICONS;
 
   readonly openCustomDialog = output<void>();
+  readonly generateSample = output<void>();
+
+  /** Minta generálás állapotok (a szülő kezeli) */
+  readonly generatingSample = input(false);
+  readonly sampleSuccess = input<string | null>(null);
+  readonly sampleError = input<string | null>(null);
 }

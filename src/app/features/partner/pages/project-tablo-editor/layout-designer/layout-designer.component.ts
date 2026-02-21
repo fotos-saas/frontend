@@ -82,7 +82,13 @@ import { firstValueFrom } from 'rxjs';
           (closeClicked)="close()"
         />
         <div class="layout-designer__content">
-          <app-layout-sort-panel (openCustomDialog)="showCustomDialog.set(true)" />
+          <app-layout-sort-panel
+            [generatingSample]="generatingSample()"
+            [sampleSuccess]="sampleSuccess()"
+            [sampleError]="sampleError()"
+            (openCustomDialog)="showCustomDialog.set(true)"
+            (generateSample)="onGenerateSample()"
+          />
           <div class="layout-designer__canvas-area" #canvasArea>
             <app-layout-canvas
               [linking]="linking()"
@@ -227,6 +233,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Projekt azonosító (fotó feltöltéshez) */
   readonly projectId = input.required<number>();
 
+  /** Projekt neve (minta generáláshoz) */
+  readonly projectName = input.required<string>();
+
   /** Bezárás event */
   readonly closeEvent = output<void>();
 
@@ -248,6 +257,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly placingPhotos = signal(false);
   readonly syncingPhotos = signal(false);
   readonly arrangingNames = signal(false);
+  readonly generatingSample = signal(false);
+  readonly sampleSuccess = signal<string | null>(null);
+  readonly sampleError = signal<string | null>(null);
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
@@ -461,6 +473,26 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       await this.ps.arrangeNames(undefined, this.getLinkedLayerNames());
     } finally {
       this.arrangingNames.set(false);
+    }
+  }
+
+  /** Minta generálás — flatten + resize + watermark + upload */
+  async onGenerateSample(): Promise<void> {
+    if (this.generatingSample()) return;
+    this.generatingSample.set(true);
+    this.sampleSuccess.set(null);
+    this.sampleError.set(null);
+    try {
+      const result = await this.ps.generateSample(this.projectId(), this.projectName());
+      if (result.success) {
+        this.sampleSuccess.set(`${result.localPaths?.length || 0} fájl mentve, ${result.uploadedCount || 0} feltöltve`);
+      } else {
+        this.sampleError.set(result.error || 'Minta generálás sikertelen');
+      }
+    } catch {
+      this.sampleError.set('Váratlan hiba a minta generálásnál');
+    } finally {
+      this.generatingSample.set(false);
     }
   }
 

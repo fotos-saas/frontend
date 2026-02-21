@@ -77,12 +77,26 @@ function _doPlacePhotos() {
 
   log("[JSX] Fotok behelyezese: " + data.layers.length + " layer");
 
+  // Images csoport keresese — ide kell a fotot behelyezni (nem a Names csoportba)
+  var imagesGroup = null;
+  try {
+    for (var g = 0; g < _doc.layerSets.length; g++) {
+      if (_doc.layerSets[g].name === "Images") {
+        imagesGroup = _doc.layerSets[g];
+        break;
+      }
+    }
+  } catch (e) { /* nincs layerSets */ }
+
   for (var i = 0; i < data.layers.length; i++) {
     var item = data.layers[i];
 
     try {
-      // Layer keresese nev alapjan
-      var layer = _findLayerByName(_doc, item.layerName);
+      // Layer keresese: eloszor az Images csoportban, fallback teljes dokumentumra
+      var layer = imagesGroup ? _findLayerByName(imagesGroup, item.layerName) : null;
+      if (!layer) {
+        layer = _findLayerByName(_doc, item.layerName);
+      }
       if (!layer) {
         log("[JSX] WARN: Layer nem talalhato: " + item.layerName);
         _errors++;

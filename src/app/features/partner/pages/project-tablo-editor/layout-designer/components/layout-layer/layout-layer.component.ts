@@ -44,10 +44,6 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
           <div class="designer-layer__linked-badge">
             <lucide-icon [name]="ICONS.LINK" [size]="10" />
           </div>
-        } @else if (layer().linked === false) {
-          <div class="designer-layer__embedded-badge">
-            <lucide-icon [name]="ICONS.UNLINK" [size]="10" />
-          </div>
         }
       } @else if (isText()) {
         <div class="designer-layer__text">
@@ -149,8 +145,7 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
       white-space: nowrap;
     }
 
-    .designer-layer__linked-badge,
-    .designer-layer__embedded-badge {
+    .designer-layer__linked-badge {
       position: absolute;
       bottom: 2px;
       left: 2px;
@@ -161,15 +156,7 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
       align-items: center;
       justify-content: center;
       pointer-events: none;
-    }
-
-    .designer-layer__linked-badge {
       background: rgba(34, 197, 94, 0.85);
-      color: #ffffff;
-    }
-
-    .designer-layer__embedded-badge {
-      background: rgba(239, 68, 68, 0.75);
       color: #ffffff;
     }
 

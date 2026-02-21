@@ -69,9 +69,9 @@ function _doFlattenExport() {
     log("[JSX] sRGB konverzio kihagyva: " + e.message);
   }
 
-  // 4. SaveAs JPEG
+  // 4. SaveAs JPEG (quality: Photoshop 0-12 skala, nem 0-100!)
   var jpegOptions = new JPEGSaveOptions();
-  jpegOptions.quality = quality;
+  jpegOptions.quality = (quality > 12) ? Math.round(quality * 12 / 100) : quality;
   jpegOptions.formatOptions = FormatOptions.PROGRESSIVE;
   jpegOptions.scans = 3;
   jpegOptions.embedColorProfile = true;

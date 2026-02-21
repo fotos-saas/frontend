@@ -119,32 +119,28 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
               {{ opacityPercent() }}%
             </button>
           </div>
-          <button class="action-btn action-btn--final"
-            [disabled]="generatingFinal()"
-            (click)="generateFinal.emit()"
-            matTooltip="Teljes méretű tablókép (vízjel és átméretezés nélkül)"
-            matTooltipPosition="right">
-            @if (generatingFinal()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              <span>Véglegesítés...</span>
-            } @else {
-              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-              <span>Véglegesítés</span>
-            }
-          </button>
-          <button class="action-btn action-btn--final"
-            [disabled]="generatingSmallTablo()"
-            (click)="generateSmallTablo.emit()"
-            matTooltip="Kistabló (3000px, vízjel nélkül)"
-            matTooltipPosition="right">
-            @if (generatingSmallTablo()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              <span>Kistabló...</span>
-            } @else {
-              <lucide-icon [name]="ICONS.FRAME" [size]="16" />
-              <span>Kistabló</span>
-            }
-          </button>
+          <div class="sidebar__split-btn sidebar__split-btn--final">
+            <button class="sidebar__split-main sidebar__split-main--final"
+              [disabled]="generatingFinal()"
+              (click)="generateFinal.emit()"
+              matTooltip="Véglegesített tablókép(ek) generálása és feltöltése"
+              matTooltipPosition="right">
+              @if (generatingFinal()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                <span>Véglegesítés...</span>
+              } @else {
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+                <span>Véglegesítés</span>
+              }
+            </button>
+            <button class="sidebar__split-toggle"
+              [class.sidebar__split-toggle--active]="finalMode() === 'flat' || finalMode() === 'both'"
+              (click)="cycleFinalMode.emit()"
+              [matTooltip]="finalModeTooltip()"
+              matTooltipPosition="right">
+              {{ finalModeLabel() }}
+            </button>
+          </div>
           <button class="action-btn"
             (click)="openProject.emit()"
             matTooltip="A PSD megnyitása Photoshopban"
@@ -241,16 +237,7 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
         cursor: not-allowed;
       }
 
-      &--final {
-        color: #34d399;
-        border-color: rgba(52, 211, 153, 0.2);
-
-        &:hover:not(:disabled) {
-          background: rgba(52, 211, 153, 0.08);
-          border-color: rgba(52, 211, 153, 0.35);
-          color: #6ee7b7;
-        }
-      }
+      &--final {}
     }
 
     .sidebar__status {
@@ -355,6 +342,14 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       font-weight: 600;
     }
 
+    .sidebar__split-main--final {
+      color: #34d399;
+
+      &:hover:not(:disabled) {
+        background: rgba(52, 211, 153, 0.1);
+      }
+    }
+
     .sidebar__section--separator {
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
@@ -378,14 +373,30 @@ export class LayoutSortPanelComponent {
   readonly openCustomDialog = output<void>();
   readonly generateSample = output<void>();
   readonly generateFinal = output<void>();
-  readonly generateSmallTablo = output<void>();
+  readonly cycleFinalMode = output<void>();
   readonly openProject = output<void>();
   readonly openWorkDir = output<void>();
 
   /** Minta generálás állapotok (a szülő kezeli) */
   readonly generatingSample = input(false);
   readonly generatingFinal = input(false);
-  readonly generatingSmallTablo = input(false);
+  readonly finalMode = input<'flat' | 'small_tablo' | 'both'>('both');
+
+  readonly finalModeLabel = computed(() => {
+    switch (this.finalMode()) {
+      case 'flat': return 'F';
+      case 'small_tablo': return 'K';
+      default: return 'F+K';
+    }
+  });
+
+  readonly finalModeTooltip = computed(() => {
+    switch (this.finalMode()) {
+      case 'flat': return 'Csak flat — kattints a kistablóhoz';
+      case 'small_tablo': return 'Csak kistabló — kattints a mind a kettőhöz';
+      default: return 'Flat + Kistabló — kattints a csak flat-hoz';
+    }
+  });
   readonly sampleLargeSize = input(false);
   readonly sampleLargeSizeChange = output<boolean>();
   readonly sampleWatermarkColor = input<'white' | 'black'>('white');

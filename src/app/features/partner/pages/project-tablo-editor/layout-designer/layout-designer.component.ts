@@ -85,7 +85,7 @@ import { firstValueFrom } from 'rxjs';
           <app-layout-sort-panel
             [generatingSample]="generatingSample()"
             [generatingFinal]="generatingFinal()"
-            [generatingSmallTablo]="generatingSmallTablo()"
+            [finalMode]="finalMode()"
             [sampleLargeSize]="sampleLargeSize()"
             [sampleWatermarkColor]="ps.sampleWatermarkColor()"
             [sampleWatermarkOpacity]="ps.sampleWatermarkOpacity()"
@@ -94,7 +94,7 @@ import { firstValueFrom } from 'rxjs';
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
             (generateFinal)="onGenerateFinal()"
-            (generateSmallTablo)="onGenerateSmallTablo()"
+            (cycleFinalMode)="onCycleFinalMode()"
             (sampleLargeSizeChange)="onLargeSizeChange($event)"
             (watermarkColorChange)="onWatermarkColorChange($event)"
             (opacityChange)="onCycleOpacity()"
@@ -271,7 +271,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly arrangingNames = signal(false);
   readonly generatingSample = signal(false);
   readonly generatingFinal = signal(false);
-  readonly generatingSmallTablo = signal(false);
+  readonly finalMode = signal<'flat' | 'small_tablo' | 'both'>('both');
   readonly sampleLargeSize = this.ps.sampleUseLargeSize;
   readonly sampleSuccess = signal<string | null>(null);
   readonly sampleError = signal<string | null>(null);
@@ -544,20 +544,50 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Véglegesítés — flatten + közvetlen upload, nincs resize/watermark */
+  /** Véglegesítés mód váltás: both → flat → small_tablo → both */
+  onCycleFinalMode(): void {
+    const modes: Array<'flat' | 'small_tablo' | 'both'> = ['both', 'flat', 'small_tablo'];
+    const idx = modes.indexOf(this.finalMode());
+    this.finalMode.set(modes[(idx + 1) % modes.length]);
+  }
+
+  /** Véglegesítés — a finalMode alapján flat és/vagy kistabló */
   async onGenerateFinal(): Promise<void> {
     if (this.generatingFinal()) return;
     this.generatingFinal.set(true);
     this.sampleSuccess.set(null);
     this.sampleError.set(null);
+
+    const mode = this.finalMode();
+    const results: string[] = [];
+    const errors: string[] = [];
+
     try {
-      const result = await this.ps.generateFinal(this.projectId(), this.projectName());
-      if (result.success && result.uploadedCount && result.uploadedCount > 0) {
-        this.sampleSuccess.set('Véglegesítés sikeresen feltöltve');
-      } else if (result.success && (!result.uploadedCount || result.uploadedCount === 0)) {
-        this.sampleError.set(result.error || 'Lokálisan mentve, de a feltöltés nem sikerült');
-      } else {
-        this.sampleError.set(result.error || 'Véglegesítés sikertelen');
+      // Flat
+      if (mode === 'flat' || mode === 'both') {
+        const r = await this.ps.generateFinal(this.projectId(), this.projectName());
+        if (r.success && r.uploadedCount && r.uploadedCount > 0) {
+          results.push('Flat');
+        } else {
+          errors.push(r.error || 'Flat feltöltés sikertelen');
+        }
+      }
+
+      // Kistabló
+      if (mode === 'small_tablo' || mode === 'both') {
+        const r = await this.ps.generateSmallTablo(this.projectId(), this.projectName());
+        if (r.success && r.uploadedCount && r.uploadedCount > 0) {
+          results.push('Kistabló');
+        } else {
+          errors.push(r.error || 'Kistabló feltöltés sikertelen');
+        }
+      }
+
+      if (results.length > 0) {
+        this.sampleSuccess.set(`Feltöltve: ${results.join(' + ')}`);
+      }
+      if (errors.length > 0) {
+        this.sampleError.set(errors.join('; '));
       }
     } catch (err) {
       console.error('Véglegesítés hiba:', err);
@@ -565,30 +595,6 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       this.sampleError.set(`Véglegesítés hiba: ${msg}`);
     } finally {
       this.generatingFinal.set(false);
-    }
-  }
-
-  /** Kistabló — flatten + 3000px resize + upload */
-  async onGenerateSmallTablo(): Promise<void> {
-    if (this.generatingSmallTablo()) return;
-    this.generatingSmallTablo.set(true);
-    this.sampleSuccess.set(null);
-    this.sampleError.set(null);
-    try {
-      const result = await this.ps.generateSmallTablo(this.projectId(), this.projectName());
-      if (result.success && result.uploadedCount && result.uploadedCount > 0) {
-        this.sampleSuccess.set('Kistabló sikeresen feltöltve');
-      } else if (result.success && (!result.uploadedCount || result.uploadedCount === 0)) {
-        this.sampleError.set(result.error || 'Lokálisan mentve, de a feltöltés nem sikerült');
-      } else {
-        this.sampleError.set(result.error || 'Kistabló generálás sikertelen');
-      }
-    } catch (err) {
-      console.error('Kistabló hiba:', err);
-      const msg = err instanceof Error ? err.message : String(err);
-      this.sampleError.set(`Kistabló hiba: ${msg}`);
-    } finally {
-      this.generatingSmallTablo.set(false);
     }
   }
 

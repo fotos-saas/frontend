@@ -139,7 +139,7 @@
                       [value]="a.file ? form.getFileKey(a.file) : ''"
                       (change)="form.onFileSelect(a.personId, $event)">
                       <option value="">(nincs kep)</option>
-                      @for (f of form.files(); track f.name) {
+                      @for (f of form.availableFilesFor(a.personId); track f.name) {
                         <option [value]="form.getFileKey(f)">{{ f.name }}</option>
                       }
                     </select>

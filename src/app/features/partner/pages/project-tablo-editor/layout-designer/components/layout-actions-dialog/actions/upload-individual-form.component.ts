@@ -173,6 +173,17 @@ export class UploadIndividualFormComponent {
     return file.name + '|' + file.size;
   }
 
+  /** A select dropdown-ban csak a szabad fájlokat + az adott személyhez rendelt fájlt mutatjuk */
+  availableFilesFor(personId: number): File[] {
+    const assignedKeys = new Set<string>();
+    for (const a of this.assignments()) {
+      if (a.file && a.personId !== personId) {
+        assignedKeys.add(this.getFileKey(a.file));
+      }
+    }
+    return this.files().filter(f => !assignedKeys.has(this.getFileKey(f)));
+  }
+
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();

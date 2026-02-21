@@ -1,5 +1,5 @@
 import {
-  Component, ChangeDetectionStrategy, output, signal, computed, ElementRef, viewChild,
+  Component, ChangeDetectionStrategy, output, signal, computed,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -56,7 +56,7 @@ export interface UploadToEveryoneFormData {
           (dragover)="onDragOver($event)"
           (dragleave)="isDragging.set(false)"
           (drop)="onDrop($event)"
-          (click)="fileInput().nativeElement.click()">
+          (click)="fileInput.click()">
           <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp"
             (change)="onFileInput($event)" class="sr-only" />
           <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
@@ -204,8 +204,6 @@ export interface UploadToEveryoneFormData {
 })
 export class UploadToEveryoneFormComponent {
   protected readonly ICONS = ICONS;
-
-  readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
   readonly groupName = signal('');
   readonly files = signal<File[]>([]);

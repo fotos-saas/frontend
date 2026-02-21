@@ -12,95 +12,158 @@
     </div>
 
     <!-- Body -->
-    <div class="dialog__body">
+    <div class="dialog__body" [class.dialog__body--two-col]="selectedAction() === 'upload-individual'">
 
-      <!-- Muvelet valaszto -->
-      <div class="dialog__field">
-        <label class="dialog__label">Muvelet</label>
-        <ps-select
-          [options]="actionOptions"
-          [ngModel]="selectedAction()"
-          (ngModelChange)="selectedAction.set($event)"
-          overlayClass="ps-overlay--dark"
-        />
+      <!-- Bal oszlop (vagy egyetlen oszlop upload-to-everyone modban) -->
+      <div class="dialog__col-left">
+        <!-- Muvelet valaszto -->
+        <div class="dialog__field">
+          <label class="dialog__label">Muvelet</label>
+          <ps-select
+            [options]="actionOptions"
+            [ngModel]="selectedAction()"
+            (ngModelChange)="selectedAction.set($event)"
+            overlayClass="ps-overlay--dark"
+          />
+        </div>
+
+        <!-- Szemelyek kivalasztasa -->
+        <div class="dialog__field">
+          <label class="dialog__label">
+            Szemelyek ({{ selectedCount() }}/{{ persons().length }})
+          </label>
+          <div class="person-columns">
+            @if (students().length > 0) {
+              <div class="person-group">
+                <div class="person-group__header">
+                  <span class="person-group__title">
+                    <lucide-icon [name]="ICONS.USERS" [size]="12" />
+                    Diakok ({{ students().length }})
+                  </span>
+                  <button class="person-group__toggle" (click)="toggleAllStudents()">
+                    {{ allStudentsSelected() ? 'Nincs' : 'Mind' }}
+                  </button>
+                </div>
+                <div class="person-group__list">
+                  @for (p of students(); track p.id) {
+                    <label class="person-item" [class.person-item--selected]="isSelected(p.id)">
+                      <span class="person-item__check">
+                        @if (isSelected(p.id)) {
+                          <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                        }
+                      </span>
+                      <span class="person-item__name">{{ p.name }}</span>
+                      <input type="checkbox" class="sr-only"
+                        [checked]="isSelected(p.id)"
+                        (change)="togglePerson(p.id)" />
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (teachers().length > 0) {
+              <div class="person-group">
+                <div class="person-group__header">
+                  <span class="person-group__title">
+                    <lucide-icon [name]="ICONS.USER" [size]="12" />
+                    Tanarok ({{ teachers().length }})
+                  </span>
+                  <button class="person-group__toggle" (click)="toggleAllTeachers()">
+                    {{ allTeachersSelected() ? 'Nincs' : 'Mind' }}
+                  </button>
+                </div>
+                <div class="person-group__list">
+                  @for (p of teachers(); track p.id) {
+                    <label class="person-item" [class.person-item--selected]="isSelected(p.id)">
+                      <span class="person-item__check">
+                        @if (isSelected(p.id)) {
+                          <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                        }
+                      </span>
+                      <span class="person-item__name">{{ p.name }}</span>
+                      <input type="checkbox" class="sr-only"
+                        [checked]="isSelected(p.id)"
+                        (change)="togglePerson(p.id)" />
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Akcio-specifikus form -->
+        @switch (selectedAction()) {
+          @case ('upload-to-everyone') {
+            <app-upload-to-everyone-form #uploadForm />
+          }
+          @case ('upload-individual') {
+            <app-upload-individual-form #individualForm [persons]="selectedPersons()" />
+          }
+        }
       </div>
 
-      <!-- Szemelyek kivalasztasa -->
-      <div class="dialog__field">
-        <label class="dialog__label">
-          Szemelyek ({{ selectedCount() }}/{{ persons().length }})
-        </label>
-        <div class="person-columns">
-          <!-- Diakok -->
-          @if (students().length > 0) {
-            <div class="person-group">
-              <div class="person-group__header">
-                <span class="person-group__title">
-                  <lucide-icon [name]="ICONS.USERS" [size]="12" />
-                  Diakok ({{ students().length }})
-                </span>
-                <button class="person-group__toggle" (click)="toggleAllStudents()">
-                  {{ allStudentsSelected() ? 'Nincs' : 'Mind' }}
+      <!-- Jobb oszlop: parositas (csak upload-individual modban) -->
+      @if (selectedAction() === 'upload-individual') {
+        <div class="dialog__col-right">
+          @if (individualForm(); as form) {
+            @if (form.assignments().length > 0) {
+              <div class="match-header">
+                <label class="dialog__label">
+                  <lucide-icon [name]="ICONS.LINK" [size]="14" />
+                  Parositas ({{ form.assignedCount() }}/{{ selectedPersons().length }})
+                </label>
+                <button class="match-header__reset" (click)="form.runMatching()">
+                  <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
+                  Ujra
                 </button>
               </div>
-              <div class="person-group__list">
-                @for (p of students(); track p.id) {
-                  <label class="person-item" [class.person-item--selected]="isSelected(p.id)">
-                    <span class="person-item__check">
-                      @if (isSelected(p.id)) {
-                        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+              <div class="match-list">
+                @for (a of form.assignments(); track a.personId) {
+                  <div class="match-row" [class.match-row--matched]="a.file && a.confidence >= 80"
+                    [class.match-row--ambiguous]="a.file && a.confidence >= 50 && a.confidence < 80"
+                    [class.match-row--unmatched]="!a.file">
+                    <span class="match-row__status">
+                      @if (a.file && a.confidence >= 80) {
+                        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                      } @else if (a.file && a.confidence >= 50) {
+                        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+                      } @else {
+                        <lucide-icon [name]="ICONS.MINUS_CIRCLE" [size]="14" />
                       }
                     </span>
-                    <span class="person-item__name">{{ p.name }}</span>
-                    <input type="checkbox" class="sr-only"
-                      [checked]="isSelected(p.id)"
-                      (change)="togglePerson(p.id)" />
-                  </label>
+                    <span class="match-row__name">{{ a.personName }}</span>
+                    <span class="match-row__arrow">&#8592;</span>
+                    <select class="match-row__select"
+                      [value]="a.file ? form.getFileKey(a.file) : ''"
+                      (change)="form.onFileSelect(a.personId, $event)">
+                      <option value="">(nincs kep)</option>
+                      @for (f of form.files(); track form.getFileKey(f)) {
+                        <option [value]="form.getFileKey(f)">{{ f.name }}</option>
+                      }
+                    </select>
+                  </div>
                 }
-              </div>
-            </div>
-          }
 
-          <!-- Tanarok -->
-          @if (teachers().length > 0) {
-            <div class="person-group">
-              <div class="person-group__header">
-                <span class="person-group__title">
-                  <lucide-icon [name]="ICONS.USER" [size]="12" />
-                  Tanarok ({{ teachers().length }})
-                </span>
-                <button class="person-group__toggle" (click)="toggleAllTeachers()">
-                  {{ allTeachersSelected() ? 'Nincs' : 'Mind' }}
-                </button>
-              </div>
-              <div class="person-group__list">
-                @for (p of teachers(); track p.id) {
-                  <label class="person-item" [class.person-item--selected]="isSelected(p.id)">
-                    <span class="person-item__check">
-                      @if (isSelected(p.id)) {
-                        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-                      }
+                @for (f of form.unassignedFiles(); track form.getFileKey(f)) {
+                  <div class="match-row match-row--extra">
+                    <span class="match-row__status">
+                      <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
                     </span>
-                    <span class="person-item__name">{{ p.name }}</span>
-                    <input type="checkbox" class="sr-only"
-                      [checked]="isSelected(p.id)"
-                      (change)="togglePerson(p.id)" />
-                  </label>
+                    <span class="match-row__name match-row__name--file">{{ f.name }}</span>
+                    <span class="match-row__hint">(nem parosított)</span>
+                  </div>
                 }
               </div>
-            </div>
+            } @else {
+              <div class="match-empty">
+                <lucide-icon [name]="ICONS.LINK" [size]="20" />
+                <span>Tolts fel kepeket a parosításhoz</span>
+              </div>
+            }
           }
         </div>
-      </div>
-
-      <!-- Akcio-specifikus form -->
-      @switch (selectedAction()) {
-        @case ('upload-to-everyone') {
-          <app-upload-to-everyone-form #uploadForm />
-        }
-        @case ('upload-individual') {
-          <app-upload-individual-form #individualForm [persons]="selectedPersons()" />
-        }
       }
 
       <!-- Hiba uzenet -->

@@ -76,6 +76,35 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+
+  &--two-col {
+    flex-direction: row;
+    gap: 0;
+  }
+}
+
+.dialog__col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+
+  .dialog__body--two-col & {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding-right: 16px;
+  }
+}
+
+.dialog__col-right {
+  flex: 0 0 50%;
+  max-width: 50%;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .dialog__field {
@@ -85,13 +114,16 @@
 }
 
 .dialog__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.75rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.5);
 }
 
 // ============================================================================
-// Person columns (tanár/diák szekciók)
+// Person columns
 // ============================================================================
 
 .person-columns {
@@ -196,6 +228,142 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+}
+
+// ============================================================================
+// Matching (jobb oszlop)
+// ============================================================================
+
+.match-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &__reset {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    background: transparent;
+    color: rgba(167, 139, 250, 0.7);
+    font-size: 0.65rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s;
+
+    &:hover {
+      background: rgba(167, 139, 250, 0.1);
+      color: #a78bfa;
+    }
+  }
+}
+
+.match-list {
+  flex: 1;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 400px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.match-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 0.75rem;
+
+  &:last-child { border-bottom: none; }
+
+  &--matched {
+    .match-row__status { color: #4ade80; }
+  }
+
+  &--ambiguous {
+    .match-row__status { color: #fbbf24; }
+  }
+
+  &--unmatched {
+    .match-row__status { color: rgba(255, 255, 255, 0.25); }
+  }
+
+  &--extra {
+    background: rgba(255, 255, 255, 0.02);
+    .match-row__status { color: rgba(255, 255, 255, 0.2); }
+  }
+
+  &__status {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  &__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.75);
+
+    &--file {
+      color: rgba(255, 255, 255, 0.4);
+      font-style: italic;
+    }
+  }
+
+  &__arrow {
+    color: rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+  }
+
+  &__select {
+    width: 160px;
+    flex-shrink: 0;
+    padding: 3px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.7rem;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+
+    &:focus {
+      border-color: rgba(167, 139, 250, 0.4);
+    }
+
+    option {
+      background: #1e1e38;
+      color: #fff;
+    }
+  }
+
+  &__hint {
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.65rem;
+    font-style: italic;
+    flex-shrink: 0;
+  }
+}
+
+.match-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.75rem;
+  min-height: 120px;
 }
 
 // ============================================================================

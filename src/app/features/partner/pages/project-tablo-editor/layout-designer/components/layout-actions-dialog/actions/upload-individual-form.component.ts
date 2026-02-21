@@ -25,134 +25,45 @@ export interface UploadIndividualFormData {
   standalone: true,
   imports: [FormsModule, LucideAngularModule],
   template: `
-    <div class="form-columns">
-      <!-- Bal oszlop: csoport neve + kepek -->
-      <div class="form-col">
-        <div class="form__field">
-          <label class="form__label">
-            <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
-            Csoport neve *
-          </label>
-          <input
-            type="text"
-            class="form__input"
-            placeholder="pl. Portre"
-            [ngModel]="groupName()"
-            (ngModelChange)="groupName.set($event)"
-          />
-        </div>
-
-        <div class="form__field">
-          <label class="form__label">
-            <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
-            Kepek *
-          </label>
-          <div class="mini-drop"
-            [class.mini-drop--active]="isDragging()"
-            (dragover)="onDragOver($event)"
-            (dragleave)="isDragging.set(false)"
-            (drop)="onDrop($event)"
-            (click)="fileInput.click()">
-            <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp"
-              (change)="onFileInput($event)" class="sr-only" />
-            <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-            <span>{{ files().length > 0 ? 'Tovabbi kepek...' : 'Kepek valasztasa' }}</span>
-          </div>
-        </div>
+    <div class="form">
+      <div class="form__field">
+        <label class="form__label">
+          <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+          Csoport neve *
+        </label>
+        <input
+          type="text"
+          class="form__input"
+          placeholder="pl. Portre"
+          [ngModel]="groupName()"
+          (ngModelChange)="groupName.set($event)"
+        />
       </div>
 
-      <!-- Jobb oszlop: parositas -->
-      <div class="form-col form-col--match">
-        @if (assignments().length > 0) {
-          <div class="match-header">
-            <label class="form__label">
-              <lucide-icon [name]="ICONS.LINK" [size]="14" />
-              Parositas ({{ assignedCount() }}/{{ persons().length }})
-            </label>
-            <button class="match-header__reset" (click)="runMatching()">
-              <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
-              Ujra
-            </button>
-          </div>
-
-          <div class="match-list">
-            @for (a of assignments(); track a.personId) {
-              <div class="match-row" [class.match-row--matched]="a.file && a.confidence >= 80"
-                [class.match-row--ambiguous]="a.file && a.confidence >= 50 && a.confidence < 80"
-                [class.match-row--unmatched]="!a.file">
-                <span class="match-row__status">
-                  @if (a.file && a.confidence >= 80) {
-                    <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
-                  } @else if (a.file && a.confidence >= 50) {
-                    <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
-                  } @else {
-                    <lucide-icon [name]="ICONS.MINUS_CIRCLE" [size]="14" />
-                  }
-                </span>
-                <span class="match-row__name">{{ a.personName }}</span>
-                <span class="match-row__arrow">&#8592;</span>
-                <select class="match-row__select"
-                  [value]="a.file ? getFileKey(a.file) : ''"
-                  (change)="onFileSelect(a.personId, $event)">
-                  <option value="">(nincs kep)</option>
-                  @for (f of files(); track getFileKey(f)) {
-                    <option [value]="getFileKey(f)">{{ f.name }}</option>
-                  }
-                </select>
-              </div>
-            }
-
-            @for (f of unassignedFiles(); track getFileKey(f)) {
-              <div class="match-row match-row--extra">
-                <span class="match-row__status">
-                  <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
-                </span>
-                <span class="match-row__name match-row__name--file">{{ f.name }}</span>
-                <span class="match-row__hint">(nem parosított)</span>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="match-empty">
-            <lucide-icon [name]="ICONS.LINK" [size]="20" />
-            <span>Tolts fel kepeket a parosításhoz</span>
-          </div>
-        }
+      <div class="form__field">
+        <label class="form__label">
+          <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+          Kepek *
+        </label>
+        <div class="mini-drop"
+          [class.mini-drop--active]="isDragging()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="isDragging.set(false)"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()">
+          <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp"
+            (change)="onFileInput($event)" class="sr-only" />
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+          <span>{{ files().length > 0 ? 'Tovabbi kepek...' : 'Kepek valasztasa' }}</span>
+        </div>
       </div>
     </div>
   `,
   styles: [`
-    .form-columns {
-      display: flex;
-      gap: 16px;
-    }
-
-    .form-col {
-      flex: 1;
-      min-width: 0;
+    .form {
       display: flex;
       flex-direction: column;
       gap: 12px;
-
-      &--match {
-        border-left: 1px solid rgba(255, 255, 255, 0.06);
-        padding-left: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-    }
-
-    .match-empty {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: rgba(255, 255, 255, 0.2);
-      font-size: 0.75rem;
-      min-height: 100px;
     }
 
     .form__field {
@@ -208,126 +119,6 @@ export interface UploadIndividualFormData {
         border-color: #a78bfa;
         background: rgba(167, 139, 250, 0.08);
         color: #a78bfa;
-      }
-    }
-
-    .match-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      &__reset {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 2px 8px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 4px;
-        background: transparent;
-        color: rgba(167, 139, 250, 0.7);
-        font-size: 0.65rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.12s;
-
-        &:hover {
-          background: rgba(167, 139, 250, 0.1);
-          color: #a78bfa;
-        }
-      }
-    }
-
-    .match-list {
-      flex: 1;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-      overflow: hidden;
-      max-height: 320px;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .match-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      font-size: 0.75rem;
-
-      &:last-child { border-bottom: none; }
-
-      &--matched {
-        .match-row__status { color: #4ade80; }
-      }
-
-      &--ambiguous {
-        .match-row__status { color: #fbbf24; }
-      }
-
-      &--unmatched {
-        .match-row__status { color: rgba(255, 255, 255, 0.25); }
-      }
-
-      &--extra {
-        background: rgba(255, 255, 255, 0.02);
-        .match-row__status { color: rgba(255, 255, 255, 0.2); }
-      }
-
-      &__status {
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-      }
-
-      &__name {
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: rgba(255, 255, 255, 0.75);
-
-        &--file {
-          color: rgba(255, 255, 255, 0.4);
-          font-style: italic;
-        }
-      }
-
-      &__arrow {
-        color: rgba(255, 255, 255, 0.2);
-        flex-shrink: 0;
-      }
-
-      &__select {
-        width: 160px;
-        flex-shrink: 0;
-        padding: 3px 6px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.04);
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 0.7rem;
-        outline: none;
-        cursor: pointer;
-        -webkit-appearance: none;
-        appearance: none;
-
-        &:focus {
-          border-color: rgba(167, 139, 250, 0.4);
-        }
-
-        option {
-          background: #1e1e38;
-          color: #fff;
-        }
-      }
-
-      &__hint {
-        color: rgba(255, 255, 255, 0.2);
-        font-size: 0.65rem;
-        font-style: italic;
-        flex-shrink: 0;
       }
     }
 

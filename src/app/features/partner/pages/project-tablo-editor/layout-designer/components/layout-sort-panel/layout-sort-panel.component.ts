@@ -155,6 +155,13 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
               {{ finalModeLabel() }}
             </button>
           </div>
+          <button class="action-btn"
+            (click)="openActions.emit()"
+            matTooltip="Batch muveletek"
+            matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.WAND" [size]="16" />
+            <span>Akciok</span>
+          </button>
         </div>
 
         @if (sampleSuccess()) {
@@ -371,6 +378,7 @@ export class LayoutSortPanelComponent {
   protected readonly ICONS = ICONS;
 
   readonly openCustomDialog = output<void>();
+  readonly openActions = output<void>();
   readonly generateSample = output<void>();
   readonly generateFinal = output<void>();
   readonly cycleFinalMode = output<void>();

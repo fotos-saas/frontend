@@ -19,6 +19,8 @@ import { LayoutSortPanelComponent } from './components/layout-sort-panel/layout-
 import { LayoutSortCustomDialogComponent } from './components/layout-sort-custom-dialog/layout-sort-custom-dialog.component';
 import { LayoutPhotoUploadDialogComponent, PhotoUploadPerson, PhotoUploadResult } from './components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
 import { LayoutPhotoBulkDialogComponent } from './components/layout-photo-bulk-dialog/layout-photo-bulk-dialog.component';
+import { LayoutActionsDialogComponent } from './components/layout-actions-dialog/layout-actions-dialog.component';
+import { ActionPersonItem } from './components/layout-actions-dialog/layout-actions.types';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DesignerDocument } from './layout-designer.types';
@@ -34,7 +36,7 @@ import { firstValueFrom } from 'rxjs';
   imports: [
     LayoutToolbarComponent, LayoutCanvasComponent, LayoutSortPanelComponent,
     LayoutSortCustomDialogComponent, LayoutPhotoUploadDialogComponent,
-    LayoutPhotoBulkDialogComponent, LucideAngularModule,
+    LayoutPhotoBulkDialogComponent, LayoutActionsDialogComponent, LucideAngularModule,
   ],
   providers: [
     LayoutDesignerStateService,
@@ -91,6 +93,7 @@ import { firstValueFrom } from 'rxjs';
             [sampleWatermarkOpacity]="ps.sampleWatermarkOpacity()"
             [sampleSuccess]="sampleSuccess()"
             [sampleError]="sampleError()"
+            (openActions)="showActionsDialog.set(true)"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
             (generateFinal)="onGenerateFinal()"
@@ -127,6 +130,14 @@ import { firstValueFrom } from 'rxjs';
             [projectId]="projectId()"
             (close)="showBulkPhotoDialog.set(false)"
             (photosAssigned)="onBulkPhotosAssigned($event)"
+          />
+        }
+        @if (showActionsDialog()) {
+          <app-layout-actions-dialog
+            [persons]="actionPersons()"
+            [preSelectedPersonIds]="preSelectedActionPersonIds()"
+            (close)="showActionsDialog.set(false)"
+            (executed)="onActionsExecuted()"
           />
         }
       }
@@ -224,11 +235,45 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Bulk dialógus megjelenítése */
   readonly showBulkPhotoDialog = signal(false);
 
+  /** Akciók dialógus megjelenítése */
+  readonly showActionsDialog = signal(false);
+
   /** Bulk dialógus személyei */
   readonly bulkDialogPersons = computed<PhotoUploadPerson[]>(() => {
     if (!this.showBulkPhotoDialog()) return [];
     return this.getSelectedImagePersons();
   });
+
+  /** Az osszes image layer szemely összegyujtese poziciokkal */
+  readonly actionPersons = computed<ActionPersonItem[]>(() => {
+    const layers = this.state.layers();
+    const result: ActionPersonItem[] = [];
+    const seen = new Set<number>();
+    for (const l of layers) {
+      if ((l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch) {
+        if (!seen.has(l.personMatch.id)) {
+          seen.add(l.personMatch.id);
+          result.push({
+            id: l.personMatch.id,
+            name: l.personMatch.name,
+            type: l.category === 'teacher-image' ? 'teacher' : 'student',
+            layerName: l.layerName,
+            x: l.editedX ?? l.x,
+            y: l.editedY ?? l.y,
+          });
+        }
+      }
+    }
+    return result;
+  });
+
+  /** A canvason kijelolt image layerek szemely ID-i */
+  readonly preSelectedActionPersonIds = computed<number[]>(() =>
+    this.state.selectedLayers()
+      .filter(l => l.category === 'student-image' || l.category === 'teacher-image')
+      .filter(l => l.personMatch)
+      .map(l => l.personMatch!.id)
+  );
 
   /** Betöltendő snapshot fájl útvonala */
   readonly snapshotPath = input.required<string>();
@@ -309,7 +354,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
     if (event.key === 'Escape') {
       // Ha dialógus nyitva, az ESC azt zárja be (DialogWrapper kezeli)
-      if (this.showPhotoDialog() || this.showBulkPhotoDialog() || this.showCustomDialog()) return;
+      if (this.showPhotoDialog() || this.showBulkPhotoDialog() || this.showCustomDialog() || this.showActionsDialog()) return;
       this.close();
       return;
     }
@@ -434,6 +479,12 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   onBulkPhotosAssigned(_result: { assignedCount: number }): void {
     this.showBulkPhotoDialog.set(false);
     this.refreshPersonsInState();
+  }
+
+  /** Akciók dialógus sikeres végrehajtás → PSD újraolvasás */
+  async onActionsExecuted(): Promise<void> {
+    this.showActionsDialog.set(false);
+    await this.refresh();
   }
 
   /** Floating toolbar-ról: link gomb */

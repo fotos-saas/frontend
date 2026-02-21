@@ -1334,6 +1334,36 @@ export class PhotoshopService {
     }
   }
 
+  /**
+   * Csoport + SO layerek hozzaadasa a megnyitott dokumentumhoz.
+   * Forraskepekbol Smart Object duplicate-ot keszit minden szemelyhez,
+   * es a megadott poziciokra helyezi oket.
+   */
+  async addGroupLayers(params: {
+    groupName: string;
+    sourceFiles: Array<{ filePath: string }>;
+    layers: Array<{
+      layerName: string;
+      group: 'Students' | 'Teachers';
+      x: number;
+      y: number;
+      sourceIndex: number;
+    }>;
+  }): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/add-group-layers.jsx',
+        jsonData: params,
+      });
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX addGroupLayers hiba', err);
+      return { success: false, error: 'Varatlan hiba a csoport layerek hozzaadasakor' };
+    }
+  }
+
   /** Sablon alkalmazása a megnyitott dokumentumra */
   async applyTemplate(
     templateId: string,

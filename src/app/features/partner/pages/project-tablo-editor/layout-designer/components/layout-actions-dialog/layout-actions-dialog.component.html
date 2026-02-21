@@ -1,0 +1,74 @@
+<div class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)">
+  <div class="dialog-panel dialog-panel--md">
+    <!-- Header -->
+    <div class="dialog__header">
+      <lucide-icon [name]="ICONS.WAND" [size]="18" />
+      <h3 class="dialog__title">Akciok</h3>
+      <button class="dialog__close" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="16" />
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="dialog__body">
+      <!-- Akcio valasztas -->
+      <div class="dialog__field">
+        <label class="dialog__label">Akcio</label>
+        <ps-select
+          [options]="actionOptions()"
+          emptyLabel="Valassz akciot..."
+          [(ngModel)]="selectedAction"
+        />
+      </div>
+
+      <!-- Szemelyek kivalasztasa -->
+      <div class="dialog__field">
+        <label class="dialog__label">
+          Szemelyek ({{ selectedPersonIds().length }}/{{ persons().length }})
+        </label>
+        <ps-multi-select-box
+          [options]="personOptions()"
+          [searchable]="true"
+          maxHeight="160px"
+          [(ngModel)]="selectedPersonIds"
+        />
+      </div>
+
+      <!-- Akcio-specifikus form -->
+      @switch (selectedAction()) {
+        @case ('upload-to-everyone') {
+          <app-upload-to-everyone-form #uploadForm />
+        }
+      }
+
+      <!-- Hiba uzenet -->
+      @if (errorMessage(); as err) {
+        <div class="dialog__error">
+          <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
+          {{ err }}
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog__footer">
+      <button class="dialog__btn dialog__btn--ghost" (click)="close.emit()">
+        Megse
+      </button>
+      <button
+        class="dialog__btn dialog__btn--primary"
+        [disabled]="!canExecute()"
+        (click)="onExecute()">
+        @if (executing()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+          Vegrehajtás...
+        } @else {
+          <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+          Vegrehajtas
+        }
+      </button>
+    </div>
+  </div>
+</div>

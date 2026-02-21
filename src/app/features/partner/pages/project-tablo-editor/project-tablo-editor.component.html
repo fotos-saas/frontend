@@ -465,6 +465,7 @@
                 [class.sample-split-btn__toggle--active]="sampleLargeSize()"
                 (click)="toggleLargeSize()"
                 [matTooltip]="sampleLargeSize() ? sampleSizeLarge() + 'px — kattints a kis mérethez' : sampleSizeSmall() + 'px — kattints a nagy mérethez'"
+                matTooltipPosition="right"
               >
                 {{ sampleLargeSize() ? 'HD' : 'SD' }}
               </button>
@@ -473,6 +474,7 @@
                 [class.sample-split-btn__color--white]="sampleWatermarkColor() === 'white'"
                 (click)="toggleWatermarkColor()"
                 [matTooltip]="sampleWatermarkColor() === 'white' ? 'Fehér vízjel — kattints a feketéhez' : 'Fekete vízjel — kattints a fehérhez'"
+                matTooltipPosition="right"
               >
                 @if (sampleWatermarkColor() === 'white') {
                   <lucide-icon [name]="ICONS.SUN" [size]="12" />
@@ -484,6 +486,7 @@
                 class="sample-split-btn__toggle sample-split-btn__opacity"
                 (click)="cycleWatermarkOpacity()"
                 [matTooltip]="'Vízjel átlátszóság: ' + (sampleWatermarkOpacity() * 100) + '% — kattints a váltáshoz'"
+                matTooltipPosition="right"
               >
                 {{ opacityPercent() }}%
               </button>

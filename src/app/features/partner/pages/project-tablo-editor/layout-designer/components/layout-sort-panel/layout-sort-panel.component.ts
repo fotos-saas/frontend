@@ -93,13 +93,15 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
             <button class="sidebar__split-toggle"
               [class.sidebar__split-toggle--active]="sampleLargeSize()"
               (click)="sampleLargeSizeChange.emit(!sampleLargeSize())"
-              [matTooltip]="sampleLargeSize() ? 'Nagy méret — kattints a kis mérethez' : 'Kis méret — kattints a nagy mérethez'">
+              [matTooltip]="sampleLargeSize() ? 'Nagy méret — kattints a kis mérethez' : 'Kis méret — kattints a nagy mérethez'"
+              matTooltipPosition="right">
               {{ sampleLargeSize() ? 'HD' : 'SD' }}
             </button>
             <button class="sidebar__split-toggle sidebar__split-color"
               [class.sidebar__split-color--white]="sampleWatermarkColor() === 'white'"
               (click)="watermarkColorChange.emit(sampleWatermarkColor() === 'white' ? 'black' : 'white')"
-              [matTooltip]="sampleWatermarkColor() === 'white' ? 'Fehér vízjel — kattints a feketéhez' : 'Fekete vízjel — kattints a fehérhez'">
+              [matTooltip]="sampleWatermarkColor() === 'white' ? 'Fehér vízjel — kattints a feketéhez' : 'Fekete vízjel — kattints a fehérhez'"
+              matTooltipPosition="right">
               @if (sampleWatermarkColor() === 'white') {
                 <lucide-icon [name]="ICONS.SUN" [size]="11" />
               } @else {
@@ -108,7 +110,8 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
             </button>
             <button class="sidebar__split-toggle sidebar__split-opacity"
               (click)="opacityChange.emit()"
-              [matTooltip]="'Átlátszóság: ' + opacityPercent() + '% — kattints a váltáshoz'">
+              [matTooltip]="'Átlátszóság: ' + opacityPercent() + '% — kattints a váltáshoz'"
+              matTooltipPosition="right">
               {{ opacityPercent() }}%
             </button>
           </div>

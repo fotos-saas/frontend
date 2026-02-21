@@ -45,53 +45,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
               }
               <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="11" class="source-badge__chevron" />
             </button>
-
-            @if (pickerOpen()) {
-              <div class="source-picker__backdrop" (click)="pickerOpen.set(false)"></div>
-              <div class="source-picker__panel">
-                <div class="source-picker__header">Forrás váltása</div>
-
-                <!-- Élő PSD opció -->
-                <button
-                  class="source-picker__item"
-                  [class.source-picker__item--active]="label === 'Friss PSD beolvasás'"
-                  (click)="onPickLivePsd()"
-                >
-                  <lucide-icon [name]="ICONS.MONITOR" [size]="14" class="source-picker__icon--live" />
-                  <div class="source-picker__item-info">
-                    <span class="source-picker__item-name">Friss PSD beolvasás</span>
-                    <span class="source-picker__item-desc">Photoshop aktuális állapota</span>
-                  </div>
-                </button>
-
-                <div class="source-picker__sep"></div>
-
-                <!-- Snapshot-ok -->
-                @for (snap of snapshots(); track snap.fileName) {
-                  <button
-                    class="source-picker__item"
-                    [class.source-picker__item--active]="label === snap.snapshotName"
-                    [disabled]="switchingSnapshot()"
-                    (click)="onPickSnapshot(snap)"
-                  >
-                    <lucide-icon [name]="ICONS.HISTORY" [size]="14" />
-                    <div class="source-picker__item-info">
-                      <span class="source-picker__item-name">{{ snap.snapshotName }}</span>
-                      <span class="source-picker__item-meta">
-                        {{ formatDate(snap.createdAt) }} · {{ snap.personCount }} layer
-                      </span>
-                    </div>
-                    @if (label === snap.snapshotName) {
-                      <lucide-icon [name]="ICONS.CHECK" [size]="14" class="source-picker__check" />
-                    }
-                  </button>
-                }
-
-                @if (snapshots().length === 0) {
-                  <div class="source-picker__empty">Nincs elérhető pillanatkép</div>
-                }
-              </div>
-            }
           </div>
         }
 
@@ -177,6 +130,54 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
 
         }
       </div>
+
+      <!-- Source picker dropdown (toolbar szintjén, overflow: hidden miatt) -->
+      @if (pickerOpen()) {
+        <div class="source-picker__backdrop" (click)="pickerOpen.set(false)"></div>
+        <div class="source-picker__panel">
+          <div class="source-picker__header">Forrás váltása</div>
+
+          <!-- Élő PSD opció -->
+          <button
+            class="source-picker__item"
+            [class.source-picker__item--active]="state.sourceLabel() === 'Friss PSD beolvasás'"
+            (click)="onPickLivePsd()"
+          >
+            <lucide-icon [name]="ICONS.MONITOR" [size]="14" class="source-picker__icon--live" />
+            <div class="source-picker__item-info">
+              <span class="source-picker__item-name">Friss PSD beolvasás</span>
+              <span class="source-picker__item-desc">Photoshop aktuális állapota</span>
+            </div>
+          </button>
+
+          <div class="source-picker__sep"></div>
+
+          <!-- Snapshot-ok -->
+          @for (snap of snapshots(); track snap.fileName) {
+            <button
+              class="source-picker__item"
+              [class.source-picker__item--active]="state.sourceLabel() === snap.snapshotName"
+              [disabled]="switchingSnapshot()"
+              (click)="onPickSnapshot(snap)"
+            >
+              <lucide-icon [name]="ICONS.HISTORY" [size]="14" />
+              <div class="source-picker__item-info">
+                <span class="source-picker__item-name">{{ snap.snapshotName }}</span>
+                <span class="source-picker__item-meta">
+                  {{ formatDate(snap.createdAt) }} · {{ snap.personCount }} layer
+                </span>
+              </div>
+              @if (state.sourceLabel() === snap.snapshotName) {
+                <lucide-icon [name]="ICONS.CHECK" [size]="14" class="source-picker__check" />
+              }
+            </button>
+          }
+
+          @if (snapshots().length === 0) {
+            <div class="source-picker__empty">Nincs elérhető pillanatkép</div>
+          }
+        </div>
+      }
 
       <!-- Dropdown: elosztás + sorok/oszlopok/rács (toolbar szintjén, overflow miatt) -->
       @if (state.hasSelection()) {
@@ -359,8 +360,9 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
 
     .source-picker__panel {
       position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
+      top: 100%;
+      left: 80px;
+      margin-top: 4px;
       background: #2a2a4a;
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 10px;

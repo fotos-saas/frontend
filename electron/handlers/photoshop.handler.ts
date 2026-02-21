@@ -309,15 +309,10 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const psPath = psStore.get('photoshopPath', null);
 
       if (process.platform === 'darwin') {
-        if (psPath) {
-          // macOS: open -g -a Photoshop file.psd (-g = hatterben, nem hoz eloterbe)
-          const child = execFile('open', ['-g', '-a', psPath, filePath]);
-          child.unref();
-        } else {
-          // Nincs PS beallitva, megnyitas alapertelmezett alkalmazassal (hatterben)
-          const child = execFile('open', ['-g', filePath]);
-          child.unref();
-        }
+        // macOS: open file.psd — ha mar nyitva van PS-ben, csak fokuszal ra (nem duplikálja)
+        // NEM hasznalunk -a flag-et, mert az uj peldanykent nyitja meg
+        const child = execFile('open', [filePath]);
+        child.unref();
       } else {
         if (psPath) {
           // Windows: Photoshop.exe file.psd

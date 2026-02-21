@@ -11,6 +11,7 @@
 
 .dialog-panel {
   width: 640px;
+  max-width: 640px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -19,10 +20,12 @@
   border-radius: 12px;
   overflow: hidden;
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
   &--wide {
-    width: min(800px, 95vw);
+    width: 800px;
+    max-width: min(800px, 95vw);
   }
 }
 

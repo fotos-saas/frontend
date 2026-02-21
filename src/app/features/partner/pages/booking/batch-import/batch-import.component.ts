@@ -207,7 +207,7 @@ export class BatchImportComponent {
 
   private loadSessionTypes(): void {
     this.service.getSessionTypes().pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(res => this.sessionTypes.set(res.data));
+      .subscribe((res: any) => this.sessionTypes.set(res.data?.session_types ?? res.data ?? []));
   }
 
   onDragOver(e: DragEvent): void { e.preventDefault(); this.dragOver.set(true); }

@@ -148,8 +148,8 @@ export class BookingPageSettingsComponent implements OnInit {
         next: (res) => {
           const d = res.data;
           if (d.booking_slug) this.slug.set(d.booking_slug);
-          if (d.page_settings) {
-            const ps = d.page_settings;
+          if (d.booking_page_settings) {
+            const ps = d.booking_page_settings;
             if (ps.logo_url) this.logoUrl.set(ps.logo_url);
             if (ps.primary_color) this.primaryColor.set(ps.primary_color);
             if (ps.background_image_url) this.bgImageUrl.set(ps.background_image_url);
@@ -169,7 +169,7 @@ export class BookingPageSettingsComponent implements OnInit {
     this.successMsg.set('');
     const payload: Partial<BookingPageSettings> = {
       booking_slug: this.slug() || null,
-      page_settings: {
+      booking_page_settings: {
         logo_url: this.logoUrl() || undefined,
         primary_color: this.primaryColor() || undefined,
         background_image_url: this.bgImageUrl() || undefined,

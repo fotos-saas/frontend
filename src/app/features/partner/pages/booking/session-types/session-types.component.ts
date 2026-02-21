@@ -43,7 +43,7 @@ export class SessionTypesComponent implements OnInit {
     this.bookingService.getSessionTypes()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => { this.sessionTypes.set(res.data); this.loading.set(false); },
+        next: (res: any) => { this.sessionTypes.set(res.data?.session_types ?? res.data ?? []); this.loading.set(false); },
         error: () => this.loading.set(false),
       });
   }

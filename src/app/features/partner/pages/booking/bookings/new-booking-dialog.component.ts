@@ -47,7 +47,10 @@ export class NewBookingDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.bookingService.getSessionTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => this.sessionTypes.set(res.data.filter(t => t.is_active)),
+      next: (res: any) => {
+        const types = res.data?.session_types ?? res.data ?? [];
+        this.sessionTypes.set(types.filter((t: any) => t.is_active));
+      },
     });
   }
 

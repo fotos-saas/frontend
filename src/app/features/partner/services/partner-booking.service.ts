@@ -143,18 +143,18 @@ export class PartnerBookingService {
   }
 
   getNoShowStats(startDate: string, endDate: string): Observable<{ data: NoShowStats }> {
-    return this.http.get<{ data: NoShowStats }>(`${this.baseUrl}/stats/no-shows`, {
+    return this.http.get<{ data: NoShowStats }>(`${this.baseUrl}/stats/no-show`, {
       params: { start_date: startDate, end_date: endDate }
     });
   }
 
   // === PAGE SETTINGS ===
   getPageSettings(): Observable<{ data: BookingPageSettings }> {
-    return this.http.get<{ data: BookingPageSettings }>(`${this.baseUrl}/page`);
+    return this.http.get<{ data: BookingPageSettings }>(`${this.baseUrl}/page-settings`);
   }
 
   updatePageSettings(data: Partial<BookingPageSettings>): Observable<{ data: BookingPageSettings }> {
-    return this.http.put<{ data: BookingPageSettings }>(`${this.baseUrl}/page`, data);
+    return this.http.put<{ data: BookingPageSettings }>(`${this.baseUrl}/page-settings`, data);
   }
 
   // === BATCH IMPORT ===

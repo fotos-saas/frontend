@@ -189,9 +189,9 @@ export class BookingListComponent implements OnInit {
     this.bookingService.getBookings(params)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => {
-          this.bookings.set(res.data);
-          this.totalPages.set((res.meta as { last_page?: number })?.last_page ?? 1);
+        next: (res: any) => {
+          this.bookings.set(res.data?.items ?? res.data ?? []);
+          this.totalPages.set(res.data?.pagination?.last_page ?? 1);
           this.filterState.loading.set(false);
         },
         error: () => this.filterState.loading.set(false),

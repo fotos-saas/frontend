@@ -37,7 +37,7 @@ interface PeriodOption {
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon"><lucide-icon [name]="ICONS.CALENDAR" [size]="20" /></div>
-            <div class="stat-value">{{ stats()!.totals.bookings }}</div>
+            <div class="stat-value">{{ stats()!.totals.total }}</div>
             <div class="stat-label">Osszes foglalas</div>
           </div>
           <div class="stat-card stat-card--green">
@@ -57,95 +57,51 @@ interface PeriodOption {
           </div>
           <div class="stat-card stat-card--amber">
             <div class="stat-icon"><lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" /></div>
-            <div class="stat-value">{{ stats()!.no_show_rate | number:'1.0-1' }}%</div>
+            <div class="stat-value">{{ stats()!.rates.no_show_rate | number:'1.0-1' }}%</div>
             <div class="stat-label">Nem jelent meg</div>
           </div>
         </div>
 
-        <!-- Kapacitas -->
+        <!-- Aranyok -->
         <div class="section-block">
-          <h2>Kapacitas</h2>
-          <div class="capacity-row">
-            <div class="capacity-info">
-              <span class="cap-used">{{ stats()!.capacity.used_slots }}</span>
-              <span class="cap-sep">/</span>
-              <span class="cap-total">{{ stats()!.capacity.total_slots }} slot</span>
+          <h2>Aranyok</h2>
+          <div class="kpi-grid">
+            <div class="kpi-item">
+              <span class="kpi-label">Teljesitesi rata</span>
+              <span class="kpi-value">{{ stats()!.rates.completion_rate | number:'1.0-1' }}%</span>
             </div>
-            <div class="capacity-bar">
-              <div class="capacity-fill" [style.width.%]="stats()!.capacity.percentage"></div>
+            <div class="kpi-item">
+              <span class="kpi-label">Lemondasi rata</span>
+              <span class="kpi-value">{{ stats()!.rates.cancellation_rate | number:'1.0-1' }}%</span>
             </div>
-            <span class="cap-pct">{{ stats()!.capacity.percentage | number:'1.0-0' }}%</span>
+            <div class="kpi-item">
+              <span class="kpi-label">No-show rata</span>
+              <span class="kpi-value">{{ stats()!.rates.no_show_rate | number:'1.0-1' }}%</span>
+            </div>
+            @if (stats()!.avg_student_count) {
+              <div class="kpi-item">
+                <span class="kpi-label">Atlagos diakletsam</span>
+                <span class="kpi-value">{{ stats()!.avg_student_count | number:'1.0-1' }}</span>
+              </div>
+            }
           </div>
         </div>
 
-        <!-- Bevetel -->
-        <div class="section-block">
-          <h2>Bevetel</h2>
-          <div class="revenue-row">
-            <div class="revenue-item">
-              <span class="revenue-label">Visszaigazolt</span>
-              <span class="revenue-value">{{ stats()!.revenue.confirmed | number:'1.0-0' }} Ft</span>
-            </div>
-            <div class="revenue-item">
-              <span class="revenue-label">Elorejelzes</span>
-              <span class="revenue-value revenue-value--forecast">{{ stats()!.revenue.forecast | number:'1.0-0' }} Ft</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Top fotoszasi tipusok -->
+        <!-- Nepszeru tipusok -->
         @if (stats()!.by_session_type.length) {
           <div class="section-block">
             <h2>Nepszeru tipusok</h2>
             <div class="session-type-list">
-              @for (st of stats()!.by_session_type; track st.key) {
+              @for (st of stats()!.by_session_type; track st.name) {
                 <div class="session-type-row">
+                  <span class="st-dot" [style.background]="st.color"></span>
                   <span class="st-name">{{ st.name }}</span>
                   <span class="st-count">{{ st.count }} db</span>
-                  <span class="st-revenue">{{ st.revenue | number:'1.0-0' }} Ft</span>
                 </div>
               }
             </div>
           </div>
         }
-
-        <!-- Napi bontasu mini chart -->
-        @if (stats()!.daily_breakdown.length) {
-          <div class="section-block">
-            <h2>Napi bontas</h2>
-            <div class="daily-chart">
-              @for (day of stats()!.daily_breakdown; track day.date) {
-                <div class="day-bar-wrapper">
-                  <div class="day-bar" [style.height.%]="day.percentage || 2"></div>
-                  <span class="day-label">{{ formatDayLabel(day.date) }}</span>
-                </div>
-              }
-            </div>
-          </div>
-        }
-
-        <!-- Egyeb mutatoszamok -->
-        <div class="section-block">
-          <h2>Egyeb mutatoszamok</h2>
-          <div class="kpi-grid">
-            <div class="kpi-item">
-              <span class="kpi-label">Atlagos elorejeles (nap)</span>
-              <span class="kpi-value">{{ stats()!.avg_lead_time_days | number:'1.0-1' }}</span>
-            </div>
-            <div class="kpi-item">
-              <span class="kpi-label">Konverzios rata</span>
-              <span class="kpi-value">{{ stats()!.conversion_rate | number:'1.0-1' }}%</span>
-            </div>
-            <div class="kpi-item">
-              <span class="kpi-label">Legnepszerubb nap</span>
-              <span class="kpi-value">{{ stats()!.busiest_day }}</span>
-            </div>
-            <div class="kpi-item">
-              <span class="kpi-label">Diakok osszesen</span>
-              <span class="kpi-value">{{ stats()!.totals.students_total }}</span>
-            </div>
-          </div>
-        </div>
       }
     </div>
   `,
@@ -182,9 +138,9 @@ interface PeriodOption {
     .revenue-value--forecast { color: #6b7280; }
     .session-type-list { display: flex; flex-direction: column; gap: 8px; }
     .session-type-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #f9fafb; border-radius: 8px; }
-    .st-name { font-weight: 500; }
+    .st-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .st-name { font-weight: 500; flex: 1; }
     .st-count { color: #6b7280; font-size: 0.85rem; }
-    .st-revenue { font-weight: 600; font-size: 0.9rem; }
     .daily-chart { display: flex; align-items: flex-end; gap: 4px; height: 120px; padding-top: 8px; }
     .day-bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
     .day-bar { width: 100%; max-width: 28px; background: #7c3aed; border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.3s ease; }
@@ -219,11 +175,6 @@ export class BookingStatsComponent implements OnInit {
     const value = +(event.target as HTMLSelectElement).value;
     this.selectedDays.set(value);
     this.loadStats();
-  }
-
-  formatDayLabel(dateStr: string): string {
-    const d = new Date(dateStr);
-    return `${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getDate().toString().padStart(2, '0')}`;
   }
 
   private loadStats(): void {

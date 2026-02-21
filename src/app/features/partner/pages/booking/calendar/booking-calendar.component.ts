@@ -6,12 +6,11 @@ import {
   effect,
   DestroyRef,
 } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { environment } from '../../../../../../environments/environment';
 import { CalendarResponse } from '../../../models/booking.models';
+import { PartnerBookingService } from '../../../services/partner-booking.service';
 import { BookingCalendarStateService } from '../../../services/booking-calendar-state.service';
 import { DailyViewComponent } from './views/daily-view.component';
 import { WeeklyViewComponent } from './views/weekly-view.component';
@@ -174,9 +173,8 @@ export class BookingCalendarComponent {
   readonly calendarData = signal<CalendarResponse | null>(null);
   readonly loading = signal(false);
 
-  private readonly http = inject(HttpClient);
+  private readonly bookingService = inject(PartnerBookingService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly baseUrl = `${environment.apiUrl}/partner`;
 
   constructor() {
     // Dátum tartomány változáskor automatikus betöltés
@@ -198,14 +196,12 @@ export class BookingCalendarComponent {
 
   private loadCalendar(start: string, end: string): void {
     this.loading.set(true);
-    this.http
-      .get<CalendarResponse>(`${this.baseUrl}/bookings/calendar`, {
-        params: { start, end },
-      })
+    this.bookingService
+      .getCalendar(start, end, this.calendarState.currentView())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (data) => {
-          this.calendarData.set(data);
+        next: (res) => {
+          this.calendarData.set(res.data);
           this.loading.set(false);
         },
         error: () => {

@@ -339,39 +339,26 @@ export interface BatchImportExecuteRow {
 export interface BookingStats {
   period: { start: string; end: string };
   totals: {
-    bookings: number;
+    total: number;
+    requested: number;
     confirmed: number;
     completed: number;
     canceled: number;
     no_show: number;
-    students_total: number;
   };
-  capacity: {
-    total_slots: number;
-    used_slots: number;
-    percentage: number;
-    forecast_percentage: number;
+  rates: {
+    completion_rate: number;
+    cancellation_rate: number;
+    no_show_rate: number;
   };
-  revenue: {
-    confirmed: number;
-    forecast: number;
-  };
-  no_show_rate: number;
-  avg_lead_time_days: number;
-  top_session_type: string;
-  busiest_day: string;
-  conversion_rate: number;
+  by_source: Record<string, number>;
   by_session_type: {
-    key: string;
     name: string;
+    color: string;
     count: number;
-    revenue: number;
   }[];
-  daily_breakdown: {
-    date: string;
-    count: number;
-    percentage: number;
-  }[];
+  weekly_breakdown: Record<string, number>;
+  avg_student_count: number | null;
 }
 
 export interface NoShowStats {
@@ -394,7 +381,7 @@ export interface NoShowStats {
 
 export interface BookingPageSettings {
   booking_slug: string | null;
-  page_settings: {
+  booking_page_settings: {
     logo_url?: string;
     primary_color?: string;
     background_image_url?: string;
@@ -403,6 +390,7 @@ export interface BookingPageSettings {
     show_price?: boolean;
     dark_mode?: boolean;
   } | null;
+  booking_url?: string | null;
 }
 
 // ============================================================
@@ -425,7 +413,7 @@ export interface GoogleCalendarStatus {
 export interface PublicBookingPartner {
   name: string;
   slug: string;
-  page_settings: BookingPageSettings['page_settings'];
+  page_settings: BookingPageSettings['booking_page_settings'];
 }
 
 export interface PublicAvailableDate {

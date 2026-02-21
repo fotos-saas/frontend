@@ -23,9 +23,6 @@ export class LayoutDesignerSortService {
   private readonly state = inject(LayoutDesignerStateService);
   private readonly partnerService = inject(PartnerService);
 
-  /** Panel láthatóság */
-  readonly panelOpen = signal(false);
-
   /** Loading state (AI hívás) */
   readonly sorting = signal(false);
 
@@ -50,8 +47,6 @@ export class LayoutDesignerSortService {
     );
 
     const names = sorted.map(l => l.personMatch?.name ?? '');
-    console.log('[SortService] ABC sorrend:', names);
-    console.log('[SortService] Eredeti sorrend:', images.map(l => l.personMatch?.name));
     this.applySort(images, names);
     this.lastResult.set(`ABC sorrendbe rendezve (${images.length} elem)`);
   }
@@ -174,16 +169,9 @@ export class LayoutDesignerSortService {
       this.state.selectedLayerIds(), this.state.layers(),
     );
 
-    console.log('[SortService] Slots:', slots);
-    console.log('[SortService] Ordered names:', orderedNames);
-    console.log('[SortService] Name→Layer map keys:', [...nameToLayer.keys()]);
-
     for (let i = 0; i < Math.min(orderedNames.length, slots.length); i++) {
       const layer = nameToLayer.get(orderedNames[i]);
-      if (!layer) {
-        console.warn('[SortService] Név nem található a map-ban:', orderedNames[i]);
-        continue;
-      }
+      if (!layer) continue;
 
       const slot = slots[i];
       const deltaX = slot.x - (layer.editedX ?? layer.x);

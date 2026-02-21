@@ -63,8 +63,8 @@ import { DesignerDocument } from './layout-designer.types';
           (closeClicked)="close()"
         />
         <div class="layout-designer__content">
-          <app-layout-canvas />
           <app-layout-sort-panel (openCustomDialog)="showCustomDialog.set(true)" />
+          <app-layout-canvas />
         </div>
         @if (showCustomDialog()) {
           <app-layout-sort-custom-dialog (close)="showCustomDialog.set(false)" />

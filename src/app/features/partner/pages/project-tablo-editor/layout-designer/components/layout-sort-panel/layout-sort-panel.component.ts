@@ -6,187 +6,163 @@ import { LayoutDesignerStateService } from '../../layout-designer-state.service'
 import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
 
 /**
- * Rendezés panel — jobb oldalon csúszó panel a rendezési akciókhoz.
+ * Fix bal oldali sidebar a Layout Designerben.
+ * Rendezési szekció — később bővíthető más szekciókkal.
  */
 @Component({
   selector: 'app-layout-sort-panel',
   standalone: true,
   imports: [LucideAngularModule, MatTooltipModule],
   template: `
-    <div class="sort-panel" [class.sort-panel--open]="sortService.panelOpen()">
-      <!-- Fejléc -->
-      <div class="sort-panel__header">
-        <span class="sort-panel__title">Rendezés</span>
-        <button class="sort-panel__close" (click)="sortService.panelOpen.set(false)"
-          matTooltip="Panel bezárása">
-          <lucide-icon [name]="ICONS.X" [size]="16" />
-        </button>
-      </div>
+    <aside class="sidebar">
+      <!-- Rendezés szekció -->
+      <div class="sidebar__section">
+        <div class="sidebar__section-header">
+          <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="14" />
+          <span>Rendezés</span>
+        </div>
 
-      <!-- Kijelölés info -->
-      <div class="sort-panel__info">
-        {{ state.selectionCount() }} kijelölve
-      </div>
+        <!-- Kijelölés info -->
+        @if (state.hasSelection()) {
+          <div class="sidebar__info">
+            {{ state.selectionCount() }} kijelölve
+          </div>
+        }
 
-      <!-- Olvasási irány toggle -->
-      <div class="sort-panel__section">
-        <span class="sort-panel__label">Olvasási irány</span>
-        <div class="sort-panel__toggle">
-          <button class="toggle-btn"
-            [class.toggle-btn--active]="sortService.gridPattern() === 'ltr'"
-            (click)="sortService.gridPattern.set('ltr')">
-            Balról jobbra &#8595;
+        <!-- Olvasási irány toggle -->
+        <div class="sidebar__field">
+          <span class="sidebar__label">Olvasási irány</span>
+          <div class="sidebar__toggle">
+            <button class="toggle-btn"
+              [class.toggle-btn--active]="sortService.gridPattern() === 'ltr'"
+              (click)="sortService.gridPattern.set('ltr')">
+              &#8595; LTR
+            </button>
+            <button class="toggle-btn"
+              [class.toggle-btn--active]="sortService.gridPattern() === 'u-shape'"
+              (click)="sortService.gridPattern.set('u-shape')">
+              &#8617; U
+            </button>
+          </div>
+        </div>
+
+        <!-- Rendezési gombok -->
+        <div class="sidebar__actions">
+          <button class="action-btn"
+            [disabled]="sortService.sorting() || state.selectionCount() < 2"
+            (click)="sortService.sortByAbc()"
+            matTooltip="Magyar ABC sorrend">
+            <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="16" />
+            <span>ABC</span>
           </button>
-          <button class="toggle-btn"
-            [class.toggle-btn--active]="sortService.gridPattern() === 'u-shape'"
-            (click)="sortService.gridPattern.set('u-shape')">
-            U-alakzat &#8617;
+          <button class="action-btn"
+            [disabled]="sortService.sorting() || state.selectionCount() < 2"
+            (click)="sortService.sortByGender(true)"
+            matTooltip="Fiúk elöl, lányok hátul">
+            <lucide-icon [name]="ICONS.USERS" [size]="16" />
+            <span>Fiúk</span>
+          </button>
+          <button class="action-btn"
+            [disabled]="sortService.sorting() || state.selectionCount() < 2"
+            (click)="sortService.sortByGender(false)"
+            matTooltip="Lányok elöl, fiúk hátul">
+            <lucide-icon [name]="ICONS.USERS" [size]="16" />
+            <span>Lányok</span>
+          </button>
+          <button class="action-btn"
+            [disabled]="sortService.sorting() || state.selectionCount() < 2"
+            (click)="openCustomDialog.emit()"
+            matTooltip="Egyedi névlista szerinti sorrend">
+            <lucide-icon [name]="ICONS.LIST_ORDERED" [size]="16" />
+            <span>Egyedi</span>
           </button>
         </div>
+
+        <!-- Loading / eredmény -->
+        @if (sortService.sorting()) {
+          <div class="sidebar__status sidebar__status--loading">
+            <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+            AI feldolgozás...
+          </div>
+        }
+        @if (sortService.lastResult(); as result) {
+          <div class="sidebar__status sidebar__status--success">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            {{ result }}
+          </div>
+        }
       </div>
-
-      <!-- Rendezési gombok -->
-      <div class="sort-panel__section">
-        <span class="sort-panel__label">Rendezési mód</span>
-        <div class="sort-panel__actions">
-          <button class="sort-btn"
-            [disabled]="sortService.sorting() || state.selectionCount() < 2"
-            (click)="sortService.sortByAbc()">
-            <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="18" />
-            <span>Magyar ABC</span>
-          </button>
-          <button class="sort-btn"
-            [disabled]="sortService.sorting() || state.selectionCount() < 2"
-            (click)="sortService.sortByGender(true)">
-            <lucide-icon [name]="ICONS.USERS" [size]="18" />
-            <span>Fiúk elöl</span>
-          </button>
-          <button class="sort-btn"
-            [disabled]="sortService.sorting() || state.selectionCount() < 2"
-            (click)="sortService.sortByGender(false)">
-            <lucide-icon [name]="ICONS.USERS" [size]="18" />
-            <span>Lányok elöl</span>
-          </button>
-          <button class="sort-btn"
-            [disabled]="sortService.sorting() || state.selectionCount() < 2"
-            (click)="openCustomDialog.emit()">
-            <lucide-icon [name]="ICONS.LIST_ORDERED" [size]="18" />
-            <span>Egyedi sorrend...</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Loading state -->
-      @if (sortService.sorting()) {
-        <div class="sort-panel__loading">
-          <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-          <span>AI feldolgozás...</span>
-        </div>
-      }
-
-      <!-- Eredmény -->
-      @if (sortService.lastResult(); as result) {
-        <div class="sort-panel__result">
-          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-          <span>{{ result }}</span>
-        </div>
-      }
-    </div>
+    </aside>
   `,
   styles: [`
-    .sort-panel {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 280px;
-      background: #2a2a4a;
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #1e1e38;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       flex-direction: column;
-      z-index: 30;
-      transform: translateX(-100%);
-      transition: transform 0.2s ease;
       overflow-y: auto;
-
-      &--open { transform: translateX(0); }
     }
 
-    .sort-panel__header {
+    .sidebar__section {
+      padding: 12px;
+    }
+
+    .sidebar__section-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .sort-panel__title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #ffffff;
-    }
-
-    .sort-panel__close {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border: none;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      color: rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      transition: all 0.12s ease;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.15);
-        color: #ffffff;
-      }
-    }
-
-    .sort-panel__info {
-      padding: 12px 16px;
-      font-size: 0.8rem;
-      color: #a78bfa;
-      font-weight: 600;
-    }
-
-    .sort-panel__section {
-      padding: 0 16px 16px;
-    }
-
-    .sort-panel__label {
-      display: block;
+      gap: 6px;
       font-size: 0.7rem;
-      font-weight: 600;
+      font-weight: 700;
       color: rgba(255, 255, 255, 0.4);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
     }
 
-    .sort-panel__toggle {
+    .sidebar__info {
+      font-size: 0.75rem;
+      color: #a78bfa;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .sidebar__field {
+      margin-bottom: 10px;
+    }
+
+    .sidebar__label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .sidebar__toggle {
       display: flex;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 6px;
       padding: 2px;
     }
 
     .toggle-btn {
       flex: 1;
-      padding: 6px 8px;
+      padding: 4px 6px;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       background: transparent;
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.75rem;
-      font-weight: 500;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 0.7rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.12s ease;
 
       &:hover:not(.toggle-btn--active) {
-        color: rgba(255, 255, 255, 0.8);
+        color: rgba(255, 255, 255, 0.7);
       }
 
       &--active {
@@ -195,56 +171,49 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       }
     }
 
-    .sort-panel__actions {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .sidebar__actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
     }
 
-    .sort-btn {
+    .action-btn {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.04);
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.8rem;
+      gap: 4px;
+      padding: 8px 4px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.65rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.12s ease;
-      text-align: left;
 
       &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
         color: #ffffff;
       }
 
       &:disabled {
-        opacity: 0.3;
+        opacity: 0.25;
         cursor: not-allowed;
       }
     }
 
-    .sort-panel__loading {
+    .sidebar__status {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      color: #a78bfa;
-      font-size: 0.8rem;
-    }
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 0.7rem;
+      line-height: 1.3;
 
-    .sort-panel__result {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      color: #4ade80;
-      font-size: 0.8rem;
+      &--loading { color: #a78bfa; }
+      &--success { color: #4ade80; }
     }
 
     .spin {

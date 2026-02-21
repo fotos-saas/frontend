@@ -373,13 +373,30 @@ function parseArgs() {
   };
 }
 
-// --- Minden layer unlinkelese a dokumentumban ---
-// DOM unlink() — egyszeruen vegigmegy minden layeren.
-function unlinkAllLayers(doc) {
+// --- Link csoportok mentes + unlink + visszaallitas ---
+// A rendezesek (arrange-names, arrange-grid) elott kell, mert a translate
+// a linkelt tarsakat is elmozditja.
+//
+// Mukodes:
+//   1. saveLinkGroups(): minden layert bejar, a linkelt layerek layer.id-jat
+//      csoport kulcs ala gyujti, majd DOM unlink()-kel mindent szethuz
+//   2. restoreLinkGroups(): a mentett layer.id csoportokat multi-select +
+//      linkSelectedLayers-szel visszaallitja
+//
+// A linkedLayerIDs lista tartalma — a PS belso link azonositoi — CSAK
+// csoport kulcskent szolgal (kik tartoznak ossze). A restore layer.id-vel
+// dolgozik (putIdentifier), ami megbizhato.
+
+function saveLinkGroups(doc, logFn) {
+  var linkMap = {};   // linkGroupKey → [layer.id, ...]
+  var allLayers = [];
+
   function walk(container) {
     try {
       for (var i = 0; i < container.artLayers.length; i++) {
-        try { container.artLayers[i].unlink(); } catch (e) { /* */ }
+        var layer = container.artLayers[i];
+        allLayers.push(layer);
+        _collectLayerLinkInfo(layer, linkMap);
       }
     } catch (e) { /* */ }
     try {
@@ -388,78 +405,118 @@ function unlinkAllLayers(doc) {
       }
     } catch (e) { /* */ }
   }
+
   walk(doc);
+
+  // Egyedi link csoportok kinyerese (csak 2+ tagu csoportok)
+  var groups = [];
+  var seen = {};
+  for (var key in linkMap) {
+    if (!linkMap.hasOwnProperty(key)) continue;
+    if (seen[key]) continue;
+    seen[key] = true;
+    if (linkMap[key].length >= 2) {
+      groups.push(linkMap[key]);
+    }
+  }
+
+  if (logFn) {
+    logFn("[JSX] saveLinkGroups: " + allLayers.length + " layer bejarva, " + groups.length + " link csoport talalva");
+    for (var dbg = 0; dbg < groups.length; dbg++) {
+      logFn("[JSX]   csoport " + dbg + ": layer.id-k = [" + groups[dbg].join(",") + "]");
+    }
+  }
+
+  // DOM unlink() minden layeren
+  for (var u = 0; u < allLayers.length; u++) {
+    try { allLayers[u].unlink(); } catch (e) { /* */ }
+  }
+
+  return groups;
 }
 
-// --- Azonos nevu kep+nev layerek osszelinkelese ---
-// Az Images es Names csoportokban azonos nevet keresunk,
-// majd a talaltakat osszelinkeljuk (ActionManager multi-select + link).
-function relinkImageNamePairs(doc) {
-  var imgGroups = [["Images", "Students"], ["Images", "Teachers"]];
-  var nameGroups = [["Names", "Students"], ["Names", "Teachers"]];
+// Egy layer link info-janak kiolvasasa
+// A linkedLayerIDs listat csoport kulcskent hasznaljuk,
+// de a csoportba a layer SAJAT layer.id-jat tesszuk.
+function _collectLayerLinkInfo(layer, linkMap) {
+  try {
+    selectLayerById(layer.id);
+    var ref = new ActionReference();
+    ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+    var desc = executeActionGet(ref);
 
-  // Osszes nev layer osszegyujtese — nev → layer id
-  var nameMap = {};  // layerName → [layerId, ...]
-  for (var n = 0; n < nameGroups.length; n++) {
-    var nGrp = getGroupByPath(doc, nameGroups[n]);
-    if (!nGrp) continue;
+    var linkedKey = stringIDToTypeID("linkedLayerIDs");
+    if (!desc.hasKey(linkedKey)) return;
+
+    var idList = desc.getList(linkedKey);
+    if (idList.count < 2) return;
+
+    // linkedLayerIDs rendezett → csoport kulcs
+    var linkedIds = [];
+    for (var i = 0; i < idList.count; i++) {
+      linkedIds.push(idList.getInteger(i));
+    }
+    linkedIds.sort();
+    var key = linkedIds.join(",");
+
+    if (!linkMap[key]) {
+      linkMap[key] = [];
+    }
+    // layer.id hozzaadasa (duplikat vedelem)
+    var found = false;
+    for (var d = 0; d < linkMap[key].length; d++) {
+      if (linkMap[key][d] === layer.id) { found = true; break; }
+    }
+    if (!found) {
+      linkMap[key].push(layer.id);
+    }
+  } catch (e) { /* */ }
+}
+
+// Eredeti link csoportok visszaallitasa
+function restoreLinkGroups(doc, groups, logFn) {
+  var restored = 0;
+  for (var g = 0; g < groups.length; g++) {
+    var ids = groups[g];
+    if (ids.length < 2) continue;
+
     try {
-      for (var ni = 0; ni < nGrp.artLayers.length; ni++) {
-        var nl = nGrp.artLayers[ni];
-        if (!nameMap[nl.name]) nameMap[nl.name] = [];
-        nameMap[nl.name].push(nl.id);
+      // Elso layer kivalasztasa
+      selectLayerById(ids[0]);
+
+      // Tobbi hozzaadasa a kivalasztashoz
+      for (var i = 1; i < ids.length; i++) {
+        var addDesc = new ActionDescriptor();
+        var addRef = new ActionReference();
+        addRef.putIdentifier(charIDToTypeID("Lyr "), ids[i]);
+        addDesc.putReference(charIDToTypeID("null"), addRef);
+        addDesc.putEnumerated(
+          stringIDToTypeID("selectionModifier"),
+          stringIDToTypeID("selectionModifierType"),
+          stringIDToTypeID("addToSelection")
+        );
+        executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
       }
-    } catch (e) { /* */ }
-  }
 
-  // Vegigmegyunk a kep layereken, parositjuk a nev layerekkel
-  var linked = 0;
-  for (var ig = 0; ig < imgGroups.length; ig++) {
-    var iGrp = getGroupByPath(doc, imgGroups[ig]);
-    if (!iGrp) continue;
-    try {
-      for (var ii = 0; ii < iGrp.artLayers.length; ii++) {
-        var imgLayer = iGrp.artLayers[ii];
-        var nameIds = nameMap[imgLayer.name];
-        if (!nameIds || nameIds.length === 0) continue;
+      // Linkeles
+      var linkDesc = new ActionDescriptor();
+      var linkRef = new ActionReference();
+      linkRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+      linkDesc.putReference(charIDToTypeID("null"), linkRef);
+      executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
+      restored++;
 
-        // Multi-select: kep + osszes azonos nevu nev layer
-        var allIds = [imgLayer.id];
-        for (var k = 0; k < nameIds.length; k++) {
-          allIds.push(nameIds[k]);
-        }
-
-        // Elso kivalasztasa
-        var desc = new ActionDescriptor();
-        var ref = new ActionReference();
-        ref.putIdentifier(charIDToTypeID("Lyr "), allIds[0]);
-        desc.putReference(charIDToTypeID("null"), ref);
-        executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-
-        // Tobbi hozzaadasa
-        for (var a = 1; a < allIds.length; a++) {
-          var addDesc = new ActionDescriptor();
-          var addRef = new ActionReference();
-          addRef.putIdentifier(charIDToTypeID("Lyr "), allIds[a]);
-          addDesc.putReference(charIDToTypeID("null"), addRef);
-          addDesc.putEnumerated(
-            stringIDToTypeID("selectionModifier"),
-            stringIDToTypeID("selectionModifierType"),
-            stringIDToTypeID("addToSelection")
-          );
-          executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-        }
-
-        // Linkeles
-        var linkDesc = new ActionDescriptor();
-        var linkRef = new ActionReference();
-        linkRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-        linkDesc.putReference(charIDToTypeID("null"), linkRef);
-        executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
-        linked++;
+      if (logFn) {
+        logFn("[JSX]   restore csoport " + g + ": " + ids.length + " layer linkelve [" + ids.join(",") + "]");
       }
-    } catch (e) { /* */ }
+    } catch (e) {
+      if (logFn) {
+        logFn("[JSX]   restore csoport " + g + " HIBA: " + e.message);
+      }
+    }
   }
-
-  return linked;
+  if (logFn) {
+    logFn("[JSX] restoreLinkGroups: " + restored + "/" + groups.length + " csoport visszaallitva");
+  }
+  return restored;
 }

@@ -218,16 +218,15 @@ function _arrangeNameGroup(nameGroupPath) {
 
 function _doArrangeNames() {
   // Linkelesek leszedese — a translate linkelt tarsakat is mozgatna
-  unlinkAllLayers(_doc);
+  var savedLinks = saveLinkGroups(_doc, log);
 
   // 1. Diak nevek
   _arrangeNameGroup(["Names", "Students"]);
   // 2. Tanar nevek
   _arrangeNameGroup(["Names", "Teachers"]);
 
-  // Azonos nevu kep+nev layerek visszalinkelese
-  var linked = relinkImageNamePairs(_doc);
-  log("[JSX] " + linked + " kep-nev par visszalinkelve");
+  // Linkelesek visszaallitasa
+  restoreLinkGroups(_doc, savedLinks, log);
 }
 
 (function () {

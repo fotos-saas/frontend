@@ -439,6 +439,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  margin-left: auto;
   font-size: 0.8125rem;
   font-weight: 600;
   color: get-color('primary', 500);
@@ -790,6 +791,13 @@
 
   .canceling-text {
     font-size: 0.6875rem;
+  }
+
+  .view-detail-link {
+    gap: 0;
+    margin-left: 0;
+
+    span { display: none; }
   }
 
   .popular-dot {

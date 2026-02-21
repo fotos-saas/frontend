@@ -554,8 +554,10 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       } else {
         this.sampleError.set(result.error || 'Véglegesítés sikertelen');
       }
-    } catch {
-      this.sampleError.set('Váratlan hiba a véglegesítésnél');
+    } catch (err) {
+      console.error('Véglegesítés hiba:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      this.sampleError.set(`Véglegesítés hiba: ${msg}`);
     } finally {
       this.generatingFinal.set(false);
     }

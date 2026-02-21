@@ -156,10 +156,10 @@ export class LayoutPhotoUploadDialogComponent implements OnInit {
 
     try {
       await firstValueFrom(
-        this.albumService.deletePersonPhoto(this.projectId(), this.person().id, photo.id),
+        this.albumService.deletePersonPhoto(this.projectId(), this.person().id, photo.mediaId),
       );
-      this.existingPhotos.update(photos => photos.filter(p => p.id !== photo.id));
-      if (this.selectedExistingPhoto()?.id === photo.id) {
+      this.existingPhotos.update(photos => photos.filter(p => p.mediaId !== photo.mediaId));
+      if (this.selectedExistingPhoto()?.mediaId === photo.mediaId) {
         this.selectedExistingPhoto.set(null);
       }
       if (this.existingPhotos().length === 0) {

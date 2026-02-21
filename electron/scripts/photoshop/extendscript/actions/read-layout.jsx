@@ -51,15 +51,15 @@ function _getLayerDescriptor(layer) {
   };
 
   // Smart Object linked/embedded allapot
+  // A descriptor "linked" BOOLEAN kulcsa jelzi (true = linked file, false = embedded)
   var linked = null; // null = nem SO
   var soKey = stringIDToTypeID("smartObject");
   if (desc.hasKey(soKey)) {
     try {
       var soObj = desc.getObjectValue(soKey);
-      var placedKey = stringIDToTypeID("placed");
-      if (soObj.hasKey(placedKey)) {
-        var placedType = soObj.getEnumerationValue(placedKey);
-        linked = (typeIDToStringID(placedType) === "linked");
+      var linkedKey = stringIDToTypeID("linked");
+      if (soObj.hasKey(linkedKey)) {
+        linked = soObj.getBoolean(linkedKey);
       } else {
         linked = false;
       }

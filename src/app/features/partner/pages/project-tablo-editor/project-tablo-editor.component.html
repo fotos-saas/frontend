@@ -942,6 +942,51 @@
   />
 }
 
+<!-- Vizuális szerkesztő mentés elnevezés dialógus (page-card KÍVÜL) -->
+@if (showDesignerSaveDialog()) {
+  <app-dialog-wrapper
+    headerStyle="flat"
+    theme="purple"
+    [icon]="ICONS.SAVE"
+    title="Pillanatkép mentése"
+    description="Add meg a pillanatkép nevét. A szerkesztett elrendezés új pillanatképként kerül mentésre."
+    size="sm"
+    variant="create"
+    [isSubmitting]="designerSaving()"
+    (closeEvent)="cancelDesignerSave()"
+    (submitEvent)="designerSaveName().trim() ? confirmDesignerSave() : null"
+  >
+    <div dialogBody>
+      <input
+        type="text"
+        class="snapshot-dialog__input"
+        placeholder="pl. Végleges elrendezés"
+        [value]="designerSaveName()"
+        (input)="designerSaveName.set($any($event.target).value)"
+      />
+    </div>
+
+    <div dialogFooter>
+      <button class="btn btn--outline" (click)="cancelDesignerSave()">
+        Mégse
+      </button>
+      <button
+        class="btn btn--primary"
+        [disabled]="!designerSaveName().trim() || designerSaving()"
+        (click)="confirmDesignerSave()"
+      >
+        @if (designerSaving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Mentés...
+        } @else {
+          <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+          Mentés
+        }
+      </button>
+    </div>
+  </app-dialog-wrapper>
+}
+
 <!-- Sablon alkalmazás dialógus (page-card KÍVÜL) -->
 @if (templateService.showApplyDialog()) {
   <app-template-apply-dialog

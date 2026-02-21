@@ -121,6 +121,12 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly designerPsdPath = signal<string | null>(null);
   readonly designerBoardConfig = signal<{ widthCm: number; heightCm: number } | null>(null);
 
+  /** Mentés elnevezési dialógus */
+  readonly showDesignerSaveDialog = signal(false);
+  readonly designerSaveName = signal('');
+  readonly designerSaving = signal(false);
+  private pendingDesignerSave: { layers: SnapshotLayer[]; isLivePsd: boolean } | null = null;
+
   /** Összecsukott snapshot csoportok (eredeti nevek set-je) */
   readonly collapsedGroups = signal<Set<string>>(new Set());
 
@@ -729,47 +735,85 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.showLayoutDesigner.set(true);
   }
 
-  /** Vizuális szerkesztő mentés: módosított layerek új snapshot-ként mentése (az eredeti megmarad) */
-  async onDesignerSave(event: { layers: SnapshotLayer[]; isLivePsd: boolean }): Promise<void> {
+  /** Vizuális szerkesztő mentés: dialógust nyit az elnevezéshez */
+  onDesignerSave(event: { layers: SnapshotLayer[]; isLivePsd: boolean }): void {
+    this.pendingDesignerSave = event;
+    this.showLayoutDesigner.set(false);
+
+    // Auto név generálás
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const dateStr = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+    if (event.isLivePsd) {
+      this.designerSaveName.set(`Élő PSD ${dateStr}`);
+    } else {
+      const latest = this.snapshotService.latestSnapshot();
+      const baseName = latest?.snapshotName.replace(/ \(szerkesztett\)$/, '') || 'Pillanatkép';
+      this.designerSaveName.set(`${baseName} (szerkesztett)`);
+    }
+
+    this.showDesignerSaveDialog.set(true);
+  }
+
+  /** Mentés elnevezési dialógus — tényleges mentés */
+  async confirmDesignerSave(): Promise<void> {
+    const event = this.pendingDesignerSave;
+    if (!event) return;
+
     const latest = this.snapshotService.latestSnapshot();
     const psdPath = await this.resolvePsdPath();
     if (!latest || !psdPath) {
-      this.showLayoutDesigner.set(false);
+      this.showDesignerSaveDialog.set(false);
+      this.pendingDesignerSave = null;
       return;
     }
 
+    this.designerSaving.set(true);
     this.clearMessages();
 
     // Snapshot betöltése → layers felülírása → új snapshot mentés
     const loadResult = await this.ps.loadSnapshot(latest.filePath);
     if (!loadResult.success || !loadResult.data) {
       this.error.set('Nem sikerült betölteni a pillanatképet a mentéshez.');
-      this.showLayoutDesigner.set(false);
+      this.showDesignerSaveDialog.set(false);
+      this.designerSaving.set(false);
+      this.pendingDesignerSave = null;
       return;
     }
 
     const snapshotData = loadResult.data as Record<string, unknown>;
     snapshotData['layers'] = event.layers;
 
-    let saveResult: { success: boolean; error?: string };
+    const name = this.designerSaveName().trim() || 'Szerkesztett';
+    snapshotData['snapshotName'] = name;
+    snapshotData['createdAt'] = new Date().toISOString();
 
-    if (event.isLivePsd) {
-      // Friss PSD beolvasásból → teljesen új snapshot "Élő PSD" névvel
-      saveResult = await this.ps.saveSnapshotDataAsNew(psdPath, snapshotData, 'Élő PSD beolvasás');
-    } else {
-      // Snapshot-ból indultunk → az eredeti neve alapján "(szerkesztett)" jelöléssel
-      const originalName = latest.snapshotName.replace(/ \(szerkesztett\)$/, '');
-      saveResult = await this.ps.saveSnapshotDataAsNew(psdPath, snapshotData, originalName);
-    }
+    // Fájlnév generálás
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+    const slugName = name.toLowerCase().replace(/[^a-z0-9áéíóöőúüű]+/gi, '-').replace(/-+$/, '');
+    const fileName = `${dateStr}_${slugName}.json`;
 
-    this.showLayoutDesigner.set(false);
+    const saveResult = await this.ps.saveSnapshotWithFileName(psdPath, snapshotData, fileName);
+
+    this.showDesignerSaveDialog.set(false);
+    this.designerSaving.set(false);
+    this.pendingDesignerSave = null;
 
     if (saveResult.success) {
-      this.successMessage.set('Elrendezés mentve új pillanatképként!');
+      this.successMessage.set(`Pillanatkép mentve: ${name}`);
       await this.loadSnapshots();
     } else {
       this.error.set(saveResult.error || 'Pillanatkép mentés sikertelen.');
     }
+  }
+
+  /** Mentés elnevezési dialógus bezárása (nem ment) */
+  cancelDesignerSave(): void {
+    this.showDesignerSaveDialog.set(false);
+    this.pendingDesignerSave = null;
   }
 
   /** Vizuális szerkesztő bezárása */

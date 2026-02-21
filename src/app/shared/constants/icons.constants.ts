@@ -196,6 +196,7 @@ export const ICONS = {
   ALERT_CIRCLE: 'alert-circle',
   ALERT_TRIANGLE: 'alert-triangle',
   CHECK_CIRCLE: 'check-circle',
+  MINUS_CIRCLE: 'minus-circle',
   X_CIRCLE: 'x-circle',
   INFO: 'info',
   BAN: 'ban',

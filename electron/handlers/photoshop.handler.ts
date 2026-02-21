@@ -1943,5 +1943,42 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // ============ Temp fajl mentes (renderer → main) ============
+  ipcMain.handle('photoshop:save-temp-files', async (_event, params: {
+    files: Array<{ name: string; data: ArrayBuffer }>;
+  }) => {
+    try {
+      if (!Array.isArray(params.files) || params.files.length === 0) {
+        return { success: false, paths: [], error: 'Nincsenek fajlok' };
+      }
+      if (params.files.length > 50) {
+        return { success: false, paths: [], error: 'Maximum 50 fajl engedelyezett' };
+      }
+
+      const tempDir = path.join(app.getPath('temp'), 'photostack-action-files');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+
+      const paths: string[] = [];
+      for (const file of params.files) {
+        if (typeof file.name !== 'string' || !file.data) {
+          continue;
+        }
+        // Biztonsagos fajlnev (csak alap karakterek)
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const filePath = path.join(tempDir, `${Date.now()}-${safeName}`);
+        fs.writeFileSync(filePath, Buffer.from(file.data));
+        paths.push(filePath);
+        log.info(`Temp fajl mentve: ${filePath} (${Buffer.from(file.data).length} byte)`);
+      }
+
+      return { success: true, paths };
+    } catch (error) {
+      log.error('Save temp files hiba:', error);
+      return { success: false, paths: [], error: error instanceof Error ? error.message : 'Ismeretlen hiba' };
+    }
+  });
+
   log.info('Photoshop IPC handlerek regisztralva');
 }

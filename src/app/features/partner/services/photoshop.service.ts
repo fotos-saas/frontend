@@ -1373,6 +1373,23 @@ export class PhotoshopService {
     }
   }
 
+  /**
+   * Fajlok mentese temp konyvtarba az Electron main process-en keresztul.
+   * A renderer process-ben a File.path nem elerheto (contextIsolation),
+   * ezert a fajl tartalmat ArrayBuffer-kent kuldjuk at IPC-n.
+   */
+  async saveTempFiles(files: File[]): Promise<{ success: boolean; paths: string[]; error?: string }> {
+    if (!this.api) return { success: false, paths: [], error: 'Nem Electron kornyezet' };
+
+    const fileData: Array<{ name: string; data: ArrayBuffer }> = [];
+    for (const f of files) {
+      const buffer = await f.arrayBuffer();
+      fileData.push({ name: f.name, data: buffer });
+    }
+
+    return this.api.saveTempFiles({ files: fileData });
+  }
+
   /** Sablon alkalmazása a megnyitott dokumentumra */
   async applyTemplate(
     templateId: string,

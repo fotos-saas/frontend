@@ -4,6 +4,8 @@ import {
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PsSelectComponent } from '@shared/components/form/ps-select/ps-select.component';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
 import { LoggerService } from '@core/services/logger.service';
 import { PhotoshopService } from '../../../../../services/photoshop.service';
@@ -11,11 +13,17 @@ import { ActionPersonItem } from './layout-actions.types';
 import {
   UploadToEveryoneFormComponent,
 } from './actions/upload-to-everyone-form.component';
+import {
+  UploadIndividualFormComponent,
+} from './actions/upload-individual-form.component';
 
 @Component({
   selector: 'app-layout-actions-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, UploadToEveryoneFormComponent],
+  imports: [
+    FormsModule, LucideAngularModule, PsSelectComponent,
+    UploadToEveryoneFormComponent, UploadIndividualFormComponent,
+  ],
   templateUrl: './layout-actions-dialog.component.html',
   styleUrl: './layout-actions-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,12 +39,18 @@ export class LayoutActionsDialogComponent {
   readonly close = output<void>();
   readonly executed = output<void>();
 
+  readonly actionOptions: PsSelectOption[] = [
+    { id: 'upload-to-everyone', label: 'Kepek feltoltese mindenkihez' },
+    { id: 'upload-individual', label: 'Kepfeltoltes kulon-kulon' },
+  ];
+
   readonly selectedAction = signal<string>('upload-to-everyone');
   readonly selectedPersonIds = signal<Set<number>>(new Set());
   readonly executing = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
   readonly uploadForm = viewChild<UploadToEveryoneFormComponent>('uploadForm');
+  readonly individualForm = viewChild<UploadIndividualFormComponent>('individualForm');
 
   readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
@@ -57,12 +71,19 @@ export class LayoutActionsDialogComponent {
 
   readonly canExecute = computed(() => {
     if (this.executing()) return false;
-    if (this.selectedPersonIds().size === 0) return false;
 
-    if (this.selectedAction() === 'upload-to-everyone') {
+    const action = this.selectedAction();
+    if (action === 'upload-to-everyone') {
+      if (this.selectedPersonIds().size === 0) return false;
       const form = this.uploadForm();
       return form ? form.formData() !== null : false;
     }
+
+    if (action === 'upload-individual') {
+      const form = this.individualForm();
+      return form ? form.formData() !== null : false;
+    }
+
     return false;
   });
 
@@ -120,8 +141,11 @@ export class LayoutActionsDialogComponent {
     this.errorMessage.set(null);
 
     try {
-      if (this.selectedAction() === 'upload-to-everyone') {
+      const action = this.selectedAction();
+      if (action === 'upload-to-everyone') {
         await this.executeUploadToEveryone();
+      } else if (action === 'upload-individual') {
+        await this.executeUploadIndividual();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -142,13 +166,13 @@ export class LayoutActionsDialogComponent {
     const selectedPersons = this.persons().filter(p => selectedIds.has(p.id));
     if (selectedPersons.length === 0) return;
 
-    const sourceFiles = formData.files.map(f => {
-      const elPath = (f as File & { path?: string }).path;
-      this.logger.info('File:', f.name, 'path:', elPath, 'size:', f.size);
-      return { filePath: elPath || f.name };
-    });
+    const tempResult = await this.ps.saveTempFiles(formData.files);
+    if (!tempResult.success || tempResult.paths.length === 0) {
+      throw new Error(tempResult.error || 'Nem sikerult a fajlok mentese');
+    }
 
-    // Shuffle indexek
+    const sourceFiles = tempResult.paths.map(p => ({ filePath: p }));
+
     const indices = Array.from({ length: sourceFiles.length }, (_, i) => i);
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -162,6 +186,54 @@ export class LayoutActionsDialogComponent {
       y: Math.round(p.y),
       sourceIndex: sourceFiles.length === 1 ? 0 : indices[i % indices.length],
     }));
+
+    const result = await this.ps.addGroupLayers({
+      groupName: formData.groupName,
+      sourceFiles,
+      layers,
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ismeretlen hiba tortent');
+    }
+
+    this.executed.emit();
+  }
+
+  private async executeUploadIndividual(): Promise<void> {
+    const form = this.individualForm();
+    if (!form) return;
+
+    const formData = form.formData();
+    if (!formData) return;
+
+    // Egyedi fajlok → temp mentes
+    const uniqueFiles = [...new Map(
+      formData.assignments.map(a => [a.file.name + a.file.size, a.file] as [string, File])
+    ).values()];
+
+    const tempResult = await this.ps.saveTempFiles(uniqueFiles);
+    if (!tempResult.success) {
+      throw new Error(tempResult.error || 'Fajl mentes sikertelen');
+    }
+
+    // Lookup: file key → temp path → sourceFiles index
+    const fileKeyToPath = new Map<string, string>();
+    uniqueFiles.forEach((f, i) => fileKeyToPath.set(f.name + f.size, tempResult.paths[i]));
+    const sourceFiles = tempResult.paths.map(p => ({ filePath: p }));
+    const pathToIdx = new Map(tempResult.paths.map((p, i) => [p, i] as [string, number]));
+
+    const layers = formData.assignments.map(a => {
+      const person = this.persons().find(p => p.id === a.personId)!;
+      const path = fileKeyToPath.get(a.file.name + a.file.size)!;
+      return {
+        layerName: person.layerName,
+        group: (person.type === 'teacher' ? 'Teachers' : 'Students') as 'Teachers' | 'Students',
+        x: Math.round(person.x),
+        y: Math.round(person.y),
+        sourceIndex: pathToIdx.get(path)!,
+      };
+    });
 
     const result = await this.ps.addGroupLayers({
       groupName: formData.groupName,

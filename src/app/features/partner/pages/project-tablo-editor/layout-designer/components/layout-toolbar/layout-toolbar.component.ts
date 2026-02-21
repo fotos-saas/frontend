@@ -127,6 +127,13 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             <lucide-icon [name]="ICONS.ALIGN_END_H" [size]="16" />
           </button>
 
+          <div class="layout-toolbar__divider"></div>
+
+          <!-- Dokumentum középre -->
+          <button class="toolbar-btn"
+            (click)="actions.centerOnDocument()" matTooltip="Dokumentum középre">
+            <lucide-icon [name]="ICONS.MOVE" [size]="16" />
+          </button>
 
         }
       </div>

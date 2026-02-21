@@ -80,6 +80,37 @@ export class LayoutDesignerActionsService {
     }));
   }
 
+  /** Dokumentum közepére igazítás: a kijelölt elemek bounding box-a a dokumentum közepére kerül */
+  centerOnDocument(): void {
+    const selected = this.state.selectedLayers();
+    if (selected.length === 0) return;
+
+    const doc = this.state.document();
+    if (!doc) return;
+
+    // Bounding box kiszámítása
+    const minX = Math.min(...selected.map(l => l.editedX ?? l.x));
+    const minY = Math.min(...selected.map(l => l.editedY ?? l.y));
+    const maxX = Math.max(...selected.map(l => (l.editedX ?? l.x) + l.width));
+    const maxY = Math.max(...selected.map(l => (l.editedY ?? l.y) + l.height));
+    const bbWidth = maxX - minX;
+    const bbHeight = maxY - minY;
+
+    // Dokumentum közepe → bounding box közepe
+    const targetX = Math.round((doc.widthPx - bbWidth) / 2);
+    const targetY = Math.round((doc.heightPx - bbHeight) / 2);
+    const deltaX = targetX - minX;
+    const deltaY = targetY - minY;
+
+    if (deltaX === 0 && deltaY === 0) return;
+
+    // Minden kijelölt elemet eltolunk + coupled párokat is
+    this.applyAlignmentWithCoupled(selected, (l) => ({
+      x: (l.editedX ?? l.x) + deltaX,
+      y: (l.editedY ?? l.y) + deltaY,
+    }));
+  }
+
   /** Vízszintes elosztás: egyenletes X gap (≥3 elem) */
   distributeHorizontal(): void {
     const selected = this.state.selectedLayers();
@@ -157,6 +188,58 @@ export class LayoutDesignerActionsService {
 
     this.applyAlignmentWithCoupled(images, (l) =>
       posMap.get(l.layerId) ?? { x: l.editedX ?? l.x, y: l.editedY ?? l.y },
+    );
+
+    // Nevek újra-igazítása a képek alá (a coupled mozgatás csak deltaX/deltaY-t ad,
+    // de ha a nevek eredetileg nem voltak a képek alatt, az nem elég)
+    this.realignNamesToImages();
+  }
+
+  /**
+   * Nevek újra-igazítása a párosított képek alá.
+   * Minden name layert a hozzá tartozó image layer alá pozícionál.
+   */
+  private realignNamesToImages(): void {
+    const layers = this.state.layers();
+    const GAP = 8;
+    const updates = new Map<number, { x: number; y: number }>();
+
+    const pairs: Array<[string, string]> = [
+      ['student-image', 'student-name'],
+      ['teacher-image', 'teacher-name'],
+    ];
+
+    for (const [imageCat, textCat] of pairs) {
+      const imageMap = new Map<number, DesignerLayer>();
+      for (const l of layers) {
+        if (l.category === imageCat && l.personMatch) {
+          imageMap.set(l.personMatch.id, l);
+        }
+      }
+
+      for (const textLayer of layers) {
+        if (textLayer.category !== textCat || !textLayer.personMatch) continue;
+        const imageLayer = imageMap.get(textLayer.personMatch.id);
+        if (!imageLayer) continue;
+
+        const imgX = imageLayer.editedX ?? imageLayer.x;
+        const imgY = imageLayer.editedY ?? imageLayer.y;
+
+        updates.set(textLayer.layerId, {
+          x: imgX,
+          y: imgY + imageLayer.height + GAP,
+        });
+      }
+    }
+
+    if (updates.size === 0) return;
+
+    this.state.updateLayers(
+      layers.map(l => {
+        const u = updates.get(l.layerId);
+        if (!u) return l;
+        return { ...l, editedX: u.x, editedY: u.y };
+      }),
     );
   }
 

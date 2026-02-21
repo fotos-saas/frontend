@@ -328,6 +328,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
         { document: readResult.data.document, layers: readResult.data.layers },
         this.persons(),
       );
+
+      // Auto-mentés: friss PSD állapot mentése snapshot-ként
+      this.save();
     } catch {
       this.loadError.set('Váratlan hiba a frissítéskor.');
     }

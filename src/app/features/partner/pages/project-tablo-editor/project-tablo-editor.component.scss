@@ -782,18 +782,65 @@
 }
 
 // Minta generálás eredmény
-.sample-size-toggle {
+// Split button — Minta készítés + méret toggle
+.sample-split-btn {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 0.825rem;
-  color: var(--text-secondary, #6b7280);
-  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
 
-  input[type="checkbox"] {
-    accent-color: var(--primary-color, #7c3aed);
+  &__main {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: var(--primary-color, #7c3aed);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
     cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--primary-hover, #6d28d9);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__size {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    background: var(--primary-hover, #6d28d9);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #5b21b6;
+      color: white;
+    }
+
+    &--active {
+      background: #059669;
+      color: white;
+
+      &:hover {
+        background: #047857;
+      }
+    }
   }
 }
 

@@ -446,24 +446,29 @@
               Először generálj egy PSD-t a fenti szekciónál.
             </div>
           } @else {
-            <label class="sample-size-toggle">
-              <input type="checkbox" [checked]="sampleLargeSize()" (change)="sampleLargeSize.set(!sampleLargeSize())" />
-              <span>Nagy méret ({{ sampleSizeLarge() }}px)</span>
-            </label>
-
-            <button
-              class="btn btn--primary btn--generate"
-              [disabled]="generatingSample()"
-              (click)="generateSample()"
-            >
-              @if (generatingSample()) {
-                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-                Minta generálás...
-              } @else {
-                <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
-                Minta generálás
-              }
-            </button>
+            <div class="sample-split-btn">
+              <button
+                class="sample-split-btn__main"
+                [disabled]="generatingSample()"
+                (click)="generateSample()"
+              >
+                @if (generatingSample()) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                  Generálás...
+                } @else {
+                  <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+                  Minta készítés
+                }
+              </button>
+              <button
+                class="sample-split-btn__size"
+                [class.sample-split-btn__size--active]="sampleLargeSize()"
+                (click)="sampleLargeSize.set(!sampleLargeSize())"
+                [matTooltip]="sampleLargeSize() ? sampleSizeLarge() + 'px — kattints a kis mérethez' : sampleSizeSmall() + 'px — kattints a nagy mérethez'"
+              >
+                {{ sampleLargeSize() ? 'HD' : 'SD' }}
+              </button>
+            </div>
 
             @if (sampleResult()) {
               <div class="sample-result">

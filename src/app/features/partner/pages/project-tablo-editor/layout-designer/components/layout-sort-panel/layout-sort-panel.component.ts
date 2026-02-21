@@ -76,24 +76,27 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           <span>Műveletek</span>
         </div>
 
-        <label class="sidebar__toggle">
-          <input type="checkbox" [checked]="sampleLargeSize()" (change)="sampleLargeSizeChange.emit(!sampleLargeSize())" />
-          <span>Nagy méret</span>
-        </label>
-
         <div class="sidebar__actions">
-          <button class="action-btn"
-            [disabled]="generatingSample()"
-            (click)="generateSample.emit()"
-            matTooltip="Vízjeles mintakép generálás">
-            @if (generatingSample()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              <span>Generálás...</span>
-            } @else {
-              <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
-              <span>Minta készítés</span>
-            }
-          </button>
+          <div class="sidebar__split-btn">
+            <button class="sidebar__split-main"
+              [disabled]="generatingSample()"
+              (click)="generateSample.emit()"
+              matTooltip="Vízjeles mintakép generálás">
+              @if (generatingSample()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                <span>Generálás...</span>
+              } @else {
+                <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+                <span>Minta készítés</span>
+              }
+            </button>
+            <button class="sidebar__split-size"
+              [class.sidebar__split-size--active]="sampleLargeSize()"
+              (click)="sampleLargeSizeChange.emit(!sampleLargeSize())"
+              [matTooltip]="sampleLargeSize() ? 'Nagy méret — kattints a kis mérethez' : 'Kis méret — kattints a nagy mérethez'">
+              {{ sampleLargeSize() ? 'HD' : 'SD' }}
+            </button>
+          </div>
           <button class="action-btn"
             (click)="openProject.emit()"
             matTooltip="A PSD megnyitása Photoshopban">
@@ -202,18 +205,63 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       &--error { color: #fca5a5; }
     }
 
-    .sidebar__toggle {
+    .sidebar__split-btn {
+      display: flex;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .sidebar__split-main {
+      flex: 1;
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.6);
+      gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.8rem;
+      border: none;
       cursor: pointer;
-      margin-bottom: 8px;
+      transition: background 0.15s;
 
-      input[type="checkbox"] {
-        accent-color: #a78bfa;
-        cursor: pointer;
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      &:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+      }
+    }
+
+    .sidebar__split-size {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border: none;
+      border-left: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      transition: all 0.15s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      &--active {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+
+        &:hover {
+          background: rgba(16, 185, 129, 0.3);
+        }
       }
     }
 

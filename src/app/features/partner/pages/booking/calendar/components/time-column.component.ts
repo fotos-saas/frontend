@@ -22,6 +22,7 @@ import { Component, ChangeDetectionStrategy, input, computed } from '@angular/co
       width: 60px;
       min-width: 60px;
       border-right: 1px solid #e5e7eb;
+      padding-top: 8px;
     }
     .hour-label {
       height: 60px;

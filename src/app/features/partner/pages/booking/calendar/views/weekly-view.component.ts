@@ -147,7 +147,8 @@ interface WeekDay {
     .day-column {
       position: relative;
       border-left: 1px solid #f3f4f6;
-      min-height: 720px; /* 12 hours * 60px */
+      min-height: 728px; /* 12 hours * 60px + 8px padding */
+      padding-top: 8px;
     }
     .day-column.today { background: rgba(99, 102, 241, 0.03); }
     .hour-line {

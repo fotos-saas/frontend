@@ -111,6 +111,7 @@ interface DayBookingPosition {
       flex: 1;
       position: relative;
       min-height: calc(var(--total-hours) * 60px);
+      padding-top: 8px;
     }
     .hour-grid-line {
       position: absolute;

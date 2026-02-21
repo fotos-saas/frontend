@@ -814,6 +814,37 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
   }
 
+  /** Auto-mentés a designer-ből (pl. frissítés után) — dialógus nélkül, nem lép ki */
+  async onDesignerAutoSave(event: { layers: SnapshotLayer[] }): Promise<void> {
+    const latest = this.snapshotService.latestSnapshot();
+    const psdPath = await this.resolvePsdPath();
+    if (!latest || !psdPath) return;
+
+    const loadResult = await this.ps.loadSnapshot(latest.filePath);
+    if (!loadResult.success || !loadResult.data) return;
+
+    const snapshotData = loadResult.data as Record<string, unknown>;
+    snapshotData['layers'] = event.layers;
+
+    // Auto cím: "Élő PSD 2026.02.21 14:30"
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const dateStr = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const name = `Élő PSD ${dateStr}`;
+
+    snapshotData['snapshotName'] = name;
+    snapshotData['createdAt'] = now.toISOString();
+
+    const fileDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+    const fileName = `${fileDate}_elo-psd.json`;
+
+    const saveResult = await this.ps.saveSnapshotWithFileName(psdPath, snapshotData, fileName);
+
+    if (saveResult.success) {
+      await this.loadSnapshots();
+    }
+  }
+
   /** Mentés elnevezési dialógus bezárása (nem ment) */
   cancelDesignerSave(): void {
     this.showDesignerSaveDialog.set(false);

@@ -233,6 +233,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Mentés event — módosított layerek + forrás információ */
   readonly saveEvent = output<{ layers: SnapshotLayer[]; isLivePsd: boolean }>();
 
+  /** Auto-mentés event — csendes mentés dialógus nélkül (pl. frissítés után) */
+  readonly autoSaveEvent = output<{ layers: SnapshotLayer[] }>();
+
   readonly overlayEl = viewChild.required<ElementRef<HTMLElement>>('overlayEl');
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
@@ -329,8 +332,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
         this.persons(),
       );
 
-      // Auto-mentés: friss PSD állapot mentése snapshot-ként
-      this.save();
+      // Auto-mentés: friss PSD állapot mentése snapshot-ként (dialógus nélkül)
+      this.autoSaveEvent.emit({ layers: this.state.exportChanges() });
     } catch {
       this.loadError.set('Váratlan hiba a frissítéskor.');
     }

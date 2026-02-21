@@ -302,24 +302,14 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.saveEvent.emit({ layers, isLivePsd });
   }
 
-  /** Frissítés Photoshopból: PSD megnyitás → JSX kiolvasás → state közvetlen frissítés */
+  /** Frissítés Photoshopból: JSX kiolvasás → state közvetlen frissítés.
+   *  A PSD már nyitva van a PS-ben (designer belépéskor megnyitotta). */
   async refresh(): Promise<void> {
     this.refreshing.set(true);
     this.loadError.set(null);
 
     try {
-      // 1. PSD megnyitása Photoshopban (ha nincs nyitva)
-      const openResult = await this.ps.openPsdFile(this.psdPath());
-      if (!openResult.success) {
-        this.loadError.set(openResult.error || 'PSD megnyitás sikertelen.');
-        this.refreshing.set(false);
-        return;
-      }
-
-      // 2. Várakozás hogy a Photoshop teljesen betöltse a dokumentumot
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // 3. Layout kiolvasás JSX-szel (mentés nélkül)
+      // Layout kiolvasás JSX-szel (a doc már nyitva, activateDocByName kezeli)
       const readResult = await this.ps.readFullLayout(this.boardConfig());
 
       if (!readResult.success || !readResult.data) {

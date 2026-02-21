@@ -85,11 +85,13 @@ import { firstValueFrom } from 'rxjs';
           <app-layout-sort-panel
             [generatingSample]="generatingSample()"
             [sampleLargeSize]="sampleLargeSize()"
+            [sampleWatermarkColor]="ps.sampleWatermarkColor()"
             [sampleSuccess]="sampleSuccess()"
             [sampleError]="sampleError()"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
             (sampleLargeSizeChange)="sampleLargeSize.set($event)"
+            (watermarkColorChange)="onWatermarkColorChange($event)"
             (openProject)="onOpenProject()"
             (openWorkDir)="onOpenWorkDir()"
           />
@@ -495,6 +497,11 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     if (psd) {
       this.ps.revealInFinder(psd);
     }
+  }
+
+  onWatermarkColorChange(color: 'white' | 'black'): void {
+    this.ps.sampleWatermarkColor.set(color);
+    this.ps.setSampleSettings({ watermarkColor: color });
   }
 
   /** Minta generálás — flatten + resize + watermark + upload */

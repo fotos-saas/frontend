@@ -231,6 +231,10 @@ export const ICONS = {
   ZOOM_IN: 'zoom-in',
   ZOOM_OUT: 'zoom-out',
 
+  // Téma
+  SUN: 'sun',
+  MOON: 'moon',
+
   // Dashboard
   LAYOUT_DASHBOARD: 'layout-dashboard',
 

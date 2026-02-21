@@ -90,11 +90,21 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
                 <span>Minta készítés</span>
               }
             </button>
-            <button class="sidebar__split-size"
-              [class.sidebar__split-size--active]="sampleLargeSize()"
+            <button class="sidebar__split-toggle"
+              [class.sidebar__split-toggle--active]="sampleLargeSize()"
               (click)="sampleLargeSizeChange.emit(!sampleLargeSize())"
               [matTooltip]="sampleLargeSize() ? 'Nagy méret — kattints a kis mérethez' : 'Kis méret — kattints a nagy mérethez'">
               {{ sampleLargeSize() ? 'HD' : 'SD' }}
+            </button>
+            <button class="sidebar__split-toggle sidebar__split-color"
+              [class.sidebar__split-color--white]="sampleWatermarkColor() === 'white'"
+              (click)="watermarkColorChange.emit(sampleWatermarkColor() === 'white' ? 'black' : 'white')"
+              [matTooltip]="sampleWatermarkColor() === 'white' ? 'Fehér vízjel — kattints a feketéhez' : 'Fekete vízjel — kattints a fehérhez'">
+              @if (sampleWatermarkColor() === 'white') {
+                <lucide-icon [name]="ICONS.SUN" [size]="11" />
+              } @else {
+                <lucide-icon [name]="ICONS.MOON" [size]="11" />
+              }
             </button>
           </div>
           <button class="action-btn"
@@ -235,11 +245,11 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       }
     }
 
-    .sidebar__split-size {
+    .sidebar__split-toggle {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
+      width: 30px;
       background: rgba(255, 255, 255, 0.06);
       color: rgba(255, 255, 255, 0.4);
       font-size: 0.6rem;
@@ -261,6 +271,29 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
 
         &:hover {
           background: rgba(16, 185, 129, 0.3);
+        }
+      }
+    }
+
+    .sidebar__split-color {
+      width: 26px;
+
+      &--white {
+        background: rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.9);
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.25);
+        }
+      }
+
+      &:not(.sidebar__split-color--white) {
+        background: rgba(0, 0, 0, 0.3);
+        color: rgba(255, 255, 255, 0.5);
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.5);
+          color: rgba(255, 255, 255, 0.7);
         }
       }
     }
@@ -294,6 +327,8 @@ export class LayoutSortPanelComponent {
   readonly generatingSample = input(false);
   readonly sampleLargeSize = input(false);
   readonly sampleLargeSizeChange = output<boolean>();
+  readonly sampleWatermarkColor = input<'white' | 'black'>('white');
+  readonly watermarkColorChange = output<'white' | 'black'>();
   readonly sampleSuccess = input<string | null>(null);
   readonly sampleError = input<string | null>(null);
 }

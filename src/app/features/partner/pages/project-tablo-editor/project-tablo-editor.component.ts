@@ -731,6 +731,12 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   // ============ Minta generálás ============
 
+  toggleWatermarkColor(): void {
+    const next = this.sampleWatermarkColor() === 'white' ? 'black' : 'white';
+    this.sampleWatermarkColor.set(next);
+    this.ps.setSampleSettings({ watermarkColor: next });
+  }
+
   async generateSample(): Promise<void> {
     if (this.generatingSample()) return;
     const p = this.project();

@@ -210,6 +210,8 @@ import {
   UsersRound,
   FileDown,
   Repeat,
+  Sun,
+  Moon,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -416,4 +418,6 @@ export const LUCIDE_ICONS_MAP = {
   UsersRound,
   FileDown,
   Repeat,
+  Sun,
+  Moon,
 };

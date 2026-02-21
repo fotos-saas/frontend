@@ -813,11 +813,11 @@
     }
   }
 
-  &__size {
+  &__toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
+    width: 38px;
     background: var(--primary-hover, #6d28d9);
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.7rem;
@@ -839,6 +839,31 @@
 
       &:hover {
         background: #047857;
+      }
+    }
+  }
+
+  &__color {
+    width: 34px;
+
+    // Fehér vízjel → világos gomb
+    &--white {
+      background: rgba(255, 255, 255, 0.85);
+      color: #1e1b4b;
+
+      &:hover {
+        background: white;
+      }
+    }
+
+    // Fekete vízjel (alapértelmezett sötét)
+    &:not(.sample-split-btn__color--white) {
+      background: #1e1b4b;
+      color: rgba(255, 255, 255, 0.8);
+
+      &:hover {
+        background: #0f0e2a;
+        color: white;
       }
     }
   }

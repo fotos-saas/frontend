@@ -461,12 +461,24 @@
                 }
               </button>
               <button
-                class="sample-split-btn__size"
-                [class.sample-split-btn__size--active]="sampleLargeSize()"
+                class="sample-split-btn__toggle"
+                [class.sample-split-btn__toggle--active]="sampleLargeSize()"
                 (click)="sampleLargeSize.set(!sampleLargeSize())"
                 [matTooltip]="sampleLargeSize() ? sampleSizeLarge() + 'px — kattints a kis mérethez' : sampleSizeSmall() + 'px — kattints a nagy mérethez'"
               >
                 {{ sampleLargeSize() ? 'HD' : 'SD' }}
+              </button>
+              <button
+                class="sample-split-btn__toggle sample-split-btn__color"
+                [class.sample-split-btn__color--white]="sampleWatermarkColor() === 'white'"
+                (click)="toggleWatermarkColor()"
+                [matTooltip]="sampleWatermarkColor() === 'white' ? 'Fehér vízjel — kattints a feketéhez' : 'Fekete vízjel — kattints a fehérhez'"
+              >
+                @if (sampleWatermarkColor() === 'white') {
+                  <lucide-icon [name]="ICONS.SUN" [size]="12" />
+                } @else {
+                  <lucide-icon [name]="ICONS.MOON" [size]="12" />
+                }
               </button>
             </div>
 

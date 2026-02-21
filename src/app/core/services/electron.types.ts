@@ -215,6 +215,7 @@ interface SampleAPI {
       watermarkText: string;
       watermarkColor: 'white' | 'black';
       watermarkOpacity: number;
+      useLargeSize: boolean;
     };
   }>;
   setSettings: (settings: Partial<{
@@ -223,6 +224,7 @@ interface SampleAPI {
     watermarkText: string;
     watermarkColor: 'white' | 'black';
     watermarkOpacity: number;
+    useLargeSize: boolean;
   }>) => Promise<{ success: boolean; error?: string }>;
   generate: (params: {
     psdFilePath: string;

@@ -26,14 +26,15 @@ function log(msg) {
 // --- Globalis valtozok ---
 var _doc;
 
-// --- Layer bounds EFFEKTEK NELKUL (boundsNoEffects) ---
-// Ugyanaz mint arrange-grid.jsx-ben — effekt nelkuli meretek
-function _getBoundsNoEffects(layer) {
+// --- Layer descriptor kiolvasas (bounds + SO info) ---
+// Egyetlen executeActionGet hivassal kinyerjuk a bounds-ot es SO allapotot
+function _getLayerDescriptor(layer) {
   selectLayerById(layer.id);
   var ref = new ActionReference();
   ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
   var desc = executeActionGet(ref);
 
+  // Bounds (effekt nelkul ha elerheto)
   var boundsKey = stringIDToTypeID("boundsNoEffects");
   var b;
   if (desc.hasKey(boundsKey)) {
@@ -42,12 +43,32 @@ function _getBoundsNoEffects(layer) {
     b = desc.getObjectValue(stringIDToTypeID("bounds"));
   }
 
-  return {
+  var bounds = {
     left: b.getUnitDoubleValue(stringIDToTypeID("left")),
     top: b.getUnitDoubleValue(stringIDToTypeID("top")),
     right: b.getUnitDoubleValue(stringIDToTypeID("right")),
     bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
   };
+
+  // Smart Object linked/embedded allapot
+  var linked = null; // null = nem SO
+  var soKey = stringIDToTypeID("smartObject");
+  if (desc.hasKey(soKey)) {
+    try {
+      var soObj = desc.getObjectValue(soKey);
+      var placedKey = stringIDToTypeID("placed");
+      if (soObj.hasKey(placedKey)) {
+        var placedType = soObj.getEnumerationValue(placedKey);
+        linked = (typeIDToStringID(placedType) === "linked");
+      } else {
+        linked = false;
+      }
+    } catch (soErr) {
+      linked = false;
+    }
+  }
+
+  return { bounds: bounds, linked: linked };
 }
 
 // --- JSON string epites (ES3 — nincs JSON.stringify!) ---
@@ -96,11 +117,11 @@ function _readAllLayers(container, pathSoFar, result) {
     for (var i = container.artLayers.length - 1; i >= 0; i--) {
       var layer = container.artLayers[i];
       try {
-        var bnfe = _getBoundsNoEffects(layer);
-        var x = Math.round(bnfe.left);
-        var y = Math.round(bnfe.top);
-        var w = Math.round(bnfe.right - bnfe.left);
-        var h = Math.round(bnfe.bottom - bnfe.top);
+        var info = _getLayerDescriptor(layer);
+        var x = Math.round(info.bounds.left);
+        var y = Math.round(info.bounds.top);
+        var w = Math.round(info.bounds.right - info.bounds.left);
+        var h = Math.round(info.bounds.bottom - info.bounds.top);
 
         var layerData = {
           layerId: layer.id,
@@ -113,30 +134,9 @@ function _readAllLayers(container, pathSoFar, result) {
           kind: "normal"
         };
 
-        // Smart Object linked/embedded allapot kiolvasas
-        if (layer.kind === LayerKind.SMARTOBJECT) {
-          try {
-            selectLayerById(layer.id);
-            var soRef = new ActionReference();
-            soRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-            var soDesc = executeActionGet(soRef);
-            var soKey = stringIDToTypeID("smartObject");
-            if (soDesc.hasKey(soKey)) {
-              var soObj = soDesc.getObjectValue(soKey);
-              var placedKey = stringIDToTypeID("placed");
-              if (soObj.hasKey(placedKey)) {
-                var placedType = soObj.getEnumerationValue(placedKey);
-                // "linked" = linkelt, barmely mas = embedded
-                layerData.linked = (typeIDToStringID(placedType) === "linked");
-              } else {
-                layerData.linked = false;
-              }
-            } else {
-              layerData.linked = false;
-            }
-          } catch (soErr) {
-            layerData.linked = false;
-          }
+        // Smart Object linked/embedded jelzes (null = nem SO)
+        if (info.linked !== null) {
+          layerData.linked = info.linked;
         }
 
         // Text layerek extra adatai

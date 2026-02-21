@@ -368,6 +368,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
           watermarkText: string;
           watermarkColor: 'white' | 'black';
           watermarkOpacity: number;
+          useLargeSize: boolean;
         };
       }>,
     setSettings: (settings: Partial<{
@@ -376,6 +377,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       watermarkText: string;
       watermarkColor: 'white' | 'black';
       watermarkOpacity: number;
+      useLargeSize: boolean;
     }>) =>
       ipcRenderer.invoke('sample:set-settings', settings) as Promise<{ success: boolean; error?: string }>,
     generate: (params: {

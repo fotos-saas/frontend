@@ -1,61 +1,115 @@
 <div class="pricing-section">
   <h2 class="section-title">Árazás</h2>
-  <div class="pricing-card" [class.pricing-card--free]="module().type === 'free'">
-    @if (module().type === 'free') {
-      <div class="pricing-badge pricing-badge--free">
-        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-        Ingyenes
+
+  @if (module().type === 'free') {
+    <!-- Ingyenes modul -->
+    <div class="pricing-card pricing-card--free">
+      <div class="pricing-free-icon">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="28" />
       </div>
-      <p class="pricing-description">Ez a modul minden felhasználó számára ingyenesen elérhető.</p>
-    } @else if (module().type === 'per_use') {
-      <div class="pricing-amount">
+      <h3 class="pricing-free-title">Ingyenes</h3>
+      <p class="pricing-free-desc">Ez a modul minden felhasználó számára díjmentesen elérhető.</p>
+      <div class="pricing-cta">
+        @if (!isActive) {
+          <button class="pricing-btn" (click)="ctaClick.emit()">
+            <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+            Aktiválás
+          </button>
+        } @else {
+          <span class="pricing-active">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+            Aktív
+          </span>
+        }
+      </div>
+    </div>
+  } @else if (module().type === 'per_use') {
+    <!-- Használat alapú -->
+    <div class="pricing-card">
+      <div class="pricing-per-use-header">
+        <lucide-icon [name]="ICONS.SPARKLES" [size]="20" />
+        <span>Használat alapú díjazás</span>
+      </div>
+      <div class="pricing-amount pricing-amount--large">
         @if (module().per_use_price != null) {
           <span class="pricing-amount__value">{{ module().per_use_price | number:'1.0-0':'hu' }}</span>
-          <span class="pricing-amount__unit">Ft/{{ module().per_use_unit ?? 'db' }}</span>
+          <span class="pricing-amount__unit">Ft / {{ module().per_use_unit ?? 'db' }}</span>
         } @else {
           <span class="pricing-amount__value">Egyedi</span>
           <span class="pricing-amount__unit">árazás</span>
         }
       </div>
-      <p class="pricing-description">Használat alapú díjazás. Csak azért fizetsz, amit tényleg használsz.</p>
-    } @else {
-      <div class="pricing-plans">
-        <div class="pricing-plan">
-          <span class="pricing-plan__label">Havi</span>
-          <div class="pricing-amount">
-            <span class="pricing-amount__value">{{ module().monthly_price! | number:'1.0-0':'hu' }}</span>
-            <span class="pricing-amount__unit">Ft/hó</span>
-          </div>
-        </div>
-        @if (module().yearly_price) {
-          <div class="pricing-plan pricing-plan--yearly">
-            <span class="pricing-plan__label">
-              Éves
-              @if (yearlySavingPercent; as saving) {
-                <span class="pricing-plan__save">-{{ saving }}%</span>
-              }
-            </span>
-            <div class="pricing-amount">
-              <span class="pricing-amount__value">{{ module().yearly_price! | number:'1.0-0':'hu' }}</span>
-              <span class="pricing-amount__unit">Ft/év</span>
-            </div>
-          </div>
+      <p class="pricing-description">Csak azért fizetsz, amit tényleg használsz. Nincs havi díj.</p>
+      <div class="pricing-cta">
+        @if (!isActive) {
+          <button class="pricing-btn" (click)="ctaClick.emit()">
+            <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+            {{ module().cta_button || 'Használat indítása' }}
+          </button>
+        } @else {
+          <span class="pricing-active">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+            Aktív
+          </span>
         }
       </div>
-    }
+    </div>
+  } @else {
+    <!-- Havi / Éves -->
+    <div class="pricing-cards-row">
+      <!-- Havi kártya -->
+      <div class="pricing-card pricing-card--plan">
+        <span class="pricing-plan-label">Havi</span>
+        <div class="pricing-amount pricing-amount--large">
+          <span class="pricing-amount__value">{{ module().monthly_price! | number:'1.0-0':'hu' }}</span>
+          <span class="pricing-amount__unit">Ft / hó</span>
+        </div>
+        <p class="pricing-description">Havi számlázás, bármikor lemondható.</p>
+        <div class="pricing-cta">
+          @if (!isActive) {
+            <button class="pricing-btn" (click)="ctaClick.emit()">
+              <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+              {{ module().cta_button || 'Feliratkozás' }}
+            </button>
+          } @else {
+            <span class="pricing-active">
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+              Aktív
+            </span>
+          }
+        </div>
+      </div>
 
-    <div class="pricing-cta">
-      @if (!isActive) {
-        <button class="pricing-btn" (click)="ctaClick.emit()">
-          <lucide-icon [name]="ICONS.PLAY" [size]="16" />
-          {{ module().cta_button || 'Feliratkozás' }}
-        </button>
-      } @else {
-        <span class="pricing-active">
-          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-          Aktív
-        </span>
+      @if (module().yearly_price) {
+        <!-- Éves kártya -->
+        <div class="pricing-card pricing-card--plan pricing-card--recommended">
+          @if (yearlySavingPercent; as saving) {
+            <div class="pricing-save-badge">
+              <lucide-icon [name]="ICONS.SPARKLES" [size]="12" />
+              {{ saving }}% megtakarítás
+            </div>
+          }
+          <span class="pricing-plan-label">Éves</span>
+          <div class="pricing-amount pricing-amount--large">
+            <span class="pricing-amount__value">{{ module().yearly_price! | number:'1.0-0':'hu' }}</span>
+            <span class="pricing-amount__unit">Ft / év</span>
+          </div>
+          <p class="pricing-description">Éves számlázás, kedvezményes áron.</p>
+          <div class="pricing-cta">
+            @if (!isActive) {
+              <button class="pricing-btn pricing-btn--recommended" (click)="ctaClick.emit()">
+                <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+                Éves előfizetés
+              </button>
+            } @else {
+              <span class="pricing-active">
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+                Aktív
+              </span>
+            }
+          </div>
+        </div>
       }
     </div>
-  </div>
+  }
 </div>

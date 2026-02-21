@@ -8,94 +8,167 @@
   margin: 0 0 20px;
 }
 
+// ============================================================================
+// Kártyák elrendezés
+// ============================================================================
+
+.pricing-cards-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  max-width: 560px;
+}
+
 .pricing-card {
+  position: relative;
   padding: 28px;
-  border-radius: 14px;
-  border: 2px solid get-color('primary', 200);
-  background: get-color('primary', 50);
-  max-width: 480px;
+  border-radius: 16px;
+  border: 1px solid get-color('slate', 200);
+  background: white;
 
   &--free {
+    text-align: center;
+    max-width: 400px;
     border-color: get-color('success', 200);
-    background: get-color('success', 50);
+    background: linear-gradient(135deg, get-color('success', 50) 0%, white 100%);
+  }
+
+  &--plan {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &--recommended {
+    border-color: get-color('primary', 300);
+    background: linear-gradient(135deg, get-color('primary', 50) 0%, white 100%);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
   }
 }
 
-.pricing-badge {
+// ============================================================================
+// Ingyenes modul
+// ============================================================================
+
+.pricing-free-icon {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-
-  &--free {
-    background: get-color('success', 100);
-    color: get-color('success', 700);
-  }
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: get-color('success', 100);
+  color: get-color('success', 600);
+  margin-bottom: 16px;
 }
 
-.pricing-description {
+.pricing-free-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: get-color('slate', 800);
+  margin: 0 0 8px;
+}
+
+.pricing-free-desc {
   font-size: 0.875rem;
-  color: get-color('slate', 600);
-  margin: 0 0 16px;
+  color: get-color('slate', 500);
+  margin: 0 0 20px;
   line-height: 1.5;
 }
 
-.pricing-plans {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+// ============================================================================
+// Használat alapú fejléc
+// ============================================================================
+
+.pricing-per-use-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: get-color('primary', 100);
+  color: get-color('primary', 700);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 16px;
 }
 
-.pricing-plan {
-  &__label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: get-color('slate', 500);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-  }
+// ============================================================================
+// Terv label + megtakarítás badge
+// ============================================================================
 
-  &__save {
-    display: inline-flex;
-    padding: 1px 6px;
-    border-radius: 4px;
-    background: get-color('success', 100);
-    color: get-color('success', 700);
-    font-size: 0.6875rem;
-    font-weight: 600;
-    margin-left: 4px;
-    text-transform: none;
-    letter-spacing: 0;
-  }
+.pricing-plan-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: get-color('slate', 400);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
 }
+
+.pricing-save-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, get-color('primary', 500), get-color('primary', 700));
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+// ============================================================================
+// Ár megjelenítés
+// ============================================================================
 
 .pricing-amount {
   display: flex;
   align-items: baseline;
   gap: 4px;
 
+  &--large {
+    margin-bottom: 8px;
+  }
+
   &__value {
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 800;
     color: get-color('slate', 900);
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
   }
 
   &__unit {
     font-size: 0.875rem;
     font-weight: 500;
-    color: get-color('slate', 500);
+    color: get-color('slate', 400);
   }
 }
 
+// ============================================================================
+// Leírás
+// ============================================================================
+
+.pricing-description {
+  font-size: 0.8125rem;
+  color: get-color('slate', 500);
+  margin: 0 0 20px;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+// ============================================================================
+// CTA gombok
+// ============================================================================
+
 .pricing-cta {
-  margin-top: 20px;
+  margin-top: auto;
 }
 
 .pricing-btn {
@@ -115,6 +188,17 @@
   &:hover {
     background: get-color('primary', 600);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  &--recommended {
+    background: linear-gradient(135deg, get-color('primary', 500), get-color('primary', 700));
+    width: 100%;
+    justify-content: center;
+
+    &:hover {
+      background: linear-gradient(135deg, get-color('primary', 600), get-color('primary', 800));
+    }
   }
 }
 
@@ -130,32 +214,49 @@
   font-weight: 600;
 }
 
+// ============================================================================
+// Dark mode
+// ============================================================================
+
 @media (prefers-color-scheme: dark) {
   .section-title { color: get-color('slate', 100); }
 
   .pricing-card {
-    background: rgba(get-color('primary', 900), 0.3);
-    border-color: get-color('primary', 700);
+    background: get-color('slate', 800);
+    border-color: get-color('slate', 700);
 
     &--free {
-      background: rgba(get-color('success', 900), 0.3);
-      border-color: get-color('success', 700);
+      background: linear-gradient(135deg, rgba(get-color('success', 900), 0.3) 0%, get-color('slate', 800) 100%);
+      border-color: get-color('success', 800);
+    }
+
+    &--recommended {
+      background: linear-gradient(135deg, rgba(get-color('primary', 900), 0.4) 0%, get-color('slate', 800) 100%);
+      border-color: get-color('primary', 700);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
     }
   }
 
-  .pricing-badge--free {
+  .pricing-free-icon {
     background: rgba(get-color('success', 800), 0.5);
-    color: get-color('success', 300);
+    color: get-color('success', 400);
   }
 
-  .pricing-description { color: get-color('slate', 400); }
-  .pricing-amount__value { color: get-color('slate', 100); }
-  .pricing-amount__unit { color: get-color('slate', 400); }
-  .pricing-plan__label { color: get-color('slate', 400); }
+  .pricing-free-title { color: get-color('slate', 100); }
+  .pricing-free-desc { color: get-color('slate', 400); }
 
-  .pricing-plan__save {
-    background: rgba(get-color('success', 800), 0.5);
-    color: get-color('success', 300);
+  .pricing-per-use-header {
+    background: rgba(get-color('primary', 800), 0.5);
+    color: get-color('primary', 300);
+  }
+
+  .pricing-plan-label { color: get-color('slate', 500); }
+  .pricing-amount__value { color: get-color('slate', 100); }
+  .pricing-amount__unit { color: get-color('slate', 500); }
+  .pricing-description { color: get-color('slate', 400); }
+
+  .pricing-save-badge {
+    background: linear-gradient(135deg, get-color('primary', 600), get-color('primary', 800));
   }
 
   .pricing-active {
@@ -164,16 +265,21 @@
   }
 }
 
-@media (max-width: 640px) {
-  .pricing-card { padding: 20px; }
+// ============================================================================
+// Responsive
+// ============================================================================
 
-  .pricing-plans {
-    flex-direction: column;
-    gap: 12px;
+@media (max-width: 640px) {
+  .pricing-cards-row {
+    grid-template-columns: 1fr;
   }
 
-  .pricing-amount__value {
-    font-size: 1.5rem;
+  .pricing-card {
+    padding: 20px;
+  }
+
+  .pricing-amount--large .pricing-amount__value {
+    font-size: 1.75rem;
   }
 }
 

@@ -268,11 +268,12 @@ export class LayoutCanvasComponent {
     return matched;
   }
 
-  /** Ellenőrzi hogy egy elem layer-e (vagy layer gyereke) */
+  /** Ellenőrzi hogy egy elem layer-e, floating toolbar-e (vagy azok gyereke) */
   private isLayerElement(el: HTMLElement): boolean {
     let current: HTMLElement | null = el;
     while (current) {
       if (current.classList.contains('designer-layer')) return true;
+      if (current.classList.contains('floating-toolbar')) return true;
       if (current.classList.contains('layout-canvas-wrapper')) return false;
       current = current.parentElement;
     }

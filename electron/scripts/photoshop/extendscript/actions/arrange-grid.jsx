@@ -211,9 +211,6 @@ function _doArrangeGrid() {
 
 (function () {
   try {
-    if (!app.documents.length) {
-      throw new Error("Nincs megnyitott dokumentum!");
-    }
     _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
     log("[JSX] Dokumentum: " + _doc.name + " (" + _doc.width + " x " + _doc.height + ")");
 

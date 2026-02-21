@@ -58,9 +58,6 @@ function _doAddNameLayers() {
 (function () {
   try {
     // --- 1. Cel dokumentum aktivalasa (nev alapjan, ha meg van adva) ---
-    if (!app.documents.length) {
-      throw new Error("Nincs megnyitott dokumentum! Elobb nyisd meg a PSD-t.");
-    }
     _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
     log("[JSX] Dokumentum: " + _doc.name + " (" + _doc.width + " x " + _doc.height + ")");
 

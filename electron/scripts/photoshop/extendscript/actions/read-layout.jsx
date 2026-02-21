@@ -173,9 +173,6 @@ function _readAllLayers(container, pathSoFar, result) {
 
 (function () {
   try {
-    if (!app.documents.length) {
-      throw new Error("Nincs megnyitott dokumentum!");
-    }
     _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
 
     // DPI kiolvasas

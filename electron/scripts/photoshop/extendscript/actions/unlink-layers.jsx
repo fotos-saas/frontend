@@ -42,9 +42,6 @@ function _findLayersByNames(container, targetNames, result) {
 
 (function () {
   try {
-    if (!app.documents.length) {
-      throw new Error("Nincs megnyitott dokumentum!");
-    }
     var doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
 
     // Bemeneti adatok beolvasasa — JSON file a CONFIG.DATA_FILE_PATH-bol

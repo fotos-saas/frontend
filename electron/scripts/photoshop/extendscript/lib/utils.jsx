@@ -23,6 +23,19 @@
 // FONTOS: az SO megnyitas/bezaras megvaltoztatja az activeDocument-et,
 // ezert minden muvelet elott es az SO bezarasa utan is hivni kell!
 function activateDocByName(targetName) {
+  // Ha nincs egyetlen dokumentum se, megprobaljuk megnyitni a PSD_FILE_PATH-bol
+  if (app.documents.length === 0) {
+    if (CONFIG.PSD_FILE_PATH) {
+      var fInit = new File(CONFIG.PSD_FILE_PATH);
+      if (fInit.exists) {
+        var openedInit = app.open(fInit);
+        app.activeDocument = openedInit;
+        return openedInit;
+      }
+    }
+    throw new Error("Nincs megnyitott dokumentum es nincs PSD_FILE_PATH!");
+  }
+
   if (!targetName) return app.activeDocument;
 
   for (var i = 0; i < app.documents.length; i++) {
@@ -32,7 +45,7 @@ function activateDocByName(targetName) {
     }
   }
 
-  // Nem talaltuk — megprobaljuk megnyitni a PSD_FILE_PATH-bol
+  // Nem talaltuk nev alapjan — megprobaljuk megnyitni a PSD_FILE_PATH-bol
   if (CONFIG.PSD_FILE_PATH) {
     var f = new File(CONFIG.PSD_FILE_PATH);
     if (f.exists) {

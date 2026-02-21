@@ -4,28 +4,17 @@ import {
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { PsSelectComponent } from '@shared/components/form/ps-select/ps-select.component';
-import { PsMultiSelectBoxComponent } from '@shared/components/form/ps-multi-select-box/ps-multi-select-box.component';
-import { PsSelectOption } from '@shared/components/form/form.types';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
 import { PhotoshopService } from '../../../../../services/photoshop.service';
-import { ActionPersonItem, ActionConfig } from './layout-actions.types';
+import { ActionPersonItem } from './layout-actions.types';
 import {
   UploadToEveryoneFormComponent,
-  UploadToEveryoneFormData,
 } from './actions/upload-to-everyone-form.component';
-
-const ACTIONS: ActionConfig[] = [
-  { id: 'upload-to-everyone', label: 'Kepek feltoltese mindenkihez', icon: 'upload' },
-];
 
 @Component({
   selector: 'app-layout-actions-dialog',
   standalone: true,
-  imports: [
-    FormsModule, LucideAngularModule, PsSelectComponent,
-    PsMultiSelectBoxComponent, UploadToEveryoneFormComponent,
-  ],
+  imports: [FormsModule, LucideAngularModule, UploadToEveryoneFormComponent],
   templateUrl: './layout-actions-dialog.component.html',
   styleUrl: './layout-actions-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,7 +30,7 @@ export class LayoutActionsDialogComponent {
   readonly executed = output<void>();
 
   readonly selectedAction = signal<string>('upload-to-everyone');
-  readonly selectedPersonIds = signal<(string | number)[]>([]);
+  readonly selectedPersonIds = signal<Set<number>>(new Set());
   readonly executing = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
@@ -49,21 +38,24 @@ export class LayoutActionsDialogComponent {
 
   readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
-  readonly actionOptions = computed<PsSelectOption[]>(() =>
-    ACTIONS.map(a => ({ id: a.id, label: a.label }))
-  );
+  readonly students = computed(() => this.persons().filter(p => p.type === 'student'));
+  readonly teachers = computed(() => this.persons().filter(p => p.type === 'teacher'));
 
-  readonly personOptions = computed<PsSelectOption[]>(() =>
-    this.persons().map(p => ({
-      id: p.id,
-      label: p.name,
-      sublabel: p.type === 'teacher' ? 'Tanar' : 'Diak',
-    }))
-  );
+  readonly selectedCount = computed(() => this.selectedPersonIds().size);
+
+  readonly allStudentsSelected = computed(() => {
+    const ids = this.selectedPersonIds();
+    return this.students().length > 0 && this.students().every(s => ids.has(s.id));
+  });
+
+  readonly allTeachersSelected = computed(() => {
+    const ids = this.selectedPersonIds();
+    return this.teachers().length > 0 && this.teachers().every(t => ids.has(t.id));
+  });
 
   readonly canExecute = computed(() => {
     if (this.executing()) return false;
-    if (this.selectedPersonIds().length === 0) return false;
+    if (this.selectedPersonIds().size === 0) return false;
 
     if (this.selectedAction() === 'upload-to-everyone') {
       const form = this.uploadForm();
@@ -73,14 +65,50 @@ export class LayoutActionsDialogComponent {
   });
 
   ngOnInit(): void {
-    // Pre-szelektalt szemelyek beallitasa
     const preIds = this.preSelectedPersonIds();
     if (preIds.length > 0) {
-      this.selectedPersonIds.set([...preIds]);
+      this.selectedPersonIds.set(new Set(preIds));
     } else {
-      // Ha nincs kijeloles, mindenkit kivalasztunk
-      this.selectedPersonIds.set(this.persons().map(p => p.id));
+      this.selectedPersonIds.set(new Set(this.persons().map(p => p.id)));
     }
+  }
+
+  togglePerson(id: number): void {
+    this.selectedPersonIds.update(set => {
+      const next = new Set(set);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  toggleAllStudents(): void {
+    this.selectedPersonIds.update(set => {
+      const next = new Set(set);
+      const all = this.allStudentsSelected();
+      for (const s of this.students()) {
+        if (all) next.delete(s.id); else next.add(s.id);
+      }
+      return next;
+    });
+  }
+
+  toggleAllTeachers(): void {
+    this.selectedPersonIds.update(set => {
+      const next = new Set(set);
+      const all = this.allTeachersSelected();
+      for (const t of this.teachers()) {
+        if (all) next.delete(t.id); else next.add(t.id);
+      }
+      return next;
+    });
+  }
+
+  isSelected(id: number): boolean {
+    return this.selectedPersonIds().has(id);
   }
 
   async onExecute(): Promise<void> {
@@ -108,24 +136,21 @@ export class LayoutActionsDialogComponent {
     const formData = form.formData();
     if (!formData) return;
 
-    const selectedIds = new Set(this.selectedPersonIds().map(Number));
+    const selectedIds = this.selectedPersonIds();
     const selectedPersons = this.persons().filter(p => selectedIds.has(p.id));
-
     if (selectedPersons.length === 0) return;
 
-    // Source files — fajl eleresi utvonalak (Electron File.path)
     const sourceFiles = formData.files.map(f => ({
       filePath: (f as File & { path?: string }).path || f.name,
     }));
 
-    // Shuffle indexek (random sorrendben)
+    // Shuffle indexek
     const indices = Array.from({ length: sourceFiles.length }, (_, i) => i);
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [indices[i], indices[j]] = [indices[j], indices[i]];
     }
 
-    // Layer kiosztás
     const layers = selectedPersons.map((p, i) => ({
       layerName: p.layerName,
       group: (p.type === 'teacher' ? 'Teachers' : 'Students') as 'Teachers' | 'Students',

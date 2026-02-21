@@ -43,13 +43,22 @@ function _doAddGroupLayers() {
   log("[JSX] Alcsoportok: Teachers + Students");
 
   // --- 3. Forras SO-k letrehozasa (Place Embedded) ---
+  // Minden kepet a top-level csoportba place-elunk mint forras SO.
   var sourceLayers = [];
   for (var i = 0; i < _data.sourceFiles.length; i++) {
     var sf = _data.sourceFiles[i];
     try {
-      // Place Embedded a dokumentumba
+      var imgFile = new File(sf.filePath);
+      if (!imgFile.exists) {
+        log("[JSX] HIBA: fajl nem talalhato: " + sf.filePath);
+        sourceLayers.push(null);
+        _errors++;
+        continue;
+      }
+
+      // Place Embedded — a dokumentum gyokerebe kerul
       var descPlace = new ActionDescriptor();
-      descPlace.putPath(charIDToTypeID("null"), new File(sf.filePath));
+      descPlace.putPath(charIDToTypeID("null"), imgFile);
       descPlace.putEnumerated(
         charIDToTypeID("FTcs"),
         charIDToTypeID("QCSt"),
@@ -62,18 +71,18 @@ function _doAddGroupLayers() {
       // A behelyezett layer az activeLayer
       var placedLayer = _doc.activeLayer;
 
-      // Nev beallitasa (fajlnev)
+      // Nev beallitasa
       var fileName = sf.filePath;
       var lastSlash = fileName.lastIndexOf("/");
       if (lastSlash < 0) lastSlash = fileName.lastIndexOf("\\");
       if (lastSlash >= 0) fileName = fileName.substring(lastSlash + 1);
-      placedLayer.name = "source-" + i + "-" + fileName;
+      placedLayer.name = "_source_" + i + "_" + fileName;
 
-      // Atrakasa a fo csoportba (gyoker szintre)
+      // Atrakasa a fo csoportba
       placedLayer.move(topGroup, ElementPlacement.INSIDE);
 
       sourceLayers.push(placedLayer);
-      log("[JSX] Forras SO letrehozva: " + placedLayer.name);
+      log("[JSX] Forras SO #" + i + " letrehozva: " + placedLayer.name + " (bounds: " + placedLayer.bounds + ")");
     } catch (e) {
       log("[JSX] HIBA forras SO (" + sf.filePath + "): " + e.message);
       sourceLayers.push(null);
@@ -97,14 +106,11 @@ function _doAddGroupLayers() {
       // Cel alcsoport
       var targetSubGroup = item.group === "Teachers" ? teachersGroup : studentsGroup;
 
-      // SO duplicate
-      var dupLayer = sourceLayer.duplicate();
+      // SO duplicate — a cel alcsoportba kozvetlenul
+      var dupLayer = sourceLayer.duplicate(targetSubGroup, ElementPlacement.INSIDE);
       dupLayer.name = item.layerName;
 
-      // Atrakasa a cel alcsoportba
-      dupLayer.move(targetSubGroup, ElementPlacement.INSIDE);
-
-      // Pozicionalas: elobb nullazas, utana translate
+      // Pozicionalas: nullazas + translate
       resetLayerPosition(dupLayer);
       dupLayer.translate(
         new UnitValue(Math.round(item.x), "px"),
@@ -118,12 +124,16 @@ function _doAddGroupLayers() {
     }
   }
 
-  // --- 5. Forras SO-k lathatosag kikapcsolasa (opcionalis, de attekinthetobb) ---
+  // --- 5. Forras SO-k torlese (mar nincs szukseg rajuk, a duplicate-ok fuggetlenek) ---
   for (var k = 0; k < sourceLayers.length; k++) {
     if (sourceLayers[k]) {
       try {
-        sourceLayers[k].visible = false;
-      } catch (e) { /* ignore */ }
+        sourceLayers[k].remove();
+        log("[JSX] Forras SO #" + k + " torolve");
+      } catch (e) {
+        // Ha nem lehet torolni, legalabb rejtjuk
+        try { sourceLayers[k].visible = false; } catch (e2) { /* ignore */ }
+      }
     }
   }
 }
@@ -154,8 +164,15 @@ function _doAddGroupLayers() {
 
     log("[JSX] Csoport: " + _data.groupName + " | Forrasok: " + _data.sourceFiles.length + " | Layerek: " + _data.layers.length);
 
+    // Forras fajlok kiirasa
+    for (var f = 0; f < _data.sourceFiles.length; f++) {
+      var sf = _data.sourceFiles[f];
+      var exists = new File(sf.filePath).exists;
+      log("[JSX] Forras #" + f + ": " + sf.filePath + " (letezik: " + exists + ")");
+    }
+
     // --- 3. Vegrehajtás — egyetlen history lepes ---
-    _doc.suspendHistory("Csoport layerek hozzaadasa: " + _data.groupName, "_doAddGroupLayers()");
+    _doc.suspendHistory("Csoport layerek: " + _data.groupName, "_doAddGroupLayers()");
 
     // --- 4. Eredmeny ---
     log("[JSX] KESZ: " + _created + " layer letrehozva, " + _errors + " hiba");

@@ -96,16 +96,16 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
   styles: [`
     .sort-panel {
       position: absolute;
-      right: 0;
+      left: 0;
       top: 0;
       bottom: 0;
       width: 280px;
       background: #2a2a4a;
-      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       flex-direction: column;
       z-index: 30;
-      transform: translateX(100%);
+      transform: translateX(-100%);
       transition: transform 0.2s ease;
       overflow-y: auto;
 

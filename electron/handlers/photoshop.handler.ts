@@ -853,7 +853,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   }
 
   // JSX script osszeallitasa: deploy + CONFIG beallitasok + #include feloldas + action kod
-  function buildJsxScript(scriptName: string, dataFilePath?: string, targetDocName?: string): string {
+  function buildJsxScript(scriptName: string, dataFilePath?: string, targetDocName?: string, psdFilePath?: string): string {
     // Scriptek kihelyezese a workDir-be (ha van beallitva)
     const workDir = psStore.get('workDirectory', null);
     if (workDir) {
@@ -880,6 +880,10 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     if (targetDocName) {
       const escapedName = targetDocName.replace(/"/g, '\\"');
       configOverrides.push(`CONFIG.TARGET_DOC_NAME = "${escapedName}";`);
+    }
+    if (psdFilePath) {
+      const escapedPsd = psdFilePath.replace(/\\/g, '/');
+      configOverrides.push(`CONFIG.PSD_FILE_PATH = "${escapedPsd}";`);
     }
 
     if (configOverrides.length > 0) {
@@ -914,6 +918,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     scriptName: string;
     dataFilePath?: string;
     targetDocName?: string;
+    psdFilePath?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
     imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number };
     jsonData?: Record<string, unknown>;
@@ -963,7 +968,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         log.info(`JSX jsonData irva: ${tempJsonPath}`);
       }
 
-      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName);
+      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName, params.psdFilePath);
       log.info(`JSX script futtatasa: ${params.scriptName} (${jsxCode.length} karakter)`);
 
       if (process.platform !== 'darwin') {
@@ -1008,6 +1013,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     scriptName: string;
     dataFilePath?: string;
     targetDocName?: string;
+    psdFilePath?: string;
     personsData?: Array<{ id: number; name: string; type: string }>;
     imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number };
     jsonData?: Record<string, unknown>;
@@ -1064,7 +1070,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         sendLog(`[DEBUG] JSON data irva: ${tempJsonPath}`, 'stdout');
       }
 
-      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName);
+      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName, params.psdFilePath);
       sendLog(`[DEBUG] JSX script: ${params.scriptName} (${jsxCode.length} karakter)`, 'stdout');
 
       if (process.platform !== 'darwin') {
@@ -1621,7 +1627,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   });
 
   // Apply template — pozíciók kiszámítása + JSX futtatás
-  ipcMain.handle('photoshop:apply-template', async (_event, params: { templateId: string; targetDocName?: string }) => {
+  ipcMain.handle('photoshop:apply-template', async (_event, params: { templateId: string; targetDocName?: string; psdFilePath?: string }) => {
     try {
       if (typeof params.templateId !== 'string') {
         return { success: false, error: 'Ervenytelen sablon azonosito' };
@@ -1640,7 +1646,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         return { success: false, error: 'read-layout.jsx nem talalhato' };
       }
 
-      const readJsxCode = buildJsxScript('actions/read-layout.jsx', undefined, params.targetDocName);
+      const readJsxCode = buildJsxScript('actions/read-layout.jsx', undefined, params.targetDocName, params.psdFilePath);
 
       if (process.platform !== 'darwin') {
         return { success: false, error: 'JSX futtatás csak macOS-en támogatott' };
@@ -1804,7 +1810,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const tempJsonPath = path.join(app.getPath('temp'), `jsx-tmpl-moves-${Date.now()}.json`);
       fs.writeFileSync(tempJsonPath, JSON.stringify({ moves }), 'utf-8');
 
-      const applyJsxCode = buildJsxScript('actions/apply-template.jsx', tempJsonPath, params.targetDocName);
+      const applyJsxCode = buildJsxScript('actions/apply-template.jsx', tempJsonPath, params.targetDocName, params.psdFilePath);
       const tempApplyJsxPath = path.join(app.getPath('temp'), `jsx-apply-tmpl-${Date.now()}.jsx`);
       fs.writeFileSync(tempApplyJsxPath, applyJsxCode, 'utf-8');
 
@@ -1836,6 +1842,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   ipcMain.handle('photoshop:place-photos', async (_event, params: {
     layers: Array<{ layerName: string; photoUrl: string }>;
     targetDocName?: string;
+    psdFilePath?: string;
   }) => {
     let tempJsonPath: string | null = null;
 
@@ -1877,7 +1884,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       log.info(`Place photos JSON irva: ${tempJsonPath} (${validLayers.length}/${params.layers.length} fotoval)`);
 
       // JSX futtatasa
-      const jsxCode = buildJsxScript('actions/place-photos.jsx', tempJsonPath, params.targetDocName);
+      const jsxCode = buildJsxScript('actions/place-photos.jsx', tempJsonPath, params.targetDocName, params.psdFilePath);
       const tempJsxPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.jsx`);
       fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
 

@@ -18,5 +18,9 @@ var CONFIG = {
   // Cel PSD dokumentum neve (pl. "projekt-12a.psd")
   // Ha meg van adva, a script NEV alapjan aktivalja a dokumentumot
   // → tobb nyitott PSD eseten is mindig a helyesben dolgozik
-  TARGET_DOC_NAME: null
+  TARGET_DOC_NAME: null,
+
+  // PSD fajl teljes eleresi utja (autoOpen-hez)
+  // Ha a TARGET_DOC_NAME nincs megnyitva, innen nyitja meg automatikusan
+  PSD_FILE_PATH: null
 };

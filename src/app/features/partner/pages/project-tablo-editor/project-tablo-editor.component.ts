@@ -497,11 +497,15 @@ export class ProjectTabloEditorComponent implements OnInit {
     const p = this.project();
     if (!s) return null;
 
-    return this.ps.computePsdPath(s.value, p ? {
+    const resolved = await this.ps.computePsdPath(s.value, p ? {
       projectName: p.name,
       className: p.className,
       brandName: this.branding.brandName(),
     } : undefined);
+
+    // Auto-open: PS service mindig tudja a PSD útvonalat
+    if (resolved) this.ps.psdPath.set(resolved);
+    return resolved;
   }
 
   /** Automatikus snapshot frissítés (csendes — nem jelenít meg hibaüzenetet) */

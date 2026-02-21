@@ -31,7 +31,18 @@ function activateDocByName(targetName) {
       return app.documents[i];
     }
   }
-  // Ha nem talaljuk, marad az aktiv — ne dobjunk hibat
+
+  // Nem talaltuk — megprobaljuk megnyitni a PSD_FILE_PATH-bol
+  if (CONFIG.PSD_FILE_PATH) {
+    var f = new File(CONFIG.PSD_FILE_PATH);
+    if (f.exists) {
+      var opened = app.open(f);
+      app.activeDocument = opened;
+      return opened;
+    }
+  }
+
+  // Fallback: marad az aktiv
   return app.activeDocument;
 }
 

@@ -186,8 +186,8 @@ interface PhotoshopAPI {
   setTextAlign: (align: string) => Promise<{ success: boolean; error?: string }>;
   getGridAlign: () => Promise<string>;
   setGridAlign: (align: string) => Promise<{ success: boolean; error?: string }>;
-  runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; output?: string }>;
-  runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string }>;
+  runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; psdFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; output?: string }>;
+  runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; psdFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string }>;
   onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;
   saveLayoutJson: (params: { psdPath: string; layoutData: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; jsonPath?: string }>;
   saveSnapshot: (params: { psdPath: string; snapshotData: Record<string, unknown>; fileName: string }) => Promise<{ success: boolean; error?: string; snapshotPath?: string }>;
@@ -200,8 +200,8 @@ interface PhotoshopAPI {
   loadTemplate: (params: { templateId: string }) => Promise<{ success: boolean; error?: string; data?: GlobalTemplate }>;
   deleteTemplate: (params: { templateId: string }) => Promise<{ success: boolean; error?: string }>;
   renameTemplate: (params: { templateId: string; newName: string }) => Promise<{ success: boolean; error?: string }>;
-  applyTemplate: (params: { templateId: string; targetDocName?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
-  placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
+  applyTemplate: (params: { templateId: string; targetDocName?: string; psdFilePath?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
+  placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string; psdFilePath?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
 }
 
 export interface ElectronAPI {

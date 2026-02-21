@@ -51,6 +51,9 @@ export class PhotoshopService {
   /** Képek sor-igazítás a gridben (left/center/right) */
   readonly gridAlign = signal<string>('center');
 
+  /** Aktuálisan nyitott PSD fájl útvonala (auto-open-hez) */
+  readonly psdPath = signal<string | null>(null);
+
   /** Konfiguralt-e (van mentett path) */
   readonly isConfigured = computed(() => !!this.path());
 
@@ -59,6 +62,11 @@ export class PhotoshopService {
 
   private get api() {
     return window.electronAPI?.photoshop;
+  }
+
+  /** runJsx wrapper — automatikusan hozzáadja a psdFilePath-ot (auto-open) */
+  private runJsx(params: Parameters<NonNullable<typeof this.api>['runJsx']>[0]) {
+    return this.api!.runJsx({ ...params, psdFilePath: this.psdPath() ?? undefined });
   }
 
   /** Mentett path betoltese + auto-detektalas */
@@ -298,7 +306,7 @@ export class PhotoshopService {
     }
 
     try {
-      const result = await this.api.runJsx({
+      const result = await this.runJsx({
         scriptName: 'actions/add-guides.jsx',
         jsonData: { marginCm },
         targetDocName,
@@ -326,7 +334,7 @@ export class PhotoshopService {
     }
 
     try {
-      const result = await this.api.runJsx({
+      const result = await this.runJsx({
         scriptName: 'actions/add-name-layers.jsx',
         personsData: persons,
         targetDocName,
@@ -356,7 +364,7 @@ export class PhotoshopService {
     }
 
     try {
-      const result = await this.api.runJsx({
+      const result = await this.runJsx({
         scriptName: 'actions/add-image-layers.jsx',
         imageData: { persons, ...imageSizeCm, studentSizeCm: this.studentSizeCm(), teacherSizeCm: this.teacherSizeCm() },
         targetDocName,
@@ -464,7 +472,7 @@ export class PhotoshopService {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
     try {
-      const result = await this.api.runJsx({
+      const result = await this.runJsx({
         scriptName: 'actions/arrange-grid.jsx',
         jsonData: {
           boardWidthCm: boardSize.widthCm,
@@ -496,7 +504,7 @@ export class PhotoshopService {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
     try {
-      const result = await this.api.runJsx({
+      const result = await this.runJsx({
         scriptName: 'actions/arrange-names.jsx',
         jsonData: {
           nameGapCm: this.nameGapCm(),
@@ -556,7 +564,7 @@ export class PhotoshopService {
 
     try {
       // 1. JSX futtatása — layout adatok kiolvasása a Photoshopból
-      const jsxResult = await this.api.runJsx({
+      const jsxResult = await this.runJsx({
         scriptName: 'actions/read-layout.jsx',
         targetDocName,
       });
@@ -639,7 +647,7 @@ export class PhotoshopService {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
     try {
-      const jsxResult = await this.api.runJsx({
+      const jsxResult = await this.runJsx({
         scriptName: 'actions/read-layout.jsx',
         targetDocName,
       });
@@ -797,7 +805,7 @@ export class PhotoshopService {
         snapshotData['restoreGroups'] = restoreGroups;
       }
 
-      const jsxResult = await this.api.runJsx({
+      const jsxResult = await this.runJsx({
         scriptName: 'actions/restore-layout.jsx',
         jsonData: snapshotData,
         targetDocName,
@@ -1194,7 +1202,7 @@ export class PhotoshopService {
     }
 
     try {
-      const result = await this.api.placePhotos({ layers, targetDocName });
+      const result = await this.api.placePhotos({ layers, targetDocName, psdFilePath: this.psdPath() ?? undefined });
       return { success: result.success, error: result.error };
     } catch (err) {
       this.logger.error('JSX placePhotos hiba', err);
@@ -1218,7 +1226,7 @@ export class PhotoshopService {
     }
 
     try {
-      const result = await this.api.runJsx({
+      const result = await this.runJsx({
         scriptName: 'actions/link-layers.jsx',
         jsonData: { layerNames },
         targetDocName,
@@ -1246,7 +1254,7 @@ export class PhotoshopService {
     }
 
     try {
-      const result = await this.api.runJsx({
+      const result = await this.runJsx({
         scriptName: 'actions/unlink-layers.jsx',
         jsonData: { layerNames },
         targetDocName,
@@ -1266,7 +1274,7 @@ export class PhotoshopService {
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
     try {
-      const result = await this.api.applyTemplate({ templateId, targetDocName });
+      const result = await this.api.applyTemplate({ templateId, targetDocName, psdFilePath: this.psdPath() ?? undefined });
       if (result.success) {
         this.logger.info('Sablon alkalmazva');
       }

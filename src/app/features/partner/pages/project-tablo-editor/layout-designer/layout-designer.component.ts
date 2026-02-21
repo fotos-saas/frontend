@@ -254,6 +254,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
+    // PSD path beállítása a service-ben (auto-open-hez)
+    this.ps.psdPath.set(this.psdPath());
+
     this.loadSnapshotData();
     this.loadSnapshotList();
     this.setupResize();

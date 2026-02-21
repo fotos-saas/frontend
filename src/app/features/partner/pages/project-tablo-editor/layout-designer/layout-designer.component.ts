@@ -1,6 +1,6 @@
 import {
   Component, ChangeDetectionStrategy, input, output, inject,
-  OnInit, OnDestroy, ElementRef, viewChild, signal,
+  OnInit, OnDestroy, ElementRef, viewChild, signal, HostListener,
 } from '@angular/core';
 import { SnapshotLayer } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
@@ -41,8 +41,6 @@ import { DesignerDocument } from './layout-designer.types';
     <div
       class="layout-designer-overlay"
       #overlayEl
-      (keydown)="onKeyDown($event)"
-      tabindex="0"
     >
       @if (loading()) {
         <div class="layout-designer__loading">
@@ -84,7 +82,6 @@ import { DesignerDocument } from './layout-designer.types';
       background: #1a1a2e;
       display: flex;
       flex-direction: column;
-      outline: none;
       -webkit-app-region: no-drag;
       /* Electron frameless: ne lógjon a macOS traffic lights alá */
       padding-top: 38px;
@@ -204,7 +201,12 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.closeEvent.emit();
   }
 
+  @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
+    // Textarea/input-ban ne kapjuk el (pl. egyedi sorrend dialógus)
+    const tag = (event.target as HTMLElement)?.tagName;
+    if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+
     if (event.key === 'Escape') { this.close(); return; }
 
     const isMod = event.metaKey || event.ctrlKey;
@@ -283,11 +285,6 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
       this.state.loadSnapshot({ document: doc, layers }, this.persons());
       this.loading.set(false);
-
-      // Fókusz az overlay-re (ESC billentyűzethez)
-      requestAnimationFrame(() => {
-        this.overlayEl().nativeElement.focus();
-      });
     } catch {
       this.loadError.set('Váratlan hiba a pillanatkép betöltésekor.');
       this.loading.set(false);

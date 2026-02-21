@@ -2,7 +2,6 @@ import { Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
 import { DesignerLayer } from './layout-designer.types';
-import { expandWithCoupledLayers } from './layout-designer.utils';
 import { PartnerService } from '../../../services/partner.service';
 
 /** Olvasási irány minta */
@@ -150,6 +149,7 @@ export class LayoutDesignerSortService {
   /**
    * Rendezés végrehajtása: az images layerek pozícióit
    * a kívánt névsorrendnek megfelelően cseréli meg.
+   * A coupled név layerek automatikusan követik a képüket.
    */
   private applySort(images: DesignerLayer[], orderedNames: string[]): void {
     // 1. Pozíció slot-ok kiolvasása: aktuális pozíciók Y→X sorrendben
@@ -169,11 +169,17 @@ export class LayoutDesignerSortService {
       }
     }
 
-    // 4. orderedNames[i] → slots[i] pozíció hozzárendelés
+    // 4. Person ID → coupled név layer map (kép melletti név keresése)
+    const allLayers = this.state.layers();
+    const personIdToNameLayer = new Map<number, DesignerLayer>();
+    for (const l of allLayers) {
+      if ((l.category === 'student-name' || l.category === 'teacher-name') && l.personMatch) {
+        personIdToNameLayer.set(l.personMatch.id, l);
+      }
+    }
+
+    // 5. orderedNames[i] → slots[i] pozíció hozzárendelés
     const updates = new Map<number, { x: number; y: number }>();
-    const expandedIds = expandWithCoupledLayers(
-      this.state.selectedLayerIds(), this.state.layers(),
-    );
 
     for (let i = 0; i < Math.min(orderedNames.length, slots.length); i++) {
       const layer = nameToLayer.get(orderedNames[i]);
@@ -183,25 +189,24 @@ export class LayoutDesignerSortService {
       const deltaX = slot.x - (layer.editedX ?? layer.x);
       const deltaY = slot.y - (layer.editedY ?? layer.y);
 
+      // Kép pozíció frissítése
       updates.set(layer.layerId, { x: slot.x, y: slot.y });
 
-      // Coupled réteg (név) delta-val követi
-      for (const id of expandedIds) {
-        if (updates.has(id)) continue;
-        const coupled = this.state.layers().find(l => l.layerId === id);
-        if (coupled && coupled.personMatch?.id === layer.personMatch?.id
-            && !this.state.selectedLayerIds().has(id)) {
-          updates.set(id, {
-            x: (coupled.editedX ?? coupled.x) + deltaX,
-            y: (coupled.editedY ?? coupled.y) + deltaY,
+      // Coupled név layer: ugyanazzal a delta-val követi
+      if (layer.personMatch) {
+        const nameLayer = personIdToNameLayer.get(layer.personMatch.id);
+        if (nameLayer) {
+          updates.set(nameLayer.layerId, {
+            x: (nameLayer.editedX ?? nameLayer.x) + deltaX,
+            y: (nameLayer.editedY ?? nameLayer.y) + deltaY,
           });
         }
       }
     }
 
-    // 5. State frissítés
+    // 6. State frissítés
     this.state.updateLayers(
-      this.state.layers().map(l => {
+      allLayers.map(l => {
         const u = updates.get(l.layerId);
         if (!u) return l;
         return { ...l, editedX: u.x, editedY: u.y };

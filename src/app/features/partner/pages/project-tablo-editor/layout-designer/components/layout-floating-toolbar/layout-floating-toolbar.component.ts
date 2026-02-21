@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, computed, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, signal, output, input } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -114,6 +114,24 @@ const GAP = 8;
 
         <div class="ft-divider"></div>
 
+        <!-- Fotó feltöltés -->
+        <button class="ft-btn ft-btn--photo"
+          (click)="uploadPhotoClicked.emit()" matTooltip="Fotó feltöltése">
+          <lucide-icon [name]="ICONS.CAMERA" [size]="15" />
+        </button>
+
+        <!-- Link/Unlink a Photoshopban -->
+        <button class="ft-btn" [disabled]="linking()"
+          (click)="linkLayersClicked.emit()" matTooltip="Összelinkelés (kép + név)">
+          <lucide-icon [name]="ICONS.LINK" [size]="15" />
+        </button>
+        <button class="ft-btn" [disabled]="linking()"
+          (click)="unlinkLayersClicked.emit()" matTooltip="Linkelés megszüntetése">
+          <lucide-icon [name]="ICONS.UNLINK" [size]="15" />
+        </button>
+
+        <div class="ft-divider"></div>
+
         <!-- Kijelölés info -->
         <span class="ft-info">{{ state.selectionCount() }} kijelölve</span>
       </div>
@@ -183,6 +201,14 @@ const GAP = 8;
       &:disabled {
         opacity: 0.3;
         cursor: not-allowed;
+      }
+
+      &--photo {
+        color: #34d399;
+        &:hover:not(:disabled) {
+          background: rgba(52, 211, 153, 0.2);
+          color: #6ee7b7;
+        }
       }
     }
 
@@ -265,6 +291,12 @@ export class LayoutFloatingToolbarComponent {
   readonly state = inject(LayoutDesignerStateService);
   readonly actions = inject(LayoutDesignerActionsService);
   protected readonly ICONS = ICONS;
+
+  readonly linking = input<boolean>(false);
+
+  readonly uploadPhotoClicked = output<void>();
+  readonly linkLayersClicked = output<void>();
+  readonly unlinkLayersClicked = output<void>();
 
   readonly moreOpen = signal(false);
 

@@ -1,0 +1,80 @@
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="green"
+  [icon]="ICONS.CAMERA"
+  [title]="'Fotó feltöltése — ' + person().name"
+  size="md"
+  variant="create"
+  [isSubmitting]="uploading()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="selectedFile() ? upload() : null"
+>
+  <div dialogBody class="upload-body">
+    @if (!selectedFile()) {
+      <app-drop-zone
+        accept=".jpg,.jpeg,.png,.webp"
+        hint="JPG, PNG vagy WebP"
+        maxSize="20MB"
+        (filesSelected)="onFilesSelected($event)"
+      />
+    } @else {
+      <div class="preview-area">
+        @if (previewUrl(); as url) {
+          <img [src]="url" class="preview-image" alt="Előnézet" />
+        }
+        <button class="preview-remove" (click)="clearFile()">
+          <lucide-icon [name]="ICONS.X" [size]="14" />
+          Eltávolítás
+        </button>
+      </div>
+    }
+
+    <div class="mode-selector">
+      <span class="mode-selector__label">Hová kerüljön a fotó?</span>
+      <label class="mode-option">
+        <input
+          type="radio"
+          name="uploadMode"
+          value="archive"
+          [checked]="uploadMode() === 'archive'"
+          (change)="uploadMode.set('archive')"
+        />
+        <span class="mode-option__text">
+          <span class="mode-option__title">Archívba</span>
+          <span class="mode-option__desc">Minden projektben elérhető lesz</span>
+        </span>
+      </label>
+      <label class="mode-option">
+        <input
+          type="radio"
+          name="uploadMode"
+          value="override"
+          [checked]="uploadMode() === 'override'"
+          (change)="uploadMode.set('override')"
+        />
+        <span class="mode-option__text">
+          <span class="mode-option__title">Csak ezen a tablón egyedi</span>
+          <span class="mode-option__desc">Projekt-specifikus felülírás</span>
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+    <button
+      class="btn btn--confirm"
+      [disabled]="!selectedFile() || uploading()"
+      (click)="upload()"
+    >
+      @if (uploading()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        Feltöltés...
+      } @else {
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+        Feltöltés
+      }
+    </button>
+  </div>
+</app-dialog-wrapper>

@@ -1,6 +1,6 @@
 import {
   Component, ChangeDetectionStrategy, inject, computed,
-  signal, NgZone, DestroyRef,
+  signal, NgZone, DestroyRef, output, input,
 } from '@angular/core';
 import { LayoutDesignerStateService } from '../../layout-designer-state.service';
 import { LayoutLayerComponent } from '../layout-layer/layout-layer.component';
@@ -51,7 +51,12 @@ const MARQUEE_THRESHOLD = 3;
         ></div>
       }
 
-      <app-layout-floating-toolbar />
+      <app-layout-floating-toolbar
+        [linking]="linking()"
+        (uploadPhotoClicked)="uploadPhotoClicked.emit()"
+        (linkLayersClicked)="linkLayersClicked.emit()"
+        (unlinkLayersClicked)="unlinkLayersClicked.emit()"
+      />
     </div>
   `,
   styles: [`
@@ -91,6 +96,12 @@ export class LayoutCanvasComponent {
   readonly state = inject(LayoutDesignerStateService);
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly linking = input<boolean>(false);
+
+  readonly uploadPhotoClicked = output<void>();
+  readonly linkLayersClicked = output<void>();
+  readonly unlinkLayersClicked = output<void>();
 
   readonly scaleInfo = this.state.scaleInfo;
 

@@ -1,0 +1,152 @@
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="green"
+  [icon]="ICONS.CAMERA"
+  [title]="title()"
+  size="lg"
+  variant="wizard"
+  [isSubmitting]="uploading() || matching() || saving()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="close.emit()"
+>
+  <div dialogBody class="bulk-body">
+    @if (step() === 'upload') {
+      <!-- 1. lépés: Upload -->
+      <app-drop-zone
+        accept=".jpg,.jpeg,.png,.webp"
+        hint="JPG, PNG vagy WebP"
+        maxSize="max. 50 kép"
+        [uploading]="uploading()"
+        (filesSelected)="onFilesSelected($event)"
+      />
+
+      @if (selectedFiles().length > 0) {
+        <div class="file-count">
+          <lucide-icon [name]="ICONS.IMAGE" [size]="15" />
+          <span>{{ selectedFiles().length }} kép kiválasztva</span>
+          <button class="file-count__clear" (click)="clearFiles()">
+            <lucide-icon [name]="ICONS.X" [size]="12" />
+            Törlés
+          </button>
+        </div>
+      }
+
+      <div class="mode-selector">
+        <span class="mode-selector__label">Hová kerüljenek a fotók?</span>
+        <label class="mode-option">
+          <input
+            type="radio"
+            name="bulkUploadMode"
+            value="archive"
+            [checked]="uploadMode() === 'archive'"
+            (change)="uploadMode.set('archive')"
+          />
+          <span class="mode-option__text">
+            <span class="mode-option__title">Archívba</span>
+            <span class="mode-option__desc">Minden projektben elérhetők lesznek</span>
+          </span>
+        </label>
+        <label class="mode-option">
+          <input
+            type="radio"
+            name="bulkUploadMode"
+            value="override"
+            [checked]="uploadMode() === 'override'"
+            (change)="uploadMode.set('override')"
+          />
+          <span class="mode-option__text">
+            <span class="mode-option__title">Csak ezen a tablón egyediek</span>
+            <span class="mode-option__desc">Projekt-specifikus felülírás</span>
+          </span>
+        </label>
+      </div>
+    } @else {
+      <!-- 2. lépés: Review -->
+      <div class="match-list">
+        @for (row of matchRows(); track row.person.id) {
+          <div class="match-row" [class.match-row--unmatched]="row.status === 'unmatched'">
+            <div class="match-row__status">
+              @if (row.status === 'matched') {
+                @if (row.confidence === 'high') {
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" class="match-icon--ok" />
+                } @else {
+                  <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" class="match-icon--warn" />
+                }
+              } @else {
+                <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" class="match-icon--fail" />
+              }
+            </div>
+            <span class="match-row__name">{{ row.person.name }}</span>
+            <span class="match-row__arrow">
+              @if (row.filename) {
+                ←
+              }
+            </span>
+            <span class="match-row__file">
+              @if (row.filename) {
+                {{ row.filename }}
+                @if (row.confidence) {
+                  <span class="match-confidence"
+                    [class.match-confidence--high]="row.confidence === 'high'"
+                    [class.match-confidence--medium]="row.confidence === 'medium'"
+                  >
+                    {{ row.confidence === 'high' ? 'biztos' : 'bizonytalan' }}
+                  </span>
+                }
+              } @else {
+                <span class="match-row__empty">nincs párosítás</span>
+              }
+            </span>
+          </div>
+        }
+      </div>
+
+      @if (unmatchedFiles().length > 0) {
+        <div class="unmatched-info">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+          <span>{{ unmatchedFiles().length }} ismeretlen kép: {{ unmatchedFiles().join(', ') }}</span>
+        </div>
+      }
+    }
+  </div>
+
+  <div dialogFooter>
+    @if (step() === 'upload') {
+      <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+      <button
+        class="btn btn--confirm"
+        [disabled]="selectedFiles().length === 0 || uploading() || matching()"
+        (click)="startMatching()"
+      >
+        @if (uploading()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Feltöltés...
+        } @else if (matching()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Párosítás...
+        } @else {
+          Párosítás
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        }
+      </button>
+    } @else {
+      <button class="btn btn--outline" (click)="goBack()">
+        <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+        Vissza
+      </button>
+      <button
+        class="btn btn--confirm"
+        [disabled]="matchedCount() === 0 || saving()"
+        (click)="saveAssignments()"
+      >
+        @if (saving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Mentés...
+        } @else {
+          <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+          Mentés ({{ matchedCount() }} párosítás)
+        }
+      </button>
+    }
+  </div>
+</app-dialog-wrapper>

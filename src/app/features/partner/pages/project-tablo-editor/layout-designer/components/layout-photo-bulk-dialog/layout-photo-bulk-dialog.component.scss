@@ -1,0 +1,213 @@
+.bulk-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.file-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #059669;
+
+  &__clear {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    padding: 2px 8px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    font-size: 0.72rem;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+  }
+}
+
+.mode-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+
+  &__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 2px;
+  }
+}
+
+.mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  input[type="radio"] {
+    margin-top: 3px;
+    accent-color: #7c3aed;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &__title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  &__desc {
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+}
+
+// Review lépés
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 360px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.match-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.1s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  &--unmatched {
+    opacity: 0.5;
+  }
+
+  &__status {
+    flex-shrink: 0;
+    display: flex;
+  }
+
+  &__name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1f2937;
+    min-width: 140px;
+    flex-shrink: 0;
+  }
+
+  &__arrow {
+    color: #9ca3af;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+  }
+
+  &__file {
+    font-size: 0.78rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__empty {
+    font-style: italic;
+    color: #d1d5db;
+  }
+}
+
+.match-icon {
+  &--ok {
+    color: #059669;
+  }
+
+  &--warn {
+    color: #d97706;
+  }
+
+  &--fail {
+    color: #dc2626;
+  }
+}
+
+.match-confidence {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+
+  &--high {
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+  }
+
+  &--medium {
+    background: rgba(217, 119, 6, 0.1);
+    color: #d97706;
+  }
+}
+
+.unmatched-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(217, 119, 6, 0.08);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: #92400e;
+
+  lucide-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

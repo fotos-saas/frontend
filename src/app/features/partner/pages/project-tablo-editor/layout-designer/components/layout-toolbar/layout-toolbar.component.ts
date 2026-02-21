@@ -90,25 +90,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           <lucide-icon [name]="ICONS.REDO" [size]="16" />
         </button>
 
-        @if (state.hasSelection()) {
-          <div class="layout-toolbar__separator"></div>
-
-          <!-- Fotók behelyezése a PSD-be -->
-          <button class="toolbar-btn toolbar-btn--place-photos" [disabled]="placingPhotos()"
-            (click)="onPlacePhotos()" matTooltip="Fotók behelyezése a PSD-be">
-            <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
-          </button>
-
-          <!-- Link/Unlink a Photoshopban -->
-          <button class="toolbar-btn" [disabled]="linking()"
-            (click)="onLinkLayers()" matTooltip="Összelinkelés a PSD-ben (kép + név)">
-            <lucide-icon [name]="ICONS.LINK" [size]="16" />
-          </button>
-          <button class="toolbar-btn" [disabled]="linking()"
-            (click)="onUnlinkLayers()" matTooltip="Linkelés megszüntetése a PSD-ben">
-            <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
-          </button>
-        }
       </div>
 
       <!-- Source picker dropdown (toolbar szintjén, overflow: hidden miatt) -->
@@ -464,13 +445,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         letter-spacing: 0.03em;
       }
 
-      &--place-photos {
-        background: rgba(52, 211, 153, 0.15);
-        color: #34d399;
-        &:hover:not(:disabled) { background: rgba(52, 211, 153, 0.25); color: #6ee7b7; }
-        &:disabled { opacity: 0.3; }
-      }
-
       &--refresh {
         padding: 0 10px;
         &:hover:not(:disabled) { color: #a78bfa; }
@@ -508,16 +482,10 @@ export class LayoutToolbarComponent {
   readonly switchingSnapshot = input<boolean>(false);
   readonly pickerOpen = signal(false);
 
-  readonly linking = input<boolean>(false);
-  readonly placingPhotos = input<boolean>(false);
-
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
   readonly snapshotSelected = output<SnapshotListItem>();
-  readonly linkLayersClicked = output<string[]>();
-  readonly unlinkLayersClicked = output<string[]>();
-  readonly placePhotosClicked = output<Array<{ layerName: string; photoUrl: string }>>();
 
   formatDate(isoDate: string | null): string {
     if (!isoDate) return '';
@@ -540,44 +508,4 @@ export class LayoutToolbarComponent {
     this.snapshotSelected.emit(snap);
   }
 
-  /** Kijelölt layerek fotóinak behelyezése a PSD-be */
-  onPlacePhotos(): void {
-    const selected = this.state.selectedLayers();
-    const layers: Array<{ layerName: string; photoUrl: string }> = [];
-    for (const l of selected) {
-      if (l.category === 'student-image' || l.category === 'teacher-image') {
-        if (l.personMatch?.photoUrl) {
-          layers.push({ layerName: l.layerName, photoUrl: l.personMatch.photoUrl });
-        }
-      }
-    }
-    if (layers.length === 0) return;
-    this.placePhotosClicked.emit(layers);
-  }
-
-  /** Kijelölt layerek neveit összegyűjti és link event-et küld */
-  onLinkLayers(): void {
-    const names = this.getSelectedLayerNames();
-    if (names.length === 0) return;
-    this.linkLayersClicked.emit(names);
-  }
-
-  /** Kijelölt layerek neveit összegyűjti és unlink event-et küld */
-  onUnlinkLayers(): void {
-    const names = this.getSelectedLayerNames();
-    if (names.length === 0) return;
-    this.unlinkLayersClicked.emit(names);
-  }
-
-  /** Kijelölt layerek egyedi nevei (deduplikálva) */
-  private getSelectedLayerNames(): string[] {
-    const selected = this.state.selectedLayers();
-    const nameSet = new Set<string>();
-    for (const l of selected) {
-      if (l.category !== 'fixed') {
-        nameSet.add(l.layerName);
-      }
-    }
-    return Array.from(nameSet);
-  }
 }

@@ -1,10 +1,11 @@
 import {
   Component, ChangeDetectionStrategy, input, output, inject,
-  OnInit, OnDestroy, ElementRef, viewChild, signal, HostListener,
+  OnInit, OnDestroy, ElementRef, viewChild, signal, computed, HostListener,
 } from '@angular/core';
 import { SnapshotLayer, SnapshotListItem } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
 import { PhotoshopService } from '../../../services/photoshop.service';
+import { PartnerProjectService } from '../../../services/partner-project.service';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
 import { LayoutDesignerActionsService } from './layout-designer-actions.service';
 import { LayoutDesignerGridService } from './layout-designer-grid.service';
@@ -16,9 +17,12 @@ import { LayoutToolbarComponent } from './components/layout-toolbar/layout-toolb
 import { LayoutCanvasComponent } from './components/layout-canvas/layout-canvas.component';
 import { LayoutSortPanelComponent } from './components/layout-sort-panel/layout-sort-panel.component';
 import { LayoutSortCustomDialogComponent } from './components/layout-sort-custom-dialog/layout-sort-custom-dialog.component';
+import { LayoutPhotoUploadDialogComponent, PhotoUploadPerson, PhotoUploadResult } from './components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
+import { LayoutPhotoBulkDialogComponent } from './components/layout-photo-bulk-dialog/layout-photo-bulk-dialog.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DesignerDocument } from './layout-designer.types';
+import { firstValueFrom } from 'rxjs';
 
 /**
  * Vizuális Tábló Szerkesztő — fullscreen overlay.
@@ -27,7 +31,11 @@ import { DesignerDocument } from './layout-designer.types';
 @Component({
   selector: 'app-layout-designer',
   standalone: true,
-  imports: [LayoutToolbarComponent, LayoutCanvasComponent, LayoutSortPanelComponent, LayoutSortCustomDialogComponent, LucideAngularModule],
+  imports: [
+    LayoutToolbarComponent, LayoutCanvasComponent, LayoutSortPanelComponent,
+    LayoutSortCustomDialogComponent, LayoutPhotoUploadDialogComponent,
+    LayoutPhotoBulkDialogComponent, LucideAngularModule,
+  ],
   providers: [
     LayoutDesignerStateService,
     LayoutDesignerActionsService,
@@ -58,24 +66,40 @@ import { DesignerDocument } from './layout-designer.types';
           [refreshing]="refreshing()"
           [snapshots]="snapshots()"
           [switchingSnapshot]="switchingSnapshot()"
-          [linking]="linking()"
-          [placingPhotos]="placingPhotos()"
           (refreshClicked)="refresh()"
           (snapshotSelected)="switchSnapshot($event)"
           (saveClicked)="save()"
           (closeClicked)="close()"
-          (linkLayersClicked)="linkLayers($event)"
-          (unlinkLayersClicked)="unlinkLayers($event)"
-          (placePhotosClicked)="placePhotos($event)"
         />
         <div class="layout-designer__content">
           <app-layout-sort-panel (openCustomDialog)="showCustomDialog.set(true)" />
           <div class="layout-designer__canvas-area" #canvasArea>
-            <app-layout-canvas />
+            <app-layout-canvas
+              [linking]="linking()"
+              (uploadPhotoClicked)="openPhotoDialog()"
+              (linkLayersClicked)="onLinkLayers()"
+              (unlinkLayersClicked)="onUnlinkLayers()"
+            />
           </div>
         </div>
         @if (showCustomDialog()) {
           <app-layout-sort-custom-dialog (close)="showCustomDialog.set(false)" />
+        }
+        @if (showPhotoDialog(); as dialogPerson) {
+          <app-layout-photo-upload-dialog
+            [person]="dialogPerson"
+            [projectId]="projectId()"
+            (close)="showPhotoDialog.set(null)"
+            (photoUploaded)="onPhotoUploaded($event)"
+          />
+        }
+        @if (showBulkPhotoDialog()) {
+          <app-layout-photo-bulk-dialog
+            [persons]="bulkDialogPersons()"
+            [projectId]="projectId()"
+            (close)="showBulkPhotoDialog.set(false)"
+            (photosAssigned)="onBulkPhotosAssigned($event)"
+          />
         }
       }
     </div>
@@ -162,8 +186,21 @@ import { DesignerDocument } from './layout-designer.types';
 export class LayoutDesignerComponent implements OnInit, OnDestroy {
   private readonly state = inject(LayoutDesignerStateService);
   private readonly ps = inject(PhotoshopService);
+  private readonly projectService = inject(PartnerProjectService);
   protected readonly ICONS = ICONS;
   readonly showCustomDialog = signal(false);
+
+  /** Single person dialógus: a kijelölt személy adatai, vagy null ha nem látszik */
+  readonly showPhotoDialog = signal<PhotoUploadPerson | null>(null);
+
+  /** Bulk dialógus megjelenítése */
+  readonly showBulkPhotoDialog = signal(false);
+
+  /** Bulk dialógus személyei */
+  readonly bulkDialogPersons = computed<PhotoUploadPerson[]>(() => {
+    if (!this.showBulkPhotoDialog()) return [];
+    return this.getSelectedImagePersons();
+  });
 
   /** Betöltendő snapshot fájl útvonala */
   readonly snapshotPath = input.required<string>();
@@ -176,6 +213,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
   /** Tábló méret konfiguráció */
   readonly boardConfig = input.required<{ widthCm: number; heightCm: number }>();
+
+  /** Projekt azonosító (fotó feltöltéshez) */
+  readonly projectId = input.required<number>();
 
   /** Bezárás event */
   readonly closeEvent = output<void>();
@@ -222,7 +262,12 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     const tag = (event.target as HTMLElement)?.tagName;
     if (tag === 'TEXTAREA' || tag === 'INPUT') return;
 
-    if (event.key === 'Escape') { this.close(); return; }
+    if (event.key === 'Escape') {
+      // Ha dialógus nyitva, az ESC azt zárja be (DialogWrapper kezeli)
+      if (this.showPhotoDialog() || this.showBulkPhotoDialog() || this.showCustomDialog()) return;
+      this.close();
+      return;
+    }
 
     const isMod = event.metaKey || event.ctrlKey;
     if (!isMod) return;
@@ -314,6 +359,44 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Fotó dialógus megnyitása — 1 elem: single, 2+: bulk */
+  openPhotoDialog(): void {
+    const imagePersons = this.getSelectedImagePersons();
+    if (imagePersons.length === 0) return;
+
+    if (imagePersons.length === 1) {
+      this.showPhotoDialog.set(imagePersons[0]);
+    } else {
+      this.showBulkPhotoDialog.set(true);
+    }
+  }
+
+  /** Single fotó feltöltés sikeres */
+  onPhotoUploaded(result: PhotoUploadResult): void {
+    this.showPhotoDialog.set(null);
+    this.refreshPersonsInState();
+  }
+
+  /** Bulk fotó feltöltés sikeres */
+  onBulkPhotosAssigned(_result: { assignedCount: number }): void {
+    this.showBulkPhotoDialog.set(false);
+    this.refreshPersonsInState();
+  }
+
+  /** Floating toolbar-ról: link gomb */
+  onLinkLayers(): void {
+    const names = this.getSelectedLayerNames();
+    if (names.length === 0) return;
+    this.linkLayers(names);
+  }
+
+  /** Floating toolbar-ról: unlink gomb */
+  onUnlinkLayers(): void {
+    const names = this.getSelectedLayerNames();
+    if (names.length === 0) return;
+    this.unlinkLayers(names);
+  }
+
   /** Fotók behelyezése a kijelölt Smart Object layerekbe */
   async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>): Promise<void> {
     this.placingPhotos.set(true);
@@ -360,6 +443,71 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       return { ...l, linked };
     });
     this.state.layers.set(updated);
+  }
+
+  /** Kijelölt image layerekhez tartozó személyek */
+  private getSelectedImagePersons(): PhotoUploadPerson[] {
+    const selected = this.state.selectedLayers();
+    const persons: PhotoUploadPerson[] = [];
+    const seenIds = new Set<number>();
+
+    for (const l of selected) {
+      if ((l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch) {
+        if (!seenIds.has(l.personMatch.id)) {
+          seenIds.add(l.personMatch.id);
+          // Keressük meg a teljes TabloPersonItem-et
+          const fullPerson = this.persons().find(p => p.id === l.personMatch!.id);
+          persons.push({
+            id: l.personMatch.id,
+            name: l.personMatch.name,
+            type: l.category === 'teacher-image' ? 'teacher' : 'student',
+            archiveId: fullPerson?.archiveId ?? null,
+          });
+        }
+      }
+    }
+
+    return persons;
+  }
+
+  /** Kijelölt layerek nevei (deduplikálva) */
+  private getSelectedLayerNames(): string[] {
+    const selected = this.state.selectedLayers();
+    const nameSet = new Set<string>();
+    for (const l of selected) {
+      if (l.category !== 'fixed') {
+        nameSet.add(l.layerName);
+      }
+    }
+    return Array.from(nameSet);
+  }
+
+  /** Személyek frissítése a backendről és state újratöltése */
+  private refreshPersonsInState(): void {
+    firstValueFrom(
+      this.projectService.getProjectPersons(this.projectId()),
+    ).then(res => {
+      // A personMatch-ek frissülnek a loadSnapshot-ban
+      // De mi nem akarjuk a teljes snapshotot újratölteni, csak a személyeket
+      const updatedPersons = res.data;
+      const personMap = new Map(updatedPersons.map(p => [p.id, p]));
+
+      const updatedLayers = this.state.layers().map(l => {
+        if (!l.personMatch) return l;
+        const person = personMap.get(l.personMatch.id);
+        if (!person) return l;
+        return {
+          ...l,
+          personMatch: {
+            ...l.personMatch,
+            photoThumbUrl: person.photoThumbUrl,
+            photoUrl: person.photoUrl,
+          },
+        };
+      });
+
+      this.state.layers.set(updatedLayers);
+    });
   }
 
   private async loadSnapshotList(): Promise<void> {

@@ -931,12 +931,13 @@
 }
 
 <!-- Vizuális szerkesztő (page-card KÍVÜL) -->
-@if (showLayoutDesigner() && designerSnapshotPath() && designerPsdPath() && designerBoardConfig()) {
+@if (showLayoutDesigner() && designerSnapshotPath() && designerPsdPath() && designerBoardConfig() && projectData()) {
   <app-layout-designer
     [snapshotPath]="designerSnapshotPath()!"
     [psdPath]="designerPsdPath()!"
     [persons]="persons()"
     [boardConfig]="designerBoardConfig()!"
+    [projectId]="projectData()!.id"
     (closeEvent)="closeLayoutDesigner()"
     (saveEvent)="onDesignerSave($event)"
   />

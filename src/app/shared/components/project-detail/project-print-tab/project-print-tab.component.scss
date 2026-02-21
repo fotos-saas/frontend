@@ -143,6 +143,9 @@
 .file-meta {
   font-size: 0.75rem;
   color: get-color('slate', 500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .file-actions {
@@ -296,9 +299,7 @@
   .print-col--left {
     flex: none;
   }
-}
 
-@media (max-width: 480px) {
   .file-card {
     flex-direction: column;
     gap: 12px;
@@ -306,13 +307,25 @@
   }
 
   .file-actions {
-    justify-content: stretch;
+    justify-content: flex-start;
   }
 
   .download-btn,
   .replace-btn {
     flex: 1;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .file-card {
+    padding: 12px;
+  }
+
+  .download-btn,
+  .replace-btn {
+    padding: 8px 12px;
+    font-size: 0.75rem;
   }
 }
 

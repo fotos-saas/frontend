@@ -126,11 +126,12 @@ async function uploadSampleToBackend(
   apiBaseUrl: string,
   projectId: number,
   authToken: string,
+  uploadFileName?: string,
 ): Promise<UploadResult> {
   try {
     const fileBuffer = await fs.promises.readFile(filePath);
     return await new Promise<UploadResult>((resolve) => {
-      const fileName = path.basename(filePath);
+      const fileName = uploadFileName || path.basename(filePath);
       const boundary = `----FormBoundary${Date.now()}`;
 
       // Multipart form-data osszeallitasa
@@ -351,6 +352,7 @@ export function registerSampleGeneratorHandlers(): void {
               params.apiBaseUrl,
               params.projectId,
               params.authToken,
+              watermarkedFileName,
             );
             if (uploadResult.success) {
               uploadedCount++;

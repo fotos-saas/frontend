@@ -30,11 +30,12 @@ async function uploadToBackend(
   projectId: number,
   authToken: string,
   type: 'flat' | 'small_tablo',
+  uploadFileName?: string,
 ): Promise<UploadResult> {
   try {
     const fileBuffer = await fs.promises.readFile(filePath);
     return await new Promise<UploadResult>((resolve) => {
-      const fileName = path.basename(filePath);
+      const fileName = uploadFileName || path.basename(filePath);
       const boundary = `----FormBoundary${Date.now()}`;
 
       const typePart = Buffer.from(
@@ -180,6 +181,7 @@ export function registerFinalizerHandlers(): void {
           params.projectId,
           params.authToken,
           type,
+          localFileName,
         );
         if (uploadResult.success) {
           uploadedCount = 1;

@@ -84,6 +84,7 @@ import { firstValueFrom } from 'rxjs';
         <div class="layout-designer__content">
           <app-layout-sort-panel
             [generatingSample]="generatingSample()"
+            [generatingFinal]="generatingFinal()"
             [sampleLargeSize]="sampleLargeSize()"
             [sampleWatermarkColor]="ps.sampleWatermarkColor()"
             [sampleWatermarkOpacity]="ps.sampleWatermarkOpacity()"
@@ -91,6 +92,7 @@ import { firstValueFrom } from 'rxjs';
             [sampleError]="sampleError()"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
+            (generateFinal)="onGenerateFinal()"
             (sampleLargeSizeChange)="onLargeSizeChange($event)"
             (watermarkColorChange)="onWatermarkColorChange($event)"
             (opacityChange)="onCycleOpacity()"
@@ -266,6 +268,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly syncingPhotos = signal(false);
   readonly arrangingNames = signal(false);
   readonly generatingSample = signal(false);
+  readonly generatingFinal = signal(false);
   readonly sampleLargeSize = this.ps.sampleUseLargeSize;
   readonly sampleSuccess = signal<string | null>(null);
   readonly sampleError = signal<string | null>(null);
@@ -535,6 +538,26 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       this.sampleError.set('Váratlan hiba a minta generálásnál');
     } finally {
       this.generatingSample.set(false);
+    }
+  }
+
+  /** Véglegesítés — flatten + közvetlen upload, nincs resize/watermark */
+  async onGenerateFinal(): Promise<void> {
+    if (this.generatingFinal()) return;
+    this.generatingFinal.set(true);
+    this.sampleSuccess.set(null);
+    this.sampleError.set(null);
+    try {
+      const result = await this.ps.generateFinal(this.projectId(), this.projectName());
+      if (result.success) {
+        this.sampleSuccess.set(`Véglegesítés feltöltve (${result.uploadedCount || 0} fájl)`);
+      } else {
+        this.sampleError.set(result.error || 'Véglegesítés sikertelen');
+      }
+    } catch {
+      this.sampleError.set('Váratlan hiba a véglegesítésnél');
+    } finally {
+      this.generatingFinal.set(false);
     }
   }
 

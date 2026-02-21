@@ -119,6 +119,19 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
               {{ opacityPercent() }}%
             </button>
           </div>
+          <button class="action-btn action-btn--final"
+            [disabled]="generatingFinal()"
+            (click)="generateFinal.emit()"
+            matTooltip="Vízjel és átméretezés nélküli véglegesített tablókép feltöltése"
+            matTooltipPosition="right">
+            @if (generatingFinal()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              <span>Véglegesítés...</span>
+            } @else {
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+              <span>Véglegesítés</span>
+            }
+          </button>
           <button class="action-btn"
             (click)="openProject.emit()"
             matTooltip="A PSD megnyitása Photoshopban"
@@ -213,6 +226,17 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       &:disabled {
         opacity: 0.25;
         cursor: not-allowed;
+      }
+
+      &--final {
+        color: #34d399;
+        border-color: rgba(52, 211, 153, 0.2);
+
+        &:hover:not(:disabled) {
+          background: rgba(52, 211, 153, 0.08);
+          border-color: rgba(52, 211, 153, 0.35);
+          color: #6ee7b7;
+        }
       }
     }
 
@@ -340,11 +364,13 @@ export class LayoutSortPanelComponent {
 
   readonly openCustomDialog = output<void>();
   readonly generateSample = output<void>();
+  readonly generateFinal = output<void>();
   readonly openProject = output<void>();
   readonly openWorkDir = output<void>();
 
   /** Minta generálás állapotok (a szülő kezeli) */
   readonly generatingSample = input(false);
+  readonly generatingFinal = input(false);
   readonly sampleLargeSize = input(false);
   readonly sampleLargeSizeChange = output<boolean>();
   readonly sampleWatermarkColor = input<'white' | 'black'>('white');

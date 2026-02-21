@@ -103,54 +103,55 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             <lucide-icon [name]="ICONS.ALIGN_END_H" [size]="16" />
           </button>
 
-          <div class="layout-toolbar__divider"></div>
-
-          <!-- Több: elosztás + sorok/oszlopok/rács dropdown -->
-          <div class="toolbar-dropdown">
-            <button class="toolbar-btn" (click)="moreOpen.set(!moreOpen())"
-              matTooltip="Elosztás és rendezés">
-              <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
-              <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="12" />
-            </button>
-            @if (moreOpen()) {
-              <div class="toolbar-dropdown__panel" (click)="moreOpen.set(false)">
-                <button class="toolbar-dropdown__item"
-                  [disabled]="state.selectionCount() < 3"
-                  (click)="actions.distributeHorizontal()">
-                  <lucide-icon [name]="ICONS.ALIGN_H_DISTRIBUTE" [size]="16" />
-                  Vízszintes elosztás
-                </button>
-                <button class="toolbar-dropdown__item"
-                  [disabled]="state.selectionCount() < 3"
-                  (click)="actions.distributeVertical()">
-                  <lucide-icon [name]="ICONS.ALIGN_V_DISTRIBUTE" [size]="16" />
-                  Függőleges elosztás
-                </button>
-                <div class="toolbar-dropdown__sep"></div>
-                <button class="toolbar-dropdown__item"
-                  [disabled]="state.selectionCount() < 2"
-                  (click)="actions.alignRows()">
-                  <lucide-icon [name]="ICONS.ROWS_3" [size]="16" />
-                  Sorok igazítása
-                </button>
-                <button class="toolbar-dropdown__item"
-                  [disabled]="state.selectionCount() < 2"
-                  (click)="actions.alignColumns()">
-                  <lucide-icon [name]="ICONS.COLUMNS_3" [size]="16" />
-                  Oszlopok igazítása
-                </button>
-                <div class="toolbar-dropdown__sep"></div>
-                <button class="toolbar-dropdown__item"
-                  [disabled]="state.selectionCount() < 2"
-                  (click)="actions.arrangeToGrid()">
-                  <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
-                  Rácsba rendezés
-                </button>
-              </div>
-            }
-          </div>
         }
       </div>
+
+      <!-- Dropdown: elosztás + sorok/oszlopok/rács (toolbar szintjén, overflow miatt) -->
+      @if (state.hasSelection()) {
+        <div class="toolbar-dropdown">
+          <button class="toolbar-btn" (click)="moreOpen.set(!moreOpen())"
+            matTooltip="Elosztás és rendezés">
+            <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="12" />
+          </button>
+          @if (moreOpen()) {
+            <div class="toolbar-dropdown__panel" (click)="moreOpen.set(false)">
+              <button class="toolbar-dropdown__item"
+                [disabled]="state.selectionCount() < 3"
+                (click)="actions.distributeHorizontal()">
+                <lucide-icon [name]="ICONS.ALIGN_H_DISTRIBUTE" [size]="16" />
+                Vízszintes elosztás
+              </button>
+              <button class="toolbar-dropdown__item"
+                [disabled]="state.selectionCount() < 3"
+                (click)="actions.distributeVertical()">
+                <lucide-icon [name]="ICONS.ALIGN_V_DISTRIBUTE" [size]="16" />
+                Függőleges elosztás
+              </button>
+              <div class="toolbar-dropdown__sep"></div>
+              <button class="toolbar-dropdown__item"
+                [disabled]="state.selectionCount() < 2"
+                (click)="actions.alignRows()">
+                <lucide-icon [name]="ICONS.ROWS_3" [size]="16" />
+                Sorok igazítása
+              </button>
+              <button class="toolbar-dropdown__item"
+                [disabled]="state.selectionCount() < 2"
+                (click)="actions.alignColumns()">
+                <lucide-icon [name]="ICONS.COLUMNS_3" [size]="16" />
+                Oszlopok igazítása
+              </button>
+              <div class="toolbar-dropdown__sep"></div>
+              <button class="toolbar-dropdown__item"
+                [disabled]="state.selectionCount() < 2"
+                (click)="actions.arrangeToGrid()">
+                <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
+                Rácsba rendezés
+              </button>
+            </div>
+          }
+        </div>
+      }
 
       <!-- Jobb: frissítés + mentés + bezárás -->
       <div class="layout-toolbar__right">
@@ -201,6 +202,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       align-items: center;
       gap: 4px;
       min-width: 0;
+      overflow: hidden;
     }
 
     .layout-toolbar__doc-info {

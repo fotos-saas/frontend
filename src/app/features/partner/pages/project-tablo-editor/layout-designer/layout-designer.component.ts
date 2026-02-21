@@ -74,6 +74,8 @@ import { DesignerDocument } from './layout-designer.types';
       flex-direction: column;
       outline: none;
       -webkit-app-region: no-drag;
+      /* Electron frameless: ne lógjon a macOS traffic lights alá */
+      padding-top: 38px;
     }
 
     .layout-designer__loading,

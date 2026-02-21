@@ -108,6 +108,7 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   /** Minta generálás */
   readonly generatingSample = signal(false);
+  readonly sampleLargeSize = signal(false);
   readonly sampleResult = signal<{ localPaths: string[]; uploadedCount: number; generatedAt: string } | null>(null);
 
   /** Minta beállítások (signal referenciák a ps service-ből) */
@@ -738,7 +739,7 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.clearMessages();
     this.generatingSample.set(true);
     try {
-      const result = await this.ps.generateSample(p.id, p.name);
+      const result = await this.ps.generateSample(p.id, p.name, this.sampleLargeSize());
       if (result.success) {
         const now = new Date();
         const pad = (n: number) => n.toString().padStart(2, '0');

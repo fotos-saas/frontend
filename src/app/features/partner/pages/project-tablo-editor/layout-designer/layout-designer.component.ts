@@ -84,10 +84,12 @@ import { firstValueFrom } from 'rxjs';
         <div class="layout-designer__content">
           <app-layout-sort-panel
             [generatingSample]="generatingSample()"
+            [sampleLargeSize]="sampleLargeSize()"
             [sampleSuccess]="sampleSuccess()"
             [sampleError]="sampleError()"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
+            (sampleLargeSizeChange)="sampleLargeSize.set($event)"
             (openProject)="onOpenProject()"
             (openWorkDir)="onOpenWorkDir()"
           />
@@ -260,6 +262,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly syncingPhotos = signal(false);
   readonly arrangingNames = signal(false);
   readonly generatingSample = signal(false);
+  readonly sampleLargeSize = signal(false);
   readonly sampleSuccess = signal<string | null>(null);
   readonly sampleError = signal<string | null>(null);
 
@@ -501,7 +504,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.sampleSuccess.set(null);
     this.sampleError.set(null);
     try {
-      const result = await this.ps.generateSample(this.projectId(), this.projectName());
+      const result = await this.ps.generateSample(this.projectId(), this.projectName(), this.sampleLargeSize());
       if (result.success) {
         this.sampleSuccess.set(`${result.localPaths?.length || 0} fájl mentve, ${result.uploadedCount || 0} feltöltve`);
       } else {

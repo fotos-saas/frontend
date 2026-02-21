@@ -782,6 +782,21 @@
 }
 
 // Minta generálás eredmény
+.sample-size-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.825rem;
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    accent-color: var(--primary-color, #7c3aed);
+    cursor: pointer;
+  }
+}
+
 .sample-result {
   margin-top: 12px;
   padding: 12px 14px;

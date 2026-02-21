@@ -1381,6 +1381,7 @@ export class PhotoshopService {
   async generateSample(
     projectId: number,
     projectName: string,
+    largeSize = false,
   ): Promise<{
     success: boolean;
     localPaths?: string[];
@@ -1435,8 +1436,7 @@ export class PhotoshopService {
         watermarkColor: this.sampleWatermarkColor(),
         watermarkOpacity: this.sampleWatermarkOpacity(),
         sizes: [
-          { name: 'nagy', width: this.sampleSizeLarge() },
-          { name: 'kicsi', width: this.sampleSizeSmall() },
+          { name: 'minta', width: largeSize ? this.sampleSizeLarge() : this.sampleSizeSmall() },
         ],
       });
 

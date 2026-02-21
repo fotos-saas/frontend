@@ -322,7 +322,9 @@ export function registerSampleGeneratorHandlers(): void {
           log.info(`Resize kesz: ${size.name} (${size.width}px)`);
 
           // Watermark
-          const watermarkedFileName = `MINTA_${sanitizedName}_${size.name}.jpg`;
+          const watermarkedFileName = sizes.length === 1
+            ? `MINTA_${sanitizedName}.jpg`
+            : `MINTA_${sanitizedName}_${size.name}.jpg`;
           const watermarkedPath = path.join(app.getPath('temp'), `sample-watermarked-${size.name}-${Date.now()}.jpg`);
           tempFiles.push(watermarkedPath);
 

@@ -76,11 +76,16 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           <span>Műveletek</span>
         </div>
 
+        <label class="sidebar__toggle">
+          <input type="checkbox" [checked]="sampleLargeSize()" (change)="sampleLargeSizeChange.emit(!sampleLargeSize())" />
+          <span>Nagy méret</span>
+        </label>
+
         <div class="sidebar__actions">
           <button class="action-btn"
             [disabled]="generatingSample()"
             (click)="generateSample.emit()"
-            matTooltip="Vízjeles mintakép generálás 2 méretben">
+            matTooltip="Vízjeles mintakép generálás">
             @if (generatingSample()) {
               <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
               <span>Generálás...</span>
@@ -197,6 +202,21 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       &--error { color: #fca5a5; }
     }
 
+    .sidebar__toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      margin-bottom: 8px;
+
+      input[type="checkbox"] {
+        accent-color: #a78bfa;
+        cursor: pointer;
+      }
+    }
+
     .sidebar__section--separator {
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
@@ -224,6 +244,8 @@ export class LayoutSortPanelComponent {
 
   /** Minta generálás állapotok (a szülő kezeli) */
   readonly generatingSample = input(false);
+  readonly sampleLargeSize = input(false);
+  readonly sampleLargeSizeChange = output<boolean>();
   readonly sampleSuccess = input<string | null>(null);
   readonly sampleError = input<string | null>(null);
 }

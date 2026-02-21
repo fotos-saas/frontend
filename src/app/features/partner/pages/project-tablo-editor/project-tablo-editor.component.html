@@ -433,7 +433,7 @@
             <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
             <div>
               <h3 class="command-card__title">Minta készítés</h3>
-              <p class="command-card__desc">A megnyitott PSD-ből mintaképet generál vízjellel, 2 méretben. Lokálisan menti és feltölti a projekt mintáihoz.</p>
+              <p class="command-card__desc">A megnyitott PSD-ből vízjeles mintaképet generál. Lokálisan menti és feltölti a projekt mintáihoz.</p>
             </div>
           </div>
 
@@ -446,6 +446,11 @@
               Először generálj egy PSD-t a fenti szekciónál.
             </div>
           } @else {
+            <label class="sample-size-toggle">
+              <input type="checkbox" [checked]="sampleLargeSize()" (change)="sampleLargeSize.set(!sampleLargeSize())" />
+              <span>Nagy méret ({{ sampleSizeLarge() }}px)</span>
+            </label>
+
             <button
               class="btn btn--primary btn--generate"
               [disabled]="generatingSample()"

@@ -296,12 +296,12 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
       if (process.platform === 'darwin') {
         if (psPath) {
-          // macOS: open -a Photoshop file.psd
-          const child = execFile('open', ['-a', psPath, filePath]);
+          // macOS: open -g -a Photoshop file.psd (-g = hatterben, nem hoz eloterbe)
+          const child = execFile('open', ['-g', '-a', psPath, filePath]);
           child.unref();
         } else {
-          // Nincs PS beallitva, megnyitas alapertelmezett alkalmazassal
-          const child = execFile('open', [filePath]);
+          // Nincs PS beallitva, megnyitas alapertelmezett alkalmazassal (hatterben)
+          const child = execFile('open', ['-g', filePath]);
           child.unref();
         }
       } else {

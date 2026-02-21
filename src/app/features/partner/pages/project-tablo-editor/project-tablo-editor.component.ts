@@ -744,12 +744,9 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.ps.setSampleSettings({ watermarkColor: next });
   }
 
-  private readonly opacitySteps = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50];
-
   cycleWatermarkOpacity(): void {
-    const current = this.sampleWatermarkOpacity();
-    const idx = this.opacitySteps.findIndex(v => v >= current - 0.001);
-    const next = this.opacitySteps[(idx + 1) % this.opacitySteps.length];
+    const pct = Math.round(this.sampleWatermarkOpacity() * 100);
+    const next = (pct >= 23 ? 10 : pct + 1) / 100;
     this.sampleWatermarkOpacity.set(next);
     this.ps.setSampleSettings({ watermarkOpacity: next });
   }

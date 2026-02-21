@@ -506,12 +506,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.ps.setSampleSettings({ useLargeSize: value });
   }
 
-  private readonly opacitySteps = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50];
-
   onCycleOpacity(): void {
-    const current = this.ps.sampleWatermarkOpacity();
-    const idx = this.opacitySteps.findIndex(v => v >= current - 0.001);
-    const next = this.opacitySteps[(idx + 1) % this.opacitySteps.length];
+    const pct = Math.round(this.ps.sampleWatermarkOpacity() * 100);
+    const next = (pct >= 23 ? 10 : pct + 1) / 100;
     this.ps.sampleWatermarkOpacity.set(next);
     this.ps.setSampleSettings({ watermarkOpacity: next });
   }

@@ -238,7 +238,7 @@ export function registerSampleGeneratorHandlers(): void {
       }
       if (settings.watermarkOpacity !== undefined) {
         const o = Number(settings.watermarkOpacity);
-        if (o >= 0.05 && o <= 0.50) sampleStore.set('sampleWatermarkOpacity', o);
+        if (o >= 0.05 && o <= 0.50) sampleStore.set('sampleWatermarkOpacity', Math.round(o * 100) / 100);
       }
       if (settings.useLargeSize !== undefined) {
         sampleStore.set('sampleUseLargeSize', !!settings.useLargeSize);

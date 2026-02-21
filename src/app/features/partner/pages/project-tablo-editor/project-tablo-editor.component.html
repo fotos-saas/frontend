@@ -291,6 +291,9 @@
                       <span class="snapshot-item__meta">
                         {{ snapshotService.formatDate(snap.createdAt) }}
                         · {{ snap.personCount }} layer
+                        @if (snap.snapshotName.includes('(szerkesztett)')) {
+                          · <span class="snapshot-item__badge">szerkesztett</span>
+                        }
                       </span>
                     </div>
                     <div class="snapshot-item__actions">

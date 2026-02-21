@@ -565,7 +565,9 @@
 .snapshot-list {
   border: 1px solid var(--border-color, #e5e7eb);
   border-radius: 8px;
-  overflow: hidden;
+  max-height: 300px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .snapshot-item {
@@ -628,6 +630,11 @@
   &__meta {
     font-size: 0.75rem;
     color: var(--text-tertiary, #9ca3af);
+  }
+
+  &__badge {
+    font-weight: 600;
+    color: #7c3aed;
   }
 
   &__actions {

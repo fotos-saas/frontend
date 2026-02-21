@@ -881,6 +881,39 @@ export class PhotoshopService {
     }
   }
 
+  /**
+   * Snapshot mentése ÚJ fájlként (az eredetit nem módosítja).
+   * A vizuális szerkesztőből használjuk: az eredeti megmarad, új "(szerkesztett)" snapshot keletkezik.
+   */
+  async saveSnapshotDataAsNew(
+    psdPath: string,
+    snapshotData: Record<string, unknown>,
+    originalName: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+    const slugName = this.sanitizeName(originalName);
+    const fileName = `${dateStr}_${slugName}-szerkesztett.json`;
+
+    snapshotData['snapshotName'] = `${originalName} (szerkesztett)`;
+    snapshotData['createdAt'] = now.toISOString();
+
+    try {
+      const result = await this.api.saveSnapshot({ psdPath, snapshotData, fileName });
+      if (!result.success) {
+        return { success: false, error: result.error || 'Snapshot mentés sikertelen' };
+      }
+      this.logger.info(`Új snapshot mentve (szerkesztett): ${fileName}`);
+      return { success: true };
+    } catch (err) {
+      this.logger.error('Snapshot új mentés hiba', err);
+      return { success: false, error: 'Váratlan hiba a snapshot mentésnél' };
+    }
+  }
+
   /** Snapshot átnevezése (a JSON fájlban a snapshotName mező módosítása) */
   async renameSnapshot(snapshotPath: string, newName: string): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

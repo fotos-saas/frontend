@@ -671,7 +671,7 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.showLayoutDesigner.set(true);
   }
 
-  /** Vizuális szerkesztő mentés: módosított layerek visszaírása a snapshot-ba */
+  /** Vizuális szerkesztő mentés: módosított layerek új snapshot-ként mentése (az eredeti megmarad) */
   async onDesignerSave(layers: SnapshotLayer[]): Promise<void> {
     const latest = this.snapshotService.latestSnapshot();
     const psdPath = await this.resolvePsdPath();
@@ -682,7 +682,7 @@ export class ProjectTabloEditorComponent implements OnInit {
 
     this.clearMessages();
 
-    // Snapshot betöltése → layers felülírása → visszamentés
+    // Snapshot betöltése → layers felülírása → új snapshot mentés
     const loadResult = await this.ps.loadSnapshot(latest.filePath);
     if (!loadResult.success || !loadResult.data) {
       this.error.set('Nem sikerült betölteni a pillanatképet a mentéshez.');
@@ -693,14 +693,14 @@ export class ProjectTabloEditorComponent implements OnInit {
     const snapshotData = loadResult.data as Record<string, unknown>;
     snapshotData['layers'] = layers;
 
-    // Régi snapshot törlés + új mentés azonos névvel
-    await this.ps.deleteSnapshot(latest.filePath);
-    const saveResult = await this.ps.saveSnapshotData(psdPath, snapshotData, latest.fileName);
+    // Eredeti snapshot marad — új snapshot keletkezik "(szerkesztett)" jelöléssel
+    const originalName = latest.snapshotName.replace(/ \(szerkesztett\)$/, '');
+    const saveResult = await this.ps.saveSnapshotDataAsNew(psdPath, snapshotData, originalName);
 
     this.showLayoutDesigner.set(false);
 
     if (saveResult.success) {
-      this.successMessage.set('Elrendezés mentve a vizuális szerkesztőből!');
+      this.successMessage.set('Elrendezés mentve új pillanatképként!');
       await this.loadSnapshots();
     } else {
       this.error.set(saveResult.error || 'Pillanatkép mentés sikertelen.');

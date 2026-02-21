@@ -135,6 +135,18 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             <lucide-icon [name]="ICONS.MOVE" [size]="16" />
           </button>
 
+          <div class="layout-toolbar__divider"></div>
+
+          <!-- Link/Unlink a Photoshopban -->
+          <button class="toolbar-btn" [disabled]="linking()"
+            (click)="onLinkLayers()" matTooltip="Összelinkelés a PSD-ben (kép + név)">
+            <lucide-icon [name]="ICONS.LINK" [size]="16" />
+          </button>
+          <button class="toolbar-btn" [disabled]="linking()"
+            (click)="onUnlinkLayers()" matTooltip="Linkelés megszüntetése a PSD-ben">
+            <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
+          </button>
+
         }
       </div>
 
@@ -642,10 +654,14 @@ export class LayoutToolbarComponent {
   readonly moreOpen = signal(false);
   readonly pickerOpen = signal(false);
 
+  readonly linking = input<boolean>(false);
+
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
   readonly snapshotSelected = output<SnapshotListItem>();
+  readonly linkLayersClicked = output<string[]>();
+  readonly unlinkLayersClicked = output<string[]>();
 
   formatDate(isoDate: string | null): string {
     if (!isoDate) return '';
@@ -666,5 +682,31 @@ export class LayoutToolbarComponent {
   onPickSnapshot(snap: SnapshotListItem): void {
     this.pickerOpen.set(false);
     this.snapshotSelected.emit(snap);
+  }
+
+  /** Kijelölt layerek neveit összegyűjti és link event-et küld */
+  onLinkLayers(): void {
+    const names = this.getSelectedLayerNames();
+    if (names.length === 0) return;
+    this.linkLayersClicked.emit(names);
+  }
+
+  /** Kijelölt layerek neveit összegyűjti és unlink event-et küld */
+  onUnlinkLayers(): void {
+    const names = this.getSelectedLayerNames();
+    if (names.length === 0) return;
+    this.unlinkLayersClicked.emit(names);
+  }
+
+  /** Kijelölt layerek egyedi nevei (deduplikálva) */
+  private getSelectedLayerNames(): string[] {
+    const selected = this.state.selectedLayers();
+    const nameSet = new Set<string>();
+    for (const l of selected) {
+      if (l.category !== 'fixed') {
+        nameSet.add(l.layerName);
+      }
+    }
+    return Array.from(nameSet);
   }
 }

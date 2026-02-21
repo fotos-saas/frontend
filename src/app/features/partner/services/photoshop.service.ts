@@ -1178,6 +1178,63 @@ export class PhotoshopService {
     }
   }
 
+  /**
+   * Layerek összelinkelése a Photoshopban név alapján.
+   * A megadott layerName-ek MINDEN előfordulását megkeresi a teljes dokumentumban
+   * (Images + Names csoportokban is), majd összelinkeli őket.
+   */
+  async linkLayers(
+    layerNames: string[],
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    if (!layerNames || layerNames.length === 0) {
+      return { success: true };
+    }
+
+    try {
+      const result = await this.api.runJsx({
+        scriptName: 'actions/link-layers.jsx',
+        jsonData: { layerNames },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX linkLayers hiba', err);
+      return { success: false, error: 'Váratlan hiba a layerek összelinkelésekor' };
+    }
+  }
+
+  /**
+   * Layerek linkelésének megszüntetése a Photoshopban név alapján.
+   * A megadott layerName-ek MINDEN előfordulásán futtatja az unlink()-et.
+   */
+  async unlinkLayers(
+    layerNames: string[],
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    if (!layerNames || layerNames.length === 0) {
+      return { success: true };
+    }
+
+    try {
+      const result = await this.api.runJsx({
+        scriptName: 'actions/unlink-layers.jsx',
+        jsonData: { layerNames },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX unlinkLayers hiba', err);
+      return { success: false, error: 'Váratlan hiba a layerek linkelés megszüntetésekor' };
+    }
+  }
+
   /** Sablon alkalmazása a megnyitott dokumentumra */
   async applyTemplate(
     templateId: string,

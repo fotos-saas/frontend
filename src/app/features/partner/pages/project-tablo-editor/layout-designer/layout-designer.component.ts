@@ -58,10 +58,13 @@ import { DesignerDocument } from './layout-designer.types';
           [refreshing]="refreshing()"
           [snapshots]="snapshots()"
           [switchingSnapshot]="switchingSnapshot()"
+          [linking]="linking()"
           (refreshClicked)="refresh()"
           (snapshotSelected)="switchSnapshot($event)"
           (saveClicked)="save()"
           (closeClicked)="close()"
+          (linkLayersClicked)="linkLayers($event)"
+          (unlinkLayersClicked)="unlinkLayers($event)"
         />
         <div class="layout-designer__content">
           <app-layout-sort-panel (openCustomDialog)="showCustomDialog.set(true)" />
@@ -186,6 +189,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Elérhető snapshotok a picker-hez */
   readonly snapshots = signal<SnapshotListItem[]>([]);
   readonly switchingSnapshot = signal(false);
+  readonly linking = signal(false);
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
@@ -305,6 +309,44 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     } finally {
       this.switchingSnapshot.set(false);
     }
+  }
+
+  /** Kijelölt layerek összelinkelése a Photoshopban */
+  async linkLayers(layerNames: string[]): Promise<void> {
+    this.linking.set(true);
+    try {
+      const result = await this.ps.linkLayers(layerNames);
+      if (result.success) {
+        // State frissítés: az érintett layerek linked = true
+        this.updateLinkedState(layerNames, true);
+      }
+    } finally {
+      this.linking.set(false);
+    }
+  }
+
+  /** Kijelölt layerek linkelésének megszüntetése a Photoshopban */
+  async unlinkLayers(layerNames: string[]): Promise<void> {
+    this.linking.set(true);
+    try {
+      const result = await this.ps.unlinkLayers(layerNames);
+      if (result.success) {
+        // State frissítés: az érintett layerek linked = false
+        this.updateLinkedState(layerNames, false);
+      }
+    } finally {
+      this.linking.set(false);
+    }
+  }
+
+  /** State linked flag frissítése adott layerName-ekre */
+  private updateLinkedState(layerNames: string[], linked: boolean): void {
+    const nameSet = new Set(layerNames);
+    const updated = this.state.layers().map(l => {
+      if (!nameSet.has(l.layerName)) return l;
+      return { ...l, linked };
+    });
+    this.state.layers.set(updated);
   }
 
   private async loadSnapshotList(): Promise<void> {

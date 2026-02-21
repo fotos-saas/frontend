@@ -395,8 +395,15 @@
   padding-bottom: 12px;
 }
 
+.module-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .module-price {
-  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .price-tag {
@@ -439,7 +446,6 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
   font-size: 0.8125rem;
   font-weight: 600;
   color: get-color('primary', 500);
@@ -763,6 +769,10 @@
     display: none;
   }
 
+  .module-footer {
+    display: contents;
+  }
+
   .module-price {
     grid-column: 2;
     grid-row: 2;
@@ -795,7 +805,6 @@
 
   .view-detail-link {
     gap: 0;
-    margin-left: 0;
 
     span { display: none; }
   }

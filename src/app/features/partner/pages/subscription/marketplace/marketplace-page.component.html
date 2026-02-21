@@ -135,69 +135,71 @@
           <h3 class="module-name">{{ module.name }}</h3>
           <p class="module-tagline">{{ module.tagline }}</p>
 
-          <div class="module-price">
-            @if (module.type === 'free') {
-              <span class="price-tag price-tag--free">Ingyenes</span>
-            } @else if (module.type === 'per_use') {
-              <span class="price-tag price-tag--per-use">
-                @if (module.per_use_price != null) {
-                  {{ module.per_use_price | number:'1.0-0':'hu' }} Ft/{{ module.per_use_unit ?? 'db' }}
-                } @else {
-                  Egyedi árazás
-                }
-              </span>
-            } @else {
-              <span class="price-tag price-tag--monthly">
-                @if (module.monthly_price != null) {
-                  {{ module.monthly_price | number:'1.0-0':'hu' }} Ft/hó
-                } @else {
-                  Egyedi árazás
-                }
-              </span>
-            }
-          </div>
+          <div class="module-footer">
+            <div class="module-price">
+              @if (module.type === 'free') {
+                <span class="price-tag price-tag--free">Ingyenes</span>
+              } @else if (module.type === 'per_use') {
+                <span class="price-tag price-tag--per-use">
+                  @if (module.per_use_price != null) {
+                    {{ module.per_use_price | number:'1.0-0':'hu' }} Ft/{{ module.per_use_unit ?? 'db' }}
+                  } @else {
+                    Egyedi árazás
+                  }
+                </span>
+              } @else {
+                <span class="price-tag price-tag--monthly">
+                  @if (module.monthly_price != null) {
+                    {{ module.monthly_price | number:'1.0-0':'hu' }} Ft/hó
+                  } @else {
+                    Egyedi árazás
+                  }
+                </span>
+              }
+            </div>
 
-          <div class="module-actions">
-            @switch (module.partner_status) {
-              @case ('inactive') {
-                @if (module.type !== 'free') {
-                  <button class="btn btn--primary btn--sm" (click)="activateModule(module.key)">
-                    <lucide-icon [name]="ICONS.PLAY" [size]="14" />
-                    Aktiválás
+            <div class="module-actions">
+              @switch (module.partner_status) {
+                @case ('inactive') {
+                  @if (module.type !== 'free') {
+                    <button class="btn btn--primary btn--sm" (click)="activateModule(module.key)">
+                      <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+                      Aktiválás
+                    </button>
+                  }
+                }
+                @case ('active') {
+                  <button class="btn btn--outline btn--sm" (click)="pauseModule(module.key)">
+                    <lucide-icon [name]="ICONS.PAUSE_CIRCLE" [size]="14" />
+                    Szünet
+                  </button>
+                  <button class="btn btn--outline btn--danger btn--sm" (click)="cancelModule(module.key)">
+                    Lemondás
                   </button>
                 }
+                @case ('paused') {
+                  <button class="btn btn--primary btn--sm" (click)="resumeModule(module.key)">
+                    <lucide-icon [name]="ICONS.PLAY_CIRCLE" [size]="14" />
+                    Folytatás
+                  </button>
+                  <button class="btn btn--outline btn--danger btn--sm" (click)="cancelModule(module.key)">
+                    Lemondás
+                  </button>
+                }
+                @case ('canceling') {
+                  <span class="canceling-text">
+                    <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                    Lejár: {{ module.cancels_at | date:'yyyy. MMM d.' }}
+                  </span>
+                }
+                @default {
+                  <span class="view-detail-link">
+                    <span>Megtekintem</span>
+                    <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="14" />
+                  </span>
+                }
               }
-              @case ('active') {
-                <button class="btn btn--outline btn--sm" (click)="pauseModule(module.key)">
-                  <lucide-icon [name]="ICONS.PAUSE_CIRCLE" [size]="14" />
-                  Szünet
-                </button>
-                <button class="btn btn--outline btn--danger btn--sm" (click)="cancelModule(module.key)">
-                  Lemondás
-                </button>
-              }
-              @case ('paused') {
-                <button class="btn btn--primary btn--sm" (click)="resumeModule(module.key)">
-                  <lucide-icon [name]="ICONS.PLAY_CIRCLE" [size]="14" />
-                  Folytatás
-                </button>
-                <button class="btn btn--outline btn--danger btn--sm" (click)="cancelModule(module.key)">
-                  Lemondás
-                </button>
-              }
-              @case ('canceling') {
-                <span class="canceling-text">
-                  <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
-                  Lejár: {{ module.cancels_at | date:'yyyy. MMM d.' }}
-                </span>
-              }
-              @default {
-                <span class="view-detail-link">
-                  <span>Megtekintem</span>
-                  <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="14" />
-                </span>
-              }
-            }
+            </div>
           </div>
 
           @if (module.popular) {

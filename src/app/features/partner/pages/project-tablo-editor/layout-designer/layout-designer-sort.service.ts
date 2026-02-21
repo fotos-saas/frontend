@@ -35,19 +35,36 @@ export class LayoutDesignerSortService {
   // Rendezési módok
   // =============================================
 
-  /** Magyar ABC sorrend — client-side, nincs AI */
-  sortByAbc(): void {
+  /** Magyar ABC sorrend — AI rendezéssel (Dr. figyelembevétel, magyar ábécé) */
+  async sortByAbc(): Promise<void> {
     const images = this.getSelectedImages();
     if (images.length < 2) return;
 
-    const collator = new Intl.Collator('hu', { sensitivity: 'base' });
-    const sorted = [...images].sort((a, b) =>
-      collator.compare(a.personMatch?.name ?? '', b.personMatch?.name ?? ''),
-    );
+    const names = images
+      .map(l => l.personMatch?.name ?? '')
+      .filter(n => n.length > 0);
+    if (names.length === 0) return;
 
-    const names = sorted.map(l => l.personMatch?.name ?? '');
-    this.applySort(images, names);
-    this.lastResult.set(`ABC sorrendbe rendezve (${images.length} elem)`);
+    this.sorting.set(true);
+    this.lastResult.set(null);
+
+    try {
+      const response = await firstValueFrom(
+        this.partnerService.sortNamesAbc(names),
+      );
+
+      if (!response.success || !response.sorted_names) {
+        this.lastResult.set('Hiba történt az ABC rendezésnél.');
+        return;
+      }
+
+      this.applySort(images, response.sorted_names);
+      this.lastResult.set(`ABC sorrendbe rendezve (${images.length} elem)`);
+    } catch {
+      this.lastResult.set('Hiba történt az ABC rendezésnél.');
+    } finally {
+      this.sorting.set(false);
+    }
   }
 
   /** Felváltva fiú-lány rendezés — AI gender classification */

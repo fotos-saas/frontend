@@ -471,4 +471,14 @@ export class PartnerService {
       unmatched: string[];
     }>(`${this.baseUrl}/ai/match-custom-order`, { layer_names: layerNames, custom_order: customOrder });
   }
+
+  sortNamesAbc(names: string[]): Observable<{
+    success: boolean;
+    sorted_names: string[];
+  }> {
+    return this.http.post<{
+      success: boolean;
+      sorted_names: string[];
+    }>(`${this.baseUrl}/ai/sort-names-abc`, { names });
+  }
 }

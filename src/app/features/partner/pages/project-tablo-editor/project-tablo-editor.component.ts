@@ -826,19 +826,15 @@ export class ProjectTabloEditorComponent implements OnInit {
     const snapshotData = loadResult.data as Record<string, unknown>;
     snapshotData['layers'] = event.layers;
 
-    // Auto cím: "Élő PSD 2026.02.21 14:30"
+    // Auto cím: "Élő PSD HH:MM"
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, '0');
-    const dateStr = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    const name = `Élő PSD ${dateStr}`;
-
-    snapshotData['snapshotName'] = name;
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    snapshotData['snapshotName'] = `Élő PSD ${timeStr}`;
     snapshotData['createdAt'] = now.toISOString();
 
-    const fileDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-    const fileName = `${fileDate}_elo-psd.json`;
-
-    const saveResult = await this.ps.saveSnapshotWithFileName(psdPath, snapshotData, fileName);
+    // Fix fájlnév — mindig felülírja az előzőt, nem halmozódik
+    const saveResult = await this.ps.saveSnapshotWithFileName(psdPath, snapshotData, '_elo-psd.json');
 
     if (saveResult.success) {
       await this.loadSnapshots();

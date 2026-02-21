@@ -781,6 +781,43 @@
   }
 }
 
+// Minta generálás eredmény
+.sample-result {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--surface-success, #f0fdf4);
+  border: 1px solid var(--border-success, #bbf7d0);
+  border-radius: 8px;
+  font-size: 0.825rem;
+
+  &__time {
+    display: block;
+    color: var(--text-secondary, #6b7280);
+    margin-bottom: 6px;
+  }
+
+  &__file {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-success, #166534);
+    margin-top: 4px;
+  }
+}
+
+// Szöveg input (szélesebb mint a szám input)
+.settings-input--text {
+  width: 160px;
+  text-align: left;
+}
+
+// Slider (range input)
+.settings-slider {
+  width: 160px;
+  accent-color: var(--primary-color, #7c3aed);
+  cursor: pointer;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .spin {
     animation-duration: 0.01ms !important;

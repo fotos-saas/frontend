@@ -14,6 +14,7 @@ initSentryMain();
 
 // Modularis IPC handlerek
 import { registerPhotoshopHandlers } from './handlers/photoshop.handler';
+import { registerSampleGeneratorHandlers } from './handlers/sample-generator.handler';
 
 const { TouchBarButton, TouchBarLabel, TouchBarSpacer, TouchBarSegmentedControl, TouchBarSlider } = TouchBar;
 
@@ -588,6 +589,9 @@ app.whenReady().then(() => {
   if (mainWindow) {
     registerPhotoshopHandlers(mainWindow);
   }
+
+  // Minta generalas IPC handlerek regisztralasa
+  registerSampleGeneratorHandlers();
 
   // macOS: recreate window when dock icon is clicked
   app.on('activate', () => {

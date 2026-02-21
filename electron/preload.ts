@@ -354,6 +354,49 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:place-photos', params) as Promise<{ success: boolean; error?: string; output?: string }>,
   },
 
+  // ============ Minta generálás ============
+  sample: {
+    getSettings: () =>
+      ipcRenderer.invoke('sample:get-settings') as Promise<{
+        success: boolean;
+        error?: string;
+        settings?: {
+          sizeLarge: number;
+          sizeSmall: number;
+          watermarkText: string;
+          watermarkColor: 'white' | 'black';
+          watermarkOpacity: number;
+        };
+      }>,
+    setSettings: (settings: Partial<{
+      sizeLarge: number;
+      sizeSmall: number;
+      watermarkText: string;
+      watermarkColor: 'white' | 'black';
+      watermarkOpacity: number;
+    }>) =>
+      ipcRenderer.invoke('sample:set-settings', settings) as Promise<{ success: boolean; error?: string }>,
+    generate: (params: {
+      psdFilePath: string;
+      outputDir: string;
+      projectId: number;
+      projectName: string;
+      apiBaseUrl: string;
+      authToken: string;
+      watermarkText?: string;
+      watermarkColor?: 'white' | 'black';
+      watermarkOpacity?: number;
+      sizes?: Array<{ name: string; width: number }>;
+    }) =>
+      ipcRenderer.invoke('sample:generate', params) as Promise<{
+        success: boolean;
+        error?: string;
+        localPaths?: string[];
+        uploadedCount?: number;
+        errors?: string[];
+      }>,
+  },
+
   // ============ Touch Bar (MacBook Pro 2016-2020) ============
   touchBar: {
     /**

@@ -204,6 +204,45 @@ interface PhotoshopAPI {
   placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string; psdFilePath?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
 }
 
+interface SampleAPI {
+  getSettings: () => Promise<{
+    success: boolean;
+    error?: string;
+    settings?: {
+      sizeLarge: number;
+      sizeSmall: number;
+      watermarkText: string;
+      watermarkColor: 'white' | 'black';
+      watermarkOpacity: number;
+    };
+  }>;
+  setSettings: (settings: Partial<{
+    sizeLarge: number;
+    sizeSmall: number;
+    watermarkText: string;
+    watermarkColor: 'white' | 'black';
+    watermarkOpacity: number;
+  }>) => Promise<{ success: boolean; error?: string }>;
+  generate: (params: {
+    psdFilePath: string;
+    outputDir: string;
+    projectId: number;
+    projectName: string;
+    apiBaseUrl: string;
+    authToken: string;
+    watermarkText?: string;
+    watermarkColor?: 'white' | 'black';
+    watermarkOpacity?: number;
+    sizes?: Array<{ name: string; width: number }>;
+  }) => Promise<{
+    success: boolean;
+    error?: string;
+    localPaths?: string[];
+    uploadedCount?: number;
+    errors?: string[];
+  }>;
+}
+
 export interface ElectronAPI {
   showNotification: (options: unknown, body?: string) => Promise<NotificationResultData | boolean>;
   onNotificationClicked: (callback: (data: { id: string }) => void) => CleanupFn;
@@ -243,6 +282,7 @@ export interface ElectronAPI {
   touchBar: TouchBarAPI;
   autoUpdate: AutoUpdateAPI;
   photoshop: PhotoshopAPI;
+  sample: SampleAPI;
 }
 
 declare global {

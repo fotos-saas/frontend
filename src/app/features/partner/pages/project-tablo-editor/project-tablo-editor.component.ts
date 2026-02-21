@@ -106,6 +106,17 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly arranging = signal(false);
   readonly arrangingNames = signal(false);
 
+  /** Minta generálás */
+  readonly generatingSample = signal(false);
+  readonly sampleResult = signal<{ localPaths: string[]; uploadedCount: number; generatedAt: string } | null>(null);
+
+  /** Minta beállítások (signal referenciák a ps service-ből) */
+  readonly sampleSizeLarge = this.ps.sampleSizeLarge;
+  readonly sampleSizeSmall = this.ps.sampleSizeSmall;
+  readonly sampleWatermarkText = this.ps.sampleWatermarkText;
+  readonly sampleWatermarkColor = this.ps.sampleWatermarkColor;
+  readonly sampleWatermarkOpacity = this.ps.sampleWatermarkOpacity;
+
   /** Aktuális PSD fájl útvonala (generáláskor mentjük) */
   readonly currentPsdPath = signal<string | null>(null);
 
@@ -715,6 +726,59 @@ export class ProjectTabloEditorComponent implements OnInit {
   /** Személyek számának getter-je a template alkalmazás összehasonlításhoz */
   get currentStudentCount(): number {
     return this.persons().filter(p => p.type !== 'teacher').length;
+  }
+
+  // ============ Minta generálás ============
+
+  async generateSample(): Promise<void> {
+    if (this.generatingSample()) return;
+    const p = this.project();
+    if (!p) return;
+
+    this.clearMessages();
+    this.generatingSample.set(true);
+    try {
+      const result = await this.ps.generateSample(p.id, p.name);
+      if (result.success) {
+        const now = new Date();
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const timeStr = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        this.sampleResult.set({
+          localPaths: result.localPaths || [],
+          uploadedCount: result.uploadedCount || 0,
+          generatedAt: timeStr,
+        });
+        this.successMessage.set(`Minta generálás kész! ${result.localPaths?.length || 0} fájl mentve, ${result.uploadedCount || 0} feltöltve.`);
+      } else {
+        this.error.set(result.error || 'Minta generálás sikertelen.');
+      }
+    } finally {
+      this.generatingSample.set(false);
+    }
+  }
+
+  setSampleSizeLargeValue(e: Event) {
+    const v = Number((e.target as HTMLInputElement).value);
+    if (!isNaN(v) && v >= 500 && v <= 10000) this.ps.setSampleSettings({ sizeLarge: v });
+  }
+
+  setSampleSizeSmallValue(e: Event) {
+    const v = Number((e.target as HTMLInputElement).value);
+    if (!isNaN(v) && v >= 500 && v <= 10000) this.ps.setSampleSettings({ sizeSmall: v });
+  }
+
+  setSampleWatermarkTextValue(e: Event) {
+    const v = (e.target as HTMLInputElement).value.trim();
+    if (v.length > 0) this.ps.setSampleSettings({ watermarkText: v });
+  }
+
+  setSampleWatermarkColorValue(color: 'white' | 'black') {
+    this.ps.setSampleSettings({ watermarkColor: color });
+  }
+
+  setSampleWatermarkOpacityValue(e: Event) {
+    const v = Number((e.target as HTMLInputElement).value);
+    if (!isNaN(v) && v >= 0.05 && v <= 0.50) this.ps.setSampleSettings({ watermarkOpacity: v });
   }
 
   // ============ Vizuális szerkesztő ============

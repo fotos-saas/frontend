@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { SnapshotListItem, SnapshotLayer, TemplateSlot, TemplateFixedLayer, TemplateListItem, GlobalTemplate } from '@core/services/electron.types';
 import { TabloSize } from '../models/partner.models';
+import { environment } from '../../../../environments/environment';
 
 /** Kistablo alias merete */
 const KISTABLO_ALIAS = { widthCm: 100, heightCm: 70 };
@@ -54,6 +55,13 @@ export class PhotoshopService {
   /** Aktuálisan nyitott PSD fájl útvonala (auto-open-hez) */
   readonly psdPath = signal<string | null>(null);
 
+  /** Minta beállítások */
+  readonly sampleSizeLarge = signal(4000);
+  readonly sampleSizeSmall = signal(2000);
+  readonly sampleWatermarkText = signal('MINTA');
+  readonly sampleWatermarkColor = signal<'white' | 'black'>('white');
+  readonly sampleWatermarkOpacity = signal(0.15);
+
   /** Konfiguralt-e (van mentett path) */
   readonly isConfigured = computed(() => !!this.path());
 
@@ -62,6 +70,10 @@ export class PhotoshopService {
 
   private get api() {
     return window.electronAPI?.photoshop;
+  }
+
+  private get sampleApi() {
+    return window.electronAPI?.sample;
   }
 
   /** runJsx wrapper — automatikusan hozzáadja a psdFilePath-ot (auto-open) */
@@ -123,6 +135,20 @@ export class PhotoshopService {
       }
       if (savedGridAlign !== undefined) {
         this.gridAlign.set(savedGridAlign);
+      }
+
+      // Minta beallitasok betoltese
+      if (this.sampleApi) {
+        try {
+          const sampleResult = await this.sampleApi.getSettings();
+          if (sampleResult.success && sampleResult.settings) {
+            this.sampleSizeLarge.set(sampleResult.settings.sizeLarge);
+            this.sampleSizeSmall.set(sampleResult.settings.sizeSmall);
+            this.sampleWatermarkText.set(sampleResult.settings.watermarkText);
+            this.sampleWatermarkColor.set(sampleResult.settings.watermarkColor);
+            this.sampleWatermarkOpacity.set(sampleResult.settings.watermarkOpacity);
+          }
+        } catch (_) { /* Minta beallitasok nem kritikus */ }
       }
     } catch (err) {
       this.logger.error('Photoshop detektalasi hiba', err);
@@ -1310,6 +1336,107 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('Sablon alkalmazás hiba', err);
       return { success: false, error: 'Váratlan hiba a sablon alkalmazásnál' };
+    }
+  }
+
+  // ============ Minta generálás ============
+
+  /** Minta beállítás mentése */
+  async setSampleSettings(settings: Partial<{
+    sizeLarge: number;
+    sizeSmall: number;
+    watermarkText: string;
+    watermarkColor: 'white' | 'black';
+    watermarkOpacity: number;
+  }>): Promise<boolean> {
+    if (!this.sampleApi) return false;
+    try {
+      const result = await this.sampleApi.setSettings(settings);
+      if (result.success) {
+        if (settings.sizeLarge !== undefined) this.sampleSizeLarge.set(settings.sizeLarge);
+        if (settings.sizeSmall !== undefined) this.sampleSizeSmall.set(settings.sizeSmall);
+        if (settings.watermarkText !== undefined) this.sampleWatermarkText.set(settings.watermarkText);
+        if (settings.watermarkColor !== undefined) this.sampleWatermarkColor.set(settings.watermarkColor);
+        if (settings.watermarkOpacity !== undefined) this.sampleWatermarkOpacity.set(settings.watermarkOpacity);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      this.logger.error('Minta beállítás mentési hiba', err);
+      return false;
+    }
+  }
+
+  /**
+   * Minta generálás: flatten → resize → watermark → save + upload.
+   *
+   * 1. JSX flatten-export.jsx futtatása → temp JPG
+   * 2. sample:generate IPC hívás → resize + watermark + mentés + feltöltés
+   */
+  async generateSample(
+    projectId: number,
+    projectName: string,
+  ): Promise<{
+    success: boolean;
+    localPaths?: string[];
+    uploadedCount?: number;
+    error?: string;
+    errors?: string[];
+  }> {
+    if (!this.api || !this.sampleApi) {
+      return { success: false, error: 'Nem Electron környezet' };
+    }
+
+    const psdFilePath = this.psdPath();
+    if (!psdFilePath) {
+      return { success: false, error: 'Nincs megnyitott PSD fájl' };
+    }
+
+    try {
+      // 1. Flatten export JSX futtatás → temp JPG
+      const tempJpgPath = `${psdFilePath.replace(/\.psd$/i, '')}_flatten_temp_${Date.now()}.jpg`;
+
+      const flattenResult = await this.runJsx({
+        scriptName: 'actions/flatten-export.jsx',
+        jsonData: { outputPath: tempJpgPath, quality: 95 },
+      });
+
+      if (!flattenResult.success) {
+        return { success: false, error: flattenResult.error || 'Flatten export sikertelen' };
+      }
+
+      // Ellenőrizzük hogy a flatten tényleg OK volt
+      const output = flattenResult.output || '';
+      if (!output.includes('__FLATTEN_RESULT__OK')) {
+        return { success: false, error: 'A flatten export nem adott vissza OK eredményt' };
+      }
+
+      // 2. Sample generálás (resize + watermark + upload)
+      const authToken = sessionStorage.getItem('marketer_token') || '';
+
+      // Az outputDir a PSD eredeti mappája (nem a temp JPG mappája)
+      const psdDirPath = psdFilePath.replace(/[/\\][^/\\]+$/, '');
+
+      const result = await this.sampleApi.generate({
+        psdFilePath: tempJpgPath,
+        outputDir: psdDirPath,
+        projectId,
+        projectName,
+        apiBaseUrl: environment.apiUrl,
+        authToken,
+        watermarkText: this.sampleWatermarkText(),
+        watermarkColor: this.sampleWatermarkColor(),
+        watermarkOpacity: this.sampleWatermarkOpacity(),
+        sizes: [
+          { name: 'nagy', width: this.sampleSizeLarge() },
+          { name: 'kicsi', width: this.sampleSizeSmall() },
+        ],
+      });
+
+      return result;
+    } catch (err) {
+      this.logger.error('Minta generálás hiba', err);
+      return { success: false, error: 'Váratlan hiba a minta generálásnál' };
     }
   }
 }

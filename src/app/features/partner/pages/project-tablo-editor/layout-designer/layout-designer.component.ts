@@ -452,10 +452,19 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   async arrangeNames(): Promise<void> {
     this.arrangingNames.set(true);
     try {
-      await this.ps.arrangeNames();
+      await this.ps.arrangeNames(undefined, this.getLinkedLayerNames());
     } finally {
       this.arrangingNames.set(false);
     }
+  }
+
+  /** Linkelt layerek neveinek kinyerése a state-ből (deduplikálva) */
+  private getLinkedLayerNames(): string[] {
+    const nameSet = new Set<string>();
+    for (const l of this.state.layers()) {
+      if (l.linked) nameSet.add(l.layerName);
+    }
+    return Array.from(nameSet);
   }
 
   /** Kijelölt layerek összelinkelése a Photoshopban */

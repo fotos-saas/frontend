@@ -217,16 +217,10 @@ function _arrangeNameGroup(nameGroupPath) {
 }
 
 function _doArrangeNames() {
-  // Linkelesek leszedese — a translate linkelt tarsakat is mozgatna
-  var savedLinks = saveLinkGroups(_doc, log);
-
   // 1. Diak nevek
   _arrangeNameGroup(["Names", "Students"]);
   // 2. Tanar nevek
   _arrangeNameGroup(["Names", "Teachers"]);
-
-  // Linkelesek visszaallitasa
-  restoreLinkGroups(_doc, savedLinks, log);
 }
 
 (function () {

@@ -464,14 +464,21 @@ export class PhotoshopService {
   /**
    * Grid elrendezés: layerek rácsba pozícionálása a megadott paraméterek alapján.
    * boardSize: a tabló méretei cm-ben (widthCm, heightCm)
+   * linkedLayerNames: linkelt layer nevek — rendezés előtt unlink, utána relink
    */
   async arrangeGrid(
     boardSize: { widthCm: number; heightCm: number },
     targetDocName?: string,
+    linkedLayerNames?: string[],
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
     try {
+      // Linkelések leszedése a rendezés előtt
+      if (linkedLayerNames?.length) {
+        await this.unlinkLayers(linkedLayerNames, targetDocName);
+      }
+
       const result = await this.runJsx({
         scriptName: 'actions/arrange-grid.jsx',
         jsonData: {
@@ -487,6 +494,11 @@ export class PhotoshopService {
         targetDocName,
       });
 
+      // Linkelések visszaállítása a rendezés után
+      if (linkedLayerNames?.length) {
+        await this.linkLayers(linkedLayerNames, targetDocName);
+      }
+
       return { success: result.success, error: result.error };
     } catch (err) {
       this.logger.error('JSX arrangeGrid hiba', err);
@@ -497,13 +509,20 @@ export class PhotoshopService {
   /**
    * Nevek rendezése: név layerek pozícionálása a képek alá.
    * A nameGapCm és textAlign beállítások alapján.
+   * linkedLayerNames: linkelt layer nevek — rendezés előtt unlink, utána relink
    */
   async arrangeNames(
     targetDocName?: string,
+    linkedLayerNames?: string[],
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
     try {
+      // Linkelések leszedése a rendezés előtt
+      if (linkedLayerNames?.length) {
+        await this.unlinkLayers(linkedLayerNames, targetDocName);
+      }
+
       const result = await this.runJsx({
         scriptName: 'actions/arrange-names.jsx',
         jsonData: {
@@ -513,6 +532,11 @@ export class PhotoshopService {
         },
         targetDocName,
       });
+
+      // Linkelések visszaállítása a rendezés után
+      if (linkedLayerNames?.length) {
+        await this.linkLayers(linkedLayerNames, targetDocName);
+      }
 
       return { success: result.success, error: result.error };
     } catch (err) {

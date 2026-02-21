@@ -166,9 +166,6 @@ function _getActualLayerSize(grp) {
 }
 
 function _doArrangeGrid() {
-  // Linkelesek leszedese — a translate linkelt tarsakat is mozgatna
-  var savedLinks = saveLinkGroups(_doc, log);
-
   // Margin, gap, board → cm-bol px-re (ezek nem layerek, nincs kerekitesi hiba)
   var marginPx = _cm2px(_data.marginCm || 0);
   var gapHPx = _cm2px(_data.gapHCm || 2);
@@ -211,8 +208,6 @@ function _doArrangeGrid() {
     log("[JSX] Tanar csoport ures vagy nem talalhato");
   }
 
-  // Linkelesek visszaallitasa
-  restoreLinkGroups(_doc, savedLinks, log);
 }
 
 (function () {

@@ -91,10 +91,10 @@ export class LayoutCanvasComponent {
 
   readonly scaleInfo = this.state.scaleInfo;
 
-  /** Canvas top pozíció (toolbar nélkül — a toolbar a parent-ben van) */
+  /** Canvas top pozíció (a canvas area-n belül) */
   readonly canvasTop = computed(() => {
     const si = this.scaleInfo();
-    return si.offsetY - 56;
+    return si.offsetY;
   });
 
   /** Marquee kiindulási pont (wrapper-hez relatív px) */
@@ -234,7 +234,7 @@ export class LayoutCanvasComponent {
 
     // Marquee screen px → PSD koordináta konverzió
     const canvasLeft = si.offsetX;
-    const canvasTopPx = si.offsetY - 56;
+    const canvasTopPx = si.offsetY;
 
     const psdLeft = (rect.left - canvasLeft) / si.scale;
     const psdTop = (rect.top - canvasTopPx) / si.scale;

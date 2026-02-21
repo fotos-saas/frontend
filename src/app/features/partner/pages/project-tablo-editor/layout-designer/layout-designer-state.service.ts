@@ -5,8 +5,6 @@ import { DesignerLayer, DesignerDocument, ScaleInfo, LayerCategory } from './lay
 import { expandWithCoupledLayers } from './layout-designer.utils';
 import { LayoutDesignerHistoryService } from './layout-designer-history.service';
 
-/** Toolbar magassága px-ben */
-const TOOLBAR_HEIGHT = 56;
 /** Belső padding a canvas körül */
 const CANVAS_PADDING = 40;
 
@@ -43,12 +41,12 @@ export class LayoutDesignerStateService {
     }
 
     const availW = cw - CANVAS_PADDING * 2;
-    const availH = ch - TOOLBAR_HEIGHT - CANVAS_PADDING * 2;
+    const availH = ch - CANVAS_PADDING * 2;
     const scale = Math.min(availW / doc.widthPx, availH / doc.heightPx);
     const displayWidth = doc.widthPx * scale;
     const displayHeight = doc.heightPx * scale;
     const offsetX = (cw - displayWidth) / 2;
-    const offsetY = TOOLBAR_HEIGHT + (ch - TOOLBAR_HEIGHT - displayHeight) / 2;
+    const offsetY = (ch - displayHeight) / 2;
 
     return { scale, offsetX, offsetY, displayWidth, displayHeight };
   });

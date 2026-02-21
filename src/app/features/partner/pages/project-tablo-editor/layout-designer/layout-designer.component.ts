@@ -64,7 +64,9 @@ import { DesignerDocument } from './layout-designer.types';
         />
         <div class="layout-designer__content">
           <app-layout-sort-panel (openCustomDialog)="showCustomDialog.set(true)" />
-          <app-layout-canvas />
+          <div class="layout-designer__canvas-area" #canvasArea>
+            <app-layout-canvas />
+          </div>
         </div>
         @if (showCustomDialog()) {
           <app-layout-sort-custom-dialog (close)="showCustomDialog.set(false)" />
@@ -111,9 +113,17 @@ import { DesignerDocument } from './layout-designer.types';
       display: flex;
     }
 
-    .layout-designer__content app-layout-canvas {
+    .layout-designer__canvas-area {
       flex: 1;
       min-width: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .layout-designer__canvas-area app-layout-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
 
     .designer-btn {
@@ -169,6 +179,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly saveEvent = output<SnapshotLayer[]>();
 
   readonly overlayEl = viewChild.required<ElementRef<HTMLElement>>('overlayEl');
+  private readonly canvasAreaEl = viewChild<ElementRef<HTMLElement>>('canvasArea');
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
   readonly refreshing = signal(false);
@@ -293,12 +304,11 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Figyelni fogjuk az overlay elemet amint rendelkezésre áll
+    // Canvas area-t figyeljük (sidebar nélküli terület)
     requestAnimationFrame(() => {
-      const el = this.overlayEl()?.nativeElement;
+      const el = this.canvasAreaEl()?.nativeElement;
       if (el) {
         this.resizeObserver!.observe(el);
-        // Kezdeti méret beállítása
         this.state.containerWidth.set(el.clientWidth);
         this.state.containerHeight.set(el.clientHeight);
       }

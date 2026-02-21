@@ -464,7 +464,7 @@ export class PhotoshopService {
   /**
    * Grid elrendezés: layerek rácsba pozícionálása a megadott paraméterek alapján.
    * boardSize: a tabló méretei cm-ben (widthCm, heightCm)
-   * linkedLayerNames: linkelt layer nevek — rendezés előtt unlink, utána relink
+   * linkedLayerNames: linkelt layer nevek — rendezés előtt unlink, utána EGYENKÉNT relink
    */
   async arrangeGrid(
     boardSize: { widthCm: number; heightCm: number },
@@ -494,9 +494,11 @@ export class PhotoshopService {
         targetDocName,
       });
 
-      // Linkelések visszaállítása a rendezés után
+      // Linkelések visszaállítása — NEMENKÉNT külön (minden név = 1 link csoport)
       if (linkedLayerNames?.length) {
-        await this.linkLayers(linkedLayerNames, targetDocName);
+        for (const name of linkedLayerNames) {
+          await this.linkLayers([name], targetDocName);
+        }
       }
 
       return { success: result.success, error: result.error };
@@ -509,7 +511,7 @@ export class PhotoshopService {
   /**
    * Nevek rendezése: név layerek pozícionálása a képek alá.
    * A nameGapCm és textAlign beállítások alapján.
-   * linkedLayerNames: linkelt layer nevek — rendezés előtt unlink, utána relink
+   * linkedLayerNames: linkelt layer nevek — rendezés előtt unlink, utána EGYENKÉNT relink
    */
   async arrangeNames(
     targetDocName?: string,
@@ -533,9 +535,11 @@ export class PhotoshopService {
         targetDocName,
       });
 
-      // Linkelések visszaállítása a rendezés után
+      // Linkelések visszaállítása — NEMENKÉNT külön (minden név = 1 link csoport)
       if (linkedLayerNames?.length) {
-        await this.linkLayers(linkedLayerNames, targetDocName);
+        for (const name of linkedLayerNames) {
+          await this.linkLayers([name], targetDocName);
+        }
       }
 
       return { success: result.success, error: result.error };

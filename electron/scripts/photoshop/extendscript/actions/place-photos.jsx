@@ -11,9 +11,9 @@
  *
  * Mukodes:
  * 1. Minden megadott layerName-hez megkeresi a layert (Images csoportban eloszor)
- * 2. Elmenti az eredeti SO meretet es poziciot
- * 3. placedLayerReplaceContents — SO tartalom csere
- * 4. Az uj kepet aranyosan atmeretezi es pozicionalja az eredeti keretbe (cover mod)
+ * 2. SO megnyitasa szerkesztesre (editContents) — kulon dokumentum nyilik az SO meretevel
+ * 3. Kep behelyezese Place Embedded-del → cover meretezes → flatten → mentes → bezaras
+ * 4. Igy az SO keret merete 100%-ban megmarad (a PSD-ben beallitott cm/px meret)
  *
  * Futtatas: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
  */
@@ -48,60 +48,6 @@ function _findLayerByName(container, targetName) {
   } catch (e) { /* nincs layerSets */ }
 
   return null;
-}
-
-// --- Layer bounds kiolvasasa pixelben ---
-function _getLayerBounds(layer) {
-  var b = layer.bounds;
-  var left = b[0].as("px");
-  var top = b[1].as("px");
-  var right = b[2].as("px");
-  var bottom = b[3].as("px");
-  return {
-    left: left,
-    top: top,
-    right: right,
-    bottom: bottom,
-    width: right - left,
-    height: bottom - top,
-    centerX: (left + right) / 2,
-    centerY: (top + bottom) / 2
-  };
-}
-
-// --- Layer transzformalasa: aranyos meretezés + kozepre igazitas ---
-// Az uj kepet ugy meretezi, hogy KITOLTSE az eredeti keretet (cover mod),
-// majd kozepre igazitja az eredeti keret kozepehez.
-function _fitLayerToFrame(layer, origBounds) {
-  var newBounds = _getLayerBounds(layer);
-
-  if (newBounds.width <= 0 || newBounds.height <= 0) return;
-
-  // Aranyos cover meretezés: a NAGYOBB skala kell (kitolti a keretet)
-  var scaleX = (origBounds.width / newBounds.width) * 100;
-  var scaleY = (origBounds.height / newBounds.height) * 100;
-  var scale = Math.max(scaleX, scaleY);
-
-  // Resize a layer kozeppont korul
-  layer.resize(scale, scale, AnchorPosition.MIDDLECENTER);
-
-  // Uj bounds a resize utan
-  var afterBounds = _getLayerBounds(layer);
-
-  // Translate: az uj kozeppont az eredeti kozeppontra
-  var dx = origBounds.centerX - afterBounds.centerX;
-  var dy = origBounds.centerY - afterBounds.centerY;
-
-  if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-    layer.translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
-  }
-}
-
-// --- Smart Object tartalom csere ---
-function _replaceSmartObjectContents(photoPath) {
-  var desc = new ActionDescriptor();
-  desc.putPath(charIDToTypeID("null"), new File(photoPath));
-  executeAction(stringIDToTypeID("placedLayerReplaceContents"), desc, DialogModes.NO);
 }
 
 function _doPlacePhotos() {
@@ -144,30 +90,30 @@ function _doPlacePhotos() {
         continue;
       }
 
-      // Eredeti meret es pozicio mentese a csere elott
-      var origBounds = _getLayerBounds(layer);
-
       // Layer kivalasztasa
       selectLayerById(layer.id);
       _doc.activeLayer = layer;
 
-      // SO tartalom csere
-      _replaceSmartObjectContents(item.photoPath);
+      // SO megnyitas → kep Place → cover meretezes → mentes → bezaras
+      // Ez megnyitja az SO belso dokumentumat (aminek a merete az eredeti keret),
+      // belerakja a kepet cover modban, flatten, save, close.
+      // Igy az SO keret merete 100%-ban megmarad!
+      placePhotoInSmartObject(_doc, layer, item.photoPath);
 
-      // Dokumentum ujra aktivalasa (a replace neha valt)
+      // Dokumentum ujra aktivalasa (az SO megnyitas/bezaras megvaltoztatja)
       _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-
-      // Layer ujra lekerdezese (a replace utan frissulhetett)
-      layer = _doc.activeLayer;
-
-      // Aranyos meretezés az eredeti keretbe + kozepre igazitas
-      _fitLayerToFrame(layer, origBounds);
 
       _placed++;
 
     } catch (e) {
       log("[JSX] HIBA (" + item.layerName + "): " + e.message);
       _errors++;
+      // Ha az SO megnyitva maradt, probaljuk bezarni
+      try {
+        if (app.documents.length > 1) {
+          app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+        }
+      } catch (closeErr) { /* ignore */ }
       // Dokumentum visszaallitasa hiba utan
       try {
         _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);

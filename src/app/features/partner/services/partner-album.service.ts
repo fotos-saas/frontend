@@ -11,6 +11,7 @@ import {
   UploadProgress,
   MatchResult,
   PhotoAssignment,
+  PersonPhotosResponse,
 } from '../models/partner.models';
 
 /**
@@ -313,6 +314,32 @@ export class PartnerAlbumService {
         version: number;
       };
     }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/photo`, formData);
+  }
+
+  // ============================================
+  // SZEMÉLY ARCHÍV FOTÓK
+  // ============================================
+
+  /**
+   * Személy archív fotóinak lekérése
+   */
+  getPersonPhotos(projectId: number, personId: number): Observable<PersonPhotosResponse> {
+    return this.http.get<PersonPhotosResponse>(
+      `${this.baseUrl}/projects/${projectId}/persons/${personId}/photos`,
+    );
+  }
+
+  /**
+   * Személy archív fotójának törlése
+   */
+  deletePersonPhoto(projectId: number, personId: number, photoId: number): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/photos/${photoId}`);
   }
 
   // ============================================

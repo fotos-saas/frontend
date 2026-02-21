@@ -2,79 +2,179 @@
   headerStyle="flat"
   theme="green"
   [icon]="ICONS.CAMERA"
-  [title]="'Fotó feltöltése — ' + person().name"
+  [title]="'Fotó kezelése — ' + person().name"
   size="md"
   variant="create"
   [isSubmitting]="uploading()"
   [errorMessage]="errorMessage()"
   (closeEvent)="close.emit()"
-  (submitEvent)="selectedFile() ? upload() : null"
+  (submitEvent)="viewMode() === 'existing' && selectedExistingPhoto() ? confirmSelectExisting() : selectedFile() ? upload() : null"
 >
   <div dialogBody class="upload-body">
-    @if (!selectedFile()) {
-      <app-drop-zone
-        accept=".jpg,.jpeg,.png,.webp"
-        hint="JPG, PNG vagy WebP"
-        maxSize="20MB"
-        (filesSelected)="onFilesSelected($event)"
-      />
-    } @else {
-      <div class="preview-area">
-        @if (previewUrl(); as url) {
-          <img [src]="url" class="preview-image" alt="Előnézet" />
-        }
-        <button class="preview-remove" (click)="clearFile()">
-          <lucide-icon [name]="ICONS.X" [size]="14" />
-          Eltávolítás
-        </button>
+    @if (loadingPhotos()) {
+      <div class="loading-photos">
+        <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+        <span>Fotók betöltése...</span>
       </div>
-    }
+    } @else {
+      <!-- Meglévő fotók szekció -->
+      @if (viewMode() === 'existing' && existingPhotos().length > 0) {
+        <div class="existing-section">
+          <div class="existing-section__header">
+            <span class="existing-section__title">
+              <lucide-icon [name]="ICONS.IMAGES" [size]="16" />
+              Meglévő fotók
+            </span>
+            <button class="btn-link" (click)="switchToUpload()">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+              Új feltöltés
+            </button>
+          </div>
 
-    <div class="mode-selector">
-      <span class="mode-selector__label">Hová kerüljön a fotó?</span>
-      <label class="mode-option">
-        <input
-          type="radio"
-          name="uploadMode"
-          value="archive"
-          [checked]="uploadMode() === 'archive'"
-          (change)="uploadMode.set('archive')"
-        />
-        <span class="mode-option__text">
-          <span class="mode-option__title">Archívba</span>
-          <span class="mode-option__desc">Minden projektben elérhető lesz</span>
-        </span>
-      </label>
-      <label class="mode-option">
-        <input
-          type="radio"
-          name="uploadMode"
-          value="override"
-          [checked]="uploadMode() === 'override'"
-          (change)="uploadMode.set('override')"
-        />
-        <span class="mode-option__text">
-          <span class="mode-option__title">Csak ezen a tablón egyedi</span>
-          <span class="mode-option__desc">Projekt-specifikus felülírás</span>
-        </span>
-      </label>
-    </div>
+          <div class="photo-grid">
+            @for (photo of existingPhotos(); track photo.id) {
+              <div
+                class="photo-card"
+                [class.photo-card--selected]="selectedExistingPhoto()?.id === photo.id"
+                [class.photo-card--active]="photo.isActive"
+                [class.photo-card--override]="overridePhotoId() === photo.mediaId"
+                (click)="selectExistingPhoto(photo)"
+              >
+                <img [src]="photo.thumbUrl || photo.url" class="photo-card__img" [alt]="photo.fileName" />
+
+                <div class="photo-card__badges">
+                  @if (photo.isActive) {
+                    <span class="badge badge--active">Aktív</span>
+                  }
+                  @if (overridePhotoId() === photo.mediaId) {
+                    <span class="badge badge--override">Egyedi</span>
+                  }
+                  @if (photo.year) {
+                    <span class="badge badge--year">{{ photo.year }}</span>
+                  }
+                </div>
+
+                <button
+                  class="photo-card__delete"
+                  (click)="requestDeletePhoto(photo, $event)"
+                  title="Fotó törlése"
+                >
+                  <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                </button>
+
+                @if (selectedExistingPhoto()?.id === photo.id) {
+                  <div class="photo-card__check">
+                    <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Feltöltés szekció -->
+      @if (viewMode() === 'upload') {
+        @if (existingPhotos().length > 0) {
+          <button class="btn-link btn-link--back" (click)="switchToExisting()">
+            <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="14" />
+            Vissza a meglévő fotókhoz
+          </button>
+        }
+
+        @if (!selectedFile()) {
+          <app-drop-zone
+            accept=".jpg,.jpeg,.png,.webp"
+            hint="JPG, PNG vagy WebP"
+            maxSize="20MB"
+            (filesSelected)="onFilesSelected($event)"
+          />
+        } @else {
+          <div class="preview-area">
+            @if (previewUrl(); as url) {
+              <img [src]="url" class="preview-image" alt="Előnézet" />
+            }
+            <button class="preview-remove" (click)="clearFile()">
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+              Eltávolítás
+            </button>
+          </div>
+        }
+
+        <div class="mode-selector">
+          <span class="mode-selector__label">Hová kerüljön a fotó?</span>
+          <label class="mode-option">
+            <input
+              type="radio"
+              name="uploadMode"
+              value="archive"
+              [checked]="uploadMode() === 'archive'"
+              (change)="uploadMode.set('archive')"
+            />
+            <span class="mode-option__text">
+              <span class="mode-option__title">Archívba</span>
+              <span class="mode-option__desc">Minden projektben elérhető lesz</span>
+            </span>
+          </label>
+          <label class="mode-option">
+            <input
+              type="radio"
+              name="uploadMode"
+              value="override"
+              [checked]="uploadMode() === 'override'"
+              (change)="uploadMode.set('override')"
+            />
+            <span class="mode-option__text">
+              <span class="mode-option__title">Csak ezen a tablón egyedi</span>
+              <span class="mode-option__desc">Projekt-specifikus felülírás</span>
+            </span>
+          </label>
+        </div>
+      }
+    }
   </div>
 
   <div dialogFooter>
     <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
-    <button
-      class="btn btn--confirm"
-      [disabled]="!selectedFile() || uploading()"
-      (click)="upload()"
-    >
-      @if (uploading()) {
-        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-        Feltöltés...
-      } @else {
-        <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-        Feltöltés
-      }
-    </button>
+
+    @if (viewMode() === 'existing' && selectedExistingPhoto()) {
+      <button
+        class="btn btn--confirm"
+        [disabled]="uploading()"
+        (click)="confirmSelectExisting()"
+      >
+        @if (uploading()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Beállítás...
+        } @else {
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+          Kiválasztás
+        }
+      </button>
+    }
+
+    @if (viewMode() === 'upload') {
+      <button
+        class="btn btn--confirm"
+        [disabled]="!selectedFile() || uploading()"
+        (click)="upload()"
+      >
+        @if (uploading()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Feltöltés...
+        } @else {
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+          Feltöltés
+        }
+      </button>
+    }
   </div>
 </app-dialog-wrapper>
+
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    message="Biztosan törölni szeretnéd ezt a fotót? Ez a művelet nem vonható vissza."
+    confirmText="Törlés"
+    (resultEvent)="onDeleteConfirmResult($event)"
+  />
+}

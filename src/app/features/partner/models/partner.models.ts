@@ -641,5 +641,27 @@ export interface LinkPreliminaryResult {
   };
 }
 
+/**
+ * Személy archív fotó
+ */
+export interface PersonPhoto {
+  id: number;
+  mediaId: number;
+  url: string;
+  thumbUrl: string;
+  year: number;
+  isActive: boolean;
+  fileName: string;
+}
+
+/**
+ * Személy archív fotók válasz
+ */
+export interface PersonPhotosResponse {
+  photos: PersonPhoto[];
+  overridePhotoId: number | null;
+  hasOverride: boolean;
+}
+
 // Re-export QrCode from shared
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';

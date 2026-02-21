@@ -29,23 +29,6 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           </div>
         }
 
-        <!-- Olvasási irány toggle -->
-        <div class="sidebar__field">
-          <span class="sidebar__label">Olvasási irány</span>
-          <div class="sidebar__toggle">
-            <button class="toggle-btn"
-              [class.toggle-btn--active]="sortService.gridPattern() === 'ltr'"
-              (click)="sortService.gridPattern.set('ltr')">
-              &#8595; LTR
-            </button>
-            <button class="toggle-btn"
-              [class.toggle-btn--active]="sortService.gridPattern() === 'u-shape'"
-              (click)="sortService.gridPattern.set('u-shape')">
-              &#8617; U
-            </button>
-          </div>
-        </div>
-
         <!-- Rendezési gombok -->
         <div class="sidebar__actions">
           <button class="action-btn"
@@ -119,49 +102,6 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       color: #a78bfa;
       font-weight: 600;
       margin-bottom: 10px;
-    }
-
-    .sidebar__field {
-      margin-bottom: 10px;
-    }
-
-    .sidebar__label {
-      display: block;
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.35);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 4px;
-    }
-
-    .sidebar__toggle {
-      display: flex;
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 6px;
-      padding: 2px;
-    }
-
-    .toggle-btn {
-      flex: 1;
-      padding: 4px 6px;
-      border: none;
-      border-radius: 4px;
-      background: transparent;
-      color: rgba(255, 255, 255, 0.45);
-      font-size: 0.7rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.12s ease;
-
-      &:hover:not(.toggle-btn--active) {
-        color: rgba(255, 255, 255, 0.7);
-      }
-
-      &--active {
-        background: rgba(124, 58, 237, 0.3);
-        color: #a78bfa;
-      }
     }
 
     .sidebar__actions {

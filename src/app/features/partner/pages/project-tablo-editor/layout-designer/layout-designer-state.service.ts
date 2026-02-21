@@ -153,6 +153,16 @@ export class LayoutDesignerStateService {
     this.selectedLayerIds.set(ids);
   }
 
+  /** Összes nem-fixed layer kijelölése (Cmd+A) */
+  selectAll(): void {
+    const ids = new Set(
+      this.layers()
+        .filter(l => l.category !== 'fixed')
+        .map(l => l.layerId),
+    );
+    this.selectedLayerIds.set(ids);
+  }
+
   /** Meglévő kijelöléshez hozzáadás (Cmd+marquee) */
   addToSelection(ids: Set<number>): void {
     const current = new Set(this.selectedLayerIds());

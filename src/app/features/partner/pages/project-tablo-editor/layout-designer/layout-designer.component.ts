@@ -220,7 +220,10 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     const isMod = event.metaKey || event.ctrlKey;
     if (!isMod) return;
 
-    if (event.key === 'z' && !event.shiftKey) {
+    if (event.key === 'a') {
+      event.preventDefault();
+      this.state.selectAll();
+    } else if (event.key === 'z' && !event.shiftKey) {
       event.preventDefault();
       this.state.undo();
     } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {

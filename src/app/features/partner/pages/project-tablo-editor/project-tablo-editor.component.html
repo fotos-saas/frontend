@@ -268,10 +268,23 @@
               </div>
             } @else {
               <div class="snapshot-list">
-                @for (snap of snapshotService.snapshots(); track snap.fileName) {
+                @for (group of groupedSnapshots(); track group.original.fileName) {
+                  <!-- Eredeti snapshot -->
                   <div class="snapshot-item">
+                    @if (group.edited.length > 0) {
+                      <button
+                        class="snapshot-item__toggle"
+                        (click)="toggleGroupCollapse(group.original.snapshotName)"
+                        [matTooltip]="isGroupCollapsed(group.original.snapshotName) ? 'Szerkesztett verziók mutatása' : 'Szerkesztett verziók elrejtése'"
+                      >
+                        <lucide-icon
+                          [name]="isGroupCollapsed(group.original.snapshotName) ? ICONS.CHEVRON_RIGHT : ICONS.CHEVRON_DOWN"
+                          [size]="14"
+                        />
+                      </button>
+                    }
                     <div class="snapshot-item__info">
-                      @if (snapshotService.editingSnapshotPath() === snap.filePath) {
+                      @if (snapshotService.editingSnapshotPath() === group.original.filePath) {
                         <input
                           type="text"
                           class="snapshot-item__edit-input"
@@ -284,14 +297,17 @@
                       } @else {
                         <span
                           class="snapshot-item__name snapshot-item__name--editable"
-                          (dblclick)="snapshotService.startEditing(snap)"
+                          (dblclick)="snapshotService.startEditing(group.original)"
                           matTooltip="Dupla kattintás az átnevezéshez"
-                        >{{ snap.snapshotName }}</span>
+                        >{{ group.original.snapshotName }}</span>
                       }
                       <span class="snapshot-item__meta">
-                        {{ snapshotService.formatDate(snap.createdAt) }}
-                        · {{ snap.personCount }} layer
-                        @if (snap.snapshotName.includes('(szerkesztett)')) {
+                        {{ snapshotService.formatDate(group.original.createdAt) }}
+                        · {{ group.original.personCount }} layer
+                        @if (group.edited.length > 0) {
+                          · <span class="snapshot-item__badge snapshot-item__badge--count">{{ group.edited.length }} szerkesztett</span>
+                        }
+                        @if (group.original.snapshotName.includes('(szerkesztett)')) {
                           · <span class="snapshot-item__badge">szerkesztett</span>
                         }
                       </span>
@@ -300,10 +316,10 @@
                       <button
                         class="btn btn--sm btn--primary"
                         [disabled]="snapshotService.restoringSnapshotPath() !== null"
-                        (click)="restoreSnapshot(snap)"
+                        (click)="restoreSnapshot(group.original)"
                         matTooltip="Visszaállítás"
                       >
-                        @if (snapshotService.restoringSnapshotPath() === snap.filePath) {
+                        @if (snapshotService.restoringSnapshotPath() === group.original.filePath) {
                           <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
                         } @else {
                           <lucide-icon [name]="ICONS.UNDO" [size]="14" />
@@ -311,13 +327,67 @@
                       </button>
                       <button
                         class="btn btn--sm btn--outline"
-                        (click)="deleteSnapshot(snap)"
+                        (click)="deleteSnapshot(group.original)"
                         matTooltip="Törlés"
                       >
                         <lucide-icon [name]="ICONS.DELETE" [size]="14" />
                       </button>
                     </div>
                   </div>
+
+                  <!-- Szerkesztett verziók (behúzva, összecsukható) -->
+                  @if (group.edited.length > 0 && !isGroupCollapsed(group.original.snapshotName)) {
+                    @for (snap of group.edited; track snap.fileName) {
+                      <div class="snapshot-item snapshot-item--child">
+                        <div class="snapshot-item__indent"></div>
+                        <div class="snapshot-item__info">
+                          @if (snapshotService.editingSnapshotPath() === snap.filePath) {
+                            <input
+                              type="text"
+                              class="snapshot-item__edit-input"
+                              [value]="snapshotService.editingName()"
+                              (input)="snapshotService.editingName.set($any($event.target).value)"
+                              (keydown.enter)="commitSnapshotRename()"
+                              (keydown.escape)="snapshotService.cancelEditing()"
+                              (blur)="commitSnapshotRename()"
+                            />
+                          } @else {
+                            <span
+                              class="snapshot-item__name snapshot-item__name--editable"
+                              (dblclick)="snapshotService.startEditing(snap)"
+                              matTooltip="Dupla kattintás az átnevezéshez"
+                            >{{ snap.snapshotName }}</span>
+                          }
+                          <span class="snapshot-item__meta">
+                            {{ snapshotService.formatDate(snap.createdAt) }}
+                            · {{ snap.personCount }} layer
+                            · <span class="snapshot-item__badge">szerkesztett</span>
+                          </span>
+                        </div>
+                        <div class="snapshot-item__actions">
+                          <button
+                            class="btn btn--sm btn--primary"
+                            [disabled]="snapshotService.restoringSnapshotPath() !== null"
+                            (click)="restoreSnapshot(snap)"
+                            matTooltip="Visszaállítás"
+                          >
+                            @if (snapshotService.restoringSnapshotPath() === snap.filePath) {
+                              <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+                            } @else {
+                              <lucide-icon [name]="ICONS.UNDO" [size]="14" />
+                            }
+                          </button>
+                          <button
+                            class="btn btn--sm btn--outline"
+                            (click)="deleteSnapshot(snap)"
+                            matTooltip="Törlés"
+                          >
+                            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  }
                 }
               </div>
             }

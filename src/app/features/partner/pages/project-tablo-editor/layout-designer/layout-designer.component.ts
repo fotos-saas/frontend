@@ -172,8 +172,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Bezárás event */
   readonly closeEvent = output<void>();
 
-  /** Mentés event — módosított SnapshotLayer[] */
-  readonly saveEvent = output<SnapshotLayer[]>();
+  /** Mentés event — módosított layerek + forrás információ */
+  readonly saveEvent = output<{ layers: SnapshotLayer[]; isLivePsd: boolean }>();
 
   readonly overlayEl = viewChild.required<ElementRef<HTMLElement>>('overlayEl');
   readonly loading = signal(true);
@@ -223,7 +223,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
   save(): void {
     const layers = this.state.exportChanges();
-    this.saveEvent.emit(layers);
+    const isLivePsd = this.state.sourceLabel() === 'Friss PSD beolvasás';
+    this.saveEvent.emit({ layers, isLivePsd });
   }
 
   /** Frissítés Photoshopból: PSD megnyitás → JSX kiolvasás → state közvetlen frissítés */

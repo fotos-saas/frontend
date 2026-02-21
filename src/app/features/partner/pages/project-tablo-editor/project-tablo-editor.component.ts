@@ -121,6 +121,64 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly designerPsdPath = signal<string | null>(null);
   readonly designerBoardConfig = signal<{ widthCm: number; heightCm: number } | null>(null);
 
+  /** Összecsukott snapshot csoportok (eredeti nevek set-je) */
+  readonly collapsedGroups = signal<Set<string>>(new Set());
+
+  /** Csoportosított snapshot lista: eredeti snapshotok + alattuk a szerkesztett verziók */
+  readonly groupedSnapshots = computed(() => {
+    const all = this.snapshotService.snapshots();
+    const originals: SnapshotListItem[] = [];
+    const editedMap = new Map<string, SnapshotListItem[]>();
+
+    for (const snap of all) {
+      if (snap.snapshotName.endsWith('(szerkesztett)')) {
+        const baseName = snap.snapshotName.replace(/ \(szerkesztett\)$/, '');
+        const list = editedMap.get(baseName) ?? [];
+        list.push(snap);
+        editedMap.set(baseName, list);
+      } else {
+        originals.push(snap);
+      }
+    }
+
+    // Eredeti snapshotokhoz csatoljuk a szerkesztett verziókat
+    const groups: Array<{ original: SnapshotListItem; edited: SnapshotListItem[] }> = [];
+    const usedEdited = new Set<string>();
+
+    for (const orig of originals) {
+      const edited = editedMap.get(orig.snapshotName) ?? [];
+      groups.push({ original: orig, edited });
+      if (edited.length) usedEdited.add(orig.snapshotName);
+    }
+
+    // Árva szerkesztett verziók (nincs hozzá eredeti)
+    for (const [baseName, editedList] of editedMap) {
+      if (!usedEdited.has(baseName)) {
+        // Nincs eredeti → önálló elemként jelennek meg
+        for (const snap of editedList) {
+          groups.push({ original: snap, edited: [] });
+        }
+      }
+    }
+
+    return groups;
+  });
+
+  toggleGroupCollapse(name: string): void {
+    const current = this.collapsedGroups();
+    const next = new Set(current);
+    if (next.has(name)) {
+      next.delete(name);
+    } else {
+      next.add(name);
+    }
+    this.collapsedGroups.set(next);
+  }
+
+  isGroupCollapsed(name: string): boolean {
+    return this.collapsedGroups().has(name);
+  }
+
   /** Üzenetek */
   readonly error = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
@@ -672,7 +730,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   }
 
   /** Vizuális szerkesztő mentés: módosított layerek új snapshot-ként mentése (az eredeti megmarad) */
-  async onDesignerSave(layers: SnapshotLayer[]): Promise<void> {
+  async onDesignerSave(event: { layers: SnapshotLayer[]; isLivePsd: boolean }): Promise<void> {
     const latest = this.snapshotService.latestSnapshot();
     const psdPath = await this.resolvePsdPath();
     if (!latest || !psdPath) {
@@ -691,11 +749,18 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
 
     const snapshotData = loadResult.data as Record<string, unknown>;
-    snapshotData['layers'] = layers;
+    snapshotData['layers'] = event.layers;
 
-    // Eredeti snapshot marad — új snapshot keletkezik "(szerkesztett)" jelöléssel
-    const originalName = latest.snapshotName.replace(/ \(szerkesztett\)$/, '');
-    const saveResult = await this.ps.saveSnapshotDataAsNew(psdPath, snapshotData, originalName);
+    let saveResult: { success: boolean; error?: string };
+
+    if (event.isLivePsd) {
+      // Friss PSD beolvasásból → teljesen új snapshot "Élő PSD" névvel
+      saveResult = await this.ps.saveSnapshotDataAsNew(psdPath, snapshotData, 'Élő PSD beolvasás');
+    } else {
+      // Snapshot-ból indultunk → az eredeti neve alapján "(szerkesztett)" jelöléssel
+      const originalName = latest.snapshotName.replace(/ \(szerkesztett\)$/, '');
+      saveResult = await this.ps.saveSnapshotDataAsNew(psdPath, snapshotData, originalName);
+    }
 
     this.showLayoutDesigner.set(false);
 

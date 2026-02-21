@@ -65,10 +65,18 @@ import { firstValueFrom } from 'rxjs';
         <app-layout-toolbar
           [refreshing]="refreshing()"
           [syncing]="syncingPhotos()"
+          [arrangingNames]="arrangingNames()"
+          [nameGapCm]="ps.nameGapCm()"
+          [nameBreakAfter]="ps.nameBreakAfter()"
+          [textAlign]="ps.textAlign()"
           [snapshots]="snapshots()"
           [switchingSnapshot]="switchingSnapshot()"
           (refreshClicked)="refresh()"
           (syncClicked)="syncAllPhotos()"
+          (arrangeNamesClicked)="arrangeNames()"
+          (nameGapChanged)="ps.setNameGap($event)"
+          (nameBreakChanged)="ps.setNameBreakAfter($event)"
+          (textAlignChanged)="ps.setTextAlign($event)"
           (snapshotSelected)="switchSnapshot($event)"
           (saveClicked)="save()"
           (closeClicked)="close()"
@@ -187,7 +195,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class LayoutDesignerComponent implements OnInit, OnDestroy {
   private readonly state = inject(LayoutDesignerStateService);
-  private readonly ps = inject(PhotoshopService);
+  protected readonly ps = inject(PhotoshopService);
   private readonly projectService = inject(PartnerProjectService);
   protected readonly ICONS = ICONS;
   readonly showCustomDialog = signal(false);
@@ -236,6 +244,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly linking = signal(false);
   readonly placingPhotos = signal(false);
   readonly syncingPhotos = signal(false);
+  readonly arrangingNames = signal(false);
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
@@ -443,6 +452,16 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       await this.ps.placePhotos(photosToSync);
     } finally {
       this.syncingPhotos.set(false);
+    }
+  }
+
+  /** Nevek igazítása a Photoshopban a beállítások szerint */
+  async arrangeNames(): Promise<void> {
+    this.arrangingNames.set(true);
+    try {
+      await this.ps.arrangeNames();
+    } finally {
+      this.arrangingNames.set(false);
     }
   }
 

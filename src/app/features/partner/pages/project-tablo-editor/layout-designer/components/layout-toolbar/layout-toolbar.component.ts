@@ -140,7 +140,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         </div>
       }
 
-      <!-- Jobb: szinkronizálás + frissítés + mentés + bezárás -->
+      <!-- Jobb: szinkronizálás + nevek + frissítés + mentés + bezárás -->
       <div class="layout-toolbar__right">
         <button
           class="toolbar-btn toolbar-btn--sync"
@@ -156,6 +156,81 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             <span>Szinkronizálás...</span>
           }
         </button>
+
+        <!-- Nevek igazítása gomb + beállítások -->
+        <div class="names-group">
+          <button
+            class="toolbar-btn toolbar-btn--names"
+            [disabled]="arrangingNames()"
+            [class.is-arranging]="arrangingNames()"
+            (click)="arrangeNamesClicked.emit()"
+            matTooltip="Nevek igazítása a beállítások szerint"
+          >
+            <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="16" />
+            @if (!arrangingNames()) {
+              <span>Nevek</span>
+            } @else {
+              <span>Rendezés...</span>
+            }
+          </button>
+          <button
+            class="toolbar-btn toolbar-btn--names-settings"
+            (click)="nameSettingsOpen.set(!nameSettingsOpen())"
+            matTooltip="Név beállítások"
+          >
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="12" />
+          </button>
+        </div>
+
+        @if (nameSettingsOpen()) {
+          <div class="name-settings__backdrop" (click)="nameSettingsOpen.set(false)"></div>
+          <div class="name-settings__panel">
+            <div class="name-settings__title">Név beállítások</div>
+
+            <label class="name-settings__label">Rés a kép aljától (cm)</label>
+            <input
+              class="name-settings__input"
+              type="number" step="0.1" min="0" max="5"
+              [value]="nameGapCm()"
+              (change)="nameGapChanged.emit(+$any($event.target).value)"
+            />
+
+            <label class="name-settings__label">Sortörés</label>
+            <select
+              class="name-settings__select"
+              (change)="nameBreakChanged.emit(+$any($event.target).value)"
+            >
+              <option value="1" [selected]="nameBreakAfter() === 1">1. szó után</option>
+              <option value="2" [selected]="nameBreakAfter() === 2">2. szó után</option>
+              <option value="0" [selected]="nameBreakAfter() === 0">Nincs törés</option>
+            </select>
+
+            <label class="name-settings__label">Igazítás</label>
+            <div class="name-settings__align">
+              <button
+                class="name-settings__align-btn"
+                [class.name-settings__align-btn--active]="textAlign() === 'left'"
+                (click)="textAlignChanged.emit('left')"
+              >
+                <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="14" />
+              </button>
+              <button
+                class="name-settings__align-btn"
+                [class.name-settings__align-btn--active]="textAlign() === 'center'"
+                (click)="textAlignChanged.emit('center')"
+              >
+                <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="14" />
+              </button>
+              <button
+                class="name-settings__align-btn"
+                [class.name-settings__align-btn--active]="textAlign() === 'right'"
+                (click)="textAlignChanged.emit('right')"
+              >
+                <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="14" />
+              </button>
+            </div>
+          </div>
+        }
         <button
           class="toolbar-btn toolbar-btn--refresh"
           [disabled]="refreshing()"
@@ -468,6 +543,26 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         &.is-syncing lucide-icon { animation: spin 1s linear infinite; }
       }
 
+      &--names {
+        padding: 0 10px;
+        background: rgba(167, 139, 250, 0.15);
+        color: #a78bfa;
+        border-radius: 6px 0 0 6px;
+        &:hover:not(:disabled) { background: rgba(167, 139, 250, 0.25); color: #c4b5fd; }
+        &:disabled { opacity: 0.4; }
+        &.is-arranging lucide-icon { animation: spin 1s linear infinite; }
+      }
+
+      &--names-settings {
+        padding: 0 4px;
+        min-width: 24px;
+        background: rgba(167, 139, 250, 0.15);
+        color: #a78bfa;
+        border-radius: 0 6px 6px 0;
+        border-left: 1px solid rgba(167, 139, 250, 0.3);
+        &:hover { background: rgba(167, 139, 250, 0.25); color: #c4b5fd; }
+      }
+
       &--refresh {
         padding: 0 10px;
         &:hover:not(:disabled) { color: #a78bfa; }
@@ -488,6 +583,95 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       }
     }
 
+    .names-group {
+      display: flex;
+      align-items: center;
+    }
+
+    .name-settings__backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 199;
+    }
+
+    .name-settings__panel {
+      position: absolute;
+      top: 100%;
+      right: 120px;
+      margin-top: 4px;
+      background: #2a2a4a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 12px;
+      min-width: 220px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .name-settings__title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .name-settings__label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
+    }
+
+    .name-settings__input,
+    .name-settings__select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #ffffff;
+      font-size: 0.8rem;
+      outline: none;
+      -webkit-appearance: none;
+      &:focus { border-color: rgba(167, 139, 250, 0.5); }
+    }
+
+    .name-settings__select option {
+      background: #2a2a4a;
+      color: #ffffff;
+    }
+
+    .name-settings__align {
+      display: flex;
+      gap: 4px;
+    }
+
+    .name-settings__align-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.1s ease;
+
+      &:hover { background: rgba(255, 255, 255, 0.12); color: #ffffff; }
+
+      &--active {
+        background: rgba(167, 139, 250, 0.25);
+        border-color: rgba(167, 139, 250, 0.4);
+        color: #a78bfa;
+      }
+    }
+
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -502,14 +686,23 @@ export class LayoutToolbarComponent {
 
   readonly refreshing = input<boolean>(false);
   readonly syncing = input<boolean>(false);
+  readonly arrangingNames = input<boolean>(false);
   readonly snapshots = input<SnapshotListItem[]>([]);
   readonly switchingSnapshot = input<boolean>(false);
+  readonly nameGapCm = input<number>(0.5);
+  readonly nameBreakAfter = input<number>(1);
+  readonly textAlign = input<string>('center');
   readonly pickerOpen = signal(false);
+  readonly nameSettingsOpen = signal(false);
 
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
   readonly syncClicked = output<void>();
+  readonly arrangeNamesClicked = output<void>();
+  readonly nameGapChanged = output<number>();
+  readonly nameBreakChanged = output<number>();
+  readonly textAlignChanged = output<string>();
   readonly snapshotSelected = output<SnapshotListItem>();
 
   formatDate(isoDate: string | null): string {

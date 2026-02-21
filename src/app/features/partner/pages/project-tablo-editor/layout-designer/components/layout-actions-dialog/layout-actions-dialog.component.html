@@ -25,75 +25,73 @@
         />
       </div>
 
-      <!-- Szemelyek kivalasztasa — CSAK upload-to-everyone modban -->
-      @if (selectedAction() !== 'upload-individual') {
-        <div class="dialog__field">
-          <label class="dialog__label">
-            Szemelyek ({{ selectedCount() }}/{{ persons().length }})
-          </label>
-          <div class="person-columns">
-            <!-- Diakok -->
-            @if (students().length > 0) {
-              <div class="person-group">
-                <div class="person-group__header">
-                  <span class="person-group__title">
-                    <lucide-icon [name]="ICONS.USERS" [size]="12" />
-                    Diakok ({{ students().length }})
-                  </span>
-                  <button class="person-group__toggle" (click)="toggleAllStudents()">
-                    {{ allStudentsSelected() ? 'Nincs' : 'Mind' }}
-                  </button>
-                </div>
-                <div class="person-group__list">
-                  @for (p of students(); track p.id) {
-                    <label class="person-item" [class.person-item--selected]="isSelected(p.id)">
-                      <span class="person-item__check">
-                        @if (isSelected(p.id)) {
-                          <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-                        }
-                      </span>
-                      <span class="person-item__name">{{ p.name }}</span>
-                      <input type="checkbox" class="sr-only"
-                        [checked]="isSelected(p.id)"
-                        (change)="togglePerson(p.id)" />
-                    </label>
-                  }
-                </div>
+      <!-- Szemelyek kivalasztasa -->
+      <div class="dialog__field">
+        <label class="dialog__label">
+          Szemelyek ({{ selectedCount() }}/{{ persons().length }})
+        </label>
+        <div class="person-columns">
+          <!-- Diakok -->
+          @if (students().length > 0) {
+            <div class="person-group">
+              <div class="person-group__header">
+                <span class="person-group__title">
+                  <lucide-icon [name]="ICONS.USERS" [size]="12" />
+                  Diakok ({{ students().length }})
+                </span>
+                <button class="person-group__toggle" (click)="toggleAllStudents()">
+                  {{ allStudentsSelected() ? 'Nincs' : 'Mind' }}
+                </button>
               </div>
-            }
+              <div class="person-group__list">
+                @for (p of students(); track p.id) {
+                  <label class="person-item" [class.person-item--selected]="isSelected(p.id)">
+                    <span class="person-item__check">
+                      @if (isSelected(p.id)) {
+                        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                      }
+                    </span>
+                    <span class="person-item__name">{{ p.name }}</span>
+                    <input type="checkbox" class="sr-only"
+                      [checked]="isSelected(p.id)"
+                      (change)="togglePerson(p.id)" />
+                  </label>
+                }
+              </div>
+            </div>
+          }
 
-            <!-- Tanarok -->
-            @if (teachers().length > 0) {
-              <div class="person-group">
-                <div class="person-group__header">
-                  <span class="person-group__title">
-                    <lucide-icon [name]="ICONS.USER" [size]="12" />
-                    Tanarok ({{ teachers().length }})
-                  </span>
-                  <button class="person-group__toggle" (click)="toggleAllTeachers()">
-                    {{ allTeachersSelected() ? 'Nincs' : 'Mind' }}
-                  </button>
-                </div>
-                <div class="person-group__list">
-                  @for (p of teachers(); track p.id) {
-                    <label class="person-item" [class.person-item--selected]="isSelected(p.id)">
-                      <span class="person-item__check">
-                        @if (isSelected(p.id)) {
-                          <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-                        }
-                      </span>
-                      <span class="person-item__name">{{ p.name }}</span>
-                      <input type="checkbox" class="sr-only"
-                        [checked]="isSelected(p.id)"
-                        (change)="togglePerson(p.id)" />
-                    </label>
-                  }
-                </div>
+          <!-- Tanarok -->
+          @if (teachers().length > 0) {
+            <div class="person-group">
+              <div class="person-group__header">
+                <span class="person-group__title">
+                  <lucide-icon [name]="ICONS.USER" [size]="12" />
+                  Tanarok ({{ teachers().length }})
+                </span>
+                <button class="person-group__toggle" (click)="toggleAllTeachers()">
+                  {{ allTeachersSelected() ? 'Nincs' : 'Mind' }}
+                </button>
               </div>
-            }
-          </div>
+              <div class="person-group__list">
+                @for (p of teachers(); track p.id) {
+                  <label class="person-item" [class.person-item--selected]="isSelected(p.id)">
+                    <span class="person-item__check">
+                      @if (isSelected(p.id)) {
+                        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                      }
+                    </span>
+                    <span class="person-item__name">{{ p.name }}</span>
+                    <input type="checkbox" class="sr-only"
+                      [checked]="isSelected(p.id)"
+                      (change)="togglePerson(p.id)" />
+                  </label>
+                }
+              </div>
+            </div>
+          }
         </div>
-      }
+      </div>
 
       <!-- Akcio-specifikus form -->
       @switch (selectedAction()) {
@@ -101,7 +99,7 @@
           <app-upload-to-everyone-form #uploadForm />
         }
         @case ('upload-individual') {
-          <app-upload-individual-form #individualForm [persons]="persons()" />
+          <app-upload-individual-form #individualForm [persons]="selectedPersons()" />
         }
       }
 

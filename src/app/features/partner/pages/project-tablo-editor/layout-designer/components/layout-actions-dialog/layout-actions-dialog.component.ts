@@ -59,6 +59,11 @@ export class LayoutActionsDialogComponent {
 
   readonly selectedCount = computed(() => this.selectedPersonIds().size);
 
+  readonly selectedPersons = computed(() => {
+    const ids = this.selectedPersonIds();
+    return this.persons().filter(p => ids.has(p.id));
+  });
+
   readonly allStudentsSelected = computed(() => {
     const ids = this.selectedPersonIds();
     return this.students().length > 0 && this.students().every(s => ids.has(s.id));
@@ -80,6 +85,7 @@ export class LayoutActionsDialogComponent {
     }
 
     if (action === 'upload-individual') {
+      if (this.selectedPersonIds().size === 0) return false;
       const form = this.individualForm();
       return form ? form.formData() !== null : false;
     }

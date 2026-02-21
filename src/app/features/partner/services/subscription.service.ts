@@ -14,6 +14,7 @@ export interface SubscriptionInfo {
   status: 'active' | 'paused' | 'canceling' | 'trial' | 'canceled' | 'pending' | 'trialing';
   started_at: string | null;
   ends_at: string | null;
+  paused_at: string | null;
   features: string[];
   limits: Record<string, number | null> & {
     storage_gb?: number;

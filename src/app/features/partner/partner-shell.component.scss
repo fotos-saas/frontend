@@ -9,6 +9,34 @@
   overflow: hidden;
 }
 
+/* ============ Paused Banner ============ */
+.paused-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: linear-gradient(90deg, get-color('warning', 500), get-color('warning', 600));
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.paused-banner__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: white;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
 /* ============ Main Container ============ */
 .main-container {
   display: flex;

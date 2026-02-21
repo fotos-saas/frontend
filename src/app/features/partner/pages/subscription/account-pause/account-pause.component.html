@@ -1,0 +1,126 @@
+<div class="account-pause-page page-card">
+  <h1 class="page-title">
+    <lucide-icon [name]="ICONS.PAUSE_CIRCLE" [size]="24" />
+    Fiók szüneteltetés
+  </h1>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="skeleton-card"></div>
+    </div>
+  } @else if (isPaused()) {
+    <!-- Fiók szünetel -->
+    <div class="paused-state">
+      <div class="paused-icon">
+        <lucide-icon [name]="ICONS.PAUSE_CIRCLE" [size]="48" />
+      </div>
+      <h2>A fiókod szüneteltetve van</h2>
+      <p class="paused-duration">
+        @if (pausedDays() > 0) {
+          <strong>{{ pausedDays() }} napja</strong> szünetel a fiókod.
+        } @else {
+          A fiókod ma lett szüneteltetve.
+        }
+      </p>
+
+      <div class="info-card info-card--neutral">
+        <h3>Mi történik újraaktiváláskor?</h3>
+        <ul class="info-list">
+          <li>
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            A teljes előfizetésed visszaáll
+          </li>
+          <li>
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            Ismét szerkesztheted a projektjeidet
+          </li>
+          <li>
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            Feltölthetsz új képeket
+          </li>
+          <li>
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            A normál havi díj kerül felszámításra
+          </li>
+        </ul>
+      </div>
+
+      <div class="paused-actions">
+        <button
+          class="btn btn--success"
+          (click)="unpauseAccount()"
+          [disabled]="actionLoading()"
+        >
+          @if (actionLoading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+          } @else {
+            <lucide-icon [name]="ICONS.PLAY" [size]="18" />
+          }
+          Újraaktiválás
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- Szüneteltetés űrlap -->
+    <div class="pause-form">
+      <div class="info-card info-card--warning">
+        <lucide-icon [name]="ICONS.INFO" [size]="24" />
+        <div class="info-content">
+          <h3>Mit jelent a szüneteltetés?</h3>
+          <p>Szüneteltesd a fiókodat ha átmenetileg nem használod a rendszert (pl. nyári szünet, szezon közötti szünet).</p>
+        </div>
+      </div>
+
+      <div class="consequences">
+        <h3>A szüneteltetés következményei:</h3>
+        <ul class="consequences-list">
+          <li>
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" class="icon--positive" />
+            Csökkentett havi díjat fizetsz
+          </li>
+          <li>
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" class="icon--positive" />
+            Minden adatod megmarad
+          </li>
+          <li>
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" class="icon--positive" />
+            Bármikor újraaktiválhatod
+          </li>
+          <li>
+            <lucide-icon [name]="ICONS.EYE" [size]="16" class="icon--neutral" />
+            Csak olvasási hozzáférés — megnézheted az adataidat
+          </li>
+          <li>
+            <lucide-icon [name]="ICONS.X" [size]="16" class="icon--negative" />
+            Nem szerkeszthetsz, nem tölthetsz fel képeket
+          </li>
+          <li>
+            <lucide-icon [name]="ICONS.X" [size]="16" class="icon--negative" />
+            Nem hozhatsz létre új projekteket
+          </li>
+        </ul>
+      </div>
+
+      <div class="confirmation-section">
+        <ps-checkbox
+          label="Megértettem a szüneteltetés következményeit"
+          [ngModel]="confirmChecked()"
+          (ngModelChange)="confirmChecked.set($event)"
+        />
+
+        <button
+          class="btn btn--warning"
+          (click)="pauseAccount()"
+          [disabled]="!confirmChecked() || actionLoading()"
+        >
+          @if (actionLoading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+          } @else {
+            <lucide-icon [name]="ICONS.PAUSE_CIRCLE" [size]="18" />
+          }
+          Fiók szüneteltetése
+        </button>
+      </div>
+    </div>
+  }
+</div>

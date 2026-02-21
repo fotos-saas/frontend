@@ -310,6 +310,11 @@ export const routes: Routes = [
             title: 'Modul részletek'
           },
           {
+            path: 'pause',
+            loadComponent: () => import('./features/partner/pages/subscription/account-pause/account-pause.component').then(m => m.AccountPauseComponent),
+            title: 'Szüneteltetés'
+          },
+          {
             path: 'account',
             loadComponent: () => import('./features/partner/pages/subscription/account-delete/account-delete.component').then(m => m.AccountDeleteComponent),
             title: 'Fiók törlése'

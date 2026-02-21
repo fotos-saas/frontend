@@ -96,6 +96,8 @@ export class PartnerShellComponent implements OnInit {
 
   // Subscription info
   subscriptionInfo = signal<SubscriptionInfo | null>(null);
+  /** Fiók szüneteltetett-e */
+  isPaused = computed(() => this.subscriptionInfo()?.status === 'paused');
   // Nyomdában lévő projektek száma (badge)
   inPrintCount = signal(0);
 
@@ -216,6 +218,7 @@ export class PartnerShellComponent implements OnInit {
           { id: 'subscription-addons', route: `${base}/subscription/addons`, label: 'Kiegészítők' },
           { id: 'subscription-marketplace', route: `${base}/subscription/marketplace`, label: 'Marketplace' },
           { id: 'subscription-usage', route: `${base}/subscription/marketplace/usage`, label: 'Használat' },
+          { id: 'subscription-pause', route: `${base}/subscription/pause`, label: 'Szüneteltetés' },
           { id: 'subscription-account', route: `${base}/subscription/account`, label: 'Fiók törlése' },
         ]
       },

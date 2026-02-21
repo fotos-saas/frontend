@@ -1,0 +1,254 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
+.account-pause-page {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: get-color('warning', 600);
+  margin-bottom: 24px;
+}
+
+/* Info Card */
+.info-card {
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.info-card--warning {
+  display: flex;
+  gap: 16px;
+  background: get-color('warning', 50);
+  border: 1px solid get-color('warning', 200);
+  color: get-color('warning', 700);
+}
+
+.info-card--warning lucide-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info-card--neutral {
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
+}
+
+.info-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.info-content p {
+  margin: 0;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.info-card--neutral h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: get-color('slate', 800);
+  margin: 0 0 12px 0;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: get-color('slate', 600);
+  font-size: 0.875rem;
+}
+
+.info-list lucide-icon {
+  color: get-color('success', 500);
+  flex-shrink: 0;
+}
+
+/* Consequences */
+.consequences {
+  margin-bottom: 24px;
+}
+
+.consequences h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: get-color('slate', 800);
+  margin: 0 0 16px 0;
+}
+
+.consequences-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.consequences-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: get-color('slate', 600);
+  font-size: 0.9375rem;
+}
+
+.icon--positive {
+  color: get-color('success', 500);
+  flex-shrink: 0;
+}
+
+.icon--neutral {
+  color: get-color('primary', 500);
+  flex-shrink: 0;
+}
+
+.icon--negative {
+  color: get-color('error', 500);
+  flex-shrink: 0;
+}
+
+/* Confirmation */
+.confirmation-section {
+  padding-top: 24px;
+  border-top: 1px solid get-color('slate', 200);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Paused State */
+.paused-state {
+  text-align: center;
+  padding: 48px 24px;
+  background: get-color('warning', 50);
+  border: 1px solid get-color('warning', 200);
+  border-radius: 12px;
+}
+
+.paused-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  color: get-color('warning', 600);
+}
+
+.paused-state h2 {
+  font-size: 1.25rem;
+  color: get-color('warning', 800);
+  margin: 0 0 8px 0;
+}
+
+.paused-duration {
+  color: get-color('warning', 700);
+  margin: 0 0 24px 0;
+  font-size: 0.9375rem;
+}
+
+.paused-state .info-card--neutral {
+  text-align: left;
+  max-width: 400px;
+  margin: 0 auto 24px;
+}
+
+.paused-actions {
+  display: flex;
+  justify-content: center;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  @include transition-normal;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--warning {
+  background: get-color('warning', 500);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: get-color('warning', 600);
+  }
+}
+
+.btn--success {
+  background: get-color('success', 500);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: get-color('success', 600);
+  }
+}
+
+/* Loading */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.skeleton-card {
+  height: 300px;
+  background: linear-gradient(90deg, get-color('slate', 100) 25%, get-color('slate', 200) 50%, get-color('slate', 100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Spin animation */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-card,
+  .spin {
+    animation: none;
+  }
+}

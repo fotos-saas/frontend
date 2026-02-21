@@ -42,6 +42,18 @@
     }
   </app-top-bar>
 
+  <!-- Szüneteltetés banner -->
+  @if (isPaused()) {
+    <div class="paused-banner">
+      <lucide-icon [name]="ICONS.PAUSE_CIRCLE" [size]="18" />
+      <span>A fiókod szüneteltetve van. Az adataid csak olvashatóak.</span>
+      <a [routerLink]="baseUrl() + '/subscription/pause'" class="paused-banner__link">
+        Újraaktiválás
+        <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="14" />
+      </a>
+    </div>
+  }
+
   <!-- Meghívó banner -->
   <app-invite-banner />
 

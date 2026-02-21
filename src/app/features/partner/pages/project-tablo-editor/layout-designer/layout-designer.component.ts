@@ -371,9 +371,24 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Single fotó feltöltés sikeres */
-  onPhotoUploaded(result: PhotoUploadResult): void {
+  /** Single fotó feltöltés/kiválasztás sikeres → Photoshopba is behelyezi */
+  async onPhotoUploaded(result: PhotoUploadResult): Promise<void> {
     this.showPhotoDialog.set(null);
+
+    // Személy layerének megkeresése a kijelöltek között
+    const selected = this.state.selectedLayers();
+    const targetLayers = selected.filter(
+      l => (l.category === 'student-image' || l.category === 'teacher-image')
+        && l.personMatch?.id === result.personId,
+    );
+
+    // Fotó behelyezése a Photoshopba ha van cél layer
+    if (targetLayers.length > 0 && result.photoUrl) {
+      await this.placePhotos(
+        targetLayers.map(l => ({ layerName: l.layerName, photoUrl: result.photoUrl })),
+      );
+    }
+
     this.refreshPersonsInState();
   }
 

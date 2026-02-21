@@ -1,5 +1,5 @@
 import {
-  Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy, output,
+  Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy, output, input,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -18,6 +18,8 @@ import { SessionType, TimeSlot, BookingConflict, BookingForm } from '../../../mo
   styleUrl: './new-booking-dialog.component.scss',
 })
 export class NewBookingDialogComponent implements OnInit {
+  readonly initialDate = input<string>('');
+  readonly initialTime = input<string>('');
   readonly close = output<void>();
   readonly saved = output<void>();
 
@@ -46,10 +48,25 @@ export class NewBookingDialogComponent implements OnInit {
   internalNotes = '';
 
   ngOnInit(): void {
+    const prefillDate = this.initialDate();
+    const prefillTime = this.initialTime();
+
+    if (prefillDate) {
+      this.date = prefillDate;
+      this.startTime = prefillTime;
+    }
+
     this.bookingService.getSessionTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res: any) => {
         const types = res.data?.session_types ?? res.data ?? [];
-        this.sessionTypes.set(types.filter((t: any) => t.is_active));
+        const active = types.filter((t: any) => t.is_active);
+        this.sessionTypes.set(active);
+
+        // Ha van prefill dátum, auto-select első típus + slot betöltés
+        if (prefillDate && active.length > 0 && !this.sessionTypeId) {
+          this.sessionTypeId = active[0].id;
+          this.loadSlots();
+        }
       },
     });
   }

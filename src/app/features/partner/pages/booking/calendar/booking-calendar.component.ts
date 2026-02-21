@@ -9,12 +9,13 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
-import { CalendarResponse } from '../../../models/booking.models';
+import { CalendarResponse, CalendarCellClick } from '../../../models/booking.models';
 import { PartnerBookingService } from '../../../services/partner-booking.service';
 import { BookingCalendarStateService } from '../../../services/booking-calendar-state.service';
 import { DailyViewComponent } from './views/daily-view.component';
 import { WeeklyViewComponent } from './views/weekly-view.component';
 import { MonthlyViewComponent } from './views/monthly-view.component';
+import { NewBookingDialogComponent } from '../bookings/new-booking-dialog.component';
 
 @Component({
   selector: 'app-booking-calendar',
@@ -25,6 +26,7 @@ import { MonthlyViewComponent } from './views/monthly-view.component';
     DailyViewComponent,
     WeeklyViewComponent,
     MonthlyViewComponent,
+    NewBookingDialogComponent,
   ],
   template: `
     <div class="booking-calendar page-card page-card--full">
@@ -77,12 +79,14 @@ import { MonthlyViewComponent } from './views/monthly-view.component';
           <app-daily-view
             [data]="calendarData()"
             (bookingClick)="onBookingClick($event)"
+            (cellClick)="onCellClick($event)"
           />
         }
         @case ('weekly') {
           <app-weekly-view
             [data]="calendarData()"
             (bookingClick)="onBookingClick($event)"
+            (cellClick)="onCellClick($event)"
           />
         }
         @case ('monthly') {
@@ -93,6 +97,15 @@ import { MonthlyViewComponent } from './views/monthly-view.component';
         }
       }
     </div>
+
+    @if (showNewBookingDialog()) {
+      <app-new-booking-dialog
+        [initialDate]="prefillDate()"
+        [initialTime]="prefillTime()"
+        (close)="showNewBookingDialog.set(false)"
+        (saved)="onBookingSaved()"
+      />
+    }
   `,
   styles: [`
     .booking-calendar { padding: 16px; }
@@ -172,6 +185,9 @@ export class BookingCalendarComponent {
   readonly calendarState = inject(BookingCalendarStateService);
   readonly calendarData = signal<CalendarResponse | null>(null);
   readonly loading = signal(false);
+  readonly showNewBookingDialog = signal(false);
+  readonly prefillDate = signal('');
+  readonly prefillTime = signal('');
 
   private readonly bookingService = inject(PartnerBookingService);
   private readonly destroyRef = inject(DestroyRef);
@@ -192,6 +208,18 @@ export class BookingCalendarComponent {
   onDayClick(date: Date): void {
     this.calendarState.goToDate(date);
     this.calendarState.setView('daily');
+  }
+
+  onCellClick(event: CalendarCellClick): void {
+    this.prefillDate.set(event.date);
+    this.prefillTime.set(event.startTime);
+    this.showNewBookingDialog.set(true);
+  }
+
+  onBookingSaved(): void {
+    this.showNewBookingDialog.set(false);
+    const range = this.calendarState.dateRange();
+    this.loadCalendar(range.start, range.end);
   }
 
   private loadCalendar(start: string, end: string): void {

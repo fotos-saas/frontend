@@ -4,8 +4,10 @@ import {
   input,
   output,
   computed,
+  inject,
 } from '@angular/core';
-import { CalendarResponse, Booking } from '../../../../models/booking.models';
+import { CalendarResponse, Booking, CalendarCellClick } from '../../../../models/booking.models';
+import { BookingCalendarStateService } from '../../../../services/booking-calendar-state.service';
 import { TimeColumnComponent } from '../components/time-column.component';
 import { BookingSlotComponent } from '../components/booking-slot.component';
 import { viewSwitchAnimation } from '../../animations/booking.animations';
@@ -34,7 +36,7 @@ interface DayBookingPosition {
       <div class="daily-body">
         <app-time-column [startHour]="startHour" [endHour]="endHour" />
 
-        <div class="day-content">
+        <div class="day-content" (click)="onCellClick($event)">
           <!-- Blokkolt idősávok -->
           @for (blocked of blockedSlots(); track blocked.start) {
             <div
@@ -112,6 +114,7 @@ interface DayBookingPosition {
       position: relative;
       min-height: calc(var(--total-hours) * 60px);
       padding-top: 8px;
+      cursor: pointer;
     }
     .hour-grid-line {
       position: absolute;
@@ -187,6 +190,9 @@ interface DayBookingPosition {
 export class DailyViewComponent {
   readonly data = input<CalendarResponse | null>(null);
   readonly bookingClick = output<number>();
+  readonly cellClick = output<CalendarCellClick>();
+
+  private readonly calendarState = inject(BookingCalendarStateService);
 
   readonly startHour = 8;
   readonly endHour = 20;
@@ -243,6 +249,32 @@ export class DailyViewComponent {
     const now = new Date();
     return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
   });
+
+  onCellClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target.closest('app-booking-slot')) return;
+
+    // Blocked nap ellenőrzés
+    const d = this.data();
+    if (d && d.blocked_dates.length > 0) return;
+
+    const container = target.closest('.day-content') as HTMLElement;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const y = event.clientY - rect.top - 8;
+    const totalMinutes = this.startHour * 60 + Math.max(0, y);
+    const rounded = Math.round(totalMinutes / 15) * 15;
+    const hours = Math.floor(rounded / 60);
+    const minutes = rounded % 60;
+    const clampedHours = Math.min(Math.max(hours, this.startHour), this.endHour - 1);
+    const startTime = `${String(clampedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    // Dátum a calendarState-ből
+    const date = this.calendarState.dateRange().start;
+
+    this.cellClick.emit({ date, startTime });
+  }
 
   private timeToPixel(time: string): number {
     const [h, m] = time.split(':').map(Number);

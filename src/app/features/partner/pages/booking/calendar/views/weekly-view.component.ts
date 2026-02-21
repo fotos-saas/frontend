@@ -6,7 +6,7 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { CalendarResponse, Booking, DailyStat } from '../../../../models/booking.models';
+import { CalendarResponse, Booking, DailyStat, CalendarCellClick } from '../../../../models/booking.models';
 import { BookingCalendarStateService } from '../../../../services/booking-calendar-state.service';
 import { TimeColumnComponent } from '../components/time-column.component';
 import { BookingSlotComponent } from '../components/booking-slot.component';
@@ -63,7 +63,8 @@ interface WeekDay {
 
         <div class="week-grid">
           @for (day of weekDays(); track day.date) {
-            <div class="day-column" [class.today]="day.isToday">
+            <div class="day-column" [class.today]="day.isToday"
+              (click)="onCellClick($event, day.date)">
               <!-- Óra rácsok -->
               @for (hour of hours; track hour) {
                 <div class="hour-line" [style.top.px]="(hour - startHour) * 60"></div>
@@ -149,6 +150,7 @@ interface WeekDay {
       border-left: 1px solid #f3f4f6;
       min-height: 728px; /* 12 hours * 60px + 8px padding */
       padding-top: 8px;
+      cursor: pointer;
     }
     .day-column.today { background: rgba(99, 102, 241, 0.03); }
     .hour-line {
@@ -200,6 +202,7 @@ interface WeekDay {
 export class WeeklyViewComponent {
   readonly data = input<CalendarResponse | null>(null);
   readonly bookingClick = output<number>();
+  readonly cellClick = output<CalendarCellClick>();
 
   private readonly calendarState = inject(BookingCalendarStateService);
 
@@ -251,5 +254,25 @@ export class WeeklyViewComponent {
 
   getEventHeight(startTime: string, endTime: string): number {
     return Math.max(20, this.timeToPixel(endTime) - this.timeToPixel(startTime));
+  }
+
+  onCellClick(event: MouseEvent, date: string): void {
+    const target = event.target as HTMLElement;
+    if (target.closest('app-booking-slot')) return;
+    if (this.isDayBlocked(date)) return;
+
+    const column = target.closest('.day-column') as HTMLElement;
+    if (!column) return;
+
+    const rect = column.getBoundingClientRect();
+    const y = event.clientY - rect.top - 8; // padding-top kompenzáció
+    const totalMinutes = this.startHour * 60 + Math.max(0, y);
+    const rounded = Math.round(totalMinutes / 15) * 15;
+    const hours = Math.floor(rounded / 60);
+    const minutes = rounded % 60;
+    const clampedHours = Math.min(Math.max(hours, this.startHour), this.endHour - 1);
+    const startTime = `${String(clampedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    this.cellClick.emit({ date, startTime });
   }
 }

@@ -248,6 +248,11 @@ export interface GoogleEvent {
   end_time: string;
 }
 
+export interface CalendarCellClick {
+  date: string;      // 'YYYY-MM-DD'
+  startTime: string; // 'HH:mm' (15 percre kerekítve)
+}
+
 export interface CalendarResponse {
   bookings: Booking[];
   availability: {

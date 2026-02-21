@@ -34,21 +34,24 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           <button class="action-btn"
             [disabled]="sortService.sorting() || state.selectionCount() < 2"
             (click)="sortService.sortByAbc()"
-            matTooltip="Magyar ABC sorrend">
+            matTooltip="Magyar ABC sorrend"
+              matTooltipPosition="right">
             <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="16" />
             <span>ABC</span>
           </button>
           <button class="action-btn"
             [disabled]="sortService.sorting() || state.selectionCount() < 2"
             (click)="sortService.sortByGender()"
-            matTooltip="Felváltva fiú-lány-fiú-lány">
+            matTooltip="Felváltva fiú-lány-fiú-lány"
+              matTooltipPosition="right">
             <lucide-icon [name]="ICONS.USERS" [size]="16" />
             <span>Felváltva</span>
           </button>
           <button class="action-btn"
             [disabled]="sortService.sorting() || state.selectionCount() < 2"
             (click)="openCustomDialog.emit()"
-            matTooltip="Egyedi névlista szerinti sorrend">
+            matTooltip="Egyedi névlista szerinti sorrend"
+              matTooltipPosition="right">
             <lucide-icon [name]="ICONS.LIST_ORDERED" [size]="16" />
             <span>Egyedi</span>
           </button>
@@ -81,7 +84,8 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
             <button class="sidebar__split-main"
               [disabled]="generatingSample()"
               (click)="generateSample.emit()"
-              matTooltip="Vízjeles mintakép generálás">
+              matTooltip="Vízjeles mintakép generálás"
+              matTooltipPosition="right">
               @if (generatingSample()) {
                 <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
                 <span>Generálás...</span>
@@ -117,13 +121,15 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           </div>
           <button class="action-btn"
             (click)="openProject.emit()"
-            matTooltip="A PSD megnyitása Photoshopban">
+            matTooltip="A PSD megnyitása Photoshopban"
+              matTooltipPosition="right">
             <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
             <span>Projekt megnyitása</span>
           </button>
           <button class="action-btn"
             (click)="openWorkDir.emit()"
-            matTooltip="A PSD munkamappa megnyitása Finderben">
+            matTooltip="A PSD munkamappa megnyitása Finderben"
+              matTooltipPosition="right">
             <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
             <span>Munkamappa</span>
           </button>

@@ -250,6 +250,7 @@
                 [disabled]="snapshotService.loadingSnapshots()"
                 (click)="loadSnapshots()"
                 matTooltip="Lista frissítése"
+                matTooltipPosition="right"
               >
                 <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
               </button>
@@ -276,6 +277,7 @@
                         class="snapshot-item__toggle"
                         (click)="toggleGroupCollapse(group.original.snapshotName)"
                         [matTooltip]="isGroupCollapsed(group.original.snapshotName) ? 'Szerkesztett verziók mutatása' : 'Szerkesztett verziók elrejtése'"
+                        matTooltipPosition="right"
                       >
                         <lucide-icon
                           [name]="isGroupCollapsed(group.original.snapshotName) ? ICONS.CHEVRON_RIGHT : ICONS.CHEVRON_DOWN"
@@ -299,6 +301,7 @@
                           class="snapshot-item__name snapshot-item__name--editable"
                           (dblclick)="snapshotService.startEditing(group.original)"
                           matTooltip="Dupla kattintás az átnevezéshez"
+                matTooltipPosition="right"
                         >{{ group.original.snapshotName }}</span>
                       }
                       <span class="snapshot-item__meta">
@@ -318,6 +321,7 @@
                         [disabled]="snapshotService.restoringSnapshotPath() !== null"
                         (click)="restoreSnapshot(group.original)"
                         matTooltip="Visszaállítás"
+                matTooltipPosition="right"
                       >
                         @if (snapshotService.restoringSnapshotPath() === group.original.filePath) {
                           <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
@@ -329,6 +333,7 @@
                         class="btn btn--sm btn--outline"
                         (click)="deleteSnapshot(group.original)"
                         matTooltip="Törlés"
+                matTooltipPosition="right"
                       >
                         <lucide-icon [name]="ICONS.DELETE" [size]="14" />
                       </button>
@@ -356,6 +361,7 @@
                               class="snapshot-item__name snapshot-item__name--editable"
                               (dblclick)="snapshotService.startEditing(snap)"
                               matTooltip="Dupla kattintás az átnevezéshez"
+                matTooltipPosition="right"
                             >{{ snap.snapshotName }}</span>
                           }
                           <span class="snapshot-item__meta">
@@ -370,6 +376,7 @@
                             [disabled]="snapshotService.restoringSnapshotPath() !== null"
                             (click)="restoreSnapshot(snap)"
                             matTooltip="Visszaállítás"
+                matTooltipPosition="right"
                           >
                             @if (snapshotService.restoringSnapshotPath() === snap.filePath) {
                               <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
@@ -381,6 +388,7 @@
                             class="btn btn--sm btn--outline"
                             (click)="deleteSnapshot(snap)"
                             matTooltip="Törlés"
+                matTooltipPosition="right"
                           >
                             <lucide-icon [name]="ICONS.DELETE" [size]="14" />
                           </button>
@@ -763,6 +771,7 @@
                   [class.align-toggle__btn--active]="textAlign() === 'left'"
                   (click)="setTextAlignValue('left')"
                   matTooltip="Balra"
+                matTooltipPosition="right"
                 >
                   <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="16" />
                 </button>
@@ -771,6 +780,7 @@
                   [class.align-toggle__btn--active]="textAlign() === 'center'"
                   (click)="setTextAlignValue('center')"
                   matTooltip="Középre"
+                matTooltipPosition="right"
                 >
                   <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="16" />
                 </button>
@@ -779,6 +789,7 @@
                   [class.align-toggle__btn--active]="textAlign() === 'right'"
                   (click)="setTextAlignValue('right')"
                   matTooltip="Jobbra"
+                matTooltipPosition="right"
                 >
                   <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="16" />
                 </button>
@@ -792,6 +803,7 @@
                   [class.align-toggle__btn--active]="gridAlign() === 'left'"
                   (click)="setGridAlignValue('left')"
                   matTooltip="Balra"
+                matTooltipPosition="right"
                 >
                   <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="16" />
                 </button>
@@ -800,6 +812,7 @@
                   [class.align-toggle__btn--active]="gridAlign() === 'center'"
                   (click)="setGridAlignValue('center')"
                   matTooltip="Középre"
+                matTooltipPosition="right"
                 >
                   <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="16" />
                 </button>
@@ -808,6 +821,7 @@
                   [class.align-toggle__btn--active]="gridAlign() === 'right'"
                   (click)="setGridAlignValue('right')"
                   matTooltip="Jobbra"
+                matTooltipPosition="right"
                 >
                   <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="16" />
                 </button>

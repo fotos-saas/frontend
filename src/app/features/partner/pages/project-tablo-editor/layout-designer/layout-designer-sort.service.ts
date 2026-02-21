@@ -86,12 +86,12 @@ export class LayoutDesignerSortService {
         .filter(l => genderMap.get(l.personMatch?.name ?? '') === 'girl')
         .sort((a, b) => collator.compare(a.personMatch?.name ?? '', b.personMatch?.name ?? ''));
 
-      // Soronkénti szimmetrikus elosztás
+      // Soronkénti váltogatásos elosztás
       const rowSizes = this.getRowSizes(images);
-      const orderedNames = this.distributeSymmetric(boys, girls, rowSizes);
+      const orderedNames = this.distributeAlternating(boys, girls, rowSizes);
       this.applySort(images, orderedNames);
 
-      this.lastResult.set(`Szimmetrikusan rendezve: ${boys.length} fiú, ${girls.length} lány`);
+      this.lastResult.set(`Felváltva rendezve: ${boys.length} fiú, ${girls.length} lány`);
     } catch {
       this.lastResult.set('Hiba történt a nevek besorolásakor.');
     } finally {
@@ -279,99 +279,121 @@ export class LayoutDesignerSortService {
   }
 
   /**
-   * Szimmetrikus nemek szerinti elosztás soronként.
-   * A kisebbségi nemet (kevesebb darab) a sorok szélein helyezi el szimmetrikusan,
-   * a többségi nem pedig a belső helyekre kerül. Mindkét nem ABC sorrendben.
+   * Váltogatásos nemek szerinti elosztás soronként.
+   * Elsődleges cél: fiú-lány-fiú-lány váltogatás.
+   * Ha az egyik nemből elfogy, a maradékot egyenletesen szétszórja
+   * a soron belül (ne csomóban legyen a sor végén).
    *
-   * Pl. 14 hely = [14], 5 lány, 9 fiú → L F F L F F F F L F F L F L
-   * (széleken + egyenletesen elosztva a belső tükörpontokon)
+   * Pl. 14 hely, 5 lány, 9 fiú:
+   *   1. sor (14): F L F L F L F L F L F F F F → váltogat ameddig tud, maradék egyenletesen
    */
-  private distributeSymmetric(
+  private distributeAlternating(
     boys: DesignerLayer[],
     girls: DesignerLayer[],
     rowSizes: number[],
   ): string[] {
-    // Kisebbségi nem = amit szimmetrikusan szórunk, többségi = aki a maradék helyre kerül
-    const minority = boys.length <= girls.length ? boys : girls;
-    const majority = boys.length <= girls.length ? girls : boys;
-
-    let mIdx = 0; // minority index
-    let jIdx = 0; // majority index
+    const totalSlots = rowSizes.reduce((a, b) => a + b, 0);
+    let bIdx = 0;
+    let gIdx = 0;
     const result: string[] = [];
 
-    for (let ri = 0; ri < rowSizes.length; ri++) {
-      const rowSize = rowSizes[ri];
-      // Mennyi minority jut erre a sorra arányosan
-      let remainingSlots = 0;
-      for (let rj = ri; rj < rowSizes.length; rj++) remainingSlots += rowSizes[rj];
-      const remainingMinority = minority.length - mIdx;
+    for (const rowSize of rowSizes) {
+      // Arányos elosztás: erre a sorra jutó fiú/lány szám
+      const remainingSlots = totalSlots - result.length;
+      const remainingBoys = boys.length - bIdx;
+      const remainingGirls = girls.length - gIdx;
 
-      // Arányos elosztás: erre a sorra jutó minority szám
-      let minInRow = Math.round((remainingMinority / remainingSlots) * rowSize);
-      minInRow = Math.min(minInRow, rowSize, minority.length - mIdx);
-      const majInRow = Math.min(rowSize - minInRow, majority.length - jIdx);
-
-      // Ha nem elég majority, töltsük minority-vel
-      const actualMin = Math.min(minInRow + Math.max(0, rowSize - minInRow - (majority.length - jIdx)), minority.length - mIdx);
-      const actualMaj = rowSize - actualMin;
-
-      // Szimmetrikus pozíciók: minority a szélekről befelé
-      const rowSlots: (string | null)[] = new Array(rowSize).fill(null);
-      const minPositions = this.getSymmetricPositions(rowSize, actualMin);
-
-      // Minority a szimmetrikus pozíciókra
-      for (const pos of minPositions) {
-        if (mIdx < minority.length) {
-          rowSlots[pos] = minority[mIdx].personMatch?.name ?? '';
-          mIdx++;
-        }
+      let boysInRow = Math.round((remainingBoys / Math.max(remainingSlots, 1)) * rowSize);
+      boysInRow = Math.min(boysInRow, rowSize, remainingBoys);
+      let girlsInRow = Math.min(rowSize - boysInRow, remainingGirls);
+      // Ha nem elég lány, pótolj fiúkkal
+      if (boysInRow + girlsInRow < rowSize) {
+        boysInRow = Math.min(rowSize - girlsInRow, remainingBoys);
       }
 
-      // Majority a maradék (null) helyekre
-      for (let k = 0; k < rowSize; k++) {
-        if (rowSlots[k] === null && jIdx < majority.length) {
-          rowSlots[k] = majority[jIdx].personMatch?.name ?? '';
-          jIdx++;
-        }
+      // Váltogatásos elhelyezés — többségi nemmel kezd
+      const rowBoys: string[] = [];
+      const rowGirls: string[] = [];
+      for (let i = 0; i < boysInRow && bIdx < boys.length; i++) {
+        rowBoys.push(boys[bIdx++].personMatch?.name ?? '');
+      }
+      for (let i = 0; i < girlsInRow && gIdx < girls.length; i++) {
+        rowGirls.push(girls[gIdx++].personMatch?.name ?? '');
       }
 
-      // Null maradékok feltöltése (ha van még minority/majority)
-      for (let k = 0; k < rowSize; k++) {
-        if (rowSlots[k] === null) {
-          if (mIdx < minority.length) {
-            rowSlots[k] = minority[mIdx++].personMatch?.name ?? '';
-          } else if (jIdx < majority.length) {
-            rowSlots[k] = majority[jIdx++].personMatch?.name ?? '';
-          }
-        }
-      }
-
-      result.push(...(rowSlots as string[]));
+      const rowResult = this.interleaveWithSpread(rowBoys, rowGirls, rowSize);
+      result.push(...rowResult);
     }
 
     return result;
   }
 
   /**
-   * Szimmetrikus pozíciók generálása egy soron belül.
-   * N slot-ból count darab helyet ad vissza, a szélekről befelé haladva tükrözve.
-   * Pl. N=8, count=3 → [0, 7, 4] (bal szél, jobb szél, közép)
-   * Pl. N=8, count=4 → [0, 7, 1, 6]
+   * Két csoportot váltogatva fűz össze.
+   * Ha az egyik csoport kifogy, a maradékot egyenletesen szétszórja.
+   * Pl. 5 fiú + 3 lány, 8 hely → F L F L F L F F (lehetőleg ne legyen 2+ azonos nem egymás mellett)
    */
-  private getSymmetricPositions(slotCount: number, count: number): number[] {
-    if (count === 0) return [];
-    if (count >= slotCount) return Array.from({ length: slotCount }, (_, i) => i);
+  private interleaveWithSpread(groupA: string[], groupB: string[], slotCount: number): string[] {
+    // A nagyobb csoport legyen "first" (ő kezd)
+    const first = groupA.length >= groupB.length ? groupA : groupB;
+    const second = groupA.length >= groupB.length ? groupB : groupA;
 
-    const positions: number[] = [];
-    let left = 0;
-    let right = slotCount - 1;
-
-    while (positions.length < count) {
-      if (positions.length < count) positions.push(left++);
-      if (positions.length < count) positions.push(right--);
+    if (second.length === 0) {
+      // Csak egy nem van — egyszerűen sorrendben
+      return [...first];
     }
 
-    return positions;
+    // Ha arány közel 1:1 → tiszta váltogatás
+    if (first.length <= second.length + 1) {
+      const row: string[] = [];
+      let fIdx = 0;
+      let sIdx = 0;
+      for (let i = 0; i < slotCount; i++) {
+        if (i % 2 === 0 && fIdx < first.length) {
+          row.push(first[fIdx++]);
+        } else if (sIdx < second.length) {
+          row.push(second[sIdx++]);
+        } else if (fIdx < first.length) {
+          row.push(first[fIdx++]);
+        }
+      }
+      return row;
+    }
+
+    // Arány nem 1:1 → second-et egyenletesen szórjuk szét a first közé
+    // Pl. 9 first + 5 second = 14 hely
+    // second pozíciók: egyenletesen elosztva (spacing alapján)
+    const row: (string | null)[] = new Array(slotCount).fill(null);
+    const spacing = slotCount / (second.length + 1);
+
+    // Second elemek egyenletes pozícionálása
+    const secondPositions: number[] = [];
+    for (let i = 0; i < second.length; i++) {
+      const pos = Math.round(spacing * (i + 1)) - 1;
+      // Ne legyen duplikált pozíció
+      const finalPos = Math.min(Math.max(pos, 0), slotCount - 1);
+      secondPositions.push(finalPos);
+    }
+
+    // Ütközésfeloldás: ha két second ugyanarra a pozícióra esne
+    const usedPositions = new Set<number>();
+    for (let i = 0; i < secondPositions.length; i++) {
+      let pos = secondPositions[i];
+      while (usedPositions.has(pos) && pos < slotCount - 1) pos++;
+      while (usedPositions.has(pos) && pos > 0) pos--;
+      usedPositions.add(pos);
+      row[pos] = second[i];
+    }
+
+    // First elemek a maradék (null) helyekre
+    let fIdx = 0;
+    for (let k = 0; k < slotCount; k++) {
+      if (row[k] === null && fIdx < first.length) {
+        row[k] = first[fIdx++];
+      }
+    }
+
+    return row as string[];
   }
 
   /** U-shape: utolsó sor slot-jainak megfordítása */

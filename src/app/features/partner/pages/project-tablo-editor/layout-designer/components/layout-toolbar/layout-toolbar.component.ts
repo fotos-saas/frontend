@@ -109,7 +109,7 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           <button class="toolbar-btn"
             [disabled]="state.selectionCount() < 2"
             [class.toolbar-btn--active]="sortService.panelOpen()"
-            (click)="sortService.panelOpen.update(v => !v)"
+            (click)="toggleSortPanel()"
             matTooltip="Rendezés panel">
             <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="16" />
           </button>
@@ -386,4 +386,8 @@ export class LayoutToolbarComponent {
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
+
+  toggleSortPanel(): void {
+    this.sortService.panelOpen.set(!this.sortService.panelOpen());
+  }
 }

@@ -12,7 +12,9 @@ import { createBackdropHandler } from '@shared/utils/dialog.util';
   standalone: true,
   imports: [LucideAngularModule],
   template: `
-    <div class="dialog-backdrop" (mousedown)="backdropHandler($event)">
+    <div class="dialog-backdrop"
+         (mousedown)="backdropHandler.onMouseDown($event)"
+         (click)="backdropHandler.onClick($event)">
       <div class="sort-dialog">
         <!-- Fejléc -->
         <div class="sort-dialog__header">

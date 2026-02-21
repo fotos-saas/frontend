@@ -896,6 +896,17 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     return scriptContent;
   }
 
+  // AppleScript: JSX futtatasa fokusz megtartassal
+  // Elotti frontmost app-ot menti, JSX utan visszaallitja
+  function buildFocusPreservingAppleScript(jsxFilePath: string): string {
+    return [
+      'set _frontApp to name of (info for (path to frontmost application))',
+      `set _result to tell application id "com.adobe.Photoshop" to do javascript file "${jsxFilePath}"`,
+      'tell application _frontApp to activate',
+      'return _result',
+    ].join('\n');
+  }
+
   // Run JSX script (non-streaming) via osascript
   ipcMain.handle('photoshop:run-jsx', async (_event, params: {
     scriptName: string;
@@ -961,7 +972,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const tempJsxPath = path.join(app.getPath('temp'), `jsx-script-${Date.now()}.jsx`);
       fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
 
-      const appleScript = `tell application id "com.adobe.Photoshop" to do javascript file "${tempJsxPath}"`;
+      const appleScript = buildFocusPreservingAppleScript(tempJsxPath);
 
       return new Promise<{ success: boolean; error?: string; output?: string }>((resolve) => {
         execFile('osascript', ['-e', appleScript], { timeout: 60000 }, (error, stdout, stderr) => {
@@ -969,11 +980,6 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
           try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
           if (tempJsonPath && fs.existsSync(tempJsonPath)) {
             try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
-          }
-
-          // Electron ablak visszahozasa fokuszba (PS eloterbe hozta magat)
-          if (_mainWindow && !_mainWindow.isDestroyed()) {
-            _mainWindow.focus();
           }
 
           if (error) {
@@ -1068,7 +1074,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
       sendLog(`[DEBUG] Temp JSX irva: ${tempJsxPath}`, 'stdout');
 
-      const appleScript = `tell application id "com.adobe.Photoshop" to do javascript file "${tempJsxPath}"`;
+      const appleScript = buildFocusPreservingAppleScript(tempJsxPath);
 
       return new Promise<{ success: boolean; error?: string }>((resolve) => {
         const child = spawn('osascript', ['-e', appleScript], { timeout: 60000 });
@@ -1094,11 +1100,6 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
           try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
           if (tempJsonPath && fs.existsSync(tempJsonPath)) {
             try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
-          }
-
-          // Electron ablak visszahozasa fokuszba
-          if (win && !win.isDestroyed()) {
-            win.focus();
           }
 
           if (code !== 0) {
@@ -1647,7 +1648,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const tempReadJsxPath = path.join(app.getPath('temp'), `jsx-read-tmpl-${Date.now()}.jsx`);
       fs.writeFileSync(tempReadJsxPath, readJsxCode, 'utf-8');
 
-      const readAppleScript = `tell application id "com.adobe.Photoshop" to do javascript file "${tempReadJsxPath}"`;
+      const readAppleScript = buildFocusPreservingAppleScript(tempReadJsxPath);
 
       const readOutput = await new Promise<string>((resolve, reject) => {
         execFile('osascript', ['-e', readAppleScript], { timeout: 30000 }, (error, stdout, stderr) => {
@@ -1805,7 +1806,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const tempApplyJsxPath = path.join(app.getPath('temp'), `jsx-apply-tmpl-${Date.now()}.jsx`);
       fs.writeFileSync(tempApplyJsxPath, applyJsxCode, 'utf-8');
 
-      const applyAppleScript = `tell application id "com.adobe.Photoshop" to do javascript file "${tempApplyJsxPath}"`;
+      const applyAppleScript = buildFocusPreservingAppleScript(tempApplyJsxPath);
 
       const applyOutput = await new Promise<string>((resolve, reject) => {
         execFile('osascript', ['-e', applyAppleScript], { timeout: 60000 }, (error, stdout, stderr) => {
@@ -1878,7 +1879,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const tempJsxPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.jsx`);
       fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
 
-      const appleScript = `tell application id "com.adobe.Photoshop" to do javascript file "${tempJsxPath}"`;
+      const appleScript = buildFocusPreservingAppleScript(tempJsxPath);
 
       return new Promise<{ success: boolean; error?: string; output?: string }>((resolve) => {
         execFile('osascript', ['-e', appleScript], { timeout: 120000 }, (error, stdout, stderr) => {

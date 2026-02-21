@@ -87,7 +87,9 @@ function _doFlattenExport() {
       throw new Error("Nincs megnyitott dokumentum!");
     }
 
-    _doc.suspendHistory("Flatten export", "_doFlattenExport()");
+    // NE hasznaljunk suspendHistory-t: saveAs + close nem kompatibilis vele,
+    // es amugy is duplikalt doc-on dolgozunk, az eredeti undo history-jat nem erintjuk.
+    _doFlattenExport();
     log("[JSX] Flatten export kesz");
 
   } catch (e) {

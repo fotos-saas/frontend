@@ -57,17 +57,10 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           </button>
           <button class="action-btn"
             [disabled]="sortService.sorting() || state.selectionCount() < 2"
-            (click)="sortService.sortByGender(true)"
-            matTooltip="Fiúk elöl, lányok hátul">
+            (click)="sortService.sortByGender()"
+            matTooltip="Felváltva fiú-lány-fiú-lány">
             <lucide-icon [name]="ICONS.USERS" [size]="16" />
-            <span>Fiúk</span>
-          </button>
-          <button class="action-btn"
-            [disabled]="sortService.sorting() || state.selectionCount() < 2"
-            (click)="sortService.sortByGender(false)"
-            matTooltip="Lányok elöl, fiúk hátul">
-            <lucide-icon [name]="ICONS.USERS" [size]="16" />
-            <span>Lányok</span>
+            <span>Felváltva</span>
           </button>
           <button class="action-btn"
             [disabled]="sortService.sorting() || state.selectionCount() < 2"
@@ -172,17 +165,16 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
     }
 
     .sidebar__actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 4px;
     }
 
     .action-btn {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 4px;
-      padding: 8px 4px;
+      gap: 8px;
+      padding: 8px 10px;
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 6px;
       background: rgba(255, 255, 255, 0.03);

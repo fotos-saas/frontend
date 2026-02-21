@@ -51,8 +51,8 @@ export class LayoutDesignerSortService {
     this.lastResult.set(`ABC sorrendbe rendezve (${images.length} elem)`);
   }
 
-  /** Fiúk elore — AI gender classification */
-  async sortByGender(boysFirst: boolean): Promise<void> {
+  /** Felváltva fiú-lány rendezés — AI gender classification */
+  async sortByGender(): Promise<void> {
     const images = this.getSelectedImages();
     if (images.length < 2) return;
 
@@ -87,12 +87,18 @@ export class LayoutDesignerSortService {
         .filter(l => genderMap.get(l.personMatch?.name ?? '') === 'girl')
         .sort((a, b) => collator.compare(a.personMatch?.name ?? '', b.personMatch?.name ?? ''));
 
-      const ordered = boysFirst ? [...boys, ...girls] : [...girls, ...boys];
+      // Felváltva: fiú-lány-fiú-lány (interleave)
+      const ordered: typeof images = [];
+      const maxLen = Math.max(boys.length, girls.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (i < boys.length) ordered.push(boys[i]);
+        if (i < girls.length) ordered.push(girls[i]);
+      }
+
       const orderedNames = ordered.map(l => l.personMatch?.name ?? '');
       this.applySort(images, orderedNames);
 
-      const label = boysFirst ? 'Fiúk elöl' : 'Lányok elöl';
-      this.lastResult.set(`${label}: ${boys.length} fiú, ${girls.length} lány`);
+      this.lastResult.set(`Felváltva rendezve: ${boys.length} fiú, ${girls.length} lány`);
     } catch {
       this.lastResult.set('Hiba történt a nevek besorolásakor.');
     } finally {

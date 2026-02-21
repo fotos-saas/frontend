@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -73,103 +73,82 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
             {{ state.selectionCount() }} kijelölve
           </span>
 
-          <!-- Vízszintes igazítás -->
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignLeft()"
-            matTooltip="Balra igazítás"
-          >
+          <!-- Igazítás: bal/közép/jobb -->
+          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignLeft()" matTooltip="Balra igazítás">
             <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="16" />
           </button>
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignCenterHorizontal()"
-            matTooltip="Vízszintes középre"
-          >
+          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignCenterHorizontal()" matTooltip="Vízszintes középre">
             <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="16" />
           </button>
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignRight()"
-            matTooltip="Jobbra igazítás"
-          >
+          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignRight()" matTooltip="Jobbra igazítás">
             <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="16" />
           </button>
 
           <div class="layout-toolbar__divider"></div>
 
-          <!-- Függőleges igazítás -->
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignTop()"
-            matTooltip="Tetejére igazítás"
-          >
+          <!-- Igazítás: fent/közép/lent -->
+          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignTop()" matTooltip="Tetejére igazítás">
             <lucide-icon [name]="ICONS.ALIGN_START_H" [size]="16" />
           </button>
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignCenterVertical()"
-            matTooltip="Függőleges középre"
-          >
+          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignCenterVertical()" matTooltip="Függőleges középre">
             <lucide-icon [name]="ICONS.ALIGN_CENTER_H" [size]="16" />
           </button>
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignBottom()"
-            matTooltip="Aljára igazítás"
-          >
+          <button class="toolbar-btn" [disabled]="state.selectionCount() < 2"
+            (click)="actions.alignBottom()" matTooltip="Aljára igazítás">
             <lucide-icon [name]="ICONS.ALIGN_END_H" [size]="16" />
           </button>
 
           <div class="layout-toolbar__divider"></div>
 
-          <!-- Elosztás + sorok -->
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 3"
-            (click)="actions.distributeHorizontal()"
-            matTooltip="Vízszintes elosztás"
-          >
-            <lucide-icon [name]="ICONS.ALIGN_H_DISTRIBUTE" [size]="16" />
-          </button>
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 3"
-            (click)="actions.distributeVertical()"
-            matTooltip="Függőleges elosztás"
-          >
-            <lucide-icon [name]="ICONS.ALIGN_V_DISTRIBUTE" [size]="16" />
-          </button>
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignRows()"
-            matTooltip="Sorok igazítása"
-          >
-            <lucide-icon [name]="ICONS.ROWS_3" [size]="16" />
-          </button>
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.alignColumns()"
-            matTooltip="Oszlopok igazítása"
-          >
-            <lucide-icon [name]="ICONS.COLUMNS_3" [size]="16" />
-          </button>
-          <button
-            class="toolbar-btn"
-            [disabled]="state.selectionCount() < 2"
-            (click)="actions.arrangeToGrid()"
-            matTooltip="Rácsba rendezés"
-          >
-            <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
-          </button>
+          <!-- Több: elosztás + sorok/oszlopok/rács dropdown -->
+          <div class="toolbar-dropdown">
+            <button class="toolbar-btn" (click)="moreOpen.set(!moreOpen())"
+              matTooltip="Elosztás és rendezés">
+              <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
+              <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="12" />
+            </button>
+            @if (moreOpen()) {
+              <div class="toolbar-dropdown__panel" (click)="moreOpen.set(false)">
+                <button class="toolbar-dropdown__item"
+                  [disabled]="state.selectionCount() < 3"
+                  (click)="actions.distributeHorizontal()">
+                  <lucide-icon [name]="ICONS.ALIGN_H_DISTRIBUTE" [size]="16" />
+                  Vízszintes elosztás
+                </button>
+                <button class="toolbar-dropdown__item"
+                  [disabled]="state.selectionCount() < 3"
+                  (click)="actions.distributeVertical()">
+                  <lucide-icon [name]="ICONS.ALIGN_V_DISTRIBUTE" [size]="16" />
+                  Függőleges elosztás
+                </button>
+                <div class="toolbar-dropdown__sep"></div>
+                <button class="toolbar-dropdown__item"
+                  [disabled]="state.selectionCount() < 2"
+                  (click)="actions.alignRows()">
+                  <lucide-icon [name]="ICONS.ROWS_3" [size]="16" />
+                  Sorok igazítása
+                </button>
+                <button class="toolbar-dropdown__item"
+                  [disabled]="state.selectionCount() < 2"
+                  (click)="actions.alignColumns()">
+                  <lucide-icon [name]="ICONS.COLUMNS_3" [size]="16" />
+                  Oszlopok igazítása
+                </button>
+                <div class="toolbar-dropdown__sep"></div>
+                <button class="toolbar-dropdown__item"
+                  [disabled]="state.selectionCount() < 2"
+                  (click)="actions.arrangeToGrid()">
+                  <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
+                  Rácsba rendezés
+                </button>
+              </div>
+            }
+          </div>
         }
       </div>
 
@@ -183,7 +162,6 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           matTooltip="Frissítés Photoshopból"
         >
           <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
-          <span>{{ refreshing() ? 'Frissítés...' : 'Frissítés' }}</span>
         </button>
         <button
           class="toolbar-btn toolbar-btn--save"
@@ -209,7 +187,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       display: flex;
       align-items: center;
       height: 56px;
-      padding: 0 16px;
+      padding: 0 12px;
       background: #1e1e38;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       flex-shrink: 0;
@@ -221,23 +199,26 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       flex: 1;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
+      min-width: 0;
     }
 
     .layout-toolbar__doc-info {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: rgba(255, 255, 255, 0.6);
       font-weight: 500;
+      white-space: nowrap;
     }
 
     .layout-toolbar__separator {
       width: 1px;
       height: 20px;
       background: rgba(255, 255, 255, 0.12);
+      flex-shrink: 0;
     }
 
     .layout-toolbar__selection {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #a78bfa;
       font-weight: 600;
       white-space: nowrap;
@@ -247,33 +228,36 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       width: 1px;
       height: 18px;
       background: rgba(255, 255, 255, 0.1);
-      margin: 0 4px;
+      margin: 0 2px;
+      flex-shrink: 0;
     }
 
     .layout-toolbar__right {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-shrink: 0;
       margin-left: auto;
+      padding-left: 8px;
     }
 
     .toolbar-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      height: 34px;
-      min-width: 34px;
-      padding: 0 8px;
+      gap: 4px;
+      height: 32px;
+      min-width: 32px;
+      padding: 0 6px;
       border: none;
       border-radius: 6px;
       background: rgba(255, 255, 255, 0.08);
       color: rgba(255, 255, 255, 0.7);
       cursor: pointer;
       transition: all 0.12s ease;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 500;
+      flex-shrink: 0;
 
       &:hover:not(:disabled) {
         background: rgba(255, 255, 255, 0.15);
@@ -291,42 +275,82 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         border: 1px solid rgba(124, 58, 237, 0.4);
       }
 
-      &--grid {
-        padding: 0 10px;
-      }
+      &--grid { padding: 0 8px; }
 
       &__label {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         font-weight: 600;
         letter-spacing: 0.03em;
       }
 
       &--refresh {
-        padding: 0 14px;
-
-        &:hover:not(:disabled) {
-          color: #a78bfa;
-        }
-
-        &.is-refreshing lucide-icon {
-          animation: spin 1s linear infinite;
-        }
+        padding: 0 10px;
+        &:hover:not(:disabled) { color: #a78bfa; }
+        &.is-refreshing lucide-icon { animation: spin 1s linear infinite; }
       }
 
       &--save {
         background: #7c3aed;
         color: #ffffff;
-        padding: 0 14px;
-
+        padding: 0 12px;
         &:hover:not(:disabled) { background: #6d28d9; }
         &:disabled { opacity: 0.4; }
       }
 
       &--close {
         background: rgba(255, 255, 255, 0.06);
-
         &:hover { background: rgba(239, 68, 68, 0.3); color: #fca5a5; }
       }
+    }
+
+    /* Dropdown menü */
+    .toolbar-dropdown {
+      position: relative;
+    }
+
+    .toolbar-dropdown__panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: #2a2a4a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 4px;
+      min-width: 200px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      z-index: 100;
+    }
+
+    .toolbar-dropdown__item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-align: left;
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+    }
+
+    .toolbar-dropdown__sep {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 4px 8px;
     }
 
     @keyframes spin {
@@ -343,9 +367,9 @@ export class LayoutToolbarComponent {
   protected readonly ICONS = ICONS;
 
   readonly refreshing = input<boolean>(false);
+  readonly moreOpen = signal(false);
 
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
   readonly refreshClicked = output<void>();
-
 }

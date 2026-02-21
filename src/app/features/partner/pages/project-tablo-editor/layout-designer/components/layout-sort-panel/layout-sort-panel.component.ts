@@ -80,6 +80,20 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
         </div>
 
         <div class="sidebar__actions">
+          <button class="action-btn"
+            (click)="openWorkDir.emit()"
+            matTooltip="A PSD munkamappa megnyitása Finderben"
+              matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+            <span>Munkamappa</span>
+          </button>
+          <button class="action-btn"
+            (click)="openProject.emit()"
+            matTooltip="A PSD megnyitása Photoshopban"
+              matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
+            <span>Projekt megnyitása</span>
+          </button>
           <div class="sidebar__split-btn">
             <button class="sidebar__split-main"
               [disabled]="generatingSample()"
@@ -141,20 +155,6 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
               {{ finalModeLabel() }}
             </button>
           </div>
-          <button class="action-btn"
-            (click)="openProject.emit()"
-            matTooltip="A PSD megnyitása Photoshopban"
-              matTooltipPosition="right">
-            <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
-            <span>Projekt megnyitása</span>
-          </button>
-          <button class="action-btn"
-            (click)="openWorkDir.emit()"
-            matTooltip="A PSD munkamappa megnyitása Finderben"
-              matTooltipPosition="right">
-            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
-            <span>Munkamappa</span>
-          </button>
         </div>
 
         @if (sampleSuccess()) {

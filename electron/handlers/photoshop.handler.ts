@@ -901,7 +901,9 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   function buildFocusPreservingAppleScript(jsxFilePath: string): string {
     return [
       'set _frontApp to name of (info for (path to frontmost application))',
-      `set _result to tell application id "com.adobe.Photoshop" to do javascript file "${jsxFilePath}"`,
+      'tell application id "com.adobe.Photoshop"',
+      `  set _result to do javascript file "${jsxFilePath}"`,
+      'end tell',
       'tell application _frontApp to activate',
       'return _result',
     ].join('\n');

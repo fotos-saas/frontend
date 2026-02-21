@@ -401,6 +401,24 @@ contextBridge.exposeInMainWorld('electronAPI', {
       }>,
   },
 
+  // ============ Véglegesítés ============
+  finalizer: {
+    upload: (params: {
+      flattenedJpgPath: string;
+      outputDir: string;
+      projectId: number;
+      projectName: string;
+      apiBaseUrl: string;
+      authToken: string;
+    }) =>
+      ipcRenderer.invoke('finalizer:upload', params) as Promise<{
+        success: boolean;
+        error?: string;
+        localPath?: string;
+        uploadedCount?: number;
+      }>,
+  },
+
   // ============ Touch Bar (MacBook Pro 2016-2020) ============
   touchBar: {
     /**

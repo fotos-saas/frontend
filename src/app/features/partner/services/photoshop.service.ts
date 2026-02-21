@@ -77,6 +77,10 @@ export class PhotoshopService {
     return window.electronAPI?.sample;
   }
 
+  private get finalizerApi() {
+    return window.electronAPI?.finalizer;
+  }
+
   /** runJsx wrapper — automatikusan hozzáadja a psdFilePath-ot (auto-open) */
   private runJsx(params: Parameters<NonNullable<typeof this.api>['runJsx']>[0]) {
     return this.api!.runJsx({ ...params, psdFilePath: this.psdPath() ?? undefined });
@@ -1450,6 +1454,68 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('Minta generálás hiba', err);
       return { success: false, error: 'Váratlan hiba a minta generálásnál' };
+    }
+  }
+
+  /**
+   * Véglegesített tablókép generálása és feltöltése.
+   * Flatten export → közvetlen feltöltés, nincs resize, nincs watermark.
+   * API: POST /partner/finalizations/{projectId}/upload (type=flat)
+   */
+  async generateFinal(
+    projectId: number,
+    projectName: string,
+  ): Promise<{
+    success: boolean;
+    localPath?: string;
+    uploadedCount?: number;
+    error?: string;
+  }> {
+    if (!this.api || !this.finalizerApi) {
+      return { success: false, error: 'Nem Electron környezet' };
+    }
+
+    const psdFilePath = this.psdPath();
+    if (!psdFilePath) {
+      return { success: false, error: 'Nincs megnyitott PSD fájl' };
+    }
+
+    try {
+      // 1. Flatten export JSX futtatás → temp JPG
+      const flattenResult = await this.runJsx({
+        scriptName: 'actions/flatten-export.jsx',
+        jsonData: { quality: 95 },
+      });
+
+      if (!flattenResult.success) {
+        return { success: false, error: flattenResult.error || 'Flatten export sikertelen' };
+      }
+
+      const output = flattenResult.output || '';
+      const okMatch = output.match(/__FLATTEN_RESULT__OK:(.+)/);
+      if (!okMatch) {
+        return { success: false, error: `A flatten export nem adott vissza OK eredményt. Output: ${output.slice(-200)}` };
+      }
+
+      const tempJpgPath = okMatch[1].trim();
+
+      // 2. Közvetlen feltöltés (resize/watermark nélkül)
+      const authToken = sessionStorage.getItem('marketer_token') || '';
+      const psdDirPath = psdFilePath.replace(/[/\\][^/\\]+$/, '');
+
+      const result = await this.finalizerApi.upload({
+        flattenedJpgPath: tempJpgPath,
+        outputDir: psdDirPath,
+        projectId,
+        projectName,
+        apiBaseUrl: environment.apiUrl,
+        authToken,
+      });
+
+      return result;
+    } catch (err) {
+      this.logger.error('Véglegesítés hiba', err);
+      return { success: false, error: 'Váratlan hiba a véglegesítésnél' };
     }
   }
 }

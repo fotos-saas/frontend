@@ -520,6 +520,64 @@
           }
         </div>
 
+        <!-- Véglegesítés -->
+        <div class="command-card">
+          <div class="command-card__header">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
+            <div>
+              <h3 class="command-card__title">Véglegesítés</h3>
+              <p class="command-card__desc">A megnyitott PSD-ből flat tablóképet generál vízjel és átméretezés nélkül, és feltölti a projekt véglegesítéséhez.</p>
+            </div>
+          </div>
+
+          @if (!isConfigured()) {
+            <div class="command-card__disabled">
+              Először állítsd be a Photoshop-ot a Beállítások fülön.
+            </div>
+          } @else if (!currentPsdPath()) {
+            <div class="command-card__disabled">
+              Először generálj egy PSD-t a fenti szekciónál.
+            </div>
+          } @else {
+            @if (projectStatus() !== 'in_print' && projectStatus() !== 'done') {
+              <div class="command-card__warning">
+                A véglegesítés feltöltés csak „Nyomdában" vagy „Kész" státuszú projekteknél lehetséges.
+              </div>
+            }
+            <button
+              class="btn btn--primary btn--generate"
+              [disabled]="generatingFinal()"
+              (click)="generateFinal()"
+            >
+              @if (generatingFinal()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                Véglegesítés...
+              } @else {
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+                Véglegesítés
+              }
+            </button>
+
+            @if (finalResult()) {
+              <div class="sample-result">
+                <span class="sample-result__time">Utolsó véglegesítés: {{ finalResult()!.generatedAt }}</span>
+                @if (finalResult()!.localPath) {
+                  <div class="sample-result__file">
+                    <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                    {{ finalResult()!.localPath.split('/').pop() }}
+                  </div>
+                }
+                @if (finalResult()!.uploadedCount > 0) {
+                  <div class="sample-result__file">
+                    <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                    Feltöltve a véglegesítéshez
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+
         <!-- Sablonok (globális elrendezés mentés + alkalmazás) -->
         <div class="command-card">
           <div class="command-card__header">

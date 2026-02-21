@@ -246,6 +246,22 @@ interface SampleAPI {
   }>;
 }
 
+interface FinalizerAPI {
+  upload: (params: {
+    flattenedJpgPath: string;
+    outputDir: string;
+    projectId: number;
+    projectName: string;
+    apiBaseUrl: string;
+    authToken: string;
+  }) => Promise<{
+    success: boolean;
+    error?: string;
+    localPath?: string;
+    uploadedCount?: number;
+  }>;
+}
+
 export interface ElectronAPI {
   showNotification: (options: unknown, body?: string) => Promise<NotificationResultData | boolean>;
   onNotificationClicked: (callback: (data: { id: string }) => void) => CleanupFn;
@@ -286,6 +302,7 @@ export interface ElectronAPI {
   autoUpdate: AutoUpdateAPI;
   photoshop: PhotoshopAPI;
   sample: SampleAPI;
+  finalizer: FinalizerAPI;
 }
 
 declare global {

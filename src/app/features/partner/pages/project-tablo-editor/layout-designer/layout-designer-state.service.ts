@@ -301,6 +301,7 @@ export class LayoutDesignerStateService {
       kind: l.kind,
       ...(l.text != null ? { text: l.text } : {}),
       ...(l.justification != null ? { justification: l.justification } : {}),
+      ...(l.linked ? { linked: true } : {}),
     }));
   }
 

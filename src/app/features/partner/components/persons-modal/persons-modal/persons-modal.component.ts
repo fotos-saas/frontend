@@ -291,8 +291,13 @@ export class PersonsModalComponent implements OnInit {
     this.extraNamesInline.set(!isInline);
   }
 
+  extraNamesCopied = signal(false);
+
   copyExtraNames(): void {
     const text = this.currentExtraText();
-    if (text) navigator.clipboard.writeText(text);
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    this.extraNamesCopied.set(true);
+    setTimeout(() => this.extraNamesCopied.set(false), 1500);
   }
 }

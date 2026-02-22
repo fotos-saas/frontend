@@ -74,6 +74,20 @@ interface NativeDragAPI {
   cleanupFiles: (filePaths: string[]) => Promise<boolean>;
 }
 
+export interface OverlayContext {
+  mode: 'designer' | 'normal';
+  projectId?: number;
+}
+
+interface OverlayAPI {
+  executeCommand: (commandId: string) => Promise<{ success: boolean; error?: string }>;
+  getContext: () => Promise<OverlayContext>;
+  setContext: (ctx: OverlayContext) => Promise<{ success: boolean; error?: string }>;
+  onContextChanged: (callback: (ctx: OverlayContext) => void) => CleanupFn;
+  hide: () => Promise<{ success: boolean }>;
+  onCommand: (callback: (commandId: string) => void) => CleanupFn;
+}
+
 interface TouchBarAPI {
   setContext: (context: string) => Promise<boolean>;
   setItems: (items: unknown[]) => Promise<boolean>;
@@ -301,6 +315,7 @@ export interface ElectronAPI {
     openPortal: (portalUrl: string) => Promise<StripeResult>;
   };
   nativeDrag: NativeDragAPI;
+  overlay: OverlayAPI;
   touchBar: TouchBarAPI;
   autoUpdate: AutoUpdateAPI;
   photoshop: PhotoshopAPI;

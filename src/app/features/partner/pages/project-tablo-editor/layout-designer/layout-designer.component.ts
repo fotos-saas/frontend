@@ -412,6 +412,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
+  private overlayCommandCleanup: (() => void) | null = null;
 
   ngOnInit(): void {
     // Body scroll lock
@@ -424,11 +425,26 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.loadSnapshotData();
     this.loadSnapshotList();
     this.setupResize();
+
+    // Overlay kontextus: designer mod jelzes
+    window.electronAPI?.overlay.setContext({ mode: 'designer', projectId: this.projectId() });
+
+    // IPC: overlay parancsok fogadasa
+    this.overlayCommandCleanup = window.electronAPI?.overlay.onCommand((commandId) => {
+      this.onOverlayCommand(commandId);
+    }) ?? null;
   }
 
   ngOnDestroy(): void {
     document.body.style.overflow = this.originalOverflow;
     this.resizeObserver?.disconnect();
+
+    // Overlay kontextus: normal mod visszaallitas
+    window.electronAPI?.overlay.setContext({ mode: 'normal' });
+
+    // IPC listener cleanup
+    this.overlayCommandCleanup?.();
+    this.overlayCommandCleanup = null;
   }
 
   close(): void {

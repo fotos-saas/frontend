@@ -1,0 +1,100 @@
+<div class="overlay">
+  <!-- Drag handle + Header -->
+  <div class="overlay__header">
+    <div class="overlay__drag">
+      <lucide-icon [name]="ICONS.GRIP" [size]="14" />
+    </div>
+    <div class="overlay__title">
+      <lucide-icon [name]="ICONS.COMMAND" [size]="14" />
+      <span>Parancsok</span>
+    </div>
+    <div class="overlay__header-actions">
+      <button class="overlay__header-btn overlay__header-btn--close"
+        (click)="hide()" matTooltip="Bezaras (Esc)">
+        <lucide-icon [name]="ICONS.X" [size]="14" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Mod indicator -->
+  @if (isDesignerMode()) {
+    <div class="overlay__mode-toggle">
+      <div class="overlay__mode-btn overlay__mode-btn--active">
+        <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="12" />
+        <span>Designer</span>
+      </div>
+    </div>
+  }
+
+  <!-- Gyorskereses -->
+  <div class="overlay__search">
+    <lucide-icon [name]="ICONS.SEARCH" [size]="14" class="overlay__search-icon" />
+    <input
+      class="overlay__search-input"
+      placeholder="Kereses parancsok kozott..."
+      [value]="searchQuery()"
+      (input)="searchQuery.set($any($event.target).value)"
+      #searchInput
+    />
+    @if (searchQuery()) {
+      <button class="overlay__search-clear" (click)="searchQuery.set('')">
+        <lucide-icon [name]="ICONS.X" [size]="12" />
+      </button>
+    }
+  </div>
+
+  <!-- Parancs szekciok -->
+  <div class="overlay__body">
+    @for (section of filteredSections(); track section.id) {
+      <div class="overlay__section">
+        <div class="overlay__section-header">
+          <lucide-icon [name]="section.icon" [size]="12" />
+          <span>{{ section.label }}</span>
+        </div>
+        <div class="overlay__section-items">
+          @for (item of section.items; track item.id) {
+            <button
+              class="cmd-btn"
+              [class.cmd-btn--green]="item.accent === 'green'"
+              [class.cmd-btn--purple]="item.accent === 'purple'"
+              [class.cmd-btn--amber]="item.accent === 'amber'"
+              [class.cmd-btn--red]="item.accent === 'red'"
+              [class.cmd-btn--blue]="item.accent === 'blue'"
+              (click)="onCommand(item.id)"
+              [matTooltip]="item.label"
+              matTooltipPosition="right"
+            >
+              <lucide-icon [name]="item.icon" [size]="16" class="cmd-btn__icon" />
+              <span class="cmd-btn__label">{{ item.label }}</span>
+              @if (item.shortcut) {
+                <kbd class="cmd-btn__kbd">{{ item.shortcut }}</kbd>
+              }
+              @if (item.badge) {
+                <span class="cmd-btn__badge"
+                  [class.cmd-btn__badge--green]="item.accent === 'green'"
+                  [class.cmd-btn__badge--amber]="item.accent === 'amber'"
+                >{{ item.badge }}</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    @if (filteredSections().length === 0) {
+      <div class="overlay__empty">
+        <lucide-icon [name]="ICONS.SEARCH" [size]="24" />
+        <span>Nincs talalat</span>
+      </div>
+    }
+  </div>
+
+  <!-- Footer: PS statusz -->
+  <div class="overlay__footer">
+    <div class="overlay__ps-status overlay__ps-status--connected">
+      <span class="overlay__ps-dot"></span>
+      <span>Photoshop</span>
+    </div>
+    <kbd class="overlay__shortcut-hint">Ctrl+Space</kbd>
+  </div>
+</div>

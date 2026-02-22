@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, nativeTheme, Notification, session, Menu, net, TouchBar, nativeImage } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, nativeTheme, Notification, session, Menu, net, TouchBar, nativeImage, globalShortcut, screen } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as https from 'https';
@@ -16,6 +16,7 @@ initSentryMain();
 import { registerPhotoshopHandlers } from './handlers/photoshop.handler';
 import { registerSampleGeneratorHandlers } from './handlers/sample-generator.handler';
 import { registerFinalizerHandlers } from './handlers/finalizer.handler';
+import { registerOverlayHandlers } from './handlers/overlay.handler';
 
 const { TouchBarButton, TouchBarLabel, TouchBarSpacer, TouchBarSegmentedControl, TouchBarSlider } = TouchBar;
 
@@ -37,6 +38,7 @@ interface UpdateState {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let overlayWindow: BrowserWindow | null = null;
 
 // ============ Electron Store for Cache ============
 interface CacheSchema {
@@ -297,6 +299,91 @@ function setTouchBarContext(context: string): void {
   }
   mainWindow.setTouchBar(touchBar);
   log.info(`Touch Bar context set to: ${context}`);
+}
+
+// ============ Overlay Window (Always-on-top Command Palette) ============
+
+function createOverlayWindow(): void {
+  overlayWindow = new BrowserWindow({
+    width: 380,
+    height: 580,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    focusable: true,
+    resizable: false,
+    show: false,
+    // macOS frosted glass
+    vibrancy: process.platform === 'darwin' ? 'under-window' : undefined,
+    visualEffectState: 'active',
+    backgroundColor: '#00000000',
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: true,
+      allowRunningInsecureContent: false,
+    },
+  });
+
+  // Overlay route betoltese
+  const overlayUrl = isDev
+    ? 'http://localhost:4205/#/overlay'
+    : `${PRODUCTION_URL}/#/overlay`;
+
+  overlayWindow.loadURL(overlayUrl).catch((error) => {
+    log.error('Failed to load overlay URL:', error);
+  });
+
+  // Focus elvesztesekor elrejtes (hacsak nem devtools)
+  overlayWindow.on('blur', () => {
+    if (overlayWindow && !overlayWindow.isDestroyed() && !overlayWindow.webContents.isDevToolsOpened()) {
+      overlayWindow.hide();
+    }
+  });
+
+  overlayWindow.on('closed', () => {
+    overlayWindow = null;
+  });
+
+  log.info('Overlay window created');
+}
+
+function toggleOverlayWindow(): void {
+  if (!overlayWindow || overlayWindow.isDestroyed()) {
+    createOverlayWindow();
+    // Var, amig betoltodik
+    overlayWindow?.once('ready-to-show', () => {
+      showOverlayAtCenter();
+    });
+    return;
+  }
+
+  if (overlayWindow.isVisible()) {
+    overlayWindow.hide();
+  } else {
+    showOverlayAtCenter();
+  }
+}
+
+function showOverlayAtCenter(): void {
+  if (!overlayWindow || overlayWindow.isDestroyed()) return;
+
+  // Aktiv monitor kozepere pozicionalas
+  const cursorPoint = screen.getCursorScreenPoint();
+  const activeDisplay = screen.getDisplayNearestPoint(cursorPoint);
+  const { x, y, width, height } = activeDisplay.workArea;
+  const [overlayWidth, overlayHeight] = overlayWindow.getSize();
+
+  overlayWindow.setPosition(
+    Math.round(x + (width - overlayWidth) / 2),
+    Math.round(y + (height - overlayHeight) / 2),
+  );
+
+  overlayWindow.show();
+  overlayWindow.focus();
 }
 
 function createWindow(): void {
@@ -586,6 +673,20 @@ app.whenReady().then(() => {
 
   createWindow();
 
+  // Overlay window letrehozasa (rejtett, Ctrl+Space-re jelenik meg)
+  createOverlayWindow();
+
+  // Overlay IPC handlerek regisztralasa
+  registerOverlayHandlers(
+    () => overlayWindow,
+    () => mainWindow,
+  );
+
+  // GlobalShortcut: Ctrl+Space (vagy Cmd+Space macOS-en)
+  globalShortcut.register('CommandOrControl+Space', () => {
+    toggleOverlayWindow();
+  });
+
   // Photoshop IPC handlerek regisztralasa
   if (mainWindow) {
     registerPhotoshopHandlers(mainWindow);
@@ -616,6 +717,11 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   // Cleanup tasks before quitting
   mainWindow?.webContents.send('app-closing');
+});
+
+app.on('will-quit', () => {
+  // GlobalShortcut cleanup
+  globalShortcut.unregisterAll();
 });
 
 // IPC Handlers

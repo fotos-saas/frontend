@@ -250,6 +250,28 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('cleanup-drag-files', filePaths) as Promise<boolean>,
   },
 
+  // ============ Overlay (Always-on-top Command Palette) ============
+  overlay: {
+    executeCommand: (commandId: string) =>
+      ipcRenderer.invoke('overlay:execute-command', commandId) as Promise<{ success: boolean; error?: string }>,
+    getContext: () =>
+      ipcRenderer.invoke('overlay:get-context') as Promise<{ mode: 'designer' | 'normal'; projectId?: number }>,
+    setContext: (ctx: { mode: 'designer' | 'normal'; projectId?: number }) =>
+      ipcRenderer.invoke('overlay:set-context', ctx) as Promise<{ success: boolean; error?: string }>,
+    onContextChanged: (callback: (ctx: { mode: 'designer' | 'normal'; projectId?: number }) => void): CleanupFn => {
+      const handler = (_event: IpcRendererEvent, ctx: { mode: 'designer' | 'normal'; projectId?: number }) => callback(ctx);
+      ipcRenderer.on('overlay:context-changed', handler);
+      return () => ipcRenderer.removeListener('overlay:context-changed', handler);
+    },
+    hide: () =>
+      ipcRenderer.invoke('overlay:hide') as Promise<{ success: boolean }>,
+    onCommand: (callback: (commandId: string) => void): CleanupFn => {
+      const handler = (_event: IpcRendererEvent, commandId: string) => callback(commandId);
+      ipcRenderer.on('overlay-command', handler);
+      return () => ipcRenderer.removeListener('overlay-command', handler);
+    },
+  },
+
   // ============ Photoshop Integration ============
   photoshop: {
     setPath: (psPath: string) =>

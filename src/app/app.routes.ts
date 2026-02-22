@@ -11,6 +11,12 @@ import { clientGuard } from './core/guards/client.guard';
 import { superAdminGuard } from './core/guards/super-admin.guard';
 
 export const routes: Routes = [
+  // Overlay route (Electron always-on-top command palette — kulon BrowserWindow)
+  {
+    path: 'overlay',
+    loadChildren: () => import('./features/overlay/overlay.routes').then(m => m.OVERLAY_ROUTES),
+  },
+
   // Public routes (nincs layout, nincs navbar/footer) - lazy-loaded
   {
     path: 'login',

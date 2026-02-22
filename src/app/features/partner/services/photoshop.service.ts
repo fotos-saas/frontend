@@ -433,17 +433,21 @@ export class PhotoshopService {
         textAlign: this.textAlign(),
       };
 
+      // Nevek normalizálása: newline → vessző+szóköz (a textarea-ban lehetnek soronként)
+      const normalizeNames = (text: string): string =>
+        text.split(/[\n,]+/).map(n => n.trim()).filter(Boolean).join(', ');
+
       if (options.includeStudents && extraNames.students) {
         jsonData['students'] = {
           header: 'Osztálytársaink voltak még:',
-          names: extraNames.students,
+          names: normalizeNames(extraNames.students),
         };
       }
 
       if (options.includeTeachers && extraNames.teachers) {
         jsonData['teachers'] = {
           header: 'Tanítottak még:',
-          names: extraNames.teachers,
+          names: normalizeNames(extraNames.teachers),
         };
       }
 

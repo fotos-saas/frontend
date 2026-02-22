@@ -199,7 +199,7 @@ export class OverlayComponent implements OnInit {
   private async pollActiveDoc(): Promise<void> {
     if (!window.electronAPI) return;
     try {
-      const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'get-active-doc' });
+      const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
       if (result.success && result.output) {
         const cleaned = result.output.trim();
         if (cleaned.startsWith('{')) {

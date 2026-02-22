@@ -40,14 +40,8 @@
         }
       </span>
       @if (person().hasOverride) {
-        <span class="card-badge card-badge--override">Egyedi</span>
+        <span class="card-badge card-badge--override" matTooltip="Csak ezen a tablón egyedi">Egyedi</span>
       }
     </div>
-    @if (person().hasOverride) {
-      <button class="card-reset-btn" (click)="onResetOverride($event)" title="Visszaállítás alapértelmezettre">
-        <lucide-icon [name]="ICONS.UNDO" [size]="12" />
-        Visszaállítás
-      </button>
-    }
   </div>
 </div>

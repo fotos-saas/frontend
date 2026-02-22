@@ -282,21 +282,6 @@ export class PersonsModalComponent implements OnInit {
     this.lightboxPerson.set(null);
   }
 
-  resetOverride(person: TabloPersonItem): void {
-    this.projectService.resetPersonPhoto(this.projectId(), person.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          const updated = this.allPersons().map(p =>
-            p.id === person.id
-              ? { ...p, hasOverride: false, hasPhoto: res.data.hasPhoto, photoThumbUrl: res.data.photoThumbUrl, photoUrl: res.data.photoUrl }
-              : p
-          );
-          this.allPersons.set(updated);
-        }
-      });
-  }
-
   onPhotoChanged(event: { personId: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean }): void {
     const updated = this.allPersons().map(p =>
       p.id === event.personId

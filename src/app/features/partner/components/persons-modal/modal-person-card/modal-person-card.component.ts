@@ -23,16 +23,10 @@ export class ModalPersonCardComponent {
   readonly animationDelay = input<string>('0s');
 
   readonly cardClick = output<TabloPersonItem>();
-  readonly resetOverride = output<TabloPersonItem>();
 
   onCardClick(): void {
     if (this.person().photoUrl) {
       this.cardClick.emit(this.person());
     }
-  }
-
-  onResetOverride(event: Event): void {
-    event.stopPropagation();
-    this.resetOverride.emit(this.person());
   }
 }

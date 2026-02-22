@@ -433,9 +433,9 @@ export class PhotoshopService {
         textAlign: this.textAlign(),
       };
 
-      // Nevek normalizálása: newline → vessző+szóköz (a textarea-ban lehetnek soronként)
+      // Nevek normalizálása: \n → \r (Photoshop ExtendScript \r-t használ sortörésnek)
       const normalizeNames = (text: string): string =>
-        text.split(/[\n,]+/).map(n => n.trim()).filter(Boolean).join(', ');
+        text.split(/\n/).map(n => n.trim()).filter(Boolean).join('\r');
 
       if (options.includeStudents && extraNames.students) {
         jsonData['students'] = {

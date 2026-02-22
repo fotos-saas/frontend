@@ -42,4 +42,14 @@ export class PartnerOrderSyncService {
       data
     );
   }
+
+  /**
+   * Partner projektek szinkronizálása a régi API-ból.
+   */
+  triggerSync(): Observable<{ success: boolean; message: string; data: { created: number; processed: number; failed: number; errors: string[] } }> {
+    return this.http.post<{ success: boolean; message: string; data: { created: number; processed: number; failed: number; errors: string[] } }>(
+      `${environment.apiUrl}/partner/order-sync/trigger`,
+      {}
+    );
+  }
 }

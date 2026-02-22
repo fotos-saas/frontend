@@ -8,6 +8,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../../services/partner.service';
 import { PartnerPreliminaryService } from '../../services/partner-preliminary.service';
+import { PartnerOrderSyncService } from '../../services/partner-order-sync.service';
 import { CreatePreliminaryModalComponent } from '../../components/create-preliminary-modal/create-preliminary-modal.component';
 import { LinkPreliminaryDialogComponent } from '../../components/link-preliminary-dialog/link-preliminary-dialog.component';
 import { ProjectCardComponent } from '../../components/project-card/project-card.component';
@@ -60,6 +61,7 @@ export class PartnerProjectListComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly partnerService = inject(PartnerService);
   private readonly preliminaryService = inject(PartnerPreliminaryService);
+  private readonly orderSyncService = inject(PartnerOrderSyncService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
@@ -105,6 +107,7 @@ export class PartnerProjectListComponent implements OnInit {
   totalPages = signal(1);
   totalProjects = signal(0);
   projectLimits = signal<ProjectLimits | null>(null);
+  syncing = signal(false);
 
   // Státusz opciók
   readonly statusOptions = [
@@ -446,5 +449,29 @@ export class PartnerProjectListComponent implements OnInit {
     this.closeLinkDialog();
     this.loadProjects();
     this.toast.success('Összekapcsolva', 'Az előzetes projekt sikeresen összekapcsolva.');
+  }
+
+  triggerSync(): void {
+    if (this.syncing()) return;
+    this.syncing.set(true);
+
+    this.orderSyncService.triggerSync()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.syncing.set(false);
+          if (res.data?.created > 0) {
+            this.toast.success('Szinkronizálva', res.message);
+            this.loadProjects();
+          } else {
+            this.toast.info('Kész', res.message);
+          }
+        },
+        error: (err) => {
+          this.syncing.set(false);
+          this.toast.error('Hiba', err.error?.message || 'Szinkronizálás sikertelen');
+          this.logger.error('Sync trigger error', err);
+        },
+      });
   }
 }

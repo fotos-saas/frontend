@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectio
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
 import { PartnerAlbumService } from '../../../services/partner-album.service';
@@ -28,7 +29,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

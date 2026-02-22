@@ -199,6 +199,7 @@ export class PartnerProjectListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProjects();
+    this.checkSyncInBackground();
   }
 
   loadProjects(): void {
@@ -452,11 +453,26 @@ export class PartnerProjectListComponent implements OnInit {
     this.toast.success('Összekapcsolva', 'Az előzetes projekt sikeresen összekapcsolva.');
   }
 
+  private checkSyncInBackground(): void {
+    this.orderSyncService.checkSync()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.pendingSyncCount.set(res.data?.pending_count ?? 0);
+        },
+        error: () => {
+          this.pendingSyncCount.set(0);
+        },
+      });
+  }
+
   triggerSync(): void {
     if (this.syncing()) return;
 
-    // Ha még nem ellenőriztük — először csak check
-    if (this.pendingSyncCount() === null) {
+    const pending = this.pendingSyncCount();
+
+    // Ha nincs pending vagy 0 → frissítsd a check-et
+    if (pending === null || pending === 0) {
       this.syncing.set(true);
       this.orderSyncService.checkSync()
         .pipe(takeUntilDestroyed(this.destroyRef))
@@ -469,23 +485,22 @@ export class PartnerProjectListComponent implements OnInit {
               this.toast.info('Naprakész', 'Nincs új szinkronizálandó projekt');
             }
           },
-          error: (err) => {
+          error: () => {
             this.syncing.set(false);
             this.toast.error('Hiba', 'Nem sikerült ellenőrizni a régi rendszert');
-            this.logger.error('Sync check error', err);
           },
         });
       return;
     }
 
-    // Ha már tudjuk hány van — szinkronizálás
+    // Ha van pending → szinkronizálás
     this.syncing.set(true);
     this.orderSyncService.triggerSync()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.syncing.set(false);
-          this.pendingSyncCount.set(null);
+          this.pendingSyncCount.set(0);
           if (res.data?.created > 0) {
             this.toast.success('Szinkronizálva', res.message);
             this.loadProjects();

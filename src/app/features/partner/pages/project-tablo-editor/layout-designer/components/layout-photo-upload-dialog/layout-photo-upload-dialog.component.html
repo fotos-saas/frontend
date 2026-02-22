@@ -136,8 +136,8 @@
     }
   </div>
 
-  <div dialogFooter>
-    <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+  <div dialogFooter class="footer-row">
+    <button class="btn btn--outline" (click)="close.emit()">Bezár</button>
 
     @if (viewMode() === 'existing' && selectedExistingPhoto()) {
       <button

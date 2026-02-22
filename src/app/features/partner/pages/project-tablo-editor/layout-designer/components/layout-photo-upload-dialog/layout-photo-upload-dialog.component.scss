@@ -262,6 +262,17 @@
   }
 }
 
+// ============ Footer ============
+
+.footer-row {
+  display: flex !important;
+  gap: 8px;
+
+  .btn {
+    flex: 1;
+  }
+}
+
 .spin {
   animation: spin 1s linear infinite;
 }

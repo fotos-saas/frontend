@@ -120,6 +120,7 @@ export interface ProjectDetailData {
   studentsWithPhotoCount?: number;
   teachersWithPhotoCount?: number;
   personsPreview?: PersonPreviewItem[];
+  extraNames?: { students: string; teachers: string };
   inPrintAt?: string | null;
   doneAt?: string | null;
   printSmallTablo?: {

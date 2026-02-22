@@ -98,6 +98,12 @@
               }
             </div>
           }
+          @if (extraStudents()) {
+            <div class="extra-names-hint">
+              <lucide-icon [name]="ICONS.LIST" [size]="12" />
+              <span>Osztálytársaik még: <span class="extra-names-hint__text">{{ extraStudents() }}</span></span>
+            </div>
+          }
         </div>
 
         <!-- Tanárok oszlop -->
@@ -138,6 +144,12 @@
                   <span class="overflow-text">+{{ teachersOverflow() }}</span>
                 </div>
               }
+            </div>
+          }
+          @if (extraTeachers()) {
+            <div class="extra-names-hint">
+              <lucide-icon [name]="ICONS.LIST" [size]="12" />
+              <span>Tanítottak még: <span class="extra-names-hint__text">{{ extraTeachers() }}</span></span>
             </div>
           }
         </div>

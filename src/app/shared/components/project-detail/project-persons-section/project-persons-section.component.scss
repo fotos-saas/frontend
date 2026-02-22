@@ -106,6 +106,31 @@
   color: get-color('gray', 400);
 }
 
+// Extra nevek jelzés
+.extra-names-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 6px 8px;
+  background: get-color('gray', 50);
+  border: 1px solid get-color('gray', 200);
+  border-radius: 6px;
+  font-size: 11px;
+  color: get-color('gray', 500);
+  line-height: 1.4;
+
+  lucide-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  &__text {
+    color: get-color('gray', 700);
+    font-weight: 500;
+  }
+}
+
 // Upload kártyák (előzetes projekt)
 .upload-grid {
   display: grid;

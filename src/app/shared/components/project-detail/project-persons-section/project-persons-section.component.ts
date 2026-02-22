@@ -41,6 +41,8 @@ export class ProjectPersonsSectionComponent {
   readonly teachersWithoutPhoto = computed(() => this.teachersCount() - this.teachersWithPhoto());
 
   readonly hasPersons = computed(() => this.personsCount() > 0);
+  readonly extraStudents = computed(() => this.project().extraNames?.students ?? '');
+  readonly extraTeachers = computed(() => this.project().extraNames?.teachers ?? '');
 
   readonly studentsOverflow = computed(() => Math.max(0, this.studentsCount() - 8));
   readonly teachersOverflow = computed(() => Math.max(0, this.teachersCount() - 8));

@@ -260,16 +260,6 @@ ps-toggle {
   color: #ef4444;
 }
 
-.edit-thumb-uploading {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #e0f2fe;
-  color: #2563eb;
-}
-
 .edit-thumb-camera {
   position: absolute;
   bottom: -4px;
@@ -290,19 +280,6 @@ ps-toggle {
 .edit-thumb-camera:hover {
   background: #1d4ed8;
   transform: scale(1.1);
-}
-
-// Screen reader only (rejtett file input)
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 // --- Mezők (név+title felül, megjegyzés alul) ---

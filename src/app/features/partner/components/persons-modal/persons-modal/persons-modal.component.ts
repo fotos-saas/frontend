@@ -5,13 +5,17 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
-import { PartnerAlbumService } from '../../../services/partner-album.service';
 import { PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
 import { ModalPersonCardComponent } from '../modal-person-card/modal-person-card.component';
 import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.component';
+import {
+  LayoutPhotoUploadDialogComponent,
+  PhotoUploadPerson,
+  PhotoUploadResult,
+} from '../../../pages/project-tablo-editor/layout-designer/components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
 
 /** Szerkesztési sor state */
 interface EditRow {
@@ -20,7 +24,6 @@ interface EditRow {
   note: string;
   dirty: boolean;
   saving: boolean;
-  uploading: boolean;
 }
 
 /**
@@ -29,7 +32,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,7 +49,6 @@ export class PersonsModalComponent implements OnInit {
 
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);
-  private albumService = inject(PartnerAlbumService);
   private destroyRef = inject(DestroyRef);
 
   loading = signal(true);
@@ -64,6 +66,9 @@ export class PersonsModalComponent implements OnInit {
 
   // Lightbox
   lightboxPerson = signal<TabloPersonItem | null>(null);
+
+  // Fotó feltöltés dialógus
+  photoUploadPerson = signal<PhotoUploadPerson | null>(null);
 
   readonly hasInitialFilter = computed(() => !!this.initialTypeFilter());
   readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
@@ -151,7 +156,7 @@ export class PersonsModalComponent implements OnInit {
   private initEditData(): void {
     const map = new Map<number, EditRow>();
     for (const p of this.filteredPersons()) {
-      map.set(p.id, { name: p.name, title: p.title || '', note: p.note || '', dirty: false, saving: false, uploading: false });
+      map.set(p.id, { name: p.name, title: p.title || '', note: p.note || '', dirty: false, saving: false });
     }
     this.editData.set(map);
   }
@@ -220,7 +225,7 @@ export class PersonsModalComponent implements OnInit {
           const newData = new Map(this.editData());
           newData.set(personId, {
             name: res.data.name, title: res.data.title || '', note: res.data.note || '',
-            dirty: false, saving: false, uploading: row.uploading,
+            dirty: false, saving: false,
           });
           this.editData.set(newData);
         },
@@ -242,46 +247,24 @@ export class PersonsModalComponent implements OnInit {
     }
   }
 
-  // --- Fotó feltöltés ---
-  onPhotoFileSelected(personId: number, event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    // Reset input
-    input.value = '';
+  // --- Fotó feltöltés dialógus ---
+  openPhotoUploadDialog(person: TabloPersonItem): void {
+    this.photoUploadPerson.set({
+      id: person.id,
+      name: person.name,
+      type: person.type as 'student' | 'teacher',
+      archiveId: person.archiveId ?? null,
+    });
+  }
 
-    // Set uploading state
-    const data = new Map(this.editData());
-    const row = data.get(personId);
-    if (row) {
-      data.set(personId, { ...row, uploading: true });
-      this.editData.set(data);
-    }
-
-    this.albumService.uploadPersonPhoto(this.projectId(), personId, file)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          // Frissítsük a person adatait
-          const updated = this.allPersons().map(p =>
-            p.id === personId
-              ? { ...p, hasPhoto: true, photoThumbUrl: res.photo.thumbUrl, photoUrl: res.photo.thumbUrl }
-              : p
-          );
-          this.allPersons.set(updated);
-          // Uploading state vége
-          const newData = new Map(this.editData());
-          const r = newData.get(personId);
-          if (r) newData.set(personId, { ...r, uploading: false });
-          this.editData.set(newData);
-        },
-        error: () => {
-          const newData = new Map(this.editData());
-          const r = newData.get(personId);
-          if (r) newData.set(personId, { ...r, uploading: false });
-          this.editData.set(newData);
-        }
-      });
+  onPhotoUploaded(result: PhotoUploadResult): void {
+    const updated = this.allPersons().map(p =>
+      p.id === result.personId
+        ? { ...p, hasPhoto: true, photoThumbUrl: result.thumbUrl, photoUrl: result.photoUrl, hasOverride: result.isOverride }
+        : p
+    );
+    this.allPersons.set(updated);
+    this.photoUploadPerson.set(null);
   }
 
   openLightbox(person: TabloPersonItem): void {

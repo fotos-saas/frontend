@@ -107,11 +107,7 @@
               <!-- Thumb + kamera feltöltés -->
               <div class="edit-thumb-wrap">
                 <div class="edit-thumb" (click)="person.photoUrl ? openLightbox(person) : null">
-                  @if (row?.uploading) {
-                    <div class="edit-thumb-uploading">
-                      <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-                    </div>
-                  } @else if (person.photoThumbUrl) {
+                  @if (person.photoThumbUrl) {
                     <img [src]="person.photoThumbUrl" [alt]="person.name" loading="lazy" />
                   } @else {
                     <div class="edit-thumb-placeholder">
@@ -119,16 +115,10 @@
                     </div>
                   }
                 </div>
-                <!-- Kamera gomb — rejtett file input -->
-                <label class="edit-thumb-camera" [matTooltip]="'Kép feltöltése'">
+                <!-- Kamera gomb — fotó feltöltés dialógus -->
+                <button type="button" class="edit-thumb-camera" matTooltip="Kép feltöltése" (click)="openPhotoUploadDialog(person)">
                   <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    class="sr-only"
-                    (change)="onPhotoFileSelected(person.id, $event)"
-                  />
-                </label>
+                </button>
               </div>
 
               <!-- Mezők -->
@@ -243,3 +233,13 @@
   (navigate)="lightboxPerson.set($event)"
   (photoChanged)="onPhotoChanged($event)"
 />
+
+<!-- Fotó feltöltés dialógus -->
+@if (photoUploadPerson(); as uploadPerson) {
+  <app-layout-photo-upload-dialog
+    [person]="uploadPerson"
+    [projectId]="projectId()"
+    (close)="photoUploadPerson.set(null)"
+    (photoUploaded)="onPhotoUploaded($event)"
+  />
+}

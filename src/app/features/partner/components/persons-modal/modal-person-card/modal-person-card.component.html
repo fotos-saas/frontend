@@ -30,7 +30,7 @@
   </div>
 
   <div class="card-info">
-    <span class="card-name" [matTooltip]="person().name">{{ person().name }}</span>
+    <span class="card-name">{{ person().name }}</span>
     <div class="card-meta">
       <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">
         @if (person().type === 'teacher' && person().title) {

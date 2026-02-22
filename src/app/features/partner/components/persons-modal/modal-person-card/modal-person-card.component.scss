@@ -21,10 +21,6 @@
   opacity: 1;
 }
 
-.person-card:hover .card-edit-btn {
-  opacity: 1;
-}
-
 @keyframes cardEntry {
   from {
     opacity: 0;
@@ -107,46 +103,14 @@
   text-align: center;
 }
 
-// --- Név sor (név + edit gomb) ---
-.card-name-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
 .card-name {
   font-size: 0.6875rem;
   font-weight: 500;
   color: #1e293b;
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-width: 0;
-  flex: 1;
-}
-
-// --- Edit gomb (a név sor jobb szélén) ---
-.card-edit-btn {
-  width: 18px;
-  height: 18px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #94a3b8;
-  cursor: pointer;
-  opacity: 0;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-  margin-left: 2px;
-}
-
-.card-edit-btn:hover {
-  background: #e2e8f0;
-  color: #475569;
 }
 
 .card-type {
@@ -210,67 +174,6 @@
   margin-right: 3px;
 }
 
-// --- Edit form ---
-.edit-form {
-  padding: 2px 0;
-}
-
-.edit-input {
-  width: 100%;
-  padding: 4px 6px;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  font-size: 0.625rem;
-  outline: none;
-  transition: border-color 0.15s ease;
-}
-
-.edit-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.edit-input--small {
-  margin-top: 3px;
-}
-
-.edit-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 4px;
-}
-
-.edit-action-btn {
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  margin: 0 2px;
-}
-
-.edit-action-btn--save {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.edit-action-btn--save:hover {
-  background: #bbf7d0;
-}
-
-.edit-action-btn--cancel {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.edit-action-btn--cancel:hover {
-  background: #fecaca;
-}
-
 @media (max-width: 480px) {
   .card-photo {
     aspect-ratio: 0.85;
@@ -300,11 +203,6 @@
   .card-reset-btn {
     font-size: 0.5rem;
     padding: 2px 0;
-  }
-
-  // Mobilon az edit gomb mindig látszik
-  .card-edit-btn {
-    opacity: 0.7;
   }
 }
 

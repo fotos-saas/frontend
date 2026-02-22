@@ -11,8 +11,16 @@ import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
 import { ModalPersonCardComponent } from '../modal-person-card/modal-person-card.component';
 import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.component';
 
+/** Szerkesztési sor state */
+interface EditRow {
+  name: string;
+  title: string;
+  dirty: boolean;
+  saving: boolean;
+}
+
 /**
- * Persons Modal - Személyek listája modal (grid nézet thumbnail-ekkel + lightbox).
+ * Persons Modal - Személyek listája (grid + szerkesztő lista nézet + lightbox).
  */
 @Component({
   selector: 'app-persons-modal',
@@ -45,27 +53,27 @@ export class PersonsModalComponent implements OnInit {
   searchQuery = signal('');
   filtersOpen = signal(false);
 
+  // Szerkesztés mód
+  editMode = signal(false);
+  editData = signal<Map<number, EditRow>>(new Map());
+
   // Lightbox
   lightboxPerson = signal<TabloPersonItem | null>(null);
-
 
   readonly hasInitialFilter = computed(() => !!this.initialTypeFilter());
   readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
 
-  /** Mobilon rövidített projektnév: iskola + osztály, évszámok nélkül */
   readonly shortProjectName = computed(() => {
     const name = this.projectName();
     const lastIdx = name.lastIndexOf(' - ');
     return lastIdx >= 0 ? name.substring(0, lastIdx) : name;
   });
 
-  // Computed counts
   readonly allCount = computed(() => this.allPersons().length);
   readonly studentCount = computed(() => this.allPersons().filter(p => p.type === 'student').length);
   readonly teacherCount = computed(() => this.allPersons().filter(p => p.type === 'teacher').length);
   readonly withoutPhotoCount = computed(() => this.allPersons().filter(p => !p.hasPhoto).length);
 
-  // Filtered persons — keresés mindkét típusban keres, tab nélkül szűri a típust
   readonly filteredPersons = computed(() => {
     let result = this.allPersons();
     const query = this.searchQuery().trim().toLowerCase();
@@ -80,10 +88,8 @@ export class PersonsModalComponent implements OnInit {
     return result;
   });
 
-  // Persons with photos for lightbox navigation
   readonly personsWithPhotos = computed(() => this.filteredPersons().filter(p => p.photoUrl));
 
-  // Empty state computed
   readonly emptyStateTitle = computed(() => {
     if (this.searchQuery()) return 'Nincs találat';
     if (this.showOnlyWithoutPhoto()) return 'Mindenkinél megvan a kép';
@@ -94,6 +100,15 @@ export class PersonsModalComponent implements OnInit {
     if (this.searchQuery()) return 'Próbálj más keresési kifejezéssel!';
     if (this.showOnlyWithoutPhoto()) return 'Minden személynek van feltöltött képe.';
     return 'Ehhez a projekthez nincs regisztrálva személy.';
+  });
+
+  /** Van-e módosítatlan sor a szerkesztés módban */
+  readonly hasDirtyEdits = computed(() => {
+    const data = this.editData();
+    for (const row of data.values()) {
+      if (row.dirty) return true;
+    }
+    return false;
   });
 
   ngOnInit(): void {
@@ -117,6 +132,89 @@ export class PersonsModalComponent implements OnInit {
           this.loading.set(false);
         }
       });
+  }
+
+  toggleEditMode(): void {
+    if (this.editMode()) {
+      this.editMode.set(false);
+      this.editData.set(new Map());
+    } else {
+      this.initEditData();
+      this.editMode.set(true);
+    }
+  }
+
+  private initEditData(): void {
+    const map = new Map<number, EditRow>();
+    for (const p of this.filteredPersons()) {
+      map.set(p.id, { name: p.name, title: p.title || '', dirty: false, saving: false });
+    }
+    this.editData.set(map);
+  }
+
+  onEditNameChange(personId: number, value: string): void {
+    const data = new Map(this.editData());
+    const row = data.get(personId);
+    if (!row) return;
+    const person = this.allPersons().find(p => p.id === personId);
+    data.set(personId, { ...row, name: value, dirty: value !== person?.name || row.title !== (person?.title || '') });
+    this.editData.set(data);
+  }
+
+  onEditTitleChange(personId: number, value: string): void {
+    const data = new Map(this.editData());
+    const row = data.get(personId);
+    if (!row) return;
+    const person = this.allPersons().find(p => p.id === personId);
+    data.set(personId, { ...row, title: value, dirty: row.name !== person?.name || value !== (person?.title || '') });
+    this.editData.set(data);
+  }
+
+  getEditRow(personId: number): EditRow | undefined {
+    return this.editData().get(personId);
+  }
+
+  saveRow(personId: number): void {
+    const row = this.editData().get(personId);
+    if (!row || !row.dirty || row.saving) return;
+    const name = row.name.trim();
+    if (!name) return;
+
+    // Mark saving
+    const data = new Map(this.editData());
+    data.set(personId, { ...row, saving: true });
+    this.editData.set(data);
+
+    this.projectService.updatePerson(this.projectId(), personId, { name, title: row.title.trim() || null })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          // Frissítjük allPersons
+          const updated = this.allPersons().map(p =>
+            p.id === personId ? { ...p, name: res.data.name, title: res.data.title } : p
+          );
+          this.allPersons.set(updated);
+          // Frissítjük editData
+          const newData = new Map(this.editData());
+          newData.set(personId, { name: res.data.name, title: res.data.title || '', dirty: false, saving: false });
+          this.editData.set(newData);
+        },
+        error: () => {
+          const newData = new Map(this.editData());
+          const r = newData.get(personId);
+          if (r) newData.set(personId, { ...r, saving: false });
+          this.editData.set(newData);
+        }
+      });
+  }
+
+  saveAllDirty(): void {
+    const data = this.editData();
+    for (const [personId, row] of data) {
+      if (row.dirty && !row.saving) {
+        this.saveRow(personId);
+      }
+    }
   }
 
   openLightbox(person: TabloPersonItem): void {
@@ -144,21 +242,6 @@ export class PersonsModalComponent implements OnInit {
       });
   }
 
-  savePerson(event: { personId: number; name: string; title: string | null }): void {
-    this.projectService.updatePerson(this.projectId(), event.personId, { name: event.name, title: event.title })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          const updated = this.allPersons().map(p =>
-            p.id === event.personId
-              ? { ...p, name: res.data.name, title: res.data.title }
-              : p
-          );
-          this.allPersons.set(updated);
-        }
-      });
-  }
-
   onPhotoChanged(event: { personId: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean }): void {
     const updated = this.allPersons().map(p =>
       p.id === event.personId
@@ -166,7 +249,6 @@ export class PersonsModalComponent implements OnInit {
         : p
     );
     this.allPersons.set(updated);
-    // Frissítsük a lightbox person-t is ha épp azt nézzük
     const current = this.lightboxPerson();
     if (current && current.id === event.personId) {
       this.lightboxPerson.set(updated.find(p => p.id === event.personId) || null);

@@ -25,7 +25,7 @@
 
     <!-- Szűrők (mobilon összecsukható) -->
     <div class="filters-collapsible" [class.filters-collapsible--open]="filtersOpen()">
-      <!-- Search + Photo Filter -->
+      <!-- Search + Photo Filter + Edit Mode -->
       <div class="search-section">
         <div class="search-row">
           <div class="search-box">
@@ -52,23 +52,36 @@
         </div>
       </div>
 
-      <!-- Type Filter Tabs (csak ha nincs initialTypeFilter) -->
-      @if (!hasInitialFilter()) {
-        <div class="filter-tabs" [class.filter-tabs--hidden]="!!searchQuery()">
-          <button type="button" class="tab" [class.tab--active]="typeFilter() === 'student'" (click)="typeFilter.set('student')">
-            Diákok
-            @if (!loading()) {
-              <span class="tab-count">({{ studentCount() }})</span>
-            }
+      <!-- Type Filter Tabs + Edit gomb -->
+      <div class="tabs-row" [class.tabs-row--hidden]="!!searchQuery()">
+        @if (!hasInitialFilter()) {
+          <div class="filter-tabs">
+            <button type="button" class="tab" [class.tab--active]="typeFilter() === 'student'" (click)="typeFilter.set('student')">
+              Diákok
+              @if (!loading()) {
+                <span class="tab-count">({{ studentCount() }})</span>
+              }
+            </button>
+            <button type="button" class="tab" [class.tab--active]="typeFilter() === 'teacher'" (click)="typeFilter.set('teacher')">
+              Tanárok
+              @if (!loading()) {
+                <span class="tab-count">({{ teacherCount() }})</span>
+              }
+            </button>
+          </div>
+        }
+        @if (!loading() && filteredPersons().length > 0) {
+          <button
+            type="button"
+            class="edit-mode-btn"
+            [class.edit-mode-btn--active]="editMode()"
+            (click)="toggleEditMode()"
+          >
+            <lucide-icon [name]="editMode() ? ICONS.X : ICONS.EDIT" [size]="14" />
+            {{ editMode() ? 'Kész' : 'Szerkesztés' }}
           </button>
-          <button type="button" class="tab" [class.tab--active]="typeFilter() === 'teacher'" (click)="typeFilter.set('teacher')">
-            Tanárok
-            @if (!loading()) {
-              <span class="tab-count">({{ teacherCount() }})</span>
-            }
-          </button>
-        </div>
-      }
+        }
+      </div>
     </div>
 
     <!-- Content -->
@@ -85,7 +98,72 @@
           <h3>{{ emptyStateTitle() }}</h3>
           <p>{{ emptyStateText() }}</p>
         </div>
+      } @else if (editMode()) {
+        <!-- Szerkesztő lista nézet -->
+        <div class="edit-list">
+          @for (person of filteredPersons(); track person.id; let i = $index) {
+            @let row = getEditRow(person.id);
+            <div class="edit-row" [class.edit-row--dirty]="row?.dirty" [class.edit-row--saving]="row?.saving">
+              <!-- Thumb -->
+              <div class="edit-thumb" (click)="openLightbox(person)">
+                @if (person.photoThumbUrl) {
+                  <img [src]="person.photoThumbUrl" [alt]="person.name" loading="lazy" />
+                } @else {
+                  <div class="edit-thumb-placeholder">
+                    <lucide-icon [name]="ICONS.USER_X" [size]="16" />
+                  </div>
+                }
+              </div>
+              <!-- Név input -->
+              <input
+                type="text"
+                class="edit-field edit-field--name"
+                placeholder="Név"
+                [value]="row?.name ?? person.name"
+                (input)="onEditNameChange(person.id, $any($event.target).value)"
+                (keydown.enter)="saveRow(person.id)"
+              />
+              <!-- Title input (csak tanárnál) -->
+              @if (person.type === 'teacher') {
+                <input
+                  type="text"
+                  class="edit-field edit-field--title"
+                  placeholder="Pozíció/tantárgy"
+                  [value]="row?.title ?? (person.title || '')"
+                  (input)="onEditTitleChange(person.id, $any($event.target).value)"
+                  (keydown.enter)="saveRow(person.id)"
+                />
+              }
+              <!-- Mentés gomb -->
+              @if (row?.dirty) {
+                <button
+                  class="edit-save-btn"
+                  (click)="saveRow(person.id)"
+                  [disabled]="row?.saving"
+                  matTooltip="Mentés"
+                >
+                  @if (row?.saving) {
+                    <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+                  } @else {
+                    <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Összes mentése gomb -->
+        @if (hasDirtyEdits()) {
+          <div class="save-all-bar">
+            <button type="button" class="save-all-btn" (click)="saveAllDirty()">
+              <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+              Összes módosítás mentése
+            </button>
+          </div>
+        }
       } @else {
+        <!-- Grid nézet -->
         <div class="persons-grid">
           @for (person of filteredPersons(); track person.id; let i = $index) {
             <app-modal-person-card
@@ -93,7 +171,6 @@
               [animationDelay]="i * 0.05 + 's'"
               (cardClick)="openLightbox($event)"
               (resetOverride)="resetOverride($event)"
-              (saveEdit)="savePerson($event)"
             />
           }
         </div>
@@ -101,7 +178,7 @@
     </div>
   </div>
 
-  <!-- Footer — dialogFooter slotban, mindig fix alul -->
+  <!-- Footer -->
   @if (!loading() && allCount() > 0) {
     <div dialogFooter class="modal-footer">
       <div class="stats-row">
@@ -115,7 +192,7 @@
           <strong>{{ withoutPhotoCount() }}</strong> kép nélkül
         </span>
       </div>
-      @if (withoutPhotoCount() > 0) {
+      @if (withoutPhotoCount() > 0 && !editMode()) {
         <button type="button" class="upload-btn" (click)="openUploadWizard.emit(typeFilter())">
           <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
           Tovább a fényképek feltöltéséhez

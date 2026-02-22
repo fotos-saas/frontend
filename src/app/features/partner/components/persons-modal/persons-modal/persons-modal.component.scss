@@ -6,15 +6,12 @@
   overflow: hidden;
 }
 
-// A dialogBody-t flex column-ná tesszük,
-// hogy a modal-content vegye a maradék helyet, a footer fix maradjon
 :host ::ng-deep .dw__body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-// Mobilon a teljes description rejtve, helyette a rövid nevet mutatjuk
 .mobile-desc {
   display: none;
 }
@@ -36,12 +33,11 @@
   }
 }
 
-// --- Filter toggle gomb (csak mobilon) ---
+// --- Filter toggle (csak mobilon) ---
 .filter-toggle {
-  display: none; // desktopon rejtve
+  display: none;
 }
 
-// --- Collapsible szűrő wrapper ---
 .filters-collapsible {
   flex-shrink: 0;
 }
@@ -107,17 +103,24 @@
   background: get-color('slate', 100);
 }
 
-.filter-tabs {
+// --- Tabs sor (filter tabs + edit gomb) ---
+.tabs-row {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
   padding-bottom: 16px;
   border-bottom: 1px solid get-color('slate', 200);
-  @include transition-fast;
   flex-shrink: 0;
 }
 
-.filter-tabs--hidden {
+.tabs-row--hidden {
   display: none;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  @include transition-fast;
 }
 
 .tab {
@@ -148,6 +151,38 @@
   opacity: 0.8;
 }
 
+// --- Szerkesztés gomb ---
+.edit-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: get-color('slate', 600);
+  cursor: pointer;
+  @include transition-fast;
+  margin-left: auto;
+}
+
+.edit-mode-btn:hover {
+  background: get-color('slate', 100);
+  border-color: get-color('slate', 300);
+}
+
+.edit-mode-btn--active {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #2563eb;
+}
+
+.edit-mode-btn--active:hover {
+  background: #bfdbfe;
+}
+
 ps-toggle {
   flex-shrink: 0;
 }
@@ -160,7 +195,7 @@ ps-toggle {
   overflow-x: hidden;
 }
 
-// --- CSS Grid: auto-fill automatikusan számolja az oszlopokat ---
+// --- Grid nézet ---
 .persons-grid,
 .skeleton-grid {
   display: grid;
@@ -168,6 +203,139 @@ ps-toggle {
   gap: 8px;
 }
 
+// --- Szerkesztő lista nézet ---
+.edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  @include transition-fast;
+}
+
+.edit-row--dirty {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.edit-row--saving {
+  opacity: 0.7;
+}
+
+.edit-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.edit-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edit-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.edit-field {
+  padding: 6px 10px;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  outline: none;
+  @include transition-fast;
+  min-width: 0;
+}
+
+.edit-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.edit-field--name {
+  flex: 2;
+}
+
+.edit-field--title {
+  flex: 1.5;
+}
+
+.edit-save-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: #dcfce7;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  @include transition-fast;
+}
+
+.edit-save-btn:hover:not(:disabled) {
+  background: #bbf7d0;
+}
+
+.edit-save-btn:disabled {
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// --- Összes mentése sáv ---
+.save-all-bar {
+  padding: 12px 0 0;
+  text-align: center;
+}
+
+.save-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  @include transition-fast;
+}
+
+.save-all-btn:hover {
+  background: #1d4ed8;
+}
+
+// --- Empty state ---
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -207,7 +375,7 @@ ps-toggle {
   100% { background-position: -200% 0; }
 }
 
-// A dw__footer-t felülírjuk: nem flex-end gombok, hanem saját layout
+// --- Footer ---
 :host ::ng-deep .dw__footer {
   flex-direction: column;
   align-items: stretch;
@@ -266,7 +434,7 @@ ps-toggle {
   background: var(--color-primary-dark, #152a45);
 }
 
-// --- Tablet (481–768px) ---
+// --- Tablet ---
 @media (max-width: 768px) {
   .search-row {
     flex-wrap: wrap;
@@ -276,9 +444,12 @@ ps-toggle {
     flex: 1 1 100%;
   }
 
+  .edit-field--title {
+    flex: 1;
+  }
 }
 
-// --- Mobil (≤480px) ---
+// --- Mobil ---
 @media (max-width: 480px) {
   .filter-toggle {
     display: flex;
@@ -334,8 +505,10 @@ ps-toggle {
     font-size: 0.8125rem;
   }
 
-  .filter-tabs {
+  .tabs-row {
     padding-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .tab {
@@ -364,6 +537,21 @@ ps-toggle {
     padding: 10px 16px;
     margin-top: 12px;
     font-size: 0.875rem;
+  }
+
+  // Edit lista mobilon: title input alá kerül
+  .edit-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .edit-field--name {
+    flex: 1 1 calc(100% - 56px);
+  }
+
+  .edit-field--title {
+    flex: 1 1 100%;
+    margin-left: 48px; // igazítás a thumb szélességéhez
   }
 }
 

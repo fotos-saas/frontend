@@ -81,6 +81,9 @@ export class ProjectTabloEditorComponent implements OnInit {
     };
   });
 
+  /** Extra nevek a projektből (diákok + tanárok akik nincsenek regisztrálva) */
+  readonly projectExtraNames = computed(() => this.project()?.extraNames ?? null);
+
   /** Photoshop állapot */
   readonly psPath = this.ps.path;
   readonly isConfigured = this.ps.isConfigured;

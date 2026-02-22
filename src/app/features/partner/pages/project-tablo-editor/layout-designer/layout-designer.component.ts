@@ -93,6 +93,10 @@ import { firstValueFrom } from 'rxjs';
             [sampleWatermarkOpacity]="ps.sampleWatermarkOpacity()"
             [sampleSuccess]="sampleSuccess()"
             [sampleError]="sampleError()"
+            [extraNames]="extraNames()"
+            [insertingExtraNames]="insertingExtraNames()"
+            [extraNamesSuccess]="extraNamesSuccess()"
+            [extraNamesError]="extraNamesError()"
             (openActions)="showActionsDialog.set(true)"
             (openCustomDialog)="showCustomDialog.set(true)"
             (generateSample)="onGenerateSample()"
@@ -103,6 +107,7 @@ import { firstValueFrom } from 'rxjs';
             (opacityChange)="onCycleOpacity()"
             (openProject)="onOpenProject()"
             (openWorkDir)="onOpenWorkDir()"
+            (insertExtraNames)="onInsertExtraNames($event)"
           />
           <div class="layout-designer__canvas-area" #canvasArea>
             <app-layout-canvas
@@ -293,6 +298,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Projekt neve (minta generáláshoz) */
   readonly projectName = input.required<string>();
 
+  /** Extra nevek (diákok + tanárok akik nincsenek regisztrálva) */
+  readonly extraNames = input<{ students: string; teachers: string } | null>(null);
+
   /** Bezárás event */
   readonly closeEvent = output<void>();
 
@@ -320,6 +328,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly sampleLargeSize = this.ps.sampleUseLargeSize;
   readonly sampleSuccess = signal<string | null>(null);
   readonly sampleError = signal<string | null>(null);
+  readonly insertingExtraNames = signal(false);
+  readonly extraNamesSuccess = signal<string | null>(null);
+  readonly extraNamesError = signal<string | null>(null);
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
@@ -555,6 +566,30 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     const psd = this.psdPath();
     if (psd) {
       this.ps.revealInFinder(psd);
+    }
+  }
+
+  /** Extra nevek beillesztése a Photoshop PSD-be */
+  async onInsertExtraNames(options: { includeStudents: boolean; includeTeachers: boolean }): Promise<void> {
+    const en = this.extraNames();
+    if (!en) return;
+
+    this.insertingExtraNames.set(true);
+    this.extraNamesSuccess.set(null);
+    this.extraNamesError.set(null);
+
+    try {
+      const result = await this.ps.addExtraNames(en, options);
+      if (result.success) {
+        this.extraNamesSuccess.set('Extra nevek beillesztve');
+        this.autoSaveEvent.emit({ layers: this.state.exportChanges() });
+      } else {
+        this.extraNamesError.set(result.error || 'Extra nevek beillesztése sikertelen');
+      }
+    } catch {
+      this.extraNamesError.set('Váratlan hiba az extra nevek beillesztésekor');
+    } finally {
+      this.insertingExtraNames.set(false);
     }
   }
 

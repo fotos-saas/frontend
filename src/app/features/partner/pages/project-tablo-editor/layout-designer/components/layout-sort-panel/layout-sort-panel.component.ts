@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, computed, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -177,6 +177,62 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
           </div>
         }
       </div>
+
+      <!-- Extra nevek szekció -->
+      @if (hasAnyExtraNames()) {
+        <div class="sidebar__section sidebar__section--separator">
+          <div class="sidebar__section-header">
+            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="14" />
+            <span>Extra nevek</span>
+          </div>
+
+          <div class="sidebar__checkboxes">
+            @if (extraNames()?.students) {
+              <label class="sidebar__checkbox">
+                <input type="checkbox"
+                  [checked]="extraStudentsEnabled()"
+                  (change)="extraStudentsEnabled.set(!extraStudentsEnabled())" />
+                <span>Osztálytársaink még</span>
+              </label>
+            }
+            @if (extraNames()?.teachers) {
+              <label class="sidebar__checkbox">
+                <input type="checkbox"
+                  [checked]="extraTeachersEnabled()"
+                  (change)="extraTeachersEnabled.set(!extraTeachersEnabled())" />
+                <span>Tanítottak még</span>
+              </label>
+            }
+          </div>
+
+          <button class="action-btn action-btn--extra"
+            [disabled]="insertingExtraNames() || (!extraStudentsEnabled() && !extraTeachersEnabled())"
+            (click)="onInsertExtraNames()"
+            matTooltip="Extra nevek beillesztése/frissítése a PSD-ben"
+            matTooltipPosition="right">
+            @if (insertingExtraNames()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+              <span>Beillesztés...</span>
+            } @else {
+              <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+              <span>Extra nevek beillesztése</span>
+            }
+          </button>
+
+          @if (extraNamesSuccess()) {
+            <div class="sidebar__status sidebar__status--success">
+              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+              {{ extraNamesSuccess() }}
+            </div>
+          }
+          @if (extraNamesError()) {
+            <div class="sidebar__status sidebar__status--error">
+              <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
+              {{ extraNamesError() }}
+            </div>
+          }
+        </div>
+      }
     </aside>
   `,
   styles: [`
@@ -361,6 +417,33 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
+    .sidebar__checkboxes {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar__checkbox {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+
+      input[type="checkbox"] {
+        accent-color: #a78bfa;
+        width: 14px;
+        height: 14px;
+        cursor: pointer;
+      }
+    }
+
+    .action-btn--extra {
+      margin-top: 4px;
+    }
+
     .spin {
       animation: spin 1s linear infinite;
     }
@@ -414,4 +497,32 @@ export class LayoutSortPanelComponent {
   readonly opacityPercent = computed(() => Math.round(this.sampleWatermarkOpacity() * 100));
   readonly sampleSuccess = input<string | null>(null);
   readonly sampleError = input<string | null>(null);
+
+  /** Extra nevek input a szülőtől (projekt adat) */
+  readonly extraNames = input<{ students: string; teachers: string } | null>(null);
+  readonly insertingExtraNames = input(false);
+
+  /** Checkbox állapotok */
+  readonly extraStudentsEnabled = signal(true);
+  readonly extraTeachersEnabled = signal(true);
+
+  /** Van-e bármilyen extra név (szekció megjelenítéséhez) */
+  readonly hasAnyExtraNames = computed(() => {
+    const en = this.extraNames();
+    return !!en && (!!en.students || !!en.teachers);
+  });
+
+  /** Extra nevek beillesztés output */
+  readonly insertExtraNames = output<{ includeStudents: boolean; includeTeachers: boolean }>();
+
+  /** Státusz üzenetek */
+  readonly extraNamesSuccess = input<string | null>(null);
+  readonly extraNamesError = input<string | null>(null);
+
+  onInsertExtraNames(): void {
+    this.insertExtraNames.emit({
+      includeStudents: this.extraStudentsEnabled(),
+      includeTeachers: this.extraTeachersEnabled(),
+    });
+  }
 }

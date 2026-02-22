@@ -1134,6 +1134,7 @@
     [boardConfig]="designerBoardConfig()!"
     [projectId]="projectData()!.id"
     [projectName]="projectData()!.name"
+    [extraNames]="projectExtraNames()"
     (closeEvent)="closeLayoutDesigner()"
     (saveEvent)="onDesignerSave($event)"
     (autoSaveEvent)="onDesignerAutoSave($event)"

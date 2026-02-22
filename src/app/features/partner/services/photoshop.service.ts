@@ -411,6 +411,55 @@ export class PhotoshopService {
     }
   }
 
+  /**
+   * Extra nevek beillesztése/frissítése a megnyitott PSD-ben.
+   * ExtraNames group létrehozása header + names text layer párokkal.
+   */
+  async addExtraNames(
+    extraNames: { students: string; teachers: string },
+    options: { includeStudents: boolean; includeTeachers: boolean },
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      const jsonData: Record<string, unknown> = {
+        includeStudents: options.includeStudents,
+        includeTeachers: options.includeTeachers,
+        font: 'ArialMT',
+        fontSize: 20,
+        headerFontSize: 22,
+        textColor: { r: 0, g: 0, b: 0 },
+        textAlign: this.textAlign(),
+      };
+
+      if (options.includeStudents && extraNames.students) {
+        jsonData['students'] = {
+          header: 'Osztálytársaink voltak még:',
+          names: extraNames.students,
+        };
+      }
+
+      if (options.includeTeachers && extraNames.teachers) {
+        jsonData['teachers'] = {
+          header: 'Tanítottak még:',
+          names: extraNames.teachers,
+        };
+      }
+
+      const result = await this.runJsx({
+        scriptName: 'actions/add-extra-names.jsx',
+        jsonData,
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX addExtraNames hiba', err);
+      return { success: false, error: 'Váratlan hiba az extra nevek beillesztésekor' };
+    }
+  }
+
   /** Vízszintes gap beállítása */
   async setGapH(gapCm: number): Promise<boolean> {
     if (!this.api || typeof this.api.setGapH !== 'function') return false;

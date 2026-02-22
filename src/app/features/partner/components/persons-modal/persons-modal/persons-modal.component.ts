@@ -11,6 +11,7 @@ import { DialogWrapperComponent } from '../../../../../shared/components/dialog-
 import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
 import { ModalPersonCardComponent } from '../modal-person-card/modal-person-card.component';
 import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   LayoutPhotoUploadDialogComponent,
   PhotoUploadPerson,
@@ -32,7 +33,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,6 +70,9 @@ export class PersonsModalComponent implements OnInit {
 
   // Fotó feltöltés dialógus
   photoUploadPerson = signal<PhotoUploadPerson | null>(null);
+
+  // Törlés megerősítés
+  deleteConfirmPerson = signal<TabloPersonItem | null>(null);
 
   readonly hasInitialFilter = computed(() => !!this.initialTypeFilter());
   readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
@@ -293,5 +297,35 @@ export class PersonsModalComponent implements OnInit {
     if (current && current.id === event.personId) {
       this.lightboxPerson.set(updated.find(p => p.id === event.personId) || null);
     }
+  }
+
+  // --- Személy törlés ---
+  deletePerson(person: TabloPersonItem): void {
+    this.deleteConfirmPerson.set(person);
+  }
+
+  confirmDeletePerson(): void {
+    const person = this.deleteConfirmPerson();
+    if (!person) return;
+
+    this.projectService.deletePerson(this.projectId(), person.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.allPersons.set(this.allPersons().filter(p => p.id !== person.id));
+          // Szerkesztési sor törlése
+          const data = new Map(this.editData());
+          data.delete(person.id);
+          this.editData.set(data);
+          this.deleteConfirmPerson.set(null);
+        },
+        error: () => {
+          this.deleteConfirmPerson.set(null);
+        },
+      });
+  }
+
+  cancelDeletePerson(): void {
+    this.deleteConfirmPerson.set(null);
   }
 }

@@ -171,6 +171,15 @@
                   }
                 </button>
               }
+
+              <!-- Törlés gomb -->
+              <button
+                class="edit-delete-btn"
+                (click)="deletePerson(person)"
+                matTooltip="Személy törlése"
+              >
+                <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              </button>
             </div>
           }
         </div>
@@ -240,5 +249,16 @@
     [projectId]="projectId()"
     (close)="closePhotoUploadDialog()"
     (photoUploaded)="onPhotoUploaded($event)"
+  />
+}
+
+<!-- Törlés megerősítő dialógus -->
+@if (deleteConfirmPerson(); as person) {
+  <app-confirm-dialog
+    [title]="'Személy törlése'"
+    [message]="'Biztosan törlöd: ' + person.name + '?'"
+    confirmText="Törlés"
+    confirmType="danger"
+    (resultEvent)="$event.action === 'confirm' ? confirmDeletePerson() : cancelDeletePerson()"
   />
 }

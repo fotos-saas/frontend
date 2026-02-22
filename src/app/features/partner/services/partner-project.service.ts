@@ -205,6 +205,21 @@ export class PartnerProjectService {
   }
 
   /**
+   * Személy törlése a projektből
+   */
+  deletePerson(projectId: number, personId: number): Observable<{
+    success: boolean;
+    message: string;
+    data: { id: number };
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+      data: { id: number };
+    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}`);
+  }
+
+  /**
    * Override: projekt-specifikus fotó beállítása
    */
   overridePersonPhoto(projectId: number, personId: number, photoId: number): Observable<{

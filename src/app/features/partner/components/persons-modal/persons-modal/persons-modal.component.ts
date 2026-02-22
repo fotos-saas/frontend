@@ -128,17 +128,17 @@ export class PersonsModalComponent implements OnInit {
     this.loadPersons();
   }
 
-  loadPersons(): void {
-    this.loading.set(true);
+  loadPersons(silent = false): void {
+    if (!silent) this.loading.set(true);
     this.partnerService.getProjectPersons(this.projectId())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.allPersons.set(response.data);
-          this.loading.set(false);
+          if (!silent) this.loading.set(false);
         },
         error: () => {
-          this.loading.set(false);
+          if (!silent) this.loading.set(false);
         }
       });
   }
@@ -255,6 +255,11 @@ export class PersonsModalComponent implements OnInit {
       type: person.type as 'student' | 'teacher',
       archiveId: person.archiveId ?? null,
     });
+  }
+
+  closePhotoUploadDialog(): void {
+    this.photoUploadPerson.set(null);
+    this.loadPersons(true);
   }
 
   onPhotoUploaded(result: PhotoUploadResult): void {

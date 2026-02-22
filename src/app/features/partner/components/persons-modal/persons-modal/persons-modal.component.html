@@ -239,7 +239,7 @@
   <app-layout-photo-upload-dialog
     [person]="uploadPerson"
     [projectId]="projectId()"
-    (close)="photoUploadPerson.set(null)"
+    (close)="closePhotoUploadDialog()"
     (photoUploaded)="onPhotoUploaded($event)"
   />
 }

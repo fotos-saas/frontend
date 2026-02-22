@@ -304,19 +304,26 @@ function setTouchBarContext(context: string): void {
 // ============ Overlay Window (Always-on-top Command Palette) ============
 
 function createOverlayWindow(): void {
+  // Vizszintes toolbar sav — alulra pozicionalva
+  const activeDisplay = screen.getPrimaryDisplay();
+  const { width: screenW, height: screenH, x: screenX, y: screenY } = activeDisplay.workArea;
+  const toolbarW = Math.min(820, screenW - 40);
+  const toolbarH = 52;
+
   overlayWindow = new BrowserWindow({
-    width: 380,
-    height: 580,
+    width: toolbarW,
+    height: toolbarH,
+    x: Math.round(screenX + (screenW - toolbarW) / 2),
+    y: Math.round(screenY + screenH - toolbarH - 20),
     frame: false,
     transparent: true,
     alwaysOnTop: true,
     skipTaskbar: true,
     focusable: true,
     resizable: false,
+    movable: true,
     show: false,
-    // macOS frosted glass
-    vibrancy: process.platform === 'darwin' ? 'under-window' : undefined,
-    visualEffectState: 'active',
+    hasShadow: false,
     backgroundColor: '#00000000',
     webPreferences: {
       nodeIntegration: false,
@@ -328,21 +335,17 @@ function createOverlayWindow(): void {
     },
   });
 
-  // Overlay route betoltese
+  // Overlay route betoltese (path-based, NEM hash!)
   const overlayUrl = isDev
-    ? 'http://localhost:4205/#/overlay'
-    : `${PRODUCTION_URL}/#/overlay`;
+    ? 'http://localhost:4205/overlay'
+    : `${PRODUCTION_URL}/overlay`;
 
   overlayWindow.loadURL(overlayUrl).catch((error) => {
     log.error('Failed to load overlay URL:', error);
   });
 
-  // Focus elvesztesekor elrejtes (hacsak nem devtools)
-  overlayWindow.on('blur', () => {
-    if (overlayWindow && !overlayWindow.isDestroyed() && !overlayWindow.webContents.isDevToolsOpened()) {
-      overlayWindow.hide();
-    }
-  });
+  // NEM rejtjuk el blur-ra! Always-on-top marad.
+  // Csak a hide gomb vagy Ctrl+K rejti el.
 
   overlayWindow.on('closed', () => {
     overlayWindow = null;
@@ -354,9 +357,8 @@ function createOverlayWindow(): void {
 function toggleOverlayWindow(): void {
   if (!overlayWindow || overlayWindow.isDestroyed()) {
     createOverlayWindow();
-    // Var, amig betoltodik
     overlayWindow?.once('ready-to-show', () => {
-      showOverlayAtCenter();
+      showOverlayWindow();
     });
     return;
   }
@@ -364,26 +366,13 @@ function toggleOverlayWindow(): void {
   if (overlayWindow.isVisible()) {
     overlayWindow.hide();
   } else {
-    showOverlayAtCenter();
+    showOverlayWindow();
   }
 }
 
-function showOverlayAtCenter(): void {
+function showOverlayWindow(): void {
   if (!overlayWindow || overlayWindow.isDestroyed()) return;
-
-  // Aktiv monitor kozepere pozicionalas
-  const cursorPoint = screen.getCursorScreenPoint();
-  const activeDisplay = screen.getDisplayNearestPoint(cursorPoint);
-  const { x, y, width, height } = activeDisplay.workArea;
-  const [overlayWidth, overlayHeight] = overlayWindow.getSize();
-
-  overlayWindow.setPosition(
-    Math.round(x + (width - overlayWidth) / 2),
-    Math.round(y + (height - overlayHeight) / 2),
-  );
-
   overlayWindow.show();
-  overlayWindow.focus();
 }
 
 function createWindow(): void {
@@ -682,10 +671,15 @@ app.whenReady().then(() => {
     () => mainWindow,
   );
 
-  // GlobalShortcut: Ctrl+Space (vagy Cmd+Space macOS-en)
-  globalShortcut.register('CommandOrControl+Space', () => {
+  // GlobalShortcut: Ctrl+K (command palette — PS-ben nem foglalt)
+  const shortcutRegistered = globalShortcut.register('Control+K', () => {
     toggleOverlayWindow();
   });
+  if (!shortcutRegistered) {
+    log.warn('Failed to register Ctrl+K global shortcut');
+  } else {
+    log.info('Overlay shortcut registered: Ctrl+K');
+  }
 
   // Photoshop IPC handlerek regisztralasa
   if (mainWindow) {

@@ -3,9 +3,9 @@
     <div class="header-content">
       <h1>Projektek</h1>
       @if (projectLimits()?.max !== null) {
-        <p class="subtitle">{{ projectLimits()?.current }} / {{ projectLimits()?.max }} projekt</p>
+        <p class="subtitle">Összes projekt: {{ projectLimits()?.current }} / {{ projectLimits()?.max }}</p>
       } @else {
-        <p class="subtitle">{{ totalProjects() }} projekt összesen</p>
+        <p class="subtitle">Összes projekt: {{ totalProjects() }}</p>
       }
     </div>
     <div class="header-actions">

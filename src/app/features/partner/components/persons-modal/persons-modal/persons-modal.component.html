@@ -210,10 +210,23 @@
       @if (!loading() && !searchQuery()) {
         @if (editMode()) {
           <div class="extra-names-section">
-            <label class="extra-names-label">
-              <lucide-icon [name]="ICONS.LIST" [size]="14" />
-              {{ typeFilter() === 'teacher' ? 'Tanítottak még' : 'Egyéb nevek' }}
-            </label>
+            <div class="extra-names-header">
+              <label class="extra-names-label">
+                <lucide-icon [name]="ICONS.LIST" [size]="14" />
+                {{ typeFilter() === 'teacher' ? 'Tanítottak még' : 'Egyéb nevek' }}
+              </label>
+              <div class="extra-names-actions">
+                <button type="button" class="en-action-btn" matTooltip="Névsor (magyar ábécé)" (click)="sortExtraNamesAbc()">
+                  <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="14" />
+                </button>
+                <button type="button" class="en-action-btn" [matTooltip]="extraNamesInline() ? 'Egymás alá' : 'Sorba'" (click)="toggleExtraNamesFormat()">
+                  <lucide-icon [name]="extraNamesInline() ? ICONS.ROWS_3 : ICONS.COLUMNS_3" [size]="14" />
+                </button>
+                <button type="button" class="en-action-btn" matTooltip="Másolás" (click)="copyExtraNames()">
+                  <lucide-icon [name]="ICONS.COPY" [size]="14" />
+                </button>
+              </div>
+            </div>
             <textarea
               class="extra-names-textarea"
               [placeholder]="typeFilter() === 'teacher' ? 'Hargitai György, Kiss Péter, ...' : 'További nevek, vesszővel elválasztva...'"
@@ -222,27 +235,23 @@
               rows="3"
             ></textarea>
             @if (extraNamesDirty()) {
-              <button
-                type="button"
-                class="extra-names-save-btn"
-                (click)="saveExtraNames()"
-                [disabled]="extraNamesSaving()"
-              >
-                @if (extraNamesSaving()) {
-                  <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
-                } @else {
-                  <lucide-icon [name]="ICONS.SAVE" [size]="14" />
-                }
+              <button type="button" class="extra-names-save-btn" (click)="saveExtraNames()" [disabled]="extraNamesSaving()">
+                <lucide-icon [name]="extraNamesSaving() ? ICONS.LOADER : ICONS.SAVE" [size]="14" [class.spin]="extraNamesSaving()" />
                 Mentés
               </button>
             }
           </div>
         } @else if (currentExtraText()) {
           <div class="extra-names-section extra-names-section--readonly">
-            <span class="extra-names-label">
-              <lucide-icon [name]="ICONS.LIST" [size]="14" />
-              {{ typeFilter() === 'teacher' ? 'Tanítottak még' : 'Egyéb nevek' }}
-            </span>
+            <div class="extra-names-header">
+              <span class="extra-names-label">
+                <lucide-icon [name]="ICONS.LIST" [size]="14" />
+                {{ typeFilter() === 'teacher' ? 'Tanítottak még' : 'Egyéb nevek' }}
+              </span>
+              <button type="button" class="en-action-btn" matTooltip="Másolás" (click)="copyExtraNames()">
+                <lucide-icon [name]="ICONS.COPY" [size]="14" />
+              </button>
+            </div>
             <p class="extra-names-text">{{ currentExtraText() }}</p>
           </div>
         }

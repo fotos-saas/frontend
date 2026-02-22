@@ -78,6 +78,7 @@ export class PersonsModalComponent implements OnInit {
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
   extraNamesDirty = signal(false);
   extraNamesSaving = signal(false);
+  extraNamesInline = signal(true); // true = sorban (vesszővel), false = egymás alatt
 
   readonly hasInitialFilter = computed(() => !!this.initialTypeFilter());
   readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
@@ -129,47 +130,28 @@ export class PersonsModalComponent implements OnInit {
 
   ngOnInit(): void {
     const initial = this.initialTypeFilter();
-    if (initial) {
-      this.typeFilter.set(initial);
-    }
+    if (initial) this.typeFilter.set(initial);
     this.loadPersons();
   }
 
   loadPersons(silent = false): void {
     if (!silent) this.loading.set(true);
-    this.partnerService.getProjectPersons(this.projectId())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.allPersons.set(response.data);
-          if (response.extraNames) {
-            this.extraNames.set(response.extraNames);
-            this.extraNamesDirty.set(false);
-          }
-          if (!silent) this.loading.set(false);
-        },
-        error: () => {
-          if (!silent) this.loading.set(false);
-        }
-      });
+    this.partnerService.getProjectPersons(this.projectId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (r) => {
+        this.allPersons.set(r.data);
+        if (r.extraNames) { this.extraNames.set(r.extraNames); this.extraNamesDirty.set(false); }
+        if (!silent) this.loading.set(false);
+      },
+      error: () => { if (!silent) this.loading.set(false); },
+    });
   }
 
   toggleEditMode(): void {
-    if (this.editMode()) {
-      this.editMode.set(false);
-      this.editData.set(new Map());
-    } else {
-      this.initEditData();
-      this.editMode.set(true);
-    }
-  }
-
-  private initEditData(): void {
+    if (this.editMode()) { this.editMode.set(false); this.editData.set(new Map()); return; }
     const map = new Map<number, EditRow>();
-    for (const p of this.filteredPersons()) {
-      map.set(p.id, { name: p.name, title: p.title || '', note: p.note || '', dirty: false, saving: false });
-    }
+    for (const p of this.filteredPersons()) map.set(p.id, { name: p.name, title: p.title || '', note: p.note || '', dirty: false, saving: false });
     this.editData.set(map);
+    this.editMode.set(true);
   }
 
   private isDirty(row: EditRow, person: TabloPersonItem | undefined): boolean {
@@ -280,18 +262,37 @@ export class PersonsModalComponent implements OnInit {
   saveExtraNames(): void {
     if (!this.extraNamesDirty() || this.extraNamesSaving()) return;
     this.extraNamesSaving.set(true);
-
     this.projectService.updateExtraNames(this.projectId(), this.extraNames())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => {
-          this.extraNames.set(res.data.extraNames);
-          this.extraNamesDirty.set(false);
-          this.extraNamesSaving.set(false);
-        },
-        error: () => {
-          this.extraNamesSaving.set(false);
-        },
+        next: (res) => { this.extraNames.set(res.data.extraNames); this.extraNamesDirty.set(false); this.extraNamesSaving.set(false); },
+        error: () => this.extraNamesSaving.set(false),
       });
+  }
+
+  sortExtraNamesAbc(): void {
+    const field = this.typeFilter() === 'teacher' ? 'teachers' : 'students';
+    const text = this.extraNames()[field];
+    const sep = text.includes('\n') ? '\n' : ', ';
+    const names = text.split(sep).map(n => n.trim()).filter(Boolean);
+    const sorted = names.sort((a, b) => a.localeCompare(b, 'hu'));
+    this.onExtraNamesChange(field, sorted.join(sep));
+  }
+
+  toggleExtraNamesFormat(): void {
+    const field = this.typeFilter() === 'teacher' ? 'teachers' : 'students';
+    const text = this.extraNames()[field];
+    const isInline = !text.includes('\n');
+    if (isInline) {
+      this.onExtraNamesChange(field, text.split(',').map(n => n.trim()).filter(Boolean).join('\n'));
+    } else {
+      this.onExtraNamesChange(field, text.split('\n').map(n => n.trim()).filter(Boolean).join(', '));
+    }
+    this.extraNamesInline.set(!isInline);
+  }
+
+  copyExtraNames(): void {
+    const text = this.currentExtraText();
+    if (text) navigator.clipboard.writeText(text);
   }
 }

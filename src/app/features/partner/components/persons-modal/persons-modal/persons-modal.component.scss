@@ -464,6 +464,13 @@ ps-toggle {
   border-color: get-color('slate', 200);
 }
 
+.extra-names-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
 .extra-names-label {
   display: flex;
   align-items: center;
@@ -471,7 +478,32 @@ ps-toggle {
   font-size: 0.8125rem;
   font-weight: 600;
   color: get-color('slate', 600);
-  margin-bottom: 8px;
+}
+
+.extra-names-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.en-action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 6px;
+  color: get-color('slate', 500);
+  cursor: pointer;
+  @include transition-fast;
+}
+
+.en-action-btn:hover {
+  background: get-color('slate', 100);
+  border-color: get-color('slate', 300);
+  color: get-color('slate', 700);
 }
 
 .extra-names-textarea {

@@ -1,7 +1,7 @@
 @if (person()) {
   <div class="lightbox" (click)="close.emit()">
     <div class="lightbox-content" (click)="$event.stopPropagation()">
-      <img [src]="person()!.photoUrl!" [alt]="person()!.name" />
+      <img [src]="person()!.photoUrl || person()!.photoThumbUrl" [alt]="person()!.name" />
       <div class="lightbox-caption">
         <span class="lightbox-name">{{ person()!.name }}</span>
         <span class="lightbox-type">

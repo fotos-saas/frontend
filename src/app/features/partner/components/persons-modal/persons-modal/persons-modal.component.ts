@@ -98,7 +98,7 @@ export class PersonsModalComponent implements OnInit {
     return result;
   });
 
-  readonly personsWithPhotos = computed(() => this.filteredPersons().filter(p => p.photoUrl));
+  readonly personsWithPhotos = computed(() => this.filteredPersons().filter(p => p.photoUrl || p.photoThumbUrl));
 
   readonly emptyStateTitle = computed(() => {
     if (this.searchQuery()) return 'Nincs találat';

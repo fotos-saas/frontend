@@ -1,6 +1,6 @@
 import {
   Component, ChangeDetectionStrategy, input, output, inject,
-  OnInit, OnDestroy, ElementRef, viewChild, signal, computed, HostListener,
+  OnInit, OnDestroy, ElementRef, viewChild, viewChildren, signal, computed, HostListener,
 } from '@angular/core';
 import { SnapshotLayer, SnapshotListItem } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
@@ -21,6 +21,7 @@ import { LayoutPhotoUploadDialogComponent, PhotoUploadPerson, PhotoUploadResult 
 import { LayoutPhotoBulkDialogComponent } from './components/layout-photo-bulk-dialog/layout-photo-bulk-dialog.component';
 import { LayoutActionsDialogComponent } from './components/layout-actions-dialog/layout-actions-dialog.component';
 import { ExtraNamesDialogComponent } from './components/extra-names-dialog/extra-names-dialog.component';
+import { LayoutCommandOverlayComponent } from './components/layout-command-overlay/layout-command-overlay.component';
 import { ActionPersonItem } from './components/layout-actions-dialog/layout-actions.types';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -38,7 +39,7 @@ import { firstValueFrom } from 'rxjs';
     LayoutToolbarComponent, LayoutCanvasComponent, LayoutSortPanelComponent,
     LayoutSortCustomDialogComponent, LayoutPhotoUploadDialogComponent,
     LayoutPhotoBulkDialogComponent, LayoutActionsDialogComponent, ExtraNamesDialogComponent,
-    LucideAngularModule,
+    LayoutCommandOverlayComponent, LucideAngularModule,
   ],
   providers: [
     LayoutDesignerStateService,
@@ -155,6 +156,21 @@ import { firstValueFrom } from 'rxjs';
             (insert)="onExtraNamesDialogInsert($event)"
           />
         }
+
+        <!-- Command Overlay (dupla Ctrl) -->
+        <app-layout-command-overlay
+          (commandExecuted)="onOverlayCommand($event)"
+        />
+
+        <!-- FAB: Command Overlay toggle -->
+        <button
+          class="command-fab"
+          (click)="commandOverlay()?.toggle()"
+          matTooltip="Parancsok (Ctrl Ctrl)"
+          matTooltipPosition="left"
+        >
+          <lucide-icon [name]="ICONS.COMMAND" [size]="20" />
+        </button>
       }
     </div>
   `,
@@ -234,6 +250,41 @@ import { firstValueFrom } from 'rxjs';
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+
+    /* FAB: Command Overlay trigger */
+    .command-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      border-radius: 14px;
+      background: linear-gradient(135deg, #2a2a4a, #1e1e38);
+      color: #a78bfa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1200;
+      box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(124, 58, 237, 0.12);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &:hover {
+        transform: scale(1.08);
+        border-color: rgba(167, 139, 250, 0.5);
+        box-shadow:
+          0 6px 28px rgba(0, 0, 0, 0.5),
+          0 0 40px rgba(124, 58, 237, 0.2);
+        color: #c4b5fd;
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -241,7 +292,18 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   private readonly state = inject(LayoutDesignerStateService);
   protected readonly ps = inject(PhotoshopService);
   private readonly projectService = inject(PartnerProjectService);
+  private readonly sortService = inject(LayoutDesignerSortService);
+  private readonly gridService = inject(LayoutDesignerGridService);
+  private readonly actionsService = inject(LayoutDesignerActionsService);
   protected readonly ICONS = ICONS;
+
+  /** Command Overlay referencia */
+  readonly commandOverlay = viewChild(LayoutCommandOverlayComponent);
+
+  /** Dupla Ctrl detekció */
+  private lastCtrlTime = 0;
+  private readonly DOUBLE_TAP_THRESHOLD = 400;
+
   readonly showCustomDialog = signal(false);
 
   /** Single person dialógus: a kijelölt személy adatai, vagy null ha nem látszik */
@@ -375,11 +437,28 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
+    // Dupla Ctrl detekció (Command Overlay toggle)
+    if (event.key === 'Control' && !event.metaKey && !event.shiftKey && !event.altKey) {
+      const now = Date.now();
+      if (now - this.lastCtrlTime < this.DOUBLE_TAP_THRESHOLD) {
+        this.commandOverlay()?.toggle();
+        this.lastCtrlTime = 0;
+      } else {
+        this.lastCtrlTime = now;
+      }
+      return;
+    }
+
     // Textarea/input-ban ne kapjuk el (pl. egyedi sorrend dialógus)
     const tag = (event.target as HTMLElement)?.tagName;
     if (tag === 'TEXTAREA' || tag === 'INPUT') return;
 
     if (event.key === 'Escape') {
+      // Command overlay nyitva? ESC azt zárja be
+      if (this.commandOverlay()?.visible()) {
+        this.commandOverlay()?.close();
+        return;
+      }
       // Ha dialógus nyitva, az ESC azt zárja be (DialogWrapper kezeli)
       if (this.showPhotoDialog() || this.showBulkPhotoDialog() || this.showCustomDialog() || this.showActionsDialog() || this.showExtraNamesDialog()) return;
       this.close();
@@ -398,6 +477,42 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {
       event.preventDefault();
       this.state.redo();
+    }
+  }
+
+  /** Command Overlay parancs végrehajtása */
+  onOverlayCommand(commandId: string): void {
+    this.commandOverlay()?.close();
+    switch (commandId) {
+      case 'sync-photos': this.syncAllPhotos(); break;
+      case 'arrange-names': this.arrangeNames(); break;
+      case 'open-project': this.onOpenProject(); break;
+      case 'open-workdir': this.onOpenWorkDir(); break;
+      case 'refresh': this.refresh(); break;
+      case 'sort-abc': this.sortService.sortByAbc(); break;
+      case 'sort-gender': this.sortService.sortByGender(); break;
+      case 'sort-custom': this.showCustomDialog.set(true); break;
+      case 'generate-sample': this.onGenerateSample(); break;
+      case 'generate-final': this.onGenerateFinal(); break;
+      case 'upload-photo': this.openPhotoDialog(); break;
+      case 'link-layers': this.onLinkLayers(); break;
+      case 'unlink-layers': this.onUnlinkLayers(); break;
+      case 'extra-names': this.showExtraNamesDialog.set(true); break;
+      case 'toggle-grid': this.gridService.cycleGridMode(); break;
+      case 'snap-grid': this.gridService.snapAllToGrid(); break;
+      case 'save': this.save(); break;
+      case 'batch-actions': this.showActionsDialog.set(true); break;
+      case 'bulk-photos': this.showBulkPhotoDialog.set(true); break;
+      case 'align-left': this.actionsService.alignLeft(); break;
+      case 'align-center-h': this.actionsService.alignCenterHorizontal(); break;
+      case 'align-right': this.actionsService.alignRight(); break;
+      case 'align-top': this.actionsService.alignTop(); break;
+      case 'align-center-v': this.actionsService.alignCenterVertical(); break;
+      case 'align-bottom': this.actionsService.alignBottom(); break;
+      case 'distribute-h': this.actionsService.distributeHorizontal(); break;
+      case 'distribute-v': this.actionsService.distributeVertical(); break;
+      case 'center-document': this.actionsService.centerOnDocument(); break;
+      case 'arrange-grid': this.actionsService.arrangeToGrid(); break;
     }
   }
 

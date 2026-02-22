@@ -407,6 +407,25 @@ export const ICONS = {
   USERS_ROUND: 'users-round',
   FILE_DOWN: 'file-down',
   REPEAT: 'repeat',
+
+  // Floating Overlay
+  COMMAND: 'command',
+  ZAPS: 'zap',
+  SQUARE_STACK: 'square-stack',
+  PANEL_LEFT: 'panel-left',
+  TYPE: 'type',
+  MINIMIZE_2: 'minimize-2',
+  GRIP: 'grip-vertical',
+  CHEVRONS_LEFT_RIGHT: 'chevrons-left-right',
+  MOUSE_POINTER_CLICK: 'mouse-pointer-click',
+  SCAN_LINE: 'scan-line',
+  REPLACE: 'replace',
+  FLIP_HORIZONTAL: 'flip-horizontal',
+  FLIP_VERTICAL: 'flip-vertical-2',
+  SHRINK: 'shrink',
+  SQUARE_DASHED_BOTTOM: 'square-dashed-bottom',
+  COMPONENT: 'component',
+  BLEND: 'blend',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

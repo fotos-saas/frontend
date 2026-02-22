@@ -218,7 +218,7 @@
               class="extra-names-textarea"
               [placeholder]="typeFilter() === 'teacher' ? 'Hargitai György, Kiss Péter, ...' : 'További nevek, vesszővel elválasztva...'"
               [value]="currentExtraText()"
-              (input)="onExtraNamesChange(typeFilter(), $any($event.target).value)"
+              (input)="onExtraNamesChange(typeFilter() === 'teacher' ? 'teachers' : 'students', $any($event.target).value)"
               rows="3"
             ></textarea>
             @if (extraNamesDirty()) {

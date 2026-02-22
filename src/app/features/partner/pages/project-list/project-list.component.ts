@@ -108,6 +108,7 @@ export class PartnerProjectListComponent implements OnInit {
   totalProjects = signal(0);
   projectLimits = signal<ProjectLimits | null>(null);
   syncing = signal(false);
+  pendingSyncCount = signal<number | null>(null);
 
   // Státusz opciók
   readonly statusOptions = [
@@ -453,13 +454,38 @@ export class PartnerProjectListComponent implements OnInit {
 
   triggerSync(): void {
     if (this.syncing()) return;
-    this.syncing.set(true);
 
+    // Ha még nem ellenőriztük — először csak check
+    if (this.pendingSyncCount() === null) {
+      this.syncing.set(true);
+      this.orderSyncService.checkSync()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (res) => {
+            this.syncing.set(false);
+            const count = res.data?.pending_count ?? 0;
+            this.pendingSyncCount.set(count);
+            if (count === 0) {
+              this.toast.info('Naprakész', 'Nincs új szinkronizálandó projekt');
+            }
+          },
+          error: (err) => {
+            this.syncing.set(false);
+            this.toast.error('Hiba', 'Nem sikerült ellenőrizni a régi rendszert');
+            this.logger.error('Sync check error', err);
+          },
+        });
+      return;
+    }
+
+    // Ha már tudjuk hány van — szinkronizálás
+    this.syncing.set(true);
     this.orderSyncService.triggerSync()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.syncing.set(false);
+          this.pendingSyncCount.set(null);
           if (res.data?.created > 0) {
             this.toast.success('Szinkronizálva', res.message);
             this.loadProjects();
@@ -469,6 +495,7 @@ export class PartnerProjectListComponent implements OnInit {
         },
         error: (err) => {
           this.syncing.set(false);
+          this.pendingSyncCount.set(null);
           this.toast.error('Hiba', err.error?.message || 'Szinkronizálás sikertelen');
           this.logger.error('Sync trigger error', err);
         },

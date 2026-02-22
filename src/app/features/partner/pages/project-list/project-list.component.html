@@ -11,17 +11,24 @@
     <div class="header-actions">
       <button
         type="button"
-        class="btn-outline"
+        class="btn-secondary btn-with-badge"
         [disabled]="syncing()"
         (click)="triggerSync()"
-        matTooltip="Megrendeléses projektek szinkronizálása a régi rendszerből"
+        [matTooltip]="pendingSyncCount() !== null && pendingSyncCount()! > 0
+          ? pendingSyncCount() + ' új projekt szinkronizálható'
+          : 'Megrendeléses projektek szinkronizálása a régi rendszerből'"
       >
         @if (syncing()) {
           <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
         } @else {
           <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
         }
-        Szinkronizálás
+        @if (pendingSyncCount() !== null && pendingSyncCount()! > 0) {
+          Szinkronizálás indítása
+          <span class="btn-badge">{{ pendingSyncCount() }}</span>
+        } @else {
+          Szinkronizálás
+        }
       </button>
       <button
         type="button"

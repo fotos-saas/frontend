@@ -44,6 +44,15 @@ export class PartnerOrderSyncService {
   }
 
   /**
+   * Szinkronizálandó projektek számának ellenőrzése.
+   */
+  checkSync(): Observable<{ success: boolean; data: { pending_count: number } }> {
+    return this.http.get<{ success: boolean; data: { pending_count: number } }>(
+      `${environment.apiUrl}/partner/order-sync/check`
+    );
+  }
+
+  /**
    * Partner projektek szinkronizálása a régi API-ból.
    */
   triggerSync(): Observable<{ success: boolean; message: string; data: { created: number; processed: number; failed: number; errors: string[] } }> {

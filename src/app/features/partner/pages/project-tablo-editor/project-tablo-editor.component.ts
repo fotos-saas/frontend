@@ -961,6 +961,14 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
   }
 
+  /** Extra nevek frissítése a layout designer dialógusból */
+  onExtraNamesUpdated(extraNames: { students: string; teachers: string }): void {
+    const p = this.project();
+    if (p) {
+      this.project.set({ ...p, extraNames });
+    }
+  }
+
   /** Mentés elnevezési dialógus bezárása (nem ment) */
   cancelDesignerSave(): void {
     this.showDesignerSaveDialog.set(false);

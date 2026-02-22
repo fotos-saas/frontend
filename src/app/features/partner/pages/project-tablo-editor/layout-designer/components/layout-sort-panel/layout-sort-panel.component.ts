@@ -186,38 +186,28 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
             <span>Extra nevek</span>
           </div>
 
-          <div class="sidebar__checkboxes">
-            @if (extraNames()?.students) {
-              <label class="sidebar__checkbox">
-                <input type="checkbox"
-                  [checked]="extraStudentsEnabled()"
-                  (change)="extraStudentsEnabled.set(!extraStudentsEnabled())" />
-                <span>Osztálytársaink még</span>
-              </label>
-            }
-            @if (extraNames()?.teachers) {
-              <label class="sidebar__checkbox">
-                <input type="checkbox"
-                  [checked]="extraTeachersEnabled()"
-                  (change)="extraTeachersEnabled.set(!extraTeachersEnabled())" />
-                <span>Tanítottak még</span>
-              </label>
-            }
+          <div class="sidebar__actions">
+            <button class="action-btn"
+              (click)="openExtraNamesDialog.emit()"
+              matTooltip="Extra nevek szerkesztése és beillesztése"
+              matTooltipPosition="right">
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+              <span>Extra nevek szerkesztése</span>
+            </button>
+            <button class="action-btn action-btn--extra"
+              [disabled]="insertingExtraNames()"
+              (click)="onInsertExtraNames()"
+              matTooltip="Extra nevek beillesztése a PSD-be (utolsó mentett állapot)"
+              matTooltipPosition="right">
+              @if (insertingExtraNames()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                <span>Beillesztés...</span>
+              } @else {
+                <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+                <span>Extra nevek beillesztése</span>
+              }
+            </button>
           </div>
-
-          <button class="action-btn action-btn--extra"
-            [disabled]="insertingExtraNames() || (!extraStudentsEnabled() && !extraTeachersEnabled())"
-            (click)="onInsertExtraNames()"
-            matTooltip="Extra nevek beillesztése/frissítése a PSD-ben"
-            matTooltipPosition="right">
-            @if (insertingExtraNames()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              <span>Beillesztés...</span>
-            } @else {
-              <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
-              <span>Extra nevek beillesztése</span>
-            }
-          </button>
 
           @if (extraNamesSuccess()) {
             <div class="sidebar__status sidebar__status--success">
@@ -417,29 +407,6 @@ import { LayoutDesignerSortService } from '../../layout-designer-sort.service';
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    .sidebar__checkboxes {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .sidebar__checkbox {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.7rem;
-      color: rgba(255, 255, 255, 0.7);
-      cursor: pointer;
-
-      input[type="checkbox"] {
-        accent-color: #a78bfa;
-        width: 14px;
-        height: 14px;
-        cursor: pointer;
-      }
-    }
-
     .action-btn--extra {
       margin-top: 4px;
     }
@@ -462,6 +429,7 @@ export class LayoutSortPanelComponent {
 
   readonly openCustomDialog = output<void>();
   readonly openActions = output<void>();
+  readonly openExtraNamesDialog = output<void>();
   readonly generateSample = output<void>();
   readonly generateFinal = output<void>();
   readonly cycleFinalMode = output<void>();
@@ -502,10 +470,6 @@ export class LayoutSortPanelComponent {
   readonly extraNames = input<{ students: string; teachers: string } | null>(null);
   readonly insertingExtraNames = input(false);
 
-  /** Checkbox állapotok */
-  readonly extraStudentsEnabled = signal(true);
-  readonly extraTeachersEnabled = signal(true);
-
   /** Van-e bármilyen extra név (szekció megjelenítéséhez) */
   readonly hasAnyExtraNames = computed(() => {
     const en = this.extraNames();
@@ -521,8 +485,8 @@ export class LayoutSortPanelComponent {
 
   onInsertExtraNames(): void {
     this.insertExtraNames.emit({
-      includeStudents: this.extraStudentsEnabled(),
-      includeTeachers: this.extraTeachersEnabled(),
+      includeStudents: !!this.extraNames()?.students,
+      includeTeachers: !!this.extraNames()?.teachers,
     });
   }
 }

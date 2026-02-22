@@ -20,6 +20,7 @@ import { LayoutSortCustomDialogComponent } from './components/layout-sort-custom
 import { LayoutPhotoUploadDialogComponent, PhotoUploadPerson, PhotoUploadResult } from './components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
 import { LayoutPhotoBulkDialogComponent } from './components/layout-photo-bulk-dialog/layout-photo-bulk-dialog.component';
 import { LayoutActionsDialogComponent } from './components/layout-actions-dialog/layout-actions-dialog.component';
+import { ExtraNamesDialogComponent } from './components/extra-names-dialog/extra-names-dialog.component';
 import { ActionPersonItem } from './components/layout-actions-dialog/layout-actions.types';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -36,7 +37,8 @@ import { firstValueFrom } from 'rxjs';
   imports: [
     LayoutToolbarComponent, LayoutCanvasComponent, LayoutSortPanelComponent,
     LayoutSortCustomDialogComponent, LayoutPhotoUploadDialogComponent,
-    LayoutPhotoBulkDialogComponent, LayoutActionsDialogComponent, LucideAngularModule,
+    LayoutPhotoBulkDialogComponent, LayoutActionsDialogComponent, ExtraNamesDialogComponent,
+    LucideAngularModule,
   ],
   providers: [
     LayoutDesignerStateService,
@@ -108,6 +110,7 @@ import { firstValueFrom } from 'rxjs';
             (openProject)="onOpenProject()"
             (openWorkDir)="onOpenWorkDir()"
             (insertExtraNames)="onInsertExtraNames($event)"
+            (openExtraNamesDialog)="showExtraNamesDialog.set(true)"
           />
           <div class="layout-designer__canvas-area" #canvasArea>
             <app-layout-canvas
@@ -143,6 +146,13 @@ import { firstValueFrom } from 'rxjs';
             [preSelectedPersonIds]="preSelectedActionPersonIds()"
             (close)="showActionsDialog.set(false)"
             (executed)="onActionsExecuted()"
+          />
+        }
+        @if (showExtraNamesDialog() && extraNames()) {
+          <app-extra-names-dialog
+            [extraNames]="extraNames()!"
+            (close)="showExtraNamesDialog.set(false)"
+            (insert)="onExtraNamesDialogInsert($event)"
           />
         }
       }
@@ -243,6 +253,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Akciók dialógus megjelenítése */
   readonly showActionsDialog = signal(false);
 
+  /** Extra nevek szerkesztő dialógus megjelenítése */
+  readonly showExtraNamesDialog = signal(false);
+
   /** Bulk dialógus személyei */
   readonly bulkDialogPersons = computed<PhotoUploadPerson[]>(() => {
     if (!this.showBulkPhotoDialog()) return [];
@@ -310,6 +323,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Auto-mentés event — csendes mentés dialógus nélkül (pl. frissítés után) */
   readonly autoSaveEvent = output<{ layers: SnapshotLayer[] }>();
 
+  /** Extra nevek frissítés event (szülőnek, hogy a projekt adatot frissítse) */
+  readonly extraNamesUpdated = output<{ students: string; teachers: string }>();
+
   readonly overlayEl = viewChild.required<ElementRef<HTMLElement>>('overlayEl');
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
@@ -365,7 +381,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
     if (event.key === 'Escape') {
       // Ha dialógus nyitva, az ESC azt zárja be (DialogWrapper kezeli)
-      if (this.showPhotoDialog() || this.showBulkPhotoDialog() || this.showCustomDialog() || this.showActionsDialog()) return;
+      if (this.showPhotoDialog() || this.showBulkPhotoDialog() || this.showCustomDialog() || this.showActionsDialog() || this.showExtraNamesDialog()) return;
       this.close();
       return;
     }
@@ -588,6 +604,43 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       }
     } catch {
       this.extraNamesError.set('Váratlan hiba az extra nevek beillesztésekor');
+    } finally {
+      this.insertingExtraNames.set(false);
+    }
+  }
+
+  /** Extra nevek dialógusból: mentés backendre + beillesztés PSD-be */
+  async onExtraNamesDialogInsert(event: {
+    extraNames: { students: string; teachers: string };
+    includeStudents: boolean;
+    includeTeachers: boolean;
+  }): Promise<void> {
+    this.showExtraNamesDialog.set(false);
+    this.insertingExtraNames.set(true);
+    this.extraNamesSuccess.set(null);
+    this.extraNamesError.set(null);
+
+    try {
+      // 1. Mentés backendre
+      const saveResult = await firstValueFrom(
+        this.projectService.updateExtraNames(this.projectId(), event.extraNames),
+      );
+      // Szülőnek szólunk, hogy frissítse a projekt adatot
+      this.extraNamesUpdated.emit(saveResult.data.extraNames);
+
+      // 2. Beillesztés PSD-be
+      const result = await this.ps.addExtraNames(
+        saveResult.data.extraNames,
+        { includeStudents: event.includeStudents, includeTeachers: event.includeTeachers },
+      );
+      if (result.success) {
+        this.extraNamesSuccess.set('Extra nevek mentve és beillesztve');
+        this.autoSaveEvent.emit({ layers: this.state.exportChanges() });
+      } else {
+        this.extraNamesError.set(result.error || 'Extra nevek beillesztése sikertelen');
+      }
+    } catch {
+      this.extraNamesError.set('Váratlan hiba az extra nevek mentésekor');
     } finally {
       this.insertingExtraNames.set(false);
     }

@@ -1,0 +1,118 @@
+<div class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (click)="backdropHandler.onClick($event)">
+  <div class="dialog-panel">
+    <!-- Header -->
+    <div class="dialog__header">
+      <lucide-icon [name]="ICONS.FILE_TEXT" [size]="18" />
+      <h3 class="dialog__title">Extra nevek szerkesztése</h3>
+      <button class="dialog__close" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="16" />
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="dialog__body">
+      <!-- Tanítottak még -->
+      @if (hasTeachers() || teachers()) {
+        <div class="en-section">
+          <div class="en-section__header">
+            <span class="en-section__label">Tanítottak még</span>
+            <div class="en-section__actions">
+              <button class="en-btn" (click)="sortAbc('teachers')" title="ABC rendezés">
+                <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="13" />
+              </button>
+              @if (isTeachersInline()) {
+                <button class="en-btn" (click)="setFormat('teachers', false)" title="Egymás alá">
+                  <lucide-icon [name]="ICONS.LIST" [size]="13" />
+                </button>
+              } @else {
+                <button class="en-btn" (click)="setFormat('teachers', true)" title="Egy sorba">
+                  <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="13" />
+                </button>
+              }
+              <button class="en-btn" (click)="copy('teachers')" title="Másolás">
+                @if (copied() === 'teachers') {
+                  <lucide-icon [name]="ICONS.CHECK" [size]="13" class="en-btn--copied" />
+                } @else {
+                  <lucide-icon [name]="ICONS.COPY" [size]="13" />
+                }
+              </button>
+            </div>
+          </div>
+          <textarea class="en-textarea"
+            [ngModel]="teachers()"
+            (ngModelChange)="teachers.set($event)"
+            rows="4"
+            placeholder="Nevek vesszővel elválasztva vagy egymás alá..."></textarea>
+        </div>
+      }
+
+      <!-- Osztálytársaink még -->
+      @if (hasStudents() || students()) {
+        <div class="en-section">
+          <div class="en-section__header">
+            <span class="en-section__label">Osztálytársaink még</span>
+            <div class="en-section__actions">
+              <button class="en-btn" (click)="sortAbc('students')" title="ABC rendezés">
+                <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="13" />
+              </button>
+              @if (isStudentsInline()) {
+                <button class="en-btn" (click)="setFormat('students', false)" title="Egymás alá">
+                  <lucide-icon [name]="ICONS.LIST" [size]="13" />
+                </button>
+              } @else {
+                <button class="en-btn" (click)="setFormat('students', true)" title="Egy sorba">
+                  <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="13" />
+                </button>
+              }
+              <button class="en-btn" (click)="copy('students')" title="Másolás">
+                @if (copied() === 'students') {
+                  <lucide-icon [name]="ICONS.CHECK" [size]="13" class="en-btn--copied" />
+                } @else {
+                  <lucide-icon [name]="ICONS.COPY" [size]="13" />
+                }
+              </button>
+            </div>
+          </div>
+          <textarea class="en-textarea"
+            [ngModel]="students()"
+            (ngModelChange)="students.set($event)"
+            rows="4"
+            placeholder="Nevek vesszővel elválasztva vagy egymás alá..."></textarea>
+        </div>
+      }
+
+      <!-- Checkboxok -->
+      <div class="en-checkboxes">
+        @if (hasTeachers()) {
+          <label class="en-check">
+            <input type="checkbox"
+              [checked]="includeTeachers()"
+              (change)="includeTeachers.set(!includeTeachers())" />
+            <span>Tanítottak még</span>
+          </label>
+        }
+        @if (hasStudents()) {
+          <label class="en-check">
+            <input type="checkbox"
+              [checked]="includeStudents()"
+              (change)="includeStudents.set(!includeStudents())" />
+            <span>Osztálytársaink még</span>
+          </label>
+        }
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog__footer">
+      <button class="dialog__btn dialog__btn--ghost" (click)="close.emit()">Mégse</button>
+      <button class="dialog__btn dialog__btn--primary"
+        [disabled]="!includeStudents() && !includeTeachers()"
+        (click)="onInsert()">
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="15" />
+        Beillesztés
+      </button>
+    </div>
+  </div>
+</div>

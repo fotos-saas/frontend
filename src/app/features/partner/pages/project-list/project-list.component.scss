@@ -4,6 +4,12 @@
 // max-width → page-card--wide kezeli
 .project-list-page {}
 
+.subtitle-filtered {
+  color: get-color('slate', 400);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
 .header-actions {
   display: flex;
   align-items: center;

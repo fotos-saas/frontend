@@ -2,11 +2,11 @@
   <header class="page-header">
     <div class="header-content">
       <h1>Projektek</h1>
-      @if (projectLimits()?.max !== null) {
-        <p class="subtitle">Összes projekt: {{ projectLimits()?.current }} / {{ projectLimits()?.max }}</p>
-      } @else {
-        <p class="subtitle">Összes projekt: {{ totalProjects() }}</p>
-      }
+      <p class="subtitle">
+        Összes projekt: {{ projectLimits()?.current ?? totalProjects() }}@if (projectLimits()?.max !== null) { / {{ projectLimits()?.max }}}@if (totalProjects() !== (projectLimits()?.current ?? totalProjects())) {
+          <span class="subtitle-filtered">(szűrve: {{ totalProjects() }})</span>
+        }
+      </p>
     </div>
     <div class="header-actions">
       <button

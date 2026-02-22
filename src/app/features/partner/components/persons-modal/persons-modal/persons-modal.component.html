@@ -219,8 +219,11 @@
                 <button type="button" class="en-action-btn" matTooltip="Névsor (magyar ábécé)" (click)="sortExtraNamesAbc()">
                   <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="14" />
                 </button>
-                <button type="button" class="en-action-btn" [matTooltip]="extraNamesInline() ? 'Egymás alá' : 'Sorba'" (click)="toggleExtraNamesFormat()">
-                  <lucide-icon [name]="extraNamesInline() ? ICONS.ROWS_3 : ICONS.COLUMNS_3" [size]="14" />
+                <button type="button" class="en-action-btn" [class.en-action-btn--active]="extraNamesInline()" matTooltip="Sorba (vesszővel)" (click)="setExtraNamesFormat(true)">
+                  <lucide-icon [name]="ICONS.COLUMNS_3" [size]="14" />
+                </button>
+                <button type="button" class="en-action-btn" [class.en-action-btn--active]="!extraNamesInline()" matTooltip="Egymás alá" (click)="setExtraNamesFormat(false)">
+                  <lucide-icon [name]="ICONS.ROWS_3" [size]="14" />
                 </button>
                 <button type="button" class="en-action-btn" [class.en-action-btn--success]="extraNamesCopied()" [matTooltip]="extraNamesCopied() ? 'Kimásolva!' : 'Másolás'" (click)="copyExtraNames()">
                   <lucide-icon [name]="extraNamesCopied() ? ICONS.CHECK : ICONS.COPY" [size]="14" />

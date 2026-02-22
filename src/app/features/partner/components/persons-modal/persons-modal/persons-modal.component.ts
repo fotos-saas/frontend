@@ -78,7 +78,11 @@ export class PersonsModalComponent implements OnInit {
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
   extraNamesDirty = signal(false);
   extraNamesSaving = signal(false);
-  extraNamesInline = signal(true); // true = sorban (vesszővel), false = egymás alatt
+  /** Aktuális formátum: a szöveg tartalom alapján automatikusan meghatározzuk */
+  readonly extraNamesInline = computed(() => {
+    const text = this.currentExtraText();
+    return !text || !text.includes('\n');
+  });
 
   readonly hasInitialFilter = computed(() => !!this.initialTypeFilter());
   readonly hasActiveFilter = computed(() => !!this.searchQuery() || this.showOnlyWithoutPhoto());
@@ -279,16 +283,16 @@ export class PersonsModalComponent implements OnInit {
     this.onExtraNamesChange(field, sorted.join(sep));
   }
 
-  toggleExtraNamesFormat(): void {
+  setExtraNamesFormat(inline: boolean): void {
     const field = this.typeFilter() === 'teacher' ? 'teachers' : 'students';
     const text = this.extraNames()[field];
-    const isInline = !text.includes('\n');
-    if (isInline) {
-      this.onExtraNamesChange(field, text.split(',').map(n => n.trim()).filter(Boolean).join('\n'));
-    } else {
+    if (inline) {
+      // Egymás alá → sorba (vesszővel)
       this.onExtraNamesChange(field, text.split('\n').map(n => n.trim()).filter(Boolean).join(', '));
+    } else {
+      // Sorba → egymás alá (newline-nal)
+      this.onExtraNamesChange(field, text.split(',').map(n => n.trim()).filter(Boolean).join('\n'));
     }
-    this.extraNamesInline.set(!isInline);
   }
 
   extraNamesCopied = signal(false);

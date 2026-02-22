@@ -506,6 +506,12 @@ ps-toggle {
   color: get-color('slate', 700);
 }
 
+.en-action-btn--active {
+  background: get-color('primary', 50);
+  border-color: get-color('primary', 300);
+  color: get-color('primary', 600);
+}
+
 .en-action-btn--success {
   background: #dcfce7;
   border-color: #86efac;

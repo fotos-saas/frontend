@@ -95,8 +95,8 @@
       } @else if (filteredPersons().length === 0) {
         <div class="empty-state">
           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="48" class="empty-icon" />
-          <h3>{{ emptyStateTitle() }}</h3>
-          <p>{{ emptyStateText() }}</p>
+          <h3>{{ emptyState().title }}</h3>
+          <p>{{ emptyState().text }}</p>
         </div>
       } @else if (editMode()) {
         <!-- Szerkesztő lista nézet -->
@@ -130,7 +130,7 @@
                     class="edit-field edit-field--name"
                     placeholder="Név"
                     [value]="row?.name ?? person.name"
-                    (input)="onEditNameChange(person.id, $any($event.target).value)"
+                    (input)="onEditFieldChange(person.id, 'name', $any($event.target).value)"
                     (keydown.enter)="saveRow(person.id)"
                   />
                   <!-- Title input (csak tanárnál) -->
@@ -140,7 +140,7 @@
                       class="edit-field edit-field--title"
                       placeholder="Pozíció/tantárgy"
                       [value]="row?.title ?? (person.title || '')"
-                      (input)="onEditTitleChange(person.id, $any($event.target).value)"
+                      (input)="onEditFieldChange(person.id, 'title', $any($event.target).value)"
                       (keydown.enter)="saveRow(person.id)"
                     />
                   }
@@ -151,7 +151,7 @@
                   class="edit-field edit-field--note"
                   placeholder="Megjegyzés..."
                   [value]="row?.note ?? (person.note || '')"
-                  (input)="onEditNoteChange(person.id, $any($event.target).value)"
+                  (input)="onEditFieldChange(person.id, 'note', $any($event.target).value)"
                   (keydown.enter)="saveRow(person.id)"
                 />
               </div>
@@ -204,6 +204,48 @@
             />
           }
         </div>
+      }
+
+      <!-- Tanítottak még / Egyéb nevek szekció -->
+      @if (!loading() && !searchQuery()) {
+        @if (editMode()) {
+          <div class="extra-names-section">
+            <label class="extra-names-label">
+              <lucide-icon [name]="ICONS.LIST" [size]="14" />
+              {{ typeFilter() === 'teacher' ? 'Tanítottak még' : 'Egyéb nevek' }}
+            </label>
+            <textarea
+              class="extra-names-textarea"
+              [placeholder]="typeFilter() === 'teacher' ? 'Hargitai György, Kiss Péter, ...' : 'További nevek, vesszővel elválasztva...'"
+              [value]="currentExtraText()"
+              (input)="onExtraNamesChange(typeFilter(), $any($event.target).value)"
+              rows="3"
+            ></textarea>
+            @if (extraNamesDirty()) {
+              <button
+                type="button"
+                class="extra-names-save-btn"
+                (click)="saveExtraNames()"
+                [disabled]="extraNamesSaving()"
+              >
+                @if (extraNamesSaving()) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+                } @else {
+                  <lucide-icon [name]="ICONS.SAVE" [size]="14" />
+                }
+                Mentés
+              </button>
+            }
+          </div>
+        } @else if (currentExtraText()) {
+          <div class="extra-names-section extra-names-section--readonly">
+            <span class="extra-names-label">
+              <lucide-icon [name]="ICONS.LIST" [size]="14" />
+              {{ typeFilter() === 'teacher' ? 'Tanítottak még' : 'Egyéb nevek' }}
+            </span>
+            <p class="extra-names-text">{{ currentExtraText() }}</p>
+          </div>
+        }
       }
     </div>
   </div>

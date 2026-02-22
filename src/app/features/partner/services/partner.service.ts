@@ -118,7 +118,10 @@ export class PartnerService {
     return this.projectService.getProjectSamples(projectId);
   }
 
-  getProjectPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: TabloPersonItem[] }> {
+  getProjectPersons(projectId: number, withoutPhoto?: boolean): Observable<{
+    data: TabloPersonItem[];
+    extraNames: { students: string; teachers: string };
+  }> {
     return this.projectService.getProjectPersons(projectId, withoutPhoto);
   }
 

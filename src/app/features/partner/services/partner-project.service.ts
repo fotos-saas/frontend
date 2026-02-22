@@ -172,11 +172,17 @@ export class PartnerProjectService {
   /**
    * Projekt személyeinek lekérése
    */
-  getProjectPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: TabloPersonItem[] }> {
+  getProjectPersons(projectId: number, withoutPhoto?: boolean): Observable<{
+    data: TabloPersonItem[];
+    extraNames: { students: string; teachers: string };
+  }> {
     const httpParams = buildHttpParams({
       without_photo: withoutPhoto || undefined,
     });
-    return this.http.get<{ data: TabloPersonItem[] }>(
+    return this.http.get<{
+      data: TabloPersonItem[];
+      extraNames: { students: string; teachers: string };
+    }>(
       `${this.baseUrl}/projects/${projectId}/persons`,
       { params: httpParams },
     );
@@ -232,6 +238,21 @@ export class PartnerProjectService {
       message: string;
       data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
     }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/override-photo`, { photo_id: photoId });
+  }
+
+  /**
+   * Extra nevek frissítése (tanítottak még / egyéb nevek)
+   */
+  updateExtraNames(projectId: number, data: { students: string; teachers: string }): Observable<{
+    success: boolean;
+    message: string;
+    data: { extraNames: { students: string; teachers: string } };
+  }> {
+    return this.http.patch<{
+      success: boolean;
+      message: string;
+      data: { extraNames: { students: string; teachers: string } };
+    }>(`${this.baseUrl}/projects/${projectId}/extra-names`, data);
   }
 
   /**

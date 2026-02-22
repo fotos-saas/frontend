@@ -450,6 +450,86 @@ ps-toggle {
   100% { background-position: -200% 0; }
 }
 
+// --- Extra nevek (tanítottak még) ---
+.extra-names-section {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+}
+
+.extra-names-section--readonly {
+  background: transparent;
+  border-color: get-color('slate', 150, get-color('slate', 200));
+}
+
+.extra-names-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: get-color('slate', 600);
+  margin-bottom: 8px;
+}
+
+.extra-names-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+  @include transition-fast;
+}
+
+.extra-names-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.extra-names-textarea::placeholder {
+  color: get-color('slate', 400);
+  font-style: italic;
+}
+
+.extra-names-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  @include transition-fast;
+}
+
+.extra-names-save-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.extra-names-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.extra-names-text {
+  font-size: 0.8125rem;
+  color: get-color('slate', 600);
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
 // --- Footer ---
 :host ::ng-deep .dw__footer {
   flex-direction: column;

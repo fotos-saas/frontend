@@ -271,6 +271,7 @@ export class PartnerProjectListComponent implements OnInit {
   closeMissingModal(): void {
     this.showMissingModal.set(false);
     this.selectedProject.set(null);
+    this.loadProjects();
   }
 
   openCreateModal(): void {

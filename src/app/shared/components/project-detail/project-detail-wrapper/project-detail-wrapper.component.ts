@@ -279,6 +279,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     }
     ref.instance.close.subscribe(() => {
       container.clear();
+      this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
     });
     ref.instance.openUploadWizard.subscribe((personType) => {
       container.clear();

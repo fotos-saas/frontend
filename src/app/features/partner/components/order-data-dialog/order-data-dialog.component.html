@@ -9,6 +9,33 @@
   (closeEvent)="close.emit()"
 >
   <ng-container dialogBody>
+    <!-- Tabok -->
+    <div class="order-dialog__tabs">
+      <button
+        class="order-dialog__tab"
+        [class.order-dialog__tab--active]="activeTab() === 'order'"
+        (click)="activeTab.set('order')"
+      >
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="14" />
+        Megrendelési adatok
+      </button>
+      <button
+        class="order-dialog__tab"
+        [class.order-dialog__tab--active]="activeTab() === 'sync'"
+        (click)="activeTab.set('sync')"
+      >
+        <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+        Szinkronizálás
+      </button>
+    </div>
+
+    <!-- Szinkronizálás tab -->
+    @if (activeTab() === 'sync') {
+      <app-order-sync-panel [projectId]="projectId()" />
+    }
+
+    <!-- Megrendelési adatok tab -->
+    @if (activeTab() === 'order') {
     <!-- Loading -->
     @if (loading) {
       <div class="order-dialog__loading">
@@ -190,6 +217,7 @@
           </section>
         }
       </div>
+    }
     }
   </ng-container>
 

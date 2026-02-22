@@ -1,0 +1,242 @@
+<!-- Loading -->
+@if (loading()) {
+  <div class="sync-panel__loading">
+    <lucide-icon [name]="ICONS.LOADER" [size]="24" class="spin" />
+    <span>Szinkronizálási adatok betöltése...</span>
+  </div>
+}
+
+@if (!loading() && syncData(); as data) {
+  <div class="sync-panel">
+    <!-- Fejléc: állapot + confidence -->
+    <div class="sync-panel__header">
+      <div class="sync-panel__status-row">
+        <span class="sync-panel__badge sync-panel__badge--{{ getStatusColor(data.syncStatus) }}">
+          {{ getStatusLabel(data.syncStatus) }}
+        </span>
+        @if (data.syncedAt) {
+          <span class="sync-panel__date">{{ data.syncedAt | date:'yyyy. MM. dd. HH:mm' }}</span>
+        }
+      </div>
+
+      @if (data.aiConfidence !== null) {
+        <div class="sync-panel__confidence">
+          <span class="sync-panel__confidence-label">AI megbízhatóság</span>
+          <div class="sync-panel__confidence-bar">
+            <div
+              class="sync-panel__confidence-fill"
+              [class.sync-panel__confidence-fill--high]="data.aiConfidence >= 80"
+              [class.sync-panel__confidence-fill--mid]="data.aiConfidence >= 50 && data.aiConfidence < 80"
+              [class.sync-panel__confidence-fill--low]="data.aiConfidence < 50"
+              [style.width.%]="data.aiConfidence"
+            ></div>
+          </div>
+          <span class="sync-panel__confidence-value">{{ data.aiConfidence }}%</span>
+        </div>
+      }
+    </div>
+
+    <!-- Figyelmeztetések -->
+    @if (data.warnings.length > 0) {
+      <div class="sync-panel__warnings">
+        @for (warning of data.warnings; track warning) {
+          <div class="sync-panel__warning">
+            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+            <span>{{ getWarningLabel(warning) }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Fájlok -->
+    @if (data.files.orderForm.exists || data.files.background.exists || data.files.otherFile.exists) {
+      <div class="sync-panel__section">
+        <h4 class="sync-panel__section-title">Fájlok</h4>
+        <div class="sync-panel__files">
+          @if (data.files.orderForm.exists) {
+            <a [href]="data.files.orderForm.url" target="_blank" class="sync-panel__file-link">
+              <lucide-icon [name]="ICONS.FILE_TEXT" [size]="14" />
+              Megrendelési űrlap (PDF)
+            </a>
+          }
+          @if (data.files.background.exists) {
+            <a [href]="data.files.background.url" target="_blank" class="sync-panel__file-link">
+              <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+              Háttérkép
+            </a>
+          }
+          @if (data.files.otherFile.exists) {
+            <a [href]="data.files.otherFile.url" target="_blank" class="sync-panel__file-link">
+              <lucide-icon [name]="ICONS.FILE" [size]="14" />
+              Egyéb fájl
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Diák névsor -->
+    @if (!editing()) {
+      <div class="sync-panel__section">
+        <div class="sync-panel__section-header">
+          <h4 class="sync-panel__section-title">
+            Diákok ({{ data.parsedStudents.length }})
+          </h4>
+        </div>
+        @if (data.parsedStudents.length > 0) {
+          <div class="sync-panel__name-list">
+            @for (student of data.parsedStudents; track student.id) {
+              <div class="sync-panel__name-item">
+                <span class="sync-panel__name">{{ student.name }}</span>
+                @if (student.note) {
+                  <span class="sync-panel__note">{{ student.note }}</span>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="sync-panel__empty">Nincs diák a névsorban</p>
+        }
+      </div>
+
+      <!-- Tanár névsor -->
+      <div class="sync-panel__section">
+        <div class="sync-panel__section-header">
+          <h4 class="sync-panel__section-title">
+            Tanárok ({{ data.parsedTeachers.length }})
+          </h4>
+        </div>
+        @if (data.parsedTeachers.length > 0) {
+          <div class="sync-panel__name-list">
+            @for (teacher of data.parsedTeachers; track teacher.id) {
+              <div class="sync-panel__name-item sync-panel__name-item--teacher">
+                <div class="sync-panel__teacher-info">
+                  <span class="sync-panel__name">{{ teacher.name }}</span>
+                  @if (teacher.title) {
+                    <span class="sync-panel__title">{{ teacher.title }}</span>
+                  }
+                </div>
+                @if (teacher.matchType) {
+                  <span
+                    class="sync-panel__match sync-panel__match--{{ teacher.matchType }}"
+                    [title]="getMatchLabel(teacher.matchType) + (teacher.confidence ? ' (' + (teacher.confidence * 100) + '%)' : '')"
+                  >
+                    <lucide-icon [name]="getMatchIcon(teacher.matchType)" [size]="12" />
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="sync-panel__empty">Nincs tanár a névsorban</p>
+        }
+      </div>
+    }
+
+    <!-- Szerkesztő mód -->
+    @if (editing()) {
+      <div class="sync-panel__section">
+        <h4 class="sync-panel__section-title">Diákok szerkesztése</h4>
+        @for (student of editStudents; track trackByIndex($index); let i = $index) {
+          <div class="sync-panel__edit-row">
+            <input
+              type="text"
+              class="sync-panel__input"
+              [(ngModel)]="student.name"
+              placeholder="Diák neve"
+            />
+            <input
+              type="text"
+              class="sync-panel__input sync-panel__input--small"
+              [(ngModel)]="student.note"
+              placeholder="Megjegyzés"
+            />
+            <button class="sync-panel__remove-btn" (click)="removeStudent(i)" title="Törlés">
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          </div>
+        }
+        <button class="sync-panel__add-btn" (click)="addStudent()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+          Diák hozzáadása
+        </button>
+      </div>
+
+      <div class="sync-panel__section">
+        <h4 class="sync-panel__section-title">Tanárok szerkesztése</h4>
+        @for (teacher of editTeachers; track trackByIndex($index); let i = $index) {
+          <div class="sync-panel__edit-row">
+            <input
+              type="text"
+              class="sync-panel__input"
+              [(ngModel)]="teacher.name"
+              placeholder="Tanár neve"
+            />
+            <input
+              type="text"
+              class="sync-panel__input sync-panel__input--small"
+              [(ngModel)]="teacher.title"
+              placeholder="Tantárgy"
+            />
+            <button class="sync-panel__remove-btn" (click)="removeTeacher(i)" title="Törlés">
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          </div>
+        }
+        <button class="sync-panel__add-btn" (click)="addTeacher()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+          Tanár hozzáadása
+        </button>
+      </div>
+    }
+
+    <!-- Gombok -->
+    <div class="sync-panel__actions">
+      @if (!editing()) {
+        <button
+          class="btn btn--outline btn--sm"
+          (click)="reparse()"
+          [disabled]="reparsing()"
+        >
+          @if (reparsing()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+            Feldolgozás...
+          } @else {
+            <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+            AI újrafuttatás
+          }
+        </button>
+        <button class="btn btn--outline btn--sm" (click)="startEditing()">
+          <lucide-icon [name]="ICONS.EDIT" [size]="14" />
+          Névsor szerkesztése
+        </button>
+      } @else {
+        <button
+          class="btn btn--primary btn--sm"
+          (click)="saveRoster()"
+          [disabled]="saving()"
+        >
+          @if (saving()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+            Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.SAVE" [size]="14" />
+            Névsor mentése
+          }
+        </button>
+        <button class="btn btn--outline btn--sm" (click)="cancelEditing()">
+          Mégse
+        </button>
+      }
+    </div>
+  </div>
+}
+
+<!-- Nincs szinkronizálási adat -->
+@if (!loading() && !syncData()) {
+  <div class="sync-panel__empty-state">
+    <lucide-icon [name]="ICONS.INBOX" [size]="36" />
+    <p>Nincs szinkronizálási adat</p>
+    <span>A megrendelés még nem lett szinkronizálva a régi rendszerből.</span>
+  </div>
+}

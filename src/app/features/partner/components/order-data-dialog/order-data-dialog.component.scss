@@ -2,6 +2,46 @@
 $blue-500: get-color('primary', 500);
 $blue-600: get-color('primary', 600);
 
+// Tabs
+.order-dialog__tabs {
+  display: flex;
+  border-bottom: 2px solid get-color('slate', 200);
+  margin-bottom: 1rem;
+  margin-left: -0.25rem;
+  margin-right: -0.25rem;
+}
+
+.order-dialog__tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: get-color('slate', 500);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+  transition: color 0.15s, border-color 0.15s;
+
+  lucide-icon {
+    margin-right: 0.375rem;
+  }
+
+  &:hover {
+    color: get-color('slate', 700);
+  }
+
+  &--active {
+    color: $blue-600;
+    border-bottom-color: $blue-600;
+    font-weight: 600;
+  }
+}
+
 // Loading
 .order-dialog__loading {
   display: flex;

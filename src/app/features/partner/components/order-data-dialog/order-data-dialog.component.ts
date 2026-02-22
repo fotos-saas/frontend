@@ -7,6 +7,7 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
@@ -19,12 +20,13 @@ import { LinkifyPipe } from '../../../../shared/pipes/linkify.pipe';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { isSecureUrl, openSecureUrl } from '../../../../core/utils/url-validator.util';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
+import { OrderSyncPanelComponent } from '../order-sync-panel/order-sync-panel.component';
 import { OrderData } from '../../../order-data/services/order-data.service';
 
 @Component({
   selector: 'app-order-data-dialog',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, SafeHtmlPipe, LinkifyPipe, DialogWrapperComponent],
+  imports: [DatePipe, LucideAngularModule, SafeHtmlPipe, LinkifyPipe, DialogWrapperComponent, OrderSyncPanelComponent],
   templateUrl: './order-data-dialog.component.html',
   styleUrls: ['./order-data-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +37,7 @@ export class OrderDataDialogComponent implements OnInit {
   readonly projectId = input.required<number>();
   readonly close = output<void>();
 
+  activeTab = signal<'order' | 'sync'>('order');
   orderData: OrderData | null = null;
   loading = true;
   error: string | null = null;

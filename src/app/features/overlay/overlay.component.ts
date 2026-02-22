@@ -1,11 +1,11 @@
 import {
   Component, ChangeDetectionStrategy, signal, computed,
-  OnInit, DestroyRef, inject, NgZone, ElementRef, viewChild,
+  OnInit, DestroyRef, inject, NgZone,
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
-import { OverlayContext } from '../../core/services/electron.types';
+import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
 
 interface ToolbarItem {
   id: string;
@@ -34,10 +34,19 @@ export class OverlayComponent implements OnInit {
   private readonly ngZone = inject(NgZone);
 
   readonly context = signal<OverlayContext>({ mode: 'normal' });
+  readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
   readonly isDesignerMode = computed(() => this.context().mode === 'designer');
 
+  /** Aktiv doc nev roviditve (max 25 karakter, kiterjesztes nelkul) */
+  readonly activeDocLabel = computed(() => {
+    const name = this.activeDoc().name;
+    if (!name) return null;
+    // Kiterjesztes levagasa
+    const base = name.replace(/\.(psd|psb|pdd)$/i, '');
+    return base.length > 25 ? base.slice(0, 22) + '...' : base;
+  });
+
   private readonly allGroups: ToolbarGroup[] = [
-    // Igazitas
     {
       id: 'align',
       designerOnly: true,
@@ -50,7 +59,6 @@ export class OverlayComponent implements OnInit {
         { id: 'align-bottom', icon: ICONS.ALIGN_END_H, label: 'Alulra igazitas' },
       ],
     },
-    // Elosztas
     {
       id: 'distribute',
       designerOnly: true,
@@ -60,7 +68,6 @@ export class OverlayComponent implements OnInit {
         { id: 'center-document', icon: ICONS.MOVE, label: 'Dokumentum kozepre' },
       ],
     },
-    // Rendezes
     {
       id: 'sort',
       designerOnly: true,
@@ -71,7 +78,6 @@ export class OverlayComponent implements OnInit {
         { id: 'sort-custom', icon: ICONS.LIST_ORDERED, label: 'Egyedi sorrend' },
       ],
     },
-    // Layerek
     {
       id: 'layers',
       designerOnly: true,
@@ -82,7 +88,6 @@ export class OverlayComponent implements OnInit {
         { id: 'extra-names', icon: ICONS.FILE_TEXT, label: 'Extra nevek' },
       ],
     },
-    // Photoshop
     {
       id: 'photoshop',
       items: [
@@ -91,7 +96,6 @@ export class OverlayComponent implements OnInit {
         { id: 'refresh', icon: ICONS.REFRESH, label: 'Frissites PS-bol' },
       ],
     },
-    // Generalas
     {
       id: 'generate',
       items: [
@@ -99,7 +103,6 @@ export class OverlayComponent implements OnInit {
         { id: 'generate-final', icon: ICONS.CHECK_CIRCLE, label: 'Veglegesites', accent: 'green' },
       ],
     },
-    // Nezet
     {
       id: 'view',
       designerOnly: true,
@@ -109,7 +112,6 @@ export class OverlayComponent implements OnInit {
         { id: 'save', icon: ICONS.SAVE, label: 'Mentes', accent: 'purple' },
       ],
     },
-    // Normal mod — gyors muveletek
     {
       id: 'ps-quick',
       items: [
@@ -129,9 +131,14 @@ export class OverlayComponent implements OnInit {
     });
   });
 
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit(): void {
     this.loadContext();
     this.listenContextChanges();
+    this.loadActiveDoc();
+    this.listenActiveDocChanges();
+    this.startPolling();
   }
 
   onCommand(commandId: string): void {
@@ -142,14 +149,17 @@ export class OverlayComponent implements OnInit {
     window.electronAPI?.overlay.hide();
   }
 
+  /** Aktiv doc mappajaank megnyitasa Finder-ben */
+  openActiveDocDir(): void {
+    this.onCommand('ps-open-workdir');
+  }
+
   private async loadContext(): Promise<void> {
     if (!window.electronAPI) return;
     try {
       const ctx = await window.electronAPI.overlay.getContext();
       this.ngZone.run(() => this.context.set(ctx));
-    } catch {
-      // default: normal mode
-    }
+    } catch { /* default: normal */ }
   }
 
   private listenContextChanges(): void {
@@ -158,5 +168,45 @@ export class OverlayComponent implements OnInit {
       this.ngZone.run(() => this.context.set(ctx));
     });
     this.destroyRef.onDestroy(cleanup);
+  }
+
+  private async loadActiveDoc(): Promise<void> {
+    if (!window.electronAPI) return;
+    try {
+      const doc = await window.electronAPI.overlay.getActiveDoc();
+      this.ngZone.run(() => this.activeDoc.set(doc));
+    } catch { /* ignore */ }
+  }
+
+  private listenActiveDocChanges(): void {
+    if (!window.electronAPI) return;
+    const cleanup = window.electronAPI.overlay.onActiveDocChanged((doc) => {
+      this.ngZone.run(() => this.activeDoc.set(doc));
+    });
+    this.destroyRef.onDestroy(cleanup);
+  }
+
+  /** 5 masodpercenkent lekerdezi az aktiv PS dokumentumot JSX-en keresztul */
+  private startPolling(): void {
+    if (!window.electronAPI) return;
+    this.pollActiveDoc();
+    this.pollTimer = setInterval(() => this.pollActiveDoc(), 5000);
+    this.destroyRef.onDestroy(() => {
+      if (this.pollTimer) clearInterval(this.pollTimer);
+    });
+  }
+
+  private async pollActiveDoc(): Promise<void> {
+    if (!window.electronAPI) return;
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'get-active-doc' });
+      if (result.success && result.output) {
+        const cleaned = result.output.trim();
+        if (cleaned.startsWith('{')) {
+          const doc: ActiveDocInfo = JSON.parse(cleaned);
+          await window.electronAPI.overlay.setActiveDoc(doc);
+        }
+      }
+    } catch { /* PS nem elerheto — skip */ }
   }
 }

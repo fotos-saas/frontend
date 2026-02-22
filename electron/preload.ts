@@ -270,6 +270,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('overlay-command', handler);
       return () => ipcRenderer.removeListener('overlay-command', handler);
     },
+    getActiveDoc: () =>
+      ipcRenderer.invoke('overlay:get-active-doc') as Promise<{ name: string | null; path: string | null; dir: string | null }>,
+    setActiveDoc: (doc: { name: string | null; path: string | null; dir: string | null }) =>
+      ipcRenderer.invoke('overlay:set-active-doc', doc) as Promise<{ success: boolean; error?: string }>,
+    onActiveDocChanged: (callback: (doc: { name: string | null; path: string | null; dir: string | null }) => void): CleanupFn => {
+      const handler = (_event: IpcRendererEvent, doc: { name: string | null; path: string | null; dir: string | null }) => callback(doc);
+      ipcRenderer.on('overlay:active-doc-changed', handler);
+      return () => ipcRenderer.removeListener('overlay:active-doc-changed', handler);
+    },
   },
 
   // ============ Photoshop Integration ============

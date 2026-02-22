@@ -31,8 +31,20 @@
   <!-- Spacer -->
   <div class="toolbar__spacer"></div>
 
+  <!-- Active document label -->
+  @if (activeDocLabel(); as docLabel) {
+    <button
+      class="toolbar__doc"
+      (click)="openActiveDocDir()"
+      [matTooltip]="activeDoc().path ?? 'Mappa megnyitasa'"
+    >
+      <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
+      <span class="toolbar__doc-name">{{ docLabel }}</span>
+    </button>
+    <div class="toolbar__sep"></div>
+  }
+
   <!-- Hide button -->
-  <div class="toolbar__sep"></div>
   <button class="toolbar__btn toolbar__btn--close" (click)="hide()" matTooltip="Elrejtes (Ctrl+K)">
     <lucide-icon [name]="ICONS.X" [size]="16" />
   </button>

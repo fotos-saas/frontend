@@ -79,6 +79,12 @@ export interface OverlayContext {
   projectId?: number;
 }
 
+export interface ActiveDocInfo {
+  name: string | null;
+  path: string | null;
+  dir: string | null;
+}
+
 interface OverlayAPI {
   executeCommand: (commandId: string) => Promise<{ success: boolean; error?: string }>;
   getContext: () => Promise<OverlayContext>;
@@ -86,6 +92,9 @@ interface OverlayAPI {
   onContextChanged: (callback: (ctx: OverlayContext) => void) => CleanupFn;
   hide: () => Promise<{ success: boolean }>;
   onCommand: (callback: (commandId: string) => void) => CleanupFn;
+  getActiveDoc: () => Promise<ActiveDocInfo>;
+  setActiveDoc: (doc: ActiveDocInfo) => Promise<{ success: boolean; error?: string }>;
+  onActiveDocChanged: (callback: (doc: ActiveDocInfo) => void) => CleanupFn;
 }
 
 interface TouchBarAPI {

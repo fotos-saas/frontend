@@ -9,7 +9,7 @@ import { createBackdropHandler } from '@shared/utils/dialog.util';
   standalone: true,
   imports: [LucideAngularModule, FormsModule],
   templateUrl: './extra-names-dialog.component.html',
-  styleUrl: './extra-names-dialog.component.scss',
+  styleUrls: ['./extra-names-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExtraNamesDialogComponent implements OnInit {

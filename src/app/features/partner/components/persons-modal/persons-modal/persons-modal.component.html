@@ -25,7 +25,7 @@
 
     <!-- Szűrők (mobilon összecsukható) -->
     <div class="filters-collapsible" [class.filters-collapsible--open]="filtersOpen()">
-      <!-- Search + Photo Filter + Edit Mode -->
+      <!-- Search + Photo Filter -->
       <div class="search-section">
         <div class="search-row">
           <div class="search-box">
@@ -104,36 +104,68 @@
           @for (person of filteredPersons(); track person.id; let i = $index) {
             @let row = getEditRow(person.id);
             <div class="edit-row" [class.edit-row--dirty]="row?.dirty" [class.edit-row--saving]="row?.saving">
-              <!-- Thumb -->
-              <div class="edit-thumb" (click)="openLightbox(person)">
-                @if (person.photoThumbUrl) {
-                  <img [src]="person.photoThumbUrl" [alt]="person.name" loading="lazy" />
-                } @else {
-                  <div class="edit-thumb-placeholder">
-                    <lucide-icon [name]="ICONS.USER_X" [size]="16" />
-                  </div>
-                }
+              <!-- Thumb + kamera feltöltés -->
+              <div class="edit-thumb-wrap">
+                <div class="edit-thumb" (click)="person.photoUrl ? openLightbox(person) : null">
+                  @if (row?.uploading) {
+                    <div class="edit-thumb-uploading">
+                      <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                    </div>
+                  } @else if (person.photoThumbUrl) {
+                    <img [src]="person.photoThumbUrl" [alt]="person.name" loading="lazy" />
+                  } @else {
+                    <div class="edit-thumb-placeholder">
+                      <lucide-icon [name]="ICONS.USER_X" [size]="16" />
+                    </div>
+                  }
+                </div>
+                <!-- Kamera gomb — rejtett file input -->
+                <label class="edit-thumb-camera" [matTooltip]="'Kép feltöltése'">
+                  <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="sr-only"
+                    (change)="onPhotoFileSelected(person.id, $event)"
+                  />
+                </label>
               </div>
-              <!-- Név input -->
-              <input
-                type="text"
-                class="edit-field edit-field--name"
-                placeholder="Név"
-                [value]="row?.name ?? person.name"
-                (input)="onEditNameChange(person.id, $any($event.target).value)"
-                (keydown.enter)="saveRow(person.id)"
-              />
-              <!-- Title input (csak tanárnál) -->
-              @if (person.type === 'teacher') {
+
+              <!-- Mezők -->
+              <div class="edit-fields">
+                <div class="edit-fields-top">
+                  <!-- Név input -->
+                  <input
+                    type="text"
+                    class="edit-field edit-field--name"
+                    placeholder="Név"
+                    [value]="row?.name ?? person.name"
+                    (input)="onEditNameChange(person.id, $any($event.target).value)"
+                    (keydown.enter)="saveRow(person.id)"
+                  />
+                  <!-- Title input (csak tanárnál) -->
+                  @if (person.type === 'teacher') {
+                    <input
+                      type="text"
+                      class="edit-field edit-field--title"
+                      placeholder="Pozíció/tantárgy"
+                      [value]="row?.title ?? (person.title || '')"
+                      (input)="onEditTitleChange(person.id, $any($event.target).value)"
+                      (keydown.enter)="saveRow(person.id)"
+                    />
+                  }
+                </div>
+                <!-- Megjegyzés -->
                 <input
                   type="text"
-                  class="edit-field edit-field--title"
-                  placeholder="Pozíció/tantárgy"
-                  [value]="row?.title ?? (person.title || '')"
-                  (input)="onEditTitleChange(person.id, $any($event.target).value)"
+                  class="edit-field edit-field--note"
+                  placeholder="Megjegyzés..."
+                  [value]="row?.note ?? (person.note || '')"
+                  (input)="onEditNoteChange(person.id, $any($event.target).value)"
                   (keydown.enter)="saveRow(person.id)"
                 />
-              }
+              </div>
+
               <!-- Mentés gomb -->
               @if (row?.dirty) {
                 <button

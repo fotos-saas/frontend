@@ -192,15 +192,15 @@ export class PartnerProjectService {
   /**
    * Személy adatainak módosítása (név, pozíció/tantárgy)
    */
-  updatePerson(projectId: number, personId: number, data: { name?: string; title?: string | null }): Observable<{
+  updatePerson(projectId: number, personId: number, data: { name?: string; title?: string | null; note?: string | null }): Observable<{
     success: boolean;
     message: string;
-    data: { id: number; name: string; title: string | null };
+    data: { id: number; name: string; title: string | null; note: string | null };
   }> {
     return this.http.patch<{
       success: boolean;
       message: string;
-      data: { id: number; name: string; title: string | null };
+      data: { id: number; name: string; title: string | null; note: string | null };
     }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}`, data);
   }
 

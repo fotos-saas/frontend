@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
+import { PartnerAlbumService } from '../../../services/partner-album.service';
 import { PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -15,8 +16,10 @@ import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.compone
 interface EditRow {
   name: string;
   title: string;
+  note: string;
   dirty: boolean;
   saving: boolean;
+  uploading: boolean;
 }
 
 /**
@@ -42,6 +45,7 @@ export class PersonsModalComponent implements OnInit {
 
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);
+  private albumService = inject(PartnerAlbumService);
   private destroyRef = inject(DestroyRef);
 
   loading = signal(true);
@@ -102,7 +106,6 @@ export class PersonsModalComponent implements OnInit {
     return 'Ehhez a projekthez nincs regisztrálva személy.';
   });
 
-  /** Van-e módosítatlan sor a szerkesztés módban */
   readonly hasDirtyEdits = computed(() => {
     const data = this.editData();
     for (const row of data.values()) {
@@ -147,9 +150,14 @@ export class PersonsModalComponent implements OnInit {
   private initEditData(): void {
     const map = new Map<number, EditRow>();
     for (const p of this.filteredPersons()) {
-      map.set(p.id, { name: p.name, title: p.title || '', dirty: false, saving: false });
+      map.set(p.id, { name: p.name, title: p.title || '', note: p.note || '', dirty: false, saving: false, uploading: false });
     }
     this.editData.set(map);
+  }
+
+  private isDirty(row: EditRow, person: TabloPersonItem | undefined): boolean {
+    if (!person) return false;
+    return row.name !== person.name || row.title !== (person.title || '') || row.note !== (person.note || '');
   }
 
   onEditNameChange(personId: number, value: string): void {
@@ -157,7 +165,8 @@ export class PersonsModalComponent implements OnInit {
     const row = data.get(personId);
     if (!row) return;
     const person = this.allPersons().find(p => p.id === personId);
-    data.set(personId, { ...row, name: value, dirty: value !== person?.name || row.title !== (person?.title || '') });
+    const updated = { ...row, name: value };
+    data.set(personId, { ...updated, dirty: this.isDirty(updated, person) });
     this.editData.set(data);
   }
 
@@ -166,7 +175,18 @@ export class PersonsModalComponent implements OnInit {
     const row = data.get(personId);
     if (!row) return;
     const person = this.allPersons().find(p => p.id === personId);
-    data.set(personId, { ...row, title: value, dirty: row.name !== person?.name || value !== (person?.title || '') });
+    const updated = { ...row, title: value };
+    data.set(personId, { ...updated, dirty: this.isDirty(updated, person) });
+    this.editData.set(data);
+  }
+
+  onEditNoteChange(personId: number, value: string): void {
+    const data = new Map(this.editData());
+    const row = data.get(personId);
+    if (!row) return;
+    const person = this.allPersons().find(p => p.id === personId);
+    const updated = { ...row, note: value };
+    data.set(personId, { ...updated, dirty: this.isDirty(updated, person) });
     this.editData.set(data);
   }
 
@@ -180,23 +200,27 @@ export class PersonsModalComponent implements OnInit {
     const name = row.name.trim();
     if (!name) return;
 
-    // Mark saving
     const data = new Map(this.editData());
     data.set(personId, { ...row, saving: true });
     this.editData.set(data);
 
-    this.projectService.updatePerson(this.projectId(), personId, { name, title: row.title.trim() || null })
+    this.projectService.updatePerson(this.projectId(), personId, {
+      name,
+      title: row.title.trim() || null,
+      note: row.note.trim() || null,
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          // Frissítjük allPersons
           const updated = this.allPersons().map(p =>
-            p.id === personId ? { ...p, name: res.data.name, title: res.data.title } : p
+            p.id === personId ? { ...p, name: res.data.name, title: res.data.title, note: res.data.note } : p
           );
           this.allPersons.set(updated);
-          // Frissítjük editData
           const newData = new Map(this.editData());
-          newData.set(personId, { name: res.data.name, title: res.data.title || '', dirty: false, saving: false });
+          newData.set(personId, {
+            name: res.data.name, title: res.data.title || '', note: res.data.note || '',
+            dirty: false, saving: false, uploading: row.uploading,
+          });
           this.editData.set(newData);
         },
         error: () => {
@@ -215,6 +239,48 @@ export class PersonsModalComponent implements OnInit {
         this.saveRow(personId);
       }
     }
+  }
+
+  // --- Fotó feltöltés ---
+  onPhotoFileSelected(personId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    // Reset input
+    input.value = '';
+
+    // Set uploading state
+    const data = new Map(this.editData());
+    const row = data.get(personId);
+    if (row) {
+      data.set(personId, { ...row, uploading: true });
+      this.editData.set(data);
+    }
+
+    this.albumService.uploadPersonPhoto(this.projectId(), personId, file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          // Frissítsük a person adatait
+          const updated = this.allPersons().map(p =>
+            p.id === personId
+              ? { ...p, hasPhoto: true, photoThumbUrl: res.photo.thumbUrl, photoUrl: res.photo.thumbUrl }
+              : p
+          );
+          this.allPersons.set(updated);
+          // Uploading state vége
+          const newData = new Map(this.editData());
+          const r = newData.get(personId);
+          if (r) newData.set(personId, { ...r, uploading: false });
+          this.editData.set(newData);
+        },
+        error: () => {
+          const newData = new Map(this.editData());
+          const r = newData.get(personId);
+          if (r) newData.set(personId, { ...r, uploading: false });
+          this.editData.set(newData);
+        }
+      });
   }
 
   openLightbox(person: TabloPersonItem): void {

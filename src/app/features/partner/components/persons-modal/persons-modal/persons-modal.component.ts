@@ -273,7 +273,7 @@ export class PersonsModalComponent implements OnInit {
   }
 
   openLightbox(person: TabloPersonItem): void {
-    if (person.photoUrl) {
+    if (person.photoUrl || person.photoThumbUrl) {
       this.lightboxPerson.set(person);
     }
   }

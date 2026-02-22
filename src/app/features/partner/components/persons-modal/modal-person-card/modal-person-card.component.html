@@ -1,7 +1,7 @@
 <div
   class="person-card"
   [class.person-card--no-photo]="!person().hasPhoto"
-  [class.person-card--clickable]="person().photoUrl"
+  [class.person-card--clickable]="person().photoUrl || person().photoThumbUrl"
   [style.animation-delay]="animationDelay()"
   (click)="onCardClick()"
 >

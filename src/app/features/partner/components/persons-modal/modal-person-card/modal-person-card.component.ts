@@ -25,7 +25,7 @@ export class ModalPersonCardComponent {
   readonly cardClick = output<TabloPersonItem>();
 
   onCardClick(): void {
-    if (this.person().photoUrl) {
+    if (this.person().photoUrl || this.person().photoThumbUrl) {
       this.cardClick.emit(this.person());
     }
   }

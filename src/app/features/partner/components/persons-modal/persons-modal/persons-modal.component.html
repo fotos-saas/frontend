@@ -106,7 +106,7 @@
             <div class="edit-row" [class.edit-row--dirty]="row?.dirty" [class.edit-row--saving]="row?.saving">
               <!-- Thumb + kamera feltöltés -->
               <div class="edit-thumb-wrap">
-                <div class="edit-thumb" (click)="person.photoUrl ? openLightbox(person) : null">
+                <div class="edit-thumb" (click)="(person.photoUrl || person.photoThumbUrl) ? openLightbox(person) : null">
                   @if (person.photoThumbUrl) {
                     <img [src]="person.photoThumbUrl" [alt]="person.name" loading="lazy" />
                   } @else {

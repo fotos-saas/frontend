@@ -143,4 +143,33 @@ export class PersonsModalComponent implements OnInit {
         }
       });
   }
+
+  savePerson(event: { personId: number; name: string; title: string | null }): void {
+    this.projectService.updatePerson(this.projectId(), event.personId, { name: event.name, title: event.title })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          const updated = this.allPersons().map(p =>
+            p.id === event.personId
+              ? { ...p, name: res.data.name, title: res.data.title }
+              : p
+          );
+          this.allPersons.set(updated);
+        }
+      });
+  }
+
+  onPhotoChanged(event: { personId: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean }): void {
+    const updated = this.allPersons().map(p =>
+      p.id === event.personId
+        ? { ...p, hasPhoto: event.hasPhoto, photoThumbUrl: event.photoThumbUrl, photoUrl: event.photoUrl, hasOverride: event.hasOverride }
+        : p
+    );
+    this.allPersons.set(updated);
+    // Frissítsük a lightbox person-t is ha épp azt nézzük
+    const current = this.lightboxPerson();
+    if (current && current.id === event.personId) {
+      this.lightboxPerson.set(updated.find(p => p.id === event.personId) || null);
+    }
+  }
 }

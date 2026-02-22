@@ -1,0 +1,55 @@
+@if (person()) {
+  <div class="lightbox" (click)="close.emit()">
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <img [src]="person()!.photoUrl!" [alt]="person()!.name" />
+      <div class="lightbox-caption">
+        <span class="lightbox-name">{{ person()!.name }}</span>
+        <span class="lightbox-type">
+          @if (person()!.type === 'teacher' && person()!.title) {
+            {{ person()!.title }}
+          } @else {
+            {{ person()!.type === 'student' ? 'Diák' : 'Tanár' }}
+          }
+        </span>
+      </div>
+
+      <!-- Archív fotó strip -->
+      @if (showArchiveStrip()) {
+        <div class="archive-strip">
+          <span class="archive-label">Archív fotók:</span>
+          <div class="archive-thumbs">
+            @for (photo of archivePhotos(); track photo.id) {
+              <button
+                class="archive-thumb"
+                [class.archive-thumb--active]="photo.isActive"
+                (click)="selectArchivePhoto(photo, $event)"
+                [title]="photo.year ? photo.year + '' : 'Archív fotó'"
+              >
+                <img [src]="photo.thumbUrl" [alt]="'Archív fotó'" loading="lazy" />
+                @if (photo.year) {
+                  <span class="archive-year">{{ photo.year }}</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <button class="lightbox-close" (click)="close.emit()">
+      <lucide-icon [name]="ICONS.X" [size]="24" />
+    </button>
+
+    <!-- Navigation -->
+    @if (canNavigatePrev()) {
+      <button class="lightbox-nav lightbox-nav--prev" (click)="navigatePrev($event)">
+        <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="32" />
+      </button>
+    }
+    @if (canNavigateNext()) {
+      <button class="lightbox-nav lightbox-nav--next" (click)="navigateNext($event)">
+        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="32" />
+      </button>
+    }
+  </div>
+}

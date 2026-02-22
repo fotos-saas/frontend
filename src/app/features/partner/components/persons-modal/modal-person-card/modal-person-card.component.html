@@ -1,0 +1,94 @@
+<div
+  class="person-card"
+  [class.person-card--no-photo]="!person().hasPhoto"
+  [class.person-card--clickable]="person().photoUrl && !editing()"
+  [style.animation-delay]="animationDelay()"
+  (click)="onCardClick()"
+>
+  <div class="card-photo">
+    @if (person().photoThumbUrl) {
+      <img [src]="person().photoThumbUrl" [alt]="person().name" loading="lazy" />
+      <div class="card-zoom-icon">
+        <lucide-icon [name]="ICONS.ZOOM_IN" [size]="16" />
+      </div>
+    } @else {
+      <div class="card-placeholder">
+        <lucide-icon [name]="ICONS.USER_X" [size]="24" />
+      </div>
+    }
+
+    <!-- photo_type badge -->
+    @if (person().type === 'teacher' && person().photoType) {
+      <div
+        class="photo-type-badge"
+        [class.photo-type-badge--camera]="person().photoType === 'with_photo'"
+        [class.photo-type-badge--pen]="person().photoType === 'name_only'"
+        [matTooltip]="person().photoType === 'with_photo' ? 'Fotóval' : 'Csak név'"
+      >
+        <lucide-icon [name]="person().photoType === 'with_photo' ? ICONS.CAMERA : ICONS.EDIT" [size]="12" />
+      </div>
+    }
+
+    <!-- Edit gomb (hover) -->
+    <button class="card-edit-btn" (click)="startEdit($event)" matTooltip="Szerkesztés">
+      <lucide-icon [name]="ICONS.EDIT" [size]="12" />
+    </button>
+  </div>
+
+  <div class="card-info">
+    @if (editing()) {
+      <!-- Szerkesztés mód -->
+      <div class="edit-form" (click)="$event.stopPropagation()">
+        <input
+          type="text"
+          class="edit-input"
+          placeholder="Név"
+          [ngModel]="editName()"
+          (ngModelChange)="editName.set($event)"
+          (keydown.enter)="confirmEdit($event)"
+          (keydown.escape)="cancelEdit($event)"
+        />
+        @if (person().type === 'teacher') {
+          <input
+            type="text"
+            class="edit-input edit-input--small"
+            placeholder="Pozíció/tantárgy"
+            [ngModel]="editTitle()"
+            (ngModelChange)="editTitle.set($event)"
+            (keydown.enter)="confirmEdit($event)"
+            (keydown.escape)="cancelEdit($event)"
+          />
+        }
+        <div class="edit-actions">
+          <button class="edit-action-btn edit-action-btn--save" (click)="confirmEdit($event)" matTooltip="Mentés">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+          </button>
+          <button class="edit-action-btn edit-action-btn--cancel" (click)="cancelEdit($event)" matTooltip="Mégse">
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+          </button>
+        </div>
+      </div>
+    } @else {
+      <!-- Normál nézet -->
+      <span class="card-name" [matTooltip]="person().name">{{ person().name }}</span>
+      <div class="card-meta">
+        <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">
+          @if (person().type === 'teacher' && person().title) {
+            {{ person().title }}
+          } @else {
+            {{ person().type === 'student' ? 'Diák' : 'Tanár' }}
+          }
+        </span>
+        @if (person().hasOverride) {
+          <span class="card-badge card-badge--override">Egyedi</span>
+        }
+      </div>
+      @if (person().hasOverride) {
+        <button class="card-reset-btn" (click)="onResetOverride($event)" title="Visszaállítás alapértelmezettre">
+          <lucide-icon [name]="ICONS.UNDO" [size]="12" />
+          Visszaállítás
+        </button>
+      }
+    }
+  </div>
+</div>

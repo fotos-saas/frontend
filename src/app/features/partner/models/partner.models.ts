@@ -160,6 +160,9 @@ export interface TabloPersonItem {
   photoUrl: string | null;
   archiveId: number | null;
   hasOverride: boolean;
+  title: string | null;
+  photoType: string | null;
+  note: string | null;
 }
 
 /**

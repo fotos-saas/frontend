@@ -93,6 +93,7 @@
               [animationDelay]="i * 0.05 + 's'"
               (cardClick)="openLightbox($event)"
               (resetOverride)="resetOverride($event)"
+              (saveEdit)="savePerson($event)"
             />
           }
         </div>
@@ -128,6 +129,8 @@
 <app-photo-lightbox
   [person]="lightboxPerson()"
   [personsWithPhotos]="personsWithPhotos()"
+  [projectId]="projectId()"
   (close)="closeLightbox()"
   (navigate)="lightboxPerson.set($event)"
+  (photoChanged)="onPhotoChanged($event)"
 />

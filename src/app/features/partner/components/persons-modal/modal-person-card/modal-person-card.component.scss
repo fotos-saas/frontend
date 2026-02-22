@@ -1,0 +1,307 @@
+.person-card {
+  background: #f8fafc;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  transition: all 0.15s ease;
+  animation: cardEntry 0.3s ease forwards;
+  opacity: 0;
+  position: relative;
+}
+
+.person-card--clickable {
+  cursor: pointer;
+}
+
+.person-card--clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.person-card--clickable:hover .card-zoom-icon {
+  opacity: 1;
+}
+
+.person-card:hover .card-edit-btn {
+  opacity: 1;
+}
+
+@keyframes cardEntry {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.person-card--no-photo {
+  border-color: #fecaca;
+}
+
+.card-photo {
+  aspect-ratio: 1;
+  background: #e2e8f0;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-zoom-icon {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+// --- Photo type badge ---
+.photo-type-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.photo-type-badge--camera {
+  background: #3b82f6;
+}
+
+.photo-type-badge--pen {
+  background: #94a3b8;
+}
+
+// --- Edit gomb ---
+.card-edit-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.card-edit-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+// --- Card info ---
+.card-info {
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.card-name {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #1e293b;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-type {
+  font-size: 0.625rem;
+  color: #64748b;
+  display: block;
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.card-type--teacher {
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.card-badge {
+  font-size: 0.5625rem;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.card-badge--override {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.card-reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 3px 0;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.5625rem;
+  cursor: pointer;
+  border-top: 1px solid #e2e8f0;
+  transition: all 0.15s ease;
+}
+
+.card-reset-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.card-reset-btn lucide-icon {
+  margin-right: 3px;
+}
+
+// --- Edit form ---
+.edit-form {
+  padding: 2px 0;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.edit-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.edit-input--small {
+  margin-top: 3px;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.edit-action-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin: 0 2px;
+}
+
+.edit-action-btn--save {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.edit-action-btn--save:hover {
+  background: #bbf7d0;
+}
+
+.edit-action-btn--cancel {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.edit-action-btn--cancel:hover {
+  background: #fecaca;
+}
+
+@media (max-width: 480px) {
+  .card-photo {
+    aspect-ratio: 0.85;
+  }
+
+  .card-placeholder lucide-icon {
+    --lucide-icon-size: 18px !important;
+  }
+
+  .card-info {
+    padding: 3px 4px;
+  }
+
+  .card-name {
+    font-size: 0.625rem;
+  }
+
+  .card-type {
+    font-size: 0.5625rem;
+  }
+
+  .card-badge {
+    font-size: 0.5rem;
+    padding: 0 3px;
+  }
+
+  .card-reset-btn {
+    font-size: 0.5rem;
+    padding: 2px 0;
+  }
+
+  // Mobilon az edit gomb mindig látszik
+  .card-edit-btn {
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .person-card {
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -190,6 +190,21 @@ export class PartnerProjectService {
   }
 
   /**
+   * Személy adatainak módosítása (név, pozíció/tantárgy)
+   */
+  updatePerson(projectId: number, personId: number, data: { name?: string; title?: string | null }): Observable<{
+    success: boolean;
+    message: string;
+    data: { id: number; name: string; title: string | null };
+  }> {
+    return this.http.patch<{
+      success: boolean;
+      message: string;
+      data: { id: number; name: string; title: string | null };
+    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}`, data);
+  }
+
+  /**
    * Override: projekt-specifikus fotó beállítása
    */
   overridePersonPhoto(projectId: number, personId: number, photoId: number): Observable<{

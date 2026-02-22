@@ -1,192 +1,45 @@
-import { Component, ChangeDetectionStrategy, input, output, computed, inject, DestroyRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, inject, DestroyRef, OnInit, signal, effect } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TabloPersonItem } from '../persons-modal.types';
+import { PartnerAlbumService } from '../../../services/partner-album.service';
+import { PartnerProjectService } from '../../../services/partner-project.service';
+import { PersonPhoto } from '../../../models/partner.models';
 
 /**
- * Lightbox komponens képek nagyított nézetéhez navigációval.
+ * Lightbox komponens képek nagyított nézetéhez navigációval + archív fotó strip.
  */
 @Component({
   selector: 'app-photo-lightbox',
   standalone: true,
   imports: [LucideAngularModule],
-  template: `
-    @if (person()) {
-      <div class="lightbox" (click)="close.emit()">
-        <div class="lightbox-content" (click)="$event.stopPropagation()">
-          <img [src]="person()!.photoUrl!" [alt]="person()!.name" />
-          <div class="lightbox-caption">
-            <span class="lightbox-name">{{ person()!.name }}</span>
-            <span class="lightbox-type">{{ person()!.type === 'student' ? 'Diák' : 'Tanár' }}</span>
-          </div>
-        </div>
-        <button class="lightbox-close" (click)="close.emit()">
-          <lucide-icon [name]="ICONS.X" [size]="24" />
-        </button>
-        <!-- Navigation -->
-        @if (canNavigatePrev()) {
-          <button class="lightbox-nav lightbox-nav--prev" (click)="navigatePrev($event)">
-            <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="32" />
-          </button>
-        }
-        @if (canNavigateNext()) {
-          <button class="lightbox-nav lightbox-nav--next" (click)="navigateNext($event)">
-            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="32" />
-          </button>
-        }
-      </div>
-    }
-  `,
-  styles: [`
-    .lightbox {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      background: rgba(0, 0, 0, 0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn 0.2s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .lightbox-content {
-      max-width: 90vw;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      animation: scaleIn 0.2s ease;
-    }
-
-    @keyframes scaleIn {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .lightbox-content img {
-      max-width: 100%;
-      max-height: calc(85vh - 60px);
-      object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .lightbox-caption {
-      margin-top: 16px;
-      text-align: center;
-      color: #fff;
-    }
-
-    .lightbox-name {
-      display: block;
-      font-size: 1.125rem;
-      font-weight: 600;
-    }
-
-    .lightbox-type {
-      display: block;
-      font-size: 0.875rem;
-      color: rgba(255, 255, 255, 0.7);
-      margin-top: 4px;
-    }
-
-    .lightbox-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 44px;
-      height: 44px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      border-radius: 50%;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s ease;
-    }
-
-    .lightbox-close:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .lightbox-nav {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 48px;
-      height: 48px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      border-radius: 50%;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s ease;
-    }
-
-    .lightbox-nav:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .lightbox-nav--prev {
-      left: 16px;
-    }
-
-    .lightbox-nav--next {
-      right: 16px;
-    }
-
-    @media (max-width: 480px) {
-      .lightbox-nav {
-        width: 40px;
-        height: 40px;
-      }
-
-      .lightbox-nav--prev {
-        left: 8px;
-      }
-
-      .lightbox-nav--next {
-        right: 8px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .lightbox,
-      .lightbox-content {
-        animation-duration: 0.01ms !important;
-      }
-    }
-  `],
+  templateUrl: './photo-lightbox.component.html',
+  styleUrl: './photo-lightbox.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PhotoLightboxComponent implements OnInit {
   readonly ICONS = ICONS;
   private destroyRef = inject(DestroyRef);
+  private albumService = inject(PartnerAlbumService);
+  private projectService = inject(PartnerProjectService);
 
-  /** Aktuálisan megjelenített személy */
   readonly person = input<TabloPersonItem | null>(null);
-
-  /** Képes személyek listája navigációhoz */
   readonly personsWithPhotos = input<TabloPersonItem[]>([]);
+  readonly projectId = input<number>(0);
 
   readonly close = output<void>();
   readonly navigate = output<TabloPersonItem>();
+  readonly photoChanged = output<{
+    personId: number;
+    hasPhoto: boolean;
+    photoThumbUrl: string | null;
+    photoUrl: string | null;
+    hasOverride: boolean;
+  }>();
 
-  ngOnInit(): void {
-    const handler = (event: KeyboardEvent) => this.onKeydown(event);
-    document.addEventListener('keydown', handler, true); // capture fázis
-    this.destroyRef.onDestroy(() => document.removeEventListener('keydown', handler, true));
-  }
+  archivePhotos = signal<PersonPhoto[]>([]);
+  archiveLoading = signal(false);
 
   readonly canNavigatePrev = computed(() => {
     const p = this.person();
@@ -203,6 +56,65 @@ export class PhotoLightboxComponent implements OnInit {
     const idx = list.findIndex(item => item.id === p.id);
     return idx < list.length - 1;
   });
+
+  readonly showArchiveStrip = computed(() => {
+    const p = this.person();
+    return p && p.type === 'teacher' && p.archiveId && this.archivePhotos().length > 1;
+  });
+
+  constructor() {
+    // Amikor a person változik, betöltjük az archív fotókat
+    effect(() => {
+      const p = this.person();
+      if (p && p.type === 'teacher' && p.archiveId && this.projectId()) {
+        this.loadArchivePhotos(this.projectId(), p.id);
+      } else {
+        this.archivePhotos.set([]);
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    const handler = (event: KeyboardEvent) => this.onKeydown(event);
+    document.addEventListener('keydown', handler, true);
+    this.destroyRef.onDestroy(() => document.removeEventListener('keydown', handler, true));
+  }
+
+  private loadArchivePhotos(projectId: number, personId: number): void {
+    this.archiveLoading.set(true);
+    this.albumService.getPersonPhotos(projectId, personId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.archivePhotos.set(res.photos);
+          this.archiveLoading.set(false);
+        },
+        error: () => {
+          this.archivePhotos.set([]);
+          this.archiveLoading.set(false);
+        }
+      });
+  }
+
+  selectArchivePhoto(photo: PersonPhoto, event: MouseEvent): void {
+    event.stopPropagation();
+    const p = this.person();
+    if (!p) return;
+
+    this.projectService.overridePersonPhoto(this.projectId(), p.id, photo.mediaId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.photoChanged.emit({
+            personId: p.id,
+            hasPhoto: res.data.hasPhoto,
+            photoThumbUrl: res.data.photoThumbUrl,
+            photoUrl: res.data.photoUrl,
+            hasOverride: res.data.hasOverride,
+          });
+        }
+      });
+  }
 
   onKeydown(event: KeyboardEvent): void {
     if (!this.person()) return;

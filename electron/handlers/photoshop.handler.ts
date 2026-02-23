@@ -926,20 +926,13 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     return scriptContent;
   }
 
-  // AppleScript: JSX futtatasa fokusz megtartassal
-  // Elotti frontmost app-ot menti, JSX utan visszaallitja
-  // FONTOS: Ha az Electron app volt a frontmost, NEM aktivaljuk vissza,
-  // mert az a main window-t is elorehozza (pl. overlay polling eseten)
+  // AppleScript: JSX futtatasa fokusz-valtas nelkul
+  // A do javascript file NEM igenyel activate-et, igy nem zavarja a fokuszt
   function buildFocusPreservingAppleScript(jsxFilePath: string): string {
-    const appName = app.getName();
     return [
-      'set _frontApp to name of (info for (path to frontmost application))',
       'tell application id "com.adobe.Photoshop"',
       `  set _result to do javascript file "${jsxFilePath}"`,
       'end tell',
-      `if _frontApp is not "${appName}" then`,
-      '  tell application _frontApp to activate',
-      'end if',
       'return _result',
     ].join('\n');
   }

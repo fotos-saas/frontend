@@ -31,7 +31,7 @@
   <!-- Spacer -->
   <div class="toolbar__spacer"></div>
 
-  <!-- Active document label -->
+  <!-- Active document label + selected layers -->
   @if (activeDocLabel(); as docLabel) {
     <button
       class="toolbar__doc"
@@ -41,6 +41,12 @@
       <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
       <span class="toolbar__doc-name">{{ docLabel }}</span>
     </button>
+    @if (selectedLayers(); as count) {
+      <span class="toolbar__selection" matTooltip="Kijelolt layerek">
+        <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
+        {{ count }}
+      </span>
+    }
     <div class="toolbar__sep"></div>
   }
 

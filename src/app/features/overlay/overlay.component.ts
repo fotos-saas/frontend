@@ -41,10 +41,12 @@ export class OverlayComponent implements OnInit {
   readonly activeDocLabel = computed(() => {
     const name = this.activeDoc().name;
     if (!name) return null;
-    // Kiterjesztes levagasa
     const base = name.replace(/\.(psd|psb|pdd)$/i, '');
     return base.length > 25 ? base.slice(0, 22) + '...' : base;
   });
+
+  /** Kijelolt layerek szama */
+  readonly selectedLayers = computed(() => this.activeDoc().selectedLayers ?? 0);
 
   private readonly allGroups: ToolbarGroup[] = [
     {

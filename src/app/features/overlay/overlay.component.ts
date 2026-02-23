@@ -175,16 +175,25 @@ export class OverlayComponent implements OnInit {
     if (!window.electronAPI) return;
     try {
       const doc = await window.electronAPI.overlay.getActiveDoc();
-      this.ngZone.run(() => this.activeDoc.set(doc));
+      this.ngZone.run(() => this.mergeActiveDoc(doc));
     } catch { /* ignore */ }
   }
 
   private listenActiveDocChanges(): void {
     if (!window.electronAPI) return;
     const cleanup = window.electronAPI.overlay.onActiveDocChanged((doc) => {
-      this.ngZone.run(() => this.activeDoc.set(doc));
+      this.ngZone.run(() => this.mergeActiveDoc(doc));
     });
     this.destroyRef.onDestroy(cleanup);
+  }
+
+  /** IPC-bol jovo doc info merge — megőrzi a selectedLayers-t ha az IPC nem kuldi */
+  private mergeActiveDoc(doc: ActiveDocInfo): void {
+    const current = this.activeDoc();
+    this.activeDoc.set({
+      ...doc,
+      selectedLayers: doc.selectedLayers ?? current.selectedLayers,
+    });
   }
 
   /** 5 masodpercenkent lekerdezi az aktiv PS dokumentumot JSX-en keresztul */

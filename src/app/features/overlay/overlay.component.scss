@@ -25,6 +25,20 @@
   box-shadow:
     0 2px 12px rgba(0, 0, 0, 0.4);
   -webkit-font-smoothing: antialiased;
+
+  &--has-collapse .toolbar__btn:not(.toolbar__btn--active):not(.toolbar__btn--sm) {
+    opacity: 0.35;
+    transition: opacity 0.2s ease;
+  }
+
+  &--has-collapse .toolbar__sep,
+  &--has-collapse .toolbar__drag,
+  &--has-collapse .toolbar__spacer,
+  &--has-collapse .toolbar__doc,
+  &--has-collapse .toolbar__info {
+    opacity: 0.35;
+    transition: opacity 0.2s ease;
+  }
 }
 
 /* Drag handle */

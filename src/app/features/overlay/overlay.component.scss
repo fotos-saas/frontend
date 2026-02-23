@@ -28,6 +28,7 @@
 
   &--has-collapse .toolbar__btn:not(.toolbar__btn--active):not(.toolbar__btn--sm) {
     opacity: 0.35;
+    pointer-events: none;
     transition: opacity 0.2s ease;
   }
 
@@ -37,6 +38,7 @@
   &--has-collapse .toolbar__doc,
   &--has-collapse .toolbar__info {
     opacity: 0.35;
+    pointer-events: none;
     transition: opacity 0.2s ease;
   }
 }

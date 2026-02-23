@@ -46,6 +46,7 @@ export class OverlayComponent implements OnInit {
   readonly isTurbo = signal(false);
   readonly busyCommand = signal<string | null>(null);
   readonly openSubmenu = signal<string | null>(null);
+  private collapseTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** Aktiv doc nev roviditve (max 25 karakter, kiterjesztes nelkul) */
   readonly activeDocLabel = computed(() => {
@@ -171,9 +172,11 @@ export class OverlayComponent implements OnInit {
   private static readonly SUBMENU_IDS = new Set(['arrange-names']);
 
   onCommand(commandId: string): void {
-    // Submenu-s gomb → popup toggle
+    // Submenu-s gomb → inline collapse toggle
     if (OverlayComponent.SUBMENU_IDS.has(commandId)) {
-      this.openSubmenu.set(this.openSubmenu() === commandId ? null : commandId);
+      const isOpen = this.openSubmenu() === commandId;
+      this.openSubmenu.set(isOpen ? null : commandId);
+      this.resetCollapseTimer(isOpen ? null : commandId);
       return;
     }
     this.closeSubmenu();
@@ -225,9 +228,38 @@ export class OverlayComponent implements OnInit {
     }, true);
   }
 
+  /** Collapse hover: egér rajta → timer törlés */
+  onCollapseEnter(): void {
+    this.clearCollapseTimer();
+  }
+
+  /** Collapse hover vége: timer újraindítás */
+  onCollapseLeave(): void {
+    if (this.openSubmenu()) {
+      this.resetCollapseTimer(this.openSubmenu());
+    }
+  }
+
   private closeSubmenu(): void {
     if (this.openSubmenu()) {
       this.openSubmenu.set(null);
+      this.clearCollapseTimer();
+    }
+  }
+
+  private resetCollapseTimer(submenuId: string | null): void {
+    this.clearCollapseTimer();
+    if (submenuId) {
+      this.collapseTimer = setTimeout(() => {
+        this.ngZone.run(() => this.closeSubmenu());
+      }, 5000);
+    }
+  }
+
+  private clearCollapseTimer(): void {
+    if (this.collapseTimer) {
+      clearTimeout(this.collapseTimer);
+      this.collapseTimer = null;
     }
   }
 

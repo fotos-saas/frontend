@@ -1,4 +1,9 @@
-<div class="toolbar" [class.toolbar--has-collapse]="openSubmenu()">
+<div
+  class="toolbar"
+  [class.toolbar--has-collapse]="openSubmenu()"
+  (mouseenter)="onCollapseEnter()"
+  (mouseleave)="onCollapseLeave()"
+>
   <!-- Drag handle -->
   <div class="toolbar__drag">
     <lucide-icon [name]="ICONS.GRIP" [size]="14" />
@@ -33,7 +38,10 @@
 
         <!-- Inline collapse: arrange-names text align opciók -->
         @if (item.id === 'arrange-names') {
-          <div class="toolbar__inline-collapse" [class.toolbar__inline-collapse--open]="openSubmenu() === 'arrange-names'">
+          <div
+            class="toolbar__inline-collapse"
+            [class.toolbar__inline-collapse--open]="openSubmenu() === 'arrange-names'"
+          >
             <div class="toolbar__inline-collapse-inner">
               <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('left')" title="Balra igazitas">
                 <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="15" />

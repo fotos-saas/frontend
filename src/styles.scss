@@ -229,6 +229,14 @@ html, body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+// Overlay ablak: transparent hatter, pointer-events atenged
+html:has(body.overlay-mode),
+body.overlay-mode {
+  background: transparent !important;
+  min-height: 0;
+  pointer-events: none;
+}
+
 // ==============================================
 // Globális Focus-Visible (WCAG 2.4.7)
 // ==============================================

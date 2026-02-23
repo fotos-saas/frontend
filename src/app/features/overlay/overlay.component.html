@@ -31,7 +31,7 @@
   <!-- Spacer -->
   <div class="toolbar__spacer"></div>
 
-  <!-- Active document + selected layers -->
+  <!-- Active document + selected layers + turbo -->
   @if (activeDocLabel()) {
     <button
       class="toolbar__doc"
@@ -47,6 +47,16 @@
     </span>
     <div class="toolbar__sep"></div>
   }
+
+  <!-- Turbo gomb -->
+  <button
+    class="toolbar__btn"
+    [class.toolbar__btn--turbo-active]="isTurbo()"
+    (click)="toggleTurbo()"
+    [title]="isTurbo() ? 'Turbo aktiv (1mp) — katt a kikapcsolashoz' : 'Turbo polling (1mp / 2 percig)'"
+  >
+    <lucide-icon [name]="ICONS.ZAPS" [size]="16" />
+  </button>
 
   <!-- Hide button -->
   <button class="toolbar__btn toolbar__btn--close" (click)="hide()" title="Elrejtes (Ctrl+K)">

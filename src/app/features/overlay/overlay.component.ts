@@ -19,6 +19,10 @@ interface ToolbarGroup {
   designerOnly?: boolean;
 }
 
+const POLL_NORMAL = 5000;
+const POLL_TURBO = 1000;
+const TURBO_DURATION = 2 * 60 * 1000; // 2 perc
+
 @Component({
   selector: 'app-overlay',
   standalone: true,
@@ -35,6 +39,7 @@ export class OverlayComponent implements OnInit {
   readonly context = signal<OverlayContext>({ mode: 'normal' });
   readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
   readonly isDesignerMode = computed(() => this.context().mode === 'designer');
+  readonly isTurbo = signal(false);
 
   /** Aktiv doc nev roviditve (max 25 karakter, kiterjesztes nelkul) */
   readonly activeDocLabel = computed(() => {
@@ -133,13 +138,14 @@ export class OverlayComponent implements OnInit {
   });
 
   private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private turboTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     this.loadContext();
     this.listenContextChanges();
     this.loadActiveDoc();
     this.listenActiveDocChanges();
-    this.startPolling();
+    this.startPolling(POLL_NORMAL);
   }
 
   onCommand(commandId: string): void {
@@ -153,6 +159,31 @@ export class OverlayComponent implements OnInit {
   /** Aktiv doc mappajaank megnyitasa Finder-ben */
   openActiveDocDir(): void {
     this.onCommand('ps-open-workdir');
+  }
+
+  /** Turbo mod: 1mp polling 2 percig, utana visszaall 5mp-re */
+  toggleTurbo(): void {
+    if (this.isTurbo()) {
+      this.stopTurbo();
+    } else {
+      this.isTurbo.set(true);
+      this.restartPolling(POLL_TURBO);
+      this.turboTimeout = setTimeout(() => this.stopTurbo(), TURBO_DURATION);
+    }
+  }
+
+  private stopTurbo(): void {
+    this.isTurbo.set(false);
+    if (this.turboTimeout) {
+      clearTimeout(this.turboTimeout);
+      this.turboTimeout = null;
+    }
+    this.restartPolling(POLL_NORMAL);
+  }
+
+  private restartPolling(interval: number): void {
+    if (this.pollTimer) clearInterval(this.pollTimer);
+    this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
   }
 
   private async loadContext(): Promise<void> {
@@ -196,13 +227,13 @@ export class OverlayComponent implements OnInit {
     });
   }
 
-  /** 5 masodpercenkent lekerdezi az aktiv PS dokumentumot JSX-en keresztul */
-  private startPolling(): void {
+  private startPolling(interval: number): void {
     if (!window.electronAPI) return;
     this.pollActiveDoc();
-    this.pollTimer = setInterval(() => this.pollActiveDoc(), 5000);
+    this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
     this.destroyRef.onDestroy(() => {
       if (this.pollTimer) clearInterval(this.pollTimer);
+      if (this.turboTimeout) clearTimeout(this.turboTimeout);
     });
   }
 
@@ -215,7 +246,6 @@ export class OverlayComponent implements OnInit {
         if (cleaned.startsWith('{')) {
           const doc: ActiveDocInfo = JSON.parse(cleaned);
           this.ngZone.run(() => this.activeDoc.set(doc));
-          // Jelezzuk a main process-nek is (pl. open-workdir szamara)
           window.electronAPI.overlay.setActiveDoc(doc);
         }
       }

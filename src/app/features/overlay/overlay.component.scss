@@ -112,6 +112,17 @@
     &:hover { background: rgba(96, 165, 250, 0.15); color: #93c5fd; }
   }
 
+  /* Turbo active */
+  &--turbo-active {
+    color: #fbbf24;
+    animation: turbo-pulse 1s ease-in-out infinite;
+
+    &:hover {
+      background: rgba(251, 191, 36, 0.15);
+      color: #fcd34d;
+    }
+  }
+
   /* Close button */
   &--close {
     color: rgba(255, 255, 255, 0.3);
@@ -123,6 +134,11 @@
       color: #fca5a5;
     }
   }
+}
+
+@keyframes turbo-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 /* Active doc label */
@@ -160,9 +176,16 @@
   text-overflow: ellipsis;
 }
 
-/* Selected layers count (inline a doc gombban) */
-.toolbar__doc-layers {
-  color: rgba(255, 255, 255, 0.3);
-  font-weight: 400;
-  margin-left: 2px;
+/* Info text (layer count stb.) */
+.toolbar__info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 0 4px;
 }

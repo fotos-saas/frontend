@@ -32,19 +32,19 @@
   <div class="toolbar__spacer"></div>
 
   <!-- Active document label + selected layers -->
-  @if (activeDocLabel(); as docLabel) {
+  @if (activeDocLabel()) {
     <button
       class="toolbar__doc"
       (click)="openActiveDocDir()"
       [matTooltip]="activeDoc().path ?? 'Mappa megnyitasa'"
     >
       <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
-      <span class="toolbar__doc-name">{{ docLabel }}</span>
+      <span class="toolbar__doc-name">{{ activeDocLabel() }}</span>
     </button>
-    @if (selectedLayers(); as count) {
+    @if (selectedLayers() > 0) {
       <span class="toolbar__selection" matTooltip="Kijelolt layerek">
         <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
-        {{ count }}
+        {{ selectedLayers() }}
       </span>
     }
     <div class="toolbar__sep"></div>

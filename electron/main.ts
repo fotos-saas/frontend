@@ -308,13 +308,13 @@ function createOverlayWindow(): void {
   // Az ablak nagyobb mint a toolbar (submenu hely felette), a toolbar az aljan van
   const activeDisplay = screen.getPrimaryDisplay();
   const { width: screenW, height: screenH, x: screenX, y: screenY } = activeDisplay.workArea;
-  const toolbarW = Math.min(920, screenW - 40);
+  const windowW = screenW;
   const windowH = 140; // 52px toolbar + 48px submenu + 40px shadow/padding
 
   overlayWindow = new BrowserWindow({
-    width: toolbarW,
+    width: windowW,
     height: windowH,
-    x: Math.round(screenX + (screenW - toolbarW) / 2),
+    x: screenX,
     y: Math.round(screenY + screenH - windowH - 8),
     frame: false,
     transparent: true,

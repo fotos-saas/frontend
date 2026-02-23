@@ -324,7 +324,6 @@ function createOverlayWindow(): void {
     movable: true,
     show: false,
     hasShadow: false,
-    roundedCorners: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

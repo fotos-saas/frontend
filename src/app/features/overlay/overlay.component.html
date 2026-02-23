@@ -31,7 +31,7 @@
   <!-- Spacer -->
   <div class="toolbar__spacer"></div>
 
-  <!-- Active document label + selected layers -->
+  <!-- Active document + selected layers -->
   @if (activeDocLabel()) {
     <button
       class="toolbar__doc"
@@ -40,15 +40,10 @@
     >
       <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
       <span class="toolbar__doc-name">{{ activeDocLabel() }}</span>
+      @if (selectedLayers() > 0) {
+        <span class="toolbar__doc-layers">· {{ selectedLayers() }} layer</span>
+      }
     </button>
-  }
-  @if (selectedLayers() > 0) {
-    <span class="toolbar__selection">
-      <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
-      {{ selectedLayers() }}
-    </span>
-  }
-  @if (activeDocLabel() || selectedLayers() > 0) {
     <div class="toolbar__sep"></div>
   }
 

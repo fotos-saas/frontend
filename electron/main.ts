@@ -307,8 +307,8 @@ function createOverlayWindow(): void {
   // Vizszintes toolbar sav — alulra pozicionalva
   const activeDisplay = screen.getPrimaryDisplay();
   const { width: screenW, height: screenH, x: screenX, y: screenY } = activeDisplay.workArea;
-  const toolbarW = Math.min(820, screenW - 40);
-  const toolbarH = 52;
+  const toolbarW = Math.min(860, screenW - 40);
+  const toolbarH = 80;
 
   overlayWindow = new BrowserWindow({
     width: toolbarW,

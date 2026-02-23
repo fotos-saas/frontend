@@ -1,6 +1,6 @@
 <div class="toolbar">
   <!-- Drag handle -->
-  <div class="toolbar__drag" matTooltip="Huzd el a pozicionalashoz">
+  <div class="toolbar__drag">
     <lucide-icon [name]="ICONS.GRIP" [size]="14" />
   </div>
 
@@ -18,7 +18,7 @@
         [class.toolbar__btn--red]="item.accent === 'red'"
         [class.toolbar__btn--blue]="item.accent === 'blue'"
         (click)="onCommand(item.id)"
-        [matTooltip]="item.label"
+        [title]="item.label"
       >
         <lucide-icon [name]="item.icon" [size]="18" />
       </button>
@@ -36,14 +36,14 @@
     <button
       class="toolbar__doc"
       (click)="openActiveDocDir()"
-      [matTooltip]="activeDoc().path ?? 'Mappa megnyitasa'"
+      [title]="activeDoc().path ?? ''"
     >
       <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
       <span class="toolbar__doc-name">{{ activeDocLabel() }}</span>
     </button>
   }
   @if (selectedLayers() > 0) {
-    <span class="toolbar__selection" matTooltip="Kijelolt layerek">
+    <span class="toolbar__selection">
       <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
       {{ selectedLayers() }}
     </span>
@@ -53,7 +53,7 @@
   }
 
   <!-- Hide button -->
-  <button class="toolbar__btn toolbar__btn--close" (click)="hide()" matTooltip="Elrejtes (Ctrl+K)">
+  <button class="toolbar__btn toolbar__btn--close" (click)="hide()" title="Elrejtes (Ctrl+K)">
     <lucide-icon [name]="ICONS.X" [size]="16" />
   </button>
 </div>

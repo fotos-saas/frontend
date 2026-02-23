@@ -3,7 +3,6 @@ import {
   OnInit, DestroyRef, inject, NgZone,
 } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
 
@@ -23,7 +22,7 @@ interface ToolbarGroup {
 @Component({
   selector: 'app-overlay',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [LucideAngularModule],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -308,7 +308,7 @@ function createOverlayWindow(): void {
   const activeDisplay = screen.getPrimaryDisplay();
   const { width: screenW, height: screenH, x: screenX, y: screenY } = activeDisplay.workArea;
   const toolbarW = Math.min(860, screenW - 40);
-  const toolbarH = 80;
+  const toolbarH = 52;
 
   overlayWindow = new BrowserWindow({
     width: toolbarW,

@@ -149,7 +149,24 @@ export class OverlayComponent implements OnInit {
   }
 
   onCommand(commandId: string): void {
+    if (commandId === 'link-layers') {
+      this.runLinkUnlink('actions/link-selected.jsx');
+      return;
+    }
+    if (commandId === 'unlink-layers') {
+      this.runLinkUnlink('actions/unlink-selected.jsx');
+      return;
+    }
     window.electronAPI?.overlay.executeCommand(commandId);
+  }
+
+  private async runLinkUnlink(scriptName: string): Promise<void> {
+    if (!window.electronAPI) return;
+    try {
+      await window.electronAPI.photoshop.runJsx({ scriptName });
+      // Azonnali poll a valtozas megjelenithesehez
+      this.pollActiveDoc();
+    } catch { /* ignore */ }
   }
 
   hide(): void {

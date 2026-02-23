@@ -217,6 +217,7 @@ import { firstValueFrom } from 'rxjs';
       min-width: 0;
       position: relative;
       overflow: hidden;
+      background: #1a1a2e;
     }
 
     .layout-designer__canvas-area app-layout-canvas {

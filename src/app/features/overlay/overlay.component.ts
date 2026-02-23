@@ -194,11 +194,11 @@ export class OverlayComponent implements OnInit {
     window.electronAPI?.overlay.executeCommand(commandId);
   }
 
-  /** Submenu bezarasa ha a submenu-n kivulre kattintanak */
+  /** Submenu bezarasa ha a toolbar-on kivulre kattintanak */
   onDocumentClick(event: MouseEvent): void {
     if (!this.openSubmenu()) return;
     const target = event.target as HTMLElement;
-    if (!target.closest('.toolbar__inline-collapse') && !target.closest('.toolbar__btn--active')) {
+    if (!target.closest('.toolbar')) {
       this.closeSubmenu();
     }
   }

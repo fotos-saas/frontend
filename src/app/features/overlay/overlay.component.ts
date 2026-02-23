@@ -99,6 +99,8 @@ export class OverlayComponent implements OnInit {
       items: [
         { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotok szinkronizalasa', accent: 'green' },
         { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazitasa', accent: 'purple' },
+        { id: 'link-layers', icon: ICONS.LINK, label: 'Osszelinkelés' },
+        { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés' },
         { id: 'refresh', icon: ICONS.REFRESH, label: 'Frissites PS-bol' },
       ],
     },

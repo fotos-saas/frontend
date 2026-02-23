@@ -204,7 +204,9 @@ export class OverlayComponent implements OnInit {
         const cleaned = result.output.trim();
         if (cleaned.startsWith('{')) {
           const doc: ActiveDocInfo = JSON.parse(cleaned);
-          await window.electronAPI.overlay.setActiveDoc(doc);
+          this.ngZone.run(() => this.activeDoc.set(doc));
+          // Jelezzuk a main process-nek is (pl. open-workdir szamara)
+          window.electronAPI.overlay.setActiveDoc(doc);
         }
       }
     } catch { /* PS nem elerheto — skip */ }

@@ -1,16 +1,23 @@
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   width: 100%;
   height: 100%;
+  padding: 0 20px 12px;
+  box-sizing: border-box;
   background: transparent;
   user-select: none;
-  overflow: hidden;
+  overflow: visible;
+  pointer-events: none;
 }
 
 .toolbar {
   display: flex;
   align-items: center;
-  height: 100%;
+  height: 52px;
+  flex-shrink: 0;
+  pointer-events: auto;
   background: #1e1e3a;
   border: 1px solid rgba(167, 139, 250, 0.2);
   border-radius: 12px;
@@ -58,6 +65,12 @@
 .toolbar__spacer {
   flex: 1;
   min-width: 4px;
+}
+
+/* Button wrapper (submenu pozicionalashoz) */
+.toolbar__btn-wrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
 /* Toolbar buttons */
@@ -121,6 +134,19 @@
       background: rgba(251, 191, 36, 0.15);
       color: #fcd34d;
     }
+  }
+
+  /* Active (submenu open) */
+  &--active {
+    background: rgba(167, 139, 250, 0.2);
+    color: #c4b5fd;
+  }
+
+  /* Busy (loading) state */
+  &--busy {
+    cursor: wait;
+    opacity: 0.6;
+    pointer-events: none;
   }
 
   /* Close button */
@@ -188,4 +214,73 @@
   white-space: nowrap;
   flex-shrink: 0;
   padding: 0 4px;
+}
+
+/* Submenu popup */
+.toolbar__submenu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  background: #1e1e3a;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 10px;
+  padding: 3px;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(124, 58, 237, 0.08);
+  animation: submenu-in 0.15s ease-out;
+  -webkit-app-region: no-drag;
+}
+
+.toolbar__submenu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: all 0.1s ease;
+
+  &:hover {
+    background: rgba(167, 139, 250, 0.2);
+    color: #c4b5fd;
+  }
+
+  &:active {
+    background: rgba(167, 139, 250, 0.3);
+    transform: scale(0.92);
+  }
+}
+
+@keyframes submenu-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Spinner */
+.toolbar__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: spinner-rotate 0.6s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
 }

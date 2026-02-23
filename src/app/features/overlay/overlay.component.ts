@@ -10,6 +10,7 @@ interface ToolbarItem {
   id: string;
   icon: string;
   label: string;
+  tooltip?: string;
   accent?: 'green' | 'purple' | 'amber' | 'red' | 'blue';
 }
 
@@ -30,6 +31,9 @@ const TURBO_DURATION = 2 * 60 * 1000; // 2 perc
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  },
 })
 export class OverlayComponent implements OnInit {
   protected readonly ICONS = ICONS;
@@ -40,6 +44,8 @@ export class OverlayComponent implements OnInit {
   readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
   readonly isDesignerMode = computed(() => this.context().mode === 'designer');
   readonly isTurbo = signal(false);
+  readonly busyCommand = signal<string | null>(null);
+  readonly openSubmenu = signal<string | null>(null);
 
   /** Aktiv doc nev roviditve (max 25 karakter, kiterjesztes nelkul) */
   readonly activeDocLabel = computed(() => {
@@ -98,9 +104,9 @@ export class OverlayComponent implements OnInit {
       id: 'photoshop',
       items: [
         { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotok szinkronizalasa', accent: 'green' },
-        { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazitasa', accent: 'purple' },
-        { id: 'link-layers', icon: ICONS.LINK, label: 'Osszelinkelés' },
-        { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés' },
+        { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazitasa', tooltip: 'Nevek a kepek ala (kijelolt kepeknel csak azokat, egyebkent mindet). Unlinkeli a parokat.', accent: 'purple' },
+        { id: 'link-layers', icon: ICONS.LINK, label: 'Osszelinkelés', tooltip: 'Kijelolt layerek osszelinkelese az azonos nevu tarsaikkal' },
+        { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés', tooltip: 'Kijelolt layerek linkelesenek megszuntetese' },
         { id: 'refresh', icon: ICONS.REFRESH, label: 'Frissites PS-bol' },
       ],
     },
@@ -143,32 +149,96 @@ export class OverlayComponent implements OnInit {
   private turboTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
+    document.body.classList.add('overlay-mode');
     this.loadContext();
     this.listenContextChanges();
     this.loadActiveDoc();
     this.listenActiveDocChanges();
     this.startPolling(POLL_NORMAL);
+    this.setupClickThrough();
   }
 
+  private static readonly ALIGN_MAP: Record<string, string> = {
+    'align-left': 'left',
+    'align-center-h': 'centerH',
+    'align-right': 'right',
+    'align-top': 'top',
+    'align-center-v': 'centerV',
+    'align-bottom': 'bottom',
+  };
+
+  /** Submenu-s gombok: kattintasra popup nyilik */
+  private static readonly SUBMENU_IDS = new Set(['arrange-names']);
+
   onCommand(commandId: string): void {
+    // Submenu-s gomb → popup toggle
+    if (OverlayComponent.SUBMENU_IDS.has(commandId)) {
+      this.openSubmenu.set(this.openSubmenu() === commandId ? null : commandId);
+      return;
+    }
+    this.closeSubmenu();
+
     if (commandId === 'link-layers') {
-      this.runLinkUnlink('actions/link-selected.jsx');
+      this.runJsxAction(commandId, 'actions/link-selected.jsx');
       return;
     }
     if (commandId === 'unlink-layers') {
-      this.runLinkUnlink('actions/unlink-selected.jsx');
+      this.runJsxAction(commandId, 'actions/unlink-selected.jsx');
+      return;
+    }
+    const alignType = OverlayComponent.ALIGN_MAP[commandId];
+    if (alignType) {
+      this.runJsxAction(commandId, 'actions/align-linked.jsx', { ALIGN_TYPE: alignType });
       return;
     }
     window.electronAPI?.overlay.executeCommand(commandId);
   }
 
-  private async runLinkUnlink(scriptName: string): Promise<void> {
+  /** Submenu bezarasa ha a submenu-n kivulre kattintanak */
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.openSubmenu()) return;
+    const target = event.target as HTMLElement;
+    if (!target.closest('.toolbar__inline-collapse') && !target.closest('.toolbar__btn--active')) {
+      this.closeSubmenu();
+    }
+  }
+
+  /** Nevek igazitasa a valasztott align-nal */
+  arrangeNames(textAlign: string): void {
+    this.closeSubmenu();
+    this.runJsxAction('arrange-names', 'actions/arrange-names-selected.jsx', { TEXT_ALIGN: textAlign });
+  }
+
+  /** Click-through: atlatszo terulet atenged kattintast a mogotte levo appnak */
+  private setupClickThrough(): void {
     if (!window.electronAPI) return;
+    document.addEventListener('mousemove', (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Ha a body/html-re mutat (atlatszo terulet) → atenged
+      if (target === document.documentElement || target === document.body) {
+        window.electronAPI!.overlay.setIgnoreMouseEvents(true);
+      }
+    });
+    // Minden lathato elem mouseenter-jere visszakapcsol
+    document.addEventListener('mouseenter', () => {
+      window.electronAPI!.overlay.setIgnoreMouseEvents(false);
+    }, true);
+  }
+
+  private closeSubmenu(): void {
+    if (this.openSubmenu()) {
+      this.openSubmenu.set(null);
+    }
+  }
+
+  private async runJsxAction(commandId: string, scriptName: string, jsonData?: Record<string, unknown>): Promise<void> {
+    if (!window.electronAPI) return;
+    this.busyCommand.set(commandId);
     try {
-      await window.electronAPI.photoshop.runJsx({ scriptName });
-      // Azonnali poll a valtozas megjelenithesehez
+      await window.electronAPI.photoshop.runJsx({ scriptName, jsonData });
       this.pollActiveDoc();
     } catch { /* ignore */ }
+    this.ngZone.run(() => this.busyCommand.set(null));
   }
 
   hide(): void {

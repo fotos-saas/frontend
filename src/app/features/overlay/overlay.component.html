@@ -10,18 +10,44 @@
   <!-- Toolbar groups -->
   @for (group of groups(); track group.id; let last = $last) {
     @for (item of group.items; track item.id) {
-      <button
-        class="toolbar__btn"
-        [class.toolbar__btn--green]="item.accent === 'green'"
-        [class.toolbar__btn--purple]="item.accent === 'purple'"
-        [class.toolbar__btn--amber]="item.accent === 'amber'"
-        [class.toolbar__btn--red]="item.accent === 'red'"
-        [class.toolbar__btn--blue]="item.accent === 'blue'"
-        (click)="onCommand(item.id)"
-        [title]="item.label"
-      >
-        <lucide-icon [name]="item.icon" [size]="18" />
-      </button>
+      <div class="toolbar__btn-wrap">
+        <button
+          class="toolbar__btn"
+          [class.toolbar__btn--green]="item.accent === 'green'"
+          [class.toolbar__btn--purple]="item.accent === 'purple'"
+          [class.toolbar__btn--amber]="item.accent === 'amber'"
+          [class.toolbar__btn--red]="item.accent === 'red'"
+          [class.toolbar__btn--blue]="item.accent === 'blue'"
+          [class.toolbar__btn--busy]="busyCommand() === item.id"
+          [class.toolbar__btn--active]="openSubmenu() === item.id"
+          [disabled]="busyCommand() === item.id"
+          (click)="onCommand(item.id)"
+          [title]="item.tooltip || item.label"
+        >
+          @if (busyCommand() === item.id) {
+            <span class="toolbar__spinner"></span>
+          } @else {
+            <lucide-icon [name]="item.icon" [size]="18" />
+          }
+        </button>
+
+        <!-- Inline collapse: arrange-names text align opciók -->
+        @if (item.id === 'arrange-names') {
+          <div class="toolbar__inline-collapse" [class.toolbar__inline-collapse--open]="openSubmenu() === 'arrange-names'">
+            <div class="toolbar__inline-collapse-inner">
+              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('left')" title="Balra igazitas">
+                <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="15" />
+              </button>
+              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('center')" title="Kozepre igazitas">
+                <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="15" />
+              </button>
+              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('right')" title="Jobbra igazitas">
+                <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="15" />
+              </button>
+            </div>
+          </div>
+        }
+      </div>
     }
     @if (!last) {
       <div class="toolbar__sep"></div>

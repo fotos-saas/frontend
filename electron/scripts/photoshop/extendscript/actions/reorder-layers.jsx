@@ -120,24 +120,21 @@ function parseJsonArray(str) {
   return result;
 }
 
-(function () {
+var __result = (function () {
   try {
     if (app.documents.length === 0) {
-      '{"reordered":0}';
-      return;
+      return '{"reordered":0}';
     }
     var doc = app.activeDocument;
 
     var orderedNamesStr = typeof CONFIG !== "undefined" && CONFIG.ORDERED_NAMES ? CONFIG.ORDERED_NAMES : "";
     if (!orderedNamesStr) {
-      '{"reordered":0,"error":"No ORDERED_NAMES"}';
-      return;
+      return '{"reordered":0,"error":"No ORDERED_NAMES"}';
     }
 
     var orderedNames = parseJsonArray(orderedNamesStr);
     if (orderedNames.length === 0) {
-      '{"reordered":0}';
-      return;
+      return '{"reordered":0}';
     }
 
     var groupFilter = typeof CONFIG !== "undefined" && CONFIG.GROUP ? CONFIG.GROUP : "All";
@@ -155,8 +152,7 @@ function parseJsonArray(str) {
 
     if (allLayers.length < 2) {
       app.preferences.rulerUnits = oldRulerUnits;
-      '{"reordered":0}';
-      return;
+      return '{"reordered":0}';
     }
 
     var slots = getPositionSlots(allLayers);
@@ -179,9 +175,10 @@ function parseJsonArray(str) {
     }
 
     app.preferences.rulerUnits = oldRulerUnits;
-    '{"reordered":' + reordered + '}';
+    return '{"reordered":' + reordered + '}';
 
   } catch (e) {
-    '{"reordered":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
+    return '{"reordered":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
   }
 })();
+__result;

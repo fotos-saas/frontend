@@ -351,7 +351,6 @@ export class OverlayComponent implements OnInit {
     this.closeSubmenu();
     if (this.sorting()) return;
     const names = await this.getImageLayerNames();
-    console.log('[sortAbc] layer names:', names);
     if (names.length < 2) return;
 
     this.sorting.set(true);
@@ -360,13 +359,8 @@ export class OverlayComponent implements OnInit {
       const prefixRe = /^(dr\.?\s*|ifj\.?\s*|id\.?\s*|prof\.?\s*|özv\.?\s*)/i;
       const sortKey = (n: string) => n.replace(prefixRe, '').trim();
       const sorted = [...names].sort((a, b) => collator.compare(sortKey(a), sortKey(b)));
-      console.log('[sortAbc] sorted:', sorted);
-      const result = await window.electronAPI!.photoshop.runJsx({
-        scriptName: 'actions/reorder-layers.jsx',
-        jsonData: { ORDERED_NAMES: JSON.stringify(sorted), GROUP: 'All' },
-      });
-      console.log('[sortAbc] reorder result:', result);
-    } catch (e) { console.error('[sortAbc] error:', e); }
+      await this.reorderLayersByNames(sorted);
+    } catch { /* ignore */ }
     this.ngZone.run(() => this.sorting.set(false));
   }
 
@@ -437,13 +431,12 @@ export class OverlayComponent implements OnInit {
       const result = await window.electronAPI.photoshop.runJsx({
         scriptName: 'actions/get-image-names.jsx',
       });
-      console.log('[getImageLayerNames] raw result:', result);
       if (!result.success || !result.output) return [];
       const cleaned = result.output.trim();
       if (!cleaned.startsWith('{')) return [];
       const data = JSON.parse(cleaned);
       return data.names || [];
-    } catch (e) { console.error('[getImageLayerNames] error:', e); return []; }
+    } catch { return []; }
   }
 
   /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket */

@@ -9,10 +9,9 @@
 // #include "../lib/config.jsx"
 // #include "../lib/utils.jsx"
 
-(function () {
+var __result = (function () {
   if (app.documents.length === 0) {
-    '{"names":[],"count":0}';
-    return;
+    return '{"names":[],"count":0}';
   }
   var doc = app.activeDocument;
   var names = [];
@@ -35,5 +34,6 @@
   }
   namesJson += "]";
 
-  '{"names":' + namesJson + ',"count":' + names.length + '}';
+  return '{"names":' + namesJson + ',"count":' + names.length + '}';
 })();
+__result;

@@ -524,6 +524,7 @@ export class OverlayComponent implements OnInit {
       const cleaned = result.output.trim();
       if (!cleaned.startsWith('{')) return [];
       const data = JSON.parse(cleaned);
+      console.log('[FRESH-SELECTED] selectedLayerNames:', data.selectedLayerNames, 'count:', data.selectedLayers);
       // Frissítsük az activeDoc signal-t is
       this.ngZone.run(() => this.activeDoc.set(data));
       return data.selectedLayerNames || [];
@@ -559,10 +560,12 @@ export class OverlayComponent implements OnInit {
 
   /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket */
   private async reorderLayersByNames(orderedNames: string[]): Promise<void> {
-    await this.runJsxAction('reorder-layers', 'actions/reorder-layers.jsx', {
+    console.log('[REORDER] orderedNames:', orderedNames);
+    const result = await this.runJsxAction('reorder-layers', 'actions/reorder-layers.jsx', {
       ORDERED_NAMES: JSON.stringify(orderedNames),
       GROUP: 'All',
     });
+    console.log('[REORDER] JSX result:', result);
   }
 
   /** Két tömb váltogatásos összefűzése */
@@ -1294,14 +1297,20 @@ export class OverlayComponent implements OnInit {
     }
   }
 
-  private async runJsxAction(commandId: string, scriptName: string, jsonData?: Record<string, unknown>): Promise<void> {
-    if (!window.electronAPI) return;
+  private async runJsxAction(commandId: string, scriptName: string, jsonData?: Record<string, unknown>): Promise<any> {
+    if (!window.electronAPI) return null;
     this.busyCommand.set(commandId);
     try {
-      await window.electronAPI.photoshop.runJsx({ scriptName, jsonData });
+      const result = await window.electronAPI.photoshop.runJsx({ scriptName, jsonData });
+      console.log(`[JSX:${commandId}] result:`, result);
       this.pollActiveDoc();
-    } catch { /* ignore */ }
-    this.ngZone.run(() => this.busyCommand.set(null));
+      return result;
+    } catch (err) {
+      console.error(`[JSX:${commandId}] error:`, err);
+      return null;
+    } finally {
+      this.ngZone.run(() => this.busyCommand.set(null));
+    }
   }
 
   hide(): void {

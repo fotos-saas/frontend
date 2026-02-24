@@ -182,8 +182,10 @@ var __result = (function () {
 
     // Nev -> layerInfo map
     var nameToLayer = {};
+    var allLayerNamesList = [];
     for (var i = 0; i < allLayers.length; i++) {
       var n = allLayers[i].name;
+      allLayerNamesList.push(n);
       if (n && !nameToLayer[n]) {
         nameToLayer[n] = allLayers[i];
       }
@@ -191,14 +193,27 @@ var __result = (function () {
 
     // Erintett layerek: ORDERED_NAMES-ben szereplo layerek
     var involvedLayers = [];
+    var matchedNames = [];
+    var unmatchedNames = [];
     for (var k = 0; k < orderedNames.length; k++) {
       if (nameToLayer[orderedNames[k]]) {
         involvedLayers.push(nameToLayer[orderedNames[k]]);
+        matchedNames.push(orderedNames[k]);
+      } else {
+        unmatchedNames.push(orderedNames[k]);
       }
     }
 
+    // Ha nincs eleg match, debug infoval terunk vissza
+    if (involvedLayers.length < 2) {
+      app.preferences.rulerUnits = oldRulerUnits;
+      // Debug: miert nem egyezett? Elso 5 layer nev + elso 3 ordered name
+      var dbgLayers = allLayerNamesList.slice(0, 5).join("|");
+      var dbgOrdered = orderedNames.slice(0, 3).join("|");
+      return '{"reordered":0,"debug":"layers:' + dbgLayers.replace(/"/g, '') + ' ordered:' + dbgOrdered.replace(/"/g, '') + ' unmatched:' + unmatchedNames.length + ' allCount:' + allLayers.length + '"}';
+    }
+
     // Slot-ok: CSAK az erintett layerek jelenlegi pozicioit hasznaljuk
-    // (ha reszleges kijeleoles, ne az osszes layer slotjait)
     var slots = getPositionSlots(involvedLayers);
 
     // Kiszamoljuk az OSSZES mozgatast elore (cel poziciok)

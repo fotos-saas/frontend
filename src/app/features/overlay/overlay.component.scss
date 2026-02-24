@@ -704,13 +704,30 @@
 
 // ---- v2: Batch drop zona ----
 .upload-panel__drop--batch {
-  min-height: 44px;
+  min-height: 40px;
   flex: none;
   margin-bottom: 6px;
   flex-direction: row;
+  padding: 6px 12px;
 
-  lucide-icon { margin-bottom: 0; margin-right: 6px; }
-  span { font-size: 11px; }
+  lucide-icon { margin-bottom: 0; margin-right: 6px; flex-shrink: 0; }
+}
+
+.upload-panel__browse-label {
+  color: #818cf8;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+
+  &:hover { color: #a5b4fc; text-decoration: underline; }
+}
+
+.upload-panel__drop-hint {
+  font-size: 10px;
+  color: #555;
+  margin-left: 6px;
+  white-space: nowrap;
 }
 
 // ---- v2: Layer lista ----

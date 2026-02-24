@@ -403,6 +403,14 @@ export class OverlayComponent implements OnInit {
     }
   }
 
+  /** Multi-file tallózás (v2 batch módhoz) */
+  onBatchFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    this.matchDroppedFiles(input.files);
+    input.value = ''; // reset, hogy ugyanaz a fájl újra kiválasztható legyen
+  }
+
   upload(): void {
     const person = this.selectedPerson();
     const file = this.selectedFile();

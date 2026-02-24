@@ -220,6 +220,9 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.loadProject(id);
     this.ps.detectPhotoshop();
     this.loadTabloSizes();
+
+    // Overlay context beallitasa a projectId-val (normal modban is kell a feltolteshez)
+    window.electronAPI?.overlay.setContext({ mode: 'normal', projectId: id });
   }
 
   private loadProject(id: number): void {

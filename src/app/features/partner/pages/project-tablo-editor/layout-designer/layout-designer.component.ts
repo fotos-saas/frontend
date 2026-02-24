@@ -440,8 +440,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     document.body.style.overflow = this.originalOverflow;
     this.resizeObserver?.disconnect();
 
-    // Overlay kontextus: normal mod visszaallitas
-    window.electronAPI?.overlay.setContext({ mode: 'normal' });
+    // Overlay kontextus: normal mod visszaallitas (projectId megtartasa)
+    window.electronAPI?.overlay.setContext({ mode: 'normal', projectId: this.projectId() });
 
     // IPC listener cleanup
     this.overlayCommandCleanup?.();

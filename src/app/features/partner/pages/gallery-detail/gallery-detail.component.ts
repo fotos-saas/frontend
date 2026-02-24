@@ -132,6 +132,12 @@ export class GalleryDetailComponent implements OnInit {
     this.state.lightboxIndex.set(newIndex);
   }
 
+  // === DOWNLOAD ALL ===
+
+  onDownloadAll(): void {
+    this.actions.downloadAll(this.state, this.projectId);
+  }
+
   // === DEADLINE ===
 
   onDeadlineExtend(days: number): void {

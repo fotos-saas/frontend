@@ -43,8 +43,10 @@
       [deadlineFormatted]="state.deadlineFormatted()"
       [settingDeadline]="state.settingDeadline()"
       [isDeadlineExpired]="state.isDeadlineExpired()"
+      [downloadingAll]="state.downloadingAll()"
       (viewModeChange)="state.viewMode.set($event)"
       (deadlineExtend)="onDeadlineExtend($event)"
+      (downloadAll)="onDownloadAll()"
     />
 
     <!-- Upload Section -->

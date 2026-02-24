@@ -25,8 +25,11 @@ export class GalleryInfoBarComponent {
   readonly settingDeadline = input<boolean>(false);
   readonly isDeadlineExpired = input<boolean>(false);
 
+  readonly downloadingAll = input<boolean>(false);
+
   readonly viewModeChange = output<'grid' | 'list'>();
   readonly deadlineExtend = output<number>();
+  readonly downloadAll = output<void>();
 
   readonly hasProgress = computed(() => {
     const p = this.progress();

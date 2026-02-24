@@ -17,6 +17,23 @@
         <span>{{ progress()!.finalized }}/{{ progress()!.totalUsers }} kész</span>
       </div>
     }
+    @if (photosCount() > 0) {
+      <span class="info-bar__divider"></span>
+      <button
+        type="button"
+        class="info-bar__download-btn"
+        [disabled]="downloadingAll()"
+        matTooltip="Összes fotó letöltése ZIP-ben"
+        (click)="downloadAll.emit()"
+      >
+        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+        @if (downloadingAll()) {
+          <span>Letöltés...</span>
+        } @else {
+          <span>Letöltés</span>
+        }
+      </button>
+    }
   </div>
 
   <!-- Grid/Lista toggle -->

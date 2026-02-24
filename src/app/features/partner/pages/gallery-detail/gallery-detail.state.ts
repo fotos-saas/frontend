@@ -39,6 +39,10 @@ export class GalleryDetailState {
   readonly deadline = signal<string | null>(null);
   readonly settingDeadline = signal<boolean>(false);
 
+  // === DOWNLOAD STATE ===
+
+  readonly downloadingAll = signal<boolean>(false);
+
   // === DELETE STATE ===
 
   readonly deleteSelectedIds = signal<number[]>([]);
@@ -303,6 +307,7 @@ export class GalleryDetailState {
     this.deadline.set(null);
     this.settingDeadline.set(false);
     this.uploading.set(false);
+    this.downloadingAll.set(false);
     this.dropZoneVisible.set(false);
     this.uploadProgress.set(0);
     this.detailedUploadProgress.set(null);

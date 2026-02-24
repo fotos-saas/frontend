@@ -213,6 +213,17 @@ export class PartnerGalleryService {
   }
 
   /**
+   * Galéria összes fotó letöltése ZIP-ben (blob letöltés)
+   */
+  downloadGalleryZip(projectId: number): Observable<Blob> {
+    return this.http.post(
+      `${this.baseUrl}/projects/${projectId}/gallery/download-zip`,
+      {},
+      { responseType: 'blob' },
+    );
+  }
+
+  /**
    * Monitoring Excel export (blob letöltés)
    */
   exportMonitoringExcel(projectId: number, filter: string): Observable<Blob> {

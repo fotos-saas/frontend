@@ -46,6 +46,32 @@
     border-radius: 6px;
   }
 
+  &__download-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-primary, #1e3a5f);
+    background: get-color('primary', 50);
+    border: 1px solid get-color('primary', 200);
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    @include transition-fast;
+
+    &:hover:not(:disabled) {
+      background: get-color('primary', 100);
+      border-color: get-color('primary', 300);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
   &__deadline {
     display: flex;
     align-items: center;

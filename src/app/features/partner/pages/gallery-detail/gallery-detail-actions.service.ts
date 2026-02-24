@@ -2,8 +2,10 @@ import { Injectable, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { PartnerService } from '../../services/partner.service';
+import { PartnerGalleryService } from '../../services/partner-gallery.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { UploadProgressService } from '../../../../core/services/upload-progress.service';
+import { saveFile } from '../../../../shared/utils/file.util';
 import { environment } from '../../../../../environments/environment';
 import { GalleryDetailState } from './gallery-detail.state';
 
@@ -16,6 +18,7 @@ import { GalleryDetailState } from './gallery-detail.state';
 @Injectable()
 export class GalleryDetailActionsService {
   private readonly partnerService = inject(PartnerService);
+  private readonly galleryService = inject(PartnerGalleryService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly uploadService = inject(UploadProgressService);
@@ -175,6 +178,25 @@ export class GalleryDetailActionsService {
           this.toast.error('Hiba', 'Nem sikerült törölni a képeket');
           state.deletingPhotos.set(false);
           this.loadGallery(state, projectId);
+        },
+      });
+  }
+
+  // === DOWNLOAD ALL PHOTOS ===
+
+  downloadAll(state: GalleryDetailState, projectId: number): void {
+    state.downloadingAll.set(true);
+    this.galleryService.downloadGalleryZip(projectId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          saveFile(blob, `galeria-fotok-${projectId}.zip`);
+          state.downloadingAll.set(false);
+          this.toast.success('Siker', 'Fotók letöltése elindult');
+        },
+        error: () => {
+          state.downloadingAll.set(false);
+          this.toast.error('Hiba', 'Nem sikerült letölteni a fotókat');
         },
       });
   }

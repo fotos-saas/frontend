@@ -213,7 +213,32 @@ function unlinkByName(doc, layerName) {
   }
 }
 
+// --- Referencia: baseline offset (position.y - bounds.top) ---
+// Adott font/merethez konstans — egyszer merjuk, minden nevnel hasznaljuk.
+var _baselineOffsetSel = null;
+
+function measureBaselineOffset(doc) {
+  var refLayer = doc.artLayers.add();
+  refLayer.kind = LayerKind.TEXT;
+  refLayer.name = "__ref_measure__";
+  var ti = refLayer.textItem;
+  ti.contents = "Hg";
+  ti.font = typeof CONFIG !== "undefined" && CONFIG.FONT_NAME ? CONFIG.FONT_NAME : "ArialMT";
+  ti.size = new UnitValue(typeof CONFIG !== "undefined" && CONFIG.FONT_SIZE ? CONFIG.FONT_SIZE : 12, "pt");
+  ti.justification = Justification.LEFT;
+
+  var posY = ti.position[1].as("px");
+  var b = getBoundsNoEffects(refLayer.id);
+  var offset = posY - b.top;
+
+  refLayer.remove();
+  return offset;
+}
+
 // --- Nev pozicionalasa a kep ala ---
+// textItem.position (baseline anchor) alapu pozicionalas:
+// A baseline pont NEM fugg a szoveg tartalmatol, ezert az ekezetes
+// es ekezetmentes nevek ugyanarra a vonalra kerulnek.
 function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, breakAfter) {
   var imgBounds = getBoundsNoEffects(imageLayer.id);
   var imgCenterX = (imgBounds.left + imgBounds.right) / 2;
@@ -222,6 +247,11 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
   // Ha nincs gap megadva, a kep szelessegenek 8%-a
   if (gapPx <= 0) {
     gapPx = Math.round((imgBounds.right - imgBounds.left) * 0.08);
+  }
+
+  // Baseline offset meres (egyszer)
+  if (_baselineOffsetSel === null) {
+    _baselineOffsetSel = measureBaselineOffset(doc);
   }
 
   // Nev layer kivalasztasa
@@ -244,26 +274,22 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
     return false;
   }
 
-  // Origora mozgatas
-  var b1 = getBoundsNoEffects(nameLayer.id);
-  nameLayer.translate(new UnitValue(Math.round(-b1.left), "px"), new UnitValue(Math.round(-b1.top), "px"));
+  // Vertikalis pozicio: bounds.top = imgBottom + gap → baseline = boundsTop + offset
+  var desiredBoundsTop = imgBottom + gapPx;
+  var desiredBaselineY = desiredBoundsTop + _baselineOffsetSel;
 
-  // Celba mozgatas
-  var desiredTop = imgBottom + gapPx;
-  var desiredLeft;
+  // Vizszintes pozicio: a justification anchor pontja
+  var desiredX;
   if (textAlign === "left") {
-    desiredLeft = imgBounds.left;
+    desiredX = imgBounds.left;
   } else if (textAlign === "right") {
-    var b2 = getBoundsNoEffects(nameLayer.id);
-    var textW = b2.right - b2.left;
-    desiredLeft = imgBounds.right - textW;
+    desiredX = imgBounds.right;
   } else {
-    var b2c = getBoundsNoEffects(nameLayer.id);
-    var textW2 = b2c.right - b2c.left;
-    desiredLeft = imgCenterX - textW2 / 2;
+    desiredX = imgCenterX;
   }
 
-  nameLayer.translate(new UnitValue(Math.round(desiredLeft), "px"), new UnitValue(Math.round(desiredTop), "px"));
+  // Position beallitasa — a baseline anchor pont
+  textItem.position = [new UnitValue(Math.round(desiredX), "px"), new UnitValue(Math.round(desiredBaselineY), "px")];
   return true;
 }
 
@@ -276,8 +302,16 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
     var doc = app.activeDocument;
 
     var textAlign = typeof CONFIG !== "undefined" && CONFIG.TEXT_ALIGN ? CONFIG.TEXT_ALIGN : "center";
-    var nameGapPx = typeof CONFIG !== "undefined" && CONFIG.NAME_GAP_PX ? parseInt(CONFIG.NAME_GAP_PX, 10) : 0;
     var breakAfter = typeof CONFIG !== "undefined" && CONFIG.BREAK_AFTER ? parseInt(CONFIG.BREAK_AFTER, 10) : 0;
+
+    // Gap: ha cm-ben kapjuk, konvertaljuk px-re; ha px-ben, hasznaljuk kozvetlenul
+    var nameGapPx = 0;
+    if (typeof CONFIG !== "undefined" && CONFIG.NAME_GAP_CM) {
+      var dpi = doc.resolution;
+      nameGapPx = Math.round((parseFloat(CONFIG.NAME_GAP_CM) / 2.54) * dpi);
+    } else if (typeof CONFIG !== "undefined" && CONFIG.NAME_GAP_PX) {
+      nameGapPx = parseInt(CONFIG.NAME_GAP_PX, 10);
+    }
 
     // Ruler pixelre
     var oldRulerUnits = app.preferences.rulerUnits;

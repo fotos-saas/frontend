@@ -344,6 +344,21 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
                 <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="14" />
               </button>
             </div>
+
+            <div class="name-settings__sep"></div>
+
+            <button
+              class="name-settings__apply-btn"
+              [disabled]="arrangingNames()"
+              (click)="arrangeNamesClicked.emit()"
+            >
+              <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+              @if (!arrangingNames()) {
+                <span>Nevek rendezése</span>
+              } @else {
+                <span>Rendezés...</span>
+              }
+            </button>
           </div>
         }
         <button
@@ -785,6 +800,32 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         border-color: rgba(167, 139, 250, 0.4);
         color: #a78bfa;
       }
+    }
+
+    .name-settings__sep {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 4px 0;
+    }
+
+    .name-settings__apply-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 7px 0;
+      border: none;
+      border-radius: 6px;
+      background: rgba(167, 139, 250, 0.2);
+      color: #a78bfa;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.12s ease;
+
+      &:hover:not(:disabled) { background: rgba(167, 139, 250, 0.35); color: #c4b5fd; }
+      &:disabled { opacity: 0.4; cursor: not-allowed; }
     }
 
     /* Align collapse panel */

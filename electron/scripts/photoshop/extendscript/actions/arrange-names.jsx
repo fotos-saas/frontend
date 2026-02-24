@@ -27,6 +27,15 @@ function log(msg) {
 // --- Globalis valtozok (suspendHistory string-eval) ---
 var _doc, _data, _dpi, _moved = 0, _errors = 0;
 
+// --- Referencia: a baseline es a bounds.top kozotti tavolsag ---
+// A textItem.position a baseline-t adja, a bounds.top a legfelso pixel.
+// A kulonbseg (baselineOffset) font-fuggetlen es konstans adott font/merethez.
+// Ezt EGYSZER merjuk, majd minden nevnel hasznaljuk:
+//   desiredBoundsTop = imgBottom + gap
+//   desiredBaseline = desiredBoundsTop + baselineOffset
+//   textItem.position = [x, desiredBaseline]
+var _baselineOffset = null;
+
 // --- Nev tordeles (breakAfter) ---
 // Rovid prefix (Dr., Cs., Id., Ifj. — max 2 betu pont nelkul) a kovetkezo szohoz tartozik,
 // NEM onallo nevresz. A "valodi" nevreszek szama dont: <3 → nem tor.
@@ -114,8 +123,51 @@ function _getBoundsNoEffects(layer) {
   };
 }
 
+// --- Referencia meres: baseline offset (position.y - bounds.top) ---
+// Letrehoz egy atmeneti "Hg" text layert ugyanazzal a fonttal/merettel,
+// megmeri a position.y (baseline) es a bounds.top kozotti kulonbseget.
+// Ez a tavolsag konstans adott font/merethez, fuggetlen a szoveg tartalmatol.
+// Ezt hasznaljuk arra, hogy a bounds.top-ot fix helyre tegyuk (kep alja + gap),
+// es ebbol kiszamitsuk a helyes baseline poziciot.
+function _measureBaselineOffset(container) {
+  var refLayer = _doc.artLayers.add();
+  refLayer.kind = LayerKind.TEXT;
+  refLayer.name = "__ref_measure__";
+  var ti = refLayer.textItem;
+  ti.contents = "Hg";
+  ti.font = CONFIG.FONT_NAME;
+  ti.size = new UnitValue(CONFIG.FONT_SIZE, "pt");
+  ti.justification = Justification.LEFT;
+  refLayer.move(container, ElementPlacement.INSIDE);
+
+  // position.y = baseline Y koordinata
+  var posY = ti.position[1].as("px");
+  // bounds.top = legfelso pixel Y koordinata
+  var b = _getBoundsNoEffects(refLayer);
+
+  var offset = posY - b.top; // baseline - boundsTop = pozitiv szam
+
+  refLayer.remove();
+  return offset;
+}
+
 // --- Nev szovegenek frissitese + pozicionalasa a kep ala ---
 // A gap a kep alja (EFFEKTEK NELKUL — stroke nem szamit!) es a szoveg teteje kozott.
+//
+// POZICIONALASI STRATEGIA (textItem.position alapu):
+// A textItem.position a szoveg BASELINE anchor pontja — ez NEM fugg a szoveg
+// tartalmatol (ekezetek, magassag stb.), csak a font es meret határozza meg.
+// A bounds.top viszont fugg a konkret karakterektol (A vs A vs g).
+//
+// Ezert a position-t hasznaljuk a vertikalis pozicionalasra:
+//   1. Kiszamoljuk hova keruljon a bounds.top: imgBottom + gap
+//   2. A baseline = bounds.top + _baselineOffset (egyszer mert konstans)
+//   3. textItem.position = [x, baseline]
+//
+// A vizszintes poziciot a textItem.position.x es a justification egyutt kezeli:
+//   - LEFT: position.x = kep bal szele
+//   - CENTER: position.x = kep kozepe
+//   - RIGHT: position.x = kep jobb szele
 function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakAfter) {
   // Kep bounds EFFEKTEK NELKUL — a gap a kep szelétől indul, NEM a stroke-tol
   var imgBounds = _getBoundsNoEffects(imageLayer);
@@ -146,43 +198,26 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakA
     return;
   }
 
-  // Vizszintes pozicio
-  var targetX;
+  // --- Pozicionalas: textItem.position (baseline anchor) ---
+  // A desiredBoundsTop az, ahova a szoveg felso szelet akarjuk:
+  var desiredBoundsTop = imgBottom + gapPx;
+  // A baseline ehhez kepest _baselineOffset-tel lejjebb van:
+  var desiredBaselineY = desiredBoundsTop + _baselineOffset;
+
+  // Vizszintes pozicio a justification alapjan:
+  // A textItem.position.x a justification anchor pontja:
+  //   LEFT → bal szeltol, CENTER → kozeptol, RIGHT → jobb szeltol
+  var desiredX;
   if (textAlign === "left") {
-    targetX = imgBounds.left;
+    desiredX = imgBounds.left;
   } else if (textAlign === "right") {
-    targetX = imgBounds.right;
+    desiredX = imgBounds.right;
   } else {
-    targetX = imgCenterX;
+    desiredX = imgCenterX;
   }
 
-  // --- Pozicionalas: translate a tenyleges bounds alapjan ---
-  // A textItem.position nem mindig frissiti a bounds-ot azonnal,
-  // ezert CSAK translate-et hasznalunk (az MINDIG frissit).
-  // Elobb origora mozgatjuk, aztan celba.
-
-  // 1. Origora mozgatas (bounds alapjan)
-  var b1 = _getBoundsNoEffects(nameLayer);
-  nameLayer.translate(new UnitValue(Math.round(-b1.left), "px"), new UnitValue(Math.round(-b1.top), "px"));
-
-  // 2. Celba mozgatas
-  var desiredTop = imgBottom + gapPx;
-  var desiredLeft;
-  if (textAlign === "left") {
-    desiredLeft = imgBounds.left;
-  } else if (textAlign === "right") {
-    // Jobb igazitas: bounds jobb szele = kep jobb szele
-    var b2 = _getBoundsNoEffects(nameLayer);
-    var textW = b2.right - b2.left;
-    desiredLeft = imgBounds.right - textW;
-  } else {
-    // Kozep igazitas: bounds kozepe = kep kozepe
-    var b2c = _getBoundsNoEffects(nameLayer);
-    var textW2 = b2c.right - b2c.left;
-    desiredLeft = imgCenterX - textW2 / 2;
-  }
-
-  nameLayer.translate(new UnitValue(Math.round(desiredLeft), "px"), new UnitValue(Math.round(desiredTop), "px"));
+  // Position beallitasa — a baseline anchor pont
+  textItem.position = [new UnitValue(Math.round(desiredX), "px"), new UnitValue(Math.round(desiredBaselineY), "px")];
 }
 
 // --- Egy csoport nev layereinek rendezese ---
@@ -193,6 +228,14 @@ function _arrangeNameGroup(nameGroupPath) {
   var gapPx = _cm2px(_data.nameGapCm || 0.5);
   var textAlign = _data.textAlign || "center";
   var breakAfter = _data.nameBreakAfter || 0;
+
+  // Baseline offset meres (egyszer, az elso csoportnal)
+  // Ez a baseline es a bounds.top kozotti fix tavolsag adott font/merethez.
+  // Ezzel tudjuk kiszamolni a helyes baseline poziciot a kivant bounds.top-bol.
+  if (_baselineOffset === null) {
+    _baselineOffset = _measureBaselineOffset(grp);
+    log("[JSX] Baseline offset (Hg): " + _baselineOffset + "px");
+  }
 
   log("[JSX] Csoport: " + nameGroupPath.join("/") + " (" + grp.artLayers.length + " layer, gap=" + gapPx + "px, align=" + textAlign + ", breakAfter=" + breakAfter + ")");
 

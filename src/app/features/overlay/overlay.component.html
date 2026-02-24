@@ -36,13 +36,13 @@
             [class.toolbar__btn--amber]="item.accent === 'amber'"
             [class.toolbar__btn--red]="item.accent === 'red'"
             [class.toolbar__btn--blue]="item.accent === 'blue'"
-            [class.toolbar__btn--busy]="busyCommand() === item.id"
+            [class.toolbar__btn--busy]="busyCommand() === item.id || (item.id === 'generate-sample' && generating() === 'sample') || (item.id === 'generate-final' && generating() === 'final')"
             [class.toolbar__btn--active]="openSubmenu() === item.id || (item.id === 'upload-photo' && uploadPanelOpen())"
-            [disabled]="busyCommand() === item.id"
+            [disabled]="busyCommand() === item.id || (item.id === 'generate-sample' && generating() === 'sample') || (item.id === 'generate-final' && generating() === 'final')"
             (click)="onCommand(item.id)"
             [attr.data-tip]="item.tooltip || item.label"
           >
-            @if (busyCommand() === item.id) {
+            @if (busyCommand() === item.id || (item.id === 'generate-sample' && generating() === 'sample') || (item.id === 'generate-final' && generating() === 'final')) {
               <span class="toolbar__spinner"></span>
             } @else {
               <lucide-icon [name]="item.icon" [size]="18" />
@@ -75,10 +75,10 @@
             </div>
           }
 
-          <!-- Inline collapse: arrange-names text align opciók -->
+          <!-- Inline collapse: arrange-names text align + sortörés + gap opciók -->
           @if (item.id === 'arrange-names') {
             <div
-              class="toolbar__inline-collapse"
+              class="toolbar__inline-collapse toolbar__inline-collapse--wide"
               [class.toolbar__inline-collapse--open]="openSubmenu() === 'arrange-names'"
             >
               <div class="toolbar__inline-collapse-inner">
@@ -90,6 +90,95 @@
                 </button>
                 <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('right')" data-tip="Jobbra">
                   <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="15" />
+                </button>
+                <div class="toolbar__collapse-sep"></div>
+                <!-- Sortörés ciklikus: 0/1/2 szó után -->
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--badge"
+                  [class.toolbar__btn--toggle-on]="nameBreakAfter() > 0"
+                  (click)="cycleBreakAfter(); $event.stopPropagation()"
+                  [attr.data-tip]="nameBreakAfter() === 0 ? 'Sortörés: nincs' : 'Sortörés: ' + nameBreakAfter() + '. szó után'"
+                >
+                  <lucide-icon [name]="ICONS.TYPE" [size]="13" />
+                  <span class="toolbar__badge">{{ nameBreakAfter() }}</span>
+                </button>
+                <div class="toolbar__collapse-sep"></div>
+                <!-- Gap: -/érték/+ -->
+                <button
+                  class="toolbar__btn toolbar__btn--sm"
+                  (click)="adjustGap(-0.1); $event.stopPropagation()"
+                  data-tip="Rés csökkentése"
+                >
+                  <lucide-icon [name]="ICONS.MINUS" [size]="13" />
+                </button>
+                <span class="toolbar__gap-value" [attr.data-tip]="'Rés: ' + nameGapCm() + ' cm'">{{ nameGapCm() }}</span>
+                <button
+                  class="toolbar__btn toolbar__btn--sm"
+                  (click)="adjustGap(0.1); $event.stopPropagation()"
+                  data-tip="Rés növelése"
+                >
+                  <lucide-icon [name]="ICONS.PLUS" [size]="13" />
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Inline collapse: generate-sample beállítások + megerősítés -->
+          @if (item.id === 'generate-sample') {
+            <div
+              class="toolbar__inline-collapse toolbar__inline-collapse--wide"
+              [class.toolbar__inline-collapse--open]="openSubmenu() === 'generate-sample'"
+            >
+              <div class="toolbar__inline-collapse-inner">
+                <!-- SD/HD toggle -->
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--label"
+                  [class.toolbar__btn--toggle-on]="sampleUseLargeSize()"
+                  (click)="toggleSampleSize(); $event.stopPropagation()"
+                  [attr.data-tip]="sampleUseLargeSize() ? 'HD (4000px)' : 'SD (2000px)'"
+                >
+                  <span class="toolbar__label-text">{{ sampleUseLargeSize() ? 'HD' : 'SD' }}</span>
+                </button>
+                <!-- Vízjel szín -->
+                <button
+                  class="toolbar__btn toolbar__btn--sm"
+                  (click)="toggleWatermarkColor(); $event.stopPropagation()"
+                  [attr.data-tip]="'Vízjel: ' + (sampleWatermarkColor() === 'white' ? 'fehér' : 'fekete')"
+                >
+                  <lucide-icon [name]="sampleWatermarkColor() === 'white' ? ICONS.SUN : ICONS.MOON" [size]="13" />
+                </button>
+                <!-- Opacity -->
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--label"
+                  (click)="cycleOpacity(); $event.stopPropagation()"
+                  [attr.data-tip]="'Átlátszóság: ' + (sampleWatermarkOpacity() * 100) + '%'"
+                >
+                  <span class="toolbar__label-text">{{ (sampleWatermarkOpacity() * 100).toFixed(0) }}%</span>
+                </button>
+                <div class="toolbar__collapse-sep"></div>
+                <!-- Indítás -->
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="confirmGenerate('sample')" data-tip="Indítás">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="15" />
+                </button>
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--red" (click)="cancelGenerate()" data-tip="Mégsem">
+                  <lucide-icon [name]="ICONS.X" [size]="15" />
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Inline collapse: generate-final megerősítés -->
+          @if (item.id === 'generate-final') {
+            <div
+              class="toolbar__inline-collapse"
+              [class.toolbar__inline-collapse--open]="openSubmenu() === 'generate-final'"
+            >
+              <div class="toolbar__inline-collapse-inner">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="confirmGenerate('final')" data-tip="Igen">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="15" />
+                </button>
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--red" (click)="cancelGenerate()" data-tip="Mégsem">
+                  <lucide-icon [name]="ICONS.X" [size]="15" />
                 </button>
               </div>
             </div>

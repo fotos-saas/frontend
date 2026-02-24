@@ -9,6 +9,7 @@
 import {
   Home,
   Image,
+  Minus,
   ImageDown,
   ShoppingCart,
   Newspaper,
@@ -243,6 +244,7 @@ export const LUCIDE_ICONS_MAP = {
   Home,
   Image,
   ImageDown,
+  Minus,
   ShoppingCart,
   Newspaper,
   MessageCircle,

@@ -239,6 +239,10 @@
   &--open {
     max-width: 150px;
   }
+
+  &--wide.toolbar__inline-collapse--open {
+    max-width: 340px;
+  }
 }
 
 .toolbar__inline-collapse-inner {
@@ -265,6 +269,52 @@
   background: rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
   margin: 0 2px;
+}
+
+/* Badge a sortörés gombon */
+.toolbar__btn--badge {
+  position: relative;
+}
+
+.toolbar__badge {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  font-size: 8px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+/* Label-style button (SD/HD, opacity %) */
+.toolbar__btn--label {
+  width: auto;
+  min-width: 28px;
+  padding: 0 4px;
+}
+
+.toolbar__label-text {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* Gap érték megjelenítés */
+.toolbar__gap-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 28px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  cursor: default;
 }
 
 /* Login label (kijelentkezés után) */

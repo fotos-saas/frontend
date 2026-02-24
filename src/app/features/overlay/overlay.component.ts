@@ -185,7 +185,6 @@ export class OverlayComponent implements OnInit {
         { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
         { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },
         { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés', tooltip: 'Kijelölt layerek linkelésének megszüntetése' },
-        { id: 'refresh', icon: ICONS.REFRESH, label: 'Frissítés PS-ből' },
       ],
     },
     {
@@ -204,23 +203,10 @@ export class OverlayComponent implements OnInit {
         { id: 'save', icon: ICONS.SAVE, label: 'Mentés', accent: 'purple' },
       ],
     },
-    {
-      id: 'ps-quick',
-      items: [
-        { id: 'ps-launch', icon: ICONS.PLAY, label: 'Photoshop indítása', accent: 'blue' },
-        { id: 'open-project', icon: ICONS.FILE_PLUS, label: 'PSD megnyitása' },
-        { id: 'ps-open-workdir', icon: ICONS.FOLDER_OPEN, label: 'Munkamappa' },
-      ],
-    },
   ];
 
   readonly groups = computed(() => {
-    const isDesigner = this.isDesignerMode();
-    return this.allGroups.filter(g => {
-      if (g.id === 'ps-quick') return !isDesigner;
-      if (g.designerOnly) return isDesigner;
-      return true;
-    });
+    return this.allGroups.filter(g => !g.designerOnly);
   });
 
   private pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -235,6 +221,7 @@ export class OverlayComponent implements OnInit {
     this.startPolling(POLL_NORMAL);
     this.setupClickThrough();
     this.listenVisibility();
+    this.loadNameSettings();
   }
 
   private static readonly ALIGN_MAP: Record<string, string> = {
@@ -246,9 +233,21 @@ export class OverlayComponent implements OnInit {
     'align-bottom': 'bottom',
   };
 
-  private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos']);
+  private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos', 'generate-sample', 'generate-final']);
 
   readonly syncWithBorder = signal(this.loadSyncBorder());
+
+  // Név beállítások (overlay-ből is elérhetőek)
+  readonly nameBreakAfter = signal(1);
+  readonly nameGapCm = signal(0.5);
+  private nameSettingsLoaded = false;
+
+  // Minta generálás beállítások
+  readonly sampleUseLargeSize = signal(false);
+  readonly sampleWatermarkColor = signal<'white' | 'black'>('white');
+  readonly sampleWatermarkOpacity = signal(0.15);
+  readonly generating = signal<'sample' | 'final' | null>(null);
+  readonly generateResult = signal<{ success: boolean; message: string } | null>(null);
 
   onCommand(commandId: string): void {
     // Upload-photo → panel toggle
@@ -293,7 +292,206 @@ export class OverlayComponent implements OnInit {
 
   arrangeNames(textAlign: string): void {
     this.closeSubmenu();
-    this.runJsxAction('arrange-names', 'actions/arrange-names-selected.jsx', { TEXT_ALIGN: textAlign });
+    this.runJsxAction('arrange-names', 'actions/arrange-names-selected.jsx', {
+      TEXT_ALIGN: textAlign,
+      BREAK_AFTER: String(this.nameBreakAfter()),
+      NAME_GAP_CM: String(this.nameGapCm()),
+    });
+  }
+
+  /** Sortörés ciklikus váltás: 0 → 1 → 2 → 0 */
+  cycleBreakAfter(): void {
+    const current = this.nameBreakAfter();
+    const next = current >= 2 ? 0 : current + 1;
+    this.nameBreakAfter.set(next);
+    this.saveNameSetting('nameBreakAfter', next);
+  }
+
+  /** Gap növelés/csökkentés */
+  adjustGap(delta: number): void {
+    const current = this.nameGapCm();
+    const next = Math.round(Math.max(0, Math.min(5, current + delta)) * 10) / 10;
+    this.nameGapCm.set(next);
+    this.saveNameSetting('nameGapCm', next);
+  }
+
+  async confirmGenerate(type: 'sample' | 'final'): Promise<void> {
+    this.closeSubmenu();
+    if (!window.electronAPI || this.generating()) return;
+
+    this.generating.set(type);
+    this.generateResult.set(null);
+
+    try {
+      if (type === 'sample') {
+        await this.doGenerateSample();
+      } else {
+        await this.doGenerateFinal();
+      }
+    } catch {
+      this.ngZone.run(() => {
+        this.generateResult.set({ success: false, message: 'Váratlan hiba' });
+      });
+    } finally {
+      this.ngZone.run(() => this.generating.set(null));
+    }
+  }
+
+  cancelGenerate(): void {
+    this.closeSubmenu();
+  }
+
+  toggleSampleSize(): void {
+    this.sampleUseLargeSize.update(v => !v);
+    window.electronAPI?.sample.setSettings({ useLargeSize: this.sampleUseLargeSize() });
+  }
+
+  toggleWatermarkColor(): void {
+    const next = this.sampleWatermarkColor() === 'white' ? 'black' : 'white';
+    this.sampleWatermarkColor.set(next);
+    window.electronAPI?.sample.setSettings({ watermarkColor: next });
+  }
+
+  cycleOpacity(): void {
+    const steps = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30];
+    const current = this.sampleWatermarkOpacity();
+    const idx = steps.findIndex(s => Math.abs(s - current) < 0.01);
+    const next = steps[(idx + 1) % steps.length];
+    this.sampleWatermarkOpacity.set(next);
+    window.electronAPI?.sample.setSettings({ watermarkOpacity: next });
+  }
+
+  private async doGenerateSample(): Promise<void> {
+    const api = window.electronAPI!;
+
+    // 1. PSD path a pollolt activeDoc-ból
+    const psdPath = this.activeDoc().path;
+    if (!psdPath) {
+      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Nincs megnyitott PSD' }));
+      return;
+    }
+    const psdDir = psdPath.replace(/[/\\][^/\\]+$/, '');
+
+    // 2. projectId
+    let pid = this.context().projectId || this.lastProjectId;
+    if (!pid) {
+      try {
+        const r = await api.overlay.getProjectId();
+        if (r.projectId) pid = r.projectId;
+      } catch { /* ignore */ }
+    }
+    if (!pid) {
+      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Nincs projekt azonosító' }));
+      return;
+    }
+
+    // 3. Flatten export JSX
+    const flattenResult = await api.photoshop.runJsx({
+      scriptName: 'actions/flatten-export.jsx',
+      jsonData: { quality: 95 },
+    });
+    if (!flattenResult.success) {
+      this.ngZone.run(() => this.generateResult.set({ success: false, message: flattenResult.error || 'Flatten hiba' }));
+      return;
+    }
+    const output = flattenResult.output || '';
+    const okMatch = output.match(/__FLATTEN_RESULT__OK:(.+)/);
+    if (!okMatch) {
+      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Flatten nem adott eredményt' }));
+      return;
+    }
+    const tempJpg = okMatch[1].trim();
+
+    // 4. Sample generálás (resize + watermark + upload)
+    const authToken = sessionStorage.getItem('marketer_token') || '';
+    const projectName = this.activeDoc().name?.replace(/\.(psd|psb|pdd)$/i, '') || 'tablo';
+    const largeSize = this.sampleUseLargeSize();
+    const sizeWidth = largeSize ? 4000 : 2000;
+
+    const result = await api.sample.generate({
+      psdFilePath: tempJpg,
+      outputDir: psdDir,
+      projectId: pid,
+      projectName,
+      apiBaseUrl: (window as { __env__?: { apiUrl?: string } }).__env__?.apiUrl || this.getApiUrl(),
+      authToken,
+      watermarkText: 'MINTA',
+      watermarkColor: this.sampleWatermarkColor(),
+      watermarkOpacity: this.sampleWatermarkOpacity(),
+      sizes: [{ name: 'minta', width: sizeWidth }],
+    });
+
+    this.ngZone.run(() => {
+      if (result.success) {
+        this.generateResult.set({ success: true, message: `${result.localPaths?.length || 0} mentve, ${result.uploadedCount || 0} feltöltve` });
+      } else {
+        this.generateResult.set({ success: false, message: result.error || 'Minta generálás sikertelen' });
+      }
+    });
+  }
+
+  private async doGenerateFinal(): Promise<void> {
+    const api = window.electronAPI!;
+
+    const psdPath = this.activeDoc().path;
+    if (!psdPath) {
+      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Nincs megnyitott PSD' }));
+      return;
+    }
+    const psdDir = psdPath.replace(/[/\\][^/\\]+$/, '');
+
+    let pid = this.context().projectId || this.lastProjectId;
+    if (!pid) {
+      try {
+        const r = await api.overlay.getProjectId();
+        if (r.projectId) pid = r.projectId;
+      } catch { /* ignore */ }
+    }
+    if (!pid) {
+      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Nincs projekt azonosító' }));
+      return;
+    }
+
+    // Flatten
+    const flattenResult = await api.photoshop.runJsx({
+      scriptName: 'actions/flatten-export.jsx',
+      jsonData: { quality: 95 },
+    });
+    if (!flattenResult.success) {
+      this.ngZone.run(() => this.generateResult.set({ success: false, message: flattenResult.error || 'Flatten hiba' }));
+      return;
+    }
+    const output = flattenResult.output || '';
+    const okMatch = output.match(/__FLATTEN_RESULT__OK:(.+)/);
+    if (!okMatch) {
+      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Flatten nem adott eredményt' }));
+      return;
+    }
+    const tempJpg = okMatch[1].trim();
+
+    const authToken = sessionStorage.getItem('marketer_token') || '';
+    const projectName = this.activeDoc().name?.replace(/\.(psd|psb|pdd)$/i, '') || 'tablo';
+
+    const result = await api.finalizer.upload({
+      flattenedJpgPath: tempJpg,
+      outputDir: psdDir,
+      projectId: pid,
+      projectName,
+      apiBaseUrl: this.getApiUrl(),
+      authToken,
+    });
+
+    this.ngZone.run(() => {
+      if (result.success) {
+        this.generateResult.set({ success: true, message: `Véglegesítve, ${result.uploadedCount || 0} feltöltve` });
+      } else {
+        this.generateResult.set({ success: false, message: result.error || 'Véglegesítés sikertelen' });
+      }
+    });
+  }
+
+  private getApiUrl(): string {
+    return environment.apiUrl;
   }
 
   syncPhotos(mode: 'all' | 'missing'): void {
@@ -818,11 +1016,15 @@ export class OverlayComponent implements OnInit {
     }, true);
   }
 
+  private collapseHover = false;
+
   onCollapseEnter(): void {
+    this.collapseHover = true;
     this.clearCollapseTimer();
   }
 
   onCollapseLeave(): void {
+    this.collapseHover = false;
     if (this.openSubmenu()) {
       this.resetCollapseTimer(this.openSubmenu());
     }
@@ -837,7 +1039,7 @@ export class OverlayComponent implements OnInit {
 
   private resetCollapseTimer(submenuId: string | null): void {
     this.clearCollapseTimer();
-    if (submenuId) {
+    if (submenuId && !this.collapseHover) {
       this.collapseTimer = setTimeout(() => {
         this.ngZone.run(() => this.closeSubmenu());
       }, 5000);
@@ -1043,6 +1245,37 @@ export class OverlayComponent implements OnInit {
     // Próbáljuk meg betölteni a személyeket — ha sikerül, a loadPersons reseteli az isLoggedOut-ot
     if (!this.loadingPersons()) {
       this.loadPersons(pid);
+    }
+  }
+
+  private async loadNameSettings(): Promise<void> {
+    if (!window.electronAPI || this.nameSettingsLoaded) return;
+    try {
+      const [gap, breakAfter, sampleSettings] = await Promise.all([
+        window.electronAPI.photoshop.getNameGap(),
+        window.electronAPI.photoshop.getNameBreakAfter(),
+        window.electronAPI.sample.getSettings(),
+      ]);
+      this.ngZone.run(() => {
+        if (gap !== undefined) this.nameGapCm.set(gap);
+        if (breakAfter !== undefined) this.nameBreakAfter.set(breakAfter);
+        if (sampleSettings.success && sampleSettings.settings) {
+          const s = sampleSettings.settings;
+          this.sampleUseLargeSize.set(s.useLargeSize);
+          this.sampleWatermarkColor.set(s.watermarkColor);
+          this.sampleWatermarkOpacity.set(s.watermarkOpacity);
+        }
+        this.nameSettingsLoaded = true;
+      });
+    } catch { /* ignore */ }
+  }
+
+  private saveNameSetting(key: string, value: number): void {
+    if (!window.electronAPI) return;
+    if (key === 'nameBreakAfter') {
+      window.electronAPI.photoshop.setNameBreakAfter(value);
+    } else if (key === 'nameGapCm') {
+      window.electronAPI.photoshop.setNameGap(value);
     }
   }
 

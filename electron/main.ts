@@ -307,15 +307,15 @@ function createOverlayWindow(): void {
   // Vizszintes toolbar sav — felülre pozicionalva
   // Az ablak nagyobb mint a toolbar (upload panel hely alatta), a toolbar a tetején van
   const activeDisplay = screen.getPrimaryDisplay();
-  const { width: screenW, x: screenX, y: screenY } = activeDisplay.workArea;
+  const { width: screenW, height: screenH, x: screenX, y: screenY } = activeDisplay.workArea;
   const windowW = screenW;
-  const windowH = 600; // toolbar + upload panel hely
+  const windowH = screenH; // teljes munkaterület magasság — panel felfelé nőhet
 
   overlayWindow = new BrowserWindow({
     width: windowW,
     height: windowH,
     x: screenX,
-    y: screenY + 8,
+    y: screenY,
     frame: false,
     transparent: true,
     alwaysOnTop: true,

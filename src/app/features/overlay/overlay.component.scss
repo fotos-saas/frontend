@@ -45,9 +45,8 @@
   }
 
   &--panel-open {
-    border-radius: 12px 12px 0 0;
-    border-bottom: 1px solid rgba(167, 139, 250, 0.2);
-    border-bottom-color: transparent;
+    border-radius: 0 0 12px 12px;
+    border-top: none;
   }
 }
 
@@ -310,14 +309,14 @@
 .upload-panel {
   pointer-events: auto;
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
   width: 520px;
   background: #1e1e3a;
   border: 1px solid rgba(167, 139, 250, 0.2);
-  border-top: none;
-  border-radius: 0 0 12px 12px;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
   animation: panel-slide-down 0.2s ease-out;
   -webkit-font-smoothing: antialiased;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
@@ -326,7 +325,7 @@
 @keyframes panel-slide-down {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

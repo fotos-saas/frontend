@@ -118,7 +118,7 @@
     margin-right: 0;
   }
 
-  &:hover {
+  &:hover:not(.chip--active) {
     background: #f1f5f9;
     color: #2563eb;
   }
@@ -126,7 +126,6 @@
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px var(--color-primary, #1e3a5f);
-    color: #2563eb;
   }
 
   &:focus:not(:focus-visible) {

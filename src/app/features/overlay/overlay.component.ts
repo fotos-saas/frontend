@@ -844,7 +844,7 @@ export class OverlayComponent implements OnInit {
     const existing = new Map(this.psLayers().map(l => [l.personId, l]));
     const merged = parsed.map(p => {
       const prev = existing.get(p.personId);
-      return prev ? { ...p, file: prev.file, uploadStatus: prev.uploadStatus, photoUrl: prev.photoUrl, personName: prev.personName, errorMsg: prev.errorMsg } : p;
+      return prev ? { ...p, file: prev.file, uploadStatus: prev.uploadStatus, photoUrl: prev.photoUrl, personName: prev.personName, photoThumbUrl: prev.photoThumbUrl, errorMsg: prev.errorMsg } : p;
     });
     // Enrich persons-ból ha van
     const persons = this.persons();

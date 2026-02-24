@@ -174,6 +174,13 @@
               [class.upload-panel__layer-row--error]="layer.uploadStatus === 'error'"
               [class.upload-panel__layer-row--uploading]="layer.uploadStatus === 'uploading'"
             >
+              <div class="upload-panel__layer-thumb">
+                @if (layer.photoThumbUrl) {
+                  <img [src]="layer.photoThumbUrl" [alt]="layer.personName || layer.slug" />
+                } @else {
+                  <lucide-icon [name]="ICONS.USER" [size]="12" />
+                }
+              </div>
               <span class="upload-panel__layer-name">{{ layer.personName || layer.slug }}</span>
               <span class="upload-panel__layer-file">
                 @if (layer.file) {

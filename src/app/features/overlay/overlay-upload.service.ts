@@ -9,6 +9,7 @@ export interface PsLayerPerson {
   layerName: string;
   slug: string;
   personName?: string;
+  photoThumbUrl?: string | null;
   file?: File;
   uploadStatus: 'pending' | 'uploading' | 'done' | 'error';
   photoUrl?: string;
@@ -78,6 +79,7 @@ export class OverlayUploadService {
       return {
         ...l,
         personName: person?.name ?? l.slug,
+        photoThumbUrl: person?.photoThumbUrl ?? l.photoThumbUrl ?? null,
       };
     });
   }

@@ -1,23 +1,14 @@
 :host {
-  display: block;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   height: 100%;
+  padding: 0 30px 30px;
   box-sizing: border-box;
   background: transparent;
   user-select: none;
   pointer-events: none;
-}
-
-// Wrapper ami a toolbart + panelt tartja — toolbar alja fix pozícióban
-.toolbar-anchor {
-  position: absolute;
-  bottom: 30px;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 // ============ Toolbar ============
@@ -28,6 +19,7 @@
   height: 52px;
   flex-shrink: 0;
   order: 2; // toolbar alul, upload-panel felül
+  margin-top: auto; // toolbar fix az aljára
   pointer-events: auto;
   background: #1e1e3a;
   border: 1px solid rgba(167, 139, 250, 0.2);

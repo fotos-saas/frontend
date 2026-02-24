@@ -167,6 +167,19 @@ var __result = (function () {
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
 
+    // Multi-select feloldasa — kivalasztunk EGYETLEN layert hogy ne legyen tobbszoros kijeleoles
+    // Ez szukseges, mert a "Move" parancs nem mukodik multi-select eseten
+    try {
+      var deselRef = new ActionReference();
+      deselRef.putIndex(charIDToTypeID("Lyr "), 1);
+      var deselDesc = new ActionDescriptor();
+      deselDesc.putReference(charIDToTypeID("null"), deselRef);
+      deselDesc.putBoolean(charIDToTypeID("MkVs"), false);
+      executeAction(charIDToTypeID("slct"), deselDesc, DialogModes.NO);
+    } catch (deselErr) {
+      // Ha nem sikerul, nem baj — folytatjuk
+    }
+
     var allLayers = [];
     if (groupFilter === "All" || groupFilter === "Students") {
       allLayers = allLayers.concat(collectLayers(doc, ["Images", "Students"]));

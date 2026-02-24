@@ -1,10 +1,11 @@
 import { Injectable, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject, debounceTime, switchMap } from 'rxjs';
+import { Subject, debounceTime, timer, switchMap } from 'rxjs';
 import { PartnerEmailService } from '../../../../features/partner/services/partner-email.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ProjectEmailsState } from './project-emails-state';
 import { ProjectEmail, ReplyData } from '../../../../features/partner/models/project-email.models';
+import { saveFile } from '../../../utils/file.util';
 
 /**
  * Actions service a projekt email tab-hoz.
@@ -146,5 +147,87 @@ export class ProjectEmailsActionsService {
   goToPage(state: ProjectEmailsState, projectId: number, page: number): void {
     state.page.set(page);
     this.loadEmails(state, projectId);
+  }
+
+  /**
+   * Csatolmány letöltése on-demand IMAP-ból.
+   */
+  downloadAttachment(
+    state: ProjectEmailsState,
+    projectId: number,
+    emailId: number,
+    attachmentIndex: number,
+    filename: string,
+    detailComponent?: { clearDownloading: () => void },
+  ): void {
+    this.emailService.downloadAttachment(projectId, emailId, attachmentIndex)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          saveFile(blob, filename);
+          detailComponent?.clearDownloading();
+        },
+        error: () => {
+          detailComponent?.clearDownloading();
+          this.toast.error('Hiba', 'Nem sikerült letölteni a csatolmányt.');
+        },
+      });
+  }
+
+  /**
+   * Kézi szinkronizálás indítása.
+   */
+  triggerSync(state: ProjectEmailsState, projectId: number): void {
+    state.syncing.set(true);
+
+    this.emailService.triggerSync(projectId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (res.status === 'already_running') {
+            this.toast.info('Info', 'Szinkronizálás már folyamatban.');
+          }
+          // Polling: várakozás a befejezésre
+          this.pollSyncStatus(state, projectId);
+        },
+        error: () => {
+          state.syncing.set(false);
+          this.toast.error('Hiba', 'Nem sikerült elindítani a szinkronizálást.');
+        },
+      });
+  }
+
+  /**
+   * Szinkron állapot polling (max 60s).
+   */
+  private pollSyncStatus(state: ProjectEmailsState, projectId: number, attempt = 0): void {
+    if (attempt > 20) {
+      // Max ~60s (20 * 3s)
+      state.syncing.set(false);
+      this.loadEmails(state, projectId);
+      this.loadStats(state, projectId);
+      return;
+    }
+
+    timer(3000).pipe(
+      switchMap(() => this.emailService.getSyncStatus(projectId)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (status) => {
+        if (status.running) {
+          this.pollSyncStatus(state, projectId, attempt + 1);
+        } else {
+          state.syncing.set(false);
+          this.loadEmails(state, projectId);
+          this.loadStats(state, projectId);
+          this.toast.success('Siker', 'Email szinkronizálás kész.');
+        }
+      },
+      error: () => {
+        state.syncing.set(false);
+        this.loadEmails(state, projectId);
+        this.loadStats(state, projectId);
+      },
+    });
   }
 }

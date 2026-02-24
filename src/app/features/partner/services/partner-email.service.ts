@@ -118,4 +118,37 @@ export class PartnerEmailService {
       )
       .pipe(map((res) => res.data));
   }
+
+  /**
+   * Csatolmány letöltése (on-demand IMAP).
+   */
+  downloadAttachment(projectId: number, emailId: number, attachmentIndex: number): Observable<Blob> {
+    return this.http.get(
+      `${this.baseUrl}/projects/${projectId}/emails/${emailId}/attachments/${attachmentIndex}`,
+      { responseType: 'blob' },
+    );
+  }
+
+  /**
+   * Kézi szinkronizálás indítása.
+   */
+  triggerSync(projectId: number): Observable<{ status: string }> {
+    return this.http
+      .post<ApiResponse<{ status: string }>>(
+        `${this.baseUrl}/projects/${projectId}/emails/sync`,
+        {},
+      )
+      .pipe(map((res) => res.data));
+  }
+
+  /**
+   * Szinkronizálás állapotának lekérdezése.
+   */
+  getSyncStatus(projectId: number): Observable<{ running: boolean }> {
+    return this.http
+      .get<ApiResponse<{ running: boolean }>>(
+        `${this.baseUrl}/projects/${projectId}/emails/sync-status`,
+      )
+      .pipe(map((res) => res.data));
+  }
 }

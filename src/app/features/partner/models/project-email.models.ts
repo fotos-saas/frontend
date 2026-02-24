@@ -32,7 +32,10 @@ export interface EmailAddress {
 }
 
 export interface EmailAttachment {
-  filename: string;
+  /** Backend 'name' mezőnévvel küldi */
+  name: string;
+  /** Alias — ha a backend filename-ként küldi */
+  filename?: string;
   mime_type: string;
   size?: number;
 }

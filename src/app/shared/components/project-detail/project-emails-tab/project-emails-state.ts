@@ -24,6 +24,9 @@ export class ProjectEmailsState {
   readonly showReply = signal(false);
   readonly sending = signal(false);
 
+  // === SYNC STATE ===
+  readonly syncing = signal(false);
+
   // === COMPUTED ===
   readonly hasEmails = computed(() => this.emails().length > 0);
   readonly unreadCount = computed(() => this.stats()?.unread ?? 0);

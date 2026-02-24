@@ -1,21 +1,36 @@
 <!-- Statisztika fejléc -->
 @if (state.stats(); as stats) {
   <div class="stats-bar">
-    <span class="stat">
-      <lucide-icon [name]="ICONS.MAIL" [size]="14" />
-      {{ stats.total }} email
-    </span>
-    @if (stats.unread > 0) {
-      <span class="stat stat--highlight">
-        {{ stats.unread }} olvasatlan
+    <div class="stats-bar__left">
+      <span class="stat">
+        <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+        {{ stats.total }} email
       </span>
-    }
-    @if (stats.needsReply > 0) {
-      <span class="stat stat--warning">
-        <lucide-icon [name]="ICONS.REPLY" [size]="14" />
-        {{ stats.needsReply }} válaszra vár
-      </span>
-    }
+      @if (stats.unread > 0) {
+        <span class="stat stat--highlight">
+          {{ stats.unread }} olvasatlan
+        </span>
+      }
+      @if (stats.needsReply > 0) {
+        <span class="stat stat--warning">
+          <lucide-icon [name]="ICONS.REPLY" [size]="14" />
+          {{ stats.needsReply }} válaszra vár
+        </span>
+      }
+    </div>
+    <button
+      class="sync-btn"
+      [disabled]="state.syncing()"
+      (click)="onSync()"
+    >
+      @if (state.syncing()) {
+        <span class="spinner-sm"></span>
+        <span>Szinkronizálás...</span>
+      } @else {
+        <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+        <span>Szinkronizálás</span>
+      }
+    </button>
   </div>
 }
 
@@ -28,6 +43,7 @@
     (reply)="onReply()"
     (markReplied)="onMarkReplied()"
     (close)="onCloseDetail()"
+    (downloadAttachment)="onDownloadAttachment($event)"
   />
 
   <!-- Válasz panel -->

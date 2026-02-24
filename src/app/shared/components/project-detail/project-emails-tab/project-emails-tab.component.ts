@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, OnInit, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, OnInit, inject, viewChild } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
 import { ProjectEmailsState } from './project-emails-state';
@@ -32,6 +32,8 @@ export class ProjectEmailsTabComponent implements OnInit {
   private readonly actions = inject(ProjectEmailsActionsService);
   readonly state = new ProjectEmailsState();
   readonly ICONS = ICONS;
+
+  private emailDetailRef = viewChild(EmailDetailComponent);
 
   readonly filters: { id: EmailFilter; label: string }[] = [
     { id: 'all', label: 'Összes' },
@@ -86,5 +88,26 @@ export class ProjectEmailsTabComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.actions.goToPage(this.state, this.projectId(), page);
+  }
+
+  onDownloadAttachment(attachmentIndex: number): void {
+    const email = this.state.selectedEmail();
+    if (!email) return;
+
+    const att = email.attachments[attachmentIndex];
+    const filename = att?.filename || att?.name || 'csatolmány';
+
+    this.actions.downloadAttachment(
+      this.state,
+      this.projectId(),
+      email.id,
+      attachmentIndex,
+      filename,
+      this.emailDetailRef(),
+    );
+  }
+
+  onSync(): void {
+    this.actions.triggerSync(this.state, this.projectId());
   }
 }

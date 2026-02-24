@@ -58,11 +58,30 @@
     <!-- Csatolmányok -->
     @if (email().hasAttachments) {
       <div class="email-detail__attachments">
-        <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
-        <span>{{ email().attachmentCount }} csatolmány</span>
-        @for (att of email().attachments; track att.filename) {
-          <span class="attachment-name">{{ att.filename }}</span>
-        }
+        <div class="attachments-header">
+          <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
+          <span>{{ email().attachmentCount }} csatolmány</span>
+        </div>
+        <div class="attachments-list">
+          @for (att of email().attachments; track $index) {
+            <button
+              class="attachment-item"
+              [disabled]="downloadingIndex() === $index"
+              (click)="onDownload($index)"
+            >
+              <lucide-icon [name]="ICONS.FILE" [size]="14" />
+              <span class="attachment-name">{{ att.filename || att.name }}</span>
+              @if (att.size) {
+                <span class="attachment-size">{{ att.size | number:'1.0-0' }} B</span>
+              }
+              @if (downloadingIndex() === $index) {
+                <span class="spinner-sm"></span>
+              } @else {
+                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="12" class="download-icon" />
+              }
+            </button>
+          }
+        </div>
       </div>
     }
 

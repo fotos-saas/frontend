@@ -17,6 +17,13 @@ export const routes: Routes = [
     loadChildren: () => import('./features/overlay/overlay.routes').then(m => m.OVERLAY_ROUTES),
   },
 
+  // Photo Upload route (Electron floating window — kulon BrowserWindow)
+  {
+    path: 'photo-upload',
+    loadComponent: () => import('./features/photo-upload-dialog/photo-upload-dialog.component').then(m => m.PhotoUploadDialogComponent),
+    canActivate: [partnerGuard],
+  },
+
   // Public routes (nincs layout, nincs navbar/footer) - lazy-loaded
   {
     path: 'login',

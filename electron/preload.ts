@@ -265,6 +265,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     hide: () =>
       ipcRenderer.invoke('overlay:hide') as Promise<{ success: boolean }>,
+    openPhotoUpload: (projectId: number) =>
+      ipcRenderer.invoke('overlay:open-photo-upload', { projectId }) as Promise<{ success: boolean; error?: string }>,
+    setIgnoreMouseEvents: (ignore: boolean) =>
+      ipcRenderer.send('overlay:set-ignore-mouse', ignore),
     onCommand: (callback: (commandId: string) => void): CleanupFn => {
       const handler = (_event: IpcRendererEvent, commandId: string) => callback(commandId);
       ipcRenderer.on('overlay-command', handler);
@@ -279,6 +283,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('overlay:active-doc-changed', handler);
       return () => ipcRenderer.removeListener('overlay:active-doc-changed', handler);
     },
+  },
+
+  // ============ Photo Upload Window ============
+  photoUpload: {
+    close: () =>
+      ipcRenderer.invoke('photo-upload:close') as Promise<{ success: boolean; error?: string }>,
   },
 
   // ============ Photoshop Integration ============

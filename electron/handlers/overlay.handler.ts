@@ -136,6 +136,13 @@ export function registerOverlayHandlers(
     return { success: false, error: 'Invalid doc info' };
   });
 
+  // Click-through: az atlatszo terulet atenged a toolbar mogotti appnak
+  ipcMain.on('overlay:set-ignore-mouse', (_event, ignore: boolean) => {
+    const overlayWindow = getOverlayWindow();
+    if (!overlayWindow || overlayWindow.isDestroyed()) return;
+    overlayWindow.setIgnoreMouseEvents(ignore, { forward: true });
+  });
+
   // Munkamappa megnyitasa Finder-ben (az aktiv doc mappajabol)
   async function handleOpenWorkDir(): Promise<{ success: boolean; error?: string }> {
     const dir = lastActiveDoc.dir;

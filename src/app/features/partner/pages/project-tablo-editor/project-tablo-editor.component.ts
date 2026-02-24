@@ -335,6 +335,7 @@ export class ProjectTabloEditorComponent implements OnInit {
 
       const result = await this.ps.generateAndOpenPsd(size, p ? {
         projectName: p.name,
+        className: p.className,
         brandName: this.branding.brandName(),
         persons: personsData.length > 0 ? personsData : undefined,
       } : undefined);
@@ -522,6 +523,7 @@ export class ProjectTabloEditorComponent implements OnInit {
 
     const resolved = await this.ps.computePsdPath(s.value, p ? {
       projectName: p.name,
+      className: p.className,
       brandName: this.branding.brandName(),
     } : undefined);
 

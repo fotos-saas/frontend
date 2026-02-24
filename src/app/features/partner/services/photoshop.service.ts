@@ -642,7 +642,7 @@ export class PhotoshopService {
    */
   async computePsdPath(
     sizeValue: string,
-    context?: { projectName: string; brandName?: string | null },
+    context?: { projectName: string; className?: string | null; brandName?: string | null },
   ): Promise<string | null> {
     if (!this.api) return null;
 
@@ -650,7 +650,9 @@ export class PhotoshopService {
       if (context && this.workDir()) {
         const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
         const year = new Date().getFullYear().toString();
-        const folderName = this.sanitizeName(context.projectName);
+        const folderName = this.sanitizeName(
+          context.className ? `${context.projectName}-${context.className}` : context.projectName,
+        );
         return `${this.workDir()}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
       }
 
@@ -1093,6 +1095,7 @@ export class PhotoshopService {
     size: TabloSize,
     context?: {
       projectName: string;
+      className?: string | null;
       brandName?: string | null;
       persons?: Array<{ id: number; name: string; type: string }>;
     },
@@ -1111,7 +1114,9 @@ export class PhotoshopService {
         // Projekt kontextus → workDir/partner/év/projekt-osztály/projekt-osztály.psd
         const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
         const year = new Date().getFullYear().toString();
-        const folderName = this.sanitizeName(context.projectName);
+        const folderName = this.sanitizeName(
+          context.className ? `${context.projectName}-${context.className}` : context.projectName,
+        );
         outputPath = `${this.workDir()}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
       } else {
         // Nincs kontextus → Downloads/PhotoStack/méret.psd

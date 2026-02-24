@@ -28,97 +28,115 @@
     <!-- Tárgy -->
     <h3 class="email-detail__subject">{{ email().subject }}</h3>
 
-    <!-- Meta infó -->
-    <div class="email-detail__meta">
-      <div class="email-detail__from">
-        <span class="label">Feladó:</span>
-        <span class="value">{{ email().fromName || email().fromEmail }}</span>
-        @if (email().fromName) {
-          <span class="email">&lt;{{ email().fromEmail }}&gt;</span>
+    <!-- Fő email kártya -->
+    <div class="email-card" [class.email-card--outbound]="email().direction === 'outbound'">
+      <div class="email-card__header">
+        <div class="email-card__avatar" [class.email-card__avatar--outbound]="email().direction === 'outbound'">
+          {{ (email().fromName || email().fromEmail).charAt(0).toUpperCase() }}
+        </div>
+        <div class="email-card__meta">
+          <div class="email-card__sender-row">
+            <span class="email-card__sender">{{ email().fromName || email().fromEmail }}</span>
+            @if (email().fromName) {
+              <span class="email-card__email">&lt;{{ email().fromEmail }}&gt;</span>
+            }
+          </div>
+          <div class="email-card__to-row">
+            <span class="email-card__to-label">Címzett:</span>
+            <span>{{ email().toName || email().toEmail }}</span>
+            @if (email().cc && email().cc.length > 0) {
+              <span class="email-card__cc">
+                · CC:
+                @for (cc of email().cc; track cc.email) {
+                  {{ cc.name || cc.email }}
+                }
+              </span>
+            }
+          </div>
+        </div>
+        <span class="email-card__date">{{ email().emailDate | date:'yyyy.MM.dd. HH:mm' }}</span>
+      </div>
+
+      <!-- Csatolmányok -->
+      @if (email().hasAttachments) {
+        <div class="email-detail__attachments">
+          <div class="attachments-header">
+            <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
+            <span>{{ email().attachmentCount }} csatolmány</span>
+          </div>
+          <div class="attachments-list">
+            @for (att of email().attachments; track $index) {
+              <button
+                class="attachment-item"
+                [disabled]="downloadingIndex() === $index"
+                (click)="onDownload($index)"
+              >
+                <lucide-icon [name]="ICONS.FILE" [size]="14" />
+                <span class="attachment-name">{{ att.filename || att.name }}</span>
+                @if (att.size) {
+                  <span class="attachment-size">{{ att.size | number:'1.0-0' }} B</span>
+                }
+                @if (downloadingIndex() === $index) {
+                  <span class="spinner-sm"></span>
+                } @else {
+                  <lucide-icon [name]="ICONS.DOWNLOAD" [size]="12" class="download-icon" />
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Body -->
+      <div class="email-card__body">
+        @if (email().bodyHtml) {
+          <div [innerHTML]="email().bodyHtml | safeHtml"></div>
+        } @else if (email().bodyText) {
+          <pre class="email-detail__text">{{ email().bodyText }}</pre>
+        } @else {
+          <p class="text-gray-400 italic">Nincs tartalom</p>
         }
       </div>
-      <div class="email-detail__to">
-        <span class="label">Címzett:</span>
-        <span class="value">{{ email().toName || email().toEmail }}</span>
-      </div>
-      @if (email().cc && email().cc.length > 0) {
-        <div class="email-detail__cc">
-          <span class="label">CC:</span>
-          @for (cc of email().cc; track cc.email) {
-            <span class="value">{{ cc.name || cc.email }}</span>
-          }
-        </div>
-      }
-      <div class="email-detail__date">
-        <span class="label">Dátum:</span>
-        <span class="value">{{ email().emailDate | date:'yyyy. MMMM d. HH:mm' }}</span>
-      </div>
-    </div>
-
-    <!-- Csatolmányok -->
-    @if (email().hasAttachments) {
-      <div class="email-detail__attachments">
-        <div class="attachments-header">
-          <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
-          <span>{{ email().attachmentCount }} csatolmány</span>
-        </div>
-        <div class="attachments-list">
-          @for (att of email().attachments; track $index) {
-            <button
-              class="attachment-item"
-              [disabled]="downloadingIndex() === $index"
-              (click)="onDownload($index)"
-            >
-              <lucide-icon [name]="ICONS.FILE" [size]="14" />
-              <span class="attachment-name">{{ att.filename || att.name }}</span>
-              @if (att.size) {
-                <span class="attachment-size">{{ att.size | number:'1.0-0' }} B</span>
-              }
-              @if (downloadingIndex() === $index) {
-                <span class="spinner-sm"></span>
-              } @else {
-                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="12" class="download-icon" />
-              }
-            </button>
-          }
-        </div>
-      </div>
-    }
-
-    <!-- Body -->
-    <div class="email-detail__body">
-      @if (email().bodyHtml) {
-        <div [innerHTML]="email().bodyHtml | safeHtml"></div>
-      } @else if (email().bodyText) {
-        <pre class="email-detail__text">{{ email().bodyText }}</pre>
-      } @else {
-        <p class="text-gray-400 italic">Nincs tartalom</p>
-      }
     </div>
 
     <!-- Thread (korábbi emailek) -->
     @if (thread().length > 0) {
       <div class="email-detail__thread">
-        <h4 class="thread-title">Korábbi levelek ({{ thread().length }})</h4>
+        <h4 class="thread-title">
+          <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+          Korábbi levelek ({{ thread().length }})
+        </h4>
+
         @for (threadEmail of thread(); track threadEmail.id) {
-          <details class="thread-item">
+          <details class="thread-item" [class.thread-item--outbound]="threadEmail.direction === 'outbound'">
             <summary class="thread-item__summary">
-              <div class="thread-item__info">
+              <div class="thread-item__avatar" [class.thread-item__avatar--outbound]="threadEmail.direction === 'outbound'">
                 @if (threadEmail.direction === 'inbound') {
-                  <lucide-icon [name]="ICONS.ARROW_DOWN_LEFT" [size]="12" class="text-blue-500" />
+                  <lucide-icon [name]="ICONS.ARROW_DOWN_LEFT" [size]="12" />
                 } @else {
-                  <lucide-icon [name]="ICONS.ARROW_UP_RIGHT" [size]="12" class="text-green-500" />
+                  <lucide-icon [name]="ICONS.ARROW_UP_RIGHT" [size]="12" />
                 }
-                <span class="thread-item__sender">{{ threadEmail.fromName || threadEmail.fromEmail }}</span>
+              </div>
+              <div class="thread-item__info">
+                <span class="thread-item__sender">
+                  @if (threadEmail.direction === 'outbound') {
+                    Nekem → {{ threadEmail.toName || threadEmail.toEmail }}
+                  } @else {
+                    {{ threadEmail.fromName || threadEmail.fromEmail }}
+                  }
+                </span>
                 <span class="thread-item__date">{{ threadEmail.emailDate | date:'MM.dd. HH:mm' }}</span>
               </div>
               <span class="thread-item__preview">{{ threadEmail.bodyPreview }}</span>
+              <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="14" class="thread-item__chevron" />
             </summary>
             <div class="thread-item__body">
               @if (threadEmail.bodyHtml) {
                 <div [innerHTML]="threadEmail.bodyHtml | safeHtml"></div>
               } @else if (threadEmail.bodyText) {
                 <pre class="email-detail__text">{{ threadEmail.bodyText }}</pre>
+              } @else {
+                <p class="text-gray-400 italic text-sm">Nincs tartalom</p>
               }
             </div>
           </details>

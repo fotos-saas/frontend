@@ -92,6 +92,8 @@ export class OverlayComponent implements OnInit {
 
   // Auth state — ha 401 jön, login gomb jelenik meg
   readonly isLoggedOut = signal(false);
+  // Utolsó ismert projectId (fallback ha a context frissül közben)
+  private lastProjectId: number | null = null;
 
   // v2 — PS layer-alapú batch upload
   readonly psLayers = signal<PsLayerPerson[]>([]);
@@ -562,7 +564,7 @@ export class OverlayComponent implements OnInit {
 
   /** Feltöltés + PS behelyezés egy lépésben */
   uploadAndPlace(): void {
-    const pid = this.context().projectId;
+    const pid = this.context().projectId || this.lastProjectId;
     if (this.batchUploading() || this.placing()) return;
     if (!pid) {
       this.batchResult.set({ success: false, message: 'Nincs projekt kiválasztva' });
@@ -677,6 +679,7 @@ export class OverlayComponent implements OnInit {
   }
 
   private loadPersons(projectId: number): void {
+    this.lastProjectId = projectId;
     this.loadingPersons.set(true);
     const url = `${environment.apiUrl}/partner/projects/${projectId}/persons`;
 

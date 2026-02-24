@@ -173,6 +173,8 @@
               [class.upload-panel__layer-row--done]="layer.uploadStatus === 'done'"
               [class.upload-panel__layer-row--error]="layer.uploadStatus === 'error'"
               [class.upload-panel__layer-row--uploading]="layer.uploadStatus === 'uploading'"
+              [class.upload-panel__layer-row--assignable]="selectedUnmatchedFile() && !layer.file && layer.uploadStatus !== 'done'"
+              (click)="onLayerRowClick(i)"
             >
               <div class="upload-panel__layer-thumb">
                 @if (layer.photoThumbUrl) {
@@ -214,7 +216,15 @@
           <div class="upload-panel__unmatched">
             <span class="upload-panel__unmatched-label">Nem párosított ({{ unmatchedFiles().length }}):</span>
             @for (file of unmatchedFiles(); track file.name; let fi = $index) {
-              <span class="upload-panel__unmatched-file">{{ file.name }}</span>
+              <button
+                class="upload-panel__unmatched-file"
+                [class.upload-panel__unmatched-file--selected]="selectedUnmatchedFile() === file"
+                (click)="selectUnmatchedFile(file)"
+                type="button"
+              >{{ file.name }}</button>
+            }
+            @if (selectedUnmatchedFile()) {
+              <span class="upload-panel__unmatched-hint">Kattints egy layer sorra a hozzárendeléshez</span>
             }
           </div>
         }

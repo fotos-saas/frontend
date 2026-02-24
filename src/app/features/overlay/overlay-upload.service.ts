@@ -164,8 +164,9 @@ export class OverlayUploadService {
               ...updatedLayers[index],
               uploadStatus: 'done',
               photoUrl: res.photo?.url,
+              photoThumbUrl: res.photo?.thumbUrl ?? updatedLayers[index].photoThumbUrl,
             };
-            onLayerUpdate(index, { uploadStatus: 'done', photoUrl: res.photo?.url });
+            onLayerUpdate(index, { uploadStatus: 'done', photoUrl: res.photo?.url, photoThumbUrl: res.photo?.thumbUrl });
             onProgress({ done, total });
             uploadNext(idx + 1);
           });

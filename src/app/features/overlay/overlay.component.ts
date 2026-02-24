@@ -98,6 +98,7 @@ export class OverlayComponent implements OnInit {
   readonly batchProgress = signal<BatchProgress>({ done: 0, total: 0 });
   readonly placing = signal(false);
   readonly unmatchedFiles = signal<File[]>([]);
+  readonly selectedUnmatchedFile = signal<File | null>(null);
   readonly batchResult = signal<{ success: boolean; message: string } | null>(null);
 
   readonly hasPsLayers = computed(() => this.psLayers().length > 0);
@@ -485,6 +486,21 @@ export class OverlayComponent implements OnInit {
       layers.map((l, i) => i === layerIndex ? { ...l, file } : l)
     );
     this.unmatchedFiles.update(files => files.filter(f => f !== file));
+    this.selectedUnmatchedFile.set(null);
+  }
+
+  /** Nem párosított fájl kiválasztása manuális hozzárendeléshez */
+  selectUnmatchedFile(file: File): void {
+    this.selectedUnmatchedFile.update(current => current === file ? null : file);
+  }
+
+  /** Layer sorra kattintás — ha van kiválasztott unmatched fájl, hozzárendeli */
+  onLayerRowClick(index: number): void {
+    const file = this.selectedUnmatchedFile();
+    if (!file) return;
+    const layer = this.psLayers()[index];
+    if (layer.file || layer.uploadStatus === 'done') return;
+    this.assignFileToLayer(index, file);
   }
 
   removeFileFromLayer(layerIndex: number): void {

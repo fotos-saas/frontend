@@ -190,9 +190,10 @@ export class ProjectEmailsActionsService {
           // Polling: várakozás a befejezésre
           this.pollSyncStatus(state, projectId);
         },
-        error: () => {
+        error: (err) => {
           state.syncing.set(false);
-          this.toast.error('Hiba', 'Nem sikerült elindítani a szinkronizálást.');
+          const msg = err?.error?.message || 'Nem sikerült elindítani a szinkronizálást.';
+          this.toast.error('Hiba', msg);
         },
       });
   }

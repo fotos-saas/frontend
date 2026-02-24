@@ -62,7 +62,7 @@ export function registerOverlayHandlers(
     if (ctx.mode && (ctx.mode === 'designer' || ctx.mode === 'normal')) {
       overlayContext = {
         mode: ctx.mode,
-        projectId: typeof ctx.projectId === 'number' ? ctx.projectId : undefined,
+        projectId: typeof ctx.projectId === 'number' ? ctx.projectId : overlayContext.projectId,
       };
 
       // Overlay ablaknak jelezzuk a kontextus valtozast

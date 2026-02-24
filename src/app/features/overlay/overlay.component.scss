@@ -847,6 +847,16 @@
   &:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 }
 
+.upload-panel__layer-ambiguous {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+  color: #fbbf24;
+  cursor: help;
+}
+
 .upload-panel__layer-status {
   width: 20px;
   flex-shrink: 0;

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, from, of, concat } from 'rxjs';
 import { map, catchError, tap, finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { matchFilesToPersons, FileMatchResult } from '../../shared/utils/filename-matcher.util';
 
 export interface PsLayerPerson {
   personId: number;
@@ -14,6 +15,8 @@ export interface PsLayerPerson {
   uploadStatus: 'pending' | 'uploading' | 'done' | 'error';
   photoUrl?: string;
   errorMsg?: string;
+  matchType?: 'exact' | 'smart' | 'ambiguous' | 'manual';
+  matchConfidence?: number;
 }
 
 export interface BatchProgress {
@@ -85,23 +88,25 @@ export class OverlayUploadService {
   }
 
   /**
-   * Fajlneveket parosit a layerekhez slug matching alapjan.
-   * Strategia: fajlnev (kiterjesztes nelkul) → normalize → slug-ok kozott keres.
+   * Fajlneveket parosit a layerekhez 2 lepcsős matching-gel:
+   * 1. Gyors slug match (meglevo logika)
+   * 2. Intelligens nev match (filename-matcher.util.ts Levenshtein + szo-atrendezes)
    */
-  matchFilesToLayers(files: File[], layers: PsLayerPerson[]): {
+  matchFilesToLayers(files: File[], layers: PsLayerPerson[], persons?: PersonItem[]): {
     matched: PsLayerPerson[];
     unmatched: File[];
   } {
     const updatedLayers = layers.map(l => ({ ...l }));
     const usedFiles = new Set<File>();
 
+    // 1. lepcso: slug-based matching
     for (const file of files) {
       const fileSlug = this.normalizeSlug(this.removeExtension(file.name));
       let bestMatch: PsLayerPerson | null = null;
       let bestScore = 0;
 
       for (const layer of updatedLayers) {
-        if (layer.file) continue; // mar parositve
+        if (layer.file) continue;
         const layerSlug = this.normalizeSlug(layer.personName || layer.slug);
         const score = this.matchScore(fileSlug, layerSlug);
         if (score > bestScore) {
@@ -112,7 +117,39 @@ export class OverlayUploadService {
 
       if (bestMatch && bestScore >= 0.8) {
         bestMatch.file = file;
+        bestMatch.matchType = bestScore === 1 ? 'exact' : 'smart';
+        bestMatch.matchConfidence = Math.round(bestScore * 100);
         usedFiles.add(file);
+      }
+    }
+
+    // 2. lepcso: intelligens nev matching a maradek fajlokra
+    const remainingFiles = files.filter(f => !usedFiles.has(f));
+    if (remainingFiles.length > 0 && persons && persons.length > 0) {
+      // Csak azok a personok, akiknek van szabad layere
+      const assignedPersonIds = new Set(
+        updatedLayers.filter(l => l.file).map(l => l.personId)
+      );
+      const availablePersons = persons
+        .filter(p => !assignedPersonIds.has(p.id))
+        .map(p => ({ id: p.id, name: p.name }));
+
+      if (availablePersons.length > 0) {
+        const smartResults = matchFilesToPersons(remainingFiles, availablePersons);
+
+        for (const result of smartResults) {
+          if (result.personId === null) continue;
+
+          const layer = updatedLayers.find(
+            l => l.personId === result.personId && !l.file
+          );
+          if (!layer) continue;
+
+          layer.file = result.file;
+          layer.matchType = result.matchType === 'ambiguous' ? 'ambiguous' : 'smart';
+          layer.matchConfidence = result.confidence;
+          usedFiles.add(result.file);
+        }
       }
     }
 

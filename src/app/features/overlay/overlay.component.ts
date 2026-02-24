@@ -481,7 +481,7 @@ export class OverlayComponent implements OnInit {
     }
     if (files.length === 0) return;
 
-    const { matched, unmatched } = this.uploadService.matchFilesToLayers(files, this.psLayers());
+    const { matched, unmatched } = this.uploadService.matchFilesToLayers(files, this.psLayers(), this.persons());
     this.psLayers.set(matched);
     this.unmatchedFiles.set(unmatched);
     this.batchResult.set(null);
@@ -489,7 +489,7 @@ export class OverlayComponent implements OnInit {
 
   assignFileToLayer(layerIndex: number, file: File): void {
     this.psLayers.update(layers =>
-      layers.map((l, i) => i === layerIndex ? { ...l, file } : l)
+      layers.map((l, i) => i === layerIndex ? { ...l, file, matchType: 'manual' as const, matchConfidence: 100 } : l)
     );
     this.unmatchedFiles.update(files => files.filter(f => f !== file));
     this.selectedUnmatchedFile.set(null);

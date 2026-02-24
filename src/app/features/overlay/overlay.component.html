@@ -198,6 +198,11 @@
                   <span class="upload-panel__layer-no-file">—</span>
                 }
               </span>
+              @if (layer.matchType === 'ambiguous') {
+                <span class="upload-panel__layer-ambiguous" data-tip="Bizonytalan párosítás — ellenőrizd!">
+                  <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="12" />
+                </span>
+              }
               <span class="upload-panel__layer-status">
                 @if (layer.uploadStatus === 'done') {
                   <lucide-icon [name]="ICONS.CHECK" [size]="13" class="upload-panel__status--done" />

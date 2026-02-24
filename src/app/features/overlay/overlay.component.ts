@@ -541,21 +541,24 @@ export class OverlayComponent implements OnInit {
   }
 
   private async loadPsLayers(): Promise<void> {
+    // Először az activeDoc-ból próbáljuk (ha a polling már beszerezte)
+    const doc = this.activeDoc();
+    if (doc.selectedLayerNames && doc.selectedLayerNames.length > 0) {
+      this.updatePsLayersFromDoc(doc);
+      return;
+    }
+    // Ha nincs, frissítsük a PS-ből
     if (!window.electronAPI) return;
     try {
       const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
       if (result.success && result.output) {
         const cleaned = result.output.trim();
         if (cleaned.startsWith('{')) {
-          const doc: ActiveDocInfo = JSON.parse(cleaned);
-          const names = doc.selectedLayerNames || [];
-          const parsed = this.uploadService.parseLayerNames(names);
-          if (parsed.length > 0 && this.persons().length > 0) {
-            const enriched = this.uploadService.enrichWithPersons(parsed, this.persons());
-            this.ngZone.run(() => this.psLayers.set(enriched));
-          } else {
-            this.ngZone.run(() => this.psLayers.set(parsed));
-          }
+          const freshDoc: ActiveDocInfo = JSON.parse(cleaned);
+          this.ngZone.run(() => {
+            this.activeDoc.set(freshDoc);
+            this.updatePsLayersFromDoc(freshDoc);
+          });
         }
       }
     } catch { /* PS nem elérhető */ }
@@ -778,10 +781,37 @@ export class OverlayComponent implements OnInit {
         const cleaned = result.output.trim();
         if (cleaned.startsWith('{')) {
           const doc: ActiveDocInfo = JSON.parse(cleaned);
-          this.ngZone.run(() => this.activeDoc.set(doc));
+          this.ngZone.run(() => {
+            this.activeDoc.set(doc);
+            // Ha a panel nyitva van, frissítsük a PS layereket is
+            if (this.uploadPanelOpen()) {
+              this.updatePsLayersFromDoc(doc);
+            }
+          });
           window.electronAPI.overlay.setActiveDoc(doc);
         }
       }
     } catch { /* PS nem elerheto — skip */ }
+  }
+
+  private updatePsLayersFromDoc(doc: ActiveDocInfo): void {
+    const names = doc.selectedLayerNames || [];
+    const parsed = this.uploadService.parseLayerNames(names);
+    if (parsed.length === 0) {
+      this.psLayers.set([]);
+      return;
+    }
+    // Meglévő feltöltési státusz megőrzése (file, uploadStatus, photoUrl)
+    const existing = new Map(this.psLayers().map(l => [l.personId, l]));
+    const merged = parsed.map(p => {
+      const prev = existing.get(p.personId);
+      return prev ? { ...p, file: prev.file, uploadStatus: prev.uploadStatus, photoUrl: prev.photoUrl, personName: prev.personName, errorMsg: prev.errorMsg } : p;
+    });
+    // Enrich persons-ból ha van
+    const persons = this.persons();
+    const result = persons.length > 0
+      ? this.uploadService.enrichWithPersons(merged, persons)
+      : merged;
+    this.psLayers.set(result);
   }
 }

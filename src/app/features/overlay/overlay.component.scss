@@ -1066,6 +1066,125 @@
   &:hover:not(:disabled) { background: #16a34a; }
 }
 
+// ============ Custom Order Panel ============
+.custom-order-panel {
+  pointer-events: auto;
+  order: -1;
+  display: flex;
+  flex-direction: column;
+  background: #1e1e3a;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  animation: panel-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-font-smoothing: antialiased;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.custom-order-panel__header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #f59e0b;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-app-region: no-drag;
+
+  lucide-icon { margin-right: 6px; }
+}
+
+.custom-order-panel__close {
+  -webkit-app-region: no-drag;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+}
+
+.custom-order-panel__body {
+  padding: 8px 12px;
+  -webkit-app-region: no-drag;
+}
+
+.custom-order-panel__desc {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.4;
+  margin: 0 0 6px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.custom-order-panel__textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+
+  &::placeholder { color: rgba(255, 255, 255, 0.2); }
+  &:focus { border-color: rgba(245, 158, 11, 0.4); }
+}
+
+.custom-order-panel__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 12px 8px;
+  -webkit-app-region: no-drag;
+}
+
+.custom-order-panel__btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  transition: all 0.12s;
+
+  &--submit {
+    background: #f59e0b;
+    color: #000;
+
+    &:hover:not(:disabled) { background: #d97706; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+.custom-order-panel__result {
+  padding: 6px 12px 8px;
+  font-size: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: center;
+
+  &--success { color: #22c55e; }
+  &--error { color: #ef4444; }
+}
+
 // ============ Reduced Motion ============
 @media (prefers-reduced-motion: reduce) {
   * {

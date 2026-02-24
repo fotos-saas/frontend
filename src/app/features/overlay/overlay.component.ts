@@ -72,6 +72,11 @@ export class OverlayComponent implements OnInit {
   readonly openSubmenu = signal<string | null>(null);
   private collapseTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // Custom order panel state
+  readonly customOrderPanelOpen = signal(false);
+  readonly customOrderText = signal('');
+  readonly customOrderResult = signal<{ success: boolean; message: string } | null>(null);
+
   // Upload panel state
   readonly uploadPanelOpen = signal(false);
   readonly persons = signal<PersonItem[]>([]);
@@ -292,6 +297,7 @@ export class OverlayComponent implements OnInit {
     if (!target.closest('.toolbar-wrap')) {
       if (this.openSubmenu()) this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
+      if (this.customOrderPanelOpen()) this.closeCustomOrderPanel();
     }
   }
 
@@ -420,6 +426,59 @@ export class OverlayComponent implements OnInit {
           gridAlign: gridAlign || 'center',
         });
       } catch { /* ignore */ }
+    }
+    this.ngZone.run(() => this.sorting.set(false));
+  }
+
+  // ============ Custom Order Panel ============
+
+  toggleCustomOrderPanel(): void {
+    if (this.customOrderPanelOpen()) {
+      this.closeCustomOrderPanel();
+    } else {
+      this.customOrderPanelOpen.set(true);
+      this.customOrderResult.set(null);
+      this.closeSubmenu();
+      if (this.uploadPanelOpen()) this.closeUploadPanel();
+    }
+  }
+
+  closeCustomOrderPanel(): void {
+    this.customOrderPanelOpen.set(false);
+    this.customOrderResult.set(null);
+  }
+
+  async submitCustomOrder(): Promise<void> {
+    const text = this.customOrderText().trim();
+    if (!text || this.sorting()) return;
+
+    const names = await this.getImageLayerNames();
+    if (names.length < 2) {
+      this.customOrderResult.set({ success: false, message: 'Legalább 2 kép layer kell a rendezéshez.' });
+      return;
+    }
+
+    this.sorting.set(true);
+    this.customOrderResult.set(null);
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ success: boolean; ordered_names: string[]; unmatched: string[] }>(
+          `${environment.apiUrl}/partner/ai/match-custom-order`,
+          { layer_names: names, custom_order: text },
+        ),
+      );
+      if (res.success && res.ordered_names) {
+        await this.reorderLayersByNames(res.ordered_names);
+        const unmatchedCount = res.unmatched?.length ?? 0;
+        const msg = unmatchedCount > 0
+          ? `Rendezve (${unmatchedCount} nem párosított)`
+          : `Rendezve (${res.ordered_names.length} elem)`;
+        this.ngZone.run(() => this.customOrderResult.set({ success: true, message: msg }));
+      } else {
+        this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' }));
+      }
+    } catch {
+      this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' }));
     }
     this.ngZone.run(() => this.sorting.set(false));
   }

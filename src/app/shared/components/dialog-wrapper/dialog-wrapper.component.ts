@@ -127,6 +127,7 @@ export class DialogWrapperComponent implements AfterViewInit {
   protected handleEscapeKey(event: Event): void {
     if (this.closable() && !this.isSubmitting()) {
       event.preventDefault();
+      event.stopImmediatePropagation();
       this.closeEvent.emit();
     }
   }

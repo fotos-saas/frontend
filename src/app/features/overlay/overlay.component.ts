@@ -85,6 +85,7 @@ export class OverlayComponent implements OnInit {
   private resizing = false;
   private resizeStartY = 0;
   private resizeStartH = 0;
+  private filePreviewCache = new Map<File, string>();
 
   private static readonly PANEL_MIN_H = 200;
   private static readonly PANEL_MAX_H_OFFSET = 120; // toolbar + padding + margó
@@ -316,7 +317,7 @@ export class OverlayComponent implements OnInit {
     this.uploadPanelOpen.set(true);
     this.closeSubmenu();
     const pid = this.context().projectId;
-    if (pid && this.persons().length === 0) {
+    if (pid) {
       this.loadPersons(pid);
     }
     this.loadPsLayers();
@@ -329,6 +330,10 @@ export class OverlayComponent implements OnInit {
     this.uploadResult.set(null);
     this.searchQuery.set('');
     this.batchResult.set(null);
+    this.selectedUnmatchedFile.set(null);
+    // Blob URL-ek felszabadítása
+    this.filePreviewCache.forEach(url => URL.revokeObjectURL(url));
+    this.filePreviewCache.clear();
   }
 
   // ============ Resize panel ============
@@ -503,10 +508,28 @@ export class OverlayComponent implements OnInit {
     this.assignFileToLayer(index, file);
   }
 
+  getFilePreview(file: File): string {
+    let url = this.filePreviewCache.get(file);
+    if (!url) {
+      url = URL.createObjectURL(file);
+      this.filePreviewCache.set(file, url);
+    }
+    return url;
+  }
+
+  private revokeFilePreview(file: File): void {
+    const url = this.filePreviewCache.get(file);
+    if (url) {
+      URL.revokeObjectURL(url);
+      this.filePreviewCache.delete(file);
+    }
+  }
+
   removeFileFromLayer(layerIndex: number): void {
     const layer = this.psLayers()[layerIndex];
     if (!layer?.file) return;
     const removedFile = layer.file;
+    this.revokeFilePreview(removedFile);
     this.psLayers.update(layers =>
       layers.map((l, i) => i === layerIndex ? { ...l, file: undefined } : l)
     );

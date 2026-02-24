@@ -179,6 +179,8 @@
               <div class="upload-panel__layer-thumb">
                 @if (layer.photoThumbUrl) {
                   <img [src]="layer.photoThumbUrl" [alt]="layer.personName || layer.slug" />
+                } @else if (layer.file) {
+                  <img [src]="getFilePreview(layer.file)" [alt]="layer.file.name" />
                 } @else {
                   <lucide-icon [name]="ICONS.USER" [size]="12" />
                 }

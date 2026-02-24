@@ -347,6 +347,26 @@ function createOverlayWindow(): void {
   // NEM rejtjuk el blur-ra! Always-on-top marad.
   // Csak a hide gomb vagy Ctrl+K rejti el.
 
+  // Ablak ne mehessen ki a képernyőről
+  overlayWindow.on('move', () => {
+    if (!overlayWindow || overlayWindow.isDestroyed()) return;
+    const [x, y] = overlayWindow.getPosition();
+    const [w, h] = overlayWindow.getSize();
+    const display = screen.getDisplayMatching({ x, y, width: w, height: h });
+    const { x: sx, y: sy, width: sw, height: sh } = display.workArea;
+
+    let newX = x;
+    let newY = y;
+    let changed = false;
+
+    if (newX < sx - w + 100) { newX = sx - w + 100; changed = true; }
+    if (newX > sx + sw - 100) { newX = sx + sw - 100; changed = true; }
+    if (newY < sy) { newY = sy; changed = true; }
+    if (newY > sy + sh - 60) { newY = sy + sh - 60; changed = true; }
+
+    if (changed) overlayWindow.setPosition(newX, newY);
+  });
+
   overlayWindow.on('closed', () => {
     overlayWindow = null;
   });

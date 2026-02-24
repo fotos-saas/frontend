@@ -346,7 +346,7 @@ export class OverlayComponent implements OnInit {
     this.closeSubmenu();
   }
 
-  /** ABC rendezés — API hívás + JSX pozíció csere */
+  /** ABC rendezés — lokális magyar collator + JSX pozíció csere */
   async sortAbc(): Promise<void> {
     this.closeSubmenu();
     if (this.sorting()) return;
@@ -355,15 +355,11 @@ export class OverlayComponent implements OnInit {
 
     this.sorting.set(true);
     try {
-      const res = await firstValueFrom(
-        this.http.post<{ success: boolean; sorted_names: string[] }>(
-          `${environment.apiUrl}/partner/ai/sort-names-abc`,
-          { names },
-        ),
-      );
-      if (res.success && res.sorted_names) {
-        await this.reorderLayersByNames(res.sorted_names);
-      }
+      const collator = new Intl.Collator('hu', { sensitivity: 'base' });
+      const prefixRe = /^(dr\.?\s*|ifj\.?\s*|id\.?\s*|prof\.?\s*|özv\.?\s*)/i;
+      const sortKey = (n: string) => n.replace(prefixRe, '').trim();
+      const sorted = [...names].sort((a, b) => collator.compare(sortKey(a), sortKey(b)));
+      await this.reorderLayersByNames(sorted);
     } catch { /* ignore */ }
     this.ngZone.run(() => this.sorting.set(false));
   }

@@ -52,7 +52,7 @@ export class ProjectDetailComponent {
     studentsWithPhotoCount: project.studentsWithPhotoCount,
     teachersWithPhotoCount: project.teachersWithPhotoCount,
     personsPreview: project.personsPreview,
-    extraNames: project.extraNames,
+    extraNames: project.extraNames ?? undefined,
     inPrintAt: (project as any).inPrintAt,
     doneAt: (project as any).doneAt,
     printSmallTablo: (project as any).printSmallTablo,

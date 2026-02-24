@@ -252,6 +252,15 @@ export class SessionService {
   logoutAdmin(): void {
     sessionStorage.removeItem('marketer_token');
     sessionStorage.removeItem('marketer_user');
+
+    // Tabló session state is törölni kell, különben a NoAuthGuard
+    // átirányít /home-ra mert hasToken() true marad
+    this.tokenService.clearToken();
+    this.storage.clearActiveSession();
+
+    // Electron: Keychain credential törlés, hogy ne legyen auto-login
+    window.electronAPI?.deleteCredentials();
+
     this.filterPersistence.clearAllFilters();
     this.sentryService.setUser(null);
 

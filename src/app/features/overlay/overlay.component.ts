@@ -228,6 +228,7 @@ export class OverlayComponent implements OnInit {
     this.listenActiveDocChanges();
     this.startPolling(POLL_NORMAL);
     this.setupClickThrough();
+    this.listenVisibility();
   }
 
   private static readonly ALIGN_MAP: Record<string, string> = {
@@ -778,8 +779,11 @@ export class OverlayComponent implements OnInit {
   }
 
   private restartPolling(interval: number): void {
+    this.lastPollInterval = interval;
     if (this.pollTimer) clearInterval(this.pollTimer);
-    this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
+    if (this.isVisible) {
+      this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
+    }
   }
 
   private async loadContext(): Promise<void> {
@@ -832,8 +836,42 @@ export class OverlayComponent implements OnInit {
     });
   }
 
+  /** Ablak lathato-e (Electron hide/show esemenyek) */
+  private isVisible = true;
+  private lastPollInterval = POLL_NORMAL;
+
+  /** Ha az Electron overlay ablak elrejtodik, szuneteltetjuk a pollingot */
+  private listenVisibility(): void {
+    const handler = (): void => {
+      const hidden = document.hidden;
+      if (hidden && this.isVisible) {
+        this.isVisible = false;
+        this.pausePolling();
+      } else if (!hidden && !this.isVisible) {
+        this.isVisible = true;
+        this.resumePolling();
+      }
+    };
+    document.addEventListener('visibilitychange', handler);
+    this.destroyRef.onDestroy(() => document.removeEventListener('visibilitychange', handler));
+  }
+
+  private pausePolling(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
+  }
+
+  private resumePolling(): void {
+    const interval = this.isTurbo() ? POLL_TURBO : this.lastPollInterval;
+    this.pollActiveDoc();
+    this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
+  }
+
   private startPolling(interval: number): void {
     if (!window.electronAPI) return;
+    this.lastPollInterval = interval;
     this.pollActiveDoc();
     this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
     this.destroyRef.onDestroy(() => {
@@ -843,7 +881,7 @@ export class OverlayComponent implements OnInit {
   }
 
   private async pollActiveDoc(): Promise<void> {
-    if (!window.electronAPI) return;
+    if (!window.electronAPI || !this.isVisible) return;
 
     // Ha kijelentkezve vagyunk, periodikusan próbáljuk a visszaállítást
     if (this.isLoggedOut()) {

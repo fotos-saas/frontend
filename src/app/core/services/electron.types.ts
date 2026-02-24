@@ -94,12 +94,11 @@ interface OverlayAPI {
   onContextChanged: (callback: (ctx: OverlayContext) => void) => CleanupFn;
   hide: () => Promise<{ success: boolean }>;
   showMainWindow: () => Promise<{ success: boolean }>;
-  setIgnoreMouseEvents: (ignore: boolean) => void;
+  setIgnoreMouseEvents: (ignore: boolean) => Promise<{ success: boolean }>;
   onCommand: (callback: (commandId: string) => void) => CleanupFn;
   getActiveDoc: () => Promise<ActiveDocInfo>;
   setActiveDoc: (doc: ActiveDocInfo) => Promise<{ success: boolean; error?: string }>;
   onActiveDocChanged: (callback: (doc: ActiveDocInfo) => void) => CleanupFn;
-  setIgnoreMouseEvents: (ignore: boolean) => Promise<{ success: boolean }>;
 }
 
 interface TouchBarAPI {

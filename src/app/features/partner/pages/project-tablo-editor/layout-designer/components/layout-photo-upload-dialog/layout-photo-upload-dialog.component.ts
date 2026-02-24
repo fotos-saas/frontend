@@ -92,6 +92,9 @@ export class LayoutPhotoUploadDialogComponent implements OnInit {
           if (photos.length === 0) {
             this.viewMode.set('upload');
           }
+          // Ha nincs aktív fotója → archívba, ha van → egyedi override
+          const hasActivePhoto = photos.some(p => p.isActive);
+          this.uploadMode.set(hasActivePhoto ? 'override' : 'archive');
           this.loadingPhotos.set(false);
         },
         error: () => {

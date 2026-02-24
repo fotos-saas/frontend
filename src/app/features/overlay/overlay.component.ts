@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
@@ -104,6 +105,8 @@ export class OverlayComponent implements OnInit {
   readonly selectedUnmatchedFile = signal<File | null>(null);
   readonly matching = signal(false);
   readonly batchResult = signal<{ success: boolean; message: string } | null>(null);
+  /** Ha true, a polling NEM őrzi meg a korábbi upload státuszokat (reset után) */
+  private skipLayerMerge = false;
 
   readonly hasPsLayers = computed(() => this.psLayers().length > 0);
   readonly uploadableLayers = computed(() =>
@@ -321,7 +324,8 @@ export class OverlayComponent implements OnInit {
     this.uploadPanelOpen.set(true);
     this.closeSubmenu();
     let pid = this.context().projectId || this.lastProjectId;
-    // Fallback: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
+
+    // Fallback 1: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
     if (!pid && window.electronAPI) {
       try {
         const result = await window.electronAPI.overlay.getProjectId();
@@ -331,6 +335,16 @@ export class OverlayComponent implements OnInit {
         }
       } catch { /* ignore */ }
     }
+
+    // Fallback 2: PS layerek personId-jéből API lookup
+    if (!pid) {
+      await this.loadPsLayers();
+      const layers = this.psLayers();
+      if (layers.length > 0) {
+        pid = await this.lookupProjectIdFromPerson(layers[0].personId);
+      }
+    }
+
     if (pid) {
       this.loadPersons(pid);
     }
@@ -484,6 +498,32 @@ export class OverlayComponent implements OnInit {
     this.loadPsLayers();
   }
 
+  /** Teljes upload state reset — fájlok, státuszok, eredmények törlése */
+  resetUploadState(): void {
+    this.filePreviewCache.forEach(url => URL.revokeObjectURL(url));
+    this.filePreviewCache.clear();
+    this.unmatchedFiles.set([]);
+    this.selectedUnmatchedFile.set(null);
+    this.batchResult.set(null);
+    this.batchUploading.set(false);
+    this.placing.set(false);
+    this.batchProgress.set({ done: 0, total: 0 });
+    // Flag: a polling NE állítsa vissza a régi upload adatokat
+    this.skipLayerMerge = true;
+    // Layer-ek reset: fájlok és státuszok törlése, layerek megtartása
+    this.psLayers.update(layers =>
+      layers.map(l => ({
+        ...l,
+        file: undefined,
+        uploadStatus: 'pending' as const,
+        photoUrl: undefined,
+        errorMsg: undefined,
+        matchType: undefined,
+        matchConfidence: undefined,
+      }))
+    );
+  }
+
   matchDroppedFiles(fileList: FileList): void {
     const files: File[] = [];
     for (let i = 0; i < fileList.length; i++) {
@@ -573,12 +613,25 @@ export class OverlayComponent implements OnInit {
   }
 
   /** Feltöltés + PS behelyezés egy lépésben */
-  uploadAndPlace(): void {
-    const pid = this.context().projectId || this.lastProjectId;
+  async uploadAndPlace(): Promise<void> {
+    let pid = this.context().projectId || this.lastProjectId;
     if (this.batchUploading() || this.placing()) return;
+
+    // Ha nincs projectId, próbáljuk a personId-ből kinyerni
     if (!pid) {
-      this.batchResult.set({ success: false, message: 'Nincs projekt kiválasztva' });
-      return;
+      const layers = this.psLayers();
+      if (layers.length > 0) {
+        this.batchUploading.set(true);
+        pid = await this.lookupProjectIdFromPerson(layers[0].personId);
+        if (!pid) {
+          this.batchUploading.set(false);
+          this.batchResult.set({ success: false, message: 'Nem sikerült a projekt azonosítása' });
+          return;
+        }
+      } else {
+        this.batchResult.set({ success: false, message: 'Nincsenek PS layerek kijelölve' });
+        return;
+      }
     }
 
     this.batchUploading.set(true);
@@ -960,6 +1013,22 @@ export class OverlayComponent implements OnInit {
     } catch { /* PS nem elerheto — skip */ }
   }
 
+  /**
+   * PersonId-ből lekéri a projectId-t a backend API-ból.
+   * Régi projekteknél is működik, ahol nincs JSON-ban tárolva a projectId.
+   */
+  private async lookupProjectIdFromPerson(personId: number): Promise<number | null> {
+    try {
+      const url = `${environment.apiUrl}/persons/${personId}/project-id`;
+      const res = await firstValueFrom(this.http.get<{ projectId: number | null }>(url));
+      if (res?.projectId) {
+        this.lastProjectId = res.projectId;
+        return res.projectId;
+      }
+    } catch { /* API nem elérhető */ }
+    return null;
+  }
+
   private tryAuthRecovery(): void {
     const pid = this.context().projectId;
     if (!pid) return;
@@ -976,6 +1045,19 @@ export class OverlayComponent implements OnInit {
       this.psLayers.set([]);
       return;
     }
+
+    // Reset után NE állítsuk vissza a régi upload adatokat
+    if (this.skipLayerMerge) {
+      this.skipLayerMerge = false;
+      // Enrich persons-ból ha van, de upload state nélkül
+      const persons = this.persons();
+      const result = persons.length > 0
+        ? this.uploadService.enrichWithPersons(parsed, persons)
+        : parsed;
+      this.psLayers.set(result);
+      return;
+    }
+
     // Meglévő feltöltési státusz megőrzése (file, uploadStatus, photoUrl)
     const existing = new Map(this.psLayers().map(l => [l.personId, l]));
     const merged = parsed.map(p => {

@@ -19,6 +19,9 @@ interface ActiveDocInfo {
 let overlayContext: OverlayContext = { mode: 'normal' };
 let lastActiveDoc: ActiveDocInfo = { name: null, path: null, dir: null };
 
+// ProjectId persistens tarolasa: PSD path → projectId mapping
+const psdProjectMap = new Map<string, number>();
+
 /**
  * Overlay IPC handlerek regisztralasa.
  * Az overlayWindow es mainWindow referenciakat kulon kapja meg.
@@ -188,18 +191,31 @@ export function registerOverlayHandlers(
   });
 
   /**
-   * PSD melletti JSON-bol projectId kiolvasasa.
-   * A JSON fajl a PSD-vel azonos neven, .json kiterjesztessel van.
+   * PSD melletti JSON-bol vagy layouts/ snapshot-bol projectId kiolvasasa.
    */
   function readProjectIdFromJson(psdPath: string): number | null {
     try {
+      // 1. PSD melletti .json
       const jsonPath = psdPath.replace(/\.(psd|psb)$/i, '.json');
-      if (!fs.existsSync(jsonPath)) return null;
-      const content = fs.readFileSync(jsonPath, 'utf-8');
-      const data = JSON.parse(content);
-      if (typeof data.projectId === 'number' && data.projectId > 0) {
-        return data.projectId;
+      if (fs.existsSync(jsonPath)) {
+        const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+        if (typeof data.projectId === 'number' && data.projectId > 0) return data.projectId;
       }
+
+      // 2. layouts/ mappaban levo legujabb snapshot
+      const psdDir = path.dirname(psdPath);
+      const layoutsDir = path.join(psdDir, 'layouts');
+      if (fs.existsSync(layoutsDir)) {
+        const files = fs.readdirSync(layoutsDir)
+          .filter(f => f.endsWith('.json'))
+          .sort()
+          .reverse(); // legujabb elol (datummal kezdodo fajlnev)
+        for (const file of files) {
+          const data = JSON.parse(fs.readFileSync(path.join(layoutsDir, file), 'utf-8'));
+          if (typeof data.projectId === 'number' && data.projectId > 0) return data.projectId;
+        }
+      }
+
       return null;
     } catch {
       return null;

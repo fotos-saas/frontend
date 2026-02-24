@@ -344,6 +344,11 @@ function createOverlayWindow(): void {
     log.error('Failed to load overlay URL:', error);
   });
 
+  // Auth token szinkronizálás amint az overlay betöltődött
+  overlayWindow.webContents.once('did-finish-load', () => {
+    syncAuthToOverlay();
+  });
+
   // NEM rejtjuk el blur-ra! Always-on-top marad.
   // Csak a hide gomb vagy Ctrl+K rejti el.
 
@@ -393,6 +398,22 @@ function toggleOverlayWindow(): void {
 function showOverlayWindow(): void {
   if (!overlayWindow || overlayWindow.isDestroyed()) return;
   overlayWindow.show();
+  // Auth token szinkronizálás: main window → overlay window
+  syncAuthToOverlay();
+}
+
+async function syncAuthToOverlay(): Promise<void> {
+  if (!mainWindow || mainWindow.isDestroyed() || !overlayWindow || overlayWindow.isDestroyed()) return;
+  try {
+    const token = await mainWindow.webContents.executeJavaScript(
+      `sessionStorage.getItem('marketer_token')`,
+    );
+    if (token) {
+      overlayWindow.webContents.executeJavaScript(
+        `sessionStorage.setItem('marketer_token', ${JSON.stringify(token)})`,
+      );
+    }
+  } catch { /* ignore — window may not be ready */ }
 }
 
 

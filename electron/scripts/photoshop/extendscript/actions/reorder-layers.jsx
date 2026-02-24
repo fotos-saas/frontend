@@ -11,6 +11,7 @@
  *   3. Az ORDERED_NAMES alapjan a layereket a slot-okba mozgatja
  *      (ket menetes: eloszor off-screen parkol, aztan cel pozicioba tesz)
  *   4. Az azonos nevu layereket is mozgatja (Names csoport, stb.) — linkelt mozgas
+ *   5. Az egesz muvelet egyetlen history lepes (suspendHistory)
  *
  * Kimenet: JSON { "reordered": N }
  */
@@ -19,6 +20,9 @@
 // #include "../lib/utils.jsx"
 
 var ROW_THRESHOLD = 20; // px
+
+// --- Globalis valtozok (suspendHistory string-eval miatt) ---
+var _doc, _orderedNames, _groupFilter, _reorderResult;
 
 function getBoundsNoEffects(layerId) {
   selectLayerById(layerId);
@@ -61,14 +65,12 @@ function collectLayers(doc, groupPath) {
   return result;
 }
 
-// Azonos nevu layerek kiszedese MINDEN releváns csoportbol
-// Visszaad: { "nev": [{ layerId, x, y }, ...], ... }
 function collectLinkedLayers(doc) {
   var groups = [
     ["Names", "Students"],
     ["Names", "Teachers"]
   ];
-  var linked = {}; // name -> [{ layerId, layer }]
+  var linked = {};
   for (var g = 0; g < groups.length; g++) {
     var grp = getGroupByPath(doc, groups[g]);
     if (!grp) continue;
@@ -113,7 +115,6 @@ function getPositionSlots(layers) {
   return slots;
 }
 
-// DOM translate — megbizhato Smart Objecteknel is
 function translateLayerTo(layerId, targetX, targetY) {
   selectLayerById(layerId);
   var layer = app.activeDocument.activeLayer;
@@ -125,7 +126,6 @@ function translateLayerTo(layerId, targetX, targetY) {
   }
 }
 
-// Layer eltolasa delta-val (nem abszolut pozicio, hanem relativ mozgatas)
 function translateLayerByDelta(layerId, dx, dy) {
   if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
   selectLayerById(layerId);
@@ -133,7 +133,6 @@ function translateLayerByDelta(layerId, dx, dy) {
   layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
 }
 
-// --- Egyszeru JSON tomb parser (ES3 — nincs JSON.parse) ---
 function parseJsonArray(str) {
   var result = [];
   str = str.replace(/^\s*\[/, "").replace(/\]\s*$/, "");
@@ -146,132 +145,126 @@ function parseJsonArray(str) {
   return result;
 }
 
+// --- Fo reorder logika (suspendHistory-bol hivva) ---
+function _doReorderLayers() {
+  var allLayers = [];
+  if (_groupFilter === "All" || _groupFilter === "Students") {
+    allLayers = allLayers.concat(collectLayers(_doc, ["Images", "Students"]));
+  }
+  if (_groupFilter === "All" || _groupFilter === "Teachers") {
+    allLayers = allLayers.concat(collectLayers(_doc, ["Images", "Teachers"]));
+  }
+
+  if (allLayers.length < 2) {
+    _reorderResult = '{"reordered":0}';
+    return;
+  }
+
+  var linkedLayers = collectLinkedLayers(_doc);
+
+  var nameToLayer = {};
+  for (var i = 0; i < allLayers.length; i++) {
+    var n = allLayers[i].name;
+    if (n && !nameToLayer[n]) {
+      nameToLayer[n] = allLayers[i];
+    }
+  }
+
+  var involvedLayers = [];
+  for (var k = 0; k < _orderedNames.length; k++) {
+    if (nameToLayer[_orderedNames[k]]) {
+      involvedLayers.push(nameToLayer[_orderedNames[k]]);
+    }
+  }
+
+  if (involvedLayers.length < 2) {
+    _reorderResult = '{"reordered":0,"error":"not enough matches"}';
+    return;
+  }
+
+  var slots = getPositionSlots(involvedLayers);
+
+  var moves = [];
+  for (var j = 0; j < Math.min(_orderedNames.length, slots.length); j++) {
+    var layerInfo = nameToLayer[_orderedNames[j]];
+    if (!layerInfo) continue;
+    moves.push({
+      layerId: layerInfo.layerId,
+      name: layerInfo.name,
+      targetX: slots[j].x,
+      targetY: slots[j].y
+    });
+  }
+
+  // 1. menet: off-screen parkolo (image + linkelt)
+  var parkX = _doc.width.as("px") + 10000;
+  for (var m1 = 0; m1 < moves.length; m1++) {
+    var origBnfe = getBoundsNoEffects(moves[m1].layerId);
+    var parkTargetX = parkX + m1 * 500;
+    var parkDx = parkTargetX - origBnfe.left;
+    var parkDy = -origBnfe.top;
+
+    translateLayerTo(moves[m1].layerId, parkTargetX, 0);
+
+    var siblings = linkedLayers[moves[m1].name];
+    if (siblings) {
+      for (var s1 = 0; s1 < siblings.length; s1++) {
+        translateLayerByDelta(siblings[s1].layerId, parkDx, parkDy);
+      }
+    }
+  }
+
+  // 2. menet: cel pozicioba (image + linkelt)
+  var reordered = 0;
+  for (var m2 = 0; m2 < moves.length; m2++) {
+    var curBnfe = getBoundsNoEffects(moves[m2].layerId);
+    var finalDx = moves[m2].targetX - curBnfe.left;
+    var finalDy = moves[m2].targetY - curBnfe.top;
+
+    translateLayerTo(moves[m2].layerId, moves[m2].targetX, moves[m2].targetY);
+
+    var siblings2 = linkedLayers[moves[m2].name];
+    if (siblings2) {
+      for (var s2 = 0; s2 < siblings2.length; s2++) {
+        translateLayerByDelta(siblings2[s2].layerId, finalDx, finalDy);
+      }
+    }
+
+    reordered++;
+  }
+
+  _reorderResult = '{"reordered":' + reordered + '}';
+}
+
+// --- Entry point ---
 var __result = (function () {
   try {
     if (app.documents.length === 0) {
       return '{"reordered":0}';
     }
-    var doc = app.activeDocument;
+    _doc = app.activeDocument;
 
     var orderedNamesStr = typeof CONFIG !== "undefined" && CONFIG.ORDERED_NAMES ? CONFIG.ORDERED_NAMES : "";
     if (!orderedNamesStr) {
       return '{"reordered":0,"error":"No ORDERED_NAMES"}';
     }
 
-    var orderedNames = parseJsonArray(orderedNamesStr);
-    if (orderedNames.length === 0) {
+    _orderedNames = parseJsonArray(orderedNamesStr);
+    if (_orderedNames.length === 0) {
       return '{"reordered":0}';
     }
 
-    var groupFilter = typeof CONFIG !== "undefined" && CONFIG.GROUP ? CONFIG.GROUP : "All";
+    _groupFilter = typeof CONFIG !== "undefined" && CONFIG.GROUP ? CONFIG.GROUP : "All";
+    _reorderResult = '{"reordered":0}';
 
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
 
-    // Image layerek osszegyujtese
-    var allLayers = [];
-    if (groupFilter === "All" || groupFilter === "Students") {
-      allLayers = allLayers.concat(collectLayers(doc, ["Images", "Students"]));
-    }
-    if (groupFilter === "All" || groupFilter === "Teachers") {
-      allLayers = allLayers.concat(collectLayers(doc, ["Images", "Teachers"]));
-    }
-
-    if (allLayers.length < 2) {
-      app.preferences.rulerUnits = oldRulerUnits;
-      return '{"reordered":0}';
-    }
-
-    // Linkelt layerek (Names csoportok) osszegyujtese
-    var linkedLayers = collectLinkedLayers(doc);
-
-    // Nev -> image layerInfo map
-    var nameToLayer = {};
-    for (var i = 0; i < allLayers.length; i++) {
-      var n = allLayers[i].name;
-      if (n && !nameToLayer[n]) {
-        nameToLayer[n] = allLayers[i];
-      }
-    }
-
-    // Erintett layerek: ORDERED_NAMES-ben szereplo image layerek
-    var involvedLayers = [];
-    for (var k = 0; k < orderedNames.length; k++) {
-      if (nameToLayer[orderedNames[k]]) {
-        involvedLayers.push(nameToLayer[orderedNames[k]]);
-      }
-    }
-
-    if (involvedLayers.length < 2) {
-      app.preferences.rulerUnits = oldRulerUnits;
-      return '{"reordered":0,"error":"not enough matches"}';
-    }
-
-    // Slot-ok: CSAK az erintett layerek jelenlegi pozicioit hasznaljuk
-    var slots = getPositionSlots(involvedLayers);
-
-    // Mozgatasok kiszamitasa: image layer + linkelt layerek
-    // moves: { layerId, targetX, targetY, name }
-    var moves = [];
-    for (var j = 0; j < Math.min(orderedNames.length, slots.length); j++) {
-      var layerInfo = nameToLayer[orderedNames[j]];
-      if (!layerInfo) continue;
-      moves.push({
-        layerId: layerInfo.layerId,
-        name: layerInfo.name,
-        origX: layerInfo.x,
-        origY: layerInfo.y,
-        targetX: slots[j].x,
-        targetY: slots[j].y
-      });
-    }
-
-    // 1. menet: OSSZES image layert off-screen parkoloba
-    var parkX = doc.width.as("px") + 10000;
-    // Linkelt layereket is parkoloba (azonos delta-val)
-    for (var m1 = 0; m1 < moves.length; m1++) {
-      var origBnfe = getBoundsNoEffects(moves[m1].layerId);
-      var parkTargetX = parkX + m1 * 500;
-      var parkTargetY = 0;
-      var parkDx = parkTargetX - origBnfe.left;
-      var parkDy = parkTargetY - origBnfe.top;
-
-      // Image layer parkolasa
-      translateLayerTo(moves[m1].layerId, parkTargetX, parkTargetY);
-
-      // Linkelt layerek (Names stb.) ugyanannyival eltolva
-      var siblings = linkedLayers[moves[m1].name];
-      if (siblings) {
-        for (var s1 = 0; s1 < siblings.length; s1++) {
-          translateLayerByDelta(siblings[s1].layerId, parkDx, parkDy);
-        }
-      }
-    }
-
-    // 2. menet: parkolobol cel pozicioba
-    var reordered = 0;
-    for (var m2 = 0; m2 < moves.length; m2++) {
-      // Image layer aktualis pozicioja (parkolt)
-      var curBnfe = getBoundsNoEffects(moves[m2].layerId);
-      var finalDx = moves[m2].targetX - curBnfe.left;
-      var finalDy = moves[m2].targetY - curBnfe.top;
-
-      // Image layer cel pozicioba
-      translateLayerTo(moves[m2].layerId, moves[m2].targetX, moves[m2].targetY);
-
-      // Linkelt layerek ugyanannyival
-      var siblings2 = linkedLayers[moves[m2].name];
-      if (siblings2) {
-        for (var s2 = 0; s2 < siblings2.length; s2++) {
-          translateLayerByDelta(siblings2[s2].layerId, finalDx, finalDy);
-        }
-      }
-
-      reordered++;
-    }
+    // Egyetlen history lepes — Ctrl+Z-vel visszavonhato
+    _doc.suspendHistory("Layerek atrendezese", "_doReorderLayers()");
 
     app.preferences.rulerUnits = oldRulerUnits;
-    return '{"reordered":' + reordered + '}';
+    return _reorderResult;
 
   } catch (e) {
     return '{"reordered":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';

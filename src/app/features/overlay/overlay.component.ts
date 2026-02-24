@@ -491,10 +491,10 @@ export class OverlayComponent implements OnInit {
           return slugToHuman.get(human.toLowerCase()) || slugNames.find(s => this.slugToHumanName(s).toLowerCase() === human.toLowerCase()) || human;
         });
         await this.reorderLayersByNames(orderedSlugs);
-        const unmatchedCount = res.unmatched?.length ?? 0;
-        const msg = unmatchedCount > 0
-          ? `Rendezve (${unmatchedCount} nem párosított)`
-          : `Rendezve (${res.ordered_names.length} elem)`;
+        // Debug: sorrend kiírása az eredmény szövegbe
+        const orderList = res.ordered_names.map((n, i) => `${i + 1}. ${n}`).join(' → ');
+        const slugList = orderedSlugs.map((s, i) => `${i + 1}. ${s}`).join(' → ');
+        const msg = `Sorrend: ${orderList} | Slugok: ${slugList}`;
         this.ngZone.run(() => this.customOrderResult.set({ success: true, message: msg }));
       } else {
         this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' }));

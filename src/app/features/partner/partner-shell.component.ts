@@ -228,6 +228,7 @@ export class PartnerShellComponent implements OnInit {
         icon: 'settings',
         children: [
           { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás és fizetés', devBadge: true },
+          { id: 'email-account', route: `${base}/settings/email-account`, label: 'E-mail fiók' },
         ]
       },
     ];

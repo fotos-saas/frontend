@@ -81,6 +81,35 @@
   flex-shrink: 0;
 }
 
+/* Email badge */
+.email-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+.email-badge--good {
+  background: linear-gradient(135deg, get-color('primary', 500) 0%, get-color('primary', 600) 100%);
+  color: #ffffff;
+}
+
+.email-badge--warning {
+  background: linear-gradient(135deg, get-color('warning', 500) 0%, get-color('warning', 600) 100%);
+  color: #ffffff;
+}
+
+.email-badge--critical {
+  background: linear-gradient(135deg, get-color('error', 500) 0%, get-color('error', 600) 100%);
+  color: #ffffff;
+}
+
 /* Preliminary badge */
 .preliminary-badge {
   display: inline-flex;

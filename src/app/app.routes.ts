@@ -340,6 +340,11 @@ export const routes: Routes = [
             path: 'services',
             loadComponent: () => import('./features/partner/pages/partner-settings/services/service-catalog.component').then(m => m.ServiceCatalogComponent),
             title: 'Szolgáltatások'
+          },
+          {
+            path: 'email-account',
+            loadComponent: () => import('./features/partner/pages/partner-settings/email-account/email-account-settings.component').then(m => m.EmailAccountSettingsComponent),
+            title: 'E-mail fiók'
           }
         ]
       },

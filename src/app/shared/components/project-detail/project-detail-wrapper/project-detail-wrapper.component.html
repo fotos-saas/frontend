@@ -44,6 +44,13 @@
           (galleryDeadlineExtend)="extendGalleryDeadline($event)"
         />
       }
+      @case ('emails') {
+        @defer {
+          <app-project-emails-tab
+            [projectId]="projectData()?.id ?? 0"
+          />
+        }
+      }
       @case ('users') {
         @defer {
           <app-project-users-tab

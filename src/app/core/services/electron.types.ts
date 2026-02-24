@@ -99,6 +99,7 @@ interface OverlayAPI {
   getActiveDoc: () => Promise<ActiveDocInfo>;
   setActiveDoc: (doc: ActiveDocInfo) => Promise<{ success: boolean; error?: string }>;
   onActiveDocChanged: (callback: (doc: ActiveDocInfo) => void) => CleanupFn;
+  setIgnoreMouseEvents: (ignore: boolean) => Promise<{ success: boolean }>;
 }
 
 interface TouchBarAPI {

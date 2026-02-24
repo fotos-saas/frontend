@@ -323,13 +323,20 @@ export class OverlayComponent implements OnInit {
     };
 
     const onUp = () => {
-      this.resizing = false;
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
+      // Kis késleltetés, hogy a mouseup utáni click ne zárja be a panelt
+      setTimeout(() => { this.resizing = false; }, 200);
     };
 
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
+    // Window blur = egér kiment az ablakból resize közben
+    const onBlur = () => {
+      onUp();
+      window.removeEventListener('blur', onBlur);
+    };
+    window.addEventListener('blur', onBlur);
   }
 
   onSearchInput(event: Event): void {

@@ -508,6 +508,12 @@ export class OverlayComponent implements OnInit {
     this.assignFileToLayer(index, file);
   }
 
+  clearUnmatchedFiles(): void {
+    this.unmatchedFiles().forEach(f => this.revokeFilePreview(f));
+    this.unmatchedFiles.set([]);
+    this.selectedUnmatchedFile.set(null);
+  }
+
   getFilePreview(file: File): string {
     let url = this.filePreviewCache.get(file);
     if (!url) {

@@ -217,6 +217,9 @@
         @if (unmatchedFiles().length > 0) {
           <div class="upload-panel__unmatched">
             <span class="upload-panel__unmatched-label">Nem párosított ({{ unmatchedFiles().length }}):</span>
+            <button class="upload-panel__unmatched-clear" (click)="clearUnmatchedFiles()" type="button" data-tip="Lista törlése">
+              <lucide-icon [name]="ICONS.X" [size]="11" />
+            </button>
             @for (file of unmatchedFiles(); track file.name; let fi = $index) {
               <button
                 class="upload-panel__unmatched-file"

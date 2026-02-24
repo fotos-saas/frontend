@@ -878,6 +878,23 @@
   font-weight: 500;
 }
 
+.upload-panel__unmatched-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 4px;
+  flex-shrink: 0;
+
+  &:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+}
+
 .upload-panel__unmatched-file {
   display: inline-flex;
   align-items: center;

@@ -374,24 +374,34 @@ export class OverlayComponent implements OnInit {
   async sortGender(): Promise<void> {
     this.closeSubmenu();
     if (this.sorting()) return;
-    const names = await this.getSortableNames();
-    if (names.length < 2) return;
+    const slugNames = await this.getSortableNames();
+    if (slugNames.length < 2) return;
+
+    // Slug→human map a gender API-hoz és visszamapeléshez
+    const humanToSlug = new Map<string, string>();
+    const humanNames = slugNames.map(slug => {
+      const human = this.slugToHumanName(slug);
+      humanToSlug.set(human, slug);
+      return human;
+    });
 
     this.sorting.set(true);
     try {
       const res = await firstValueFrom(
         this.http.post<{ success: boolean; classifications: Array<{ name: string; gender: 'boy' | 'girl' }> }>(
           `${environment.apiUrl}/partner/ai/classify-name-genders`,
-          { names },
+          { names: humanNames },
         ),
       );
       if (res.success && res.classifications) {
         const collator = new Intl.Collator('hu', { sensitivity: 'base' });
         const genderMap = new Map(res.classifications.map(c => [c.name, c.gender]));
-        const boys = names.filter(n => genderMap.get(n) === 'boy').sort(collator.compare);
-        const girls = names.filter(n => genderMap.get(n) === 'girl').sort(collator.compare);
-        const ordered = this.interleave(boys, girls);
-        await this.reorderLayersByNames(ordered);
+        const boys = humanNames.filter(n => genderMap.get(n) === 'boy').sort(collator.compare);
+        const girls = humanNames.filter(n => genderMap.get(n) === 'girl').sort(collator.compare);
+        const orderedHuman = this.interleave(boys, girls);
+        // Human nevek visszamapelése slug-okra a reorder JSX-hez
+        const orderedSlugs = orderedHuman.map(h => humanToSlug.get(h) || h);
+        await this.reorderLayersByNames(orderedSlugs);
       }
     } catch { /* ignore */ }
     this.ngZone.run(() => this.sorting.set(false));
@@ -452,11 +462,19 @@ export class OverlayComponent implements OnInit {
     const text = this.customOrderText().trim();
     if (!text || this.sorting()) return;
 
-    const names = await this.getSortableNames();
-    if (names.length < 2) {
+    const slugNames = await this.getSortableNames();
+    if (slugNames.length < 2) {
       this.customOrderResult.set({ success: false, message: 'Legalább 2 kijelölt kép layer kell a rendezéshez.' });
       return;
     }
+
+    // Slug→human map: "piller-csenge---14668" → "Piller Csenge"
+    const slugToHuman = new Map<string, string>();
+    const humanNames = slugNames.map(slug => {
+      const human = this.slugToHumanName(slug);
+      slugToHuman.set(human.toLowerCase(), slug);
+      return human;
+    });
 
     this.sorting.set(true);
     this.customOrderResult.set(null);
@@ -464,11 +482,15 @@ export class OverlayComponent implements OnInit {
       const res = await firstValueFrom(
         this.http.post<{ success: boolean; ordered_names: string[]; unmatched: string[] }>(
           `${environment.apiUrl}/partner/ai/match-custom-order`,
-          { layer_names: names, custom_order: text },
+          { layer_names: humanNames, custom_order: text },
         ),
       );
       if (res.success && res.ordered_names) {
-        await this.reorderLayersByNames(res.ordered_names);
+        // AI human neveket ad vissza → visszamapeljük slug-okra a reorderhez
+        const orderedSlugs = res.ordered_names.map(human => {
+          return slugToHuman.get(human.toLowerCase()) || slugNames.find(s => this.slugToHumanName(s).toLowerCase() === human.toLowerCase()) || human;
+        });
+        await this.reorderLayersByNames(orderedSlugs);
         const unmatchedCount = res.unmatched?.length ?? 0;
         const msg = unmatchedCount > 0
           ? `Rendezve (${unmatchedCount} nem párosított)`
@@ -483,11 +505,41 @@ export class OverlayComponent implements OnInit {
     this.ngZone.run(() => this.sorting.set(false));
   }
 
-  /** Rendezéshez a nevek: kijelölt layerek nevei, vagy ha nincs kijelölés, az összes Images layer */
+  /** Rendezéshez a nevek: FRISSEN lekéri a kijelölt layereket PS-ből, nem a stale polling adatot */
   private async getSortableNames(): Promise<string[]> {
-    const selected = this.activeDoc().selectedLayerNames ?? [];
-    if (selected.length >= 2) return selected;
+    // Mindig frissen kérjük le a PS-ből a kijelölt layereket
+    const freshSelected = await this.getFreshSelectedLayerNames();
+    if (freshSelected.length >= 2) return freshSelected;
     return this.getImageLayerNames();
+  }
+
+  /** PS-ből frissen lekéri a kijelölt layerek neveit (get-active-doc.jsx) */
+  private async getFreshSelectedLayerNames(): Promise<string[]> {
+    if (!window.electronAPI) return [];
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({
+        scriptName: 'actions/get-active-doc.jsx',
+      });
+      if (!result.success || !result.output) return [];
+      const cleaned = result.output.trim();
+      if (!cleaned.startsWith('{')) return [];
+      const data = JSON.parse(cleaned);
+      // Frissítsük az activeDoc signal-t is
+      this.ngZone.run(() => this.activeDoc.set(data));
+      return data.selectedLayerNames || [];
+    } catch { return []; }
+  }
+
+  /** Slug layer névből human-readable nevet csinál: "piller-csenge---14668" → "Piller Csenge" */
+  private slugToHumanName(slug: string): string {
+    // Levágja a ---SZÁM szuffixot
+    const withoutId = slug.replace(/---\d+$/, '');
+    // Kötőjeleket szóközre cseréli, szavakat nagybetűsíti
+    return withoutId
+      .split('-')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   /** PS-ből kiszedi az összes Images layerek neveit */

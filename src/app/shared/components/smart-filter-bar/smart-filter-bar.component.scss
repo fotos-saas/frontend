@@ -133,9 +133,9 @@
   animation: sortFadeIn 0.15s ease;
 }
 
-// === MOBILE SORT BAR ===
+// === SORT BAR ===
 .mobile-sort-bar {
-  display: none;
+  display: block;
   padding: 12px;
   background: get-color('slate', 50);
   border-radius: 10px;
@@ -296,9 +296,7 @@
     display: flex;
   }
 
-  .mobile-sort-bar {
-    display: block;
-  }
+  // .mobile-sort-bar: már alapból block
 }
 
 // === REDUCED MOTION ===

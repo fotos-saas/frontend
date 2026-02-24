@@ -265,6 +265,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     hide: () =>
       ipcRenderer.invoke('overlay:hide') as Promise<{ success: boolean }>,
+    showMainWindow: () =>
+      ipcRenderer.invoke('overlay:show-main-window') as Promise<{ success: boolean }>,
     setIgnoreMouseEvents: (ignore: boolean) =>
       ipcRenderer.send('overlay:set-ignore-mouse', ignore),
     onCommand: (callback: (commandId: string) => void): CleanupFn => {

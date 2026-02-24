@@ -93,6 +93,7 @@ interface OverlayAPI {
   setContext: (ctx: OverlayContext) => Promise<{ success: boolean; error?: string }>;
   onContextChanged: (callback: (ctx: OverlayContext) => void) => CleanupFn;
   hide: () => Promise<{ success: boolean }>;
+  showMainWindow: () => Promise<{ success: boolean }>;
   setIgnoreMouseEvents: (ignore: boolean) => void;
   onCommand: (callback: (commandId: string) => void) => CleanupFn;
   getActiveDoc: () => Promise<ActiveDocInfo>;

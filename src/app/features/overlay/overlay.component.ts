@@ -89,6 +89,9 @@ export class OverlayComponent implements OnInit {
   private static readonly PANEL_MIN_H = 200;
   private static readonly PANEL_MAX_H_OFFSET = 120; // toolbar + padding + margó
 
+  // Auth state — ha 401 jön, login gomb jelenik meg
+  readonly isLoggedOut = signal(false);
+
   // v2 — PS layer-alapú batch upload
   readonly psLayers = signal<PsLayerPerson[]>([]);
   readonly batchUploading = signal(false);
@@ -599,6 +602,7 @@ export class OverlayComponent implements OnInit {
             const personsList = res.data || [];
             this.persons.set(personsList);
             this.loadingPersons.set(false);
+            this.isLoggedOut.set(false);
             // PS layerek enrichelése az új személylistával
             const current = this.psLayers();
             if (current.length > 0 && personsList.length > 0) {
@@ -606,8 +610,13 @@ export class OverlayComponent implements OnInit {
             }
           });
         },
-        error: () => {
-          this.ngZone.run(() => this.loadingPersons.set(false));
+        error: (err) => {
+          this.ngZone.run(() => {
+            this.loadingPersons.set(false);
+            if (err.status === 401 || err.status === 419) {
+              this.isLoggedOut.set(true);
+            }
+          });
         },
       });
   }
@@ -696,6 +705,10 @@ export class OverlayComponent implements OnInit {
     window.electronAPI?.overlay.hide();
   }
 
+  showLogin(): void {
+    window.electronAPI?.overlay.showMainWindow();
+  }
+
   openActiveDocDir(): void {
     this.onCommand('ps-open-workdir');
   }
@@ -738,8 +751,11 @@ export class OverlayComponent implements OnInit {
       this.ngZone.run(() => {
         this.context.set(ctx);
         this.syncWithBorder.set(this.loadSyncBorderForProject(ctx.projectId));
-        // Uj projekt → szemely lista ujratoltese
-        if (ctx.projectId && this.uploadPanelOpen()) {
+        // Context change → auth recovery próba
+        if (this.isLoggedOut() && ctx.projectId) {
+          this.isLoggedOut.set(false);
+          this.loadPersons(ctx.projectId);
+        } else if (ctx.projectId && this.uploadPanelOpen()) {
           this.loadPersons(ctx.projectId);
         }
       });
@@ -783,6 +799,12 @@ export class OverlayComponent implements OnInit {
 
   private async pollActiveDoc(): Promise<void> {
     if (!window.electronAPI) return;
+
+    // Ha kijelentkezve vagyunk, periodikusan próbáljuk a visszaállítást
+    if (this.isLoggedOut()) {
+      this.tryAuthRecovery();
+    }
+
     try {
       const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
       if (result.success && result.output) {
@@ -800,6 +822,15 @@ export class OverlayComponent implements OnInit {
         }
       }
     } catch { /* PS nem elerheto — skip */ }
+  }
+
+  private tryAuthRecovery(): void {
+    const pid = this.context().projectId;
+    if (!pid) return;
+    // Próbáljuk meg betölteni a személyeket — ha sikerül, a loadPersons reseteli az isLoggedOut-ot
+    if (!this.loadingPersons()) {
+      this.loadPersons(pid);
+    }
   }
 
   private updatePsLayersFromDoc(doc: ActiveDocInfo): void {

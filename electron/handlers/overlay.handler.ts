@@ -92,6 +92,22 @@ export function registerOverlayHandlers(
     }
   });
 
+  // Fo ablak megmutatasa es fokuszalasa (pl. login szukseges)
+  ipcMain.handle('overlay:show-main-window', async () => {
+    try {
+      const mainWindow = getMainWindow();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.show();
+        mainWindow.focus();
+      }
+      return { success: true };
+    } catch (error) {
+      log.error('Show main window failed:', error);
+      return { success: false, error: 'Show failed' };
+    }
+  });
+
   // Aktiv PS dokumentum lekerdezese (cached)
   ipcMain.handle('overlay:get-active-doc', async () => {
     return lastActiveDoc;

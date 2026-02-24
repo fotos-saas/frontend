@@ -17,111 +17,120 @@
   <!-- Separator after drag -->
   <div class="toolbar__sep"></div>
 
-  <!-- Toolbar groups -->
-  @for (group of groups(); track group.id; let last = $last) {
-    @for (item of group.items; track item.id) {
-      <div class="toolbar__btn-wrap">
-        <button
-          class="toolbar__btn"
-          [class.toolbar__btn--green]="item.accent === 'green'"
-          [class.toolbar__btn--purple]="item.accent === 'purple'"
-          [class.toolbar__btn--amber]="item.accent === 'amber'"
-          [class.toolbar__btn--red]="item.accent === 'red'"
-          [class.toolbar__btn--blue]="item.accent === 'blue'"
-          [class.toolbar__btn--busy]="busyCommand() === item.id"
-          [class.toolbar__btn--active]="openSubmenu() === item.id || (item.id === 'upload-photo' && uploadPanelOpen())"
-          [disabled]="busyCommand() === item.id"
-          (click)="onCommand(item.id)"
-          [attr.data-tip]="item.label"
-        >
-          @if (busyCommand() === item.id) {
-            <span class="toolbar__spinner"></span>
-          } @else {
-            <lucide-icon [name]="item.icon" [size]="18" />
+  @if (isLoggedOut()) {
+    <!-- Logged out: login gomb -->
+    <button class="toolbar__btn toolbar__btn--login" (click)="showLogin()" data-tip="Bejelentkezés szükséges">
+      <lucide-icon [name]="ICONS.LOG_IN" [size]="16" />
+    </button>
+    <span class="toolbar__login-label" (click)="showLogin()">Bejelentkezés</span>
+    <div class="toolbar__spacer"></div>
+  } @else {
+    <!-- Toolbar groups -->
+    @for (group of groups(); track group.id; let last = $last) {
+      @for (item of group.items; track item.id) {
+        <div class="toolbar__btn-wrap">
+          <button
+            class="toolbar__btn"
+            [class.toolbar__btn--green]="item.accent === 'green'"
+            [class.toolbar__btn--purple]="item.accent === 'purple'"
+            [class.toolbar__btn--amber]="item.accent === 'amber'"
+            [class.toolbar__btn--red]="item.accent === 'red'"
+            [class.toolbar__btn--blue]="item.accent === 'blue'"
+            [class.toolbar__btn--busy]="busyCommand() === item.id"
+            [class.toolbar__btn--active]="openSubmenu() === item.id || (item.id === 'upload-photo' && uploadPanelOpen())"
+            [disabled]="busyCommand() === item.id"
+            (click)="onCommand(item.id)"
+            [attr.data-tip]="item.label"
+          >
+            @if (busyCommand() === item.id) {
+              <span class="toolbar__spinner"></span>
+            } @else {
+              <lucide-icon [name]="item.icon" [size]="18" />
+            }
+          </button>
+
+          <!-- Inline collapse: sync-photos opciók -->
+          @if (item.id === 'sync-photos') {
+            <div
+              class="toolbar__inline-collapse"
+              [class.toolbar__inline-collapse--open]="openSubmenu() === 'sync-photos'"
+            >
+              <div class="toolbar__inline-collapse-inner">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing')" data-tip="Csak hiányzó">
+                  <lucide-icon [name]="ICONS.USER_X" [size]="15" />
+                </button>
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all')" data-tip="Mind">
+                  <lucide-icon [name]="ICONS.IMAGES" [size]="15" />
+                </button>
+                <div class="toolbar__collapse-sep"></div>
+                <button
+                  class="toolbar__btn toolbar__btn--sm"
+                  [class.toolbar__btn--toggle-on]="syncWithBorder()"
+                  (click)="toggleSyncBorder()"
+                  [attr.data-tip]="syncWithBorder() ? 'Keret: BE' : 'Keret: KI'"
+                >
+                  <lucide-icon [name]="ICONS.FRAME" [size]="15" />
+                </button>
+              </div>
+            </div>
           }
-        </button>
 
-        <!-- Inline collapse: sync-photos opciók -->
-        @if (item.id === 'sync-photos') {
-          <div
-            class="toolbar__inline-collapse"
-            [class.toolbar__inline-collapse--open]="openSubmenu() === 'sync-photos'"
-          >
-            <div class="toolbar__inline-collapse-inner">
-              <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing')" data-tip="Csak hiányzó">
-                <lucide-icon [name]="ICONS.USER_X" [size]="15" />
-              </button>
-              <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all')" data-tip="Mind">
-                <lucide-icon [name]="ICONS.IMAGES" [size]="15" />
-              </button>
-              <div class="toolbar__collapse-sep"></div>
-              <button
-                class="toolbar__btn toolbar__btn--sm"
-                [class.toolbar__btn--toggle-on]="syncWithBorder()"
-                (click)="toggleSyncBorder()"
-                [attr.data-tip]="syncWithBorder() ? 'Keret: BE' : 'Keret: KI'"
-              >
-                <lucide-icon [name]="ICONS.FRAME" [size]="15" />
-              </button>
+          <!-- Inline collapse: arrange-names text align opciók -->
+          @if (item.id === 'arrange-names') {
+            <div
+              class="toolbar__inline-collapse"
+              [class.toolbar__inline-collapse--open]="openSubmenu() === 'arrange-names'"
+            >
+              <div class="toolbar__inline-collapse-inner">
+                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('left')" data-tip="Balra">
+                  <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="15" />
+                </button>
+                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('center')" data-tip="Középre">
+                  <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="15" />
+                </button>
+                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('right')" data-tip="Jobbra">
+                  <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="15" />
+                </button>
+              </div>
             </div>
-          </div>
-        }
-
-        <!-- Inline collapse: arrange-names text align opciók -->
-        @if (item.id === 'arrange-names') {
-          <div
-            class="toolbar__inline-collapse"
-            [class.toolbar__inline-collapse--open]="openSubmenu() === 'arrange-names'"
-          >
-            <div class="toolbar__inline-collapse-inner">
-              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('left')" data-tip="Balra">
-                <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="15" />
-              </button>
-              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('center')" data-tip="Középre">
-                <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="15" />
-              </button>
-              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('right')" data-tip="Jobbra">
-                <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="15" />
-              </button>
-            </div>
-          </div>
-        }
-      </div>
+          }
+        </div>
+      }
+      @if (!last) {
+        <div class="toolbar__sep"></div>
+      }
     }
-    @if (!last) {
+
+    <!-- Spacer -->
+    <div class="toolbar__spacer"></div>
+
+    <!-- Active document + selected layers + turbo -->
+    @if (activeDocLabel()) {
+      <button
+        class="toolbar__doc"
+        (click)="openActiveDocDir()"
+        [attr.data-tip]="activeDoc().name"
+      >
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
+        <span class="toolbar__doc-name">{{ activeDocLabel() }}</span>
+      </button>
+      <span class="toolbar__info">
+        <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
+        {{ selectedLayers() }}
+      </span>
       <div class="toolbar__sep"></div>
     }
-  }
 
-  <!-- Spacer -->
-  <div class="toolbar__spacer"></div>
-
-  <!-- Active document + selected layers + turbo -->
-  @if (activeDocLabel()) {
+    <!-- Turbo gomb -->
     <button
-      class="toolbar__doc"
-      (click)="openActiveDocDir()"
-      [attr.data-tip]="activeDoc().name"
+      class="toolbar__btn"
+      [class.toolbar__btn--turbo-active]="isTurbo()"
+      (click)="toggleTurbo()"
+      [attr.data-tip]="isTurbo() ? 'Turbo kikapcsolás' : 'Turbo polling'"
     >
-      <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
-      <span class="toolbar__doc-name">{{ activeDocLabel() }}</span>
+      <lucide-icon [name]="ICONS.ZAPS" [size]="16" />
     </button>
-    <span class="toolbar__info">
-      <lucide-icon [name]="ICONS.LAYERS" [size]="12" />
-      {{ selectedLayers() }}
-    </span>
-    <div class="toolbar__sep"></div>
   }
-
-  <!-- Turbo gomb -->
-  <button
-    class="toolbar__btn"
-    [class.toolbar__btn--turbo-active]="isTurbo()"
-    (click)="toggleTurbo()"
-    [attr.data-tip]="isTurbo() ? 'Turbo kikapcsolás' : 'Turbo polling'"
-  >
-    <lucide-icon [name]="ICONS.ZAPS" [size]="16" />
-  </button>
 
   <!-- Hide button -->
   <button class="toolbar__btn toolbar__btn--close" (click)="hide()" data-tip="Elrejtés (Ctrl+K)">

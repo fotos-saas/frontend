@@ -287,6 +287,7 @@ export const ICONS = {
   FILE_SPREADSHEET: 'file-spreadsheet',
 
   // Client / Auth
+  LOG_IN: 'log-in',
   LOGOUT: 'log-out',
   IMAGES: 'images',
   SAVE: 'save',

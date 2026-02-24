@@ -175,6 +175,12 @@
     height: 28px;
     &:hover { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
   }
+
+  &--login {
+    color: #fbbf24;
+    animation: turbo-pulse 1.5s ease-in-out infinite;
+    &:hover { background: rgba(251, 191, 36, 0.15); color: #fcd34d; }
+  }
 }
 
 @keyframes turbo-pulse {
@@ -259,6 +265,20 @@
   background: rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
   margin: 0 2px;
+}
+
+/* Login label (kijelentkezés után) */
+.toolbar__login-label {
+  color: #fbbf24;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-app-region: no-drag;
+  transition: color 0.15s;
+
+  &:hover { color: #fcd34d; }
 }
 
 /* Spinner */

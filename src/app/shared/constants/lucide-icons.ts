@@ -231,6 +231,7 @@ import {
   SquareDashedBottom,
   Component,
   Blend,
+  LogIn,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -458,4 +459,5 @@ export const LUCIDE_ICONS_MAP = {
   SquareDashedBottom,
   Component,
   Blend,
+  LogIn,
 };

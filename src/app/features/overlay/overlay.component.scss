@@ -1,15 +1,23 @@
 :host {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
+  display: block;
+  position: relative;
   width: 100%;
   height: 100%;
-  padding: 30px;
   box-sizing: border-box;
   background: transparent;
   user-select: none;
   pointer-events: none;
+}
+
+// Wrapper ami a toolbart + panelt tartja — toolbar alja fix pozícióban
+.toolbar-anchor {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 // ============ Toolbar ============

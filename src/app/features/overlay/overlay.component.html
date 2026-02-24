@@ -27,7 +27,7 @@
           [class.toolbar__btn--active]="openSubmenu() === item.id"
           [disabled]="busyCommand() === item.id"
           (click)="onCommand(item.id)"
-          [title]="item.tooltip || item.label"
+          [attr.data-tip]="item.label"
         >
           @if (busyCommand() === item.id) {
             <span class="toolbar__spinner"></span>
@@ -43,13 +43,13 @@
             [class.toolbar__inline-collapse--open]="openSubmenu() === 'arrange-names'"
           >
             <div class="toolbar__inline-collapse-inner">
-              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('left')" title="Balra igazitas">
+              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('left')" data-tip="Balra">
                 <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="15" />
               </button>
-              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('center')" title="Kozepre igazitas">
+              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('center')" data-tip="Középre">
                 <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="15" />
               </button>
-              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('right')" title="Jobbra igazitas">
+              <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('right')" data-tip="Jobbra">
                 <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="15" />
               </button>
             </div>
@@ -70,7 +70,7 @@
     <button
       class="toolbar__doc"
       (click)="openActiveDocDir()"
-      [title]="activeDoc().path ?? ''"
+      [attr.data-tip]="activeDoc().name"
     >
       <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
       <span class="toolbar__doc-name">{{ activeDocLabel() }}</span>
@@ -87,13 +87,13 @@
     class="toolbar__btn"
     [class.toolbar__btn--turbo-active]="isTurbo()"
     (click)="toggleTurbo()"
-    [title]="isTurbo() ? 'Turbo aktiv (1mp) — katt a kikapcsolashoz' : 'Turbo polling (1mp / 2 percig)'"
+    [attr.data-tip]="isTurbo() ? 'Turbo kikapcsolás' : 'Turbo polling'"
   >
     <lucide-icon [name]="ICONS.ZAPS" [size]="16" />
   </button>
 
   <!-- Hide button -->
-  <button class="toolbar__btn toolbar__btn--close" (click)="hide()" title="Elrejtes (Ctrl+K)">
+  <button class="toolbar__btn toolbar__btn--close" (click)="hide()" data-tip="Elrejtés (Ctrl+K)">
     <lucide-icon [name]="ICONS.X" [size]="16" />
   </button>
 </div>

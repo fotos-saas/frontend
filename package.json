@@ -65,7 +65,6 @@
     "@capacitor/splash-screen": "^6.0.4",
     "@capacitor/status-bar": "^6.0.3",
     "@capgo/capacitor-updater": "^6.42.3",
-    "@img/sharp-darwin-arm64": "^0.34.5",
     "@sentry/angular": "^10.38.0",
     "@sentry/electron": "^7.7.1",
     "capacitor-native-biometric": "^4.2.2",

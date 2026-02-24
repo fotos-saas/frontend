@@ -8,6 +8,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
 import { environment } from '../../../environments/environment';
+import { OverlayUploadService, PsLayerPerson, BatchProgress } from './overlay-upload.service';
 
 interface ToolbarItem {
   id: string;
@@ -34,7 +35,7 @@ interface PersonItem {
 interface UploadResult {
   success: boolean;
   message?: string;
-  photo?: { thumbUrl: string };
+  photo?: { thumbUrl: string; url?: string };
 }
 
 const POLL_NORMAL = 5000;
@@ -47,6 +48,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   selector: 'app-overlay',
   standalone: true,
   imports: [LucideAngularModule],
+  providers: [OverlayUploadService],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +61,7 @@ export class OverlayComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
   private readonly http = inject(HttpClient);
+  private readonly uploadService = inject(OverlayUploadService);
 
   readonly context = signal<OverlayContext>({ mode: 'normal' });
   readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
@@ -85,6 +88,22 @@ export class OverlayComponent implements OnInit {
 
   private static readonly PANEL_MIN_H = 200;
   private static readonly PANEL_MAX_H_OFFSET = 120; // toolbar + padding + margó
+
+  // v2 — PS layer-alapú batch upload
+  readonly psLayers = signal<PsLayerPerson[]>([]);
+  readonly batchUploading = signal(false);
+  readonly batchProgress = signal<BatchProgress>({ done: 0, total: 0 });
+  readonly placing = signal(false);
+  readonly unmatchedFiles = signal<File[]>([]);
+  readonly batchResult = signal<{ success: boolean; message: string } | null>(null);
+
+  readonly hasPsLayers = computed(() => this.psLayers().length > 0);
+  readonly uploadableLayers = computed(() =>
+    this.psLayers().filter(l => l.file && l.uploadStatus !== 'done')
+  );
+  readonly placableLayers = computed(() =>
+    this.psLayers().filter(l => l.uploadStatus === 'done' && l.photoUrl)
+  );
 
   readonly filteredPersons = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -296,6 +315,7 @@ export class OverlayComponent implements OnInit {
     if (pid && this.persons().length === 0) {
       this.loadPersons(pid);
     }
+    this.loadPsLayers();
   }
 
   closeUploadPanel(): void {
@@ -304,6 +324,7 @@ export class OverlayComponent implements OnInit {
     this.selectedFile.set(null);
     this.uploadResult.set(null);
     this.searchQuery.set('');
+    this.batchResult.set(null);
   }
 
   // ============ Resize panel ============
@@ -372,7 +393,12 @@ export class OverlayComponent implements OnInit {
     event.stopPropagation();
     this.dragOver.set(false);
     const files = event.dataTransfer?.files;
-    if (files?.length) {
+    if (!files?.length) return;
+
+    // v2 mód: ha vannak PS layerek, batch matching
+    if (this.hasPsLayers()) {
+      this.matchDroppedFiles(files);
+    } else {
       this.setFile(files[0]);
     }
   }
@@ -421,6 +447,120 @@ export class OverlayComponent implements OnInit {
       });
   }
 
+  // ============ v2 — PS Layer batch upload ============
+
+  refreshPsLayers(): void {
+    this.loadPsLayers();
+  }
+
+  matchDroppedFiles(fileList: FileList): void {
+    const files: File[] = [];
+    for (let i = 0; i < fileList.length; i++) {
+      const f = fileList[i];
+      if (ALLOWED_TYPES.includes(f.type) && f.size <= MAX_FILE_SIZE) {
+        files.push(f);
+      }
+    }
+    if (files.length === 0) return;
+
+    const { matched, unmatched } = this.uploadService.matchFilesToLayers(files, this.psLayers());
+    this.psLayers.set(matched);
+    this.unmatchedFiles.set(unmatched);
+    this.batchResult.set(null);
+  }
+
+  assignFileToLayer(layerIndex: number, file: File): void {
+    this.psLayers.update(layers =>
+      layers.map((l, i) => i === layerIndex ? { ...l, file } : l)
+    );
+    this.unmatchedFiles.update(files => files.filter(f => f !== file));
+  }
+
+  removeFileFromLayer(layerIndex: number): void {
+    const layer = this.psLayers()[layerIndex];
+    if (!layer?.file) return;
+    const removedFile = layer.file;
+    this.psLayers.update(layers =>
+      layers.map((l, i) => i === layerIndex ? { ...l, file: undefined } : l)
+    );
+    this.unmatchedFiles.update(files => [...files, removedFile]);
+  }
+
+  batchUpload(): void {
+    const pid = this.context().projectId;
+    if (!pid || this.batchUploading()) return;
+
+    this.batchUploading.set(true);
+    this.batchResult.set(null);
+    this.batchProgress.set({ done: 0, total: this.uploadableLayers().length });
+
+    this.uploadService.uploadBatch(
+      pid,
+      this.psLayers(),
+      (progress) => this.ngZone.run(() => this.batchProgress.set(progress)),
+      (index, update) => this.ngZone.run(() => {
+        this.psLayers.update(layers =>
+          layers.map((l, i) => i === index ? { ...l, ...update } : l)
+        );
+      }),
+    ).pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.ngZone.run(() => {
+            this.psLayers.set(updated);
+            this.batchUploading.set(false);
+            const doneCount = updated.filter(l => l.uploadStatus === 'done').length;
+            const errCount = updated.filter(l => l.uploadStatus === 'error').length;
+            this.batchResult.set({
+              success: errCount === 0,
+              message: errCount > 0
+                ? `${doneCount} sikeres, ${errCount} hibás`
+                : `${doneCount} fotó feltöltve`,
+            });
+          });
+        },
+        error: () => {
+          this.ngZone.run(() => this.batchUploading.set(false));
+        },
+      });
+  }
+
+  async placeInPs(): Promise<void> {
+    this.placing.set(true);
+    this.batchResult.set(null);
+    const result = await this.uploadService.placePhotosInPs(this.psLayers());
+    this.ngZone.run(() => {
+      this.placing.set(false);
+      this.batchResult.set({
+        success: result.success,
+        message: result.success
+          ? 'Fotók behelyezve a Photoshopba'
+          : (result.error || 'Hiba a behelyezés során'),
+      });
+    });
+  }
+
+  private async loadPsLayers(): Promise<void> {
+    if (!window.electronAPI) return;
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
+      if (result.success && result.output) {
+        const cleaned = result.output.trim();
+        if (cleaned.startsWith('{')) {
+          const doc: ActiveDocInfo = JSON.parse(cleaned);
+          const names = doc.selectedLayerNames || [];
+          const parsed = this.uploadService.parseLayerNames(names);
+          if (parsed.length > 0 && this.persons().length > 0) {
+            const enriched = this.uploadService.enrichWithPersons(parsed, this.persons());
+            this.ngZone.run(() => this.psLayers.set(enriched));
+          } else {
+            this.ngZone.run(() => this.psLayers.set(parsed));
+          }
+        }
+      }
+    } catch { /* PS nem elérhető */ }
+  }
+
   // ============ Private helpers ============
 
   private setFile(file: File): void {
@@ -445,8 +585,14 @@ export class OverlayComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.ngZone.run(() => {
-            this.persons.set(res.data || []);
+            const personsList = res.data || [];
+            this.persons.set(personsList);
             this.loadingPersons.set(false);
+            // PS layerek enrichelése az új személylistával
+            const current = this.psLayers();
+            if (current.length > 0 && personsList.length > 0) {
+              this.psLayers.set(this.uploadService.enrichWithPersons(current, personsList));
+            }
           });
         },
         error: () => {

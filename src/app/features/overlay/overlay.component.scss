@@ -679,6 +679,172 @@
   lucide-icon { margin-bottom: 6px; }
 }
 
+// ---- v2: Refresh gomb a header-ben ----
+.upload-panel__refresh {
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: 4px;
+  transition: all 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #34d399;
+  }
+}
+
+// ---- v2: Batch drop zona ----
+.upload-panel__drop--batch {
+  min-height: 44px;
+  flex: none;
+  margin-bottom: 6px;
+  flex-direction: row;
+
+  lucide-icon { margin-bottom: 0; margin-right: 6px; }
+  span { font-size: 11px; }
+}
+
+// ---- v2: Layer lista ----
+.upload-panel__layer-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    &:hover { background: rgba(255, 255, 255, 0.2); }
+  }
+}
+
+.upload-panel__layer-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  color: #c0c0d0;
+  transition: background 0.12s;
+
+  &:hover { background: rgba(255, 255, 255, 0.03); }
+
+  &--done { background: rgba(34, 197, 94, 0.06); }
+  &--error { background: rgba(239, 68, 68, 0.06); }
+  &--uploading { background: rgba(99, 102, 241, 0.06); }
+}
+
+.upload-panel__layer-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.upload-panel__layer-file {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  color: #888;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.upload-panel__layer-no-file { color: #555; }
+
+.upload-panel__layer-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 4px;
+  flex-shrink: 0;
+
+  &:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+}
+
+.upload-panel__layer-status {
+  width: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-panel__status--done { color: #22c55e; }
+.upload-panel__status--error { color: #ef4444; }
+.upload-panel__status--pending { color: #555; font-size: 10px; }
+
+// ---- v2: Nem párosított fájlok ----
+.upload-panel__unmatched {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 4px 6px;
+  margin-top: 4px;
+  font-size: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #888;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.upload-panel__unmatched-label {
+  color: #fbbf24;
+  margin-right: 6px;
+  font-weight: 500;
+}
+
+.upload-panel__unmatched-file {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin: 1px 2px;
+}
+
+// ---- v2: Batch akció gombok ----
+.upload-panel__batch-actions {
+  display: flex;
+  margin-top: 6px;
+
+  .upload-panel__btn {
+    flex: 1;
+
+    &:first-child { margin-right: 4px; }
+    &:last-child { margin-left: 4px; }
+  }
+}
+
+.upload-panel__btn--green {
+  background: #22c55e;
+  &:hover:not(:disabled) { background: #16a34a; }
+}
+
 // ============ Reduced Motion ============
 @media (prefers-reduced-motion: reduce) {
   * {

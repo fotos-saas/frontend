@@ -84,6 +84,7 @@ export interface ActiveDocInfo {
   path: string | null;
   dir: string | null;
   selectedLayers?: number;
+  selectedLayerNames?: string[];
 }
 
 interface OverlayAPI {

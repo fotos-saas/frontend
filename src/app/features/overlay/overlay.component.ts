@@ -353,10 +353,8 @@ export class OverlayComponent implements OnInit {
   }
 
   cycleOpacity(): void {
-    const steps = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30];
-    const current = this.sampleWatermarkOpacity();
-    const idx = steps.findIndex(s => Math.abs(s - current) < 0.01);
-    const next = steps[(idx + 1) % steps.length];
+    const pct = Math.round(this.sampleWatermarkOpacity() * 100);
+    const next = (pct >= 23 ? 10 : pct + 1) / 100;
     this.sampleWatermarkOpacity.set(next);
     window.electronAPI?.sample.setSettings({ watermarkOpacity: next });
   }

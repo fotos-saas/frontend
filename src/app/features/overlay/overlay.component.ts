@@ -95,7 +95,6 @@ export class OverlayComponent implements OnInit {
       id: 'layers',
       designerOnly: true,
       items: [
-        { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Foto feltoltese', accent: 'green' },
         { id: 'link-layers', icon: ICONS.LINK, label: 'Osszelinkelés' },
         { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés' },
         { id: 'extra-names', icon: ICONS.FILE_TEXT, label: 'Extra nevek' },
@@ -104,6 +103,7 @@ export class OverlayComponent implements OnInit {
     {
       id: 'photoshop',
       items: [
+        { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Foto feltoltese', accent: 'green' },
         { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotok szinkronizalasa', accent: 'green' },
         { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazitasa', tooltip: 'Nevek a kepek ala (kijelolt kepeknel csak azokat, egyebkent mindet). Unlinkeli a parokat.', accent: 'purple' },
         { id: 'link-layers', icon: ICONS.LINK, label: 'Osszelinkelés', tooltip: 'Kijelolt layerek osszelinkelese az azonos nevu tarsaikkal' },

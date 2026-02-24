@@ -246,7 +246,7 @@ export class OverlayComponent implements OnInit {
 
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    if (!target.closest('.toolbar') && !target.closest('.upload-panel')) {
+    if (!target.closest('.toolbar-wrap')) {
       if (this.openSubmenu()) this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
     }

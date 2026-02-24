@@ -8,11 +8,19 @@
 }
 
 // ============ Toolbar ============
-.toolbar {
+// Wrapper — fix pozícióban tartja toolbar + panelt
+.toolbar-wrap {
   position: fixed;
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.toolbar {
   display: flex;
   align-items: center;
   height: 52px;
@@ -304,24 +312,20 @@
 // ============ Upload Panel ============
 .upload-panel {
   pointer-events: auto;
-  position: fixed;
-  bottom: 82px; // 30px padding + 52px toolbar
-  left: 50%;
-  transform: translateX(-50%);
-  width: 520px;
+  order: -1; // panel a toolbar felett
   background: #1e1e3a;
   border: 1px solid rgba(167, 139, 250, 0.2);
   border-bottom: none;
   border-radius: 12px 12px 0 0;
-  animation: panel-slide-down 0.2s ease-out;
+  animation: panel-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-font-smoothing: antialiased;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes panel-slide-down {
+@keyframes panel-slide-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;

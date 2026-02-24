@@ -164,7 +164,7 @@
         <h3>Teszt eredmény</h3>
         <div class="test-results__row" [class.test-results__row--ok]="result.smtp.ok" [class.test-results__row--fail]="!result.smtp.ok">
           <lucide-icon [name]="result.smtp.ok ? ICONS.CHECK_CIRCLE : ICONS.X_CIRCLE" [size]="16" />
-          <span>SMTP: {{ result.smtp.ok ? 'Sikeres' : result.smtp.error }}</span>
+          <span>SMTP: {{ result.smtp.ok ? 'Sikeres' : result.smtp.error }}{{ result.smtp.info }}</span>
         </div>
         <div class="test-results__row" [class.test-results__row--ok]="result.imap.ok" [class.test-results__row--fail]="!result.imap.ok">
           <lucide-icon [name]="result.imap.ok ? ICONS.CHECK_CIRCLE : ICONS.X_CIRCLE" [size]="16" />

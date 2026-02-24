@@ -701,7 +701,7 @@ export interface PartnerEmailAccount {
  * E-mail fiók teszt eredmény
  */
 export interface EmailAccountTestResult {
-  smtp: { ok: boolean; error: string | null };
+  smtp: { ok: boolean; error: string | null; info?: string | null };
   imap: { ok: boolean; error: string | null };
 }
 

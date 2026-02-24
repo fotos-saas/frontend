@@ -36,6 +36,32 @@
           }
         </button>
 
+        <!-- Inline collapse: sync-photos opciók -->
+        @if (item.id === 'sync-photos') {
+          <div
+            class="toolbar__inline-collapse"
+            [class.toolbar__inline-collapse--open]="openSubmenu() === 'sync-photos'"
+          >
+            <div class="toolbar__inline-collapse-inner">
+              <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing')" data-tip="Csak hiányzó">
+                <lucide-icon [name]="ICONS.USER_X" [size]="15" />
+              </button>
+              <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all')" data-tip="Mind">
+                <lucide-icon [name]="ICONS.IMAGES" [size]="15" />
+              </button>
+              <div class="toolbar__collapse-sep"></div>
+              <button
+                class="toolbar__btn toolbar__btn--sm"
+                [class.toolbar__btn--toggle-on]="syncWithBorder()"
+                (click)="toggleSyncBorder()"
+                [attr.data-tip]="syncWithBorder() ? 'Keret: BE' : 'Keret: KI'"
+              >
+                <lucide-icon [name]="ICONS.FRAME" [size]="15" />
+              </button>
+            </div>
+          </div>
+        }
+
         <!-- Inline collapse: arrange-names text align opciók -->
         @if (item.id === 'arrange-names') {
           <div

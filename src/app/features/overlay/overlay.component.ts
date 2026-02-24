@@ -168,8 +168,11 @@ export class OverlayComponent implements OnInit {
     'align-bottom': 'bottom',
   };
 
-  /** Submenu-s gombok: kattintasra popup nyilik */
-  private static readonly SUBMENU_IDS = new Set(['arrange-names']);
+  /** Submenu-s gombok: kattintasra inline collapse nyilik */
+  private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos']);
+
+  /** Keret toggle szinkronizáláshoz */
+  readonly syncWithBorder = signal(true);
 
   onCommand(commandId: string): void {
     // Submenu-s gomb → inline collapse toggle
@@ -210,6 +213,21 @@ export class OverlayComponent implements OnInit {
   arrangeNames(textAlign: string): void {
     this.closeSubmenu();
     this.runJsxAction('arrange-names', 'actions/arrange-names-selected.jsx', { TEXT_ALIGN: textAlign });
+  }
+
+  /** Fotó szinkronizálás — mind vagy csak hiányzó */
+  syncPhotos(mode: 'all' | 'missing'): void {
+    this.closeSubmenu();
+    const commandId = mode === 'missing' ? 'sync-photos-missing' : 'sync-photos';
+    window.electronAPI?.overlay.executeCommand(commandId);
+  }
+
+  /** Keret toggle */
+  toggleSyncBorder(): void {
+    this.syncWithBorder.update(v => !v);
+    window.electronAPI?.overlay.executeCommand(
+      this.syncWithBorder() ? 'sync-border-on' : 'sync-border-off',
+    );
   }
 
   /** Click-through: atlatszo terulet atenged kattintast a mogotte levo appnak */

@@ -295,7 +295,7 @@
   transition: max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
   &--open {
-    max-width: 120px;
+    max-width: 150px;
   }
 }
 
@@ -310,6 +310,19 @@
 .toolbar__btn--sm {
   width: 28px;
   height: 28px;
+}
+
+.toolbar__btn--toggle-on {
+  background: rgba(52, 211, 153, 0.2) !important;
+  color: #34d399 !important;
+}
+
+.toolbar__collapse-sep {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+  margin: 0 2px;
 }
 
 /* Spinner */

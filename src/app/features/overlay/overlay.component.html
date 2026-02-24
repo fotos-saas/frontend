@@ -147,12 +147,6 @@
   </div>
 
   <div class="upload-panel__body">
-    @if (!context().projectId) {
-      <div class="upload-panel__empty">
-        <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
-        <span>Nyiss meg egy projektet a feltöltéshez</span>
-      </div>
-    } @else {
       <!-- v2: PS Layer mód (ha vannak kijelölt layerek slug---id formatummal) -->
       @if (hasPsLayers()) {
         <!-- Drop zóna -->
@@ -371,7 +365,6 @@
           </div>
         </div>
       }
-    }
   </div>
 </div>
 }

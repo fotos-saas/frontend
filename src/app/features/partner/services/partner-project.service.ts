@@ -270,6 +270,29 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/override-photo`, { photo_id: null });
   }
 
+  /**
+   * Személyek hozzáadása névlista alapján
+   */
+  addPersons(projectId: number, names: string, type: 'student' | 'teacher'): Observable<{
+    success: boolean;
+    message: string;
+    data: {
+      created: Array<{ id: number; name: string; type: string; archiveLinked: boolean; hasPhoto: boolean }>;
+      duplicates: string[];
+      archiveMatches: number;
+    };
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: {
+        created: Array<{ id: number; name: string; type: string; archiveLinked: boolean; hasPhoto: boolean }>;
+        duplicates: string[];
+        archiveMatches: number;
+      };
+    }>(`${this.baseUrl}/projects/${projectId}/persons/add`, { names, type });
+  }
+
   // ============================================
   // AUTOCOMPLETE
   // ============================================

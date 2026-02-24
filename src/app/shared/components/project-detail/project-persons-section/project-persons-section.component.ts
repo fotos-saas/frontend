@@ -18,6 +18,7 @@ export class ProjectPersonsSectionComponent {
   readonly openPersonsModal = output<'student' | 'teacher' | undefined>();
   readonly openUploadWizard = output<'students' | 'teachers'>();
   readonly downloadPendingZip = output<void>();
+  readonly addPersons = output<'student' | 'teacher'>();
 
   readonly isPreliminary = computed(() => this.project().isPreliminary ?? false);
   readonly pendingStudentPhotos = computed(() => this.project().pendingStudentPhotos ?? 0);

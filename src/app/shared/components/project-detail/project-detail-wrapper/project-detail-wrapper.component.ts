@@ -108,6 +108,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly projectEditModalContainer = viewChild('projectEditModalContainer', { read: ViewContainerRef });
   private readonly orderDataDialogContainer = viewChild('orderDataDialogContainer', { read: ViewContainerRef });
   private readonly personsModalContainer = viewChild('personsModalContainer', { read: ViewContainerRef });
+  private readonly addPersonsDialogContainer = viewChild('addPersonsDialogContainer', { read: ViewContainerRef });
   private readonly uploadWizardContainer = viewChild('uploadWizardContainer', { read: ViewContainerRef });
   private readonly selectionDownloadContainer = viewChild('selectionDownloadContainer', { read: ViewContainerRef });
   private readonly orderWizardContainer = viewChild('orderWizardContainer', { read: ViewContainerRef });
@@ -286,6 +287,26 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     ref.instance.openUploadWizard.subscribe((personType) => {
       container.clear();
       this.openUploadWizardDialog(personType === 'student' ? 'students' : 'teachers');
+    });
+    ref.instance.addPersonsRequested.subscribe((type) => {
+      this.openAddPersonsDialog(type);
+    });
+  }
+
+  async openAddPersonsDialog(type: 'student' | 'teacher'): Promise<void> {
+    const container = this.addPersonsDialogContainer();
+    if (!container || !this.projectData()) return;
+
+    container.clear();
+    const { AddPersonsDialogComponent } = await import(
+      '../../../../features/partner/components/add-persons-dialog/add-persons-dialog.component'
+    );
+    const ref = container.createComponent(AddPersonsDialogComponent);
+    ref.setInput('projectId', this.projectData()!.id);
+    ref.setInput('type', type);
+    ref.instance.close.subscribe(() => container.clear());
+    ref.instance.personsAdded.subscribe(() => {
+      this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
     });
   }
 

@@ -151,6 +151,34 @@
   opacity: 0.8;
 }
 
+// --- Tabs akció gombok ---
+.tabs-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.add-person-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px dashed get-color('gray', 300);
+  border-radius: 8px;
+  background: transparent;
+  color: get-color('gray', 400);
+  cursor: pointer;
+  @include transition-fast;
+
+  &:hover {
+    border-color: var(--color-primary, #6366f1);
+    color: var(--color-primary, #6366f1);
+    background: rgba(99, 102, 241, 0.05);
+  }
+}
+
 // --- Szerkesztés gomb ---
 .edit-mode-btn {
   display: flex;
@@ -165,7 +193,6 @@
   color: get-color('slate', 600);
   cursor: pointer;
   @include transition-fast;
-  margin-left: auto;
 }
 
 .edit-mode-btn:hover {

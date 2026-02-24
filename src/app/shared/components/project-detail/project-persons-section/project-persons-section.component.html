@@ -66,6 +66,13 @@
               <span class="text-sm font-semibold text-gray-800">Diákok</span>
               <span class="text-xs text-gray-400">({{ studentsCount() }})</span>
             </div>
+            <button
+              type="button"
+              class="add-person-btn"
+              (click)="addPersons.emit('student'); $event.stopPropagation()"
+            >
+              <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+            </button>
           </div>
           <div class="stats-row">
             <span class="stat-item stat-item--green">
@@ -114,6 +121,13 @@
               <span class="text-sm font-semibold text-gray-800">Tanárok</span>
               <span class="text-xs text-gray-400">({{ teachersCount() }})</span>
             </div>
+            <button
+              type="button"
+              class="add-person-btn"
+              (click)="addPersons.emit('teacher'); $event.stopPropagation()"
+            >
+              <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+            </button>
           </div>
           <div class="stats-row">
             <span class="stat-item stat-item--green">
@@ -165,18 +179,27 @@
 } @else {
   <!-- Empty state -->
   <section class="mb-6">
-    <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
+    <div class="empty-persons">
       <div class="flex items-center gap-3">
         <lucide-icon [name]="ICONS.USERS" [size]="20" class="text-gray-400" />
         <span class="text-sm text-gray-500">Még nincs személy hozzárendelve</span>
       </div>
-      <button
-        class="px-3 py-1.5 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
-        (click)="openPersonsModal.emit(undefined)"
-      >
-        <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
-        Névsor kezelése
-      </button>
+      <div class="empty-persons__actions">
+        <button
+          class="empty-persons__btn empty-persons__btn--student"
+          (click)="addPersons.emit('student')"
+        >
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+          Diákok
+        </button>
+        <button
+          class="empty-persons__btn empty-persons__btn--teacher"
+          (click)="addPersons.emit('teacher')"
+        >
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+          Tanárok
+        </button>
+      </div>
     </div>
   </section>
 }

@@ -1,0 +1,179 @@
+@use 'styles/colors' as *;
+
+.hint-text {
+  font-size: 13px;
+  color: get-color('gray', 500);
+  margin-bottom: 10px;
+}
+
+.names-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 10px 12px;
+  border: 1px solid get-color('gray', 200);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: get-color('gray', 300);
+  }
+}
+
+.count-text {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: get-color('gray', 500);
+  text-align: right;
+}
+
+// Eredmény szekció
+.result-section {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin-bottom: 12px;
+
+  &--success {
+    background-color: get-color('success', 50);
+    color: get-color('success', 600);
+  }
+}
+
+.result-message {
+  font-size: 15px;
+  font-weight: 600;
+  color: get-color('gray', 800);
+  margin-bottom: 16px;
+}
+
+.result-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: -4px;
+  margin-bottom: 16px;
+}
+
+.result-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: get-color('gray', 600);
+  margin: 4px;
+
+  strong {
+    font-weight: 700;
+    color: get-color('gray', 800);
+  }
+
+  &--archive {
+    color: get-color('primary', 600);
+
+    strong {
+      color: get-color('primary', 700);
+    }
+  }
+
+  &--photo {
+    color: get-color('success', 600);
+
+    strong {
+      color: get-color('success', 700);
+    }
+  }
+}
+
+// Duplikátumok
+.duplicates-box {
+  text-align: left;
+  padding: 10px 12px;
+  background: get-color('warning', 50);
+  border: 1px solid get-color('warning', 200);
+  border-radius: 8px;
+}
+
+.duplicates-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: get-color('warning', 700);
+  margin-bottom: 4px;
+}
+
+.duplicates-list {
+  font-size: 12px;
+  color: get-color('warning', 600);
+  line-height: 1.5;
+}
+
+// Gombok
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: var(--color-primary, #6366f1);
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      filter: brightness(0.9);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: get-color('gray', 600);
+
+    &:hover:not(:disabled) {
+      background: get-color('gray', 100);
+    }
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

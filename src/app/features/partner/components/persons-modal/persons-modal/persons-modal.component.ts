@@ -47,6 +47,7 @@ export class PersonsModalComponent implements OnInit {
 
   readonly close = output<void>();
   readonly openUploadWizard = output<TypeFilter>();
+  readonly addPersonsRequested = output<'student' | 'teacher'>();
 
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);

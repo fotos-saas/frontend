@@ -1,0 +1,100 @@
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="flat"
+  [theme]="theme()"
+  [icon]="icon()"
+  [title]="title()"
+  size="md"
+  [closable]="!submitting()"
+  [isSubmitting]="submitting()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="submitted() ? close.emit() : submit()"
+>
+  <div dialogBody>
+    @if (!submitted()) {
+      <!-- Beviteli mód -->
+      <p class="hint-text">
+        Írd be a neveket soronként. Minden sor egy személy.
+      </p>
+      <textarea
+        class="names-textarea"
+        [placeholder]="placeholder()"
+        [ngModel]="namesText()"
+        (ngModelChange)="namesText.set($event)"
+        rows="10"
+        [disabled]="submitting()"
+      ></textarea>
+      @if (namesCount() > 0) {
+        <p class="count-text">{{ namesCount() }} név megadva</p>
+      }
+    } @else {
+      <!-- Eredmény mód -->
+      <div class="result-section">
+        <div class="result-icon result-icon--success">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="32" />
+        </div>
+        <p class="result-message">{{ resultMessage() }}</p>
+
+        @if (createdPersons().length > 0) {
+          <div class="result-details">
+            <div class="result-stat">
+              <lucide-icon [name]="ICONS.USER_PLUS" [size]="16" />
+              <span><strong>{{ createdPersons().length }}</strong> személy létrehozva</span>
+            </div>
+            @if (archiveMatches() > 0) {
+              <div class="result-stat result-stat--archive">
+                <lucide-icon [name]="ICONS.LINK" [size]="16" />
+                <span><strong>{{ archiveMatches() }}</strong> archívum egyezés</span>
+              </div>
+            }
+            @if (hasPhotoPerson()) {
+              <div class="result-stat result-stat--photo">
+                <lucide-icon [name]="ICONS.CAMERA" [size]="16" />
+                <span><strong>{{ withPhotoCount() }}</strong> személynek van fotója</span>
+              </div>
+            }
+          </div>
+        }
+
+        @if (duplicates().length > 0) {
+          <div class="duplicates-box">
+            <div class="duplicates-header">
+              <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+              <span>Kihagyott duplikátumok ({{ duplicates().length }}):</span>
+            </div>
+            <p class="duplicates-list">{{ duplicates().join(', ') }}</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div dialogFooter>
+    @if (!submitted()) {
+      <button type="button" class="btn btn--ghost" (click)="close.emit()" [disabled]="submitting()">
+        Mégse
+      </button>
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="!canSubmit()"
+        (click)="submit()"
+      >
+        @if (submitting()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        } @else {
+          <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        }
+        Hozzáadás
+      </button>
+    } @else {
+      <button type="button" class="btn btn--ghost" (click)="addMore()">
+        <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        Továbbiak hozzáadása
+      </button>
+      <button type="button" class="btn btn--primary" (click)="close.emit()">
+        Bezárás
+      </button>
+    }
+  </div>
+</app-dialog-wrapper>

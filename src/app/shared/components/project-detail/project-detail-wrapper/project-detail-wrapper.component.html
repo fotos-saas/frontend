@@ -42,6 +42,7 @@
           (openOrderWizard)="openOrderWizardDialog()"
           (createGallery)="createGallery()"
           (galleryDeadlineExtend)="extendGalleryDeadline($event)"
+          (addPersons)="openAddPersonsDialog($event)"
         />
       }
       @case ('emails') {
@@ -121,6 +122,9 @@
 
 <!-- Persons Modal container -->
 <ng-container #personsModalContainer></ng-container>
+
+<!-- Add Persons Dialog container -->
+<ng-container #addPersonsDialogContainer></ng-container>
 
 <!-- Upload Wizard container -->
 <ng-container #uploadWizardContainer></ng-container>

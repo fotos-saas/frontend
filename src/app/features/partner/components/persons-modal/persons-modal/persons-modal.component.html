@@ -70,17 +70,29 @@
             </button>
           </div>
         }
-        @if (!loading() && filteredPersons().length > 0) {
-          <button
-            type="button"
-            class="edit-mode-btn"
-            [class.edit-mode-btn--active]="editMode()"
-            (click)="toggleEditMode()"
-          >
-            <lucide-icon [name]="editMode() ? ICONS.X : ICONS.EDIT" [size]="14" />
-            {{ editMode() ? 'Kész' : 'Szerkesztés' }}
-          </button>
-        }
+        <div class="tabs-actions">
+          @if (!loading()) {
+            <button
+              type="button"
+              class="add-person-btn"
+              matTooltip="Személy hozzáadása"
+              (click)="addPersonsRequested.emit(typeFilter())"
+            >
+              <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+            </button>
+          }
+          @if (!loading() && filteredPersons().length > 0) {
+            <button
+              type="button"
+              class="edit-mode-btn"
+              [class.edit-mode-btn--active]="editMode()"
+              (click)="toggleEditMode()"
+            >
+              <lucide-icon [name]="editMode() ? ICONS.X : ICONS.EDIT" [size]="14" />
+              {{ editMode() ? 'Kész' : 'Szerkesztés' }}
+            </button>
+          }
+        </div>
       </div>
     </div>
 

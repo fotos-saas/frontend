@@ -259,6 +259,7 @@ export const ICONS = {
   // Navigáció és rendezés
   ARROW_UP: 'arrow-up',
   ARROW_DOWN: 'arrow-down',
+  ARROW_UP_DOWN: 'arrow-up-down',
   CHEVRON_UP: 'chevron-up',
   CHEVRON_DOWN: 'chevron-down',
   FILTER: 'filter',

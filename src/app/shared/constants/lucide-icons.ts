@@ -184,6 +184,7 @@ import {
   Columns3,
   // Rendezés
   ArrowDownAZ,
+  ArrowUpDown,
   ListOrdered,
   // Vizuális szerkesztő
   Move,
@@ -416,6 +417,7 @@ export const LUCIDE_ICONS_MAP = {
   Columns3,
   // Rendezés
   ArrowDownAZ,
+  ArrowUpDown,
   ListOrdered,
   // Vizuális szerkesztő
   Move,

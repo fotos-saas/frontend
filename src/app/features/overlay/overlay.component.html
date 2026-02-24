@@ -149,21 +149,12 @@
   <div class="upload-panel__body">
       <!-- v2: PS Layer mód (ha vannak kijelölt layerek slug---id formatummal) -->
       @if (hasPsLayers()) {
-        <!-- Tallózás + drop zóna -->
-        <div
-          class="upload-panel__drop upload-panel__drop--batch"
-          [class.upload-panel__drop--drag-over]="dragOver()"
-          (dragover)="onDragOver($event)"
-          (dragleave)="onDragLeave($event)"
-          (drop)="onDrop($event)"
-        >
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-          <label class="upload-panel__browse-label">
-            Képek kiválasztása
-            <input type="file" accept="image/*" multiple (change)="onBatchFileSelect($event)" hidden />
-          </label>
-          <span class="upload-panel__drop-hint">vagy húzd ide</span>
-        </div>
+        <!-- Tallózás gomb -->
+        <label class="upload-panel__browse">
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+          <span>Képek kiválasztása</span>
+          <input type="file" accept="image/*" multiple (change)="onBatchFileSelect($event)" hidden />
+        </label>
 
         <!-- Layer lista -->
         <div class="upload-panel__layer-list">

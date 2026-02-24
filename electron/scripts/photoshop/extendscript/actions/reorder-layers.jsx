@@ -180,9 +180,6 @@ var __result = (function () {
       return '{"reordered":0}';
     }
 
-    // Slot-ok: a jelenlegi poziciok Y->X sorrendben
-    var slots = getPositionSlots(allLayers);
-
     // Nev -> layerInfo map
     var nameToLayer = {};
     for (var i = 0; i < allLayers.length; i++) {
@@ -191,6 +188,18 @@ var __result = (function () {
         nameToLayer[n] = allLayers[i];
       }
     }
+
+    // Erintett layerek: ORDERED_NAMES-ben szereplo layerek
+    var involvedLayers = [];
+    for (var k = 0; k < orderedNames.length; k++) {
+      if (nameToLayer[orderedNames[k]]) {
+        involvedLayers.push(nameToLayer[orderedNames[k]]);
+      }
+    }
+
+    // Slot-ok: CSAK az erintett layerek jelenlegi pozicioit hasznaljuk
+    // (ha reszleges kijeleoles, ne az osszes layer slotjait)
+    var slots = getPositionSlots(involvedLayers);
 
     // Kiszamoljuk az OSSZES mozgatast elore (cel poziciok)
     var moves = []; // { layerId, targetX, targetY }

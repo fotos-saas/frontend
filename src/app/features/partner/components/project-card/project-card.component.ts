@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -36,6 +36,27 @@ export class ProjectCardComponent {
   readonly deleteClick = output<PartnerProjectListItem>();
   readonly linkClick = output<PartnerProjectListItem>();
   readonly statusChangeClick = output<{ projectId: number; status: string; label: string; color: string }>();
+
+  /**
+   * Email badge tooltip szöveg
+   */
+  readonly emailTooltip = computed(() => {
+    const metrics = this.project().emailMetrics;
+    if (!metrics || metrics.unansweredCount === 0) return '';
+    const parts = [`${metrics.unansweredCount} megválaszolatlan`];
+    if (metrics.avgResponseHours !== null) {
+      parts.push(`Átl. válaszidő: ~${Math.round(metrics.avgResponseHours)} óra`);
+    }
+    return parts.join(' · ');
+  });
+
+  /**
+   * Email badge CSS class a válaszidő státusz alapján
+   */
+  readonly emailBadgeClass = computed(() => {
+    const status = this.project().emailMetrics?.responseStatus;
+    return status ? `email-badge--${status}` : 'email-badge--good';
+  });
 
   /**
    * Rövidített státusz címke a badge-hez

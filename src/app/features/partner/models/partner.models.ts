@@ -40,6 +40,16 @@ export interface TabloStatus {
 }
 
 /**
+ * Projekt email metrikák (lista badge-hez)
+ */
+export interface ProjectEmailMetrics {
+  unansweredCount: number;
+  lastEmailAt: string | null;
+  avgResponseHours: number | null;
+  responseStatus: 'good' | 'warning' | 'critical' | null;
+}
+
+/**
  * Projekt lista elem
  */
 export interface PartnerProjectListItem {
@@ -74,6 +84,7 @@ export interface PartnerProjectListItem {
   linkedProjectId: number | null;
   linkedAt: string | null;
   preliminaryNote: string | null;
+  emailMetrics: ProjectEmailMetrics | null;
 }
 
 /**

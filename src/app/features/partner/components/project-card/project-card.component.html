@@ -41,6 +41,16 @@
           {{ project().draftPhotoCount }}
         </span>
       }
+      @if (project().emailMetrics?.unansweredCount) {
+        <span
+          class="email-badge"
+          [class]="emailBadgeClass()"
+          [matTooltip]="emailTooltip()"
+        >
+          <lucide-icon [name]="ICONS.MAIL" [size]="10" />
+          {{ project().emailMetrics!.unansweredCount }}
+        </span>
+      }
       @if (project().orderSubmittedAt && !isMarketer()) {
         <button
           type="button"

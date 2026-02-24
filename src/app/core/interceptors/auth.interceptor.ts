@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { TabloStorageService } from '../services/tablo-storage.service';
@@ -34,6 +35,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const storage = inject(TabloStorageService);
   const logger = inject(LoggerService);
   const guestService = inject(GuestService);
+  const router = inject(Router);
 
   // Marketer token ellenőrzése először
   const marketerToken = authService.getMarketerToken();
@@ -80,23 +82,29 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             errorMessage: error.error?.message
           });
 
-          // NE logout-oljon ha:
-          // - share session (guest session-nel autentikál)
-          // - newsfeed API hívás (guest session hiánya okozhatja)
-          // - gamification API hívás (opcionális, service catchError-rel kezeli)
-          // - marketer session (külön kezeljük)
-          const isMarketerRequest = req.url.includes('/marketer');
-          if (activeSession?.sessionType !== 'share' &&
-              !req.url.includes('/newsfeed') &&
-              !req.url.includes('/gamification') &&
-              !isMarketerRequest) {
-            logger.warn('[AuthInterceptor] Automatikus logout 401 miatt');
-            authService.clearAuth();
-          } else if (isMarketerRequest) {
-            logger.warn('[AuthInterceptor] Marketer logout 401 miatt');
-            authService.logoutMarketer();
+          // Overlay ablakban NE logout-oljon (nincs router navigate, overlay kezeli magának)
+          const isOverlay = router.url.startsWith('/overlay');
+          if (isOverlay) {
+            logger.info('[AuthInterceptor] 401 ignorálva (overlay mód)');
           } else {
-            logger.info('[AuthInterceptor] 401 ignorálva (share session, newsfeed vagy gamification)');
+            // NE logout-oljon ha:
+            // - share session (guest session-nel autentikál)
+            // - newsfeed API hívás (guest session hiánya okozhatja)
+            // - gamification API hívás (opcionális, service catchError-rel kezeli)
+            // - marketer session (külön kezeljük)
+            const isMarketerRequest = req.url.includes('/marketer');
+            if (activeSession?.sessionType !== 'share' &&
+                !req.url.includes('/newsfeed') &&
+                !req.url.includes('/gamification') &&
+                !isMarketerRequest) {
+              logger.warn('[AuthInterceptor] Automatikus logout 401 miatt');
+              authService.clearAuth();
+            } else if (isMarketerRequest) {
+              logger.warn('[AuthInterceptor] Marketer logout 401 miatt');
+              authService.logoutMarketer();
+            } else {
+              logger.info('[AuthInterceptor] 401 ignorálva (share session, newsfeed vagy gamification)');
+            }
           }
         }
       }

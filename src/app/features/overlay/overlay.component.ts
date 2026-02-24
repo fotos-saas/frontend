@@ -171,8 +171,8 @@ export class OverlayComponent implements OnInit {
   /** Submenu-s gombok: kattintasra inline collapse nyilik */
   private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos']);
 
-  /** Keret toggle szinkronizáláshoz */
-  readonly syncWithBorder = signal(true);
+  /** Keret toggle szinkronizáláshoz (projekt szinten mentve) */
+  readonly syncWithBorder = signal(this.loadSyncBorder());
 
   onCommand(commandId: string): void {
     // Submenu-s gomb → inline collapse toggle
@@ -225,9 +225,34 @@ export class OverlayComponent implements OnInit {
   /** Keret toggle */
   toggleSyncBorder(): void {
     this.syncWithBorder.update(v => !v);
+    this.saveSyncBorder(this.syncWithBorder());
     window.electronAPI?.overlay.executeCommand(
       this.syncWithBorder() ? 'sync-border-on' : 'sync-border-off',
     );
+  }
+
+  private syncBorderKey(): string {
+    const projectId = this.context().projectId ?? 'default';
+    return `sync-border-${projectId}`;
+  }
+
+  private loadSyncBorder(): boolean {
+    return this.loadSyncBorderForProject(this.context().projectId);
+  }
+
+  private loadSyncBorderForProject(projectId?: number): boolean {
+    try {
+      const key = `sync-border-${projectId ?? 'default'}`;
+      return localStorage.getItem(key) !== 'false';
+    } catch {
+      return true;
+    }
+  }
+
+  private saveSyncBorder(value: boolean): void {
+    try {
+      localStorage.setItem(this.syncBorderKey(), String(value));
+    } catch { /* ignore */ }
   }
 
   /** Click-through: atlatszo terulet atenged kattintast a mogotte levo appnak */
@@ -336,7 +361,10 @@ export class OverlayComponent implements OnInit {
   private listenContextChanges(): void {
     if (!window.electronAPI) return;
     const cleanup = window.electronAPI.overlay.onContextChanged((ctx) => {
-      this.ngZone.run(() => this.context.set(ctx));
+      this.ngZone.run(() => {
+        this.context.set(ctx);
+        this.syncWithBorder.set(this.loadSyncBorderForProject(ctx.projectId));
+      });
     });
     this.destroyRef.onDestroy(cleanup);
   }

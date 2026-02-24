@@ -317,10 +317,20 @@ export class OverlayComponent implements OnInit {
     }
   }
 
-  private openUploadPanel(): void {
+  private async openUploadPanel(): Promise<void> {
     this.uploadPanelOpen.set(true);
     this.closeSubmenu();
-    const pid = this.context().projectId;
+    let pid = this.context().projectId || this.lastProjectId;
+    // Fallback: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
+    if (!pid && window.electronAPI) {
+      try {
+        const result = await window.electronAPI.overlay.getProjectId();
+        if (result.projectId) {
+          pid = result.projectId;
+          this.lastProjectId = pid;
+        }
+      } catch { /* ignore */ }
+    }
     if (pid) {
       this.loadPersons(pid);
     }

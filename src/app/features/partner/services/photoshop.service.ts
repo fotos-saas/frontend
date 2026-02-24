@@ -674,6 +674,7 @@ export class PhotoshopService {
     boardConfig: { widthCm: number; heightCm: number },
     psdPath: string,
     targetDocName?: string,
+    projectId?: number,
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
@@ -709,7 +710,7 @@ export class PhotoshopService {
       }
 
       // 3. Teljes layout objektum összeállítása
-      const layoutData = {
+      const layoutData: Record<string, unknown> = {
         version: 3,
         updatedAt: new Date().toISOString(),
         document: layoutResult.document,
@@ -723,6 +724,9 @@ export class PhotoshopService {
         },
         layers: layoutResult.layers || [],
       };
+      if (projectId) {
+        layoutData['projectId'] = projectId;
+      }
 
       // 4. Mentés a PSD mellé
       const saveResult = await this.api.saveLayoutJson({

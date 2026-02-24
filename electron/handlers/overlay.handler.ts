@@ -1,5 +1,7 @@
 import { ipcMain, BrowserWindow, shell } from 'electron';
 import log from 'electron-log/main';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Overlay kontextus — melyik modban van az app
 interface OverlayContext {
@@ -141,6 +143,19 @@ export function registerOverlayHandlers(
         dir: typeof doc.dir === 'string' ? doc.dir : null,
       };
 
+      // PSD melletti JSON-bol projectId kinyerese ha a context-ben nincs
+      if (!overlayContext.projectId && lastActiveDoc.path) {
+        const projectId = readProjectIdFromJson(lastActiveDoc.path);
+        if (projectId) {
+          overlayContext = { ...overlayContext, projectId };
+          log.info(`ProjectId from PSD JSON: ${projectId}`);
+          const ow = getOverlayWindow();
+          if (ow && !ow.isDestroyed()) {
+            ow.webContents.send('overlay:context-changed', overlayContext);
+          }
+        }
+      }
+
       // Overlay-nek jelezzuk a valtozast
       const overlayWindow = getOverlayWindow();
       if (overlayWindow && !overlayWindow.isDestroyed()) {
@@ -152,12 +167,44 @@ export function registerOverlayHandlers(
     return { success: false, error: 'Invalid doc info' };
   });
 
+  // ProjectId lekerdezese: context-bol vagy PSD melletti JSON-bol
+  ipcMain.handle('overlay:get-project-id', async () => {
+    if (overlayContext.projectId) return { projectId: overlayContext.projectId };
+    if (lastActiveDoc.path) {
+      const projectId = readProjectIdFromJson(lastActiveDoc.path);
+      if (projectId) {
+        overlayContext = { ...overlayContext, projectId };
+        return { projectId };
+      }
+    }
+    return { projectId: null };
+  });
+
   // Click-through: az atlatszo terulet atenged a toolbar mogotti appnak
   ipcMain.on('overlay:set-ignore-mouse', (_event, ignore: boolean) => {
     const overlayWindow = getOverlayWindow();
     if (!overlayWindow || overlayWindow.isDestroyed()) return;
     overlayWindow.setIgnoreMouseEvents(ignore, { forward: true });
   });
+
+  /**
+   * PSD melletti JSON-bol projectId kiolvasasa.
+   * A JSON fajl a PSD-vel azonos neven, .json kiterjesztessel van.
+   */
+  function readProjectIdFromJson(psdPath: string): number | null {
+    try {
+      const jsonPath = psdPath.replace(/\.(psd|psb)$/i, '.json');
+      if (!fs.existsSync(jsonPath)) return null;
+      const content = fs.readFileSync(jsonPath, 'utf-8');
+      const data = JSON.parse(content);
+      if (typeof data.projectId === 'number' && data.projectId > 0) {
+        return data.projectId;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
 
   // Munkamappa megnyitasa Finder-ben (az aktiv doc mappajabol)
   async function handleOpenWorkDir(): Promise<{ success: boolean; error?: string }> {

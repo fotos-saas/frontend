@@ -263,6 +263,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('overlay:context-changed', handler);
       return () => ipcRenderer.removeListener('overlay:context-changed', handler);
     },
+    getProjectId: () =>
+      ipcRenderer.invoke('overlay:get-project-id') as Promise<{ projectId: number | null }>,
     hide: () =>
       ipcRenderer.invoke('overlay:hide') as Promise<{ success: boolean }>,
     showMainWindow: () =>

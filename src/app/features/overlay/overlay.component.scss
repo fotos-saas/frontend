@@ -427,7 +427,7 @@
   display: flex;
   gap: 8px;
   min-height: 200px;
-  max-height: 350px;
+  max-height: calc(100vh - 160px); // toolbar(52) + padding(30) + header(36) + search(40) + extra
 }
 
 // ---- Person list (bal) ----

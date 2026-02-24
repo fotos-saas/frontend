@@ -212,9 +212,11 @@
 }
 
 .toolbar__doc-name {
-  max-width: 160px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
+  direction: rtl;
+  text-align: left;
 }
 
 .toolbar__info {

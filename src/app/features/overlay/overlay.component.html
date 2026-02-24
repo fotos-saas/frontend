@@ -223,7 +223,10 @@
                 [class.upload-panel__unmatched-file--selected]="selectedUnmatchedFile() === file"
                 (click)="selectUnmatchedFile(file)"
                 type="button"
-              >{{ file.name }}</button>
+              >
+                <img class="upload-panel__unmatched-thumb" [src]="getFilePreview(file)" [alt]="file.name" />
+                {{ file.name }}
+              </button>
             }
             @if (selectedUnmatchedFile()) {
               <span class="upload-panel__unmatched-hint">Kattints egy layer sorra a hozzárendeléshez</span>

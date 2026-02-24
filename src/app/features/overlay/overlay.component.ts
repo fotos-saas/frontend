@@ -130,7 +130,9 @@ export class OverlayComponent implements OnInit {
   readonly activeDocLabel = computed(() => {
     const name = this.activeDoc().name;
     if (!name) return null;
-    return name.replace(/\.(psd|psb|pdd)$/i, '');
+    const base = name.replace(/\.(psd|psb|pdd)$/i, '');
+    if (base.length <= 30) return base;
+    return base.slice(0, 12) + '...' + base.slice(-12);
   });
 
   readonly selectedLayers = computed(() => this.activeDoc().selectedLayers ?? 0);

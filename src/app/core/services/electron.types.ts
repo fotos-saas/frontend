@@ -92,16 +92,11 @@ interface OverlayAPI {
   setContext: (ctx: OverlayContext) => Promise<{ success: boolean; error?: string }>;
   onContextChanged: (callback: (ctx: OverlayContext) => void) => CleanupFn;
   hide: () => Promise<{ success: boolean }>;
-  openPhotoUpload: (projectId: number) => Promise<{ success: boolean; error?: string }>;
   setIgnoreMouseEvents: (ignore: boolean) => void;
   onCommand: (callback: (commandId: string) => void) => CleanupFn;
   getActiveDoc: () => Promise<ActiveDocInfo>;
   setActiveDoc: (doc: ActiveDocInfo) => Promise<{ success: boolean; error?: string }>;
   onActiveDocChanged: (callback: (doc: ActiveDocInfo) => void) => CleanupFn;
-}
-
-interface PhotoUploadAPI {
-  close: () => Promise<{ success: boolean; error?: string }>;
 }
 
 interface TouchBarAPI {
@@ -332,7 +327,6 @@ export interface ElectronAPI {
   };
   nativeDrag: NativeDragAPI;
   overlay: OverlayAPI;
-  photoUpload: PhotoUploadAPI;
   touchBar: TouchBarAPI;
   autoUpdate: AutoUpdateAPI;
   photoshop: PhotoshopAPI;

@@ -1,6 +1,8 @@
+<!-- Toolbar -->
 <div
   class="toolbar"
   [class.toolbar--has-collapse]="openSubmenu()"
+  [class.toolbar--panel-open]="uploadPanelOpen()"
   (mouseenter)="onCollapseEnter()"
   (mouseleave)="onCollapseLeave()"
 >
@@ -24,7 +26,7 @@
           [class.toolbar__btn--red]="item.accent === 'red'"
           [class.toolbar__btn--blue]="item.accent === 'blue'"
           [class.toolbar__btn--busy]="busyCommand() === item.id"
-          [class.toolbar__btn--active]="openSubmenu() === item.id"
+          [class.toolbar__btn--active]="openSubmenu() === item.id || (item.id === 'upload-photo' && uploadPanelOpen())"
           [disabled]="busyCommand() === item.id"
           (click)="onCommand(item.id)"
           [attr.data-tip]="item.label"
@@ -122,4 +124,141 @@
   <button class="toolbar__btn toolbar__btn--close" (click)="hide()" data-tip="Elrejtés (Ctrl+K)">
     <lucide-icon [name]="ICONS.X" [size]="16" />
   </button>
-</div>
+
+  <!-- Upload Panel (toolbar ALATT, absolute pozíció) -->
+  @if (uploadPanelOpen()) {
+  <div class="upload-panel">
+    <div class="upload-panel__header">
+      <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+      <span>Fotó feltöltés</span>
+      <button class="upload-panel__close" (click)="closeUploadPanel()" type="button">
+        <lucide-icon [name]="ICONS.X" [size]="14" />
+      </button>
+    </div>
+
+    <div class="upload-panel__body">
+      @if (!context().projectId) {
+        <div class="upload-panel__empty">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
+          <span>Nyiss meg egy projektet a feltöltéshez</span>
+        </div>
+      } @else {
+        <!-- Kereses -->
+        <div class="upload-panel__search">
+          <lucide-icon [name]="ICONS.SEARCH" [size]="14" class="upload-panel__search-icon" />
+          <input
+            type="text"
+            placeholder="Személy keresése..."
+            [value]="searchQuery()"
+            (input)="onSearchInput($event)"
+            class="upload-panel__search-input"
+          />
+        </div>
+
+        <!-- Szemely lista + upload zona egymás mellett -->
+        <div class="upload-panel__content">
+          <!-- Szemely lista (bal oldal) -->
+          <div class="upload-panel__persons">
+            @if (loadingPersons()) {
+              <div class="upload-panel__loading">Betöltés...</div>
+            } @else if (filteredPersons().length === 0) {
+              <div class="upload-panel__loading">
+                @if (searchQuery()) {
+                  Nincs találat
+                } @else {
+                  Üres lista
+                }
+              </div>
+            } @else {
+              @for (person of filteredPersons(); track person.id) {
+                <button
+                  class="upload-panel__person"
+                  [class.upload-panel__person--selected]="selectedPerson()?.id === person.id"
+                  [class.upload-panel__person--has-photo]="person.hasPhoto"
+                  (click)="selectPerson(person)"
+                  type="button"
+                >
+                  <div class="upload-panel__avatar">
+                    @if (person.photoThumbUrl) {
+                      <img [src]="person.photoThumbUrl" [alt]="person.name" />
+                    } @else {
+                      <lucide-icon [name]="ICONS.USER" [size]="14" />
+                    }
+                  </div>
+                  <span class="upload-panel__name">{{ person.name }}</span>
+                  <span class="upload-panel__type">{{ person.type === 'teacher' ? 'T' : 'D' }}</span>
+                  @if (person.hasPhoto) {
+                    <lucide-icon [name]="ICONS.CHECK" [size]="12" class="upload-panel__check" />
+                  }
+                </button>
+              }
+            }
+          </div>
+
+          <!-- Upload zona (jobb oldal) -->
+          <div class="upload-panel__upload">
+            @if (selectedPerson()) {
+              <div class="upload-panel__selected">
+                <lucide-icon [name]="ICONS.USER" [size]="12" />
+                <span>{{ selectedPerson()!.name }}</span>
+              </div>
+
+              <div
+                class="upload-panel__drop"
+                [class.upload-panel__drop--drag-over]="dragOver()"
+                [class.upload-panel__drop--has-file]="!!selectedFile()"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+              >
+                @if (selectedFile()) {
+                  <lucide-icon [name]="ICONS.IMAGE" [size]="20" class="upload-panel__file-icon" />
+                  <span class="upload-panel__file-name">{{ selectedFile()!.name }}</span>
+                } @else {
+                  <lucide-icon [name]="ICONS.UPLOAD" [size]="20" />
+                  <span>Húzd ide</span>
+                  <label class="upload-panel__file-label">
+                    vagy válassz
+                    <input type="file" accept="image/*" (change)="onFileSelect($event)" hidden />
+                  </label>
+                }
+              </div>
+
+              <button
+                class="upload-panel__btn"
+                [disabled]="!canUpload()"
+                (click)="upload()"
+                type="button"
+              >
+                @if (uploading()) {
+                  <span class="upload-panel__spinner"></span>
+                  Feltöltés...
+                } @else {
+                  <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+                  Feltöltés
+                }
+              </button>
+
+              @if (uploadResult()) {
+                <div class="upload-panel__result" [class.upload-panel__result--success]="uploadResult()!.success" [class.upload-panel__result--error]="!uploadResult()!.success">
+                  @if (uploadResult()!.success) {
+                    <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                    <span>Sikeres!</span>
+                  } @else {
+                    <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+                    <span>{{ uploadResult()!.message }}</span>
+                  }
+                </div>
+              }
+            } @else {
+              <div class="upload-panel__placeholder">
+                <lucide-icon [name]="ICONS.USER" [size]="24" />
+                <span>Válassz személyt a listából</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

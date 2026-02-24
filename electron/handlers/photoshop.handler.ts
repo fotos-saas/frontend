@@ -879,7 +879,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   }
 
   // JSX script osszeallitasa: deploy + CONFIG beallitasok + #include feloldas + action kod
-  function buildJsxScript(scriptName: string, dataFilePath?: string, targetDocName?: string, psdFilePath?: string): string {
+  function buildJsxScript(scriptName: string, dataFilePath?: string, targetDocName?: string, psdFilePath?: string, extraConfig?: Record<string, string>): string {
     // Scriptek kihelyezese a workDir-be (ha van beallitva)
     const workDir = psStore.get('workDirectory', null);
     if (workDir) {
@@ -910,6 +910,12 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     if (psdFilePath) {
       const escapedPsd = psdFilePath.replace(/\\/g, '/');
       configOverrides.push(`CONFIG.PSD_FILE_PATH = "${escapedPsd}";`);
+    }
+    if (extraConfig) {
+      for (const [key, val] of Object.entries(extraConfig)) {
+        const escaped = val.replace(/"/g, '\\"');
+        configOverrides.push(`CONFIG.${key} = "${escaped}";`);
+      }
     }
 
     if (configOverrides.length > 0) {
@@ -985,14 +991,23 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       }
 
       // Ha jsonData-t kaptunk (altalanos JSON adat, pl. guide margo), temp fajlba irjuk
+      // Egyszeru string ertekeket CONFIG override-kent is atadhatjuk
+      let extraConfig: Record<string, string> | undefined;
       if (!dataFilePath && params.jsonData) {
-        tempJsonPath = path.join(app.getPath('temp'), `jsx-data-${Date.now()}.json`);
-        fs.writeFileSync(tempJsonPath, JSON.stringify(params.jsonData), 'utf-8');
-        dataFilePath = tempJsonPath;
-        log.info(`JSX jsonData irva: ${tempJsonPath}`);
+        // Ellenorizzuk, hogy CSAK egyszeru string ertekek vannak-e
+        const allSimple = Object.values(params.jsonData).every(v => typeof v === 'string');
+        if (allSimple) {
+          extraConfig = params.jsonData as Record<string, string>;
+          log.info(`JSX jsonData mint CONFIG override: ${JSON.stringify(extraConfig)}`);
+        } else {
+          tempJsonPath = path.join(app.getPath('temp'), `jsx-data-${Date.now()}.json`);
+          fs.writeFileSync(tempJsonPath, JSON.stringify(params.jsonData), 'utf-8');
+          dataFilePath = tempJsonPath;
+          log.info(`JSX jsonData irva: ${tempJsonPath}`);
+        }
       }
 
-      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName, params.psdFilePath);
+      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName, params.psdFilePath, extraConfig);
       log.info(`JSX script futtatasa: ${params.scriptName} (${jsxCode.length} karakter)`);
 
       if (process.platform !== 'darwin') {

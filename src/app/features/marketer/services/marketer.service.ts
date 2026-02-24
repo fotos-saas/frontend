@@ -105,6 +105,7 @@ export interface ProjectDetails extends ProjectListItem {
     hasPhoto: boolean;
     photoThumbUrl: string | null;
   }>;
+  extraNames?: { students: string; teachers: string };
   updatedAt: string;
 }
 

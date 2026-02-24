@@ -39,7 +39,6 @@ interface UpdateState {
 
 let mainWindow: BrowserWindow | null = null;
 let overlayWindow: BrowserWindow | null = null;
-let photoUploadWindow: BrowserWindow | null = null;
 
 // ============ Electron Store for Cache ============
 interface CacheSchema {
@@ -305,18 +304,18 @@ function setTouchBarContext(context: string): void {
 // ============ Overlay Window (Always-on-top Command Palette) ============
 
 function createOverlayWindow(): void {
-  // Vizszintes toolbar sav — alulra pozicionalva
-  // Az ablak nagyobb mint a toolbar (submenu hely felette), a toolbar az aljan van
+  // Vizszintes toolbar sav — felülre pozicionalva
+  // Az ablak nagyobb mint a toolbar (upload panel hely alatta), a toolbar a tetején van
   const activeDisplay = screen.getPrimaryDisplay();
-  const { width: screenW, height: screenH, x: screenX, y: screenY } = activeDisplay.workArea;
+  const { width: screenW, x: screenX, y: screenY } = activeDisplay.workArea;
   const windowW = screenW;
-  const windowH = 180; // 52px toolbar + 48px submenu + 80px shadow padding (felül+alul)
+  const windowH = 600; // toolbar + upload panel hely
 
   overlayWindow = new BrowserWindow({
     width: windowW,
     height: windowH,
     x: screenX,
-    y: Math.round(screenY + screenH - windowH - 8),
+    y: screenY + 8,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -376,62 +375,6 @@ function showOverlayWindow(): void {
   overlayWindow.show();
 }
 
-// ============ Photo Upload Window (Floating dialog for photo upload) ============
-
-function createPhotoUploadWindow(projectId: number): void {
-  // Ha mar nyitva van, fokuszaljuk
-  if (photoUploadWindow && !photoUploadWindow.isDestroyed()) {
-    photoUploadWindow.focus();
-    return;
-  }
-
-  const activeDisplay = screen.getPrimaryDisplay();
-  const { width: screenW, height: screenH } = activeDisplay.workArea;
-
-  photoUploadWindow = new BrowserWindow({
-    width: 480,
-    height: 600,
-    x: Math.round((screenW - 480) / 2),
-    y: Math.round((screenH - 600) / 2),
-    frame: false,
-    alwaysOnTop: true,
-    resizable: true,
-    minWidth: 380,
-    minHeight: 500,
-    show: false,
-    backgroundColor: '#1a1a2e',
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      sandbox: true,
-      preload: path.join(__dirname, 'preload.js'),
-      webSecurity: true,
-      allowRunningInsecureContent: false,
-    },
-  });
-
-  const uploadUrl = isDev
-    ? `http://localhost:4205/photo-upload?projectId=${projectId}`
-    : `${PRODUCTION_URL}/photo-upload?projectId=${projectId}`;
-
-  photoUploadWindow.loadURL(uploadUrl).catch((error) => {
-    log.error('Failed to load photo upload URL:', error);
-    if (photoUploadWindow && !photoUploadWindow.isDestroyed()) {
-      photoUploadWindow.close();
-    }
-    photoUploadWindow = null;
-  });
-
-  photoUploadWindow.once('ready-to-show', () => {
-    photoUploadWindow?.show();
-  });
-
-  photoUploadWindow.on('closed', () => {
-    photoUploadWindow = null;
-  });
-
-  log.info(`Photo upload window created for project: ${projectId}`);
-}
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -727,35 +670,7 @@ app.whenReady().then(() => {
   registerOverlayHandlers(
     () => overlayWindow,
     () => mainWindow,
-    createPhotoUploadWindow,
   );
-
-  // Photo Upload IPC handler
-  ipcMain.handle('overlay:open-photo-upload', async (_event, params: { projectId: number }) => {
-    if (typeof params?.projectId !== 'number' || params.projectId <= 0) {
-      return { success: false, error: 'Invalid project ID' };
-    }
-    try {
-      createPhotoUploadWindow(params.projectId);
-      return { success: true };
-    } catch (error) {
-      log.error('Failed to open photo upload window:', error);
-      return { success: false, error: 'Failed to open photo upload window' };
-    }
-  });
-
-  // Photo Upload window bezarasa
-  ipcMain.handle('photo-upload:close', async () => {
-    try {
-      if (photoUploadWindow && !photoUploadWindow.isDestroyed()) {
-        photoUploadWindow.close();
-      }
-      return { success: true };
-    } catch (error) {
-      log.error('Failed to close photo upload window:', error);
-      return { success: false, error: 'Failed to close' };
-    }
-  });
 
   // GlobalShortcut: Ctrl+K (command palette — PS-ben nem foglalt)
   const shortcutRegistered = globalShortcut.register('Control+K', () => {

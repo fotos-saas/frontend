@@ -2,9 +2,12 @@ import {
   Component, ChangeDetectionStrategy, signal, computed,
   OnInit, DestroyRef, inject, NgZone,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
+import { environment } from '../../../environments/environment';
 
 interface ToolbarItem {
   id: string;
@@ -20,9 +23,25 @@ interface ToolbarGroup {
   designerOnly?: boolean;
 }
 
+interface PersonItem {
+  id: number;
+  name: string;
+  type: 'student' | 'teacher';
+  hasPhoto: boolean;
+  photoThumbUrl: string | null;
+}
+
+interface UploadResult {
+  success: boolean;
+  message?: string;
+  photo?: { thumbUrl: string };
+}
+
 const POLL_NORMAL = 5000;
 const POLL_TURBO = 1000;
-const TURBO_DURATION = 2 * 60 * 1000; // 2 perc
+const TURBO_DURATION = 2 * 60 * 1000;
+const MAX_FILE_SIZE = 100 * 1024 * 1024;
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 
 @Component({
   selector: 'app-overlay',
@@ -39,6 +58,7 @@ export class OverlayComponent implements OnInit {
   protected readonly ICONS = ICONS;
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
+  private readonly http = inject(HttpClient);
 
   readonly context = signal<OverlayContext>({ mode: 'normal' });
   readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
@@ -48,7 +68,28 @@ export class OverlayComponent implements OnInit {
   readonly openSubmenu = signal<string | null>(null);
   private collapseTimer: ReturnType<typeof setTimeout> | null = null;
 
-  /** Aktiv doc nev roviditve (max 25 karakter, kiterjesztes nelkul) */
+  // Upload panel state
+  readonly uploadPanelOpen = signal(false);
+  readonly persons = signal<PersonItem[]>([]);
+  readonly selectedPerson = signal<PersonItem | null>(null);
+  readonly searchQuery = signal('');
+  readonly uploading = signal(false);
+  readonly uploadResult = signal<UploadResult | null>(null);
+  readonly dragOver = signal(false);
+  readonly loadingPersons = signal(false);
+  readonly selectedFile = signal<File | null>(null);
+
+  readonly filteredPersons = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    const list = this.persons();
+    if (!q) return list;
+    return list.filter(p => p.name.toLowerCase().includes(q));
+  });
+
+  readonly canUpload = computed(() =>
+    !!this.selectedPerson() && !!this.selectedFile() && !this.uploading()
+  );
+
   readonly activeDocLabel = computed(() => {
     const name = this.activeDoc().name;
     if (!name) return null;
@@ -56,7 +97,6 @@ export class OverlayComponent implements OnInit {
     return base.length > 25 ? base.slice(0, 22) + '...' : base;
   });
 
-  /** Kijelolt layerek szama */
   readonly selectedLayers = computed(() => this.activeDoc().selectedLayers ?? 0);
 
   private readonly allGroups: ToolbarGroup[] = [
@@ -64,30 +104,30 @@ export class OverlayComponent implements OnInit {
       id: 'align',
       designerOnly: true,
       items: [
-        { id: 'align-left', icon: ICONS.ALIGN_START_V, label: 'Balra igazitas' },
-        { id: 'align-center-h', icon: ICONS.ALIGN_CENTER_V, label: 'Vizszintes kozepre' },
-        { id: 'align-right', icon: ICONS.ALIGN_END_V, label: 'Jobbra igazitas' },
-        { id: 'align-top', icon: ICONS.ALIGN_START_H, label: 'Felulre igazitas' },
-        { id: 'align-center-v', icon: ICONS.ALIGN_CENTER_H, label: 'Fuggoleges kozepre' },
-        { id: 'align-bottom', icon: ICONS.ALIGN_END_H, label: 'Alulra igazitas' },
+        { id: 'align-left', icon: ICONS.ALIGN_START_V, label: 'Balra igazítás' },
+        { id: 'align-center-h', icon: ICONS.ALIGN_CENTER_V, label: 'Vízszintes középre' },
+        { id: 'align-right', icon: ICONS.ALIGN_END_V, label: 'Jobbra igazítás' },
+        { id: 'align-top', icon: ICONS.ALIGN_START_H, label: 'Felülre igazítás' },
+        { id: 'align-center-v', icon: ICONS.ALIGN_CENTER_H, label: 'Függőleges középre' },
+        { id: 'align-bottom', icon: ICONS.ALIGN_END_H, label: 'Alulra igazítás' },
       ],
     },
     {
       id: 'distribute',
       designerOnly: true,
       items: [
-        { id: 'distribute-h', icon: ICONS.ALIGN_H_DISTRIBUTE, label: 'Vizszintes elosztas' },
-        { id: 'distribute-v', icon: ICONS.ALIGN_V_DISTRIBUTE, label: 'Fuggoleges elosztas' },
-        { id: 'center-document', icon: ICONS.MOVE, label: 'Dokumentum kozepre' },
+        { id: 'distribute-h', icon: ICONS.ALIGN_H_DISTRIBUTE, label: 'Vízszintes elosztás' },
+        { id: 'distribute-v', icon: ICONS.ALIGN_V_DISTRIBUTE, label: 'Függőleges elosztás' },
+        { id: 'center-document', icon: ICONS.MOVE, label: 'Dokumentum középre' },
       ],
     },
     {
       id: 'sort',
       designerOnly: true,
       items: [
-        { id: 'arrange-grid', icon: ICONS.LAYOUT_GRID, label: 'Racsba rendezes', accent: 'purple' },
+        { id: 'arrange-grid', icon: ICONS.LAYOUT_GRID, label: 'Rácsba rendezés', accent: 'purple' },
         { id: 'sort-abc', icon: ICONS.ARROW_DOWN_AZ, label: 'ABC sorrend', accent: 'blue' },
-        { id: 'sort-gender', icon: ICONS.USERS, label: 'Felvaltva fiu-lany' },
+        { id: 'sort-gender', icon: ICONS.USERS, label: 'Felváltva fiú-lány' },
         { id: 'sort-custom', icon: ICONS.LIST_ORDERED, label: 'Egyedi sorrend' },
       ],
     },
@@ -95,7 +135,7 @@ export class OverlayComponent implements OnInit {
       id: 'layers',
       designerOnly: true,
       items: [
-        { id: 'link-layers', icon: ICONS.LINK, label: 'Osszelinkelés' },
+        { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés' },
         { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés' },
         { id: 'extra-names', icon: ICONS.FILE_TEXT, label: 'Extra nevek' },
       ],
@@ -103,35 +143,35 @@ export class OverlayComponent implements OnInit {
     {
       id: 'photoshop',
       items: [
-        { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Foto feltoltese', accent: 'green' },
-        { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotok szinkronizalasa', accent: 'green' },
-        { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazitasa', tooltip: 'Nevek a kepek ala (kijelolt kepeknel csak azokat, egyebkent mindet). Unlinkeli a parokat.', accent: 'purple' },
-        { id: 'link-layers', icon: ICONS.LINK, label: 'Osszelinkelés', tooltip: 'Kijelolt layerek osszelinkelese az azonos nevu tarsaikkal' },
-        { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés', tooltip: 'Kijelolt layerek linkelesenek megszuntetese' },
-        { id: 'refresh', icon: ICONS.REFRESH, label: 'Frissites PS-bol' },
+        { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Fotó feltöltése', accent: 'green' },
+        { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', accent: 'green' },
+        { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
+        { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },
+        { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés', tooltip: 'Kijelölt layerek linkelésének megszüntetése' },
+        { id: 'refresh', icon: ICONS.REFRESH, label: 'Frissítés PS-ből' },
       ],
     },
     {
       id: 'generate',
       items: [
-        { id: 'generate-sample', icon: ICONS.IMAGE, label: 'Minta generalasa', accent: 'amber' },
-        { id: 'generate-final', icon: ICONS.CHECK_CIRCLE, label: 'Veglegesites', accent: 'green' },
+        { id: 'generate-sample', icon: ICONS.IMAGE, label: 'Minta generálása', accent: 'amber' },
+        { id: 'generate-final', icon: ICONS.CHECK_CIRCLE, label: 'Véglegesítés', accent: 'green' },
       ],
     },
     {
       id: 'view',
       designerOnly: true,
       items: [
-        { id: 'toggle-grid', icon: ICONS.GRID, label: 'Racs be/ki' },
-        { id: 'snap-grid', icon: ICONS.WAND, label: 'Racsba igazit' },
-        { id: 'save', icon: ICONS.SAVE, label: 'Mentes', accent: 'purple' },
+        { id: 'toggle-grid', icon: ICONS.GRID, label: 'Rács be/ki' },
+        { id: 'snap-grid', icon: ICONS.WAND, label: 'Rácsba igazít' },
+        { id: 'save', icon: ICONS.SAVE, label: 'Mentés', accent: 'purple' },
       ],
     },
     {
       id: 'ps-quick',
       items: [
-        { id: 'ps-launch', icon: ICONS.PLAY, label: 'Photoshop inditasa', accent: 'blue' },
-        { id: 'open-project', icon: ICONS.FILE_PLUS, label: 'PSD megnyitasa' },
+        { id: 'ps-launch', icon: ICONS.PLAY, label: 'Photoshop indítása', accent: 'blue' },
+        { id: 'open-project', icon: ICONS.FILE_PLUS, label: 'PSD megnyitása' },
         { id: 'ps-open-workdir', icon: ICONS.FOLDER_OPEN, label: 'Munkamappa' },
       ],
     },
@@ -168,13 +208,17 @@ export class OverlayComponent implements OnInit {
     'align-bottom': 'bottom',
   };
 
-  /** Submenu-s gombok: kattintasra inline collapse nyilik */
   private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos']);
 
-  /** Keret toggle szinkronizáláshoz (projekt szinten mentve) */
   readonly syncWithBorder = signal(this.loadSyncBorder());
 
   onCommand(commandId: string): void {
+    // Upload-photo → panel toggle
+    if (commandId === 'upload-photo') {
+      this.toggleUploadPanel();
+      return;
+    }
+
     // Submenu-s gomb → inline collapse toggle
     if (OverlayComponent.SUBMENU_IDS.has(commandId)) {
       const isOpen = this.openSubmenu() === commandId;
@@ -200,35 +244,174 @@ export class OverlayComponent implements OnInit {
     window.electronAPI?.overlay.executeCommand(commandId);
   }
 
-  /** Submenu bezarasa ha a toolbar-on kivulre kattintanak */
   onDocumentClick(event: MouseEvent): void {
-    if (!this.openSubmenu()) return;
     const target = event.target as HTMLElement;
-    if (!target.closest('.toolbar')) {
-      this.closeSubmenu();
+    if (!target.closest('.toolbar') && !target.closest('.upload-panel')) {
+      if (this.openSubmenu()) this.closeSubmenu();
+      if (this.uploadPanelOpen()) this.closeUploadPanel();
     }
   }
 
-  /** Nevek igazitasa a valasztott align-nal */
   arrangeNames(textAlign: string): void {
     this.closeSubmenu();
     this.runJsxAction('arrange-names', 'actions/arrange-names-selected.jsx', { TEXT_ALIGN: textAlign });
   }
 
-  /** Fotó szinkronizálás — mind vagy csak hiányzó */
   syncPhotos(mode: 'all' | 'missing'): void {
     this.closeSubmenu();
     const commandId = mode === 'missing' ? 'sync-photos-missing' : 'sync-photos';
     window.electronAPI?.overlay.executeCommand(commandId);
   }
 
-  /** Keret toggle */
   toggleSyncBorder(): void {
     this.syncWithBorder.update(v => !v);
     this.saveSyncBorder(this.syncWithBorder());
     window.electronAPI?.overlay.executeCommand(
       this.syncWithBorder() ? 'sync-border-on' : 'sync-border-off',
     );
+  }
+
+  // ============ Upload Panel ============
+
+  toggleUploadPanel(): void {
+    if (this.uploadPanelOpen()) {
+      this.closeUploadPanel();
+    } else {
+      this.openUploadPanel();
+    }
+  }
+
+  private openUploadPanel(): void {
+    this.uploadPanelOpen.set(true);
+    this.closeSubmenu();
+    const pid = this.context().projectId;
+    if (pid && this.persons().length === 0) {
+      this.loadPersons(pid);
+    }
+  }
+
+  closeUploadPanel(): void {
+    this.uploadPanelOpen.set(false);
+    this.selectedPerson.set(null);
+    this.selectedFile.set(null);
+    this.uploadResult.set(null);
+    this.searchQuery.set('');
+  }
+
+  onSearchInput(event: Event): void {
+    this.searchQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  selectPerson(person: PersonItem): void {
+    this.selectedPerson.set(person);
+    this.uploadResult.set(null);
+  }
+
+  onFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.setFile(input.files[0]);
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver.set(true);
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver.set(false);
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver.set(false);
+    const files = event.dataTransfer?.files;
+    if (files?.length) {
+      this.setFile(files[0]);
+    }
+  }
+
+  upload(): void {
+    const person = this.selectedPerson();
+    const file = this.selectedFile();
+    const pid = this.context().projectId;
+    if (!person || !file || !pid) return;
+
+    this.uploading.set(true);
+    this.uploadResult.set(null);
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    const url = `${environment.apiUrl}/partner/projects/${pid}/persons/${person.id}/photo`;
+
+    this.http.post<UploadResult>(url, formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.ngZone.run(() => {
+            this.uploading.set(false);
+            this.uploadResult.set(res);
+            this.selectedFile.set(null);
+            if (res.success) {
+              this.persons.update(list =>
+                list.map(p => p.id === person.id
+                  ? { ...p, hasPhoto: true, photoThumbUrl: res.photo?.thumbUrl ?? p.photoThumbUrl }
+                  : p
+                )
+              );
+            }
+          });
+        },
+        error: (err) => {
+          this.ngZone.run(() => {
+            this.uploading.set(false);
+            this.uploadResult.set({
+              success: false,
+              message: err.error?.message || 'Hiba történt a feltöltés során.',
+            });
+          });
+        },
+      });
+  }
+
+  // ============ Private helpers ============
+
+  private setFile(file: File): void {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      this.uploadResult.set({ success: false, message: 'Csak képfájlok engedélyezettek (JPG, PNG, WebP, HEIC).' });
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      this.uploadResult.set({ success: false, message: `A fájl túl nagy (max 100 MB).` });
+      return;
+    }
+    this.selectedFile.set(file);
+    this.uploadResult.set(null);
+  }
+
+  private loadPersons(projectId: number): void {
+    this.loadingPersons.set(true);
+    const url = `${environment.apiUrl}/partner/projects/${projectId}/persons`;
+
+    this.http.get<{ data: PersonItem[] }>(url)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.ngZone.run(() => {
+            this.persons.set(res.data || []);
+            this.loadingPersons.set(false);
+          });
+        },
+        error: () => {
+          this.ngZone.run(() => this.loadingPersons.set(false));
+        },
+      });
   }
 
   private syncBorderKey(): string {
@@ -255,28 +438,23 @@ export class OverlayComponent implements OnInit {
     } catch { /* ignore */ }
   }
 
-  /** Click-through: atlatszo terulet atenged kattintast a mogotte levo appnak */
   private setupClickThrough(): void {
     if (!window.electronAPI) return;
     document.addEventListener('mousemove', (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      // Ha a body/html-re mutat (atlatszo terulet) → atenged
       if (target === document.documentElement || target === document.body) {
         window.electronAPI!.overlay.setIgnoreMouseEvents(true);
       }
     });
-    // Minden lathato elem mouseenter-jere visszakapcsol
     document.addEventListener('mouseenter', () => {
       window.electronAPI!.overlay.setIgnoreMouseEvents(false);
     }, true);
   }
 
-  /** Collapse hover: egér rajta → timer törlés */
   onCollapseEnter(): void {
     this.clearCollapseTimer();
   }
 
-  /** Collapse hover vége: timer újraindítás */
   onCollapseLeave(): void {
     if (this.openSubmenu()) {
       this.resetCollapseTimer(this.openSubmenu());
@@ -320,12 +498,10 @@ export class OverlayComponent implements OnInit {
     window.electronAPI?.overlay.hide();
   }
 
-  /** Aktiv doc mappajaank megnyitasa Finder-ben */
   openActiveDocDir(): void {
     this.onCommand('ps-open-workdir');
   }
 
-  /** Turbo mod: 1mp polling 2 percig, utana visszaall 5mp-re */
   toggleTurbo(): void {
     if (this.isTurbo()) {
       this.stopTurbo();
@@ -364,6 +540,10 @@ export class OverlayComponent implements OnInit {
       this.ngZone.run(() => {
         this.context.set(ctx);
         this.syncWithBorder.set(this.loadSyncBorderForProject(ctx.projectId));
+        // Uj projekt → szemely lista ujratoltese
+        if (ctx.projectId && this.uploadPanelOpen()) {
+          this.loadPersons(ctx.projectId);
+        }
       });
     });
     this.destroyRef.onDestroy(cleanup);
@@ -385,7 +565,6 @@ export class OverlayComponent implements OnInit {
     this.destroyRef.onDestroy(cleanup);
   }
 
-  /** IPC-bol jovo doc info merge — megőrzi a selectedLayers-t ha az IPC nem kuldi */
   private mergeActiveDoc(doc: ActiveDocInfo): void {
     const current = this.activeDoc();
     this.activeDoc.set({

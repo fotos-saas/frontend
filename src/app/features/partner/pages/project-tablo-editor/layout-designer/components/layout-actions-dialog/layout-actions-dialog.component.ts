@@ -43,9 +43,9 @@ export class LayoutActionsDialogComponent {
   readonly executed = output<void>();
 
   readonly actionOptions: PsSelectOption[] = [
-    { id: 'upload-to-everyone', label: 'Kepek feltoltese mindenkihez' },
-    { id: 'upload-individual', label: 'Kepfeltoltes kulon-kulon' },
-    { id: 'resize', label: 'Atmeretezes' },
+    { id: 'upload-to-everyone', label: 'Képek feltöltése mindenkihez' },
+    { id: 'upload-individual', label: 'Képfeltöltés külön-külön' },
+    { id: 'resize', label: 'Átméretezés' },
   ];
 
   readonly selectedAction = signal<string>('upload-to-everyone');

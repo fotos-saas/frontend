@@ -490,11 +490,9 @@ export class OverlayComponent implements OnInit {
         const orderedSlugs = res.ordered_names.map(human => {
           return slugToHuman.get(human.toLowerCase()) || slugNames.find(s => this.slugToHumanName(s).toLowerCase() === human.toLowerCase()) || human;
         });
-        const jsxResult = await this.reorderLayersByNames(orderedSlugs);
-        // Debug: sorrend + JSX output kiírása
+        await this.reorderLayersByNames(orderedSlugs);
         const orderList = res.ordered_names.map((n, i) => `${i + 1}. ${n}`).join(' → ');
-        const jsxOut = jsxResult?.output || jsxResult?.error || 'no output';
-        const msg = `Sorrend: ${orderList} | JSX: ${jsxOut}`;
+        const msg = `Rendezve: ${orderList}`;
         this.ngZone.run(() => this.customOrderResult.set({ success: true, message: msg }));
       } else {
         this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' }));

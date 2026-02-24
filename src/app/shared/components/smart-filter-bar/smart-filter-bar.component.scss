@@ -133,111 +133,6 @@
   animation: sortFadeIn 0.15s ease;
 }
 
-// === DESKTOP SORT BUTTON ===
-.desktop-sort-wrapper {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.desktop-sort-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 12px;
-  background: #ffffff;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 10px;
-  cursor: pointer;
-  color: get-color('slate', 500);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  white-space: nowrap;
-  @include transition-fast;
-
-  &:hover {
-    background: get-color('slate', 50);
-    border-color: get-color('slate', 300);
-    color: get-color('slate', 700);
-  }
-
-  &--active {
-    border-color: var(--color-primary, #1e3a5f);
-    color: var(--color-primary, #1e3a5f);
-    background: rgba(var(--color-primary-rgb, 30, 58, 95), 0.05);
-  }
-}
-
-.desktop-sort-label {
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.desktop-sort-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  min-width: 180px;
-  background: #ffffff;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 8px;
-  @include shadow-lg;
-  z-index: 100;
-  overflow: hidden;
-  animation: sortFadeIn 0.15s ease;
-}
-
-.desktop-sort-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 12px;
-  border: none;
-  background: transparent;
-  font-size: 0.8125rem;
-  color: get-color('gray', 700);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.1s ease;
-
-  &:hover {
-    background: get-color('slate', 100);
-  }
-
-  &--active {
-    background: #e0f2fe;
-    color: var(--color-primary, #1e3a5f);
-    font-weight: 500;
-
-    &:hover {
-      background: #bae6fd;
-    }
-  }
-}
-
-.desktop-sort-dir {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  color: get-color('slate', 400);
-  @include transition-fast;
-  margin-left: auto;
-  flex-shrink: 0;
-
-  &:hover {
-    background: get-color('slate', 100);
-    color: var(--color-primary, #1e3a5f);
-  }
-}
-
 // === MOBILE SORT BAR ===
 .mobile-sort-bar {
   display: none;
@@ -405,9 +300,6 @@
     display: block;
   }
 
-  .desktop-sort-wrapper {
-    display: none;
-  }
 }
 
 // === REDUCED MOTION ===

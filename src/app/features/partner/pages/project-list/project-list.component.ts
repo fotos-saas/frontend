@@ -198,6 +198,14 @@ export class PartnerProjectListComponent implements OnInit {
     }))
   );
 
+  toggleOrderSort(): void {
+    if (this.filterState.sortBy() === 'order_submitted_at') {
+      this.filterState.setSortBy('created_at');
+    } else {
+      this.filterState.setSortBy('order_submitted_at');
+    }
+  }
+
   ngOnInit(): void {
     this.loadProjects();
     this.checkSyncInBackground();

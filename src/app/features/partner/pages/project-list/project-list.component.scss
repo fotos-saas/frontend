@@ -50,6 +50,41 @@
   align-items: center;
 }
 
+// === Leadva rendezés toggle gomb ===
+.sort-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  background: #ffffff;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 10px;
+  cursor: pointer;
+  color: get-color('slate', 500);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: get-color('slate', 50);
+    border-color: get-color('slate', 300);
+    color: get-color('slate', 700);
+  }
+
+  &--active {
+    border-color: var(--color-primary, #1e3a5f);
+    color: var(--color-primary, #1e3a5f);
+    background: rgba(var(--color-primary-rgb, 30, 58, 95), 0.06);
+
+    &:hover {
+      background: rgba(var(--color-primary-rgb, 30, 58, 95), 0.1);
+    }
+  }
+}
+
 /* Project List */
 .project-grid {
   display: flex;
@@ -64,6 +99,12 @@
 }
 
 /* Responsive */
+@media (max-width: 640px) {
+  .sort-toggle-btn {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .filter-controls {
     display: none;

@@ -52,7 +52,6 @@ export class SmartFilterBarComponent {
   // === INTERNAL STATE ===
   readonly mobileSortOpen = signal(false);
   readonly mobileFiltersOpen = signal(false);
-  readonly desktopSortOpen = signal(false);
 
   /** Van-e aktív keresési szöveg */
   readonly hasSearchText = computed(() => !!this.filterState().search());
@@ -127,29 +126,11 @@ export class SmartFilterBarComponent {
     this.mobileSortOpen.update(v => !v);
   }
 
-  /** Desktop sort dropdown toggle */
-  toggleDesktopSortDropdown(): void {
-    this.desktopSortOpen.update(v => !v);
-  }
-
-  /** Desktop sort: opció kiválasztása */
-  selectDesktopSortOption(value: string): void {
-    this.desktopSortOpen.set(false);
-    this.filterState().setSortBy(value);
-  }
-
-  /** Desktop sort: irány váltás (stopPropagation, hogy ne záródjon a dropdown) */
-  toggleDesktopSortDir(event: MouseEvent): void {
-    event.stopPropagation();
-    this.filterState().toggleSortDir();
-  }
-
   /** Dokumentum kattintás - dropdown-ok bezárása */
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.mobileSortOpen.set(false);
       this.mobileFiltersOpen.set(false);
-      this.desktopSortOpen.set(false);
     }
   }
 }

@@ -61,7 +61,19 @@
     [filterConfigs]="filterConfigs"
     [visibleFilterCount]="2"
     [sortConfig]="sortDef"
-  />
+  >
+    <button
+      filterBarExtra
+      type="button"
+      class="sort-toggle-btn"
+      [class.sort-toggle-btn--active]="filterState.sortBy() === 'order_submitted_at'"
+      (click)="toggleOrderSort()"
+      [matTooltip]="filterState.sortBy() === 'order_submitted_at' ? 'Rendezés: leadás dátuma' : 'Rendezés leadás dátuma szerint'"
+    >
+      <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="16" />
+      Leadva
+    </button>
+  </app-smart-filter-bar>
 
   <!-- Lista -->
   @if (filterState.loading()) {

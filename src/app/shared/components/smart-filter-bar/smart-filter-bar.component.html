@@ -60,49 +60,7 @@
     </div>
   }
 
-  <!-- Desktop rendezés gomb -->
-  @if (sortConfig(); as sort) {
-    <div class="desktop-sort-wrapper">
-      <button
-        type="button"
-        class="desktop-sort-btn"
-        [class.desktop-sort-btn--active]="desktopSortOpen()"
-        (click)="toggleDesktopSortDropdown()"
-        matTooltip="Rendezés"
-      >
-        <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="16" />
-        <span class="desktop-sort-label">{{ currentSortLabel() }}</span>
-        <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="14" />
-      </button>
-      @if (desktopSortOpen()) {
-        <div class="desktop-sort-menu">
-          @for (opt of sort.options; track opt.value) {
-            <button
-              type="button"
-              class="desktop-sort-item"
-              [class.desktop-sort-item--active]="filterState().sortBy() === opt.value"
-              (click)="selectDesktopSortOption(opt.value)"
-            >
-              @if (filterState().sortBy() === opt.value) {
-                <lucide-icon [name]="ICONS.CHECK" [size]="14" />
-              }
-              {{ opt.label }}
-              @if (filterState().sortBy() === opt.value) {
-                <button
-                  type="button"
-                  class="desktop-sort-dir"
-                  (click)="toggleDesktopSortDir($event)"
-                  [attr.aria-label]="filterState().sortDir() === 'asc' ? 'Növekvő sorrend' : 'Csökkenő sorrend'"
-                >
-                  <lucide-icon [name]="filterState().sortDir() === 'asc' ? ICONS.ARROW_UP : ICONS.ARROW_DOWN" [size]="14" />
-                </button>
-              }
-            </button>
-          }
-        </div>
-      }
-    </div>
-  }
+  <ng-content select="[filterBarExtra]" />
 </div>
 
 <!-- Mobil szűrők (összecsukható) -->

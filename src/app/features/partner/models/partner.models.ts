@@ -669,5 +669,41 @@ export interface PersonPhotosResponse {
   hasOverride: boolean;
 }
 
+/**
+ * Partner e-mail fiók (IMAP/SMTP) beállítások
+ */
+export interface PartnerEmailAccount {
+  id: number;
+  tablo_partner_id: number;
+  name: string;
+  smtp_host: string;
+  smtp_port: number;
+  smtp_encryption: string;
+  smtp_username: string;
+  smtp_password?: string;
+  smtp_from_address: string;
+  smtp_from_name: string;
+  imap_host: string;
+  imap_port: number;
+  imap_encryption: string;
+  imap_username: string;
+  imap_password?: string;
+  imap_sent_folder: string;
+  imap_save_sent: boolean;
+  is_active: boolean;
+  last_test_at: string | null;
+  last_test_status: 'ok' | 'failed' | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * E-mail fiók teszt eredmény
+ */
+export interface EmailAccountTestResult {
+  smtp: { ok: boolean; error: string | null };
+  imap: { ok: boolean; error: string | null };
+}
+
 // Re-export QrCode from shared
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';

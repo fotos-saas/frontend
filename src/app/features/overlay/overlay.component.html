@@ -131,7 +131,8 @@
 
 <!-- Upload Panel (toolbar FELETT, a flex flow-ban előtte) -->
 @if (uploadPanelOpen()) {
-<div class="upload-panel">
+<div class="upload-panel" [style.height.px]="panelHeight()">
+  <div class="upload-panel__resize" (mousedown)="onResizeStart($event)"></div>
   <div class="upload-panel__header">
     <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
     <span>Fotó feltöltés</span>

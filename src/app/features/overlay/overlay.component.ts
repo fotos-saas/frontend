@@ -78,6 +78,13 @@ export class OverlayComponent implements OnInit {
   readonly dragOver = signal(false);
   readonly loadingPersons = signal(false);
   readonly selectedFile = signal<File | null>(null);
+  readonly panelHeight = signal(300); // default panel magasság
+  private resizing = false;
+  private resizeStartY = 0;
+  private resizeStartH = 0;
+
+  private static readonly PANEL_MIN_H = 200;
+  private static readonly PANEL_MAX_H_OFFSET = 120; // toolbar + padding + margó
 
   readonly filteredPersons = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -296,6 +303,32 @@ export class OverlayComponent implements OnInit {
     this.selectedFile.set(null);
     this.uploadResult.set(null);
     this.searchQuery.set('');
+  }
+
+  // ============ Resize panel ============
+
+  onResizeStart(event: MouseEvent): void {
+    event.preventDefault();
+    this.resizing = true;
+    this.resizeStartY = event.clientY;
+    this.resizeStartH = this.panelHeight();
+
+    const onMove = (e: MouseEvent) => {
+      if (!this.resizing) return;
+      const delta = this.resizeStartY - e.clientY; // felfelé húzás = pozitív
+      const maxH = window.innerHeight - OverlayComponent.PANEL_MAX_H_OFFSET;
+      const newH = Math.max(OverlayComponent.PANEL_MIN_H, Math.min(maxH, this.resizeStartH + delta));
+      this.ngZone.run(() => this.panelHeight.set(newH));
+    };
+
+    const onUp = () => {
+      this.resizing = false;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
   }
 
   onSearchInput(event: Event): void {

@@ -266,6 +266,8 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   // === PERSONS MODAL ===
 
+  private personsModalRef: { instance: { loadPersons: (silent?: boolean) => void } } | null = null;
+
   async openPersonsModalDialog(typeFilter?: 'student' | 'teacher'): Promise<void> {
     const container = this.personsModalContainer();
     if (!container || !this.projectData()) return;
@@ -280,12 +282,15 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     if (typeFilter) {
       ref.setInput('initialTypeFilter', typeFilter);
     }
+    this.personsModalRef = ref;
     ref.instance.close.subscribe(() => {
       container.clear();
+      this.personsModalRef = null;
       this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
     });
     ref.instance.openUploadWizard.subscribe((personType) => {
       container.clear();
+      this.personsModalRef = null;
       this.openUploadWizardDialog(personType === 'student' ? 'students' : 'teachers');
     });
     ref.instance.addPersonsRequested.subscribe((type) => {
@@ -307,6 +312,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     ref.instance.close.subscribe(() => container.clear());
     ref.instance.personsAdded.subscribe(() => {
       this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
+      this.personsModalRef?.instance.loadPersons(true);
     });
   }
 

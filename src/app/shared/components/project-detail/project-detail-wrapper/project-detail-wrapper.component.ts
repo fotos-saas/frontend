@@ -29,6 +29,7 @@ import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-
 import { ProjectSettingsTabComponent } from '../project-settings-tab/project-settings-tab.component';
 import { ProjectUsersTabComponent } from '../project-users-tab/project-users-tab.component';
 import { ProjectPrintTabComponent, PrintFileUploadEvent, PrintFileDownloadEvent, PrintFileDeleteEvent } from '../project-print-tab/project-print-tab.component';
+import { ProjectEmailsTabComponent } from '../project-emails-tab/project-emails-tab.component';
 import {
   ProjectSamplesTabComponent,
   PackageDialogRequest,
@@ -70,6 +71,7 @@ import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persiste
     ProjectSamplesTabComponent,
     ProjectSettingsTabComponent,
     ProjectPrintTabComponent,
+    ProjectEmailsTabComponent,
     ConfirmDialogComponent,
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
@@ -168,7 +170,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
     this.facade.setMapFn(this.mapToDetailData());
 
-    initTabFromFragment(this.activeTab, this.location, ['overview', 'users', 'samples', 'settings', 'print'] as const, 'overview');
+    initTabFromFragment(this.activeTab, this.location, ['overview', 'emails', 'users', 'samples', 'settings', 'print'] as const, 'overview');
 
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id || isNaN(id) || id < 1) {

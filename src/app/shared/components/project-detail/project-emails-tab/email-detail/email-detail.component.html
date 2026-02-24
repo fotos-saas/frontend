@@ -1,0 +1,110 @@
+@if (loading()) {
+  <div class="flex items-center justify-center py-12">
+    <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+  </div>
+} @else {
+  <div class="email-detail">
+    <!-- Fejléc -->
+    <div class="email-detail__header">
+      <button class="email-detail__back" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+        <span>Vissza</span>
+      </button>
+
+      <div class="email-detail__actions">
+        @if (email().needsReply && !email().isReplied) {
+          <button class="action-btn action-btn--secondary" (click)="markReplied.emit()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            <span>Megválaszoltnak jelölés</span>
+          </button>
+        }
+        <button class="action-btn action-btn--primary" (click)="reply.emit()">
+          <lucide-icon [name]="ICONS.REPLY" [size]="14" />
+          <span>Válasz</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tárgy -->
+    <h3 class="email-detail__subject">{{ email().subject }}</h3>
+
+    <!-- Meta infó -->
+    <div class="email-detail__meta">
+      <div class="email-detail__from">
+        <span class="label">Feladó:</span>
+        <span class="value">{{ email().fromName || email().fromEmail }}</span>
+        @if (email().fromName) {
+          <span class="email">&lt;{{ email().fromEmail }}&gt;</span>
+        }
+      </div>
+      <div class="email-detail__to">
+        <span class="label">Címzett:</span>
+        <span class="value">{{ email().toName || email().toEmail }}</span>
+      </div>
+      @if (email().cc && email().cc.length > 0) {
+        <div class="email-detail__cc">
+          <span class="label">CC:</span>
+          @for (cc of email().cc; track cc.email) {
+            <span class="value">{{ cc.name || cc.email }}</span>
+          }
+        </div>
+      }
+      <div class="email-detail__date">
+        <span class="label">Dátum:</span>
+        <span class="value">{{ email().emailDate | date:'yyyy. MMMM d. HH:mm' }}</span>
+      </div>
+    </div>
+
+    <!-- Csatolmányok -->
+    @if (email().hasAttachments) {
+      <div class="email-detail__attachments">
+        <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
+        <span>{{ email().attachmentCount }} csatolmány</span>
+        @for (att of email().attachments; track att.filename) {
+          <span class="attachment-name">{{ att.filename }}</span>
+        }
+      </div>
+    }
+
+    <!-- Body -->
+    <div class="email-detail__body">
+      @if (email().bodyHtml) {
+        <div [innerHTML]="email().bodyHtml | safeHtml"></div>
+      } @else if (email().bodyText) {
+        <pre class="email-detail__text">{{ email().bodyText }}</pre>
+      } @else {
+        <p class="text-gray-400 italic">Nincs tartalom</p>
+      }
+    </div>
+
+    <!-- Thread (korábbi emailek) -->
+    @if (thread().length > 0) {
+      <div class="email-detail__thread">
+        <h4 class="thread-title">Korábbi levelek ({{ thread().length }})</h4>
+        @for (threadEmail of thread(); track threadEmail.id) {
+          <details class="thread-item">
+            <summary class="thread-item__summary">
+              <div class="thread-item__info">
+                @if (threadEmail.direction === 'inbound') {
+                  <lucide-icon [name]="ICONS.ARROW_DOWN_LEFT" [size]="12" class="text-blue-500" />
+                } @else {
+                  <lucide-icon [name]="ICONS.ARROW_UP_RIGHT" [size]="12" class="text-green-500" />
+                }
+                <span class="thread-item__sender">{{ threadEmail.fromName || threadEmail.fromEmail }}</span>
+                <span class="thread-item__date">{{ threadEmail.emailDate | date:'MM.dd. HH:mm' }}</span>
+              </div>
+              <span class="thread-item__preview">{{ threadEmail.bodyPreview }}</span>
+            </summary>
+            <div class="thread-item__body">
+              @if (threadEmail.bodyHtml) {
+                <div [innerHTML]="threadEmail.bodyHtml | safeHtml"></div>
+              } @else if (threadEmail.bodyText) {
+                <pre class="email-detail__text">{{ threadEmail.bodyText }}</pre>
+              }
+            </div>
+          </details>
+        }
+      </div>
+    }
+  </div>
+}

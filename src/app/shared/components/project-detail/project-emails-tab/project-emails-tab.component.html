@@ -1,0 +1,125 @@
+<!-- Statisztika fejléc -->
+@if (state.stats(); as stats) {
+  <div class="stats-bar">
+    <span class="stat">
+      <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+      {{ stats.total }} email
+    </span>
+    @if (stats.unread > 0) {
+      <span class="stat stat--highlight">
+        {{ stats.unread }} olvasatlan
+      </span>
+    }
+    @if (stats.needsReply > 0) {
+      <span class="stat stat--warning">
+        <lucide-icon [name]="ICONS.REPLY" [size]="14" />
+        {{ stats.needsReply }} válaszra vár
+      </span>
+    }
+  </div>
+}
+
+<!-- Detail nézet (ha van kiválasztott email) -->
+@if (state.selectedEmail(); as selectedEmail) {
+  <app-email-detail
+    [email]="selectedEmail"
+    [thread]="state.thread()"
+    [loading]="state.loadingDetail()"
+    (reply)="onReply()"
+    (markReplied)="onMarkReplied()"
+    (close)="onCloseDetail()"
+  />
+
+  <!-- Válasz panel -->
+  @if (state.showReply()) {
+    <app-email-reply
+      [email]="selectedEmail"
+      [sending]="state.sending()"
+      (sendReply)="onSendReply($event)"
+      (cancel)="onCancelReply()"
+    />
+  }
+} @else {
+  <!-- Szűrők + Keresés -->
+  <div class="toolbar">
+    <div class="filter-chips">
+      @for (f of filters; track f.id) {
+        <button
+          class="chip"
+          [class.chip--active]="state.filter() === f.id"
+          (click)="onFilterChange(f.id)"
+        >
+          {{ f.label }}
+          @if (f.id === 'needs_reply' && state.needsReplyCount() > 0) {
+            <span class="chip-badge">{{ state.needsReplyCount() }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="14" />
+      <input
+        type="text"
+        placeholder="Keresés tárgy, feladó..."
+        [value]="state.search()"
+        (input)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Email lista -->
+  @if (state.loading()) {
+    <div class="flex flex-col items-center justify-center py-12">
+      <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+      <p class="mt-3 text-gray-500 text-sm">Emailek betöltése...</p>
+    </div>
+  } @else if (!state.hasEmails()) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.MAIL" [size]="40" class="text-gray-300" />
+      <p class="empty-state__title">Nincsenek emailek</p>
+      <p class="empty-state__desc">
+        @if (state.filter() !== 'all' || state.search()) {
+          A szűrési feltételeknek nincs megfelelő email.
+        } @else {
+          Ehhez a projekthez még nem érkezett email.
+        }
+      </p>
+    </div>
+  } @else {
+    <div class="email-list">
+      @for (email of state.emails(); track email.id; let i = $index) {
+        <app-email-list-item
+          [email]="email"
+          [isSelected]="state.selectedEmail()?.id === email.id"
+          (select)="onSelectEmail($event)"
+          [style.animation-delay]="i * 0.03 + 's'"
+        />
+      }
+    </div>
+
+    <!-- Paginálás -->
+    @if (state.lastPage() > 1) {
+      <div class="pagination">
+        <button
+          class="pagination__btn"
+          [disabled]="state.page() <= 1"
+          (click)="onPageChange(state.page() - 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+        </button>
+        <span class="pagination__info">
+          {{ state.page() }} / {{ state.lastPage() }}
+          <span class="pagination__total">({{ state.total() }} email)</span>
+        </span>
+        <button
+          class="pagination__btn"
+          [disabled]="state.page() >= state.lastPage()"
+          (click)="onPageChange(state.page() + 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+}

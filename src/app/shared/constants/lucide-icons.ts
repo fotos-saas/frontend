@@ -231,6 +231,10 @@ import {
   SquareDashedBottom,
   Component,
   Blend,
+  // Email
+  ArrowDownLeft,
+  ArrowUpRight,
+  Reply,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -458,4 +462,8 @@ export const LUCIDE_ICONS_MAP = {
   SquareDashedBottom,
   Component,
   Blend,
+  // Email
+  ArrowDownLeft,
+  ArrowUpRight,
+  Reply,
 };

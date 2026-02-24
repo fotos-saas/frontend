@@ -342,6 +342,11 @@ export const ICONS = {
   HOURGLASS: 'hourglass',
   TIMER: 'timer',
 
+  // Email
+  ARROW_DOWN_LEFT: 'arrow-down-left',
+  ARROW_UP_RIGHT: 'arrow-up-right',
+  REPLY: 'reply',
+
   // Monitoring & Export
   ACTIVITY: 'activity',
   ARCHIVE: 'archive',

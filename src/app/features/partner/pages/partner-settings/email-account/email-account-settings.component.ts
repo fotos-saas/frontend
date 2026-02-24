@@ -52,9 +52,9 @@ export class EmailAccountSettingsComponent implements OnInit {
   imapSaveSent = true;
 
   readonly encryptionOptions = [
-    { value: 'tls', label: 'TLS' },
-    { value: 'ssl', label: 'SSL' },
-    { value: 'none', label: 'Nincs' },
+    { id: 'tls', label: 'TLS' },
+    { id: 'ssl', label: 'SSL' },
+    { id: 'none', label: 'Nincs' },
   ];
 
   ngOnInit(): void {

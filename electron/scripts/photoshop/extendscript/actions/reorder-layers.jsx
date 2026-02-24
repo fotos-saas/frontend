@@ -96,38 +96,19 @@ function getPositionSlots(layers) {
   return slots;
 }
 
-// Translate layer: aktualis bounds-bol szamolja a delta-t
+// Translate layer: DOM layer.translate() — megbizhato Smart Objecteknel is
+// (arrange-grid.jsx mintajara, az ActionManager "move" parancs nem megbizhato)
 function translateLayerTo(layerId, targetX, targetY) {
-  // Kivalasztjuk a layert es kiolvasuk aktualis poziciot
-  var desc2 = new ActionDescriptor();
-  var ref2 = new ActionReference();
-  ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
-  desc2.putReference(charIDToTypeID("null"), ref2);
-  executeAction(charIDToTypeID("slct"), desc2, DialogModes.NO);
+  // Layer kivalasztasa (selectLayerById a utils.jsx-bol jon)
+  selectLayerById(layerId);
+  var layer = app.activeDocument.activeLayer;
 
-  var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-  var desc = executeActionGet(ref);
-  var boundsKey = stringIDToTypeID("boundsNoEffects");
-  var b;
-  if (desc.hasKey(boundsKey)) {
-    b = desc.getObjectValue(boundsKey);
-  } else {
-    b = desc.getObjectValue(stringIDToTypeID("bounds"));
-  }
-  var curX = b.getUnitDoubleValue(stringIDToTypeID("left"));
-  var curY = b.getUnitDoubleValue(stringIDToTypeID("top"));
-
-  var dx = targetX - curX;
-  var dy = targetY - curY;
+  // Aktualis pozicio kiolvasasa (boundsNoEffects)
+  var bnfe = getBoundsNoEffects(layerId);
+  var dx = targetX - bnfe.left;
+  var dy = targetY - bnfe.top;
   if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-    // ActionManager translate — gyorsabb mint DOM translate
-    var moveDesc = new ActionDescriptor();
-    var posDesc = new ActionDescriptor();
-    posDesc.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), Math.round(dx));
-    posDesc.putUnitDouble(charIDToTypeID("Vrtc"), charIDToTypeID("#Pxl"), Math.round(dy));
-    moveDesc.putObject(charIDToTypeID("T   "), charIDToTypeID("Ofst"), posDesc);
-    executeAction(charIDToTypeID("move"), moveDesc, DialogModes.NO);
+    layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
   }
 }
 
@@ -166,19 +147,6 @@ var __result = (function () {
 
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
-
-    // Multi-select feloldasa — kivalasztunk EGYETLEN layert hogy ne legyen tobbszoros kijeleoles
-    // Ez szukseges, mert a "Move" parancs nem mukodik multi-select eseten
-    try {
-      var deselRef = new ActionReference();
-      deselRef.putIndex(charIDToTypeID("Lyr "), 1);
-      var deselDesc = new ActionDescriptor();
-      deselDesc.putReference(charIDToTypeID("null"), deselRef);
-      deselDesc.putBoolean(charIDToTypeID("MkVs"), false);
-      executeAction(charIDToTypeID("slct"), deselDesc, DialogModes.NO);
-    } catch (deselErr) {
-      // Ha nem sikerul, nem baj — folytatjuk
-    }
 
     var allLayers = [];
     if (groupFilter === "All" || groupFilter === "Students") {

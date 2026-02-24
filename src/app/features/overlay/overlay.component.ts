@@ -560,9 +560,10 @@ export class OverlayComponent implements OnInit {
     this.unmatchedFiles.update(files => [...files, removedFile]);
   }
 
-  batchUpload(): void {
+  /** Feltöltés + PS behelyezés egy lépésben */
+  uploadAndPlace(): void {
     const pid = this.context().projectId;
-    if (!pid || this.batchUploading()) return;
+    if (!pid || this.batchUploading() || this.placing()) return;
 
     this.batchUploading.set(true);
     this.batchResult.set(null);
@@ -579,19 +580,36 @@ export class OverlayComponent implements OnInit {
       }),
     ).pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (updated) => {
+        next: async (updated) => {
           this.ngZone.run(() => {
             this.psLayers.set(updated);
             this.batchUploading.set(false);
-            const doneCount = updated.filter(l => l.uploadStatus === 'done').length;
-            const errCount = updated.filter(l => l.uploadStatus === 'error').length;
-            this.batchResult.set({
-              success: errCount === 0,
-              message: errCount > 0
-                ? `${doneCount} sikeres, ${errCount} hibás`
-                : `${doneCount} fotó feltöltve`,
-            });
           });
+
+          const doneCount = updated.filter(l => l.uploadStatus === 'done').length;
+          const errCount = updated.filter(l => l.uploadStatus === 'error').length;
+
+          // Ha van sikeres feltöltés, behelyezés PS-be
+          if (doneCount > 0) {
+            this.ngZone.run(() => this.placing.set(true));
+            const result = await this.uploadService.placePhotosInPs(updated);
+            this.ngZone.run(() => {
+              this.placing.set(false);
+              this.batchResult.set({
+                success: result.success && errCount === 0,
+                message: result.success
+                  ? (errCount > 0 ? `${doneCount} behelyezve, ${errCount} hibás` : `${doneCount} fotó behelyezve`)
+                  : (result.error || 'Hiba a behelyezés során'),
+              });
+            });
+          } else {
+            this.ngZone.run(() => {
+              this.batchResult.set({
+                success: false,
+                message: errCount > 0 ? `${errCount} feltöltés hibás` : 'Nincs feltölthető fotó',
+              });
+            });
+          }
         },
         error: () => {
           this.ngZone.run(() => this.batchUploading.set(false));

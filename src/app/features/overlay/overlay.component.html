@@ -250,34 +250,23 @@
           </div>
         }
 
-        <!-- Akció gombok -->
+        <!-- Akció gomb -->
         <div class="upload-panel__batch-actions">
           <button
-            class="upload-panel__btn"
-            [disabled]="batchUploading() || uploadableLayers().length === 0"
-            (click)="batchUpload()"
+            class="upload-panel__btn upload-panel__btn--green"
+            [disabled]="batchUploading() || placing() || uploadableLayers().length === 0"
+            (click)="uploadAndPlace()"
             type="button"
           >
             @if (batchUploading()) {
               <span class="upload-panel__spinner"></span>
               Feltöltés ({{ batchProgress().done }}/{{ batchProgress().total }})
+            } @else if (placing()) {
+              <span class="upload-panel__spinner"></span>
+              Behelyezés PS-be...
             } @else {
               <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
-              Feltöltés ({{ uploadableLayers().length }})
-            }
-          </button>
-          <button
-            class="upload-panel__btn upload-panel__btn--green"
-            [disabled]="placing() || placableLayers().length === 0"
-            (click)="placeInPs()"
-            type="button"
-          >
-            @if (placing()) {
-              <span class="upload-panel__spinner"></span>
-              Behelyezés...
-            } @else {
-              <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="14" />
-              Behelyezés PS-be ({{ placableLayers().length }})
+              Feltöltés + Behelyezés ({{ uploadableLayers().length }})
             }
           </button>
         </div>

@@ -274,16 +274,40 @@ export class OverlayUploadService {
   }
 
   /**
+   * Fajlnev slug-bol eltavolitja a vezeto szamokat (pl. "01farago" → "farago").
+   */
+  private stripLeadingNumbers(slug: string): string {
+    return slug.replace(/^\d+[-]?/, '');
+  }
+
+  /**
    * Matching score 0-1 kozott.
-   * 1 = pontos match, 0.9 = egyik tartalmazza a masikat, 0 = nem parosithato.
+   * 1 = pontos match, 0.9 = tartalmazza, 0.85 = szo-szintu match, 0 = nem parosithato.
    */
   private matchScore(fileSlug: string, layerSlug: string): number {
     if (fileSlug === layerSlug) return 1;
+
+    // Vezeto szamok nelkul is probaljuk (pl. "01farago" → "farago")
+    const fileClean = this.stripLeadingNumbers(fileSlug);
+    const layerClean = this.stripLeadingNumbers(layerSlug);
+    if (fileClean && fileClean === layerClean) return 1;
+
+    // Tartalmazas (teljes slug)
     if (fileSlug.includes(layerSlug) || layerSlug.includes(fileSlug)) return 0.9;
-    // Levenshtein-jellegű ellenőrzés rövid nevek esetén
-    if (Math.abs(fileSlug.length - layerSlug.length) <= 2) {
-      const longer = fileSlug.length >= layerSlug.length ? fileSlug : layerSlug;
-      const shorter = fileSlug.length < layerSlug.length ? fileSlug : layerSlug;
+    if (fileClean && (fileClean.includes(layerClean) || layerClean.includes(fileClean))) return 0.9;
+
+    // Szo-szintu: a fajlnev szavai kozul legalabb 1 megegyezik a layer szavaival
+    const fileWords = fileClean.split('-').filter(w => w.length > 1);
+    const layerWords = layerClean.split('-').filter(w => w.length > 1);
+    const commonWords = fileWords.filter(w => layerWords.some(lw => lw.startsWith(w) || w.startsWith(lw)));
+    if (commonWords.length > 0 && commonWords.length >= Math.min(fileWords.length, 1)) {
+      return 0.85;
+    }
+
+    // Levenshtein rövid nevek esetén
+    if (Math.abs(fileClean.length - layerClean.length) <= 2) {
+      const longer = fileClean.length >= layerClean.length ? fileClean : layerClean;
+      const shorter = fileClean.length < layerClean.length ? fileClean : layerClean;
       let matches = 0;
       for (let i = 0; i < shorter.length; i++) {
         if (shorter[i] === longer[i]) matches++;

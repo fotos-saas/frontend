@@ -222,8 +222,12 @@
         @if (unmatchedFiles().length > 0) {
           <div class="upload-panel__unmatched">
             <span class="upload-panel__unmatched-label">Nem párosított ({{ unmatchedFiles().length }}):</span>
-            <button class="upload-panel__unmatched-match" (click)="retrySmartMatch()" type="button" data-tip="Intelligens párosítás">
-              <lucide-icon [name]="ICONS.SPARKLES" [size]="11" />
+            <button class="upload-panel__unmatched-match" [disabled]="matching()" (click)="retrySmartMatch()" type="button" data-tip="Intelligens párosítás">
+              @if (matching()) {
+                <span class="upload-panel__spinner"></span>
+              } @else {
+                <lucide-icon [name]="ICONS.SPARKLES" [size]="11" />
+              }
               Párosítás
             </button>
             <button class="upload-panel__unmatched-clear" (click)="clearUnmatchedFiles()" type="button" data-tip="Lista törlése">

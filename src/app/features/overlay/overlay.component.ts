@@ -100,6 +100,7 @@ export class OverlayComponent implements OnInit {
   readonly placing = signal(false);
   readonly unmatchedFiles = signal<File[]>([]);
   readonly selectedUnmatchedFile = signal<File | null>(null);
+  readonly matching = signal(false);
   readonly batchResult = signal<{ success: boolean; message: string } | null>(null);
 
   readonly hasPsLayers = computed(() => this.psLayers().length > 0);
@@ -512,10 +513,17 @@ export class OverlayComponent implements OnInit {
   /** Nem párosított fájlok újra-matchelése a persons lista alapján */
   retrySmartMatch(): void {
     const files = this.unmatchedFiles();
-    if (files.length === 0) return;
-    const { matched, unmatched } = this.uploadService.matchFilesToLayers(files, this.psLayers(), this.persons());
-    this.psLayers.set(matched);
-    this.unmatchedFiles.set(unmatched);
+    if (files.length === 0 || this.matching()) return;
+    this.matching.set(true);
+    // Kis delay hogy a spinner látható legyen
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        const { matched, unmatched } = this.uploadService.matchFilesToLayers(files, this.psLayers(), this.persons());
+        this.psLayers.set(matched);
+        this.unmatchedFiles.set(unmatched);
+        this.matching.set(false);
+      });
+    }, 300);
   }
 
   clearUnmatchedFiles(): void {

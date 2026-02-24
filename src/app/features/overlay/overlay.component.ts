@@ -499,7 +499,15 @@ export class OverlayComponent implements OnInit {
   }
 
   /** Teljes upload state reset — fájlok, státuszok, eredmények törlése */
-  resetUploadState(): void {
+  resetUploadState(event?: MouseEvent): void {
+    // Tooltip elrejtése (Electron overlay hover beragadás ellen)
+    if (event) {
+      const btn = (event.target as HTMLElement).closest('button');
+      if (btn) {
+        btn.removeAttribute('data-tip');
+        setTimeout(() => btn.setAttribute('data-tip', 'Reset'), 500);
+      }
+    }
     this.filePreviewCache.forEach(url => URL.revokeObjectURL(url));
     this.filePreviewCache.clear();
     this.unmatchedFiles.set([]);

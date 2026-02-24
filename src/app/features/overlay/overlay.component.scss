@@ -729,6 +729,12 @@
     bottom: auto;
     top: calc(100% + 4px);
   }
+
+  // Kattintás után tooltip eltüntetése (Electron hover beragadás ellen)
+  &:active[data-tip]::after {
+    opacity: 0 !important;
+    transition: none;
+  }
 }
 
 // ---- v2: Tallózás gomb ----

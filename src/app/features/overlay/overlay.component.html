@@ -146,10 +146,10 @@
     <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
     <span>Fotó feltöltés</span>
     @if (hasPsLayers()) {
-      <button class="upload-panel__refresh" (click)="resetUploadState()" type="button" data-tip="Állapot resetelése">
+      <button class="upload-panel__refresh" (click)="resetUploadState($event)" type="button" data-tip="Reset">
         <lucide-icon [name]="ICONS.UNDO" [size]="13" />
       </button>
-      <button class="upload-panel__refresh" (click)="refreshPsLayers()" type="button" data-tip="Frissítés PS-ből">
+      <button class="upload-panel__refresh" (click)="refreshPsLayers()" type="button" data-tip="Frissítés">
         <lucide-icon [name]="ICONS.REFRESH" [size]="13" />
       </button>
     }

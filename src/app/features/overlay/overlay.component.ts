@@ -356,7 +356,7 @@ export class OverlayComponent implements OnInit {
   async sortAbc(): Promise<void> {
     this.closeSubmenu();
     if (this.sorting()) return;
-    const names = await this.getImageLayerNames();
+    const names = await this.getSortableNames();
     if (names.length < 2) return;
 
     this.sorting.set(true);
@@ -374,7 +374,7 @@ export class OverlayComponent implements OnInit {
   async sortGender(): Promise<void> {
     this.closeSubmenu();
     if (this.sorting()) return;
-    const names = await this.getImageLayerNames();
+    const names = await this.getSortableNames();
     if (names.length < 2) return;
 
     this.sorting.set(true);
@@ -452,9 +452,9 @@ export class OverlayComponent implements OnInit {
     const text = this.customOrderText().trim();
     if (!text || this.sorting()) return;
 
-    const names = await this.getImageLayerNames();
+    const names = await this.getSortableNames();
     if (names.length < 2) {
-      this.customOrderResult.set({ success: false, message: 'Legalább 2 kép layer kell a rendezéshez.' });
+      this.customOrderResult.set({ success: false, message: 'Legalább 2 kijelölt kép layer kell a rendezéshez.' });
       return;
     }
 
@@ -483,7 +483,14 @@ export class OverlayComponent implements OnInit {
     this.ngZone.run(() => this.sorting.set(false));
   }
 
-  /** PS-ből kiszedi az Images layerek neveit */
+  /** Rendezéshez a nevek: kijelölt layerek nevei, vagy ha nincs kijelölés, az összes Images layer */
+  private async getSortableNames(): Promise<string[]> {
+    const selected = this.activeDoc().selectedLayerNames ?? [];
+    if (selected.length >= 2) return selected;
+    return this.getImageLayerNames();
+  }
+
+  /** PS-ből kiszedi az összes Images layerek neveit */
   private async getImageLayerNames(): Promise<string[]> {
     if (!window.electronAPI) return [];
     try {

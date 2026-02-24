@@ -252,6 +252,7 @@ export class OverlayComponent implements OnInit {
   }
 
   onDocumentClick(event: MouseEvent): void {
+    if (this.resizing) return;
     const target = event.target as HTMLElement;
     if (!target.closest('.toolbar-wrap')) {
       if (this.openSubmenu()) this.closeSubmenu();

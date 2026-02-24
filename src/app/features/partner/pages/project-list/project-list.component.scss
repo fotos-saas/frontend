@@ -54,15 +54,15 @@
 .sort-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 14px;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px;
   background: #ffffff;
   border: 1px solid get-color('slate', 200);
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: pointer;
   color: get-color('slate', 500);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
   transition: all 150ms ease;

@@ -101,9 +101,7 @@ export class TabloEditorDebugService {
     this.addLog('Electron API', 'Elérhető', 'ok');
 
     if (p && workDir) {
-      const folderName = this.ps.sanitizeName(
-        p.className ? `${p.name}-${p.className}` : p.name,
-      );
+      const folderName = this.ps.sanitizeName(p.name);
       outputPath = `${workDir}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
     } else {
       const dl = await api.getDownloadsPath();

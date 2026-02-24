@@ -340,11 +340,32 @@ export class SentryErrorHandler implements ErrorHandler {
   private sentryService = inject(SentryService);
 
   handleError(error: unknown): void {
+    // ChunkLoadError → deploy utáni elavult chunk, automatikus újratöltés
+    if (this.isChunkLoadError(error)) {
+      const reloadKey = 'chunk_reload';
+      const lastReload = sessionStorage.getItem(reloadKey);
+      // Max 1 reload per session, hogy ne legyen végtelen loop
+      if (!lastReload) {
+        sessionStorage.setItem(reloadKey, Date.now().toString());
+        window.location.reload();
+        return;
+      }
+    }
+
     // Hiba kuldese a Sentry-nek
     const eventId = this.sentryService.captureException(error);
 
     // Konzolra is kiirjuk (fejleszteshez)
     console.error('[SentryErrorHandler] Error captured:', error, 'Event ID:', eventId);
+  }
+
+  private isChunkLoadError(error: unknown): boolean {
+    const message = (error as { message?: string })?.message ?? '';
+    const rejectionMessage = (error as { rejection?: { message?: string } })?.rejection?.message ?? '';
+    return message.includes('ChunkLoadError') ||
+           message.includes('Loading chunk') ||
+           rejectionMessage.includes('ChunkLoadError') ||
+           rejectionMessage.includes('Loading chunk');
   }
 }
 

@@ -40,7 +40,7 @@
             [class.toolbar__btn--active]="openSubmenu() === item.id || (item.id === 'upload-photo' && uploadPanelOpen())"
             [disabled]="busyCommand() === item.id"
             (click)="onCommand(item.id)"
-            [attr.data-tip]="item.label"
+            [attr.data-tip]="item.tooltip || item.label"
           >
             @if (busyCommand() === item.id) {
               <span class="toolbar__spinner"></span>

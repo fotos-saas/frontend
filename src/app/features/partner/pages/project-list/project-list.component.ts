@@ -93,7 +93,7 @@ export class PartnerProjectListComponent implements OnInit {
     defaultSortBy: 'created_at',
     defaultSortDir: 'desc',
     validation: {
-      sortByOptions: ['created_at', 'photo_date', 'class_year', 'school_name', 'tablo_status', 'missing_count', 'samples_count'],
+      sortByOptions: ['created_at', 'photo_date', 'class_year', 'school_name', 'tablo_status', 'missing_count', 'samples_count', 'order_submitted_at'],
       filterOptions: {
         aware: ['true', 'false'],
         draft: ['true', 'false'],
@@ -154,6 +154,7 @@ export class PartnerProjectListComponent implements OnInit {
     { value: 'tablo_status', label: 'Státusz' },
     { value: 'missing_count', label: 'Hiányzó' },
     { value: 'created_at', label: 'Létrehozva' },
+    { value: 'order_submitted_at', label: 'Leadva' },
   ];
 
   readonly sortDef: SortDef = {
@@ -210,7 +211,7 @@ export class PartnerProjectListComponent implements OnInit {
       page: this.filterState.page(),
       per_page: 12,
       search: this.filterState.search() || undefined,
-      sort_by: this.filterState.sortBy() as 'created_at' | 'photo_date' | 'class_year' | 'school_name' | 'tablo_status' | 'missing_count' | 'samples_count',
+      sort_by: this.filterState.sortBy() as 'created_at' | 'photo_date' | 'class_year' | 'school_name' | 'tablo_status' | 'missing_count' | 'samples_count' | 'order_submitted_at',
       sort_dir: this.filterState.sortDir(),
       status: filters['status'] || undefined,
       is_aware: filters['aware'] ? filters['aware'] === 'true' : undefined,

@@ -24,6 +24,7 @@ let lastActiveDoc: ActiveDocInfo = { name: null, path: null, dir: null };
 export function registerOverlayHandlers(
   getOverlayWindow: () => BrowserWindow | null,
   getMainWindow: () => BrowserWindow | null,
+  openPhotoUpload?: (projectId: number) => void,
 ): void {
   // Parancs vegrehajtas: overlay → main process → mainWindow
   ipcMain.handle('overlay:execute-command', async (_event, commandId: string) => {
@@ -35,6 +36,21 @@ export function registerOverlayHandlers(
       // Specialis overlay parancsok — kozvetlenul kezeljuk
       if (commandId === 'ps-open-workdir' || commandId === 'open-workdir') {
         return handleOpenWorkDir();
+      }
+
+      // Photo upload — kozvetlenul megnyitja a floating ablakot
+      if (commandId === 'upload-photo') {
+        const projectId = overlayContext.projectId;
+        if (!projectId) {
+          log.warn('upload-photo: no projectId in overlay context');
+          return { success: false, error: 'Nincs projekt kivalasztva' };
+        }
+        if (openPhotoUpload) {
+          openPhotoUpload(projectId);
+          log.info(`upload-photo: opening for project ${projectId}`);
+          return { success: true };
+        }
+        return { success: false, error: 'Photo upload not available' };
       }
 
       const mainWindow = getMainWindow();

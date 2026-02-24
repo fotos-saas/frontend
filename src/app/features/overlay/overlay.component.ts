@@ -184,15 +184,6 @@ export class OverlayComponent implements OnInit {
     }
     this.closeSubmenu();
 
-    // Photo upload — kozvetlenul megnyitja a floating ablakot
-    if (commandId === 'upload-photo') {
-      const projectId = this.context().projectId;
-      if (projectId) {
-        window.electronAPI?.overlay.openPhotoUpload(projectId);
-      }
-      return;
-    }
-
     if (commandId === 'link-layers') {
       this.runJsxAction(commandId, 'actions/link-selected.jsx');
       return;

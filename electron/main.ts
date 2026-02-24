@@ -727,6 +727,7 @@ app.whenReady().then(() => {
   registerOverlayHandlers(
     () => overlayWindow,
     () => mainWindow,
+    createPhotoUploadWindow,
   );
 
   // Photo Upload IPC handler

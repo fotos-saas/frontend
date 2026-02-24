@@ -9,6 +9,7 @@
  *   1. Kiszedi az Images/Students es/vagy Images/Teachers layerek pozicioit (slot-ok)
  *   2. A slot-okat sor-oszlop sorrendbe rendezi (Y->X)
  *   3. Az ORDERED_NAMES alapjan a layereket a slot-okba mozgatja
+ *      (ket menetes: eloszor off-screen parkol, aztan cel pozicioba tesz)
  *
  * Kimenet: JSON { "reordered": N }
  */
@@ -53,6 +54,7 @@ function collectLayers(doc, groupPath) {
     var b = getBoundsNoEffects(layer.id);
     result.push({
       layer: layer,
+      layerId: layer.id,
       name: layer.name,
       x: b.left,
       y: b.top,
@@ -94,13 +96,38 @@ function getPositionSlots(layers) {
   return slots;
 }
 
-function moveLayerTo(layer, targetX, targetY) {
-  var b = getBoundsNoEffects(layer.id);
-  var dx = targetX - b.left;
-  var dy = targetY - b.top;
+// Translate layer: aktualis bounds-bol szamolja a delta-t
+function translateLayerTo(layerId, targetX, targetY) {
+  // Kivalasztjuk a layert es kiolvasuk aktualis poziciot
+  var desc2 = new ActionDescriptor();
+  var ref2 = new ActionReference();
+  ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
+  desc2.putReference(charIDToTypeID("null"), ref2);
+  executeAction(charIDToTypeID("slct"), desc2, DialogModes.NO);
+
+  var ref = new ActionReference();
+  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  var desc = executeActionGet(ref);
+  var boundsKey = stringIDToTypeID("boundsNoEffects");
+  var b;
+  if (desc.hasKey(boundsKey)) {
+    b = desc.getObjectValue(boundsKey);
+  } else {
+    b = desc.getObjectValue(stringIDToTypeID("bounds"));
+  }
+  var curX = b.getUnitDoubleValue(stringIDToTypeID("left"));
+  var curY = b.getUnitDoubleValue(stringIDToTypeID("top"));
+
+  var dx = targetX - curX;
+  var dy = targetY - curY;
   if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-    selectLayerById(layer.id);
-    layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
+    // ActionManager translate — gyorsabb mint DOM translate
+    var moveDesc = new ActionDescriptor();
+    var posDesc = new ActionDescriptor();
+    posDesc.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), Math.round(dx));
+    posDesc.putUnitDouble(charIDToTypeID("Vrtc"), charIDToTypeID("#Pxl"), Math.round(dy));
+    moveDesc.putObject(charIDToTypeID("T   "), charIDToTypeID("Ofst"), posDesc);
+    executeAction(charIDToTypeID("move"), moveDesc, DialogModes.NO);
   }
 }
 
@@ -113,8 +140,6 @@ function parseJsonArray(str) {
   var parts = str.split(",");
   for (var i = 0; i < parts.length; i++) {
     var s = parts[i].replace(/^\s*"/, "").replace(/"\s*$/, "");
-    // Ha a split feldarabolt egy nevet ami vesszot tartalmaz, rakjuk ossze
-    // (nem valoszinu magyar neveknel de biztonsag kedveert)
     result.push(s);
   }
   return result;
@@ -155,8 +180,10 @@ var __result = (function () {
       return '{"reordered":0}';
     }
 
+    // Slot-ok: a jelenlegi poziciok Y->X sorrendben
     var slots = getPositionSlots(allLayers);
 
+    // Nev -> layerInfo map
     var nameToLayer = {};
     for (var i = 0; i < allLayers.length; i++) {
       var n = allLayers[i].name;
@@ -165,12 +192,28 @@ var __result = (function () {
       }
     }
 
-    var reordered = 0;
+    // Kiszamoljuk az OSSZES mozgatast elore (cel poziciok)
+    var moves = []; // { layerId, targetX, targetY }
     for (var j = 0; j < Math.min(orderedNames.length, slots.length); j++) {
       var layerInfo = nameToLayer[orderedNames[j]];
       if (!layerInfo) continue;
+      moves.push({
+        layerId: layerInfo.layerId,
+        targetX: slots[j].x,
+        targetY: slots[j].y
+      });
+    }
 
-      moveLayerTo(layerInfo.layer, slots[j].x, slots[j].y);
+    // 1. menet: OSSZES layert off-screen parkoloba (doc szelesseg + 10000px)
+    var parkX = doc.width.as("px") + 10000;
+    for (var m1 = 0; m1 < moves.length; m1++) {
+      translateLayerTo(moves[m1].layerId, parkX + m1 * 500, 0);
+    }
+
+    // 2. menet: parkolobol cel pozicioba
+    var reordered = 0;
+    for (var m2 = 0; m2 < moves.length; m2++) {
+      translateLayerTo(moves[m2].layerId, moves[m2].targetX, moves[m2].targetY);
       reordered++;
     }
 

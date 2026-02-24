@@ -184,6 +184,7 @@ export class OverlayComponent implements OnInit {
         { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Fotó feltöltése', accent: 'green' },
         { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', accent: 'green' },
         { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
+        { id: 'sort-menu', icon: ICONS.ARROW_DOWN_AZ, label: 'Rendezés', tooltip: 'ABC / fiú-lány / rácsba rendezés', accent: 'blue' },
         { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },
         { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés', tooltip: 'Kijelölt layerek linkelésének megszüntetése' },
       ],
@@ -234,7 +235,7 @@ export class OverlayComponent implements OnInit {
     'align-bottom': 'bottom',
   };
 
-  private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos', 'generate-sample', 'generate-final']);
+  private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos', 'generate-sample', 'generate-final', 'sort-menu']);
 
   readonly syncWithBorder = signal(this.loadSyncBorder());
 
@@ -249,6 +250,9 @@ export class OverlayComponent implements OnInit {
   readonly sampleWatermarkOpacity = signal(0.15);
   readonly generating = signal<'sample' | 'final' | null>(null);
   readonly generateResult = signal<{ success: boolean; message: string } | null>(null);
+
+  // Rendezés
+  readonly sorting = signal(false);
 
   onCommand(commandId: string): void {
     // Upload-photo → panel toggle
@@ -340,6 +344,130 @@ export class OverlayComponent implements OnInit {
 
   cancelGenerate(): void {
     this.closeSubmenu();
+  }
+
+  /** ABC rendezés — API hívás + JSX pozíció csere */
+  async sortAbc(): Promise<void> {
+    this.closeSubmenu();
+    if (this.sorting()) return;
+    const names = await this.getImageLayerNames();
+    if (names.length < 2) return;
+
+    this.sorting.set(true);
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ success: boolean; sorted_names: string[] }>(
+          `${environment.apiUrl}/partner/ai/sort-names-abc`,
+          { names },
+        ),
+      );
+      if (res.success && res.sorted_names) {
+        await this.reorderLayersByNames(res.sorted_names);
+      }
+    } catch { /* ignore */ }
+    this.ngZone.run(() => this.sorting.set(false));
+  }
+
+  /** Felváltva fiú-lány rendezés — API gender classification + JSX */
+  async sortGender(): Promise<void> {
+    this.closeSubmenu();
+    if (this.sorting()) return;
+    const names = await this.getImageLayerNames();
+    if (names.length < 2) return;
+
+    this.sorting.set(true);
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ success: boolean; classifications: Array<{ name: string; gender: 'boy' | 'girl' }> }>(
+          `${environment.apiUrl}/partner/ai/classify-name-genders`,
+          { names },
+        ),
+      );
+      if (res.success && res.classifications) {
+        const collator = new Intl.Collator('hu', { sensitivity: 'base' });
+        const genderMap = new Map(res.classifications.map(c => [c.name, c.gender]));
+        const boys = names.filter(n => genderMap.get(n) === 'boy').sort(collator.compare);
+        const girls = names.filter(n => genderMap.get(n) === 'girl').sort(collator.compare);
+        const ordered = this.interleave(boys, girls);
+        await this.reorderLayersByNames(ordered);
+      }
+    } catch { /* ignore */ }
+    this.ngZone.run(() => this.sorting.set(false));
+  }
+
+  /** Rácsba rendezés — arrange-grid JSX közvetlen futtatás */
+  async sortGrid(): Promise<void> {
+    this.closeSubmenu();
+    if (this.sorting()) return;
+    this.sorting.set(true);
+    // Grid paramétereket a PS beállításokból olvassuk
+    if (window.electronAPI) {
+      try {
+        const [margin, gapH, gapV, studentSize, teacherSize, gridAlign] = await Promise.all([
+          window.electronAPI.photoshop.getMargin(),
+          window.electronAPI.photoshop.getGapH(),
+          window.electronAPI.photoshop.getGapV(),
+          window.electronAPI.photoshop.getStudentSize(),
+          window.electronAPI.photoshop.getTeacherSize(),
+          window.electronAPI.photoshop.getGridAlign(),
+        ]);
+        const doc = this.activeDoc();
+        // boardWidthCm/heightCm a PSD méretéből
+        await this.runJsxAction('arrange-grid', 'actions/arrange-grid.jsx', {
+          boardWidthCm: 120, // fallback — a JSX a doc szélességet is használhatja
+          boardHeightCm: 80,
+          marginCm: margin || 2,
+          gapHCm: gapH || 2,
+          gapVCm: gapV || 3,
+          studentSizeCm: studentSize || 6,
+          teacherSizeCm: teacherSize || 6,
+          gridAlign: gridAlign || 'center',
+        });
+      } catch { /* ignore */ }
+    }
+    this.ngZone.run(() => this.sorting.set(false));
+  }
+
+  /** PS-ből kiszedi az Images layerek neveit */
+  private async getImageLayerNames(): Promise<string[]> {
+    if (!window.electronAPI) return [];
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({
+        scriptName: 'actions/get-image-names.jsx',
+      });
+      if (!result.success || !result.output) return [];
+      const cleaned = result.output.trim();
+      if (!cleaned.startsWith('{')) return [];
+      const data = JSON.parse(cleaned);
+      return data.names || [];
+    } catch { return []; }
+  }
+
+  /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket */
+  private async reorderLayersByNames(orderedNames: string[]): Promise<void> {
+    await this.runJsxAction('reorder-layers', 'actions/reorder-layers.jsx', {
+      ORDERED_NAMES: JSON.stringify(orderedNames),
+      GROUP: 'All',
+    });
+  }
+
+  /** Két tömb váltogatásos összefűzése */
+  private interleave(a: string[], b: string[]): string[] {
+    const first = a.length >= b.length ? a : b;
+    const second = a.length >= b.length ? b : a;
+    const result: string[] = [];
+    let fi = 0;
+    let si = 0;
+    for (let i = 0; i < first.length + second.length; i++) {
+      if (i % 2 === 0 && fi < first.length) {
+        result.push(first[fi++]);
+      } else if (si < second.length) {
+        result.push(second[si++]);
+      } else if (fi < first.length) {
+        result.push(first[fi++]);
+      }
+    }
+    return result;
   }
 
   toggleSampleSize(): void {

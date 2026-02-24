@@ -123,6 +123,49 @@
             </div>
           }
 
+          <!-- Inline collapse: sort-menu rendezési opciók -->
+          @if (item.id === 'sort-menu') {
+            <div
+              class="toolbar__inline-collapse toolbar__inline-collapse--wide"
+              [class.toolbar__inline-collapse--open]="openSubmenu() === 'sort-menu'"
+            >
+              <div class="toolbar__inline-collapse-inner">
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--blue"
+                  [class.toolbar__btn--busy]="sorting()"
+                  [disabled]="sorting()"
+                  (click)="sortAbc(); $event.stopPropagation()"
+                  data-tip="ABC sorrend"
+                >
+                  @if (sorting()) {
+                    <span class="toolbar__spinner toolbar__spinner--sm"></span>
+                  } @else {
+                    <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="15" />
+                  }
+                </button>
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--purple"
+                  [class.toolbar__btn--busy]="sorting()"
+                  [disabled]="sorting()"
+                  (click)="sortGender(); $event.stopPropagation()"
+                  data-tip="Fiú-lány felváltva"
+                >
+                  <lucide-icon [name]="ICONS.USERS" [size]="15" />
+                </button>
+                <div class="toolbar__collapse-sep"></div>
+                <button
+                  class="toolbar__btn toolbar__btn--sm"
+                  [class.toolbar__btn--busy]="sorting()"
+                  [disabled]="sorting()"
+                  (click)="sortGrid(); $event.stopPropagation()"
+                  data-tip="Rácsba rendezés"
+                >
+                  <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="15" />
+                </button>
+              </div>
+            </div>
+          }
+
           <!-- Inline collapse: generate-sample beállítások + megerősítés -->
           @if (item.id === 'generate-sample') {
             <div

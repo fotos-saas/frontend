@@ -1,0 +1,187 @@
+/**
+ * reorder-layers.jsx — Layer poziciok atrendezese megadott nevsorrendben
+ *
+ * Bemeneti JSON (CONFIG-ban):
+ *   ORDERED_NAMES = JSON string tomb: ["Nev1", "Nev2", "Nev3", ...]
+ *   GROUP = "Students" | "Teachers" | "All" (default: "All")
+ *
+ * Mukodese:
+ *   1. Kiszedi az Images/Students es/vagy Images/Teachers layerek pozicioit (slot-ok)
+ *   2. A slot-okat sor-oszlop sorrendbe rendezi (Y->X)
+ *   3. Az ORDERED_NAMES alapjan a layereket a slot-okba mozgatja
+ *
+ * Kimenet: JSON { "reordered": N }
+ */
+
+// #include "../lib/config.jsx"
+// #include "../lib/utils.jsx"
+
+var ROW_THRESHOLD = 20; // px
+
+function getBoundsNoEffects(layerId) {
+  var desc2 = new ActionDescriptor();
+  var ref2 = new ActionReference();
+  ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
+  desc2.putReference(charIDToTypeID("null"), ref2);
+  executeAction(charIDToTypeID("slct"), desc2, DialogModes.NO);
+
+  var ref = new ActionReference();
+  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  var desc = executeActionGet(ref);
+
+  var boundsKey = stringIDToTypeID("boundsNoEffects");
+  var b;
+  if (desc.hasKey(boundsKey)) {
+    b = desc.getObjectValue(boundsKey);
+  } else {
+    b = desc.getObjectValue(stringIDToTypeID("bounds"));
+  }
+  return {
+    left: b.getUnitDoubleValue(stringIDToTypeID("left")),
+    top: b.getUnitDoubleValue(stringIDToTypeID("top")),
+    right: b.getUnitDoubleValue(stringIDToTypeID("right")),
+    bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
+  };
+}
+
+function collectLayers(doc, groupPath) {
+  var grp = getGroupByPath(doc, groupPath);
+  if (!grp) return [];
+  var result = [];
+  for (var i = 0; i < grp.artLayers.length; i++) {
+    var layer = grp.artLayers[i];
+    var b = getBoundsNoEffects(layer.id);
+    result.push({
+      layer: layer,
+      name: layer.name,
+      x: b.left,
+      y: b.top,
+      w: b.right - b.left,
+      h: b.bottom - b.top
+    });
+  }
+  return result;
+}
+
+function getPositionSlots(layers) {
+  var sorted = layers.slice(0);
+  sorted.sort(function (a, b) { return a.y - b.y; });
+
+  var rows = [];
+  var currentRow = [];
+  var currentRowY = -99999;
+
+  for (var i = 0; i < sorted.length; i++) {
+    var ly = sorted[i].y;
+    if (currentRow.length === 0 || Math.abs(ly - currentRowY) <= ROW_THRESHOLD) {
+      currentRow.push(sorted[i]);
+      if (currentRow.length === 1) currentRowY = ly;
+    } else {
+      rows.push(currentRow);
+      currentRow = [sorted[i]];
+      currentRowY = ly;
+    }
+  }
+  if (currentRow.length > 0) rows.push(currentRow);
+
+  var slots = [];
+  for (var r = 0; r < rows.length; r++) {
+    rows[r].sort(function (a, b) { return a.x - b.x; });
+    for (var c = 0; c < rows[r].length; c++) {
+      slots.push({ x: rows[r][c].x, y: rows[r][c].y });
+    }
+  }
+  return slots;
+}
+
+function moveLayerTo(layer, targetX, targetY) {
+  var b = getBoundsNoEffects(layer.id);
+  var dx = targetX - b.left;
+  var dy = targetY - b.top;
+  if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+    selectLayerById(layer.id);
+    layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
+  }
+}
+
+// --- Egyszeru JSON tomb parser (ES3 — nincs JSON.parse) ---
+// Csak string tombot kezel: ["aaa","bbb","ccc"]
+function parseJsonArray(str) {
+  var result = [];
+  str = str.replace(/^\s*\[/, "").replace(/\]\s*$/, "");
+  if (str.length === 0) return result;
+  var parts = str.split(",");
+  for (var i = 0; i < parts.length; i++) {
+    var s = parts[i].replace(/^\s*"/, "").replace(/"\s*$/, "");
+    // Ha a split feldarabolt egy nevet ami vesszot tartalmaz, rakjuk ossze
+    // (nem valoszinu magyar neveknel de biztonsag kedveert)
+    result.push(s);
+  }
+  return result;
+}
+
+(function () {
+  try {
+    if (app.documents.length === 0) {
+      '{"reordered":0}';
+      return;
+    }
+    var doc = app.activeDocument;
+
+    var orderedNamesStr = typeof CONFIG !== "undefined" && CONFIG.ORDERED_NAMES ? CONFIG.ORDERED_NAMES : "";
+    if (!orderedNamesStr) {
+      '{"reordered":0,"error":"No ORDERED_NAMES"}';
+      return;
+    }
+
+    var orderedNames = parseJsonArray(orderedNamesStr);
+    if (orderedNames.length === 0) {
+      '{"reordered":0}';
+      return;
+    }
+
+    var groupFilter = typeof CONFIG !== "undefined" && CONFIG.GROUP ? CONFIG.GROUP : "All";
+
+    var oldRulerUnits = app.preferences.rulerUnits;
+    app.preferences.rulerUnits = Units.PIXELS;
+
+    var allLayers = [];
+    if (groupFilter === "All" || groupFilter === "Students") {
+      allLayers = allLayers.concat(collectLayers(doc, ["Images", "Students"]));
+    }
+    if (groupFilter === "All" || groupFilter === "Teachers") {
+      allLayers = allLayers.concat(collectLayers(doc, ["Images", "Teachers"]));
+    }
+
+    if (allLayers.length < 2) {
+      app.preferences.rulerUnits = oldRulerUnits;
+      '{"reordered":0}';
+      return;
+    }
+
+    var slots = getPositionSlots(allLayers);
+
+    var nameToLayer = {};
+    for (var i = 0; i < allLayers.length; i++) {
+      var n = allLayers[i].name;
+      if (n && !nameToLayer[n]) {
+        nameToLayer[n] = allLayers[i];
+      }
+    }
+
+    var reordered = 0;
+    for (var j = 0; j < Math.min(orderedNames.length, slots.length); j++) {
+      var layerInfo = nameToLayer[orderedNames[j]];
+      if (!layerInfo) continue;
+
+      moveLayerTo(layerInfo.layer, slots[j].x, slots[j].y);
+      reordered++;
+    }
+
+    app.preferences.rulerUnits = oldRulerUnits;
+    '{"reordered":' + reordered + '}';
+
+  } catch (e) {
+    '{"reordered":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
+  }
+})();

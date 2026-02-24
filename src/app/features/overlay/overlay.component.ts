@@ -490,11 +490,11 @@ export class OverlayComponent implements OnInit {
         const orderedSlugs = res.ordered_names.map(human => {
           return slugToHuman.get(human.toLowerCase()) || slugNames.find(s => this.slugToHumanName(s).toLowerCase() === human.toLowerCase()) || human;
         });
-        await this.reorderLayersByNames(orderedSlugs);
-        // Debug: sorrend kiírása az eredmény szövegbe
+        const jsxResult = await this.reorderLayersByNames(orderedSlugs);
+        // Debug: sorrend + JSX output kiírása
         const orderList = res.ordered_names.map((n, i) => `${i + 1}. ${n}`).join(' → ');
-        const slugList = orderedSlugs.map((s, i) => `${i + 1}. ${s}`).join(' → ');
-        const msg = `Sorrend: ${orderList} | Slugok: ${slugList}`;
+        const jsxOut = jsxResult?.output || jsxResult?.error || 'no output';
+        const msg = `Sorrend: ${orderList} | JSX: ${jsxOut}`;
         this.ngZone.run(() => this.customOrderResult.set({ success: true, message: msg }));
       } else {
         this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' }));
@@ -559,13 +559,14 @@ export class OverlayComponent implements OnInit {
   }
 
   /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket */
-  private async reorderLayersByNames(orderedNames: string[]): Promise<void> {
+  private async reorderLayersByNames(orderedNames: string[]): Promise<any> {
     console.log('[REORDER] orderedNames:', orderedNames);
     const result = await this.runJsxAction('reorder-layers', 'actions/reorder-layers.jsx', {
       ORDERED_NAMES: JSON.stringify(orderedNames),
       GROUP: 'All',
     });
     console.log('[REORDER] JSX result:', result);
+    return result;
   }
 
   /** Két tömb váltogatásos összefűzése */

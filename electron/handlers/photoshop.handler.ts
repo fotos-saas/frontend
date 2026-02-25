@@ -1497,6 +1497,49 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Backup PSD file (meglévő PSD + layouts/ mappa másolása _backup_YYYYMMDD_HHmmss suffixszel)
+  ipcMain.handle('photoshop:backup-psd', (_event, params: { psdPath: string }) => {
+    try {
+      if (typeof params.psdPath !== 'string' || params.psdPath.length > 500) {
+        return { success: false, error: 'Érvénytelen paraméter' };
+      }
+      if (params.psdPath.includes('..')) {
+        return { success: false, error: 'Path traversal nem megengedett' };
+      }
+      if (!fs.existsSync(params.psdPath)) {
+        return { success: false, error: 'A PSD fájl nem létezik' };
+      }
+
+      const psdDir = path.dirname(params.psdPath);
+      const psdBase = path.basename(params.psdPath, '.psd');
+      const now = new Date();
+      const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+      const backupName = `${psdBase}_backup_${timestamp}.psd`;
+      const backupPath = path.join(psdDir, backupName);
+
+      // PSD fájl másolása
+      fs.copyFileSync(params.psdPath, backupPath);
+      log.info(`PSD backup keszult: ${backupPath}`);
+
+      // layouts/ mappa másolása ha létezik
+      const layoutsDir = path.join(psdDir, 'layouts');
+      if (fs.existsSync(layoutsDir)) {
+        const backupLayoutsDir = path.join(psdDir, `layouts_backup_${timestamp}`);
+        fs.mkdirSync(backupLayoutsDir, { recursive: true });
+        const files = fs.readdirSync(layoutsDir).filter(f => f.endsWith('.json'));
+        for (const file of files) {
+          fs.copyFileSync(path.join(layoutsDir, file), path.join(backupLayoutsDir, file));
+        }
+        log.info(`Layouts backup keszult: ${backupLayoutsDir} (${files.length} fajl)`);
+      }
+
+      return { success: true, backupPath };
+    } catch (error) {
+      log.error('PSD backup hiba:', error);
+      return { success: false, error: 'Backup készítés sikertelen' };
+    }
+  });
+
   // Load snapshot JSON content
   ipcMain.handle('photoshop:load-snapshot', (_event, params: { snapshotPath: string }) => {
     try {

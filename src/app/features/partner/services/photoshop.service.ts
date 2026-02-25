@@ -1099,6 +1099,17 @@ export class PhotoshopService {
     }
   }
 
+  /** PSD backup készítése (másolat _backup_YYYYMMDD_HHmmss suffixszel) */
+  async backupPsd(psdPath: string): Promise<{ success: boolean; error?: string; backupPath?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    try {
+      return await this.api.backupPsd({ psdPath });
+    } catch (err) {
+      this.logger.error('PSD backup hiba', err);
+      return { success: false, error: 'Backup készítés sikertelen' };
+    }
+  }
+
   /** Snapshot betöltése (JSON tartalom visszaadása) */
   async loadSnapshot(snapshotPath: string): Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

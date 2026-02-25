@@ -8,14 +8,15 @@ import { BatchJobState } from '../../models/batch.types';
  * PSD generálás workflow — teljes tabló PSD létrehozása.
  *
  * Lépések:
+ * 0. PSD létezés ellenőrzés (ha létezik → hiba, nem generálunk)
  * 1. PSD generálás és megnyitás Photoshopban
  * 2. Név layerek hozzáadása
  * 3. Kép layerek hozzáadása
  * 4. Rács elrendezés
  * 5. Pillanatkép mentése
  *
- * FONTOS: Minden Photoshop hívás előtt a psdPath signal-t beállítjuk,
- * hogy a runJsx wrapper a helyes dokumentumot célozza (multi-doc fókusz).
+ * FONTOS: Ha a PSD fájl már létezik, a workflow HIBÁT dob.
+ * A felhasználónak törölnie/átneveznie kell a meglévő fájlt.
  */
 @Injectable({
   providedIn: 'root',
@@ -24,6 +25,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
   readonly type = 'generate-psd' as const;
   readonly label = 'PSD generálás';
   readonly stepLabels = [
+    'Ellenőrzés',
     'PSD generálás',
     'Név layerek',
     'Kép layerek',
@@ -47,6 +49,14 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       throw new Error(`Érvénytelen méret: ${size.value}`);
     }
 
+    // 0. PSD létezés ellenőrzés — ha már van fájl, NEM generálunk
+    onStep(0);
+    const existsCheck = await ps.checkPsdExists(psdPath);
+    if (existsCheck.exists) {
+      throw new Error(`PSD már létezik: ${psdPath.split('/').pop()} — töröld vagy nevezd át a meglévő fájlt`);
+    }
+    checkAbort();
+
     // PSD path signal beállítása — a runJsx wrapper ezt használja a dokumentum fókuszhoz
     ps.psdPath.set(psdPath);
 
@@ -54,7 +64,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     const docName = psdPath.split('/').pop()?.replace('.psd', '') ?? undefined;
 
     // 1. PSD generálás — className és brandName a helyes mappa/fájlnévhez
-    onStep(0);
+    onStep(1);
     const genResult = await ps.generateAndOpenPsd(size, {
       projectName: job.projectName,
       className: job.className,
@@ -67,7 +77,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     checkAbort();
 
     // 2. Név layerek
-    onStep(1);
+    onStep(2);
     const nameResult = await ps.addNameLayers(
       persons.map(p => ({ id: p.id, name: p.name, type: p.type })),
       docName,
@@ -78,7 +88,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     checkAbort();
 
     // 3. Kép layerek
-    onStep(2);
+    onStep(3);
     const imageResult = await ps.addImageLayers(
       persons.map(p => ({ id: p.id, name: p.name, type: p.type, photoUrl: p.photoUrl })),
       undefined,
@@ -90,7 +100,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     checkAbort();
 
     // 4. Rács elrendezés
-    onStep(3);
+    onStep(4);
     const gridResult = await ps.arrangeGrid(
       { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
       docName,
@@ -101,7 +111,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     checkAbort();
 
     // 5. Pillanatkép mentése
-    onStep(4);
+    onStep(5);
     const snapshotResult = await ps.saveSnapshot(
       'batch-initial',
       { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },

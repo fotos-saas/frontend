@@ -257,6 +257,18 @@ export class BatchQueueService {
       // Projekt adatok betoltese
       const projectData = await this.loadProjectData(nextJob);
 
+      // Backup: minta/véglegesítés előtt backup a meglévő PSD-ről
+      if (nextJob.workflowType !== 'generate-psd') {
+        const existsCheck = await this.photoshopService.checkPsdExists(projectData.psdPath);
+        if (existsCheck.exists) {
+          this.logger.info(`Backup készítés: ${projectData.psdPath}`);
+          const backupResult = await this.photoshopService.backupPsd(projectData.psdPath);
+          if (!backupResult.success) {
+            throw new Error(`Backup sikertelen: ${backupResult.error}`);
+          }
+        }
+      }
+
       // Workflow futtatás
       await workflow.execute(nextJob, projectData, {
         onStep: (stepIndex: number) => {

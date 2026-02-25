@@ -71,7 +71,6 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       projectName: job.projectName,
       schoolName: job.schoolName,
       className: job.className,
-      classYear: job.classYear,
       brandName,
       persons: persons.map(p => ({ id: p.id, name: p.name, type: p.type })),
     });

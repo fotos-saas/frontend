@@ -19,7 +19,6 @@ export interface BatchWorkspaceItem {
   projectName: string;
   schoolName: string | null;
   className: string | null;
-  classYear: string | null;
   personsCount: number;
   sampleThumbUrl: string | null;
   workflowType: BatchWorkflowType;
@@ -33,7 +32,6 @@ export interface BatchJobState {
   projectName: string;
   schoolName: string | null;
   className: string | null;
-  classYear: string | null;
   workflowType: BatchWorkflowType;
   status: BatchJobStatus;
   error?: string;

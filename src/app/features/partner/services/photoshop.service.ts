@@ -1264,8 +1264,6 @@ export class PhotoshopService {
       projectName: string;
       schoolName?: string | null;
       className?: string | null;
-      classYear?: string | null;
-      quote?: string | null;
       brandName?: string | null;
       persons?: Array<{ id: number; name: string; type: string }>;
     },
@@ -1294,25 +1292,6 @@ export class PhotoshopService {
         outputPath = `${downloadsPath}/PhotoStack/${size.value}.psd`;
       }
 
-      // Feliratok összeállítása a Subtitles csoporthoz
-      const subtitles: Array<{ name: string; text: string }> = [];
-      if (context?.schoolName) {
-        subtitles.push({ name: 'iskola-neve', text: context.schoolName });
-      }
-      if (context?.className) {
-        subtitles.push({ name: 'osztaly', text: context.className });
-      }
-      if (context?.classYear) {
-        subtitles.push({ name: 'evfolyam', text: context.classYear });
-      }
-      if (context?.quote) {
-        subtitles.push({ name: 'idezet', text: context.quote });
-      }
-
-      // DEBUG: subtitle adatok ellenőrzés
-      console.log('[PSD] context:', JSON.stringify({ schoolName: context?.schoolName, className: context?.className, classYear: context?.classYear, quote: context?.quote }));
-      console.log('[PSD] subtitles:', JSON.stringify(subtitles));
-
       // PSD generálás
       const genResult = await this.api.generatePsd({
         widthCm: dimensions.widthCm,
@@ -1321,7 +1300,6 @@ export class PhotoshopService {
         mode: 'RGB',
         outputPath,
         persons: context?.persons,
-        subtitles: subtitles.length > 0 ? subtitles : undefined,
       });
 
       if (!genResult.success) {

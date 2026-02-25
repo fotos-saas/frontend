@@ -93,6 +93,24 @@ export class BatchQueueService {
   async startBatch(items: BatchWorkspaceItem[]): Promise<void> {
     if (items.length === 0) return;
 
+    // Előfeltétel: workDir beállítva kell legyen
+    if (!this.photoshopService.workDir()) {
+      this.toast.error(
+        'Munka mappa nincs beállítva',
+        'Állítsd be a munka mappát a Tablókészítő → Beállítások oldalon, mielőtt batch-et indítanál.',
+      );
+      return;
+    }
+
+    // Előfeltétel: detectPhotoshop lefutott
+    if (!this.photoshopService.isConfigured()) {
+      this.toast.error(
+        'Photoshop nem konfigurált',
+        'Ellenőrizd a Photoshop beállításokat a Tablókészítő → Beállítások oldalon.',
+      );
+      return;
+    }
+
     const jobs: BatchJobState[] = items.map(item => ({
       id: item.id,
       projectId: item.projectId,
@@ -317,7 +335,7 @@ export class BatchQueueService {
     });
 
     if (!psdPath) {
-      throw new Error('Nem sikerült PSD útvonalat meghatározni');
+      throw new Error('Nem sikerült PSD útvonalat meghatározni — ellenőrizd a munka mappa beállítást');
     }
 
     return {

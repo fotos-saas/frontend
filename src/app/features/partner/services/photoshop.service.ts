@@ -92,44 +92,6 @@ export class PhotoshopService {
     return this.api!.runJsx({ ...params, psdFilePath: this.psdPath() ?? undefined });
   }
 
-  /**
-   * Várakozás amíg a Photoshop ténylegesen betölti a dokumentumot.
-   * A PSD open (osascript) azonnal visszatér, de a PS-nek idő kell
-   * egy nagy fájl (~178 MB) betöltéséhez. Ez poll-olja a get-active-doc
-   * JSX-et amíg a dokumentum neve nem null.
-   */
-  private async waitForDocumentReady(expectedDocName?: string, timeoutMs = 30_000): Promise<boolean> {
-    if (!this.api) return false;
-
-    const pollInterval = 1000;
-    const maxAttempts = Math.ceil(timeoutMs / pollInterval);
-
-    for (let i = 0; i < maxAttempts; i++) {
-      try {
-        const result = await this.api.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
-        // A handler { success, output } formátumot ad vissza, az output a JSX JSON string
-        const output = result?.output ?? (typeof result === 'string' ? result : '');
-        if (output) {
-          try {
-            const doc = JSON.parse(output);
-            if (doc.name) {
-              if (!expectedDocName || doc.name === expectedDocName) {
-                this.logger.info(`PS dokumentum kész: ${doc.name} (${i + 1} poll)`);
-                return true;
-              }
-            }
-          } catch { /* parse hiba — PS még nem válaszol rendesen */ }
-        }
-      } catch {
-        // JSX hiba — PS még betölt, vagy -609 Connection is invalid
-      }
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-    }
-
-    this.logger.warn(`PS dokumentum timeout (${timeoutMs}ms) — folytatás mindenképp`);
-    return false;
-  }
-
   /** Mentett path betoltese + auto-detektalas */
   async detectPhotoshop(): Promise<void> {
     if (!this.api) return;
@@ -1302,8 +1264,6 @@ export class PhotoshopService {
       projectName: string;
       schoolName?: string | null;
       className?: string | null;
-      classYear?: string | null;
-      quote?: string | null;
       brandName?: string | null;
       persons?: Array<{ id: number; name: string; type: string }>;
     },
@@ -1332,21 +1292,6 @@ export class PhotoshopService {
         outputPath = `${downloadsPath}/PhotoStack/${size.value}.psd`;
       }
 
-      // Feliratok összeállítása a Subtitles csoporthoz
-      const subtitles: Array<{ name: string; text: string }> = [];
-      if (context?.schoolName) {
-        subtitles.push({ name: 'iskola-neve', text: context.schoolName });
-      }
-      if (context?.className) {
-        subtitles.push({ name: 'osztaly', text: context.className });
-      }
-      if (context?.classYear) {
-        subtitles.push({ name: 'evfolyam', text: context.classYear });
-      }
-      if (context?.quote) {
-        subtitles.push({ name: 'idezet', text: context.quote });
-      }
-
       // PSD generálás
       const genResult = await this.api.generatePsd({
         widthCm: dimensions.widthCm,
@@ -1355,7 +1300,6 @@ export class PhotoshopService {
         mode: 'RGB',
         outputPath,
         persons: context?.persons,
-        subtitles: subtitles.length > 0 ? subtitles : undefined,
       });
 
       if (!genResult.success) {
@@ -1367,11 +1311,6 @@ export class PhotoshopService {
       if (!openResult.success) {
         return { success: false, error: openResult.error || 'Nem sikerült megnyitni a PSD-t', stdout: genResult.stdout, stderr: genResult.stderr };
       }
-
-      // Várakozás amíg a PS ténylegesen betölti a dokumentumot
-      // (az openFile azonnal visszatér, de egy nagy PSD betöltése 5-15 mp is lehet)
-      const expectedDocName = outputPath.split('/').pop() ?? undefined;
-      await this.waitForDocumentReady(expectedDocName);
 
       return { success: true, outputPath, stdout: genResult.stdout, stderr: genResult.stderr };
     } catch (err) {

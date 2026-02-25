@@ -111,16 +111,7 @@ export class TabloEditorDebugService {
     }
     this.addLog('Output path', outputPath, 'info');
 
-    // 7. Feliratok összeállítása
-    const subtitles: Array<{ name: string; text: string }> = [];
-    if (p?.school?.name) subtitles.push({ name: 'iskola-neve', text: p.school.name });
-    if (p?.className) subtitles.push({ name: 'osztaly', text: p.className });
-    if (p?.classYear) subtitles.push({ name: 'evfolyam', text: p.classYear });
-    if (subtitles.length > 0) {
-      this.addLog('Feliratok', subtitles.map(s => `${s.name}: "${s.text}"`).join(', '), 'ok');
-    }
-
-    // 8. IPC params
+    // 7. IPC params
     const ipcParams: any = {
       widthCm: dims.widthCm,
       heightCm: dims.heightCm,
@@ -128,9 +119,8 @@ export class TabloEditorDebugService {
       mode: 'RGB',
       outputPath,
       persons: personsData.length > 0 ? personsData : undefined,
-      subtitles: subtitles.length > 0 ? subtitles : undefined,
     };
-    this.addLog('IPC params', `widthCm=${ipcParams.widthCm}, heightCm=${ipcParams.heightCm}, dpi=${ipcParams.dpi}, persons=${personsData.length}, subtitles=${subtitles.length}`, 'info');
+    this.addLog('IPC params', `widthCm=${ipcParams.widthCm}, heightCm=${ipcParams.heightCm}, dpi=${ipcParams.dpi}, persons=${personsData.length}`, 'info');
 
     // 8. PSD streaming debug
     const unsubscribe = api.onPsdDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
@@ -185,13 +175,11 @@ export class TabloEditorDebugService {
 
       if (!openResult.success) return;
 
+      this.addLog('JSX', 'Várakozás Photoshop-ra (2s)...', 'info');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       // PSD fajlnev a cel dokumentum aktivalasahoz
       const psdFileName = outputPath.split('/').pop() || undefined;
-
-      // Várakozás amíg a PS ténylegesen betölti a dokumentumot
-      this.addLog('JSX', 'Várakozás Photoshop-ra (dokumentum betöltés)...', 'info');
-      const docReady = await this.waitForPsDocReady(api, psdFileName);
-      this.addLog('JSX', docReady ? 'Dokumentum betöltve' : 'Timeout — folytatás', docReady ? 'ok' : 'warn');
 
       // Margó guide-ok hozzáadása
       const marginCm = this.ps.marginCm();
@@ -322,28 +310,5 @@ export class TabloEditorDebugService {
     } catch (openErr) {
       this.addLog('PSD megnyitás', `EXCEPTION: ${String(openErr)}`, 'error');
     }
-  }
-
-  /** Várakozás amíg a PS ténylegesen betölti a dokumentumot (poll get-active-doc) */
-  private async waitForPsDocReady(api: any, expectedDocName?: string, timeoutMs = 30_000): Promise<boolean> {
-    const pollInterval = 1000;
-    const maxAttempts = Math.ceil(timeoutMs / pollInterval);
-
-    for (let i = 0; i < maxAttempts; i++) {
-      try {
-        const result = await api.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
-        const output = result?.output ?? (typeof result === 'string' ? result : '');
-        if (output) {
-          try {
-            const doc = JSON.parse(output);
-            if (doc.name && (!expectedDocName || doc.name === expectedDocName)) {
-              return true;
-            }
-          } catch { /* parse hiba */ }
-        }
-      } catch { /* PS még nem válaszol */ }
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-    }
-    return false;
   }
 }

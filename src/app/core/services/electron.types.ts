@@ -190,8 +190,8 @@ interface PhotoshopAPI {
   launch: () => Promise<{ success: boolean; error?: string }>;
   checkInstalled: () => Promise<{ found: boolean; path: string | null }>;
   browsePath: () => Promise<{ cancelled: boolean; path?: string }>;
-  generatePsd: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string; persons?: Array<{ id: number; name: string; type: string }>; subtitles?: Array<{ name: string; text: string }> }) => Promise<{ success: boolean; error?: string; stdout?: string; stderr?: string }>;
-  generatePsdDebug: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string; persons?: Array<{ id: number; name: string; type: string }>; subtitles?: Array<{ name: string; text: string }> }) => Promise<{ success: boolean; error?: string }>;
+  generatePsd: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string; persons?: Array<{ id: number; name: string; type: string }> }) => Promise<{ success: boolean; error?: string; stdout?: string; stderr?: string }>;
+  generatePsdDebug: (params: { widthCm: number; heightCm: number; dpi: number; mode: string; outputPath: string; persons?: Array<{ id: number; name: string; type: string }> }) => Promise<{ success: boolean; error?: string }>;
   onPsdDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;
   getDownloadsPath: () => Promise<string>;
   openFile: (filePath: string) => Promise<{ success: boolean; error?: string }>;

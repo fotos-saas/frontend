@@ -343,7 +343,6 @@ export class ProjectTabloEditorComponent implements OnInit {
         projectName: p.name,
         schoolName: p.school?.name ?? null,
         className: p.className,
-        classYear: p.classYear ?? null,
         brandName: this.branding.brandName(),
         persons: personsData.length > 0 ? personsData : undefined,
       } : undefined);

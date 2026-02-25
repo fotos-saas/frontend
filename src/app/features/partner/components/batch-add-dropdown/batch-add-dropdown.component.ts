@@ -42,7 +42,6 @@ export class BatchAddDropdownComponent {
   addToCart(type: BatchWorkflowType, event: Event): void {
     event.stopPropagation();
     this.workspaceService.addTask(this.project(), type);
-    this.workspaceService.panelOpen.set(true);
     this.open.set(false);
   }
 

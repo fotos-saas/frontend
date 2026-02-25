@@ -133,9 +133,9 @@ export class LayoutDesignerStateService {
   loadSnapshot(data: { document: DesignerDocument; layers: SnapshotLayer[] }, persons: TabloPersonItem[]): void {
     this.document.set(data.document);
 
-    // Rejtett layerek kiszűrése — nem jelennek meg a vizuális szerkesztőben
-    this.hiddenLayers = data.layers.filter(l => l.visible === false);
-    const visibleLayers = data.layers.filter(l => l.visible !== false);
+    // Rejtett és 0 méretű layerek kiszűrése — nem jelennek meg a vizuális szerkesztőben
+    this.hiddenLayers = data.layers.filter(l => l.visible === false || l.width <= 0 || l.height <= 0);
+    const visibleLayers = data.layers.filter(l => l.visible !== false && l.width > 0 && l.height > 0);
 
     const designerLayers: DesignerLayer[] = visibleLayers.map(layer => {
       const category = this.categorizeLayer(layer);

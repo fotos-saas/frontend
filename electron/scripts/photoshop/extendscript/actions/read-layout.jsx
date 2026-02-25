@@ -111,11 +111,17 @@ function _readAllLayers(container, pathSoFar, result) {
     for (var i = container.artLayers.length - 1; i >= 0; i--) {
       var layer = container.artLayers[i];
       try {
+        // Rejtett layereket kihagyjuk — nem kellenek a snapshotba
+        if (!layer.visible) continue;
+
         var info = _getLayerDescriptor(layer);
         var x = Math.round(info.bounds.left);
         var y = Math.round(info.bounds.top);
         var w = Math.round(info.bounds.right - info.bounds.left);
         var h = Math.round(info.bounds.bottom - info.bounds.top);
+
+        // 0 meretu layereket kihagyjuk (ures placeholder-ek)
+        if (w <= 0 || h <= 0) continue;
 
         var layerData = {
           layerId: layer.id,
@@ -126,7 +132,7 @@ function _readAllLayers(container, pathSoFar, result) {
           width: w,
           height: h,
           kind: "normal",
-          visible: layer.visible
+          visible: true
         };
 
         // Linked Layers jelzes (lánc ikon a PS Layers panelen)
@@ -160,6 +166,8 @@ function _readAllLayers(container, pathSoFar, result) {
   try {
     for (var j = container.layerSets.length - 1; j >= 0; j--) {
       var grp = container.layerSets[j];
+      // Rejtett csoportokat kihagyjuk
+      if (!grp.visible) continue;
       // Uj groupPath — ES3: concat nem mutál
       var childPath = [];
       for (var k = 0; k < pathSoFar.length; k++) {

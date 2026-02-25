@@ -20,6 +20,8 @@ interface PhotoshopSchema {
   tabloNameBreakAfter: number;
   tabloTextAlign: string;
   tabloGridAlign: string;
+  tabloPositionGapCm: number;
+  tabloPositionFontSize: number;
 }
 
 const psStore = new Store<PhotoshopSchema>({
@@ -36,6 +38,8 @@ const psStore = new Store<PhotoshopSchema>({
     tabloNameBreakAfter: 1,
     tabloTextAlign: 'center',
     tabloGridAlign: 'center',
+    tabloPositionGapCm: 0.15,
+    tabloPositionFontSize: 18,
   },
 });
 
@@ -576,6 +580,46 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     } catch (error) {
       log.error('Tablo grid igazitas beallitasi hiba:', error);
       return { success: false, error: 'Nem sikerult menteni az igazitas erteket' };
+    }
+  });
+
+  // Get position gap (pozicio szoveg tavolsaga a nev alja alatt)
+  ipcMain.handle('photoshop:get-position-gap', () => {
+    return psStore.get('tabloPositionGapCm', 0.15);
+  });
+
+  // Set position gap
+  ipcMain.handle('photoshop:set-position-gap', (_event, gapCm: number) => {
+    try {
+      if (typeof gapCm !== 'number' || gapCm < 0 || gapCm > 5) {
+        return { success: false, error: 'Ervenytelen pozicio gap ertek (0-5 cm)' };
+      }
+      psStore.set('tabloPositionGapCm', gapCm);
+      log.info(`Tablo pozicio gap beallitva: ${gapCm} cm`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo pozicio gap beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a gap erteket' };
+    }
+  });
+
+  // Get position font size
+  ipcMain.handle('photoshop:get-position-font-size', () => {
+    return psStore.get('tabloPositionFontSize', 18);
+  });
+
+  // Set position font size
+  ipcMain.handle('photoshop:set-position-font-size', (_event, fontSize: number) => {
+    try {
+      if (typeof fontSize !== 'number' || fontSize < 6 || fontSize > 100) {
+        return { success: false, error: 'Ervenytelen pozicio font meret (6-100 pt)' };
+      }
+      psStore.set('tabloPositionFontSize', fontSize);
+      log.info(`Tablo pozicio font meret beallitva: ${fontSize} pt`);
+      return { success: true };
+    } catch (error) {
+      log.error('Tablo pozicio font meret beallitasi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a font meretet' };
     }
   });
 

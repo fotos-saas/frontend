@@ -74,14 +74,20 @@ import { firstValueFrom } from 'rxjs';
           [nameGapCm]="ps.nameGapCm()"
           [nameBreakAfter]="ps.nameBreakAfter()"
           [textAlign]="ps.textAlign()"
+          [updatingPositions]="updatingPositions()"
+          [positionGapCm]="ps.positionGapCm()"
+          [positionFontSize]="ps.positionFontSize()"
           [snapshots]="snapshots()"
           [switchingSnapshot]="switchingSnapshot()"
           (refreshClicked)="refresh()"
           (syncClicked)="syncAllPhotos()"
           (arrangeNamesClicked)="arrangeNames()"
+          (updatePositionsClicked)="updatePositions()"
           (nameGapChanged)="ps.setNameGap($event)"
           (nameBreakChanged)="ps.setNameBreakAfter($event)"
           (textAlignChanged)="ps.setTextAlign($event)"
+          (positionGapChanged)="ps.setPositionGap($event)"
+          (positionFontSizeChanged)="ps.setPositionFontSize($event)"
           (snapshotSelected)="switchSnapshot($event)"
           (saveClicked)="save()"
           (closeClicked)="close()"
@@ -401,6 +407,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly placingPhotos = signal(false);
   readonly syncingPhotos = signal(false);
   readonly arrangingNames = signal(false);
+  readonly updatingPositions = signal(false);
   readonly generatingSample = signal(false);
   readonly generatingFinal = signal(false);
   readonly finalMode = signal<'flat' | 'small_tablo' | 'both'>('both');
@@ -503,6 +510,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     switch (commandId) {
       case 'sync-photos': this.syncAllPhotos(); break;
       case 'arrange-names': this.arrangeNames(); break;
+      case 'update-positions': this.updatePositions(); break;
       case 'open-project': this.onOpenProject(); break;
       case 'open-workdir': this.onOpenWorkDir(); break;
       case 'refresh': this.refresh(); break;
@@ -698,6 +706,40 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       await this.ps.arrangeNames(undefined, this.getLinkedLayerNames());
     } finally {
       this.arrangingNames.set(false);
+    }
+  }
+
+  /** Pozíció és felirat frissítése a Photoshopban */
+  async updatePositions(): Promise<void> {
+    this.updatingPositions.set(true);
+    try {
+      // Személyek listája — ha van kijelölés, csak azok
+      const allPersons = this.persons();
+      const selectedIds = this.state.selectedLayerIds();
+
+      let personsToUpdate: typeof allPersons;
+      if (selectedIds.size > 0) {
+        // Kijelölt layerek alapján szűrés: person ID kinyerése a layerName-ből
+        const selectedPersonIds = new Set<number>();
+        for (const layer of this.state.layers()) {
+          if (selectedIds.has(layer.layerId) && layer.personMatch) {
+            selectedPersonIds.add(layer.personMatch.id);
+          }
+        }
+        personsToUpdate = allPersons.filter(p => selectedPersonIds.has(p.id));
+      } else {
+        personsToUpdate = allPersons;
+      }
+
+      if (personsToUpdate.length === 0) return;
+
+      await this.ps.updatePositions(
+        personsToUpdate.map(p => ({ id: p.id, name: p.name, type: p.type, title: p.title })),
+        undefined,
+        this.getLinkedLayerNames(),
+      );
+    } finally {
+      this.updatingPositions.set(false);
     }
   }
 

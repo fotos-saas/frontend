@@ -385,6 +385,10 @@ export class LayoutDesignerStateService {
         if (subGroup === 'Students') return 'student-name';
         if (subGroup === 'Teachers') return 'teacher-name';
       }
+      if (topGroup === 'Positions') {
+        if (subGroup === 'Students') return 'student-position';
+        if (subGroup === 'Teachers') return 'teacher-position';
+      }
     }
 
     return 'fixed';

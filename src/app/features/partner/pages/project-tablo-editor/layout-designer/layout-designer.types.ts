@@ -1,7 +1,7 @@
 import { SnapshotLayer } from '@core/services/electron.types';
 
 /** Layer kategória a vizuális szerkesztőben */
-export type LayerCategory = 'student-image' | 'teacher-image' | 'student-name' | 'teacher-name' | 'fixed';
+export type LayerCategory = 'student-image' | 'teacher-image' | 'student-name' | 'teacher-name' | 'student-position' | 'teacher-position' | 'fixed';
 
 /** Személy párosítás (layer → projekt személy) */
 export interface PersonMatch {

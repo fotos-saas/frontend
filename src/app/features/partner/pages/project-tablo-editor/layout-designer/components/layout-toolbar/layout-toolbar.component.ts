@@ -297,6 +297,31 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           </button>
         </div>
 
+        <!-- Pozíciók gomb + beállítások -->
+        <div class="names-group">
+          <button
+            class="toolbar-btn toolbar-btn--positions"
+            [disabled]="updatingPositions()"
+            [class.is-updating]="updatingPositions()"
+            (click)="updatePositionsClicked.emit()"
+            matTooltip="Pozíció és felirat frissítése"
+          >
+            <lucide-icon [name]="ICONS.TAG" [size]="16" />
+            @if (!updatingPositions()) {
+              <span>Pozíciók</span>
+            } @else {
+              <span>Frissítés...</span>
+            }
+          </button>
+          <button
+            class="toolbar-btn toolbar-btn--positions-settings"
+            (click)="positionSettingsOpen.set(!positionSettingsOpen())"
+            matTooltip="Pozíció beállítások"
+          >
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="12" />
+          </button>
+        </div>
+
         @if (nameSettingsOpen()) {
           <div class="name-settings__backdrop" (click)="nameSettingsOpen.set(false)"></div>
           <div class="name-settings__panel">
@@ -357,6 +382,44 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
                 <span>Nevek rendezése</span>
               } @else {
                 <span>Rendezés...</span>
+              }
+            </button>
+          </div>
+        }
+
+        @if (positionSettingsOpen()) {
+          <div class="name-settings__backdrop" (click)="positionSettingsOpen.set(false)"></div>
+          <div class="name-settings__panel position-settings__panel">
+            <div class="name-settings__title">Pozíció beállítások</div>
+
+            <label class="name-settings__label">Rés a név aljától (cm)</label>
+            <input
+              class="name-settings__input"
+              type="number" step="0.05" min="0" max="3"
+              [value]="positionGapCm()"
+              (change)="positionGapChanged.emit(+$any($event.target).value)"
+            />
+
+            <label class="name-settings__label">Font méret (pt)</label>
+            <input
+              class="name-settings__input"
+              type="number" step="1" min="6" max="100"
+              [value]="positionFontSize()"
+              (change)="positionFontSizeChanged.emit(+$any($event.target).value)"
+            />
+
+            <div class="name-settings__sep"></div>
+
+            <button
+              class="name-settings__apply-btn position-settings__apply-btn"
+              [disabled]="updatingPositions()"
+              (click)="updatePositionsClicked.emit()"
+            >
+              <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+              @if (!updatingPositions()) {
+                <span>Pozíciók frissítése</span>
+              } @else {
+                <span>Frissítés...</span>
               }
             </button>
           </div>
@@ -693,6 +756,26 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         &:hover { background: rgba(167, 139, 250, 0.25); color: #c4b5fd; }
       }
 
+      &--positions {
+        padding: 0 10px;
+        background: rgba(251, 191, 36, 0.15);
+        color: #fbbf24;
+        border-radius: 6px 0 0 6px;
+        &:hover:not(:disabled) { background: rgba(251, 191, 36, 0.25); color: #fcd34d; }
+        &:disabled { opacity: 0.4; }
+        &.is-updating lucide-icon { animation: spin 1s linear infinite; }
+      }
+
+      &--positions-settings {
+        padding: 0 4px;
+        min-width: 24px;
+        background: rgba(251, 191, 36, 0.15);
+        color: #fbbf24;
+        border-radius: 0 6px 6px 0;
+        border-left: 1px solid rgba(251, 191, 36, 0.3);
+        &:hover { background: rgba(251, 191, 36, 0.25); color: #fcd34d; }
+      }
+
       &--refresh {
         padding: 0 10px;
         &:hover:not(:disabled) { color: #a78bfa; }
@@ -808,6 +891,16 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       margin: 4px 0;
     }
 
+    .position-settings__panel {
+      right: 180px;
+    }
+
+    .position-settings__apply-btn {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      &:hover:not(:disabled) { background: rgba(251, 191, 36, 0.35); color: #fcd34d; }
+    }
+
     .name-settings__apply-btn {
       display: flex;
       align-items: center;
@@ -885,8 +978,12 @@ export class LayoutToolbarComponent {
   readonly nameGapCm = input<number>(0.5);
   readonly nameBreakAfter = input<number>(1);
   readonly textAlign = input<string>('center');
+  readonly updatingPositions = input<boolean>(false);
+  readonly positionGapCm = input<number>(0.15);
+  readonly positionFontSize = input<number>(18);
   readonly pickerOpen = signal(false);
   readonly nameSettingsOpen = signal(false);
+  readonly positionSettingsOpen = signal(false);
 
   readonly saveClicked = output<void>();
   readonly closeClicked = output<void>();
@@ -896,6 +993,9 @@ export class LayoutToolbarComponent {
   readonly nameGapChanged = output<number>();
   readonly nameBreakChanged = output<number>();
   readonly textAlignChanged = output<string>();
+  readonly updatePositionsClicked = output<void>();
+  readonly positionGapChanged = output<number>();
+  readonly positionFontSizeChanged = output<number>();
   readonly snapshotSelected = output<SnapshotListItem>();
 
   formatDate(isoDate: string | null): string {

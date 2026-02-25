@@ -356,6 +356,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:get-grid-align') as Promise<string>,
     setGridAlign: (align: string) =>
       ipcRenderer.invoke('photoshop:set-grid-align', align) as Promise<{ success: boolean; error?: string }>,
+    getPositionGap: () =>
+      ipcRenderer.invoke('photoshop:get-position-gap') as Promise<number>,
+    setPositionGap: (gapCm: number) =>
+      ipcRenderer.invoke('photoshop:set-position-gap', gapCm) as Promise<{ success: boolean; error?: string }>,
+    getPositionFontSize: () =>
+      ipcRenderer.invoke('photoshop:get-position-font-size') as Promise<number>,
+    setPositionFontSize: (fontSize: number) =>
+      ipcRenderer.invoke('photoshop:set-position-font-size', fontSize) as Promise<{ success: boolean; error?: string }>,
     runJsx: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; psdFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) =>
       ipcRenderer.invoke('photoshop:run-jsx', params) as Promise<{ success: boolean; error?: string; output?: string }>,
     runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; psdFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) =>

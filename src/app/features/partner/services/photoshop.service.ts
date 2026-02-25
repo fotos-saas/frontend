@@ -52,6 +52,12 @@ export class PhotoshopService {
   /** Képek sor-igazítás a gridben (left/center/right) */
   readonly gridAlign = signal<string>('center');
 
+  /** Pozíció szöveg távolsága a név aljától (cm) */
+  readonly positionGapCm = signal<number>(0.15);
+
+  /** Pozíció szöveg font mérete (pt) */
+  readonly positionFontSize = signal<number>(18);
+
   /** Aktuálisan nyitott PSD fájl útvonala (auto-open-hez) */
   readonly psdPath = signal<string | null>(null);
 
@@ -95,7 +101,7 @@ export class PhotoshopService {
       const safe = <T>(fn: (() => Promise<T>) | undefined, fallback: T): Promise<T> =>
         typeof fn === 'function' ? fn().catch(() => fallback) : Promise.resolve(fallback);
 
-      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize, savedGapH, savedGapV, savedNameGap, savedNameBreak, savedTextAlign, savedGridAlign] = await Promise.all([
+      const [result, savedWorkDir, savedMargin, savedStudentSize, savedTeacherSize, savedGapH, savedGapV, savedNameGap, savedNameBreak, savedTextAlign, savedGridAlign, savedPositionGap, savedPositionFontSize] = await Promise.all([
         this.api.checkInstalled(),
         safe(this.api.getWorkDir, null as string | null),
         safe(this.api.getMargin, undefined as number | undefined),
@@ -107,6 +113,8 @@ export class PhotoshopService {
         safe(this.api.getNameBreakAfter, undefined as number | undefined),
         safe(this.api.getTextAlign, undefined as string | undefined),
         safe(this.api.getGridAlign, undefined as string | undefined),
+        safe(this.api.getPositionGap, undefined as number | undefined),
+        safe(this.api.getPositionFontSize, undefined as number | undefined),
       ]);
       if (result.found && result.path) {
         this.path.set(result.path);
@@ -140,6 +148,12 @@ export class PhotoshopService {
       }
       if (savedGridAlign !== undefined) {
         this.gridAlign.set(savedGridAlign);
+      }
+      if (savedPositionGap !== undefined) {
+        this.positionGapCm.set(savedPositionGap);
+      }
+      if (savedPositionFontSize !== undefined) {
+        this.positionFontSize.set(savedPositionFontSize);
       }
 
       // Minta beallitasok betoltese
@@ -633,6 +647,87 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('JSX arrangeNames hiba', err);
       return { success: false, error: 'Váratlan hiba a nevek rendezésénél' };
+    }
+  }
+
+  /**
+   * Pozíció (beosztás) layerek frissítése/létrehozása/törlése.
+   * persons: személy adatok title (pozíció) mezővel
+   * linkedLayerNames: linkelt layerek — rendezés előtt unlink, utána relink
+   */
+  async updatePositions(
+    persons: Array<{ id: number; name: string; type: string; title: string | null }>,
+    targetDocName?: string,
+    linkedLayerNames?: string[],
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      // Linkelések leszedése
+      if (linkedLayerNames?.length) {
+        await this.unlinkLayers(linkedLayerNames, targetDocName);
+      }
+
+      // Személy adatok előkészítése a JSX-nek
+      const jsxPersons = persons.map(p => ({
+        layerName: this.sanitizeName(p.name) + '---' + p.id,
+        displayText: p.name,
+        position: p.title || null,
+        group: p.type === 'student' ? 'Students' : 'Teachers',
+      }));
+
+      const result = await this.runJsx({
+        scriptName: 'actions/update-positions.jsx',
+        jsonData: {
+          persons: jsxPersons,
+          nameBreakAfter: this.nameBreakAfter(),
+          textAlign: this.textAlign(),
+          nameGapCm: this.nameGapCm(),
+          positionGapCm: this.positionGapCm(),
+          positionFontSize: this.positionFontSize(),
+        },
+        targetDocName,
+      });
+
+      // Linkelések visszaállítása
+      if (linkedLayerNames?.length) {
+        for (const name of linkedLayerNames) {
+          await this.linkLayers([name], targetDocName);
+        }
+      }
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX updatePositions hiba', err);
+      return { success: false, error: 'Váratlan hiba a pozíciók frissítésénél' };
+    }
+  }
+
+  /** Pozíció gap beállítása (cm) */
+  async setPositionGap(gapCm: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setPositionGap !== 'function') return false;
+    try {
+      const result = await this.api.setPositionGap(Number(gapCm));
+      if (result.success) { this.positionGapCm.set(gapCm); return true; }
+      this.logger.warn('Pozíció gap beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Pozíció gap beállítás hiba:', err);
+      return false;
+    }
+  }
+
+  /** Pozíció font méret beállítása (pt) */
+  async setPositionFontSize(fontSize: number): Promise<boolean> {
+    if (!this.api || typeof this.api.setPositionFontSize !== 'function') return false;
+    try {
+      const result = await this.api.setPositionFontSize(Number(fontSize));
+      if (result.success) { this.positionFontSize.set(fontSize); return true; }
+      this.logger.warn('Pozíció font méret beállítás sikertelen:', result.error);
+      return false;
+    } catch (err) {
+      this.logger.error('Pozíció font méret beállítás hiba:', err);
+      return false;
     }
   }
 

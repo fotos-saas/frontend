@@ -20,6 +20,10 @@ var CONFIG = {
   // → tobb nyitott PSD eseten is mindig a helyesben dolgozik
   TARGET_DOC_NAME: null,
 
+  // Pozicio (beosztás) text layer beallitasok
+  POSITION_FONT_SIZE: 18,      // pontmeret (pt) — kisebb mint a 25pt nev
+  POSITION_GAP_CM: 0.15,       // gap a nev alja es pozicio teteje kozott (cm)
+
   // PSD fajl teljes eleresi utja (autoOpen-hez)
   // Ha a TARGET_DOC_NAME nincs megnyitva, innen nyitja meg automatikusan
   PSD_FILE_PATH: null

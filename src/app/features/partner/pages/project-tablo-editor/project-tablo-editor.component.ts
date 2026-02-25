@@ -358,57 +358,60 @@ export class ProjectTabloEditorComponent implements OnInit {
         this.snapshotService.loadSnapshots(result.outputPath);
       }
 
-      // Varunk hogy a Photoshop megnyissa a PSD-t
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // TODO: TESZT — csak subtitle tesztelés, nevek/képek kikommentelve
+      this.successMessage.set(`PSD generálva (subtitle teszt): ${size.label}`);
 
-      // PSD fajlnev kiszamitasa a cel dokumentum nev-alapu aktivalasahoz
-      const psdFileName = result.outputPath
-        ? result.outputPath.split('/').pop() || undefined
-        : undefined;
-
-      // 0. Margó guide-ok (mindig, ha van margó beállítva)
-      const guideResult = await this.ps.addGuides(psdFileName);
-      if (!guideResult.success) {
-        this.error.set(`Guide-ok: ${guideResult.error}`);
-      }
-
-      // PSD megnyitás után: JSX layerek hozzáadása (ha vannak személyek)
-      if (personsData.length > 0) {
-        // 1. Név layerek (text)
-        const nameResult = await this.ps.addNameLayers(personsData, psdFileName);
-
-        // 2. Image layerek (Smart Object placeholder-ek)
-        const imageResult = await this.ps.addImageLayers(personsData, undefined, psdFileName);
-
-        const nameOk = nameResult.success;
-        const imageOk = imageResult.success;
-
-        // 3. Grid elrendezés (image layerek pozícionálása rácsba)
-        if (imageOk) {
-          const boardSize = this.ps.parseSizeValue(size.value);
-          if (boardSize) {
-            const gridResult = await this.ps.arrangeGrid(boardSize, psdFileName);
-            if (!gridResult.success) {
-              this.error.set(`Grid elrendezés: ${gridResult.error}`);
-            }
-
-            // 4. Layout JSON automatikus mentése a PSD mellé
-            await this.autoSaveSnapshot(result.outputPath);
-          }
-        }
-
-        if (nameOk && imageOk) {
-          this.successMessage.set(`PSD generálva: ${personsData.length} név + kép layer: ${size.label}`);
-        } else {
-          this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
-          const errors: string[] = [];
-          if (!nameOk) errors.push(`Név layerek: ${nameResult.error}`);
-          if (!imageOk) errors.push(`Image layerek: ${imageResult.error}`);
-          this.error.set(errors.join(' | '));
-        }
-      } else {
-        this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
-      }
+      // // Varunk hogy a Photoshop megnyissa a PSD-t
+      // await new Promise(resolve => setTimeout(resolve, 2000));
+      //
+      // // PSD fajlnev kiszamitasa a cel dokumentum nev-alapu aktivalasahoz
+      // const psdFileName = result.outputPath
+      //   ? result.outputPath.split('/').pop() || undefined
+      //   : undefined;
+      //
+      // // 0. Margó guide-ok (mindig, ha van margó beállítva)
+      // const guideResult = await this.ps.addGuides(psdFileName);
+      // if (!guideResult.success) {
+      //   this.error.set(`Guide-ok: ${guideResult.error}`);
+      // }
+      //
+      // // PSD megnyitás után: JSX layerek hozzáadása (ha vannak személyek)
+      // if (personsData.length > 0) {
+      //   // 1. Név layerek (text)
+      //   const nameResult = await this.ps.addNameLayers(personsData, psdFileName);
+      //
+      //   // 2. Image layerek (Smart Object placeholder-ek)
+      //   const imageResult = await this.ps.addImageLayers(personsData, undefined, psdFileName);
+      //
+      //   const nameOk = nameResult.success;
+      //   const imageOk = imageResult.success;
+      //
+      //   // 3. Grid elrendezés (image layerek pozícionálása rácsba)
+      //   if (imageOk) {
+      //     const boardSize = this.ps.parseSizeValue(size.value);
+      //     if (boardSize) {
+      //       const gridResult = await this.ps.arrangeGrid(boardSize, psdFileName);
+      //       if (!gridResult.success) {
+      //         this.error.set(`Grid elrendezés: ${gridResult.error}`);
+      //       }
+      //
+      //       // 4. Layout JSON automatikus mentése a PSD mellé
+      //       await this.autoSaveSnapshot(result.outputPath);
+      //     }
+      //   }
+      //
+      //   if (nameOk && imageOk) {
+      //     this.successMessage.set(`PSD generálva: ${personsData.length} név + kép layer: ${size.label}`);
+      //   } else {
+      //     this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
+      //     const errors: string[] = [];
+      //     if (!nameOk) errors.push(`Név layerek: ${nameResult.error}`);
+      //     if (!imageOk) errors.push(`Image layerek: ${imageResult.error}`);
+      //     this.error.set(errors.join(' | '));
+      //   }
+      // } else {
+      //   this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
+      // }
     } finally {
       this.generating.set(false);
     }

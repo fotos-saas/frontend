@@ -1309,6 +1309,10 @@ export class PhotoshopService {
         subtitles.push({ name: 'idezet', text: context.quote });
       }
 
+      // DEBUG: subtitle adatok ellenőrzés
+      console.log('[PSD] context:', JSON.stringify({ schoolName: context?.schoolName, className: context?.className, classYear: context?.classYear, quote: context?.quote }));
+      console.log('[PSD] subtitles:', JSON.stringify(subtitles));
+
       // PSD generálás
       const genResult = await this.api.generatePsd({
         widthCm: dimensions.widthCm,

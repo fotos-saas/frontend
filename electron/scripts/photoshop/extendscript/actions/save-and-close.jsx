@@ -3,7 +3,7 @@
  *
  * Mukodes:
  * 1. Dokumentum aktivalasa (TARGET_DOC_NAME / PSD_FILE_PATH alapjan)
- * 2. Mentes (save — PSD formatumban, a meglevo eleresi utra)
+ * 2. Mentes PSD formatumban (explicit eleresi uttal a PSD_FILE_PATH-bol)
  * 3. Bezaras (DONOTSAVECHANGES — mar mentettuk)
  *
  * Visszateres: "OK" vagy hibauzenet
@@ -27,9 +27,22 @@ function log(msg) {
     var doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
     log("[JSX] Dokumentum: " + doc.name);
 
-    // Mentes
-    doc.save();
-    log("[JSX] Mentve");
+    // Mentes — SaveAs PSD formatumban az explicit eleresi utra
+    // doc.save() nem megbizhato ha a dokumentumot programmatikusan hoztuk letre,
+    // mert a Photoshop "Save As" dialogot nyithat. SaveAs explicit File-lal biztonsagosabb.
+    var savePath = CONFIG.PSD_FILE_PATH;
+    if (savePath) {
+      var psdOpts = new PhotoshopSaveOptions();
+      psdOpts.layers = true;
+      psdOpts.embedColorProfile = true;
+      psdOpts.annotations = true;
+      doc.saveAs(new File(savePath), psdOpts, true, Extension.LOWERCASE);
+      log("[JSX] Mentve: " + savePath);
+    } else {
+      // Fallback: ha nincs explicit ut, probaljuk a sima save()-et
+      doc.save();
+      log("[JSX] Mentve (save fallback)");
+    }
 
     // Bezaras (mar mentettuk, nem kell ujra)
     doc.close(SaveOptions.DONOTSAVECHANGES);

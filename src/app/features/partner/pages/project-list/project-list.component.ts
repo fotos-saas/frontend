@@ -8,6 +8,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../../services/partner.service';
 import { PartnerTagService } from '../../services/partner-tag.service';
+import { PsdStatusService } from '../../services/psd-status.service';
 import { PartnerPreliminaryService } from '../../services/partner-preliminary.service';
 import { PartnerOrderSyncService } from '../../services/partner-order-sync.service';
 import { CreatePreliminaryModalComponent } from '../../components/create-preliminary-modal/create-preliminary-modal.component';
@@ -66,6 +67,7 @@ export class PartnerProjectListComponent implements OnInit {
   private readonly orderSyncService = inject(PartnerOrderSyncService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly psdStatusService = inject(PsdStatusService);
 
   readonly ICONS = ICONS;
 
@@ -76,7 +78,7 @@ export class PartnerProjectListComponent implements OnInit {
     { key: 'photos_uploaded', label: '', width: '24px', align: 'center', icon: 'package-check', tooltip: 'Feltöltve' },
     { key: 'tablo_status', label: 'Státusz', width: '110px', align: 'center', sortable: true },
     { key: 'missing_count', label: 'Hiányzó', width: '75px', align: 'center', sortable: true },
-    { key: 'actions', label: '', width: '56px' },
+    { key: 'actions', label: '', width: '120px' },
   ];
   readonly gridTemplate = this.tableCols.map(c => c.width ?? '1fr').join(' ');
   readonly qrService: IQrCodeService = this.partnerService;
@@ -262,6 +264,7 @@ export class PartnerProjectListComponent implements OnInit {
           this.totalProjects.set(response.total);
           this.projectLimits.set(response.limits ?? null);
           this.filterState.loading.set(false);
+          this.psdStatusService.checkProjects(response.data);
         },
         error: (err) => {
           this.logger.error('Failed to load projects', err);

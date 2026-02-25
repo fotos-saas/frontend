@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerProjectListItem } from '../../services/partner.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { PsdStatusService } from '../../services/psd-status.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { StatusDropdownComponent } from '../../../../shared/components/status-dropdown/status-dropdown.component';
 import { BatchAddDropdownComponent } from '../batch-add-dropdown/batch-add-dropdown.component';
@@ -23,9 +24,13 @@ import { BatchAddDropdownComponent } from '../batch-add-dropdown/batch-add-dropd
 export class ProjectCardComponent {
   readonly ICONS = ICONS;
   private authService = inject(AuthService);
+  private psdStatusService = inject(PsdStatusService);
   readonly isMarketer = this.authService.isMarketer;
 
   readonly project = input.required<PartnerProjectListItem>();
+
+  /** PSD státusz a projekthez */
+  readonly psdStatus = computed(() => this.psdStatusService.getStatus(this.project().id));
 
   readonly cardClick = output<PartnerProjectListItem>();
   readonly samplesClick = output<PartnerProjectListItem>();
@@ -171,5 +176,15 @@ export class ProjectCardComponent {
       label: event.label,
       color: event.color,
     });
+  }
+
+  onOpenPsClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.psdStatusService.openInPhotoshop(this.project().id);
+  }
+
+  onOpenFolderClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.psdStatusService.revealFolder(this.project().id);
   }
 }

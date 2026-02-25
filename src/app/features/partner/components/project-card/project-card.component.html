@@ -129,6 +129,24 @@
 
   <!-- Col 6: Műveletek -->
   <div class="col col-actions">
+    @if (psdStatus()?.exists) {
+      <button
+        type="button"
+        class="action-btn action-btn--ps"
+        (click)="onOpenPsClick($event)"
+        matTooltip="Megnyitás Photoshopban"
+      >
+        <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
+      </button>
+      <button
+        type="button"
+        class="action-btn action-btn--folder"
+        (click)="onOpenFolderClick($event)"
+        matTooltip="Mappa megnyitása"
+      >
+        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
+      </button>
+    }
     @if (project().isPreliminary && !project().linkedProjectId) {
       <button
         type="button"

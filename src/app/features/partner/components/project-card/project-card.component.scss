@@ -407,6 +407,25 @@
   background: #059669;
 }
 
+.action-btn--ps {
+  background: #31a8ff;
+  color: #ffffff;
+}
+
+.action-btn--ps:hover {
+  background: #2196f3;
+}
+
+.action-btn--folder {
+  background: get-color('slate', 200);
+  color: get-color('slate', 600);
+}
+
+.action-btn--folder:hover {
+  background: get-color('slate', 300);
+  color: get-color('slate', 700);
+}
+
 .action-btn--delete {
   background: transparent;
   color: get-color('slate', 400);

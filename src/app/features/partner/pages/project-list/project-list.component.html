@@ -66,6 +66,17 @@
       filterBarExtra
       type="button"
       class="sort-toggle-btn"
+      [class.sort-toggle-btn--active]="filterState.sortBy() === 'last_content_update'"
+      (click)="toggleContentSort()"
+      [matTooltip]="filterState.sortBy() === 'last_content_update' ? 'Rendezés: legújabb módosítás' : 'Rendezés legújabb módosítás szerint'"
+    >
+      <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="16" />
+      Módosítva
+    </button>
+    <button
+      filterBarExtra
+      type="button"
+      class="sort-toggle-btn"
       [class.sort-toggle-btn--active]="filterState.sortBy() === 'order_submitted_at'"
       (click)="toggleOrderSort()"
       [matTooltip]="filterState.sortBy() === 'order_submitted_at' ? 'Rendezés: leadás dátuma' : 'Rendezés leadás dátuma szerint'"

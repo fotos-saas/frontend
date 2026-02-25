@@ -95,7 +95,7 @@ export class PartnerProjectListComponent implements OnInit {
     defaultSortBy: 'created_at',
     defaultSortDir: 'desc',
     validation: {
-      sortByOptions: ['created_at', 'photo_date', 'class_year', 'school_name', 'tablo_status', 'missing_count', 'samples_count', 'order_submitted_at'],
+      sortByOptions: ['created_at', 'photo_date', 'class_year', 'school_name', 'tablo_status', 'missing_count', 'samples_count', 'order_submitted_at', 'last_content_update'],
       filterOptions: {
         aware: ['true', 'false'],
         draft: ['true', 'false'],
@@ -157,6 +157,7 @@ export class PartnerProjectListComponent implements OnInit {
     { value: 'missing_count', label: 'Hiányzó' },
     { value: 'created_at', label: 'Létrehozva' },
     { value: 'order_submitted_at', label: 'Leadva' },
+    { value: 'last_content_update', label: 'Módosítva' },
   ];
 
   readonly sortDef: SortDef = {
@@ -208,6 +209,14 @@ export class PartnerProjectListComponent implements OnInit {
     }
   }
 
+  toggleContentSort(): void {
+    if (this.filterState.sortBy() === 'last_content_update') {
+      this.filterState.setSortBy('created_at');
+    } else {
+      this.filterState.setSortBy('last_content_update');
+    }
+  }
+
   ngOnInit(): void {
     this.loadProjects();
     this.checkSyncInBackground();
@@ -243,7 +252,7 @@ export class PartnerProjectListComponent implements OnInit {
       page: this.filterState.page(),
       per_page: 12,
       search: this.filterState.search() || undefined,
-      sort_by: this.filterState.sortBy() as 'created_at' | 'photo_date' | 'class_year' | 'school_name' | 'tablo_status' | 'missing_count' | 'samples_count' | 'order_submitted_at',
+      sort_by: this.filterState.sortBy() as 'created_at' | 'photo_date' | 'class_year' | 'school_name' | 'tablo_status' | 'missing_count' | 'samples_count' | 'order_submitted_at' | 'last_content_update',
       sort_dir: this.filterState.sortDir(),
       status: filters['status'] || undefined,
       is_aware: filters['aware'] ? filters['aware'] === 'true' : undefined,

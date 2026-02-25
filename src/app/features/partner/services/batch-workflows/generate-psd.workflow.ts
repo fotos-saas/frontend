@@ -62,8 +62,8 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     // PSD path signal beállítása — a runJsx wrapper ezt használja a dokumentum fókuszhoz
     ps.psdPath.set(psdPath);
 
-    // Dokumentum neve a PSD path-ból (fájlnév kiterjesztés nélkül)
-    const docName = psdPath.split('/').pop()?.replace('.psd', '') ?? undefined;
+    // Dokumentum neve a PSD path-ból (kiterjesztéssel — a PS document.name .psd-vel adja vissza!)
+    const docName = psdPath.split('/').pop() ?? undefined;
 
     // 1. PSD generálás — className és brandName a helyes mappa/fájlnévhez
     onStep(1);

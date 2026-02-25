@@ -657,7 +657,7 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.generatingInitialSnapshot.set(true);
     this.clearMessages();
 
-    const psdFileName = psdPath.split('/').pop()?.replace('.psd', '') || undefined;
+    const psdFileName = psdPath.split('/').pop() || undefined;
 
     const result = await this.snapshotService.saveSnapshot(
       'Kezdeti elrendezés',

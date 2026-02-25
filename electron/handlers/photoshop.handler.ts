@@ -1466,6 +1466,37 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Check if PSD file exists and has layouts/ directory
+  ipcMain.handle('photoshop:check-psd-exists', (_event, params: { psdPath: string }) => {
+    try {
+      if (typeof params.psdPath !== 'string' || params.psdPath.length > 500) {
+        return { success: false, exists: false, hasLayouts: false };
+      }
+      if (params.psdPath.includes('..')) {
+        return { success: false, exists: false, hasLayouts: false };
+      }
+
+      const exists = fs.existsSync(params.psdPath);
+      if (!exists) {
+        return { success: true, exists: false, hasLayouts: false };
+      }
+
+      const psdDir = path.dirname(params.psdPath);
+      const layoutsDir = path.join(psdDir, 'layouts');
+      let hasLayouts = false;
+
+      if (fs.existsSync(layoutsDir)) {
+        const jsonFiles = fs.readdirSync(layoutsDir).filter(f => f.endsWith('.json'));
+        hasLayouts = jsonFiles.length > 0;
+      }
+
+      return { success: true, exists: true, hasLayouts };
+    } catch (error) {
+      log.error('PSD letezés ellenorzes hiba:', error);
+      return { success: false, exists: false, hasLayouts: false };
+    }
+  });
+
   // Load snapshot JSON content
   ipcMain.handle('photoshop:load-snapshot', (_event, params: { snapshotPath: string }) => {
     try {

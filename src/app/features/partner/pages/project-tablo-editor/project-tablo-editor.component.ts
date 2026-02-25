@@ -206,6 +206,11 @@ export class ProjectTabloEditorComponent implements OnInit {
     return this.collapsedGroups().has(name);
   }
 
+  /** PSD fájl létezés (régi migrált projekteknél) */
+  readonly psdExists = signal(false);
+  readonly psdHasLayouts = signal(false);
+  readonly generatingInitialSnapshot = signal(false);
+
   /** Üzenetek */
   readonly error = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
@@ -585,7 +590,18 @@ export class ProjectTabloEditorComponent implements OnInit {
     if (this.snapshotsInitLoaded) return;
     if (!this.project() || !this.selectedSize()) return;
     this.snapshotsInitLoaded = true;
-    await this.loadSnapshots();
+
+    const psdPath = await this.resolvePsdPath();
+    if (!psdPath) return;
+
+    // PSD fájl létezés ellenőrzése (régi migrált projekteknél)
+    const check = await this.ps.checkPsdExists(psdPath);
+    this.psdExists.set(check.exists);
+    this.psdHasLayouts.set(check.hasLayouts);
+
+    if (check.exists && check.hasLayouts) {
+      await this.snapshotService.loadSnapshots(psdPath);
+    }
   }
 
   /** Snapshot lista betöltése (ha van PSD path) */
@@ -593,6 +609,39 @@ export class ProjectTabloEditorComponent implements OnInit {
     const psdPath = await this.resolvePsdPath();
     if (!psdPath) return;
     await this.snapshotService.loadSnapshots(psdPath);
+  }
+
+  /** Pillanatkép generálása meglévő PSD-ből (régi migrált projektek) */
+  async generateSnapshotFromExistingPsd(): Promise<void> {
+    const size = this.selectedSize();
+    if (!size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    const psdPath = await this.resolvePsdPath();
+    if (!psdPath) return;
+
+    this.generatingInitialSnapshot.set(true);
+    this.clearMessages();
+
+    const psdFileName = psdPath.split('/').pop()?.replace('.psd', '') || undefined;
+
+    const result = await this.snapshotService.saveSnapshot(
+      'Kezdeti elrendezés',
+      boardSize,
+      psdPath,
+      psdFileName,
+    );
+
+    this.generatingInitialSnapshot.set(false);
+
+    if (result.success) {
+      this.psdHasLayouts.set(true);
+      this.successMessage.set('Pillanatkép létrehozva a meglévő PSD-ből!');
+    } else {
+      this.error.set(result.error || 'Nem sikerült kiolvasni az elrendezést. Győződj meg, hogy a PSD meg van nyitva a Photoshop-ban!');
+    }
   }
 
   /** Új pillanatkép mentése */

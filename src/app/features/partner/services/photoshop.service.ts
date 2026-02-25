@@ -1076,6 +1076,18 @@ export class PhotoshopService {
     this.api?.revealInFinder(filePath);
   }
 
+  /** PSD fájl létezés ellenőrzés (layouts/ mappa is) */
+  async checkPsdExists(psdPath: string): Promise<{ exists: boolean; hasLayouts: boolean }> {
+    if (!this.api) return { exists: false, hasLayouts: false };
+    try {
+      const result = await this.api.checkPsdExists({ psdPath });
+      return result.success ? { exists: result.exists, hasLayouts: result.hasLayouts } : { exists: false, hasLayouts: false };
+    } catch (err) {
+      this.logger.error('PSD létezés ellenőrzés hiba', err);
+      return { exists: false, hasLayouts: false };
+    }
+  }
+
   /** Snapshot betöltése (JSON tartalom visszaadása) */
   async loadSnapshot(snapshotPath: string): Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

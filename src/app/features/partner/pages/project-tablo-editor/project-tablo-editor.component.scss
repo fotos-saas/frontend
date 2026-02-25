@@ -140,6 +140,16 @@
     font-style: italic;
   }
 
+  &__action {
+    padding: 12px 0;
+  }
+
+  &__hint {
+    font-size: 13px;
+    color: var(--text-secondary, #6b7280);
+    margin: 0 0 8px;
+  }
+
   &__warning {
     font-size: 0.8rem;
     color: #d97706;
@@ -535,8 +545,17 @@
 }
 
 // Spinner
-.spin {
+.spin, .spinner {
   animation: spin 1s linear infinite;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
 }
 
 @keyframes spin {

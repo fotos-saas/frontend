@@ -195,6 +195,25 @@
                 <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
                 Pillanatképek betöltése...
               </div>
+            } @else if (snapshotService.snapshots().length === 0 && psdExists() && !psdHasLayouts()) {
+              <div class="command-card__action">
+                <p class="command-card__hint">
+                  A PSD fájl megvan, de még nincs pillanatkép.
+                  Nyisd meg a PSD-t a Photoshop-ban, majd kattints ide:
+                </p>
+                <button
+                  class="btn btn--primary btn--generate"
+                  [disabled]="generatingInitialSnapshot()"
+                  (click)="generateSnapshotFromExistingPsd()"
+                >
+                  @if (generatingInitialSnapshot()) {
+                    <span class="spinner"></span> Elrendezés kiolvasása...
+                  } @else {
+                    <lucide-icon [name]="ICONS.SCAN" [size]="16" />
+                    Pillanatkép létrehozása a PSD-ből
+                  }
+                </button>
+              </div>
             } @else if (snapshotService.snapshots().length === 0) {
               <div class="snapshot-empty">
                 <lucide-icon [name]="ICONS.HISTORY" [size]="20" />
@@ -353,6 +372,25 @@
           } @else if (!selectedSize()) {
             <div class="command-card__disabled">
               Válassz méretet a fenti szekciónál.
+            </div>
+          } @else if (snapshotService.snapshots().length === 0 && psdExists() && !psdHasLayouts()) {
+            <div class="command-card__action">
+              <p class="command-card__hint">
+                A PSD fájl megvan, de még nincs pillanatkép.
+                Nyisd meg a PSD-t a Photoshop-ban, majd kattints ide:
+              </p>
+              <button
+                class="btn btn--primary btn--generate"
+                [disabled]="generatingInitialSnapshot()"
+                (click)="generateSnapshotFromExistingPsd()"
+              >
+                @if (generatingInitialSnapshot()) {
+                  <span class="spinner"></span> Elrendezés kiolvasása...
+                } @else {
+                  <lucide-icon [name]="ICONS.SCAN" [size]="16" />
+                  Pillanatkép létrehozása a PSD-ből
+                }
+              </button>
             </div>
           } @else if (snapshotService.snapshots().length === 0) {
             <div class="command-card__disabled">

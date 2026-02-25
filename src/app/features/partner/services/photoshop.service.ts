@@ -748,20 +748,11 @@ export class PhotoshopService {
           context.className ? `${context.projectName}-${context.className}` : context.projectName,
         );
 
-        // Először keressük meg a meglévő PSD-t (régi migrált projektek támogatása)
-        const partnerFullDir = `${this.workDir()}/${partnerDir}`;
-        const existing = await this.api.findExistingPsd({ partnerDir: partnerFullDir, folderName });
-        if (existing.success && existing.found && existing.psdPath) {
-          return existing.psdPath;
-        }
-
-        // Nem találtunk meglévő PSD-t → új útvonal generálás
-        const year = new Date().getFullYear().toString();
         const dimensions = this.parseSizeValue(sizeValue);
         const sizeLabel = dimensions ? `${dimensions.widthCm}x${dimensions.heightCm}` : sizeValue;
         const dpi = 200;
         const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
-        return `${partnerFullDir}/${year}/${folderName}/${psdFileName}.psd`;
+        return `${this.workDir()}/${partnerDir}/${folderName}/${psdFileName}.psd`;
       }
 
       const downloadsPath = await this.api.getDownloadsPath();
@@ -1231,16 +1222,15 @@ export class PhotoshopService {
       let outputPath: string;
 
       if (context && this.workDir()) {
-        // Projekt kontextus → workDir/partner/év/iskolaNév_osztály_SZxMA_DPIdpi.psd
+        // Projekt kontextus → workDir/partner/iskolaNév_osztály/iskolaNév_osztály_SZxMA_DPIdpi.psd
         const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
-        const year = new Date().getFullYear().toString();
         const folderName = this.sanitizeName(
           context.className ? `${context.projectName}-${context.className}` : context.projectName,
         );
         const sizeLabel = `${dimensions.widthCm}x${dimensions.heightCm}`;
         const dpi = 200;
         const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
-        outputPath = `${this.workDir()}/${partnerDir}/${year}/${folderName}/${psdFileName}.psd`;
+        outputPath = `${this.workDir()}/${partnerDir}/${folderName}/${psdFileName}.psd`;
       } else {
         // Nincs kontextus → Downloads/PhotoStack/méret.psd
         const downloadsPath = await this.api.getDownloadsPath();

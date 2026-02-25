@@ -1110,6 +1110,29 @@ export class PhotoshopService {
     }
   }
 
+  /** Dokumentum mentése és bezárása Photoshopban */
+  async saveAndCloseDocument(targetDocName?: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/save-and-close.jsx',
+        targetDocName,
+      });
+      if (!result.success) {
+        return { success: false, error: result.error || 'Mentés és bezárás sikertelen' };
+      }
+      const output = result.output ?? '';
+      if (output.indexOf('__SAVE_CLOSE__OK') === -1) {
+        const errorMatch = output.match(/\[JSX\] HIBA: (.+)/);
+        return { success: false, error: errorMatch?.[1] || 'Ismeretlen hiba a mentésnél' };
+      }
+      return { success: true };
+    } catch (err) {
+      this.logger.error('Dokumentum mentés/bezárás hiba', err);
+      return { success: false, error: 'Váratlan hiba a dokumentum mentésnél' };
+    }
+  }
+
   /** Snapshot betöltése (JSON tartalom visszaadása) */
   async loadSnapshot(snapshotPath: string): Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

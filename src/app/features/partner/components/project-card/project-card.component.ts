@@ -31,11 +31,12 @@ export class ProjectCardComponent {
   readonly isElectron = this.electronService.isElectron;
 
   readonly project = input.required<PartnerProjectListItem>();
+  readonly selected = input(false);
 
   /** PSD státusz a projekthez */
   readonly psdStatus = computed(() => this.psdStatusService.getStatus(this.project().id));
 
-  readonly cardClick = output<PartnerProjectListItem>();
+  readonly cardClick = output<{ project: PartnerProjectListItem; event: MouseEvent }>();
   readonly samplesClick = output<PartnerProjectListItem>();
   readonly missingClick = output<PartnerProjectListItem>();
   readonly qrClick = output<PartnerProjectListItem>();
@@ -127,6 +128,7 @@ export class ProjectCardComponent {
   }
 
   onSamplesClick(event: MouseEvent): void {
+    if (this.selected()) return; // kijelölt módban a cardClick kezeli
     event.stopPropagation();
     const project = this.project();
     if (project.sampleThumbUrl) {

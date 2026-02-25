@@ -113,8 +113,9 @@
       @for (project of projects(); track project.id; let i = $index) {
         <app-partner-project-card
           [project]="project"
+          [selected]="selectedProjectIds().has(project.id)"
           [style.animation-delay]="i * 0.05 + 's'"
-          (cardClick)="viewProject($event)"
+          (cardClick)="onCardSelect($event.project, $event.event, i)"
           (samplesClick)="openSamplesModal($event)"
           (missingClick)="openMissingModal($event)"
           (qrClick)="openQrModal($event)"
@@ -139,6 +140,38 @@
     />
   }
 </div>
+
+<!-- Bulk akció sáv (multi-select) -->
+@if (selectedProjectIds().size > 0) {
+  <div class="bulk-action-bar">
+    <div class="bulk-action-bar__info">
+      <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+      <span>{{ selectedProjectIds().size }} projekt kijelölve</span>
+    </div>
+    @if (isElectron) {
+      <div class="bulk-action-bar__actions">
+        @if (canBulkGeneratePsd()) {
+          <button type="button" class="bulk-btn" (click)="addSelectedToBatch('generate-psd')">
+            PSD generálás
+          </button>
+        }
+        @if (canBulkGenerateSample()) {
+          <button type="button" class="bulk-btn" (click)="addSelectedToBatch('generate-sample')">
+            Minta
+          </button>
+        }
+        @if (canBulkFinalize()) {
+          <button type="button" class="bulk-btn" (click)="addSelectedToBatch('finalize')">
+            Végl.
+          </button>
+        }
+      </div>
+    }
+    <button type="button" class="bulk-action-bar__close" (click)="clearSelection()">
+      <lucide-icon [name]="ICONS.X" [size]="16" />
+    </button>
+  </div>
+}
 
 <!-- Samples Lightbox -->
 @if (samplesLightboxIndex() !== null) {

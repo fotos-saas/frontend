@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild, ComponentRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild, ComponentRef, HostListener } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { ToastService } from '@core/services/toast.service';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +9,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../../services/partner.service';
 import { PartnerTagService } from '../../services/partner-tag.service';
 import { PsdStatusService } from '../../services/psd-status.service';
+import { BatchWorkspaceService } from '../../services/batch-workspace.service';
+import { BatchWorkflowType } from '../../models/batch.types';
 import { ElectronService } from '../../../../core/services/electron.service';
 import { PartnerPreliminaryService } from '../../services/partner-preliminary.service';
 import { PartnerOrderSyncService } from '../../services/partner-order-sync.service';
@@ -69,9 +71,11 @@ export class PartnerProjectListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly psdStatusService = inject(PsdStatusService);
+  private readonly batchWorkspaceService = inject(BatchWorkspaceService);
   private readonly electronService = inject(ElectronService);
 
   readonly ICONS = ICONS;
+  readonly isElectron = this.electronService.isElectron;
 
   readonly tableCols: TableColumn[] = [
     { key: 'sample', label: '', width: '48px' },
@@ -178,6 +182,27 @@ export class PartnerProjectListComponent implements OnInit {
   uploadWizardAlbum = signal<'students' | 'teachers' | undefined>(undefined);
   selectedProject = signal<PartnerProjectListItem | null>(null);
 
+  // Multi-select
+  readonly selectedProjectIds = signal<Set<number>>(new Set());
+  private lastSelectedIndex: number | null = null;
+
+  readonly selectedProjects = computed(() => {
+    const ids = this.selectedProjectIds();
+    return this.projects().filter(p => ids.has(p.id));
+  });
+
+  readonly canBulkGeneratePsd = computed(() =>
+    this.selectedProjects().some(p => !this.psdStatusService.getStatus(p.id)?.exists)
+  );
+
+  readonly canBulkGenerateSample = computed(() =>
+    this.selectedProjects().some(p => this.psdStatusService.getStatus(p.id)?.exists)
+  );
+
+  readonly canBulkFinalize = computed(() =>
+    this.selectedProjects().some(p => this.psdStatusService.getStatus(p.id)?.exists)
+  );
+
   // Delete Confirm
   showDeleteConfirm = signal(false);
   deletingProjectName = signal('');
@@ -243,6 +268,7 @@ export class PartnerProjectListComponent implements OnInit {
   }
 
   loadProjects(): void {
+    this.clearSelection();
     this.filterState.loading.set(true);
 
     const filters = this.filterState.filters();
@@ -280,6 +306,69 @@ export class PartnerProjectListComponent implements OnInit {
 
   viewProject(project: PartnerProjectListItem): void {
     this.router.navigate(['/partner/projects', project.id]);
+  }
+
+  // Multi-select handlers
+  onCardSelect(project: PartnerProjectListItem, event: MouseEvent, index: number): void {
+    if (event.metaKey || event.ctrlKey) {
+      // Cmd/Ctrl+klikk → toggle
+      this.selectedProjectIds.update(ids => {
+        const next = new Set(ids);
+        if (next.has(project.id)) {
+          next.delete(project.id);
+        } else {
+          next.add(project.id);
+        }
+        return next;
+      });
+      this.lastSelectedIndex = index;
+    } else if (event.shiftKey && this.lastSelectedIndex !== null) {
+      // Shift+klikk → tartomány
+      const start = Math.min(this.lastSelectedIndex, index);
+      const end = Math.max(this.lastSelectedIndex, index);
+      const rangeIds = this.projects().slice(start, end + 1).map(p => p.id);
+      this.selectedProjectIds.update(ids => {
+        const next = new Set(ids);
+        rangeIds.forEach(id => next.add(id));
+        return next;
+      });
+    } else {
+      // Sima klikk → ha van kijelölés, töröljük; egyébként navigáció
+      if (this.selectedProjectIds().size > 0) {
+        this.clearSelection();
+      } else {
+        this.viewProject(project);
+      }
+    }
+  }
+
+  clearSelection(): void {
+    this.selectedProjectIds.set(new Set());
+    this.lastSelectedIndex = null;
+  }
+
+  addSelectedToBatch(workflowType: BatchWorkflowType): void {
+    const selected = this.selectedProjects();
+    let filtered: PartnerProjectListItem[];
+
+    if (workflowType === 'generate-psd') {
+      filtered = selected.filter(p => !this.psdStatusService.getStatus(p.id)?.exists);
+    } else {
+      filtered = selected.filter(p => this.psdStatusService.getStatus(p.id)?.exists);
+    }
+
+    if (filtered.length > 0) {
+      this.batchWorkspaceService.addTasks(filtered, workflowType);
+      this.batchWorkspaceService.panelOpen.set(true);
+    }
+    this.clearSelection();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapePress(): void {
+    if (this.selectedProjectIds().size > 0) {
+      this.clearSelection();
+    }
   }
 
   // Samples Lightbox handlers

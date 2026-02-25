@@ -1,11 +1,15 @@
-<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" (click)="cardClick.emit(project())">
+<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" [class.project-row--selected]="selected()" (click)="cardClick.emit({ project: project(), event: $event })">
   <!-- Col 1: Minta kép -->
   <div
     class="col col-sample"
-    [class.col-sample--clickable]="project().sampleThumbUrl"
+    [class.col-sample--clickable]="project().sampleThumbUrl && !selected()"
     (click)="onSamplesClick($event)"
   >
-    @if (project().sampleThumbUrl) {
+    @if (selected()) {
+      <div class="selected-check">
+        <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+      </div>
+    } @else if (project().sampleThumbUrl) {
       <img
         [src]="project().sampleThumbUrl"
         [alt]="'Minta'"

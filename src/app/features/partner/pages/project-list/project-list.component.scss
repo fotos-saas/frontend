@@ -98,6 +98,88 @@
   border-radius: 10px;
 }
 
+/* Bulk akció sáv */
+.bulk-action-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: get-color('slate', 800);
+  color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 12px 20px;
+  z-index: 100;
+  animation: bulkBarSlideUp 0.25s ease-out;
+}
+
+@keyframes bulkBarSlideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.bulk-action-bar__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.bulk-action-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bulk-btn {
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.bulk-action-bar__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 4px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+  }
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .sort-toggle-btn {
@@ -123,5 +205,31 @@
 
   .search-box {
     max-width: 100%;
+  }
+
+  .bulk-action-bar {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    transform: none;
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  @keyframes bulkBarSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bulk-action-bar {
+    animation: none;
   }
 }

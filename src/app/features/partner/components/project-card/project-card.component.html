@@ -112,11 +112,19 @@
     class="col col-missing"
     [class.col-missing--danger]="project().missingCount > 0"
     [class.col-missing--clickable]="project().missingCount > 0"
+    [class.col-missing--ok]="project().personsCount > 0 && project().missingCount === 0"
     (click)="onMissingClick($event)"
   >
-    <span class="missing-row"><span class="missing-label">D:</span><span class="missing-num" [class.missing-num--active]="project().missingStudentsCount > 0">{{ project().missingStudentsCount }}</span></span>
-    <span class="missing-sep">/</span>
-    <span class="missing-row"><span class="missing-label">T:</span><span class="missing-num" [class.missing-num--active]="project().missingTeachersCount > 0">{{ project().missingTeachersCount }}</span></span>
+    @if (project().personsCount === 0) {
+      <span class="missing-empty">–</span>
+    } @else if (project().missingCount === 0) {
+      <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+      <span>OK</span>
+    } @else {
+      <span class="missing-row"><span class="missing-label">D:</span><span class="missing-num" [class.missing-num--active]="project().missingStudentsCount > 0">{{ project().missingStudentsCount }}</span></span>
+      <span class="missing-sep">/</span>
+      <span class="missing-row"><span class="missing-label">T:</span><span class="missing-num" [class.missing-num--active]="project().missingTeachersCount > 0">{{ project().missingTeachersCount }}</span></span>
+    }
   </div>
 
   <!-- Col 6: Műveletek -->

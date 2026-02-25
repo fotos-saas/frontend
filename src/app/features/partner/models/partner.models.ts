@@ -67,6 +67,7 @@ export interface PartnerProjectListItem {
   deadline: string | null;
   guestsCount: number;
   expectedClassSize: number | null;
+  personsCount: number;
   missingCount: number;
   missingStudentsCount: number;
   missingTeachersCount: number;

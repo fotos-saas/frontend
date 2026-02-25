@@ -278,6 +278,15 @@
   color: get-color('slate', 500);
 }
 
+.col-missing--ok {
+  color: get-color('success', 500);
+  font-weight: 600;
+}
+
+.missing-empty {
+  color: get-color('slate', 300);
+}
+
 .missing-label {
   font-weight: 600;
   color: get-color('slate', 400);

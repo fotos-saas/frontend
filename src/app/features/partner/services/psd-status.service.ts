@@ -107,8 +107,6 @@ export class PsdStatusService {
       const result = await this.ps.checkPsdExists(psdPath);
       const folderPath = psdPath.substring(0, psdPath.lastIndexOf('/'));
 
-      this.logger.debug(`PSD check: ${project.schoolName} / ${project.className} → ${psdPath} → exists: ${result.exists}`);
-
       return { exists: result.exists, psdPath, folderPath };
     } catch {
       return { exists: false, psdPath: null, folderPath: null };

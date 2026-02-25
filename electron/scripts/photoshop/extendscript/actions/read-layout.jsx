@@ -125,7 +125,8 @@ function _readAllLayers(container, pathSoFar, result) {
           y: y,
           width: w,
           height: h,
-          kind: "normal"
+          kind: "normal",
+          visible: layer.visible
         };
 
         // Linked Layers jelzes (lánc ikon a PS Layers panelen)

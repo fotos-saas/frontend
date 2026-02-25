@@ -301,6 +301,11 @@ function _doRestore() {
         _restoreTextContent(layer, layerData.text, layerData.justification);
       }
 
+      // Lathatosag visszaallitasa (ha a snapshot tartalmazza)
+      if (layerData.visible !== undefined) {
+        layer.visible = layerData.visible;
+      }
+
       _restored++;
     } catch (e) {
       log("[JSX] WARN: Layer visszaallitas sikertelen (" + layerData.layerName + "): " + e.message);

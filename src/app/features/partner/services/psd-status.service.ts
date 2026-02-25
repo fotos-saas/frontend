@@ -58,7 +58,10 @@ export class PsdStatusService {
   async checkProjects(projects: PartnerProjectListItem[]): Promise<void> {
     if (!this.electron.isElectron || projects.length === 0) return;
 
-    // workDir nélkül nem tudunk projekt-specifikus PSD path-ot számolni
+    // PS beállítások betöltése (workDir, stb.) — ha még nem történt meg
+    if (!this.ps.workDir()) {
+      await this.ps.detectPhotoshop();
+    }
     if (!this.ps.workDir()) return;
 
     this.loading.set(true);

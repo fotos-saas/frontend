@@ -9,6 +9,10 @@ Hasznalat:
 
 Struktura:
   Subtitles/
+    iskola-neve        (TypeLayer, Arial 50pt, szoveg: pl. "Petőfi Sándor Általános Iskola")
+    osztaly             (TypeLayer, Arial 50pt, szoveg: pl. "12.A")
+    evfolyam           (TypeLayer, Arial 50pt, szoveg: pl. "2020-2025")
+    idezet             (TypeLayer, Arial 50pt, szoveg: pl. "Emlékezz ránk!" — opcionális)
   Names/
     Students/
       kiss-janos---42   (TypeLayer, Arial 25pt, szoveg: "Kiss Janos")
@@ -257,6 +261,26 @@ def create_name_layers(psd, persons):
     return [students, teachers]
 
 
+def create_subtitle_layers(psd, subtitles_data):
+    """Subtitles csoport TypeLayer-ekkel (iskola, osztaly, idezet).
+    subtitles_data: lista max 3 elemmel, pl:
+      [{"name": "iskola-neve", "text": "Petőfi Sándor Általános Iskola"},
+       {"name": "osztaly-neve", "text": "8.A - 2026"},
+       {"name": "idezet", "text": "Emlékezz ránk!"}]
+    """
+    layers = []
+    for item in subtitles_data:
+        layer = create_type_layer(
+            psd,
+            layer_name=item['name'],
+            display_text=item['text'],
+            font_name='ArialMT',
+            font_size=50.0,
+        )
+        layers.append(layer)
+    return layers
+
+
 def create_empty_sub_pair(psd):
     """Ures Students + Teachers almappa par."""
     students = psd.create_group(name='Students')
@@ -274,6 +298,8 @@ def main() -> None:
     parser.add_argument('--output', type=str, required=True)
     parser.add_argument('--persons-json', type=str, default=None,
                         help='JSON fajl a szemelyek listajával')
+    parser.add_argument('--subtitles-json', type=str, default=None,
+                        help='JSON fajl a feliratokhoz (iskola, osztaly, idezet)')
     args = parser.parse_args()
 
     print(f'[DEBUG] Script indulas: width={args.width_cm}cm, '
@@ -321,6 +347,21 @@ def main() -> None:
     else:
         print('[DEBUG] Nincs persons-json parameter — ures Names/ mappastruktura')
 
+    # Feliratok betoltese JSON-bol (ha megadtak)
+    subtitles_data = None
+    if args.subtitles_json:
+        sub_path = Path(args.subtitles_json)
+        if not sub_path.exists():
+            print(f'[DEBUG] HIBA: Subtitles JSON nem letezik: {sub_path}')
+            print(f'Subtitles JSON fajl nem talalhato: {sub_path}',
+                  file=sys.stderr)
+            sys.exit(1)
+        with open(sub_path, 'r', encoding='utf-8') as f:
+            subtitles_data = json.loads(f.read())
+        print(f'[DEBUG] Subtitles JSON beolvasva: {len(subtitles_data)} felirat')
+    else:
+        print('[DEBUG] Nincs subtitles-json parameter — ures Subtitles/ csoport')
+
     # --- PSD letrehozasa ---
     print(f'[DEBUG] PSD letrehozasa: {width_px}x{height_px}px, {mode}')
     psd = PSDImage.new(mode=mode, size=(width_px, height_px))
@@ -358,8 +399,14 @@ def main() -> None:
     names = psd.create_group(
         layer_list=create_empty_sub_pair(psd), name='Names')
 
-    print('[DEBUG] Subtitles/ csoport letrehozasa')
-    subtitles = psd.create_group(name='Subtitles')
+    if subtitles_data:
+        print(f'[DEBUG] Subtitles/ csoport letrehozasa ({len(subtitles_data)} felirattal)')
+        sub_layers = create_subtitle_layers(psd, subtitles_data)
+        subtitles = psd.create_group(
+            name='Subtitles', layer_list=sub_layers or None)
+    else:
+        print('[DEBUG] Subtitles/ csoport letrehozasa (ures)')
+        subtitles = psd.create_group(name='Subtitles')
 
     # Csoportok hozzaadasa (Photoshop-ban alulrol felfele jelenik meg)
     print('[DEBUG] Csoportok hozzaadasa a PSD-hez...')

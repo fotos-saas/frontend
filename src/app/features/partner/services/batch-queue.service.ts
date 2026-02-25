@@ -127,6 +127,7 @@ export class BatchQueueService {
       projectName: item.projectName,
       schoolName: item.schoolName,
       className: item.className,
+      classYear: item.classYear,
       workflowType: item.workflowType,
       status: 'pending',
     }));

@@ -215,8 +215,10 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     mode: string;
     outputPath: string;
     persons?: Array<{ id: number; name: string; type: string }>;
+    subtitles?: Array<{ name: string; text: string }>;
   }) => {
     let personsJsonPath: string | null = null;
+    let subtitlesJsonPath: string | null = null;
 
     try {
       // Input validacio
@@ -259,11 +261,22 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         log.info(`Szemelyek JSON irva: ${personsJsonPath} (${params.persons.length} fo)`);
       }
 
+      // Feliratok JSON temp fajlba irasa (ha vannak)
+      if (params.subtitles && params.subtitles.length > 0) {
+        subtitlesJsonPath = path.join(app.getPath('temp'), `psd-subtitles-${Date.now()}.json`);
+        fs.writeFileSync(subtitlesJsonPath, JSON.stringify(params.subtitles), 'utf-8');
+        args.push('--subtitles-json', subtitlesJsonPath);
+        log.info(`Feliratok JSON irva: ${subtitlesJsonPath} (${params.subtitles.length} felirat)`);
+      }
+
       return new Promise<{ success: boolean; error?: string; stdout?: string; stderr?: string }>((resolve) => {
         execFile('python3', args, { timeout: 30000 }, (error, stdout, stderr) => {
-          // Temp fajl torlese
+          // Temp fajlok torlese
           if (personsJsonPath && fs.existsSync(personsJsonPath)) {
             try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+          }
+          if (subtitlesJsonPath && fs.existsSync(subtitlesJsonPath)) {
+            try { fs.unlinkSync(subtitlesJsonPath); } catch (_) { /* ignore */ }
           }
 
           if (error) {
@@ -276,9 +289,12 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         });
       });
     } catch (error) {
-      // Temp fajl torlese hiba eseten is
+      // Temp fajlok torlese hiba eseten is
       if (personsJsonPath && fs.existsSync(personsJsonPath)) {
         try { fs.unlinkSync(personsJsonPath); } catch (_) { /* ignore */ }
+      }
+      if (subtitlesJsonPath && fs.existsSync(subtitlesJsonPath)) {
+        try { fs.unlinkSync(subtitlesJsonPath); } catch (_) { /* ignore */ }
       }
       log.error('PSD generalasi hiba:', error);
       return { success: false, error: 'Nem sikerult a PSD generalasa' };

@@ -157,7 +157,7 @@ export class PartnerProjectListComponent implements OnInit {
     { value: 'missing_count', label: 'Hiányzó' },
     { value: 'created_at', label: 'Létrehozva' },
     { value: 'order_submitted_at', label: 'Leadva' },
-    { value: 'last_content_update', label: 'Módosítva' },
+    { value: 'last_content_update', label: 'Legújabb fotó' },
   ];
 
   readonly sortDef: SortDef = {

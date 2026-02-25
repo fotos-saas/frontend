@@ -68,10 +68,10 @@
       class="sort-toggle-btn"
       [class.sort-toggle-btn--active]="filterState.sortBy() === 'last_content_update'"
       (click)="toggleContentSort()"
-      [matTooltip]="filterState.sortBy() === 'last_content_update' ? 'Rendezés: legújabb módosítás' : 'Rendezés legújabb módosítás szerint'"
+      [matTooltip]="filterState.sortBy() === 'last_content_update' ? 'Rendezés: legújabb fotó feltöltés' : 'Rendezés legújabb fotó feltöltés szerint'"
     >
       <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="16" />
-      Módosítva
+      Legújabb fotó
     </button>
     <button
       filterBarExtra

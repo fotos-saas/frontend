@@ -4,6 +4,8 @@ import {
   input,
   output,
   effect,
+  signal,
+  computed,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
@@ -89,23 +91,31 @@ import { StepReviewService } from './step-review.service';
       <!-- PÁROSÍTOTT SZEMÉLYEK (akiknek VAN képük) -->
       @if (pairedPersons().length > 0) {
         <div class="section section--paired">
-          <h4 class="section-title section-title--success">
+          <h4 class="section-title section-title--success section-title--collapsible"
+              (click)="togglePairedCollapsed()">
             <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
             Párosítva ({{ pairedPersons().length }})
             <span class="section-hint">Húzz új képet a cseréhez</span>
+            <lucide-icon
+              [name]="pairedCollapsed() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_UP"
+              [size]="16"
+              class="collapse-icon"
+            />
           </h4>
-          <div class="persons-grid persons-grid--paired">
-            @for (person of pairedPersons(); track person.id; let i = $index) {
-              <app-review-person-card
-                [person]="person"
-                [animationDelay]="i * 0.02 + 's'"
-                [connectedDropLists]="allDropListIds()"
-                (photoClick)="openLightbox($event)"
-                (removeClick)="removeAssignment(person)"
-                (drop)="onDropOnPersonCard($event, person)"
-              />
-            }
-          </div>
+          @if (!pairedCollapsed()) {
+            <div class="persons-grid persons-grid--paired">
+              @for (person of pairedPersons(); track person.id; let i = $index) {
+                <app-review-person-card
+                  [person]="person"
+                  [animationDelay]="i * 0.02 + 's'"
+                  [connectedDropLists]="allDropListIds()"
+                  (photoClick)="openLightbox($event)"
+                  (removeClick)="removeAssignment(person)"
+                  (drop)="onDropOnPersonCard($event, person)"
+                />
+              }
+            </div>
+          }
         </div>
       }
 
@@ -175,6 +185,23 @@ export class StepReviewComponent {
     effect(() => this.svc.setUploadedPhotos(this.uploadedPhotos()));
     effect(() => this.svc.setAssignments(this.assignments()));
     effect(() => this.svc.setUnassignedPhotos(this.unassignedPhotos()));
+
+    // Alapból csukva ha van hiányzó (egyszer fut)
+    let initialSet = false;
+    effect(() => {
+      const missing = this.missingPersonsList();
+      if (!initialSet && missing.length > 0) {
+        this.pairedCollapsed.set(true);
+        initialSet = true;
+      }
+    });
+  }
+
+  // === Collapse state: alapból becsukva ha van hiányzó ===
+  readonly pairedCollapsed = signal(false);
+
+  togglePairedCollapsed(): void {
+    this.pairedCollapsed.update(v => !v);
   }
 
   // === Template-delegálás: signal-ek ===

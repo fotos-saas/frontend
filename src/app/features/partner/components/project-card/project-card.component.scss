@@ -383,6 +383,20 @@
   color: get-color('slate', 400);
 }
 
+/* Col: PSD */
+.col-psd {
+  justify-content: center;
+  gap: 4px;
+}
+
+.psd-missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: get-color('slate', 300);
+  opacity: 0.6;
+}
+
 /* Col: Actions */
 .col-actions {
   justify-content: center;
@@ -444,6 +458,7 @@
 
   .col-aware,
   .col-status,
+  .col-psd,
   .col-actions {
     display: none;
   }

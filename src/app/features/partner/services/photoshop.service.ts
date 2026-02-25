@@ -328,15 +328,25 @@ export class PhotoshopService {
    * Ékezetek eltávolítása, kisbetűsítés, nem alfanumerikus → kötőjel.
    */
   sanitizeName(text: string): string {
+    return this.slugify(text, '-');
+  }
+
+  /** Fájl/mappa név generálás (aláhúzásos szeparátor) */
+  sanitizePathName(text: string): string {
+    return this.slugify(text, '_');
+  }
+
+  private slugify(text: string, separator: string): string {
     const accents: Record<string, string> = {
       á: 'a', é: 'e', í: 'i', ó: 'o', ö: 'o', ő: 'o', ú: 'u', ü: 'u', ű: 'u',
       Á: 'A', É: 'E', Í: 'I', Ó: 'O', Ö: 'O', Ő: 'O', Ú: 'U', Ü: 'U', Ű: 'U',
     };
+    const escaped = separator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return text
       .split('').map(c => accents[c] || c).join('')
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/[^a-z0-9]+/g, separator)
+      .replace(new RegExp(`^${escaped}+|${escaped}+$`, 'g'), '');
   }
 
   /**
@@ -743,16 +753,17 @@ export class PhotoshopService {
 
     try {
       if (context && this.workDir()) {
-        const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
-        const folderName = this.sanitizeName(
-          context.className ? `${context.projectName}-${context.className}` : context.projectName,
+        const partnerDir = context.brandName ? this.sanitizePathName(context.brandName) : 'photostack';
+        const folderName = this.sanitizePathName(
+          context.className ? `${context.projectName} ${context.className}` : context.projectName,
         );
 
+        const year = new Date().getFullYear().toString();
         const dimensions = this.parseSizeValue(sizeValue);
         const sizeLabel = dimensions ? `${dimensions.widthCm}x${dimensions.heightCm}` : sizeValue;
         const dpi = 200;
         const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
-        return `${this.workDir()}/${partnerDir}/${folderName}/${psdFileName}.psd`;
+        return `${this.workDir()}/${partnerDir}/${year}/${folderName}/${psdFileName}.psd`;
       }
 
       const downloadsPath = await this.api.getDownloadsPath();
@@ -1222,15 +1233,16 @@ export class PhotoshopService {
       let outputPath: string;
 
       if (context && this.workDir()) {
-        // Projekt kontextus → workDir/partner/iskolaNév_osztály/iskolaNév_osztály_SZxMA_DPIdpi.psd
-        const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
-        const folderName = this.sanitizeName(
-          context.className ? `${context.projectName}-${context.className}` : context.projectName,
+        // Projekt kontextus → workDir/partner/év/iskolaNév_osztály/iskolaNév_osztály_SZxMA_DPIdpi.psd
+        const partnerDir = context.brandName ? this.sanitizePathName(context.brandName) : 'photostack';
+        const year = new Date().getFullYear().toString();
+        const folderName = this.sanitizePathName(
+          context.className ? `${context.projectName} ${context.className}` : context.projectName,
         );
         const sizeLabel = `${dimensions.widthCm}x${dimensions.heightCm}`;
         const dpi = 200;
         const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
-        outputPath = `${this.workDir()}/${partnerDir}/${folderName}/${psdFileName}.psd`;
+        outputPath = `${this.workDir()}/${partnerDir}/${year}/${folderName}/${psdFileName}.psd`;
       } else {
         // Nincs kontextus → Downloads/PhotoStack/méret.psd
         const downloadsPath = await this.api.getDownloadsPath();

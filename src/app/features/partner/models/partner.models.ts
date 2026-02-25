@@ -126,7 +126,6 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   qrCodesHistory: QrCodeHistory[];
   tabloGalleryId: number | null;
   galleryPhotosCount: number;
-  personsCount?: number;
   studentsCount?: number;
   teachersCount?: number;
   studentsWithPhotoCount?: number;

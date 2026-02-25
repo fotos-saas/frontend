@@ -745,7 +745,11 @@ export class OverlayComponent implements OnInit {
       missing: 'sync-photos-missing',
       selected: 'sync-photos-selected',
     };
-    window.electronAPI?.overlay.executeCommand(commandMap[mode]);
+    const cmd = commandMap[mode];
+    // DEBUG — töröld ha működik
+    console.log('[OVERLAY-DEBUG] syncPhotos FIRED, mode:', mode, 'cmd:', cmd, 'electronAPI:', !!window.electronAPI);
+    document.title = `SYNC: ${mode} → ${cmd}`;
+    window.electronAPI?.overlay.executeCommand(cmd);
   }
 
   toggleSyncBorder(): void {

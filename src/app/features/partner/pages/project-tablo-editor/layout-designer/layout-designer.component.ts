@@ -513,6 +513,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
   /** Command Overlay parancs végrehajtása */
   onOverlayCommand(commandId: string): void {
+    // DEBUG — töröld ha működik
+    console.log('[LD-DEBUG] onOverlayCommand RECEIVED:', commandId);
     this.commandOverlay()?.close();
     switch (commandId) {
       case 'sync-photos': this.syncAllPhotos(); break;
@@ -736,9 +738,15 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Kijelölt layerek fotóinak szinkronizálása — PS kijelölés alapján */
   async syncSelectedPhotos(): Promise<void> {
     // PS-ből friss kijelölés lekérése (az overlay polling-ból nem mindig friss)
+    console.log('[LD-DEBUG] syncSelectedPhotos CALLED');
     const doc = await window.electronAPI?.overlay.getActiveDoc();
+    console.log('[LD-DEBUG] getActiveDoc:', JSON.stringify(doc));
     const selectedNames = doc?.selectedLayerNames;
-    if (!selectedNames || selectedNames.length === 0) return;
+    console.log('[LD-DEBUG] selectedLayerNames:', selectedNames);
+    if (!selectedNames || selectedNames.length === 0) {
+      console.log('[LD-DEBUG] ABORT: no selected layer names');
+      return;
+    }
 
     const nameSet = new Set(selectedNames);
     const layers = this.state.layers();

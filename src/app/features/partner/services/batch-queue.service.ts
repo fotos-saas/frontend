@@ -97,6 +97,7 @@ export class BatchQueueService {
       id: item.id,
       projectId: item.projectId,
       projectName: item.projectName,
+      className: item.className,
       workflowType: item.workflowType,
       status: 'pending',
     }));
@@ -311,6 +312,7 @@ export class BatchQueueService {
 
     const psdPath = await this.photoshopService.computePsdPath(size.value, {
       projectName: job.projectName,
+      className: job.className,
       brandName: this.brandingService.brandName(),
     });
 
@@ -323,6 +325,7 @@ export class BatchQueueService {
       extraNames: personsResp.extraNames,
       size,
       psdPath,
+      brandName: this.brandingService.brandName(),
     };
   }
 

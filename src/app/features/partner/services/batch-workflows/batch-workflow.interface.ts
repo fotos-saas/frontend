@@ -7,6 +7,7 @@ export interface BatchProjectData {
   extraNames: { students: string; teachers: string };
   size: TabloSize;
   psdPath: string;
+  brandName: string | null;
 }
 
 /** Callback-ek amiket a workflow futás közben meghív */

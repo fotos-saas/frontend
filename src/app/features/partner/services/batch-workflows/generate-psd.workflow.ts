@@ -13,6 +13,9 @@ import { BatchJobState } from '../../models/batch.types';
  * 3. Kép layerek hozzáadása
  * 4. Rács elrendezés
  * 5. Pillanatkép mentése
+ *
+ * FONTOS: Minden Photoshop hívás előtt a psdPath signal-t beállítjuk,
+ * hogy a runJsx wrapper a helyes dokumentumot célozza (multi-doc fókusz).
  */
 @Injectable({
   providedIn: 'root',
@@ -36,7 +39,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     projectData: BatchProjectData,
     { onStep, checkAbort }: BatchWorkflowCallbacks,
   ): Promise<void> {
-    const { persons, extraNames, size, psdPath } = projectData;
+    const { persons, extraNames, size, psdPath, brandName } = projectData;
     const ps = this.photoshopService;
     const dimensions = ps.parseSizeValue(size.value);
 
@@ -44,15 +47,18 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       throw new Error(`Érvénytelen méret: ${size.value}`);
     }
 
+    // PSD path signal beállítása — a runJsx wrapper ezt használja a dokumentum fókuszhoz
+    ps.psdPath.set(psdPath);
+
     // Dokumentum neve a PSD path-ból (fájlnév kiterjesztés nélkül)
     const docName = psdPath.split('/').pop()?.replace('.psd', '') ?? undefined;
 
-    // 1. PSD generálás
+    // 1. PSD generálás — className és brandName a helyes mappa/fájlnévhez
     onStep(0);
     const genResult = await ps.generateAndOpenPsd(size, {
       projectName: job.projectName,
-      className: undefined,
-      brandName: undefined,
+      className: job.className,
+      brandName,
       persons: persons.map(p => ({ id: p.id, name: p.name, type: p.type })),
     });
     if (!genResult.success) {

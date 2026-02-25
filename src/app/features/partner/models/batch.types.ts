@@ -30,6 +30,7 @@ export interface BatchJobState {
   id: string;
   projectId: number;
   projectName: string;
+  className: string | null;
   workflowType: BatchWorkflowType;
   status: BatchJobStatus;
   error?: string;

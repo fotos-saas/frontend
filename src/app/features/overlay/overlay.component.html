@@ -56,25 +56,25 @@
               [class.toolbar__inline-collapse--open]="openSubmenu() === 'sync-photos'"
             >
               <div class="toolbar__inline-collapse-inner">
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing')" matTooltip="Csak hiányzó">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing'); $event.stopPropagation()" matTooltip="Csak hiányzó">
                   <lucide-icon [name]="ICONS.USER_X" [size]="15" />
                 </button>
                 <button
                   class="toolbar__btn toolbar__btn--sm toolbar__btn--green"
                   [disabled]="selectedLayers() === 0"
-                  (click)="syncPhotos('selected')"
+                  (click)="syncPhotos('selected'); $event.stopPropagation()"
                   matTooltip="Kijelöltek"
                 >
                   <lucide-icon [name]="ICONS.MOUSE_POINTER_CLICK" [size]="15" />
                 </button>
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all')" matTooltip="Mind">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all'); $event.stopPropagation()" matTooltip="Mind">
                   <lucide-icon [name]="ICONS.IMAGES" [size]="15" />
                 </button>
                 <div class="toolbar__collapse-sep"></div>
                 <button
                   class="toolbar__btn toolbar__btn--sm"
                   [class.toolbar__btn--toggle-on]="syncWithBorder()"
-                  (click)="toggleSyncBorder()"
+                  (click)="toggleSyncBorder(); $event.stopPropagation()"
                   [matTooltip]="syncWithBorder() ? 'Keret: BE' : 'Keret: KI'"
                 >
                   <lucide-icon [name]="ICONS.FRAME" [size]="15" />

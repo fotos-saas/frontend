@@ -32,6 +32,8 @@ export class BatchAddDropdownComponent {
 
   readonly workflowOptions: { type: BatchWorkflowType; label: string }[] = [
     { type: 'generate-psd', label: BATCH_WORKFLOW_LABELS['generate-psd'] },
+    { type: 'generate-sample', label: BATCH_WORKFLOW_LABELS['generate-sample'] },
+    { type: 'finalize', label: BATCH_WORKFLOW_LABELS['finalize'] },
   ];
 
   toggle(event: Event): void {

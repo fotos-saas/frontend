@@ -420,7 +420,6 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly sampleLargeSize = this.ps.sampleUseLargeSize;
   readonly sampleSuccess = signal<string | null>(null);
   readonly sampleError = signal<string | null>(null);
-  readonly syncBorder = signal(false);
   readonly insertingExtraNames = signal(false);
   readonly extraNamesSuccess = signal<string | null>(null);
   readonly extraNamesError = signal<string | null>(null);
@@ -513,15 +512,9 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
   /** Command Overlay parancs végrehajtása */
   onOverlayCommand(commandId: string): void {
-    // DEBUG — töröld ha működik
-    console.log('[LD-DEBUG] onOverlayCommand RECEIVED:', commandId);
     this.commandOverlay()?.close();
     switch (commandId) {
       case 'sync-photos': this.syncAllPhotos(); break;
-      case 'sync-photos-missing': this.syncMissingPhotos(); break;
-      case 'sync-photos-selected': this.syncSelectedPhotos(); break;
-      case 'sync-border-on': this.syncBorder.set(true); break;
-      case 'sync-border-off': this.syncBorder.set(false); break;
       case 'arrange-names': this.arrangeNames(); break;
       case 'update-positions': this.updatePositions(); break;
       case 'open-project': this.onOpenProject(); break;
@@ -701,61 +694,6 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
         photosToSync.push({ layerName: l.layerName, photoUrl: l.personMatch.photoUrl });
       }
     }
-
-    if (photosToSync.length === 0) return;
-
-    this.syncingPhotos.set(true);
-    try {
-      await this.ps.placePhotos(photosToSync);
-    } finally {
-      this.syncingPhotos.set(false);
-    }
-  }
-
-  /** Csak hiányzó fotók szinkronizálása — akikhez van photoUrl az adatbázisban.
-   *  Megjegyzés: placedPhotoUrl tracking még nincs, ezért egyelőre = syncAllPhotos. */
-  async syncMissingPhotos(): Promise<void> {
-    const layers = this.state.layers();
-    const photosToSync: Array<{ layerName: string; photoUrl: string }> = [];
-
-    for (const l of layers) {
-      if ((l.category === 'student-image' || l.category === 'teacher-image')
-        && l.personMatch?.photoUrl) {
-        photosToSync.push({ layerName: l.layerName, photoUrl: l.personMatch.photoUrl });
-      }
-    }
-
-    if (photosToSync.length === 0) return;
-
-    this.syncingPhotos.set(true);
-    try {
-      await this.ps.placePhotos(photosToSync);
-    } finally {
-      this.syncingPhotos.set(false);
-    }
-  }
-
-  /** Kijelölt layerek fotóinak szinkronizálása — PS kijelölés alapján */
-  async syncSelectedPhotos(): Promise<void> {
-    // PS-ből friss kijelölés lekérése (az overlay polling-ból nem mindig friss)
-    console.log('[LD-DEBUG] syncSelectedPhotos CALLED');
-    const doc = await window.electronAPI?.overlay.getActiveDoc();
-    console.log('[LD-DEBUG] getActiveDoc:', JSON.stringify(doc));
-    const selectedNames = doc?.selectedLayerNames;
-    console.log('[LD-DEBUG] selectedLayerNames:', selectedNames);
-    if (!selectedNames || selectedNames.length === 0) {
-      console.log('[LD-DEBUG] ABORT: no selected layer names');
-      return;
-    }
-
-    const nameSet = new Set(selectedNames);
-    const layers = this.state.layers();
-
-    const photosToSync = layers
-      .filter(l => nameSet.has(l.layerName)
-        && (l.category === 'student-image' || l.category === 'teacher-image')
-        && l.personMatch?.photoUrl)
-      .map(l => ({ layerName: l.layerName, photoUrl: l.personMatch!.photoUrl! }));
 
     if (photosToSync.length === 0) return;
 

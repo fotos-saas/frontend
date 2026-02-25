@@ -185,11 +185,13 @@ export class TabloEditorDebugService {
 
       if (!openResult.success) return;
 
-      this.addLog('JSX', 'Várakozás Photoshop-ra (2s)...', 'info');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
       // PSD fajlnev a cel dokumentum aktivalasahoz
       const psdFileName = outputPath.split('/').pop() || undefined;
+
+      // Várakozás amíg a PS ténylegesen betölti a dokumentumot
+      this.addLog('JSX', 'Várakozás Photoshop-ra (dokumentum betöltés)...', 'info');
+      const docReady = await this.waitForPsDocReady(api, psdFileName);
+      this.addLog('JSX', docReady ? 'Dokumentum betöltve' : 'Timeout — folytatás', docReady ? 'ok' : 'warn');
 
       // Margó guide-ok hozzáadása
       const marginCm = this.ps.marginCm();
@@ -320,5 +322,28 @@ export class TabloEditorDebugService {
     } catch (openErr) {
       this.addLog('PSD megnyitás', `EXCEPTION: ${String(openErr)}`, 'error');
     }
+  }
+
+  /** Várakozás amíg a PS ténylegesen betölti a dokumentumot (poll get-active-doc) */
+  private async waitForPsDocReady(api: any, expectedDocName?: string, timeoutMs = 30_000): Promise<boolean> {
+    const pollInterval = 1000;
+    const maxAttempts = Math.ceil(timeoutMs / pollInterval);
+
+    for (let i = 0; i < maxAttempts; i++) {
+      try {
+        const result = await api.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
+        const output = result?.output ?? (typeof result === 'string' ? result : '');
+        if (output) {
+          try {
+            const doc = JSON.parse(output);
+            if (doc.name && (!expectedDocName || doc.name === expectedDocName)) {
+              return true;
+            }
+          } catch { /* parse hiba */ }
+        }
+      } catch { /* PS még nem válaszol */ }
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
+    return false;
   }
 }

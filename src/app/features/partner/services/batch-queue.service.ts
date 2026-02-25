@@ -9,6 +9,8 @@ import { BrandingService } from './branding.service';
 import { BatchWorkspaceItem, BatchJobState, BatchQueueState, BatchQueueStatus } from '../models/batch.types';
 import { BatchWorkflow, BatchProjectData } from './batch-workflows/batch-workflow.interface';
 import { GeneratePsdWorkflow } from './batch-workflows/generate-psd.workflow';
+import { GenerateSampleWorkflow } from './batch-workflows/generate-sample.workflow';
+import { FinalizeWorkflow } from './batch-workflows/finalize.workflow';
 import { selectTabloSize } from '@shared/utils/tablo-size.util';
 import { firstValueFrom } from 'rxjs';
 
@@ -84,7 +86,11 @@ export class BatchQueueService {
   constructor() {
     // Workflow-k regisztralasa
     const generatePsd = inject(GeneratePsdWorkflow);
+    const generateSample = inject(GenerateSampleWorkflow);
+    const finalize = inject(FinalizeWorkflow);
     this.workflows.set(generatePsd.type, generatePsd);
+    this.workflows.set(generateSample.type, generateSample);
+    this.workflows.set(finalize.type, finalize);
   }
 
   // ========== Publikus API ==========

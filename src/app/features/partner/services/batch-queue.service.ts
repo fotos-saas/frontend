@@ -93,20 +93,24 @@ export class BatchQueueService {
   async startBatch(items: BatchWorkspaceItem[]): Promise<void> {
     if (items.length === 0) return;
 
+    // Photoshop beállítások betöltése (workDir, path, stb.)
+    // Ez szükséges mert a detectPhotoshop() normálisan csak a Tablókészítő oldalon fut le
+    await this.photoshopService.detectPhotoshop();
+
+    // Előfeltétel: Photoshop megtalálva
+    if (!this.photoshopService.isConfigured()) {
+      this.toast.error(
+        'Photoshop nem található',
+        'Ellenőrizd a Photoshop beállításokat a Tablókészítő → Beállítások oldalon.',
+      );
+      return;
+    }
+
     // Előfeltétel: workDir beállítva kell legyen
     if (!this.photoshopService.workDir()) {
       this.toast.error(
         'Munka mappa nincs beállítva',
         'Állítsd be a munka mappát a Tablókészítő → Beállítások oldalon, mielőtt batch-et indítanál.',
-      );
-      return;
-    }
-
-    // Előfeltétel: detectPhotoshop lefutott
-    if (!this.photoshopService.isConfigured()) {
-      this.toast.error(
-        'Photoshop nem konfigurált',
-        'Ellenőrizd a Photoshop beállításokat a Tablókészítő → Beállítások oldalon.',
       );
       return;
     }

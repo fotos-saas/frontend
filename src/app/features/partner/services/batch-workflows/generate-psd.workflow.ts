@@ -69,6 +69,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     onStep(1);
     const genResult = await ps.generateAndOpenPsd(size, {
       projectName: job.projectName,
+      schoolName: job.schoolName,
       className: job.className,
       brandName,
       persons: persons.map(p => ({ id: p.id, name: p.name, type: p.type })),

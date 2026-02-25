@@ -738,10 +738,14 @@ export class OverlayComponent implements OnInit {
     return environment.apiUrl;
   }
 
-  syncPhotos(mode: 'all' | 'missing'): void {
+  syncPhotos(mode: 'all' | 'missing' | 'selected'): void {
     this.closeSubmenu();
-    const commandId = mode === 'missing' ? 'sync-photos-missing' : 'sync-photos';
-    window.electronAPI?.overlay.executeCommand(commandId);
+    const commandMap: Record<string, string> = {
+      all: 'sync-photos',
+      missing: 'sync-photos-missing',
+      selected: 'sync-photos-selected',
+    };
+    window.electronAPI?.overlay.executeCommand(commandMap[mode]);
   }
 
   toggleSyncBorder(): void {

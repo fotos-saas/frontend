@@ -59,6 +59,14 @@
                 <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing')" matTooltip="Csak hiányzó">
                   <lucide-icon [name]="ICONS.USER_X" [size]="15" />
                 </button>
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--green"
+                  [disabled]="selectedLayers() === 0"
+                  (click)="syncPhotos('selected')"
+                  matTooltip="Kijelöltek"
+                >
+                  <lucide-icon [name]="ICONS.MOUSE_POINTER_CLICK" [size]="15" />
+                </button>
                 <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all')" matTooltip="Mind">
                   <lucide-icon [name]="ICONS.IMAGES" [size]="15" />
                 </button>

@@ -380,6 +380,12 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   /** Projekt neve (minta generáláshoz) */
   readonly projectName = input.required<string>();
 
+  /** Iskola neve (fájlnév generáláshoz) */
+  readonly schoolName = input<string | null>(null);
+
+  /** Osztály neve (fájlnév generáláshoz) */
+  readonly className = input<string | null>(null);
+
   /** Extra nevek (diákok + tanárok akik nincsenek regisztrálva) */
   readonly extraNames = input<{ students: string; teachers: string } | null>(null);
 
@@ -844,7 +850,10 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.sampleSuccess.set(null);
     this.sampleError.set(null);
     try {
-      const result = await this.ps.generateSample(this.projectId(), this.projectName(), this.sampleLargeSize());
+      const result = await this.ps.generateSample(this.projectId(), this.projectName(), this.sampleLargeSize(), {
+        schoolName: this.schoolName(),
+        className: this.className(),
+      });
       if (result.success) {
         this.sampleSuccess.set(`${result.localPaths?.length || 0} fájl mentve, ${result.uploadedCount || 0} feltöltve`);
       } else {
@@ -878,7 +887,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     try {
       // Flat
       if (mode === 'flat' || mode === 'both') {
-        const r = await this.ps.generateFinal(this.projectId(), this.projectName());
+        const ctx = { schoolName: this.schoolName(), className: this.className() };
+        const r = await this.ps.generateFinal(this.projectId(), this.projectName(), ctx);
         if (r.success && r.uploadedCount && r.uploadedCount > 0) {
           results.push('Flat');
         } else {
@@ -888,7 +898,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
       // Kistabló
       if (mode === 'small_tablo' || mode === 'both') {
-        const r = await this.ps.generateSmallTablo(this.projectId(), this.projectName());
+        const ctx = { schoolName: this.schoolName(), className: this.className() };
+        const r = await this.ps.generateSmallTablo(this.projectId(), this.projectName(), ctx);
         if (r.success && r.uploadedCount && r.uploadedCount > 0) {
           results.push('Kistabló');
         } else {

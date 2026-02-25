@@ -336,6 +336,21 @@ export class PhotoshopService {
     return this.slugify(text, '_');
   }
 
+  /**
+   * Projekt mappa név generálása: iskolaNév + osztály (tömörítve, szeparátor nélkül).
+   * Pl. "VSZC Boronkay ... Gimnázium" + "12 k" → "vszc_boronkay_..._gimnazium_12k"
+   */
+  buildProjectFolderName(
+    ctx: { schoolName?: string | null; projectName: string; className?: string | null },
+  ): string {
+    const baseName = ctx.schoolName || ctx.projectName;
+    // Osztálynévből minden nem-alfanumerikus karakter ki (12 k → 12k, 12.A → 12A)
+    const classCompact = ctx.className
+      ? ctx.className.replace(/[^a-zA-Z0-9áéíóöőúüűÁÉÍÓÖŐÚÜŰ]/g, '')
+      : '';
+    return this.sanitizePathName(classCompact ? `${baseName} ${classCompact}` : baseName);
+  }
+
   private slugify(text: string, separator: string): string {
     const accents: Record<string, string> = {
       á: 'a', é: 'e', í: 'i', ó: 'o', ö: 'o', ő: 'o', ú: 'u', ü: 'u', ű: 'u',
@@ -747,22 +762,18 @@ export class PhotoshopService {
    */
   async computePsdPath(
     sizeValue: string,
-    context?: { projectName: string; className?: string | null; brandName?: string | null },
+    context?: { projectName: string; schoolName?: string | null; className?: string | null; brandName?: string | null },
   ): Promise<string | null> {
     if (!this.api) return null;
 
     try {
       if (context && this.workDir()) {
         const partnerDir = context.brandName ? this.sanitizePathName(context.brandName) : 'photostack';
-        const folderName = this.sanitizePathName(
-          context.className ? `${context.projectName} ${context.className}` : context.projectName,
-        );
+        const folderName = this.buildProjectFolderName(context);
 
         const year = new Date().getFullYear().toString();
-        const dimensions = this.parseSizeValue(sizeValue);
-        const sizeLabel = dimensions ? `${dimensions.widthCm}x${dimensions.heightCm}` : sizeValue;
         const dpi = 200;
-        const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
+        const psdFileName = `${folderName}_${sizeValue}_${dpi}dpi`;
         return `${this.workDir()}/${partnerDir}/${year}/${folderName}/${psdFileName}.psd`;
       }
 
@@ -1251,6 +1262,7 @@ export class PhotoshopService {
     size: TabloSize,
     context?: {
       projectName: string;
+      schoolName?: string | null;
       className?: string | null;
       brandName?: string | null;
       persons?: Array<{ id: number; name: string; type: string }>;
@@ -1270,12 +1282,9 @@ export class PhotoshopService {
         // Projekt kontextus → workDir/partner/év/iskolaNév_osztály/iskolaNév_osztály_SZxMA_DPIdpi.psd
         const partnerDir = context.brandName ? this.sanitizePathName(context.brandName) : 'photostack';
         const year = new Date().getFullYear().toString();
-        const folderName = this.sanitizePathName(
-          context.className ? `${context.projectName} ${context.className}` : context.projectName,
-        );
-        const sizeLabel = `${dimensions.widthCm}x${dimensions.heightCm}`;
+        const folderName = this.buildProjectFolderName(context);
         const dpi = 200;
-        const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
+        const psdFileName = `${folderName}_${size.value}_${dpi}dpi`;
         outputPath = `${this.workDir()}/${partnerDir}/${year}/${folderName}/${psdFileName}.psd`;
       } else {
         // Nincs kontextus → Downloads/PhotoStack/méret.psd
@@ -1697,6 +1706,7 @@ export class PhotoshopService {
     projectId: number,
     projectName: string,
     largeSize = false,
+    context?: { schoolName?: string | null; className?: string | null },
   ): Promise<{
     success: boolean;
     localPaths?: string[];
@@ -1715,7 +1725,6 @@ export class PhotoshopService {
 
     try {
       // 1. Flatten export JSX futtatás → temp JPG
-      // A JSX maga hatarozza meg a temp utat (Folder.temp), az outputban adja vissza
       const flattenResult = await this.runJsx({
         scriptName: 'actions/flatten-export.jsx',
         jsonData: { quality: 95 },
@@ -1725,7 +1734,6 @@ export class PhotoshopService {
         return { success: false, error: flattenResult.error || 'Flatten export sikertelen' };
       }
 
-      // Az OK marker tartalmazza a tényleges temp JPG útvonalat
       const output = flattenResult.output || '';
       const okMatch = output.match(/__FLATTEN_RESULT__OK:(.+)/);
       if (!okMatch) {
@@ -1736,15 +1744,20 @@ export class PhotoshopService {
 
       // 2. Sample generálás (resize + watermark + upload)
       const authToken = sessionStorage.getItem('marketer_token') || '';
-
-      // Az outputDir a PSD eredeti mappája (nem a temp JPG mappája)
       const psdDirPath = psdFilePath.replace(/[/\\][^/\\]+$/, '');
+
+      // buildProjectFolderName-et használjuk a fájlnévhez (konzisztens a mappanévvel)
+      const folderName = this.buildProjectFolderName({
+        schoolName: context?.schoolName,
+        projectName,
+        className: context?.className,
+      });
 
       const result = await this.sampleApi.generate({
         psdFilePath: tempJpgPath,
         outputDir: psdDirPath,
         projectId,
-        projectName,
+        projectName: folderName,
         apiBaseUrl: environment.apiUrl,
         authToken,
         watermarkText: this.sampleWatermarkText(),
@@ -1770,6 +1783,7 @@ export class PhotoshopService {
   async generateFinal(
     projectId: number,
     projectName: string,
+    context?: { schoolName?: string | null; className?: string | null },
   ): Promise<{
     success: boolean;
     localPath?: string;
@@ -1808,11 +1822,17 @@ export class PhotoshopService {
       const authToken = sessionStorage.getItem('marketer_token') || '';
       const psdDirPath = psdFilePath.replace(/[/\\][^/\\]+$/, '');
 
+      const folderName = this.buildProjectFolderName({
+        schoolName: context?.schoolName,
+        projectName,
+        className: context?.className,
+      });
+
       const result = await this.finalizerApi.upload({
         flattenedJpgPath: tempJpgPath,
         outputDir: psdDirPath,
         projectId,
-        projectName,
+        projectName: folderName,
         apiBaseUrl: environment.apiUrl,
         authToken,
         type: 'flat',
@@ -1833,6 +1853,7 @@ export class PhotoshopService {
   async generateSmallTablo(
     projectId: number,
     projectName: string,
+    context?: { schoolName?: string | null; className?: string | null },
   ): Promise<{
     success: boolean;
     localPath?: string;
@@ -1871,11 +1892,17 @@ export class PhotoshopService {
       const authToken = sessionStorage.getItem('marketer_token') || '';
       const psdDirPath = psdFilePath.replace(/[/\\][^/\\]+$/, '');
 
+      const folderName = this.buildProjectFolderName({
+        schoolName: context?.schoolName,
+        projectName,
+        className: context?.className,
+      });
+
       const result = await this.finalizerApi.upload({
         flattenedJpgPath: tempJpgPath,
         outputDir: psdDirPath,
         projectId,
-        projectName,
+        projectName: folderName,
         apiBaseUrl: environment.apiUrl,
         authToken,
         type: 'small_tablo',

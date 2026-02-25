@@ -313,12 +313,11 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const psPath = psStore.get('photoshopPath', null);
 
       if (process.platform === 'darwin') {
-        // macOS: AppleScript-tel ellenorizzuk hogy a fajl mar nyitva van-e PS-ben
-        // Ha igen, csak aktivaljuk — ha nem, megnyitjuk
+        // macOS: AppleScript-tel megnyitjuk a fajlt PS-ben
         const fileName = path.basename(filePath);
-        const script = `
+        // Ellenorizzuk hogy a fajl mar nyitva van-e PS-ben
+        const checkScript = `
           tell application id "com.adobe.Photoshop"
-            activate
             set isOpen to false
             repeat with d in documents
               if name of d is "${fileName.replace(/"/g, '\\"')}" then
@@ -327,13 +326,31 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
                 exit repeat
               end if
             end repeat
-            if not isOpen then
-              open POSIX file "${filePath.replace(/"/g, '\\"')}"
-            end if
+            return isOpen
           end tell
         `;
-        const child = execFile('osascript', ['-e', script]);
-        child.unref();
+        const isAlreadyOpen = await new Promise<boolean>((resolve) => {
+          execFile('osascript', ['-e', checkScript], (err, stdout) => {
+            resolve(!err && stdout.trim() === 'true');
+          });
+        });
+
+        if (isAlreadyOpen) {
+          // Mar nyitva van, csak aktivaljuk a PS-t
+          execFile('osascript', ['-e', 'tell application id "com.adobe.Photoshop" to activate']);
+        } else {
+          // Megnyitas: open -a kezeli az ekezetes utvonalakat
+          await new Promise<void>((resolve, reject) => {
+            execFile('open', ['-a', 'Adobe Photoshop 2026', filePath], (err) => {
+              if (err) {
+                log.error('PSD megnyitas hiba (open -a):', err.message);
+                reject(err);
+              } else {
+                resolve();
+              }
+            });
+          });
+        }
       } else {
         if (psPath) {
           // Windows: Photoshop.exe file.psd

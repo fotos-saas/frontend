@@ -101,11 +101,12 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly textAlign = this.ps.textAlign;
   readonly gridAlign = this.ps.gridAlign;
 
-  /** PSD generálás */
+  /** PSD generálás / megnyitás */
   readonly tabloSizes = signal<TabloSize[]>([]);
   readonly selectedSize = signal<TabloSize | null>(null);
   readonly loadingSizes = signal(false);
   readonly generating = signal(false);
+  readonly opening = signal(false);
   readonly arranging = signal(false);
   readonly arrangingNames = signal(false);
 
@@ -340,6 +341,7 @@ export class ProjectTabloEditorComponent implements OnInit {
 
       const result = await this.ps.generateAndOpenPsd(size, p ? {
         projectName: p.name,
+        schoolName: p.school?.name ?? null,
         className: p.className,
         brandName: this.branding.brandName(),
         persons: personsData.length > 0 ? personsData : undefined,
@@ -409,6 +411,32 @@ export class ProjectTabloEditorComponent implements OnInit {
     } finally {
       this.generating.set(false);
     }
+  }
+
+  /** PSD fájl megnyitása Photoshopban */
+  async openPsdFile(): Promise<void> {
+    const psdPath = this.currentPsdPath();
+    console.log('[DEBUG] openPsdFile called, psdPath:', psdPath);
+    if (!psdPath) return;
+
+    this.clearMessages();
+    this.opening.set(true);
+    try {
+      const result = await this.ps.openPsdFile(psdPath);
+      console.log('[DEBUG] openPsdFile result:', result);
+      if (!result.success) {
+        this.error.set(result.error || 'Nem sikerült megnyitni a PSD fájlt.');
+      }
+    } finally {
+      this.opening.set(false);
+    }
+  }
+
+  /** Projekt mappa megnyitása Finderben */
+  openProjectFolder(): void {
+    const psdPath = this.currentPsdPath();
+    if (!psdPath) return;
+    this.ps.revealInFinder(psdPath);
   }
 
   async arrangeGrid(): Promise<void> {
@@ -528,6 +556,7 @@ export class ProjectTabloEditorComponent implements OnInit {
 
     const resolved = await this.ps.computePsdPath(s.value, p ? {
       projectName: p.name,
+      schoolName: p.school?.name ?? null,
       className: p.className,
       brandName: this.branding.brandName(),
     } : undefined);
@@ -594,13 +623,16 @@ export class ProjectTabloEditorComponent implements OnInit {
     const psdPath = await this.resolvePsdPath();
     if (!psdPath) return;
 
-    // PSD fájl létezés ellenőrzése (régi migrált projekteknél)
+    // PSD fájl létezés ellenőrzése
     const check = await this.ps.checkPsdExists(psdPath);
     this.psdExists.set(check.exists);
     this.psdHasLayouts.set(check.hasLayouts);
 
-    if (check.exists && check.hasLayouts) {
-      await this.snapshotService.loadSnapshots(psdPath);
+    if (check.exists) {
+      this.currentPsdPath.set(psdPath);
+      if (check.hasLayouts) {
+        await this.snapshotService.loadSnapshots(psdPath);
+      }
     }
   }
 
@@ -819,7 +851,10 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.clearMessages();
     this.generatingSample.set(true);
     try {
-      const result = await this.ps.generateSample(p.id, p.name, this.sampleLargeSize());
+      const result = await this.ps.generateSample(p.id, p.name, this.sampleLargeSize(), {
+        schoolName: p.school?.name ?? null,
+        className: p.className ?? null,
+      });
       if (result.success) {
         const now = new Date();
         const pad = (n: number) => n.toString().padStart(2, '0');
@@ -846,7 +881,10 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.clearMessages();
     this.generatingFinal.set(true);
     try {
-      const result = await this.ps.generateFinal(p.id, p.name);
+      const result = await this.ps.generateFinal(p.id, p.name, {
+        schoolName: p.school?.name ?? null,
+        className: p.className ?? null,
+      });
       if (result.success) {
         const now = new Date();
         const pad = (n: number) => n.toString().padStart(2, '0');

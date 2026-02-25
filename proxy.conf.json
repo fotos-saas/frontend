@@ -1,7 +1,13 @@
 {
+  "/api": {
+    "target": "https://api.tablostudio.hu",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
   "/storage": {
-    "target": "http://localhost:8000",
-    "secure": false,
+    "target": "https://api.tablostudio.hu",
+    "secure": true,
     "changeOrigin": true,
     "logLevel": "debug"
   }

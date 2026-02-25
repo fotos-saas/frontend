@@ -306,12 +306,12 @@ export function registerSampleGeneratorHandlers(): void {
         { name: 'kicsi', width: sampleStore.get('sampleSizeSmall', 2000) },
       ];
 
-      // A projectName-bol generalunk fajlnevet
+      // A projectName-bol generalunk fajlnevet (underscore szeparator, PSD-vel egységes)
       const sanitizedName = params.projectName
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'minta';
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'minta';
 
       log.info(`Minta generalas indul: ${params.projectName} (${sizes.length} meret)`);
 

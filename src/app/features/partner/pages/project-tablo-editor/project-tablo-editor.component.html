@@ -84,57 +84,115 @@
           }
         </div>
 
-        <!-- Tabló generálása -->
+        <!-- Tabló generálása / Projekt megnyitása -->
         <div class="command-card">
-          <div class="command-card__header">
-            <lucide-icon [name]="ICONS.FILE_PLUS" [size]="20" />
-            <div>
-              <h3 class="command-card__title">Tabló generálása</h3>
-              <p class="command-card__desc">Üres PSD fájl generálása mappastruktúrával (200 DPI, RGB).</p>
+          @if (psdExists()) {
+            <!-- PSD már létezik → megnyitás gombok -->
+            <div class="command-card__header">
+              <lucide-icon [name]="ICONS.FILE_CHECK" [size]="20" />
+              <div>
+                <h3 class="command-card__title">Projekt fájl</h3>
+                <p class="command-card__desc">A PSD fájl és a mappastruktúra már létezik.</p>
+              </div>
             </div>
-          </div>
 
-          @if (!isConfigured()) {
-            <div class="command-card__disabled">
-              Először állítsd be a Photoshop-ot a Beállítások fülön.
-            </div>
-          } @else if (loadingSizes()) {
-            <div class="command-card__loading">
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              Méretek betöltése...
-            </div>
-          } @else if (tabloSizes().length === 0) {
-            <div class="command-card__empty">
-              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-              Nincsenek beállított tablóméretek.
-            </div>
-          } @else {
-            <div class="size-grid">
-              @for (size of tabloSizes(); track size.value) {
+            @if (!isConfigured()) {
+              <div class="command-card__disabled">
+                Először állítsd be a Photoshop-ot a Beállítások fülön.
+              </div>
+            } @else {
+              <!-- Méretválasztó (meglévő PSD-hez is kell a path feloldáshoz) -->
+              @if (!loadingSizes() && tabloSizes().length > 0) {
+                <div class="size-grid">
+                  @for (size of tabloSizes(); track size.value) {
+                    <button
+                      class="size-card"
+                      [class.size-card--selected]="selectedSize()?.value === size.value"
+                      (click)="selectSize(size)"
+                    >
+                      <span class="size-card__label">{{ size.label }}</span>
+                      <span class="size-card__pixels">{{ getSizePixels(size) }}</span>
+                    </button>
+                  }
+                </div>
+              }
+
+              <div class="command-card__actions">
                 <button
-                  class="size-card"
-                  [class.size-card--selected]="selectedSize()?.value === size.value"
-                  (click)="selectSize(size)"
+                  class="btn btn--primary"
+                  [disabled]="!currentPsdPath() || opening()"
+                  (click)="openPsdFile()"
                 >
-                  <span class="size-card__label">{{ size.label }}</span>
-                  <span class="size-card__pixels">{{ getSizePixels(size) }}</span>
+                  @if (opening()) {
+                    <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                    Megnyitás...
+                  } @else {
+                    <lucide-icon [name]="ICONS.FILE" [size]="16" />
+                    Projekt megnyitása
+                  }
                 </button>
-              }
+                <button
+                  class="btn btn--outline"
+                  [disabled]="!currentPsdPath()"
+                  (click)="openProjectFolder()"
+                >
+                  <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+                  Projekt mappa megnyitása
+                </button>
+              </div>
+            }
+          } @else {
+            <!-- PSD nem létezik → generálás -->
+            <div class="command-card__header">
+              <lucide-icon [name]="ICONS.FILE_PLUS" [size]="20" />
+              <div>
+                <h3 class="command-card__title">Tabló generálása</h3>
+                <p class="command-card__desc">Üres PSD fájl generálása mappastruktúrával (200 DPI, RGB).</p>
+              </div>
             </div>
 
-            <button
-              class="btn btn--primary btn--generate"
-              [disabled]="!selectedSize() || generating()"
-              (click)="generatePsd()"
-            >
-              @if (generating()) {
+            @if (!isConfigured()) {
+              <div class="command-card__disabled">
+                Először állítsd be a Photoshop-ot a Beállítások fülön.
+              </div>
+            } @else if (loadingSizes()) {
+              <div class="command-card__loading">
                 <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-                Generálás...
-              } @else {
-                <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
-                PSD generálás és megnyitás
-              }
-            </button>
+                Méretek betöltése...
+              </div>
+            } @else if (tabloSizes().length === 0) {
+              <div class="command-card__empty">
+                <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+                Nincsenek beállított tablóméretek.
+              </div>
+            } @else {
+              <div class="size-grid">
+                @for (size of tabloSizes(); track size.value) {
+                  <button
+                    class="size-card"
+                    [class.size-card--selected]="selectedSize()?.value === size.value"
+                    (click)="selectSize(size)"
+                  >
+                    <span class="size-card__label">{{ size.label }}</span>
+                    <span class="size-card__pixels">{{ getSizePixels(size) }}</span>
+                  </button>
+                }
+              </div>
+
+              <button
+                class="btn btn--primary btn--generate"
+                [disabled]="!selectedSize() || generating()"
+                (click)="generatePsd()"
+              >
+                @if (generating()) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                  Generálás...
+                } @else {
+                  <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
+                  PSD generálás és megnyitás
+                }
+              </button>
+            }
           }
         </div>
 
@@ -926,6 +984,8 @@
     [boardConfig]="designerBoardConfig()!"
     [projectId]="projectData()!.id"
     [projectName]="projectData()!.name"
+    [schoolName]="projectData()!.school?.name ?? null"
+    [className]="projectData()!.className ?? null"
     [extraNames]="projectExtraNames()"
     (closeEvent)="closeLayoutDesigner()"
     (saveEvent)="onDesignerSave($event)"

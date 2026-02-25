@@ -141,8 +141,8 @@ export function registerFinalizerHandlers(): void {
       const sanitizedName = params.projectName
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'tablo';
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'tablo';
 
       // Ha maxSize van, resize Sharp-pal (leghosszabb oldal)
       let fileToUpload = resolvedPath;

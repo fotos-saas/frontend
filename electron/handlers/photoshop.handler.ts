@@ -1466,6 +1466,57 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Find existing PSD file in partner directory (legacy project support)
+  // Searches all year subdirs for a folder containing folderName and a .psd file
+  ipcMain.handle('photoshop:find-existing-psd', (_event, params: { partnerDir: string; folderName: string }) => {
+    try {
+      if (typeof params.partnerDir !== 'string' || params.partnerDir.length > 500) {
+        return { success: true, found: false };
+      }
+      if (typeof params.folderName !== 'string' || params.folderName.length > 200) {
+        return { success: true, found: false };
+      }
+      if (params.partnerDir.includes('..') || params.folderName.includes('..')) {
+        return { success: true, found: false };
+      }
+
+      if (!fs.existsSync(params.partnerDir)) {
+        return { success: true, found: false };
+      }
+
+      // Bejarjuk az eves mappakat (pl. 2024/, 2025/, 2026/)
+      const entries = fs.readdirSync(params.partnerDir, { withFileTypes: true });
+      for (const yearEntry of entries) {
+        if (!yearEntry.isDirectory()) continue;
+        const yearDir = path.join(params.partnerDir, yearEntry.name);
+
+        // Bejarjuk a projekt mappakat az eves mappakon belul
+        const projectEntries = fs.readdirSync(yearDir, { withFileTypes: true });
+        for (const projEntry of projectEntries) {
+          if (!projEntry.isDirectory()) continue;
+
+          // A mappa neve tartalmazza a folderName-et? (prefix match)
+          if (!projEntry.name.startsWith(params.folderName)) continue;
+
+          // Van-e .psd fajl benne?
+          const projDir = path.join(yearDir, projEntry.name);
+          const files = fs.readdirSync(projDir);
+          const psdFile = files.find(f => f.endsWith('.psd'));
+          if (psdFile) {
+            const psdPath = path.join(projDir, psdFile);
+            log.info(`Megtalalt PSD: ${psdPath}`);
+            return { success: true, found: true, psdPath };
+          }
+        }
+      }
+
+      return { success: true, found: false };
+    } catch (error) {
+      log.error('PSD kereses hiba:', error);
+      return { success: false, found: false };
+    }
+  });
+
   // Check if PSD file exists and has layouts/ directory
   ipcMain.handle('photoshop:check-psd-exists', (_event, params: { psdPath: string }) => {
     try {

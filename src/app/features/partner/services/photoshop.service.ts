@@ -744,15 +744,24 @@ export class PhotoshopService {
     try {
       if (context && this.workDir()) {
         const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
-        const year = new Date().getFullYear().toString();
         const folderName = this.sanitizeName(
           context.className ? `${context.projectName}-${context.className}` : context.projectName,
         );
+
+        // Először keressük meg a meglévő PSD-t (régi migrált projektek támogatása)
+        const partnerFullDir = `${this.workDir()}/${partnerDir}`;
+        const existing = await this.api.findExistingPsd({ partnerDir: partnerFullDir, folderName });
+        if (existing.success && existing.found && existing.psdPath) {
+          return existing.psdPath;
+        }
+
+        // Nem találtunk meglévő PSD-t → új útvonal generálás
+        const year = new Date().getFullYear().toString();
         const dimensions = this.parseSizeValue(sizeValue);
         const sizeLabel = dimensions ? `${dimensions.widthCm}x${dimensions.heightCm}` : sizeValue;
         const dpi = 200;
         const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
-        return `${this.workDir()}/${partnerDir}/${year}/${folderName}/${psdFileName}.psd`;
+        return `${partnerFullDir}/${year}/${folderName}/${psdFileName}.psd`;
       }
 
       const downloadsPath = await this.api.getDownloadsPath();

@@ -34,13 +34,14 @@
   &__select-all {
     display: flex;
     align-items: center;
-    gap: 8px;
     font-size: 13px;
     color: var(--text-secondary, #6b7280);
     cursor: pointer;
 
+    // gap fallback Safari
     input[type="checkbox"] {
       cursor: pointer;
+      margin-right: 8px;
     }
   }
 }
@@ -52,31 +53,31 @@
 
 .cart-group {
   &__header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
     padding: 8px 16px 4px;
     background: var(--surface-secondary, #f9fafb);
   }
 
   &__name {
+    display: block;
     font-size: 12px;
     font-weight: 600;
     color: var(--text-primary, #111827);
-  }
-
-  &__school {
-    font-size: 11px;
-    color: var(--text-tertiary, #9ca3af);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
 .cart-item {
   display: flex;
   align-items: center;
-  gap: 8px;
   padding: 6px 16px;
   transition: background 0.15s;
+
+  // gap fallback Safari
+  > * + * {
+    margin-left: 8px;
+  }
 
   &:hover {
     background: var(--surface-secondary, #f9fafb);
@@ -96,11 +97,16 @@
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 6px;
+
+    // gap fallback Safari
+    > * + * {
+      margin-left: 6px;
+    }
   }
 
   &__class {
     font-size: 13px;
+    font-weight: 500;
     color: var(--text-primary, #111827);
     white-space: nowrap;
     overflow: hidden;
@@ -111,6 +117,7 @@
     font-size: 11px;
     color: var(--text-tertiary, #9ca3af);
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   &__badge {
@@ -121,6 +128,7 @@
     white-space: nowrap;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+    flex-shrink: 0;
 
     &.badge--purple {
       background: var(--primary-100, #ede9fe);
@@ -170,7 +178,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+
+    // gap fallback Safari
+    lucide-icon {
+      margin-right: 6px;
+    }
   }
 }
 
@@ -187,7 +199,11 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
+
+  // gap fallback Safari
+  lucide-icon {
+    margin-right: 4px;
+  }
 
   &:hover {
     color: var(--error-500, #ef4444);

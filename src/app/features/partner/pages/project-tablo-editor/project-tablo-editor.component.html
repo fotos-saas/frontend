@@ -139,6 +139,21 @@
                   <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
                   Projekt mappa megnyitása
                 </button>
+
+                <!-- TESZT: Subtitle teszt újragenerálás -->
+                <button
+                  class="btn btn--primary btn--generate"
+                  [disabled]="!selectedSize() || generating()"
+                  (click)="generatePsd()"
+                >
+                  @if (generating()) {
+                    <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                    Generálás...
+                  } @else {
+                    <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
+                    TESZT: PSD újragenerálás (subtitle)
+                  }
+                </button>
               </div>
             }
           } @else {

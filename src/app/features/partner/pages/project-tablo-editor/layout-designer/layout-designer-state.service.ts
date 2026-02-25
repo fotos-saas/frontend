@@ -30,8 +30,11 @@ export class LayoutDesignerStateService {
   /** Forrás dátum (ISO string) */
   readonly sourceDate = signal<string | null>(null);
 
-  /** Az összes layer */
+  /** Az összes (látható) layer */
   readonly layers = signal<DesignerLayer[]>([]);
+
+  /** Rejtett layerek (nem jelennek meg, de mentéskor visszakerülnek) */
+  private hiddenLayers: SnapshotLayer[] = [];
 
   /** Kijelölt layer ID-k */
   readonly selectedLayerIds = signal<Set<number>>(new Set());
@@ -130,7 +133,11 @@ export class LayoutDesignerStateService {
   loadSnapshot(data: { document: DesignerDocument; layers: SnapshotLayer[] }, persons: TabloPersonItem[]): void {
     this.document.set(data.document);
 
-    const designerLayers: DesignerLayer[] = data.layers.map(layer => {
+    // Rejtett layerek kiszűrése — nem jelennek meg a vizuális szerkesztőben
+    this.hiddenLayers = data.layers.filter(l => l.visible === false);
+    const visibleLayers = data.layers.filter(l => l.visible !== false);
+
+    const designerLayers: DesignerLayer[] = visibleLayers.map(layer => {
       const category = this.categorizeLayer(layer);
       const personMatch = this.matchPerson(layer, category, persons);
 
@@ -288,9 +295,9 @@ export class LayoutDesignerStateService {
     if (snapshot) this.layers.set(snapshot);
   }
 
-  /** Módosított SnapshotLayer[] exportálása (mentéshez) */
+  /** Módosított SnapshotLayer[] exportálása (mentéshez) — rejtett layerek is benne vannak */
   exportChanges(): SnapshotLayer[] {
-    return this.layers().map(l => ({
+    const visibleExport: SnapshotLayer[] = this.layers().map(l => ({
       layerId: l.layerId,
       layerName: l.layerName,
       groupPath: l.groupPath,
@@ -302,7 +309,11 @@ export class LayoutDesignerStateService {
       ...(l.text != null ? { text: l.text } : {}),
       ...(l.justification != null ? { justification: l.justification } : {}),
       ...(l.linked ? { linked: true } : {}),
+      visible: true,
     }));
+
+    // Rejtett layerek visszaadása változatlanul
+    return [...visibleExport, ...this.hiddenLayers];
   }
 
   /**

@@ -138,6 +138,8 @@ export interface SnapshotLayer {
   justification?: 'left' | 'center' | 'right';
   /** Linked Layers — össze van-e linkelve más layerekkel (lánc ikon a PS-ben) */
   linked?: boolean;
+  /** Layer láthatósága a Photoshop-ban (rejtett layerek kiszűréséhez) */
+  visible?: boolean;
 }
 
 /** Sablon slot — egy szemely pozicioja (kep + nev) */

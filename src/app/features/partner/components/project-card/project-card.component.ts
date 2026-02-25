@@ -6,6 +6,7 @@ import { PartnerProjectListItem } from '../../services/partner.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { StatusDropdownComponent } from '../../../../shared/components/status-dropdown/status-dropdown.component';
+import { BatchAddDropdownComponent } from '../batch-add-dropdown/batch-add-dropdown.component';
 
 /**
  * Partner Project Card - Projekt sor a fotós felületen.
@@ -14,7 +15,7 @@ import { StatusDropdownComponent } from '../../../../shared/components/status-dr
 @Component({
   selector: 'app-partner-project-card',
   standalone: true,
-  imports: [LucideAngularModule, DatePipe, MatTooltipModule, StatusDropdownComponent],
+  imports: [LucideAngularModule, DatePipe, MatTooltipModule, StatusDropdownComponent, BatchAddDropdownComponent],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

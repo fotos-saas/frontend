@@ -169,6 +169,11 @@ import {
   MoreVertical,
   // Code editor
   Code,
+  // Batch automatizálás
+  Pause,
+  RotateCcw,
+  Square,
+  ListTodo,
   // Tablókészítő
   Layers,
   // Igazítás
@@ -403,6 +408,11 @@ export const LUCIDE_ICONS_MAP = {
   MoreVertical,
   // Code editor
   Code,
+  // Batch automatizálás
+  Pause,
+  RotateCcw,
+  Square,
+  ListTodo,
   // Tablókészítő
   Layers,
   // Igazítás

@@ -1,0 +1,81 @@
+@if (isEmpty()) {
+  <div class="cart-empty">
+    <lucide-icon [name]="ICONS.SHOPPING_CART" [size]="32" class="cart-empty__icon" />
+    <p>A kosár üres</p>
+    <span class="cart-empty__hint">Adj hozzá projekteket a lista oldalról</span>
+  </div>
+} @else {
+  <!-- Toolbar -->
+  <div class="cart-toolbar">
+    <label class="cart-toolbar__select-all">
+      <input
+        type="checkbox"
+        [checked]="workspaceService.allSelected()"
+        (change)="toggleAll()"
+      />
+      <span>Összes ({{ workspaceService.itemCount() }})</span>
+    </label>
+    <div class="cart-toolbar__actions">
+      <button
+        type="button"
+        class="btn-sm btn-ghost"
+        (click)="clearAll()"
+      >
+        <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+        Törlés
+      </button>
+    </div>
+  </div>
+
+  <!-- Csoportosított lista -->
+  <div class="cart-list">
+    @for (group of groups(); track group.projectId) {
+      <div class="cart-group">
+        <div class="cart-group__header">
+          <span class="cart-group__name">{{ group.projectName }}</span>
+          @if (group.schoolName) {
+            <span class="cart-group__school">{{ group.schoolName }}</span>
+          }
+        </div>
+        @for (item of group.items; track item.id) {
+          <div class="cart-item" [class.cart-item--selected]="isSelected(item.id)">
+            <input
+              type="checkbox"
+              [checked]="isSelected(item.id)"
+              (change)="toggleItem(item.id)"
+            />
+            <div class="cart-item__info">
+              @if (item.className) {
+                <span class="cart-item__class">{{ item.className }}</span>
+              }
+              <span class="cart-item__persons">{{ item.personsCount }} fő</span>
+            </div>
+            <span class="cart-item__badge" [class]="getWorkflowBadgeClass(item.workflowType)">
+              {{ getWorkflowLabel(item.workflowType) }}
+            </span>
+            <button
+              type="button"
+              class="cart-item__remove"
+              (click)="removeItem(item.id)"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Start gomb -->
+  <div class="cart-footer">
+    <button
+      type="button"
+      class="btn-primary btn-sm cart-footer__start"
+      [disabled]="!workspaceService.hasSelection()"
+      (click)="startBatch()"
+    >
+      <lucide-icon [name]="ICONS.PLAY" [size]="16" />
+      Indítás ({{ workspaceService.selectedIds().length }})
+    </button>
+  </div>
+}

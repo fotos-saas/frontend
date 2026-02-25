@@ -1,0 +1,43 @@
+@if (isElectron) {
+  <!-- Lebegő gomb -->
+  <button
+    type="button"
+    class="batch-fab"
+    [class.batch-fab--active]="workspaceService.panelOpen()"
+    [class.batch-fab--running]="queueService.isRunning()"
+    (click)="togglePanel()"
+  >
+    <lucide-icon [name]="queueService.isRunning() ? ICONS.LOADER : ICONS.SHOPPING_CART" [size]="22"
+      [class.spin]="queueService.isRunning()"
+    />
+    @if (showBadge()) {
+      <span class="batch-fab__badge">{{ badgeText() }}</span>
+    }
+  </button>
+
+  <!-- Panel -->
+  @if (workspaceService.panelOpen()) {
+    <div class="batch-panel">
+      <div class="batch-panel__header">
+        <h3>
+          @if (queueService.isRunning() || queueService.isPaused()) {
+            Batch feldolgozás
+          } @else {
+            Batch kosár
+          }
+        </h3>
+        <button type="button" class="batch-panel__close" (click)="togglePanel()">
+          <lucide-icon [name]="ICONS.X" [size]="18" />
+        </button>
+      </div>
+
+      <div class="batch-panel__body">
+        @if (queueService.isRunning() || queueService.isPaused() || queueService.queueState().status === 'completed') {
+          <app-batch-progress-view />
+        } @else {
+          <app-batch-cart-view />
+        }
+      </div>
+    </div>
+  }
+}

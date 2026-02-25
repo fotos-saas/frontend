@@ -1,0 +1,138 @@
+:host {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+.batch-fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary-600, #7c3aed);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, background 0.2s;
+  position: relative;
+
+  &:hover {
+    transform: scale(1.08);
+    background: var(--primary-700, #6d28d9);
+  }
+
+  &--active {
+    background: var(--primary-700, #6d28d9);
+  }
+
+  &--running {
+    background: var(--success-600, #16a34a);
+
+    &:hover {
+      background: var(--success-700, #15803d);
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--error-500, #ef4444);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    line-height: 1;
+  }
+}
+
+.batch-panel {
+  position: absolute;
+  bottom: 64px;
+  right: 0;
+  width: 400px;
+  max-height: 520px;
+  background: var(--surface-primary, #fff);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+  border: 1px solid var(--border-secondary, #e5e7eb);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-secondary, #e5e7eb);
+
+    h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary, #111827);
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-tertiary, #9ca3af);
+    padding: 4px;
+    border-radius: 4px;
+
+    &:hover {
+      color: var(--text-primary, #111827);
+      background: var(--surface-secondary, #f3f4f6);
+    }
+  }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .batch-panel {
+    animation: none;
+  }
+  .spin {
+    animation: none;
+  }
+}

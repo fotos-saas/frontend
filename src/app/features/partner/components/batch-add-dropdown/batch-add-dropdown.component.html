@@ -1,0 +1,26 @@
+@if (isElectron) {
+  <div class="batch-add">
+    <button
+      type="button"
+      class="batch-add__trigger"
+      (click)="toggle($event)"
+      matTooltip="Kosárba"
+    >
+      <lucide-icon [name]="ICONS.SHOPPING_CART" [size]="14" />
+    </button>
+
+    @if (open()) {
+      <div class="batch-add__dropdown" (click)="$event.stopPropagation()">
+        @for (option of workflowOptions; track option.type) {
+          <button
+            type="button"
+            class="batch-add__option"
+            (click)="addToCart(option.type, $event)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

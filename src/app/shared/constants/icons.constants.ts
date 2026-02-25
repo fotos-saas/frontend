@@ -375,6 +375,13 @@ export const ICONS = {
   // Tablóméretek
   RULER: 'ruler',
 
+  // Batch automatizálás
+  SHOPPING_CART: 'shopping-cart',
+  PAUSE: 'pause',
+  ROTATE_CCW: 'rotate-ccw',
+  SQUARE: 'square',
+  LIST_TODO: 'list-todo',
+
   // Tablókészítő
   LAYERS: 'layers',
 

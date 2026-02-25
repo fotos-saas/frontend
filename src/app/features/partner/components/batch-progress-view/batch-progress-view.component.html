@@ -1,0 +1,86 @@
+<!-- Progress bar -->
+<div class="progress-header">
+  <div class="progress-stats">
+    <span class="progress-stats__text">
+      {{ queueService.summary().completed + queueService.summary().failed }} / {{ queueService.summary().total }}
+    </span>
+    <span class="progress-stats__percent">{{ queueService.overallProgress() }}%</span>
+  </div>
+  <div class="progress-bar">
+    <div
+      class="progress-bar__fill"
+      [class.progress-bar__fill--complete]="isComplete()"
+      [class.progress-bar__fill--has-errors]="queueService.summary().failed > 0"
+      [style.width.%]="queueService.overallProgress()"
+    ></div>
+  </div>
+</div>
+
+<!-- Aktuális job -->
+@if (queueService.currentJob(); as currentJob) {
+  <div class="current-job">
+    <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+    <div class="current-job__info">
+      <span class="current-job__name">{{ currentJob.projectName }}</span>
+      @if (currentJob.currentStep) {
+        <span class="current-job__step">{{ currentJob.currentStep }}</span>
+      }
+    </div>
+  </div>
+}
+
+<!-- Vezérlő gombok -->
+<div class="controls">
+  @if (queueService.isRunning()) {
+    <button type="button" class="btn-ctrl btn-ctrl--warning" (click)="pause()">
+      <lucide-icon [name]="ICONS.PAUSE" [size]="14" />
+      Szünet
+    </button>
+    <button type="button" class="btn-ctrl btn-ctrl--danger" (click)="cancel()">
+      <lucide-icon [name]="ICONS.SQUARE" [size]="14" />
+      Leállítás
+    </button>
+  } @else if (queueService.isPaused()) {
+    <button type="button" class="btn-ctrl btn-ctrl--success" (click)="resume()">
+      <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+      Folytatás
+    </button>
+    <button type="button" class="btn-ctrl btn-ctrl--danger" (click)="cancel()">
+      <lucide-icon [name]="ICONS.SQUARE" [size]="14" />
+      Leállítás
+    </button>
+  } @else if (isComplete()) {
+    <button type="button" class="btn-ctrl btn-ctrl--ghost" (click)="clearQueue()">
+      <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+      Bezárás
+    </button>
+  }
+</div>
+
+<!-- Job lista -->
+<div class="job-list">
+  @for (job of jobs(); track job.id) {
+    <div class="job-row" [class]="getStatusClass(job.status)">
+      <lucide-icon
+        [name]="getStatusIcon(job.status)"
+        [size]="16"
+        class="job-row__icon"
+        [class.spin]="job.status === 'running'"
+      />
+      <div class="job-row__info">
+        <span class="job-row__name">{{ job.projectName }}</span>
+        @if (job.status === 'running' && job.currentStep) {
+          <span class="job-row__step">{{ job.currentStep }}</span>
+        }
+        @if (job.status === 'failed' && job.error) {
+          <span class="job-row__error">{{ job.error }}</span>
+        }
+      </div>
+      @if (job.status === 'failed' && job.retryable) {
+        <button type="button" class="job-row__retry" (click)="retryJob(job.id)">
+          <lucide-icon [name]="ICONS.ROTATE_CCW" [size]="14" />
+        </button>
+      }
+    </div>
+  }
+</div>

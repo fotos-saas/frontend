@@ -748,7 +748,11 @@ export class PhotoshopService {
         const folderName = this.sanitizeName(
           context.className ? `${context.projectName}-${context.className}` : context.projectName,
         );
-        return `${this.workDir()}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
+        const dimensions = this.parseSizeValue(sizeValue);
+        const sizeLabel = dimensions ? `${dimensions.widthCm}x${dimensions.heightCm}` : sizeValue;
+        const dpi = 200;
+        const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
+        return `${this.workDir()}/${partnerDir}/${year}/${folderName}/${psdFileName}.psd`;
       }
 
       const downloadsPath = await this.api.getDownloadsPath();
@@ -1206,13 +1210,16 @@ export class PhotoshopService {
       let outputPath: string;
 
       if (context && this.workDir()) {
-        // Projekt kontextus → workDir/partner/év/projekt-osztály/projekt-osztály.psd
+        // Projekt kontextus → workDir/partner/év/iskolaNév_osztály_SZxMA_DPIdpi.psd
         const partnerDir = context.brandName ? this.sanitizeName(context.brandName) : 'photostack';
         const year = new Date().getFullYear().toString();
         const folderName = this.sanitizeName(
           context.className ? `${context.projectName}-${context.className}` : context.projectName,
         );
-        outputPath = `${this.workDir()}/${partnerDir}/${year}/${folderName}/${folderName}.psd`;
+        const sizeLabel = `${dimensions.widthCm}x${dimensions.heightCm}`;
+        const dpi = 200;
+        const psdFileName = `${folderName}_${sizeLabel}_${dpi}dpi`;
+        outputPath = `${this.workDir()}/${partnerDir}/${year}/${folderName}/${psdFileName}.psd`;
       } else {
         // Nincs kontextus → Downloads/PhotoStack/méret.psd
         const downloadsPath = await this.api.getDownloadsPath();

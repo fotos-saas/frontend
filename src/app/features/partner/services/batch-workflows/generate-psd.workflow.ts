@@ -14,7 +14,8 @@ import { BatchJobState } from '../../models/batch.types';
  * 3. Kép layerek hozzáadása
  * 4. Rács elrendezés
  * 5. Pillanatkép mentése
- * 6. PSD mentése és bezárása
+ *
+ * A PSD nyitva marad Photoshopban szerkesztésre — a user maga menti/zárja.
  *
  * FONTOS: Ha a PSD fájl már létezik, a workflow HIBÁT dob.
  * A felhasználónak törölnie/átneveznie kell a meglévő fájlt.
@@ -32,7 +33,6 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     'Kép layerek',
     'Rács elrendezés',
     'Pillanatkép',
-    'Mentés és bezárás',
   ];
 
   private readonly logger = inject(LoggerService);
@@ -124,13 +124,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     if (!snapshotResult.success) {
       this.logger.warn('Pillanatkép mentés sikertelen (nem kritikus)', snapshotResult.error);
     }
-    checkAbort();
 
-    // 6. PSD mentése és bezárása
-    onStep(6);
-    const saveCloseResult = await ps.saveAndCloseDocument(docName);
-    if (!saveCloseResult.success) {
-      this.logger.warn('PSD mentés/bezárás sikertelen (nem kritikus)', saveCloseResult.error);
-    }
+    // PSD nyitva marad Photoshopban — a user pimpeli és maga menti
   }
 }

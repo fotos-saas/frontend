@@ -35,12 +35,6 @@
           </span>
         }
       }
-      @if (project().draftPhotoCount > 0) {
-        <span class="draft-badge" [title]="'Véglegesítésre vár: ' + project().draftPhotoCount + ' kép'">
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="10" />
-          {{ project().draftPhotoCount }}
-        </span>
-      }
       @if (project().emailMetrics?.unansweredCount) {
         <span
           class="email-badge"

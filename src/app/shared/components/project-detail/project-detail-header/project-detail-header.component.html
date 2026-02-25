@@ -78,15 +78,6 @@
               (statusChange)="statusChange.emit($event)"
             />
           }
-          @if (p.draftPhotoCount && p.draftPhotoCount! > 0) {
-            <span
-              class="detail-badge detail-badge--amber"
-              [matTooltip]="'Véglegesítésre vár: ' + p.draftPhotoCount + ' kép'"
-            >
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="12" />
-              {{ p.draftPhotoCount }} kép vár
-            </span>
-          }
           @if (p.orderSubmittedAt && !isMarketer()) {
             <span
               class="detail-badge detail-badge--green"

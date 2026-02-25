@@ -393,6 +393,36 @@ export class PhotoshopService {
   }
 
   /**
+   * Felirat text layerek hozzáadása a Subtitles csoportba (JSX).
+   * Iskola neve, osztály, évfolyam, idézet — Arial 50pt, center.
+   */
+  async addSubtitleLayers(
+    subtitles: Array<{ name: string; text: string }>,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    if (!subtitles || subtitles.length === 0) {
+      return { success: true };
+    }
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/add-subtitle-layers.jsx',
+        jsonData: {
+          subtitles: subtitles.map(s => ({ layerName: s.name, displayText: s.text })),
+        },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX addSubtitleLayers hiba', err);
+      return { success: false, error: 'Váratlan hiba a felirat layerek hozzáadásakor' };
+    }
+  }
+
+  /**
    * JSX script futtatása a megnyitott Photoshop dokumentumon.
    * Személynevek text layerként hozzáadása a Names/Students és Names/Teachers csoportba.
    */

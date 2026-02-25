@@ -10,10 +10,11 @@ import { BatchJobState } from '../../models/batch.types';
  * Lépések:
  * 0. PSD létezés ellenőrzés (ha létezik → hiba, nem generálunk)
  * 1. PSD generálás és megnyitás Photoshopban
- * 2. Név layerek hozzáadása
- * 3. Kép layerek hozzáadása
- * 4. Rács elrendezés
- * 5. Pillanatkép mentése
+ * 2. Felirat layerek (iskola, osztály, évfolyam)
+ * 3. Név layerek hozzáadása
+ * 4. Kép layerek hozzáadása
+ * 5. Rács elrendezés
+ * 6. Pillanatkép mentése
  *
  * A PSD nyitva marad Photoshopban szerkesztésre — a user maga menti/zárja.
  *
@@ -29,6 +30,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
   readonly stepLabels = [
     'Ellenőrzés',
     'PSD generálás',
+    'Feliratok',
     'Név layerek',
     'Kép layerek',
     'Rács elrendezés',
@@ -79,8 +81,23 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     }
     checkAbort();
 
-    // 2. Név layerek
+    // 2. Felirat layerek (iskola, osztály, évfolyam) — JSX, a Subtitles csoportba
     onStep(2);
+    const subtitles: Array<{ name: string; text: string }> = [];
+    if (job.schoolName) subtitles.push({ name: 'iskola-neve', text: job.schoolName });
+    if (job.className) subtitles.push({ name: 'osztaly', text: job.className });
+    if (job.classYear) subtitles.push({ name: 'evfolyam', text: job.classYear });
+
+    if (subtitles.length > 0) {
+      const subResult = await ps.addSubtitleLayers(subtitles, docName);
+      if (!subResult.success) {
+        this.logger.warn('Felirat layerek sikertelen (nem kritikus)', subResult.error);
+      }
+    }
+    checkAbort();
+
+    // 3. Név layerek
+    onStep(3);
     const nameResult = await ps.addNameLayers(
       persons.map(p => ({ id: p.id, name: p.name, type: p.type })),
       docName,
@@ -90,8 +107,8 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     }
     checkAbort();
 
-    // 3. Kép layerek
-    onStep(3);
+    // 4. Kép layerek
+    onStep(4);
     const imageResult = await ps.addImageLayers(
       persons.map(p => ({ id: p.id, name: p.name, type: p.type, photoUrl: p.photoUrl })),
       undefined,
@@ -102,8 +119,8 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     }
     checkAbort();
 
-    // 4. Rács elrendezés
-    onStep(4);
+    // 5. Rács elrendezés
+    onStep(5);
     const gridResult = await ps.arrangeGrid(
       { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
       docName,
@@ -113,8 +130,8 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     }
     checkAbort();
 
-    // 5. Pillanatkép mentése
-    onStep(5);
+    // 6. Pillanatkép mentése
+    onStep(6);
     const snapshotResult = await ps.saveSnapshot(
       'batch-initial',
       { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },

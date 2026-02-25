@@ -148,9 +148,15 @@ export class TabloEditorDebugService {
 
     this.addLog('IPC generatePsd', genResult.success ? 'Sikeres' : `HIBA: ${genResult.error}`, genResult.success ? 'ok' : 'error');
 
-    // 10. PSD megnyitás + JSX text layerek + image layerek
+    // 10. Feliratok összeállítása
+    const subtitles: Array<{ name: string; text: string }> = [];
+    if (p?.school?.name) subtitles.push({ name: 'iskola-neve', text: p.school.name });
+    if (p?.className) subtitles.push({ name: 'osztaly', text: p.className });
+    if (p?.classYear) subtitles.push({ name: 'evfolyam', text: p.classYear });
+
+    // 11. PSD megnyitás + JSX layerek
     if (genResult.success && personsData.length > 0) {
-      await this.runJsxDebugPhase(api, outputPath, personsData, size);
+      await this.runJsxDebugPhase(api, outputPath, personsData, size, subtitles);
     }
 
     // 11. Végeredmény
@@ -167,6 +173,7 @@ export class TabloEditorDebugService {
     outputPath: string,
     personsData: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
     size?: TabloSize,
+    subtitles?: Array<{ name: string; text: string }>,
   ): Promise<void> {
     this.addLog('PSD megnyitás', 'Fájl megnyitása Photoshopban...', 'info');
     try {
@@ -194,6 +201,23 @@ export class TabloEditorDebugService {
           this.addLog('Guide-ok', guideResult.success ? '4 guide hozzáadva' : `HIBA: ${guideResult.error}`, guideResult.success ? 'ok' : 'error');
         } catch (guideErr) {
           this.addLog('Guide-ok', `EXCEPTION: ${String(guideErr)}`, 'error');
+        }
+      }
+
+      // Felirat layerek hozzáadása (Subtitles csoport)
+      if (subtitles && subtitles.length > 0) {
+        this.addLog('Feliratok', `${subtitles.length} felirat hozzáadása...`, 'info');
+        try {
+          const subResult = await api.runJsxDebug({
+            scriptName: 'actions/add-subtitle-layers.jsx',
+            jsonData: {
+              subtitles: subtitles.map(s => ({ layerName: s.name, displayText: s.text })),
+            },
+            targetDocName: psdFileName,
+          });
+          this.addLog('Feliratok', subResult.success ? 'Felirat layerek hozzáadva' : `HIBA: ${subResult.error}`, subResult.success ? 'ok' : 'error');
+        } catch (subErr) {
+          this.addLog('Feliratok', `EXCEPTION: ${String(subErr)}`, 'error');
         }
       }
 

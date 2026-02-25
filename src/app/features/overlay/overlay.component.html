@@ -19,7 +19,7 @@
 
   @if (isLoggedOut()) {
     <!-- Logged out: login gomb -->
-    <button class="toolbar__btn toolbar__btn--login" (click)="showLogin()" data-tip="Bejelentkezés szükséges">
+    <button class="toolbar__btn toolbar__btn--login" (click)="showLogin()" matTooltip="Bejelentkezés szükséges">
       <lucide-icon [name]="ICONS.LOG_IN" [size]="16" />
     </button>
     <span class="toolbar__login-label" (click)="showLogin()">Bejelentkezés</span>
@@ -40,7 +40,7 @@
             [class.toolbar__btn--active]="openSubmenu() === item.id || (item.id === 'upload-photo' && uploadPanelOpen())"
             [disabled]="busyCommand() === item.id || (item.id === 'generate-sample' && generating() === 'sample') || (item.id === 'generate-final' && generating() === 'final') || (item.id === 'sort-menu' && sorting())"
             (click)="onCommand(item.id)"
-            [attr.data-tip]="item.tooltip || item.label"
+            [matTooltip]="item.tooltip || item.label"
           >
             @if (busyCommand() === item.id || (item.id === 'generate-sample' && generating() === 'sample') || (item.id === 'generate-final' && generating() === 'final') || (item.id === 'sort-menu' && sorting())) {
               <span class="toolbar__spinner"></span>
@@ -56,10 +56,10 @@
               [class.toolbar__inline-collapse--open]="openSubmenu() === 'sync-photos'"
             >
               <div class="toolbar__inline-collapse-inner">
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing')" data-tip="Csak hiányzó">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing')" matTooltip="Csak hiányzó">
                   <lucide-icon [name]="ICONS.USER_X" [size]="15" />
                 </button>
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all')" data-tip="Mind">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all')" matTooltip="Mind">
                   <lucide-icon [name]="ICONS.IMAGES" [size]="15" />
                 </button>
                 <div class="toolbar__collapse-sep"></div>
@@ -67,7 +67,7 @@
                   class="toolbar__btn toolbar__btn--sm"
                   [class.toolbar__btn--toggle-on]="syncWithBorder()"
                   (click)="toggleSyncBorder()"
-                  [attr.data-tip]="syncWithBorder() ? 'Keret: BE' : 'Keret: KI'"
+                  [matTooltip]="syncWithBorder() ? 'Keret: BE' : 'Keret: KI'"
                 >
                   <lucide-icon [name]="ICONS.FRAME" [size]="15" />
                 </button>
@@ -82,13 +82,13 @@
               [class.toolbar__inline-collapse--open]="openSubmenu() === 'arrange-names'"
             >
               <div class="toolbar__inline-collapse-inner">
-                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('left')" data-tip="Balra">
+                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('left')" matTooltip="Balra">
                   <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="15" />
                 </button>
-                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('center')" data-tip="Középre">
+                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('center')" matTooltip="Középre">
                   <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="15" />
                 </button>
-                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('right')" data-tip="Jobbra">
+                <button class="toolbar__btn toolbar__btn--sm" (click)="arrangeNames('right')" matTooltip="Jobbra">
                   <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="15" />
                 </button>
                 <div class="toolbar__collapse-sep"></div>
@@ -97,7 +97,7 @@
                   class="toolbar__btn toolbar__btn--sm toolbar__btn--badge"
                   [class.toolbar__btn--toggle-on]="nameBreakAfter() > 0"
                   (click)="cycleBreakAfter(); $event.stopPropagation()"
-                  [attr.data-tip]="nameBreakAfter() === 0 ? 'Sortörés: nincs' : 'Sortörés: ' + nameBreakAfter() + '. szó után'"
+                  [matTooltip]="nameBreakAfter() === 0 ? 'Sortörés: nincs' : 'Sortörés: ' + nameBreakAfter() + '. szó után'"
                 >
                   <lucide-icon [name]="ICONS.TYPE" [size]="13" />
                   <span class="toolbar__badge">{{ nameBreakAfter() }}</span>
@@ -107,15 +107,15 @@
                 <button
                   class="toolbar__btn toolbar__btn--sm"
                   (click)="adjustGap(-0.1); $event.stopPropagation()"
-                  data-tip="Rés csökkentése"
+                  matTooltip="Rés csökkentése"
                 >
                   <lucide-icon [name]="ICONS.MINUS" [size]="13" />
                 </button>
-                <span class="toolbar__gap-value" [attr.data-tip]="'Rés: ' + nameGapCm() + ' cm'">{{ nameGapCm() }}</span>
+                <span class="toolbar__gap-value" [matTooltip]="'Rés: ' + nameGapCm() + ' cm'">{{ nameGapCm() }}</span>
                 <button
                   class="toolbar__btn toolbar__btn--sm"
                   (click)="adjustGap(0.1); $event.stopPropagation()"
-                  data-tip="Rés növelése"
+                  matTooltip="Rés növelése"
                 >
                   <lucide-icon [name]="ICONS.PLUS" [size]="13" />
                 </button>
@@ -135,7 +135,7 @@
                   [class.toolbar__btn--busy]="sorting()"
                   [disabled]="sorting()"
                   (click)="sortAbc(); $event.stopPropagation()"
-                  data-tip="ABC sorrend"
+                  matTooltip="ABC sorrend"
                 >
                   @if (sorting()) {
                     <span class="toolbar__spinner toolbar__spinner--sm"></span>
@@ -148,7 +148,7 @@
                   [class.toolbar__btn--busy]="sorting()"
                   [disabled]="sorting()"
                   (click)="sortGender(); $event.stopPropagation()"
-                  data-tip="Fiú-lány felváltva"
+                  matTooltip="Fiú-lány felváltva"
                 >
                   <lucide-icon [name]="ICONS.USERS" [size]="15" />
                 </button>
@@ -158,7 +158,7 @@
                   [class.toolbar__btn--busy]="sorting()"
                   [disabled]="sorting()"
                   (click)="sortGrid(); $event.stopPropagation()"
-                  data-tip="Rácsba rendezés"
+                  matTooltip="Rácsba rendezés"
                 >
                   <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="15" />
                 </button>
@@ -169,7 +169,7 @@
                   [class.toolbar__btn--active]="customOrderPanelOpen()"
                   [disabled]="sorting()"
                   (click)="toggleCustomOrderPanel(); $event.stopPropagation()"
-                  data-tip="Egyedi sorrend"
+                  matTooltip="Egyedi sorrend"
                 >
                   <lucide-icon [name]="ICONS.LIST_ORDERED" [size]="15" />
                 </button>
@@ -189,7 +189,7 @@
                   class="toolbar__btn toolbar__btn--sm toolbar__btn--label"
                   [class.toolbar__btn--toggle-on]="sampleUseLargeSize()"
                   (click)="toggleSampleSize(); $event.stopPropagation()"
-                  [attr.data-tip]="sampleUseLargeSize() ? 'HD (4000px)' : 'SD (2000px)'"
+                  [matTooltip]="sampleUseLargeSize() ? 'HD (4000px)' : 'SD (2000px)'"
                 >
                   <span class="toolbar__label-text">{{ sampleUseLargeSize() ? 'HD' : 'SD' }}</span>
                 </button>
@@ -197,7 +197,7 @@
                 <button
                   class="toolbar__btn toolbar__btn--sm"
                   (click)="toggleWatermarkColor(); $event.stopPropagation()"
-                  [attr.data-tip]="'Vízjel: ' + (sampleWatermarkColor() === 'white' ? 'fehér' : 'fekete')"
+                  [matTooltip]="'Vízjel: ' + (sampleWatermarkColor() === 'white' ? 'fehér' : 'fekete')"
                 >
                   <lucide-icon [name]="sampleWatermarkColor() === 'white' ? ICONS.SUN : ICONS.MOON" [size]="13" />
                 </button>
@@ -205,16 +205,16 @@
                 <button
                   class="toolbar__btn toolbar__btn--sm toolbar__btn--label"
                   (click)="cycleOpacity(); $event.stopPropagation()"
-                  [attr.data-tip]="'Átlátszóság: ' + (sampleWatermarkOpacity() * 100) + '%'"
+                  [matTooltip]="'Átlátszóság: ' + (sampleWatermarkOpacity() * 100) + '%'"
                 >
                   <span class="toolbar__label-text">{{ (sampleWatermarkOpacity() * 100).toFixed(0) }}%</span>
                 </button>
                 <div class="toolbar__collapse-sep"></div>
                 <!-- Indítás -->
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="confirmGenerate('sample')" data-tip="Indítás">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="confirmGenerate('sample')" matTooltip="Indítás">
                   <lucide-icon [name]="ICONS.CHECK" [size]="15" />
                 </button>
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--red" (click)="cancelGenerate()" data-tip="Mégsem">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--red" (click)="cancelGenerate()" matTooltip="Mégsem">
                   <lucide-icon [name]="ICONS.X" [size]="15" />
                 </button>
               </div>
@@ -228,10 +228,10 @@
               [class.toolbar__inline-collapse--open]="openSubmenu() === 'generate-final'"
             >
               <div class="toolbar__inline-collapse-inner">
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="confirmGenerate('final')" data-tip="Igen">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="confirmGenerate('final')" matTooltip="Igen">
                   <lucide-icon [name]="ICONS.CHECK" [size]="15" />
                 </button>
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--red" (click)="cancelGenerate()" data-tip="Mégsem">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--red" (click)="cancelGenerate()" matTooltip="Mégsem">
                   <lucide-icon [name]="ICONS.X" [size]="15" />
                 </button>
               </div>
@@ -252,7 +252,7 @@
       <button
         class="toolbar__doc"
         (click)="openActiveDocDir()"
-        [attr.data-tip]="activeDoc().name"
+        [matTooltip]="activeDoc().name"
       >
         <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
         <span class="toolbar__doc-name">{{ activeDocLabel() }}</span>
@@ -269,14 +269,14 @@
       class="toolbar__btn"
       [class.toolbar__btn--turbo-active]="isTurbo()"
       (click)="toggleTurbo()"
-      [attr.data-tip]="isTurbo() ? 'Turbo kikapcsolás' : 'Turbo polling'"
+      [matTooltip]="isTurbo() ? 'Turbo kikapcsolás' : 'Turbo polling'"
     >
       <lucide-icon [name]="ICONS.ZAPS" [size]="16" />
     </button>
   }
 
   <!-- Hide button -->
-  <button class="toolbar__btn toolbar__btn--close" (click)="hide()" data-tip="Elrejtés (Ctrl+K)">
+  <button class="toolbar__btn toolbar__btn--close" (click)="hide()" matTooltip="Elrejtés (Ctrl+K)">
     <lucide-icon [name]="ICONS.X" [size]="16" />
   </button>
 </div>
@@ -289,10 +289,10 @@
     <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
     <span>Fotó feltöltés</span>
     @if (hasPsLayers()) {
-      <button class="upload-panel__refresh" (click)="resetUploadState($event)" type="button" data-tip="Reset">
+      <button class="upload-panel__refresh" (click)="resetUploadState($event)" type="button" matTooltip="Reset">
         <lucide-icon [name]="ICONS.UNDO" [size]="13" />
       </button>
-      <button class="upload-panel__refresh" (click)="refreshPsLayers()" type="button" data-tip="Frissítés">
+      <button class="upload-panel__refresh" (click)="refreshPsLayers()" type="button" matTooltip="Frissítés">
         <lucide-icon [name]="ICONS.REFRESH" [size]="13" />
       </button>
     }
@@ -345,7 +345,7 @@
                 }
               </span>
               @if (layer.matchType === 'ambiguous') {
-                <span class="upload-panel__layer-ambiguous" data-tip="Bizonytalan párosítás — ellenőrizd!">
+                <span class="upload-panel__layer-ambiguous" matTooltip="Bizonytalan párosítás — ellenőrizd!">
                   <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="12" />
                 </span>
               }
@@ -368,7 +368,7 @@
         @if (unmatchedFiles().length > 0) {
           <div class="upload-panel__unmatched">
             <span class="upload-panel__unmatched-label">Nem párosított ({{ unmatchedFiles().length }}):</span>
-            <button class="upload-panel__unmatched-match" [disabled]="matching()" (click)="retrySmartMatch()" type="button" data-tip="Intelligens párosítás">
+            <button class="upload-panel__unmatched-match" [disabled]="matching()" (click)="retrySmartMatch()" type="button" matTooltip="Intelligens párosítás">
               @if (matching()) {
                 <span class="upload-panel__spinner"></span>
               } @else {
@@ -376,7 +376,7 @@
               }
               Párosítás
             </button>
-            <button class="upload-panel__unmatched-clear" (click)="clearUnmatchedFiles()" type="button" data-tip="Lista törlése">
+            <button class="upload-panel__unmatched-clear" (click)="clearUnmatchedFiles()" type="button" matTooltip="Lista törlése">
               <lucide-icon [name]="ICONS.X" [size]="11" />
             </button>
             @for (file of unmatchedFiles(); track file.name; let fi = $index) {

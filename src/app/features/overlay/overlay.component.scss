@@ -350,45 +350,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* CSS-only top tooltip */
-[data-tip] {
-  position: relative;
-
-  &::after {
-    content: attr(data-tip);
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 4px 8px;
-    border-radius: 6px;
-    background: #0f0f1e;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 11px;
-    font-weight: 500;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    z-index: 10;
-  }
-
-  &:hover::after {
-    opacity: 1;
-  }
-}
-
-/* Panel nyitva → tooltip lefelé mutat (felülről a panel eltakarná) */
-.toolbar--panel-open [data-tip]::after {
-  bottom: auto;
-  top: calc(100% + 6px);
-}
-
-.toolbar__doc[data-tip]::after {
-  max-width: 260px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* Tooltip: matTooltip (Angular Material) kezeli */
 
 // ============ Upload Panel ============
 .upload-panel {
@@ -785,17 +747,6 @@
     color: #34d399;
   }
 
-  // Tooltip alulra (mert a panel overflow: hidden levágná felül)
-  &[data-tip]::after {
-    bottom: auto;
-    top: calc(100% + 4px);
-  }
-
-  // Kattintás után tooltip eltüntetése (Electron hover beragadás ellen)
-  &:active[data-tip]::after {
-    opacity: 0 !important;
-    transition: none;
-  }
 }
 
 // ---- v2: Tallózás gomb ----

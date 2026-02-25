@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
 import { environment } from '../../../environments/environment';
@@ -48,7 +49,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 @Component({
   selector: 'app-overlay',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, MatTooltipModule],
   providers: [OverlayUploadService],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',

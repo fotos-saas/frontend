@@ -81,7 +81,7 @@ function _doFlattenExport() {
 
 (function () {
   try {
-    _doc = app.activeDocument;
+    _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
     if (!_doc) {
       throw new Error("Nincs megnyitott dokumentum!");
     }

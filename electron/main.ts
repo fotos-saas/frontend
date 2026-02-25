@@ -491,6 +491,11 @@ async function loadApp(): Promise<void> {
   const targetUrl = isDev ? 'http://localhost:4205' : PRODUCTION_URL;
 
   try {
+    // Dev módban: Chromium cache kiürítése, hogy mindig friss kódot töltsön
+    if (isDev) {
+      await mainWindow.webContents.session.clearCache();
+    }
+
     await mainWindow.loadURL(targetUrl);
 
     // Open DevTools only in development

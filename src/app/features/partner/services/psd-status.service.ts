@@ -17,6 +17,10 @@ export interface PsdStatus {
 /**
  * PSD létezés ellenőrzés a projekt listához.
  * Háttérben ellenőrzi minden projekthez hogy van-e PSD fájl.
+ *
+ * FONTOS: Csak akkor működik, ha a workDir be van állítva a PhotoshopService-ben.
+ * workDir nélkül a computePsdPath fallback-et ad (Downloads/PhotoStack/size.psd),
+ * ami nem projekt-specifikus — ilyenkor nem ellenőrzünk.
  */
 @Injectable({
   providedIn: 'root',
@@ -54,10 +58,12 @@ export class PsdStatusService {
   async checkProjects(projects: PartnerProjectListItem[]): Promise<void> {
     if (!this.electron.isElectron || projects.length === 0) return;
 
+    // workDir nélkül nem tudunk projekt-specifikus PSD path-ot számolni
+    if (!this.ps.workDir()) return;
+
     this.loading.set(true);
 
     try {
-      // Tablóméretek lekérése (egyszer, cache)
       if (!this.tabloSizesCache) {
         const resp = await firstValueFrom(this.projectService.getTabloSizes());
         this.tabloSizesCache = { sizes: resp.sizes, threshold: resp.threshold };
@@ -106,8 +112,6 @@ export class PsdStatusService {
 
       const result = await this.ps.checkPsdExists(psdPath);
       const folderPath = psdPath.substring(0, psdPath.lastIndexOf('/'));
-
-      console.warn(`[PSD] ${project.schoolName} / ${project.className} → ${psdPath} → exists: ${result.exists}`);
 
       return { exists: result.exists, psdPath, folderPath };
     } catch {

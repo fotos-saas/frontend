@@ -111,7 +111,16 @@ export class TabloEditorDebugService {
     }
     this.addLog('Output path', outputPath, 'info');
 
-    // 7. IPC params
+    // 7. Feliratok összeállítása
+    const subtitles: Array<{ name: string; text: string }> = [];
+    if (p?.school?.name) subtitles.push({ name: 'iskola-neve', text: p.school.name });
+    if (p?.className) subtitles.push({ name: 'osztaly', text: p.className });
+    if (p?.classYear) subtitles.push({ name: 'evfolyam', text: p.classYear });
+    if (subtitles.length > 0) {
+      this.addLog('Feliratok', subtitles.map(s => `${s.name}: "${s.text}"`).join(', '), 'ok');
+    }
+
+    // 8. IPC params
     const ipcParams: any = {
       widthCm: dims.widthCm,
       heightCm: dims.heightCm,
@@ -119,8 +128,9 @@ export class TabloEditorDebugService {
       mode: 'RGB',
       outputPath,
       persons: personsData.length > 0 ? personsData : undefined,
+      subtitles: subtitles.length > 0 ? subtitles : undefined,
     };
-    this.addLog('IPC params', `widthCm=${ipcParams.widthCm}, heightCm=${ipcParams.heightCm}, dpi=${ipcParams.dpi}, persons=${personsData.length}`, 'info');
+    this.addLog('IPC params', `widthCm=${ipcParams.widthCm}, heightCm=${ipcParams.heightCm}, dpi=${ipcParams.dpi}, persons=${personsData.length}, subtitles=${subtitles.length}`, 'info');
 
     // 8. PSD streaming debug
     const unsubscribe = api.onPsdDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {

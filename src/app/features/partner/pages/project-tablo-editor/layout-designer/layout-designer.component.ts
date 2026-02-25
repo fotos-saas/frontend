@@ -733,14 +733,18 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Kijelölt layerek fotóinak szinkronizálása */
+  /** Kijelölt layerek fotóinak szinkronizálása — PS kijelölés alapján */
   async syncSelectedPhotos(): Promise<void> {
+    // PS-ből friss kijelölés lekérése (az overlay polling-ból nem mindig friss)
+    const doc = await window.electronAPI?.overlay.getActiveDoc();
+    const selectedNames = doc?.selectedLayerNames;
+    if (!selectedNames || selectedNames.length === 0) return;
+
+    const nameSet = new Set(selectedNames);
     const layers = this.state.layers();
-    const selectedIds = this.state.selectedLayerIds();
-    if (selectedIds.size === 0) return;
 
     const photosToSync = layers
-      .filter(l => selectedIds.has(l.layerId)
+      .filter(l => nameSet.has(l.layerName)
         && (l.category === 'student-image' || l.category === 'teacher-image')
         && l.personMatch?.photoUrl)
       .map(l => ({ layerName: l.layerName, photoUrl: l.personMatch!.photoUrl! }));

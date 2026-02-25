@@ -11,7 +11,7 @@
 
     @if (open()) {
       <div class="batch-add__dropdown" (click)="$event.stopPropagation()">
-        @for (option of workflowOptions; track option.type) {
+        @for (option of workflowOptions(); track option.type) {
           <button
             type="button"
             class="batch-add__option"

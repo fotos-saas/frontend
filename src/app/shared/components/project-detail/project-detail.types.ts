@@ -137,6 +137,7 @@ export interface ProjectDetailData {
     mimeType: string;
     uploadedAt: string;
   } | null;
+  tags?: Array<{ id: number; name: string; color: string }>;
   createdAt: string;
   updatedAt: string;
 }

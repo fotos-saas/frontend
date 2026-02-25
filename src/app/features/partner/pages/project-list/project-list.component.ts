@@ -7,6 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../../services/partner.service';
+import { PartnerTagService } from '../../services/partner-tag.service';
 import { PartnerPreliminaryService } from '../../services/partner-preliminary.service';
 import { PartnerOrderSyncService } from '../../services/partner-order-sync.service';
 import { CreatePreliminaryModalComponent } from '../../components/create-preliminary-modal/create-preliminary-modal.component';
@@ -60,6 +61,7 @@ export class PartnerProjectListComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private readonly toast = inject(ToastService);
   private readonly partnerService = inject(PartnerService);
+  private readonly tagService = inject(PartnerTagService);
   private readonly preliminaryService = inject(PartnerPreliminaryService);
   private readonly orderSyncService = inject(PartnerOrderSyncService);
   private readonly destroyRef = inject(DestroyRef);
@@ -89,7 +91,7 @@ export class PartnerProjectListComponent implements OnInit {
   // Filter state
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'projects' },
-    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: getCurrentGraduationYear().toString(), is_preliminary: '', photos_uploaded: '' },
+    defaultFilters: { status: '', aware: '', draft: '', school_id: '', graduation_year: getCurrentGraduationYear().toString(), is_preliminary: '', photos_uploaded: '', tag_ids: '' },
     defaultSortBy: 'created_at',
     defaultSortDir: 'desc',
     validation: {
@@ -128,7 +130,7 @@ export class PartnerProjectListComponent implements OnInit {
     { value: 'push_could_be_done', label: 'Nyomni, mert kész lehetne' },
   ];
 
-  readonly filterConfigs: FilterConfig[] = [
+  filterConfigs = signal<FilterConfig[]>([
     { id: 'graduation_year', label: 'Tanév', icon: 'calendar', options: this.yearOptions },
     { id: 'status', label: 'Összes státusz', icon: 'filter', options: this.statusOptions },
     { id: 'is_preliminary', label: 'Típus', options: [
@@ -147,7 +149,7 @@ export class PartnerProjectListComponent implements OnInit {
       { value: 'true', label: 'Feltöltve' },
       { value: 'false', label: 'Nincs feltöltve' }
     ]}
-  ];
+  ]);
 
   readonly sortOptions: SortOption[] = [
     { value: 'school_name', label: 'Iskola' },
@@ -209,6 +211,28 @@ export class PartnerProjectListComponent implements OnInit {
   ngOnInit(): void {
     this.loadProjects();
     this.checkSyncInBackground();
+    this.loadTagsForFilter();
+  }
+
+  private loadTagsForFilter(): void {
+    this.tagService.getTags()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const tags = response.data;
+          if (tags.length > 0) {
+            const tagFilter: FilterConfig = {
+              id: 'tag_ids',
+              label: 'Címke',
+              icon: 'tag',
+              options: [
+                ...tags.map(t => ({ value: t.id.toString(), label: t.name })),
+              ],
+            };
+            this.filterConfigs.update(configs => [...configs, tagFilter]);
+          }
+        },
+      });
   }
 
   loadProjects(): void {
@@ -228,6 +252,7 @@ export class PartnerProjectListComponent implements OnInit {
       graduation_year: filters['graduation_year'] ? parseInt(filters['graduation_year'], 10) : undefined,
       is_preliminary: filters['is_preliminary'] || undefined,
       photos_uploaded: filters['photos_uploaded'] || undefined,
+      tag_ids: filters['tag_ids'] || undefined,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

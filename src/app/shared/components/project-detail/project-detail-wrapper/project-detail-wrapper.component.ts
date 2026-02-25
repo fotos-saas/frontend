@@ -50,6 +50,7 @@ import {
 } from '../project-detail.tokens';
 import { ICONS } from '../../../constants/icons.constants';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../confirm-dialog/confirm-dialog.component';
+import { ProjectTagManagerComponent } from '../../../../features/partner/components/project-tag-manager/project-tag-manager.component';
 import { GuestSession, SamplePackage } from '../../../../features/partner/services/partner.service';
 import { PartnerFinalizationService } from '../../../../features/partner/services/partner-finalization.service';
 import { ProjectDetailWrapperFacadeService } from './project-detail-wrapper-facade.service';
@@ -75,6 +76,7 @@ import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persiste
     ConfirmDialogComponent,
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
+    ProjectTagManagerComponent,
   ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -191,6 +193,13 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   onStatusChange(event: { value: string; label: string; color: string }): void {
     this.facade.updateProjectStatus(event);
+  }
+
+  onTagsChanged(tags: Array<{ id: number; name: string; color: string }>): void {
+    const current = this.facade.projectData();
+    if (current) {
+      this.facade.projectData.set({ ...current, tags });
+    }
   }
 
   changeTab(tab: ProjectDetailTab): void {

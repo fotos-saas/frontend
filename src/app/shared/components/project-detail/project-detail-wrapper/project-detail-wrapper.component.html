@@ -19,6 +19,17 @@
       (statusChange)="onStatusChange($event)"
     />
 
+    <!-- Címkék -->
+    @if (!isMarketer()) {
+      <div class="mb-3">
+        <app-project-tag-manager
+          [projectId]="projectData()!.id"
+          [tags]="projectData()?.tags ?? []"
+          (tagsChanged)="onTagsChanged($event)"
+        />
+      </div>
+    }
+
     <!-- Tab navigáció -->
     <app-project-detail-tabs
       [activeTab]="activeTab()"

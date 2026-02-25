@@ -35,6 +35,12 @@
           </span>
         }
       }
+      @for (tag of visibleTags(); track tag.id) {
+        <span class="tag-badge tag-badge--{{ tag.color }}" [title]="tag.name">{{ tag.name }}</span>
+      }
+      @if (extraTagCount() > 0) {
+        <span class="tag-badge tag-badge--extra" [title]="extraTagsTooltip()">+{{ extraTagCount() }}</span>
+      }
       @if (project().emailMetrics?.unansweredCount) {
         <span
           class="email-badge"

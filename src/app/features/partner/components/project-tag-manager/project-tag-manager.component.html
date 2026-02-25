@@ -1,0 +1,80 @@
+<div class="tag-manager">
+  <!-- Aktuális címkék pill-ként -->
+  <div class="tag-pills">
+    @for (tag of tags(); track tag.id) {
+      <span class="tag-pill tag-pill--{{ tag.color }}">
+        {{ tag.name }}
+        <button type="button" class="tag-pill__remove" (click)="removeTag(tag.id)" title="Eltávolítás">
+          <lucide-icon [name]="ICONS.X" [size]="10" />
+        </button>
+      </span>
+    }
+
+    <!-- Hozzáadás gomb -->
+    <div class="tag-add-wrapper">
+      <button type="button" class="tag-add-btn" (click)="toggleDropdown()">
+        <lucide-icon [name]="ICONS.PLUS" [size]="12" />
+        Címke
+      </button>
+
+      <!-- Dropdown -->
+      @if (dropdownOpen()) {
+        <div class="tag-dropdown" (click)="$event.stopPropagation()">
+          @if (!creatingNew()) {
+            <!-- Meglévő címkék listája -->
+            @if (availableTags().length > 0) {
+              <div class="tag-dropdown__list">
+                @for (tag of availableTags(); track tag.id) {
+                  <button type="button" class="tag-dropdown__item" (click)="addTag(tag)">
+                    <span class="tag-color-dot tag-color-dot--{{ tag.color }}"></span>
+                    {{ tag.name }}
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="tag-dropdown__empty">Nincs több elérhető címke</div>
+            }
+            <div class="tag-dropdown__divider"></div>
+            <button type="button" class="tag-dropdown__create-btn" (click)="creatingNew.set(true)">
+              <lucide-icon [name]="ICONS.PLUS" [size]="12" />
+              Új címke létrehozása
+            </button>
+          } @else {
+            <!-- Új címke form -->
+            <div class="tag-dropdown__form">
+              <input
+                type="text"
+                class="tag-dropdown__input"
+                placeholder="Címke neve..."
+                [ngModel]="newTagName()"
+                (ngModelChange)="newTagName.set($event)"
+                (keydown.enter)="createAndAddTag()"
+                maxlength="100"
+              />
+              <div class="tag-dropdown__colors">
+                @for (c of TAG_COLORS; track c.value) {
+                  <button
+                    type="button"
+                    class="tag-color-btn tag-color-btn--{{ c.value }}"
+                    [class.tag-color-btn--active]="newTagColor() === c.value"
+                    [title]="c.label"
+                    (click)="newTagColor.set(c.value)"
+                  ></button>
+                }
+              </div>
+              <div class="tag-dropdown__actions">
+                <button type="button" class="tag-dropdown__cancel" (click)="creatingNew.set(false)">Mégse</button>
+                <button type="button" class="tag-dropdown__save" [disabled]="!newTagName().trim()" (click)="createAndAddTag()">Létrehozás</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop a dropdown bezárásához -->
+@if (dropdownOpen()) {
+  <div class="tag-backdrop" (click)="closeDropdown()"></div>
+}

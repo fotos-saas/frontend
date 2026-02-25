@@ -72,6 +72,7 @@ export class PartnerProjectDetailComponent {
     doneAt: project.doneAt,
     printSmallTablo: project.printSmallTablo,
     printFlat: project.printFlat,
+    tags: project.tags ?? [],
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

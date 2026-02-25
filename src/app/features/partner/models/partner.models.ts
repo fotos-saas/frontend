@@ -40,6 +40,15 @@ export interface TabloStatus {
 }
 
 /**
+ * Projekt címke
+ */
+export interface ProjectTag {
+  id: number;
+  name: string;
+  color: string;
+}
+
+/**
  * Projekt email metrikák (lista badge-hez)
  */
 export interface ProjectEmailMetrics {
@@ -85,6 +94,7 @@ export interface PartnerProjectListItem {
   linkedProjectId: number | null;
   linkedAt: string | null;
   preliminaryNote: string | null;
+  tags: ProjectTag[];
   emailMetrics: ProjectEmailMetrics | null;
 }
 

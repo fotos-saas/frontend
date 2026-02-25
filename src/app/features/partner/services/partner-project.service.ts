@@ -58,6 +58,7 @@ export class PartnerProjectService {
     graduation_year?: number;
     is_preliminary?: string;
     photos_uploaded?: string;
+    tag_ids?: string;
   }): Observable<ProjectListResponse> {
     const httpParams = buildHttpParams({
       page: params?.page,
@@ -72,6 +73,7 @@ export class PartnerProjectService {
       graduation_year: params?.graduation_year,
       is_preliminary: params?.is_preliminary,
       photos_uploaded: params?.photos_uploaded,
+      tag_ids: params?.tag_ids,
     });
 
     return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });

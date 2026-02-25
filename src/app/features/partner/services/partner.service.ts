@@ -12,6 +12,7 @@ export type {
   ContactListItem, ContactLimits, GuestSession, SamplePackage, SampleVersionImage, SampleVersion,
   ProjectAutocompleteItem, CreateProjectRequest, CreateSchoolRequest, ProjectLimits,
   PaginatedResponse, ProjectListResponse, UploadProgress, TabloSize, TabloSizeThreshold,
+  ProjectTag,
 } from '../models/partner.models';
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';
 export type { ImportResult } from './partner-contact.service';

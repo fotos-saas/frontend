@@ -37,6 +37,15 @@ export class ProjectCardComponent {
   readonly linkClick = output<PartnerProjectListItem>();
   readonly statusChangeClick = output<{ projectId: number; status: string; label: string; color: string }>();
 
+  /** Látható címkék (max 2) */
+  readonly visibleTags = computed(() => (this.project().tags ?? []).slice(0, 2));
+
+  /** Extra címkék száma */
+  readonly extraTagCount = computed(() => Math.max(0, (this.project().tags ?? []).length - 2));
+
+  /** Extra címkék tooltip */
+  readonly extraTagsTooltip = computed(() => (this.project().tags ?? []).slice(2).map(t => t.name).join(', '));
+
   /**
    * Email badge tooltip szöveg
    */

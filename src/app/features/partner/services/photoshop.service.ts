@@ -937,6 +937,7 @@ export class PhotoshopService {
           layers,
           restoreGroups: [['Images'], ['Names']],
           historyName: 'Sorrend frissítés',
+          moveAllSiblings: true,
           ...(linkedLayerNames?.length ? { linkedLayerNames } : {}),
         },
         targetDocName,

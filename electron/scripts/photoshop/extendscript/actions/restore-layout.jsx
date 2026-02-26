@@ -339,12 +339,30 @@ function _doRestore() {
   _groupCacheKeys = [];
   _groupCacheValues = [];
 
+  // moveAllSiblings: ha true, minden azonos nevu layert mozgatunk (nem csak az ID szerintit)
+  var moveAllSiblings = !!_snapshotData.moveAllSiblings;
+
+  // Deduplikalas: layerName-enkent csak egyszer dolgozzuk fel (a tobbi testvart amugy is mozgatjuk)
+  // ES3: parhuzamos tomb a mar feldolgozott nevekhez
+  var _processedNames = [];
+  function _isProcessed(name) {
+    for (var p = 0; p < _processedNames.length; p++) {
+      if (_processedNames[p] === name) return true;
+    }
+    return false;
+  }
+
   for (var i = 0; i < layers.length; i++) {
     var layerData = layers[i];
     var groupPath = layerData.groupPath || [];
 
     // restoreGroups szuro — ha megadva, csak matching layerek
     if (hasFilter && !_matchesRestoreGroups(groupPath, restoreGroups)) {
+      continue;
+    }
+
+    // moveAllSiblings mod: nev alapjan deduplikalas — egy nevet csak egyszer dolgozunk fel
+    if (moveAllSiblings && layerData.layerName && _isProcessed(layerData.layerName)) {
       continue;
     }
 
@@ -373,19 +391,51 @@ function _doRestore() {
 
     // Pozicio visszaallitasa
     try {
-      _restoreLayerPosition(layer, layerData.x, layerData.y);
+      // moveAllSiblings: minden azonos nevu layert mozgatunk az egesz dokumentumban
+      if (moveAllSiblings && layerData.layerName) {
+        var siblings = [];
+        _findLayersByNames(_doc, [layerData.layerName], siblings);
 
-      // Text layerek: text + justification visszaallitasa
-      if (layerData.kind === "text") {
-        _restoreTextContent(layer, layerData.text, layerData.justification);
+        if (siblings.length > 0) {
+          // Referencia layer pozicioja (amibol a delta-t szamoljuk)
+          var refBnfe = _getBoundsNoEffects(siblings[0]);
+          var refX = Math.round(refBnfe.left);
+          var refY = Math.round(refBnfe.top);
+          var dx = layerData.x - refX;
+          var dy = layerData.y - refY;
+
+          for (var s = 0; s < siblings.length; s++) {
+            try {
+              if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
+                siblings[s].translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
+              }
+              // Text tartalom visszaallitasa (csak text layereknel)
+              if (siblings[s].kind === LayerKind.TEXT && layerData.kind === "text") {
+                _restoreTextContent(siblings[s], layerData.text, layerData.justification);
+              }
+            } catch (se) {
+              log("[JSX] WARN: Sibling mozgatas sikertelen (" + siblings[s].name + "): " + se.message);
+            }
+          }
+          _restored += siblings.length;
+        }
+        _processedNames.push(layerData.layerName);
+      } else {
+        // Eredeti logika: csak a talalt layert mozgatjuk
+        _restoreLayerPosition(layer, layerData.x, layerData.y);
+
+        // Text layerek: text + justification visszaallitasa
+        if (layerData.kind === "text") {
+          _restoreTextContent(layer, layerData.text, layerData.justification);
+        }
+
+        // Lathatosag visszaallitasa (ha a snapshot tartalmazza)
+        if (layerData.visible !== undefined) {
+          layer.visible = layerData.visible;
+        }
+
+        _restored++;
       }
-
-      // Lathatosag visszaallitasa (ha a snapshot tartalmazza)
-      if (layerData.visible !== undefined) {
-        layer.visible = layerData.visible;
-      }
-
-      _restored++;
     } catch (e) {
       log("[JSX] WARN: Layer visszaallitas sikertelen (" + layerData.layerName + "): " + e.message);
       _skipped++;

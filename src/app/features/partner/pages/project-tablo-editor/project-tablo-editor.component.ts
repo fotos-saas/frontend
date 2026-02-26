@@ -401,7 +401,7 @@ export class ProjectTabloEditorComponent implements OnInit {
         if (imageOk) {
           const boardSize = this.ps.parseSizeValue(size.value);
           if (boardSize) {
-            const layoutResult = await this.ps.arrangeTabloLayout(boardSize, psdFileName);
+            const layoutResult = await this.ps.arrangeTabloLayout(boardSize, psdFileName, undefined, this.lastLayoutConfig() ?? undefined);
             if (!layoutResult.success) {
               this.error.set(`Tablóelrendezés: ${layoutResult.error}`);
             }

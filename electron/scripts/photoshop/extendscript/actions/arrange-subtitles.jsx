@@ -88,44 +88,21 @@ function _doArrangeSubtitles() {
       selectLayerById(lyr.id);
       _doc.activeLayer = lyr;
 
-      // Vizszintes kozepre igazitas
-      // Text layer eseten textItem.position-t hasznaljuk (baseline anchor)
-      if (lyr.kind === LayerKind.TEXT) {
-        // A text position a baseline pont — left/center/right aligned
-        // Center aligned text-nel: X = doc kozep, Y = baseline
-        // A bounds top-ja a szoveg teteje, baseline lejjebb van
-        var baselineOffset = info.bounds.bottom - info.bounds.top; // teljes magassag
-        // Becsult baseline: a bounds bottom kozeleben
-        // A textItem.position az anchor pont (baseline + alignment)
-        var targetX = docCenterX;
-        var targetY = currentY + baselineOffset;
+      // Cel pozicio: vizszintesen kozepre, fuggoleges currentY-ra
+      var targetX = Math.round((docW - info.width) / 2);
+      var targetY = currentY;
 
-        // Jelenlegi poziciobol szamolt delta
-        var curPos = lyr.textItem.position;
-        var curX = curPos[0].as("px");
-        var curY = curPos[1].as("px");
+      // Bounds-alapu delta (minden layer tipusnal mukodik — text es nem-text)
+      // A translate delta-t a jelenlegi bounds-bol szamoljuk
+      var curBounds = _getBoundsNoEffects(lyr);
+      var dx = targetX - curBounds.left;
+      var dy = targetY - curBounds.top;
 
-        var dx = targetX - curX;
-        var dy = currentY - info.bounds.top;
-
-        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-          lyr.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
-        }
-      } else {
-        // Nem text layer: origoba mozgatas, majd celpozicio
-        var bnfe = info.bounds;
-        var dx = -bnfe.left;
-        var dy = -bnfe.top;
-        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-          lyr.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
-        }
-
-        // Kozepre + celpozicio
-        var layerCenterOffset = Math.round((docW - info.width) / 2);
-        lyr.translate(new UnitValue(layerCenterOffset, "px"), new UnitValue(currentY, "px"));
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+        lyr.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
       }
 
-      log("[JSX] Layer '" + lyr.name + "': Y=" + currentY + "px, h=" + info.height + "px");
+      log("[JSX] Layer '" + lyr.name + "': X=" + targetX + ", Y=" + targetY + "px, h=" + info.height + "px");
 
     } catch (e) {
       log("[JSX] WARN: Layer '" + lyr.name + "' pozicionalas sikertelen: " + e.message);

@@ -10,11 +10,10 @@ import log from 'electron-log/main';
 // Engedelyezett fajlkiterjesztesek
 const SUPPORTED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.tiff', '.tif']);
 
-// Engedelyezett letoltesi domainek
+// Engedelyezett letoltesi domainek (csak HTTPS)
 const ALLOWED_DOWNLOAD_DOMAINS = [
   'api.tablostudio.hu',
   'tablostudio.hu',
-  'localhost', // Lokalis fejlesztes
 ];
 
 /** Python script base path (extraResources or dev) */
@@ -61,10 +60,6 @@ function isInsideTempDir(filePath: string): boolean {
 function isAllowedUrl(urlString: string): boolean {
   try {
     const parsed = new URL(urlString);
-    // Lokalis fejleszteskor HTTP is megengedett localhost-ra
-    if (parsed.hostname === 'localhost') {
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-    }
     if (parsed.protocol !== 'https:') return false;
     if (!ALLOWED_DOWNLOAD_DOMAINS.includes(parsed.hostname)) return false;
     return true;
@@ -81,20 +76,24 @@ function downloadFile(url: string, destPath: string, maxRedirects = 5): Promise<
       return;
     }
 
-    if (!url.startsWith('https://') && !url.startsWith('http://localhost')) {
+    if (!url.startsWith('https://')) {
       reject(new Error('Csak HTTPS URL megengedett'));
       return;
     }
 
     const file = fs.createWriteStream(destPath);
-    const protocol = https;
 
-    protocol.get(url, (response) => {
+    https.get(url, (response) => {
       if (response.statusCode === 301 || response.statusCode === 302) {
         const redirectUrl = response.headers.location;
         if (redirectUrl) {
           file.close();
           fs.unlink(destPath, () => {});
+          // Redirect URL is validalva kell legyen
+          if (!isAllowedUrl(redirectUrl)) {
+            reject(new Error('Nem engedelyezett redirect cel'));
+            return;
+          }
           downloadFile(redirectUrl, destPath, maxRedirects - 1).then(resolve).catch(reject);
           return;
         }
@@ -391,7 +390,6 @@ export function registerPortraitHandlers(): void {
   // ============ Cleanup temp files ============
   ipcMain.handle('portrait:cleanup-temp', (_event, filePaths: string[]) => {
     if (!Array.isArray(filePaths)) return { success: false };
-    const tmpBase = path.resolve(os.tmpdir());
     let cleaned = 0;
     for (const fp of filePaths) {
       if (typeof fp === 'string' && isInsideTempDir(fp)) {

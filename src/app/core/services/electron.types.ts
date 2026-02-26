@@ -301,6 +301,41 @@ interface FinalizerAPI {
   }>;
 }
 
+// ============ Portrait API ============
+
+export interface PortraitProcessResult {
+  success: boolean;
+  error?: string;
+  processing_time?: number;
+}
+
+export interface PortraitBatchResult {
+  success: boolean;
+  error?: string;
+  results?: Array<{ success: boolean; input: string; output?: string; error?: string; processing_time?: number }>;
+  total?: number;
+  successful?: number;
+}
+
+interface PortraitAPI {
+  checkPython: () => Promise<{ available: boolean; error?: string }>;
+  processSingle: (params: {
+    inputPath: string;
+    outputPath: string;
+    settings: Record<string, unknown>;
+  }) => Promise<PortraitProcessResult>;
+  processBatch: (params: {
+    items: Array<{ input: string; output: string }>;
+    settings: Record<string, unknown>;
+  }) => Promise<PortraitBatchResult>;
+  downloadBackground: (params: {
+    url: string;
+    outputPath: string;
+  }) => Promise<{ success: boolean; error?: string; path?: string }>;
+  getTempDir: () => Promise<string>;
+  cleanupTemp: (filePaths: string[]) => Promise<{ success: boolean; cleaned?: number }>;
+}
+
 export interface ElectronAPI {
   showNotification: (options: unknown, body?: string) => Promise<NotificationResultData | boolean>;
   onNotificationClicked: (callback: (data: { id: string }) => void) => CleanupFn;
@@ -343,6 +378,7 @@ export interface ElectronAPI {
   photoshop: PhotoshopAPI;
   sample: SampleAPI;
   finalizer: FinalizerAPI;
+  portrait: PortraitAPI;
 }
 
 declare global {

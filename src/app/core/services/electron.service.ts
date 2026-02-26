@@ -6,12 +6,13 @@ import { ElectronNotificationService } from './electron-notification.service';
 import { ElectronCacheService } from './electron-cache.service';
 import { ElectronPaymentService } from './electron-payment.service';
 import { ElectronDragService } from './electron-drag.service';
+import { ElectronPortraitService } from './electron-portrait.service';
 
 // Re-export tipusok backward kompatibilitashoz
 export type { NotificationOptions, NotificationResult } from './electron-notification.service';
 export type { QueuedRequest } from './electron-cache.service';
 export type { NativeDragFile, TouchBarItem, TouchBarItemType, TouchBarContext } from './electron-drag.service';
-export type { UpdateState } from './electron.types';
+export type { UpdateState, PortraitProcessResult, PortraitBatchResult } from './electron.types';
 
 // Window.electronAPI tipus deklaracio importalasa (side-effect)
 import './electron.types';
@@ -24,6 +25,7 @@ import './electron.types';
  * - ElectronCacheService: cache, offline queue, sync
  * - ElectronPaymentService: Stripe fizetes, deep link
  * - ElectronDragService: native drag & drop, Touch Bar
+ * - ElectronPortraitService: portre hatter feldolgozas
  */
 @Injectable({
   providedIn: 'root'
@@ -35,6 +37,7 @@ export class ElectronService {
   private readonly cacheService = inject(ElectronCacheService);
   private readonly paymentService = inject(ElectronPaymentService);
   private readonly dragService = inject(ElectronDragService);
+  private readonly portraitService = inject(ElectronPortraitService);
 
   private readonly _darkMode = signal<boolean>(false);
   private readonly _onlineStatus = signal<boolean>(true);
@@ -243,4 +246,20 @@ export class ElectronService {
   onTouchBarAction(cb: (actionId: string, data?: Record<string, unknown>) => void): void {
     this.dragService.onTouchBarAction(cb);
   }
+
+  // --- Portrait ---
+  get pythonAvailable() { return this.portraitService.pythonAvailable; }
+  checkPortraitPython() { return this.portraitService.checkPython(); }
+  isPortraitPythonAvailable() { return this.portraitService.isPythonAvailable(); }
+  processPortraitSingle(...args: Parameters<ElectronPortraitService['processSingle']>) {
+    return this.portraitService.processSingle(...args);
+  }
+  processPortraitBatch(...args: Parameters<ElectronPortraitService['processBatch']>) {
+    return this.portraitService.processBatch(...args);
+  }
+  downloadPortraitBackground(...args: Parameters<ElectronPortraitService['downloadBackground']>) {
+    return this.portraitService.downloadBackground(...args);
+  }
+  getPortraitTempDir() { return this.portraitService.getTempDir(); }
+  cleanupPortraitTemp(paths: string[]) { return this.portraitService.cleanupTemp(paths); }
 }

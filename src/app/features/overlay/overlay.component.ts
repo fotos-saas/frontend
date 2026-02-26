@@ -806,8 +806,25 @@ export class OverlayComponent implements OnInit {
       } catch (e) { console.error('[RENAME] fetch persons error:', e); }
     }
 
-    // 3. Matching: slug → person (exact → startsWith → includes fallback)
+    // 3. Matching: slug → person (exact → startsWith → fuzzy fallback)
     const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[_\-]+/g, ' ').trim();
+
+    // Levenshtein distance — max 2 karakter eltérésnél matchel
+    const levenshtein = (a: string, b: string): number => {
+      const m = a.length, n = b.length;
+      if (Math.abs(m - n) > 2) return 3; // early exit
+      const dp: number[][] = Array.from({ length: m + 1 }, (_, i) => [i]);
+      for (let j = 1; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          dp[i][j] = a[i - 1] === b[j - 1]
+            ? dp[i - 1][j - 1]
+            : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+        }
+      }
+      return dp[m][n];
+    };
+
     const matched: Array<{ old: string; new: string; personName: string }> = [];
     const unmatched: Array<{ layerName: string; newId: string }> = [];
     const usedPersonIds = new Set<number>();
@@ -816,11 +833,13 @@ export class OverlayComponent implements OnInit {
       const slug = layerName.replace(/---\d+$/, '');
       const normalizedSlug = normalize(slug);
 
-      // Exact → startsWith → includes (csak nem használt person-ök közül)
+      // Exact → startsWith → fuzzy (max 2 karakter eltérés)
+      const available = personList.filter(p => !usedPersonIds.has(p.id));
       const person =
-        personList.find(p => !usedPersonIds.has(p.id) && normalize(p.name) === normalizedSlug) ||
-        personList.find(p => !usedPersonIds.has(p.id) && normalize(p.name).startsWith(normalizedSlug + ' ')) ||
-        personList.find(p => !usedPersonIds.has(p.id) && normalizedSlug.startsWith(normalize(p.name) + ' '));
+        available.find(p => normalize(p.name) === normalizedSlug) ||
+        available.find(p => normalize(p.name).startsWith(normalizedSlug + ' ')) ||
+        available.find(p => normalizedSlug.startsWith(normalize(p.name) + ' ')) ||
+        available.find(p => levenshtein(normalize(p.name), normalizedSlug) <= 2);
 
       if (person) {
         usedPersonIds.add(person.id);

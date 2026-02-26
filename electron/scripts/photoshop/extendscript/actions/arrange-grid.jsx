@@ -292,13 +292,16 @@ function _doArrangeGrid() {
 })();
 
 // tabloLayout modban JSON-t adunk vissza a freeZone ertekekkel
+// FONTOS: valtozoba kell tenni, mert az if/else NEM expression statement!
+var _result;
 if (_data && _data.tabloLayout && _freeZone) {
-  JSON.stringify({
+  _result = JSON.stringify({
     success: true,
     freeZoneTopPx: _freeZone.top,
     freeZoneBottomPx: _freeZone.bottom,
     log: _logLines.join("\n")
   });
 } else {
-  _logLines.join("\n");
+  _result = _logLines.join("\n");
 }
+_result;

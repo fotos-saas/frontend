@@ -807,7 +807,7 @@ export class OverlayComponent implements OnInit {
     }
 
     // 3. Matching: slug → person (exact → startsWith → fuzzy fallback)
-    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[_\-]+/g, ' ').trim();
+    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[._\-]+/g, ' ').replace(/\s+/g, ' ').trim();
 
     // Levenshtein distance — max 2 karakter eltérésnél matchel
     const levenshtein = (a: string, b: string): number => {

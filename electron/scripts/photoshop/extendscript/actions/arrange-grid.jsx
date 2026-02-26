@@ -291,16 +291,11 @@ function _doArrangeGrid() {
   }
 })();
 
-// tabloLayout modban JSON-t adunk vissza a freeZone ertekekkel
-// FONTOS: valtozoba kell tenni, mert az if/else NEM expression statement!
+// tabloLayout modban JSON stringet adunk vissza a freeZone ertekekkel
+// FONTOS: ExtendScript ES3 — NINCS JSON.stringify! Kezzel epitjuk a stringet.
 var _result;
 if (_data && _data.tabloLayout && _freeZone) {
-  _result = JSON.stringify({
-    success: true,
-    freeZoneTopPx: _freeZone.top,
-    freeZoneBottomPx: _freeZone.bottom,
-    log: _logLines.join("\n")
-  });
+  _result = '{"success":true,"freeZoneTopPx":' + _freeZone.top + ',"freeZoneBottomPx":' + _freeZone.bottom + '}';
 } else {
   _result = _logLines.join("\n");
 }

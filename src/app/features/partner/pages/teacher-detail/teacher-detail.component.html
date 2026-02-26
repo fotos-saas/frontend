@@ -173,6 +173,65 @@
           }
         </section>
 
+        <!-- Csoport fotók szekció -->
+        @if (t.linkedGroup && groupPhotos().length > 0) {
+          <section class="content-section">
+            <div class="section-head">
+              <div class="section-title">
+                <lucide-icon [name]="ICONS.LINK" [size]="16" />
+                <h2>Csoport fotói</h2>
+                <span class="count-badge">{{ groupPhotos().length }}</span>
+              </div>
+            </div>
+
+            @if (loadingGroupPhotos()) {
+              <div class="loading-state">
+                <div class="skeleton-row skeleton-shimmer"></div>
+              </div>
+            } @else {
+              <div class="photos-grid">
+                @for (gp of groupPhotos(); track gp.mediaId) {
+                  <div class="photo-card" [class.photo-card--active]="isActiveGroupPhoto(gp)">
+                    <div class="photo-image">
+                      @if (gp.thumbUrl) {
+                        <img [src]="gp.thumbUrl" [alt]="gp.teacherName" loading="lazy" />
+                      } @else {
+                        <lucide-icon [name]="ICONS.IMAGE" [size]="24" />
+                      }
+                      @if (isActiveGroupPhoto(gp)) {
+                        <span class="active-indicator" matTooltip="Aktív fotó">
+                          <lucide-icon [name]="ICONS.CHECK" [size]="10" />
+                        </span>
+                      }
+                      @if (gp.duplicateCount > 1) {
+                        <span class="photo-year">{{ gp.duplicateCount }}x</span>
+                      }
+                      <div class="photo-overlay">
+                        @if (!isActiveGroupPhoto(gp)) {
+                          <button
+                            class="overlay-btn"
+                            matTooltip="Beállítás mindenkinek"
+                            [disabled]="settingGroupPhoto()"
+                            (click)="$event.stopPropagation(); setGroupActivePhoto(gp)"
+                          >
+                            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                          </button>
+                        }
+                      </div>
+                    </div>
+                    <div class="photo-card__meta">
+                      @if (gp.schoolName) {
+                        <span class="photo-card__school">{{ gp.schoolName }}</span>
+                      }
+                      <span class="photo-card__detail">{{ gp.year }} &middot; {{ formatFileSize(gp.fileSize) }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+        }
+
         <!-- Projektek szekció -->
         @if (t.projects.length > 0) {
           <section class="content-section">

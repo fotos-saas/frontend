@@ -3,13 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TeacherListItem, SyncResultItem } from '../../models/teacher.models';
+import { TeacherListItem, SyncResultItem, LinkTeachersResponse, LinkedGroupPhoto } from '../../models/teacher.models';
 import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool, ArchiveSchoolGroup } from '../../models/archive.models';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { ArchiveEditModalComponent } from '../../components/archive/archive-edit-modal/archive-edit-modal.component';
 import { ArchiveBulkImportDialogComponent } from '../../components/archive/archive-bulk-import-dialog/archive-bulk-import-dialog.component';
 import { ArchiveBulkPhotoUploadComponent } from '../../components/archive/archive-bulk-photo-upload/archive-bulk-photo-upload.component';
 import { TeacherLinkDialogComponent } from '../../components/teacher-link-dialog/teacher-link-dialog.component';
+import { TeacherPhotoChooserDialogComponent } from '../../components/teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
 import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
 import { ArchiveDownloadDialogComponent, ArchiveDownloadOptions } from '../../components/archive/archive-download-dialog/archive-download-dialog.component';
 import { ArchiveProjectViewComponent } from '../../components/archive/archive-project-view/archive-project-view.component';
@@ -30,7 +31,8 @@ import { TeacherListStateService } from './teacher-list-state.service';
   imports: [
     FormsModule, LucideAngularModule, MatTooltipModule,
     ArchiveEditModalComponent, ArchiveBulkImportDialogComponent, ArchiveBulkPhotoUploadComponent,
-    TeacherLinkDialogComponent, ArchivePhotoUploadComponent, ArchiveDownloadDialogComponent,
+    TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent,
+    ArchivePhotoUploadComponent, ArchiveDownloadDialogComponent,
     ArchiveProjectViewComponent, TeacherUploadHistoryComponent, ConfirmDialogComponent,
     MediaLightboxComponent, SmartFilterBarComponent,
     ListPaginationComponent, TableHeaderComponent, ViewModeToggleComponent,
@@ -102,6 +104,8 @@ export class PartnerTeacherListComponent implements OnInit {
   createForTeacher = signal<ArchivePersonInSchool | null>(null);
   noPhotoTarget = signal<ArchivePersonInSchool | null>(null);
   downloadSchoolTarget = signal<ArchiveSchoolGroup | null>(null);
+  showPhotoChooser = signal(false);
+  photoChooserData = signal<{ photos: LinkedGroupPhoto[]; linkedGroup: string } | null>(null);
   private readonly projectView = viewChild(ArchiveProjectViewComponent);
 
   ngOnInit(): void { this.state.init(); }
@@ -148,7 +152,16 @@ export class PartnerTeacherListComponent implements OnInit {
   // Link dialog
   openLinkDialog(t: TeacherListItem): void { this.selectedTeacher.set(t); this.showLinkDialog.set(true); }
   closeLinkDialog(): void { this.showLinkDialog.set(false); this.selectedTeacher.set(null); }
-  onTeacherLinked(): void { this.closeLinkDialog(); this.state.loadTeachers(); }
+  onTeacherLinked(data?: LinkTeachersResponse | void): void {
+    this.closeLinkDialog();
+    this.state.loadTeachers();
+    if (data && data.photos && data.photos.length > 1) {
+      this.photoChooserData.set({ photos: data.photos, linkedGroup: data.linkedGroup });
+      this.showPhotoChooser.set(true);
+    }
+  }
+  closePhotoChooser(): void { this.showPhotoChooser.set(false); this.photoChooserData.set(null); }
+  onPhotoChosen(): void { this.closePhotoChooser(); this.state.loadTeachers(); }
   unlinkTeacher(t: TeacherListItem): void { this.state.unlinkTeacher(t.id); }
 
   // Project view actions

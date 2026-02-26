@@ -1,0 +1,72 @@
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="green"
+  [icon]="ICONS.IMAGE"
+  [title]="'Egységes fotó választása'"
+  [description]="'Az összekapcsolt tanárnak több fotója van. Válaszd ki, melyik legyen az egységes fotó minden iskolánál.'"
+  size="lg"
+  [isSubmitting]="isSubmitting()"
+  [errorMessage]="errorMessage()"
+  (closeEvent)="closeEvent.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <ng-container dialogBody>
+    @if (sortedPhotos().length === 0) {
+      <p class="empty-state">Nincs elérhető fotó a csoportban.</p>
+    } @else {
+      <div class="photo-grid">
+        @for (photo of sortedPhotos(); track photo.mediaId) {
+          <div
+            class="photo-card"
+            [class.photo-card--selected]="isSelected(photo.mediaId)"
+            (click)="selectPhoto(photo.mediaId)"
+          >
+            <div class="photo-card__image">
+              @if (photo.thumbUrl) {
+                <img [src]="photo.thumbUrl" [alt]="photo.teacherName" loading="lazy" />
+              } @else {
+                <lucide-icon [name]="ICONS.IMAGE" [size]="32" />
+              }
+              @if (isSelected(photo.mediaId)) {
+                <div class="photo-card__check">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+                </div>
+              }
+              @if (photo.duplicateCount > 1) {
+                <span class="photo-card__badge">{{ photo.duplicateCount }}x</span>
+              }
+            </div>
+            <div class="photo-card__info">
+              @if (photo.schoolName) {
+                <span class="photo-card__school">{{ photo.schoolName }}</span>
+              }
+              <span class="photo-card__meta">{{ photo.year }} &middot; {{ formatFileSize(photo.fileSize) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </ng-container>
+
+  <ng-container dialogFooter>
+    <button
+      type="button"
+      class="btn-secondary"
+      [disabled]="isSubmitting()"
+      (click)="onSkip()"
+    >
+      Kihagyás
+    </button>
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="!hasSelection() || isSubmitting()"
+      (click)="onSubmit()"
+    >
+      @if (isSubmitting()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      Alkalmazás mindenkire
+    </button>
+  </ng-container>
+</app-dialog-wrapper>

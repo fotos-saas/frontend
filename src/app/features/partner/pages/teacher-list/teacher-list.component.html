@@ -213,7 +213,17 @@
     [teacher]="selectedTeacher()!"
     [allTeachers]="state.teachers()"
     (closeEvent)="closeLinkDialog()"
-    (savedEvent)="onTeacherLinked()"
+    (savedEvent)="onTeacherLinked($event)"
+  />
+}
+
+<!-- Teacher Photo Chooser Dialog (post-link) -->
+@if (showPhotoChooser() && photoChooserData(); as chooserData) {
+  <app-teacher-photo-chooser-dialog
+    [photos]="chooserData.photos"
+    [linkedGroup]="chooserData.linkedGroup"
+    (closeEvent)="closePhotoChooser()"
+    (savedEvent)="onPhotoChosen()"
   />
 }
 

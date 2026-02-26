@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
-import { TeacherDetail, TeacherChangeLogEntry, TeacherPhoto } from '../../models/teacher.models';
+import { TeacherDetail, TeacherChangeLogEntry, TeacherPhoto, LinkedGroupPhoto } from '../../models/teacher.models';
 import { ARCHIVE_SERVICE } from '../../models/archive.models';
 import { ArchivePhotoUploadComponent } from '../../components/archive/archive-photo-upload/archive-photo-upload.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -47,6 +47,11 @@ export class PartnerTeacherDetailComponent implements OnInit {
   loading = signal(true);
   showPhotoUpload = signal(false);
   deletePhotoTarget = signal<TeacherPhoto | null>(null);
+
+  // Csoport fotók
+  groupPhotos = signal<LinkedGroupPhoto[]>([]);
+  loadingGroupPhotos = signal(false);
+  settingGroupPhoto = signal(false);
 
   // Inline alias edit
   newAlias = '';
@@ -98,6 +103,11 @@ export class PartnerTeacherDetailComponent implements OnInit {
         next: (res) => {
           this.teacher.set(res.data);
           this.loading.set(false);
+          if (res.data.linkedGroup) {
+            this.loadGroupPhotos(res.data.linkedGroup);
+          } else {
+            this.groupPhotos.set([]);
+          }
         },
         error: () => {
           this.loading.set(false);
@@ -242,7 +252,51 @@ export class PartnerTeacherDetailComponent implements OnInit {
       photo_uploaded: 'Fotó feltöltve',
       photo_deleted: 'Fotó törölve',
       active_photo_changed: 'Aktív fotó módosítva',
+      group_photo_unified: 'Csoport fotó egységesítve',
     };
     return labels[type] ?? type;
+  }
+
+  // === Csoport fotók ===
+
+  loadGroupPhotos(groupId: string): void {
+    this.loadingGroupPhotos.set(true);
+    this.teacherService.getLinkedGroupPhotos(groupId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.groupPhotos.set(res.data);
+          this.loadingGroupPhotos.set(false);
+        },
+        error: () => this.loadingGroupPhotos.set(false),
+      });
+  }
+
+  setGroupActivePhoto(photo: LinkedGroupPhoto): void {
+    const t = this.teacher();
+    if (!t?.linkedGroup || this.settingGroupPhoto()) return;
+
+    this.settingGroupPhoto.set(true);
+    this.teacherService.setGroupActivePhoto(t.linkedGroup, photo.mediaId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.settingGroupPhoto.set(false);
+          this.loadTeacher();
+        },
+        error: () => this.settingGroupPhoto.set(false),
+      });
+  }
+
+  isActiveGroupPhoto(photo: LinkedGroupPhoto): boolean {
+    const t = this.teacher();
+    if (!t) return false;
+    return t.photos.some(p => p.mediaId === photo.mediaId && p.isActive);
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 }

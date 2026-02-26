@@ -73,8 +73,28 @@ export interface TeacherDetail {
   aliases: TeacherAlias[];
   photos: TeacherPhoto[];
   projects: TeacherProject[];
+  linkedGroup: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LinkedGroupPhoto {
+  mediaId: number;
+  teacherName: string;
+  schoolName: string | null;
+  year: number;
+  thumbUrl: string | null;
+  url: string | null;
+  fileName: string | null;
+  fileSize: number;
+  md5Hash: string | null;
+  createdAt: string | null;
+  duplicateCount: number;
+}
+
+export interface LinkTeachersResponse {
+  linkedGroup: string;
+  photos: LinkedGroupPhoto[];
 }
 
 export interface TeacherChangeLogEntry {

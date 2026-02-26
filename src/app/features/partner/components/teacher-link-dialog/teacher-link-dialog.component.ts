@@ -16,7 +16,7 @@ import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog
 import { ICONS } from '@shared/constants/icons.constants';
 import { PsInputComponent } from '@shared/components/form';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
-import type { TeacherListItem } from '../../models/teacher.models';
+import type { TeacherListItem, LinkTeachersResponse } from '../../models/teacher.models';
 
 @Component({
   selector: 'app-teacher-link-dialog',
@@ -39,7 +39,7 @@ export class TeacherLinkDialogComponent implements OnInit {
   readonly allTeachers = input.required<TeacherListItem[]>();
 
   readonly closeEvent = output<void>();
-  readonly savedEvent = output<void>();
+  readonly savedEvent = output<LinkTeachersResponse | void>();
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -105,9 +105,9 @@ export class TeacherLinkDialogComponent implements OnInit {
     this.teacherService.linkTeachers(teacherIds)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.isSubmitting.set(false);
-          this.savedEvent.emit();
+          this.savedEvent.emit(res.data);
         },
         error: (err) => {
           this.isSubmitting.set(false);

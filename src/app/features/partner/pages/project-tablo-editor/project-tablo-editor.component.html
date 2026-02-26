@@ -413,6 +413,63 @@
           }
         </div>
 
+        <!-- Tablóelrendezés (tanárok fent, feliratok középen, diákok lent) -->
+        <div class="command-card">
+          <div class="command-card__header">
+            <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="20" />
+            <div>
+              <h3 class="command-card__title">Elrendezés</h3>
+              <p class="command-card__desc">Képek és nevek rácsba rendezése. A tablóelrendezés tanárokat felülre, diákokat alulra, feliratokat középre helyezi.</p>
+            </div>
+          </div>
+
+          @if (!isConfigured()) {
+            <div class="command-card__disabled">
+              Először állítsd be a Photoshop-ot a Beállítások fülön.
+            </div>
+          } @else if (!selectedSize()) {
+            <div class="command-card__disabled">
+              Válassz méretet a fenti szekciónál.
+            </div>
+          } @else {
+            <div class="command-card__actions" style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button
+                class="btn btn--primary"
+                [disabled]="arranging()"
+                (click)="arrangeTabloLayout()"
+              >
+                @if (arranging()) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                  Rendezés...
+                } @else {
+                  <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="16" />
+                  Tablóelrendezés
+                }
+              </button>
+              <button
+                class="btn btn--outline"
+                [disabled]="arranging()"
+                (click)="arrangeGrid()"
+              >
+                <lucide-icon [name]="ICONS.GRID" [size]="16" />
+                Rácsba rendezés
+              </button>
+              <button
+                class="btn btn--outline"
+                [disabled]="arrangingNames()"
+                (click)="arrangeNames()"
+              >
+                @if (arrangingNames()) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+                } @else {
+                  <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+                }
+                Nevek rendezése
+              </button>
+            </div>
+          }
+        </div>
+
         <!-- Vizuális szerkesztő -->
         <div class="command-card">
           <div class="command-card__header">

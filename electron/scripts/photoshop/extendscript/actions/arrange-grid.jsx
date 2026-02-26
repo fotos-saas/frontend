@@ -31,7 +31,7 @@ function log(msg) {
 }
 
 // --- Globalis valtozok (suspendHistory string-eval) ---
-var _doc, _data, _dpi;
+var _doc, _data, _dpi, _freeZone;
 
 // --- cm → px konverzio (lokalis, kerekitett) ---
 function _cm2px(cm) {
@@ -165,12 +165,22 @@ function _getActualLayerSize(grp) {
   return { w: w, h: h };
 }
 
+// --- Sorok szamanak kiszamitasa egy csoporthoz ---
+function _calcRows(grp, photoWPx, marginPx, gapHPx, boardWPx) {
+  if (!grp || grp.artLayers.length === 0) return 0;
+  var availableW = boardWPx - 2 * marginPx;
+  var columns = Math.floor((availableW + gapHPx) / (photoWPx + gapHPx));
+  if (columns < 1) columns = 1;
+  return Math.ceil(grp.artLayers.length / columns);
+}
+
 function _doArrangeGrid() {
   // Margin, gap, board → cm-bol px-re (ezek nem layerek, nincs kerekitesi hiba)
   var marginPx = _cm2px(_data.marginCm || 0);
   var gapHPx = _cm2px(_data.gapHCm || 2);
   var gapVPx = _cm2px(_data.gapVCm || 3);
   var boardWPx = _cm2px(_data.boardWidthCm);
+  var boardHPx = _cm2px(_data.boardHeightCm);
 
   // Fallback cm → px (ha nincs layer)
   var studentWPxFallback = _cm2px(_data.studentSizeCm);
@@ -178,18 +188,58 @@ function _doArrangeGrid() {
   var teacherWPxFallback = _cm2px(_data.teacherSizeCm);
   var teacherHPxFallback = _cm2px(_data.teacherSizeCm * 1.5);
 
-  log("[JSX] === GRID v5 BOUNDS_NO_EFFECTS ===");
-  log("[JSX] DPI=" + _dpi + ", board=" + boardWPx + "px, margin=" + marginPx + "px, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px");
+  log("[JSX] === GRID v6 TABLO_LAYOUT ===");
+  log("[JSX] DPI=" + _dpi + ", board=" + boardWPx + "x" + boardHPx + "px, margin=" + marginPx + "px, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px");
+  log("[JSX] tabloLayout=" + (_data.tabloLayout ? "true" : "false"));
 
+  var studentsGroup = getGroupByPath(_doc, ["Images", "Students"]);
+  var teachersGroup = getGroupByPath(_doc, ["Images", "Teachers"]);
+
+  // Tenyleges kepmeretek kiolvasasa
+  var studentActual = studentsGroup ? _getActualLayerSize(studentsGroup) : null;
+  var sW = studentActual ? studentActual.w : studentWPxFallback;
+  var sH = studentActual ? studentActual.h : studentHPxFallback;
+
+  var teacherActual = teachersGroup ? _getActualLayerSize(teachersGroup) : null;
+  var tW = teacherActual ? teacherActual.w : teacherWPxFallback;
+  var tH = teacherActual ? teacherActual.h : teacherHPxFallback;
+
+  // --- Tablo layout mod: tanarok fent, diakok lent ---
+  if (_data.tabloLayout) {
+    var teacherEndY = marginPx;
+    var studentStartY = marginPx;
+
+    // 1. Tanarok FENTROL (startY = marginPx)
+    if (teachersGroup && teachersGroup.artLayers.length > 0) {
+      log("[JSX] Tanar csoport (FENT): " + teachersGroup.artLayers.length + " layer, meret: " + tW + "x" + tH + "px" + (teacherActual ? " (bounds)" : " (fallback)"));
+      teacherEndY = _arrangeGroupGridPx(teachersGroup, tW, tH, marginPx, gapHPx, gapVPx, boardWPx, marginPx);
+    } else {
+      log("[JSX] Tanar csoport ures vagy nem talalhato");
+    }
+
+    // 2. Diakok ALULROL (startY szamitas: alulrol felfelve)
+    if (studentsGroup && studentsGroup.artLayers.length > 0) {
+      var sRows = _calcRows(studentsGroup, sW, marginPx, gapHPx, boardWPx);
+      var studentGridH = sRows * sH + (sRows - 1) * gapVPx;
+      studentStartY = boardHPx - marginPx - studentGridH;
+      log("[JSX] Diak csoport (LENT): " + studentsGroup.artLayers.length + " layer, meret: " + sW + "x" + sH + "px, " + sRows + " sor, startY=" + studentStartY + "px" + (studentActual ? " (bounds)" : " (fallback)"));
+      _arrangeGroupGridPx(studentsGroup, sW, sH, marginPx, gapHPx, gapVPx, boardWPx, studentStartY);
+    } else {
+      log("[JSX] Diak csoport ures vagy nem talalhato");
+      studentStartY = boardHPx - marginPx;
+    }
+
+    // 3. Szabad zona kiszamitasa es tarolasa
+    _freeZone = { top: teacherEndY, bottom: studentStartY };
+    log("[JSX] Szabad zona: top=" + _freeZone.top + "px, bottom=" + _freeZone.bottom + "px (" + (_freeZone.bottom - _freeZone.top) + "px)");
+    return;
+  }
+
+  // --- Normál mód (backward compat): diakok fent, tanarok lent ---
   var startTopPx = marginPx;
 
   // 1. Diak csoport
-  var studentsGroup = getGroupByPath(_doc, ["Images", "Students"]);
   if (studentsGroup && studentsGroup.artLayers.length > 0) {
-    // Tenyleges kepmeret kiolvasasa az elso layerbol
-    var studentActual = _getActualLayerSize(studentsGroup);
-    var sW = studentActual ? studentActual.w : studentWPxFallback;
-    var sH = studentActual ? studentActual.h : studentHPxFallback;
     log("[JSX] Diak csoport: " + studentsGroup.artLayers.length + " layer, tenyleges meret: " + sW + "x" + sH + "px" + (studentActual ? " (bounds)" : " (fallback)"));
     startTopPx = _arrangeGroupGridPx(studentsGroup, sW, sH, marginPx, gapHPx, gapVPx, boardWPx, startTopPx);
   } else {
@@ -197,11 +247,7 @@ function _doArrangeGrid() {
   }
 
   // 2. Tanar csoport (a diakok alatt)
-  var teachersGroup = getGroupByPath(_doc, ["Images", "Teachers"]);
   if (teachersGroup && teachersGroup.artLayers.length > 0) {
-    var teacherActual = _getActualLayerSize(teachersGroup);
-    var tW = teacherActual ? teacherActual.w : teacherWPxFallback;
-    var tH = teacherActual ? teacherActual.h : teacherHPxFallback;
     log("[JSX] Tanar csoport: " + teachersGroup.artLayers.length + " layer, tenyleges meret: " + tW + "x" + tH + "px" + (teacherActual ? " (bounds)" : " (fallback)"));
     _arrangeGroupGridPx(teachersGroup, tW, tH, marginPx, gapHPx, gapVPx, boardWPx, startTopPx);
   } else {
@@ -245,4 +291,14 @@ function _doArrangeGrid() {
   }
 })();
 
-_logLines.join("\n");
+// tabloLayout modban JSON-t adunk vissza a freeZone ertekekkel
+if (_data && _data.tabloLayout && _freeZone) {
+  JSON.stringify({
+    success: true,
+    freeZoneTopPx: _freeZone.top,
+    freeZoneBottomPx: _freeZone.bottom,
+    log: _logLines.join("\n")
+  });
+} else {
+  _logLines.join("\n");
+}

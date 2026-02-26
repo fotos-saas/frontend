@@ -734,6 +734,125 @@ export class PhotoshopService {
   }
 
   /**
+   * Felirat layerek pozícionálása a szabad zónába (tanárok és diákok között).
+   * A Subtitles csoport layereit függőlegesen és vízszintesen középre igazítja.
+   */
+  async arrangeSubtitles(
+    freeZone: { topPx: number; bottomPx: number },
+    subtitleGapPx = 30,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/arrange-subtitles.jsx',
+        jsonData: {
+          freeZoneTopPx: freeZone.topPx,
+          freeZoneBottomPx: freeZone.bottomPx,
+          subtitleGapPx,
+        },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX arrangeSubtitles hiba', err);
+      return { success: false, error: 'Váratlan hiba a feliratok pozícionálásakor' };
+    }
+  }
+
+  /**
+   * Teljes tablóelrendezés: tanárok fent, feliratok középen, diákok lent.
+   * 1. arrangeGrid (tabloLayout mód) → freeZone kinyerése
+   * 2. arrangeNames (nevek a képek alá)
+   * 3. arrangeSubtitles (feliratok a szabad zónába)
+   */
+  async arrangeTabloLayout(
+    boardSize: { widthCm: number; heightCm: number },
+    targetDocName?: string,
+    linkedLayerNames?: string[],
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      // Linkelések leszedése a rendezés előtt
+      if (linkedLayerNames?.length) {
+        await this.unlinkLayers(linkedLayerNames, targetDocName);
+      }
+
+      // 1. Grid elrendezés tabloLayout módban
+      const gridResult = await this.runJsx({
+        scriptName: 'actions/arrange-grid.jsx',
+        jsonData: {
+          boardWidthCm: boardSize.widthCm,
+          boardHeightCm: boardSize.heightCm,
+          marginCm: this.marginCm(),
+          studentSizeCm: this.studentSizeCm(),
+          teacherSizeCm: this.teacherSizeCm(),
+          gapHCm: this.gapHCm(),
+          gapVCm: this.gapVCm(),
+          gridAlign: this.gridAlign(),
+          tabloLayout: true,
+        },
+        targetDocName,
+      });
+
+      if (!gridResult.success) {
+        return { success: false, error: gridResult.error || 'Grid elrendezés sikertelen' };
+      }
+
+      // freeZone kinyerése a JSX JSON outputból
+      let freeZone: { topPx: number; bottomPx: number } | null = null;
+      if (gridResult.output) {
+        try {
+          const parsed = JSON.parse(gridResult.output);
+          if (parsed.freeZoneTopPx !== undefined && parsed.freeZoneBottomPx !== undefined) {
+            freeZone = { topPx: parsed.freeZoneTopPx, bottomPx: parsed.freeZoneBottomPx };
+          }
+        } catch {
+          this.logger.warn('Grid output JSON parse hiba — feliratok kihagyva');
+        }
+      }
+
+      // 2. Nevek rendezése
+      const namesResult = await this.runJsx({
+        scriptName: 'actions/arrange-names.jsx',
+        jsonData: {
+          nameGapCm: this.nameGapCm(),
+          textAlign: this.textAlign(),
+          nameBreakAfter: this.nameBreakAfter(),
+        },
+        targetDocName,
+      });
+
+      if (!namesResult.success) {
+        this.logger.warn('Nevek rendezése sikertelen:', namesResult.error);
+      }
+
+      // 3. Feliratok pozícionálása a szabad zónába
+      if (freeZone) {
+        const subResult = await this.arrangeSubtitles(freeZone, 30, targetDocName);
+        if (!subResult.success) {
+          this.logger.warn('Feliratok pozícionálása sikertelen:', subResult.error);
+        }
+      }
+
+      // Linkelések visszaállítása
+      if (linkedLayerNames?.length) {
+        for (const name of linkedLayerNames) {
+          await this.linkLayers([name], targetDocName);
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      this.logger.error('JSX arrangeTabloLayout hiba', err);
+      return { success: false, error: 'Váratlan hiba a tablóelrendezésnél' };
+    }
+  }
+
+  /**
    * Pozíció (beosztás) layerek frissítése/létrehozása/törlése.
    * persons: személy adatok title (pozíció) mezővel
    * linkedLayerNames: linkelt layerek — rendezés előtt unlink, utána relink

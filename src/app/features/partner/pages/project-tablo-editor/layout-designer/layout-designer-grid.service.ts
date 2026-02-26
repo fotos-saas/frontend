@@ -287,7 +287,15 @@ export class LayoutDesignerGridService {
         break;
     }
 
-    const originY = marginPx;
+    // Origin Y: tanárok felülre (marginPx), diákok alulra (alulról felfelé)
+    let originY: number;
+    if (type === 'teacher') {
+      originY = marginPx;
+    } else {
+      // Diákok: alulról felfelé — grid alja a docHeight - marginPx vonalhoz igazodik
+      const gridTotalH = rows * imageHeightPx + (rows - 1) * gapVPx;
+      originY = docHeight - marginPx - gridTotalH;
+    }
 
     return {
       originX: Math.round(originX),

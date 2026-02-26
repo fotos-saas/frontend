@@ -452,6 +452,28 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.ps.revealInFinder(psdPath);
   }
 
+  async arrangeTabloLayout(): Promise<void> {
+    const size = this.selectedSize();
+    if (!size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    this.clearMessages();
+    this.arranging.set(true);
+    try {
+      const result = await this.ps.arrangeTabloLayout(boardSize);
+      if (result.success) {
+        this.successMessage.set('Tablóelrendezés kész!');
+        await this.autoSaveSnapshot();
+      } else {
+        this.error.set(result.error || 'Tablóelrendezés sikertelen.');
+      }
+    } finally {
+      this.arranging.set(false);
+    }
+  }
+
   async arrangeGrid(): Promise<void> {
     const size = this.selectedSize();
     if (!size) return;

@@ -1,9 +1,11 @@
-import { Component, OnInit, inject, signal, computed, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, viewChild, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TeacherListItem, SyncResultItem, LinkTeachersResponse, LinkedGroupPhoto } from '../../models/teacher.models';
+import { TeacherListItem, TeacherGroupRow, SyncResultItem, LinkTeachersResponse, LinkedGroupPhoto } from '../../models/teacher.models';
 import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool, ArchiveSchoolGroup } from '../../models/archive.models';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { ArchiveEditModalComponent } from '../../components/archive/archive-edit-modal/archive-edit-modal.component';
@@ -29,7 +31,7 @@ import { TeacherListStateService } from './teacher-list-state.service';
   selector: 'app-partner-teacher-list',
   standalone: true,
   imports: [
-    FormsModule, LucideAngularModule, MatTooltipModule,
+    FormsModule, NgTemplateOutlet, LucideAngularModule, MatTooltipModule,
     ArchiveEditModalComponent, ArchiveBulkImportDialogComponent, ArchiveBulkPhotoUploadComponent,
     TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent,
     ArchivePhotoUploadComponent, ArchiveDownloadDialogComponent,
@@ -47,6 +49,8 @@ import { TeacherListStateService } from './teacher-list-state.service';
 })
 export class PartnerTeacherListComponent implements OnInit {
   protected readonly state = inject(TeacherListStateService);
+  private readonly teacherService = inject(PartnerTeacherService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   readonly ICONS = ICONS;
@@ -84,6 +88,28 @@ export class PartnerTeacherListComponent implements OnInit {
     bulkImportHasConfidence: true, bulkImportTextareaLabel: 'Tanárnevek (soronként egy)',
     bulkImportTextareaPlaceholder: 'Kiss János\nDr. Nagy Anna\nHorváth Péterné\n...',
   };
+
+  // Group expand state
+  readonly expandedGroups = signal<Set<string>>(new Set());
+
+  private readonly resetExpandEffect = effect(() => {
+    this.state.teachers(); // track dependency
+    this.expandedGroups.set(new Set());
+  });
+
+  toggleGroup(linkedGroup: string): void {
+    const s = new Set(this.expandedGroups());
+    s.has(linkedGroup) ? s.delete(linkedGroup) : s.add(linkedGroup);
+    this.expandedGroups.set(s);
+  }
+
+  isExpanded(linkedGroup: string): boolean {
+    return this.expandedGroups().has(linkedGroup);
+  }
+
+  trackByGroup(row: TeacherGroupRow): string | number {
+    return row.linkedGroup ?? row.primary.id;
+  }
 
   // View & UI state
   viewMode = signal<'flat' | 'project' | 'history'>(
@@ -159,6 +185,17 @@ export class PartnerTeacherListComponent implements OnInit {
       this.photoChooserData.set({ photos: data.photos, linkedGroup: data.linkedGroup });
       this.showPhotoChooser.set(true);
     }
+  }
+  onOpenPhotoChooserFromLink(groupId: string): void {
+    this.closeLinkDialog();
+    this.teacherService.getLinkedGroupPhotos(groupId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(res => {
+        if (res.data?.length > 0) {
+          this.photoChooserData.set({ photos: res.data, linkedGroup: groupId });
+          this.showPhotoChooser.set(true);
+        }
+      });
   }
   closePhotoChooser(): void { this.showPhotoChooser.set(false); this.photoChooserData.set(null); }
   onPhotoChosen(): void { this.closePhotoChooser(); this.state.loadTeachers(); }

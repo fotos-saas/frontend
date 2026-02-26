@@ -2,6 +2,12 @@
  * Tanár archívum interface-ek és típusok.
  */
 
+export interface TeacherGroupRow {
+  primary: TeacherListItem;
+  members: TeacherListItem[];
+  linkedGroup: string | null;
+}
+
 export interface TeacherListItem {
   id: number;
   canonicalName: string;

@@ -97,76 +97,111 @@
     <div [style.--table-cols]="gridTemplate()">
     <app-table-header [columns]="tableCols" />
 
-    <div class="teacher-grid">
-      @for (teacher of state.teachers(); track teacher.id; let i = $index) {
+    <!-- Sor sablon: ng-template a duplikáció elkerüléséhez -->
+    <ng-template #teacherRowTpl let-teacher let-isGroupHeader="isGroupHeader" let-schoolCount="schoolCount">
+      <div class="teacher-info" (click)="viewTeacher(teacher)">
+        @if (isGroupHeader) {
+          <button type="button" class="group-toggle"
+            [class.group-toggle--open]="isExpanded(teacher.linkedGroup)"
+            (click)="toggleGroup(teacher.linkedGroup); $event.stopPropagation()">
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="14" />
+          </button>
+        }
         <div
-          class="teacher-row"
-          [style.animation-delay]="i * 0.03 + 's'"
+          class="teacher-avatar"
+          [class.teacher-avatar--clickable]="!!teacher.photoUrl"
+          (click)="openAvatarLightbox(teacher, $event)"
         >
-          <div class="teacher-info" (click)="viewTeacher(teacher)">
-            <div
-              class="teacher-avatar"
-              [class.teacher-avatar--clickable]="!!teacher.photoUrl"
-              (click)="openAvatarLightbox(teacher, $event)"
-            >
-              @if (teacher.photoMiniThumbUrl || teacher.photoThumbUrl) {
-                <img [src]="teacher.photoMiniThumbUrl || teacher.photoThumbUrl" [alt]="teacher.fullDisplayName" loading="lazy" />
-              } @else {
-                <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="20" />
-              }
-            </div>
-            <div class="teacher-details">
-              <div class="teacher-name-row">
-                <span class="teacher-name">{{ teacher.fullDisplayName }}</span>
-                @if (teacher.linkedGroup) {
-                  <span class="linked-badge" matTooltip="Összekapcsolt tanár">
-                    <lucide-icon [name]="ICONS.LINK" [size]="12" />
-                  </span>
-                }
-              </div>
-              @if (teacher.position) {
-                <span class="teacher-position-label">{{ teacher.position }}</span>
-              }
-            </div>
-          </div>
-
-          <div class="teacher-school" (click)="viewTeacher(teacher)">
-            <span class="school-name-text">{{ teacher.schoolName }}</span>
-          </div>
-
-          <div class="teacher-actions">
-            @if (teacher.linkedGroup) {
-              <button
-                class="action-btn action-btn--linked"
-                matTooltip="Leválasztás csoportról"
-                (click)="unlinkTeacher(teacher)"
-              >
-                <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
-              </button>
-            }
-            <button
-              class="action-btn"
-              [matTooltip]="teacher.linkedGroup ? 'Csoport szerkesztése' : 'Összekapcsolás'"
-              (click)="openLinkDialog(teacher)"
-            >
-              <lucide-icon [name]="ICONS.LINK" [size]="16" />
-            </button>
-            <button
-              class="action-btn"
-              matTooltip="Szerkesztés"
-              (click)="editTeacher(teacher)"
-            >
-              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
-            </button>
-            <button
-              class="action-btn action-btn--danger"
-              matTooltip="Törlés"
-              (click)="confirmDeleteTeacher(teacher)"
-            >
-              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
-            </button>
-          </div>
+          @if (teacher.photoMiniThumbUrl || teacher.photoThumbUrl) {
+            <img [src]="teacher.photoMiniThumbUrl || teacher.photoThumbUrl" [alt]="teacher.fullDisplayName" loading="lazy" />
+          } @else {
+            <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="20" />
+          }
         </div>
+        <div class="teacher-details">
+          <div class="teacher-name-row">
+            <span class="teacher-name">{{ teacher.fullDisplayName }}</span>
+            @if (teacher.linkedGroup) {
+              <span class="linked-badge" matTooltip="Összekapcsolt tanár">
+                <lucide-icon [name]="ICONS.LINK" [size]="12" />
+              </span>
+            }
+            @if (isGroupHeader && schoolCount > 1) {
+              <span class="group-count-badge">{{ schoolCount }} iskola</span>
+            }
+          </div>
+          @if (teacher.position) {
+            <span class="teacher-position-label">{{ teacher.position }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="teacher-school" (click)="viewTeacher(teacher)">
+        <span class="school-name-text">{{ teacher.schoolName }}</span>
+      </div>
+
+      <div class="teacher-actions">
+        @if (teacher.linkedGroup) {
+          <button
+            class="action-btn action-btn--linked"
+            matTooltip="Leválasztás csoportról"
+            (click)="unlinkTeacher(teacher)"
+          >
+            <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
+          </button>
+        }
+        <button
+          class="action-btn"
+          [matTooltip]="teacher.linkedGroup ? 'Csoport szerkesztése' : 'Összekapcsolás'"
+          (click)="openLinkDialog(teacher)"
+        >
+          <lucide-icon [name]="ICONS.LINK" [size]="16" />
+        </button>
+        <button
+          class="action-btn"
+          matTooltip="Szerkesztés"
+          (click)="editTeacher(teacher)"
+        >
+          <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+        </button>
+        <button
+          class="action-btn action-btn--danger"
+          matTooltip="Törlés"
+          (click)="confirmDeleteTeacher(teacher)"
+        >
+          <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+        </button>
+      </div>
+    </ng-template>
+
+    <div class="teacher-grid">
+      @for (row of state.groupedTeachers(); track trackByGroup(row); let i = $index) {
+        <!-- Fő sor -->
+        <div class="teacher-row"
+          [class.teacher-row--group-header]="row.members.length > 0"
+          [style.animation-delay]="i * 0.03 + 's'">
+          <ng-container [ngTemplateOutlet]="teacherRowTpl"
+            [ngTemplateOutletContext]="{
+              $implicit: row.primary,
+              isGroupHeader: row.members.length > 0,
+              schoolCount: row.members.length + 1
+            }" />
+        </div>
+
+        <!-- Kibontott child sorok -->
+        @if (row.members.length > 0 && isExpanded(row.linkedGroup!)) {
+          @for (member of row.members; track member.id; let last = $last) {
+            <div class="teacher-row teacher-row--child"
+              [class.teacher-row--child-last]="last">
+              <ng-container [ngTemplateOutlet]="teacherRowTpl"
+                [ngTemplateOutletContext]="{
+                  $implicit: member,
+                  isGroupHeader: false,
+                  schoolCount: 0
+                }" />
+            </div>
+          }
+        }
       }
     </div>
 
@@ -214,6 +249,7 @@
     [allTeachers]="state.teachers()"
     (closeEvent)="closeLinkDialog()"
     (savedEvent)="onTeacherLinked($event)"
+    (photoChooserEvent)="onOpenPhotoChooserFromLink($event)"
   />
 }
 

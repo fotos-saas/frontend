@@ -486,24 +486,4 @@ export class PartnerService {
     }>(`${this.baseUrl}/ai/sort-names-abc`, { names });
   }
 
-  suggestLayout(params: {
-    pattern: string;
-    totalItems: number;
-    maxPerRow: number;
-    boardWidthCm: number;
-    boardHeightCm: number;
-    cellSizeCm: number;
-    gapHCm: number;
-    marginCm: number;
-  }): Observable<{
-    success: boolean;
-    rowConfigs: number[];
-    reasoning: string;
-  }> {
-    return this.http.post<{
-      success: boolean;
-      rowConfigs: number[];
-      reasoning: string;
-    }>(`${this.baseUrl}/ai/suggest-layout`, params);
-  }
 }

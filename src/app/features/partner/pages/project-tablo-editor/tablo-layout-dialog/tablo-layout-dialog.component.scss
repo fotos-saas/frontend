@@ -75,44 +75,6 @@
   font-size: 0.7rem;
 }
 
-// Minta választó gombok
-.pattern-selector {
-  display: flex;
-  gap: 0.35rem;
-  margin-bottom: 0.75rem;
-}
-
-.pattern-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 36px;
-  border: 1px solid var(--border-color, #d1d5db);
-  border-radius: 6px;
-  background: var(--bg-primary, #fff);
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    border-color: var(--primary, #7c3aed);
-    background: rgba(124, 58, 237, 0.05);
-  }
-
-  &.active {
-    border-color: var(--primary, #7c3aed);
-    background: rgba(124, 58, 237, 0.12);
-    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
-  }
-
-  .pattern-icon {
-    font-size: 1.1rem;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--text-primary, #1a1a2e);
-  }
-}
-
 // Igazítás választó
 .align-selector {
   display: flex;
@@ -158,19 +120,6 @@
   border-radius: 8px;
   background: var(--bg-secondary, #f8f9fa);
   border: 1px dashed var(--border-color, #d1d5db);
-}
-
-.preview-loading {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 6px;
-  background: rgba(124, 58, 237, 0.08);
-  color: #7c3aed;
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
 }
 
 .preview-svg {
@@ -253,40 +202,6 @@
   color: #92400e;
   font-size: 0.75rem;
   font-weight: 500;
-}
-
-// AI badge + reasoning
-.ai-badge {
-  color: #7c3aed;
-}
-
-.ai-reasoning {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.35rem;
-  margin-top: 0.5rem;
-  padding: 0.4rem 0.6rem;
-  border-radius: 6px;
-  background: rgba(124, 58, 237, 0.06);
-  border: 1px solid rgba(124, 58, 237, 0.15);
-  font-size: 0.7rem;
-  color: var(--text-secondary, #6b7280);
-  line-height: 1.4;
-
-  lucide-icon {
-    color: #7c3aed;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 // Footer

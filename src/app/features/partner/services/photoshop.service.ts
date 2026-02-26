@@ -4,7 +4,6 @@ import { SnapshotListItem, SnapshotLayer, TemplateSlot, TemplateFixedLayer, Temp
 import { TabloSize } from '../models/partner.models';
 import { environment } from '../../../../environments/environment';
 import { TabloLayoutConfig } from '../pages/project-tablo-editor/layout-designer/layout-designer.types';
-import { buildRowConfigs } from '../pages/project-tablo-editor/layout-designer/layout-pattern.utils';
 
 /** Kistablo alias merete */
 const KISTABLO_ALIAS = { widthCm: 100, heightCm: 70 };
@@ -785,7 +784,6 @@ export class PhotoshopService {
       }
 
       // 1. Grid elrendezés tabloLayout módban
-      // Ha van layoutConfig, rowConfigs előre kiszámolása TypeScript-ben
       const jsonData: Record<string, unknown> = {
         boardWidthCm: boardSize.widthCm,
         boardHeightCm: boardSize.heightCm,
@@ -799,16 +797,8 @@ export class PhotoshopService {
       };
 
       if (layoutConfig) {
-        // AI rowConfigs előnyben — ha az AI visszaadott javaslatot, azt használjuk
-        // Különben lokális buildRowConfigs() algoritmussal számolunk
-        const studentRowConfigs = layoutConfig.studentRowConfigs
-          ?? buildRowConfigs(layoutConfig.studentPattern, 100, layoutConfig.studentMaxPerRow);
-        const teacherRowConfigs = layoutConfig.teacherRowConfigs
-          ?? buildRowConfigs(layoutConfig.teacherPattern, 100, layoutConfig.teacherMaxPerRow);
-        jsonData['studentRowConfigs'] = studentRowConfigs;
-        jsonData['teacherRowConfigs'] = teacherRowConfigs;
-        jsonData['studentTwoSides'] = layoutConfig.studentPattern === 'two-sides';
-        jsonData['teacherTwoSides'] = layoutConfig.teacherPattern === 'two-sides';
+        jsonData['studentMaxPerRow'] = layoutConfig.studentMaxPerRow;
+        jsonData['teacherMaxPerRow'] = layoutConfig.teacherMaxPerRow;
       }
 
       const gridResult = await this.runJsx({

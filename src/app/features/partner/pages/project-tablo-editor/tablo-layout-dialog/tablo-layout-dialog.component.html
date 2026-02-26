@@ -2,8 +2,8 @@
   headerStyle="flat"
   theme="purple"
   [icon]="ICONS.LAYOUT_TEMPLATE"
-  title="Elrendezési minta"
-  description="Válaszd ki az elrendezési mintát a diákok és tanárok számára."
+  title="Tablóelrendezés"
+  description="Állítsd be a soronkénti elemszámot és a réseket."
   size="lg"
   [columns]="2"
   (closeEvent)="close.emit()"
@@ -16,20 +16,6 @@
         <lucide-icon [name]="ICONS.USERS" [size]="16" />
         Diák beállítások
       </h4>
-
-      <label class="field-label">Minta</label>
-      <div class="pattern-selector">
-        @for (opt of PATTERN_OPTIONS; track opt.type) {
-          <button
-            class="pattern-btn"
-            [class.active]="studentPattern() === opt.type"
-            [matTooltip]="opt.label"
-            (click)="setStudentPattern(opt.type)"
-          >
-            <span class="pattern-icon">{{ opt.icon }}</span>
-          </button>
-        }
-      </div>
 
       <label class="field-label">
         Max soronként
@@ -54,20 +40,6 @@
         <lucide-icon [name]="ICONS.USER_CHECK" [size]="16" />
         Tanár beállítások
       </h4>
-
-      <label class="field-label">Minta</label>
-      <div class="pattern-selector">
-        @for (opt of PATTERN_OPTIONS; track opt.type) {
-          <button
-            class="pattern-btn"
-            [class.active]="teacherPattern() === opt.type"
-            [matTooltip]="opt.label"
-            (click)="setTeacherPattern(opt.type)"
-          >
-            <span class="pattern-icon">{{ opt.icon }}</span>
-          </button>
-        }
-      </div>
 
       <label class="field-label">
         Max soronként
@@ -168,12 +140,6 @@
     }
 
     <div class="preview-container">
-      @if (studentAiLoading() || teacherAiLoading()) {
-        <div class="preview-loading">
-          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
-          AI javaslat betöltése…
-        </div>
-      }
       <svg
         [attr.viewBox]="'0 0 ' + viewBoxW() + ' ' + viewBoxH()"
         class="preview-svg"
@@ -200,7 +166,7 @@
         @for (row of teacherRows(); track $index; let rowIdx = $index) {
           @for (item of [].constructor(row); track $index; let colIdx = $index) {
             <rect
-              [attr.x]="getCellX(colIdx, row, teacherCellCm(), teacherPattern(), teacherEffectiveMax())"
+              [attr.x]="getCellX(colIdx, row, teacherCellCm())"
               [attr.y]="getTeacherCellY(rowIdx)"
               [attr.width]="teacherCellCm()"
               [attr.height]="teacherCellHCm()"
@@ -225,7 +191,7 @@
         @for (row of studentRows(); track $index; let rowIdx = $index) {
           @for (item of [].constructor(row); track $index; let colIdx = $index) {
             <rect
-              [attr.x]="getCellX(colIdx, row, studentCellCm(), studentPattern(), studentEffectiveMax())"
+              [attr.x]="getCellX(colIdx, row, studentCellCm())"
               [attr.y]="getStudentCellY(rowIdx)"
               [attr.width]="studentCellCm()"
               [attr.height]="studentCellHCm()"
@@ -238,34 +204,12 @@
 
       <div class="preview-legend">
         <span class="legend-item legend-item--teacher">
-          Tanárok ({{ teacherCount() || '?' }})
-          · {{ teacherRows().length }} sor
-          @if (teacherAiLoading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="12" class="spin" />
-          }
-          @if (teacherAiRows()) {
-            <lucide-icon [name]="ICONS.SPARKLES" [size]="12" class="ai-badge" matTooltip="AI javaslat" />
-          }
+          Tanárok ({{ teacherCount() || '?' }}) · {{ teacherRows().length }} sor
         </span>
         <span class="legend-item legend-item--student">
-          Diákok ({{ studentCount() || '?' }})
-          · {{ studentRows().length }} sor
-          @if (studentAiLoading()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="12" class="spin" />
-          }
-          @if (studentAiRows()) {
-            <lucide-icon [name]="ICONS.SPARKLES" [size]="12" class="ai-badge" matTooltip="AI javaslat" />
-          }
+          Diákok ({{ studentCount() || '?' }}) · {{ studentRows().length }} sor
         </span>
       </div>
-
-      <!-- AI indoklás -->
-      @if (studentAiReasoning() || teacherAiReasoning()) {
-        <div class="ai-reasoning">
-          <lucide-icon [name]="ICONS.SPARKLES" [size]="12" />
-          {{ studentAiReasoning() || teacherAiReasoning() }}
-        </div>
-      }
     </div>
   </div>
 

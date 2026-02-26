@@ -39,7 +39,7 @@ function _doAddSubtitleLayers() {
       createTextLayer(subtitlesGroup, item.displayText, {
         name: item.layerName,
         font: "ArialMT",
-        size: 50,
+        size: item.fontSize || 50,
         color: { r: 0, g: 0, b: 0 },
         alignment: "center"
       });

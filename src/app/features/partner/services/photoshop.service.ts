@@ -400,22 +400,22 @@ export class PhotoshopService {
     schoolName?: string | null;
     className?: string | null;
     classYear?: string | null;
-  }): Array<{ name: string; text: string }> {
-    const subtitles: Array<{ name: string; text: string }> = [];
+  }): Array<{ name: string; text: string; fontSize?: number }> {
+    const subtitles: Array<{ name: string; text: string; fontSize?: number }> = [];
 
     if (context.schoolName) {
-      subtitles.push({ name: 'iskola-neve', text: context.schoolName });
+      subtitles.push({ name: 'iskola-neve', text: context.schoolName, fontSize: 80 });
     }
     if (context.className) {
-      subtitles.push({ name: 'osztaly', text: context.className });
+      subtitles.push({ name: 'osztaly', text: context.className, fontSize: 70 });
     }
 
     // Év: classYear ha van, különben aktuális év
     const year = context.classYear || new Date().getFullYear().toString();
-    subtitles.push({ name: 'evfolyam', text: year });
+    subtitles.push({ name: 'evfolyam', text: year, fontSize: 70 });
 
     // Idézet — hardcoded placeholder
-    subtitles.push({ name: 'idezet', text: '„Nem az a fontos, amit adnak, hanem amit adunk."' });
+    subtitles.push({ name: 'idezet', text: '„Nem az a fontos, amit adnak, hanem amit adunk."', fontSize: 50 });
 
     return subtitles;
   }
@@ -425,7 +425,7 @@ export class PhotoshopService {
    * Iskola neve, osztály, évfolyam, idézet — Arial 50pt, center.
    */
   async addSubtitleLayers(
-    subtitles: Array<{ name: string; text: string }>,
+    subtitles: Array<{ name: string; text: string; fontSize?: number }>,
     targetDocName?: string,
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
@@ -438,7 +438,7 @@ export class PhotoshopService {
       const result = await this.runJsx({
         scriptName: 'actions/add-subtitle-layers.jsx',
         jsonData: {
-          subtitles: subtitles.map(s => ({ layerName: s.name, displayText: s.text })),
+          subtitles: subtitles.map(s => ({ layerName: s.name, displayText: s.text, fontSize: s.fontSize || 50 })),
         },
         targetDocName,
       });

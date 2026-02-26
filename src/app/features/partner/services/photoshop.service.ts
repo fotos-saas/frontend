@@ -803,20 +803,19 @@ export class PhotoshopService {
       }
 
       // freeZone kinyerése a JSX JSON outputból
+      const debugInfo: string[] = [];
       let freeZone: { topPx: number; bottomPx: number } | null = null;
-      this.logger.info('arrangeTabloLayout gridResult output:', gridResult.output?.substring(0, 500));
+      debugInfo.push(`gridResult.output: ${gridResult.output?.substring(0, 300) ?? 'ÜRES'}`);
       if (gridResult.output) {
         try {
           const parsed = JSON.parse(gridResult.output);
-          this.logger.info('arrangeTabloLayout parsed freeZone:', parsed.freeZoneTopPx, parsed.freeZoneBottomPx);
+          debugInfo.push(`parsed OK: freeZoneTopPx=${parsed.freeZoneTopPx}, freeZoneBottomPx=${parsed.freeZoneBottomPx}`);
           if (parsed.freeZoneTopPx !== undefined && parsed.freeZoneBottomPx !== undefined) {
             freeZone = { topPx: parsed.freeZoneTopPx, bottomPx: parsed.freeZoneBottomPx };
           }
-        } catch {
-          this.logger.warn('Grid output JSON parse hiba — feliratok kihagyva. Output:', gridResult.output?.substring(0, 200));
+        } catch (e) {
+          debugInfo.push(`JSON parse HIBA: ${e}`);
         }
-      } else {
-        this.logger.warn('arrangeTabloLayout: gridResult.output ÜRES — freeZone nem elérhető');
       }
 
       // 2. Nevek rendezése
@@ -830,20 +829,15 @@ export class PhotoshopService {
         targetDocName,
       });
 
-      if (!namesResult.success) {
-        this.logger.warn('Nevek rendezése sikertelen:', namesResult.error);
-      }
+      debugInfo.push(`namesResult: ${namesResult.success ? 'OK' : namesResult.error}`);
 
       // 3. Feliratok pozícionálása a szabad zónába
       if (freeZone) {
-        this.logger.info('arrangeSubtitles hívás freeZone:', freeZone);
+        debugInfo.push(`arrangeSubtitles hívás: top=${freeZone.topPx}, bottom=${freeZone.bottomPx}`);
         const subResult = await this.arrangeSubtitles(freeZone, 30, targetDocName);
-        this.logger.info('arrangeSubtitles eredmény:', subResult);
-        if (!subResult.success) {
-          this.logger.warn('Feliratok pozícionálása sikertelen:', subResult.error);
-        }
+        debugInfo.push(`arrangeSubtitles: ${subResult.success ? 'OK' : subResult.error}`);
       } else {
-        this.logger.warn('arrangeTabloLayout: freeZone NULL — feliratok kihagyva');
+        debugInfo.push('freeZone NULL — feliratok KIHAGYVA');
       }
 
       // Linkelések visszaállítása
@@ -853,7 +847,7 @@ export class PhotoshopService {
         }
       }
 
-      return { success: true };
+      return { success: true, error: debugInfo.join(' | ') };
     } catch (err) {
       this.logger.error('JSX arrangeTabloLayout hiba', err);
       return { success: false, error: 'Váratlan hiba a tablóelrendezésnél' };

@@ -464,7 +464,8 @@ export class ProjectTabloEditorComponent implements OnInit {
     try {
       const result = await this.ps.arrangeTabloLayout(boardSize);
       if (result.success) {
-        this.successMessage.set('Tablóelrendezés kész!');
+        // DEBUG: debug info megjelenítése success esetén is
+        this.successMessage.set(`Tablóelrendezés kész! DEBUG: ${result.error || 'nincs debug'}`);
         await this.autoSaveSnapshot();
       } else {
         this.error.set(result.error || 'Tablóelrendezés sikertelen.');

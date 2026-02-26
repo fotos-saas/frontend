@@ -371,6 +371,19 @@ export class ProjectTabloEditorComponent implements OnInit {
         this.error.set(`Guide-ok: ${guideResult.error}`);
       }
 
+      // 0.5 Subtitle feliratok
+      const subtitles = this.ps.buildSubtitles({
+        schoolName: p?.school?.name,
+        className: p?.className,
+        classYear: p?.classYear,
+      });
+      if (subtitles.length > 0) {
+        const subResult = await this.ps.addSubtitleLayers(subtitles, psdFileName);
+        if (!subResult.success) {
+          this.error.set(`Feliratok: ${subResult.error}`);
+        }
+      }
+
       // PSD megnyitás után: JSX layerek hozzáadása (ha vannak személyek)
       if (personsData.length > 0) {
         // 1. Név layerek (text)

@@ -72,13 +72,13 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     }
     checkAbort();
 
-    // 2. Felirat layerek — HARDCODE teszt szöveggel
+    // 2. Felirat layerek — valós projekt adatokból
     onStep(2);
-    const subtitles: Array<{ name: string; text: string }> = [
-      { name: 'iskola-neve', text: 'Teszt Iskola Neve' },
-      { name: 'osztaly', text: '12.D' },
-      { name: 'evfolyam', text: '2022 – 2026' },
-    ];
+    const subtitles = ps.buildSubtitles({
+      schoolName: job.schoolName,
+      className: job.className,
+      classYear: job.classYear,
+    });
 
     const subResult = await ps.addSubtitleLayers(subtitles, docName);
     if (!subResult.success) {

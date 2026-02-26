@@ -393,6 +393,34 @@ export class PhotoshopService {
   }
 
   /**
+   * Subtitle felirat tömb összeállítása projekt adatokból.
+   * Iskola neve, osztály (pl. "12.D"), év (pl. "2026"), idézet.
+   */
+  buildSubtitles(context: {
+    schoolName?: string | null;
+    className?: string | null;
+    classYear?: string | null;
+  }): Array<{ name: string; text: string }> {
+    const subtitles: Array<{ name: string; text: string }> = [];
+
+    if (context.schoolName) {
+      subtitles.push({ name: 'iskola-neve', text: context.schoolName });
+    }
+    if (context.className) {
+      subtitles.push({ name: 'osztaly', text: context.className });
+    }
+
+    // Év: classYear ha van, különben aktuális év
+    const year = context.classYear || new Date().getFullYear().toString();
+    subtitles.push({ name: 'evfolyam', text: year });
+
+    // Idézet — hardcoded placeholder
+    subtitles.push({ name: 'idezet', text: '„Nem az a fontos, amit adnak, hanem amit adunk."' });
+
+    return subtitles;
+  }
+
+  /**
    * Felirat text layerek hozzáadása a Subtitles csoportba (JSX).
    * Iskola neve, osztály, évfolyam, idézet — Arial 50pt, center.
    */

@@ -143,9 +143,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.resizeObserver?.disconnect();
     window.electronAPI?.overlay.setContext({ mode: 'normal', projectId: this.projectId() });
     this.overlayCommandCleanup?.();
-    this.overlayCommandCleanup = null;
   }
-
   close(): void { this.closeEvent.emit(); }
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {

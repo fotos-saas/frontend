@@ -98,6 +98,7 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
       &--fixed {
         background: rgba(156, 163, 175, 0.15);
         border-color: rgba(156, 163, 175, 0.3);
+        pointer-events: none;
       }
 
       &--swap-target {

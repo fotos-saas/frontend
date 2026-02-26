@@ -99,6 +99,13 @@
 }
 
 .teacher-list {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
   &__label {
     display: flex;
     align-items: center;
@@ -106,7 +113,7 @@
     font-size: 0.8125rem;
     font-weight: 600;
     color: get-color('gray', 700);
-    margin-bottom: 8px;
+    margin-bottom: 0;
   }
 
   &__count {
@@ -202,6 +209,23 @@
   &__linked-icon {
     color: get-color('warning', 500);
     flex-shrink: 0;
+  }
+}
+
+.select-all-btn {
+  background: none;
+  border: none;
+  color: get-color('primary', 500);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  @include mix.transition-fast;
+
+  &:hover {
+    background: get-color('primary', 50);
+    color: get-color('primary', 600);
   }
 }
 

@@ -67,6 +67,13 @@ export class TeacherLinkDialogComponent implements OnInit {
   /** Legalább 1 másik tanár ki van-e jelölve */
   readonly canSubmit = computed(() => this.selectedIds().size > 0);
 
+  /** Mind ki van-e jelölve a szűrt listából */
+  readonly allSelected = computed(() => {
+    const filtered = this.filteredTeachers();
+    if (filtered.length === 0) return false;
+    return filtered.every(t => this.selectedIds().has(t.id));
+  });
+
   ngOnInit(): void {
     // Ha már csoportban van, előre kijelöljük a csoporttársakat
     const current = this.teacher();
@@ -92,6 +99,19 @@ export class TeacherLinkDialogComponent implements OnInit {
 
   isSelected(teacherId: number): boolean {
     return this.selectedIds().has(teacherId);
+  }
+
+  toggleAll(): void {
+    const filtered = this.filteredTeachers();
+    if (this.allSelected()) {
+      const current = new Set(this.selectedIds());
+      for (const t of filtered) current.delete(t.id);
+      this.selectedIds.set(current);
+    } else {
+      const current = new Set(this.selectedIds());
+      for (const t of filtered) current.add(t.id);
+      this.selectedIds.set(current);
+    }
   }
 
   onSubmit(): void {

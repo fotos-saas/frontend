@@ -37,12 +37,19 @@
 
     <!-- Tanár lista -->
     <div class="teacher-list">
-      <label class="teacher-list__label">
-        Kapcsolandó tanárok:
-        @if (selectedIds().size > 0) {
-          <span class="teacher-list__count">({{ selectedIds().size }} kijelölve)</span>
+      <div class="teacher-list__header">
+        <label class="teacher-list__label">
+          Kapcsolandó tanárok:
+          @if (selectedIds().size > 0) {
+            <span class="teacher-list__count">({{ selectedIds().size }} kijelölve)</span>
+          }
+        </label>
+        @if (filteredTeachers().length > 0) {
+          <button type="button" class="select-all-btn" (click)="toggleAll()">
+            {{ allSelected() ? 'Kijelölés törlése' : 'Mind kijelölése' }}
+          </button>
         }
-      </label>
+      </div>
 
       @if (filteredTeachers().length === 0) {
         <p class="teacher-list__empty">

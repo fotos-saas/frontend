@@ -395,13 +395,13 @@ export class ProjectTabloEditorComponent implements OnInit {
         const nameOk = nameResult.success;
         const imageOk = imageResult.success;
 
-        // 3. Grid elrendezés (image layerek pozícionálása rácsba)
+        // 3. Tablóelrendezés: tanárok fent, feliratok középen, diákok lent + nevek
         if (imageOk) {
           const boardSize = this.ps.parseSizeValue(size.value);
           if (boardSize) {
-            const gridResult = await this.ps.arrangeGrid(boardSize, psdFileName);
-            if (!gridResult.success) {
-              this.error.set(`Grid elrendezés: ${gridResult.error}`);
+            const layoutResult = await this.ps.arrangeTabloLayout(boardSize, psdFileName);
+            if (!layoutResult.success) {
+              this.error.set(`Tablóelrendezés: ${layoutResult.error}`);
             }
 
             // 4. Layout JSON automatikus mentése a PSD mellé

@@ -398,21 +398,27 @@ function _doRestore() {
         _findLayersByNames(_doc, [layerData.layerName], siblings);
 
         if (siblings.length > 0) {
-          // Referencia layer pozicioja (amibol a delta-t szamoljuk)
-          var refBnfe = _getBoundsNoEffects(siblings[0]);
+          // Delta szamitas: a layerData-ban megadott layerId-s layer poziciojabol
+          // Ez biztositja, hogy a referencia a HELYES layer (image vs name)
+          var refLayer = null;
+          if (layerData.layerId && layerData.layerId > 0) {
+            for (var r = 0; r < siblings.length; r++) {
+              if (siblings[r].id === layerData.layerId) { refLayer = siblings[r]; break; }
+            }
+          }
+          if (!refLayer) refLayer = siblings[0];
+
+          var refBnfe = _getBoundsNoEffects(refLayer);
           var refX = Math.round(refBnfe.left);
           var refY = Math.round(refBnfe.top);
           var dx = layerData.x - refX;
           var dy = layerData.y - refY;
 
+          // Minden testvért ugyanazzal a delta-val mozgatjuk
           for (var s = 0; s < siblings.length; s++) {
             try {
               if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
                 siblings[s].translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
-              }
-              // Text tartalom visszaallitasa (csak text layereknel)
-              if (siblings[s].kind === LayerKind.TEXT && layerData.kind === "text") {
-                _restoreTextContent(siblings[s], layerData.text, layerData.justification);
               }
             } catch (se) {
               log("[JSX] WARN: Sibling mozgatas sikertelen (" + siblings[s].name + "): " + se.message);

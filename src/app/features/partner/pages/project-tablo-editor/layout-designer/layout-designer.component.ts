@@ -724,17 +724,17 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     const allLayers = this.state.layers();
     const selectedIds = this.state.selectedLayerIds();
 
-    // Csak image + name layerek relevánsak
-    const isRelocatable = (l: { category: string }) =>
-      l.category === 'student-image' || l.category === 'teacher-image'
-      || l.category === 'student-name' || l.category === 'teacher-name';
+    // Csak image layerek — a JSX moveAllSiblings módban megkeresi
+    // az összes azonos nevű testvért (name, position, stb.) és együtt mozgatja
+    const isImage = (l: { category: string }) =>
+      l.category === 'student-image' || l.category === 'teacher-image';
 
-    // Ha van kijelölés → kijelöltek; ha nincs → módosítottak
+    // Ha van kijelölés → kijelölt image-ek; ha nincs → módosított image-ek
     let layersToSync: typeof allLayers;
     if (selectedIds.size > 0) {
-      layersToSync = allLayers.filter(l => selectedIds.has(l.layerId) && isRelocatable(l));
+      layersToSync = allLayers.filter(l => selectedIds.has(l.layerId) && isImage(l));
     } else {
-      layersToSync = allLayers.filter(l => isRelocatable(l) && (l.editedX !== null || l.editedY !== null));
+      layersToSync = allLayers.filter(l => isImage(l) && (l.editedX !== null || l.editedY !== null));
     }
 
     if (layersToSync.length === 0) return;

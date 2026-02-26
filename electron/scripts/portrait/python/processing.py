@@ -1,7 +1,8 @@
 """Edge processing: shrink, feather, decontaminate, hair refinement, smooth."""
 
 import logging
-from typing import Optional, Tuple
+from __future__ import annotations
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -12,7 +13,7 @@ from constants import DEFAULT_DECONTAMINATE_STRENGTH, DEFAULT_FEATHER_RADIUS
 logger = logging.getLogger(__name__)
 
 
-def detect_background_color(original: Image.Image, alpha_mask: Image.Image) -> Tuple[int, int, int]:
+def detect_background_color(original: Image.Image, alpha_mask: Image.Image) -> tuple[int, int, int]:
     img_array = np.array(original.convert("RGB"))
     mask_array = np.array(alpha_mask)
     bg_mask = mask_array < 30
@@ -45,7 +46,7 @@ def feather_edges(alpha_mask: Image.Image, radius: int = DEFAULT_FEATHER_RADIUS)
     return Image.fromarray(result.astype(np.uint8), mode="L")
 
 
-def refine_hair_edges(foreground: Image.Image, alpha_mask: Image.Image, strength: float = 0.5) -> Tuple[Image.Image, Image.Image]:
+def refine_hair_edges(foreground: Image.Image, alpha_mask: Image.Image, strength: float = 0.5) -> tuple[Image.Image, Image.Image]:
     mask_array = np.array(alpha_mask).astype(np.float32)
     original_mask = mask_array.copy()
     mask_uint8 = mask_array.astype(np.uint8)
@@ -80,7 +81,7 @@ def smooth_edges(alpha_mask: Image.Image, smoothness: int = 2) -> Image.Image:
     return Image.fromarray(result.astype(np.uint8), mode="L")
 
 
-def color_decontaminate(foreground: Image.Image, alpha_mask: Image.Image, bg_color: Tuple[int, int, int], strength: float = DEFAULT_DECONTAMINATE_STRENGTH) -> Image.Image:
+def color_decontaminate(foreground: Image.Image, alpha_mask: Image.Image, bg_color: tuple[int, int, int], strength: float = DEFAULT_DECONTAMINATE_STRENGTH) -> Image.Image:
     fg_array = np.array(foreground).astype(np.float32)
     alpha_array = np.array(alpha_mask).astype(np.float32) / 255.0
     r, g, b, a = fg_array[:, :, 0], fg_array[:, :, 1], fg_array[:, :, 2], fg_array[:, :, 3]
@@ -109,7 +110,7 @@ class EdgeProcessor:
         self.edge_smoothing = edge_smoothing
 
     def process(self, foreground: Image.Image, alpha_mask: Image.Image,
-                original_image: Optional[Image.Image] = None) -> Tuple[Image.Image, Image.Image]:
+                original_image: Optional[Image.Image] = None) -> tuple[Image.Image, Image.Image]:
         if self.edge_inset > 0:
             alpha_mask = shrink_mask(alpha_mask, self.edge_inset)
         if self.edge_smoothing > 0:

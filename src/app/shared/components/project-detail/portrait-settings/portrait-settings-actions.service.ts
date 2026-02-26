@@ -11,7 +11,7 @@ import {
 @Injectable()
 export class PortraitSettingsActionsService {
   private partnerService = inject(PartnerService);
-  readonly toast = inject(ToastService);
+  private readonly toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   // Állapotok

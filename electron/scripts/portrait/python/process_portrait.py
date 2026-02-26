@@ -27,6 +27,7 @@ import argparse
 import io
 import json
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -34,13 +35,33 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageCms
 
+# Kepmeretkorlat: max 50 megapixel (vedelem image bomb ellen)
+Image.MAX_IMAGE_PIXELS = 50_000_000
+
+MAX_BATCH_SIZE = 500
+
+# Engedelyezett utvonal prefixek (defense-in-depth)
+_ALLOWED_PREFIXES = [
+    os.path.realpath(os.path.expanduser("~")),
+    os.path.realpath(os.environ.get("TMPDIR", "/tmp")),
+]
+
+
+def _is_allowed_path(filepath: str) -> bool:
+    """Ellenorzi, hogy az utvonal az engedelyezett konyvtarakon belul van-e."""
+    try:
+        real = os.path.realpath(filepath)
+        return any(real.startswith(prefix + os.sep) for prefix in _ALLOWED_PREFIXES)
+    except (ValueError, OSError):
+        return False
+
 # Add parent to path for relative imports
 sys.path.insert(0, str(Path(__file__).parent))
 
 from birefnet import remove_background, check_available, BiRefNetError
 from border_crop import detect_and_crop_border
 from compositor import Compositor, darken_background
-from constants import PRESET_BACKGROUNDS
+from constants import PRESET_BACKGROUNDS, DEFAULT_PRESET
 from processing import EdgeProcessor, shrink_mask, feather_edges, smooth_edges
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -72,10 +93,10 @@ def resolve_background(settings: dict):
     bg_type = settings.get("background_type", "preset")
 
     if bg_type == "preset":
-        preset = settings.get("preset_name", "charcoal")
+        preset = settings.get("preset_name", DEFAULT_PRESET)
         if preset in PRESET_BACKGROUNDS:
             return PRESET_BACKGROUNDS[preset]
-        return PRESET_BACKGROUNDS["charcoal"]
+        return PRESET_BACKGROUNDS[DEFAULT_PRESET]
 
     elif bg_type == "color":
         r = int(settings.get("color_r", 0) or 0)
@@ -85,10 +106,10 @@ def resolve_background(settings: dict):
 
     elif bg_type == "image":
         bg_path = settings.get("background_image_path")
-        if bg_path and Path(bg_path).exists():
+        if bg_path and _is_allowed_path(bg_path) and Path(bg_path).exists():
             return Path(bg_path)
-        logger.warning("Háttérkép nem található, preset használata")
-        return PRESET_BACKGROUNDS["charcoal"]
+        logger.warning("Háttérkép nem található vagy nem engedélyezett, preset használata")
+        return PRESET_BACKGROUNDS[DEFAULT_PRESET]
 
     elif bg_type == "gradient":
         sr = int(settings.get("gradient_start_r", 0) or 0)
@@ -100,7 +121,7 @@ def resolve_background(settings: dict):
         direction = settings.get("gradient_direction", "vertical")
         return {"type": "gradient", "start": (sr, sg, sb), "end": (er, eg, eb), "direction": direction}
 
-    return PRESET_BACKGROUNDS["charcoal"]
+    return PRESET_BACKGROUNDS[DEFAULT_PRESET]
 
 
 def create_gradient_image(size, start_color, end_color, direction="vertical"):
@@ -129,6 +150,13 @@ def create_gradient_image(size, start_color, end_color, direction="vertical"):
 def process_single(input_path: str, output_path: str, settings: dict) -> dict:
     """Process a single portrait image."""
     start_time = time.time()
+
+    # Path validacio (defense-in-depth)
+    if not _is_allowed_path(input_path):
+        return {"success": False, "input": input_path, "error": "Nem engedélyezett bemeneti útvonal", "processing_time": 0}
+    if not _is_allowed_path(output_path):
+        return {"success": False, "input": input_path, "error": "Nem engedélyezett kimeneti útvonal", "processing_time": 0}
+
     input_path = Path(input_path)
     output_path = Path(output_path)
 
@@ -251,6 +279,9 @@ def main():
             print(json.dumps({"success": False, "error": "Batch JSON nem található"}))
             sys.exit(1)
         items = json.loads(batch_path.read_text("utf-8"))
+        if len(items) > MAX_BATCH_SIZE:
+            print(json.dumps({"success": False, "error": f"Túl sok elem (max {MAX_BATCH_SIZE})"}))
+            sys.exit(1)
         results = []
         for item in items:
             result = process_single(item["input"], item["output"], settings)

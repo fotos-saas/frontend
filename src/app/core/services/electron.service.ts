@@ -12,7 +12,7 @@ import { ElectronPortraitService } from './electron-portrait.service';
 export type { NotificationOptions, NotificationResult } from './electron-notification.service';
 export type { QueuedRequest } from './electron-cache.service';
 export type { NativeDragFile, TouchBarItem, TouchBarItemType, TouchBarContext } from './electron-drag.service';
-export type { UpdateState, PortraitProcessResult, PortraitBatchResult } from './electron.types';
+export type { UpdateState, PortraitProcessResult, PortraitBatchResult, PortraitProcessingSettings } from './electron.types';
 
 // Window.electronAPI tipus deklaracio importalasa (side-effect)
 import './electron.types';

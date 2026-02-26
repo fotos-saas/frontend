@@ -1,7 +1,6 @@
 """White border detection and automatic cropping for portrait images."""
 
 import logging
-from typing import Tuple
 
 import numpy as np
 from PIL import Image

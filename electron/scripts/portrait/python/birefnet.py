@@ -4,10 +4,9 @@ First run downloads the model (~200MB). Runs on MPS (Apple Silicon),
 CUDA (NVIDIA), or CPU automatically.
 """
 
-import io
 import logging
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Union
 
 from PIL import Image
 
@@ -39,7 +38,7 @@ def _load_remover(mode: str = "base"):
     return _remover
 
 
-def remove_background(image_or_path: Union[str, Path, Image.Image]) -> Tuple[Image.Image, Image.Image]:
+def remove_background(image_or_path: Union[str, Path, Image.Image]) -> tuple[Image.Image, Image.Image]:
     """Remove background from image file or PIL Image object.
 
     Args:

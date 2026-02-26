@@ -49,11 +49,15 @@ function isAllowedPath(filePath: string): boolean {
   return resolved.startsWith(homeDir + path.sep) || resolved.startsWith(tmpDir + path.sep);
 }
 
-/** Check if a resolved path is inside the temp directory */
+/** Check if a resolved path is inside the temp directory (symlink-safe) */
 function isInsideTempDir(filePath: string): boolean {
-  const resolved = path.resolve(filePath);
-  const tmpDir = path.resolve(os.tmpdir());
-  return resolved.startsWith(tmpDir + path.sep);
+  try {
+    const resolved = fs.realpathSync(filePath);
+    const tmpDir = fs.realpathSync(os.tmpdir());
+    return resolved.startsWith(tmpDir + path.sep);
+  } catch {
+    return false;
+  }
 }
 
 /** Validate download URL - only HTTPS from allowed domains */
@@ -68,7 +72,10 @@ function isAllowedUrl(urlString: string): boolean {
   }
 }
 
-/** Download a file from URL to a local path (HTTPS only, max 5 redirects) */
+/** Max letoltesi meret: 50 MB */
+const MAX_DOWNLOAD_SIZE = 50 * 1024 * 1024;
+
+/** Download a file from URL to a local path (HTTPS only, max 5 redirects, 50 MB limit) */
 function downloadFile(url: string, destPath: string, maxRedirects = 5): Promise<void> {
   return new Promise((resolve, reject) => {
     if (maxRedirects <= 0) {
@@ -82,14 +89,13 @@ function downloadFile(url: string, destPath: string, maxRedirects = 5): Promise<
     }
 
     const file = fs.createWriteStream(destPath);
+    const cleanup = () => { file.close(); fs.unlink(destPath, () => {}); };
 
     https.get(url, (response) => {
       if (response.statusCode === 301 || response.statusCode === 302) {
         const redirectUrl = response.headers.location;
         if (redirectUrl) {
-          file.close();
-          fs.unlink(destPath, () => {});
-          // Redirect URL is validalva kell legyen
+          cleanup();
           if (!isAllowedUrl(redirectUrl)) {
             reject(new Error('Nem engedelyezett redirect cel'));
             return;
@@ -99,16 +105,35 @@ function downloadFile(url: string, destPath: string, maxRedirects = 5): Promise<
         }
       }
       if (response.statusCode !== 200) {
-        file.close();
-        fs.unlink(destPath, () => {});
+        cleanup();
         reject(new Error(`HTTP ${response.statusCode}`));
         return;
       }
+
+      // Meretkorlat ellenorzes Content-Length-bol
+      const contentLength = parseInt(response.headers['content-length'] || '0', 10);
+      if (contentLength > MAX_DOWNLOAD_SIZE) {
+        cleanup();
+        response.destroy();
+        reject(new Error('A fajl merete meghaladja a megengedettet (50 MB)'));
+        return;
+      }
+
+      // Streaming meretkorlat
+      let downloaded = 0;
+      response.on('data', (chunk: Buffer) => {
+        downloaded += chunk.length;
+        if (downloaded > MAX_DOWNLOAD_SIZE) {
+          response.destroy();
+          cleanup();
+          reject(new Error('A fajl merete meghaladja a megengedettet (50 MB)'));
+        }
+      });
+
       response.pipe(file);
       file.on('finish', () => { file.close(); resolve(); });
     }).on('error', (err) => {
-      file.close();
-      fs.unlink(destPath, () => {});
+      cleanup();
       reject(err);
     });
   });
@@ -128,20 +153,61 @@ function parseLastJsonResult(stdout: string): Record<string, unknown> | null {
   return null;
 }
 
-/** Sanitize settings values to safe ranges */
+/** Whitelist-alapu sanitizalas: csak ismert kulcsok, ervenyes ertekek */
 function sanitizeSettings(settings: Record<string, unknown>): Record<string, unknown> {
-  return {
-    ...settings,
-    edge_inset: Math.max(0, Math.min(20, Number(settings.edge_inset) || 2)),
-    feather_radius: Math.max(0, Math.min(50, Number(settings.feather_radius) || 3)),
-    edge_smoothing: Math.max(0, Math.min(10, Number(settings.edge_smoothing) || 2)),
-    output_quality: Math.max(50, Math.min(100, Number(settings.output_quality) || 95)),
-    decontaminate_strength: Math.max(0, Math.min(1, Number(settings.decontaminate_strength) || 0.8)),
-    hair_refinement_strength: Math.max(0, Math.min(1, Number(settings.hair_refinement_strength) || 0.4)),
-    shadow_opacity: Math.max(0, Math.min(1, Number(settings.shadow_opacity) || 0.3)),
-    darken_amount: Math.max(0, Math.min(1, Number(settings.darken_amount) || 0.7)),
-    target_brightness: Math.max(0, Math.min(255, Number(settings.target_brightness) || 35)),
+  const VALID_MODES = ['replace', 'darken'];
+  const VALID_BG_TYPES = ['preset', 'color', 'image', 'gradient'];
+  const VALID_PRESETS = ['black', 'charcoal', 'dark_gray', 'navy', 'dark_blue', 'white', 'light_gray'];
+  const VALID_DIRECTIONS = ['vertical', 'horizontal', 'radial'];
+
+  const clampNum = (val: unknown, min: number, max: number, fallback: number): number => {
+    const num = Number(val);
+    return isNaN(num) ? fallback : Math.max(min, Math.min(max, num));
   };
+
+  const clampColor = (val: unknown): number => clampNum(val, 0, 255, 0);
+
+  const sanitized: Record<string, unknown> = {
+    // String enum mezok
+    mode: VALID_MODES.includes(String(settings.mode)) ? settings.mode : 'replace',
+    background_type: VALID_BG_TYPES.includes(String(settings.background_type)) ? settings.background_type : 'preset',
+    preset_name: VALID_PRESETS.includes(String(settings.preset_name)) ? settings.preset_name : 'charcoal',
+    gradient_direction: VALID_DIRECTIONS.includes(String(settings.gradient_direction)) ? settings.gradient_direction : 'vertical',
+
+    // Szin ertekek (0-255)
+    color_r: clampColor(settings.color_r),
+    color_g: clampColor(settings.color_g),
+    color_b: clampColor(settings.color_b),
+    gradient_start_r: clampColor(settings.gradient_start_r),
+    gradient_start_g: clampColor(settings.gradient_start_g),
+    gradient_start_b: clampColor(settings.gradient_start_b),
+    gradient_end_r: clampColor(settings.gradient_end_r),
+    gradient_end_g: clampColor(settings.gradient_end_g),
+    gradient_end_b: clampColor(settings.gradient_end_b),
+
+    // El feldolgozas
+    edge_inset: clampNum(settings.edge_inset, 0, 20, 2),
+    feather_radius: clampNum(settings.feather_radius, 0, 50, 3),
+    edge_smoothing: clampNum(settings.edge_smoothing, 0, 10, 2),
+    output_quality: clampNum(settings.output_quality, 50, 100, 95),
+
+    // Float ertekek (0-1)
+    decontaminate: Boolean(settings.decontaminate),
+    decontaminate_strength: clampNum(settings.decontaminate_strength, 0, 1, 0.8),
+    hair_refinement: Boolean(settings.hair_refinement),
+    hair_refinement_strength: clampNum(settings.hair_refinement_strength, 0, 1, 0.4),
+    add_shadow: Boolean(settings.add_shadow),
+    shadow_opacity: clampNum(settings.shadow_opacity, 0, 1, 0.3),
+    darken_amount: clampNum(settings.darken_amount, 0, 1, 0.7),
+    target_brightness: clampNum(settings.target_brightness, 0, 255, 35),
+  };
+
+  // background_image_path validacio (path traversal vedelem)
+  if (typeof settings.background_image_path === 'string' && isAllowedPath(settings.background_image_path)) {
+    sanitized.background_image_path = settings.background_image_path;
+  }
+
+  return sanitized;
 }
 
 export function registerPortraitHandlers(): void {

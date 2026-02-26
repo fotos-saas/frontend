@@ -317,16 +317,46 @@ export interface PortraitBatchResult {
   successful?: number;
 }
 
+/** Electron IPC portrait settings (csak a feldolgozashoz szukseges mezok) */
+export interface PortraitProcessingSettings {
+  mode: 'replace' | 'darken';
+  background_type: 'preset' | 'color' | 'image' | 'gradient';
+  preset_name?: string | null;
+  background_image_path?: string | null;
+  color_r?: number | null;
+  color_g?: number | null;
+  color_b?: number | null;
+  gradient_start_r?: number | null;
+  gradient_start_g?: number | null;
+  gradient_start_b?: number | null;
+  gradient_end_r?: number | null;
+  gradient_end_g?: number | null;
+  gradient_end_b?: number | null;
+  gradient_direction?: 'vertical' | 'horizontal' | 'radial' | null;
+  edge_inset: number;
+  feather_radius: number;
+  decontaminate: boolean;
+  decontaminate_strength: number;
+  hair_refinement: boolean;
+  hair_refinement_strength: number;
+  edge_smoothing: number;
+  add_shadow: boolean;
+  shadow_opacity: number;
+  darken_amount?: number | null;
+  target_brightness?: number | null;
+  output_quality: number;
+}
+
 interface PortraitAPI {
   checkPython: () => Promise<{ available: boolean; error?: string }>;
   processSingle: (params: {
     inputPath: string;
     outputPath: string;
-    settings: Record<string, unknown>;
+    settings: PortraitProcessingSettings;
   }) => Promise<PortraitProcessResult>;
   processBatch: (params: {
     items: Array<{ input: string; output: string }>;
-    settings: Record<string, unknown>;
+    settings: PortraitProcessingSettings;
   }) => Promise<PortraitBatchResult>;
   downloadBackground: (params: {
     url: string;

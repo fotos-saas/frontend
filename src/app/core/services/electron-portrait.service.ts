@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { LoggerService } from './logger.service';
-import { PortraitProcessResult, PortraitBatchResult } from './electron.types';
+import { PortraitProcessResult, PortraitBatchResult, PortraitProcessingSettings } from './electron.types';
 
 /**
  * ElectronPortraitService - Lokalis portre hatter feldolgozas
@@ -54,7 +54,7 @@ export class ElectronPortraitService {
   async processSingle(
     inputPath: string,
     outputPath: string,
-    settings: Record<string, unknown>,
+    settings: PortraitProcessingSettings,
   ): Promise<PortraitProcessResult> {
     if (!this.isElectron) {
       return { success: false, error: 'Csak Electron alkalmazásban érhető el' };
@@ -67,7 +67,7 @@ export class ElectronPortraitService {
   /** Kötegelt portré feldolgozás */
   async processBatch(
     items: Array<{ input: string; output: string }>,
-    settings: Record<string, unknown>,
+    settings: PortraitProcessingSettings,
   ): Promise<PortraitBatchResult> {
     if (!this.isElectron) {
       return { success: false, error: 'Csak Electron alkalmazásban érhető el' };

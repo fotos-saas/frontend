@@ -796,12 +796,15 @@ export class OverlayComponent implements OnInit {
 
       if (pid) {
         try {
+          const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
+          console.log('[RENAME] fetching persons from:', url);
           const res = await firstValueFrom(
-            this.http.get<{ data: PersonItem[] }>(`${environment.apiUrl}/partner/projects/${pid}/persons`),
+            this.http.get<{ data: PersonItem[] }>(url),
           );
           personList = res.data || [];
+          console.log('[RENAME] fetched persons:', personList.length);
           this.ngZone.run(() => this.persons.set(personList));
-        } catch { /* ignore */ }
+        } catch (e) { console.error('[RENAME] fetch persons error:', e); }
       }
     }
 

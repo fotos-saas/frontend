@@ -778,34 +778,32 @@ export class OverlayComponent implements OnInit {
     const allNames = await this.getImageLayerNames();
     if (allNames.length === 0) return;
 
-    // 2. Persons betöltése
-    let personList = this.persons();
-    if (personList.length === 0) {
-      let pid = this.context().projectId || this.lastProjectId;
+    // 2. Persons betöltése — MINDIG frissen az aktuális projektből
+    let pid = this.context().projectId || this.lastProjectId;
 
-      // Fallback: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
-      if (!pid && window.electronAPI) {
-        try {
-          const result = await window.electronAPI.overlay.getProjectId();
-          if (result.projectId) {
-            pid = result.projectId;
-            this.lastProjectId = pid;
-          }
-        } catch { /* ignore */ }
-      }
+    // Fallback: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
+    if (!pid && window.electronAPI) {
+      try {
+        const result = await window.electronAPI.overlay.getProjectId();
+        if (result.projectId) {
+          pid = result.projectId;
+          this.lastProjectId = pid;
+        }
+      } catch { /* ignore */ }
+    }
 
-      if (pid) {
-        try {
-          const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
-          console.log('[RENAME] fetching persons from:', url);
-          const res = await firstValueFrom(
-            this.http.get<{ data: PersonItem[] }>(url),
-          );
-          personList = res.data || [];
-          console.log('[RENAME] fetched persons:', personList.length);
-          this.ngZone.run(() => this.persons.set(personList));
-        } catch (e) { console.error('[RENAME] fetch persons error:', e); }
-      }
+    let personList: PersonItem[] = [];
+    if (pid) {
+      try {
+        const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
+        console.log('[RENAME] fetching persons from:', url, 'projectId:', pid);
+        const res = await firstValueFrom(
+          this.http.get<{ data: PersonItem[] }>(url),
+        );
+        personList = res.data || [];
+        console.log('[RENAME] fetched persons:', personList.length);
+        this.ngZone.run(() => this.persons.set(personList));
+      } catch (e) { console.error('[RENAME] fetch persons error:', e); }
     }
 
     // 3. Matching: slug → person (exact → startsWith → includes fallback)

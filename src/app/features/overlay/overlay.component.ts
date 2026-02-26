@@ -596,12 +596,14 @@ export class OverlayComponent implements OnInit {
   toggleSampleSize(): void {
     this.sampleUseLargeSize.update(v => !v);
     window.electronAPI?.sample.setSettings({ useLargeSize: this.sampleUseLargeSize() });
+    this.saveSampleSettingsToBackend({ sample_use_large_size: this.sampleUseLargeSize() });
   }
 
   toggleWatermarkColor(): void {
     const next = this.sampleWatermarkColor() === 'white' ? 'black' : 'white';
     this.sampleWatermarkColor.set(next);
     window.electronAPI?.sample.setSettings({ watermarkColor: next });
+    this.saveSampleSettingsToBackend({ sample_watermark_color: next });
   }
 
   cycleOpacity(): void {
@@ -609,6 +611,7 @@ export class OverlayComponent implements OnInit {
     const next = (pct >= 23 ? 10 : pct + 1) / 100;
     this.sampleWatermarkOpacity.set(next);
     window.electronAPI?.sample.setSettings({ watermarkOpacity: next });
+    this.saveSampleSettingsToBackend({ sample_watermark_opacity: Math.round(next * 100) });
   }
 
   private async doGenerateSample(): Promise<void> {
@@ -1541,6 +1544,10 @@ export class OverlayComponent implements OnInit {
       this.ngZone.run(() => {
         this.context.set(ctx);
         this.syncWithBorder.set(this.loadSyncBorderForProject(ctx.projectId));
+        // Projekt váltáskor → sample settings betöltés
+        if (ctx.projectId) {
+          this.loadSampleSettingsForProject(ctx.projectId);
+        }
         // Context change → auth recovery próba
         if (this.isLoggedOut() && ctx.projectId) {
           this.isLoggedOut.set(false);
@@ -1692,6 +1699,11 @@ export class OverlayComponent implements OnInit {
         }
         this.nameSettingsLoaded = true;
       });
+      // Electron settings betöltve → felülírás backend értékekkel ha van aktív projekt
+      const pid = this.context().projectId || this.lastProjectId;
+      if (pid) {
+        this.loadSampleSettingsForProject(pid);
+      }
     } catch { /* ignore */ }
   }
 
@@ -1702,6 +1714,44 @@ export class OverlayComponent implements OnInit {
     } else if (key === 'nameGapCm') {
       window.electronAPI.photoshop.setNameGap(value);
     }
+  }
+
+  private loadSampleSettingsForProject(projectId: number): void {
+    this.http.get<{
+      data: {
+        sample_use_large_size: boolean | null;
+        sample_watermark_color: 'white' | 'black' | null;
+        sample_watermark_opacity: number | null;
+      };
+    }>(`${environment.apiUrl}/partner/projects/${projectId}/sample-settings`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          const d = res.data;
+          if (d.sample_use_large_size !== null) {
+            this.sampleUseLargeSize.set(d.sample_use_large_size);
+          }
+          if (d.sample_watermark_color !== null) {
+            this.sampleWatermarkColor.set(d.sample_watermark_color);
+          }
+          if (d.sample_watermark_opacity !== null) {
+            this.sampleWatermarkOpacity.set(d.sample_watermark_opacity / 100);
+          }
+        },
+      });
+  }
+
+  private saveSampleSettingsToBackend(data: {
+    sample_use_large_size?: boolean;
+    sample_watermark_color?: 'white' | 'black';
+    sample_watermark_opacity?: number;
+  }): void {
+    const pid = this.context().projectId || this.lastProjectId;
+    if (!pid) return;
+    this.http.put(
+      `${environment.apiUrl}/partner/projects/${pid}/sample-settings`,
+      data,
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   private updatePsLayersFromDoc(doc: ActiveDocInfo): void {

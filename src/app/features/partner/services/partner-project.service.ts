@@ -459,6 +459,54 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/${projectId}/settings`, data);
   }
 
+  // ============================================
+  // SAMPLE SETTINGS (overlay toolbar)
+  // ============================================
+
+  /**
+   * Minta generálás beállítások lekérése projekthez
+   */
+  getSampleSettings(projectId: number): Observable<{
+    data: {
+      sample_use_large_size: boolean | null;
+      sample_watermark_color: 'white' | 'black' | null;
+      sample_watermark_opacity: number | null;
+    };
+  }> {
+    return this.http.get<{
+      data: {
+        sample_use_large_size: boolean | null;
+        sample_watermark_color: 'white' | 'black' | null;
+        sample_watermark_opacity: number | null;
+      };
+    }>(`${this.baseUrl}/projects/${projectId}/sample-settings`);
+  }
+
+  /**
+   * Minta generálás beállítások mentése projekthez
+   */
+  updateSampleSettings(projectId: number, data: {
+    sample_use_large_size?: boolean | null;
+    sample_watermark_color?: 'white' | 'black' | null;
+    sample_watermark_opacity?: number | null;
+  }): Observable<{
+    success: boolean;
+    data: {
+      sample_use_large_size: boolean | null;
+      sample_watermark_color: 'white' | 'black' | null;
+      sample_watermark_opacity: number | null;
+    };
+  }> {
+    return this.http.put<{
+      success: boolean;
+      data: {
+        sample_use_large_size: boolean | null;
+        sample_watermark_color: 'white' | 'black' | null;
+        sample_watermark_opacity: number | null;
+      };
+    }>(`${this.baseUrl}/projects/${projectId}/sample-settings`, data);
+  }
+
   /**
    * Globális beállítások lekérése
    */

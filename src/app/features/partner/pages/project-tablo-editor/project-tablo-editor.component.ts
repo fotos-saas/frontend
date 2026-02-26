@@ -20,7 +20,7 @@ import { SnapshotRestoreDialogComponent } from './snapshot-restore-dialog.compon
 import { TemplateSaveDialogComponent } from './template-save-dialog.component';
 import { TemplateApplyDialogComponent } from './template-apply-dialog.component';
 import { LayoutDesignerComponent } from './layout-designer/layout-designer.component';
-import { TabloLayoutDialogComponent } from './tablo-layout-dialog/tablo-layout-dialog.component';
+import { TabloLayoutDialogComponent, BoardDimensions } from './tablo-layout-dialog/tablo-layout-dialog.component';
 import { TabloLayoutConfig } from './layout-designer/layout-designer.types';
 
 type EditorTab = 'commands' | 'settings' | 'debug';
@@ -498,6 +498,21 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly teacherCountForDialog = computed(() =>
     this.persons().filter(p => p.type === 'teacher').length,
   );
+
+  /** Tábla fizikai méretek a dialógus arányos előnézetéhez */
+  readonly boardDimensionsForDialog = computed<BoardDimensions | null>(() => {
+    const size = this.selectedSize();
+    if (!size) return null;
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return null;
+    return {
+      boardWidthCm: boardSize.widthCm,
+      boardHeightCm: boardSize.heightCm,
+      marginCm: this.ps.marginCm(),
+      studentSizeCm: this.ps.studentSizeCm(),
+      teacherSizeCm: this.ps.teacherSizeCm(),
+    };
+  });
 
   arrangeTabloLayout(): void {
     this.pendingGenerate.set(false);

@@ -24,6 +24,13 @@
   color: var(--text-primary, #1a1a2e);
 }
 
+.board-size-label {
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+  margin-left: auto;
+}
+
 .field-label {
   display: block;
   font-size: 0.75rem;
@@ -55,6 +62,17 @@
     border-color: var(--primary, #7c3aed);
     box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
   }
+
+  &.overflow {
+    border-color: #f59e0b;
+    background: #fffbeb;
+  }
+}
+
+.overflow-hint {
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 0.7rem;
 }
 
 // Minta választó gombok
@@ -136,7 +154,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 0.75rem;
   border-radius: 8px;
   background: var(--bg-secondary, #f8f9fa);
   border: 1px dashed var(--border-color, #d1d5db);
@@ -144,33 +162,46 @@
 
 .preview-svg {
   width: 100%;
-  max-height: 280px;
+  max-height: 340px;
+}
+
+.preview-board {
+  fill: #f1f0ee;
+  stroke: #c9c7c3;
+  stroke-width: 0.3;
+}
+
+.preview-margin {
+  fill: none;
+  stroke: #d1d5db;
+  stroke-width: 0.15;
+  stroke-dasharray: 1 0.5;
 }
 
 .preview-cell {
-  stroke-width: 0.05;
+  stroke-width: 0.15;
 
   &--teacher {
-    fill: rgba(59, 130, 246, 0.5);
-    stroke: rgba(59, 130, 246, 0.8);
+    fill: rgba(59, 130, 246, 0.45);
+    stroke: rgba(59, 130, 246, 0.7);
   }
 
   &--student {
-    fill: rgba(124, 58, 237, 0.4);
-    stroke: rgba(124, 58, 237, 0.7);
+    fill: rgba(124, 58, 237, 0.35);
+    stroke: rgba(124, 58, 237, 0.6);
   }
 }
 
-.preview-separator {
-  stroke: var(--border-color, #d1d5db);
-  stroke-width: 0.04;
-  stroke-dasharray: 0.15 0.1;
+.preview-zone-text {
+  fill: #9ca3af;
+  font-size: 3px;
+  font-style: italic;
 }
 
 .preview-legend {
   display: flex;
   gap: 1rem;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   font-size: 0.7rem;
   color: var(--text-secondary, #6b7280);
 }
@@ -188,12 +219,27 @@
   }
 
   &--teacher::before {
-    background: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.45);
   }
 
   &--student::before {
-    background: rgba(124, 58, 237, 0.4);
+    background: rgba(124, 58, 237, 0.35);
   }
+}
+
+// Figyelmeztetés
+.overflow-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 // Footer

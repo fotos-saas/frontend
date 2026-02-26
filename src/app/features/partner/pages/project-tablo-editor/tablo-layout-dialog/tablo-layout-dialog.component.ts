@@ -21,6 +21,15 @@ const PATTERN_OPTIONS: PatternOption[] = [
   { type: 'two-sides', label: 'Két oldal', icon: '‖' },
 ];
 
+/** Tábla fizikai méretek (cm) az arányos előnézethez */
+export interface BoardDimensions {
+  boardWidthCm: number;
+  boardHeightCm: number;
+  marginCm: number;
+  studentSizeCm: number;
+  teacherSizeCm: number;
+}
+
 @Component({
   selector: 'app-tablo-layout-dialog',
   standalone: true,
@@ -33,10 +42,11 @@ export class TabloLayoutDialogComponent implements OnInit {
   protected readonly ICONS = ICONS;
   protected readonly PATTERN_OPTIONS = PATTERN_OPTIONS;
 
-  /** Kezdeti konfig (ha van) */
+  /** Bemenetek */
   initialConfig = input<TabloLayoutConfig | null>(null);
   studentCount = input(0);
   teacherCount = input(0);
+  boardDimensions = input<BoardDimensions | null>(null);
 
   /** Output */
   apply = output<TabloLayoutConfig>();
@@ -51,26 +61,94 @@ export class TabloLayoutDialogComponent implements OnInit {
   gapVCm = signal(3);
   gridAlign = signal<'left' | 'center' | 'right'>('center');
 
-  /** Előnézet: diák sorok */
-  readonly studentRows = computed(() =>
-    buildRowConfigs(this.studentPattern(), this.studentCount() || 12, this.studentMaxPerRow()),
-  );
-
-  /** Előnézet: tanár sorok */
-  readonly teacherRows = computed(() =>
-    buildRowConfigs(this.teacherPattern(), this.teacherCount() || 4, this.teacherMaxPerRow()),
-  );
-
-  /** SVG viewBox méretezés */
-  readonly previewMaxCols = computed(() => {
-    const sMax = Math.max(...this.studentRows(), 0);
-    const tMax = Math.max(...this.teacherRows(), 0);
-    return Math.max(sMax, tMax, 1);
+  /** Fizikai korlát: max hány fér egy sorba a tábla szélességéből */
+  readonly studentPhysicalMax = computed(() => {
+    const dims = this.boardDimensions();
+    if (!dims) return 99;
+    const availW = dims.boardWidthCm - 2 * dims.marginCm;
+    return Math.max(1, Math.floor((availW + this.gapHCm()) / (dims.studentSizeCm + this.gapHCm())));
   });
 
-  readonly previewTotalRows = computed(() =>
-    this.teacherRows().length + this.studentRows().length + 1,
+  readonly teacherPhysicalMax = computed(() => {
+    const dims = this.boardDimensions();
+    if (!dims) return 99;
+    const availW = dims.boardWidthCm - 2 * dims.marginCm;
+    return Math.max(1, Math.floor((availW + this.gapHCm()) / (dims.teacherSizeCm + this.gapHCm())));
+  });
+
+  /** Effektív max/sor = min(user beállítás, fizikai korlát) */
+  readonly studentEffectiveMax = computed(() =>
+    Math.min(this.studentMaxPerRow(), this.studentPhysicalMax()),
   );
+
+  readonly teacherEffectiveMax = computed(() =>
+    Math.min(this.teacherMaxPerRow(), this.teacherPhysicalMax()),
+  );
+
+  /** Figyelmeztetés ha a user beállítás > fizikai korlát */
+  readonly studentOverflow = computed(() =>
+    this.studentMaxPerRow() > this.studentPhysicalMax(),
+  );
+
+  readonly teacherOverflow = computed(() =>
+    this.teacherMaxPerRow() > this.teacherPhysicalMax(),
+  );
+
+  /** Előnézet: soronkénti elemszám — effektív max-szal */
+  readonly studentRows = computed(() =>
+    buildRowConfigs(this.studentPattern(), this.studentCount() || 12, this.studentEffectiveMax()),
+  );
+
+  readonly teacherRows = computed(() =>
+    buildRowConfigs(this.teacherPattern(), this.teacherCount() || 4, this.teacherEffectiveMax()),
+  );
+
+  // --- Arányos SVG előnézet ---
+
+  /** Belső arányok cm-ben (protected — template-ből is olvasható) */
+  protected readonly boardW = computed(() => this.boardDimensions()?.boardWidthCm ?? 120);
+  protected readonly boardH = computed(() => this.boardDimensions()?.boardHeightCm ?? 80);
+  protected readonly margin = computed(() => this.boardDimensions()?.marginCm ?? 2);
+  protected readonly studentCellCm = computed(() => this.boardDimensions()?.studentSizeCm ?? 6);
+  protected readonly teacherCellCm = computed(() => this.boardDimensions()?.teacherSizeCm ?? 6);
+
+  /** Cella aspect ratio (portré ~1:1.5) */
+  protected readonly studentCellHCm = computed(() => this.studentCellCm() * 1.5);
+  protected readonly teacherCellHCm = computed(() => this.teacherCellCm() * 1.5);
+
+  /** SVG viewBox: a tábla arányaiban */
+  readonly viewBoxW = computed(() => this.boardW());
+  readonly viewBoxH = computed(() => this.boardH());
+
+  /** Tanár grid magasság cm-ben */
+  readonly teacherGridH = computed(() => {
+    const rows = this.teacherRows();
+    if (rows.length === 0) return 0;
+    return rows.length * this.teacherCellHCm() + (rows.length - 1) * this.gapVCm();
+  });
+
+  /** Diák grid magasság cm-ben */
+  readonly studentGridH = computed(() => {
+    const rows = this.studentRows();
+    if (rows.length === 0) return 0;
+    return rows.length * this.studentCellHCm() + (rows.length - 1) * this.gapVCm();
+  });
+
+  /** Tanár Y kezdőpont (margótól felülről) */
+  readonly teacherStartY = computed(() => this.margin());
+
+  /** Diák Y kezdőpont (alulról felfelé, mint a JSX-ben) */
+  readonly studentStartY = computed(() =>
+    this.boardH() - this.margin() - this.gapVCm() - this.studentGridH(),
+  );
+
+  /** Szabad zóna (feliratok) */
+  readonly freeZoneTop = computed(() => this.teacherStartY() + this.teacherGridH());
+  readonly freeZoneBottom = computed(() => this.studentStartY());
+  readonly freeZoneH = computed(() => Math.max(0, this.freeZoneBottom() - this.freeZoneTop()));
+
+  /** Kilógás figyelmeztetés: diákok + tanárok + gap nem fér a táblára */
+  readonly verticalOverflow = computed(() => this.freeZoneH() < 0);
 
   ngOnInit(): void {
     const cfg = this.initialConfig();
@@ -95,12 +173,12 @@ export class TabloLayoutDialogComponent implements OnInit {
 
   setStudentMaxPerRow(event: Event): void {
     const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 1 && v <= 20) this.studentMaxPerRow.set(v);
+    if (!isNaN(v) && v >= 1 && v <= 30) this.studentMaxPerRow.set(v);
   }
 
   setTeacherMaxPerRow(event: Event): void {
     const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 1 && v <= 20) this.teacherMaxPerRow.set(v);
+    if (!isNaN(v) && v >= 1 && v <= 30) this.teacherMaxPerRow.set(v);
   }
 
   setGapH(event: Event): void {
@@ -121,27 +199,37 @@ export class TabloLayoutDialogComponent implements OnInit {
     this.apply.emit({
       studentPattern: this.studentPattern(),
       teacherPattern: this.teacherPattern(),
-      studentMaxPerRow: this.studentMaxPerRow(),
-      teacherMaxPerRow: this.teacherMaxPerRow(),
+      studentMaxPerRow: this.studentEffectiveMax(),
+      teacherMaxPerRow: this.teacherEffectiveMax(),
       gapHCm: this.gapHCm(),
       gapVCm: this.gapVCm(),
       gridAlign: this.gridAlign(),
     });
   }
 
-  /** SVG előnézet segéd: cella X pozíció az igazítás alapján */
-  getCellX(col: number, rowCols: number): number {
-    const maxCols = this.previewMaxCols();
-    const cellSize = 1;
-    const gap = 0.3;
-    const rowWidth = rowCols * cellSize + (rowCols - 1) * gap;
-    const totalWidth = maxCols * cellSize + (maxCols - 1) * gap;
+  /** SVG cella X pozíció (cm, arányos a tábla szélességéhez) */
+  getCellX(col: number, rowCols: number, cellW: number): number {
+    const bw = this.boardW();
+    const m = this.margin();
+    const gapH = this.gapHCm();
+    const availW = bw - 2 * m;
+    const rowWidth = rowCols * cellW + (rowCols - 1) * gapH;
 
-    let offsetX = 0;
+    let offsetX = m;
     const align = this.gridAlign();
-    if (align === 'center') offsetX = (totalWidth - rowWidth) / 2;
-    else if (align === 'right') offsetX = totalWidth - rowWidth;
+    if (align === 'center') offsetX = m + (availW - rowWidth) / 2;
+    else if (align === 'right') offsetX = m + availW - rowWidth;
 
-    return offsetX + col * (cellSize + gap);
+    return offsetX + col * (cellW + gapH);
+  }
+
+  /** SVG cella Y pozíció a tanár csoportban */
+  getTeacherCellY(rowIdx: number): number {
+    return this.teacherStartY() + rowIdx * (this.teacherCellHCm() + this.gapVCm());
+  }
+
+  /** SVG cella Y pozíció a diák csoportban */
+  getStudentCellY(rowIdx: number): number {
+    return this.studentStartY() + rowIdx * (this.studentCellHCm() + this.gapVCm());
   }
 }

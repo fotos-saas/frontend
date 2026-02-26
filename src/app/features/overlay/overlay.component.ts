@@ -79,6 +79,12 @@ export class OverlayComponent implements OnInit {
   readonly customOrderText = signal('');
   readonly customOrderResult = signal<{ success: boolean; message: string } | null>(null);
 
+  // Rename layer IDs dialog state
+  readonly renameDialogOpen = signal(false);
+  readonly renameMatched = signal<Array<{ old: string; new: string; personName: string }>>([]);
+  readonly renameUnmatched = signal<Array<{ layerName: string; newId: string }>>([]);
+  readonly renameApplying = signal(false);
+
   // Upload panel state
   readonly uploadPanelOpen = signal(false);
   readonly persons = signal<PersonItem[]>([]);
@@ -765,10 +771,7 @@ export class OverlayComponent implements OnInit {
   private async doRenameLayerIds(): Promise<void> {
     // 1. Összes layer név lekérése a PSD-ből (nem csak kijelöltek)
     const allNames = await this.getImageLayerNames();
-    if (allNames.length === 0) {
-      alert('Nincs kép layer a PSD-ben!');
-      return;
-    }
+    if (allNames.length === 0) return;
 
     // 2. Persons betöltése
     let personList = this.persons();
@@ -799,9 +802,8 @@ export class OverlayComponent implements OnInit {
 
     // 3. Matching: slug → person
     const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[_\-]+/g, ' ').trim();
-    const renameMap: Array<{ old: string; new: string }> = [];
-    const lines: string[] = [];
-    const unmatched: string[] = [];
+    const matched: Array<{ old: string; new: string; personName: string }> = [];
+    const unmatched: Array<{ layerName: string; newId: string }> = [];
 
     for (const layerName of allNames) {
       const slug = layerName.replace(/---\d+$/, '');
@@ -810,36 +812,79 @@ export class OverlayComponent implements OnInit {
       if (person) {
         const newName = `${slug}---${person.id}`;
         if (newName !== layerName) {
-          renameMap.push({ old: layerName, new: newName });
-          lines.push(`✅ ${person.name}: ${layerName} → ${newName}`);
+          matched.push({ old: layerName, new: newName, personName: person.name });
         }
       } else {
-        unmatched.push(layerName);
+        unmatched.push({ layerName, newId: '' });
       }
     }
 
-    // 4. Alert — csak ami nem matchelt
-    if (unmatched.length > 0) {
-      const unmatchedNames = unmatched.map(u => `❌ ${u}`).join('\n');
-      alert(`${renameMap.length} átnevezve, ${unmatched.length} NEM TALÁLVA:\n\n${unmatchedNames}`);
-    }
-
-    if (renameMap.length === 0) {
+    // 4. Ha nincs nem matchelt ÉS van átnevezhető → azonnal futtatjuk
+    if (unmatched.length === 0 && matched.length > 0) {
+      await this.executeRename(matched.map(m => ({ old: m.old, new: m.new })));
       return;
     }
 
-    // 5. JSX futtatás — layerek átnevezése a PSD-ben
-    // jsonData objektumként → temp JSON fájlba kerül (nem CONFIG override, mert nem "allSimple")
+    // 5. Ha nincs átnevezhető sem → nincs teendő
+    if (unmatched.length === 0 && matched.length === 0) return;
+
+    // 6. Dialógus megnyitása — a user kézzel megadhatja a nem matchelt ID-kat
+    this.ngZone.run(() => {
+      this.renameMatched.set(matched);
+      this.renameUnmatched.set(unmatched);
+      this.renameDialogOpen.set(true);
+    });
+  }
+
+  /** Rename dialógus: kézi ID módosítás az unmatched listán */
+  updateUnmatchedId(index: number, newId: string): void {
+    this.renameUnmatched.update(list => {
+      const copy = [...list];
+      copy[index] = { ...copy[index], newId };
+      return copy;
+    });
+  }
+
+  /** Rename dialógus: "Alkalmazás" gomb */
+  async applyRename(): Promise<void> {
+    this.renameApplying.set(true);
+    try {
+      const renameMap: Array<{ old: string; new: string }> = [];
+
+      // Matchelt layerek (auto)
+      for (const m of this.renameMatched()) {
+        renameMap.push({ old: m.old, new: m.new });
+      }
+
+      // Kézzel megadott ID-k
+      for (const u of this.renameUnmatched()) {
+        const id = u.newId.trim();
+        if (id) {
+          const slug = u.layerName.replace(/---\d+$/, '');
+          renameMap.push({ old: u.layerName, new: `${slug}---${id}` });
+        }
+      }
+
+      if (renameMap.length > 0) {
+        await this.executeRename(renameMap);
+      }
+
+      this.renameDialogOpen.set(false);
+    } finally {
+      this.renameApplying.set(false);
+    }
+  }
+
+  closeRenameDialog(): void {
+    this.renameDialogOpen.set(false);
+  }
+
+  private async executeRename(renameMap: Array<{ old: string; new: string }>): Promise<void> {
     const result = await window.electronAPI?.photoshop.runJsx({
       scriptName: 'actions/rename-layers.jsx',
       jsonData: { renameMap },
     });
     console.log('[RENAME] result:', result);
-
-    if (unmatched.length === 0) {
-      const parsed = result?.output ? JSON.parse(result.output) : null;
-      alert(`✅ Mind átnevezve! (${parsed?.renamed ?? renameMap.length} layer)`);
-    }
   }
 
   /** Fotó szinkronizálás — az overlay önállóan kezeli, PS JSX + backend API */

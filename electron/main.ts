@@ -17,6 +17,7 @@ import { registerPhotoshopHandlers } from './handlers/photoshop.handler';
 import { registerSampleGeneratorHandlers } from './handlers/sample-generator.handler';
 import { registerFinalizerHandlers } from './handlers/finalizer.handler';
 import { registerOverlayHandlers } from './handlers/overlay.handler';
+import { registerPortraitHandlers } from './handlers/portrait.handler';
 
 const { TouchBarButton, TouchBarLabel, TouchBarSpacer, TouchBarSegmentedControl, TouchBarSlider } = TouchBar;
 
@@ -738,6 +739,9 @@ app.whenReady().then(() => {
 
   // Véglegesítés IPC handlerek regisztralasa
   registerFinalizerHandlers();
+
+  // Portrait háttér feldolgozás IPC handlerek regisztralasa
+  registerPortraitHandlers();
 
   // macOS: recreate window when dock icon is clicked
   app.on('activate', () => {

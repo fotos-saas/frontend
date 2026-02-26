@@ -135,6 +135,15 @@
           "**/*",
           "!**/.gitkeep"
         ]
+      },
+      {
+        "from": "electron/scripts/portrait",
+        "to": "scripts/portrait",
+        "filter": [
+          "**/*",
+          "!**/__pycache__",
+          "!**/*.pyc"
+        ]
       }
     ],
     "mac": {

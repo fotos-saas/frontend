@@ -472,6 +472,30 @@ contextBridge.exposeInMainWorld('electronAPI', {
       }>,
   },
 
+  // ============ Portrait háttér feldolgozás ============
+  portrait: {
+    checkPython: () =>
+      ipcRenderer.invoke('portrait:check-python') as Promise<{ available: boolean; error?: string }>,
+    processSingle: (params: { inputPath: string; outputPath: string; settings: Record<string, unknown> }) =>
+      ipcRenderer.invoke('portrait:process-single', params) as Promise<{
+        success: boolean; error?: string; processing_time?: number;
+      }>,
+    processBatch: (params: { items: Array<{ input: string; output: string }>; settings: Record<string, unknown> }) =>
+      ipcRenderer.invoke('portrait:process-batch', params) as Promise<{
+        success: boolean; error?: string;
+        results?: Array<{ success: boolean; input: string; output?: string; error?: string; processing_time?: number }>;
+        total?: number; successful?: number;
+      }>,
+    downloadBackground: (params: { url: string; outputPath: string }) =>
+      ipcRenderer.invoke('portrait:download-background', params) as Promise<{
+        success: boolean; error?: string; path?: string;
+      }>,
+    getTempDir: () =>
+      ipcRenderer.invoke('portrait:get-temp-dir') as Promise<string>,
+    cleanupTemp: (filePaths: string[]) =>
+      ipcRenderer.invoke('portrait:cleanup-temp', filePaths) as Promise<{ success: boolean; cleaned?: number }>,
+  },
+
   // ============ Touch Bar (MacBook Pro 2016-2020) ============
   touchBar: {
     /**

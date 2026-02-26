@@ -48,50 +48,86 @@ function buildGrid(total: number, maxCols: number): number[] {
 }
 
 /**
- * U-alak: teljes sorok felül, az utolsó sor rövidebb.
- * Pl. maxCols=14, total=38 → [14, 14, 10]
+ * U-alak: két szár (2 elem soronként a széleken) + teljes alsó sor.
+ * Valódi U betű forma felülről nézve.
+ * Pl. maxCols=14, total=25 → [2, 2, 2, 2, 2, 2, 2, 2, 9]
+ * Pl. maxCols=14, total=30 → [2, 2, 2, 2, 2, 2, 14, 4] (ha sok elem van)
  */
 function buildUShape(total: number, maxCols: number): number[] {
-  if (total <= maxCols) return buildGrid(total, maxCols);
+  if (total <= maxCols) return [total];
+  if (maxCols < 3) return buildGrid(total, maxCols);
 
+  // Az alsó sor teljes (maxCols), a többit szárakra osztjuk (2/sor)
+  // Ha kell, több teljes sor is lehet alul
   const rows: number[] = [];
   let remaining = total;
 
-  // Teljes sorok amíg lehet
-  while (remaining > maxCols) {
-    rows.push(maxCols);
-    remaining -= maxCols;
-  }
+  // Minimum 2 sor szár kell hogy U legyen
+  const minStemRows = 2;
+  const stemItems = minStemRows * 2; // 4 elem szárakra
+  const bottomItems = remaining - stemItems;
 
-  // Utolsó sor: ami marad (rövidebb)
-  if (remaining > 0) {
-    rows.push(remaining);
+  if (bottomItems <= maxCols && bottomItems > 0) {
+    // Egyszerű eset: pár szár sor + 1 alsó sor
+    for (let i = 0; i < minStemRows; i++) rows.push(2);
+    rows.push(bottomItems);
+  } else {
+    // Sok elem: szárak felül, teljes sorok alul, maradék az utolsó sorban
+    remaining = total;
+
+    // Szár sorok felül (2 elem) — annyi amennyit kell
+    // Úgy számolunk: alulra maxCols-os sorok kellenek, felülre 2-es szárak
+    const fullBottomRows = Math.floor((remaining - minStemRows * 2) / maxCols);
+    const afterFull = remaining - minStemRows * 2 - fullBottomRows * maxCols;
+
+    // Szárak
+    for (let i = 0; i < minStemRows; i++) rows.push(2);
+
+    // Teljes sorok
+    for (let i = 0; i < fullBottomRows; i++) rows.push(maxCols);
+
+    // Maradék
+    if (afterFull > 0) rows.push(afterFull);
   }
 
   return rows;
 }
 
 /**
- * Fordított U: az első sor rövidebb, utána teljes sorok.
- * Pl. maxCols=14, total=38 → [10, 14, 14]
+ * Fordított U (∩): teljes felső sor + két szár (2 elem soronként a széleken).
+ * Pl. maxCols=14, total=25 → [9, 2, 2, 2, 2, 2, 2, 2]
  */
 function buildInvertedU(total: number, maxCols: number): number[] {
-  if (total <= maxCols) return buildGrid(total, maxCols);
-
-  // Hány teljes sor fér el + maradék
-  const fullRows = Math.floor(total / maxCols);
-  const remainder = total - fullRows * maxCols;
+  if (total <= maxCols) return [total];
+  if (maxCols < 3) return buildGrid(total, maxCols);
 
   const rows: number[] = [];
+  let remaining = total;
 
-  if (remainder > 0) {
-    // Első sor: a maradék (rövidebb)
-    rows.push(remainder);
-  }
+  // Minimum 2 sor szár kell
+  const minStemRows = 2;
+  const stemItems = minStemRows * 2;
+  const topItems = remaining - stemItems;
 
-  // Teljes sorok
-  for (let i = 0; i < fullRows; i++) {
-    rows.push(maxCols);
+  if (topItems <= maxCols && topItems > 0) {
+    // Egyszerű eset: 1 felső sor + pár szár sor
+    rows.push(topItems);
+    for (let i = 0; i < minStemRows; i++) rows.push(2);
+  } else {
+    // Sok elem: teljes sorok felül, szárak alul
+    remaining = total;
+
+    const fullTopRows = Math.floor((remaining - minStemRows * 2) / maxCols);
+    const afterFull = remaining - fullTopRows * maxCols - minStemRows * 2;
+
+    // Teljes sorok
+    for (let i = 0; i < fullTopRows; i++) rows.push(maxCols);
+
+    // Maradék ha van (plusz sor)
+    if (afterFull > 0) rows.push(afterFull);
+
+    // Szárak
+    for (let i = 0; i < minStemRows; i++) rows.push(2);
   }
 
   return rows;

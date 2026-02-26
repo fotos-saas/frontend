@@ -337,11 +337,23 @@ export class TabloLayoutDialogComponent implements OnInit {
     });
   }
 
-  getCellX(col: number, rowCols: number, cellW: number): number {
+  /** Szár sor-e (U/∩ mintánál 2 elem a széleken) */
+  isStemRow(rowCols: number, pattern: LayoutPatternType): boolean {
+    return rowCols === 2 && (pattern === 'u-shape' || pattern === 'inverted-u');
+  }
+
+  getCellX(col: number, rowCols: number, cellW: number, pattern: LayoutPatternType, maxPerRow: number): number {
     const bw = this.boardW();
     const m = this.margin();
     const gapH = this.gapHCm();
     const availW = bw - 2 * m;
+
+    // U/∩ szár sorok: 2 elem a szélekre igazítva (teljes szélességben)
+    if (this.isStemRow(rowCols, pattern) && maxPerRow > 2) {
+      if (col === 0) return m;
+      return m + availW - cellW;
+    }
+
     const rowWidth = rowCols * cellW + (rowCols - 1) * gapH;
 
     let offsetX = m;

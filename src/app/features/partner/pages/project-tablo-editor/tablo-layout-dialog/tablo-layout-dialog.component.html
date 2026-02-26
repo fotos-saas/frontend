@@ -168,6 +168,12 @@
     }
 
     <div class="preview-container">
+      @if (studentAiLoading() || teacherAiLoading()) {
+        <div class="preview-loading">
+          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+          AI javaslat betöltése…
+        </div>
+      }
       <svg
         [attr.viewBox]="'0 0 ' + viewBoxW() + ' ' + viewBoxH()"
         class="preview-svg"
@@ -194,7 +200,7 @@
         @for (row of teacherRows(); track $index; let rowIdx = $index) {
           @for (item of [].constructor(row); track $index; let colIdx = $index) {
             <rect
-              [attr.x]="getCellX(colIdx, row, teacherCellCm())"
+              [attr.x]="getCellX(colIdx, row, teacherCellCm(), teacherPattern(), teacherEffectiveMax())"
               [attr.y]="getTeacherCellY(rowIdx)"
               [attr.width]="teacherCellCm()"
               [attr.height]="teacherCellHCm()"
@@ -219,7 +225,7 @@
         @for (row of studentRows(); track $index; let rowIdx = $index) {
           @for (item of [].constructor(row); track $index; let colIdx = $index) {
             <rect
-              [attr.x]="getCellX(colIdx, row, studentCellCm())"
+              [attr.x]="getCellX(colIdx, row, studentCellCm(), studentPattern(), studentEffectiveMax())"
               [attr.y]="getStudentCellY(rowIdx)"
               [attr.width]="studentCellCm()"
               [attr.height]="studentCellHCm()"

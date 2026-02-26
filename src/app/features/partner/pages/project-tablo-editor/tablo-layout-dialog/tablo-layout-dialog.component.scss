@@ -160,6 +160,19 @@
   border: 1px dashed var(--border-color, #d1d5db);
 }
 
+.preview-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
 .preview-svg {
   width: 100%;
   max-height: 340px;

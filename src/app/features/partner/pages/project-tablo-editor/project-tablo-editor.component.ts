@@ -326,7 +326,40 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
   }
 
-  async generatePsd(): Promise<void> {
+  /** PSD generálás indítása — dialógust nyit a layout beállításokhoz */
+  readonly pendingGenerate = signal(false);
+
+  generatePsd(): void {
+    this.pendingGenerate.set(true);
+    this.showLayoutDialog.set(true);
+  }
+
+  /** Layout dialógus → Alkalmaz → PSD generálás vagy újrarendezés */
+  async onLayoutConfigApplyInternal(config: TabloLayoutConfig): Promise<void> {
+    this.showLayoutDialog.set(false);
+    this.lastLayoutConfig.set(config);
+
+    // Gap + align frissítés a service-ben
+    this.ps.setGapH(config.gapHCm);
+    this.ps.setGapV(config.gapVCm);
+    this.ps.setGridAlign(config.gridAlign);
+
+    if (this.pendingGenerate()) {
+      this.pendingGenerate.set(false);
+      await this.doGeneratePsd(config);
+    } else {
+      await this.doArrangeTabloLayout(config);
+    }
+  }
+
+  /** Dialógus bezárásakor a pending generate-et is töröljük */
+  closeLayoutDialog(): void {
+    this.showLayoutDialog.set(false);
+    this.pendingGenerate.set(false);
+  }
+
+  /** Tényleges PSD generálás (a dialógus után) */
+  private async doGeneratePsd(config: TabloLayoutConfig): Promise<void> {
     const size = this.selectedSize();
     const p = this.project();
     if (!size) return;
@@ -401,7 +434,7 @@ export class ProjectTabloEditorComponent implements OnInit {
         if (imageOk) {
           const boardSize = this.ps.parseSizeValue(size.value);
           if (boardSize) {
-            const layoutResult = await this.ps.arrangeTabloLayout(boardSize, psdFileName, undefined, this.lastLayoutConfig() ?? undefined);
+            const layoutResult = await this.ps.arrangeTabloLayout(boardSize, psdFileName, undefined, config);
             if (!layoutResult.success) {
               this.error.set(`Tablóelrendezés: ${layoutResult.error}`);
             }
@@ -467,23 +500,17 @@ export class ProjectTabloEditorComponent implements OnInit {
   );
 
   arrangeTabloLayout(): void {
+    this.pendingGenerate.set(false);
     this.showLayoutDialog.set(true);
   }
 
-  async onLayoutConfigApply(config: TabloLayoutConfig): Promise<void> {
-    this.showLayoutDialog.set(false);
-    this.lastLayoutConfig.set(config);
-
+  /** Tényleges újrarendezés (a dialógus után, nem generálás) */
+  private async doArrangeTabloLayout(config: TabloLayoutConfig): Promise<void> {
     const size = this.selectedSize();
     if (!size) return;
 
     const boardSize = this.ps.parseSizeValue(size.value);
     if (!boardSize) return;
-
-    // Gap + align frissítés a service-ben is
-    this.ps.setGapH(config.gapHCm);
-    this.ps.setGapV(config.gapVCm);
-    this.ps.setGridAlign(config.gridAlign);
 
     this.clearMessages();
     this.arranging.set(true);

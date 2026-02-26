@@ -1102,8 +1102,8 @@
     [initialConfig]="lastLayoutConfig()"
     [studentCount]="studentCountForDialog()"
     [teacherCount]="teacherCountForDialog()"
-    (apply)="onLayoutConfigApply($event)"
-    (close)="showLayoutDialog.set(false)"
+    (apply)="onLayoutConfigApplyInternal($event)"
+    (close)="closeLayoutDialog()"
   />
 }
 

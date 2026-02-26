@@ -6,8 +6,8 @@ import { ICONS } from '../../../constants/icons.constants';
 import { InfoBoxComponent } from '../../../components/info-box';
 import { PsInputComponent, PsToggleComponent, PsSelectComponent, PsSelectOption } from '@shared/components/form';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
-import { ToastService } from '../../../../core/services/toast.service';
 import { PortraitSettingsComponent } from '../portrait-settings/portrait-settings.component';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-project-settings-tab',

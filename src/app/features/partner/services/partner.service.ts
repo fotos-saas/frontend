@@ -16,6 +16,10 @@ export type {
 } from '../models/partner.models';
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';
 export type { ImportResult } from './partner-contact.service';
+export type {
+  PortraitSettings, PortraitSettingsResponse, UpdatePortraitSettingsResponse,
+  UploadPortraitBackgroundResponse, DeletePortraitBackgroundResponse,
+} from '../models/portrait.models';
 
 import type {
   PartnerDashboardStats, ProjectContact, PartnerProjectListItem, PartnerProjectDetails,
@@ -24,6 +28,7 @@ import type {
   ProjectListResponse, UploadProgress, SamplePackage, ProjectAutocompleteItem, TabloSize,
 } from '../models/partner.models';
 import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
+import type { PortraitSettings } from '../models/portrait.models';
 // Import sub-service-ek
 import { PartnerProjectService } from './partner-project.service';
 import { PartnerQrService } from './partner-qr.service';
@@ -441,6 +446,26 @@ export class PartnerService {
 
   deleteSampleVersion(projectId: number, packageId: number, versionId: number) {
     return this.guestService.deleteSampleVersion(projectId, packageId, versionId);
+  }
+
+  // ============================================
+  // PORTRAIT SETTINGS (delegálás)
+  // ============================================
+
+  getPortraitSettings(projectId: number) {
+    return this.projectService.getPortraitSettings(projectId);
+  }
+
+  updatePortraitSettings(projectId: number, settings: PortraitSettings) {
+    return this.projectService.updatePortraitSettings(projectId, settings);
+  }
+
+  uploadPortraitBackground(projectId: number, file: File) {
+    return this.projectService.uploadPortraitBackground(projectId, file);
+  }
+
+  deletePortraitBackground(projectId: number) {
+    return this.projectService.deletePortraitBackground(projectId);
   }
 
   // ============================================

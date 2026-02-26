@@ -1,0 +1,249 @@
+@use '../../../styles/settings-page' as *;
+@use 'styles/colors' as *;
+
+// === SECTION OVERRIDES ===
+.settings-section {
+  margin-top: 8px;
+  max-width: none;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  color: get-color('slate', 800);
+
+  lucide-icon {
+    margin-right: 8px;
+    color: var(--color-primary, #1e3a5f);
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &--with-info {
+    flex-wrap: wrap;
+
+    app-info-box {
+      flex-basis: 100%;
+      margin-top: 12px;
+    }
+  }
+}
+
+// === CARD OVERRIDES ===
+.setting-card + .setting-card {
+  margin-top: 16px;
+}
+
+.setting-row {
+  margin-bottom: 16px;
+}
+
+.setting-info {
+  margin-right: 0;
+}
+
+.setting-description {
+  margin-top: 2px;
+  line-height: normal;
+}
+
+// === INFO ROW ===
+.info-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid get-color('slate', 200);
+  font-size: 0.8125rem;
+  color: get-color('slate', 500);
+
+  .info-icon {
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  strong {
+    color: get-color('slate', 700);
+  }
+}
+
+// === SUB SETTINGS ===
+.sub-settings {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+
+  > * + * {
+    margin-top: 12px;
+  }
+}
+
+// === PRESET GRID ===
+.preset-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -4px;
+}
+
+.preset-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 2px solid;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  color: white;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &--selected {
+    box-shadow: 0 0 0 3px var(--color-primary, #1e3a5f);
+  }
+
+  .text-dark {
+    color: get-color('slate', 700);
+  }
+}
+
+// === COLOR ROW ===
+.color-row {
+  display: flex;
+  margin: -4px;
+
+  > * {
+    flex: 1;
+    margin: 4px;
+  }
+}
+
+// === COLOR PREVIEW ===
+.color-preview,
+.gradient-preview {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid get-color('slate', 200);
+}
+
+// === GRADIENT COLORS ===
+.gradient-colors {
+  display: flex;
+  flex-direction: column;
+
+  > * + * {
+    margin-top: 12px;
+  }
+}
+
+.gradient-color-group {
+  .setting-label--sub {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+    color: get-color('slate', 600);
+  }
+}
+
+// === BACKGROUND IMAGE PREVIEW ===
+.bg-image-preview {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid get-color('slate', 200);
+  }
+
+  .delete-bg-btn {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 12px;
+    padding: 6px 12px;
+    background: get-color('error', 50);
+    color: get-color('error', 600);
+    border: 1px solid get-color('error', 200);
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    lucide-icon {
+      margin-right: 4px;
+    }
+
+    &:hover {
+      background: get-color('error', 100);
+    }
+  }
+}
+
+// === UPLOAD AREA ===
+.upload-area {
+  display: flex;
+  align-items: center;
+
+  .upload-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--color-primary, #1e3a5f);
+    color: white;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    lucide-icon,
+    .animate-spin {
+      margin-right: 6px;
+    }
+
+    &:hover:not(.uploading) {
+      opacity: 0.9;
+    }
+
+    &.uploading {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .upload-hint {
+    margin-left: 12px;
+    font-size: 0.75rem;
+    color: get-color('slate', 400);
+  }
+}
+
+// === ACTION ROW ===
+.action-row {
+  padding-top: 16px;
+  border-top: 1px solid get-color('slate', 200);
+  margin-top: 4px;
+}
+
+.save-btn {
+  padding: 8px 20px;
+}
+
+// === A11Y ===
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

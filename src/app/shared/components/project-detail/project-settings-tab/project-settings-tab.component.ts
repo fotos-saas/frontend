@@ -7,11 +7,12 @@ import { InfoBoxComponent } from '../../../components/info-box';
 import { PsInputComponent, PsToggleComponent, PsSelectComponent, PsSelectOption } from '@shared/components/form';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PortraitSettingsComponent } from '../portrait-settings/portrait-settings.component';
 
 @Component({
   selector: 'app-project-settings-tab',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, InfoBoxComponent, PsInputComponent, PsToggleComponent, PsSelectComponent],
+  imports: [FormsModule, LucideAngularModule, InfoBoxComponent, PsInputComponent, PsToggleComponent, PsSelectComponent, PortraitSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-settings-tab.component.html',
   styleUrl: './project-settings-tab.component.scss',

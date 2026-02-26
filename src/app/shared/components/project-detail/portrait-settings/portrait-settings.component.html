@@ -1,0 +1,307 @@
+@if (actions.loading()) {
+  <div class="flex items-center justify-center py-12">
+    <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+  </div>
+} @else {
+  <div class="settings-section">
+    <div class="section-header section-header--with-info">
+      <lucide-icon [name]="ICONS.SCAN_FACE" [size]="20" />
+      <h3>Portré háttércsere</h3>
+      <app-info-box storageKey="portrait-settings" title="Portré háttércsere">
+        A desktop alkalmazás automatikusan lecseréli a portré fotók hátterét a kiválasztott beállítások szerint.
+        A feldolgozás helyi AI modellel történik, nincs szükség internetkapcsolatra.
+      </app-info-box>
+    </div>
+
+    <!-- Engedélyezés -->
+    <div class="setting-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Portré háttércsere engedélyezése</span>
+          <span class="setting-description">
+            Bekapcsolás után a desktop alkalmazás automatikusan feldolgozza a portré fotókat.
+          </span>
+        </div>
+      </div>
+      <ps-toggle
+        label="Háttércsere aktív"
+        [ngModel]="settings().enabled"
+        (ngModelChange)="actions.updateSetting('enabled', $event)"
+      />
+    </div>
+
+    @if (settings().enabled) {
+      <!-- Feldolgozási mód -->
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Feldolgozási mód</span>
+            <span class="setting-description">
+              Háttér cseréje: teljes háttér eltávolítás és új háttér alkalmazása.
+              Háttér sötétítése: az eredeti háttér megtartása, csak sötétítés.
+            </span>
+          </div>
+        </div>
+        <ps-select
+          label="Mód"
+          [options]="modeOptions"
+          [ngModel]="settings().mode"
+          (ngModelChange)="onModeChange($event)"
+        />
+      </div>
+
+      @if (isReplace()) {
+        <!-- Háttér típus (csak replace módban) -->
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Háttér típus</span>
+              <span class="setting-description">Válaszd ki milyen hátteret szeretnél a portré fotókhoz.</span>
+            </div>
+          </div>
+
+          <ps-select
+            label="Típus"
+            [options]="bgTypeOptions"
+            [ngModel]="settings().background_type"
+            (ngModelChange)="onBgTypeChange($event)"
+          />
+
+          <!-- Preset választó -->
+          @if (settings().background_type === 'preset') {
+            <div class="sub-settings">
+              <div class="preset-grid">
+                @for (preset of PRESET_BACKGROUNDS; track preset.name) {
+                  <button
+                    class="preset-swatch"
+                    [class.preset-swatch--selected]="settings().preset_name === preset.name"
+                    [style.background-color]="preset.color"
+                    [style.border-color]="preset.name === 'white' ? '#ccc' : preset.color"
+                    (click)="actions.updateSetting('preset_name', preset.name)"
+                    [attr.title]="preset.label"
+                    type="button"
+                  >
+                    @if (settings().preset_name === preset.name) {
+                      <lucide-icon
+                        [name]="ICONS.CHECK"
+                        [size]="16"
+                        [class.text-dark]="preset.name === 'white' || preset.name === 'light_gray'"
+                      />
+                    }
+                  </button>
+                }
+              </div>
+              <div class="info-row">
+                <lucide-icon [name]="ICONS.INFO" [size]="14" class="info-icon" />
+                <span>Kiválasztott: <strong>{{ selectedPresetLabel() }}</strong></span>
+              </div>
+            </div>
+          }
+
+          <!-- Egyedi szín -->
+          @if (settings().background_type === 'color') {
+            <div class="sub-settings">
+              <div class="color-row">
+                <ps-input type="number" label="Piros (R)" min="0" max="255"
+                  [ngModel]="settings().color_r ?? 0"
+                  (ngModelChange)="actions.updateSetting('color_r', $event)" />
+                <ps-input type="number" label="Zöld (G)" min="0" max="255"
+                  [ngModel]="settings().color_g ?? 0"
+                  (ngModelChange)="actions.updateSetting('color_g', $event)" />
+                <ps-input type="number" label="Kék (B)" min="0" max="255"
+                  [ngModel]="settings().color_b ?? 0"
+                  (ngModelChange)="actions.updateSetting('color_b', $event)" />
+              </div>
+              <div class="color-preview" [style.background-color]="colorPreviewStyle()"></div>
+            </div>
+          }
+
+          <!-- Feltöltött kép -->
+          @if (settings().background_type === 'image') {
+            <div class="sub-settings">
+              @if (actions.hasBackgroundImage()) {
+                <div class="bg-image-preview">
+                  <img [src]="actions.backgroundThumbUrl()" alt="Háttérkép" />
+                  <button class="delete-bg-btn" (click)="deleteBackground()" [disabled]="actions.deleting()" type="button">
+                    <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                    Törlés
+                  </button>
+                </div>
+              }
+              <div class="upload-area">
+                <label class="upload-btn" [class.uploading]="actions.uploading()">
+                  @if (actions.uploading()) {
+                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  } @else {
+                    <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+                  }
+                  {{ actions.hasBackgroundImage() ? 'Kép cseréje' : 'Háttérkép feltöltése' }}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="hidden"
+                    (change)="onFileSelected($event)"
+                    [disabled]="actions.uploading()"
+                  />
+                </label>
+                <span class="upload-hint">JPG, PNG vagy WebP, max 20 MB</span>
+              </div>
+            </div>
+          }
+
+          <!-- Gradient -->
+          @if (settings().background_type === 'gradient') {
+            <div class="sub-settings">
+              <ps-select
+                label="Irány"
+                [options]="gradientDirOptions"
+                [ngModel]="settings().gradient_direction ?? 'vertical'"
+                (ngModelChange)="actions.updateSetting('gradient_direction', $event)"
+              />
+              <div class="gradient-colors">
+                <div class="gradient-color-group">
+                  <span class="setting-label setting-label--sub">Kezdő szín</span>
+                  <div class="color-row">
+                    <ps-input type="number" label="R" min="0" max="255"
+                      [ngModel]="settings().gradient_start_r ?? 0"
+                      (ngModelChange)="actions.updateSetting('gradient_start_r', $event)" />
+                    <ps-input type="number" label="G" min="0" max="255"
+                      [ngModel]="settings().gradient_start_g ?? 0"
+                      (ngModelChange)="actions.updateSetting('gradient_start_g', $event)" />
+                    <ps-input type="number" label="B" min="0" max="255"
+                      [ngModel]="settings().gradient_start_b ?? 0"
+                      (ngModelChange)="actions.updateSetting('gradient_start_b', $event)" />
+                  </div>
+                </div>
+                <div class="gradient-color-group">
+                  <span class="setting-label setting-label--sub">Záró szín</span>
+                  <div class="color-row">
+                    <ps-input type="number" label="R" min="0" max="255"
+                      [ngModel]="settings().gradient_end_r ?? 0"
+                      (ngModelChange)="actions.updateSetting('gradient_end_r', $event)" />
+                    <ps-input type="number" label="G" min="0" max="255"
+                      [ngModel]="settings().gradient_end_g ?? 0"
+                      (ngModelChange)="actions.updateSetting('gradient_end_g', $event)" />
+                    <ps-input type="number" label="B" min="0" max="255"
+                      [ngModel]="settings().gradient_end_b ?? 0"
+                      (ngModelChange)="actions.updateSetting('gradient_end_b', $event)" />
+                  </div>
+                </div>
+              </div>
+              <div class="gradient-preview" [style.background]="gradientPreviewStyle()"></div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (isDarken()) {
+        <!-- Darken beállítások -->
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Sötétítés beállítások</span>
+              <span class="setting-description">Az eredeti háttér sötétítésének mértéke és cél fényerő.</span>
+            </div>
+          </div>
+          <div class="sub-settings">
+            <ps-input type="number" label="Sötétítés mértéke (0-1)" min="0" max="1" step="0.1"
+              [ngModel]="settings().darken_amount ?? 0.7"
+              (ngModelChange)="actions.updateSetting('darken_amount', $event)" />
+            <ps-input type="number" label="Cél fényerő (0-255)" min="0" max="255"
+              [ngModel]="settings().target_brightness ?? 35"
+              (ngModelChange)="actions.updateSetting('target_brightness', $event)" />
+          </div>
+        </div>
+      }
+
+      <!-- Él feldolgozás -->
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Él feldolgozás</span>
+            <span class="setting-description">Az alak kontúrjának finomhangolása a természetes megjelenésért.</span>
+          </div>
+        </div>
+        <div class="sub-settings">
+          <ps-input type="number" label="Él behúzás (px)" min="0" max="10"
+            [ngModel]="settings().edge_inset"
+            (ngModelChange)="actions.updateSetting('edge_inset', $event)" />
+          <ps-input type="number" label="Él lágyítás (px)" min="0" max="20"
+            [ngModel]="settings().feather_radius"
+            (ngModelChange)="actions.updateSetting('feather_radius', $event)" />
+          <ps-input type="number" label="Él simítás (0-5)" min="0" max="5"
+            [ngModel]="settings().edge_smoothing"
+            (ngModelChange)="actions.updateSetting('edge_smoothing', $event)" />
+        </div>
+      </div>
+
+      <!-- Szín és haj finomítás -->
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Szín és haj finomítás</span>
+            <span class="setting-description">A háttérszín beszivárgás korrigálása és a haj részletek megőrzése.</span>
+          </div>
+        </div>
+        <div class="sub-settings">
+          <ps-toggle
+            label="Színszennyeződés eltávolítás"
+            [ngModel]="settings().decontaminate"
+            (ngModelChange)="actions.updateSetting('decontaminate', $event)"
+          />
+          @if (settings().decontaminate) {
+            <ps-input type="number" label="Erősség (0-1)" min="0" max="1" step="0.1"
+              [ngModel]="settings().decontaminate_strength"
+              (ngModelChange)="actions.updateSetting('decontaminate_strength', $event)" />
+          }
+
+          <ps-toggle
+            label="Hajfinomítás"
+            [ngModel]="settings().hair_refinement"
+            (ngModelChange)="actions.updateSetting('hair_refinement', $event)"
+          />
+          @if (settings().hair_refinement) {
+            <ps-input type="number" label="Erősség (0-1)" min="0" max="1" step="0.1"
+              [ngModel]="settings().hair_refinement_strength"
+              (ngModelChange)="actions.updateSetting('hair_refinement_strength', $event)" />
+          }
+        </div>
+      </div>
+
+      <!-- Árnyék és kimenet -->
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Árnyék és kimenet</span>
+            <span class="setting-description">Árnyék hozzáadása és a kimeneti minőség beállítása.</span>
+          </div>
+        </div>
+        <div class="sub-settings">
+          <ps-toggle
+            label="Árnyék hozzáadása"
+            [ngModel]="settings().add_shadow"
+            (ngModelChange)="actions.updateSetting('add_shadow', $event)"
+          />
+          @if (settings().add_shadow) {
+            <ps-input type="number" label="Árnyék átlátszóság (0-1)" min="0" max="1" step="0.1"
+              [ngModel]="settings().shadow_opacity"
+              (ngModelChange)="actions.updateSetting('shadow_opacity', $event)" />
+          }
+          <ps-input type="number" label="Kimeneti minőség (%)" min="50" max="100"
+            [ngModel]="settings().output_quality"
+            (ngModelChange)="actions.updateSetting('output_quality', $event)" />
+        </div>
+      </div>
+
+      <!-- Mentés gomb -->
+      <div class="action-row">
+        <button class="save-btn" [disabled]="actions.saving()" (click)="save()">
+          @if (actions.saving()) {
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          }
+          Mentés
+        </button>
+      </div>
+    }
+  </div>
+}

@@ -741,15 +741,15 @@ export class OverlayComponent implements OnInit {
       outputDir: psdDir,
       projectId: pid,
       projectName,
-      apiBaseUrl: this.getApiUrl(),
+      apiBaseUrl: (window as { __env__?: { apiUrl?: string } }).__env__?.apiUrl || this.getApiUrl(),
       authToken,
     });
 
     this.ngZone.run(() => {
-      if (result.success) {
-        this.generateResult.set({ success: true, message: `Véglegesítve, ${result.uploadedCount || 0} feltöltve` });
+      if (result.success && (result.uploadedCount ?? 0) > 0) {
+        this.generateResult.set({ success: true, message: `Véglegesítve, ${result.uploadedCount ?? 0} feltöltve` });
       } else {
-        this.generateResult.set({ success: false, message: result.error || 'Véglegesítés sikertelen' });
+        this.generateResult.set({ success: false, message: result.error || 'Feltöltés sikertelen — a szerver nem érthető el' });
       }
     });
   }

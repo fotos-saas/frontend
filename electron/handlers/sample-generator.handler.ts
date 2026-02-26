@@ -18,6 +18,7 @@ import * as http from 'http';
 import Store from 'electron-store';
 import log from 'electron-log/main';
 import sharp from 'sharp';
+import { resolveApiBaseUrl } from '../utils/api-url';
 
 // ============ Store schema ============
 
@@ -346,10 +347,11 @@ export function registerSampleGeneratorHandlers(): void {
           log.info(`Lokalis mentes: ${localOutputPath}`);
 
           // 5. Upload
-          if (params.apiBaseUrl && params.authToken) {
+          const resolvedApiUrl = resolveApiBaseUrl(params.apiBaseUrl || '');
+          if (resolvedApiUrl && params.authToken) {
             const uploadResult = await uploadSampleToBackend(
               watermarkedPath,
-              params.apiBaseUrl,
+              resolvedApiUrl,
               params.projectId,
               params.authToken,
               watermarkedFileName,

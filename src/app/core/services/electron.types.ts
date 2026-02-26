@@ -238,7 +238,7 @@ interface PhotoshopAPI {
   deleteTemplate: (params: { templateId: string }) => Promise<{ success: boolean; error?: string }>;
   renameTemplate: (params: { templateId: string; newName: string }) => Promise<{ success: boolean; error?: string }>;
   applyTemplate: (params: { templateId: string; targetDocName?: string; psdFilePath?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
-  placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string; psdFilePath?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
+  placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string; psdFilePath?: string; syncBorder?: boolean }) => Promise<{ success: boolean; error?: string; output?: string }>;
   saveTempFiles: (params: { files: Array<{ name: string; data: ArrayBuffer }> }) => Promise<{ success: boolean; paths: string[]; error?: string }>;
 }
 

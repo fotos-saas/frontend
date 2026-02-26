@@ -242,6 +242,40 @@
   font-weight: 500;
 }
 
+// AI badge + reasoning
+.ai-badge {
+  color: #7c3aed;
+}
+
+.ai-reasoning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  font-size: 0.7rem;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.4;
+
+  lucide-icon {
+    color: #7c3aed;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 // Footer
 .dialog-footer {
   display: flex;

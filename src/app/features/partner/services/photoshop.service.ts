@@ -799,20 +799,12 @@ export class PhotoshopService {
       };
 
       if (layoutConfig) {
-        // A rowConfigs tömböket a TypeScript számolja, JSON-ben küldjük a JSX-nek
-        // Ehhez szükség van az elemszámra — jelenleg becsüljük a layerekből
-        // A JSX a tényleges layer-számot használja, de a rowConfigs az elvárt mintát írja le
-        // Ha az elemszám nem ismert, a maxPerRow-t használjuk tükrelt becslésre
-        const studentRowConfigs = buildRowConfigs(
-          layoutConfig.studentPattern,
-          100, // Magas szám — a JSX a tényleges layer-számig használja
-          layoutConfig.studentMaxPerRow,
-        );
-        const teacherRowConfigs = buildRowConfigs(
-          layoutConfig.teacherPattern,
-          100,
-          layoutConfig.teacherMaxPerRow,
-        );
+        // AI rowConfigs előnyben — ha az AI visszaadott javaslatot, azt használjuk
+        // Különben lokális buildRowConfigs() algoritmussal számolunk
+        const studentRowConfigs = layoutConfig.studentRowConfigs
+          ?? buildRowConfigs(layoutConfig.studentPattern, 100, layoutConfig.studentMaxPerRow);
+        const teacherRowConfigs = layoutConfig.teacherRowConfigs
+          ?? buildRowConfigs(layoutConfig.teacherPattern, 100, layoutConfig.teacherMaxPerRow);
         jsonData['studentRowConfigs'] = studentRowConfigs;
         jsonData['teacherRowConfigs'] = teacherRowConfigs;
         jsonData['studentTwoSides'] = layoutConfig.studentPattern === 'two-sides';

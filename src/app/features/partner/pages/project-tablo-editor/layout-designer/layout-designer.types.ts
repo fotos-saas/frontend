@@ -111,6 +111,9 @@ export interface TabloLayoutConfig {
   gapHCm: number;
   gapVCm: number;
   gridAlign: 'left' | 'center' | 'right';
+  /** AI-tól kapott soronkénti elemszámok (ha van) — felülírja a lokális algoritmust */
+  studentRowConfigs?: number[];
+  teacherRowConfigs?: number[];
 }
 
 /** Téglalap leírás overlap számításhoz */

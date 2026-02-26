@@ -1,8 +1,11 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, OnInit, inject, DestroyRef, effect } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, debounceTime, switchMap, catchError, of } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
+import { PartnerService } from '../../../services/partner.service';
 import { LayoutPatternType, TabloLayoutConfig } from '../layout-designer/layout-designer.types';
 import { buildRowConfigs } from '../layout-designer/layout-pattern.utils';
 
@@ -20,6 +23,9 @@ const PATTERN_OPTIONS: PatternOption[] = [
   { type: 'inverted-v', label: 'Fordított V', icon: '∧' },
   { type: 'two-sides', label: 'Két oldal', icon: '‖' },
 ];
+
+/** Minták amikhez AI javaslatot kérünk (a többihez lokális algo elég) */
+const AI_PATTERNS: Set<LayoutPatternType> = new Set(['v-shape', 'inverted-v', 'u-shape', 'inverted-u']);
 
 /** Tábla fizikai méretek (cm) az arányos előnézethez */
 export interface BoardDimensions {
@@ -39,6 +45,8 @@ export interface BoardDimensions {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TabloLayoutDialogComponent implements OnInit {
+  private readonly partnerService = inject(PartnerService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
   protected readonly PATTERN_OPTIONS = PATTERN_OPTIONS;
 
@@ -61,7 +69,7 @@ export class TabloLayoutDialogComponent implements OnInit {
   gapVCm = signal(3);
   gridAlign = signal<'left' | 'center' | 'right'>('center');
 
-  /** Fizikai korlát: max hány fér egy sorba a tábla szélességéből */
+  /** Fizikai korlát: max hány fér egy sorba */
   readonly studentPhysicalMax = computed(() => {
     const dims = this.boardDimensions();
     if (!dims) return 99;
@@ -76,7 +84,6 @@ export class TabloLayoutDialogComponent implements OnInit {
     return Math.max(1, Math.floor((availW + this.gapHCm()) / (dims.teacherSizeCm + this.gapHCm())));
   });
 
-  /** Effektív max/sor = min(user beállítás, fizikai korlát) */
   readonly studentEffectiveMax = computed(() =>
     Math.min(this.studentMaxPerRow(), this.studentPhysicalMax()),
   );
@@ -85,7 +92,6 @@ export class TabloLayoutDialogComponent implements OnInit {
     Math.min(this.teacherMaxPerRow(), this.teacherPhysicalMax()),
   );
 
-  /** Figyelmeztetés ha a user beállítás > fizikai korlát */
   readonly studentOverflow = computed(() =>
     this.studentMaxPerRow() > this.studentPhysicalMax(),
   );
@@ -94,61 +100,168 @@ export class TabloLayoutDialogComponent implements OnInit {
     this.teacherMaxPerRow() > this.teacherPhysicalMax(),
   );
 
-  /** Előnézet: soronkénti elemszám — effektív max-szal */
+  // --- AI javaslat ---
+
+  /** AI-tól kapott soronkénti elemszámok (null = lokális algo) */
+  readonly studentAiRows = signal<number[] | null>(null);
+  readonly teacherAiRows = signal<number[] | null>(null);
+  readonly studentAiLoading = signal(false);
+  readonly teacherAiLoading = signal(false);
+  readonly studentAiReasoning = signal('');
+  readonly teacherAiReasoning = signal('');
+
+  private readonly studentAiTrigger$ = new Subject<void>();
+  private readonly teacherAiTrigger$ = new Subject<void>();
+
+  /** Előnézet: AI eredmény ha van, különben lokális */
   readonly studentRows = computed(() =>
-    buildRowConfigs(this.studentPattern(), this.studentCount() || 12, this.studentEffectiveMax()),
+    this.studentAiRows() ?? buildRowConfigs(this.studentPattern(), this.studentCount() || 12, this.studentEffectiveMax()),
   );
 
   readonly teacherRows = computed(() =>
-    buildRowConfigs(this.teacherPattern(), this.teacherCount() || 4, this.teacherEffectiveMax()),
+    this.teacherAiRows() ?? buildRowConfigs(this.teacherPattern(), this.teacherCount() || 4, this.teacherEffectiveMax()),
   );
 
   // --- Arányos SVG előnézet ---
 
-  /** Belső arányok cm-ben (protected — template-ből is olvasható) */
   protected readonly boardW = computed(() => this.boardDimensions()?.boardWidthCm ?? 120);
   protected readonly boardH = computed(() => this.boardDimensions()?.boardHeightCm ?? 80);
   protected readonly margin = computed(() => this.boardDimensions()?.marginCm ?? 2);
   protected readonly studentCellCm = computed(() => this.boardDimensions()?.studentSizeCm ?? 6);
   protected readonly teacherCellCm = computed(() => this.boardDimensions()?.teacherSizeCm ?? 6);
-
-  /** Cella aspect ratio (portré ~1:1.5) */
   protected readonly studentCellHCm = computed(() => this.studentCellCm() * 1.5);
   protected readonly teacherCellHCm = computed(() => this.teacherCellCm() * 1.5);
 
-  /** SVG viewBox: a tábla arányaiban */
   readonly viewBoxW = computed(() => this.boardW());
   readonly viewBoxH = computed(() => this.boardH());
 
-  /** Tanár grid magasság cm-ben */
   readonly teacherGridH = computed(() => {
     const rows = this.teacherRows();
     if (rows.length === 0) return 0;
     return rows.length * this.teacherCellHCm() + (rows.length - 1) * this.gapVCm();
   });
 
-  /** Diák grid magasság cm-ben */
   readonly studentGridH = computed(() => {
     const rows = this.studentRows();
     if (rows.length === 0) return 0;
     return rows.length * this.studentCellHCm() + (rows.length - 1) * this.gapVCm();
   });
 
-  /** Tanár Y kezdőpont (margótól felülről) */
   readonly teacherStartY = computed(() => this.margin());
 
-  /** Diák Y kezdőpont (alulról felfelé, mint a JSX-ben) */
   readonly studentStartY = computed(() =>
     this.boardH() - this.margin() - this.gapVCm() - this.studentGridH(),
   );
 
-  /** Szabad zóna (feliratok) */
   readonly freeZoneTop = computed(() => this.teacherStartY() + this.teacherGridH());
   readonly freeZoneBottom = computed(() => this.studentStartY());
   readonly freeZoneH = computed(() => Math.max(0, this.freeZoneBottom() - this.freeZoneTop()));
-
-  /** Kilógás figyelmeztetés: diákok + tanárok + gap nem fér a táblára */
   readonly verticalOverflow = computed(() => this.freeZoneH() < 0);
+
+  constructor() {
+    // Diák AI trigger — debounce 500ms
+    this.studentAiTrigger$.pipe(
+      debounceTime(500),
+      switchMap(() => {
+        const dims = this.boardDimensions();
+        const pattern = this.studentPattern();
+        const total = this.studentCount() || 12;
+        const max = this.studentEffectiveMax();
+
+        if (!AI_PATTERNS.has(pattern) || !dims) {
+          this.studentAiRows.set(null);
+          this.studentAiLoading.set(false);
+          return of(null);
+        }
+
+        this.studentAiLoading.set(true);
+        return this.partnerService.suggestLayout({
+          pattern,
+          totalItems: total,
+          maxPerRow: max,
+          boardWidthCm: dims.boardWidthCm,
+          boardHeightCm: dims.boardHeightCm,
+          cellSizeCm: dims.studentSizeCm,
+          gapHCm: this.gapHCm(),
+          marginCm: dims.marginCm,
+        }).pipe(
+          catchError(() => of(null)),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(res => {
+      this.studentAiLoading.set(false);
+      if (res?.success && res.rowConfigs?.length > 0) {
+        this.studentAiRows.set(res.rowConfigs);
+        this.studentAiReasoning.set(res.reasoning || '');
+      } else {
+        this.studentAiRows.set(null);
+        this.studentAiReasoning.set('');
+      }
+    });
+
+    // Tanár AI trigger — debounce 500ms
+    this.teacherAiTrigger$.pipe(
+      debounceTime(500),
+      switchMap(() => {
+        const dims = this.boardDimensions();
+        const pattern = this.teacherPattern();
+        const total = this.teacherCount() || 4;
+        const max = this.teacherEffectiveMax();
+
+        if (!AI_PATTERNS.has(pattern) || !dims) {
+          this.teacherAiRows.set(null);
+          this.teacherAiLoading.set(false);
+          return of(null);
+        }
+
+        this.teacherAiLoading.set(true);
+        return this.partnerService.suggestLayout({
+          pattern,
+          totalItems: total,
+          maxPerRow: max,
+          boardWidthCm: dims.boardWidthCm,
+          boardHeightCm: dims.boardHeightCm,
+          cellSizeCm: dims.teacherSizeCm,
+          gapHCm: this.gapHCm(),
+          marginCm: dims.marginCm,
+        }).pipe(
+          catchError(() => of(null)),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(res => {
+      this.teacherAiLoading.set(false);
+      if (res?.success && res.rowConfigs?.length > 0) {
+        this.teacherAiRows.set(res.rowConfigs);
+        this.teacherAiReasoning.set(res.reasoning || '');
+      } else {
+        this.teacherAiRows.set(null);
+        this.teacherAiReasoning.set('');
+      }
+    });
+
+    // Effect: paraméter-változáskor triggereljük az AI-t
+    effect(() => {
+      // Read all reactive dependencies
+      this.studentPattern();
+      this.studentEffectiveMax();
+      this.gapHCm();
+      this.boardDimensions();
+      this.studentCount();
+      // Trigger
+      this.studentAiTrigger$.next();
+    });
+
+    effect(() => {
+      this.teacherPattern();
+      this.teacherEffectiveMax();
+      this.gapHCm();
+      this.boardDimensions();
+      this.teacherCount();
+      this.teacherAiTrigger$.next();
+    });
+  }
 
   ngOnInit(): void {
     const cfg = this.initialConfig();
@@ -161,7 +274,6 @@ export class TabloLayoutDialogComponent implements OnInit {
       this.gapVCm.set(cfg.gapVCm);
       this.gridAlign.set(cfg.gridAlign);
     } else {
-      // Alapértelmezett: a fizikai korlát (ami ténylegesen kifér)
       this.studentMaxPerRow.set(this.studentPhysicalMax());
       this.teacherMaxPerRow.set(this.teacherPhysicalMax());
     }
@@ -169,25 +281,37 @@ export class TabloLayoutDialogComponent implements OnInit {
 
   setStudentPattern(type: LayoutPatternType): void {
     this.studentPattern.set(type);
+    this.studentAiRows.set(null); // Reset AI, lokális azonnal mutat
   }
 
   setTeacherPattern(type: LayoutPatternType): void {
     this.teacherPattern.set(type);
+    this.teacherAiRows.set(null);
   }
 
   setStudentMaxPerRow(event: Event): void {
     const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 1 && v <= 30) this.studentMaxPerRow.set(v);
+    if (!isNaN(v) && v >= 1 && v <= 30) {
+      this.studentMaxPerRow.set(v);
+      this.studentAiRows.set(null);
+    }
   }
 
   setTeacherMaxPerRow(event: Event): void {
     const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 1 && v <= 30) this.teacherMaxPerRow.set(v);
+    if (!isNaN(v) && v >= 1 && v <= 30) {
+      this.teacherMaxPerRow.set(v);
+      this.teacherAiRows.set(null);
+    }
   }
 
   setGapH(event: Event): void {
     const v = Number((event.target as HTMLInputElement).value);
-    if (!isNaN(v) && v >= 0 && v <= 10) this.gapHCm.set(v);
+    if (!isNaN(v) && v >= 0 && v <= 10) {
+      this.gapHCm.set(v);
+      this.studentAiRows.set(null);
+      this.teacherAiRows.set(null);
+    }
   }
 
   setGapV(event: Event): void {
@@ -208,10 +332,11 @@ export class TabloLayoutDialogComponent implements OnInit {
       gapHCm: this.gapHCm(),
       gapVCm: this.gapVCm(),
       gridAlign: this.gridAlign(),
+      studentRowConfigs: this.studentAiRows() ?? undefined,
+      teacherRowConfigs: this.teacherAiRows() ?? undefined,
     });
   }
 
-  /** SVG cella X pozíció (cm, arányos a tábla szélességéhez) */
   getCellX(col: number, rowCols: number, cellW: number): number {
     const bw = this.boardW();
     const m = this.margin();
@@ -227,12 +352,10 @@ export class TabloLayoutDialogComponent implements OnInit {
     return offsetX + col * (cellW + gapH);
   }
 
-  /** SVG cella Y pozíció a tanár csoportban */
   getTeacherCellY(rowIdx: number): number {
     return this.teacherStartY() + rowIdx * (this.teacherCellHCm() + this.gapVCm());
   }
 
-  /** SVG cella Y pozíció a diák csoportban */
   getStudentCellY(rowIdx: number): number {
     return this.studentStartY() + rowIdx * (this.studentCellHCm() + this.gapVCm());
   }

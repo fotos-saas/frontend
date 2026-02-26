@@ -234,12 +234,32 @@
         <span class="legend-item legend-item--teacher">
           Tanárok ({{ teacherCount() || '?' }})
           · {{ teacherRows().length }} sor
+          @if (teacherAiLoading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="12" class="spin" />
+          }
+          @if (teacherAiRows()) {
+            <lucide-icon [name]="ICONS.SPARKLES" [size]="12" class="ai-badge" matTooltip="AI javaslat" />
+          }
         </span>
         <span class="legend-item legend-item--student">
           Diákok ({{ studentCount() || '?' }})
           · {{ studentRows().length }} sor
+          @if (studentAiLoading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="12" class="spin" />
+          }
+          @if (studentAiRows()) {
+            <lucide-icon [name]="ICONS.SPARKLES" [size]="12" class="ai-badge" matTooltip="AI javaslat" />
+          }
         </span>
       </div>
+
+      <!-- AI indoklás -->
+      @if (studentAiReasoning() || teacherAiReasoning()) {
+        <div class="ai-reasoning">
+          <lucide-icon [name]="ICONS.SPARKLES" [size]="12" />
+          {{ studentAiReasoning() || teacherAiReasoning() }}
+        </div>
+      }
     </div>
   </div>
 

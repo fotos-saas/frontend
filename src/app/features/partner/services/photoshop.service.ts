@@ -916,6 +916,52 @@ export class PhotoshopService {
     }
   }
 
+  /**
+   * Layerek áthelyezése a Photoshopban az editor-beli koordinátákra.
+   * A restore-layout.jsx-et használja, ami layerId alapján translate()-tel mozgatja a layereket.
+   */
+  async relocateLayers(
+    layers: Array<{ layerId: number; layerName: string; groupPath: string[]; x: number; y: number; width: number; height: number; kind: string }>,
+    targetDocName?: string,
+    linkedLayerNames?: string[],
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      // Linkelések leszedése
+      if (linkedLayerNames?.length) {
+        await this.unlinkLayers(linkedLayerNames, targetDocName);
+      }
+
+      this.logger.info('Elrendezés szinkronizálás indul:', { layerCount: layers.length });
+
+      const result = await this.runJsx({
+        scriptName: 'actions/restore-layout.jsx',
+        jsonData: {
+          layers,
+          restoreGroups: [['Images'], ['Names']],
+        },
+        targetDocName,
+      });
+
+      // Linkelések visszaállítása
+      if (linkedLayerNames?.length) {
+        for (const name of linkedLayerNames) {
+          await this.linkLayers([name], targetDocName);
+        }
+      }
+
+      if (!result.success) {
+        this.logger.error('Elrendezés szinkronizálás JSX hiba:', result.error);
+      }
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('Elrendezés szinkronizálás hiba', err);
+      return { success: false, error: 'Váratlan hiba az elrendezés szinkronizálásnál' };
+    }
+  }
+
   /** Pozíció gap beállítása (cm) */
   async setPositionGap(gapCm: number): Promise<boolean> {
     if (!this.api || typeof this.api.setPositionGap !== 'function') return false;

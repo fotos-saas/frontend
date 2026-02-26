@@ -565,6 +565,7 @@ export class LayoutCommandOverlayComponent {
       items: [
         { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', shortcut: '⌘⇧S', accent: 'green' },
         { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', shortcut: '⌘⇧N', accent: 'purple' },
+        { id: 'relocate-layout', icon: ICONS.LAYOUT_GRID, label: 'Elrendezés szinkronizálása', accent: 'blue' },
         { id: 'update-positions', icon: ICONS.TAG, label: 'Pozíciók frissítése', shortcut: '⌘⇧P', accent: 'amber' },
         { id: 'open-project', icon: ICONS.FILE_PLUS, label: 'PSD megnyitása', shortcut: '⌘O' },
         { id: 'open-workdir', icon: ICONS.FOLDER_OPEN, label: 'Munkamappa megnyitása' },

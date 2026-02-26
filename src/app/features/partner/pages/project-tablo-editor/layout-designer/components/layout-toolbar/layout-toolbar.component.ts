@@ -297,6 +297,22 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
           </button>
         </div>
 
+        <!-- Elrendezés gomb -->
+        <button
+          class="toolbar-btn toolbar-btn--relocate"
+          [disabled]="relocating() || !state.hasChanges()"
+          [class.is-relocating]="relocating()"
+          (click)="relocateClicked.emit()"
+          matTooltip="Kijelölt layerek áthelyezése a Photoshopban"
+        >
+          <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
+          @if (!relocating()) {
+            <span>Elrendezés</span>
+          } @else {
+            <span>Áthelyezés...</span>
+          }
+        </button>
+
         <!-- Pozíciók gomb + beállítások -->
         <div class="names-group">
           <button
@@ -756,6 +772,15 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         &:hover { background: rgba(167, 139, 250, 0.25); color: #c4b5fd; }
       }
 
+      &--relocate {
+        padding: 0 10px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+        &:hover:not(:disabled) { background: rgba(59, 130, 246, 0.25); color: #60a5fa; }
+        &:disabled { opacity: 0.4; }
+        &.is-relocating lucide-icon { animation: spin 1s linear infinite; }
+      }
+
       &--positions {
         padding: 0 10px;
         background: rgba(251, 191, 36, 0.15);
@@ -978,6 +1003,7 @@ export class LayoutToolbarComponent {
   readonly nameGapCm = input<number>(0.5);
   readonly nameBreakAfter = input<number>(1);
   readonly textAlign = input<string>('center');
+  readonly relocating = input<boolean>(false);
   readonly updatingPositions = input<boolean>(false);
   readonly positionGapCm = input<number>(0.15);
   readonly positionFontSize = input<number>(18);
@@ -993,6 +1019,7 @@ export class LayoutToolbarComponent {
   readonly nameGapChanged = output<number>();
   readonly nameBreakChanged = output<number>();
   readonly textAlignChanged = output<string>();
+  readonly relocateClicked = output<void>();
   readonly updatePositionsClicked = output<void>();
   readonly positionGapChanged = output<number>();
   readonly positionFontSizeChanged = output<number>();

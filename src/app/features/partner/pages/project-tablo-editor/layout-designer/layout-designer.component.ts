@@ -74,6 +74,7 @@ import { firstValueFrom } from 'rxjs';
           [nameGapCm]="ps.nameGapCm()"
           [nameBreakAfter]="ps.nameBreakAfter()"
           [textAlign]="ps.textAlign()"
+          [relocating]="relocating()"
           [updatingPositions]="updatingPositions()"
           [positionGapCm]="ps.positionGapCm()"
           [positionFontSize]="ps.positionFontSize()"
@@ -82,6 +83,7 @@ import { firstValueFrom } from 'rxjs';
           (refreshClicked)="refresh()"
           (syncClicked)="syncAllPhotos()"
           (arrangeNamesClicked)="arrangeNames()"
+          (relocateClicked)="relocateToPhotoshop()"
           (updatePositionsClicked)="updatePositions()"
           (nameGapChanged)="ps.setNameGap($event)"
           (nameBreakChanged)="ps.setNameBreakAfter($event)"
@@ -413,6 +415,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly placingPhotos = signal(false);
   readonly syncingPhotos = signal(false);
   readonly arrangingNames = signal(false);
+  readonly relocating = signal(false);
   readonly updatingPositions = signal(false);
   readonly generatingSample = signal(false);
   readonly generatingFinal = signal(false);
@@ -514,6 +517,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   onOverlayCommand(commandId: string): void {
     this.commandOverlay()?.close();
     switch (commandId) {
+      case 'relocate-layout': this.relocateToPhotoshop(); break;
       case 'sync-photos': this.syncAllPhotos(); break;
       case 'arrange-names': this.arrangeNames(); break;
       case 'update-positions': this.updatePositions(); break;
@@ -712,6 +716,47 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       await this.ps.arrangeNames(undefined, this.getLinkedLayerNames());
     } finally {
       this.arrangingNames.set(false);
+    }
+  }
+
+  /** Elrendezés szinkronizálása a Photoshopba — editor-beli pozíciók átküldése */
+  async relocateToPhotoshop(): Promise<void> {
+    const allLayers = this.state.layers();
+    const selectedIds = this.state.selectedLayerIds();
+
+    // Csak image + name layerek relevánsak
+    const isRelocatable = (l: { category: string }) =>
+      l.category === 'student-image' || l.category === 'teacher-image'
+      || l.category === 'student-name' || l.category === 'teacher-name';
+
+    // Ha van kijelölés → kijelöltek; ha nincs → módosítottak
+    let layersToSync: typeof allLayers;
+    if (selectedIds.size > 0) {
+      layersToSync = allLayers.filter(l => selectedIds.has(l.layerId) && isRelocatable(l));
+    } else {
+      layersToSync = allLayers.filter(l => isRelocatable(l) && (l.editedX !== null || l.editedY !== null));
+    }
+
+    if (layersToSync.length === 0) return;
+
+    this.relocating.set(true);
+    try {
+      await this.ps.relocateLayers(
+        layersToSync.map(l => ({
+          layerId: l.layerId,
+          layerName: l.layerName,
+          groupPath: l.groupPath,
+          x: l.editedX ?? l.x,
+          y: l.editedY ?? l.y,
+          width: l.width,
+          height: l.height,
+          kind: l.kind,
+        })),
+        undefined,
+        this.getLinkedLayerNames(),
+      );
+    } finally {
+      this.relocating.set(false);
     }
   }
 

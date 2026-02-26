@@ -195,6 +195,18 @@ import { firstValueFrom } from 'rxjs';
       -webkit-app-region: no-drag;
       /* Electron frameless: ne lógjon a macOS traffic lights alá */
       padding-top: 38px;
+
+      /* Drag region a fejléc (padding) területen */
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 38px;
+        -webkit-app-region: drag;
+        z-index: 1;
+      }
     }
 
     .layout-designer__loading,

@@ -479,6 +479,11 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
       flex-shrink: 0;
       position: relative;
       z-index: 20;
+      -webkit-app-region: drag;
+
+      button, select, input, .source-badge {
+        -webkit-app-region: no-drag;
+      }
     }
 
     .layout-toolbar__left {

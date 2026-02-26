@@ -26,6 +26,16 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    margin: -2px;
+
+    > * {
+      margin: 2px;
+    }
+  }
 }
 
 .add-person-btn {
@@ -138,6 +148,19 @@
   overflow: hidden;
   border: 1px solid get-color('gray', 200);
   background: #fff;
+
+  &--compact {
+    border-radius: 5px;
+
+    .copy-btn-group__main {
+      padding: 3px 6px;
+    }
+
+    .copy-btn-group__toggle {
+      width: 22px;
+      font-size: 10px;
+    }
+  }
 
   &__main {
     display: inline-flex;

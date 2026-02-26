@@ -34,12 +34,14 @@ export class ProjectPersonsSectionComponent {
   readonly downloadPendingZip = output<void>();
   readonly addPersons = output<'student' | 'teacher'>();
 
-  /** ID megjelenítés toggle */
+  /** ID megjelenítés toggle (közös a két oszlophoz) */
   readonly withId = signal(false);
   /** Másolás folyamatban */
   readonly copying = signal(false);
-  /** Sikeres másolás visszajelzés */
-  readonly copied = signal(false);
+  /** Melyik típust másoljuk éppen */
+  readonly copyingType = signal<'student' | 'teacher' | null>(null);
+  /** Melyik típust másoltuk sikeresen */
+  readonly copiedType = signal<'student' | 'teacher' | null>(null);
 
   readonly isPreliminary = computed(() => this.project().isPreliminary ?? false);
   readonly pendingStudentPhotos = computed(() => this.project().pendingStudentPhotos ?? 0);
@@ -81,51 +83,42 @@ export class ProjectPersonsSectionComponent {
     this.withId.update(v => !v);
   }
 
-  copyNames(event: MouseEvent): void {
+  copyNames(event: MouseEvent, type: 'student' | 'teacher'): void {
     event.stopPropagation();
     const url = this.personsApiUrl();
     if (!url || this.copying()) return;
 
     this.copying.set(true);
-    this.copied.set(false);
+    this.copyingType.set(type);
+    this.copiedType.set(null);
 
     this.http.get<{ data: PersonListItem[] }>(url).subscribe({
       next: (res) => {
-        const students = res.data.filter(p => p.type === 'student');
-        const teachers = res.data.filter(p => p.type === 'teacher');
+        const persons = res.data.filter(p => p.type === type);
         const includeId = this.withId();
+        const text = persons
+          .map(p => includeId ? `#${p.id} ${p.name}` : p.name)
+          .join('\n');
 
-        const lines: string[] = [];
-        if (students.length > 0) {
-          lines.push(`Diákok (${students.length}):`);
-          students.forEach(p => {
-            lines.push(includeId ? `#${p.id} ${p.name}` : p.name);
-          });
-        }
-        if (teachers.length > 0) {
-          if (lines.length > 0) lines.push('');
-          lines.push(`Tanárok (${teachers.length}):`);
-          teachers.forEach(p => {
-            lines.push(includeId ? `#${p.id} ${p.name}` : p.name);
-          });
-        }
-
-        const text = lines.join('\n');
+        const label = type === 'student' ? 'Diákok' : 'Tanárok';
         navigator.clipboard.writeText(text).then(() => {
           this.toastService.success(
-            'Névsor másolva!',
-            `${students.length} diák + ${teachers.length} tanár a vágólapon`,
+            `${label} másolva!`,
+            `${persons.length} név a vágólapon`,
           );
           this.copying.set(false);
-          this.copied.set(true);
-          setTimeout(() => this.copied.set(false), 2000);
+          this.copyingType.set(null);
+          this.copiedType.set(type);
+          setTimeout(() => this.copiedType.set(null), 2000);
         }).catch(() => {
           this.toastService.error('Hiba', 'Nem sikerült a vágólapra másolni');
           this.copying.set(false);
+          this.copyingType.set(null);
         });
       },
       error: () => {
         this.copying.set(false);
+        this.copyingType.set(null);
       },
     });
   }

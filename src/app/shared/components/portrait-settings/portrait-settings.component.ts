@@ -1,16 +1,16 @@
 import { Component, ChangeDetectionStrategy, inject, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { ICONS } from '../../../constants/icons.constants';
+import { ICONS } from '../../constants/icons.constants';
 import { PsInputComponent, PsToggleComponent, PsSelectComponent, PsSelectOption } from '@shared/components/form';
-import { InfoBoxComponent } from '../../../components/info-box';
-import { ToastService } from '../../../../core/services/toast.service';
+import { InfoBoxComponent } from '../../components/info-box';
+import { ToastService } from '../../../core/services/toast.service';
 import { PortraitSettingsActionsService } from './portrait-settings-actions.service';
 import {
   PRESET_BACKGROUNDS,
   type PortraitBackgroundType,
   type PortraitMode,
-} from '../../../../features/partner/models/portrait.models';
+} from '../../../features/partner/models/portrait.models';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB

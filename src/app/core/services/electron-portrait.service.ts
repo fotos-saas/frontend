@@ -91,7 +91,8 @@ export class ElectronPortraitService {
     // Alapvető URL validáció renderer oldalon is (defense-in-depth)
     try {
       const parsed = new URL(url);
-      if (parsed.protocol !== 'https:') {
+      const isLocalDev = parsed.hostname === 'localhost' && parsed.protocol === 'http:';
+      if (parsed.protocol !== 'https:' && !isLocalDev) {
         return { success: false, error: 'Csak HTTPS URL megengedett' };
       }
     } catch {

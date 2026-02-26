@@ -1,12 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { PartnerService } from '../../../../features/partner/services/partner.service';
-import { ToastService } from '../../../../core/services/toast.service';
+import { PartnerService } from '../../../features/partner/services/partner.service';
+import { ToastService } from '../../../core/services/toast.service';
 import {
   PortraitSettings,
-  DEFAULT_PORTRAIT_SETTINGS,
-} from '../../../../features/partner/models/portrait.models';
+  EMPTY_PORTRAIT_SETTINGS,
+} from '../../../features/partner/models/portrait.models';
 
 @Injectable()
 export class PortraitSettingsActionsService {
@@ -19,7 +19,7 @@ export class PortraitSettingsActionsService {
   readonly saving = signal(false);
   readonly uploading = signal(false);
   readonly deleting = signal(false);
-  readonly settings = signal<PortraitSettings>({ ...DEFAULT_PORTRAIT_SETTINGS });
+  readonly settings = signal<PortraitSettings>({ ...EMPTY_PORTRAIT_SETTINGS });
   readonly hasBackgroundImage = signal(false);
   readonly backgroundImageUrl = signal<string | null>(null);
   readonly backgroundThumbUrl = signal<string | null>(null);

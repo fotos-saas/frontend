@@ -4,6 +4,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import * as http from 'http';
 import * as https from 'https';
 import log from 'electron-log/main';
 
@@ -14,6 +15,7 @@ const SUPPORTED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.bmp', 
 const ALLOWED_DOWNLOAD_DOMAINS = [
   'api.tablostudio.hu',
   'tablostudio.hu',
+  ...(app.isPackaged ? [] : ['localhost']),
 ];
 
 /** Python script base path (extraResources or dev) */
@@ -60,11 +62,12 @@ function isInsideTempDir(filePath: string): boolean {
   }
 }
 
-/** Validate download URL - only HTTPS from allowed domains */
+/** Validate download URL - only HTTPS from allowed domains (+ localhost dev) */
 function isAllowedUrl(urlString: string): boolean {
   try {
     const parsed = new URL(urlString);
-    if (parsed.protocol !== 'https:') return false;
+    const isLocalDev = !app.isPackaged && parsed.hostname === 'localhost' && parsed.protocol === 'http:';
+    if (parsed.protocol !== 'https:' && !isLocalDev) return false;
     if (!ALLOWED_DOWNLOAD_DOMAINS.includes(parsed.hostname)) return false;
     return true;
   } catch {
@@ -83,15 +86,18 @@ function downloadFile(url: string, destPath: string, maxRedirects = 5): Promise<
       return;
     }
 
-    if (!url.startsWith('https://')) {
+    const isHttp = url.startsWith('http://');
+    const isHttps = url.startsWith('https://');
+    if (!isHttps && !(isHttp && !app.isPackaged)) {
       reject(new Error('Csak HTTPS URL megengedett'));
       return;
     }
 
     const file = fs.createWriteStream(destPath);
     const cleanup = () => { file.close(); fs.unlink(destPath, () => {}); };
+    const getter = isHttp ? http.get : https.get;
 
-    https.get(url, (response) => {
+    getter(url, (response) => {
       if (response.statusCode === 301 || response.statusCode === 302) {
         const redirectUrl = response.headers.location;
         if (redirectUrl) {

@@ -126,25 +126,22 @@ export interface DeletePortraitBackgroundResponse {
 }
 
 // ============================================
-// ALAPÉRTELMEZETT BEÁLLÍTÁSOK
+// ÜRES BEÁLLÍTÁSOK (init placeholder — a valós default-ot a backend adja)
 // ============================================
 
-/** Alapértelmezett portré beállítások (szinkronban a backend defaultSettings()-szel) */
-export const DEFAULT_PORTRAIT_SETTINGS: PortraitSettings = {
+/** Üres init érték a signal-hez. A load() felülírja a backend-ből jövő valós default-okkal. */
+export const EMPTY_PORTRAIT_SETTINGS: PortraitSettings = {
   enabled: false,
   mode: 'replace',
   background_type: 'preset',
-  preset_name: 'charcoal',
-  edge_inset: 2,
-  feather_radius: 3,
-  decontaminate: true,
-  decontaminate_strength: 0.8,
-  hair_refinement: true,
-  hair_refinement_strength: 0.4,
-  edge_smoothing: 2,
+  edge_inset: 0,
+  feather_radius: 0,
+  decontaminate: false,
+  decontaminate_strength: 0,
+  hair_refinement: false,
+  hair_refinement_strength: 0,
+  edge_smoothing: 0,
   add_shadow: false,
-  shadow_opacity: 0.3,
-  darken_amount: 0.7,
-  target_brightness: 35,
+  shadow_opacity: 0,
   output_quality: 95,
 };

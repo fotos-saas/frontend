@@ -246,6 +246,7 @@ export class PartnerShellComponent implements OnInit {
       items = allItems
         .filter(item => !['team', 'customization', 'subscription', 'partner-settings', 'activity-log'].includes(item.id))
         .concat([
+          { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere', icon: 'scan-face' },
           { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások', icon: 'settings' },
           { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },
         ]);

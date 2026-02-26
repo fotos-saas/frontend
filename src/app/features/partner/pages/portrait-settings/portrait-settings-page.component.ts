@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { PortraitSettingsComponent } from '@shared/components/project-detail/portrait-settings';
+import { PortraitSettingsComponent } from '@shared/components/portrait-settings';
 
 @Component({
   selector: 'app-portrait-settings-page',

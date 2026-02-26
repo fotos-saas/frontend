@@ -300,7 +300,7 @@ import { LayoutDesignerGridService } from '../../layout-designer-grid.service';
         <!-- Elrendezés gomb -->
         <button
           class="toolbar-btn toolbar-btn--relocate"
-          [disabled]="relocating() || !state.hasChanges()"
+          [disabled]="relocating() || (!state.hasChanges() && !state.hasSelection())"
           [class.is-relocating]="relocating()"
           (click)="relocateClicked.emit()"
           matTooltip="Kijelölt layerek áthelyezése a Photoshopban"

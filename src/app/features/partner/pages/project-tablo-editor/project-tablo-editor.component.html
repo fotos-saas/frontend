@@ -1096,6 +1096,17 @@
   </app-dialog-wrapper>
 }
 
+<!-- Elrendezési minta dialógus (page-card KÍVÜL) -->
+@if (showLayoutDialog()) {
+  <app-tablo-layout-dialog
+    [initialConfig]="lastLayoutConfig()"
+    [studentCount]="studentCountForDialog()"
+    [teacherCount]="teacherCountForDialog()"
+    (apply)="onLayoutConfigApply($event)"
+    (close)="showLayoutDialog.set(false)"
+  />
+}
+
 <!-- Sablon alkalmazás dialógus (page-card KÍVÜL) -->
 @if (templateService.showApplyDialog()) {
   <app-template-apply-dialog

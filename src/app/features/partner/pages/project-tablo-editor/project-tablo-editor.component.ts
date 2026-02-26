@@ -20,13 +20,15 @@ import { SnapshotRestoreDialogComponent } from './snapshot-restore-dialog.compon
 import { TemplateSaveDialogComponent } from './template-save-dialog.component';
 import { TemplateApplyDialogComponent } from './template-apply-dialog.component';
 import { LayoutDesignerComponent } from './layout-designer/layout-designer.component';
+import { TabloLayoutDialogComponent } from './tablo-layout-dialog/tablo-layout-dialog.component';
+import { TabloLayoutConfig } from './layout-designer/layout-designer.types';
 
 type EditorTab = 'commands' | 'settings' | 'debug';
 
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
-  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent, LayoutDesignerComponent],
+  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent, LayoutDesignerComponent, TabloLayoutDialogComponent],
   providers: [TabloEditorDebugService, TabloEditorSnapshotService, TabloEditorTemplateService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
@@ -452,20 +454,43 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.ps.revealInFinder(psdPath);
   }
 
-  async arrangeTabloLayout(): Promise<void> {
+  /** Elrendezési minta dialógus */
+  readonly showLayoutDialog = signal(false);
+  readonly lastLayoutConfig = signal<TabloLayoutConfig | null>(null);
+
+  /** Diákok és tanárok száma a dialógushoz */
+  readonly studentCountForDialog = computed(() =>
+    this.persons().filter(p => p.type !== 'teacher').length,
+  );
+  readonly teacherCountForDialog = computed(() =>
+    this.persons().filter(p => p.type === 'teacher').length,
+  );
+
+  arrangeTabloLayout(): void {
+    this.showLayoutDialog.set(true);
+  }
+
+  async onLayoutConfigApply(config: TabloLayoutConfig): Promise<void> {
+    this.showLayoutDialog.set(false);
+    this.lastLayoutConfig.set(config);
+
     const size = this.selectedSize();
     if (!size) return;
 
     const boardSize = this.ps.parseSizeValue(size.value);
     if (!boardSize) return;
 
+    // Gap + align frissítés a service-ben is
+    this.ps.setGapH(config.gapHCm);
+    this.ps.setGapV(config.gapVCm);
+    this.ps.setGridAlign(config.gridAlign);
+
     this.clearMessages();
     this.arranging.set(true);
     try {
-      const result = await this.ps.arrangeTabloLayout(boardSize);
+      const result = await this.ps.arrangeTabloLayout(boardSize, undefined, undefined, config);
       if (result.success) {
-        // DEBUG: debug info megjelenítése success esetén is
-        this.successMessage.set(`Tablóelrendezés kész! DEBUG: ${result.error || 'nincs debug'}`);
+        this.successMessage.set('Tablóelrendezés kész!');
         await this.autoSaveSnapshot();
       } else {
         this.error.set(result.error || 'Tablóelrendezés sikertelen.');

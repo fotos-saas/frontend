@@ -202,19 +202,37 @@ export class LayoutDesignerGridService {
     return null;
   }
 
-  /** Grid cellák generálása */
+  /** Grid cellák generálása (rowConfigs támogatással) */
   private generateCells(grid: GroupGridConfig): GridCell[] {
     const cells: GridCell[] = [];
-    for (let row = 0; row < grid.rows; row++) {
-      for (let col = 0; col < grid.cols; col++) {
-        cells.push({
-          col,
-          row,
-          x: grid.originX + col * grid.cellWidth,
-          y: grid.originY + row * grid.cellHeight,
-        });
+
+    if (grid.rowConfigs && grid.rowConfigs.length > 0) {
+      // Minta-alapú: soronként eltérő oszlopszám
+      for (let row = 0; row < grid.rowConfigs.length; row++) {
+        const colsThisRow = grid.rowConfigs[row];
+        for (let col = 0; col < colsThisRow; col++) {
+          cells.push({
+            col,
+            row,
+            x: grid.originX + col * grid.cellWidth,
+            y: grid.originY + row * grid.cellHeight,
+          });
+        }
+      }
+    } else {
+      // Egyenletes rács
+      for (let row = 0; row < grid.rows; row++) {
+        for (let col = 0; col < grid.cols; col++) {
+          cells.push({
+            col,
+            row,
+            x: grid.originX + col * grid.cellWidth,
+            y: grid.originY + row * grid.cellHeight,
+          });
+        }
       }
     }
+
     return cells;
   }
 

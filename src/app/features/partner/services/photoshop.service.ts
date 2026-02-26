@@ -3,6 +3,8 @@ import { LoggerService } from '@core/services/logger.service';
 import { SnapshotListItem, SnapshotLayer, TemplateSlot, TemplateFixedLayer, TemplateListItem, GlobalTemplate } from '@core/services/electron.types';
 import { TabloSize } from '../models/partner.models';
 import { environment } from '../../../../environments/environment';
+import { TabloLayoutConfig } from '../pages/project-tablo-editor/layout-designer/layout-designer.types';
+import { buildRowConfigs } from '../pages/project-tablo-editor/layout-designer/layout-pattern.utils';
 
 /** Kistablo alias merete */
 const KISTABLO_ALIAS = { widthCm: 100, heightCm: 70 };
@@ -772,6 +774,7 @@ export class PhotoshopService {
     boardSize: { widthCm: number; heightCm: number },
     targetDocName?: string,
     linkedLayerNames?: string[],
+    layoutConfig?: TabloLayoutConfig,
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
@@ -782,19 +785,43 @@ export class PhotoshopService {
       }
 
       // 1. Grid elrendezés tabloLayout módban
+      // Ha van layoutConfig, rowConfigs előre kiszámolása TypeScript-ben
+      const jsonData: Record<string, unknown> = {
+        boardWidthCm: boardSize.widthCm,
+        boardHeightCm: boardSize.heightCm,
+        marginCm: this.marginCm(),
+        studentSizeCm: this.studentSizeCm(),
+        teacherSizeCm: this.teacherSizeCm(),
+        gapHCm: layoutConfig?.gapHCm ?? this.gapHCm(),
+        gapVCm: layoutConfig?.gapVCm ?? this.gapVCm(),
+        gridAlign: layoutConfig?.gridAlign ?? this.gridAlign(),
+        tabloLayout: true,
+      };
+
+      if (layoutConfig) {
+        // A rowConfigs tömböket a TypeScript számolja, JSON-ben küldjük a JSX-nek
+        // Ehhez szükség van az elemszámra — jelenleg becsüljük a layerekből
+        // A JSX a tényleges layer-számot használja, de a rowConfigs az elvárt mintát írja le
+        // Ha az elemszám nem ismert, a maxPerRow-t használjuk tükrelt becslésre
+        const studentRowConfigs = buildRowConfigs(
+          layoutConfig.studentPattern,
+          100, // Magas szám — a JSX a tényleges layer-számig használja
+          layoutConfig.studentMaxPerRow,
+        );
+        const teacherRowConfigs = buildRowConfigs(
+          layoutConfig.teacherPattern,
+          100,
+          layoutConfig.teacherMaxPerRow,
+        );
+        jsonData['studentRowConfigs'] = studentRowConfigs;
+        jsonData['teacherRowConfigs'] = teacherRowConfigs;
+        jsonData['studentTwoSides'] = layoutConfig.studentPattern === 'two-sides';
+        jsonData['teacherTwoSides'] = layoutConfig.teacherPattern === 'two-sides';
+      }
+
       const gridResult = await this.runJsx({
         scriptName: 'actions/arrange-grid.jsx',
-        jsonData: {
-          boardWidthCm: boardSize.widthCm,
-          boardHeightCm: boardSize.heightCm,
-          marginCm: this.marginCm(),
-          studentSizeCm: this.studentSizeCm(),
-          teacherSizeCm: this.teacherSizeCm(),
-          gapHCm: this.gapHCm(),
-          gapVCm: this.gapVCm(),
-          gridAlign: this.gridAlign(),
-          tabloLayout: true,
-        },
+        jsonData,
         targetDocName,
       });
 

@@ -1,0 +1,203 @@
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="purple"
+  [icon]="ICONS.LAYOUT_TEMPLATE"
+  title="Elrendezési minta"
+  description="Válaszd ki az elrendezési mintát a diákok és tanárok számára."
+  size="lg"
+  [columns]="2"
+  (closeEvent)="close.emit()"
+>
+  <!-- Bal oldal: Beállítások -->
+  <div dialogLeft class="settings-panel">
+    <!-- Diák beállítások -->
+    <div class="settings-section">
+      <h4 class="section-title">
+        <lucide-icon [name]="ICONS.USERS" [size]="16" />
+        Diák beállítások
+      </h4>
+
+      <label class="field-label">Minta</label>
+      <div class="pattern-selector">
+        @for (opt of PATTERN_OPTIONS; track opt.type) {
+          <button
+            class="pattern-btn"
+            [class.active]="studentPattern() === opt.type"
+            [matTooltip]="opt.label"
+            (click)="setStudentPattern(opt.type)"
+          >
+            <span class="pattern-icon">{{ opt.icon }}</span>
+          </button>
+        }
+      </div>
+
+      <label class="field-label">Max soronként</label>
+      <input
+        type="number"
+        class="form-input form-input--sm"
+        [value]="studentMaxPerRow()"
+        min="1"
+        max="20"
+        (change)="setStudentMaxPerRow($event)"
+      />
+    </div>
+
+    <!-- Tanár beállítások -->
+    <div class="settings-section">
+      <h4 class="section-title">
+        <lucide-icon [name]="ICONS.USER_CHECK" [size]="16" />
+        Tanár beállítások
+      </h4>
+
+      <label class="field-label">Minta</label>
+      <div class="pattern-selector">
+        @for (opt of PATTERN_OPTIONS; track opt.type) {
+          <button
+            class="pattern-btn"
+            [class.active]="teacherPattern() === opt.type"
+            [matTooltip]="opt.label"
+            (click)="setTeacherPattern(opt.type)"
+          >
+            <span class="pattern-icon">{{ opt.icon }}</span>
+          </button>
+        }
+      </div>
+
+      <label class="field-label">Max soronként</label>
+      <input
+        type="number"
+        class="form-input form-input--sm"
+        [value]="teacherMaxPerRow()"
+        min="1"
+        max="20"
+        (change)="setTeacherMaxPerRow($event)"
+      />
+    </div>
+
+    <!-- Közös beállítások -->
+    <div class="settings-section">
+      <h4 class="section-title">
+        <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
+        Közös beállítások
+      </h4>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Vízszintes rés (cm)</label>
+          <input
+            type="number"
+            class="form-input form-input--sm"
+            [value]="gapHCm()"
+            min="0"
+            max="10"
+            step="0.5"
+            (change)="setGapH($event)"
+          />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Függőleges rés (cm)</label>
+          <input
+            type="number"
+            class="form-input form-input--sm"
+            [value]="gapVCm()"
+            min="0"
+            max="10"
+            step="0.5"
+            (change)="setGapV($event)"
+          />
+        </div>
+      </div>
+
+      <label class="field-label">Igazítás</label>
+      <div class="align-selector">
+        <button
+          class="align-btn"
+          [class.active]="gridAlign() === 'left'"
+          matTooltip="Balra igazítás"
+          (click)="setGridAlign('left')"
+        >
+          <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="16" />
+        </button>
+        <button
+          class="align-btn"
+          [class.active]="gridAlign() === 'center'"
+          matTooltip="Középre igazítás"
+          (click)="setGridAlign('center')"
+        >
+          <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="16" />
+        </button>
+        <button
+          class="align-btn"
+          [class.active]="gridAlign() === 'right'"
+          matTooltip="Jobbra igazítás"
+          (click)="setGridAlign('right')"
+        >
+          <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="16" />
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jobb oldal: Előnézet -->
+  <div dialogRight class="preview-panel">
+    <h4 class="section-title">Előnézet</h4>
+    <div class="preview-container">
+      <svg
+        [attr.viewBox]="'0 0 ' + (previewMaxCols() * 1.3) + ' ' + (previewTotalRows() * 1.4 + 0.5)"
+        class="preview-svg"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <!-- Tanárok (felül, kék) -->
+        @for (row of teacherRows(); track $index; let rowIdx = $index) {
+          @for (item of [].constructor(row); track $index; let colIdx = $index) {
+            <rect
+              [attr.x]="getCellX(colIdx, row)"
+              [attr.y]="rowIdx * 1.4"
+              width="1"
+              height="1"
+              rx="0.1"
+              class="preview-cell preview-cell--teacher"
+            />
+          }
+        }
+
+        <!-- Elválasztó vonal -->
+        <line
+          x1="0"
+          [attr.y1]="teacherRows().length * 1.4 + 0.3"
+          [attr.x2]="previewMaxCols() * 1.3"
+          [attr.y2]="teacherRows().length * 1.4 + 0.3"
+          class="preview-separator"
+        />
+
+        <!-- Diákok (alul, lila) -->
+        @for (row of studentRows(); track $index; let rowIdx = $index) {
+          @for (item of [].constructor(row); track $index; let colIdx = $index) {
+            <rect
+              [attr.x]="getCellX(colIdx, row)"
+              [attr.y]="(teacherRows().length + 1) * 1.4 + rowIdx * 1.4"
+              width="1"
+              height="1"
+              rx="0.1"
+              class="preview-cell preview-cell--student"
+            />
+          }
+        }
+      </svg>
+
+      <div class="preview-legend">
+        <span class="legend-item legend-item--teacher">Tanárok ({{ teacherCount() || '?' }})</span>
+        <span class="legend-item legend-item--student">Diákok ({{ studentCount() || '?' }})</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div dialogFooter class="dialog-footer">
+    <button class="btn btn--ghost" (click)="close.emit()">Mégse</button>
+    <button class="btn btn--primary" (click)="onApply()">
+      <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="16" />
+      Alkalmaz
+    </button>
+  </div>
+</app-dialog-wrapper>

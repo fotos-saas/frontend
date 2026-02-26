@@ -56,6 +56,8 @@ export interface GroupGridConfig {
   cols: number;
   /** Sorok száma */
   rows: number;
+  /** Soronkénti oszlopszám (ha minta-alapú elrendezés — felülírja cols-t soronként) */
+  rowConfigs?: number[];
 }
 
 /** Drag állapot a natív drag rendszerhez */
@@ -95,6 +97,20 @@ export interface GridCell {
   x: number;
   /** Cella bal felső Y (PSD px) */
   y: number;
+}
+
+/** Elrendezési minta típus */
+export type LayoutPatternType = 'grid' | 'u-shape' | 'inverted-u' | 'v-shape' | 'inverted-v' | 'two-sides';
+
+/** Tablóelrendezés konfigurációja (dialógusból jön) */
+export interface TabloLayoutConfig {
+  studentPattern: LayoutPatternType;
+  teacherPattern: LayoutPatternType;
+  studentMaxPerRow: number;
+  teacherMaxPerRow: number;
+  gapHCm: number;
+  gapVCm: number;
+  gridAlign: 'left' | 'center' | 'right';
 }
 
 /** Téglalap leírás overlap számításhoz */

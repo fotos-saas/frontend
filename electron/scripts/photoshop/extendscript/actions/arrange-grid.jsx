@@ -74,32 +74,50 @@ function _getBoundsNoEffects(layer) {
 // marginPx, gapHPx, gapVPx: margo es gap pixelben
 // boardWPx: tablo szelessege pixelben
 // startTopPx: a racs indulasi pontja fentrol pixelben
+// rowConfigs: opcionalis tomb — soronkenti elemszamok (TypeScript szamolja)
+// isTwoSides: true eseten a 2 elem a tabla ket szelen
 // Visszaadja a kovetkezo csoport start poziciojat pixelben
-function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, boardWPx, startTopPx) {
+function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, boardWPx, startTopPx, rowConfigs, isTwoSides) {
   if (!grp || grp.artLayers.length === 0) return startTopPx;
 
   var availableW = boardWPx - 2 * marginPx;
 
-  // Hany kep fer egy sorba
+  // Hany kep fer egy sorba (alap — rowConfigs felulirja soronkent)
   var columns = Math.floor((availableW + gapHPx) / (photoWPx + gapHPx));
   if (columns < 1) columns = 1;
 
   var layerCount = grp.artLayers.length;
-  var rows = Math.ceil(layerCount / columns);
 
-  log("[JSX] Grid: " + columns + " oszlop x " + rows + " sor, " + layerCount + " layer, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px, kep=" + photoWPx + "x" + photoHPx + "px");
+  // Ha rowConfigs letezik, abbol szamolunk
+  var useRowConfigs = rowConfigs && rowConfigs.length > 0;
+  var rows;
+  if (useRowConfigs) {
+    rows = rowConfigs.length;
+    log("[JSX] Grid (rowConfigs): " + rows + " sor, " + layerCount + " layer, twoSides=" + (isTwoSides ? "true" : "false"));
+  } else {
+    rows = Math.ceil(layerCount / columns);
+    log("[JSX] Grid: " + columns + " oszlop x " + rows + " sor, " + layerCount + " layer, gapH=" + gapHPx + "px, gapV=" + gapVPx + "px, kep=" + photoWPx + "x" + photoHPx + "px");
+  }
 
   var currentRow = 0;
   var currentCol = 0;
   var topPx = startTopPx;
 
+  // Aktualis sor oszlopszama
+  var colsThisRow = useRowConfigs ? rowConfigs[0] : columns;
+
   for (var i = grp.artLayers.length - 1; i >= 0; i--) {
     var layer = grp.artLayers[i];
 
     try {
-      // Aktualis sor elemszama (utolso sor rovidebb lehet)
-      var remainingItems = layerCount - (currentRow * columns);
-      var itemsInThisRow = (remainingItems >= columns) ? columns : remainingItems;
+      // Aktualis sor elemszama
+      var itemsInThisRow;
+      if (useRowConfigs) {
+        itemsInThisRow = colsThisRow;
+      } else {
+        var remainingItems = layerCount - (currentRow * columns);
+        itemsInThisRow = (remainingItems >= columns) ? columns : remainingItems;
+      }
 
       // Igazitas pixelben (left/center/right)
       var totalRowW = itemsInThisRow * photoWPx + (itemsInThisRow - 1) * gapHPx;
@@ -114,7 +132,17 @@ function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, 
       }
 
       // Celpozicio pixelben
-      var leftPx = offsetX + currentCol * (photoWPx + gapHPx);
+      var leftPx;
+      if (isTwoSides && colsThisRow === 2) {
+        // Two-sides: 1. elem bal szelen, 2. elem jobb szelen
+        if (currentCol === 0) {
+          leftPx = marginPx;
+        } else {
+          leftPx = boardWPx - marginPx - photoWPx;
+        }
+      } else {
+        leftPx = offsetX + currentCol * (photoWPx + gapHPx);
+      }
 
       // Layer kivalasztasa es pozicionalasa
       selectLayerById(layer.id);
@@ -134,10 +162,16 @@ function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, 
 
       // Kovetkezo pozicio
       currentCol++;
-      if (currentCol >= columns) {
+      if (currentCol >= colsThisRow) {
         currentCol = 0;
         currentRow++;
         topPx += photoHPx + gapVPx;
+        // Kovetkezo sor oszlopszama
+        if (useRowConfigs && currentRow < rowConfigs.length) {
+          colsThisRow = rowConfigs[currentRow];
+        } else if (!useRowConfigs) {
+          colsThisRow = columns;
+        }
       }
     } catch (e) {
       log("[JSX] WARN: Layer pozicionalas sikertelen (" + layer.name + "): " + e.message);
@@ -209,21 +243,33 @@ function _doArrangeGrid() {
     var teacherEndY = marginPx;
     var studentStartY = marginPx;
 
+    // rowConfigs tombokbol (TypeScript szamolja, JSON-ben jon)
+    var teacherRowConfigs = _data.teacherRowConfigs || null;
+    var studentRowConfigs = _data.studentRowConfigs || null;
+    var teacherTwoSides = _data.teacherTwoSides || false;
+    var studentTwoSides = _data.studentTwoSides || false;
+
     // 1. Tanarok FENTROL (startY = marginPx)
     if (teachersGroup && teachersGroup.artLayers.length > 0) {
-      log("[JSX] Tanar csoport (FENT): " + teachersGroup.artLayers.length + " layer, meret: " + tW + "x" + tH + "px" + (teacherActual ? " (bounds)" : " (fallback)"));
-      teacherEndY = _arrangeGroupGridPx(teachersGroup, tW, tH, marginPx, gapHPx, gapVPx, boardWPx, marginPx);
+      log("[JSX] Tanar csoport (FENT): " + teachersGroup.artLayers.length + " layer, meret: " + tW + "x" + tH + "px" + (teacherActual ? " (bounds)" : " (fallback)") + (teacherRowConfigs ? ", rowConfigs=[" + teacherRowConfigs.join(",") + "]" : ""));
+      teacherEndY = _arrangeGroupGridPx(teachersGroup, tW, tH, marginPx, gapHPx, gapVPx, boardWPx, marginPx, teacherRowConfigs, teacherTwoSides);
     } else {
       log("[JSX] Tanar csoport ures vagy nem talalhato");
     }
 
     // 2. Diakok ALULROL (startY szamitas: alulrol felfelve)
     if (studentsGroup && studentsGroup.artLayers.length > 0) {
-      var sRows = _calcRows(studentsGroup, sW, marginPx, gapHPx, boardWPx);
+      // Ha rowConfigs van, abbol szamoljuk a sorokat
+      var sRows;
+      if (studentRowConfigs && studentRowConfigs.length > 0) {
+        sRows = studentRowConfigs.length;
+      } else {
+        sRows = _calcRows(studentsGroup, sW, marginPx, gapHPx, boardWPx);
+      }
       var studentGridH = sRows * sH + (sRows - 1) * gapVPx;
       studentStartY = boardHPx - marginPx - gapVPx - studentGridH;
-      log("[JSX] Diak csoport (LENT): " + studentsGroup.artLayers.length + " layer, meret: " + sW + "x" + sH + "px, " + sRows + " sor, startY=" + studentStartY + "px (margin+gap alulrol)" + (studentActual ? " (bounds)" : " (fallback)"));
-      _arrangeGroupGridPx(studentsGroup, sW, sH, marginPx, gapHPx, gapVPx, boardWPx, studentStartY);
+      log("[JSX] Diak csoport (LENT): " + studentsGroup.artLayers.length + " layer, meret: " + sW + "x" + sH + "px, " + sRows + " sor, startY=" + studentStartY + "px (margin+gap alulrol)" + (studentActual ? " (bounds)" : " (fallback)") + (studentRowConfigs ? ", rowConfigs=[" + studentRowConfigs.join(",") + "]" : ""));
+      _arrangeGroupGridPx(studentsGroup, sW, sH, marginPx, gapHPx, gapVPx, boardWPx, studentStartY, studentRowConfigs, studentTwoSides);
     } else {
       log("[JSX] Diak csoport ures vagy nem talalhato");
       studentStartY = boardHPx - marginPx;

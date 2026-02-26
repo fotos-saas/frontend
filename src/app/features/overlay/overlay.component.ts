@@ -190,6 +190,7 @@ export class OverlayComponent implements OnInit {
       items: [
         { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Fotó feltöltése', accent: 'green' },
         { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', accent: 'green' },
+        { id: 'rename-layer-ids', icon: ICONS.REPLACE, label: 'Layer ID frissítés', tooltip: 'Régi layer ID-k cseréje az új DB ID-kra', accent: 'amber' },
         { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
         { id: 'sort-menu', icon: ICONS.ARROW_DOWN_AZ, label: 'Rendezés', tooltip: 'ABC / fiú-lány / rácsba rendezés', accent: 'blue' },
         { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },
@@ -277,6 +278,10 @@ export class OverlayComponent implements OnInit {
     }
     this.closeSubmenu();
 
+    if (commandId === 'rename-layer-ids') {
+      this.renameLayerIds();
+      return;
+    }
     if (commandId === 'link-layers') {
       this.runJsxAction(commandId, 'actions/link-selected.jsx');
       return;
@@ -740,21 +745,114 @@ export class OverlayComponent implements OnInit {
   }
 
   syncPhotos(mode: 'all' | 'missing' | 'selected'): void {
+    console.log('🔴 syncPhotos CALLED, mode:', mode);
     this.closeSubmenu();
     this.doSyncPhotos(mode);
   }
 
+  private async renameLayerIds(): Promise<void> {
+    this.busyCommand.set('rename-layer-ids');
+    try {
+      await this.doRenameLayerIds();
+    } finally {
+      this.ngZone.run(() => this.busyCommand.set(null));
+    }
+  }
+
+  private async doRenameLayerIds(): Promise<void> {
+    // 1. Összes layer név lekérése a PSD-ből (nem csak kijelöltek)
+    const allNames = await this.getImageLayerNames();
+    if (allNames.length === 0) {
+      alert('Nincs kép layer a PSD-ben!');
+      return;
+    }
+
+    // 2. Persons betöltése
+    let personList = this.persons();
+    if (personList.length === 0) {
+      let pid = this.context().projectId || this.lastProjectId;
+
+      // Fallback: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
+      if (!pid && window.electronAPI) {
+        try {
+          const result = await window.electronAPI.overlay.getProjectId();
+          if (result.projectId) {
+            pid = result.projectId;
+            this.lastProjectId = pid;
+          }
+        } catch { /* ignore */ }
+      }
+
+      if (pid) {
+        try {
+          const res = await firstValueFrom(
+            this.http.get<{ data: PersonItem[] }>(`${environment.apiUrl}/partner/projects/${pid}/persons`),
+          );
+          personList = res.data || [];
+          this.ngZone.run(() => this.persons.set(personList));
+        } catch { /* ignore */ }
+      }
+    }
+
+    // 3. Matching: slug → person
+    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[_\-]+/g, ' ').trim();
+    const renameMap: Array<{ old: string; new: string }> = [];
+    const lines: string[] = [];
+    const unmatched: string[] = [];
+
+    for (const layerName of allNames) {
+      const slug = layerName.replace(/---\d+$/, '');
+      const normalizedSlug = normalize(slug);
+      const person = personList.find(p => normalize(p.name) === normalizedSlug);
+      if (person) {
+        const newName = `${slug}---${person.id}`;
+        if (newName !== layerName) {
+          renameMap.push({ old: layerName, new: newName });
+          lines.push(`✅ ${person.name}: ${layerName} → ${newName}`);
+        }
+      } else {
+        unmatched.push(layerName);
+      }
+    }
+
+    // 4. Alert — csak ami nem matchelt
+    if (unmatched.length > 0) {
+      const unmatchedNames = unmatched.map(u => `❌ ${u}`).join('\n');
+      alert(`${renameMap.length} átnevezve, ${unmatched.length} NEM TALÁLVA:\n\n${unmatchedNames}`);
+    }
+
+    if (renameMap.length === 0) {
+      return;
+    }
+
+    // 5. JSX futtatás — layerek átnevezése a PSD-ben
+    // jsonData objektumként → temp JSON fájlba kerül (nem CONFIG override, mert nem "allSimple")
+    const result = await window.electronAPI?.photoshop.runJsx({
+      scriptName: 'actions/rename-layers.jsx',
+      jsonData: { renameMap },
+    });
+    console.log('[RENAME] result:', result);
+
+    if (unmatched.length === 0) {
+      const parsed = result?.output ? JSON.parse(result.output) : null;
+      alert(`✅ Mind átnevezve! (${parsed?.renamed ?? renameMap.length} layer)`);
+    }
+  }
+
   /** Fotó szinkronizálás — az overlay önállóan kezeli, PS JSX + backend API */
   private async doSyncPhotos(mode: 'all' | 'missing' | 'selected'): Promise<void> {
-    if (!window.electronAPI) return;
+    if (!window.electronAPI) { console.log('[SYNC] no electronAPI'); return; }
 
     // 1. Layer nevek lekérése PS-ből
+    console.log('[SYNC] mode:', mode);
     let layerNames: string[];
     if (mode === 'selected') {
       layerNames = await this.getFreshSelectedLayerNames();
-      if (layerNames.length === 0) return;
+      console.log('[SYNC] selected layerNames:', layerNames);
+      if (layerNames.length === 0) { console.log('[SYNC] ABORT: no selected layers'); return; }
     } else {
       layerNames = await this.getImageLayerNames();
+      console.log('[SYNC] all/missing layerNames count:', layerNames.length);
     }
 
     // 2. Layer névből person ID kinyerése (slug---ID formátum)
@@ -765,38 +863,57 @@ export class OverlayComponent implements OnInit {
         layerPersonMap.set(parseInt(match[1], 10), name);
       }
     }
-    if (layerPersonMap.size === 0) return;
+    console.log('[SYNC] layerPersonMap size:', layerPersonMap.size);
+    if (layerPersonMap.size === 0) { console.log('[SYNC] ABORT: no person IDs in layer names'); return; }
 
     // 3. Person-ök fotó URL-jének lekérése
     const personIds = Array.from(layerPersonMap.keys());
     let persons = this.persons();
+    console.log('[SYNC] cached persons:', persons.length, 'needed IDs:', personIds);
 
     // Ha nincs betöltve vagy hiányzik valaki, töltsük be a backendről
-    const pid = this.context().projectId || this.lastProjectId;
-    if (pid && (persons.length === 0 || personIds.some(id => !persons.find(p => p.id === id)))) {
+    let pid = this.context().projectId || this.lastProjectId;
+
+    // Fallback: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
+    if (!pid && window.electronAPI) {
+      try {
+        const result = await window.electronAPI.overlay.getProjectId();
+        if (result.projectId) {
+          pid = result.projectId;
+          this.lastProjectId = pid;
+        }
+      } catch { /* ignore */ }
+    }
+
+    console.log('[SYNC] projectId:', pid);
+    if (pid) {
       try {
         const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
+        console.log('[SYNC] fetching persons from:', url);
         const res = await firstValueFrom(this.http.get<{ data: PersonItem[] }>(url));
         persons = res.data || [];
+        console.log('[SYNC] fetched persons:', persons.length);
         this.ngZone.run(() => this.persons.set(persons));
-      } catch { /* fallback a meglévő listára */ }
+      } catch (e) { console.log('[SYNC] fetch persons error:', e); }
     }
 
     // 4. Fotó URL-ek összegyűjtése
     const photosToSync: Array<{ layerName: string; photoUrl: string }> = [];
     for (const [personId, layerName] of layerPersonMap) {
       const person = persons.find(p => p.id === personId);
+      console.log('[SYNC] person', personId, '→', person?.name, 'photoUrl:', person?.photoUrl?.substring(0, 50));
       if (person?.photoUrl) {
         photosToSync.push({ layerName, photoUrl: person.photoUrl });
       }
     }
 
-    if (photosToSync.length === 0) return;
+    console.log('[SYNC] photosToSync:', photosToSync.length);
+    if (photosToSync.length === 0) { console.log('[SYNC] ABORT: no photos to sync'); return; }
 
     // 5. Behelyezés a Photoshopba
     this.busyCommand.set('sync-photos');
     try {
-      await window.electronAPI.photoshop.placePhotos({ layers: photosToSync });
+      await window.electronAPI.photoshop.placePhotos({ layers: photosToSync, syncBorder: this.syncWithBorder() });
     } finally {
       this.ngZone.run(() => this.busyCommand.set(null));
     }

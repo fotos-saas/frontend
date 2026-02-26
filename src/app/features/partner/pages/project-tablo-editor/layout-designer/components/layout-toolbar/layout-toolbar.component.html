@@ -1,0 +1,434 @@
+    <div class="layout-toolbar">
+      <!-- Bal: dokumentum info + grid + igazítás -->
+      <div class="layout-toolbar__left">
+        @if (state.documentSizeCm(); as size) {
+          <span class="layout-toolbar__doc-info">
+            {{ size.widthCm }} &times; {{ size.heightCm }} cm
+          </span>
+        }
+
+        @if (state.sourceLabel(); as label) {
+          <div class="source-picker">
+            <button
+              class="source-badge"
+              [class.source-badge--live]="label === 'Friss PSD beolvasás'"
+              (click)="pickerOpen.set(!pickerOpen())"
+            >
+              @if (label === 'Friss PSD beolvasás') {
+                <lucide-icon [name]="ICONS.MONITOR" [size]="13" />
+                <span class="source-badge__type">Élő PSD</span>
+              } @else {
+                <lucide-icon [name]="ICONS.HISTORY" [size]="13" />
+                <span class="source-badge__type">Pillanatkép:</span>
+                <span class="source-badge__name">{{ label }}</span>
+              }
+              @if (state.sourceDate()) {
+                <span class="source-badge__date">{{ formatDate(state.sourceDate()) }}</span>
+              }
+              <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="11" class="source-badge__chevron" />
+            </button>
+          </div>
+        }
+
+        <div class="layout-toolbar__separator"></div>
+
+        <button
+          class="toolbar-btn toolbar-btn--grid"
+          [class.toolbar-btn--active]="gridService.gridEnabled()"
+          (click)="gridService.cycleGridMode()"
+          matTooltip="Rács mód: {{ gridService.gridModeLabel() }}"
+        >
+          <lucide-icon [name]="ICONS.GRID" [size]="16" />
+          @if (gridService.gridEnabled()) {
+            <span class="toolbar-btn__label">{{ gridService.gridModeLabel() }}</span>
+          }
+        </button>
+
+        <button
+          class="toolbar-btn"
+          [disabled]="!gridService.gridEnabled()"
+          (click)="gridService.snapAllToGrid()"
+          matTooltip="Mindenkit rácsba igazít"
+        >
+          <lucide-icon [name]="ICONS.WAND" [size]="16" />
+        </button>
+
+        <div class="layout-toolbar__separator"></div>
+
+        <button
+          class="toolbar-btn"
+          [disabled]="!state.canUndo()"
+          (click)="state.undo()"
+          matTooltip="Visszavonás (⌘Z)"
+        >
+          <lucide-icon [name]="ICONS.UNDO" [size]="16" />
+        </button>
+        <button
+          class="toolbar-btn"
+          [disabled]="!state.canRedo()"
+          (click)="state.redo()"
+          matTooltip="Újra (⌘⇧Z)"
+        >
+          <lucide-icon [name]="ICONS.REDO" [size]="16" />
+        </button>
+
+        <div class="layout-toolbar__separator"></div>
+
+        <!-- Igazítás collapse trigger -->
+        <button
+          class="toolbar-btn"
+          [class.toolbar-btn--active]="alignPanelOpen()"
+          (click)="alignPanelOpen.set(!alignPanelOpen())"
+          matTooltip="Igazítás"
+        >
+          <lucide-icon [name]="ICONS.MOVE" [size]="16" />
+        </button>
+
+        <!-- Igazítás gombok (collapse panel) -->
+        <div class="align-collapse" [class.align-collapse--open]="alignPanelOpen()">
+          <div class="align-collapse__inner">
+            <!-- Vízszintes igazítás -->
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 2"
+              (click)="actions.alignLeft()"
+              matTooltip="Balra igazítás"
+            >
+              <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="15" />
+            </button>
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 2"
+              (click)="actions.alignCenterHorizontal()"
+              matTooltip="Vízszintes középre"
+            >
+              <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="15" />
+            </button>
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 2"
+              (click)="actions.alignRight()"
+              matTooltip="Jobbra igazítás"
+            >
+              <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="15" />
+            </button>
+
+            <div class="align-collapse__sep"></div>
+
+            <!-- Függőleges igazítás -->
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 2"
+              (click)="actions.alignTop()"
+              matTooltip="Tetejére igazítás"
+            >
+              <lucide-icon [name]="ICONS.ALIGN_START_H" [size]="15" />
+            </button>
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 2"
+              (click)="actions.alignCenterVertical()"
+              matTooltip="Függőleges középre"
+            >
+              <lucide-icon [name]="ICONS.ALIGN_CENTER_H" [size]="15" />
+            </button>
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 2"
+              (click)="actions.alignBottom()"
+              matTooltip="Aljára igazítás"
+            >
+              <lucide-icon [name]="ICONS.ALIGN_END_H" [size]="15" />
+            </button>
+
+            <div class="align-collapse__sep"></div>
+
+            <!-- Dokumentum középre -->
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 1"
+              (click)="actions.centerOnDocument()"
+              matTooltip="Dokumentum közepére"
+            >
+              <lucide-icon [name]="ICONS.MOVE" [size]="15" />
+            </button>
+
+            <div class="align-collapse__sep"></div>
+
+            <!-- Elosztás / rendezés -->
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 3"
+              (click)="actions.distributeHorizontal()"
+              matTooltip="Vízszintes elosztás"
+            >
+              <lucide-icon [name]="ICONS.ALIGN_H_DISTRIBUTE" [size]="15" />
+            </button>
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 3"
+              (click)="actions.distributeVertical()"
+              matTooltip="Függőleges elosztás"
+            >
+              <lucide-icon [name]="ICONS.ALIGN_V_DISTRIBUTE" [size]="15" />
+            </button>
+
+            <div class="align-collapse__sep"></div>
+
+            <button
+              class="toolbar-btn toolbar-btn--compact"
+              [disabled]="state.selectionCount() < 2"
+              (click)="actions.arrangeToGrid()"
+              matTooltip="Rácsba rendezés"
+            >
+              <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="15" />
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Source picker dropdown (toolbar szintjén, overflow: hidden miatt) -->
+      @if (pickerOpen()) {
+        <div class="source-picker__backdrop" (click)="pickerOpen.set(false)"></div>
+        <div class="source-picker__panel">
+          <div class="source-picker__header">Forrás váltása</div>
+
+          <!-- Élő PSD opció -->
+          <button
+            class="source-picker__item"
+            [class.source-picker__item--active]="state.sourceLabel() === 'Friss PSD beolvasás'"
+            (click)="onPickLivePsd()"
+          >
+            <lucide-icon [name]="ICONS.MONITOR" [size]="14" class="source-picker__icon--live" />
+            <div class="source-picker__item-info">
+              <span class="source-picker__item-name">Friss PSD beolvasás</span>
+              <span class="source-picker__item-desc">Photoshop aktuális állapota</span>
+            </div>
+          </button>
+
+          <div class="source-picker__sep"></div>
+
+          <!-- Snapshot-ok -->
+          @for (snap of snapshots(); track snap.fileName) {
+            <button
+              class="source-picker__item"
+              [class.source-picker__item--active]="state.sourceLabel() === snap.snapshotName"
+              [disabled]="switchingSnapshot()"
+              (click)="onPickSnapshot(snap)"
+            >
+              <lucide-icon [name]="ICONS.HISTORY" [size]="14" />
+              <div class="source-picker__item-info">
+                <span class="source-picker__item-name">{{ snap.snapshotName }}</span>
+                <span class="source-picker__item-meta">
+                  {{ formatDate(snap.createdAt) }} · {{ snap.personCount }} layer
+                </span>
+              </div>
+              @if (state.sourceLabel() === snap.snapshotName) {
+                <lucide-icon [name]="ICONS.CHECK" [size]="14" class="source-picker__check" />
+              }
+            </button>
+          }
+
+          @if (snapshots().length === 0) {
+            <div class="source-picker__empty">Nincs elérhető pillanatkép</div>
+          }
+        </div>
+      }
+
+      <!-- Jobb: szinkronizálás + nevek + frissítés + mentés + bezárás -->
+      <div class="layout-toolbar__right">
+        <button
+          class="toolbar-btn toolbar-btn--sync"
+          [disabled]="syncing()"
+          [class.is-syncing]="syncing()"
+          (click)="syncClicked.emit()"
+          matTooltip="Fotók szinkronizálása a Photoshopba"
+        >
+          <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="16" />
+          @if (!syncing()) {
+            <span>Szinkron</span>
+          } @else {
+            <span>Szinkronizálás...</span>
+          }
+        </button>
+
+        <!-- Nevek igazítása gomb + beállítások -->
+        <div class="names-group">
+          <button
+            class="toolbar-btn toolbar-btn--names"
+            [disabled]="arrangingNames()"
+            [class.is-arranging]="arrangingNames()"
+            (click)="arrangeNamesClicked.emit()"
+            matTooltip="Nevek igazítása a beállítások szerint"
+          >
+            <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="16" />
+            @if (!arrangingNames()) {
+              <span>Nevek</span>
+            } @else {
+              <span>Rendezés...</span>
+            }
+          </button>
+          <button
+            class="toolbar-btn toolbar-btn--names-settings"
+            (click)="nameSettingsOpen.set(!nameSettingsOpen())"
+            matTooltip="Név beállítások"
+          >
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="12" />
+          </button>
+        </div>
+
+        <!-- Pozíciók gomb + beállítások -->
+        <div class="names-group">
+          <button
+            class="toolbar-btn toolbar-btn--positions"
+            [disabled]="updatingPositions()"
+            [class.is-updating]="updatingPositions()"
+            (click)="updatePositionsClicked.emit()"
+            matTooltip="Pozíció és felirat frissítése"
+          >
+            <lucide-icon [name]="ICONS.TAG" [size]="16" />
+            @if (!updatingPositions()) {
+              <span>Pozíciók</span>
+            } @else {
+              <span>Frissítés...</span>
+            }
+          </button>
+          <button
+            class="toolbar-btn toolbar-btn--positions-settings"
+            (click)="positionSettingsOpen.set(!positionSettingsOpen())"
+            matTooltip="Pozíció beállítások"
+          >
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="12" />
+          </button>
+        </div>
+
+        @if (nameSettingsOpen()) {
+          <div class="name-settings__backdrop" (click)="nameSettingsOpen.set(false)"></div>
+          <div class="name-settings__panel">
+            <div class="name-settings__title">Név beállítások</div>
+
+            <label class="name-settings__label">Rés a kép aljától (cm)</label>
+            <input
+              class="name-settings__input"
+              type="number" step="0.1" min="0" max="5"
+              [value]="nameGapCm()"
+              (change)="nameGapChanged.emit(+$any($event.target).value)"
+            />
+
+            <label class="name-settings__label">Sortörés</label>
+            <select
+              class="name-settings__select"
+              (change)="nameBreakChanged.emit(+$any($event.target).value)"
+            >
+              <option value="1" [selected]="nameBreakAfter() === 1">1. szó után</option>
+              <option value="2" [selected]="nameBreakAfter() === 2">2. szó után</option>
+              <option value="0" [selected]="nameBreakAfter() === 0">Nincs törés</option>
+            </select>
+
+            <label class="name-settings__label">Igazítás</label>
+            <div class="name-settings__align">
+              <button
+                class="name-settings__align-btn"
+                [class.name-settings__align-btn--active]="textAlign() === 'left'"
+                (click)="textAlignChanged.emit('left')"
+              >
+                <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="14" />
+              </button>
+              <button
+                class="name-settings__align-btn"
+                [class.name-settings__align-btn--active]="textAlign() === 'center'"
+                (click)="textAlignChanged.emit('center')"
+              >
+                <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="14" />
+              </button>
+              <button
+                class="name-settings__align-btn"
+                [class.name-settings__align-btn--active]="textAlign() === 'right'"
+                (click)="textAlignChanged.emit('right')"
+              >
+                <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="14" />
+              </button>
+            </div>
+
+            <div class="name-settings__sep"></div>
+
+            <button
+              class="name-settings__apply-btn"
+              [disabled]="arrangingNames()"
+              (click)="arrangeNamesClicked.emit()"
+            >
+              <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+              @if (!arrangingNames()) {
+                <span>Nevek rendezése</span>
+              } @else {
+                <span>Rendezés...</span>
+              }
+            </button>
+          </div>
+        }
+
+        @if (positionSettingsOpen()) {
+          <div class="name-settings__backdrop" (click)="positionSettingsOpen.set(false)"></div>
+          <div class="name-settings__panel position-settings__panel">
+            <div class="name-settings__title">Pozíció beállítások</div>
+
+            <label class="name-settings__label">Rés a név aljától (cm)</label>
+            <input
+              class="name-settings__input"
+              type="number" step="0.05" min="0" max="3"
+              [value]="positionGapCm()"
+              (change)="positionGapChanged.emit(+$any($event.target).value)"
+            />
+
+            <label class="name-settings__label">Font méret (pt)</label>
+            <input
+              class="name-settings__input"
+              type="number" step="1" min="6" max="100"
+              [value]="positionFontSize()"
+              (change)="positionFontSizeChanged.emit(+$any($event.target).value)"
+            />
+
+            <div class="name-settings__sep"></div>
+
+            <button
+              class="name-settings__apply-btn position-settings__apply-btn"
+              [disabled]="updatingPositions()"
+              (click)="updatePositionsClicked.emit()"
+            >
+              <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+              @if (!updatingPositions()) {
+                <span>Pozíciók frissítése</span>
+              } @else {
+                <span>Frissítés...</span>
+              }
+            </button>
+          </div>
+        }
+        <button
+          class="toolbar-btn toolbar-btn--refresh"
+          [disabled]="refreshing()"
+          [class.is-refreshing]="refreshing()"
+          (click)="refreshClicked.emit()"
+          matTooltip="Frissítés Photoshopból"
+        >
+          <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
+        </button>
+        <button
+          class="toolbar-btn toolbar-btn--save"
+          [disabled]="!state.hasChanges()"
+          (click)="saveClicked.emit()"
+          matTooltip="Módosítások mentése"
+        >
+          <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+          <span>Mentés</span>
+        </button>
+        <button
+          class="toolbar-btn toolbar-btn--close"
+          (click)="closeClicked.emit()"
+          matTooltip="Bezárás"
+        >
+          <lucide-icon [name]="ICONS.X" [size]="18" />
+        </button>
+      </div>
+    </div>

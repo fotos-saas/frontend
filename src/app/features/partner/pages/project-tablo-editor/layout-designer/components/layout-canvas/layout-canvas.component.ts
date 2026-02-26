@@ -19,77 +19,8 @@ const MARQUEE_THRESHOLD = 3;
   selector: 'app-layout-canvas',
   standalone: true,
   imports: [LayoutLayerComponent, LayoutGridOverlayComponent, LayoutFloatingToolbarComponent],
-  template: `
-    <div
-      class="layout-canvas-wrapper"
-      (mousedown)="onWrapperMouseDown($event)"
-    >
-      <div
-        class="layout-canvas"
-        [style.width.px]="scaleInfo().displayWidth"
-        [style.height.px]="scaleInfo().displayHeight"
-        [style.left.px]="canvasLeft()"
-        [style.top.px]="canvasTop()"
-      >
-        <app-layout-grid-overlay />
-        @for (layer of state.layers(); track layer.layerId) {
-          <app-layout-layer
-            [layer]="layer"
-            [scale]="scaleInfo().scale"
-            [isSelected]="isLayerSelected(layer.layerId)"
-          />
-        }
-      </div>
-
-      @if (marqueeRect(); as rect) {
-        <div
-          class="marquee-selection"
-          [style.left.px]="rect.left"
-          [style.top.px]="rect.top"
-          [style.width.px]="rect.width"
-          [style.height.px]="rect.height"
-        ></div>
-      }
-
-      <app-layout-floating-toolbar
-        [linking]="linking()"
-        (uploadPhotoClicked)="uploadPhotoClicked.emit()"
-        (linkLayersClicked)="linkLayersClicked.emit()"
-        (unlinkLayersClicked)="unlinkLayersClicked.emit()"
-      />
-    </div>
-  `,
-  styles: [`
-    :host {
-      display: block;
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .layout-canvas-wrapper {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
-
-    .layout-canvas {
-      position: absolute;
-      background: #ffffff;
-      box-shadow:
-        0 4px 24px rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-    }
-
-    .marquee-selection {
-      position: absolute;
-      background: rgba(124, 58, 237, 0.1);
-      border: 1px solid rgba(124, 58, 237, 0.5);
-      pointer-events: none;
-      z-index: 200;
-    }
-  `],
+  templateUrl: './layout-canvas.component.html',
+  styleUrl: './layout-canvas.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayoutCanvasComponent {
@@ -249,8 +180,6 @@ export class LayoutCanvasComponent {
     const layers = this.state.layers();
 
     // Marquee screen px → PSD koordináta konverzió
-    // A marquee koordináták a canvas-wrapper-hez (canvasArea) relatívak.
-    // Az offsetX/Y az overlay-hez relatív → le kell vonni a sidebar és toolbar+padding offsetet.
     const canvasLeft = si.offsetX - LayoutCanvasComponent.SIDEBAR_WIDTH;
     const canvasTopPx = si.offsetY - LayoutCanvasComponent.TOOLBAR_HEIGHT;
 

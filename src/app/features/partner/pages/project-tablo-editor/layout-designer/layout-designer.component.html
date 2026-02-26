@@ -1,0 +1,128 @@
+    <div
+      class="layout-designer-overlay"
+      #overlayEl
+    >
+      @if (loading()) {
+        <div class="layout-designer__loading">
+          <lucide-icon [name]="ICONS.LOADER" [size]="32" class="spin" />
+          <span>Pillanatkép betöltése...</span>
+        </div>
+      } @else if (loadError()) {
+        <div class="layout-designer__error">
+          <lucide-icon [name]="ICONS.X_CIRCLE" [size]="32" />
+          <span>{{ loadError() }}</span>
+          <button class="designer-btn" (click)="close()">Bezárás</button>
+        </div>
+      } @else {
+        <app-layout-toolbar
+          [refreshing]="refreshing()"
+          [syncing]="psBridge.syncingPhotos()"
+          [arrangingNames]="psBridge.arrangingNames()"
+          [nameGapCm]="ps.nameGapCm()"
+          [nameBreakAfter]="ps.nameBreakAfter()"
+          [textAlign]="ps.textAlign()"
+          [updatingPositions]="psBridge.updatingPositions()"
+          [positionGapCm]="ps.positionGapCm()"
+          [positionFontSize]="ps.positionFontSize()"
+          [snapshots]="snapshots()"
+          [switchingSnapshot]="switchingSnapshot()"
+          (refreshClicked)="refresh()"
+          (syncClicked)="psBridge.syncAllPhotos()"
+          (arrangeNamesClicked)="psBridge.arrangeNames()"
+          (updatePositionsClicked)="psBridge.updatePositions()"
+          (nameGapChanged)="ps.setNameGap($event)"
+          (nameBreakChanged)="ps.setNameBreakAfter($event)"
+          (textAlignChanged)="ps.setTextAlign($event)"
+          (positionGapChanged)="ps.setPositionGap($event)"
+          (positionFontSizeChanged)="ps.setPositionFontSize($event)"
+          (snapshotSelected)="switchSnapshot($event)"
+          (saveClicked)="save()"
+          (closeClicked)="close()"
+        />
+        <div class="layout-designer__content">
+          <app-layout-sort-panel
+            [generatingSample]="sampleActions.generatingSample()"
+            [generatingFinal]="sampleActions.generatingFinal()"
+            [finalMode]="sampleActions.finalMode()"
+            [sampleLargeSize]="sampleLargeSize()"
+            [sampleWatermarkColor]="ps.sampleWatermarkColor()"
+            [sampleWatermarkOpacity]="ps.sampleWatermarkOpacity()"
+            [sampleSuccess]="sampleActions.sampleSuccess()"
+            [sampleError]="sampleActions.sampleError()"
+            [extraNames]="extraNames()"
+            [insertingExtraNames]="psBridge.insertingExtraNames()"
+            [extraNamesSuccess]="psBridge.extraNamesSuccess()"
+            [extraNamesError]="psBridge.extraNamesError()"
+            (openActions)="showActionsDialog.set(true)"
+            (openCustomDialog)="showCustomDialog.set(true)"
+            (generateSample)="sampleActions.onGenerateSample()"
+            (generateFinal)="sampleActions.onGenerateFinal()"
+            (cycleFinalMode)="sampleActions.onCycleFinalMode()"
+            (sampleLargeSizeChange)="sampleActions.onLargeSizeChange($event)"
+            (watermarkColorChange)="sampleActions.onWatermarkColorChange($event)"
+            (opacityChange)="sampleActions.onCycleOpacity()"
+            (openProject)="psBridge.onOpenProject()"
+            (openWorkDir)="psBridge.onOpenWorkDir()"
+            (insertExtraNames)="psBridge.onInsertExtraNames($event)"
+            (openExtraNamesDialog)="showExtraNamesDialog.set(true)"
+          />
+          <div class="layout-designer__canvas-area" #canvasArea>
+            <app-layout-canvas
+              [linking]="psBridge.linking()"
+              (uploadPhotoClicked)="openPhotoDialog()"
+              (linkLayersClicked)="psBridge.onLinkLayers()"
+              (unlinkLayersClicked)="psBridge.onUnlinkLayers()"
+            />
+          </div>
+        </div>
+        @if (showCustomDialog()) {
+          <app-layout-sort-custom-dialog (close)="showCustomDialog.set(false)" />
+        }
+        @if (showPhotoDialog(); as dialogPerson) {
+          <app-layout-photo-upload-dialog
+            [person]="dialogPerson"
+            [projectId]="projectId()"
+            (close)="showPhotoDialog.set(null)"
+            (photoUploaded)="psBridge.onPhotoUploaded($event)"
+          />
+        }
+        @if (showBulkPhotoDialog()) {
+          <app-layout-photo-bulk-dialog
+            [persons]="bulkDialogPersons()"
+            [projectId]="projectId()"
+            (close)="showBulkPhotoDialog.set(false)"
+            (photosAssigned)="psBridge.onBulkPhotosAssigned($event)"
+          />
+        }
+        @if (showActionsDialog()) {
+          <app-layout-actions-dialog
+            [persons]="actionPersons()"
+            [preSelectedPersonIds]="preSelectedActionPersonIds()"
+            (close)="showActionsDialog.set(false)"
+            (executed)="onActionsExecuted()"
+          />
+        }
+        @if (showExtraNamesDialog() && extraNames()) {
+          <app-extra-names-dialog
+            [extraNames]="extraNames()!"
+            (close)="showExtraNamesDialog.set(false)"
+            (insert)="psBridge.onExtraNamesDialogInsert($event)"
+          />
+        }
+
+        <!-- Command Overlay (dupla Ctrl) -->
+        <app-layout-command-overlay
+          (commandExecuted)="onOverlayCommand($event)"
+        />
+
+        <!-- FAB: Command Overlay toggle -->
+        <button
+          class="command-fab"
+          (click)="commandOverlay()?.toggle()"
+          matTooltip="Parancsok (Ctrl Ctrl)"
+          matTooltipPosition="left"
+        >
+          <lucide-icon [name]="ICONS.COMMAND" [size]="20" />
+        </button>
+      }
+    </div>

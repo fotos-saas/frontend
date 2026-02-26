@@ -1,0 +1,38 @@
+    <div
+      class="layout-canvas-wrapper"
+      (mousedown)="onWrapperMouseDown($event)"
+    >
+      <div
+        class="layout-canvas"
+        [style.width.px]="scaleInfo().displayWidth"
+        [style.height.px]="scaleInfo().displayHeight"
+        [style.left.px]="canvasLeft()"
+        [style.top.px]="canvasTop()"
+      >
+        <app-layout-grid-overlay />
+        @for (layer of state.layers(); track layer.layerId) {
+          <app-layout-layer
+            [layer]="layer"
+            [scale]="scaleInfo().scale"
+            [isSelected]="isLayerSelected(layer.layerId)"
+          />
+        }
+      </div>
+
+      @if (marqueeRect(); as rect) {
+        <div
+          class="marquee-selection"
+          [style.left.px]="rect.left"
+          [style.top.px]="rect.top"
+          [style.width.px]="rect.width"
+          [style.height.px]="rect.height"
+        ></div>
+      }
+
+      <app-layout-floating-toolbar
+        [linking]="linking()"
+        (uploadPhotoClicked)="uploadPhotoClicked.emit()"
+        (linkLayersClicked)="linkLayersClicked.emit()"
+        (unlinkLayersClicked)="unlinkLayersClicked.emit()"
+      />
+    </div>

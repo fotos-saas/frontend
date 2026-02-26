@@ -1,0 +1,111 @@
+    :host { display: contents; }
+
+    .layout-designer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      -webkit-app-region: no-drag;
+      /* Electron frameless: ne lógjon a macOS traffic lights alá */
+      padding-top: 38px;
+    }
+
+    .layout-designer__loading,
+    .layout-designer__error {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.95rem;
+    }
+
+    .layout-designer__error {
+      color: #fca5a5;
+    }
+
+    .layout-designer__content {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .layout-designer__canvas-area {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      overflow: hidden;
+      background: #1a1a2e;
+    }
+
+    .layout-designer__canvas-area app-layout-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .designer-btn {
+      margin-top: 8px;
+      padding: 8px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.12s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+      }
+    }
+
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* FAB: Command Overlay trigger */
+    .command-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      border-radius: 14px;
+      background: linear-gradient(135deg, #2a2a4a, #1e1e38);
+      color: #a78bfa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1200;
+      box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(124, 58, 237, 0.12);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &:hover {
+        transform: scale(1.08);
+        border-color: rgba(167, 139, 250, 0.5);
+        box-shadow:
+          0 6px 28px rgba(0, 0, 0, 0.5),
+          0 0 40px rgba(124, 58, 237, 0.2);
+        color: #c4b5fd;
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }

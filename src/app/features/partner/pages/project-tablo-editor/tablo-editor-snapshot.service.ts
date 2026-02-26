@@ -43,6 +43,34 @@ export class TabloEditorSnapshotService {
   /** Legutolso snapshot (lista elso eleme — legujabb) */
   readonly latestSnapshot = computed(() => this.snapshots()[0] ?? null);
 
+  /** Összecsukott snapshot csoportok (eredeti nevek set-je) */
+  readonly collapsedGroups = signal<Set<string>>(new Set());
+
+  /** Csoportosított snapshot lista: eredeti snapshotok + alattuk a szerkesztett verziók */
+  readonly groupedSnapshots = computed(() => {
+    const all = this.snapshots();
+    const originals: SnapshotListItem[] = [], editedMap = new Map<string, SnapshotListItem[]>();
+    for (const s of all) {
+      if (s.snapshotName.endsWith('(szerkesztett)')) {
+        const base = s.snapshotName.replace(/ \(szerkesztett\)$/, '');
+        (editedMap.get(base) ?? (editedMap.set(base, []), editedMap.get(base)!)).push(s);
+      } else { originals.push(s); }
+    }
+    const groups: Array<{ original: SnapshotListItem; edited: SnapshotListItem[] }> = [];
+    const used = new Set<string>();
+    for (const o of originals) { const e = editedMap.get(o.snapshotName) ?? []; groups.push({ original: o, edited: e }); if (e.length) used.add(o.snapshotName); }
+    for (const [k, v] of editedMap) { if (!used.has(k)) for (const s of v) groups.push({ original: s, edited: [] }); }
+    return groups;
+  });
+
+  toggleGroupCollapse(name: string): void {
+    const n = new Set(this.collapsedGroups());
+    n.has(name) ? n.delete(name) : n.add(name);
+    this.collapsedGroups.set(n);
+  }
+
+  isGroupCollapsed(name: string): boolean { return this.collapsedGroups().has(name); }
+
   /** Snapshot lista betoltese a layouts/ mappabol */
   async loadSnapshots(psdPath: string): Promise<void> {
     this.loadingSnapshots.set(true);

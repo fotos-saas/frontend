@@ -1,0 +1,117 @@
+    @if (position(); as pos) {
+      <div
+        class="floating-toolbar"
+        [class.floating-toolbar--below]="pos.below"
+        [style.left.px]="pos.x"
+        [style.top.px]="pos.y"
+      >
+        <!-- Vízszintes igazítás: bal/közép/jobb -->
+        <button class="ft-btn" [disabled]="state.selectionCount() < 2"
+          (click)="actions.alignLeft()" matTooltip="Balra igazítás">
+          <lucide-icon [name]="ICONS.ALIGN_START_V" [size]="15" />
+        </button>
+        <button class="ft-btn" [disabled]="state.selectionCount() < 2"
+          (click)="actions.alignCenterHorizontal()" matTooltip="Vízszintes középre">
+          <lucide-icon [name]="ICONS.ALIGN_CENTER_V" [size]="15" />
+        </button>
+        <button class="ft-btn" [disabled]="state.selectionCount() < 2"
+          (click)="actions.alignRight()" matTooltip="Jobbra igazítás">
+          <lucide-icon [name]="ICONS.ALIGN_END_V" [size]="15" />
+        </button>
+
+        <div class="ft-divider"></div>
+
+        <!-- Függőleges igazítás: fent/közép/lent -->
+        <button class="ft-btn" [disabled]="state.selectionCount() < 2"
+          (click)="actions.alignTop()" matTooltip="Tetejére igazítás">
+          <lucide-icon [name]="ICONS.ALIGN_START_H" [size]="15" />
+        </button>
+        <button class="ft-btn" [disabled]="state.selectionCount() < 2"
+          (click)="actions.alignCenterVertical()" matTooltip="Függőleges középre">
+          <lucide-icon [name]="ICONS.ALIGN_CENTER_H" [size]="15" />
+        </button>
+        <button class="ft-btn" [disabled]="state.selectionCount() < 2"
+          (click)="actions.alignBottom()" matTooltip="Aljára igazítás">
+          <lucide-icon [name]="ICONS.ALIGN_END_H" [size]="15" />
+        </button>
+
+        <div class="ft-divider"></div>
+
+        <!-- Dokumentum középre -->
+        <button class="ft-btn"
+          (click)="actions.centerOnDocument()" matTooltip="Dokumentum középre">
+          <lucide-icon [name]="ICONS.MOVE" [size]="15" />
+        </button>
+
+        <div class="ft-divider"></div>
+
+        <!-- Elosztás dropdown -->
+        <div class="ft-dropdown">
+          <button class="ft-btn" (click)="moreOpen.set(!moreOpen())"
+            matTooltip="Elosztás és rendezés">
+            <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="15" />
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="10" />
+          </button>
+          @if (moreOpen()) {
+            <div class="ft-dropdown__backdrop" (click)="moreOpen.set(false)"></div>
+            <div class="ft-dropdown__panel">
+              <button class="ft-dropdown__item"
+                [disabled]="state.selectionCount() < 3"
+                (click)="moreOpen.set(false); actions.distributeHorizontal()">
+                <lucide-icon [name]="ICONS.ALIGN_H_DISTRIBUTE" [size]="15" />
+                Vízszintes elosztás
+              </button>
+              <button class="ft-dropdown__item"
+                [disabled]="state.selectionCount() < 3"
+                (click)="moreOpen.set(false); actions.distributeVertical()">
+                <lucide-icon [name]="ICONS.ALIGN_V_DISTRIBUTE" [size]="15" />
+                Függőleges elosztás
+              </button>
+              <div class="ft-dropdown__sep"></div>
+              <button class="ft-dropdown__item"
+                [disabled]="state.selectionCount() < 2"
+                (click)="moreOpen.set(false); actions.alignRows()">
+                <lucide-icon [name]="ICONS.ROWS_3" [size]="15" />
+                Sorok igazítása
+              </button>
+              <button class="ft-dropdown__item"
+                [disabled]="state.selectionCount() < 2"
+                (click)="moreOpen.set(false); actions.alignColumns()">
+                <lucide-icon [name]="ICONS.COLUMNS_3" [size]="15" />
+                Oszlopok igazítása
+              </button>
+              <div class="ft-dropdown__sep"></div>
+              <button class="ft-dropdown__item"
+                [disabled]="state.selectionCount() < 2"
+                (click)="moreOpen.set(false); actions.arrangeToGrid()">
+                <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="15" />
+                Rácsba rendezés
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="ft-divider"></div>
+
+        <!-- Fotó feltöltés -->
+        <button class="ft-btn ft-btn--photo"
+          (click)="uploadPhotoClicked.emit()" matTooltip="Fotó feltöltése">
+          <lucide-icon [name]="ICONS.CAMERA" [size]="15" />
+        </button>
+
+        <!-- Link/Unlink a Photoshopban -->
+        <button class="ft-btn" [disabled]="linking()"
+          (click)="linkLayersClicked.emit()" matTooltip="Összelinkelés (kép + név)">
+          <lucide-icon [name]="ICONS.LINK" [size]="15" />
+        </button>
+        <button class="ft-btn" [disabled]="linking()"
+          (click)="unlinkLayersClicked.emit()" matTooltip="Linkelés megszüntetése">
+          <lucide-icon [name]="ICONS.UNLINK" [size]="15" />
+        </button>
+
+        <div class="ft-divider"></div>
+
+        <!-- Kijelölés info -->
+        <span class="ft-info">{{ state.selectionCount() }} kijelölve</span>
+      </div>
+    }

@@ -1,0 +1,210 @@
+    <aside class="sidebar">
+      <!-- Rendezés szekció -->
+      <div class="sidebar__section">
+        <div class="sidebar__section-header">
+          <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="14" />
+          <span>Rendezés</span>
+        </div>
+
+        <!-- Kijelölés info -->
+        @if (state.hasSelection()) {
+          <div class="sidebar__info">
+            {{ state.selectionCount() }} kijelölve
+          </div>
+        }
+
+        <!-- Rendezési gombok -->
+        <div class="sidebar__actions">
+          <button class="action-btn"
+            [disabled]="sortService.sorting() || state.selectionCount() < 2"
+            (click)="sortService.sortByAbc()"
+            matTooltip="Magyar ABC sorrend"
+              matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.ARROW_DOWN_AZ" [size]="16" />
+            <span>ABC</span>
+          </button>
+          <button class="action-btn"
+            [disabled]="sortService.sorting() || state.selectionCount() < 2"
+            (click)="sortService.sortByGender()"
+            matTooltip="Felváltva fiú-lány-fiú-lány"
+              matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.USERS" [size]="16" />
+            <span>Felváltva</span>
+          </button>
+          <button class="action-btn"
+            [disabled]="sortService.sorting() || state.selectionCount() < 2"
+            (click)="openCustomDialog.emit()"
+            matTooltip="Egyedi névlista szerinti sorrend"
+              matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.LIST_ORDERED" [size]="16" />
+            <span>Egyedi</span>
+          </button>
+        </div>
+
+        <!-- Loading / eredmény -->
+        @if (sortService.sorting()) {
+          <div class="sidebar__status sidebar__status--loading">
+            <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+            AI feldolgozás...
+          </div>
+        }
+        @if (sortService.lastResult(); as result) {
+          <div class="sidebar__status sidebar__status--success">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            {{ result }}
+          </div>
+        }
+      </div>
+
+      <!-- Műveletek szekció -->
+      <div class="sidebar__section sidebar__section--separator">
+        <div class="sidebar__section-header">
+          <lucide-icon [name]="ICONS.SETTINGS" [size]="14" />
+          <span>Műveletek</span>
+        </div>
+
+        <div class="sidebar__actions">
+          <button class="action-btn"
+            (click)="openWorkDir.emit()"
+            matTooltip="A PSD munkamappa megnyitása Finderben"
+              matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+            <span>Munkamappa</span>
+          </button>
+          <button class="action-btn"
+            (click)="openProject.emit()"
+            matTooltip="A PSD megnyitása Photoshopban"
+              matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
+            <span>Projekt megnyitása</span>
+          </button>
+          <div class="sidebar__split-btn">
+            <button class="sidebar__split-main"
+              [disabled]="generatingSample()"
+              (click)="generateSample.emit()"
+              matTooltip="Vízjeles mintakép generálás"
+              matTooltipPosition="right">
+              @if (generatingSample()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                <span>Generálás...</span>
+              } @else {
+                <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+                <span>Minta</span>
+              }
+            </button>
+            <button class="sidebar__split-toggle"
+              [class.sidebar__split-toggle--active]="sampleLargeSize()"
+              (click)="sampleLargeSizeChange.emit(!sampleLargeSize())"
+              [matTooltip]="sampleLargeSize() ? 'Nagy méret — kattints a kis mérethez' : 'Kis méret — kattints a nagy mérethez'"
+              matTooltipPosition="right">
+              {{ sampleLargeSize() ? 'HD' : 'SD' }}
+            </button>
+            <button class="sidebar__split-toggle sidebar__split-color"
+              [class.sidebar__split-color--white]="sampleWatermarkColor() === 'white'"
+              (click)="watermarkColorChange.emit(sampleWatermarkColor() === 'white' ? 'black' : 'white')"
+              [matTooltip]="sampleWatermarkColor() === 'white' ? 'Fehér vízjel — kattints a feketéhez' : 'Fekete vízjel — kattints a fehérhez'"
+              matTooltipPosition="right">
+              @if (sampleWatermarkColor() === 'white') {
+                <lucide-icon [name]="ICONS.SUN" [size]="11" />
+              } @else {
+                <lucide-icon [name]="ICONS.MOON" [size]="11" />
+              }
+            </button>
+            <button class="sidebar__split-toggle sidebar__split-opacity"
+              (click)="opacityChange.emit()"
+              [matTooltip]="'Átlátszóság: ' + opacityPercent() + '% — kattints a váltáshoz'"
+              matTooltipPosition="right">
+              {{ opacityPercent() }}%
+            </button>
+          </div>
+          <div class="sidebar__split-btn sidebar__split-btn--final">
+            <button class="sidebar__split-main sidebar__split-main--final"
+              [disabled]="generatingFinal()"
+              (click)="generateFinal.emit()"
+              matTooltip="Véglegesített tablókép(ek) generálása és feltöltése"
+              matTooltipPosition="right">
+              @if (generatingFinal()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                <span>Véglegesítés...</span>
+              } @else {
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+                <span>Véglegesítés</span>
+              }
+            </button>
+            <button class="sidebar__split-toggle"
+              [class.sidebar__split-toggle--active]="finalMode() === 'flat' || finalMode() === 'both'"
+              (click)="cycleFinalMode.emit()"
+              [matTooltip]="finalModeTooltip()"
+              matTooltipPosition="right">
+              {{ finalModeLabel() }}
+            </button>
+          </div>
+          <button class="action-btn"
+            (click)="openActions.emit()"
+            matTooltip="Batch muveletek"
+            matTooltipPosition="right">
+            <lucide-icon [name]="ICONS.WAND" [size]="16" />
+            <span>Akciok</span>
+          </button>
+        </div>
+
+        @if (sampleSuccess()) {
+          <div class="sidebar__status sidebar__status--success">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            {{ sampleSuccess() }}
+          </div>
+        }
+        @if (sampleError()) {
+          <div class="sidebar__status sidebar__status--error">
+            <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
+            {{ sampleError() }}
+          </div>
+        }
+      </div>
+
+      <!-- Extra nevek szekció -->
+      @if (hasAnyExtraNames()) {
+        <div class="sidebar__section sidebar__section--separator">
+          <div class="sidebar__section-header">
+            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="14" />
+            <span>Extra nevek</span>
+          </div>
+
+          <div class="sidebar__actions">
+            <button class="action-btn"
+              (click)="openExtraNamesDialog.emit()"
+              matTooltip="Extra nevek szerkesztése és beillesztése"
+              matTooltipPosition="right">
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+              <span>Extra nevek szerkesztése</span>
+            </button>
+            <button class="action-btn action-btn--extra"
+              [disabled]="insertingExtraNames()"
+              (click)="onInsertExtraNames()"
+              matTooltip="Extra nevek beillesztése a PSD-be (utolsó mentett állapot)"
+              matTooltipPosition="right">
+              @if (insertingExtraNames()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                <span>Beillesztés...</span>
+              } @else {
+                <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+                <span>Extra nevek beillesztése</span>
+              }
+            </button>
+          </div>
+
+          @if (extraNamesSuccess()) {
+            <div class="sidebar__status sidebar__status--success">
+              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+              {{ extraNamesSuccess() }}
+            </div>
+          }
+          @if (extraNamesError()) {
+            <div class="sidebar__status sidebar__status--error">
+              <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" />
+              {{ extraNamesError() }}
+            </div>
+          }
+        </div>
+      }
+    </aside>

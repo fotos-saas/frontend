@@ -1,53 +1,20 @@
-import { Injectable, inject, signal, computed, NgZone } from '@angular/core';
-import { LoggerService } from '@core/services/logger.service';
-import { ToastService } from '@core/services/toast.service';
-import { ElectronCacheService } from '@core/services/electron-cache.service';
-import { ElectronNotificationService } from '@core/services/electron-notification.service';
-import { PartnerProjectService } from './partner-project.service';
-import { PhotoshopService } from './photoshop.service';
-import { BrandingService } from './branding.service';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { BatchWorkspaceItem, BatchJobState, BatchQueueState, BatchQueueStatus } from '../models/batch.types';
-import { BatchWorkflow, BatchProjectData } from './batch-workflows/batch-workflow.interface';
-import { GeneratePsdWorkflow } from './batch-workflows/generate-psd.workflow';
-import { GenerateSampleWorkflow } from './batch-workflows/generate-sample.workflow';
-import { FinalizeWorkflow } from './batch-workflows/finalize.workflow';
-import { selectTabloSize } from '@shared/utils/tablo-size.util';
-import { firstValueFrom } from 'rxjs';
-
-const CACHE_KEY = 'batch_queue_state';
-const PERSIST_DEBOUNCE = 500;
-
-/** Hiba amit a checkAbort() dob pause/cancel eseten */
-class BatchAbortError extends Error {
-  constructor(public readonly reason: 'paused' | 'cancelled') {
-    super(`Batch ${reason}`);
-  }
-}
+import { BatchQueuePersistService } from './batch-queue-persist.service';
+import { BatchJobRunnerService } from './batch-job-runner.service';
 
 /**
- * Batch Queue Service — workflow-agnosztikus queue state management.
- * Feladatokat futtat egymas utan, state-et perzisztalja ElectronCacheService-en.
+ * Batch Queue Service — facade a queue állapot kezeléshez.
+ * Delegál: BatchJobRunnerService (futtatás), BatchQueuePersistService (perzisztálás).
  */
 @Injectable({
   providedIn: 'root',
 })
 export class BatchQueueService {
-  private readonly logger = inject(LoggerService);
-  private readonly toast = inject(ToastService);
-  private readonly ngZone = inject(NgZone);
-  private readonly cacheService = inject(ElectronCacheService);
-  private readonly notificationService = inject(ElectronNotificationService);
-  private readonly projectService = inject(PartnerProjectService);
-  private readonly photoshopService = inject(PhotoshopService);
-  private readonly brandingService = inject(BrandingService);
+  private readonly persistService = inject(BatchQueuePersistService);
+  private readonly jobRunner = inject(BatchJobRunnerService);
 
-  /** Regisztralt workflow-k */
-  private readonly workflows = new Map<string, BatchWorkflow>();
-
-  /** Persist debounce timer */
-  private persistTimer: ReturnType<typeof setTimeout> | null = null;
-
-  /** A mega-signal: queue teljes allapota */
+  /** A mega-signal: queue teljes állapota */
   readonly queueState = signal<BatchQueueState>({
     jobs: [],
     status: 'idle',
@@ -83,43 +50,15 @@ export class BatchQueueService {
     return s.total === 0 ? 0 : Math.round(((s.completed + s.failed) / s.total) * 100);
   });
 
-  constructor() {
-    // Workflow-k regisztralasa
-    const generatePsd = inject(GeneratePsdWorkflow);
-    const generateSample = inject(GenerateSampleWorkflow);
-    const finalize = inject(FinalizeWorkflow);
-    this.workflows.set(generatePsd.type, generatePsd);
-    this.workflows.set(generateSample.type, generateSample);
-    this.workflows.set(finalize.type, finalize);
-  }
-
   // ========== Publikus API ==========
 
-  /** Batch inditas a kijelolt workspace elemekbol */
+  /** Batch indítás a kijelölt workspace elemekből */
   async startBatch(items: BatchWorkspaceItem[]): Promise<void> {
     if (items.length === 0) return;
 
-    // Photoshop beállítások betöltése (workDir, path, stb.)
-    // Ez szükséges mert a detectPhotoshop() normálisan csak a Tablókészítő oldalon fut le
-    await this.photoshopService.detectPhotoshop();
+    await this.jobRunner.detectPhotoshop();
 
-    // Előfeltétel: Photoshop megtalálva
-    if (!this.photoshopService.isConfigured()) {
-      this.toast.error(
-        'Photoshop nem található',
-        'Ellenőrizd a Photoshop beállításokat a Tablókészítő → Beállítások oldalon.',
-      );
-      return;
-    }
-
-    // Előfeltétel: workDir beállítva kell legyen
-    if (!this.photoshopService.workDir()) {
-      this.toast.error(
-        'Munka mappa nincs beállítva',
-        'Állítsd be a munka mappát a Tablókészítő → Beállítások oldalon, mielőtt batch-et indítanál.',
-      );
-      return;
-    }
+    if (!this.jobRunner.validatePrerequisites()) return;
 
     const jobs: BatchJobState[] = items.map(item => ({
       id: item.id,
@@ -140,7 +79,7 @@ export class BatchQueueService {
       completedAt: undefined,
     });
 
-    await this.notificationService.setBadgeString(`${jobs.length}`);
+    await this.persistService.setBadgeCount(jobs.length);
     this.processNext();
   }
 
@@ -172,7 +111,7 @@ export class BatchQueueService {
       currentJobId: null,
       completedAt: new Date().toISOString(),
     });
-    this.onBatchComplete();
+    this.persistService.notifyBatchComplete(this.summary());
   }
 
   /** Sikertelen job újrapróbálása */
@@ -190,7 +129,7 @@ export class BatchQueueService {
     }
   }
 
-  /** Queue torlese */
+  /** Queue törlése */
   clearQueue(): void {
     this.updateState({
       jobs: [],
@@ -199,180 +138,62 @@ export class BatchQueueService {
       startedAt: undefined,
       completedAt: undefined,
     });
-    this.notificationService.clearBadge();
+    this.persistService.clearBadge();
   }
 
-  /** App indulaskor: eltarolt allapot visszatoltese */
+  /** App induláskor: eltárolt állapot visszatöltése */
   async restoreState(): Promise<void> {
-    try {
-      const saved = await this.cacheService.cacheGet<BatchQueueState>(CACHE_KEY);
-      if (!saved || !saved.jobs?.length) return;
-
-      // Felbe szakadt "running" jobokat "failed"-re állitjuk
-      const jobs = saved.jobs.map(j =>
-        j.status === 'running'
-          ? { ...j, status: 'failed' as const, error: 'Megszakadt (app újraindítás)', retryable: true }
-          : j,
-      );
-
-      const hasPending = jobs.some(j => j.status === 'pending');
-
-      this.updateState({
-        ...saved,
-        jobs,
-        status: hasPending ? 'paused' : 'completed',
-        currentJobId: null,
-      });
-
-      this.logger.info('Batch queue allapot visszatoltve', { jobCount: jobs.length });
-    } catch (err) {
-      this.logger.warn('Batch queue allapot visszatoltes sikertelen', err);
+    const restored = await this.persistService.restoreState();
+    if (restored) {
+      this.queueState.set(restored);
     }
   }
 
-  // ========== Belso logika ==========
+  // ========== Belső logika ==========
 
-  /** Kovetkezo pending job feldolgozasa */
-  private async processNext(): Promise<void> {
+  /** Következő pending job feldolgozása */
+  private processNext(): void {
     const state = this.queueState();
     if (state.status !== 'running') return;
 
     const nextJob = state.jobs.find(j => j.status === 'pending');
     if (!nextJob) {
-      // Nincs tobb feladat
       this.updateState({
         status: 'completed',
         currentJobId: null,
         completedAt: new Date().toISOString(),
       });
-      this.onBatchComplete();
+      this.persistService.notifyBatchComplete(this.summary());
       return;
     }
 
-    // Job inditas
+    // Job indítás
     this.updateJob(nextJob.id, {
       status: 'running',
       startedAt: new Date().toISOString(),
     });
     this.updateState({ currentJobId: nextJob.id });
 
-    try {
-      const workflow = this.workflows.get(nextJob.workflowType);
-      if (!workflow) {
-        throw new Error(`Ismeretlen workflow: ${nextJob.workflowType}`);
-      }
-
-      // Projekt adatok betoltese
-      const projectData = await this.loadProjectData(nextJob);
-
-      // Backup: minta/véglegesítés előtt backup a meglévő PSD-ről
-      if (nextJob.workflowType !== 'generate-psd') {
-        const existsCheck = await this.photoshopService.checkPsdExists(projectData.psdPath);
-        if (existsCheck.exists) {
-          this.logger.info(`Backup készítés: ${projectData.psdPath}`);
-          const backupResult = await this.photoshopService.backupPsd(projectData.psdPath);
-          if (!backupResult.success) {
-            throw new Error(`Backup sikertelen: ${backupResult.error}`);
-          }
-        }
-      }
-
-      // Workflow futtatás
-      await workflow.execute(nextJob, projectData, {
-        onStep: (stepIndex: number) => {
-          this.ngZone.run(() => {
-            this.updateJob(nextJob.id, {
-              stepIndex,
-              currentStep: workflow.stepLabels[stepIndex] ?? `Lépés ${stepIndex + 1}`,
-              stepCount: workflow.stepLabels.length,
-            });
-          });
-        },
-        checkAbort: () => {
-          const currentStatus = this.queueState().status;
-          if (currentStatus === 'paused') throw new BatchAbortError('paused');
-          if (currentStatus !== 'running') throw new BatchAbortError('cancelled');
-        },
-      });
-
-      // Sikeres befejezés
-      this.ngZone.run(() => {
-        this.updateJob(nextJob.id, {
-          status: 'completed',
-          completedAt: new Date().toISOString(),
-        });
-        this.updateBadge();
-        this.processNext();
-      });
-    } catch (err) {
-      this.ngZone.run(() => {
-        if (err instanceof BatchAbortError) {
-          if (err.reason === 'paused') {
-            // Visszaallitas pending-re, megvarjuk a resume-ot
-            this.updateJob(nextJob.id, {
-              status: 'pending',
-              startedAt: undefined,
-              currentStep: undefined,
-              stepIndex: undefined,
-            });
-            this.updateState({ currentJobId: null });
-          }
-          return;
-        }
-
-        const errorMsg = err instanceof Error ? err.message : 'Ismeretlen hiba';
-        this.logger.error(`Batch job sikertelen: ${nextJob.projectName}`, err);
-        this.updateJob(nextJob.id, {
-          status: 'failed',
-          error: errorMsg,
-          retryable: true,
-          completedAt: new Date().toISOString(),
-        });
-
-        this.updateBadge();
-        this.processNext();
-      });
-    }
-  }
-
-  /** Projekt adatok betoltese az API-bol */
-  private async loadProjectData(job: BatchJobState): Promise<BatchProjectData> {
-    const [personsResp, sizesResp] = await Promise.all([
-      firstValueFrom(this.projectService.getProjectPersons(job.projectId)),
-      firstValueFrom(this.projectService.getTabloSizes()),
-    ]);
-
-    const size = selectTabloSize(
-      personsResp.data.length,
-      sizesResp.sizes,
-      sizesResp.threshold,
-    );
-
-    if (!size) {
-      throw new Error('Nem sikerült tablóméretet választani');
-    }
-
-    const psdPath = await this.photoshopService.computePsdPath(size.value, {
-      projectName: job.projectName,
-      schoolName: job.schoolName,
-      className: job.className,
-      brandName: this.brandingService.brandName(),
+    this.jobRunner.executeJob(nextJob, {
+      getStatus: () => this.queueState().status,
+      onJobUpdate: (id, patch) => this.updateJob(id, patch),
+      onJobCompleted: (id) => {
+        this.updateJob(id, { status: 'completed', completedAt: new Date().toISOString() });
+        this.persistService.updateBadge(this.queueState().jobs);
+      },
+      onJobFailed: (id, error) => {
+        this.updateJob(id, { status: 'failed', error, retryable: true, completedAt: new Date().toISOString() });
+        this.persistService.updateBadge(this.queueState().jobs);
+      },
+      onJobPaused: (id) => {
+        this.updateJob(id, { status: 'pending', startedAt: undefined, currentStep: undefined, stepIndex: undefined });
+        this.updateState({ currentJobId: null });
+      },
+      onProcessNext: () => this.processNext(),
     });
-
-    if (!psdPath) {
-      throw new Error('Nem sikerült PSD útvonalat meghatározni — ellenőrizd a munka mappa beállítást');
-    }
-
-    return {
-      persons: personsResp.data,
-      extraNames: personsResp.extraNames,
-      size,
-      psdPath,
-      brandName: this.brandingService.brandName(),
-    };
   }
 
-  /** Egy job frissitese a queue-ban */
+  /** Egy job frissítése a queue-ban */
   private updateJob(jobId: string, patch: Partial<BatchJobState>): void {
     this.queueState.update(state => ({
       ...state,
@@ -380,56 +201,12 @@ export class BatchQueueService {
         j.id === jobId ? { ...j, ...patch } : j,
       ),
     }));
-    this.schedulePersist();
+    this.persistService.schedulePersist(this.queueState());
   }
 
-  /** Queue state frissitese */
+  /** Queue state frissítése */
   private updateState(patch: Partial<BatchQueueState>): void {
     this.queueState.update(state => ({ ...state, ...patch }));
-    this.schedulePersist();
-  }
-
-  /** Debounced state perzisztalas */
-  private schedulePersist(): void {
-    if (this.persistTimer) clearTimeout(this.persistTimer);
-    this.persistTimer = setTimeout(() => {
-      this.cacheService.cacheSet(CACHE_KEY, this.queueState());
-    }, PERSIST_DEBOUNCE);
-  }
-
-  /** Badge frissitese a hátralévő jobokkal */
-  private updateBadge(): void {
-    const pending = this.queueState().jobs.filter(j => j.status === 'pending' || j.status === 'running').length;
-    if (pending > 0) {
-      this.notificationService.setBadgeString(`${pending}`);
-    } else {
-      this.notificationService.clearBadge();
-    }
-  }
-
-  /** Batch befejezésekor: notification + badge clear */
-  private async onBatchComplete(): Promise<void> {
-    const s = this.summary();
-    await this.notificationService.clearBadge();
-
-    if (s.failed > 0) {
-      this.toast.warning(
-        'Batch befejezve',
-        `${s.completed} sikeres, ${s.failed} sikertelen a ${s.total} feladatból`,
-      );
-      await this.notificationService.showNotification({
-        title: 'Batch befejezve',
-        body: `${s.completed} sikeres, ${s.failed} sikertelen`,
-      });
-    } else {
-      this.toast.success(
-        'Batch kész!',
-        `Mind a ${s.total} feladat sikeresen elkészült`,
-      );
-      await this.notificationService.showNotification({
-        title: 'Batch kész!',
-        body: `Mind a ${s.total} feladat sikeresen elkészült`,
-      });
-    }
+    this.persistService.schedulePersist(this.queueState());
   }
 }

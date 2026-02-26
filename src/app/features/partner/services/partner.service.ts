@@ -485,4 +485,5 @@ export class PartnerService {
       sorted_names: string[];
     }>(`${this.baseUrl}/ai/sort-names-abc`, { names });
   }
+
 }

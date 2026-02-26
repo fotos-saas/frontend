@@ -10,14 +10,10 @@ import { BatchJobState } from '../../models/batch.types';
  * Lépések:
  * 0. PSD létezés ellenőrzés (ha létezik → hiba, nem generálunk)
  * 1. PSD generálás és megnyitás Photoshopban
- * 2. Név layerek hozzáadása
- * 3. Kép layerek hozzáadása
- * 4. Rács elrendezés
- * 5. Pillanatkép mentése
- * 6. PSD mentése és bezárása
+ * 2. Felirat layerek (iskola, osztály, évfolyam)
+ * 3. Pillanatkép mentése
  *
- * FONTOS: Ha a PSD fájl már létezik, a workflow HIBÁT dob.
- * A felhasználónak törölnie/átneveznie kell a meglévő fájlt.
+ * MEGJEGYZÉS: Név/Kép/Rács lépések ideiglenesen kikommentezve — subtitle tesztelés.
  */
 @Injectable({
   providedIn: 'root',
@@ -28,11 +24,8 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
   readonly stepLabels = [
     'Ellenőrzés',
     'PSD generálás',
-    'Név layerek',
-    'Kép layerek',
-    'Rács elrendezés',
+    'Feliratok',
     'Pillanatkép',
-    'Mentés és bezárás',
   ];
 
   private readonly logger = inject(LoggerService);
@@ -62,8 +55,8 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     // PSD path signal beállítása — a runJsx wrapper ezt használja a dokumentum fókuszhoz
     ps.psdPath.set(psdPath);
 
-    // Dokumentum neve a PSD path-ból (fájlnév kiterjesztés nélkül)
-    const docName = psdPath.split('/').pop()?.replace('.psd', '') ?? undefined;
+    // Dokumentum neve a PSD path-ból (kiterjesztéssel — a PS document.name .psd-vel adja vissza!)
+    const docName = psdPath.split('/').pop() ?? undefined;
 
     // 1. PSD generálás — className és brandName a helyes mappa/fájlnévhez
     onStep(1);
@@ -79,42 +72,56 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     }
     checkAbort();
 
-    // 2. Név layerek
+    // 2. Felirat layerek — valós projekt adatokból
     onStep(2);
-    const nameResult = await ps.addNameLayers(
-      persons.map(p => ({ id: p.id, name: p.name, type: p.type })),
-      docName,
-    );
-    if (!nameResult.success) {
-      throw new Error(nameResult.error ?? 'Név layerek hozzáadása sikertelen');
+    const subtitles = ps.buildSubtitles({
+      schoolName: job.schoolName,
+      className: job.className,
+      classYear: job.classYear,
+    });
+
+    const subResult = await ps.addSubtitleLayers(subtitles, docName);
+    if (!subResult.success) {
+      this.logger.warn('Felirat layerek sikertelen', subResult.error);
     }
     checkAbort();
 
-    // 3. Kép layerek
+    // // 3. Név layerek — KIKOMMENTEZVE
+    // onStep(3);
+    // const nameResult = await ps.addNameLayers(
+    //   persons.map(p => ({ id: p.id, name: p.name, type: p.type })),
+    //   docName,
+    // );
+    // if (!nameResult.success) {
+    //   throw new Error(nameResult.error ?? 'Név layerek hozzáadása sikertelen');
+    // }
+    // checkAbort();
+
+    // // 4. Kép layerek — KIKOMMENTEZVE
+    // onStep(4);
+    // const imageResult = await ps.addImageLayers(
+    //   persons.map(p => ({ id: p.id, name: p.name, type: p.type, photoUrl: p.photoUrl })),
+    //   undefined,
+    //   docName,
+    // );
+    // if (!imageResult.success) {
+    //   throw new Error(imageResult.error ?? 'Kép layerek hozzáadása sikertelen');
+    // }
+    // checkAbort();
+
+    // // 5. Rács elrendezés — KIKOMMENTEZVE
+    // onStep(5);
+    // const gridResult = await ps.arrangeGrid(
+    //   { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
+    //   docName,
+    // );
+    // if (!gridResult.success) {
+    //   throw new Error(gridResult.error ?? 'Rács elrendezés sikertelen');
+    // }
+    // checkAbort();
+
+    // 3. Pillanatkép mentése
     onStep(3);
-    const imageResult = await ps.addImageLayers(
-      persons.map(p => ({ id: p.id, name: p.name, type: p.type, photoUrl: p.photoUrl })),
-      undefined,
-      docName,
-    );
-    if (!imageResult.success) {
-      throw new Error(imageResult.error ?? 'Kép layerek hozzáadása sikertelen');
-    }
-    checkAbort();
-
-    // 4. Rács elrendezés
-    onStep(4);
-    const gridResult = await ps.arrangeGrid(
-      { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
-      docName,
-    );
-    if (!gridResult.success) {
-      throw new Error(gridResult.error ?? 'Rács elrendezés sikertelen');
-    }
-    checkAbort();
-
-    // 5. Pillanatkép mentése
-    onStep(5);
     const snapshotResult = await ps.saveSnapshot(
       'batch-initial',
       { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
@@ -124,13 +131,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     if (!snapshotResult.success) {
       this.logger.warn('Pillanatkép mentés sikertelen (nem kritikus)', snapshotResult.error);
     }
-    checkAbort();
 
-    // 6. PSD mentése és bezárása
-    onStep(6);
-    const saveCloseResult = await ps.saveAndCloseDocument(docName);
-    if (!saveCloseResult.success) {
-      this.logger.warn('PSD mentés/bezárás sikertelen (nem kritikus)', saveCloseResult.error);
-    }
+    // PSD nyitva marad Photoshopban — a user pimpeli és maga menti
   }
 }

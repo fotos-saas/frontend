@@ -1,11 +1,15 @@
-<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" (click)="cardClick.emit(project())">
+<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" [class.project-row--selected]="selected()" (click)="cardClick.emit({ project: project(), event: $event })">
   <!-- Col 1: Minta kép -->
   <div
     class="col col-sample"
-    [class.col-sample--clickable]="project().sampleThumbUrl"
+    [class.col-sample--clickable]="project().sampleThumbUrl && !selected()"
     (click)="onSamplesClick($event)"
   >
-    @if (project().sampleThumbUrl) {
+    @if (selected()) {
+      <div class="selected-check">
+        <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+      </div>
+    } @else if (project().sampleThumbUrl) {
       <img
         [src]="project().sampleThumbUrl"
         [alt]="'Minta'"
@@ -127,7 +131,35 @@
     }
   </div>
 
-  <!-- Col 6: Műveletek -->
+  <!-- Col 6: PSD (csak Electronban) -->
+  @if (isElectron) {
+    <div class="col col-psd">
+      @if (psdStatus()?.exists) {
+        <button
+          type="button"
+          class="action-btn action-btn--ps"
+          (click)="onOpenPsClick($event)"
+          matTooltip="Megnyitás Photoshopban"
+        >
+          <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
+        </button>
+        <button
+          type="button"
+          class="action-btn action-btn--folder"
+          (click)="onOpenFolderClick($event)"
+          matTooltip="Mappa megnyitása"
+        >
+          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
+        </button>
+      } @else {
+        <span class="psd-missing" matTooltip="Nincs PSD generálva">
+          <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
+        </span>
+      }
+    </div>
+  }
+
+  <!-- Col 7: Műveletek -->
   <div class="col col-actions">
     @if (project().isPreliminary && !project().linkedProjectId) {
       <button

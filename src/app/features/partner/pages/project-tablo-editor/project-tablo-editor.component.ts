@@ -20,13 +20,15 @@ import { SnapshotRestoreDialogComponent } from './snapshot-restore-dialog.compon
 import { TemplateSaveDialogComponent } from './template-save-dialog.component';
 import { TemplateApplyDialogComponent } from './template-apply-dialog.component';
 import { LayoutDesignerComponent } from './layout-designer/layout-designer.component';
+import { TabloLayoutDialogComponent, BoardDimensions } from './tablo-layout-dialog/tablo-layout-dialog.component';
+import { TabloLayoutConfig } from './layout-designer/layout-designer.types';
 
 type EditorTab = 'commands' | 'settings' | 'debug';
 
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
-  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent, LayoutDesignerComponent],
+  imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent, LayoutDesignerComponent, TabloLayoutDialogComponent],
   providers: [TabloEditorDebugService, TabloEditorSnapshotService, TabloEditorTemplateService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
@@ -326,7 +328,40 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
   }
 
-  async generatePsd(): Promise<void> {
+  /** PSD generálás indítása — dialógust nyit a layout beállításokhoz */
+  readonly pendingGenerate = signal(false);
+
+  generatePsd(): void {
+    this.pendingGenerate.set(true);
+    this.showLayoutDialog.set(true);
+  }
+
+  /** Layout dialógus → Alkalmaz → PSD generálás vagy újrarendezés */
+  async onLayoutConfigApplyInternal(config: TabloLayoutConfig): Promise<void> {
+    this.showLayoutDialog.set(false);
+    this.lastLayoutConfig.set(config);
+
+    // Gap + align frissítés a service-ben
+    this.ps.setGapH(config.gapHCm);
+    this.ps.setGapV(config.gapVCm);
+    this.ps.setGridAlign(config.gridAlign);
+
+    if (this.pendingGenerate()) {
+      this.pendingGenerate.set(false);
+      await this.doGeneratePsd(config);
+    } else {
+      await this.doArrangeTabloLayout(config);
+    }
+  }
+
+  /** Dialógus bezárásakor a pending generate-et is töröljük */
+  closeLayoutDialog(): void {
+    this.showLayoutDialog.set(false);
+    this.pendingGenerate.set(false);
+  }
+
+  /** Tényleges PSD generálás (a dialógus után) */
+  private async doGeneratePsd(config: TabloLayoutConfig): Promise<void> {
     const size = this.selectedSize();
     const p = this.project();
     if (!size) return;
@@ -373,6 +408,19 @@ export class ProjectTabloEditorComponent implements OnInit {
         this.error.set(`Guide-ok: ${guideResult.error}`);
       }
 
+      // 0.5 Subtitle feliratok
+      const subtitles = this.ps.buildSubtitles({
+        schoolName: p?.school?.name,
+        className: p?.className,
+        classYear: p?.classYear,
+      });
+      if (subtitles.length > 0) {
+        const subResult = await this.ps.addSubtitleLayers(subtitles, psdFileName);
+        if (!subResult.success) {
+          this.error.set(`Feliratok: ${subResult.error}`);
+        }
+      }
+
       // PSD megnyitás után: JSX layerek hozzáadása (ha vannak személyek)
       if (personsData.length > 0) {
         // 1. Név layerek (text)
@@ -384,13 +432,13 @@ export class ProjectTabloEditorComponent implements OnInit {
         const nameOk = nameResult.success;
         const imageOk = imageResult.success;
 
-        // 3. Grid elrendezés (image layerek pozícionálása rácsba)
+        // 3. Tablóelrendezés: tanárok fent, feliratok középen, diákok lent + nevek
         if (imageOk) {
           const boardSize = this.ps.parseSizeValue(size.value);
           if (boardSize) {
-            const gridResult = await this.ps.arrangeGrid(boardSize, psdFileName);
-            if (!gridResult.success) {
-              this.error.set(`Grid elrendezés: ${gridResult.error}`);
+            const layoutResult = await this.ps.arrangeTabloLayout(boardSize, psdFileName, undefined, config);
+            if (!layoutResult.success) {
+              this.error.set(`Tablóelrendezés: ${layoutResult.error}`);
             }
 
             // 4. Layout JSON automatikus mentése a PSD mellé
@@ -439,6 +487,61 @@ export class ProjectTabloEditorComponent implements OnInit {
     const psdPath = this.currentPsdPath();
     if (!psdPath) return;
     this.ps.revealInFinder(psdPath);
+  }
+
+  /** Elrendezési minta dialógus */
+  readonly showLayoutDialog = signal(false);
+  readonly lastLayoutConfig = signal<TabloLayoutConfig | null>(null);
+
+  /** Diákok és tanárok száma a dialógushoz */
+  readonly studentCountForDialog = computed(() =>
+    this.persons().filter(p => p.type !== 'teacher').length,
+  );
+  readonly teacherCountForDialog = computed(() =>
+    this.persons().filter(p => p.type === 'teacher').length,
+  );
+
+  /** Tábla fizikai méretek a dialógus arányos előnézetéhez */
+  readonly boardDimensionsForDialog = computed<BoardDimensions | null>(() => {
+    const size = this.selectedSize();
+    if (!size) return null;
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return null;
+    return {
+      boardWidthCm: boardSize.widthCm,
+      boardHeightCm: boardSize.heightCm,
+      marginCm: this.ps.marginCm(),
+      studentSizeCm: this.ps.studentSizeCm(),
+      teacherSizeCm: this.ps.teacherSizeCm(),
+    };
+  });
+
+  arrangeTabloLayout(): void {
+    this.pendingGenerate.set(false);
+    this.showLayoutDialog.set(true);
+  }
+
+  /** Tényleges újrarendezés (a dialógus után, nem generálás) */
+  private async doArrangeTabloLayout(config: TabloLayoutConfig): Promise<void> {
+    const size = this.selectedSize();
+    if (!size) return;
+
+    const boardSize = this.ps.parseSizeValue(size.value);
+    if (!boardSize) return;
+
+    this.clearMessages();
+    this.arranging.set(true);
+    try {
+      const result = await this.ps.arrangeTabloLayout(boardSize, undefined, undefined, config);
+      if (result.success) {
+        this.successMessage.set('Tablóelrendezés kész!');
+        await this.autoSaveSnapshot();
+      } else {
+        this.error.set(result.error || 'Tablóelrendezés sikertelen.');
+      }
+    } finally {
+      this.arranging.set(false);
+    }
   }
 
   async arrangeGrid(): Promise<void> {
@@ -662,7 +765,7 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.generatingInitialSnapshot.set(true);
     this.clearMessages();
 
-    const psdFileName = psdPath.split('/').pop()?.replace('.psd', '') || undefined;
+    const psdFileName = psdPath.split('/').pop() || undefined;
 
     const result = await this.snapshotService.saveSnapshot(
       'Kezdeti elrendezés',

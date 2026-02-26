@@ -1,0 +1,224 @@
+<app-dialog-wrapper
+  headerStyle="flat"
+  theme="purple"
+  [icon]="ICONS.LAYOUT_TEMPLATE"
+  title="Tablóelrendezés"
+  description="Állítsd be a soronkénti elemszámot és a réseket."
+  size="lg"
+  [columns]="2"
+  (closeEvent)="close.emit()"
+>
+  <!-- Bal oldal: Beállítások -->
+  <div dialogLeft class="settings-panel">
+    <!-- Diák beállítások -->
+    <div class="settings-section">
+      <h4 class="section-title">
+        <lucide-icon [name]="ICONS.USERS" [size]="16" />
+        Diák beállítások
+      </h4>
+
+      <label class="field-label">
+        Max soronként
+        @if (studentOverflow()) {
+          <span class="overflow-hint">(max {{ studentPhysicalMax() }} fér ki)</span>
+        }
+      </label>
+      <input
+        type="number"
+        class="form-input form-input--sm"
+        [class.overflow]="studentOverflow()"
+        [value]="studentMaxPerRow()"
+        min="1"
+        max="30"
+        (change)="setStudentMaxPerRow($event)"
+      />
+    </div>
+
+    <!-- Tanár beállítások -->
+    <div class="settings-section">
+      <h4 class="section-title">
+        <lucide-icon [name]="ICONS.USER_CHECK" [size]="16" />
+        Tanár beállítások
+      </h4>
+
+      <label class="field-label">
+        Max soronként
+        @if (teacherOverflow()) {
+          <span class="overflow-hint">(max {{ teacherPhysicalMax() }} fér ki)</span>
+        }
+      </label>
+      <input
+        type="number"
+        class="form-input form-input--sm"
+        [class.overflow]="teacherOverflow()"
+        [value]="teacherMaxPerRow()"
+        min="1"
+        max="30"
+        (change)="setTeacherMaxPerRow($event)"
+      />
+    </div>
+
+    <!-- Közös beállítások -->
+    <div class="settings-section">
+      <h4 class="section-title">
+        <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
+        Közös beállítások
+      </h4>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Vízszintes rés (cm)</label>
+          <input
+            type="number"
+            class="form-input form-input--sm"
+            [value]="gapHCm()"
+            min="0"
+            max="10"
+            step="0.5"
+            (change)="setGapH($event)"
+          />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Függőleges rés (cm)</label>
+          <input
+            type="number"
+            class="form-input form-input--sm"
+            [value]="gapVCm()"
+            min="0"
+            max="10"
+            step="0.5"
+            (change)="setGapV($event)"
+          />
+        </div>
+      </div>
+
+      <label class="field-label">Igazítás</label>
+      <div class="align-selector">
+        <button
+          class="align-btn"
+          [class.active]="gridAlign() === 'left'"
+          matTooltip="Balra igazítás"
+          (click)="setGridAlign('left')"
+        >
+          <lucide-icon [name]="ICONS.ALIGN_LEFT" [size]="16" />
+        </button>
+        <button
+          class="align-btn"
+          [class.active]="gridAlign() === 'center'"
+          matTooltip="Középre igazítás"
+          (click)="setGridAlign('center')"
+        >
+          <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="16" />
+        </button>
+        <button
+          class="align-btn"
+          [class.active]="gridAlign() === 'right'"
+          matTooltip="Jobbra igazítás"
+          (click)="setGridAlign('right')"
+        >
+          <lucide-icon [name]="ICONS.ALIGN_RIGHT" [size]="16" />
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jobb oldal: Arányos Előnézet -->
+  <div dialogRight class="preview-panel">
+    <h4 class="section-title">
+      Előnézet
+      @if (boardDimensions()) {
+        <span class="board-size-label">{{ boardDimensions()!.boardWidthCm }} × {{ boardDimensions()!.boardHeightCm }} cm</span>
+      }
+    </h4>
+
+    <!-- Kilógás figyelmeztetés -->
+    @if (verticalOverflow()) {
+      <div class="overflow-warning">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+        Nem fér ki! A tanár + diák grid magasabb mint a tábla.
+      </div>
+    }
+
+    <div class="preview-container">
+      <svg
+        [attr.viewBox]="'0 0 ' + viewBoxW() + ' ' + viewBoxH()"
+        class="preview-svg"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <!-- Tábla háttér -->
+        <rect
+          x="0" y="0"
+          [attr.width]="viewBoxW()"
+          [attr.height]="viewBoxH()"
+          class="preview-board"
+        />
+
+        <!-- Margó keret (halvány vonal) -->
+        <rect
+          [attr.x]="margin()"
+          [attr.y]="margin()"
+          [attr.width]="viewBoxW() - 2 * margin()"
+          [attr.height]="viewBoxH() - 2 * margin()"
+          class="preview-margin"
+        />
+
+        <!-- Tanárok (felül, kék) -->
+        @for (row of teacherRows(); track $index; let rowIdx = $index) {
+          @for (item of [].constructor(row); track $index; let colIdx = $index) {
+            <rect
+              [attr.x]="getCellX(colIdx, row, teacherCellCm())"
+              [attr.y]="getTeacherCellY(rowIdx)"
+              [attr.width]="teacherCellCm()"
+              [attr.height]="teacherCellHCm()"
+              rx="0.3"
+              class="preview-cell preview-cell--teacher"
+            />
+          }
+        }
+
+        <!-- Szabad zóna jelzés (feliratok helye) -->
+        @if (freeZoneH() > 2) {
+          <text
+            [attr.x]="viewBoxW() / 2"
+            [attr.y]="freeZoneTop() + freeZoneH() / 2"
+            class="preview-zone-text"
+            text-anchor="middle"
+            dominant-baseline="central"
+          >feliratok</text>
+        }
+
+        <!-- Diákok (alul, lila) -->
+        @for (row of studentRows(); track $index; let rowIdx = $index) {
+          @for (item of [].constructor(row); track $index; let colIdx = $index) {
+            <rect
+              [attr.x]="getCellX(colIdx, row, studentCellCm())"
+              [attr.y]="getStudentCellY(rowIdx)"
+              [attr.width]="studentCellCm()"
+              [attr.height]="studentCellHCm()"
+              rx="0.3"
+              class="preview-cell preview-cell--student"
+            />
+          }
+        }
+      </svg>
+
+      <div class="preview-legend">
+        <span class="legend-item legend-item--teacher">
+          Tanárok ({{ teacherCount() || '?' }}) · {{ teacherRows().length }} sor
+        </span>
+        <span class="legend-item legend-item--student">
+          Diákok ({{ studentCount() || '?' }}) · {{ studentRows().length }} sor
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div dialogFooter class="dialog-footer">
+    <button class="btn btn--ghost" (click)="close.emit()">Mégse</button>
+    <button class="btn btn--primary" (click)="onApply()">
+      <lucide-icon [name]="ICONS.LAYOUT_TEMPLATE" [size]="16" />
+      Alkalmaz
+    </button>
+  </div>
+</app-dialog-wrapper>

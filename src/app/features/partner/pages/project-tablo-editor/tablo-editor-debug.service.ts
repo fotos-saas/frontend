@@ -33,7 +33,7 @@ export class TabloEditorDebugService {
 
   /**
    * PSD generálás debug módban — streaming logokkal.
-   * A teljes workflow: méret ellenőrzés → PSD generálás → megnyitás → JSX text layerek.
+   * MEGJEGYZÉS: Név/Kép/Grid kikommentezve — subtitle tesztelés.
    */
   async runDebugGeneration(params: {
     size: TabloSize;
@@ -148,12 +148,12 @@ export class TabloEditorDebugService {
 
     this.addLog('IPC generatePsd', genResult.success ? 'Sikeres' : `HIBA: ${genResult.error}`, genResult.success ? 'ok' : 'error');
 
-    // 10. PSD megnyitás + JSX text layerek + image layerek
-    if (genResult.success && personsData.length > 0) {
+    // 10. PSD megnyitás + HARDCODE Subtitle teszt
+    if (genResult.success) {
       await this.runJsxDebugPhase(api, outputPath, personsData, size);
     }
 
-    // 11. Végeredmény
+    // Végeredmény
     if (genResult.success) {
       this.addLog('Végeredmény', `PSD sikeresen generálva: ${outputPath}`, 'ok');
     } else {
@@ -197,116 +197,36 @@ export class TabloEditorDebugService {
         }
       }
 
-      const jsxUnsubscribe = api.onJsxDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
-        if (data.stream === 'stderr') {
-          this.addLog('JSX stderr', data.line, 'error');
-        } else if (data.line.startsWith('[JSX]')) {
-          const msg = data.line.replace('[JSX] ', '');
-          this.addLog('JSX', msg, msg.startsWith('HIBA') ? 'error' : 'info');
-        } else if (data.line.startsWith('[DEBUG]')) {
-          this.addLog('JSX debug', data.line.replace('[DEBUG] ', ''), 'info');
-        } else {
-          this.addLog('JSX', data.line, 'info');
-        }
-      });
-
-      this.addLog('JSX', `Név layerek hozzáadása (${personsData.length} fő)...`, 'info');
-      let jsxResult: any;
+      // HARDCODE Felirat layerek — teszt szöveggel
+      this.addLog('Feliratok', '3 hardcode felirat hozzáadása...', 'info');
       try {
-        jsxResult = await api.runJsxDebug({
-          scriptName: 'actions/add-name-layers.jsx',
-          personsData,
+        const subResult = await api.runJsxDebug({
+          scriptName: 'actions/add-subtitle-layers.jsx',
+          jsonData: {
+            subtitles: [
+              { layerName: 'iskola-neve', displayText: 'Teszt Iskola Neve' },
+              { layerName: 'osztaly', displayText: '12.D' },
+              { layerName: 'evfolyam', displayText: '2022 – 2026' },
+            ],
+          },
           targetDocName: psdFileName,
         });
-      } catch (jsxErr) {
-        this.addLog('JSX', `EXCEPTION: ${String(jsxErr)}`, 'error');
-        jsxUnsubscribe?.();
-        return;
+        this.addLog('Feliratok', subResult.success ? 'Felirat layerek hozzáadva' : `HIBA: ${subResult.error}`, subResult.success ? 'ok' : 'error');
+      } catch (subErr) {
+        this.addLog('Feliratok', `EXCEPTION: ${String(subErr)}`, 'error');
       }
-      jsxUnsubscribe?.();
 
-      this.addLog('JSX', jsxResult.success ? 'Név layerek sikeresen hozzáadva' : `HIBA: ${jsxResult.error}`, jsxResult.success ? 'ok' : 'error');
+      // // NÉV LAYEREK — KIKOMMENTEZVE
+      // const jsxUnsubscribe = api.onJsxDebugLog?.(...);
+      // this.addLog('JSX', `Név layerek hozzáadása (${personsData.length} fő)...`, 'info');
+      // ...
 
-      // Image layerek (Smart Object placeholder-ek)
-      if (jsxResult.success) {
-        this.addLog('JSX', 'Image layerek hozzáadása (Smart Object)...', 'info');
+      // // IMAGE LAYEREK — KIKOMMENTEZVE
+      // ...
 
-        const imgUnsubscribe = api.onJsxDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
-          if (data.stream === 'stderr') {
-            this.addLog('JSX Image stderr', data.line, 'error');
-          } else if (data.line.startsWith('[JSX]')) {
-            const msg = data.line.replace('[JSX] ', '');
-            this.addLog('JSX Image', msg, msg.startsWith('HIBA') ? 'error' : 'info');
-          } else {
-            this.addLog('JSX Image', data.line, 'info');
-          }
-        });
+      // // GRID — KIKOMMENTEZVE
+      // ...
 
-        let imgResult: any;
-        try {
-          imgResult = await api.runJsxDebug({
-            scriptName: 'actions/add-image-layers.jsx',
-            imageData: {
-              persons: personsData,
-              widthCm: 10.4,
-              heightCm: 15.4,
-              dpi: 300,
-              studentSizeCm: this.ps.studentSizeCm(),
-              teacherSizeCm: this.ps.teacherSizeCm(),
-            },
-            targetDocName: psdFileName,
-          });
-        } catch (imgErr) {
-          this.addLog('JSX Image', `EXCEPTION: ${String(imgErr)}`, 'error');
-          imgUnsubscribe?.();
-          return;
-        }
-        imgUnsubscribe?.();
-
-        this.addLog('JSX Image', imgResult.success ? 'Image layerek sikeresen hozzáadva' : `HIBA: ${imgResult.error}`, imgResult.success ? 'ok' : 'error');
-
-        // Grid elrendezés (image layerek pozícionálása rácsba)
-        if (imgResult.success) {
-          this.addLog('Grid', 'Rácsba rendezés indítása...', 'info');
-
-          const dims = size ? this.ps.parseSizeValue(size.value) : null;
-          if (dims) {
-            const gridUnsubscribe = api.onJsxDebugLog?.((data: { line: string; stream: 'stdout' | 'stderr' }) => {
-              if (data.stream === 'stderr') {
-                this.addLog('Grid stderr', data.line, 'error');
-              } else {
-                this.addLog('Grid', data.line.replace('[JSX] ', ''), 'info');
-              }
-            });
-
-            let gridResult: any;
-            try {
-              gridResult = await api.runJsxDebug({
-                scriptName: 'actions/arrange-grid.jsx',
-                jsonData: {
-                  boardWidthCm: dims.widthCm,
-                  boardHeightCm: dims.heightCm,
-                  marginCm: this.ps.marginCm(),
-                  studentSizeCm: this.ps.studentSizeCm(),
-                  teacherSizeCm: this.ps.teacherSizeCm(),
-                  gapHCm: this.ps.gapHCm(),
-                  gapVCm: this.ps.gapVCm(),
-                },
-                targetDocName: psdFileName,
-              });
-            } catch (gridErr) {
-              this.addLog('Grid', `EXCEPTION: ${String(gridErr)}`, 'error');
-              gridUnsubscribe?.();
-              return;
-            }
-            gridUnsubscribe?.();
-
-            this.addLog('Grid', gridResult.success ? 'Rácsba rendezés sikeres' : `HIBA: ${gridResult.error}`, gridResult.success ? 'ok' : 'error');
-          } else {
-            this.addLog('Grid', 'Méret nem parszolható — grid kihagyva', 'warn');
-          }
-        }
-      }
     } catch (openErr) {
       this.addLog('PSD megnyitás', `EXCEPTION: ${String(openErr)}`, 'error');
     }

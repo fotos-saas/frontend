@@ -3,6 +3,7 @@ import { LoggerService } from '@core/services/logger.service';
 import { SnapshotListItem, SnapshotLayer, TemplateSlot, TemplateFixedLayer, TemplateListItem, GlobalTemplate } from '@core/services/electron.types';
 import { TabloSize } from '../models/partner.models';
 import { environment } from '../../../../environments/environment';
+import { TabloLayoutConfig } from '../pages/project-tablo-editor/layout-designer/layout-designer.types';
 
 /** Kistablo alias merete */
 const KISTABLO_ALIAS = { widthCm: 100, heightCm: 70 };
@@ -393,6 +394,64 @@ export class PhotoshopService {
   }
 
   /**
+   * Subtitle felirat tömb összeállítása projekt adatokból.
+   * Iskola neve, osztály (pl. "12.D"), év (pl. "2026"), idézet.
+   */
+  buildSubtitles(context: {
+    schoolName?: string | null;
+    className?: string | null;
+    classYear?: string | null;
+  }): Array<{ name: string; text: string; fontSize?: number }> {
+    const subtitles: Array<{ name: string; text: string; fontSize?: number }> = [];
+
+    if (context.schoolName) {
+      subtitles.push({ name: 'iskola-neve', text: context.schoolName, fontSize: 80 });
+    }
+    if (context.className) {
+      subtitles.push({ name: 'osztaly', text: context.className, fontSize: 70 });
+    }
+
+    // Év: classYear ha van, különben aktuális év
+    const year = context.classYear || new Date().getFullYear().toString();
+    subtitles.push({ name: 'evfolyam', text: year, fontSize: 70 });
+
+    // Idézet — hardcoded placeholder
+    subtitles.push({ name: 'idezet', text: '„Nem az a fontos, amit adnak, hanem amit adunk."', fontSize: 50 });
+
+    return subtitles;
+  }
+
+  /**
+   * Felirat text layerek hozzáadása a Subtitles csoportba (JSX).
+   * Iskola neve, osztály, évfolyam, idézet — Arial 50pt, center.
+   */
+  async addSubtitleLayers(
+    subtitles: Array<{ name: string; text: string; fontSize?: number }>,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    if (!subtitles || subtitles.length === 0) {
+      return { success: true };
+    }
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/add-subtitle-layers.jsx',
+        jsonData: {
+          subtitles: subtitles.map(s => ({ layerName: s.name, displayText: s.text, fontSize: s.fontSize || 50 })),
+        },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX addSubtitleLayers hiba', err);
+      return { success: false, error: 'Váratlan hiba a felirat layerek hozzáadásakor' };
+    }
+  }
+
+  /**
    * JSX script futtatása a megnyitott Photoshop dokumentumon.
    * Személynevek text layerként hozzáadása a Names/Students és Names/Teachers csoportba.
    */
@@ -672,6 +731,135 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('JSX arrangeNames hiba', err);
       return { success: false, error: 'Váratlan hiba a nevek rendezésénél' };
+    }
+  }
+
+  /**
+   * Felirat layerek pozícionálása a szabad zónába (tanárok és diákok között).
+   * A Subtitles csoport layereit függőlegesen és vízszintesen középre igazítja.
+   */
+  async arrangeSubtitles(
+    freeZone: { topPx: number; bottomPx: number },
+    subtitleGapPx = 30,
+    targetDocName?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/arrange-subtitles.jsx',
+        jsonData: {
+          freeZoneTopPx: freeZone.topPx,
+          freeZoneBottomPx: freeZone.bottomPx,
+          subtitleGapPx,
+        },
+        targetDocName,
+      });
+
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('JSX arrangeSubtitles hiba', err);
+      return { success: false, error: 'Váratlan hiba a feliratok pozícionálásakor' };
+    }
+  }
+
+  /**
+   * Teljes tablóelrendezés: tanárok fent, feliratok középen, diákok lent.
+   * 1. arrangeGrid (tabloLayout mód) → freeZone kinyerése
+   * 2. arrangeNames (nevek a képek alá)
+   * 3. arrangeSubtitles (feliratok a szabad zónába)
+   */
+  async arrangeTabloLayout(
+    boardSize: { widthCm: number; heightCm: number },
+    targetDocName?: string,
+    linkedLayerNames?: string[],
+    layoutConfig?: TabloLayoutConfig,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+
+    try {
+      // Linkelések leszedése a rendezés előtt
+      if (linkedLayerNames?.length) {
+        await this.unlinkLayers(linkedLayerNames, targetDocName);
+      }
+
+      // 1. Grid elrendezés tabloLayout módban
+      const jsonData: Record<string, unknown> = {
+        boardWidthCm: boardSize.widthCm,
+        boardHeightCm: boardSize.heightCm,
+        marginCm: this.marginCm(),
+        studentSizeCm: this.studentSizeCm(),
+        teacherSizeCm: this.teacherSizeCm(),
+        gapHCm: layoutConfig?.gapHCm ?? this.gapHCm(),
+        gapVCm: layoutConfig?.gapVCm ?? this.gapVCm(),
+        gridAlign: layoutConfig?.gridAlign ?? this.gridAlign(),
+        tabloLayout: true,
+      };
+
+      if (layoutConfig) {
+        jsonData['studentMaxPerRow'] = layoutConfig.studentMaxPerRow;
+        jsonData['teacherMaxPerRow'] = layoutConfig.teacherMaxPerRow;
+      }
+
+      const gridResult = await this.runJsx({
+        scriptName: 'actions/arrange-grid.jsx',
+        jsonData,
+        targetDocName,
+      });
+
+      if (!gridResult.success) {
+        return { success: false, error: gridResult.error || 'Grid elrendezés sikertelen' };
+      }
+
+      // freeZone kinyerése a JSX JSON outputból
+      const debugInfo: string[] = [];
+      let freeZone: { topPx: number; bottomPx: number } | null = null;
+      debugInfo.push(`gridResult.output: ${gridResult.output?.substring(0, 300) ?? 'ÜRES'}`);
+      if (gridResult.output) {
+        try {
+          const parsed = JSON.parse(gridResult.output);
+          debugInfo.push(`parsed OK: freeZoneTopPx=${parsed.freeZoneTopPx}, freeZoneBottomPx=${parsed.freeZoneBottomPx}`);
+          if (parsed.freeZoneTopPx !== undefined && parsed.freeZoneBottomPx !== undefined) {
+            freeZone = { topPx: parsed.freeZoneTopPx, bottomPx: parsed.freeZoneBottomPx };
+          }
+        } catch (e) {
+          debugInfo.push(`JSON parse HIBA: ${e}`);
+        }
+      }
+
+      // 2. Nevek rendezése (tablóelrendezésnél mindig center)
+      const namesResult = await this.runJsx({
+        scriptName: 'actions/arrange-names.jsx',
+        jsonData: {
+          nameGapCm: this.nameGapCm(),
+          textAlign: 'center',
+          nameBreakAfter: this.nameBreakAfter(),
+        },
+        targetDocName,
+      });
+
+      debugInfo.push(`namesResult: ${namesResult.success ? 'OK' : namesResult.error}`);
+
+      // 3. Feliratok pozícionálása a szabad zónába
+      if (freeZone) {
+        debugInfo.push(`arrangeSubtitles hívás: top=${freeZone.topPx}, bottom=${freeZone.bottomPx}`);
+        const subResult = await this.arrangeSubtitles(freeZone, 30, targetDocName);
+        debugInfo.push(`arrangeSubtitles: ${subResult.success ? 'OK' : subResult.error}`);
+      } else {
+        debugInfo.push('freeZone NULL — feliratok KIHAGYVA');
+      }
+
+      // Linkelések visszaállítása
+      if (linkedLayerNames?.length) {
+        for (const name of linkedLayerNames) {
+          await this.linkLayers([name], targetDocName);
+        }
+      }
+
+      return { success: true, error: debugInfo.join(' | ') };
+    } catch (err) {
+      this.logger.error('JSX arrangeTabloLayout hiba', err);
+      return { success: false, error: 'Váratlan hiba a tablóelrendezésnél' };
     }
   }
 

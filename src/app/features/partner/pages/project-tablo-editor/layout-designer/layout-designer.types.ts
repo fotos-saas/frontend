@@ -97,6 +97,17 @@ export interface GridCell {
   y: number;
 }
 
+/** Tablóelrendezés konfigurációja (dialógusból jön) */
+export interface TabloLayoutConfig {
+  studentPattern: 'grid';
+  teacherPattern: 'grid';
+  studentMaxPerRow: number;
+  teacherMaxPerRow: number;
+  gapHCm: number;
+  gapVCm: number;
+  gridAlign: 'left' | 'center' | 'right';
+}
+
 /** Téglalap leírás overlap számításhoz */
 export interface Rect {
   x: number;

@@ -4,6 +4,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerProjectListItem } from '../../services/partner.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ElectronService } from '../../../../core/services/electron.service';
+import { PsdStatusService } from '../../services/psd-status.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { StatusDropdownComponent } from '../../../../shared/components/status-dropdown/status-dropdown.component';
 import { BatchAddDropdownComponent } from '../batch-add-dropdown/batch-add-dropdown.component';
@@ -23,11 +25,18 @@ import { BatchAddDropdownComponent } from '../batch-add-dropdown/batch-add-dropd
 export class ProjectCardComponent {
   readonly ICONS = ICONS;
   private authService = inject(AuthService);
+  private electronService = inject(ElectronService);
+  private psdStatusService = inject(PsdStatusService);
   readonly isMarketer = this.authService.isMarketer;
+  readonly isElectron = this.electronService.isElectron;
 
   readonly project = input.required<PartnerProjectListItem>();
+  readonly selected = input(false);
 
-  readonly cardClick = output<PartnerProjectListItem>();
+  /** PSD státusz a projekthez */
+  readonly psdStatus = computed(() => this.psdStatusService.getStatus(this.project().id));
+
+  readonly cardClick = output<{ project: PartnerProjectListItem; event: MouseEvent }>();
   readonly samplesClick = output<PartnerProjectListItem>();
   readonly missingClick = output<PartnerProjectListItem>();
   readonly qrClick = output<PartnerProjectListItem>();
@@ -119,6 +128,7 @@ export class ProjectCardComponent {
   }
 
   onSamplesClick(event: MouseEvent): void {
+    if (this.selected()) return; // kijelölt módban a cardClick kezeli
     event.stopPropagation();
     const project = this.project();
     if (project.sampleThumbUrl) {
@@ -171,5 +181,15 @@ export class ProjectCardComponent {
       label: event.label,
       color: event.color,
     });
+  }
+
+  onOpenPsClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.psdStatusService.openInPhotoshop(this.project().id);
+  }
+
+  onOpenFolderClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.psdStatusService.revealFolder(this.project().id);
   }
 }

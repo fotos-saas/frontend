@@ -20,6 +20,28 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+/* Kijelölt projekt */
+.project-row--selected {
+  background: get-color('primary', 50);
+  border-color: get-color('primary', 300);
+}
+
+.project-row--selected:hover {
+  background: get-color('primary', 100);
+  border-color: get-color('primary', 400);
+}
+
+.selected-check {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: get-color('primary', 500);
+  border-radius: 4px;
+  color: #ffffff;
+}
+
 .col {
   display: flex;
   align-items: center;
@@ -383,6 +405,20 @@
   color: get-color('slate', 400);
 }
 
+/* Col: PSD */
+.col-psd {
+  justify-content: center;
+  gap: 4px;
+}
+
+.psd-missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: get-color('slate', 300);
+  opacity: 0.6;
+}
+
 /* Col: Actions */
 .col-actions {
   justify-content: center;
@@ -407,6 +443,25 @@
   background: #059669;
 }
 
+.action-btn--ps {
+  background: #31a8ff;
+  color: #ffffff;
+}
+
+.action-btn--ps:hover {
+  background: #2196f3;
+}
+
+.action-btn--folder {
+  background: get-color('slate', 200);
+  color: get-color('slate', 600);
+}
+
+.action-btn--folder:hover {
+  background: get-color('slate', 300);
+  color: get-color('slate', 700);
+}
+
 .action-btn--delete {
   background: transparent;
   color: get-color('slate', 400);
@@ -425,6 +480,7 @@
 
   .col-aware,
   .col-status,
+  .col-psd,
   .col-actions {
     display: none;
   }

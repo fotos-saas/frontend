@@ -805,16 +805,24 @@ export class OverlayComponent implements OnInit {
       }
     }
 
-    // 3. Matching: slug → person
+    // 3. Matching: slug → person (exact → startsWith → includes fallback)
     const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[_\-]+/g, ' ').trim();
     const matched: Array<{ old: string; new: string; personName: string }> = [];
     const unmatched: Array<{ layerName: string; newId: string }> = [];
+    const usedPersonIds = new Set<number>();
 
     for (const layerName of allNames) {
       const slug = layerName.replace(/---\d+$/, '');
       const normalizedSlug = normalize(slug);
-      const person = personList.find(p => normalize(p.name) === normalizedSlug);
+
+      // Exact → startsWith → includes (csak nem használt person-ök közül)
+      const person =
+        personList.find(p => !usedPersonIds.has(p.id) && normalize(p.name) === normalizedSlug) ||
+        personList.find(p => !usedPersonIds.has(p.id) && normalize(p.name).startsWith(normalizedSlug + ' ')) ||
+        personList.find(p => !usedPersonIds.has(p.id) && normalizedSlug.startsWith(normalize(p.name) + ' '));
+
       if (person) {
+        usedPersonIds.add(person.id);
         const newName = `${slug}---${person.id}`;
         if (newName !== layerName) {
           matched.push({ old: layerName, new: newName, personName: person.name });

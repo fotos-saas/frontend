@@ -334,7 +334,8 @@ function _doRestore() {
     app.preferences.rulerUnits = Units.PIXELS;
 
     // Egyetlen Undo lepes — parameter nelkuli hivas (a tobbi JSX mintajara)
-    _doc.suspendHistory("Snapshot visszaállítás", "_doRestore()");
+    var historyName = (_snapshotData && _snapshotData.historyName) ? _snapshotData.historyName : "Snapshot visszaállítás";
+    _doc.suspendHistory(historyName, "_doRestore()");
 
     // Ruler visszaallitasa
     app.preferences.rulerUnits = oldRulerUnits;

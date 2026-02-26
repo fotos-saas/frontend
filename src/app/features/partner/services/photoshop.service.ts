@@ -940,6 +940,7 @@ export class PhotoshopService {
         jsonData: {
           layers,
           restoreGroups: [['Images'], ['Names']],
+          historyName: 'Sorrend frissítés',
         },
         targetDocName,
       });

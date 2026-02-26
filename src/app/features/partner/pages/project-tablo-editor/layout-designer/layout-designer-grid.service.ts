@@ -292,9 +292,9 @@ export class LayoutDesignerGridService {
     if (type === 'teacher') {
       originY = marginPx;
     } else {
-      // Diákok: alulról felfelé — grid alja a docHeight - marginPx vonalhoz igazodik
+      // Diákok: alulról felfelé — grid alja a docHeight - marginPx - gapVPx vonalhoz igazodik
       const gridTotalH = rows * imageHeightPx + (rows - 1) * gapVPx;
-      originY = docHeight - marginPx - gridTotalH;
+      originY = docHeight - marginPx - gapVPx - gridTotalH;
     }
 
     return {

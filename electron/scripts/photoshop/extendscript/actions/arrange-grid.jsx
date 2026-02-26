@@ -221,8 +221,8 @@ function _doArrangeGrid() {
     if (studentsGroup && studentsGroup.artLayers.length > 0) {
       var sRows = _calcRows(studentsGroup, sW, marginPx, gapHPx, boardWPx);
       var studentGridH = sRows * sH + (sRows - 1) * gapVPx;
-      studentStartY = boardHPx - marginPx - studentGridH;
-      log("[JSX] Diak csoport (LENT): " + studentsGroup.artLayers.length + " layer, meret: " + sW + "x" + sH + "px, " + sRows + " sor, startY=" + studentStartY + "px" + (studentActual ? " (bounds)" : " (fallback)"));
+      studentStartY = boardHPx - marginPx - gapVPx - studentGridH;
+      log("[JSX] Diak csoport (LENT): " + studentsGroup.artLayers.length + " layer, meret: " + sW + "x" + sH + "px, " + sRows + " sor, startY=" + studentStartY + "px (margin+gap alulrol)" + (studentActual ? " (bounds)" : " (fallback)"));
       _arrangeGroupGridPx(studentsGroup, sW, sH, marginPx, gapHPx, gapVPx, boardWPx, studentStartY);
     } else {
       log("[JSX] Diak csoport ures vagy nem talalhato");

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -6,7 +6,7 @@ import { TabloPersonItem } from '../persons-modal.types';
 
 /**
  * Személy kártya a személyek listájában.
- * Title megjelenítés, photo_type badge.
+ * Title megjelenítés, photo_type badge, ID copy.
  */
 @Component({
   selector: 'app-modal-person-card',
@@ -23,10 +23,18 @@ export class ModalPersonCardComponent {
   readonly animationDelay = input<string>('0s');
 
   readonly cardClick = output<TabloPersonItem>();
+  readonly idCopied = signal(false);
 
   onCardClick(): void {
     if (this.person().photoUrl || this.person().photoThumbUrl) {
       this.cardClick.emit(this.person());
     }
+  }
+
+  copyId(event: Event): void {
+    event.stopPropagation();
+    navigator.clipboard.writeText(this.person().id.toString());
+    this.idCopied.set(true);
+    setTimeout(() => this.idCopied.set(false), 1500);
   }
 }

@@ -47,58 +47,51 @@ function buildGrid(total: number, maxCols: number): number[] {
   return rows;
 }
 
-/** Felső+alsó sor teljes, középen kevesebb (U-alak) */
+/**
+ * U-alak: teljes sorok felül, az utolsó sor rövidebb.
+ * Pl. maxCols=14, total=38 → [14, 14, 10]
+ */
 function buildUShape(total: number, maxCols: number): number[] {
-  const innerCols = Math.max(1, maxCols - 2);
-
-  // Ha kevesebb elem mint 1 teljes sor → grid fallback
   if (total <= maxCols) return buildGrid(total, maxCols);
 
   const rows: number[] = [];
   let remaining = total;
 
-  // Első sor: maxCols
-  rows.push(Math.min(maxCols, remaining));
-  remaining -= rows[0];
-
-  // Középső sorok: innerCols
+  // Teljes sorok amíg lehet
   while (remaining > maxCols) {
-    const count = Math.min(innerCols, remaining);
-    rows.push(count);
-    remaining -= count;
+    rows.push(maxCols);
+    remaining -= maxCols;
   }
 
-  // Utolsó sor: maxCols (vagy maradék)
+  // Utolsó sor: ami marad (rövidebb)
   if (remaining > 0) {
-    rows.push(Math.min(maxCols, remaining));
+    rows.push(remaining);
   }
 
   return rows;
 }
 
-/** Szélső sorok kevesebb, közép teljes (fordított U) */
+/**
+ * Fordított U: az első sor rövidebb, utána teljes sorok.
+ * Pl. maxCols=14, total=38 → [10, 14, 14]
+ */
 function buildInvertedU(total: number, maxCols: number): number[] {
-  const outerCols = Math.max(1, maxCols - 2);
+  if (total <= maxCols) return buildGrid(total, maxCols);
 
-  if (total <= outerCols) return buildGrid(total, outerCols);
+  // Hány teljes sor fér el + maradék
+  const fullRows = Math.floor(total / maxCols);
+  const remainder = total - fullRows * maxCols;
 
   const rows: number[] = [];
-  let remaining = total;
 
-  // Első sor: outerCols
-  rows.push(Math.min(outerCols, remaining));
-  remaining -= rows[0];
-
-  // Középső sorok: maxCols
-  while (remaining > outerCols) {
-    const count = Math.min(maxCols, remaining);
-    rows.push(count);
-    remaining -= count;
+  if (remainder > 0) {
+    // Első sor: a maradék (rövidebb)
+    rows.push(remainder);
   }
 
-  // Utolsó sor: outerCols (vagy maradék)
-  if (remaining > 0) {
-    rows.push(Math.min(outerCols, remaining));
+  // Teljes sorok
+  for (let i = 0; i < fullRows; i++) {
+    rows.push(maxCols);
   }
 
   return rows;

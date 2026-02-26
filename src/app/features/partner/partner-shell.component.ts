@@ -224,6 +224,7 @@ export class PartnerShellComponent implements OnInit {
           { id: 'subscription-account', route: `${base}/subscription/account`, label: 'Fiók törlése' },
         ]
       },
+      { id: 'activity-log', route: `${base}/activity-log`, label: 'Tevékenységnapló', icon: 'scroll-text' },
       {
         id: 'partner-settings',
         label: 'Beállítások',
@@ -242,7 +243,7 @@ export class PartnerShellComponent implements OnInit {
     } else {
       // Csapattagok: nincs Csapatom, nincs Testreszabás, nincs Előfizetésem (de van Fiók törlése + Beállítások)
       items = allItems
-        .filter(item => !['team', 'customization', 'subscription', 'partner-settings'].includes(item.id))
+        .filter(item => !['team', 'customization', 'subscription', 'partner-settings', 'activity-log'].includes(item.id))
         .concat([
           { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások', icon: 'settings' },
           { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },

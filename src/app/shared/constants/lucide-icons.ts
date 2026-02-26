@@ -244,6 +244,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Reply,
+  ScrollText,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -484,4 +485,5 @@ export const LUCIDE_ICONS_MAP = {
   ArrowDownLeft,
   ArrowUpRight,
   Reply,
+  ScrollText,
 };

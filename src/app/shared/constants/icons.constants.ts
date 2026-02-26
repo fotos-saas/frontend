@@ -440,6 +440,7 @@ export const ICONS = {
   SQUARE_DASHED_BOTTOM: 'square-dashed-bottom',
   COMPONENT: 'component',
   BLEND: 'blend',
+  SCROLL_TEXT: 'scroll-text',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

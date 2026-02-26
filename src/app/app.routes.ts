@@ -280,6 +280,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/customization/email-templates/email-template-edit/email-template-edit.component').then(m => m.EmailTemplateEditComponent),
         title: 'Email sablon szerkesztése'
       },
+      // Tevékenységnapló (csak partner)
+      {
+        path: 'activity-log',
+        loadComponent: () => import('./features/partner/pages/activity-log/activity-log.component').then(m => m.ActivityLogComponent),
+        title: 'Tevékenységnapló'
+      },
       // Előfizetésem - subscription management
       {
         path: 'subscription',

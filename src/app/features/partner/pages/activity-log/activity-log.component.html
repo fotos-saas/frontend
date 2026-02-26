@@ -1,0 +1,155 @@
+<div class="activity-log page-card">
+  <div class="page-header">
+    <h1>
+      <lucide-icon [name]="ICONS.SCROLL_TEXT" [size]="24" />
+      Tevékenységnapló
+    </h1>
+    <span class="total-badge">{{ total() }} bejegyzés</span>
+  </div>
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="filter-row">
+      <select
+        [ngModel]="selectedCategory()"
+        (ngModelChange)="selectedCategory.set($event); onFilterChange()"
+        class="filter-select"
+      >
+        @for (cat of categories; track cat.value) {
+          <option [value]="cat.value">{{ cat.label }}</option>
+        }
+      </select>
+
+      <select
+        [ngModel]="selectedEvent()"
+        (ngModelChange)="selectedEvent.set($event); onFilterChange()"
+        class="filter-select"
+      >
+        @for (ev of events; track ev.value) {
+          <option [value]="ev.value">{{ ev.label }}</option>
+        }
+      </select>
+
+      <input
+        type="date"
+        [ngModel]="dateFrom()"
+        (ngModelChange)="dateFrom.set($event); onFilterChange()"
+        class="filter-input"
+        placeholder="Dátum -tól"
+      />
+
+      <input
+        type="date"
+        [ngModel]="dateTo()"
+        (ngModelChange)="dateTo.set($event); onFilterChange()"
+        class="filter-input"
+        placeholder="Dátum -ig"
+      />
+    </div>
+
+    <div class="filter-row">
+      <div class="search-wrapper">
+        <lucide-icon name="search" [size]="16" />
+        <input
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          (keyup.enter)="onSearch()"
+          class="search-input"
+          placeholder="Keresés a naplóban..."
+        />
+      </div>
+
+      @if (hasFilters()) {
+        <button class="clear-btn" (click)="clearFilters()">
+          <lucide-icon name="x" [size]="14" />
+          Szűrők törlése
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Táblázat -->
+  @if (loading()) {
+    <div class="skeleton-container">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.SCROLL_TEXT" [size]="48" />
+      <p>Nincs tevékenységnapló bejegyzés</p>
+    </div>
+  } @else {
+    <div class="table-header">
+      <span class="th th-date">Dátum</span>
+      <span class="th th-category">Kategória</span>
+      <span class="th th-event">Esemény</span>
+      <span class="th th-subject">Tárgy</span>
+      <span class="th th-user">Felhasználó</span>
+      <span class="th th-changes">Változások</span>
+    </div>
+
+    <div class="row-grid">
+      @for (item of items(); track item.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+          <span class="cell cell-date">{{ item.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
+          <span class="cell cell-category">
+            <span class="category-badge">{{ getCategoryLabel(item.log_name) }}</span>
+          </span>
+          <span class="cell cell-event">
+            @if (item.event) {
+              <span class="event-badge" [class]="getEventClass(item.event)">
+                {{ getEventLabel(item.event) }}
+              </span>
+            } @else {
+              <span class="event-badge badge-gray">{{ item.description }}</span>
+            }
+          </span>
+          <span class="cell cell-subject">
+            @if (item.subject_name) {
+              <span class="subject-name">{{ item.subject_name }}</span>
+            }
+            @if (item.subject_type) {
+              <span class="subject-type">{{ item.subject_type }}</span>
+            }
+          </span>
+          <span class="cell cell-user">
+            @if (item.causer) {
+              {{ item.causer.name }}
+            } @else {
+              <span class="text-muted">Rendszer</span>
+            }
+          </span>
+          <span class="cell cell-changes">
+            @if (item.changes) {
+              <span class="changes-text">{{ formatChanges(item.changes) }}</span>
+            }
+          </span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Lapozás -->
+  @if (lastPage() > 1) {
+    <div class="pagination">
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === 1"
+        (click)="goToPage(currentPage() - 1)"
+      >
+        <lucide-icon name="chevron-left" [size]="16" />
+      </button>
+      <span class="page-info">{{ currentPage() }} / {{ lastPage() }}</span>
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === lastPage()"
+        (click)="goToPage(currentPage() + 1)"
+      >
+        <lucide-icon name="chevron-right" [size]="16" />
+      </button>
+    </div>
+  }
+</div>

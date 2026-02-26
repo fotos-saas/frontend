@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output, computed, signal, in
 import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ClipboardService } from '../../../../core/services/clipboard.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { ProjectDetailData, PersonPreviewItem } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
 
@@ -22,7 +22,7 @@ interface PersonListItem {
 })
 export class ProjectPersonsSectionComponent {
   private readonly http = inject(HttpClient);
-  private readonly clipboardService = inject(ClipboardService);
+  private readonly toastService = inject(ToastService);
   readonly ICONS = ICONS;
 
   readonly project = input.required<ProjectDetailData>();
@@ -111,10 +111,17 @@ export class ProjectPersonsSectionComponent {
         }
 
         const text = lines.join('\n');
-        this.clipboardService.copy(text, 'Névsor').then(() => {
+        navigator.clipboard.writeText(text).then(() => {
+          this.toastService.success(
+            'Névsor másolva!',
+            `${students.length} diák + ${teachers.length} tanár a vágólapon`,
+          );
           this.copying.set(false);
           this.copied.set(true);
           setTimeout(() => this.copied.set(false), 2000);
+        }).catch(() => {
+          this.toastService.error('Hiba', 'Nem sikerült a vágólapra másolni');
+          this.copying.set(false);
         });
       },
       error: () => {

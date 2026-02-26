@@ -818,12 +818,12 @@ export class PhotoshopService {
         }
       }
 
-      // 2. Nevek rendezése
+      // 2. Nevek rendezése (tablóelrendezésnél mindig center)
       const namesResult = await this.runJsx({
         scriptName: 'actions/arrange-names.jsx',
         jsonData: {
           nameGapCm: this.nameGapCm(),
-          textAlign: this.textAlign(),
+          textAlign: 'center',
           nameBreakAfter: this.nameBreakAfter(),
         },
         targetDocName,

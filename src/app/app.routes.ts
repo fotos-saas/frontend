@@ -286,6 +286,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/activity-log/activity-log.component').then(m => m.ActivityLogComponent),
         title: 'Tevékenységnapló'
       },
+      // Portré háttércsere beállítások (partner szintű)
+      {
+        path: 'settings/portrait',
+        loadComponent: () => import('./features/partner/pages/portrait-settings/portrait-settings-page.component').then(m => m.PortraitSettingsPageComponent),
+        title: 'Portré beállítások'
+      },
       // Előfizetésem - subscription management
       {
         path: 'subscription',

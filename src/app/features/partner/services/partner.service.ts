@@ -16,10 +16,6 @@ export type {
 } from '../models/partner.models';
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';
 export type { ImportResult } from './partner-contact.service';
-export type {
-  PortraitSettings, PortraitSettingsResponse, UpdatePortraitSettingsResponse,
-  UploadPortraitBackgroundResponse, DeletePortraitBackgroundResponse,
-} from '../models/portrait.models';
 
 import type {
   PartnerDashboardStats, ProjectContact, PartnerProjectListItem, PartnerProjectDetails,
@@ -28,7 +24,11 @@ import type {
   ProjectListResponse, UploadProgress, SamplePackage, ProjectAutocompleteItem, TabloSize,
 } from '../models/partner.models';
 import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
-import type { PortraitSettings } from '../models/portrait.models';
+import type {
+  PortraitSettings,
+  PortraitSettingsResponse, UpdatePortraitSettingsResponse,
+  UploadPortraitBackgroundResponse, DeletePortraitBackgroundResponse,
+} from '../models/portrait.models';
 // Import sub-service-ek
 import { PartnerProjectService } from './partner-project.service';
 import { PartnerQrService } from './partner-qr.service';
@@ -449,23 +449,25 @@ export class PartnerService {
   }
 
   // ============================================
-  // PORTRAIT SETTINGS (delegálás)
+  // PORTRAIT SETTINGS (partner szintű)
   // ============================================
 
-  getPortraitSettings(projectId: number) {
-    return this.projectService.getPortraitSettings(projectId);
+  getPortraitSettings(): Observable<PortraitSettingsResponse> {
+    return this.http.get<PortraitSettingsResponse>(`${this.baseUrl}/portrait-settings`);
   }
 
-  updatePortraitSettings(projectId: number, settings: PortraitSettings) {
-    return this.projectService.updatePortraitSettings(projectId, settings);
+  updatePortraitSettings(settings: PortraitSettings): Observable<UpdatePortraitSettingsResponse> {
+    return this.http.put<UpdatePortraitSettingsResponse>(`${this.baseUrl}/portrait-settings`, settings);
   }
 
-  uploadPortraitBackground(projectId: number, file: File) {
-    return this.projectService.uploadPortraitBackground(projectId, file);
+  uploadPortraitBackground(file: File): Observable<UploadPortraitBackgroundResponse> {
+    const formData = new FormData();
+    formData.append('background', file);
+    return this.http.post<UploadPortraitBackgroundResponse>(`${this.baseUrl}/portrait-background`, formData);
   }
 
-  deletePortraitBackground(projectId: number) {
-    return this.projectService.deletePortraitBackground(projectId);
+  deletePortraitBackground(): Observable<DeletePortraitBackgroundResponse> {
+    return this.http.delete<DeletePortraitBackgroundResponse>(`${this.baseUrl}/portrait-background`);
   }
 
   // ============================================

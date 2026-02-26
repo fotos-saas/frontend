@@ -92,7 +92,7 @@ export interface PortraitSettings {
 // API VÁLASZ TÍPUSOK
 // ============================================
 
-/** GET /partner/projects/{id}/portrait-settings válasz */
+/** GET /partner/portrait-settings válasz */
 export interface PortraitSettingsResponse {
   success: boolean;
   data: {
@@ -104,12 +104,12 @@ export interface PortraitSettingsResponse {
   };
 }
 
-/** PUT /partner/projects/{id}/portrait-settings válasz */
+/** PUT /partner/portrait-settings válasz */
 export type UpdatePortraitSettingsResponse = PortraitSettingsResponse & {
   message: string;
 };
 
-/** POST /partner/projects/{id}/portrait-background válasz */
+/** POST /partner/portrait-background válasz */
 export interface UploadPortraitBackgroundResponse {
   success: boolean;
   message: string;
@@ -119,7 +119,7 @@ export interface UploadPortraitBackgroundResponse {
   };
 }
 
-/** DELETE /partner/projects/{id}/portrait-background válasz */
+/** DELETE /partner/portrait-background válasz */
 export interface DeletePortraitBackgroundResponse {
   success: boolean;
   message: string;

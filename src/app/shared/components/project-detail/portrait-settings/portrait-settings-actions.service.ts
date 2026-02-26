@@ -24,9 +24,9 @@ export class PortraitSettingsActionsService {
   readonly backgroundImageUrl = signal<string | null>(null);
   readonly backgroundThumbUrl = signal<string | null>(null);
 
-  load(projectId: number): void {
+  load(): void {
     this.loading.set(true);
-    this.partnerService.getPortraitSettings(projectId).pipe(
+    this.partnerService.getPortraitSettings().pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (res) => {
@@ -43,9 +43,9 @@ export class PortraitSettingsActionsService {
     });
   }
 
-  save(projectId: number): void {
+  save(): void {
     this.saving.set(true);
-    this.partnerService.updatePortraitSettings(projectId, this.settings()).pipe(
+    this.partnerService.updatePortraitSettings(this.settings()).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (res) => {
@@ -60,9 +60,9 @@ export class PortraitSettingsActionsService {
     });
   }
 
-  uploadBackground(projectId: number, file: File): void {
+  uploadBackground(file: File): void {
     this.uploading.set(true);
-    this.partnerService.uploadPortraitBackground(projectId, file).pipe(
+    this.partnerService.uploadPortraitBackground(file).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (res) => {
@@ -79,9 +79,9 @@ export class PortraitSettingsActionsService {
     });
   }
 
-  deleteBackground(projectId: number): void {
+  deleteBackground(): void {
     this.deleting.set(true);
-    this.partnerService.deletePortraitBackground(projectId).pipe(
+    this.partnerService.deletePortraitBackground().pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: () => {

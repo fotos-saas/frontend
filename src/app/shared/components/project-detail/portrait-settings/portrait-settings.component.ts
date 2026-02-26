@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, computed, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
@@ -25,8 +25,6 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
   styleUrl: './portrait-settings.component.scss',
 })
 export class PortraitSettingsComponent implements OnInit {
-  projectId = input.required<number>();
-
   readonly actions = inject(PortraitSettingsActionsService);
   private toast = inject(ToastService);
   readonly ICONS = ICONS;
@@ -77,7 +75,7 @@ export class PortraitSettingsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.actions.load(this.projectId());
+    this.actions.load();
   }
 
   onModeChange(mode: string): void {
@@ -105,15 +103,15 @@ export class PortraitSettingsComponent implements OnInit {
       return;
     }
 
-    this.actions.uploadBackground(this.projectId(), file);
+    this.actions.uploadBackground(file);
     input.value = '';
   }
 
   save(): void {
-    this.actions.save(this.projectId());
+    this.actions.save();
   }
 
   deleteBackground(): void {
-    this.actions.deleteBackground(this.projectId());
+    this.actions.deleteBackground();
   }
 }

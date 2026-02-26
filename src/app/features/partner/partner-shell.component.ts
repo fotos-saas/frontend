@@ -230,6 +230,7 @@ export class PartnerShellComponent implements OnInit {
         label: 'Beállítások',
         icon: 'settings',
         children: [
+          { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere' },
           { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás és fizetés', devBadge: true },
           { id: 'email-account', route: `${base}/settings/email-account`, label: 'E-mail fiók' },
         ]

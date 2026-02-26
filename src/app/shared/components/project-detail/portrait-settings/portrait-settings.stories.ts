@@ -37,9 +37,7 @@ type Story = StoryObj<PortraitSettingsComponent>;
  * Default - A komponens HTTP-hívásokat végez ngOnInit-ben.
  * Backend nélkül loading/error állapot jelenik meg.
  */
-export const Default: Story = {
-  args: { projectId: 1 },
-};
+export const Default: Story = {};
 
 /** Loading - Betöltési állapot skeleton shimmer-rel */
 export const Loading: Story = {
@@ -224,12 +222,11 @@ export const Gradient: Story = {
 
 /** DarkMode - Sötét háttéren */
 export const DarkMode: Story = {
-  args: { projectId: 1 },
   parameters: { backgrounds: { default: 'dark' } },
   render: () => ({
     template: `
       <div style="padding: 20px; background: #1e293b; border-radius: 12px;">
-        <app-portrait-settings [projectId]="1" />
+        <app-portrait-settings />
       </div>
     `,
   }),
@@ -237,7 +234,6 @@ export const DarkMode: Story = {
 
 /** A11y - Reduced motion tesztelés */
 export const A11y: Story = {
-  args: { projectId: 1 },
   parameters: {
     a11y: { config: { rules: [{ id: 'color-contrast', enabled: true }] } },
   },

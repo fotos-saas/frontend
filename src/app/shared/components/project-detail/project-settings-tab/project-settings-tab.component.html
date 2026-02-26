@@ -157,13 +157,5 @@
       </button>
     </div>
 
-    <!-- Portré háttércsere beállítások (lazy loaded) -->
-    @defer (on viewport) {
-      <app-portrait-settings [projectId]="projectId()" />
-    } @placeholder {
-      <div class="py-8 text-center text-slate-400 text-sm">
-        Görgess lejjebb a portré beállításokhoz...
-      </div>
-    }
   </div>
 }

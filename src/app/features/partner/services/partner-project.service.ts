@@ -15,13 +15,6 @@ import {
   TabloSize,
   TabloSizeThreshold,
 } from '../models/partner.models';
-import {
-  PortraitSettings,
-  PortraitSettingsResponse,
-  UpdatePortraitSettingsResponse,
-  UploadPortraitBackgroundResponse,
-  DeletePortraitBackgroundResponse,
-} from '../models/portrait.models';
 
 /**
  * Projekt kezelés service.
@@ -575,47 +568,4 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/settings`, data);
   }
 
-  // ============================================
-  // PORTRAIT SETTINGS (Portré háttércsere)
-  // ============================================
-
-  /**
-   * Portré beállítások lekérése
-   */
-  getPortraitSettings(projectId: number): Observable<PortraitSettingsResponse> {
-    return this.http.get<PortraitSettingsResponse>(
-      `${this.baseUrl}/projects/${projectId}/portrait-settings`,
-    );
-  }
-
-  /**
-   * Portré beállítások mentése
-   */
-  updatePortraitSettings(projectId: number, settings: PortraitSettings): Observable<UpdatePortraitSettingsResponse> {
-    return this.http.put<UpdatePortraitSettingsResponse>(
-      `${this.baseUrl}/projects/${projectId}/portrait-settings`,
-      settings,
-    );
-  }
-
-  /**
-   * Portré háttérkép feltöltése
-   */
-  uploadPortraitBackground(projectId: number, file: File): Observable<UploadPortraitBackgroundResponse> {
-    const formData = new FormData();
-    formData.append('background', file);
-    return this.http.post<UploadPortraitBackgroundResponse>(
-      `${this.baseUrl}/projects/${projectId}/portrait-background`,
-      formData,
-    );
-  }
-
-  /**
-   * Portré háttérkép törlése
-   */
-  deletePortraitBackground(projectId: number): Observable<DeletePortraitBackgroundResponse> {
-    return this.http.delete<DeletePortraitBackgroundResponse>(
-      `${this.baseUrl}/projects/${projectId}/portrait-background`,
-    );
-  }
 }

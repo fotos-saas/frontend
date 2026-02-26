@@ -21,7 +21,7 @@
             [class.photo-card--selected]="isSelected(photo.mediaId)"
             (click)="selectPhoto(photo.mediaId)"
           >
-            <div class="photo-card__image">
+            <div class="photo-card__image" (click)="openLightbox(photo, $event)">
               @if (photo.thumbUrl) {
                 <img [src]="photo.thumbUrl" [alt]="photo.teacherName" loading="lazy" />
               } @else {
@@ -70,3 +70,12 @@
     </button>
   </ng-container>
 </app-dialog-wrapper>
+
+@if (lightboxIndex() >= 0 && lightboxMedia().length > 0) {
+  <app-media-lightbox
+    [media]="lightboxMedia()"
+    [currentIndex]="lightboxIndex()"
+    (close)="lightboxIndex.set(-1)"
+    (navigate)="lightboxIndex.set($event)"
+  />
+}

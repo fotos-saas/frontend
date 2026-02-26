@@ -84,6 +84,25 @@
           }
         </div>
 
+        <!-- PSD útvonal debug infó -->
+        @if (currentPsdPath() || resolvedPsdPath()) {
+          <div class="psd-path-info">
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
+            <span class="psd-path-info__path">{{ currentPsdPath() || resolvedPsdPath() }}</span>
+            @if (psdExists()) {
+              <span class="psd-path-info__status psd-path-info__status--ok">
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" />
+                Létezik
+              </span>
+            } @else {
+              <span class="psd-path-info__status psd-path-info__status--missing">
+                <lucide-icon [name]="ICONS.X_CIRCLE" [size]="12" />
+                Nem található
+              </span>
+            }
+          </div>
+        }
+
         <!-- Tabló generálása / Projekt megnyitása -->
         <div class="command-card">
           @if (psdExists()) {

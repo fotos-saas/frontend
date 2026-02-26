@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import * as http from 'http';
+import * as crypto from 'crypto';
 import Store from 'electron-store';
 import log from 'electron-log/main';
 import sharp from 'sharp';
@@ -2017,6 +2018,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     layers: Array<{ layerName: string; photoUrl: string }>;
     targetDocName?: string;
     psdFilePath?: string;
+    syncBorder?: boolean;
   }) => {
     let tempJsonPath: string | null = null;
 
@@ -2032,7 +2034,9 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         params.layers.map(async (item) => {
           try {
             const ext = item.photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
-            const fileName = `${item.layerName}.${ext}`;
+            // URL hash a fájlnévben — ha a fotó URL megváltozik (pl. aktív fotó csere), a cache invalidálódik
+            const urlHash = crypto.createHash('md5').update(item.photoUrl).digest('hex').substring(0, 8);
+            const fileName = `${item.layerName}-${urlHash}.${ext}`;
             const localPath = await downloadPhoto(item.photoUrl, fileName);
             return { layerName: item.layerName, photoPath: localPath };
           } catch (err) {
@@ -2058,7 +2062,8 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       log.info(`Place photos JSON irva: ${tempJsonPath} (${validLayers.length}/${params.layers.length} fotoval)`);
 
       // JSX futtatasa
-      const jsxCode = buildJsxScript('actions/place-photos.jsx', tempJsonPath, params.targetDocName, params.psdFilePath);
+      const extraConfig = params.syncBorder ? { SYNC_BORDER: 'true' } : undefined;
+      const jsxCode = buildJsxScript('actions/place-photos.jsx', tempJsonPath, params.targetDocName, params.psdFilePath, extraConfig);
       const tempJsxPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.jsx`);
       fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
 

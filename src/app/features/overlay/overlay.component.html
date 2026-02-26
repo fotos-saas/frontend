@@ -56,17 +56,25 @@
               [class.toolbar__inline-collapse--open]="openSubmenu() === 'sync-photos'"
             >
               <div class="toolbar__inline-collapse-inner">
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing')" matTooltip="Csak hiányzó">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('missing'); $event.stopPropagation()" matTooltip="Csak hiányzó">
                   <lucide-icon [name]="ICONS.USER_X" [size]="15" />
                 </button>
-                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all')" matTooltip="Mind">
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--green"
+                  [disabled]="selectedLayers() === 0"
+                  (click)="syncPhotos('selected'); $event.stopPropagation()"
+                  matTooltip="Kijelöltek"
+                >
+                  <lucide-icon [name]="ICONS.MOUSE_POINTER_CLICK" [size]="15" />
+                </button>
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="syncPhotos('all'); $event.stopPropagation()" matTooltip="Mind">
                   <lucide-icon [name]="ICONS.IMAGES" [size]="15" />
                 </button>
                 <div class="toolbar__collapse-sep"></div>
                 <button
                   class="toolbar__btn toolbar__btn--sm"
                   [class.toolbar__btn--toggle-on]="syncWithBorder()"
-                  (click)="toggleSyncBorder()"
+                  (click)="toggleSyncBorder(); $event.stopPropagation()"
                   [matTooltip]="syncWithBorder() ? 'Keret: BE' : 'Keret: KI'"
                 >
                   <lucide-icon [name]="ICONS.FRAME" [size]="15" />
@@ -592,6 +600,84 @@
       <span>{{ customOrderResult()!.message }}</span>
     </div>
   }
+</div>
+}
+
+<!-- Rename Layer IDs Dialog -->
+@if (renameDialogOpen()) {
+<div class="rename-panel">
+  <div class="rename-panel__header">
+    <lucide-icon [name]="ICONS.REPLACE" [size]="14" />
+    <span>Layer ID frissítés</span>
+    <button class="rename-panel__close" (click)="closeRenameDialog()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+
+  <div class="rename-panel__body">
+    <!-- Matched (automatikusan párosított) -->
+    @if (renameMatched().length > 0) {
+      <div class="rename-panel__section">
+        <span class="rename-panel__section-label rename-panel__section-label--ok">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" />
+          Párosított ({{ renameMatched().length }})
+        </span>
+        @for (m of renameMatched(); track m.old) {
+          <div class="rename-panel__row rename-panel__row--ok">
+            <span class="rename-panel__name">{{ m.personName }}</span>
+            <span class="rename-panel__arrow">→</span>
+            <span class="rename-panel__id">{{ m.new }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Unmatched (kézzel megadható) -->
+    @if (renameUnmatched().length > 0) {
+      <div class="rename-panel__section">
+        <span class="rename-panel__section-label rename-panel__section-label--warn">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="12" />
+          Nem találva ({{ renameUnmatched().length }})
+        </span>
+        @for (u of renameUnmatched(); track u.layerName; let i = $index) {
+          <div class="rename-panel__row rename-panel__row--warn">
+            <span class="rename-panel__layer-name">{{ u.layerName }}</span>
+            <input
+              class="rename-panel__input"
+              type="text"
+              placeholder="Új ID"
+              [value]="u.newId"
+              (input)="updateUnmatchedId(i, $any($event.target).value)"
+            />
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="rename-panel__footer">
+    <button
+      class="rename-panel__btn rename-panel__btn--cancel"
+      (click)="closeRenameDialog()"
+      type="button"
+    >
+      Mégse
+    </button>
+    <button
+      class="rename-panel__btn rename-panel__btn--submit"
+      [disabled]="!renameCanApply()"
+      (click)="applyRename()"
+      type="button"
+    >
+      @if (renameApplying()) {
+        <span class="toolbar__spinner toolbar__spinner--sm"></span>
+        Alkalmazás...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+        Alkalmazás
+      }
+    </button>
+  </div>
 </div>
 }
 

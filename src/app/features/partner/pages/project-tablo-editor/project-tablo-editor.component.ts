@@ -132,6 +132,8 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   /** Aktuális PSD fájl útvonala (generáláskor mentjük) */
   readonly currentPsdPath = signal<string | null>(null);
+  /** Feloldott PSD útvonal (debug kijelzéshez) */
+  readonly resolvedPsdPath = signal<string | null>(null);
 
   /** Projekt személyei (diákok + tanárok) */
   readonly persons = signal<TabloPersonItem[]>([]);
@@ -665,7 +667,10 @@ export class ProjectTabloEditorComponent implements OnInit {
     } : undefined);
 
     // Auto-open: PS service mindig tudja a PSD útvonalat
-    if (resolved) this.ps.psdPath.set(resolved);
+    if (resolved) {
+      this.ps.psdPath.set(resolved);
+      this.resolvedPsdPath.set(resolved);
+    }
     return resolved;
   }
 

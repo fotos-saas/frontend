@@ -6,6 +6,12 @@
   (click)="onCardClick()"
 >
   <div class="card-photo">
+    <button
+      class="id-badge"
+      type="button"
+      (click)="copyId($event)"
+      [matTooltip]="idCopied() ? 'Másolva!' : 'ID: ' + person().id"
+    >{{ person().id }}</button>
     @if (person().photoThumbUrl) {
       <img [src]="person().photoThumbUrl" [alt]="person().name" loading="lazy" />
       <div class="card-zoom-icon">

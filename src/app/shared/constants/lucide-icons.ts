@@ -123,6 +123,7 @@ import {
   // Loading spinner
   Loader2,
   // Biometric / Security
+  Scan,
   ScanFace,
   Fingerprint,
   ShieldCheck,
@@ -362,6 +363,7 @@ export const LUCIDE_ICONS_MAP = {
   // Loading spinner
   Loader2,
   // Biometric / Security
+  Scan,
   ScanFace,
   Fingerprint,
   ShieldCheck,

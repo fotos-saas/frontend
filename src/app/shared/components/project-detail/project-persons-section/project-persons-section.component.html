@@ -66,13 +66,44 @@
               <span class="text-sm font-semibold text-gray-800">Diákok</span>
               <span class="text-xs text-gray-400">({{ studentsCount() }})</span>
             </div>
-            <button
-              type="button"
-              class="add-person-btn"
-              (click)="addPersons.emit('student'); $event.stopPropagation()"
-            >
-              <lucide-icon [name]="ICONS.PLUS" [size]="14" />
-            </button>
+            <div class="column-header__actions">
+              @if (personsApiUrl()) {
+                <div class="copy-btn-group copy-btn-group--compact">
+                  <button
+                    type="button"
+                    class="copy-btn-group__main"
+                    [class.copy-btn-group__main--copied]="copiedType() === 'student'"
+                    [disabled]="copying()"
+                    matTooltip="Diákok másolása"
+                    (click)="copyNames($event, 'student')"
+                  >
+                    @if (copying() && copyingType() === 'student') {
+                      <lucide-icon [name]="ICONS.REFRESH" [size]="12" class="animate-spin" />
+                    } @else if (copiedType() === 'student') {
+                      <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                    } @else {
+                      <lucide-icon [name]="ICONS.COPY" [size]="12" />
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="copy-btn-group__toggle"
+                    [class.copy-btn-group__toggle--active]="withId()"
+                    matTooltip="ID megjelenítése"
+                    (click)="toggleWithId($event)"
+                  >
+                    #
+                  </button>
+                </div>
+              }
+              <button
+                type="button"
+                class="add-person-btn"
+                (click)="addPersons.emit('student'); $event.stopPropagation()"
+              >
+                <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+              </button>
+            </div>
           </div>
           <div class="stats-row">
             <span class="stat-item stat-item--green">
@@ -121,13 +152,44 @@
               <span class="text-sm font-semibold text-gray-800">Tanárok</span>
               <span class="text-xs text-gray-400">({{ teachersCount() }})</span>
             </div>
-            <button
-              type="button"
-              class="add-person-btn"
-              (click)="addPersons.emit('teacher'); $event.stopPropagation()"
-            >
-              <lucide-icon [name]="ICONS.PLUS" [size]="14" />
-            </button>
+            <div class="column-header__actions">
+              @if (personsApiUrl()) {
+                <div class="copy-btn-group copy-btn-group--compact">
+                  <button
+                    type="button"
+                    class="copy-btn-group__main"
+                    [class.copy-btn-group__main--copied]="copiedType() === 'teacher'"
+                    [disabled]="copying()"
+                    matTooltip="Tanárok másolása"
+                    (click)="copyNames($event, 'teacher')"
+                  >
+                    @if (copying() && copyingType() === 'teacher') {
+                      <lucide-icon [name]="ICONS.REFRESH" [size]="12" class="animate-spin" />
+                    } @else if (copiedType() === 'teacher') {
+                      <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                    } @else {
+                      <lucide-icon [name]="ICONS.COPY" [size]="12" />
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="copy-btn-group__toggle"
+                    [class.copy-btn-group__toggle--active]="withId()"
+                    matTooltip="ID megjelenítése"
+                    (click)="toggleWithId($event)"
+                  >
+                    #
+                  </button>
+                </div>
+              }
+              <button
+                type="button"
+                class="add-person-btn"
+                (click)="addPersons.emit('teacher'); $event.stopPropagation()"
+              >
+                <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+              </button>
+            </div>
           </div>
           <div class="stats-row">
             <span class="stat-item stat-item--green">

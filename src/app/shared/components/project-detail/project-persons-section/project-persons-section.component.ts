@@ -1,24 +1,47 @@
-import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ToastService } from '../../../../core/services/toast.service';
 import { ProjectDetailData, PersonPreviewItem } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
+
+interface PersonListItem {
+  id: number;
+  name: string;
+  type: 'student' | 'teacher';
+}
 
 @Component({
   selector: 'app-project-persons-section',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, MatTooltipModule],
   templateUrl: './project-persons-section.component.html',
   styleUrls: ['./project-persons-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectPersonsSectionComponent {
+  private readonly http = inject(HttpClient);
+  private readonly toastService = inject(ToastService);
   readonly ICONS = ICONS;
 
   readonly project = input.required<ProjectDetailData>();
+  /** API URL a személyek lekéréséhez. Ha nincs megadva, a másolás gomb rejtett. */
+  readonly personsApiUrl = input<string | null>(null);
+
   readonly openPersonsModal = output<'student' | 'teacher' | undefined>();
   readonly openUploadWizard = output<'students' | 'teachers'>();
   readonly downloadPendingZip = output<void>();
   readonly addPersons = output<'student' | 'teacher'>();
+
+  /** ID megjelenítés toggle (közös a két oszlophoz) */
+  readonly withId = signal(false);
+  /** Másolás folyamatban */
+  readonly copying = signal(false);
+  /** Melyik típust másoljuk éppen */
+  readonly copyingType = signal<'student' | 'teacher' | null>(null);
+  /** Melyik típust másoltuk sikeresen */
+  readonly copiedType = signal<'student' | 'teacher' | null>(null);
 
   readonly isPreliminary = computed(() => this.project().isPreliminary ?? false);
   readonly pendingStudentPhotos = computed(() => this.project().pendingStudentPhotos ?? 0);
@@ -53,5 +76,50 @@ export class ProjectPersonsSectionComponent {
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  toggleWithId(event: MouseEvent): void {
+    event.stopPropagation();
+    this.withId.update(v => !v);
+  }
+
+  copyNames(event: MouseEvent, type: 'student' | 'teacher'): void {
+    event.stopPropagation();
+    const url = this.personsApiUrl();
+    if (!url || this.copying()) return;
+
+    this.copying.set(true);
+    this.copyingType.set(type);
+    this.copiedType.set(null);
+
+    this.http.get<{ data: PersonListItem[] }>(url).subscribe({
+      next: (res) => {
+        const persons = res.data.filter(p => p.type === type);
+        const includeId = this.withId();
+        const text = persons
+          .map(p => includeId ? `#${p.id} ${p.name}` : p.name)
+          .join('\n');
+
+        const label = type === 'student' ? 'Diákok' : 'Tanárok';
+        navigator.clipboard.writeText(text).then(() => {
+          this.toastService.success(
+            `${label} másolva!`,
+            `${persons.length} név a vágólapon`,
+          );
+          this.copying.set(false);
+          this.copyingType.set(null);
+          this.copiedType.set(type);
+          setTimeout(() => this.copiedType.set(null), 2000);
+        }).catch(() => {
+          this.toastService.error('Hiba', 'Nem sikerült a vágólapra másolni');
+          this.copying.set(false);
+          this.copyingType.set(null);
+        });
+      },
+      error: () => {
+        this.copying.set(false);
+        this.copyingType.set(null);
+      },
+    });
   }
 }

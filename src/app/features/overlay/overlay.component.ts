@@ -574,6 +574,27 @@ export class OverlayComponent implements OnInit {
     } catch { return []; }
   }
 
+  /** Names csoport text layerek nevét és szöveges tartalmát olvassa ki */
+  private async getNamesTextContent(): Promise<Map<string, string>> {
+    const map = new Map<string, string>();
+    if (!window.electronAPI) return map;
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({
+        scriptName: 'actions/get-names-text-content.jsx',
+      });
+      if (!result.success || !result.output) return map;
+      const cleaned = result.output.trim();
+      if (!cleaned.startsWith('{')) return map;
+      const data = JSON.parse(cleaned);
+      for (const item of data.items || []) {
+        // \r sortörést szóközre cseréljük
+        const text = (item.textContent || '').replace(/[\r\n]+/g, ' ').trim();
+        if (text) map.set(item.layerName, text);
+      }
+      return map;
+    } catch { return map; }
+  }
+
   /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket */
   private async reorderLayersByNames(orderedNames: string[]): Promise<any> {
     console.log('[REORDER] orderedNames:', orderedNames);
@@ -849,6 +870,36 @@ export class OverlayComponent implements OnInit {
         }
       } else {
         unmatched.push({ layerName, newId: '' });
+      }
+    }
+
+    // 3b. Fallback: Names text content alapján matchelés az unmatched layerekre
+    if (unmatched.length > 0 && personList.length > 0) {
+      const namesTextMap = await this.getNamesTextContent();
+      if (namesTextMap.size > 0) {
+        const stillUnmatched: typeof unmatched = [];
+        for (const um of unmatched) {
+          const textContent = namesTextMap.get(um.layerName);
+          if (!textContent) { stillUnmatched.push(um); continue; }
+          const normalizedText = normalize(textContent);
+          const available = personList.filter(p => !usedPersonIds.has(p.id));
+          const person =
+            available.find(p => normalize(p.name) === normalizedText) ||
+            available.find(p => levenshtein(normalize(p.name), normalizedText) <= 2);
+          if (person) {
+            usedPersonIds.add(person.id);
+            const slug = um.layerName.replace(/---\d+$/, '');
+            const newName = `${slug}---${person.id}`;
+            if (newName !== um.layerName) {
+              matched.push({ old: um.layerName, new: newName, personName: person.name });
+            }
+          } else {
+            stillUnmatched.push(um);
+          }
+        }
+        unmatched.length = 0;
+        unmatched.push(...stillUnmatched);
+        console.log('[RENAME] Names fallback matched:', matched.length, 'still unmatched:', unmatched.length);
       }
     }
 

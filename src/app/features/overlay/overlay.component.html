@@ -665,7 +665,7 @@
     </button>
     <button
       class="rename-panel__btn rename-panel__btn--submit"
-      [disabled]="renameApplying() || (renameMatched().length === 0 && renameUnmatched().every(u => !u.newId.trim()))"
+      [disabled]="!renameCanApply()"
       (click)="applyRename()"
       type="button"
     >

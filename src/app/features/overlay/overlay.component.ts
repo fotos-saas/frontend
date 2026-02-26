@@ -84,6 +84,11 @@ export class OverlayComponent implements OnInit {
   readonly renameMatched = signal<Array<{ old: string; new: string; personName: string }>>([]);
   readonly renameUnmatched = signal<Array<{ layerName: string; newId: string }>>([]);
   readonly renameApplying = signal(false);
+  readonly renameCanApply = computed(() => {
+    if (this.renameApplying()) return false;
+    if (this.renameMatched().length > 0) return true;
+    return this.renameUnmatched().some(u => u.newId.trim().length > 0);
+  });
 
   // Upload panel state
   readonly uploadPanelOpen = signal(false);

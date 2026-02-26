@@ -160,6 +160,10 @@ export class TabloLayoutDialogComponent implements OnInit {
       this.gapHCm.set(cfg.gapHCm);
       this.gapVCm.set(cfg.gapVCm);
       this.gridAlign.set(cfg.gridAlign);
+    } else {
+      // Alapértelmezett: a fizikai korlát (ami ténylegesen kifér)
+      this.studentMaxPerRow.set(this.studentPhysicalMax());
+      this.teacherMaxPerRow.set(this.teacherPhysicalMax());
     }
   }
 

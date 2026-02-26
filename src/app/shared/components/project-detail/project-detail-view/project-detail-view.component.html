@@ -21,6 +21,7 @@
   <!-- Névsor szekció (diákok + tanárok) -->
   <app-project-persons-section
     [project]="project()!"
+    [personsApiUrl]="personsApiUrl()"
     (openPersonsModal)="openPersonsModal.emit($event)"
     (openUploadWizard)="openUploadWizard.emit($event)"
     (downloadPendingZip)="downloadPendingZip.emit()"

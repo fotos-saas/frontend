@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ClipboardService } from '../../../../core/services/clipboard.service';
+import { environment } from '../../../../../environments/environment';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
   AddButtonComponent,
@@ -45,6 +46,13 @@ export class ProjectDetailViewComponent {
 
   readonly project = input<ProjectDetailData | null>(null);
   readonly isMarketer = input<boolean>(false);
+
+  /** Partner felületen megadjuk a persons API URL-t a másolás gombhoz */
+  readonly personsApiUrl = computed(() => {
+    const p = this.project();
+    if (this.isMarketer() || !p) return null;
+    return `${environment.apiUrl}/partner/projects/${p.id}/persons`;
+  });
 
   readonly openPersonsModal = output<'student' | 'teacher' | undefined>();
   readonly openUploadWizard = output<'students' | 'teachers'>();

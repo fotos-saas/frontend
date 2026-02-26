@@ -47,13 +47,45 @@
             {{ personsCount() }} fő
           </span>
         </div>
-        <button
-          class="px-3 py-1.5 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
-          (click)="openPersonsModal.emit(undefined)"
-        >
-          <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
-          Mind megtekintése
-        </button>
+        <div class="flex items-center gap-1">
+          @if (personsApiUrl()) {
+            <div class="copy-btn-group">
+              <button
+                type="button"
+                class="copy-btn-group__main"
+                [class.copy-btn-group__main--copied]="copied()"
+                [disabled]="copying()"
+                [matTooltip]="withId() ? 'Névsor másolása ID-vel' : 'Névsor másolása'"
+                (click)="copyNames($event)"
+              >
+                @if (copying()) {
+                  <lucide-icon [name]="ICONS.REFRESH" [size]="13" class="animate-spin" />
+                } @else if (copied()) {
+                  <lucide-icon [name]="ICONS.CHECK" [size]="13" />
+                } @else {
+                  <lucide-icon [name]="ICONS.COPY" [size]="13" />
+                }
+                Másolás
+              </button>
+              <button
+                type="button"
+                class="copy-btn-group__toggle"
+                [class.copy-btn-group__toggle--active]="withId()"
+                matTooltip="ID megjelenítése a névsorban"
+                (click)="toggleWithId($event)"
+              >
+                #
+              </button>
+            </div>
+          }
+          <button
+            class="px-3 py-1.5 text-primary hover:bg-primary-50 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+            (click)="openPersonsModal.emit(undefined)"
+          >
+            <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
+            Mind megtekintése
+          </button>
+        </div>
       </div>
 
       <!-- 2 oszlopos layout -->

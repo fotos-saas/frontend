@@ -357,7 +357,8 @@ function _doRestore() {
     var groupPath = layerData.groupPath || [];
 
     // restoreGroups szuro — ha megadva, csak matching layerek
-    if (hasFilter && !_matchesRestoreGroups(groupPath, restoreGroups)) {
+    // moveAllSiblings modban NEM szurunk — a teljes doksit bejarja nev alapjan
+    if (!moveAllSiblings && hasFilter && !_matchesRestoreGroups(groupPath, restoreGroups)) {
       continue;
     }
 

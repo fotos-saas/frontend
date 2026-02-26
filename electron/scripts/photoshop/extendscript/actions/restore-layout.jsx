@@ -230,11 +230,90 @@ function _convertV2ToLayers(persons) {
   return layers;
 }
 
+// --- Rekurziv layer kereses nev alapjan (unlink/relink-hez) ---
+function _findLayersByNames(container, targetNames, result) {
+  try {
+    for (var i = 0; i < container.artLayers.length; i++) {
+      var layer = container.artLayers[i];
+      for (var n = 0; n < targetNames.length; n++) {
+        if (layer.name === targetNames[n]) {
+          result.push(layer);
+          break;
+        }
+      }
+    }
+  } catch (e) { /* nincs artLayers */ }
+  try {
+    for (var j = 0; j < container.layerSets.length; j++) {
+      _findLayersByNames(container.layerSets[j], targetNames, result);
+    }
+  } catch (e) { /* nincs layerSets */ }
+}
+
+// --- Tobb layer kijelolese ID alapjan (ActionManager) — relink-hez ---
+function _selectMultipleLayersById(layerIds) {
+  if (layerIds.length === 0) return;
+  var desc = new ActionDescriptor();
+  var ref = new ActionReference();
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
+  desc.putReference(charIDToTypeID("null"), ref);
+  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+  for (var i = 1; i < layerIds.length; i++) {
+    var addDesc = new ActionDescriptor();
+    var addRef = new ActionReference();
+    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
+    addDesc.putReference(charIDToTypeID("null"), addRef);
+    addDesc.putEnumerated(
+      stringIDToTypeID("selectionModifier"),
+      stringIDToTypeID("selectionModifierType"),
+      stringIDToTypeID("addToSelection")
+    );
+    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  }
+}
+
+// --- Linked layerek unlinkelese nev alapjan ---
+function _unlinkByNames(doc, layerNames) {
+  var found = [];
+  _findLayersByNames(doc, layerNames, found);
+  var count = 0;
+  for (var i = 0; i < found.length; i++) {
+    try { found[i].unlink(); count++; } catch (e) { /* nem linkelt */ }
+  }
+  return count;
+}
+
+// --- Linked layerek visszalinkelese nev alapjan ---
+// Nev alapjan: adott layerName osszes elofordulasa (Images + Names) ossze lesz linkelve
+function _relinkByNames(doc, layerNames) {
+  for (var n = 0; n < layerNames.length; n++) {
+    var found = [];
+    _findLayersByNames(doc, [layerNames[n]], found);
+    if (found.length < 2) continue;
+    var ids = [];
+    for (var i = 0; i < found.length; i++) { ids.push(found[i].id); }
+    _selectMultipleLayersById(ids);
+    var linkDesc = new ActionDescriptor();
+    var linkRef = new ActionReference();
+    linkRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+    linkDesc.putReference(charIDToTypeID("null"), linkRef);
+    executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
+  }
+}
+
 // --- Fo visszaallitasi logika ---
 function _doRestore() {
   if (!_snapshotData) {
     log("[JSX] HIBA: _snapshotData null/undefined");
     return;
+  }
+
+  // Linked layerek kezelese — unlink a mozgatas elott
+  var linkedNames = _snapshotData.linkedLayerNames || null;
+  var hasLinked = linkedNames && linkedNames.length > 0;
+  if (hasLinked) {
+    var unlinked = _unlinkByNames(_doc, linkedNames);
+    log("[JSX] Unlink: " + unlinked + " layer");
   }
 
   // v2 backward compat: persons → layers konverzio
@@ -311,6 +390,12 @@ function _doRestore() {
       log("[JSX] WARN: Layer visszaallitas sikertelen (" + layerData.layerName + "): " + e.message);
       _skipped++;
     }
+  }
+
+  // Linked layerek visszalinkelese a mozgatas utan
+  if (hasLinked) {
+    _relinkByNames(_doc, linkedNames);
+    log("[JSX] Relink: " + linkedNames.length + " layerName visszalinkelve");
   }
 
   log("[JSX] Visszaallitas kesz: " + _restored + " layer visszaallitva, " + _skipped + " kihagyva");

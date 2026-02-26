@@ -928,29 +928,19 @@ export class PhotoshopService {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
     try {
-      // Linkelések leszedése
-      if (linkedLayerNames?.length) {
-        await this.unlinkLayers(linkedLayerNames, targetDocName);
-      }
-
       this.logger.info('Elrendezés szinkronizálás indul:', { layerCount: layers.length });
 
+      // Unlink → mozgatás → relink egyetlen JSX hívásban (1 suspendHistory)
       const result = await this.runJsx({
         scriptName: 'actions/restore-layout.jsx',
         jsonData: {
           layers,
           restoreGroups: [['Images'], ['Names']],
           historyName: 'Sorrend frissítés',
+          ...(linkedLayerNames?.length ? { linkedLayerNames } : {}),
         },
         targetDocName,
       });
-
-      // Linkelések visszaállítása
-      if (linkedLayerNames?.length) {
-        for (const name of linkedLayerNames) {
-          await this.linkLayers([name], targetDocName);
-        }
-      }
 
       if (!result.success) {
         this.logger.error('Elrendezés szinkronizálás JSX hiba:', result.error);

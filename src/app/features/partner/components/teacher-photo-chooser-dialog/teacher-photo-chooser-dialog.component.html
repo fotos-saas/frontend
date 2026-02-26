@@ -40,7 +40,7 @@
               @if (photo.schoolName) {
                 <span class="photo-card__school">{{ photo.schoolName }}</span>
               }
-              <span class="photo-card__meta">{{ photo.year }} &middot; {{ formatFileSize(photo.fileSize) }}</span>
+              <span class="photo-card__meta">{{ photo.createdAt | date:'yyyy.MM.dd HH:mm' }} &middot; {{ formatFileSize(photo.fileSize) }}</span>
             </div>
           </div>
         }

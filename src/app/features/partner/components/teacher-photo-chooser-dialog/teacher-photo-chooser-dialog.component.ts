@@ -10,6 +10,7 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -19,7 +20,7 @@ import type { LinkedGroupPhoto } from '../../models/teacher.models';
 @Component({
   selector: 'app-teacher-photo-chooser-dialog',
   standalone: true,
-  imports: [LucideAngularModule, DialogWrapperComponent],
+  imports: [LucideAngularModule, DialogWrapperComponent, DatePipe],
   templateUrl: './teacher-photo-chooser-dialog.component.html',
   styleUrl: './teacher-photo-chooser-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

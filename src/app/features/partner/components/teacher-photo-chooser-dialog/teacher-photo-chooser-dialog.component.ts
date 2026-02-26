@@ -6,6 +6,7 @@ import {
   output,
   signal,
   computed,
+  linkedSignal,
   DestroyRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -37,17 +38,13 @@ export class TeacherPhotoChooserDialogComponent {
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly selectedMediaId = signal<number | null>(null);
+
+  readonly selectedMediaId = linkedSignal<LinkedGroupPhoto[], number | null>({
+    source: this.photos,
+    computation: (photos) => photos.length > 0 ? photos[0].mediaId : null,
+  });
 
   readonly hasSelection = computed(() => this.selectedMediaId() !== null);
-
-  readonly sortedPhotos = computed(() => {
-    const items = this.photos();
-    if (items.length > 0 && this.selectedMediaId() === null) {
-      this.selectedMediaId.set(items[0].mediaId);
-    }
-    return items;
-  });
 
   selectPhoto(mediaId: number): void {
     this.selectedMediaId.set(mediaId);

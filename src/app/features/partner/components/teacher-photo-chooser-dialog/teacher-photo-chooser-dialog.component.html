@@ -11,11 +11,11 @@
   (submitEvent)="onSubmit()"
 >
   <ng-container dialogBody>
-    @if (sortedPhotos().length === 0) {
+    @if (photos().length === 0) {
       <p class="empty-state">Nincs elérhető fotó a csoportban.</p>
     } @else {
       <div class="photo-grid">
-        @for (photo of sortedPhotos(); track photo.mediaId) {
+        @for (photo of photos(); track photo.mediaId) {
           <div
             class="photo-card"
             [class.photo-card--selected]="isSelected(photo.mediaId)"

@@ -1,32 +1,31 @@
-import {
-  Component, ChangeDetectionStrategy, input, output, inject,
-  OnInit, OnDestroy, ElementRef, viewChild, viewChildren, signal, computed, HostListener,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject, OnInit, OnDestroy, ElementRef, viewChild, signal, computed, HostListener } from '@angular/core';
 import { SnapshotLayer, SnapshotListItem } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
 import { PhotoshopService } from '../../../services/photoshop.service';
-import { PartnerProjectService } from '../../../services/partner-project.service';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
 import { LayoutDesignerActionsService } from './layout-designer-actions.service';
 import { LayoutDesignerGridService } from './layout-designer-grid.service';
 import { LayoutDesignerDragService } from './layout-designer-drag.service';
 import { LayoutDesignerSwapService } from './layout-designer-swap.service';
 import { LayoutDesignerHistoryService } from './layout-designer-history.service';
+import { LayoutDesignerSelectionService } from './layout-designer-selection.service';
 import { LayoutDesignerSortService } from './layout-designer-sort.service';
+import { LayoutDesignerPsBridgeService } from './layout-designer-ps-bridge.service';
+import { LayoutDesignerSampleService } from './layout-designer-sample.service';
 import { LayoutToolbarComponent } from './components/layout-toolbar/layout-toolbar.component';
 import { LayoutCanvasComponent } from './components/layout-canvas/layout-canvas.component';
 import { LayoutSortPanelComponent } from './components/layout-sort-panel/layout-sort-panel.component';
 import { LayoutSortCustomDialogComponent } from './components/layout-sort-custom-dialog/layout-sort-custom-dialog.component';
-import { LayoutPhotoUploadDialogComponent, PhotoUploadPerson, PhotoUploadResult } from './components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
+import { LayoutPhotoUploadDialogComponent, PhotoUploadPerson } from './components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
 import { LayoutPhotoBulkDialogComponent } from './components/layout-photo-bulk-dialog/layout-photo-bulk-dialog.component';
 import { LayoutActionsDialogComponent } from './components/layout-actions-dialog/layout-actions-dialog.component';
 import { ExtraNamesDialogComponent } from './components/extra-names-dialog/extra-names-dialog.component';
 import { LayoutCommandOverlayComponent } from './components/layout-command-overlay/layout-command-overlay.component';
 import { ActionPersonItem } from './components/layout-actions-dialog/layout-actions.types';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
-import { DesignerDocument } from './layout-designer.types';
-import { firstValueFrom } from 'rxjs';
+import { parseSnapshotData, extractImagePersons } from './layout-designer.utils';
 
 /**
  * Vizuális Tábló Szerkesztő — fullscreen overlay.
@@ -39,457 +38,131 @@ import { firstValueFrom } from 'rxjs';
     LayoutToolbarComponent, LayoutCanvasComponent, LayoutSortPanelComponent,
     LayoutSortCustomDialogComponent, LayoutPhotoUploadDialogComponent,
     LayoutPhotoBulkDialogComponent, LayoutActionsDialogComponent, ExtraNamesDialogComponent,
-    LayoutCommandOverlayComponent, LucideAngularModule,
+    LayoutCommandOverlayComponent, LucideAngularModule, MatTooltipModule,
   ],
   providers: [
-    LayoutDesignerStateService,
-    LayoutDesignerActionsService,
-    LayoutDesignerGridService,
-    LayoutDesignerDragService,
-    LayoutDesignerSwapService,
-    LayoutDesignerHistoryService,
-    LayoutDesignerSortService,
+    LayoutDesignerStateService, LayoutDesignerActionsService,
+    LayoutDesignerGridService, LayoutDesignerDragService,
+    LayoutDesignerSwapService, LayoutDesignerHistoryService,
+    LayoutDesignerSelectionService, LayoutDesignerSortService,
+    LayoutDesignerPsBridgeService, LayoutDesignerSampleService,
   ],
-  template: `
-    <div
-      class="layout-designer-overlay"
-      #overlayEl
-    >
-      @if (loading()) {
-        <div class="layout-designer__loading">
-          <lucide-icon [name]="ICONS.LOADER" [size]="32" class="spin" />
-          <span>Pillanatkép betöltése...</span>
-        </div>
-      } @else if (loadError()) {
-        <div class="layout-designer__error">
-          <lucide-icon [name]="ICONS.X_CIRCLE" [size]="32" />
-          <span>{{ loadError() }}</span>
-          <button class="designer-btn" (click)="close()">Bezárás</button>
-        </div>
-      } @else {
-        <app-layout-toolbar
-          [refreshing]="refreshing()"
-          [syncing]="syncingPhotos()"
-          [arrangingNames]="arrangingNames()"
-          [nameGapCm]="ps.nameGapCm()"
-          [nameBreakAfter]="ps.nameBreakAfter()"
-          [textAlign]="ps.textAlign()"
-          [updatingPositions]="updatingPositions()"
-          [positionGapCm]="ps.positionGapCm()"
-          [positionFontSize]="ps.positionFontSize()"
-          [snapshots]="snapshots()"
-          [switchingSnapshot]="switchingSnapshot()"
-          (refreshClicked)="refresh()"
-          (syncClicked)="syncAllPhotos()"
-          (arrangeNamesClicked)="arrangeNames()"
-          (updatePositionsClicked)="updatePositions()"
-          (nameGapChanged)="ps.setNameGap($event)"
-          (nameBreakChanged)="ps.setNameBreakAfter($event)"
-          (textAlignChanged)="ps.setTextAlign($event)"
-          (positionGapChanged)="ps.setPositionGap($event)"
-          (positionFontSizeChanged)="ps.setPositionFontSize($event)"
-          (snapshotSelected)="switchSnapshot($event)"
-          (saveClicked)="save()"
-          (closeClicked)="close()"
-        />
-        <div class="layout-designer__content">
-          <app-layout-sort-panel
-            [generatingSample]="generatingSample()"
-            [generatingFinal]="generatingFinal()"
-            [finalMode]="finalMode()"
-            [sampleLargeSize]="sampleLargeSize()"
-            [sampleWatermarkColor]="ps.sampleWatermarkColor()"
-            [sampleWatermarkOpacity]="ps.sampleWatermarkOpacity()"
-            [sampleSuccess]="sampleSuccess()"
-            [sampleError]="sampleError()"
-            [extraNames]="extraNames()"
-            [insertingExtraNames]="insertingExtraNames()"
-            [extraNamesSuccess]="extraNamesSuccess()"
-            [extraNamesError]="extraNamesError()"
-            (openActions)="showActionsDialog.set(true)"
-            (openCustomDialog)="showCustomDialog.set(true)"
-            (generateSample)="onGenerateSample()"
-            (generateFinal)="onGenerateFinal()"
-            (cycleFinalMode)="onCycleFinalMode()"
-            (sampleLargeSizeChange)="onLargeSizeChange($event)"
-            (watermarkColorChange)="onWatermarkColorChange($event)"
-            (opacityChange)="onCycleOpacity()"
-            (openProject)="onOpenProject()"
-            (openWorkDir)="onOpenWorkDir()"
-            (insertExtraNames)="onInsertExtraNames($event)"
-            (openExtraNamesDialog)="showExtraNamesDialog.set(true)"
-          />
-          <div class="layout-designer__canvas-area" #canvasArea>
-            <app-layout-canvas
-              [linking]="linking()"
-              (uploadPhotoClicked)="openPhotoDialog()"
-              (linkLayersClicked)="onLinkLayers()"
-              (unlinkLayersClicked)="onUnlinkLayers()"
-            />
-          </div>
-        </div>
-        @if (showCustomDialog()) {
-          <app-layout-sort-custom-dialog (close)="showCustomDialog.set(false)" />
-        }
-        @if (showPhotoDialog(); as dialogPerson) {
-          <app-layout-photo-upload-dialog
-            [person]="dialogPerson"
-            [projectId]="projectId()"
-            (close)="showPhotoDialog.set(null)"
-            (photoUploaded)="onPhotoUploaded($event)"
-          />
-        }
-        @if (showBulkPhotoDialog()) {
-          <app-layout-photo-bulk-dialog
-            [persons]="bulkDialogPersons()"
-            [projectId]="projectId()"
-            (close)="showBulkPhotoDialog.set(false)"
-            (photosAssigned)="onBulkPhotosAssigned($event)"
-          />
-        }
-        @if (showActionsDialog()) {
-          <app-layout-actions-dialog
-            [persons]="actionPersons()"
-            [preSelectedPersonIds]="preSelectedActionPersonIds()"
-            (close)="showActionsDialog.set(false)"
-            (executed)="onActionsExecuted()"
-          />
-        }
-        @if (showExtraNamesDialog() && extraNames()) {
-          <app-extra-names-dialog
-            [extraNames]="extraNames()!"
-            (close)="showExtraNamesDialog.set(false)"
-            (insert)="onExtraNamesDialogInsert($event)"
-          />
-        }
-
-        <!-- Command Overlay (dupla Ctrl) -->
-        <app-layout-command-overlay
-          (commandExecuted)="onOverlayCommand($event)"
-        />
-
-        <!-- FAB: Command Overlay toggle -->
-        <button
-          class="command-fab"
-          (click)="commandOverlay()?.toggle()"
-          matTooltip="Parancsok (Ctrl Ctrl)"
-          matTooltipPosition="left"
-        >
-          <lucide-icon [name]="ICONS.COMMAND" [size]="20" />
-        </button>
-      }
-    </div>
-  `,
-  styles: [`
-    :host { display: contents; }
-
-    .layout-designer-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1100;
-      background: #1a1a2e;
-      display: flex;
-      flex-direction: column;
-      -webkit-app-region: no-drag;
-      /* Electron frameless: ne lógjon a macOS traffic lights alá */
-      padding-top: 38px;
-    }
-
-    .layout-designer__loading,
-    .layout-designer__error {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.95rem;
-    }
-
-    .layout-designer__error {
-      color: #fca5a5;
-    }
-
-    .layout-designer__content {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-    }
-
-    .layout-designer__canvas-area {
-      flex: 1;
-      min-width: 0;
-      position: relative;
-      overflow: hidden;
-      background: #1a1a2e;
-    }
-
-    .layout-designer__canvas-area app-layout-canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .designer-btn {
-      margin-top: 8px;
-      padding: 8px 20px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      background: transparent;
-      color: rgba(255, 255, 255, 0.7);
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.12s ease;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #ffffff;
-      }
-    }
-
-    .spin {
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* FAB: Command Overlay trigger */
-    .command-fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 48px;
-      height: 48px;
-      border: 1px solid rgba(167, 139, 250, 0.3);
-      border-radius: 14px;
-      background: linear-gradient(135deg, #2a2a4a, #1e1e38);
-      color: #a78bfa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 1200;
-      box-shadow:
-        0 4px 20px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(124, 58, 237, 0.12);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-      &:hover {
-        transform: scale(1.08);
-        border-color: rgba(167, 139, 250, 0.5);
-        box-shadow:
-          0 6px 28px rgba(0, 0, 0, 0.5),
-          0 0 40px rgba(124, 58, 237, 0.2);
-        color: #c4b5fd;
-      }
-
-      &:active {
-        transform: scale(0.95);
-      }
-    }
-  `],
+  templateUrl: './layout-designer.component.html',
+  styleUrl: './layout-designer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayoutDesignerComponent implements OnInit, OnDestroy {
   private readonly state = inject(LayoutDesignerStateService);
   protected readonly ps = inject(PhotoshopService);
-  private readonly projectService = inject(PartnerProjectService);
   private readonly sortService = inject(LayoutDesignerSortService);
   private readonly gridService = inject(LayoutDesignerGridService);
   private readonly actionsService = inject(LayoutDesignerActionsService);
+  protected readonly psBridge = inject(LayoutDesignerPsBridgeService);
+  protected readonly sampleActions = inject(LayoutDesignerSampleService);
   protected readonly ICONS = ICONS;
 
-  /** Command Overlay referencia */
   readonly commandOverlay = viewChild(LayoutCommandOverlayComponent);
-
-  /** Dupla Ctrl detekció */
   private lastCtrlTime = 0;
   private readonly DOUBLE_TAP_THRESHOLD = 400;
 
   readonly showCustomDialog = signal(false);
-
-  /** Single person dialógus: a kijelölt személy adatai, vagy null ha nem látszik */
   readonly showPhotoDialog = signal<PhotoUploadPerson | null>(null);
-
-  /** Bulk dialógus megjelenítése */
   readonly showBulkPhotoDialog = signal(false);
-
-  /** Akciók dialógus megjelenítése */
   readonly showActionsDialog = signal(false);
-
-  /** Extra nevek szerkesztő dialógus megjelenítése */
   readonly showExtraNamesDialog = signal(false);
-
-  /** Bulk dialógus személyei */
-  readonly bulkDialogPersons = computed<PhotoUploadPerson[]>(() => {
-    if (!this.showBulkPhotoDialog()) return [];
-    return this.getSelectedImagePersons();
-  });
-
-  /** Az osszes image layer szemely összegyujtese poziciokkal */
+  readonly bulkDialogPersons = computed<PhotoUploadPerson[]>(() =>
+    this.showBulkPhotoDialog() ? extractImagePersons(this.state.selectedLayers(), this.persons()) : [],
+  );
   readonly actionPersons = computed<ActionPersonItem[]>(() => {
-    const layers = this.state.layers();
     const result: ActionPersonItem[] = [];
     const seen = new Set<number>();
-    for (const l of layers) {
-      if ((l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch) {
-        if (!seen.has(l.personMatch.id)) {
-          seen.add(l.personMatch.id);
-          result.push({
-            id: l.personMatch.id,
-            name: l.personMatch.name,
-            type: l.category === 'teacher-image' ? 'teacher' : 'student',
-            layerName: l.layerName,
-            x: l.editedX ?? l.x,
-            y: l.editedY ?? l.y,
-          });
-        }
+    for (const l of this.state.layers()) {
+      if ((l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch && !seen.has(l.personMatch.id)) {
+        seen.add(l.personMatch.id);
+        result.push({ id: l.personMatch.id, name: l.personMatch.name, type: l.category === 'teacher-image' ? 'teacher' : 'student', layerName: l.layerName, x: l.editedX ?? l.x, y: l.editedY ?? l.y });
       }
     }
     return result;
   });
-
-  /** A canvason kijelolt image layerek szemely ID-i */
   readonly preSelectedActionPersonIds = computed<number[]>(() =>
     this.state.selectedLayers()
-      .filter(l => l.category === 'student-image' || l.category === 'teacher-image')
-      .filter(l => l.personMatch)
+      .filter(l => (l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch)
       .map(l => l.personMatch!.id)
   );
 
-  /** Betöltendő snapshot fájl útvonala */
   readonly snapshotPath = input.required<string>();
-
-  /** PSD fájl útvonala (frissítéshez szükséges) */
   readonly psdPath = input.required<string>();
-
-  /** Projekt személyei */
   readonly persons = input.required<TabloPersonItem[]>();
-
-  /** Tábló méret konfiguráció */
   readonly boardConfig = input.required<{ widthCm: number; heightCm: number }>();
-
-  /** Projekt azonosító (fotó feltöltéshez) */
   readonly projectId = input.required<number>();
-
-  /** Projekt neve (minta generáláshoz) */
   readonly projectName = input.required<string>();
-
-  /** Iskola neve (fájlnév generáláshoz) */
   readonly schoolName = input<string | null>(null);
-
-  /** Osztály neve (fájlnév generáláshoz) */
   readonly className = input<string | null>(null);
-
-  /** Extra nevek (diákok + tanárok akik nincsenek regisztrálva) */
   readonly extraNames = input<{ students: string; teachers: string } | null>(null);
-
-  /** Bezárás event */
   readonly closeEvent = output<void>();
-
-  /** Mentés event — módosított layerek + forrás információ */
   readonly saveEvent = output<{ layers: SnapshotLayer[]; isLivePsd: boolean }>();
-
-  /** Auto-mentés event — csendes mentés dialógus nélkül (pl. frissítés után) */
   readonly autoSaveEvent = output<{ layers: SnapshotLayer[] }>();
-
-  /** Extra nevek frissítés event (szülőnek, hogy a projekt adatot frissítse) */
   readonly extraNamesUpdated = output<{ students: string; teachers: string }>();
-
   readonly overlayEl = viewChild.required<ElementRef<HTMLElement>>('overlayEl');
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
   readonly refreshing = signal(false);
-
-  /** Elérhető snapshotok a picker-hez */
   readonly snapshots = signal<SnapshotListItem[]>([]);
   readonly switchingSnapshot = signal(false);
-  readonly linking = signal(false);
-  readonly placingPhotos = signal(false);
-  readonly syncingPhotos = signal(false);
-  readonly arrangingNames = signal(false);
-  readonly updatingPositions = signal(false);
-  readonly generatingSample = signal(false);
-  readonly generatingFinal = signal(false);
-  readonly finalMode = signal<'flat' | 'small_tablo' | 'both'>('both');
   readonly sampleLargeSize = this.ps.sampleUseLargeSize;
-  readonly sampleSuccess = signal<string | null>(null);
-  readonly sampleError = signal<string | null>(null);
-  readonly insertingExtraNames = signal(false);
-  readonly extraNamesSuccess = signal<string | null>(null);
-  readonly extraNamesError = signal<string | null>(null);
-
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
   private overlayCommandCleanup: (() => void) | null = null;
 
   ngOnInit(): void {
-    // Body scroll lock
     this.originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-
-    // PSD path beállítása a service-ben (auto-open-hez)
     this.ps.psdPath.set(this.psdPath());
-
+    this.psBridge.configure({
+      psdPath: this.psdPath(), persons: this.persons(), projectId: this.projectId(),
+      extraNames: this.extraNames(),
+      autoSaveEmitter: (layers) => this.autoSaveEvent.emit({ layers }),
+      extraNamesUpdatedEmitter: (en) => this.extraNamesUpdated.emit(en),
+      showPhotoDialogSetter: (v) => this.showPhotoDialog.set(v),
+      showBulkPhotoDialogSetter: (v) => this.showBulkPhotoDialog.set(v),
+      refreshFn: () => this.refresh(),
+    });
+    this.sampleActions.configure({
+      projectId: this.projectId(), projectName: this.projectName(),
+      schoolName: this.schoolName(), className: this.className(),
+    });
     this.loadSnapshotData();
     this.loadSnapshotList();
     this.setupResize();
-
-    // Overlay kontextus: designer mod jelzes
     window.electronAPI?.overlay.setContext({ mode: 'designer', projectId: this.projectId() });
-
-    // IPC: overlay parancsok fogadasa
-    this.overlayCommandCleanup = window.electronAPI?.overlay.onCommand((commandId) => {
-      this.onOverlayCommand(commandId);
-    }) ?? null;
+    this.overlayCommandCleanup = window.electronAPI?.overlay.onCommand((cmd) => this.onOverlayCommand(cmd)) ?? null;
   }
 
   ngOnDestroy(): void {
     document.body.style.overflow = this.originalOverflow;
     this.resizeObserver?.disconnect();
-
-    // Overlay kontextus: normal mod visszaallitas (projectId megtartasa)
     window.electronAPI?.overlay.setContext({ mode: 'normal', projectId: this.projectId() });
-
-    // IPC listener cleanup
     this.overlayCommandCleanup?.();
     this.overlayCommandCleanup = null;
   }
 
-  close(): void {
-    this.closeEvent.emit();
-  }
-
+  close(): void { this.closeEvent.emit(); }
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
-    // Dupla Ctrl detekció (Command Overlay toggle)
     if (event.key === 'Control' && !event.metaKey && !event.shiftKey && !event.altKey) {
       const now = Date.now();
       if (now - this.lastCtrlTime < this.DOUBLE_TAP_THRESHOLD) {
         this.commandOverlay()?.toggle();
         this.lastCtrlTime = 0;
-      } else {
-        this.lastCtrlTime = now;
-      }
+      } else { this.lastCtrlTime = now; }
       return;
     }
 
-    // Textarea/input-ban ne kapjuk el (pl. egyedi sorrend dialógus)
     const tag = (event.target as HTMLElement)?.tagName;
     if (tag === 'TEXTAREA' || tag === 'INPUT') return;
 
     if (event.key === 'Escape') {
-      // Command overlay nyitva? ESC azt zárja be
-      if (this.commandOverlay()?.visible()) {
-        this.commandOverlay()?.close();
-        return;
-      }
-      // Ha dialógus nyitva, az ESC azt zárja be (DialogWrapper kezeli)
+      if (this.commandOverlay()?.visible()) { this.commandOverlay()?.close(); return; }
       if (this.showPhotoDialog() || this.showBulkPhotoDialog() || this.showCustomDialog() || this.showActionsDialog() || this.showExtraNamesDialog()) return;
       this.close();
       return;
@@ -497,54 +170,46 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
     const isMod = event.metaKey || event.ctrlKey;
     if (!isMod) return;
-
-    if (event.key === 'a') {
-      event.preventDefault();
-      this.state.selectAll();
-    } else if (event.key === 'z' && !event.shiftKey) {
-      event.preventDefault();
-      this.state.undo();
-    } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {
-      event.preventDefault();
-      this.state.redo();
-    }
+    if (event.key === 'a') { event.preventDefault(); this.state.selectAll(); }
+    else if (event.key === 'z' && !event.shiftKey) { event.preventDefault(); this.state.undo(); }
+    else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') { event.preventDefault(); this.state.redo(); }
   }
 
-  /** Command Overlay parancs végrehajtása */
   onOverlayCommand(commandId: string): void {
     this.commandOverlay()?.close();
-    switch (commandId) {
-      case 'sync-photos': this.syncAllPhotos(); break;
-      case 'arrange-names': this.arrangeNames(); break;
-      case 'update-positions': this.updatePositions(); break;
-      case 'open-project': this.onOpenProject(); break;
-      case 'open-workdir': this.onOpenWorkDir(); break;
-      case 'refresh': this.refresh(); break;
-      case 'sort-abc': this.sortService.sortByAbc(); break;
-      case 'sort-gender': this.sortService.sortByGender(); break;
-      case 'sort-custom': this.showCustomDialog.set(true); break;
-      case 'generate-sample': this.onGenerateSample(); break;
-      case 'generate-final': this.onGenerateFinal(); break;
-      case 'upload-photo': this.openPhotoDialog(); break;
-      case 'link-layers': this.onLinkLayers(); break;
-      case 'unlink-layers': this.onUnlinkLayers(); break;
-      case 'extra-names': this.showExtraNamesDialog.set(true); break;
-      case 'toggle-grid': this.gridService.cycleGridMode(); break;
-      case 'snap-grid': this.gridService.snapAllToGrid(); break;
-      case 'save': this.save(); break;
-      case 'batch-actions': this.showActionsDialog.set(true); break;
-      case 'bulk-photos': this.showBulkPhotoDialog.set(true); break;
-      case 'align-left': this.actionsService.alignLeft(); break;
-      case 'align-center-h': this.actionsService.alignCenterHorizontal(); break;
-      case 'align-right': this.actionsService.alignRight(); break;
-      case 'align-top': this.actionsService.alignTop(); break;
-      case 'align-center-v': this.actionsService.alignCenterVertical(); break;
-      case 'align-bottom': this.actionsService.alignBottom(); break;
-      case 'distribute-h': this.actionsService.distributeHorizontal(); break;
-      case 'distribute-v': this.actionsService.distributeVertical(); break;
-      case 'center-document': this.actionsService.centerOnDocument(); break;
-      case 'arrange-grid': this.actionsService.arrangeToGrid(); break;
-    }
+    const commands: Record<string, () => void> = {
+      'sync-photos': () => this.psBridge.syncAllPhotos(),
+      'arrange-names': () => this.psBridge.arrangeNames(),
+      'update-positions': () => this.psBridge.updatePositions(),
+      'open-project': () => this.psBridge.onOpenProject(),
+      'open-workdir': () => this.psBridge.onOpenWorkDir(),
+      'refresh': () => this.refresh(),
+      'sort-abc': () => this.sortService.sortByAbc(),
+      'sort-gender': () => this.sortService.sortByGender(),
+      'sort-custom': () => this.showCustomDialog.set(true),
+      'generate-sample': () => this.sampleActions.onGenerateSample(),
+      'generate-final': () => this.sampleActions.onGenerateFinal(),
+      'upload-photo': () => this.openPhotoDialog(),
+      'link-layers': () => this.psBridge.onLinkLayers(),
+      'unlink-layers': () => this.psBridge.onUnlinkLayers(),
+      'extra-names': () => this.showExtraNamesDialog.set(true),
+      'toggle-grid': () => this.gridService.cycleGridMode(),
+      'snap-grid': () => this.gridService.snapAllToGrid(),
+      'save': () => this.save(),
+      'batch-actions': () => this.showActionsDialog.set(true),
+      'bulk-photos': () => this.showBulkPhotoDialog.set(true),
+      'align-left': () => this.actionsService.alignLeft(),
+      'align-center-h': () => this.actionsService.alignCenterHorizontal(),
+      'align-right': () => this.actionsService.alignRight(),
+      'align-top': () => this.actionsService.alignTop(),
+      'align-center-v': () => this.actionsService.alignCenterVertical(),
+      'align-bottom': () => this.actionsService.alignBottom(),
+      'distribute-h': () => this.actionsService.distributeHorizontal(),
+      'distribute-v': () => this.actionsService.distributeVertical(),
+      'center-document': () => this.actionsService.centerOnDocument(),
+      'arrange-grid': () => this.actionsService.arrangeToGrid(),
+    };
+    commands[commandId]?.();
   }
 
   save(): void {
@@ -553,485 +218,51 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
     this.saveEvent.emit({ layers, isLivePsd });
   }
 
-  /** Frissítés Photoshopból: JSX kiolvasás → state közvetlen frissítés.
-   *  A PSD már nyitva van a PS-ben (designer belépéskor megnyitotta). */
   async refresh(): Promise<void> {
     this.refreshing.set(true);
     this.loadError.set(null);
-
     try {
-      // Layout kiolvasás JSX-szel (a doc már nyitva, activateDocByName kezeli)
       const readResult = await this.ps.readFullLayout(this.boardConfig());
-
       if (!readResult.success || !readResult.data) {
         this.loadError.set(readResult.error || 'Photoshop kiolvasás sikertelen.');
         this.refreshing.set(false);
         return;
       }
-
-      // 4. State közvetlen frissítés a friss adatokkal
       this.state.sourceLabel.set('Friss PSD beolvasás');
       this.state.sourceDate.set(new Date().toISOString());
       this.state.loadSnapshot(
         { document: readResult.data.document, layers: readResult.data.layers },
         this.persons(),
       );
-
-      // Auto-mentés: friss PSD állapot mentése snapshot-ként (dialógus nélkül)
       this.autoSaveEvent.emit({ layers: this.state.exportChanges() });
-    } catch {
-      this.loadError.set('Váratlan hiba a frissítéskor.');
-    }
-
+    } catch { this.loadError.set('Váratlan hiba a frissítéskor.'); }
     this.refreshing.set(false);
   }
 
-  /** Snapshot váltás a picker-ből */
   async switchSnapshot(snapshot: SnapshotListItem): Promise<void> {
     this.switchingSnapshot.set(true);
     try {
       const result = await this.ps.loadSnapshot(snapshot.filePath);
-      if (!result.success || !result.data) {
-        this.loadError.set(result.error || 'Nem sikerült betölteni a pillanatképet.');
-        return;
-      }
-
-      const data = result.data as Record<string, unknown>;
-      const doc = data['document'] as DesignerDocument | undefined;
-      const layers = (data['layers'] as SnapshotLayer[] | undefined) ?? [];
-
-      if (!doc) {
-        this.loadError.set('Érvénytelen pillanatkép formátum.');
-        return;
-      }
-
+      if (!result.success || !result.data) { this.loadError.set(result.error || 'Nem sikerült betölteni a pillanatképet.'); return; }
+      const parsed = parseSnapshotData(result.data as Record<string, unknown>);
+      if (!parsed) { this.loadError.set('Érvénytelen pillanatkép formátum.'); return; }
       this.state.sourceLabel.set(snapshot.snapshotName);
       this.state.sourceDate.set(snapshot.createdAt);
-      this.state.loadSnapshot({ document: doc, layers }, this.persons());
-    } catch {
-      this.loadError.set('Váratlan hiba a pillanatkép váltásakor.');
-    } finally {
-      this.switchingSnapshot.set(false);
-    }
+      this.state.loadSnapshot(parsed, this.persons());
+    } catch { this.loadError.set('Váratlan hiba a pillanatkép váltásakor.'); }
+    finally { this.switchingSnapshot.set(false); }
   }
 
-  /** Fotó dialógus megnyitása — 1 elem: single, 2+: bulk */
   openPhotoDialog(): void {
-    const imagePersons = this.getSelectedImagePersons();
+    const imagePersons = extractImagePersons(this.state.selectedLayers(), this.persons());
     if (imagePersons.length === 0) return;
-
-    if (imagePersons.length === 1) {
-      this.showPhotoDialog.set(imagePersons[0]);
-    } else {
-      this.showBulkPhotoDialog.set(true);
-    }
+    if (imagePersons.length === 1) this.showPhotoDialog.set(imagePersons[0]);
+    else this.showBulkPhotoDialog.set(true);
   }
 
-  /** Single fotó feltöltés/kiválasztás sikeres → Photoshopba is behelyezi */
-  async onPhotoUploaded(result: PhotoUploadResult): Promise<void> {
-    this.showPhotoDialog.set(null);
-
-    // Személy layerének megkeresése a kijelöltek között
-    const selected = this.state.selectedLayers();
-    const targetLayers = selected.filter(
-      l => (l.category === 'student-image' || l.category === 'teacher-image')
-        && l.personMatch?.id === result.personId,
-    );
-
-    // Fotó behelyezése a Photoshopba ha van cél layer
-    if (targetLayers.length > 0 && result.photoUrl) {
-      await this.placePhotos(
-        targetLayers.map(l => ({ layerName: l.layerName, photoUrl: result.photoUrl })),
-      );
-    }
-
-    this.refreshPersonsInState();
-  }
-
-  /** Bulk fotó feltöltés sikeres */
-  onBulkPhotosAssigned(_result: { assignedCount: number }): void {
-    this.showBulkPhotoDialog.set(false);
-    this.refreshPersonsInState();
-  }
-
-  /** Akciók dialógus sikeres végrehajtás → PSD újraolvasás */
   async onActionsExecuted(): Promise<void> {
     this.showActionsDialog.set(false);
     await this.refresh();
-  }
-
-  /** Floating toolbar-ról: link gomb */
-  onLinkLayers(): void {
-    const names = this.getSelectedLayerNames();
-    if (names.length === 0) return;
-    this.linkLayers(names);
-  }
-
-  /** Floating toolbar-ról: unlink gomb */
-  onUnlinkLayers(): void {
-    const names = this.getSelectedLayerNames();
-    if (names.length === 0) return;
-    this.unlinkLayers(names);
-  }
-
-  /** Fotók behelyezése a kijelölt Smart Object layerekbe */
-  async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>): Promise<void> {
-    this.placingPhotos.set(true);
-    try {
-      await this.ps.placePhotos(layers);
-    } finally {
-      this.placingPhotos.set(false);
-    }
-  }
-
-  /** Összes fotó szinkronizálása a Photoshopba — minden személy akinek van fotója */
-  async syncAllPhotos(): Promise<void> {
-    const layers = this.state.layers();
-    const photosToSync: Array<{ layerName: string; photoUrl: string }> = [];
-
-    for (const l of layers) {
-      if ((l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch?.photoUrl) {
-        photosToSync.push({ layerName: l.layerName, photoUrl: l.personMatch.photoUrl });
-      }
-    }
-
-    if (photosToSync.length === 0) return;
-
-    this.syncingPhotos.set(true);
-    try {
-      await this.ps.placePhotos(photosToSync);
-    } finally {
-      this.syncingPhotos.set(false);
-    }
-  }
-
-  /** Nevek igazítása a Photoshopban a beállítások szerint */
-  async arrangeNames(): Promise<void> {
-    this.arrangingNames.set(true);
-    try {
-      await this.ps.arrangeNames(undefined, this.getLinkedLayerNames());
-    } finally {
-      this.arrangingNames.set(false);
-    }
-  }
-
-  /** Pozíció és felirat frissítése a Photoshopban */
-  async updatePositions(): Promise<void> {
-    this.updatingPositions.set(true);
-    try {
-      // Személyek listája — ha van kijelölés, csak azok
-      const allPersons = this.persons();
-      const selectedIds = this.state.selectedLayerIds();
-
-      let personsToUpdate: typeof allPersons;
-      if (selectedIds.size > 0) {
-        // Kijelölt layerek alapján szűrés: person ID kinyerése a layerName-ből
-        const selectedPersonIds = new Set<number>();
-        for (const layer of this.state.layers()) {
-          if (selectedIds.has(layer.layerId) && layer.personMatch) {
-            selectedPersonIds.add(layer.personMatch.id);
-          }
-        }
-        personsToUpdate = allPersons.filter(p => selectedPersonIds.has(p.id));
-      } else {
-        personsToUpdate = allPersons;
-      }
-
-      if (personsToUpdate.length === 0) return;
-
-      await this.ps.updatePositions(
-        personsToUpdate.map(p => ({ id: p.id, name: p.name, type: p.type, title: p.title })),
-        undefined,
-        this.getLinkedLayerNames(),
-      );
-    } finally {
-      this.updatingPositions.set(false);
-    }
-  }
-
-  /** Projekt megnyitása Photoshopban */
-  onOpenProject(): void {
-    const psd = this.psdPath();
-    if (psd) {
-      this.ps.openPsdFile(psd);
-    }
-  }
-
-  /** Munkamappa megnyitása Finderben — a PSD mappáját nyitja meg */
-  onOpenWorkDir(): void {
-    const psd = this.psdPath();
-    if (psd) {
-      this.ps.revealInFinder(psd);
-    }
-  }
-
-  /** Extra nevek beillesztése a Photoshop PSD-be */
-  async onInsertExtraNames(options: { includeStudents: boolean; includeTeachers: boolean }): Promise<void> {
-    const en = this.extraNames();
-    if (!en) return;
-
-    this.insertingExtraNames.set(true);
-    this.extraNamesSuccess.set(null);
-    this.extraNamesError.set(null);
-
-    try {
-      const result = await this.ps.addExtraNames(en, options);
-      if (result.success) {
-        this.extraNamesSuccess.set('Extra nevek beillesztve');
-        this.autoSaveEvent.emit({ layers: this.state.exportChanges() });
-      } else {
-        this.extraNamesError.set(result.error || 'Extra nevek beillesztése sikertelen');
-      }
-    } catch {
-      this.extraNamesError.set('Váratlan hiba az extra nevek beillesztésekor');
-    } finally {
-      this.insertingExtraNames.set(false);
-    }
-  }
-
-  /** Extra nevek dialógusból: mentés backendre + beillesztés PSD-be */
-  async onExtraNamesDialogInsert(event: {
-    extraNames: { students: string; teachers: string };
-    includeStudents: boolean;
-    includeTeachers: boolean;
-  }): Promise<void> {
-    this.showExtraNamesDialog.set(false);
-    this.insertingExtraNames.set(true);
-    this.extraNamesSuccess.set(null);
-    this.extraNamesError.set(null);
-
-    try {
-      // 1. Mentés backendre
-      const saveResult = await firstValueFrom(
-        this.projectService.updateExtraNames(this.projectId(), event.extraNames),
-      );
-      // Szülőnek szólunk, hogy frissítse a projekt adatot
-      this.extraNamesUpdated.emit(saveResult.data.extraNames);
-
-      // 2. Beillesztés PSD-be
-      const result = await this.ps.addExtraNames(
-        saveResult.data.extraNames,
-        { includeStudents: event.includeStudents, includeTeachers: event.includeTeachers },
-      );
-      if (result.success) {
-        this.extraNamesSuccess.set('Extra nevek mentve és beillesztve');
-        this.autoSaveEvent.emit({ layers: this.state.exportChanges() });
-      } else {
-        this.extraNamesError.set(result.error || 'Extra nevek beillesztése sikertelen');
-      }
-    } catch {
-      this.extraNamesError.set('Váratlan hiba az extra nevek mentésekor');
-    } finally {
-      this.insertingExtraNames.set(false);
-    }
-  }
-
-  onLargeSizeChange(value: boolean): void {
-    this.sampleLargeSize.set(value);
-    this.ps.setSampleSettings({ useLargeSize: value });
-  }
-
-  onCycleOpacity(): void {
-    const pct = Math.round(this.ps.sampleWatermarkOpacity() * 100);
-    const next = (pct >= 23 ? 10 : pct + 1) / 100;
-    this.ps.sampleWatermarkOpacity.set(next);
-    this.ps.setSampleSettings({ watermarkOpacity: next });
-  }
-
-  onWatermarkColorChange(color: 'white' | 'black'): void {
-    this.ps.sampleWatermarkColor.set(color);
-    this.ps.setSampleSettings({ watermarkColor: color });
-  }
-
-  /** Minta generálás — flatten + resize + watermark + upload */
-  async onGenerateSample(): Promise<void> {
-    if (this.generatingSample()) return;
-    this.generatingSample.set(true);
-    this.sampleSuccess.set(null);
-    this.sampleError.set(null);
-    try {
-      const result = await this.ps.generateSample(this.projectId(), this.projectName(), this.sampleLargeSize(), {
-        schoolName: this.schoolName(),
-        className: this.className(),
-      });
-      if (result.success) {
-        this.sampleSuccess.set(`${result.localPaths?.length || 0} fájl mentve, ${result.uploadedCount || 0} feltöltve`);
-      } else {
-        this.sampleError.set(result.error || 'Minta generálás sikertelen');
-      }
-    } catch {
-      this.sampleError.set('Váratlan hiba a minta generálásnál');
-    } finally {
-      this.generatingSample.set(false);
-    }
-  }
-
-  /** Véglegesítés mód váltás: both → flat → small_tablo → both */
-  onCycleFinalMode(): void {
-    const modes: Array<'flat' | 'small_tablo' | 'both'> = ['both', 'flat', 'small_tablo'];
-    const idx = modes.indexOf(this.finalMode());
-    this.finalMode.set(modes[(idx + 1) % modes.length]);
-  }
-
-  /** Véglegesítés — a finalMode alapján flat és/vagy kistabló */
-  async onGenerateFinal(): Promise<void> {
-    if (this.generatingFinal()) return;
-    this.generatingFinal.set(true);
-    this.sampleSuccess.set(null);
-    this.sampleError.set(null);
-
-    const mode = this.finalMode();
-    const results: string[] = [];
-    const errors: string[] = [];
-
-    try {
-      // Flat
-      if (mode === 'flat' || mode === 'both') {
-        const ctx = { schoolName: this.schoolName(), className: this.className() };
-        const r = await this.ps.generateFinal(this.projectId(), this.projectName(), ctx);
-        if (r.success && r.uploadedCount && r.uploadedCount > 0) {
-          results.push('Flat');
-        } else {
-          errors.push(r.error || 'Flat feltöltés sikertelen');
-        }
-      }
-
-      // Kistabló
-      if (mode === 'small_tablo' || mode === 'both') {
-        const ctx = { schoolName: this.schoolName(), className: this.className() };
-        const r = await this.ps.generateSmallTablo(this.projectId(), this.projectName(), ctx);
-        if (r.success && r.uploadedCount && r.uploadedCount > 0) {
-          results.push('Kistabló');
-        } else {
-          errors.push(r.error || 'Kistabló feltöltés sikertelen');
-        }
-      }
-
-      if (results.length > 0) {
-        this.sampleSuccess.set(`Feltöltve: ${results.join(' + ')}`);
-      }
-      if (errors.length > 0) {
-        this.sampleError.set(errors.join('; '));
-      }
-    } catch (err) {
-      console.error('Véglegesítés hiba:', err);
-      const msg = err instanceof Error ? err.message : String(err);
-      this.sampleError.set(`Véglegesítés hiba: ${msg}`);
-    } finally {
-      this.generatingFinal.set(false);
-    }
-  }
-
-  /** Linkelt layerek neveinek kinyerése a state-ből (deduplikálva) */
-  private getLinkedLayerNames(): string[] {
-    const nameSet = new Set<string>();
-    for (const l of this.state.layers()) {
-      if (l.linked) nameSet.add(l.layerName);
-    }
-    return Array.from(nameSet);
-  }
-
-  /** Kijelölt layerek összelinkelése a Photoshopban */
-  async linkLayers(layerNames: string[]): Promise<void> {
-    this.linking.set(true);
-    try {
-      const result = await this.ps.linkLayers(layerNames);
-      if (result.success) {
-        // State frissítés: az érintett layerek linked = true
-        this.updateLinkedState(layerNames, true);
-      }
-    } finally {
-      this.linking.set(false);
-    }
-  }
-
-  /** Kijelölt layerek linkelésének megszüntetése a Photoshopban */
-  async unlinkLayers(layerNames: string[]): Promise<void> {
-    this.linking.set(true);
-    try {
-      const result = await this.ps.unlinkLayers(layerNames);
-      if (result.success) {
-        // State frissítés: az érintett layerek linked = false
-        this.updateLinkedState(layerNames, false);
-      }
-    } finally {
-      this.linking.set(false);
-    }
-  }
-
-  /** State linked flag frissítése adott layerName-ekre */
-  private updateLinkedState(layerNames: string[], linked: boolean): void {
-    const nameSet = new Set(layerNames);
-    const updated = this.state.layers().map(l => {
-      if (!nameSet.has(l.layerName)) return l;
-      return { ...l, linked };
-    });
-    this.state.layers.set(updated);
-  }
-
-  /** Kijelölt image layerekhez tartozó személyek */
-  private getSelectedImagePersons(): PhotoUploadPerson[] {
-    const selected = this.state.selectedLayers();
-    const persons: PhotoUploadPerson[] = [];
-    const seenIds = new Set<number>();
-
-    for (const l of selected) {
-      if ((l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch) {
-        if (!seenIds.has(l.personMatch.id)) {
-          seenIds.add(l.personMatch.id);
-          // Keressük meg a teljes TabloPersonItem-et
-          const fullPerson = this.persons().find(p => p.id === l.personMatch!.id);
-          persons.push({
-            id: l.personMatch.id,
-            name: l.personMatch.name,
-            type: l.category === 'teacher-image' ? 'teacher' : 'student',
-            archiveId: fullPerson?.archiveId ?? null,
-          });
-        }
-      }
-    }
-
-    return persons;
-  }
-
-  /** Kijelölt layerek nevei (deduplikálva) */
-  private getSelectedLayerNames(): string[] {
-    const selected = this.state.selectedLayers();
-    const nameSet = new Set<string>();
-    for (const l of selected) {
-      if (l.category !== 'fixed') {
-        nameSet.add(l.layerName);
-      }
-    }
-    return Array.from(nameSet);
-  }
-
-  /** Személyek frissítése a backendről és state újratöltése */
-  private refreshPersonsInState(): void {
-    firstValueFrom(
-      this.projectService.getProjectPersons(this.projectId()),
-    ).then(res => {
-      // A personMatch-ek frissülnek a loadSnapshot-ban
-      // De mi nem akarjuk a teljes snapshotot újratölteni, csak a személyeket
-      const updatedPersons = res.data;
-      const personMap = new Map(updatedPersons.map(p => [p.id, p]));
-
-      const updatedLayers = this.state.layers().map(l => {
-        if (!l.personMatch) return l;
-        const person = personMap.get(l.personMatch.id);
-        if (!person) return l;
-        return {
-          ...l,
-          personMatch: {
-            ...l.personMatch,
-            photoThumbUrl: person.photoThumbUrl,
-            photoUrl: person.photoUrl,
-          },
-        };
-      });
-
-      this.state.layers.set(updatedLayers);
-    });
   }
 
   private async loadSnapshotList(): Promise<void> {
@@ -1042,44 +273,24 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   private async loadSnapshotData(): Promise<void> {
     try {
       const result = await this.ps.loadSnapshot(this.snapshotPath());
-      if (!result.success || !result.data) {
-        this.loadError.set(result.error || 'Nem sikerült betölteni a pillanatképet.');
-        this.loading.set(false);
-        return;
-      }
-
+      if (!result.success || !result.data) { this.loadError.set(result.error || 'Nem sikerült betölteni a pillanatképet.'); this.loading.set(false); return; }
       const data = result.data as Record<string, unknown>;
-      const doc = data['document'] as DesignerDocument | undefined;
-      const layers = (data['layers'] as SnapshotLayer[] | undefined) ?? [];
-
-      if (!doc) {
-        this.loadError.set('Érvénytelen pillanatkép formátum (hiányzó document mező).');
-        this.loading.set(false);
-        return;
-      }
-
-      const snapshotName = data['snapshotName'] as string | undefined;
-      const createdAt = data['createdAt'] as string | undefined;
-      this.state.sourceLabel.set(snapshotName || 'Pillanatkép');
-      this.state.sourceDate.set(createdAt || null);
-      this.state.loadSnapshot({ document: doc, layers }, this.persons());
+      const parsed = parseSnapshotData(data);
+      if (!parsed) { this.loadError.set('Érvénytelen pillanatkép formátum (hiányzó document mező).'); this.loading.set(false); return; }
+      this.state.sourceLabel.set(data['snapshotName'] as string || 'Pillanatkép');
+      this.state.sourceDate.set(data['createdAt'] as string || null);
+      this.state.loadSnapshot(parsed, this.persons());
       this.loading.set(false);
-    } catch {
-      this.loadError.set('Váratlan hiba a pillanatkép betöltésekor.');
-      this.loading.set(false);
-    }
+    } catch { this.loadError.set('Váratlan hiba a pillanatkép betöltésekor.'); this.loading.set(false); }
   }
 
   private setupResize(): void {
     this.resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        this.state.containerWidth.set(width);
-        this.state.containerHeight.set(height);
+        this.state.containerWidth.set(entry.contentRect.width);
+        this.state.containerHeight.set(entry.contentRect.height);
       }
     });
-
-    // Overlay-t figyeljük (mindig elérhető, nem feltételes renderelés)
     requestAnimationFrame(() => {
       const el = this.overlayEl().nativeElement;
       this.resizeObserver!.observe(el);

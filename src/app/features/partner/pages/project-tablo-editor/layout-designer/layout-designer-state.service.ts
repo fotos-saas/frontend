@@ -1,9 +1,13 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { SnapshotLayer } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
-import { DesignerLayer, DesignerDocument, ScaleInfo, LayerCategory, PersonMatch } from './layout-designer.types';
-import { expandWithCoupledLayers } from './layout-designer.utils';
+import { DesignerLayer, DesignerDocument, ScaleInfo, LayerCategory } from './layout-designer.types';
+import {
+  expandWithCoupledLayers, categorizeLayer, matchPerson,
+  normalizeLayerSizes, alignTextToImageLayers,
+} from './layout-designer.utils';
 import { LayoutDesignerHistoryService } from './layout-designer-history.service';
+import { LayoutDesignerSelectionService } from './layout-designer-selection.service';
 
 /** Toolbar magassága px-ben */
 const TOOLBAR_HEIGHT = 56;
@@ -20,6 +24,7 @@ const CANVAS_PADDING = 40;
 export class LayoutDesignerStateService {
 
   private readonly history = inject(LayoutDesignerHistoryService);
+  private readonly selection = inject(LayoutDesignerSelectionService);
 
   /** Dokumentum adatok */
   readonly document = signal<DesignerDocument | null>(null);
@@ -35,9 +40,6 @@ export class LayoutDesignerStateService {
 
   /** Rejtett layerek (nem jelennek meg, de mentéskor visszakerülnek) */
   private hiddenLayers: SnapshotLayer[] = [];
-
-  /** Kijelölt layer ID-k */
-  readonly selectedLayerIds = signal<Set<number>>(new Set());
 
   /** Viewport méret (a konténer mérete) */
   readonly containerWidth = signal(0);
@@ -65,56 +67,26 @@ export class LayoutDesignerStateService {
     return { scale, offsetX, offsetY, displayWidth, displayHeight };
   });
 
+  // --- Kijelölés delegálás (LayoutDesignerSelectionService) ---
+
+  /** Kijelölt layer ID-k */
+  readonly selectedLayerIds = this.selection.selectedLayerIds;
+
   /** Kijelölt layerek */
-  readonly selectedLayers = computed(() => {
-    const ids = this.selectedLayerIds();
-    return this.layers().filter(l => ids.has(l.layerId));
-  });
+  readonly selectedLayers = this.selection.selectedLayers;
 
   /** Van-e kijelölés */
-  readonly hasSelection = computed(() => this.selectedLayerIds().size > 0);
+  readonly hasSelection = this.selection.hasSelection;
 
   /** Kijelölés darabszáma */
-  readonly selectionCount = computed(() => this.selectedLayerIds().size);
+  readonly selectionCount = this.selection.selectionCount;
+
+  /** Kijelölt layerek bounding box-a screen px-ben */
+  readonly selectionScreenBounds = this.selection.selectionScreenBounds;
 
   /** Van-e módosított layer */
   readonly hasChanges = computed(() => {
     return this.layers().some(l => l.editedX !== null || l.editedY !== null);
-  });
-
-  /**
-   * Kijelölt layerek bounding box-a screen px-ben (canvas wrapper-hez relatív).
-   * A floating toolbar pozícionálásához használjuk.
-   */
-  readonly selectionScreenBounds = computed(() => {
-    const selected = this.selectedLayers();
-    const si = this.scaleInfo();
-    if (selected.length === 0 || si.displayWidth === 0) return null;
-
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const l of selected) {
-      if (l.category === 'student-name' || l.category === 'teacher-name') continue;
-      const lx = l.editedX ?? l.x;
-      const ly = l.editedY ?? l.y;
-      minX = Math.min(minX, lx);
-      minY = Math.min(minY, ly);
-      maxX = Math.max(maxX, lx + l.width);
-      maxY = Math.max(maxY, ly + l.height);
-    }
-
-    if (minX === Infinity) return null;
-
-    // PSD → screen px konverzió (canvas wrapper-hez relatív)
-    const canvasLeft = si.offsetX - SIDEBAR_WIDTH;
-    const canvasTopPx = si.offsetY - TOOLBAR_HEIGHT;
-
-    return {
-      left: minX * si.scale + canvasLeft,
-      top: minY * si.scale + canvasTopPx,
-      right: maxX * si.scale + canvasLeft,
-      bottom: maxY * si.scale + canvasTopPx,
-      centerX: ((minX + maxX) / 2) * si.scale + canvasLeft,
-    };
   });
 
   /** Dokumentum méret cm-ben (DPI alapján) */
@@ -126,8 +98,13 @@ export class LayoutDesignerStateService {
     return { widthCm, heightCm };
   });
 
+  constructor() {
+    // Selection service-nek átadjuk a layers és scaleInfo signal referenciákat
+    this.selection.configure(this.layers, this.scaleInfo);
+  }
+
   /**
-   * Snapshot betöltése: SnapshotLayer[] → DesignerLayer[] konverzió.
+   * Snapshot betöltése: SnapshotLayer[] -> DesignerLayer[] konverzió.
    * Kategorizálja a layereket és párosítja a személyeket.
    */
   loadSnapshot(data: { document: DesignerDocument; layers: SnapshotLayer[] }, persons: TabloPersonItem[]): void {
@@ -138,8 +115,8 @@ export class LayoutDesignerStateService {
     const visibleLayers = data.layers.filter(l => l.visible !== false && l.width > 0 && l.height > 0);
 
     const designerLayers: DesignerLayer[] = visibleLayers.map(layer => {
-      const category = this.categorizeLayer(layer);
-      const personMatch = this.matchPerson(layer, category, persons);
+      const category = categorizeLayer(layer);
+      const personMatch = matchPerson(layer, category, persons);
 
       return {
         ...layer,
@@ -151,65 +128,43 @@ export class LayoutDesignerStateService {
     });
 
     // Image layerek szélességének normalizálása kategórián belül.
-    this.normalizeLayerSizes(designerLayers);
+    normalizeLayerSizes(designerLayers);
 
     // Text layerek pozícionálása a párosított kép layer alapján.
-    this.alignTextToImageLayers(designerLayers);
+    alignTextToImageLayers(designerLayers);
 
     this.layers.set(designerLayers);
-    this.selectedLayerIds.set(new Set());
+    this.selection.clearSelection();
 
     this.history.clear();
     this.history.pushState(designerLayers);
   }
 
+  // --- Kijelölés metódusok delegálása ---
+
   /** Kijelölés toggle (klikk/Cmd+klikk) */
   toggleSelection(layerId: number, additive: boolean): void {
-    const current = new Set(this.selectedLayerIds());
-
-    if (additive) {
-      if (current.has(layerId)) {
-        current.delete(layerId);
-      } else {
-        current.add(layerId);
-      }
-    } else {
-      if (current.has(layerId) && current.size === 1) {
-        current.clear();
-      } else {
-        current.clear();
-        current.add(layerId);
-      }
-    }
-
-    this.selectedLayerIds.set(current);
+    this.selection.toggleSelection(layerId, additive);
   }
 
   /** Kijelölés törlése */
   clearSelection(): void {
-    this.selectedLayerIds.set(new Set());
+    this.selection.clearSelection();
   }
 
   /** Layerek kijelölése (marquee) */
   selectLayers(ids: Set<number>): void {
-    this.selectedLayerIds.set(ids);
+    this.selection.selectLayers(ids);
   }
 
   /** Összes nem-fixed layer kijelölése (Cmd+A) */
   selectAll(): void {
-    const ids = new Set(
-      this.layers()
-        .filter(l => l.category !== 'fixed')
-        .map(l => l.layerId),
-    );
-    this.selectedLayerIds.set(ids);
+    this.selection.selectAll();
   }
 
   /** Meglévő kijelöléshez hozzáadás (Cmd+marquee) */
   addToSelection(ids: Set<number>): void {
-    const current = new Set(this.selectedLayerIds());
-    for (const id of ids) current.add(id);
-    this.selectedLayerIds.set(current);
+    this.selection.addToSelection(ids);
   }
 
   /** Kijelölt elemek mozgatása (PSD koordinátákban) — csak image/fixed layerek, nevek automatikusan követik */
@@ -217,7 +172,7 @@ export class LayoutDesignerStateService {
     const ids = this.selectedLayerIds();
     if (ids.size === 0) return;
 
-    // Coupled párok bővítése (kép → név, név → kép) — a kijelölésben legyen benne
+    // Coupled párok bővítése (kép -> név, név -> kép) — a kijelölésben legyen benne
     const expandedIds = expandWithCoupledLayers(ids, this.layers());
 
     const updatedLayers = this.layers().map(l => {
@@ -249,7 +204,7 @@ export class LayoutDesignerStateService {
   /**
    * Name layerek pozícióinak igazítása a párosított image alá.
    * MINDEN pozíció-módosítás után automatikusan fut az updateLayers()-en keresztül.
-   * Klónozza a name layereket (új objektum referencia) → OnPush change detection működik.
+   * Klónozza a name layereket (új objektum referencia) -> OnPush change detection működik.
    */
   realignNamesToImages(layers: DesignerLayer[]): DesignerLayer[] {
     const GAP = 8;
@@ -314,123 +269,5 @@ export class LayoutDesignerStateService {
 
     // Rejtett layerek visszaadása változatlanul
     return [...visibleExport, ...this.hiddenLayers];
-  }
-
-  /**
-   * Layer méretek normalizálása kategórián belül.
-   * A boundsNoEffects eltérő méretet adhat (üres SO, eltérő szöveghossz),
-   * ezért kategórián belül medián értékre egységesítünk.
-   */
-  private normalizeLayerSizes(layers: DesignerLayer[]): void {
-    // Image layerek: szélesség normalizálás
-    for (const cat of ['student-image', 'teacher-image'] as const) {
-      const group = layers.filter(l => l.category === cat);
-      if (group.length < 2) continue;
-
-      const widths = group.map(l => l.width).sort((a, b) => a - b);
-      const medianW = widths[Math.floor(widths.length / 2)];
-
-      for (const layer of group) {
-        if (layer.width !== medianW) {
-          const diff = layer.width - medianW;
-          layer.x = Math.round(layer.x + diff / 2);
-          layer.width = medianW;
-        }
-      }
-    }
-
-  }
-
-  /**
-   * Text layerek pozícionálása a párosított kép layer alapján.
-   * Person ID-vel párosítjuk a kép és szöveg layereket, majd a szöveget
-   * a kép közepéhez igazítjuk (X) és a kép alja alá helyezzük (Y).
-   */
-  private alignTextToImageLayers(layers: DesignerLayer[]): void {
-    const pairs: Array<[LayerCategory, LayerCategory]> = [
-      ['student-image', 'student-name'],
-      ['teacher-image', 'teacher-name'],
-    ];
-
-    /** Kis gap a kép alja és a név teteje között (PSD px) */
-    const GAP = 8;
-
-    for (const [imageCat, textCat] of pairs) {
-      const imageMap = new Map<number, DesignerLayer>();
-      for (const l of layers) {
-        if (l.category === imageCat && l.personMatch) {
-          imageMap.set(l.personMatch.id, l);
-        }
-      }
-
-      for (const textLayer of layers) {
-        if (textLayer.category !== textCat || !textLayer.personMatch) continue;
-
-        const imageLayer = imageMap.get(textLayer.personMatch.id);
-        if (!imageLayer) continue;
-
-        // X és width: kép pozíciójára és szélességére igazítás
-        // A text-align: center a span-on a kép közepéhez centrázza a szöveget
-        textLayer.x = imageLayer.x;
-        textLayer.width = imageLayer.width;
-
-        // Y: kép alja + gap
-        textLayer.y = imageLayer.y + imageLayer.height + GAP;
-      }
-    }
-  }
-
-  /** Layer kategorizálása a groupPath alapján */
-  private categorizeLayer(layer: SnapshotLayer): LayerCategory {
-    const path = layer.groupPath;
-
-    if (path.length >= 2) {
-      const topGroup = path[0];
-      const subGroup = path[1];
-
-      if (topGroup === 'Images') {
-        if (subGroup === 'Students') return 'student-image';
-        if (subGroup === 'Teachers') return 'teacher-image';
-      }
-      if (topGroup === 'Names') {
-        if (subGroup === 'Students') return 'student-name';
-        if (subGroup === 'Teachers') return 'teacher-name';
-      }
-      if (topGroup === 'Positions') {
-        if (subGroup === 'Students') return 'student-position';
-        if (subGroup === 'Teachers') return 'teacher-position';
-      }
-    }
-
-    return 'fixed';
-  }
-
-  /**
-   * Személy párosítása layer név alapján.
-   * A layerName formátum: "slug---personId" (pl. "kiss-janos---42").
-   * Először a person ID-vel próbálunk, ha nincs --- szeparátor, akkor név egyezés.
-   */
-  private matchPerson(layer: SnapshotLayer, category: LayerCategory, persons: TabloPersonItem[]): PersonMatch | null {
-    if (category === 'fixed') return null;
-
-    // 1. Person ID kinyerése a layerName-ből (slug---personId formátum)
-    const triDashIdx = layer.layerName.lastIndexOf('---');
-    if (triDashIdx !== -1) {
-      const personId = parseInt(layer.layerName.substring(triDashIdx + 3), 10);
-      if (!isNaN(personId)) {
-        const match = persons.find(p => p.id === personId);
-        if (match) {
-          return { id: match.id, name: match.name, photoThumbUrl: match.photoThumbUrl, photoUrl: match.photoUrl };
-        }
-      }
-    }
-
-    // 2. Fallback: pontos név egyezés
-    const nameMatch = persons.find(p => p.name === layer.layerName);
-    if (nameMatch) {
-      return { id: nameMatch.id, name: nameMatch.name, photoThumbUrl: nameMatch.photoThumbUrl, photoUrl: nameMatch.photoUrl };
-    }
-
-    return null;
   }
 }

@@ -115,4 +115,12 @@ export class ElectronPortraitService {
     if (!this.isElectron) return { success: false };
     return window.electronAPI!.portrait.cleanupTemp(filePaths);
   }
+
+  /** Feldolgozott fájl beolvasása (batch upload-hoz) */
+  async readProcessedFile(params: { filePath: string }): Promise<{ success: boolean; data?: ArrayBuffer; error?: string }> {
+    if (!this.isElectron) {
+      return { success: false, error: 'Csak Electron alkalmazásban érhető el' };
+    }
+    return window.electronAPI!.portrait.readProcessedFile(params);
+  }
 }

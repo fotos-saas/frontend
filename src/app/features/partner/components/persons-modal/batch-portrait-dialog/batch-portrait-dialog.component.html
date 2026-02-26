@@ -1,0 +1,85 @@
+<app-dialog-wrapper
+  variant="info"
+  headerStyle="hero"
+  theme="purple"
+  [icon]="ICONS.SCAN_FACE"
+  [title]="'Portré háttércsere'"
+  [description]="persons().length + ' személy feldolgozása'"
+  size="md"
+  [closable]="isDone"
+  (closeEvent)="onClose()"
+>
+  <div dialogBody>
+    <!-- Fázis lépések -->
+    <div class="phase-steps">
+      @for (step of phaseSteps; track step) {
+        @let isActive = phase() === step;
+        @let isPast = getPhaseOrder(phase()) > getPhaseOrder(step);
+        <div class="phase-step" [class.phase-step--active]="isActive" [class.phase-step--done]="isPast">
+          <div class="phase-step__icon">
+            @if (isPast) {
+              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            } @else if (isActive) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+            } @else {
+              <lucide-icon [name]="ICONS.CIRCLE" [size]="14" />
+            }
+          </div>
+          <span class="phase-step__label">{{ getPhaseLabel(step) }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-section">
+      <div class="progress-bar">
+        <div
+          class="progress-bar__fill"
+          [class.progress-bar__fill--indeterminate]="phase() === 'processing'"
+          [style.width.%]="progress()"
+        ></div>
+      </div>
+      <span class="progress-text">{{ currentStep() }}</span>
+    </div>
+
+    <!-- Eredmények -->
+    @if (results().length > 0) {
+      <div class="results-section">
+        <div class="results-header">
+          @if (isDone) {
+            <span class="results-summary">
+              <strong class="results-summary__success">{{ successCount }}</strong> sikeres
+              @if (failCount > 0) {
+                <span class="results-summary__sep">·</span>
+                <strong class="results-summary__fail">{{ failCount }}</strong> sikertelen
+              }
+            </span>
+          }
+        </div>
+
+        <div class="results-list">
+          @for (item of results(); track item.personId) {
+            <div class="result-row" [class.result-row--success]="item.success" [class.result-row--fail]="!item.success">
+              <lucide-icon
+                [name]="item.success ? ICONS.CHECK_CIRCLE : ICONS.X_CIRCLE"
+                [size]="16"
+                class="result-row__icon"
+              />
+              <span class="result-row__name">{{ item.personName }}</span>
+              @if (item.error) {
+                <span class="result-row__error">{{ item.error }}</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  @if (isDone) {
+    <div dialogFooter>
+      <button type="button" class="close-btn" (click)="onClose()">Bezárás</button>
+    </div>
+  }
+</app-dialog-wrapper>

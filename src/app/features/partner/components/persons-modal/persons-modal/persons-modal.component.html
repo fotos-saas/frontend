@@ -81,7 +81,19 @@
               <lucide-icon [name]="ICONS.PLUS" [size]="14" />
             </button>
           }
-          @if (!loading() && filteredPersons().length > 0) {
+          @if (!loading() && isElectron && selectablePersons().length > 0 && !editMode()) {
+            <button
+              type="button"
+              class="selection-mode-btn"
+              [class.selection-mode-btn--active]="batchActions.selectionMode()"
+              matTooltip="Kijelölés mód"
+              (click)="batchActions.toggleSelectionMode()"
+            >
+              <lucide-icon [name]="batchActions.selectionMode() ? ICONS.X : ICONS.SQUARE" [size]="14" />
+              {{ batchActions.selectionMode() ? 'Mégse' : 'Kijelölés' }}
+            </button>
+          }
+          @if (!loading() && filteredPersons().length > 0 && !batchActions.selectionMode()) {
             <button
               type="button"
               class="edit-mode-btn"
@@ -209,13 +221,62 @@
         <!-- Grid nézet -->
         <div class="persons-grid">
           @for (person of filteredPersons(); track person.id; let i = $index) {
-            <app-modal-person-card
-              [person]="person"
-              [animationDelay]="i * 0.05 + 's'"
-              (cardClick)="openLightbox($event)"
-            />
+            @if (batchActions.selectionMode()) {
+              @let isSelectable = person.hasPhoto && (person.photoUrl || person.photoThumbUrl);
+              @let isSelected = batchActions.selectedPersonIds().has(person.id);
+              <div
+                class="selection-card-wrap"
+                [class.selection-card-wrap--selected]="isSelected"
+                [class.selection-card-wrap--disabled]="!isSelectable"
+                (click)="isSelectable ? batchActions.togglePersonSelection(person.id) : null"
+              >
+                @if (isSelectable) {
+                  <div class="selection-checkbox" [class.selection-checkbox--checked]="isSelected">
+                    @if (isSelected) {
+                      <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                    }
+                  </div>
+                }
+                <app-modal-person-card
+                  [person]="person"
+                  [animationDelay]="i * 0.05 + 's'"
+                  (cardClick)="$event"
+                />
+              </div>
+            } @else {
+              <app-modal-person-card
+                [person]="person"
+                [animationDelay]="i * 0.05 + 's'"
+                (cardClick)="openLightbox($event)"
+              />
+            }
           }
         </div>
+
+        <!-- Kijelölés floating action bar -->
+        @if (batchActions.selectionMode()) {
+          <div class="selection-action-bar">
+            <div class="selection-action-bar__left">
+              <button
+                type="button"
+                class="select-all-btn"
+                (click)="batchActions.toggleSelectAll(selectablePersons())"
+              >
+                {{ batchActions.isAllSelected(selectablePersons()) ? 'Kijelölés törlése' : 'Mind kijelölése' }}
+              </button>
+              <span class="selection-count">{{ batchActions.selectedCount() }} kijelölve</span>
+            </div>
+            <button
+              type="button"
+              class="batch-portrait-btn"
+              [disabled]="batchActions.selectedCount() === 0"
+              (click)="startBatchPortrait()"
+            >
+              <lucide-icon [name]="ICONS.SCAN_FACE" [size]="16" />
+              Portré háttércsere
+            </button>
+          </div>
+        }
       }
 
       <!-- Tanítottak még / Egyéb nevek szekció -->
@@ -326,5 +387,15 @@
     confirmText="Törlés"
     confirmType="danger"
     (resultEvent)="$event.action === 'confirm' ? confirmDeletePerson() : cancelDeletePerson()"
+  />
+}
+
+<!-- Batch portré háttércsere dialógus -->
+@if (batchPortraitPersons(); as batchPersons) {
+  <app-batch-portrait-dialog
+    [persons]="batchPersons"
+    [projectId]="projectId()"
+    (close)="batchPortraitPersons.set(null)"
+    (completed)="onBatchPortraitCompleted()"
   />
 }

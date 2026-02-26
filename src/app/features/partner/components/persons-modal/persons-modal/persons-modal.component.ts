@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
+import { ElectronService } from '../../../../../core/services/electron.service';
 import { PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -12,6 +13,8 @@ import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
 import { ModalPersonCardComponent } from '../modal-person-card/modal-person-card.component';
 import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { BatchPortraitDialogComponent } from '../batch-portrait-dialog/batch-portrait-dialog.component';
+import { BatchPortraitActionsService } from '../batch-portrait-dialog/batch-portrait-actions.service';
 import {
   LayoutPhotoUploadDialogComponent,
   PhotoUploadPerson,
@@ -33,7 +36,8 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent],
+  providers: [BatchPortraitActionsService],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,7 +55,9 @@ export class PersonsModalComponent implements OnInit {
 
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);
+  private electronService = inject(ElectronService);
   private destroyRef = inject(DestroyRef);
+  readonly batchActions = inject(BatchPortraitActionsService);
 
   loading = signal(true);
   allPersons = signal<TabloPersonItem[]>([]);
@@ -74,6 +80,9 @@ export class PersonsModalComponent implements OnInit {
 
   // Törlés megerősítés
   deleteConfirmPerson = signal<TabloPersonItem | null>(null);
+
+  // Batch portrait dialógus
+  batchPortraitPersons = signal<TabloPersonItem[] | null>(null);
 
   // Extra nevek (tanítottak még)
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
@@ -304,5 +313,27 @@ export class PersonsModalComponent implements OnInit {
     navigator.clipboard.writeText(text);
     this.extraNamesCopied.set(true);
     setTimeout(() => this.extraNamesCopied.set(false), 1500);
+  }
+
+  // --- Batch portré háttércsere ---
+
+  get isElectron(): boolean { return this.electronService.isElectron; }
+
+  /** Kijelölhető személyek (akiknek VAN fotójuk) */
+  readonly selectablePersons = computed(() =>
+    this.filteredPersons().filter(p => p.hasPhoto && (p.photoUrl || p.photoThumbUrl))
+  );
+
+  startBatchPortrait(): void {
+    const selectedIds = this.batchActions.selectedPersonIds();
+    const persons = this.filteredPersons().filter(p => selectedIds.has(p.id));
+    if (persons.length === 0) return;
+    this.batchPortraitPersons.set(persons);
+  }
+
+  onBatchPortraitCompleted(): void {
+    this.batchPortraitPersons.set(null);
+    this.batchActions.resetSelection();
+    this.loadPersons(true);
   }
 }

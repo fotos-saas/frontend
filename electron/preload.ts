@@ -494,6 +494,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('portrait:get-temp-dir') as Promise<string>,
     cleanupTemp: (filePaths: string[]) =>
       ipcRenderer.invoke('portrait:cleanup-temp', filePaths) as Promise<{ success: boolean; cleaned?: number }>,
+    readProcessedFile: (params: { filePath: string }) =>
+      ipcRenderer.invoke('portrait:read-processed-file', params) as Promise<{
+        success: boolean; data?: ArrayBuffer; error?: string;
+      }>,
   },
 
   // ============ Touch Bar (MacBook Pro 2016-2020) ============

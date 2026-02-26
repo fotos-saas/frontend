@@ -364,6 +364,7 @@ interface PortraitAPI {
   }) => Promise<{ success: boolean; error?: string; path?: string }>;
   getTempDir: () => Promise<string>;
   cleanupTemp: (filePaths: string[]) => Promise<{ success: boolean; cleaned?: number }>;
+  readProcessedFile: (params: { filePath: string }) => Promise<{ success: boolean; data?: ArrayBuffer; error?: string }>;
 }
 
 export interface ElectronAPI {

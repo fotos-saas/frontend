@@ -1,0 +1,198 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
+// --- Fázis lépések ---
+.phase-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0 20px;
+}
+
+.phase-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: get-color('slate', 400);
+  @include transition-fast;
+
+  &--active {
+    color: #7c3aed;
+    background: #f5f3ff;
+  }
+
+  &--done {
+    color: #16a34a;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// --- Progress ---
+.progress-section {
+  padding: 0 0 16px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: get-color('slate', 100);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  border-radius: 3px;
+  @include transition-fast;
+  min-width: 2%;
+
+  &--indeterminate {
+    width: 100% !important;
+    background: linear-gradient(90deg, #7c3aed 0%, #a78bfa 50%, #7c3aed 100%);
+    background-size: 200% 100%;
+    animation: indeterminate 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes indeterminate {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.progress-text {
+  display: block;
+  font-size: 0.8125rem;
+  color: get-color('slate', 500);
+  text-align: center;
+}
+
+// --- Eredmények ---
+.results-section {
+  border-top: 1px solid get-color('slate', 200);
+  padding-top: 16px;
+}
+
+.results-header {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.results-summary {
+  font-size: 0.875rem;
+  color: get-color('slate', 600);
+
+  &__success {
+    color: #16a34a;
+  }
+
+  &__fail {
+    color: #dc2626;
+  }
+
+  &__sep {
+    margin: 0 8px;
+    color: get-color('slate', 400);
+  }
+}
+
+.results-list {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+
+  &--success {
+    background: #f0fdf4;
+  }
+
+  &--success &__icon {
+    color: #16a34a;
+  }
+
+  &--fail {
+    background: #fef2f2;
+  }
+
+  &--fail &__icon {
+    color: #dc2626;
+  }
+
+  &__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: get-color('slate', 700);
+  }
+
+  &__error {
+    font-size: 0.75rem;
+    color: #dc2626;
+    flex-shrink: 0;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// --- Footer gomb ---
+.close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background: get-color('slate', 100);
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: get-color('slate', 700);
+  cursor: pointer;
+  @include transition-fast;
+
+  &:hover {
+    background: get-color('slate', 200);
+  }
+}
+
+// --- Spin animáció ---
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// --- Accessibility ---
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

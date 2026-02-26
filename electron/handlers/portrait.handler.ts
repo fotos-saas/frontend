@@ -216,7 +216,39 @@ function sanitizeSettings(settings: Record<string, unknown>): Record<string, unk
   return sanitized;
 }
 
+/** Cleanup old temp files (24+ hours) on startup */
+function cleanupOldTempFiles(): void {
+  const portraitTmpDir = path.join(os.tmpdir(), 'photostack-portrait');
+  if (!fs.existsSync(portraitTmpDir)) return;
+
+  const maxAge = 24 * 60 * 60 * 1000; // 24 óra
+  try {
+    const entries = fs.readdirSync(portraitTmpDir);
+    for (const entry of entries) {
+      const filePath = path.join(portraitTmpDir, entry);
+      try {
+        const stats = fs.statSync(filePath);
+        if (Date.now() - stats.mtimeMs > maxAge) {
+          fs.unlinkSync(filePath);
+          log.info(`Regi portrait temp torolve: ${entry}`);
+        }
+      } catch { /* skip */ }
+    }
+  } catch { /* skip */ }
+}
+
+/** Max read size for readProcessedFile: 30 MB */
+const MAX_READ_SIZE = 30 * 1024 * 1024;
+
 export function registerPortraitHandlers(): void {
+  // Induláskori régi temp fájlok törlése
+  cleanupOldTempFiles();
+
+  // Kilépéskori cleanup
+  app.on('will-quit', () => {
+    const portraitTmpDir = path.join(os.tmpdir(), 'photostack-portrait');
+    try { fs.rmSync(portraitTmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  });
   // ============ Check Python + InSPyReNet availability ============
   ipcMain.handle('portrait:check-python', () => {
     return new Promise<{ available: boolean; error?: string }>((resolve) => {
@@ -470,6 +502,36 @@ export function registerPortraitHandlers(): void {
       }
     }
     return { success: true, cleaned };
+  });
+
+  // ============ Read processed file (for batch upload) ============
+  ipcMain.handle('portrait:read-processed-file', async (_event, params: { filePath: string }) => {
+    if (!params || typeof params.filePath !== 'string') {
+      return { success: false, error: 'Ervenytelen parameterek' };
+    }
+
+    if (!isInsideTempDir(params.filePath)) {
+      return { success: false, error: 'Csak temp konyvtarbol olvasas engedelyezett' };
+    }
+
+    const ext = path.extname(params.filePath).toLowerCase();
+    if (!SUPPORTED_EXTENSIONS.has(ext)) {
+      return { success: false, error: 'Nem tamogatott fajlformatum' };
+    }
+
+    try {
+      const stats = fs.statSync(params.filePath);
+      if (stats.size > MAX_READ_SIZE || stats.size === 0) {
+        return { success: false, error: 'Ervenytelen fajlmeret' };
+      }
+
+      const buffer = fs.readFileSync(params.filePath);
+      // Explicit ArrayBuffer masolat (Buffer.buffer problema elkerulese)
+      const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+      return { success: true, data: arrayBuffer };
+    } catch {
+      return { success: false, error: 'Fajl olvasasi hiba' };
+    }
   });
 
   log.info('Portrait IPC handlerek regisztralva');

@@ -111,7 +111,7 @@ export class ActivityLogComponent implements OnInit {
         next: (projects) => {
           this.projectSearchFilter.update(f => ({
             ...f,
-            options: projects.map(p => ({ value: String(p.id), label: p.name })),
+            options: projects.map(p => ({ id: String(p.id), value: String(p.id), label: p.name })),
           }));
         },
       });

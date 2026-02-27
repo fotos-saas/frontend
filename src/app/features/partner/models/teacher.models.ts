@@ -2,6 +2,12 @@
  * Tanár archívum interface-ek és típusok.
  */
 
+export interface TeacherGroupRow {
+  primary: TeacherListItem;
+  members: TeacherListItem[];
+  linkedGroup: string | null;
+}
+
 export interface TeacherListItem {
   id: number;
   canonicalName: string;
@@ -73,8 +79,29 @@ export interface TeacherDetail {
   aliases: TeacherAlias[];
   photos: TeacherPhoto[];
   projects: TeacherProject[];
+  linkedGroup: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LinkedGroupPhoto {
+  mediaId: number;
+  teacherName: string;
+  schoolName: string | null;
+  year: number;
+  thumbUrl: string | null;
+  url: string | null;
+  fileName: string | null;
+  fileSize: number;
+  md5Hash: string | null;
+  createdAt: string | null;
+  duplicateCount: number;
+  isActive: boolean;
+}
+
+export interface LinkTeachersResponse {
+  linkedGroup: string;
+  photos: LinkedGroupPhoto[];
 }
 
 export interface TeacherChangeLogEntry {

@@ -384,7 +384,7 @@ export class MarketerShellComponent {
 
   // Menü items (Lucide ikonokkal - desktop, tablet és mobile egyaránt)
   navItems: MenuItem[] = [
-    { id: 'dashboard', route: '/marketer/dashboard', label: 'Irányítópult', icon: 'home' },
+    { id: 'dashboard', route: '/marketer/dashboard', label: 'Dashboard', icon: 'home' },
     { id: 'projects', route: '/marketer/projects', label: 'Projektek', icon: 'folder-open' },
     { id: 'schools', route: '/marketer/schools', label: 'Iskolák', icon: 'graduation-cap' },
   ];

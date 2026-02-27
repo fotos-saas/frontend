@@ -9,6 +9,8 @@ import {
   TeacherPhoto,
   TeacherChangeLogEntry,
   TeacherLinkedGroup,
+  LinkedGroupPhoto,
+  LinkTeachersResponse,
   CreateTeacherRequest,
   UpdateTeacherRequest,
   BulkImportPreviewItem,
@@ -193,10 +195,23 @@ export class PartnerTeacherService implements ArchiveService {
 
   // ============ Teacher Linking (Tanár összekapcsolás) ============
 
-  linkTeachers(teacherIds: number[]): Observable<{ success: boolean; message: string; data: { linkedGroup: string } }> {
-    return this.http.post<{ success: boolean; message: string; data: { linkedGroup: string } }>(
+  linkTeachers(teacherIds: number[]): Observable<{ success: boolean; message: string; data: LinkTeachersResponse }> {
+    return this.http.post<{ success: boolean; message: string; data: LinkTeachersResponse }>(
       `${this.baseUrl}/link`,
       { teacher_ids: teacherIds }
+    );
+  }
+
+  getLinkedGroupPhotos(groupId: string): Observable<{ success: boolean; data: LinkedGroupPhoto[] }> {
+    return this.http.get<{ success: boolean; data: LinkedGroupPhoto[] }>(
+      `${this.baseUrl}/linked-group/${groupId}/photos`
+    );
+  }
+
+  setGroupActivePhoto(groupId: string, mediaId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.baseUrl}/linked-group/${groupId}/set-active-photo`,
+      { media_id: mediaId }
     );
   }
 

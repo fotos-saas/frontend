@@ -45,9 +45,26 @@
           {{ person().type === 'student' ? 'Diák' : 'Tanár' }}
         }
       </span>
+      @if (person().linkedGroup) {
+        <span class="card-badge card-badge--linked" matTooltip="Összekapcsolva">
+          <lucide-icon [name]="ICONS.LINK" [size]="10" />
+        </span>
+      }
       @if (person().hasOverride) {
         <span class="card-badge card-badge--override" matTooltip="Csak ezen a tablón egyedi">Egyedi</span>
       }
     </div>
+    @if (person().type === 'teacher' && person().archiveId) {
+      <div class="card-actions">
+        <button type="button" class="card-action-btn" matTooltip="Összekapcsolás" (click)="onLinkClick($event)">
+          <lucide-icon [name]="ICONS.LINK" [size]="12" />
+        </button>
+        @if (person().linkedGroup) {
+          <button type="button" class="card-action-btn" matTooltip="Fotó csere archívumból" (click)="onPhotoChooserClick($event)">
+            <lucide-icon [name]="ICONS.IMAGE" [size]="12" />
+          </button>
+        }
+      </div>
+    }
   </div>
 </div>

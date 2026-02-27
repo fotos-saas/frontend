@@ -6,6 +6,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
 import { ElectronService } from '../../../../../core/services/electron.service';
+import { forkJoin } from 'rxjs';
+import { PartnerTeacherService } from '../../../services/partner-teacher.service';
+import { TeacherListItem, LinkedGroupPhoto } from '../../../models/teacher.models';
 import { PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -20,6 +23,8 @@ import {
   PhotoUploadPerson,
   PhotoUploadResult,
 } from '../../../pages/project-tablo-editor/layout-designer/components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
+import { TeacherLinkDialogComponent } from '../../teacher-link-dialog/teacher-link-dialog.component';
+import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
 
 /** Szerkesztési sor state */
 interface EditRow {
@@ -36,7 +41,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
   providers: [BatchPortraitActionsService],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
@@ -56,6 +61,7 @@ export class PersonsModalComponent implements OnInit {
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);
   private electronService = inject(ElectronService);
+  private teacherService = inject(PartnerTeacherService);
   private destroyRef = inject(DestroyRef);
   readonly batchActions = inject(BatchPortraitActionsService);
 
@@ -83,6 +89,14 @@ export class PersonsModalComponent implements OnInit {
 
   // Batch portrait dialógus
   batchPortraitPersons = signal<TabloPersonItem[] | null>(null);
+
+  // Teacher link & photo chooser dialog
+  showTeacherLinkDialog = signal(false);
+  showPhotoChooserDialog = signal(false);
+  linkDialogTeacher = signal<TeacherListItem | null>(null);
+  linkDialogAllTeachers = signal<TeacherListItem[]>([]);
+  photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
+  photoChooserLinkedGroup = signal('');
 
   // Extra nevek (tanítottak még)
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
@@ -338,6 +352,75 @@ export class PersonsModalComponent implements OnInit {
   onBatchPortraitCompleted(): void {
     this.batchPortraitPersons.set(null);
     this.batchActions.resetSelection();
+    this.loadPersons(true);
+  }
+
+  // --- Teacher link & photo chooser ---
+
+  openLinkDialog(person: TabloPersonItem): void {
+    if (!person.archiveId) return;
+    forkJoin({
+      teacher: this.teacherService.getTeacher(person.archiveId),
+      allTeachers: this.teacherService.getAllTeachers(),
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ teacher: res, allTeachers }) => {
+        const t = res.data;
+        const teacherListItem: TeacherListItem = {
+          id: t.id,
+          canonicalName: t.canonicalName,
+          titlePrefix: t.titlePrefix,
+          position: t.position ?? null,
+          fullDisplayName: t.fullDisplayName,
+          schoolId: t.schoolId,
+          schoolName: t.schoolName ?? null,
+          isActive: true,
+          photoThumbUrl: t.photoThumbUrl ?? null,
+          photoMiniThumbUrl: t.photoThumbUrl ?? null,
+          photoUrl: t.photoUrl ?? null,
+          aliasesCount: t.aliases?.length ?? 0,
+          photosCount: t.photos?.length ?? 0,
+          linkedGroup: t.linkedGroup ?? null,
+        };
+        const enriched = allTeachers.some(at => at.id === teacherListItem.id)
+          ? allTeachers
+          : [teacherListItem, ...allTeachers];
+        this.linkDialogTeacher.set(teacherListItem);
+        this.linkDialogAllTeachers.set(enriched);
+        this.showTeacherLinkDialog.set(true);
+      },
+    });
+  }
+
+  onTeacherLinked(): void {
+    this.showTeacherLinkDialog.set(false);
+    this.loadPersons(true);
+  }
+
+  openPhotoChooser(person: TabloPersonItem): void {
+    if (!person.linkedGroup) return;
+    const group = person.linkedGroup;
+    this.teacherService.getLinkedGroupPhotos(group).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.photoChooserPhotos.set(res.data || []);
+        this.photoChooserLinkedGroup.set(group);
+        this.showPhotoChooserDialog.set(true);
+      },
+    });
+  }
+
+  onOpenPhotoChooserFromLink(groupId: string): void {
+    this.showTeacherLinkDialog.set(false);
+    this.teacherService.getLinkedGroupPhotos(groupId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.photoChooserPhotos.set(res.data || []);
+        this.photoChooserLinkedGroup.set(groupId);
+        this.showPhotoChooserDialog.set(true);
+      },
+    });
+  }
+
+  onPhotoChosen(): void {
+    this.showPhotoChooserDialog.set(false);
     this.loadPersons(true);
   }
 }

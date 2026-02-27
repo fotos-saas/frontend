@@ -152,6 +152,7 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   pendingTeacherPhotos?: number;
   inPrintAt?: string | null;
   doneAt?: string | null;
+  tabloSize: string | null;
   printSmallTablo?: PrintReadyFile | null;
   printFlat?: PrintReadyFile | null;
   updatedAt: string;
@@ -185,6 +186,7 @@ export interface TabloPersonItem {
   title: string | null;
   photoType: string | null;
   note: string | null;
+  linkedGroup: string | null;
 }
 
 /**

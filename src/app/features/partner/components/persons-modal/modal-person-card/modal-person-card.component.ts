@@ -23,6 +23,8 @@ export class ModalPersonCardComponent {
   readonly animationDelay = input<string>('0s');
 
   readonly cardClick = output<TabloPersonItem>();
+  readonly linkClick = output<TabloPersonItem>();
+  readonly photoChooserClick = output<TabloPersonItem>();
   readonly idCopied = signal(false);
 
   onCardClick(): void {
@@ -36,5 +38,15 @@ export class ModalPersonCardComponent {
     navigator.clipboard.writeText(this.person().id.toString());
     this.idCopied.set(true);
     setTimeout(() => this.idCopied.set(false), 1500);
+  }
+
+  onLinkClick(event: Event): void {
+    event.stopPropagation();
+    this.linkClick.emit(this.person());
+  }
+
+  onPhotoChooserClick(event: Event): void {
+    event.stopPropagation();
+    this.photoChooserClick.emit(this.person());
   }
 }

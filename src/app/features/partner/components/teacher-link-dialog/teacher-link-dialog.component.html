@@ -32,19 +32,28 @@
     <ps-input
       placeholder="Tanár keresése név vagy iskola alapján..."
       [ngModel]="searchQuery()"
-      (ngModelChange)="searchQuery.set($event)"
+      (ngModelChange)="onSearchChange($event)"
     />
 
     <!-- Tanár lista -->
     <div class="teacher-list">
-      <label class="teacher-list__label">
-        Kapcsolandó tanárok:
-        @if (selectedIds().size > 0) {
-          <span class="teacher-list__count">({{ selectedIds().size }} kijelölve)</span>
+      <div class="teacher-list__header">
+        <label class="teacher-list__label">
+          Kapcsolandó tanárok:
+          @if (selectedIds().size > 0) {
+            <span class="teacher-list__count">({{ selectedIds().size }} kijelölve)</span>
+          }
+        </label>
+        @if (filteredTeachers().length > 0) {
+          <button type="button" class="select-all-btn" (click)="toggleAll()">
+            {{ allSelected() ? 'Kijelölés törlése' : 'Mind kijelölése' }}
+          </button>
         }
-      </label>
+      </div>
 
-      @if (filteredTeachers().length === 0) {
+      @if (searchLoading()) {
+        <p class="teacher-list__empty">Keresés...</p>
+      } @else if (filteredTeachers().length === 0) {
         <p class="teacher-list__empty">
           @if (searchQuery()) {
             Nincs találat a keresésre.
@@ -58,10 +67,12 @@
             <label
               class="teacher-item"
               [class.teacher-item--selected]="isSelected(t.id)"
+              [class.teacher-item--current]="isCurrent(t.id)"
             >
               <input
                 type="checkbox"
                 [checked]="isSelected(t.id)"
+                [disabled]="isCurrent(t.id)"
                 (change)="toggleTeacher(t.id)"
                 class="teacher-item__checkbox"
               />
@@ -78,7 +89,9 @@
                   <span class="teacher-item__school">{{ t.schoolName }}</span>
                 }
               </div>
-              @if (t.linkedGroup && t.linkedGroup !== teacher().linkedGroup) {
+              @if (isCurrent(t.id)) {
+                <span class="teacher-item__current-badge">Aktuális</span>
+              } @else if (t.linkedGroup && t.linkedGroup !== teacher().linkedGroup) {
                 <lucide-icon
                   [name]="ICONS.LINK"
                   [size]="14"
@@ -94,6 +107,17 @@
   </ng-container>
 
   <ng-container dialogFooter>
+    @if (hasLinkedGroup()) {
+      <button
+        type="button"
+        class="btn-photo-chooser"
+        (click)="onOpenPhotoChooser()"
+      >
+        <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+        Fotó egységesítés
+      </button>
+    }
+    <span class="footer-spacer"></span>
     <button
       type="button"
       class="btn-secondary"

@@ -8,15 +8,17 @@ import {
   computed,
   DestroyRef,
   OnInit,
+  effect,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PsInputComponent } from '@shared/components/form';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
-import type { TeacherListItem } from '../../models/teacher.models';
+import type { TeacherListItem, LinkTeachersResponse } from '../../models/teacher.models';
 
 @Component({
   selector: 'app-teacher-link-dialog',
@@ -35,49 +37,116 @@ export class TeacherLinkDialogComponent implements OnInit {
   /** A tanár, amiből a dialog nyílt */
   readonly teacher = input.required<TeacherListItem>();
 
-  /** Partner összes tanárja (flat nézet lista) */
+  /** Partner összes tanárja (kezdeti lista — fallback) */
   readonly allTeachers = input.required<TeacherListItem[]>();
 
   readonly closeEvent = output<void>();
-  readonly savedEvent = output<void>();
+  readonly savedEvent = output<LinkTeachersResponse | void>();
+  readonly photoChooserEvent = output<string>();
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly searchQuery = signal('');
+  readonly searchLoading = signal(false);
+
+  /** Szerver-oldali keresés eredménye */
+  readonly searchResults = signal<TeacherListItem[]>([]);
 
   /** Kijelölt tanár ID-k (checkbox-ok) */
   readonly selectedIds = signal<Set<number>>(new Set());
 
-  /** Elérhető tanárok (kiindulási tanár nélkül, kereséssel szűrve) */
-  readonly filteredTeachers = computed(() => {
-    const current = this.teacher();
-    const query = this.searchQuery().toLowerCase().trim();
-    let list = this.allTeachers().filter(t => t.id !== current.id);
+  private readonly searchSubject = new Subject<string>();
+  private initialLinkedApplied = false;
 
-    if (query) {
-      list = list.filter(t =>
-        t.fullDisplayName.toLowerCase().includes(query) ||
-        (t.schoolName?.toLowerCase().includes(query) ?? false)
-      );
+  /** Elérhető tanárok (kereséssel szűrve, aktuális tanár jelölve de nem kiszűrve) */
+  readonly filteredTeachers = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const results = this.searchResults();
+
+    // Ha van keresés eredmény, azt használjuk
+    if (results.length > 0 || query) {
+      return results;
     }
 
-    return list;
+    // Nincs keresés → allTeachers fallback
+    return this.allTeachers();
   });
 
-  /** Legalább 1 másik tanár ki van-e jelölve */
-  readonly canSubmit = computed(() => this.selectedIds().size > 0);
+  /** Van-e már linked group */
+  readonly hasLinkedGroup = computed(() => !!this.teacher().linkedGroup);
+
+  /** Legalább 1 másik tanár ki van-e jelölve (nem önmaga) */
+  readonly canSubmit = computed(() => {
+    const currentId = this.teacher().id;
+    const ids = this.selectedIds();
+    // Legalább 1 MÁSIK tanár kell
+    return Array.from(ids).some(id => id !== currentId);
+  });
+
+  /** Mind ki van-e jelölve a szűrt listából (aktuális tanáron kívül) */
+  readonly allSelected = computed(() => {
+    const filtered = this.filteredTeachers().filter(t => t.id !== this.teacher().id);
+    if (filtered.length === 0) return false;
+    return filtered.every(t => this.selectedIds().has(t.id));
+  });
 
   ngOnInit(): void {
-    // Ha már csoportban van, előre kijelöljük a csoporttársakat
     const current = this.teacher();
+
+    // Szerver-oldali keresés debounce-szal
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(query => {
+        if (!query.trim()) {
+          this.searchLoading.set(false);
+          this.searchResults.set([]);
+          return [];
+        }
+        this.searchLoading.set(true);
+        return this.teacherService.getAllTeachers({ search: query });
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (results) => {
+        if (Array.isArray(results)) {
+          this.searchResults.set(results);
+          // Ha már csoportban van, előre kijelöljük a csoporttársakat
+          if (current.linkedGroup && !this.initialLinkedApplied) {
+            this.initialLinkedApplied = true;
+            const linkedPeers = results.filter(
+              t => t.linkedGroup === current.linkedGroup && t.id !== current.id
+            );
+            if (linkedPeers.length > 0) {
+              this.selectedIds.set(new Set(linkedPeers.map(t => t.id)));
+            }
+          }
+        }
+        this.searchLoading.set(false);
+      },
+      error: () => this.searchLoading.set(false),
+    });
+
+    // Ha már csoportban van és az allTeachers-ben is vannak linked peers, jelöljük be
     if (current.linkedGroup) {
       const linkedPeers = this.allTeachers().filter(
-        t => t.id !== current.id && t.linkedGroup === current.linkedGroup
+        t => t.linkedGroup === current.linkedGroup && t.id !== current.id
       );
       if (linkedPeers.length > 0) {
+        this.initialLinkedApplied = true;
         this.selectedIds.set(new Set(linkedPeers.map(t => t.id)));
       }
     }
+
+    // Alapértelmezett keresés = a tanár neve
+    const name = current.canonicalName || current.fullDisplayName;
+    this.searchQuery.set(name);
+    this.searchSubject.next(name);
+  }
+
+  onSearchChange(query: string): void {
+    this.searchQuery.set(query);
+    this.searchSubject.next(query);
   }
 
   toggleTeacher(teacherId: number): void {
@@ -94,20 +163,45 @@ export class TeacherLinkDialogComponent implements OnInit {
     return this.selectedIds().has(teacherId);
   }
 
+  isCurrent(teacherId: number): boolean {
+    return teacherId === this.teacher().id;
+  }
+
+  toggleAll(): void {
+    const filtered = this.filteredTeachers().filter(t => t.id !== this.teacher().id);
+    if (this.allSelected()) {
+      const current = new Set(this.selectedIds());
+      for (const t of filtered) current.delete(t.id);
+      this.selectedIds.set(current);
+    } else {
+      const current = new Set(this.selectedIds());
+      for (const t of filtered) current.add(t.id);
+      this.selectedIds.set(current);
+    }
+  }
+
+  onOpenPhotoChooser(): void {
+    const group = this.teacher().linkedGroup;
+    if (group) {
+      this.closeEvent.emit();
+      this.photoChooserEvent.emit(group);
+    }
+  }
+
   onSubmit(): void {
     if (!this.canSubmit() || this.isSubmitting()) return;
 
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
-    const teacherIds = [this.teacher().id, ...Array.from(this.selectedIds())];
+    const teacherIds = [this.teacher().id, ...Array.from(this.selectedIds()).filter(id => id !== this.teacher().id)];
 
     this.teacherService.linkTeachers(teacherIds)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.isSubmitting.set(false);
-          this.savedEvent.emit();
+          this.savedEvent.emit(res.data);
         },
         error: (err) => {
           this.isSubmitting.set(false);

@@ -33,6 +33,10 @@ import {
   }
 })
 export class DialogWrapperComponent implements AfterViewInit {
+  /** Nyitott dialog-ok stack-je (ESC csak a legfelsőt zárja) */
+  private static readonly openStack: DialogWrapperComponent[] = [];
+  private registeredInStack = false;
+
   // === INPUTS ===
   readonly headerStyle = input<DialogHeaderStyle>('flat');
   readonly theme = input<DialogTheme>('blue');
@@ -71,7 +75,12 @@ export class DialogWrapperComponent implements AfterViewInit {
   private previousActiveElement: HTMLElement | null = null;
 
   constructor() {
+    DialogWrapperComponent.openStack.push(this);
+    this.registeredInStack = true;
+
     this.destroyRef.onDestroy(() => {
+      const idx = DialogWrapperComponent.openStack.indexOf(this);
+      if (idx !== -1) DialogWrapperComponent.openStack.splice(idx, 1);
       this.unlockBodyScroll();
       if (this.previousActiveElement?.focus) {
         setTimeout(() => this.previousActiveElement?.focus(), 100);
@@ -125,6 +134,10 @@ export class DialogWrapperComponent implements AfterViewInit {
   // ============================================================================
 
   protected handleEscapeKey(event: Event): void {
+    // Csak a legfelső (legbelső) nyitott dialog reagáljon ESC-re
+    const stack = DialogWrapperComponent.openStack;
+    if (stack.length > 0 && stack[stack.length - 1] !== this) return;
+
     if (this.closable() && !this.isSubmitting()) {
       event.preventDefault();
       event.stopImmediatePropagation();

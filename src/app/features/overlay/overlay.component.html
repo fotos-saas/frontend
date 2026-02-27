@@ -476,11 +476,30 @@
                     } @else {
                       <lucide-icon [name]="ICONS.USER" [size]="14" />
                     }
+                    @if (person.linkedGroup) {
+                      <span class="upload-panel__linked-badge">
+                        <lucide-icon [name]="ICONS.LINK" [size]="8" />
+                      </span>
+                    }
                   </div>
                   <span class="upload-panel__name">{{ person.name }}</span>
                   <span class="upload-panel__type">{{ person.type === 'teacher' ? 'T' : 'D' }}</span>
                   @if (person.hasPhoto) {
                     <lucide-icon [name]="ICONS.CHECK" [size]="12" class="upload-panel__check" />
+                  }
+                  @if (person.type === 'teacher' && person.archiveId) {
+                    <div class="upload-panel__teacher-actions" (click)="$event.stopPropagation()">
+                      <button class="upload-panel__action-btn" matTooltip="Összekapcsolás"
+                        (click)="openLinkDialog(person)">
+                        <lucide-icon [name]="ICONS.LINK" [size]="10" />
+                      </button>
+                      @if (person.linkedGroup) {
+                        <button class="upload-panel__action-btn" matTooltip="Fotó csere"
+                          (click)="openPhotoChooser(person)">
+                          <lucide-icon [name]="ICONS.IMAGE" [size]="10" />
+                        </button>
+                      }
+                    </div>
                   }
                 </button>
               }
@@ -679,6 +698,25 @@
     </button>
   </div>
 </div>
+}
+
+@if (showTeacherLinkDialog() && linkDialogTeacher()) {
+  <app-teacher-link-dialog
+    [teacher]="linkDialogTeacher()!"
+    [allTeachers]="linkDialogAllTeachers()"
+    (closeEvent)="showTeacherLinkDialog.set(false)"
+    (savedEvent)="onTeacherLinked()"
+    (photoChooserEvent)="onOpenPhotoChooserFromLink($event)"
+  />
+}
+
+@if (showPhotoChooserDialog() && photoChooserPhotos().length > 0) {
+  <app-teacher-photo-chooser-dialog
+    [photos]="photoChooserPhotos()"
+    [linkedGroup]="photoChooserLinkedGroup()"
+    (closeEvent)="showPhotoChooserDialog.set(false)"
+    (savedEvent)="onPhotoChosen()"
+  />
 }
 
 </div><!-- /toolbar-wrap -->

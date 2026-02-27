@@ -480,6 +480,27 @@
   &--danger:hover { background: get-color('error', 50); color: get-color('error', 600); }
 }
 
+.photo-card__meta {
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.photo-card__school {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: get-color('slate', 700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photo-card__detail {
+  font-size: 0.5625rem;
+  color: get-color('slate', 500);
+}
+
 .empty-section {
   display: flex;
   flex-direction: column;
@@ -654,6 +675,7 @@
   [data-type="position_changed"] & { background: #fefce8; color: #ca8a04; }
   [data-type="active_photo_changed"] & { background: #ecfeff; color: #0891b2; }
   [data-type="photo_deleted"] & { background: get-color('error', 50); color: get-color('error', 600); }
+  [data-type="group_photo_unified"] & { background: #ecfdf5; color: #059669; }
 }
 
 .old-val {

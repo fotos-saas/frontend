@@ -99,6 +99,10 @@ export class ProjectDetailViewComponent {
     return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
   }
 
+  copyToClipboard(value: string): void {
+    this.clipboardService.copy(value);
+  }
+
   getInitials(name: string): string {
     if (!name) return '?';
     const parts = name.trim().split(/\s+/);

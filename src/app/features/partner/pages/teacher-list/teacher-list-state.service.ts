@@ -1,8 +1,8 @@
-import { Injectable, inject, signal, DestroyRef } from '@angular/core';
+import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
-import { TeacherListItem, SyncResultItem } from '../../models/teacher.models';
+import { TeacherListItem, TeacherGroupRow, SyncResultItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { ArchivePersonInSchool, ArchiveSchoolGroup } from '../../models/archive.models';
 import { SelectOption } from '@shared/components/form';
@@ -28,6 +28,29 @@ export class TeacherListStateService {
   readonly syncingSchoolId = signal(0);
   readonly downloading = signal(false);
   readonly downloadingSchoolId = signal(0);
+
+  readonly groupedTeachers = computed<TeacherGroupRow[]>(() => {
+    const teachers = this.teachers();
+    const groupMap = new Map<string, TeacherGroupRow>();
+    const result: TeacherGroupRow[] = [];
+    const seen = new Set<string>();
+
+    for (const t of teachers) {
+      if (!t.linkedGroup) {
+        result.push({ primary: t, members: [], linkedGroup: null });
+        continue;
+      }
+      if (seen.has(t.linkedGroup)) {
+        groupMap.get(t.linkedGroup)!.members.push(t);
+        continue;
+      }
+      seen.add(t.linkedGroup);
+      const row: TeacherGroupRow = { primary: t, members: [], linkedGroup: t.linkedGroup };
+      groupMap.set(t.linkedGroup, row);
+      result.push(row);
+    }
+    return result;
+  });
 
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'teachers' },

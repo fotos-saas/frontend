@@ -148,7 +148,7 @@ export class PartnerShellComponent implements OnInit {
 
     // Teljes menü (partner tulajdonosnak)
     const allItems: MenuItem[] = [
-      { id: 'dashboard', route: `${base}/dashboard`, label: 'Irányítópult', icon: 'home' },
+      { id: 'dashboard', route: `${base}/dashboard`, label: 'Dashboard', icon: 'home' },
       {
         id: 'projects',
         label: 'Projektek',

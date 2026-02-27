@@ -16,6 +16,7 @@ import * as https from 'https';
 import * as http from 'http';
 import log from 'electron-log/main';
 import sharp from 'sharp';
+import { resolveApiBaseUrl } from '../utils/api-url';
 
 // ============ HTTP feltöltés ============
 
@@ -170,14 +171,15 @@ export function registerFinalizerHandlers(): void {
       let uploadedCount = 0;
       let uploadError: string | undefined;
 
-      if (!params.apiBaseUrl) {
+      const resolvedApiUrl = resolveApiBaseUrl(params.apiBaseUrl || '');
+      if (!resolvedApiUrl) {
         uploadError = 'Nincs API URL beállítva';
       } else if (!params.authToken) {
         uploadError = 'Nincs bejelentkezési token (marketer_token)';
       } else {
         const uploadResult = await uploadToBackend(
           fileToUpload,
-          params.apiBaseUrl,
+          resolvedApiUrl,
           params.projectId,
           params.authToken,
           type,

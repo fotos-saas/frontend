@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit, DestroyRef } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -23,6 +23,7 @@ interface LogCategory {
   imports: [LucideAngularModule, FormsModule, DatePipe],
   templateUrl: './activity-log.component.html',
   styleUrl: './activity-log.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActivityLogComponent implements OnInit {
   private activityService = inject(PartnerActivityService);
@@ -105,7 +106,7 @@ export class ActivityLogComponent implements OnInit {
     if (this.dateFrom()) filters.date_from = this.dateFrom();
     if (this.dateTo()) filters.date_to = this.dateTo();
 
-    this.activityService.getActivityLog(filters).subscribe({
+    this.activityService.getActivityLog(filters).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.items.set(res.items);
         this.lastPage.set(res.pagination.last_page);

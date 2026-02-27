@@ -17,6 +17,29 @@ export interface ActivityLogItem {
   created_at: string;
 }
 
+export interface ProjectActivityItem {
+  id: number;
+  logName: string;
+  event: string | null;
+  eventLabel: string;
+  subjectType: string | null;
+  subjectId: number | null;
+  subjectName: string | null;
+  changes: { old?: Record<string, unknown>; attributes?: Record<string, unknown>; source?: string } | null;
+  causer: { id: number; name: string } | null;
+  createdAt: string;
+}
+
+export interface ProjectActivityResponse {
+  items: ProjectActivityItem[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
 export interface ActivityLogResponse {
   items: ActivityLogItem[];
   pagination: {
@@ -48,5 +71,13 @@ export class PartnerActivityService {
   getActivityLog(filters: ActivityLogFilters = {}): Observable<ActivityLogResponse> {
     const params = buildHttpParams(filters as Record<string, string | number | boolean | null | undefined>);
     return this.http.get<ActivityLogResponse>(this.apiUrl, { params });
+  }
+
+  getProjectActivity(projectId: number, page = 1, perPage = 20): Observable<ProjectActivityResponse> {
+    const params = buildHttpParams({ page, per_page: perPage });
+    return this.http.get<ProjectActivityResponse>(
+      `${environment.apiUrl}/partner/projects/${projectId}/activity`,
+      { params },
+    );
   }
 }

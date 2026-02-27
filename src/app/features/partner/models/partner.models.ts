@@ -95,6 +95,7 @@ export interface PartnerProjectListItem {
   linkedAt: string | null;
   preliminaryNote: string | null;
   tags: ProjectTag[];
+  lastActivityAt: string | null;
   emailMetrics: ProjectEmailMetrics | null;
 }
 

@@ -92,6 +92,13 @@
           />
         }
       }
+      @case ('activity') {
+        @defer {
+          <app-project-activity-tab
+            [projectId]="projectData()?.id ?? 0"
+          />
+        }
+      }
       @case ('settings') {
         @defer {
           <app-project-settings-tab

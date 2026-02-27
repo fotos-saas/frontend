@@ -1,0 +1,74 @@
+@if (loading() && items().length === 0) {
+  <div class="activity-loading">
+    @for (i of [1, 2, 3, 4, 5]; track i) {
+      <div class="skeleton-row skeleton-shimmer"></div>
+    }
+  </div>
+} @else if (items().length === 0) {
+  <div class="activity-empty">
+    <lucide-icon [name]="ICONS.ACTIVITY" [size]="32" />
+    <p>Még nincs tevékenység naplózva.</p>
+  </div>
+} @else {
+  <div class="activity-header">
+    <span class="activity-count">{{ total() }} bejegyzés</span>
+  </div>
+
+  <div class="activity-timeline">
+    @for (item of items(); track item.id) {
+      <div class="activity-item">
+        <div class="activity-item__icon" [style.background]="getEventColor(item.event) + '18'" [style.color]="getEventColor(item.event)">
+          <lucide-icon [name]="getEventIcon(item.event)" [size]="14" />
+        </div>
+
+        <div class="activity-item__content">
+          <div class="activity-item__header">
+            <span class="activity-item__event">{{ item.eventLabel }}</span>
+            @if (item.subjectType) {
+              <span class="activity-item__subject-type">{{ item.subjectType }}</span>
+            }
+            @if (item.subjectName) {
+              <span class="activity-item__subject-name">{{ item.subjectName }}</span>
+            }
+          </div>
+
+          @if (item.changes && getChangeKeys(item.changes).length > 0) {
+            <div class="activity-item__changes">
+              @for (key of getChangeKeys(item.changes); track key) {
+                <div class="change-row">
+                  <span class="change-row__key">{{ key }}</span>
+                  @if (item.changes!.old && item.changes!.old![key] !== undefined) {
+                    <span class="change-row__old">{{ formatChangeValue(item.changes!.old![key]) }}</span>
+                    <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="12" class="change-row__arrow" />
+                  }
+                  @if (item.changes!.attributes && item.changes!.attributes![key] !== undefined) {
+                    <span class="change-row__new">{{ formatChangeValue(item.changes!.attributes![key]) }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (item.changes?.source) {
+            <span class="activity-item__source">{{ item.changes!.source }}</span>
+          }
+        </div>
+
+        <div class="activity-item__meta">
+          <time class="activity-item__time">{{ item.createdAt | date:'yyyy.MM.dd HH:mm' }}</time>
+          @if (item.causer) {
+            <span class="activity-item__causer">{{ item.causer.name }}</span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (currentPage() < lastPage()) {
+    <div class="activity-load-more">
+      <button type="button" class="btn-secondary" (click)="loadMore()">
+        Továbbiak betöltése
+      </button>
+    </div>
+  }
+}

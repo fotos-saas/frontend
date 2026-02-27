@@ -84,6 +84,17 @@
       <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="16" />
       Leadva
     </button>
+    <button
+      filterBarExtra
+      type="button"
+      class="sort-toggle-btn"
+      [class.sort-toggle-btn--active]="filterState.sortBy() === 'last_activity_at'"
+      (click)="toggleActivitySort()"
+      [matTooltip]="filterState.sortBy() === 'last_activity_at' ? 'Rendezés: utolsó módosítás' : 'Rendezés utolsó módosítás szerint'"
+    >
+      <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="16" />
+      Módosítva
+    </button>
   </app-smart-filter-bar>
 
   <!-- Lista -->

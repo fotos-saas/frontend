@@ -49,7 +49,7 @@ export class PartnerProjectService {
     page?: number;
     per_page?: number;
     search?: string;
-    sort_by?: 'created_at' | 'photo_date' | 'class_year' | 'school_name' | 'tablo_status' | 'missing_count' | 'samples_count' | 'order_submitted_at' | 'last_content_update';
+    sort_by?: 'created_at' | 'photo_date' | 'class_year' | 'school_name' | 'tablo_status' | 'missing_count' | 'samples_count' | 'order_submitted_at' | 'last_content_update' | 'last_activity_at';
     sort_dir?: 'asc' | 'desc';
     status?: string;
     is_aware?: boolean;

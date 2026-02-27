@@ -12,6 +12,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '@shared/constants/icons.constants';
 import { MediaLightboxComponent, LightboxMediaItem } from '@shared/components/media-lightbox';
@@ -21,7 +22,7 @@ import type { LinkedGroupPhoto } from '../../models/teacher.models';
 @Component({
   selector: 'app-teacher-photo-chooser-dialog',
   standalone: true,
-  imports: [LucideAngularModule, DialogWrapperComponent, DatePipe, MediaLightboxComponent],
+  imports: [LucideAngularModule, DialogWrapperComponent, DatePipe, MediaLightboxComponent, MatTooltipModule],
   templateUrl: './teacher-photo-chooser-dialog.component.html',
   styleUrl: './teacher-photo-chooser-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -98,6 +98,7 @@ export interface LinkedGroupPhoto {
   createdAt: string | null;
   duplicateCount: number;
   isActive: boolean;
+  isPortraitProcessed?: boolean;
 }
 
 export interface LinkTeachersResponse {

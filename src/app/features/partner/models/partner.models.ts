@@ -187,6 +187,7 @@ export interface TabloPersonItem {
   photoType: string | null;
   note: string | null;
   linkedGroup: string | null;
+  isPortraitProcessed?: boolean;
 }
 
 /**

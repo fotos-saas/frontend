@@ -59,7 +59,11 @@ export class BatchPortraitActionsService {
   readonly results = signal<BatchPersonResult[]>([]);
 
   /** Teljes batch feldolgozás futtatása */
-  async processAll(persons: TabloPersonItem[], projectId: number): Promise<BatchResult> {
+  async processAll(
+    persons: TabloPersonItem[],
+    projectId: number,
+    archiveMode: 'archive' | 'project_only' = 'archive',
+  ): Promise<BatchResult> {
     this.phase.set('downloading');
     this.progress.set(0);
     this.currentStep.set('Beállítások betöltése...');
@@ -205,7 +209,10 @@ export class BatchPortraitActionsService {
 
             // Feltöltés
             const uploadResult = await firstValueFrom(
-              this.partnerService.uploadPersonPhoto(projectId, item.person.id, file),
+              this.partnerService.uploadPersonPhoto(projectId, item.person.id, file, {
+                archiveMode,
+                isPortraitProcessed: true,
+              }),
             );
 
             if (!uploadResult.success) {

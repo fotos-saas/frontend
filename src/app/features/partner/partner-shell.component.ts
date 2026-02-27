@@ -230,7 +230,7 @@ export class PartnerShellComponent implements OnInit {
         label: 'Beállítások',
         icon: 'settings',
         children: [
-          { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere' },
+          { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere', visible: () => this.electronService.isElectron },
           { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás és fizetés', devBadge: true },
           { id: 'email-account', route: `${base}/settings/email-account`, label: 'E-mail fiók' },
         ]
@@ -246,8 +246,15 @@ export class PartnerShellComponent implements OnInit {
       items = allItems
         .filter(item => !['team', 'customization', 'subscription', 'partner-settings', 'activity-log'].includes(item.id))
         .concat([
-          { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere', icon: 'scan-face' },
-          { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások', icon: 'settings' },
+          {
+            id: 'partner-settings',
+            label: 'Beállítások',
+            icon: 'settings',
+            children: [
+              { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
+              { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere', visible: () => this.electronService.isElectron },
+            ]
+          },
           { id: 'account-delete', route: `${base}/account`, label: 'Fiók törlése', icon: 'user-x' },
         ]);
     }

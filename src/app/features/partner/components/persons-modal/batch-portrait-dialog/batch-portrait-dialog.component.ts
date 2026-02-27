@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -14,7 +14,7 @@ import { BatchPortraitActionsService, BatchPhase } from './batch-portrait-action
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [BatchPortraitActionsService],
 })
-export class BatchPortraitDialogComponent implements OnInit {
+export class BatchPortraitDialogComponent {
   readonly ICONS = ICONS;
 
   readonly persons = input.required<TabloPersonItem[]>();
@@ -30,8 +30,12 @@ export class BatchPortraitDialogComponent implements OnInit {
   readonly currentStep = this.batchActions.currentStep;
   readonly results = this.batchActions.results;
 
-  ngOnInit(): void {
-    this.batchActions.processAll(this.persons(), this.projectId());
+  /** Választott mód: null = még nem választott */
+  readonly archiveMode = signal<'archive' | 'project_only' | null>(null);
+
+  startProcessing(mode: 'archive' | 'project_only'): void {
+    this.archiveMode.set(mode);
+    this.batchActions.processAll(this.persons(), this.projectId(), mode);
   }
 
   onClose(): void {

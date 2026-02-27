@@ -82,6 +82,16 @@
     background: get-color('warning', 500);
     color: white;
     border-radius: 4px;
+
+    &--portrait {
+      top: auto;
+      bottom: 6px;
+      left: 6px;
+      padding: 3px 5px;
+      background: #7c3aed;
+      display: flex;
+      align-items: center;
+    }
   }
 
   &__info {

@@ -291,7 +291,12 @@ export class PartnerAlbumService {
   /**
    * Egyéni kép feltöltése személyhez
    */
-  uploadPersonPhoto(projectId: number, personId: number, photo: File): Observable<{
+  uploadPersonPhoto(
+    projectId: number,
+    personId: number,
+    photo: File,
+    options?: { archiveMode?: string; isPortraitProcessed?: boolean },
+  ): Observable<{
     success: boolean;
     message: string;
     photo: {
@@ -303,6 +308,12 @@ export class PartnerAlbumService {
   }> {
     const formData = new FormData();
     formData.append('photo', photo);
+    if (options?.archiveMode) {
+      formData.append('archive_mode', options.archiveMode);
+    }
+    if (options?.isPortraitProcessed) {
+      formData.append('is_portrait_processed', '1');
+    }
 
     return this.http.post<{
       success: boolean;

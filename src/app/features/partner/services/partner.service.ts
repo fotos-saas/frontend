@@ -352,8 +352,13 @@ export class PartnerService {
     return this.albumService.getTalonPhotos(projectId);
   }
 
-  uploadPersonPhoto(projectId: number, personId: number, photo: File) {
-    return this.albumService.uploadPersonPhoto(projectId, personId, photo);
+  uploadPersonPhoto(
+    projectId: number,
+    personId: number,
+    photo: File,
+    options?: { archiveMode?: string; isPortraitProcessed?: boolean },
+  ) {
+    return this.albumService.uploadPersonPhoto(projectId, personId, photo, options);
   }
 
   // ============================================

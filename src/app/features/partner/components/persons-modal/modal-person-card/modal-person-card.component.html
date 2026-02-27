@@ -28,6 +28,11 @@
           <lucide-icon [name]="person().photoType === 'with_photo' ? ICONS.CAMERA : ICONS.EDIT" [size]="12" />
         </div>
       }
+      @if (person().isPortraitProcessed) {
+        <div class="portrait-badge" matTooltip="Háttércserés fotó">
+          <lucide-icon [name]="ICONS.SCAN_FACE" [size]="12" />
+        </div>
+      }
     } @else {
       <div class="card-placeholder">
         <lucide-icon [name]="ICONS.USER_X" [size]="24" />

@@ -1,6 +1,77 @@
 @use 'styles/mixins' as *;
 @use 'styles/colors' as *;
 
+// --- Választó nézet ---
+.mode-chooser {
+  padding: 8px 0 4px;
+  text-align: center;
+
+  &__description {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 16px;
+  }
+
+  &__cards {
+    display: flex;
+    // Safari gap fallback
+    > * + * { margin-left: 12px; }
+  }
+}
+
+.mode-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #a78bfa;
+    background: #faf5ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+  }
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+
+    &--archive {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+
+    &--project {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+  }
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  &__desc {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+}
+
 // --- Fázis lépések ---
 .phase-steps {
   display: flex;

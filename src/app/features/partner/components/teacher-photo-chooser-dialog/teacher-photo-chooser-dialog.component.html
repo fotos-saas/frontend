@@ -35,6 +35,11 @@
               @if (photo.duplicateCount > 1) {
                 <span class="photo-card__badge">{{ photo.duplicateCount }}x</span>
               }
+              @if (photo.isPortraitProcessed) {
+                <span class="photo-card__badge photo-card__badge--portrait" matTooltip="Háttércserés">
+                  <lucide-icon [name]="ICONS.SCAN_FACE" [size]="14" />
+                </span>
+              }
             </div>
             <div class="photo-card__info">
               @if (photo.schoolName) {

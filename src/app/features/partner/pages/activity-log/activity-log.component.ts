@@ -6,7 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ICONS } from '@shared/constants/icons.constants';
-import { SmartFilterBarComponent, SearchConfig, SortDef } from '@shared/components/smart-filter-bar';
+import { SmartFilterBarComponent, SearchConfig, SortDef, SearchableFilterDef } from '@shared/components/smart-filter-bar';
 import { FilterConfig } from '@shared/components/expandable-filters';
 import { PsInputComponent } from '@shared/components/form/ps-input/ps-input.component';
 import { ListPaginationComponent } from '@shared/components/list-pagination/list-pagination.component';
@@ -86,13 +86,14 @@ export class ActivityLogComponent implements OnInit {
         { value: 'other', label: 'Egyéb (pl. feltöltés)' },
       ],
     },
-    {
-      id: 'project_id',
-      label: 'Projekt',
-      icon: 'folder',
-      options: [{ value: '', label: 'Összes projekt' }],
-    },
   ]);
+
+  readonly projectSearchFilter = signal<SearchableFilterDef>({
+    id: 'project_id',
+    placeholder: 'Projekt keresése...',
+    allLabel: 'Összes projekt',
+    options: [],
+  });
 
   readonly sortDef: SortDef = {
     options: [],
@@ -108,19 +109,10 @@ export class ActivityLogComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (projects) => {
-          this.filterConfigs.update(configs =>
-            configs.map(c =>
-              c.id === 'project_id'
-                ? {
-                    ...c,
-                    options: [
-                      { value: '', label: 'Összes projekt' },
-                      ...projects.map(p => ({ value: String(p.id), label: p.name })),
-                    ],
-                  }
-                : c
-            )
-          );
+          this.projectSearchFilter.update(f => ({
+            ...f,
+            options: projects.map(p => ({ value: String(p.id), label: p.name })),
+          }));
         },
       });
   }

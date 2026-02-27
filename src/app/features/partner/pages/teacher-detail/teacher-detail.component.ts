@@ -291,7 +291,7 @@ export class PartnerTeacherDetailComponent implements OnInit {
   isActiveGroupPhoto(photo: LinkedGroupPhoto): boolean {
     const t = this.teacher();
     if (!t) return false;
-    return t.photos.some(p => p.mediaId === photo.mediaId && p.isActive);
+    return photo.isActive || t.photos.some(p => p.mediaId === photo.mediaId && p.isActive);
   }
 
   formatFileSize(bytes: number): string {

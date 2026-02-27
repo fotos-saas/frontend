@@ -56,6 +56,7 @@ export class TeacherLinkDialogComponent implements OnInit {
   readonly selectedIds = signal<Set<number>>(new Set());
 
   private readonly searchSubject = new Subject<string>();
+  private initialLinkedApplied = false;
 
   /** Elérhető tanárok (kereséssel szűrve, aktuális tanár jelölve de nem kiszűrve) */
   readonly filteredTeachers = computed(() => {
@@ -90,6 +91,8 @@ export class TeacherLinkDialogComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const current = this.teacher();
+
     // Szerver-oldali keresés debounce-szal
     this.searchSubject.pipe(
       debounceTime(300),
@@ -108,19 +111,29 @@ export class TeacherLinkDialogComponent implements OnInit {
       next: (results) => {
         if (Array.isArray(results)) {
           this.searchResults.set(results);
+          // Ha már csoportban van, előre kijelöljük a csoporttársakat
+          if (current.linkedGroup && !this.initialLinkedApplied) {
+            this.initialLinkedApplied = true;
+            const linkedPeers = results.filter(
+              t => t.linkedGroup === current.linkedGroup && t.id !== current.id
+            );
+            if (linkedPeers.length > 0) {
+              this.selectedIds.set(new Set(linkedPeers.map(t => t.id)));
+            }
+          }
         }
         this.searchLoading.set(false);
       },
       error: () => this.searchLoading.set(false),
     });
 
-    // Ha már csoportban van, előre kijelöljük a csoporttársakat
-    const current = this.teacher();
+    // Ha már csoportban van és az allTeachers-ben is vannak linked peers, jelöljük be
     if (current.linkedGroup) {
       const linkedPeers = this.allTeachers().filter(
-        t => t.linkedGroup === current.linkedGroup
+        t => t.linkedGroup === current.linkedGroup && t.id !== current.id
       );
       if (linkedPeers.length > 0) {
+        this.initialLinkedApplied = true;
         this.selectedIds.set(new Set(linkedPeers.map(t => t.id)));
       }
     }

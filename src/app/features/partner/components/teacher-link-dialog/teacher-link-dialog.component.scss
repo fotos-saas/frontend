@@ -261,15 +261,16 @@
 .btn-photo-chooser {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: none;
   border: 1px solid get-color('success', 300);
   color: get-color('success', 700);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
   @include mix.transition-fast;
 
   &:hover {
@@ -279,12 +280,14 @@
 }
 
 .btn-secondary {
-  @include btn-secondary($bg: get-color('gray', 100), $hover-bg: get-color('gray', 200), $color: get-color('gray', 700), $border-color: get-color('gray', 300), $hover-border: get-color('gray', 300), $padding: 8px 16px, $font-size: 0.8125rem);
+  @include btn-secondary($bg: get-color('gray', 100), $hover-bg: get-color('gray', 200), $color: get-color('gray', 700), $border-color: get-color('gray', 300), $hover-border: get-color('gray', 300), $padding: 6px 12px, $font-size: 0.75rem);
+  white-space: nowrap;
 }
 
 .btn-primary {
-  @include btn-primary($bg: get-color('primary', 500), $hover-bg: get-color('primary', 600), $padding: 8px 16px, $font-size: 0.8125rem);
-  gap: 6px;
+  @include btn-primary($bg: get-color('primary', 500), $hover-bg: get-color('primary', 600), $padding: 6px 12px, $font-size: 0.75rem);
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .spin {

@@ -14,20 +14,49 @@
     [searchableFilters]="[projectSearchFilter()]"
     [visibleFilterCount]="3"
   >
-    <ps-input
-      filterBarExtra
-      type="date"
-      [ngModel]="filterState.filters()['date_from']"
-      (ngModelChange)="filterState.setFilter('date_from', $event)"
-      placeholder="Dátumtól"
-    />
-    <ps-input
-      filterBarExtra
-      type="date"
-      [ngModel]="filterState.filters()['date_to']"
-      (ngModelChange)="filterState.setFilter('date_to', $event)"
-      placeholder="Dátumig"
-    />
+    <div filterBarExtra class="date-filter-wrapper">
+      <button
+        type="button"
+        class="date-filter-btn"
+        [class.date-filter-btn--active]="hasDateFilter()"
+        (click)="dateDropdownOpen.set(!dateDropdownOpen())"
+      >
+        <lucide-icon [name]="ICONS.CALENDAR" [size]="14" />
+        <span class="date-filter-btn__text">
+          @if (hasDateFilter()) {
+            {{ filterState.filters()['date_from'] || '…' }} – {{ filterState.filters()['date_to'] || '…' }}
+          } @else {
+            Időszak
+          }
+        </span>
+        <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="14" class="date-filter-btn__chevron" />
+      </button>
+
+      @if (dateDropdownOpen()) {
+        <div class="date-dropdown">
+          <label class="date-dropdown__label">Dátumtól</label>
+          <ps-input
+            type="date"
+            [ngModel]="filterState.filters()['date_from']"
+            (ngModelChange)="filterState.setFilter('date_from', $event)"
+            placeholder="éééé-hh-nn"
+          />
+          <label class="date-dropdown__label">Dátumig</label>
+          <ps-input
+            type="date"
+            [ngModel]="filterState.filters()['date_to']"
+            (ngModelChange)="filterState.setFilter('date_to', $event)"
+            placeholder="éééé-hh-nn"
+          />
+          @if (hasDateFilter()) {
+            <button type="button" class="date-dropdown__clear" (click)="clearDateFilter()">
+              <lucide-icon [name]="ICONS.X" [size]="12" />
+              Törlés
+            </button>
+          }
+        </div>
+      }
+    </div>
   </app-smart-filter-bar>
 
   <!-- Táblázat -->

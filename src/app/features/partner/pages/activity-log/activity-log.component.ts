@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -36,6 +36,8 @@ export class ActivityLogComponent implements OnInit {
   items = signal<ActivityLogItem[]>([]);
   total = signal(0);
   lastPage = signal(1);
+  dateDropdownOpen = signal(false);
+  hasDateFilter = computed(() => !!(this.filterState.filters()['date_from'] || this.filterState.filters()['date_to']));
   private loadSub?: Subscription;
 
   readonly searchConfig: SearchConfig = {
@@ -115,6 +117,12 @@ export class ActivityLogComponent implements OnInit {
           }));
         },
       });
+  }
+
+  clearDateFilter(): void {
+    this.filterState.setFilter('date_from', '');
+    this.filterState.setFilter('date_to', '');
+    this.dateDropdownOpen.set(false);
   }
 
   goToProject(projectId: number): void {

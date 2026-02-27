@@ -12,6 +12,7 @@ import { LayoutDesignerGridService } from './layout-designer-grid.service';
 import { LayoutDesignerDragService } from './layout-designer-drag.service';
 import { LayoutDesignerSwapService } from './layout-designer-swap.service';
 import { LayoutDesignerHistoryService } from './layout-designer-history.service';
+import { LayoutDesignerSelectionService } from './layout-designer-selection.service';
 import { LayoutDesignerSortService } from './layout-designer-sort.service';
 import { LayoutToolbarComponent } from './components/layout-toolbar/layout-toolbar.component';
 import { LayoutCanvasComponent } from './components/layout-canvas/layout-canvas.component';
@@ -48,6 +49,7 @@ import { firstValueFrom } from 'rxjs';
     LayoutDesignerDragService,
     LayoutDesignerSwapService,
     LayoutDesignerHistoryService,
+    LayoutDesignerSelectionService,
     LayoutDesignerSortService,
   ],
   template: `

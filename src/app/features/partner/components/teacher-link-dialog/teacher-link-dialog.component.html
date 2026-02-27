@@ -32,7 +32,7 @@
     <ps-input
       placeholder="Tanár keresése név vagy iskola alapján..."
       [ngModel]="searchQuery()"
-      (ngModelChange)="searchQuery.set($event)"
+      (ngModelChange)="onSearchChange($event)"
     />
 
     <!-- Tanár lista -->
@@ -51,7 +51,9 @@
         }
       </div>
 
-      @if (filteredTeachers().length === 0) {
+      @if (searchLoading()) {
+        <p class="teacher-list__empty">Keresés...</p>
+      } @else if (filteredTeachers().length === 0) {
         <p class="teacher-list__empty">
           @if (searchQuery()) {
             Nincs találat a keresésre.
@@ -65,10 +67,12 @@
             <label
               class="teacher-item"
               [class.teacher-item--selected]="isSelected(t.id)"
+              [class.teacher-item--current]="isCurrent(t.id)"
             >
               <input
                 type="checkbox"
                 [checked]="isSelected(t.id)"
+                [disabled]="isCurrent(t.id)"
                 (change)="toggleTeacher(t.id)"
                 class="teacher-item__checkbox"
               />
@@ -85,7 +89,9 @@
                   <span class="teacher-item__school">{{ t.schoolName }}</span>
                 }
               </div>
-              @if (t.linkedGroup && t.linkedGroup !== teacher().linkedGroup) {
+              @if (isCurrent(t.id)) {
+                <span class="teacher-item__current-badge">Aktuális</span>
+              } @else if (t.linkedGroup && t.linkedGroup !== teacher().linkedGroup) {
                 <lucide-icon
                   [name]="ICONS.LINK"
                   [size]="14"

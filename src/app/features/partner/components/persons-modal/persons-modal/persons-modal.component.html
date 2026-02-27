@@ -62,48 +62,6 @@
             </button>
           </div>
         }
-        <div class="tabs-actions">
-          @if (!loading()) {
-            <button
-              type="button"
-              class="add-person-btn"
-              [matTooltip]="'Új ' + (typeFilter() === 'teacher' ? 'tanár' : 'diák') + ' hozzáadása'"
-              (click)="addPersonsRequested.emit(typeFilter())"
-            >
-              <lucide-icon [name]="ICONS.PLUS" [size]="14" />
-              Új {{ typeFilter() === 'teacher' ? 'tanár' : 'diák' }}
-            </button>
-          }
-          @if (!loading() && isElectron && batchActions.selectedCount() > 0) {
-            <button
-              type="button"
-              class="batch-portrait-btn"
-              (click)="startBatchPortrait()"
-            >
-              <lucide-icon [name]="ICONS.SCAN_FACE" [size]="14" />
-              Háttércsere ({{ batchActions.selectedCount() }})
-            </button>
-            <button
-              type="button"
-              class="selection-clear-btn"
-              matTooltip="Kijelölés törlése"
-              (click)="batchActions.resetSelection()"
-            >
-              <lucide-icon [name]="ICONS.X" [size]="14" />
-            </button>
-          }
-          @if (!loading() && filteredPersons().length > 0) {
-            <button
-              type="button"
-              class="edit-mode-btn"
-              [class.edit-mode-btn--active]="editMode()"
-              (click)="toggleEditMode()"
-            >
-              <lucide-icon [name]="editMode() ? ICONS.X : ICONS.EDIT" [size]="14" />
-              {{ editMode() ? 'Kész' : 'Szerkesztés' }}
-            </button>
-          }
-        </div>
       </div>
     </div>
 
@@ -300,12 +258,48 @@
   </div>
 
   <!-- Footer -->
-  @if (!loading() && withoutPhotoCount() > 0 && !editMode()) {
+  @if (!loading()) {
     <div dialogFooter class="modal-footer">
-      <button type="button" class="upload-btn" (click)="openUploadWizard.emit(typeFilter())">
-        <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
-        Tovább a fényképek feltöltéséhez
-      </button>
+      <div class="footer-actions">
+        <button
+          type="button"
+          class="add-person-btn"
+          [matTooltip]="'Új ' + (typeFilter() === 'teacher' ? 'tanár' : 'diák') + ' hozzáadása'"
+          (click)="addPersonsRequested.emit(typeFilter())"
+        >
+          <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+          Új {{ typeFilter() === 'teacher' ? 'tanár' : 'diák' }}
+        </button>
+
+        @if (isElectron && batchActions.selectedCount() > 0) {
+          <button type="button" class="batch-portrait-btn" (click)="startBatchPortrait()">
+            <lucide-icon [name]="ICONS.SCAN_FACE" [size]="14" />
+            Háttércsere ({{ batchActions.selectedCount() }})
+          </button>
+          <button type="button" class="selection-clear-btn" matTooltip="Kijelölés törlése" (click)="batchActions.resetSelection()">
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+          </button>
+        }
+
+        @if (filteredPersons().length > 0) {
+          <button
+            type="button"
+            class="edit-mode-btn"
+            [class.edit-mode-btn--active]="editMode()"
+            (click)="toggleEditMode()"
+          >
+            <lucide-icon [name]="editMode() ? ICONS.X : ICONS.EDIT" [size]="14" />
+            {{ editMode() ? 'Kész' : 'Szerkesztés' }}
+          </button>
+        }
+      </div>
+
+      @if (withoutPhotoCount() > 0 && !editMode()) {
+        <button type="button" class="upload-btn" (click)="openUploadWizard.emit(typeFilter())">
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
+          Tovább a fényképek feltöltéséhez
+        </button>
+      }
     </div>
   }
 </app-dialog-wrapper>

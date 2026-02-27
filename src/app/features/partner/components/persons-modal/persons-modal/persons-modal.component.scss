@@ -639,6 +639,13 @@ ps-toggle {
   width: 100%;
 }
 
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .stats-row {
   display: flex;
   justify-content: center;
@@ -672,7 +679,7 @@ ps-toggle {
   gap: 8px;
   width: 100%;
   padding: 12px 20px;
-  margin-top: 16px;
+  margin-top: 8px;
   background: var(--color-primary, #1e3a5f);
   border: none;
   border-radius: 8px;

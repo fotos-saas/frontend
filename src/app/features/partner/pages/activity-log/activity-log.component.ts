@@ -1,26 +1,26 @@
-import { Component, signal, computed, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ICONS } from '@shared/constants/icons.constants';
+import { SmartFilterBarComponent, SearchConfig, SortDef } from '@shared/components/smart-filter-bar';
+import { FilterConfig } from '@shared/components/expandable-filters';
+import { PsInputComponent } from '@shared/components/form/ps-input/ps-input.component';
+import { ListPaginationComponent } from '@shared/components/list-pagination/list-pagination.component';
+import { useFilterState } from '@shared/utils/use-filter-state';
 import {
   PartnerActivityService,
   ActivityLogItem,
   ActivityLogFilters,
 } from '../../services/partner-activity.service';
-import { PartnerService, ProjectAutocompleteItem } from '../../services/partner.service';
-
-interface LogCategory {
-  value: string;
-  label: string;
-}
+import { PartnerService } from '../../services/partner.service';
 
 @Component({
   selector: 'app-activity-log',
   standalone: true,
-  imports: [LucideAngularModule, FormsModule, DatePipe],
+  imports: [LucideAngularModule, DatePipe, FormsModule, SmartFilterBarComponent, ListPaginationComponent, PsInputComponent],
   templateUrl: './activity-log.component.html',
   styleUrl: './activity-log.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,56 +33,92 @@ export class ActivityLogComponent implements OnInit {
   readonly ICONS = ICONS;
 
   items = signal<ActivityLogItem[]>([]);
-  loading = signal(false);
-  currentPage = signal(1);
-  lastPage = signal(1);
   total = signal(0);
+  lastPage = signal(1);
 
-  // Projekt szűrő
-  projectOptions = signal<Array<{ id: number; name: string }>>([]);
-  selectedProjectId = signal<number | null>(null);
+  readonly searchConfig: SearchConfig = {
+    placeholder: 'Keresés a naplóban...',
+  };
 
-  // Szűrők
-  selectedCategory = signal('');
-  selectedEvent = signal('');
-  searchQuery = signal('');
-  dateFrom = signal('');
-  dateTo = signal('');
+  readonly filterState = useFilterState({
+    context: { type: 'partner', page: 'projects' },
+    defaultFilters: {
+      log_name: '',
+      event: '',
+      project_id: '',
+      date_from: '',
+      date_to: '',
+    },
+    defaultSortBy: '',
+    defaultSortDir: 'desc',
+    onStateChange: () => this.loadData(),
+  });
 
-  readonly categories: LogCategory[] = [
-    { value: '', label: 'Összes kategória' },
-    { value: 'partner', label: 'Partner' },
-    { value: 'project', label: 'Projekt' },
-    { value: 'photo', label: 'Fotó' },
-    { value: 'album', label: 'Album' },
-    { value: 'tablo', label: 'Tabló' },
-    { value: 'billing', label: 'Számlázás' },
-    { value: 'order', label: 'Rendelés' },
-    { value: 'export', label: 'Export' },
-    { value: 'email', label: 'E-mail' },
-  ];
+  readonly filterConfigs = signal<FilterConfig[]>([
+    {
+      id: 'log_name',
+      label: 'Kategória',
+      icon: 'layers',
+      options: [
+        { value: '', label: 'Mind' },
+        { value: 'partner', label: 'Partner' },
+        { value: 'project', label: 'Projekt' },
+        { value: 'photo', label: 'Fotó' },
+        { value: 'album', label: 'Album' },
+        { value: 'tablo', label: 'Tabló' },
+        { value: 'billing', label: 'Számlázás' },
+        { value: 'order', label: 'Rendelés' },
+        { value: 'export', label: 'Export' },
+        { value: 'email', label: 'E-mail' },
+      ],
+    },
+    {
+      id: 'event',
+      label: 'Esemény',
+      icon: 'zap',
+      options: [
+        { value: '', label: 'Mind' },
+        { value: 'created', label: 'Létrehozva' },
+        { value: 'updated', label: 'Módosítva' },
+        { value: 'deleted', label: 'Törölve' },
+      ],
+    },
+    {
+      id: 'project_id',
+      label: 'Projekt',
+      icon: 'folder',
+      options: [{ value: '', label: 'Összes projekt' }],
+    },
+  ]);
 
-  readonly events = [
-    { value: '', label: 'Összes esemény' },
-    { value: 'created', label: 'Létrehozva' },
-    { value: 'updated', label: 'Módosítva' },
-    { value: 'deleted', label: 'Törölve' },
-  ];
-
-  hasFilters = computed(() =>
-    !!this.selectedCategory() || !!this.selectedEvent() || !!this.searchQuery() || !!this.dateFrom() || !!this.dateTo() || !!this.selectedProjectId()
-  );
+  readonly sortDef: SortDef = {
+    options: [],
+  };
 
   ngOnInit(): void {
-    this.loadData();
     this.loadProjects();
+    this.loadData();
   }
 
   private loadProjects(): void {
     this.partnerService.getProjectsAutocomplete()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (projects) => this.projectOptions.set(projects.map(p => ({ id: p.id, name: p.name }))),
+        next: (projects) => {
+          this.filterConfigs.update(configs =>
+            configs.map(c =>
+              c.id === 'project_id'
+                ? {
+                    ...c,
+                    options: [
+                      { value: '', label: 'Összes projekt' },
+                      ...projects.map(p => ({ value: String(p.id), label: p.name })),
+                    ],
+                  }
+                : c
+            )
+          );
+        },
       });
   }
 
@@ -90,61 +126,40 @@ export class ActivityLogComponent implements OnInit {
     this.router.navigate(['/partner/projects', projectId]);
   }
 
-  loadData(page = 1): void {
-    this.loading.set(true);
-    this.currentPage.set(page);
+  loadData(): void {
+    this.filterState.loading.set(true);
 
+    const f = this.filterState.filters();
     const filters: ActivityLogFilters = {
-      page,
+      page: this.filterState.page(),
       per_page: 20,
     };
 
-    if (this.selectedCategory()) filters.log_name = this.selectedCategory();
-    if (this.selectedEvent()) filters.event = this.selectedEvent();
-    if (this.selectedProjectId()) filters.project_id = this.selectedProjectId()!;
-    if (this.searchQuery()) filters.search = this.searchQuery();
-    if (this.dateFrom()) filters.date_from = this.dateFrom();
-    if (this.dateTo()) filters.date_to = this.dateTo();
+    if (this.filterState.search()) filters.search = this.filterState.search();
+    if (f['log_name']) filters.log_name = f['log_name'];
+    if (f['event']) filters.event = f['event'];
+    if (f['project_id']) filters.project_id = Number(f['project_id']);
+    if (f['date_from']) filters.date_from = f['date_from'];
+    if (f['date_to']) filters.date_to = f['date_to'];
 
-    this.activityService.getActivityLog(filters).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => {
-        this.items.set(res.items);
-        this.lastPage.set(res.pagination.last_page);
-        this.total.set(res.pagination.total);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
-    });
-  }
-
-  onFilterChange(): void {
-    this.loadData(1);
-  }
-
-  onSearch(): void {
-    this.loadData(1);
-  }
-
-  clearFilters(): void {
-    this.selectedCategory.set('');
-    this.selectedEvent.set('');
-    this.selectedProjectId.set(null);
-    this.searchQuery.set('');
-    this.dateFrom.set('');
-    this.dateTo.set('');
-    this.loadData(1);
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.lastPage()) {
-      this.loadData(page);
-    }
+    this.activityService.getActivityLog(filters)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.items.set(res.items);
+          this.lastPage.set(res.pagination.last_page);
+          this.total.set(res.pagination.total);
+          this.filterState.loading.set(false);
+        },
+        error: () => {
+          this.filterState.loading.set(false);
+        },
+      });
   }
 
   getCategoryLabel(logName: string): string {
-    return this.categories.find(c => c.value === logName)?.label ?? logName;
+    const opt = this.filterConfigs().find(c => c.id === 'log_name')?.options?.find(o => o.value === logName);
+    return opt?.label ?? logName;
   }
 
   getEventLabel(event: string | null): string {

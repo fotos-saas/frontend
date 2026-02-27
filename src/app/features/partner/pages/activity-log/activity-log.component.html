@@ -7,81 +7,30 @@
     <span class="total-badge">{{ total() }} bejegyzés</span>
   </div>
 
-  <!-- Szűrők -->
-  <div class="filters">
-    <div class="filter-row">
-      <select
-        [ngModel]="selectedCategory()"
-        (ngModelChange)="selectedCategory.set($event); onFilterChange()"
-        class="filter-select"
-      >
-        @for (cat of categories; track cat.value) {
-          <option [value]="cat.value">{{ cat.label }}</option>
-        }
-      </select>
-
-      <select
-        [ngModel]="selectedEvent()"
-        (ngModelChange)="selectedEvent.set($event); onFilterChange()"
-        class="filter-select"
-      >
-        @for (ev of events; track ev.value) {
-          <option [value]="ev.value">{{ ev.label }}</option>
-        }
-      </select>
-
-      <select
-        [ngModel]="selectedProjectId()"
-        (ngModelChange)="selectedProjectId.set($event ? +$event : null); onFilterChange()"
-        class="filter-select"
-      >
-        <option [ngValue]="null">Összes projekt</option>
-        @for (proj of projectOptions(); track proj.id) {
-          <option [ngValue]="proj.id">{{ proj.name }}</option>
-        }
-      </select>
-
-      <input
-        type="date"
-        [ngModel]="dateFrom()"
-        (ngModelChange)="dateFrom.set($event); onFilterChange()"
-        class="filter-input"
-        placeholder="Dátum -tól"
-      />
-
-      <input
-        type="date"
-        [ngModel]="dateTo()"
-        (ngModelChange)="dateTo.set($event); onFilterChange()"
-        class="filter-input"
-        placeholder="Dátum -ig"
-      />
-    </div>
-
-    <div class="filter-row">
-      <div class="search-wrapper">
-        <lucide-icon name="search" [size]="16" />
-        <input
-          type="text"
-          [ngModel]="searchQuery()"
-          (ngModelChange)="searchQuery.set($event)"
-          (keyup.enter)="onSearch()"
-          class="search-input"
-          placeholder="Keresés a naplóban..."
-        />
-      </div>
-
-      @if (hasFilters()) {
-        <button class="clear-btn" (click)="clearFilters()">
-          <lucide-icon name="x" [size]="14" />
-          Szűrők törlése
-        </button>
-      }
-    </div>
-  </div>
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="searchConfig"
+    [filterConfigs]="filterConfigs()"
+    [visibleFilterCount]="3"
+  >
+    <ps-input
+      filterBarExtra
+      type="date"
+      [ngModel]="filterState.filters()['date_from']"
+      (ngModelChange)="filterState.setFilter('date_from', $event)"
+      placeholder="Dátumtól"
+    />
+    <ps-input
+      filterBarExtra
+      type="date"
+      [ngModel]="filterState.filters()['date_to']"
+      (ngModelChange)="filterState.setFilter('date_to', $event)"
+      placeholder="Dátumig"
+    />
+  </app-smart-filter-bar>
 
   <!-- Táblázat -->
-  @if (loading()) {
+  @if (filterState.loading()) {
     <div class="skeleton-container">
       @for (i of [1,2,3,4,5]; track i) {
         <div class="skeleton-row"></div>
@@ -154,23 +103,9 @@
   }
 
   <!-- Lapozás -->
-  @if (lastPage() > 1) {
-    <div class="pagination">
-      <button
-        class="page-btn"
-        [disabled]="currentPage() === 1"
-        (click)="goToPage(currentPage() - 1)"
-      >
-        <lucide-icon name="chevron-left" [size]="16" />
-      </button>
-      <span class="page-info">{{ currentPage() }} / {{ lastPage() }}</span>
-      <button
-        class="page-btn"
-        [disabled]="currentPage() === lastPage()"
-        (click)="goToPage(currentPage() + 1)"
-      >
-        <lucide-icon name="chevron-right" [size]="16" />
-      </button>
-    </div>
-  }
+  <app-list-pagination
+    [currentPage]="filterState.page()"
+    [lastPage]="lastPage()"
+    (pageChange)="filterState.setPage($event)"
+  />
 </div>

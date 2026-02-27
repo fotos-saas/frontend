@@ -51,6 +51,7 @@ export class ExpandableFiltersComponent {
   readonly filters = input<FilterConfig[]>([]);
   readonly values = input<Record<string, string>>({});
   readonly visibleCount = input<number>(3);
+  readonly size = input<'xs' | 'sm'>('sm');
 
   /** Signal-based output */
   readonly filterChange = output<FilterChangeEvent>();

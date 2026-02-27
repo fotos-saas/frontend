@@ -55,6 +55,7 @@
         [filters]="filterConfigs()"
         [values]="filterState().filters()"
         [visibleCount]="visibleFilterCount()"
+        [size]="filterSize()"
         (filterChange)="onFilterChange($event)"
       />
     </div>

@@ -32,6 +32,7 @@ import { SearchConfig, SearchableFilterDef, SortDef, FilterConfig } from './smar
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:click)': 'onDocumentClick($event)',
+    '[class.smart-filter-bar--xs]': 'filterSize() === "xs"',
   },
 })
 export class SmartFilterBarComponent {
@@ -46,6 +47,7 @@ export class SmartFilterBarComponent {
   // === OPTIONAL ===
   readonly filterConfigs = input<FilterConfig[]>([]);
   readonly visibleFilterCount = input<number>(3);
+  readonly filterSize = input<'xs' | 'sm'>('sm');
   readonly searchableFilters = input<SearchableFilterDef[]>([]);
   readonly sortConfig = input<SortDef | null>(null);
 

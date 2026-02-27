@@ -68,6 +68,14 @@
   max-width: 240px;
 }
 
+// === XS (COMPACT) FILTER SIZE ===
+:host.smart-filter-bar--xs {
+  .searchable-filter ::ng-deep .ps-searchable-select__trigger {
+    height: 36px;
+    font-size: 0.875rem;
+  }
+}
+
 // === FILTER CONTROLS (ExpandableFilters wrapper) ===
 .filter-controls {
   display: flex;

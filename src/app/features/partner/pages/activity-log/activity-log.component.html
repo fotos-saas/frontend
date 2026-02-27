@@ -30,6 +30,17 @@
         }
       </select>
 
+      <select
+        [ngModel]="selectedProjectId()"
+        (ngModelChange)="selectedProjectId.set($event ? +$event : null); onFilterChange()"
+        class="filter-select"
+      >
+        <option [ngValue]="null">Összes projekt</option>
+        @for (proj of projectOptions(); track proj.id) {
+          <option [ngValue]="proj.id">{{ proj.name }}</option>
+        }
+      </select>
+
       <input
         type="date"
         [ngModel]="dateFrom()"
@@ -84,6 +95,7 @@
   } @else {
     <div class="table-header">
       <span class="th th-date">Dátum</span>
+      <span class="th th-project">Projekt</span>
       <span class="th th-category">Kategória</span>
       <span class="th th-event">Esemény</span>
       <span class="th th-subject">Tárgy</span>
@@ -95,6 +107,15 @@
       @for (item of items(); track item.id; let i = $index) {
         <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
           <span class="cell cell-date">{{ item.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
+          <span class="cell cell-project">
+            @if (item.project) {
+              <button type="button" class="project-link" (click)="goToProject(item.project.id); $event.stopPropagation()">
+                {{ item.project.name }}
+              </button>
+            } @else {
+              <span class="text-muted">–</span>
+            }
+          </span>
           <span class="cell cell-category">
             <span class="category-badge">{{ getCategoryLabel(item.log_name) }}</span>
           </span>

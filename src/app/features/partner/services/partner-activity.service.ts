@@ -12,6 +12,7 @@ export interface ActivityLogItem {
   subject_type: string | null;
   subject_id: number | null;
   subject_name: string | null;
+  project: { id: number; name: string } | null;
   causer: { id: number; name: string } | null;
   changes: { old?: Record<string, unknown>; attributes?: Record<string, unknown> } | null;
   created_at: string;
@@ -57,6 +58,7 @@ export interface ActivityLogFilters {
   date_to?: string;
   search?: string;
   causer_id?: number;
+  project_id?: number;
   per_page?: number;
   page?: number;
 }

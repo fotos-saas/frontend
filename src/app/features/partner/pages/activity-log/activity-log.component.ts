@@ -1,4 +1,6 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -8,6 +10,7 @@ import {
   ActivityLogItem,
   ActivityLogFilters,
 } from '../../services/partner-activity.service';
+import { PartnerService, ProjectAutocompleteItem } from '../../services/partner.service';
 
 interface LogCategory {
   value: string;
@@ -23,6 +26,9 @@ interface LogCategory {
 })
 export class ActivityLogComponent implements OnInit {
   private activityService = inject(PartnerActivityService);
+  private partnerService = inject(PartnerService);
+  private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
   readonly ICONS = ICONS;
 
   items = signal<ActivityLogItem[]>([]);
@@ -30,6 +36,10 @@ export class ActivityLogComponent implements OnInit {
   currentPage = signal(1);
   lastPage = signal(1);
   total = signal(0);
+
+  // Projekt szűrő
+  projectOptions = signal<Array<{ id: number; name: string }>>([]);
+  selectedProjectId = signal<number | null>(null);
 
   // Szűrők
   selectedCategory = signal('');
@@ -59,11 +69,24 @@ export class ActivityLogComponent implements OnInit {
   ];
 
   hasFilters = computed(() =>
-    !!this.selectedCategory() || !!this.selectedEvent() || !!this.searchQuery() || !!this.dateFrom() || !!this.dateTo()
+    !!this.selectedCategory() || !!this.selectedEvent() || !!this.searchQuery() || !!this.dateFrom() || !!this.dateTo() || !!this.selectedProjectId()
   );
 
   ngOnInit(): void {
     this.loadData();
+    this.loadProjects();
+  }
+
+  private loadProjects(): void {
+    this.partnerService.getProjectsAutocomplete()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (projects) => this.projectOptions.set(projects.map(p => ({ id: p.id, name: p.name }))),
+      });
+  }
+
+  goToProject(projectId: number): void {
+    this.router.navigate(['/partner/projects', projectId]);
   }
 
   loadData(page = 1): void {
@@ -77,6 +100,7 @@ export class ActivityLogComponent implements OnInit {
 
     if (this.selectedCategory()) filters.log_name = this.selectedCategory();
     if (this.selectedEvent()) filters.event = this.selectedEvent();
+    if (this.selectedProjectId()) filters.project_id = this.selectedProjectId()!;
     if (this.searchQuery()) filters.search = this.searchQuery();
     if (this.dateFrom()) filters.date_from = this.dateFrom();
     if (this.dateTo()) filters.date_to = this.dateTo();
@@ -105,6 +129,7 @@ export class ActivityLogComponent implements OnInit {
   clearFilters(): void {
     this.selectedCategory.set('');
     this.selectedEvent.set('');
+    this.selectedProjectId.set(null);
     this.searchQuery.set('');
     this.dateFrom.set('');
     this.dateTo.set('');

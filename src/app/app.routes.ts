@@ -556,6 +556,12 @@ export const routes: Routes = [
         path: 'orders/albums/:id',
         loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
       },
+      // Portré háttércsere (grafikusnak is elérhető)
+      {
+        path: 'settings/portrait',
+        loadComponent: () => import('./features/partner/pages/portrait-settings/portrait-settings-page.component').then(m => m.PortraitSettingsPageComponent),
+        title: 'Portré beállítások'
+      },
       // Fiók törlése (csapattagoknak csak ez érhető el)
       {
         path: 'account',

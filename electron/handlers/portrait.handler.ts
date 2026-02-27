@@ -340,7 +340,7 @@ export function registerPortraitHandlers(): void {
 
       log.info(`Portrait feldolgozas: ${path.basename(params.inputPath)}`);
 
-      execFile('python3', args, { timeout: 120000, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
+      execFile('python3', args, { timeout: 300000, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
         cleanupTemp(settingsPath);
 
         if (error) {
@@ -427,7 +427,8 @@ export function registerPortraitHandlers(): void {
 
       log.info(`Portrait batch feldolgozas: ${params.items.length} elem`);
 
-      const timeout = Math.min(params.items.length * 120000, 600000);
+      // Minimum 5 perc (modell első betöltése lassú) + elemenként 2 perc, max 10 perc
+      const timeout = Math.min(300000 + params.items.length * 120000, 600000);
 
       execFile('python3', args, { timeout, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
         cleanupTemp(settingsPath);

@@ -272,7 +272,7 @@
         </button>
 
         @if (isElectron && batchActions.selectedCount() > 0) {
-          <button type="button" class="btn btn--ghost" (click)="startBatchPortrait()">
+          <button type="button" class="btn btn--purple" (click)="startBatchPortrait()">
             <lucide-icon [name]="ICONS.SCAN_FACE" [size]="14" />
             Háttércsere ({{ batchActions.selectedCount() }})
           </button>

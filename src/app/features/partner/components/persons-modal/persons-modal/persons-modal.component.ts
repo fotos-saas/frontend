@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
+import { forkJoin } from 'rxjs';
 import { PartnerTeacherService } from '../../../services/partner-teacher.service';
 import { TeacherListItem, LinkedGroupPhoto } from '../../../models/teacher.models';
 import { PsToggleComponent } from '@shared/components/form';
@@ -322,20 +323,37 @@ export class PersonsModalComponent implements OnInit {
   // --- Teacher link & photo chooser ---
 
   openLinkDialog(person: TabloPersonItem): void {
-    console.log('[LINK] openLinkDialog called, person:', person.name, 'archiveId:', person.archiveId);
-    if (!person.archiveId) { console.log('[LINK] no archiveId, abort'); return; }
-    this.teacherService.getAllTeachers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (allTeachers) => {
-        console.log('[LINK] getAllTeachers response:', allTeachers.length, 'teachers');
-        const teacher = allTeachers.find(t => t.id === person.archiveId);
-        console.log('[LINK] found teacher:', teacher?.id, teacher?.canonicalName);
-        if (!teacher) { console.log('[LINK] teacher not found in list, abort'); return; }
-        this.linkDialogTeacher.set(teacher);
-        this.linkDialogAllTeachers.set(allTeachers);
+    if (!person.archiveId) return;
+    forkJoin({
+      teacher: this.teacherService.getTeacher(person.archiveId),
+      allTeachers: this.teacherService.getAllTeachers(),
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ teacher: res, allTeachers }) => {
+        const t = res.data;
+        const teacherListItem: TeacherListItem = {
+          id: t.id,
+          canonicalName: t.canonicalName,
+          titlePrefix: t.titlePrefix,
+          position: t.position ?? null,
+          fullDisplayName: t.fullDisplayName,
+          schoolId: t.schoolId,
+          schoolName: t.schoolName ?? null,
+          isActive: true,
+          photoThumbUrl: t.photoThumbUrl ?? null,
+          photoMiniThumbUrl: t.photoThumbUrl ?? null,
+          photoUrl: t.photoUrl ?? null,
+          aliasesCount: t.aliases?.length ?? 0,
+          photosCount: t.photos?.length ?? 0,
+          linkedGroup: t.linkedGroup ?? null,
+        };
+        // Ha nem szerepel az allTeachers listában, adjuk hozzá
+        const enriched = allTeachers.some(at => at.id === teacherListItem.id)
+          ? allTeachers
+          : [teacherListItem, ...allTeachers];
+        this.linkDialogTeacher.set(teacherListItem);
+        this.linkDialogAllTeachers.set(enriched);
         this.showTeacherLinkDialog.set(true);
-        console.log('[LINK] dialog should be open now');
       },
-      error: (err) => console.error('[LINK] getAllTeachers error:', err),
     });
   }
 

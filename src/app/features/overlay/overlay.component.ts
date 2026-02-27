@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -1936,15 +1936,25 @@ export class OverlayComponent implements OnInit {
 
   openLinkDialog(person: PersonItem): void {
     if (!person.archiveId) return;
-    this.teacherService.getAllTeachers().pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (allTeachers) => {
-        const teacher = allTeachers.find(t => t.id === person.archiveId);
-        if (!teacher) return;
+    forkJoin({
+      teacher: this.teacherService.getTeacher(person.archiveId),
+      allTeachers: this.teacherService.getAllTeachers(),
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ teacher: res, allTeachers }) => {
+        const t = res.data;
+        const teacherListItem: TeacherListItem = {
+          id: t.id, canonicalName: t.canonicalName, titlePrefix: t.titlePrefix,
+          position: t.position ?? null, fullDisplayName: t.fullDisplayName,
+          schoolId: t.schoolId, schoolName: t.schoolName ?? null, isActive: true,
+          photoThumbUrl: t.photoThumbUrl ?? null, photoMiniThumbUrl: t.photoThumbUrl ?? null,
+          photoUrl: t.photoUrl ?? null, aliasesCount: t.aliases?.length ?? 0,
+          photosCount: t.photos?.length ?? 0, linkedGroup: t.linkedGroup ?? null,
+        };
+        const enriched = allTeachers.some(at => at.id === teacherListItem.id)
+          ? allTeachers : [teacherListItem, ...allTeachers];
         this.ngZone.run(() => {
-          this.linkDialogTeacher.set(teacher);
-          this.linkDialogAllTeachers.set(allTeachers);
+          this.linkDialogTeacher.set(teacherListItem);
+          this.linkDialogAllTeachers.set(enriched);
           this.showTeacherLinkDialog.set(true);
         });
       },

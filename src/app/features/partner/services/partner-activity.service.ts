@@ -14,7 +14,7 @@ export interface ActivityLogItem {
   subject_name: string | null;
   project: { id: number; name: string } | null;
   causer: { id: number; name: string } | null;
-  changes: { old?: Record<string, unknown>; attributes?: Record<string, unknown> } | null;
+  changes: { old?: Record<string, unknown>; attributes?: Record<string, unknown>; source?: string; meta?: Record<string, unknown> } | null;
   created_at: string;
 }
 

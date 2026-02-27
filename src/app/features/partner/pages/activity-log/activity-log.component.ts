@@ -83,6 +83,7 @@ export class ActivityLogComponent implements OnInit {
         { value: 'created', label: 'Létrehozva' },
         { value: 'updated', label: 'Módosítva' },
         { value: 'deleted', label: 'Törölve' },
+        { value: 'other', label: 'Egyéb (pl. feltöltés)' },
       ],
     },
     {
@@ -187,6 +188,8 @@ export class ActivityLogComponent implements OnInit {
   formatChanges(changes: ActivityLogItem['changes']): string {
     if (!changes) return '';
     const parts: string[] = [];
+
+    // Spatie diff: old → attributes
     if (changes.old && changes.attributes) {
       for (const key of Object.keys(changes.attributes)) {
         const oldVal = changes.old[key] ?? '—';
@@ -194,6 +197,19 @@ export class ActivityLogComponent implements OnInit {
         parts.push(`${key}: ${oldVal} → ${newVal}`);
       }
     }
-    return parts.join(', ');
+
+    // Kontextuális meta (pl. filename, version)
+    if (changes.meta) {
+      for (const [key, val] of Object.entries(changes.meta)) {
+        parts.push(`${key}: ${val}`);
+      }
+    }
+
+    // Forrás (overlay, desktop stb.)
+    if (changes.source) {
+      parts.push(`forrás: ${changes.source}`);
+    }
+
+    return parts.join(' · ');
   }
 }

@@ -1,7 +1,8 @@
 """Edge processing: shrink, feather, decontaminate, hair refinement, smooth."""
 
-import logging
 from __future__ import annotations
+
+import logging
 from typing import Optional
 
 import cv2

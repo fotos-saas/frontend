@@ -653,9 +653,9 @@ export class OverlayComponent implements OnInit {
     this.saveSampleSettingsToBackend({ sample_watermark_color: next });
   }
 
-  cycleOpacity(): void {
+  cycleOpacity(direction: 1 | -1 = 1): void {
     const pct = Math.round(this.sampleWatermarkOpacity() * 100);
-    const next = (pct >= 23 ? 10 : pct + 1) / 100;
+    const next = Math.min(50, Math.max(5, pct + direction)) / 100;
     this.sampleWatermarkOpacity.set(next);
     window.electronAPI?.sample.setSettings({ watermarkOpacity: next });
     this.saveSampleSettingsToBackend({ sample_watermark_opacity: Math.round(next * 100) });
@@ -1872,15 +1872,11 @@ export class OverlayComponent implements OnInit {
       .subscribe({
         next: (res) => {
           const d = res.data;
-          if (d.sample_use_large_size !== null) {
-            this.sampleUseLargeSize.set(d.sample_use_large_size);
-          }
-          if (d.sample_watermark_color !== null) {
-            this.sampleWatermarkColor.set(d.sample_watermark_color);
-          }
-          if (d.sample_watermark_opacity !== null) {
-            this.sampleWatermarkOpacity.set(d.sample_watermark_opacity / 100);
-          }
+          this.sampleUseLargeSize.set(d.sample_use_large_size ?? false);
+          this.sampleWatermarkColor.set(d.sample_watermark_color ?? 'white');
+          this.sampleWatermarkOpacity.set(
+            d.sample_watermark_opacity !== null ? d.sample_watermark_opacity / 100 : 0.15,
+          );
         },
       });
   }

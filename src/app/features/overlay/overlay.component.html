@@ -212,8 +212,9 @@
                 <!-- Opacity -->
                 <button
                   class="toolbar__btn toolbar__btn--sm toolbar__btn--label"
-                  (click)="cycleOpacity(); $event.stopPropagation()"
-                  [matTooltip]="'Átlátszóság: ' + (sampleWatermarkOpacity() * 100) + '%'"
+                  (click)="cycleOpacity(1); $event.stopPropagation()"
+                  (contextmenu)="cycleOpacity(-1); $event.preventDefault(); $event.stopPropagation()"
+                  [matTooltip]="'Átlátszóság (jobb klikk: csökkent)'"
                 >
                   <span class="toolbar__label-text">{{ (sampleWatermarkOpacity() * 100).toFixed(0) }}%</span>
                 </button>

@@ -118,13 +118,15 @@ export class BatchPortraitActionsService {
         const inputPath = `${tempDir}/input_${person.id}_${Date.now()}${ext}`;
         const outputPath = `${tempDir}/output_${person.id}_${Date.now()}${ext}`;
 
+        this.logger.info(`Fotó letöltés: ${person.name} → ${photoUrl}`);
         const dlResult = await this.portraitService.downloadBackground(photoUrl, inputPath);
         if (dlResult.success && dlResult.path) {
           downloadedItems.push({ person, inputPath: dlResult.path, outputPath });
         } else {
+          this.logger.error(`Fotó letöltés sikertelen: ${person.name}`, dlResult.error);
           this.results.update(r => [...r, {
             personId: person.id, personName: person.name, success: false,
-            error: 'Fotó letöltése sikertelen',
+            error: dlResult.error || 'Fotó letöltése sikertelen',
           }]);
         }
 

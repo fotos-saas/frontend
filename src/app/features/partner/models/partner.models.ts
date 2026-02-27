@@ -152,6 +152,7 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   pendingTeacherPhotos?: number;
   inPrintAt?: string | null;
   doneAt?: string | null;
+  tabloSize: string | null;
   printSmallTablo?: PrintReadyFile | null;
   printFlat?: PrintReadyFile | null;
   updatedAt: string;

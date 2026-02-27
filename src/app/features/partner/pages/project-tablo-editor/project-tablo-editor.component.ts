@@ -9,9 +9,11 @@ import { ProjectDetailHeaderComponent } from '@shared/components/project-detail/
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ProjectDetailData } from '@shared/components/project-detail/project-detail.types';
 import { PartnerService, PartnerProjectDetails } from '../../services/partner.service';
+import { PartnerFinalizationService } from '../../services/partner-finalization.service';
 import { PhotoshopService } from '../../services/photoshop.service';
 import { BrandingService } from '../../services/branding.service';
-import { TabloSize, TabloPersonItem } from '../../models/partner.models';
+import { TabloSize, TabloSizeThreshold, TabloPersonItem } from '../../models/partner.models';
+import { selectTabloSize } from '@shared/utils/tablo-size.util';
 import { TabloEditorDebugService, DebugLogEntry } from './tablo-editor-debug.service';
 import { TabloEditorSnapshotService } from './tablo-editor-snapshot.service';
 import { TabloEditorTemplateService } from './tablo-editor-template.service';
@@ -38,6 +40,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private readonly partnerService = inject(PartnerService);
+  private readonly finalizationService = inject(PartnerFinalizationService);
   private readonly ps = inject(PhotoshopService);
   private readonly branding = inject(BrandingService);
   private readonly debugService = inject(TabloEditorDebugService);
@@ -107,6 +110,8 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly tabloSizes = signal<TabloSize[]>([]);
   readonly selectedSize = signal<TabloSize | null>(null);
   readonly loadingSizes = signal(false);
+  private sizeThreshold: TabloSizeThreshold | null = null;
+  private sizeResolved = false;
   readonly generating = signal(false);
   readonly opening = signal(false);
   readonly arranging = signal(false);
@@ -243,6 +248,7 @@ export class ProjectTabloEditorComponent implements OnInit {
         this.project.set(project);
         this.loading.set(false);
         this.loadPersons(id);
+        this.tryResolveSize();
         this.tryLoadSnapshots();
       },
       error: () => this.loading.set(false),
@@ -265,14 +271,41 @@ export class ProjectTabloEditorComponent implements OnInit {
     ).subscribe({
       next: (res) => {
         this.tabloSizes.set(res.sizes);
-        if (res.sizes.length > 0) {
-          this.selectedSize.set(res.sizes[0]);
-        }
+        this.sizeThreshold = res.threshold;
+        this.tryResolveSize();
         this.loadingSizes.set(false);
         this.tryLoadSnapshots();
       },
       error: () => this.loadingSizes.set(false),
     });
+  }
+
+  /** Méretválasztás: mindkét adat (sizes + project) kell hozzá */
+  private tryResolveSize(): void {
+    if (this.sizeResolved) return;
+    const sizes = this.tabloSizes();
+    const project = this.project();
+    if (sizes.length === 0 || !project) return;
+
+    this.sizeResolved = true;
+
+    // 1. Mentett projekt-szintű méret
+    if (project.tabloSize) {
+      const match = sizes.find(s => s.value === project.tabloSize);
+      if (match) { this.selectedSize.set(match); return; }
+    }
+
+    // 2. Küszöbérték: csak diákok száma számít (tanárok nem!)
+    if (this.sizeThreshold) {
+      const studentCount = project.studentsCount ?? project.expectedClassSize ?? 0;
+      if (studentCount > 0) {
+        const auto = selectTabloSize(studentCount, sizes, this.sizeThreshold);
+        if (auto) { this.selectedSize.set(auto); return; }
+      }
+    }
+
+    // 3. Fallback: első méret
+    this.selectedSize.set(sizes[0]);
   }
 
   goBack(): void {
@@ -297,6 +330,12 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   selectSize(size: TabloSize): void {
     this.selectedSize.set(size);
+    const projectId = this.project()?.id;
+    if (projectId) {
+      this.finalizationService.updateTabloSize(projectId, size.value).pipe(
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe();
+    }
   }
 
   /** Input event → szám validáció → setter hívás */

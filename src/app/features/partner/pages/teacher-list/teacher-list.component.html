@@ -129,7 +129,7 @@
         </div>
       </div>
 
-      <div class="teacher-school" (click)="viewTeacher(teacher)">
+      <div class="teacher-school" (click)="viewTeacher(teacher)" [matTooltip]="teacher.schoolName ?? ''" matTooltipPosition="above">
         <span class="school-name-text">{{ teacher.schoolName }}</span>
       </div>
 

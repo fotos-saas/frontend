@@ -263,7 +263,7 @@
       <div class="footer-actions">
         <button
           type="button"
-          class="btn btn--ghost"
+          class="btn btn--primary"
           [matTooltip]="'Új ' + (typeFilter() === 'teacher' ? 'tanár' : 'diák') + ' hozzáadása'"
           (click)="addPersonsRequested.emit(typeFilter())"
         >
@@ -284,7 +284,7 @@
         @if (filteredPersons().length > 0) {
           <button
             type="button"
-            class="btn btn--ghost"
+            class="btn btn--outline"
             (click)="toggleEditMode()"
           >
             <lucide-icon [name]="editMode() ? ICONS.X : ICONS.EDIT" [size]="14" />

@@ -100,15 +100,6 @@
     <!-- Sor sablon: ng-template a duplikáció elkerüléséhez -->
     <ng-template #teacherRowTpl let-teacher let-isGroupHeader="isGroupHeader" let-isChild="isChild" let-schoolCount="schoolCount">
       <div class="teacher-info" (click)="viewTeacher(teacher)">
-        @if (isGroupHeader) {
-          <button type="button" class="group-toggle"
-            [class.group-toggle--open]="isExpanded(teacher.linkedGroup)"
-            (click)="toggleGroup(teacher.linkedGroup); $event.stopPropagation()">
-            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="14" />
-          </button>
-        } @else if (isChild) {
-          <div class="group-toggle-spacer"></div>
-        }
         <div
           class="teacher-avatar"
           [class.teacher-avatar--clickable]="!!teacher.photoUrl"
@@ -173,6 +164,14 @@
         >
           <lucide-icon [name]="ICONS.DELETE" [size]="16" />
         </button>
+        @if (isGroupHeader) {
+          <button type="button" class="group-toggle"
+            [class.group-toggle--open]="isExpanded(teacher.linkedGroup)"
+            (click)="toggleGroup(teacher.linkedGroup)"
+            matTooltip="Csoport lenyitása">
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="14" />
+          </button>
+        }
       </div>
     </ng-template>
 

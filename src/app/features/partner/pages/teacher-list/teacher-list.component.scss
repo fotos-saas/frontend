@@ -244,13 +244,8 @@
   }
 
   &--open lucide-icon {
-    transform: rotate(90deg);
+    transform: rotate(180deg);
   }
-}
-
-.group-toggle-spacer {
-  width: 24px;
-  flex-shrink: 0;
 }
 
 .teacher-row--group-header {

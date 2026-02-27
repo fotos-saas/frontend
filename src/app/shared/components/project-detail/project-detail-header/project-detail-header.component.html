@@ -8,11 +8,23 @@
     }
     <!-- Top Bar -->
     <div class="flex items-center justify-between mb-6">
-      <app-back-button
-        [label]="'Vissza'"
-        [display]="'icon-text'"
-        (clicked)="back.emit()"
-      />
+      <div class="flex items-center gap-2">
+        <app-back-button
+          [label]="'Vissza'"
+          [display]="'icon-text'"
+          (clicked)="back.emit()"
+        />
+        <button
+          class="id-badge"
+          (click)="copyId()"
+          matTooltip="ID másolása vágólapra"
+        >
+          #{{ p.id }}
+          @if (idCopied()) {
+            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+          }
+        </button>
+      </div>
       <div class="flex items-center gap-1">
         @if (showTabloEditor()) {
           <button

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -31,6 +31,16 @@ export class ProjectDetailHeaderComponent {
   readonly statusChange = output<{ value: string; label: string; color: string }>();
 
   readonly hasGallery = computed(() => !!this.project()?.tabloGalleryId);
+  readonly idCopied = signal(false);
+
+  copyId(): void {
+    const id = this.project()?.id;
+    if (!id) return;
+    navigator.clipboard.writeText(String(id)).then(() => {
+      this.idCopied.set(true);
+      setTimeout(() => this.idCopied.set(false), 1500);
+    });
+  }
 
   getStatusIcon(status: string | null): string {
     const iconMap: Record<string, string> = {

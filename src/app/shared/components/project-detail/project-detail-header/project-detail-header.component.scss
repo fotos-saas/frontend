@@ -23,6 +23,29 @@
   }
 }
 
+.id-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  color: get-color('gray', 500);
+  background: get-color('gray', 100);
+  border: 1px solid get-color('gray', 200);
+  border-radius: 6px;
+  cursor: pointer;
+  @include transition-normal;
+  line-height: 1;
+
+  &:hover {
+    color: get-color('primary', 600);
+    background: get-color('primary', 50);
+    border-color: get-color('primary', 200);
+  }
+}
+
 .school-name {
   font-size: 1.5rem;
   font-weight: 700;

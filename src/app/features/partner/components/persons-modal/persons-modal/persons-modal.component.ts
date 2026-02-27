@@ -322,15 +322,20 @@ export class PersonsModalComponent implements OnInit {
   // --- Teacher link & photo chooser ---
 
   openLinkDialog(person: TabloPersonItem): void {
-    if (!person.archiveId) return;
+    console.log('[LINK] openLinkDialog called, person:', person.name, 'archiveId:', person.archiveId);
+    if (!person.archiveId) { console.log('[LINK] no archiveId, abort'); return; }
     this.teacherService.getAllTeachers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (allTeachers) => {
+        console.log('[LINK] getAllTeachers response:', allTeachers.length, 'teachers');
         const teacher = allTeachers.find(t => t.id === person.archiveId);
-        if (!teacher) return;
+        console.log('[LINK] found teacher:', teacher?.id, teacher?.canonicalName);
+        if (!teacher) { console.log('[LINK] teacher not found in list, abort'); return; }
         this.linkDialogTeacher.set(teacher);
         this.linkDialogAllTeachers.set(allTeachers);
         this.showTeacherLinkDialog.set(true);
+        console.log('[LINK] dialog should be open now');
       },
+      error: (err) => console.error('[LINK] getAllTeachers error:', err),
     });
   }
 

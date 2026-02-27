@@ -556,6 +556,12 @@ export const routes: Routes = [
         path: 'orders/albums/:id',
         loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
       },
+      // Tevékenységnapló (grafikusnak is elérhető)
+      {
+        path: 'activity-log',
+        loadComponent: () => import('./features/partner/pages/activity-log/activity-log.component').then(m => m.ActivityLogComponent),
+        title: 'Tevékenységnapló'
+      },
       // Portré háttércsere (grafikusnak is elérhető)
       {
         path: 'settings/portrait',

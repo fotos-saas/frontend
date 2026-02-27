@@ -79,11 +79,10 @@
             }
           </span>
           <span class="cell cell-subject">
-            @if (item.subject_name) {
+            @if (item.subject_name && item.subject_name !== item.project?.name) {
               <span class="subject-name">{{ item.subject_name }}</span>
-            }
-            @if (item.subject_type) {
-              <span class="subject-type">{{ item.subject_type }}</span>
+            } @else if (!item.subject_name) {
+              <span class="text-muted">–</span>
             }
           </span>
           <span class="cell cell-user">

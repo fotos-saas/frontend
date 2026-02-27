@@ -101,6 +101,17 @@
   </ng-container>
 
   <ng-container dialogFooter>
+    @if (hasLinkedGroup()) {
+      <button
+        type="button"
+        class="btn-photo-chooser"
+        (click)="onOpenPhotoChooser()"
+      >
+        <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+        Fotó egységesítés
+      </button>
+    }
+    <span class="footer-spacer"></span>
     <button
       type="button"
       class="btn-secondary"

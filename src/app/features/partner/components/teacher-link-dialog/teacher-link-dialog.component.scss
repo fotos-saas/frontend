@@ -98,6 +98,11 @@
   }
 }
 
+:host ::ng-deep ps-input {
+  display: block;
+  margin-bottom: 14px;
+}
+
 .teacher-list {
   &__header {
     display: flex;
@@ -226,6 +231,30 @@
   &:hover {
     background: get-color('primary', 50);
     color: get-color('primary', 600);
+  }
+}
+
+.footer-spacer {
+  flex: 1;
+}
+
+.btn-photo-chooser {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid get-color('success', 300);
+  color: get-color('success', 700);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  @include mix.transition-fast;
+
+  &:hover {
+    background: get-color('success', 50);
+    border-color: get-color('success', 400);
   }
 }
 

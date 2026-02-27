@@ -40,6 +40,7 @@ export class TeacherLinkDialogComponent implements OnInit {
 
   readonly closeEvent = output<void>();
   readonly savedEvent = output<LinkTeachersResponse | void>();
+  readonly photoChooserEvent = output<string>();
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -63,6 +64,9 @@ export class TeacherLinkDialogComponent implements OnInit {
 
     return list;
   });
+
+  /** Van-e már linked group */
+  readonly hasLinkedGroup = computed(() => !!this.teacher().linkedGroup);
 
   /** Legalább 1 másik tanár ki van-e jelölve */
   readonly canSubmit = computed(() => this.selectedIds().size > 0);
@@ -111,6 +115,14 @@ export class TeacherLinkDialogComponent implements OnInit {
       const current = new Set(this.selectedIds());
       for (const t of filtered) current.add(t.id);
       this.selectedIds.set(current);
+    }
+  }
+
+  onOpenPhotoChooser(): void {
+    const group = this.teacher().linkedGroup;
+    if (group) {
+      this.closeEvent.emit();
+      this.photoChooserEvent.emit(group);
     }
   }
 

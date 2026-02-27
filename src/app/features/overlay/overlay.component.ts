@@ -1060,7 +1060,7 @@ export class OverlayComponent implements OnInit {
     // 5. Behelyezés a Photoshopba
     this.busyCommand.set('sync-photos');
     try {
-      await window.electronAPI.photoshop.placePhotos({ layers: photosToSync, syncBorder: this.syncWithBorder() });
+      await window.electronAPI.photoshop.placePhotos({ layers: photosToSync, syncBorder: this.syncWithBorder(), psdFilePath: this.activeDoc().path ?? undefined });
     } finally {
       this.ngZone.run(() => this.busyCommand.set(null));
     }
@@ -1433,7 +1433,7 @@ export class OverlayComponent implements OnInit {
           // Ha van sikeres feltöltés, behelyezés PS-be
           if (doneCount > 0) {
             this.ngZone.run(() => this.placing.set(true));
-            this.uploadService.placePhotosInPs(updated, this.syncWithBorder()).then(result => {
+            this.uploadService.placePhotosInPs(updated, this.syncWithBorder(), this.activeDoc().path ?? undefined).then(result => {
               this.ngZone.run(() => {
                 this.placing.set(false);
                 this.batchResult.set({
@@ -1462,7 +1462,7 @@ export class OverlayComponent implements OnInit {
   async placeInPs(): Promise<void> {
     this.placing.set(true);
     this.batchResult.set(null);
-    const result = await this.uploadService.placePhotosInPs(this.psLayers(), this.syncWithBorder());
+    const result = await this.uploadService.placePhotosInPs(this.psLayers(), this.syncWithBorder(), this.activeDoc().path ?? undefined);
     this.ngZone.run(() => {
       this.placing.set(false);
       this.batchResult.set({

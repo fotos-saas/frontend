@@ -232,7 +232,7 @@ export class OverlayUploadService {
   /**
    * PS Smart Object frissites — placePhotos IPC hivas.
    */
-  async placePhotosInPs(layers: PsLayerPerson[], syncBorder = false): Promise<{ success: boolean; error?: string }> {
+  async placePhotosInPs(layers: PsLayerPerson[], syncBorder = false, psdFilePath?: string): Promise<{ success: boolean; error?: string }> {
     if (!window.electronAPI) {
       return { success: false, error: 'Electron API nem elérhető' };
     }
@@ -246,7 +246,7 @@ export class OverlayUploadService {
     }
 
     try {
-      return await window.electronAPI.photoshop.placePhotos({ layers: photosToPlace, syncBorder });
+      return await window.electronAPI.photoshop.placePhotos({ layers: photosToPlace, syncBorder, psdFilePath });
     } catch (e) {
       return { success: false, error: 'PS kommunikációs hiba' };
     }

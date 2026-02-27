@@ -3,7 +3,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TabloPersonItem } from '../persons-modal.types';
-import { BatchPortraitActionsService, BatchPhase, BatchPersonResult } from './batch-portrait-actions.service';
+import { BatchPortraitActionsService, BatchPhase } from './batch-portrait-actions.service';
 
 @Component({
   selector: 'app-batch-portrait-dialog',
@@ -21,7 +21,6 @@ export class BatchPortraitDialogComponent implements OnInit {
   readonly projectId = input.required<number>();
 
   readonly close = output<void>();
-  readonly completed = output<{ successful: number; failed: number }>();
 
   readonly batchActions = inject(BatchPortraitActionsService);
 
@@ -32,12 +31,7 @@ export class BatchPortraitDialogComponent implements OnInit {
   readonly results = this.batchActions.results;
 
   ngOnInit(): void {
-    this.startProcessing();
-  }
-
-  private async startProcessing(): Promise<void> {
-    const result = await this.batchActions.processAll(this.persons(), this.projectId());
-    this.completed.emit(result);
+    this.batchActions.processAll(this.persons(), this.projectId());
   }
 
   onClose(): void {

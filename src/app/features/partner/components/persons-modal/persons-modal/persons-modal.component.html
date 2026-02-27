@@ -364,7 +364,6 @@
   <app-batch-portrait-dialog
     [persons]="batchPersons"
     [projectId]="projectId()"
-    (close)="batchPortraitPersons.set(null)"
-    (completed)="onBatchPortraitCompleted()"
+    (close)="onBatchPortraitCompleted()"
   />
 }

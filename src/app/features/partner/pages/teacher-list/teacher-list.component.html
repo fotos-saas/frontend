@@ -133,6 +133,14 @@
         <span class="school-name-text">{{ teacher.schoolName }}</span>
       </div>
 
+      <div class="teacher-projects">
+        @if (teacher.projectsCount > 0) {
+          <span class="projects-badge">{{ teacher.projectsCount }}</span>
+        } @else {
+          <span class="projects-badge projects-badge--empty">—</span>
+        }
+      </div>
+
       <div class="teacher-actions">
         @if (teacher.linkedGroup) {
           <button

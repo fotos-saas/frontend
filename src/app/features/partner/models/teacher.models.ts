@@ -24,6 +24,7 @@ export interface TeacherListItem {
   photosCount: number;
   linkedGroup: string | null;
   groupSize: number;
+  projectsCount: number;
 }
 
 // Tanár összekapcsolás (linking) types

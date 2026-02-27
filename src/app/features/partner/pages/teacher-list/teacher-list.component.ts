@@ -58,6 +58,7 @@ export class PartnerTeacherListComponent implements OnInit {
   readonly tableCols: TableColumn[] = [
     { key: 'name', label: 'Tanár' },
     { key: 'school', label: 'Iskola', width: '200px' },
+    { key: 'projects', label: 'Projektek', width: '90px', align: 'center' },
     { key: 'actions', label: 'Műveletek', width: '120px', align: 'center' },
   ];
   readonly gridTemplate = computed(() => this.tableCols.map(c => c.width ?? '1fr').join(' '));

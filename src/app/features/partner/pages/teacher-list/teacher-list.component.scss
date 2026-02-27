@@ -114,6 +114,22 @@
   text-overflow: ellipsis;
 }
 
+.teacher-projects {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.projects-badge {
+  font-size: 13px;
+  font-weight: 500;
+  color: get-color('slate', 800);
+
+  &--empty {
+    color: get-color('slate', 400);
+  }
+}
+
 .teacher-actions {
   display: flex;
   justify-content: center;
@@ -293,7 +309,8 @@
     grid-template-columns: 1fr 120px;
   }
 
-  .teacher-school {
+  .teacher-school,
+  .teacher-projects {
     display: none;
   }
 

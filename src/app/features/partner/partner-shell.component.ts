@@ -244,7 +244,7 @@ export class PartnerShellComponent implements OnInit {
     } else {
       // Csapattagok: nincs Csapatom, nincs Testreszabás, nincs Előfizetésem (de van Fiók törlése + Beállítások)
       items = allItems
-        .filter(item => !['team', 'customization', 'subscription', 'partner-settings', 'activity-log'].includes(item.id))
+        .filter(item => !['team', 'customization', 'subscription', 'partner-settings'].includes(item.id))
         .concat([
           {
             id: 'partner-settings',

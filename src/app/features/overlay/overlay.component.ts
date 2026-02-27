@@ -1949,7 +1949,7 @@ export class OverlayComponent implements OnInit {
           photoThumbUrl: t.photoThumbUrl ?? null, photoMiniThumbUrl: t.photoThumbUrl ?? null,
           photoUrl: t.photoUrl ?? null, aliasesCount: t.aliases?.length ?? 0,
           photosCount: t.photos?.length ?? 0, linkedGroup: t.linkedGroup ?? null,
-          groupSize: 0,
+          groupSize: 0, projectsCount: t.projects?.length ?? 0,
         };
         const enriched = allTeachers.some(at => at.id === teacherListItem.id)
           ? allTeachers : [teacherListItem, ...allTeachers];

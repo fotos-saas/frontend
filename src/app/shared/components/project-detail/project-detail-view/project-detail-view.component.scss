@@ -294,10 +294,13 @@
   gap: 5px;
   padding: 4px 10px;
   background: get-color('gray', 100);
+  border: none;
   border-radius: 6px;
+  font-family: inherit;
   font-size: 0.8125rem;
   color: get-color('gray', 600);
   text-decoration: none;
+  cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
   max-width: 100%;
   overflow: hidden;

@@ -343,16 +343,16 @@
             <!-- Alsó sor: email + telefon (kattintható chipek) -->
             <div class="contact-card__details">
               @if (contact.email) {
-                <a [href]="'mailto:' + contact.email" class="contact-chip">
+                <button type="button" class="contact-chip" matTooltip="Másolás vágólapra" (click)="copyToClipboard(contact.email)">
                   <lucide-icon [name]="ICONS.MAIL" [size]="13" />
                   <span class="contact-chip__text">{{ contact.email }}</span>
-                </a>
+                </button>
               }
               @if (contact.phone) {
-                <a [href]="'tel:' + contact.phone" class="contact-chip">
+                <button type="button" class="contact-chip" matTooltip="Másolás vágólapra" (click)="copyToClipboard(contact.phone!)">
                   <lucide-icon [name]="ICONS.PHONE" [size]="13" />
                   <span>{{ contact.phone }}</span>
-                </a>
+                </button>
               }
             </div>
           </div>

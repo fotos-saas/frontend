@@ -35,7 +35,7 @@ export class SuperAdminShellComponent implements OnInit {
 
   // Menu items (Lucide ikonokkal - desktop, tablet es mobile egyarant)
   navItems: MenuItem[] = [
-    { id: 'dashboard', route: '/super-admin/dashboard', label: 'Irányítópult', icon: 'home' },
+    { id: 'dashboard', route: '/super-admin/dashboard', label: 'Dashboard', icon: 'home' },
     { id: 'subscribers', route: '/super-admin/subscribers', label: 'Előfizetők', icon: 'credit-card' },
     { id: 'settings', route: '/super-admin/settings', label: 'Beállítások', icon: 'settings' },
   ];

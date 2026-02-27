@@ -279,6 +279,22 @@ export class ProjectTabloEditorComponent implements OnInit {
     this.location.back();
   }
 
+  onStatusChange(event: { value: string; label: string; color: string }): void {
+    const id = this.project()?.id;
+    if (!id) return;
+
+    this.partnerService.updateProject(id, { status: event.value }).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: () => {
+        const current = this.project();
+        if (current) {
+          this.project.set({ ...current, status: event.value, statusLabel: event.label, statusColor: event.color });
+        }
+      },
+    });
+  }
+
   selectSize(size: TabloSize): void {
     this.selectedSize.set(size);
   }

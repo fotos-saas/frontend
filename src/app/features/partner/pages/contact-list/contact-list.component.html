@@ -102,16 +102,16 @@
 
           <div class="contact-info">
             @if (contact.email) {
-              <a [href]="'mailto:' + contact.email" class="contact-link" matTooltip="Email küldése">
+              <button type="button" class="contact-link" matTooltip="Másolás vágólapra" (click)="copyToClipboard(contact.email)">
                 <lucide-icon [name]="ICONS.MAIL" [size]="14" />
                 <span class="contact-text">{{ contact.email }}</span>
-              </a>
+              </button>
             }
             @if (contact.phone) {
-              <a [href]="'tel:' + contact.phone" class="contact-link" matTooltip="Hívás">
+              <button type="button" class="contact-link" matTooltip="Másolás vágólapra" (click)="copyToClipboard(contact.phone!)">
                 <lucide-icon [name]="ICONS.PHONE" [size]="14" />
                 <span class="contact-text">{{ contact.phone }}</span>
-              </a>
+              </button>
             }
             @if (!contact.email && !contact.phone) {
               <span class="no-contact">Nincs megadva</span>

@@ -11,6 +11,7 @@ import { UpgradeDialogComponent } from '../../../../shared/components/upgrade-di
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { saveFile } from '../../../../shared/utils/file.util';
+import { ClipboardService } from '../../../../core/services/clipboard.service';
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
@@ -45,6 +46,7 @@ export class PartnerContactListComponent implements OnInit {
   private readonly partnerService = inject(PartnerService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly clipboardService = inject(ClipboardService);
 
   readonly ICONS = ICONS;
 
@@ -233,6 +235,10 @@ export class PartnerContactListComponent implements OnInit {
   closeImportResult(): void {
     this.showImportResult.set(false);
     this.importResult.set(null);
+  }
+
+  copyToClipboard(value: string): void {
+    this.clipboardService.copy(value);
   }
 
   private saveFile = saveFile;

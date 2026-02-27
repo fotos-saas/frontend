@@ -172,7 +172,7 @@ function createSmartObjectPlaceholder(doc, container, options) {
 //   3. Kep atmeretezese hogy kitoltse az SO-t (cover logika)
 //   4. Mentes + Bezaras → visszakerul a fo PSD-be
 // photoPath: a lokalis kepfajl TELJES utvonala (a handler tolti le)
-function placePhotoInSmartObject(doc, layer, photoPath) {
+function placePhotoInSmartObject(doc, layer, photoPath, syncBorder) {
   // Layer aktiv legyen
   doc.activeLayer = layer;
 
@@ -234,10 +234,17 @@ function placePhotoInSmartObject(doc, layer, photoPath) {
     placedLayer.translate(new UnitValue(offsetX, "px"), new UnitValue(offsetY, "px"));
   }
 
-  // 4. Flatten (egyetlen layer legyen az SO-ban)
+  // 4. Keretezés — Photoshop Action futtatása az SO-n belül (flatten előtt)
+  if (syncBorder) {
+    try {
+      app.doAction("tker_without_save", "tablo_common");
+    } catch (e) { /* action nem létezik vagy hiba — folytatjuk */ }
+  }
+
+  // 5. Flatten (egyetlen layer legyen az SO-ban)
   soDoc.flatten();
 
-  // 5. Mentes + Bezaras (Ctrl+S, Ctrl+W)
+  // 6. Mentes + Bezaras (Ctrl+S, Ctrl+W)
   soDoc.save();
   soDoc.close(SaveOptions.DONOTSAVECHANGES); // mar mentettuk
 }

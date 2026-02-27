@@ -98,16 +98,7 @@ function _doPlacePhotos() {
       // Ez megnyitja az SO belso dokumentumat (aminek a merete az eredeti keret),
       // belerakja a kepet cover modban, flatten, save, close.
       // Igy az SO keret merete 100%-ban megmarad!
-      placePhotoInSmartObject(_doc, layer, item.photoPath);
-
-      // Keretezés — Photoshop Action futtatása
-      if (CONFIG.SYNC_BORDER === "true") {
-        try {
-          app.doAction("tker_without_save", "tablo_common");
-        } catch (e) {
-          log("[JSX] WARN: Keretezés action hiba (" + item.layerName + "): " + e.message);
-        }
-      }
+      placePhotoInSmartObject(_doc, layer, item.photoPath, CONFIG.SYNC_BORDER === "true");
 
       // Dokumentum ujra aktivalasa (az SO megnyitas/bezaras megvaltoztatja)
       _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);

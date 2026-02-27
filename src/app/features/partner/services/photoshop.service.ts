@@ -345,11 +345,9 @@ export class PhotoshopService {
     ctx: { schoolName?: string | null; projectName: string; className?: string | null },
   ): string {
     const baseName = ctx.schoolName || ctx.projectName;
-    // Osztálynévből minden nem-alfanumerikus karakter ki (12 k → 12k, 12.A → 12A)
-    const classCompact = ctx.className
-      ? ctx.className.replace(/[^a-zA-Z0-9áéíóöőúüűÁÉÍÓÖŐÚÜŰ]/g, '')
-      : '';
-    return this.sanitizePathName(classCompact ? `${baseName} ${classCompact}` : baseName);
+    // Osztálynév slugify-olva (szóköz → _, pont/egyéb kiesik): "13. R" → "13_r", "13.R" → "13r"
+    const classSlug = ctx.className ? this.sanitizePathName(ctx.className) : '';
+    return this.sanitizePathName(classSlug ? `${baseName} ${classSlug}` : baseName);
   }
 
   private slugify(text: string, separator: string): string {

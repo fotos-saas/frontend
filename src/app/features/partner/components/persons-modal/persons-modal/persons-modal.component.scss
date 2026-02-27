@@ -179,35 +179,43 @@
   }
 }
 
-// --- Kijelölés mód gomb ---
-.selection-mode-btn {
-  display: flex;
+// --- Batch portré háttércsere gomb (fejlécben) ---
+.batch-portrait-btn {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  background: get-color('slate', 50);
-  border: 1px solid get-color('slate', 200);
+  background: #7c3aed;
+  border: none;
   border-radius: 8px;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: get-color('slate', 600);
+  color: #fff;
   cursor: pointer;
   @include transition-fast;
+
+  &:hover {
+    background: #6d28d9;
+  }
 }
 
-.selection-mode-btn:hover {
-  background: get-color('slate', 100);
-  border-color: get-color('slate', 300);
-}
+.selection-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  background: get-color('slate', 50);
+  color: get-color('slate', 500);
+  cursor: pointer;
+  @include transition-fast;
 
-.selection-mode-btn--active {
-  background: #f5f3ff;
-  border-color: #c4b5fd;
-  color: #7c3aed;
-}
-
-.selection-mode-btn--active:hover {
-  background: #ede9fe;
+  &:hover {
+    background: get-color('slate', 100);
+    color: get-color('slate', 700);
+  }
 }
 
 // --- Szerkesztés gomb ---
@@ -261,10 +269,9 @@ ps-toggle {
   gap: 8px;
 }
 
-// --- Kijelölés overlay ---
-.selection-card-wrap {
+// --- Kártya kijelölés (CMD/Ctrl+kattintás) ---
+.card-wrap {
   position: relative;
-  cursor: pointer;
   border-radius: 8px;
   border: 2px solid transparent;
   @include transition-fast;
@@ -272,19 +279,6 @@ ps-toggle {
   &--selected {
     border-color: #7c3aed;
     background: rgba(124, 58, 237, 0.05);
-  }
-
-  &--disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &:not(.selection-card-wrap--disabled):hover {
-    border-color: get-color('slate', 300);
-  }
-
-  &--selected:hover {
-    border-color: #7c3aed;
   }
 }
 
@@ -296,85 +290,13 @@ ps-toggle {
   width: 22px;
   height: 22px;
   border-radius: 4px;
-  border: 2px solid get-color('slate', 300);
-  background: #fff;
+  background: #7c3aed;
+  border: 2px solid #7c3aed;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  @include transition-fast;
-
-  &--checked {
-    background: #7c3aed;
-    border-color: #7c3aed;
-    color: #fff;
-  }
-}
-
-// --- Kijelölés floating action bar ---
-.selection-action-bar {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  margin-top: 12px;
-  background: #fff;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 10px;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
-
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-}
-
-.select-all-btn {
-  padding: 6px 12px;
-  background: get-color('slate', 100);
-  border: 1px solid get-color('slate', 200);
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: get-color('slate', 600);
-  cursor: pointer;
-  @include transition-fast;
-
-  &:hover {
-    background: get-color('slate', 200);
-  }
-}
-
-.selection-count {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: get-color('slate', 500);
-}
-
-.batch-portrait-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #7c3aed;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #fff;
-  cursor: pointer;
-  @include transition-fast;
-
-  &:hover:not(:disabled) {
-    background: #6d28d9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  pointer-events: none;
 }
 
 // --- Szerkesztő lista nézet ---

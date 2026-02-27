@@ -315,14 +315,18 @@ export class PersonsModalComponent implements OnInit {
     setTimeout(() => this.extraNamesCopied.set(false), 1500);
   }
 
-  // --- Batch portré háttércsere ---
+  // --- Batch portré háttércsere (CMD/Ctrl+kattintás kijelölés) ---
 
   get isElectron(): boolean { return this.electronService.isElectron; }
 
-  /** Kijelölhető személyek (akiknek VAN fotójuk) */
-  readonly selectablePersons = computed(() =>
-    this.filteredPersons().filter(p => p.hasPhoto && (p.photoUrl || p.photoThumbUrl))
-  );
+  /** Kártya kattintás: CMD/Ctrl → kijelölés, egyébként → lightbox */
+  onCardClick(person: TabloPersonItem, event: MouseEvent): void {
+    if (this.isElectron && (event.metaKey || event.ctrlKey) && person.hasPhoto) {
+      this.batchActions.togglePersonSelection(person.id);
+    } else {
+      this.openLightbox(person);
+    }
+  }
 
   startBatchPortrait(): void {
     const selectedIds = this.batchActions.selectedPersonIds();

@@ -4,7 +4,7 @@ import { PartnerService } from '../../../services/partner.service';
 import { ElectronPortraitService } from '../../../../../core/services/electron-portrait.service';
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { TabloPersonItem } from '../persons-modal.types';
-import { PortraitSettings, PortraitSettingsResponse } from '../../../models/portrait.models';
+import { PortraitSettings } from '../../../models/portrait.models';
 import { PortraitProcessingSettings } from '../../../../../core/services/electron.types';
 
 /** Batch feldolgozás fázis */
@@ -32,26 +32,10 @@ export class BatchPortraitActionsService {
   private readonly portraitService = inject(ElectronPortraitService);
   private readonly logger = inject(LoggerService);
 
-  // ============ Kijelölés mód ============
+  // ============ Kijelölés (CMD/Ctrl+kattintás) ============
 
-  readonly selectionMode = signal(false);
   readonly selectedPersonIds = signal<Set<number>>(new Set());
-
-  /** Kijelölhető személyek (akiknek VAN fotójuk) */
-  readonly selectablePersons = computed(() => (persons: TabloPersonItem[]) =>
-    persons.filter(p => p.hasPhoto && (p.photoUrl || p.photoThumbUrl))
-  );
-
   readonly selectedCount = computed(() => this.selectedPersonIds().size);
-
-  toggleSelectionMode(): void {
-    if (this.selectionMode()) {
-      this.selectionMode.set(false);
-      this.selectedPersonIds.set(new Set());
-    } else {
-      this.selectionMode.set(true);
-    }
-  }
 
   togglePersonSelection(personId: number): void {
     const current = new Set(this.selectedPersonIds());
@@ -63,26 +47,7 @@ export class BatchPortraitActionsService {
     this.selectedPersonIds.set(current);
   }
 
-  toggleSelectAll(selectablePersons: TabloPersonItem[]): void {
-    const selectableIds = selectablePersons.map(p => p.id);
-    const current = this.selectedPersonIds();
-    const allSelected = selectableIds.every(id => current.has(id));
-
-    if (allSelected) {
-      this.selectedPersonIds.set(new Set());
-    } else {
-      this.selectedPersonIds.set(new Set(selectableIds));
-    }
-  }
-
-  isAllSelected(selectablePersons: TabloPersonItem[]): boolean {
-    if (selectablePersons.length === 0) return false;
-    const current = this.selectedPersonIds();
-    return selectablePersons.every(p => current.has(p.id));
-  }
-
   resetSelection(): void {
-    this.selectionMode.set(false);
     this.selectedPersonIds.set(new Set());
   }
 

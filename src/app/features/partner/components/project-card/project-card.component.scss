@@ -87,6 +87,14 @@
   display: inline;
 }
 
+.school-meta-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: get-color('slate', 400);
+  cursor: default;
+}
+
 /* Tag badge */
 .tag-badge {
   display: inline-flex;

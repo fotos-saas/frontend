@@ -1710,6 +1710,7 @@ export class PhotoshopService {
   async placePhotos(
     layers: Array<{ layerName: string; photoUrl: string }>,
     targetDocName?: string,
+    syncBorder?: boolean,
   ): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
 
@@ -1718,7 +1719,7 @@ export class PhotoshopService {
     }
 
     try {
-      const result = await this.api.placePhotos({ layers, targetDocName, psdFilePath: this.psdPath() ?? undefined });
+      const result = await this.api.placePhotos({ layers, targetDocName, psdFilePath: this.psdPath() ?? undefined, syncBorder });
       return { success: result.success, error: result.error };
     } catch (err) {
       this.logger.error('JSX placePhotos hiba', err);

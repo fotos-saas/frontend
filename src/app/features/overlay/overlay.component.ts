@@ -1433,7 +1433,7 @@ export class OverlayComponent implements OnInit {
           // Ha van sikeres feltöltés, behelyezés PS-be
           if (doneCount > 0) {
             this.ngZone.run(() => this.placing.set(true));
-            this.uploadService.placePhotosInPs(updated).then(result => {
+            this.uploadService.placePhotosInPs(updated, this.syncWithBorder()).then(result => {
               this.ngZone.run(() => {
                 this.placing.set(false);
                 this.batchResult.set({
@@ -1462,7 +1462,7 @@ export class OverlayComponent implements OnInit {
   async placeInPs(): Promise<void> {
     this.placing.set(true);
     this.batchResult.set(null);
-    const result = await this.uploadService.placePhotosInPs(this.psLayers());
+    const result = await this.uploadService.placePhotosInPs(this.psLayers(), this.syncWithBorder());
     this.ngZone.run(() => {
       this.placing.set(false);
       this.batchResult.set({

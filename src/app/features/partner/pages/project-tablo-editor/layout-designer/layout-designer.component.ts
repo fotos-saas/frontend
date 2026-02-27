@@ -438,6 +438,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   readonly insertingExtraNames = signal(false);
   readonly extraNamesSuccess = signal<string | null>(null);
   readonly extraNamesError = signal<string | null>(null);
+  readonly syncBorder = signal(false);
 
   private resizeObserver: ResizeObserver | null = null;
   private originalOverflow = '';
@@ -560,6 +561,8 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
       case 'distribute-v': this.actionsService.distributeVertical(); break;
       case 'center-document': this.actionsService.centerOnDocument(); break;
       case 'arrange-grid': this.actionsService.arrangeToGrid(); break;
+      case 'sync-border-on': this.syncBorder.set(true); break;
+      case 'sync-border-off': this.syncBorder.set(false); break;
     }
   }
 
@@ -694,7 +697,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
   async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>): Promise<void> {
     this.placingPhotos.set(true);
     try {
-      await this.ps.placePhotos(layers);
+      await this.ps.placePhotos(layers, undefined, this.syncBorder());
     } finally {
       this.placingPhotos.set(false);
     }
@@ -715,7 +718,7 @@ export class LayoutDesignerComponent implements OnInit, OnDestroy {
 
     this.syncingPhotos.set(true);
     try {
-      await this.ps.placePhotos(photosToSync);
+      await this.ps.placePhotos(photosToSync, undefined, this.syncBorder());
     } finally {
       this.syncingPhotos.set(false);
     }

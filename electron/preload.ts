@@ -401,7 +401,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:rename-template', params) as Promise<{ success: boolean; error?: string }>,
     applyTemplate: (params: { templateId: string; targetDocName?: string; psdFilePath?: string }) =>
       ipcRenderer.invoke('photoshop:apply-template', params) as Promise<{ success: boolean; error?: string; output?: string }>,
-    placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string; psdFilePath?: string }) =>
+    placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string; psdFilePath?: string; syncBorder?: boolean }) =>
       ipcRenderer.invoke('photoshop:place-photos', params) as Promise<{ success: boolean; error?: string; output?: string }>,
     saveTempFiles: (params: { files: Array<{ name: string; data: ArrayBuffer }> }) =>
       ipcRenderer.invoke('photoshop:save-temp-files', params) as Promise<{ success: boolean; paths: string[]; error?: string }>,

@@ -65,7 +65,7 @@ export class LayoutDesignerPsBridgeService {
   }
 
   /** Összes fotó szinkronizálása a Photoshopba */
-  async syncAllPhotos(): Promise<void> {
+  async syncAllPhotos(syncBorder?: boolean): Promise<void> {
     const layers = this.state.layers();
     const photosToSync: Array<{ layerName: string; photoUrl: string }> = [];
     for (const l of layers) {
@@ -75,7 +75,7 @@ export class LayoutDesignerPsBridgeService {
     }
     if (photosToSync.length === 0) return;
     this.syncingPhotos.set(true);
-    try { await this.ps.placePhotos(photosToSync); } finally { this.syncingPhotos.set(false); }
+    try { await this.ps.placePhotos(photosToSync, undefined, syncBorder); } finally { this.syncingPhotos.set(false); }
   }
 
   /** Nevek igazítása */
@@ -156,9 +156,9 @@ export class LayoutDesignerPsBridgeService {
   }
 
   /** Fotók behelyezése */
-  async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>): Promise<void> {
+  async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>, syncBorder?: boolean): Promise<void> {
     this.placingPhotos.set(true);
-    try { await this.ps.placePhotos(layers); } finally { this.placingPhotos.set(false); }
+    try { await this.ps.placePhotos(layers, undefined, syncBorder); } finally { this.placingPhotos.set(false); }
   }
 
   /** Single fotó feltöltés sikeres → Photoshopba behelyezés */

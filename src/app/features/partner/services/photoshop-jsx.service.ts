@@ -291,11 +291,11 @@ export class PhotoshopJsxService {
   }
 
   /** Fotók behelyezése Smart Object layerekbe */
-  async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>, targetDocName?: string): Promise<{ success: boolean; error?: string }> {
+  async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>, targetDocName?: string, syncBorder?: boolean): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
     if (!layers || layers.length === 0) return { success: true };
     try {
-      const result = await this.api.placePhotos({ layers, targetDocName, psdFilePath: this.pathService.psdPath() ?? undefined });
+      const result = await this.api.placePhotos({ layers, targetDocName, psdFilePath: this.pathService.psdPath() ?? undefined, syncBorder });
       return { success: result.success, error: result.error };
     } catch (err) {
       this.logger.error('JSX placePhotos hiba', err);

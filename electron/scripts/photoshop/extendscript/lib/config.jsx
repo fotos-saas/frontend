@@ -26,5 +26,8 @@ var CONFIG = {
 
   // PSD fajl teljes eleresi utja (autoOpen-hez)
   // Ha a TARGET_DOC_NAME nincs megnyitva, innen nyitja meg automatikusan
-  PSD_FILE_PATH: null
+  PSD_FILE_PATH: null,
+
+  // Keretezés — ha "true", a place-photos.jsx app.doAction("tker_without_save", "tablo_common") fut
+  SYNC_BORDER: null
 };

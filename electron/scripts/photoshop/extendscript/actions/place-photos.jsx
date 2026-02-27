@@ -100,6 +100,15 @@ function _doPlacePhotos() {
       // Igy az SO keret merete 100%-ban megmarad!
       placePhotoInSmartObject(_doc, layer, item.photoPath);
 
+      // Keretezés — Photoshop Action futtatása
+      if (CONFIG.SYNC_BORDER === "true") {
+        try {
+          app.doAction("tker_without_save", "tablo_common");
+        } catch (e) {
+          log("[JSX] WARN: Keretezés action hiba (" + item.layerName + "): " + e.message);
+        }
+      }
+
       // Dokumentum ujra aktivalasa (az SO megnyitas/bezaras megvaltoztatja)
       _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
 

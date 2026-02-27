@@ -53,54 +53,9 @@
   gap: 16px;
 }
 
-.search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
+.search-input-field {
   flex: 1;
   min-width: 0;
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  color: get-color('slate', 400);
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  padding: 10px 36px;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  @include transition-fast;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--color-primary, #1e3a5f);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.clear-btn {
-  position: absolute;
-  right: 8px;
-  background: none;
-  border: none;
-  color: get-color('slate', 400);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  @include transition-fast;
-}
-
-.clear-btn:hover {
-  color: get-color('slate', 500);
-  background: get-color('slate', 100);
 }
 
 // --- Tabs sor (filter tabs + edit gomb) ---
@@ -738,7 +693,7 @@ ps-toggle {
     flex-wrap: wrap;
   }
 
-  .search-box {
+  .search-input-field {
     flex: 1 1 100%;
   }
 
@@ -794,13 +749,8 @@ ps-toggle {
     gap: 10px;
   }
 
-  .search-box {
+  .search-input-field {
     flex: 1 1 100%;
-  }
-
-  .search-input {
-    padding: 8px 36px;
-    font-size: 0.8125rem;
   }
 
   .tabs-row {

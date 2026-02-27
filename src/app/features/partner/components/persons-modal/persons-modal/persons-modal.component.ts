@@ -9,7 +9,7 @@ import { ElectronService } from '../../../../../core/services/electron.service';
 import { forkJoin } from 'rxjs';
 import { PartnerTeacherService } from '../../../services/partner-teacher.service';
 import { TeacherListItem, LinkedGroupPhoto } from '../../../models/teacher.models';
-import { PsToggleComponent } from '@shared/components/form';
+import { PsToggleComponent, PsInputComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
@@ -41,7 +41,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, PsInputComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
   providers: [BatchPortraitActionsService],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',

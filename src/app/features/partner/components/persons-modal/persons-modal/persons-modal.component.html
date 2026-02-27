@@ -28,21 +28,13 @@
       <!-- Search + Photo Filter -->
       <div class="search-section">
         <div class="search-row">
-          <div class="search-box">
-            <lucide-icon [name]="ICONS.SEARCH" class="search-icon" [size]="16" />
-            <input
-              type="text"
-              placeholder="Keresés név alapján..."
-              [ngModel]="searchQuery()"
-              (ngModelChange)="searchQuery.set($event)"
-              class="search-input"
-            />
-            @if (searchQuery()) {
-              <button class="clear-btn" (click)="searchQuery.set('')">
-                <lucide-icon [name]="ICONS.X" [size]="14" />
-              </button>
-            }
-          </div>
+          <ps-input
+            placeholder="Keresés név alapján..."
+            suffix="search"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            class="search-input-field"
+          />
           <ps-toggle
             label="Kép nélkül"
             labelPosition="after"

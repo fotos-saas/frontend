@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper';
 import { DropZoneComponent } from '@shared/components/drop-zone/drop-zone.component';
@@ -34,7 +35,7 @@ export interface PhotoUploadResult {
 @Component({
   selector: 'app-layout-photo-upload-dialog',
   standalone: true,
-  imports: [DialogWrapperComponent, DropZoneComponent, LucideAngularModule, ConfirmDialogComponent],
+  imports: [DialogWrapperComponent, DropZoneComponent, LucideAngularModule, ConfirmDialogComponent, MatTooltipModule],
   templateUrl: './layout-photo-upload-dialog.component.html',
   styleUrls: ['./layout-photo-upload-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

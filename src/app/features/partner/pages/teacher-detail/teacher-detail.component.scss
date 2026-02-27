@@ -435,6 +435,20 @@
   border-radius: 50%;
 }
 
+.portrait-indicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: #7c3aed;
+  color: #fff;
+  border-radius: 50%;
+}
+
 .photo-year {
   position: absolute;
   bottom: 0;

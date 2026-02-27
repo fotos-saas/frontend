@@ -155,6 +155,11 @@
                         <lucide-icon [name]="ICONS.CHECK" [size]="10" />
                       </span>
                     }
+                    @if (photo.isPortraitProcessed) {
+                      <span class="portrait-indicator" matTooltip="Háttércserés fotó">
+                        <lucide-icon [name]="ICONS.SCAN_FACE" [size]="10" />
+                      </span>
+                    }
                     <span class="photo-year">{{ photo.year }}</span>
                     <div class="photo-overlay">
                       @if (!photo.isActive) {
@@ -201,6 +206,11 @@
                       @if (isActiveGroupPhoto(gp)) {
                         <span class="active-indicator" matTooltip="Aktív fotó">
                           <lucide-icon [name]="ICONS.CHECK" [size]="10" />
+                        </span>
+                      }
+                      @if (gp.isPortraitProcessed) {
+                        <span class="portrait-indicator" matTooltip="Háttércserés fotó">
+                          <lucide-icon [name]="ICONS.SCAN_FACE" [size]="10" />
                         </span>
                       }
                       @if (gp.duplicateCount > 1) {

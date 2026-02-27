@@ -52,6 +52,11 @@
                   @if (photo.year) {
                     <span class="badge badge--year">{{ photo.year }}</span>
                   }
+                  @if (photo.isPortraitProcessed) {
+                    <span class="badge badge--portrait" matTooltip="Háttércserés">
+                      <lucide-icon [name]="ICONS.SCAN_FACE" [size]="12" />
+                    </span>
+                  }
                 </div>
 
                 @if (!photo.isOverrideOnly) {

@@ -691,6 +691,7 @@ export interface PersonPhoto {
   isActive: boolean;
   fileName: string;
   isOverrideOnly: boolean;
+  isPortraitProcessed?: boolean;
 }
 
 /**

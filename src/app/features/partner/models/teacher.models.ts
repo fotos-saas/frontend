@@ -56,6 +56,7 @@ export interface TeacherPhoto {
   url: string | null;
   thumbUrl: string | null;
   fileName: string | null;
+  isPortraitProcessed?: boolean;
 }
 
 export interface TeacherProject {

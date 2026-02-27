@@ -171,6 +171,14 @@
     background: rgba(0, 0, 0, 0.6);
     color: #fff;
   }
+
+  &--portrait {
+    background: rgba(124, 58, 237, 0.9);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+  }
 }
 
 // ============ Feltöltés ============

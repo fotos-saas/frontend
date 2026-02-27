@@ -234,10 +234,19 @@ function placePhotoInSmartObject(doc, layer, photoPath) {
     placedLayer.translate(new UnitValue(offsetX, "px"), new UnitValue(offsetY, "px"));
   }
 
-  // 4. Flatten (egyetlen layer legyen az SO-ban)
+  // 4. Keret PS Action futtatasa (ha be van kapcsolva)
+  if (typeof CONFIG !== "undefined" && CONFIG.SYNC_BORDER === "true") {
+    try {
+      app.doAction("tker_without_save", "tablo_common");
+    } catch (e) {
+      // Ha nincs ilyen action, figyelmen kivul hagyjuk
+    }
+  }
+
+  // 5. Flatten (egyetlen layer legyen az SO-ban)
   soDoc.flatten();
 
-  // 5. Mentes + Bezaras (Ctrl+S, Ctrl+W)
+  // 6. Mentes + Bezaras (Ctrl+S, Ctrl+W)
   soDoc.save();
   soDoc.close(SaveOptions.DONOTSAVECHANGES); // mar mentettuk
 }

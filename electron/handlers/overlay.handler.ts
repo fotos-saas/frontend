@@ -14,10 +14,12 @@ interface ActiveDocInfo {
   name: string | null;
   path: string | null;
   dir: string | null;
+  selectedLayers?: number;
+  selectedLayerNames?: string[];
 }
 
 let overlayContext: OverlayContext = { mode: 'normal' };
-let lastActiveDoc: ActiveDocInfo = { name: null, path: null, dir: null };
+let lastActiveDoc: ActiveDocInfo = { name: null, path: null, dir: null, selectedLayers: 0, selectedLayerNames: [] };
 
 // ProjectId persistens tarolasa: PSD path → projectId mapping
 const psdProjectMap = new Map<string, number>();
@@ -144,12 +146,15 @@ export function registerOverlayHandlers(
         name: typeof doc.name === 'string' ? doc.name : null,
         path: typeof doc.path === 'string' ? doc.path : null,
         dir: typeof doc.dir === 'string' ? doc.dir : null,
+        selectedLayers: typeof doc.selectedLayers === 'number' ? doc.selectedLayers : 0,
+        selectedLayerNames: Array.isArray(doc.selectedLayerNames) ? doc.selectedLayerNames : [],
       };
 
-      // PSD melletti JSON-bol projectId kinyerese ha a context-ben nincs
-      if (!overlayContext.projectId && lastActiveDoc.path) {
+      // PSD melletti JSON-bol projectId kinyerese (mindig probaljuk, mert
+      // masik PSD-t nyithatott meg masik projekthez)
+      if (lastActiveDoc.path) {
         const projectId = readProjectIdFromJson(lastActiveDoc.path);
-        if (projectId) {
+        if (projectId && projectId !== overlayContext.projectId) {
           overlayContext = { ...overlayContext, projectId };
           log.info(`ProjectId from PSD JSON: ${projectId}`);
           const ow = getOverlayWindow();

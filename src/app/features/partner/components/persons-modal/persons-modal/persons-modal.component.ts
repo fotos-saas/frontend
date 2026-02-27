@@ -389,6 +389,7 @@ export class PersonsModalComponent implements OnInit {
             aliasesCount: t.aliases?.length ?? 0,
             photosCount: t.photos?.length ?? 0,
             linkedGroup: t.linkedGroup ?? null,
+            groupSize: 0,
           };
           const enriched = allTeachers.some(at => at.id === teacherListItem.id)
             ? allTeachers

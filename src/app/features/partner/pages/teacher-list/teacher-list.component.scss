@@ -248,6 +248,11 @@
   }
 }
 
+.group-toggle-spacer {
+  width: 24px;
+  flex-shrink: 0;
+}
+
 .teacher-row--group-header {
   border-left: 3px solid get-color('primary', 300);
 }
@@ -262,10 +267,6 @@
 
   &-last {
     margin-bottom: 8px;
-  }
-
-  .teacher-info {
-    padding-left: 16px;
   }
 }
 
@@ -304,7 +305,4 @@
     min-width: 100%;
   }
 
-  .teacher-row--child .teacher-info {
-    padding-left: 8px;
-  }
 }

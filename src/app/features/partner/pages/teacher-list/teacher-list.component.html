@@ -98,7 +98,7 @@
     <app-table-header [columns]="tableCols" />
 
     <!-- Sor sablon: ng-template a duplikáció elkerüléséhez -->
-    <ng-template #teacherRowTpl let-teacher let-isGroupHeader="isGroupHeader" let-schoolCount="schoolCount">
+    <ng-template #teacherRowTpl let-teacher let-isGroupHeader="isGroupHeader" let-isChild="isChild" let-schoolCount="schoolCount">
       <div class="teacher-info" (click)="viewTeacher(teacher)">
         @if (isGroupHeader) {
           <button type="button" class="group-toggle"
@@ -106,6 +106,8 @@
             (click)="toggleGroup(teacher.linkedGroup); $event.stopPropagation()">
             <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="14" />
           </button>
+        } @else if (isChild) {
+          <div class="group-toggle-spacer"></div>
         }
         <div
           class="teacher-avatar"
@@ -184,6 +186,7 @@
             [ngTemplateOutletContext]="{
               $implicit: row.primary,
               isGroupHeader: row.members.length > 0,
+              isChild: false,
               schoolCount: row.members.length + 1
             }" />
         </div>
@@ -197,6 +200,7 @@
                 [ngTemplateOutletContext]="{
                   $implicit: member,
                   isGroupHeader: false,
+                  isChild: true,
                   schoolCount: 0
                 }" />
             </div>

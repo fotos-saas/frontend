@@ -75,10 +75,11 @@
             <button
               type="button"
               class="add-person-btn"
-              matTooltip="Személy hozzáadása"
+              [matTooltip]="'Új ' + (typeFilter() === 'teacher' ? 'tanár' : 'diák') + ' hozzáadása'"
               (click)="addPersonsRequested.emit(typeFilter())"
             >
               <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+              Új {{ typeFilter() === 'teacher' ? 'tanár' : 'diák' }}
             </button>
           }
           @if (!loading() && isElectron && batchActions.selectedCount() > 0) {

@@ -162,14 +162,17 @@
 .add-person-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
+  gap: 6px;
   height: 32px;
+  padding: 0 10px;
   border: 1px dashed get-color('gray', 300);
   border-radius: 8px;
   background: transparent;
   color: get-color('gray', 400);
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
+  white-space: nowrap;
   @include transition-fast;
 
   &:hover {

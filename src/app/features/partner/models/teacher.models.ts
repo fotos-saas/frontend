@@ -96,6 +96,7 @@ export interface LinkedGroupPhoto {
   md5Hash: string | null;
   createdAt: string | null;
   duplicateCount: number;
+  isActive: boolean;
 }
 
 export interface LinkTeachersResponse {

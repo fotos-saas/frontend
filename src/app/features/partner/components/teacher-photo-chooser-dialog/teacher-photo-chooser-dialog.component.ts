@@ -43,7 +43,10 @@ export class TeacherPhotoChooserDialogComponent {
 
   readonly selectedMediaId = linkedSignal<LinkedGroupPhoto[], number | null>({
     source: this.photos,
-    computation: (photos) => photos.length > 0 ? photos[0].mediaId : null,
+    computation: (photos) => {
+      const active = photos.find(p => p.isActive);
+      return active ? active.mediaId : (photos.length > 0 ? photos[0].mediaId : null);
+    },
   });
 
   readonly hasSelection = computed(() => this.selectedMediaId() !== null);

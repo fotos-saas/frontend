@@ -358,37 +358,52 @@ export class PersonsModalComponent implements OnInit {
   // --- Teacher link & photo chooser ---
 
   openLinkDialog(person: TabloPersonItem): void {
-    if (!person.archiveId) return;
-    forkJoin({
-      teacher: this.teacherService.getTeacher(person.archiveId),
-      allTeachers: this.teacherService.getAllTeachers(),
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: ({ teacher: res, allTeachers }) => {
-        const t = res.data;
-        const teacherListItem: TeacherListItem = {
-          id: t.id,
-          canonicalName: t.canonicalName,
-          titlePrefix: t.titlePrefix,
-          position: t.position ?? null,
-          fullDisplayName: t.fullDisplayName,
-          schoolId: t.schoolId,
-          schoolName: t.schoolName ?? null,
-          isActive: true,
-          photoThumbUrl: t.photoThumbUrl ?? null,
-          photoMiniThumbUrl: t.photoThumbUrl ?? null,
-          photoUrl: t.photoUrl ?? null,
-          aliasesCount: t.aliases?.length ?? 0,
-          photosCount: t.photos?.length ?? 0,
-          linkedGroup: t.linkedGroup ?? null,
-        };
-        const enriched = allTeachers.some(at => at.id === teacherListItem.id)
-          ? allTeachers
-          : [teacherListItem, ...allTeachers];
-        this.linkDialogTeacher.set(teacherListItem);
-        this.linkDialogAllTeachers.set(enriched);
-        this.showTeacherLinkDialog.set(true);
-      },
-    });
+    const doOpen = (archiveId: number) => {
+      forkJoin({
+        teacher: this.teacherService.getTeacher(archiveId),
+        allTeachers: this.teacherService.getAllTeachers(),
+      }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: ({ teacher: res, allTeachers }) => {
+          const t = res.data;
+          const teacherListItem: TeacherListItem = {
+            id: t.id,
+            canonicalName: t.canonicalName,
+            titlePrefix: t.titlePrefix,
+            position: t.position ?? null,
+            fullDisplayName: t.fullDisplayName,
+            schoolId: t.schoolId,
+            schoolName: t.schoolName ?? null,
+            isActive: true,
+            photoThumbUrl: t.photoThumbUrl ?? null,
+            photoMiniThumbUrl: t.photoThumbUrl ?? null,
+            photoUrl: t.photoUrl ?? null,
+            aliasesCount: t.aliases?.length ?? 0,
+            photosCount: t.photos?.length ?? 0,
+            linkedGroup: t.linkedGroup ?? null,
+          };
+          const enriched = allTeachers.some(at => at.id === teacherListItem.id)
+            ? allTeachers
+            : [teacherListItem, ...allTeachers];
+          this.linkDialogTeacher.set(teacherListItem);
+          this.linkDialogAllTeachers.set(enriched);
+          this.showTeacherLinkDialog.set(true);
+        },
+      });
+    };
+
+    if (person.archiveId) {
+      doOpen(person.archiveId);
+    } else {
+      // Archív bejegyzés automatikus létrehozása
+      this.projectService.ensurePersonArchive(this.projectId(), person.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (res) => {
+            person.archiveId = res.data.archiveId;
+            doOpen(res.data.archiveId);
+          },
+        });
+    }
   }
 
   onTeacherLinked(): void {

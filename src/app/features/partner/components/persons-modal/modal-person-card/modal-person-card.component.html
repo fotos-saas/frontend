@@ -54,7 +54,7 @@
         <span class="card-badge card-badge--override" matTooltip="Csak ezen a tablón egyedi">Egyedi</span>
       }
     </div>
-    @if (person().type === 'teacher' && person().archiveId) {
+    @if (person().type === 'teacher') {
       <div class="card-actions">
         <button type="button" class="card-action-btn" matTooltip="Összekapcsolás" (click)="onLinkClick($event)">
           <lucide-icon [name]="ICONS.LINK" [size]="12" />

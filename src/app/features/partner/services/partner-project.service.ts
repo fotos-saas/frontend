@@ -198,6 +198,16 @@ export class PartnerProjectService {
   }
 
   /**
+   * Személy archív rekord biztosítása (ha nincs, létrehozza).
+   */
+  ensurePersonArchive(projectId: number, personId: number): Observable<{ success: boolean; data: { archiveId: number }; message: string }> {
+    return this.http.post<{ success: boolean; data: { archiveId: number }; message: string }>(
+      `${this.baseUrl}/projects/${projectId}/persons/${personId}/ensure-archive`,
+      {},
+    );
+  }
+
+  /**
    * Személy adatainak módosítása (név, pozíció/tantárgy)
    */
   updatePerson(projectId: number, personId: number, data: { name?: string; title?: string | null; note?: string | null }): Observable<{

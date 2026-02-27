@@ -185,6 +185,7 @@ export interface TabloPersonItem {
   title: string | null;
   photoType: string | null;
   note: string | null;
+  linkedGroup: string | null;
 }
 
 /**

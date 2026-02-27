@@ -213,6 +213,8 @@
               [person]="person"
               [animationDelay]="i * 0.05 + 's'"
               (cardClick)="openLightbox($event)"
+              (linkClick)="openLinkDialog($event)"
+              (photoChooserClick)="openPhotoChooser($event)"
             />
           }
         </div>
@@ -326,5 +328,26 @@
     confirmText="Törlés"
     confirmType="danger"
     (resultEvent)="$event.action === 'confirm' ? confirmDeletePerson() : cancelDeletePerson()"
+  />
+}
+
+<!-- Tanár összekapcsolás dialógus -->
+@if (showTeacherLinkDialog() && linkDialogTeacher()) {
+  <app-teacher-link-dialog
+    [teacher]="linkDialogTeacher()!"
+    [allTeachers]="linkDialogAllTeachers()"
+    (closeEvent)="showTeacherLinkDialog.set(false)"
+    (savedEvent)="onTeacherLinked()"
+    (photoChooserEvent)="onOpenPhotoChooserFromLink($event)"
+  />
+}
+
+<!-- Fotó csere archívumból dialógus -->
+@if (showPhotoChooserDialog() && photoChooserPhotos().length > 0) {
+  <app-teacher-photo-chooser-dialog
+    [photos]="photoChooserPhotos()"
+    [linkedGroup]="photoChooserLinkedGroup()"
+    (closeEvent)="showPhotoChooserDialog.set(false)"
+    (savedEvent)="onPhotoChosen()"
   />
 }

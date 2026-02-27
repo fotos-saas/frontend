@@ -23,6 +23,8 @@ export class ModalPersonCardComponent {
   readonly animationDelay = input<string>('0s');
 
   readonly cardClick = output<TabloPersonItem>();
+  readonly linkClick = output<TabloPersonItem>();
+  readonly photoChooserClick = output<TabloPersonItem>();
   readonly idCopied = signal(false);
 
   onCardClick(): void {

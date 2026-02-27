@@ -5,6 +5,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
+import { PartnerTeacherService } from '../../../services/partner-teacher.service';
+import { TeacherListItem, LinkedGroupPhoto } from '../../../models/teacher.models';
 import { PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -17,6 +19,8 @@ import {
   PhotoUploadPerson,
   PhotoUploadResult,
 } from '../../../pages/project-tablo-editor/layout-designer/components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
+import { TeacherLinkDialogComponent } from '../../teacher-link-dialog/teacher-link-dialog.component';
+import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
 
 /** Szerkesztési sor state */
 interface EditRow {
@@ -33,7 +37,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,6 +55,7 @@ export class PersonsModalComponent implements OnInit {
 
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);
+  private teacherService = inject(PartnerTeacherService);
   private destroyRef = inject(DestroyRef);
 
   loading = signal(true);
@@ -74,6 +79,14 @@ export class PersonsModalComponent implements OnInit {
 
   // Törlés megerősítés
   deleteConfirmPerson = signal<TabloPersonItem | null>(null);
+
+  // Teacher link & photo chooser dialog
+  showTeacherLinkDialog = signal(false);
+  showPhotoChooserDialog = signal(false);
+  linkDialogTeacher = signal<TeacherListItem | null>(null);
+  linkDialogAllTeachers = signal<TeacherListItem[]>([]);
+  photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
+  photoChooserLinkedGroup = signal('');
 
   // Extra nevek (tanítottak még)
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
@@ -304,5 +317,53 @@ export class PersonsModalComponent implements OnInit {
     navigator.clipboard.writeText(text);
     this.extraNamesCopied.set(true);
     setTimeout(() => this.extraNamesCopied.set(false), 1500);
+  }
+
+  // --- Teacher link & photo chooser ---
+
+  openLinkDialog(person: TabloPersonItem): void {
+    if (!person.archiveId) return;
+    this.teacherService.getAllTeachers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (allTeachers) => {
+        const teacher = allTeachers.find(t => t.id === person.archiveId);
+        if (!teacher) return;
+        this.linkDialogTeacher.set(teacher);
+        this.linkDialogAllTeachers.set(allTeachers);
+        this.showTeacherLinkDialog.set(true);
+      },
+    });
+  }
+
+  onTeacherLinked(): void {
+    this.showTeacherLinkDialog.set(false);
+    this.loadPersons(true);
+  }
+
+  openPhotoChooser(person: TabloPersonItem): void {
+    if (!person.linkedGroup) return;
+    const group = person.linkedGroup;
+    this.teacherService.getLinkedGroupPhotos(group).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.photoChooserPhotos.set(res.data || []);
+        this.photoChooserLinkedGroup.set(group);
+        this.showPhotoChooserDialog.set(true);
+      },
+    });
+  }
+
+  onOpenPhotoChooserFromLink(groupId: string): void {
+    this.showTeacherLinkDialog.set(false);
+    this.teacherService.getLinkedGroupPhotos(groupId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.photoChooserPhotos.set(res.data || []);
+        this.photoChooserLinkedGroup.set(groupId);
+        this.showPhotoChooserDialog.set(true);
+      },
+    });
+  }
+
+  onPhotoChosen(): void {
+    this.showPhotoChooserDialog.set(false);
+    this.loadPersons(true);
   }
 }

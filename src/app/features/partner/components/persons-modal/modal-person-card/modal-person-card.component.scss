@@ -181,6 +181,43 @@
   color: #2563eb;
 }
 
+.card-badge--linked {
+  background: #ede9fe;
+  color: #7c3aed;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 3px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+
+  // Safari gap fallback
+  > * + * { margin-left: 4px; }
+}
+
+.card-action-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: #fff;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+
+  &:hover {
+    background: #ede9fe;
+    border-color: #c4b5fd;
+    color: #7c3aed;
+  }
+}
+
 @media (max-width: 480px) {
   .card-photo {
     aspect-ratio: 0.85;

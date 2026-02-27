@@ -4,7 +4,7 @@
     <ps-select
       class="filter-item"
       [class.filter-item--active]="!!getFilterValue(filter.id)"
-      [size]="size()"
+      size="sm"
       [emptyLabel]="filter.label"
       [options]="toPsOptions(filter)"
       [ngModel]="getFilterValue(filter.id)"

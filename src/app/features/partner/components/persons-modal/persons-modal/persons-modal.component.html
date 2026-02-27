@@ -35,12 +35,16 @@
             (ngModelChange)="searchQuery.set($event)"
             class="search-input-field"
           />
-          <ps-toggle
-            label="Kép nélkül"
-            labelPosition="after"
-            [ngModel]="showOnlyWithoutPhoto()"
-            (ngModelChange)="showOnlyWithoutPhoto.set($event)"
-          />
+          <button
+            type="button"
+            class="btn"
+            [class.btn--outline]="!showOnlyWithoutPhoto()"
+            [class.btn--primary]="showOnlyWithoutPhoto()"
+            (click)="showOnlyWithoutPhoto.set(!showOnlyWithoutPhoto())"
+          >
+            <lucide-icon [name]="ICONS.EYE_OFF" [size]="14" />
+            Kép nélkül
+          </button>
         </div>
       </div>
 

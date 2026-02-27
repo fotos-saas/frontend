@@ -601,8 +601,8 @@ ps-toggle {
   white-space: pre-wrap;
 }
 
-// --- Footer ---
-:host ::ng-deep .dw__footer {
+// --- Footer (csak a saját dialog-wrapper-re, NEM a gyermek dialogokra) ---
+:host > app-dialog-wrapper ::ng-deep .dw__footer {
   flex-direction: column;
   align-items: stretch;
   padding: 12px 1.5rem;

@@ -88,9 +88,15 @@ export class ElectronPortraitService {
       return { success: false, error: 'Csak Electron alkalmazásban érhető el' };
     }
 
-    // Alapvető URL validáció renderer oldalon is (defense-in-depth)
+    // URL path encode-olás (szóközök, ékezetes karakterek a fájlnevekben)
+    let encodedUrl = url;
     try {
       const parsed = new URL(url);
+      parsed.pathname = parsed.pathname.split('/').map(segment =>
+        encodeURIComponent(decodeURIComponent(segment))
+      ).join('/');
+      encodedUrl = parsed.toString();
+
       const isLocalDev = parsed.hostname === 'localhost' && parsed.protocol === 'http:';
       if (parsed.protocol !== 'https:' && !isLocalDev) {
         return { success: false, error: 'Csak HTTPS URL megengedett' };
@@ -99,7 +105,7 @@ export class ElectronPortraitService {
       return { success: false, error: 'Érvénytelen URL formátum' };
     }
 
-    return window.electronAPI!.portrait.downloadBackground({ url, outputPath });
+    return window.electronAPI!.portrait.downloadBackground({ url: encodedUrl, outputPath });
   }
 
   // ============ Temp Kezelés ============

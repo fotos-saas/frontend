@@ -62,6 +62,20 @@ function isInsideTempDir(filePath: string): boolean {
   }
 }
 
+/** Encode URL path (szóközök és speciális karakterek kezelése a fájlnevekben) */
+function encodeUrlPath(urlString: string): string {
+  try {
+    const parsed = new URL(urlString);
+    // A pathname-t encode-oljuk, de a már encode-olt %-eket ne duplázza
+    parsed.pathname = parsed.pathname.split('/').map(segment =>
+      encodeURIComponent(decodeURIComponent(segment))
+    ).join('/');
+    return parsed.toString();
+  } catch {
+    return urlString;
+  }
+}
+
 /** Validate download URL - only HTTPS from allowed domains (+ localhost dev) */
 function isAllowedUrl(urlString: string): boolean {
   try {
@@ -456,8 +470,11 @@ export function registerPortraitHandlers(): void {
       return { success: false, error: 'URL tul hosszu' };
     }
 
+    // URL path encode-olás (szóközök, ékezetes karakterek a fájlnevekben)
+    const encodedUrl = encodeUrlPath(params.url);
+
     // URL whitelist validacio
-    if (!isAllowedUrl(params.url)) {
+    if (!isAllowedUrl(encodedUrl)) {
       return { success: false, error: 'Nem engedelyezett URL domain' };
     }
 
@@ -472,7 +489,7 @@ export function registerPortraitHandlers(): void {
         fs.mkdirSync(dir, { recursive: true });
       }
 
-      await downloadFile(params.url, params.outputPath);
+      await downloadFile(encodedUrl, params.outputPath);
       log.info(`Portrait hatterkep letoltve: ${path.basename(params.outputPath)}`);
       return { success: true, path: params.outputPath };
     } catch (err: unknown) {

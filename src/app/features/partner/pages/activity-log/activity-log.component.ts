@@ -1,5 +1,6 @@
 import { Component, signal, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { DatePipe } from '@angular/common';
@@ -35,13 +36,14 @@ export class ActivityLogComponent implements OnInit {
   items = signal<ActivityLogItem[]>([]);
   total = signal(0);
   lastPage = signal(1);
+  private loadSub?: Subscription;
 
   readonly searchConfig: SearchConfig = {
     placeholder: 'Keresés a naplóban...',
   };
 
   readonly filterState = useFilterState({
-    context: { type: 'partner', page: 'projects' },
+    context: { type: 'partner', page: 'activity-log' },
     defaultFilters: {
       log_name: '',
       event: '',
@@ -127,6 +129,7 @@ export class ActivityLogComponent implements OnInit {
   }
 
   loadData(): void {
+    this.loadSub?.unsubscribe();
     this.filterState.loading.set(true);
 
     const f = this.filterState.filters();
@@ -142,7 +145,7 @@ export class ActivityLogComponent implements OnInit {
     if (f['date_from']) filters.date_from = f['date_from'];
     if (f['date_to']) filters.date_to = f['date_to'];
 
-    this.activityService.getActivityLog(filters)
+    this.loadSub = this.activityService.getActivityLog(filters)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {

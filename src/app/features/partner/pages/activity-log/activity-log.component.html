@@ -105,7 +105,9 @@
   <!-- Lapozás -->
   <app-list-pagination
     [currentPage]="filterState.page()"
-    [lastPage]="lastPage()"
+    [totalPages]="lastPage()"
+    [totalItems]="total()"
+    itemLabel="bejegyzés"
     (pageChange)="filterState.setPage($event)"
   />
 </div>

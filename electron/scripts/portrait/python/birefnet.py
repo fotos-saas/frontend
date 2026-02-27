@@ -33,8 +33,10 @@ def _load_remover(mode: str = "base"):
         )
 
     logger.info(f"InSPyReNet modell betöltése (mode={mode})...")
-    _remover = Remover(mode=mode)
-    logger.info("InSPyReNet modell betöltve")
+    # MPS (Apple Silicon) elakad Python 3.9 + torch 2.8 kombóval,
+    # CPU-n 3-4 mp a betöltés és stabil a feldolgozás
+    _remover = Remover(mode=mode, device="cpu")
+    logger.info("InSPyReNet modell betöltve (CPU)")
     return _remover
 
 

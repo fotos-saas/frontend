@@ -92,26 +92,22 @@ export class PartnerSchoolListComponent implements OnInit {
   totalSchools = signal(0);
   schoolLimits = signal<SchoolLimits | null>(null);
 
-  // Csoportosított nézet (linked_group alapján)
+  // Lazy loaded csoport tagok cache-e
+  readonly groupMembers = signal<Map<string, SchoolListItem[]>>(new Map());
+
+  // Csoportosított nézet — a backend már primary-kat ad, nincs kliens-oldali csoportosítás
   readonly groupedSchools = computed<SchoolGroupRow[]>(() => {
     const schools = this.schools();
-    const groupMap = new Map<string, SchoolGroupRow>();
+    const members = this.groupMembers();
     const result: SchoolGroupRow[] = [];
-    const seen = new Set<string>();
 
     for (const s of schools) {
-      if (!s.linkedGroup) {
-        result.push({ primary: s, members: [], linkedGroup: null });
-        continue;
+      if (!s.linkedGroup || s.groupSize <= 1) {
+        result.push({ primary: s, members: [], linkedGroup: s.linkedGroup });
+      } else {
+        const cachedMembers = members.get(s.linkedGroup) ?? [];
+        result.push({ primary: s, members: cachedMembers, linkedGroup: s.linkedGroup });
       }
-      if (seen.has(s.linkedGroup)) {
-        groupMap.get(s.linkedGroup)!.members.push(s);
-        continue;
-      }
-      seen.add(s.linkedGroup);
-      const row: SchoolGroupRow = { primary: s, members: [], linkedGroup: s.linkedGroup };
-      groupMap.set(s.linkedGroup, row);
-      result.push(row);
     }
     return result;
   });
@@ -121,16 +117,37 @@ export class PartnerSchoolListComponent implements OnInit {
   private readonly resetExpandEffect = effect(() => {
     this.schools();
     this.expandedGroups.set(new Set());
+    this.groupMembers.set(new Map());
   });
 
   toggleGroup(linkedGroup: string): void {
     const s = new Set(this.expandedGroups());
-    s.has(linkedGroup) ? s.delete(linkedGroup) : s.add(linkedGroup);
+    if (s.has(linkedGroup)) {
+      s.delete(linkedGroup);
+    } else {
+      s.add(linkedGroup);
+      this.loadGroupMembers(linkedGroup);
+    }
     this.expandedGroups.set(s);
   }
 
   isExpanded(linkedGroup: string): boolean {
     return this.expandedGroups().has(linkedGroup);
+  }
+
+  private loadGroupMembers(linkedGroup: string): void {
+    if (this.groupMembers().has(linkedGroup)) return;
+    this.schoolService.getGroupMembers(linkedGroup)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (members) => {
+          this.groupMembers.update(m => {
+            const updated = new Map(m);
+            updated.set(linkedGroup, members);
+            return updated;
+          });
+        },
+      });
   }
 
   trackByGroup(row: SchoolGroupRow): string | number {

@@ -23,6 +23,7 @@ export interface TeacherListItem {
   aliasesCount: number;
   photosCount: number;
   linkedGroup: string | null;
+  groupSize: number;
 }
 
 // Tanár összekapcsolás (linking) types

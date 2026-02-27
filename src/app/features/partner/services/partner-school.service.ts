@@ -25,6 +25,15 @@ export class PartnerSchoolService {
   private baseUrl = `${environment.apiUrl}/partner`;
 
   /**
+   * Csoport tagok lekérése (lazy load chevron kattintásra)
+   */
+  getGroupMembers(linkedGroup: string): Observable<SchoolListItem[]> {
+    return this.http.get<SchoolListItem[]>(
+      `${this.baseUrl}/schools/group/${linkedGroup}`,
+    );
+  }
+
+  /**
    * Összes iskola lekérése (projekt létrehozáshoz / autocomplete)
    */
   getAllSchools(search?: string): Observable<SchoolItem[]> {

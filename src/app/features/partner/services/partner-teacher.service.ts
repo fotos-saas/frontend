@@ -45,6 +45,10 @@ export class PartnerTeacherService implements ArchiveService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/partner/teachers`;
 
+  getGroupMembers(linkedGroup: string): Observable<TeacherListItem[]> {
+    return this.http.get<TeacherListItem[]>(`${this.baseUrl}/group/${linkedGroup}`);
+  }
+
   getTeachers(params?: {
     page?: number;
     per_page?: number;

@@ -29,25 +29,23 @@ export class TeacherListStateService {
   readonly downloading = signal(false);
   readonly downloadingSchoolId = signal(0);
 
+  // Lazy loaded csoport tagok cache-e
+  readonly groupMembers = signal<Map<string, TeacherListItem[]>>(new Map());
+
   readonly groupedTeachers = computed<TeacherGroupRow[]>(() => {
     const teachers = this.teachers();
-    const groupMap = new Map<string, TeacherGroupRow>();
+    const members = this.groupMembers();
     const result: TeacherGroupRow[] = [];
-    const seen = new Set<string>();
 
     for (const t of teachers) {
-      if (!t.linkedGroup) {
-        result.push({ primary: t, members: [], linkedGroup: null });
-        continue;
+      if (!t.linkedGroup || t.groupSize <= 1) {
+        // Egyedülálló tanár vagy egyszemélyes "csoport"
+        result.push({ primary: t, members: [], linkedGroup: t.linkedGroup });
+      } else {
+        // Csoportos tanár — a backend már csak a primary-t adja
+        const cachedMembers = members.get(t.linkedGroup) ?? [];
+        result.push({ primary: t, members: cachedMembers, linkedGroup: t.linkedGroup });
       }
-      if (seen.has(t.linkedGroup)) {
-        groupMap.get(t.linkedGroup)!.members.push(t);
-        continue;
-      }
-      seen.add(t.linkedGroup);
-      const row: TeacherGroupRow = { primary: t, members: [], linkedGroup: t.linkedGroup };
-      groupMap.set(t.linkedGroup, row);
-      result.push(row);
     }
     return result;
   });
@@ -82,6 +80,8 @@ export class TeacherListStateService {
 
   loadTeachers(): void {
     this.filterState.loading.set(true);
+    // Lapváltáskor a csoport cache törlése
+    this.groupMembers.set(new Map());
     const schoolId = this.filterState.filters().school_id;
     const classYear = this.filterState.filters().class_year;
 
@@ -101,6 +101,24 @@ export class TeacherListStateService {
           this.filterState.loading.set(false);
         },
         error: () => this.filterState.loading.set(false),
+      });
+  }
+
+  /**
+   * Csoport tagok lazy betöltése (chevron kattintásra)
+   */
+  loadGroupMembers(linkedGroup: string): void {
+    if (this.groupMembers().has(linkedGroup)) return;
+    this.teacherService.getGroupMembers(linkedGroup)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (members) => {
+          this.groupMembers.update(m => {
+            const updated = new Map(m);
+            updated.set(linkedGroup, members);
+            return updated;
+          });
+        },
       });
   }
 

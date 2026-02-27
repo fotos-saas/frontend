@@ -99,7 +99,12 @@ export class PartnerTeacherListComponent implements OnInit {
 
   toggleGroup(linkedGroup: string): void {
     const s = new Set(this.expandedGroups());
-    s.has(linkedGroup) ? s.delete(linkedGroup) : s.add(linkedGroup);
+    if (s.has(linkedGroup)) {
+      s.delete(linkedGroup);
+    } else {
+      s.add(linkedGroup);
+      this.state.loadGroupMembers(linkedGroup);
+    }
     this.expandedGroups.set(s);
   }
 

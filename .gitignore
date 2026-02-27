@@ -56,3 +56,6 @@ Thumbs.db
 # Build outputs
 release/
 electron/dist/
+
+# Portrait Python venv
+electron/scripts/portrait/python/.venv/

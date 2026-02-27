@@ -21,11 +21,12 @@
     "electron:compile": "tsc -p electron/tsconfig.json",
     "electron:compile:watch": "tsc -p electron/tsconfig.json --watch",
     "electron:dev": "npm run electron:compile && concurrently \"npm run start\" \"npm run electron:compile:watch\" \"wait-on http://localhost:4205 && NODE_ENV=development electron .\"",
-    "electron:build": "npm run build && npm run electron:compile && electron-builder --mac && npm run sentry:sourcemaps",
-    "electron:build:win": "npm run build && npm run electron:compile && electron-builder --win && npm run sentry:sourcemaps",
-    "electron:build:linux": "npm run build && npm run electron:compile && electron-builder --linux && npm run sentry:sourcemaps",
-    "electron:build:all": "npm run build && npm run electron:compile && electron-builder --mac --win --linux && npm run sentry:sourcemaps",
-    "electron:build:dir": "npm run build && npm run electron:compile && electron-builder --mac --dir && npm run sentry:sourcemaps",
+    "electron:setup-portrait": "bash electron/scripts/portrait/setup-venv.sh",
+    "electron:build": "npm run electron:setup-portrait && npm run build && npm run electron:compile && electron-builder --mac && npm run sentry:sourcemaps",
+    "electron:build:win": "npm run electron:setup-portrait && npm run build && npm run electron:compile && electron-builder --win && npm run sentry:sourcemaps",
+    "electron:build:linux": "npm run electron:setup-portrait && npm run build && npm run electron:compile && electron-builder --linux && npm run sentry:sourcemaps",
+    "electron:build:all": "npm run electron:setup-portrait && npm run build && npm run electron:compile && electron-builder --mac --win --linux && npm run sentry:sourcemaps",
+    "electron:build:dir": "npm run electron:setup-portrait && npm run build && npm run electron:compile && electron-builder --mac --dir && npm run sentry:sourcemaps",
     "sentry:sourcemaps": "node scripts/sentry-sourcemaps.js",
     "cap:sync": "npx cap sync",
     "cap:ios": "npx cap open ios",
@@ -142,7 +143,8 @@
         "filter": [
           "**/*",
           "!**/__pycache__",
-          "!**/*.pyc"
+          "!**/*.pyc",
+          "!**/.venv/**"
         ]
       }
     ],

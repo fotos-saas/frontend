@@ -11,6 +11,10 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
 import { environment } from '../../../environments/environment';
 import { OverlayUploadService, PsLayerPerson, BatchProgress } from './overlay-upload.service';
+import { PartnerTeacherService } from '../partner/services/partner-teacher.service';
+import { TeacherLinkDialogComponent } from '../partner/components/teacher-link-dialog/teacher-link-dialog.component';
+import { TeacherPhotoChooserDialogComponent } from '../partner/components/teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
+import { TeacherListItem, LinkedGroupPhoto } from '../partner/models/teacher.models';
 
 interface ToolbarItem {
   id: string;
@@ -33,6 +37,8 @@ interface PersonItem {
   hasPhoto: boolean;
   photoThumbUrl: string | null;
   photoUrl: string | null;
+  archiveId: number | null;
+  linkedGroup: string | null;
 }
 
 interface UploadResult {
@@ -50,7 +56,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 @Component({
   selector: 'app-overlay',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [LucideAngularModule, MatTooltipModule, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
   providers: [OverlayUploadService],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
@@ -65,6 +71,7 @@ export class OverlayComponent implements OnInit {
   private readonly ngZone = inject(NgZone);
   private readonly http = inject(HttpClient);
   private readonly uploadService = inject(OverlayUploadService);
+  private readonly teacherService = inject(PartnerTeacherService);
 
   readonly context = signal<OverlayContext>({ mode: 'normal' });
   readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
@@ -89,6 +96,14 @@ export class OverlayComponent implements OnInit {
     if (this.renameMatched().length > 0) return true;
     return this.renameUnmatched().some(u => u.newId.trim().length > 0);
   });
+
+  // Teacher link & photo chooser dialog state
+  readonly showTeacherLinkDialog = signal(false);
+  readonly showPhotoChooserDialog = signal(false);
+  readonly linkDialogTeacher = signal<TeacherListItem | null>(null);
+  readonly linkDialogAllTeachers = signal<TeacherListItem[]>([]);
+  readonly photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
+  readonly photoChooserLinkedGroup = signal('');
 
   // Upload panel state
   readonly uploadPanelOpen = signal(false);
@@ -1915,5 +1930,70 @@ export class OverlayComponent implements OnInit {
       ? this.uploadService.enrichWithPersons(merged, persons)
       : merged;
     this.psLayers.set(result);
+  }
+
+  // ---- Teacher link & photo chooser ----
+
+  openLinkDialog(person: PersonItem): void {
+    if (!person.archiveId) return;
+    this.teacherService.getAllTeachers().pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (allTeachers) => {
+        const teacher = allTeachers.find(t => t.id === person.archiveId);
+        if (!teacher) return;
+        this.ngZone.run(() => {
+          this.linkDialogTeacher.set(teacher);
+          this.linkDialogAllTeachers.set(allTeachers);
+          this.showTeacherLinkDialog.set(true);
+        });
+      },
+    });
+  }
+
+  onTeacherLinked(): void {
+    this.showTeacherLinkDialog.set(false);
+    this.reloadPersons();
+  }
+
+  openPhotoChooser(person: PersonItem): void {
+    if (!person.linkedGroup) return;
+    const group = person.linkedGroup;
+    this.teacherService.getLinkedGroupPhotos(group).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (res) => {
+        this.ngZone.run(() => {
+          this.photoChooserPhotos.set(res.data || []);
+          this.photoChooserLinkedGroup.set(group);
+          this.showPhotoChooserDialog.set(true);
+        });
+      },
+    });
+  }
+
+  onOpenPhotoChooserFromLink(groupId: string): void {
+    this.showTeacherLinkDialog.set(false);
+    this.teacherService.getLinkedGroupPhotos(groupId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (res) => {
+        this.ngZone.run(() => {
+          this.photoChooserPhotos.set(res.data || []);
+          this.photoChooserLinkedGroup.set(groupId);
+          this.showPhotoChooserDialog.set(true);
+        });
+      },
+    });
+  }
+
+  onPhotoChosen(): void {
+    this.showPhotoChooserDialog.set(false);
+    this.reloadPersons();
+  }
+
+  private reloadPersons(): void {
+    const pid = this.lastProjectId || this.context().projectId;
+    if (pid) this.loadPersons(pid);
   }
 }

@@ -39,4 +39,14 @@ export class ModalPersonCardComponent {
     this.idCopied.set(true);
     setTimeout(() => this.idCopied.set(false), 1500);
   }
+
+  onLinkClick(event: Event): void {
+    event.stopPropagation();
+    this.linkClick.emit(this.person());
+  }
+
+  onPhotoChooserClick(event: Event): void {
+    event.stopPropagation();
+    this.photoChooserClick.emit(this.person());
+  }
 }

@@ -253,7 +253,6 @@
 }
 
 .teacher-row--child {
-  margin-left: 16px;
   background: get-color('slate', 50);
   border-left: 3px solid get-color('primary', 100);
 
@@ -263,6 +262,10 @@
 
   &-last {
     margin-bottom: 8px;
+  }
+
+  .teacher-info {
+    padding-left: 16px;
   }
 }
 
@@ -301,7 +304,7 @@
     min-width: 100%;
   }
 
-  .teacher-row--child {
-    margin-left: 8px;
+  .teacher-row--child .teacher-info {
+    padding-left: 8px;
   }
 }

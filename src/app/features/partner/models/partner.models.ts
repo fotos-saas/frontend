@@ -327,6 +327,15 @@ export interface SchoolListItem {
 }
 
 /**
+ * Iskola csoportosított sor (linked_group alapján)
+ */
+export interface SchoolGroupRow {
+  primary: SchoolListItem;
+  members: SchoolListItem[];
+  linkedGroup: string | null;
+}
+
+/**
  * Iskola limitek
  */
 export interface SchoolLimits {

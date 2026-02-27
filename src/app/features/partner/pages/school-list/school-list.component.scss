@@ -152,6 +152,70 @@
   }
 }
 
+// Group toggle (chevron gomb)
+.group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: get-color('slate', 500);
+  cursor: pointer;
+  flex-shrink: 0;
+  @include transition-fast;
+
+  lucide-icon {
+    @include transition-fast;
+  }
+
+  &:hover {
+    background: get-color('slate', 100);
+    color: get-color('primary', 500);
+  }
+
+  &--open lucide-icon {
+    transform: rotate(180deg);
+  }
+}
+
+.group-toggle-spacer {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.school-row--group-header {
+  border-left: 3px solid get-color('primary', 300);
+}
+
+.school-row--child {
+  background: get-color('slate', 50);
+  border-left: 3px solid get-color('primary', 100);
+
+  &:hover {
+    border-left-color: get-color('primary', 300);
+  }
+
+  &-last {
+    margin-bottom: 8px;
+  }
+}
+
+.group-count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  background: get-color('primary', 50);
+  color: get-color('primary', 600);
+  white-space: nowrap;
+}
+
 // Responsive
 @media (max-width: 640px) {
   app-table-header {

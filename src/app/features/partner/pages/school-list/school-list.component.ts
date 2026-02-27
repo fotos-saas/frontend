@@ -1,10 +1,11 @@
-import { Component, OnInit, inject, signal, computed, effect, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild, TemplateRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PartnerService, SchoolListItem, SchoolItem, SchoolLimits } from '../../services/partner.service';
+import { NgTemplateOutlet } from '@angular/common';
+import { PartnerService, SchoolListItem, SchoolItem, SchoolLimits, SchoolGroupRow } from '../../services/partner.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
 import { SelectionDownloadResult } from '../../components/selection-download-dialog/selection-download-dialog.component';
 import { saveFile } from '../../../../shared/utils/file.util';
@@ -33,6 +34,7 @@ import { generateYearOptions, getCurrentGraduationYear } from '../../../../share
   standalone: true,
   imports: [
     FormsModule,
+    NgTemplateOutlet,
     LucideAngularModule,
     MatTooltipModule,
     SchoolEditModalComponent,
@@ -89,6 +91,51 @@ export class PartnerSchoolListComponent implements OnInit {
   totalPages = signal(1);
   totalSchools = signal(0);
   schoolLimits = signal<SchoolLimits | null>(null);
+
+  // Csoportosított nézet (linked_group alapján)
+  readonly groupedSchools = computed<SchoolGroupRow[]>(() => {
+    const schools = this.schools();
+    const groupMap = new Map<string, SchoolGroupRow>();
+    const result: SchoolGroupRow[] = [];
+    const seen = new Set<string>();
+
+    for (const s of schools) {
+      if (!s.linkedGroup) {
+        result.push({ primary: s, members: [], linkedGroup: null });
+        continue;
+      }
+      if (seen.has(s.linkedGroup)) {
+        groupMap.get(s.linkedGroup)!.members.push(s);
+        continue;
+      }
+      seen.add(s.linkedGroup);
+      const row: SchoolGroupRow = { primary: s, members: [], linkedGroup: s.linkedGroup };
+      groupMap.set(s.linkedGroup, row);
+      result.push(row);
+    }
+    return result;
+  });
+
+  readonly expandedGroups = signal<Set<string>>(new Set());
+
+  private readonly resetExpandEffect = effect(() => {
+    this.schools();
+    this.expandedGroups.set(new Set());
+  });
+
+  toggleGroup(linkedGroup: string): void {
+    const s = new Set(this.expandedGroups());
+    s.has(linkedGroup) ? s.delete(linkedGroup) : s.add(linkedGroup);
+    this.expandedGroups.set(s);
+  }
+
+  isExpanded(linkedGroup: string): boolean {
+    return this.expandedGroups().has(linkedGroup);
+  }
+
+  trackByGroup(row: SchoolGroupRow): string | number {
+    return row.linkedGroup ?? row.primary.id;
+  }
 
   // Modals
   showEditModal = signal(false);

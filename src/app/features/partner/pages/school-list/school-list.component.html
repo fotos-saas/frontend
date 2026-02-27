@@ -65,92 +65,132 @@
     <!-- Asztali fejléc (640px felett) -->
     <app-table-header [columns]="tableCols" />
 
-    <!-- Iskola sorok -->
-    <div class="school-grid">
-      @for (school of schools(); track school.id; let i = $index) {
-        <div
-          class="school-row"
-          [style.animation-delay]="i * 0.03 + 's'"
-        >
-          <div class="school-info" (click)="openSchoolDetail(school)">
-            <lucide-icon [name]="ICONS.SCHOOL" [size]="20" class="school-icon" />
-            <div class="school-details">
-              <div class="school-name-row">
-                <span class="school-name">{{ school.name }}</span>
-                @if (school.linkedGroup) {
-                  <span
-                    class="linked-badge"
-                    [matTooltip]="'Összekapcsolva: ' + getLinkedSchoolNames(school)"
-                  >
-                    <lucide-icon [name]="ICONS.LINK" [size]="12" />
-                  </span>
-                }
-              </div>
-              @if (school.city) {
-                <span class="school-city">
-                  <lucide-icon [name]="ICONS.MAP_PIN" [size]="12" />
-                  {{ school.city }}
-                </span>
-              }
-            </div>
-          </div>
-
-          <div class="school-projects" (click)="openSchoolDetail(school)">
-            <span
-              class="projects-badge"
-              [class.projects-badge--active]="school.hasActiveProjects"
-              [matTooltip]="school.activeProjectsCount + ' aktív / ' + school.projectsCount + ' összes'"
-            >
-              @if (school.hasActiveProjects) {
-                {{ school.activeProjectsCount }}/{{ school.projectsCount }}
-              } @else {
-                {{ school.projectsCount }}
-              }
-            </span>
-          </div>
-
-          <div class="school-actions">
+    <!-- Sor sablon -->
+    <ng-template #schoolRowTpl let-school let-isGroupHeader="isGroupHeader" let-isChild="isChild" let-memberCount="memberCount">
+      <div class="school-info" (click)="openSchoolDetail(school)">
+        <lucide-icon [name]="ICONS.SCHOOL" [size]="20" class="school-icon" />
+        <div class="school-details">
+          <div class="school-name-row">
+            <span class="school-name">{{ school.name }}</span>
             @if (school.linkedGroup) {
-              <button
-                class="action-btn action-btn--warning"
-                matTooltip="Leválasztás"
-                (click)="unlinkSchool(school)"
+              <span
+                class="linked-badge"
+                [matTooltip]="'Összekapcsolva: ' + getLinkedSchoolNames(school)"
               >
-                <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
-              </button>
-            } @else {
-              <button
-                class="action-btn"
-                matTooltip="Összekapcsolás"
-                (click)="openLinkDialog(school)"
-              >
-                <lucide-icon [name]="ICONS.LINK" [size]="16" />
-              </button>
+                <lucide-icon [name]="ICONS.LINK" [size]="12" />
+              </span>
             }
-            <button
-              class="action-btn"
-              matTooltip="Tanári fotók letöltése"
-              (click)="openDownloadDialog(school)"
-            >
-              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-            </button>
-            <button
-              class="action-btn"
-              matTooltip="Szerkesztés"
-              (click)="editSchool(school)"
-            >
-              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
-            </button>
-            <button
-              class="action-btn action-btn--danger"
-              matTooltip="Törlés"
-              [disabled]="school.projectsCount > 0"
-              (click)="confirmDeleteSchool(school)"
-            >
-              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
-            </button>
+            @if (isGroupHeader && memberCount > 0) {
+              <span class="group-count-badge">{{ memberCount + 1 }} variáns</span>
+            }
           </div>
+          @if (school.city) {
+            <span class="school-city">
+              <lucide-icon [name]="ICONS.MAP_PIN" [size]="12" />
+              {{ school.city }}
+            </span>
+          }
         </div>
+      </div>
+
+      <div class="school-projects" (click)="openSchoolDetail(school)">
+        <span
+          class="projects-badge"
+          [class.projects-badge--active]="school.hasActiveProjects"
+          [matTooltip]="school.activeProjectsCount + ' aktív / ' + school.projectsCount + ' összes'"
+        >
+          @if (school.hasActiveProjects) {
+            {{ school.activeProjectsCount }}/{{ school.projectsCount }}
+          } @else {
+            {{ school.projectsCount }}
+          }
+        </span>
+      </div>
+
+      <div class="school-actions">
+        @if (school.linkedGroup) {
+          <button
+            class="action-btn action-btn--warning"
+            matTooltip="Leválasztás"
+            (click)="unlinkSchool(school)"
+          >
+            <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
+          </button>
+        } @else {
+          <button
+            class="action-btn"
+            matTooltip="Összekapcsolás"
+            (click)="openLinkDialog(school)"
+          >
+            <lucide-icon [name]="ICONS.LINK" [size]="16" />
+          </button>
+        }
+        <button
+          class="action-btn"
+          matTooltip="Tanári fotók letöltése"
+          (click)="openDownloadDialog(school)"
+        >
+          <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+        </button>
+        <button
+          class="action-btn"
+          matTooltip="Szerkesztés"
+          (click)="editSchool(school)"
+        >
+          <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+        </button>
+        <button
+          class="action-btn action-btn--danger"
+          matTooltip="Törlés"
+          [disabled]="school.projectsCount > 0"
+          (click)="confirmDeleteSchool(school)"
+        >
+          <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+        </button>
+        @if (isGroupHeader) {
+          <button type="button" class="group-toggle"
+            [class.group-toggle--open]="isExpanded(school.linkedGroup)"
+            (click)="toggleGroup(school.linkedGroup)"
+            matTooltip="Csoport lenyitása">
+            <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="14" />
+          </button>
+        } @else if (!isChild) {
+          <div class="group-toggle-spacer"></div>
+        }
+      </div>
+    </ng-template>
+
+    <!-- Iskola sorok (csoportosított) -->
+    <div class="school-grid">
+      @for (row of groupedSchools(); track trackByGroup(row); let i = $index) {
+        <!-- Fő sor -->
+        <div class="school-row"
+          [class.school-row--group-header]="row.members.length > 0"
+          [style.animation-delay]="i * 0.03 + 's'">
+          <ng-container [ngTemplateOutlet]="schoolRowTpl"
+            [ngTemplateOutletContext]="{
+              $implicit: row.primary,
+              isGroupHeader: row.members.length > 0,
+              isChild: false,
+              memberCount: row.members.length
+            }" />
+        </div>
+
+        <!-- Kibontott child sorok -->
+        @if (row.members.length > 0 && isExpanded(row.linkedGroup!)) {
+          @for (member of row.members; track member.id; let last = $last) {
+            <div class="school-row school-row--child"
+              [class.school-row--child-last]="last">
+              <ng-container [ngTemplateOutlet]="schoolRowTpl"
+                [ngTemplateOutletContext]="{
+                  $implicit: member,
+                  isGroupHeader: false,
+                  isChild: true,
+                  memberCount: 0
+                }" />
+            </div>
+          }
+        }
       }
     </div>
 

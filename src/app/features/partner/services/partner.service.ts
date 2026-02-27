@@ -8,7 +8,7 @@ export type {
   PartnerDashboardStats, ProjectContact, TabloStatus, PartnerProjectListItem, QrCodeHistory,
   PartnerProjectDetails, SampleItem, TabloPersonItem, MissingPersonItem, UploadedPhoto,
   DraftInfo, DraftDetails, MatchResult, AlbumType, AlbumSummaryItem, AlbumsSummary,
-  AlbumMissingPerson, AlbumDetails, PhotoAssignment, SchoolItem, SchoolListItem, SchoolLimits,
+  AlbumMissingPerson, AlbumDetails, PhotoAssignment, SchoolItem, SchoolListItem, SchoolGroupRow, SchoolLimits,
   ContactListItem, ContactLimits, GuestSession, SamplePackage, SampleVersionImage, SampleVersion,
   ProjectAutocompleteItem, CreateProjectRequest, CreateSchoolRequest, ProjectLimits,
   PaginatedResponse, ProjectListResponse, UploadProgress, TabloSize, TabloSizeThreshold,

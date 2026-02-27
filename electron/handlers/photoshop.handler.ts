@@ -25,6 +25,88 @@ interface PhotoshopSchema {
   tabloPositionFontSize: number;
 }
 
+// ============ Placed Photos JSON helpers ============
+
+interface PlacedPhotoEntry {
+  mediaId: number | null;
+  photoUrl: string;
+  withFrame: boolean;
+  placedAt: string;
+}
+
+type PlacedPhotosMap = Record<string, PlacedPhotoEntry>;
+
+function extractPersonId(layerName: string): number | null {
+  const idx = layerName.indexOf('---');
+  if (idx === -1) return null;
+  const id = parseInt(layerName.substring(idx + 3), 10);
+  return isNaN(id) ? null : id;
+}
+
+function extractMediaId(photoUrl: string): number | null {
+  const match = photoUrl.match(/\/storage\/(\d+)\//);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+function updatePlacedPhotosJson(
+  psdFilePath: string | undefined,
+  jsxOutput: string | undefined,
+  layers: Array<{ layerName: string; photoUrl: string }>,
+  syncBorder: boolean,
+): void {
+  // PSD path meghatározása: params-ból vagy JSX output-ból
+  let psdDir: string | undefined;
+
+  if (psdFilePath) {
+    psdDir = path.dirname(psdFilePath);
+  } else if (jsxOutput) {
+    // JSX output-ból PSD path kinyerése (CONFIG.PSD_FILE_PATH sorokból)
+    const psdMatch = jsxOutput.match(/PSD_FILE_PATH[:\s]+"?([^"\n]+)"?/);
+    if (psdMatch) {
+      psdDir = path.dirname(psdMatch[1]);
+    }
+  }
+
+  if (!psdDir) {
+    log.info('Placed photos JSON: nincs PSD utvonal, kihagyva');
+    return;
+  }
+
+  const jsonPath = path.join(psdDir, 'placed-photos.json');
+
+  // Meglévő JSON beolvasása
+  let existing: PlacedPhotosMap = {};
+  try {
+    if (fs.existsSync(jsonPath)) {
+      existing = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+    }
+  } catch (err) {
+    log.warn('Placed photos JSON olvasasi hiba, uj fajl lesz:', err);
+  }
+
+  // Frissítés a behelyezett fotókkal
+  const now = new Date().toISOString();
+  for (const layer of layers) {
+    const personId = extractPersonId(layer.layerName);
+    if (personId === null) continue;
+
+    existing[String(personId)] = {
+      mediaId: extractMediaId(layer.photoUrl),
+      photoUrl: layer.photoUrl,
+      withFrame: syncBorder,
+      placedAt: now,
+    };
+  }
+
+  // Visszaírás
+  try {
+    fs.writeFileSync(jsonPath, JSON.stringify(existing, null, 2), 'utf-8');
+    log.info(`Placed photos JSON frissitve: ${jsonPath} (${Object.keys(existing).length} person)`);
+  } catch (err) {
+    log.error('Placed photos JSON irasi hiba:', err);
+  }
+}
+
 const psStore = new Store<PhotoshopSchema>({
   name: 'photostack-photoshop',
   defaults: {
@@ -2083,6 +2165,14 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
             return;
           }
           log.info('Place photos kesz:', stdout.trim().slice(0, 500));
+
+          // Placed photos JSON frissítése
+          try {
+            updatePlacedPhotosJson(params.psdFilePath, stdout, params.layers, !!params.syncBorder);
+          } catch (jsonErr) {
+            log.warn('Placed photos JSON frissites sikertelen:', jsonErr);
+          }
+
           resolve({ success: true, output: stdout || '' });
         });
       });

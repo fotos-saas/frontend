@@ -19,6 +19,7 @@ import { NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { formatFileSize } from '@shared/utils/formatters.util';
+import { getFileTypeIcon } from '@shared/utils/file-type-icon.util';
 import { MediaLightboxComponent, LightboxMediaItem } from '@shared/components/media-lightbox';
 import { PsFieldSize, PsFieldState } from '../form.types';
 
@@ -52,6 +53,7 @@ let nextUploadId = 0;
 })
 export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
   readonly ICONS = ICONS;
+  readonly getFileTypeIcon = getFileTypeIcon;
 
   private readonly document = inject(DOCUMENT);
   private readonly appRef = inject(ApplicationRef);

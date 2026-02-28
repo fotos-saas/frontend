@@ -60,7 +60,7 @@
                 (click)="openLightbox(i); $event.stopPropagation()"
               />
             } @else {
-              <lucide-icon [name]="ICONS.FILE" [size]="16" class="ps-upload__mini-file-icon" />
+              <lucide-icon [name]="getFileTypeIcon(preview.file.type)" [size]="16" class="ps-upload__mini-file-icon" />
             }
             <span class="ps-upload__mini-name" [title]="preview.name">{{ preview.name }}</span>
             <span class="ps-upload__mini-size">{{ preview.size }}</span>
@@ -144,7 +144,7 @@
               />
             } @else {
               <div class="ps-upload__thumb ps-upload__thumb--placeholder">
-                <lucide-icon [name]="ICONS.FILE" [size]="20" />
+                <lucide-icon [name]="getFileTypeIcon(preview.file.type)" [size]="20" />
               </div>
             }
             <div class="ps-upload__file-info">

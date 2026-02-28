@@ -230,6 +230,23 @@
             </div>
           }
 
+          <!-- Inline collapse: refresh-placed-json megerősítés -->
+          @if (item.id === 'refresh-placed-json') {
+            <div
+              class="toolbar__inline-collapse"
+              [class.toolbar__inline-collapse--open]="openSubmenu() === 'refresh-placed-json'"
+            >
+              <div class="toolbar__inline-collapse-inner">
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--blue" (click)="confirmRefreshPlacedJson(); $event.stopPropagation()" matTooltip="JSON frissítése">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="15" />
+                </button>
+                <button class="toolbar__btn toolbar__btn--sm toolbar__btn--red" (click)="closeSubmenu(); $event.stopPropagation()" matTooltip="Mégsem">
+                  <lucide-icon [name]="ICONS.X" [size]="15" />
+                </button>
+              </div>
+            </div>
+          }
+
           <!-- Inline collapse: generate-final megerősítés -->
           @if (item.id === 'generate-final') {
             <div

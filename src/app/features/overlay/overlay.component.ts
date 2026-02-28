@@ -270,7 +270,7 @@ export class OverlayComponent implements OnInit {
     'align-bottom': 'bottom',
   };
 
-  private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos', 'generate-sample', 'generate-final', 'sort-menu']);
+  private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos', 'generate-sample', 'generate-final', 'sort-menu', 'refresh-placed-json']);
 
   readonly syncWithBorder = signal(this.loadSyncBorder());
 
@@ -307,10 +307,6 @@ export class OverlayComponent implements OnInit {
 
     if (commandId === 'rename-layer-ids') {
       this.renameLayerIds();
-      return;
-    }
-    if (commandId === 'refresh-placed-json') {
-      this.refreshPlacedJson();
       return;
     }
     if (commandId === 'link-layers') {
@@ -805,7 +801,7 @@ export class OverlayComponent implements OnInit {
     this.doSyncPhotos(mode);
   }
 
-  refreshPlacedJson(): void {
+  confirmRefreshPlacedJson(): void {
     this.closeSubmenu();
     this.doRefreshPlacedJson();
   }
@@ -851,7 +847,7 @@ export class OverlayComponent implements OnInit {
     }
     if (layers.length === 0) { console.log('[REFRESH-JSON] nincs fotó'); return; }
 
-    this.busyCommand.set('refresh-placed-json');
+    this.ngZone.run(() => this.busyCommand.set('refresh-placed-json'));
     try {
       const result = await window.electronAPI.photoshop.refreshPlacedJson({
         psdFilePath,

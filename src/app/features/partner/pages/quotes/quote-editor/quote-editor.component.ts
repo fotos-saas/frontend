@@ -4,11 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
-import { DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '@shared/constants';
 import { QuoteEditorActionsService } from './quote-editor-actions.service';
-import { PartnerQuoteService } from '../../../services/partner-quote.service';
 import { Quote, QUOTE_STATUS_CONFIG, ContentItem, PriceListItem, VolumeDiscount } from '../../../models/quote.models';
 import { SendQuoteEmailDialogComponent } from '../components/send-quote-email-dialog/send-quote-email-dialog.component';
 import { QuoteEmailHistoryComponent } from '../components/quote-email-history/quote-email-history.component';
@@ -35,8 +32,6 @@ type EditorTab = 'data' | 'content' | 'pricing';
 export class QuoteEditorComponent implements OnInit {
   protected readonly actions = inject(QuoteEditorActionsService);
   private readonly route = inject(ActivatedRoute);
-  private readonly quoteService = inject(PartnerQuoteService);
-  private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
   protected readonly STATUS_CONFIG = QUOTE_STATUS_CONFIG;
 
@@ -133,18 +128,6 @@ export class QuoteEditorComponent implements OnInit {
 
   save(): void {
     this.actions.save(this.form());
-  }
-
-  openPdfInNewTab(): void {
-    const quote = this.actions.quote();
-    if (!quote) return;
-    this.quoteService.downloadPdf(quote.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((blob) => {
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-      });
   }
 
   // --- Tartalom szekció ---

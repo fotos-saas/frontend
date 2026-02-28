@@ -73,12 +73,6 @@
         Árazás
         <span class="tab-badge">{{ formatPrice(totalPrice()) }}</span>
       </button>
-      @if (!actions.isNew()) {
-        <button class="tab-btn" (click)="openPdfInNewTab()">
-          <lucide-icon [name]="ICONS.EYE" [size]="16" />
-          PDF előnézet
-        </button>
-      }
     </div>
 
     <!-- TAB: Adatok -->

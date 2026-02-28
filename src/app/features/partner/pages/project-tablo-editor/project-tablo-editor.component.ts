@@ -447,6 +447,17 @@ export class ProjectTabloEditorComponent implements OnInit {
       if (result.outputPath) {
         this.currentPsdPath.set(result.outputPath);
         this.snapshotService.loadSnapshots(result.outputPath);
+
+        // Project-info.json írása a PSD mappájába (overlay toolbar azonosításhoz)
+        if (p) {
+          window.electronAPI?.photoshop.writeProjectInfo({
+            psdFilePath: result.outputPath,
+            projectId: p.id,
+            projectName: p.name,
+            schoolName: p.school?.name ?? undefined,
+            className: p.className ?? undefined,
+          });
+        }
       }
 
       // Varunk hogy a Photoshop megnyissa a PSD-t
@@ -793,6 +804,19 @@ export class ProjectTabloEditorComponent implements OnInit {
 
     if (check.exists) {
       this.currentPsdPath.set(psdPath);
+
+      // Project-info.json frissítése (overlay toolbar azonosításhoz)
+      const p = this.project();
+      if (p) {
+        window.electronAPI?.photoshop.writeProjectInfo({
+          psdFilePath: psdPath,
+          projectId: p.id,
+          projectName: p.name,
+          schoolName: p.school?.name ?? undefined,
+          className: p.className ?? undefined,
+        });
+      }
+
       if (check.hasLayouts) {
         await this.snapshotService.loadSnapshots(psdPath);
       }

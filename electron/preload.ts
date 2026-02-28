@@ -377,6 +377,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:check-psd-exists', params) as Promise<{ success: boolean; exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean }>,
     refreshPlacedJson: (params: { psdFilePath: string; layers: Array<{ layerName: string; photoUrl: string }>; syncBorder?: boolean }) =>
       ipcRenderer.invoke('photoshop:refresh-placed-json', params) as Promise<{ success: boolean; count?: number; error?: string }>,
+    writeProjectInfo: (params: { psdFilePath: string; projectId: number; projectName?: string; schoolName?: string; className?: string }) =>
+      ipcRenderer.invoke('photoshop:write-project-info', params) as Promise<{ success: boolean; error?: string }>,
     backupPsd: (params: { psdPath: string }) =>
       ipcRenderer.invoke('photoshop:backup-psd', params) as Promise<{ success: boolean; error?: string; backupPath?: string }>,
     saveLayoutJson: (params: { psdPath: string; layoutData: Record<string, unknown> }) =>

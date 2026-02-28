@@ -205,21 +205,28 @@ export function registerOverlayHandlers(
         return num > 0 ? num : null;
       };
 
-      // 1. PSD melletti data.json (leggyakoribb)
+      // 1. PSD melletti project-info.json (saját rendszer, legmegbízhatóbb)
+      const projectInfoPath = path.join(psdDir, 'project-info.json');
+      if (fs.existsSync(projectInfoPath)) {
+        const id = extractId(JSON.parse(fs.readFileSync(projectInfoPath, 'utf-8')));
+        if (id) return id;
+      }
+
+      // 2. PSD melletti data.json (régi rendszer fallback)
       const dataJsonPath = path.join(psdDir, 'data.json');
       if (fs.existsSync(dataJsonPath)) {
         const id = extractId(JSON.parse(fs.readFileSync(dataJsonPath, 'utf-8')));
         if (id) return id;
       }
 
-      // 2. PSD melletti azonos nevű .json
+      // 3. PSD melletti azonos nevű .json
       const jsonPath = psdPath.replace(/\.(psd|psb)$/i, '.json');
       if (fs.existsSync(jsonPath)) {
         const id = extractId(JSON.parse(fs.readFileSync(jsonPath, 'utf-8')));
         if (id) return id;
       }
 
-      // 3. layouts/ mappaban levo legujabb snapshot
+      // 4. layouts/ mappaban levo legujabb snapshot
       const layoutsDir = path.join(psdDir, 'layouts');
       if (fs.existsSync(layoutsDir)) {
         const files = fs.readdirSync(layoutsDir)

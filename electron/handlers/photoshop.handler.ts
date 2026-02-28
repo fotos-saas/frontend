@@ -1621,6 +1621,42 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Project-info.json írása a PSD mappájába (projekt azonosítás overlay toolbar számára)
+  ipcMain.handle('photoshop:write-project-info', (_event, params: {
+    psdFilePath: string;
+    projectId: number;
+    projectName?: string;
+    schoolName?: string;
+    className?: string;
+  }) => {
+    try {
+      if (typeof params.psdFilePath !== 'string' || params.psdFilePath.includes('..') || params.psdFilePath.length > 500) {
+        return { success: false, error: 'Érvénytelen PSD útvonal' };
+      }
+      if (typeof params.projectId !== 'number' || params.projectId <= 0) {
+        return { success: false, error: 'Érvénytelen projectId' };
+      }
+      const psdDir = path.dirname(params.psdFilePath);
+      if (!fs.existsSync(psdDir)) {
+        fs.mkdirSync(psdDir, { recursive: true });
+      }
+      const infoPath = path.join(psdDir, 'project-info.json');
+      const info = {
+        projectId: params.projectId,
+        projectName: params.projectName || null,
+        schoolName: params.schoolName || null,
+        className: params.className || null,
+        updatedAt: new Date().toISOString(),
+      };
+      fs.writeFileSync(infoPath, JSON.stringify(info, null, 2), 'utf-8');
+      log.info(`Project-info.json irva: ${infoPath} (projectId: ${params.projectId})`);
+      return { success: true };
+    } catch (error) {
+      log.error('Project-info.json irasi hiba:', error);
+      return { success: false, error: 'Nem sikerült a project-info.json írása' };
+    }
+  });
+
   // Backup PSD file (meglévő PSD + layouts/ mappa másolása _backup_YYYYMMDD_HHmmss suffixszel)
   ipcMain.handle('photoshop:backup-psd', (_event, params: { psdPath: string }) => {
     try {

@@ -226,6 +226,7 @@ interface PhotoshopAPI {
   onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;
   checkPsdExists: (params: { psdPath: string }) => Promise<{ success: boolean; exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean }>;
   refreshPlacedJson: (params: { psdFilePath: string; layers: Array<{ layerName: string; photoUrl: string }>; syncBorder?: boolean }) => Promise<{ success: boolean; count?: number; error?: string }>;
+  writeProjectInfo: (params: { psdFilePath: string; projectId: number; projectName?: string; schoolName?: string; className?: string }) => Promise<{ success: boolean; error?: string }>;
   backupPsd: (params: { psdPath: string }) => Promise<{ success: boolean; error?: string; backupPath?: string }>;
   saveLayoutJson: (params: { psdPath: string; layoutData: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; jsonPath?: string }>;
   saveSnapshot: (params: { psdPath: string; snapshotData: Record<string, unknown>; fileName: string }) => Promise<{ success: boolean; error?: string; snapshotPath?: string }>;

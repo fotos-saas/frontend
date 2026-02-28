@@ -291,14 +291,14 @@
             {{ editMode() ? 'Kész' : 'Szerkesztés' }}
           </button>
         }
-      </div>
 
-      @if (withoutPhotoCount() > 0 && !editMode()) {
-        <button type="button" class="upload-btn" (click)="openUploadWizard.emit(typeFilter())">
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
-          Tovább a fényképek feltöltéséhez
-        </button>
-      }
+        @if (withoutPhotoCount() > 0 && !editMode()) {
+          <button type="button" class="btn btn--purple" (click)="openUploadWizard.emit(typeFilter())">
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+            Tovább a fényképek feltöltéséhez
+          </button>
+        }
+      </div>
     </div>
   }
 </app-dialog-wrapper>

@@ -594,27 +594,6 @@ ps-toggle {
   color: get-color('slate', 400);
 }
 
-.upload-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px 20px;
-  margin-top: 8px;
-  background: var(--color-primary, #1e3a5f);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: #ffffff;
-  cursor: pointer;
-  @include transition-fast;
-}
-
-.upload-btn:hover {
-  background: var(--color-primary-dark, #152a45);
-}
 
 // --- Tablet ---
 @media (max-width: 768px) {
@@ -708,12 +687,6 @@ ps-toggle {
   .stats-row {
     font-size: 0.75rem;
     gap: 4px;
-  }
-
-  .upload-btn {
-    padding: 10px 16px;
-    margin-top: 12px;
-    font-size: 0.875rem;
   }
 
   // Edit lista mobilon: title input alá kerül

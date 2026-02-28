@@ -52,14 +52,9 @@
                 [size]="18"
                 class="group__chevron"
               />
-              <div class="group__info">
-                <span class="group__name" (click)="navigateToProject(group.project_id); $event.stopPropagation()">
-                  {{ group.project_name }}
-                </span>
-                @if (group.school_name) {
-                  <span class="group__school">{{ group.school_name }}</span>
-                }
-              </div>
+              <span class="group__name" (click)="navigateToProject(group.project_id); $event.stopPropagation()">
+                {{ group.project_name }}
+              </span>
               <span class="group__badge" [class.group__badge--done]="group.completed_count === group.total_count">
                 {{ group.completed_count }}/{{ group.total_count }} kész
               </span>

@@ -41,16 +41,6 @@
         <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
         Beállítások
       </button>
-      <button
-        class="tab-nav__item"
-        [class.tab-nav__item--active]="activeTab() === 'debug'"
-        (click)="activeTab.set('debug')"
-        role="tab"
-        [attr.aria-selected]="activeTab() === 'debug'"
-      >
-        <lucide-icon [name]="ICONS.BUG" [size]="16" />
-        Debug
-      </button>
     </nav>
 
     <!-- ============ Parancsok tab ============ -->
@@ -852,60 +842,6 @@
           </div>
         </div>
 
-      </div>
-    }
-
-    <!-- ============ Debug tab ============ -->
-    @if (activeTab() === 'debug') {
-      <div class="tab-content" role="tabpanel">
-        <div class="debug-actions">
-          <button
-            class="btn btn--primary"
-            [disabled]="generating() || !selectedSize()"
-            (click)="generatePsdDebug()"
-          >
-            @if (generating()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              Futtatás...
-            } @else {
-              <lucide-icon [name]="ICONS.BUG" [size]="16" />
-              Debug futtatás
-            }
-          </button>
-          <button
-            class="btn btn--outline"
-            [disabled]="debugLogs().length === 0"
-            (click)="clearDebugLogs()"
-          >
-            <lucide-icon [name]="ICONS.DELETE" [size]="16" />
-            Törlés
-          </button>
-        </div>
-
-        @if (debugLogs().length === 0) {
-          <div class="debug-empty">
-            <lucide-icon [name]="ICONS.BUG" [size]="24" />
-            <p>Nyomd meg a "Debug futtatás" gombot a PSD generálás diagnosztikájához.</p>
-          </div>
-        } @else {
-          <div class="debug-log-list">
-            @for (log of debugLogs(); track $index) {
-              <div class="debug-log-entry" [class]="'debug-log-entry--' + log.status">
-                <span class="debug-log-entry__time">{{ log.time }}</span>
-                <span class="debug-log-entry__status">
-                  @switch (log.status) {
-                    @case ('ok') { <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" /> }
-                    @case ('warn') { <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" /> }
-                    @case ('error') { <lucide-icon [name]="ICONS.X_CIRCLE" [size]="14" /> }
-                    @case ('info') { <lucide-icon [name]="ICONS.INFO" [size]="14" /> }
-                  }
-                </span>
-                <span class="debug-log-entry__step">{{ log.step }}</span>
-                <span class="debug-log-entry__detail">{{ log.detail }}</span>
-              </div>
-            }
-          </div>
-        }
       </div>
     }
 

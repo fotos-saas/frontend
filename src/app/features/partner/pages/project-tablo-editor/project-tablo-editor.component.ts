@@ -14,7 +14,6 @@ import { PhotoshopService } from '../../services/photoshop.service';
 import { BrandingService } from '../../services/branding.service';
 import { TabloSize, TabloSizeThreshold, TabloPersonItem } from '../../models/partner.models';
 import { selectTabloSize } from '@shared/utils/tablo-size.util';
-import { TabloEditorDebugService, DebugLogEntry } from './tablo-editor-debug.service';
 import { TabloEditorSnapshotService } from './tablo-editor-snapshot.service';
 import { TabloEditorTemplateService } from './tablo-editor-template.service';
 import { SnapshotListItem, SnapshotLayer, TemplateListItem } from '@core/services/electron.types';
@@ -25,13 +24,13 @@ import { LayoutDesignerComponent } from './layout-designer/layout-designer.compo
 import { TabloLayoutDialogComponent, BoardDimensions } from './tablo-layout-dialog/tablo-layout-dialog.component';
 import { TabloLayoutConfig } from './layout-designer/layout-designer.types';
 
-type EditorTab = 'commands' | 'settings' | 'debug';
+type EditorTab = 'commands' | 'settings';
 
 @Component({
   selector: 'app-project-tablo-editor',
   standalone: true,
   imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent, LayoutDesignerComponent, TabloLayoutDialogComponent],
-  providers: [TabloEditorDebugService, TabloEditorSnapshotService, TabloEditorTemplateService],
+  providers: [TabloEditorSnapshotService, TabloEditorTemplateService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,7 +42,6 @@ export class ProjectTabloEditorComponent implements OnInit {
   private readonly finalizationService = inject(PartnerFinalizationService);
   private readonly ps = inject(PhotoshopService);
   private readonly branding = inject(BrandingService);
-  private readonly debugService = inject(TabloEditorDebugService);
   readonly snapshotService = inject(TabloEditorSnapshotService);
   readonly templateService = inject(TabloEditorTemplateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -137,14 +135,11 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   /** Aktuális PSD fájl útvonala (generáláskor mentjük) */
   readonly currentPsdPath = signal<string | null>(null);
-  /** Feloldott PSD útvonal (debug kijelzéshez) */
+  /** Feloldott PSD útvonal */
   readonly resolvedPsdPath = signal<string | null>(null);
 
   /** Projekt személyei (diákok + tanárok) */
   readonly persons = signal<TabloPersonItem[]>([]);
-
-  /** Debug log (delegálva a debug service-nek) */
-  readonly debugLogs = this.debugService.debugLogs;
 
   /** Vizuális szerkesztő */
   readonly showLayoutDesigner = signal(false);
@@ -532,14 +527,12 @@ export class ProjectTabloEditorComponent implements OnInit {
   /** PSD fájl megnyitása Photoshopban */
   async openPsdFile(): Promise<void> {
     const psdPath = this.currentPsdPath();
-    console.log('[DEBUG] openPsdFile called, psdPath:', psdPath);
     if (!psdPath) return;
 
     this.clearMessages();
     this.opening.set(true);
     try {
       const result = await this.ps.openPsdFile(psdPath);
-      console.log('[DEBUG] openPsdFile result:', result);
       if (!result.success) {
         this.error.set(result.error || 'Nem sikerült megnyitni a PSD fájlt.');
       }
@@ -756,35 +749,6 @@ export class ProjectTabloEditorComponent implements OnInit {
   private clearMessages(): void {
     this.error.set(null);
     this.successMessage.set(null);
-  }
-
-  addLog(step: string, detail: string, status: DebugLogEntry['status'] = 'info'): void {
-    this.debugService.addLog(step, detail, status);
-  }
-
-  clearDebugLogs(): void {
-    this.debugService.clearLogs();
-  }
-
-  async generatePsdDebug(): Promise<void> {
-    const size = this.selectedSize();
-    if (!size) {
-      this.addLog('Méret', 'Nincs méret kiválasztva!', 'error');
-      return;
-    }
-
-    this.generating.set(true);
-    try {
-      await this.debugService.runDebugGeneration({
-        size,
-        project: this.project(),
-        persons: this.persons(),
-      });
-    } catch (err) {
-      this.addLog('Váratlan hiba', String(err), 'error');
-    } finally {
-      this.generating.set(false);
-    }
   }
 
   /** Snapshot lista betöltés próba (projekt + méret kész után) */

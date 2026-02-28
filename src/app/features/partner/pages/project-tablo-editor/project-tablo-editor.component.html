@@ -46,36 +46,7 @@
     <!-- ============ Parancsok tab ============ -->
     @if (activeTab() === 'commands') {
       <div class="tab-content" role="tabpanel">
-        <!-- Photoshop státusz (rövid) -->
-        <div class="ps-status" [class.ps-status--ok]="isConfigured()" [class.ps-status--warn]="!isConfigured()">
-          @if (checking()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-            <span>Photoshop keresése...</span>
-          } @else if (isConfigured()) {
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-            <span>Photoshop konfigurálva</span>
-            <button
-              class="btn btn--sm btn--primary"
-              [disabled]="launching()"
-              (click)="launchPs()"
-            >
-              @if (launching()) {
-                <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
-              } @else {
-                <lucide-icon [name]="ICONS.PLAY" [size]="14" />
-              }
-              Indítás
-            </button>
-          } @else {
-            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-            <span>Photoshop nincs beállítva</span>
-            <button class="btn btn--sm btn--outline" (click)="activeTab.set('settings')">
-              Beállítás
-            </button>
-          }
-        </div>
-
-        <!-- PSD útvonal debug infó -->
+        <!-- PSD útvonal infó -->
         @if (currentPsdPath() || resolvedPsdPath()) {
           <div class="psd-path-info">
             <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />

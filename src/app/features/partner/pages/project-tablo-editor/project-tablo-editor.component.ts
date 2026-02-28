@@ -291,16 +291,24 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
 
     // 2. Küszöbérték: csak diákok száma számít (tanárok nem!)
+    let resolved: TabloSize | null = null;
     if (this.sizeThreshold) {
       const studentCount = project.studentsCount ?? project.expectedClassSize ?? 0;
       if (studentCount > 0) {
-        const auto = selectTabloSize(studentCount, sizes, this.sizeThreshold);
-        if (auto) { this.selectedSize.set(auto); return; }
+        resolved = selectTabloSize(studentCount, sizes, this.sizeThreshold);
       }
     }
 
     // 3. Fallback: első méret
-    this.selectedSize.set(sizes[0]);
+    if (!resolved) resolved = sizes[0];
+    this.selectedSize.set(resolved);
+
+    // Automatikus méretválasztás mentése, hogy a lista nézet is konzisztens legyen
+    if (project.id && resolved) {
+      this.finalizationService.updateTabloSize(project.id, resolved.value).pipe(
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe();
+    }
   }
 
   goBack(): void {

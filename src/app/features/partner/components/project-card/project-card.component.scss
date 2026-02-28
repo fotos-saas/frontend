@@ -427,6 +427,23 @@
   opacity: 0.6;
 }
 
+.psd-btn-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.placed-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 1.5px solid #ffffff;
+  pointer-events: none;
+}
+
 /* Col: Actions */
 .col-actions {
   justify-content: center;

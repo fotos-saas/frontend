@@ -1590,10 +1590,12 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         hasLayouts = jsonFiles.length > 0;
       }
 
-      return { success: true, exists: true, hasLayouts };
+      const hasPlacedPhotos = fs.existsSync(path.join(psdDir, 'placed-photos.json'));
+
+      return { success: true, exists: true, hasLayouts, hasPlacedPhotos };
     } catch (error) {
       log.error('PSD letezés ellenorzes hiba:', error);
-      return { success: false, exists: false, hasLayouts: false };
+      return { success: false, exists: false, hasLayouts: false, hasPlacedPhotos: false };
     }
   });
 

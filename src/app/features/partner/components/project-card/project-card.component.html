@@ -135,14 +135,19 @@
   @if (isElectron) {
     <div class="col col-psd">
       @if (psdStatus()?.exists) {
-        <button
-          type="button"
-          class="action-btn action-btn--ps"
-          (click)="onOpenPsClick($event)"
-          matTooltip="Megnyitás Photoshopban"
-        >
-          <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
-        </button>
+        <div class="psd-btn-wrap">
+          <button
+            type="button"
+            class="action-btn action-btn--ps"
+            (click)="onOpenPsClick($event)"
+            matTooltip="Megnyitás Photoshopban"
+          >
+            <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
+          </button>
+          @if (psdStatus()?.hasPlacedPhotos) {
+            <span class="placed-dot" matTooltip="Van placed-photos.json (képek el vannak helyezve)"></span>
+          }
+        </div>
         <button
           type="button"
           class="action-btn action-btn--folder"

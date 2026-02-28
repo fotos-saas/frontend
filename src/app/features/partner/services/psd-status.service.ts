@@ -12,6 +12,7 @@ export interface PsdStatus {
   exists: boolean;
   psdPath: string | null;
   folderPath: string | null;
+  hasPlacedPhotos: boolean;
 }
 
 /**
@@ -103,7 +104,7 @@ export class PsdStatusService {
   ): Promise<PsdStatus> {
     try {
       const size = selectTabloSize(project.personsCount, sizes, threshold);
-      if (!size) return { exists: false, psdPath: null, folderPath: null };
+      if (!size) return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
 
       const psdPath = await this.ps.computePsdPath(size.value, {
         projectName: project.name,
@@ -111,14 +112,14 @@ export class PsdStatusService {
         className: project.className,
         brandName,
       });
-      if (!psdPath) return { exists: false, psdPath: null, folderPath: null };
+      if (!psdPath) return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
 
       const result = await this.ps.checkPsdExists(psdPath);
       const folderPath = psdPath.substring(0, psdPath.lastIndexOf('/'));
 
-      return { exists: result.exists, psdPath, folderPath };
+      return { exists: result.exists, psdPath, folderPath, hasPlacedPhotos: result.hasPlacedPhotos };
     } catch {
-      return { exists: false, psdPath: null, folderPath: null };
+      return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
     }
   }
 }

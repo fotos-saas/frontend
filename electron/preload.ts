@@ -374,7 +374,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return () => { ipcRenderer.removeListener('jsx-debug-log', handler); };
     },
     checkPsdExists: (params: { psdPath: string }) =>
-      ipcRenderer.invoke('photoshop:check-psd-exists', params) as Promise<{ success: boolean; exists: boolean; hasLayouts: boolean }>,
+      ipcRenderer.invoke('photoshop:check-psd-exists', params) as Promise<{ success: boolean; exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean }>,
     backupPsd: (params: { psdPath: string }) =>
       ipcRenderer.invoke('photoshop:backup-psd', params) as Promise<{ success: boolean; error?: string; backupPath?: string }>,
     saveLayoutJson: (params: { psdPath: string; layoutData: Record<string, unknown> }) =>

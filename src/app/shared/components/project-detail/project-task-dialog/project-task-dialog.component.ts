@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
 import { DialogWrapperComponent } from '../../dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent } from '../../form/ps-input/ps-input.component';
-import { PsTextareaComponent } from '../../form/ps-textarea/ps-textarea.component';
+import { PsEditorComponent } from '../../form/ps-editor/ps-editor.component';
 import { PsSelectComponent } from '../../form/ps-select/ps-select.component';
 import { PartnerTaskService } from '../../../../features/partner/services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -15,7 +15,7 @@ import type { ProjectTask } from '../../../../features/partner/models/partner.mo
 @Component({
   selector: 'app-project-task-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent, PsTextareaComponent, PsSelectComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent, PsEditorComponent, PsSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-task-dialog.component.html',
   styleUrls: ['./project-task-dialog.component.scss'],

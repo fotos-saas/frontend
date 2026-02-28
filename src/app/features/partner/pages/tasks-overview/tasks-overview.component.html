@@ -84,7 +84,7 @@
                           <!-- saját feladatnál nem kell extra info -->
                         }
                         @if (task.description) {
-                          <span class="task-row__desc">{{ task.description }}</span>
+                          <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
                         }
                       </div>
                     </div>

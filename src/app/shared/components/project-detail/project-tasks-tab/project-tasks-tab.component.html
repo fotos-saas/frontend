@@ -52,7 +52,7 @@
                 </span>
               }
               @if (task.description) {
-                <span class="task-row__desc">{{ task.description }}</span>
+                <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
               }
             </div>
 
@@ -93,7 +93,7 @@
                 </span>
               }
               @if (task.description) {
-                <span class="task-row__desc">{{ task.description }}</span>
+                <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
               }
             </div>
 

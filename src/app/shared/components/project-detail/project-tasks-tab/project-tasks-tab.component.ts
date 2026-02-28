@@ -12,6 +12,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
+import { SafeHtmlPipe } from '../../../pipes/safe-html.pipe';
 import { PartnerTaskService } from '../../../../features/partner/services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import type { ProjectTask } from '../../../../features/partner/models/partner.models';
@@ -19,7 +20,7 @@ import type { ProjectTask } from '../../../../features/partner/models/partner.mo
 @Component({
   selector: 'app-project-tasks-tab',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, SafeHtmlPipe],
   templateUrl: './project-tasks-tab.component.html',
   styleUrls: ['./project-tasks-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

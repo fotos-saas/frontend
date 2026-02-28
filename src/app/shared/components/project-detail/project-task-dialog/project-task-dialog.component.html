@@ -17,11 +17,10 @@
       [(ngModel)]="title"
     />
 
-    <ps-textarea
+    <ps-editor
       label="Leírás"
       placeholder="Opcionális leírás..."
-      [maxLength]="2000"
-      [rows]="3"
+      mode="basic"
       size="full"
       [(ngModel)]="description"
     />

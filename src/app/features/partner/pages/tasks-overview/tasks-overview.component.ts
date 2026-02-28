@@ -11,6 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { SafeHtmlPipe } from '../../../../shared/pipes/safe-html.pipe';
 import { PartnerTaskService } from '../../services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -28,7 +29,7 @@ interface TaskSection {
 @Component({
   selector: 'app-tasks-overview',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, SafeHtmlPipe],
   templateUrl: './tasks-overview.component.html',
   styleUrls: ['./tasks-overview.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,7 +1,7 @@
 // PS form komponensek kezelik a stílusokat — itt csak layout override-ok kellenek
 :host {
   ps-input,
-  ps-textarea,
+  ps-editor,
   ps-select {
     display: block;
     margin-bottom: 14px;

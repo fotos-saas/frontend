@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy, signal, computed, effect } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -12,9 +12,8 @@ import { PartnerQuoteService } from '../../../services/partner-quote.service';
 import { Quote, QUOTE_STATUS_CONFIG, ContentItem, PriceListItem, VolumeDiscount } from '../../../models/quote.models';
 import { SendQuoteEmailDialogComponent } from '../components/send-quote-email-dialog/send-quote-email-dialog.component';
 import { QuoteEmailHistoryComponent } from '../components/quote-email-history/quote-email-history.component';
-import { PdfPreviewComponent } from '../components/pdf-preview/pdf-preview.component';
 
-type EditorTab = 'data' | 'content' | 'pricing' | 'preview';
+type EditorTab = 'data' | 'content' | 'pricing';
 
 @Component({
   selector: 'app-quote-editor',
@@ -27,7 +26,6 @@ type EditorTab = 'data' | 'content' | 'pricing' | 'preview';
     NgClass,
     SendQuoteEmailDialogComponent,
     QuoteEmailHistoryComponent,
-    PdfPreviewComponent,
   ],
   providers: [QuoteEditorActionsService],
   templateUrl: './quote-editor.component.html',
@@ -44,14 +42,6 @@ export class QuoteEditorComponent implements OnInit {
 
   protected showEmailDialog = signal(false);
   protected activeTab = signal<EditorTab>('data');
-  protected pdfBlob = signal<Blob | null>(null);
-  protected pdfLoading = signal(false);
-
-  private readonly tabEffect = effect(() => {
-    if (this.activeTab() === 'preview' && this.actions.quote()) {
-      this.loadPdfPreview();
-    }
-  });
 
   // Form model
   protected form = signal<Partial<Quote>>({
@@ -145,31 +135,15 @@ export class QuoteEditorComponent implements OnInit {
     this.actions.save(this.form());
   }
 
-  refreshPdfPreview(): void {
-    this.loadPdfPreview();
-  }
-
   openPdfInNewTab(): void {
-    const blob = this.pdfBlob();
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  }
-
-  private loadPdfPreview(): void {
     const quote = this.actions.quote();
     if (!quote) return;
-    this.pdfLoading.set(true);
-    this.pdfBlob.set(null);
     this.quoteService.downloadPdf(quote.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => {
-          this.pdfBlob.set(blob);
-          this.pdfLoading.set(false);
-        },
-        error: () => this.pdfLoading.set(false),
+      .subscribe((blob) => {
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
       });
   }
 

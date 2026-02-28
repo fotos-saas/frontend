@@ -74,7 +74,7 @@
         <span class="tab-badge">{{ formatPrice(totalPrice()) }}</span>
       </button>
       @if (!actions.isNew()) {
-        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'preview'" (click)="activeTab.set('preview')">
+        <button class="tab-btn" (click)="openPdfInNewTab()">
           <lucide-icon [name]="ICONS.EYE" [size]="16" />
           PDF előnézet
         </button>
@@ -287,38 +287,6 @@
       </section>
     }
 
-    <!-- TAB: PDF előnézet -->
-    @if (activeTab() === 'preview' && !actions.isNew()) {
-      <div class="pdf-preview-container">
-        <div class="pdf-toolbar">
-          <span class="pdf-toolbar-text">
-            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
-            PDF előnézet
-          </span>
-          <div class="pdf-toolbar-actions">
-            <button class="btn-outline btn-outline--sm" [disabled]="pdfLoading()" (click)="refreshPdfPreview()">
-              <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
-              {{ pdfLoading() ? 'Betöltés...' : 'Frissítés' }}
-            </button>
-            <button class="btn-outline btn-outline--sm" [disabled]="pdfLoading()" (click)="openPdfInNewTab()">
-              <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
-              Új ablak
-            </button>
-            <button class="btn-outline btn-outline--sm" (click)="actions.downloadPdf()">
-              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
-              Letöltés
-            </button>
-          </div>
-        </div>
-        @if (pdfLoading()) {
-          <div class="pdf-loading">
-            <div class="skeleton-row skeleton-shimmer" style="height: 100%;"></div>
-          </div>
-        } @else if (pdfBlob()) {
-          <app-pdf-preview [pdfBlob]="pdfBlob()" />
-        }
-      </div>
-    }
   }
 </div>
 

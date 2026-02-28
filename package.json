@@ -80,7 +80,6 @@
     "lucide-angular": "^0.562.0",
     "ngx-editor": "^19.0.0-beta.1",
     "ngx-quill": "^30.0.1",
-    "pdfjs-dist": "^5.4.624",
     "pusher-js": "^8.4.0",
     "quill": "^2.0.3",
     "rxjs": "~7.8.0",

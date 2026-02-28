@@ -4,8 +4,11 @@ import {
 } from '@angular/core';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Worker beállítás — assets-ből, CSP-kompatibilis
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/pdfjs/pdf.worker.min.mjs';
+// Worker beállítás — abszolút URL a same-origin check-hez
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  '/assets/pdfjs/pdf.worker.min.mjs',
+  document.baseURI,
+).href;
 
 @Component({
   selector: 'app-pdf-preview',

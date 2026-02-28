@@ -14,6 +14,7 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
 import { PartnerFinalizationService } from './services/partner-finalization.service';
 import { PartnerTaskService } from './services/partner-task.service';
+import { PartnerWorkflowService } from './services/partner-workflow.service';
 import { BrandingService } from './services/branding.service';
 import { ICONS, TEAM_MEMBER_ROLES, getSubscriptionStatusLabel } from '../../shared/constants';
 import { environment } from '../../../environments/environment';
@@ -74,6 +75,7 @@ export class PartnerShellComponent implements OnInit {
   private subscriptionService = inject(SubscriptionService);
   private finalizationService = inject(PartnerFinalizationService);
   private taskService = inject(PartnerTaskService);
+  private workflowService = inject(PartnerWorkflowService);
   protected readonly brandingService = inject(BrandingService);
   private router = inject(Router);
   protected sidebarState = inject(SidebarStateService);
@@ -106,6 +108,8 @@ export class PartnerShellComponent implements OnInit {
   inPrintCount = signal(0);
   // Hátralévő feladatok száma (badge)
   pendingTaskCount = signal(0);
+  // Jóváhagyásra váró workflow-k száma (badge)
+  pendingApprovalCount = signal(0);
 
   // User role info - azonnal inicializálva a computed-ok miatt
   private userRoles = signal<string[]>(this.authService.getCurrentUser()?.roles ?? []);
@@ -182,6 +186,15 @@ export class PartnerShellComponent implements OnInit {
           { id: 'booking-import', route: `${base}/booking/batch-import`, label: 'CSV Import' },
           { id: 'booking-page', route: `${base}/booking/page-settings`, label: 'Foglalasi oldal' },
           { id: 'booking-stats', route: `${base}/booking/stats`, label: 'Statisztikak' },
+        ]
+      },
+      {
+        id: 'workflows',
+        label: 'Előkészítő',
+        icon: 'workflow',
+        children: [
+          { id: 'workflow-list', route: `${base}/workflows`, label: 'Munkafolyamatok', badge: this.pendingApprovalCount() || undefined },
+          { id: 'workflow-settings', route: `${base}/workflows/settings`, label: 'Ütemezés' },
         ]
       },
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },
@@ -308,6 +321,7 @@ export class PartnerShellComponent implements OnInit {
     '/webshop': 'webshop',
     '/prepayment': 'prepayment',
     '/booking': 'booking',
+    '/workflows': 'workflows',
   };
 
   // Mobile menü items (desktop + hibajelentés)
@@ -365,6 +379,7 @@ export class PartnerShellComponent implements OnInit {
     this.loadBranding();
     this.loadInPrintCount();
     this.loadPendingTaskCount();
+    this.loadPendingApprovalCount();
   }
 
   private loadSubscriptionInfo(): void {
@@ -394,6 +409,15 @@ export class PartnerShellComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => this.pendingTaskCount.set(res.data.count),
+        error: () => {},
+      });
+  }
+
+  private loadPendingApprovalCount(): void {
+    this.workflowService.getPendingCount()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => this.pendingApprovalCount.set(res.count),
         error: () => {},
       });
   }

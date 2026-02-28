@@ -1,0 +1,75 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+
+  &__indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 24px;
+  }
+
+  &__line {
+    flex: 1;
+    width: 2px;
+    min-height: 16px;
+    background: #e5e7eb;
+    margin-top: 4px;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__label {
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  &__executor {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    background: #f3f4f6;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  &__time {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 2px;
+  }
+
+  &__error {
+    display: block;
+    font-size: 0.75rem;
+    color: #ef4444;
+    margin-top: 4px;
+  }
+
+  // Status colors
+  &--completed { color: #059669; }
+  &--running { color: #2563eb; }
+  &--failed { color: #dc2626; }
+  &--skipped { color: #9ca3af; }
+  &--pending { color: #d1d5db; }
+
+  &--running .step__line { background: #93c5fd; }
+  &--completed .step__line { background: #6ee7b7; }
+}

@@ -1,0 +1,68 @@
+<div class="workflow-list page-card">
+  <div class="page-header">
+    <div class="page-header__left">
+      <h1>
+        <lucide-icon [name]="ICONS.SETTINGS" [size]="24" />
+        Előkészítő
+      </h1>
+      <span class="total-badge">{{ total() }} munkafolyamat</span>
+    </div>
+    <button type="button" class="page-header__btn" (click)="goToSettings()">
+      <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+      Ütemezés
+    </button>
+  </div>
+
+  <app-smart-filter-bar
+    [filterState]="filterState"
+    [searchConfig]="searchConfig"
+    [filterConfigs]="filterConfigs()"
+    [visibleFilterCount]="2"
+  />
+
+  @if (filterState.loading()) {
+    <div class="skeleton-container">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.SETTINGS" [size]="48" />
+      <p>Nincs munkafolyamat</p>
+      <span class="empty-state__hint">Az előkészítő automatikusan vagy kézileg indítható a projekteknél.</span>
+    </div>
+  } @else {
+    <div class="table-header">
+      <span class="th th-project">Projekt</span>
+      <span class="th th-type">Típus</span>
+      <span class="th th-status">Státusz</span>
+      <span class="th th-trigger">Indítás</span>
+      <span class="th th-date">Létrehozva</span>
+    </div>
+
+    <div class="row-grid">
+      @for (item of items(); track item.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'" (click)="goToDetail(item)">
+          <span class="cell cell-project">{{ item.project_name }}</span>
+          <span class="cell cell-type">
+            <span class="type-badge">{{ getTypeLabel(item.type) }}</span>
+          </span>
+          <span class="cell cell-status">
+            <app-workflow-status-badge [status]="item.status" />
+          </span>
+          <span class="cell cell-trigger">{{ getTriggerLabel(item.trigger_type) }}</span>
+          <span class="cell cell-date">{{ item.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <app-list-pagination
+    [currentPage]="filterState.page()"
+    [totalPages]="lastPage()"
+    [totalItems]="total()"
+    itemLabel="munkafolyamat"
+    (pageChange)="filterState.setPage($event)"
+  />
+</div>

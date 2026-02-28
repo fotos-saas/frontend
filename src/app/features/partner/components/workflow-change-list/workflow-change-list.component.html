@@ -1,0 +1,31 @@
+<div class="change-list">
+  <h3 class="change-list__title">
+    <lucide-icon [name]="ICONS.IMAGES" [size]="16" />
+    Változások ({{ changes().length }})
+  </h3>
+
+  <div class="change-grid">
+    @for (change of changes(); track change.person_id) {
+      <div class="change-card" [ngClass]="getChangeTypeClass(change.change_type)">
+        <div class="change-card__images">
+          @if (change.before_url) {
+            <div class="change-card__img">
+              <img [src]="change.before_url" [alt]="change.person_name + ' (előtte)'" loading="lazy" />
+              <span class="change-card__img-label">Előtte</span>
+            </div>
+          }
+          @if (change.after_url) {
+            <div class="change-card__img">
+              <img [src]="change.after_url" [alt]="change.person_name + ' (utána)'" loading="lazy" />
+              <span class="change-card__img-label">Utána</span>
+            </div>
+          }
+        </div>
+        <div class="change-card__info">
+          <span class="change-card__name">{{ change.person_name }}</span>
+          <span class="change-card__type">{{ getChangeTypeLabel(change.change_type) }}</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>

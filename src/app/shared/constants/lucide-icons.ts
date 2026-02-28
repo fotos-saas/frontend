@@ -246,6 +246,8 @@ import {
   ArrowUpRight,
   Reply,
   ScrollText,
+  // Workflow
+  Workflow,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -488,4 +490,6 @@ export const LUCIDE_ICONS_MAP = {
   ArrowUpRight,
   Reply,
   ScrollText,
+  // Workflow
+  Workflow,
 };

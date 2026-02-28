@@ -1,0 +1,88 @@
+<div class="workflow-detail page-card">
+  <!-- Fejléc -->
+  <div class="page-header">
+    <button type="button" class="back-btn" (click)="goBack()">
+      <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+      Vissza
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-container">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="32" />
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (workflow(); as wf) {
+    <!-- Fejléc infó -->
+    <div class="detail-header">
+      <div class="detail-header__left">
+        <h1>{{ typeLabel() }}</h1>
+        <app-workflow-status-badge [status]="wf.status" />
+      </div>
+      <div class="detail-header__meta">
+        <span>
+          <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+          {{ wf.project_name }}
+        </span>
+        <span>
+          <lucide-icon [name]="ICONS.CALENDAR" [size]="14" />
+          {{ wf.created_at | date:'yyyy.MM.dd HH:mm' }}
+        </span>
+        @if (wf.triggered_by) {
+          <span>
+            <lucide-icon [name]="ICONS.USER" [size]="14" />
+            {{ wf.triggered_by }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Két oszlopos layout -->
+    <div class="detail-body">
+      <!-- Bal: Timeline -->
+      <div class="detail-body__left">
+        <div class="section-card">
+          <h2>
+            <lucide-icon [name]="ICONS.LIST" [size]="16" />
+            Lépések
+          </h2>
+          <app-workflow-timeline [steps]="wf.steps" />
+        </div>
+
+        @if (wf.error_message) {
+          <div class="section-card section-card--error">
+            <h2>
+              <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+              Hiba
+            </h2>
+            <p class="error-msg">{{ wf.error_message }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Jobb: Approval + Changes -->
+      <div class="detail-body__right">
+        <!-- Jóváhagyás kártya -->
+        @if (wf.status === 'awaiting_approval' || wf.status === 'approved' || wf.status === 'rejected') {
+          <app-workflow-approval-card
+            [workflow]="wf"
+            [canApproveHere]="canApproveHere()"
+            (approve)="onApprove($event)"
+            (reject)="onReject($event)"
+          />
+        }
+
+        <!-- Változások lista -->
+        @if (changes().length > 0) {
+          <app-workflow-change-list [changes]="changes()" />
+        }
+      </div>
+    </div>
+  }
+</div>

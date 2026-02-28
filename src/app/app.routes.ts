@@ -485,6 +485,22 @@ export const routes: Routes = [
           },
         ]
       },
+      // Workflow (Előkészítő)
+      {
+        path: 'workflows',
+        loadComponent: () => import('./features/partner/pages/workflow-list/workflow-list.component').then(m => m.WorkflowListComponent),
+        title: 'Előkészítő'
+      },
+      {
+        path: 'workflows/settings',
+        loadComponent: () => import('./features/partner/pages/workflow-schedule-settings/workflow-schedule-settings.component').then(m => m.WorkflowScheduleSettingsComponent),
+        title: 'Ütemezés beállítások'
+      },
+      {
+        path: 'workflows/:id',
+        loadComponent: () => import('./features/partner/pages/workflow-detail/workflow-detail.component').then(m => m.WorkflowDetailComponent),
+        title: 'Workflow részletek'
+      },
     ]
   },
 
@@ -666,6 +682,22 @@ export const routes: Routes = [
             title: 'Statisztikak'
           },
         ]
+      },
+      // Workflow (Előkészítő) — designer is elérheti
+      {
+        path: 'workflows',
+        loadComponent: () => import('./features/partner/pages/workflow-list/workflow-list.component').then(m => m.WorkflowListComponent),
+        title: 'Előkészítő'
+      },
+      {
+        path: 'workflows/settings',
+        loadComponent: () => import('./features/partner/pages/workflow-schedule-settings/workflow-schedule-settings.component').then(m => m.WorkflowScheduleSettingsComponent),
+        title: 'Ütemezés beállítások'
+      },
+      {
+        path: 'workflows/:id',
+        loadComponent: () => import('./features/partner/pages/workflow-detail/workflow-detail.component').then(m => m.WorkflowDetailComponent),
+        title: 'Workflow részletek'
       },
     ]
   },

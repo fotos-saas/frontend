@@ -1,0 +1,24 @@
+<div class="timeline">
+  @for (step of steps(); track step.id; let i = $index; let last = $last) {
+    <div class="step" [ngClass]="getStepColor(step.status)">
+      <div class="step__indicator">
+        <lucide-icon [name]="getStepIcon(step.status)" [size]="18" />
+        @if (!last) {
+          <div class="step__line"></div>
+        }
+      </div>
+      <div class="step__content">
+        <div class="step__header">
+          <span class="step__label">{{ getStepLabel(step.step_key) }}</span>
+          <span class="step__executor">{{ getExecutorLabel(step.executor) }}</span>
+        </div>
+        @if (step.started_at) {
+          <span class="step__time">{{ step.started_at | date:'HH:mm:ss' }}</span>
+        }
+        @if (step.error_message) {
+          <span class="step__error">{{ step.error_message }}</span>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -442,6 +442,9 @@ export const ICONS = {
   COMPONENT: 'component',
   BLEND: 'blend',
   SCROLL_TEXT: 'scroll-text',
+
+  // Workflow
+  WORKFLOW: 'workflow',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

@@ -1,0 +1,127 @@
+<div class="approval-card">
+  @if (!canApproveHere()) {
+    <div class="approval-card__desktop-only">
+      <lucide-icon [name]="ICONS.MONITOR" [size]="24" />
+      <p>Ez a munkafolyamat csak az asztali alkalmazásban hagyható jóvá.</p>
+    </div>
+  } @else if (isAwaitingApproval()) {
+    <!-- Összefoglaló -->
+    @if (summary()) {
+      <div class="approval-card__summary">
+        <h3>
+          <lucide-icon [name]="ICONS.FILE_TEXT" [size]="16" />
+          Összefoglaló
+        </h3>
+        <p>{{ summary() }}</p>
+      </div>
+    }
+
+    <!-- Minta -->
+    @if (sampleUrl()) {
+      <div class="approval-card__sample">
+        <h3>
+          <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+          Minta
+        </h3>
+        <img [src]="sampleUrl()" alt="Minta" class="approval-card__sample-img" loading="lazy" />
+      </div>
+    }
+
+    <!-- Email vázlat -->
+    @if (emailDraft()) {
+      <div class="approval-card__email">
+        <h3>
+          <lucide-icon [name]="ICONS.MAIL" [size]="16" />
+          Email vázlat
+        </h3>
+        <div class="approval-card__email-meta">
+          <span><strong>Tárgy:</strong> {{ emailDraft()!.subject }}</span>
+          <span><strong>Címzettek:</strong> {{ emailDraft()!.recipients.join(', ') }}</span>
+        </div>
+        <div class="approval-card__email-body">{{ emailDraft()!.body }}</div>
+      </div>
+    }
+
+    <!-- Akció gombok -->
+    <div class="approval-card__actions">
+      @if (!showRejectForm()) {
+        <div class="approval-card__approve-section">
+          <textarea
+            class="approval-card__notes"
+            [(ngModel)]="approveNotes"
+            placeholder="Megjegyzés (opcionális)..."
+            rows="2"
+          ></textarea>
+          <div class="approval-card__buttons">
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="isSubmitting()"
+              (click)="onApprove()"
+            >
+              <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+              Jóváhagyom
+            </button>
+            <button
+              type="button"
+              class="btn btn--outline-red"
+              [disabled]="isSubmitting()"
+              (click)="toggleRejectForm()"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              Elutasítom
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="approval-card__reject-section">
+          <textarea
+            class="approval-card__reason"
+            [(ngModel)]="rejectReason"
+            placeholder="Elutasítás oka (kötelező)..."
+            rows="3"
+          ></textarea>
+          <div class="approval-card__buttons">
+            <button
+              type="button"
+              class="btn btn--red"
+              [disabled]="isSubmitting() || !rejectReason().trim()"
+              (click)="onReject()"
+            >
+              <lucide-icon [name]="ICONS.X" [size]="16" />
+              Elutasítás küldése
+            </button>
+            <button
+              type="button"
+              class="btn btn--ghost"
+              (click)="toggleRejectForm()"
+            >
+              Mégsem
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Már jóváhagyva/elutasítva -->
+    <div class="approval-card__result">
+      @if (workflow().status === 'approved') {
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="24" class="text-green" />
+        <div>
+          <strong>Jóváhagyva</strong>
+          @if (workflow().approved_by) {
+            <span> — {{ workflow().approved_by!.name }}</span>
+          }
+        </div>
+      } @else if (workflow().status === 'rejected') {
+        <lucide-icon [name]="ICONS.X_CIRCLE" [size]="24" class="text-red" />
+        <div>
+          <strong>Elutasítva</strong>
+          @if (workflow().rejected_reason) {
+            <p class="approval-card__reject-reason">{{ workflow().rejected_reason }}</p>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

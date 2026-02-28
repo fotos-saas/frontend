@@ -1,0 +1,104 @@
+<div class="schedule-settings page-card page-card--narrow">
+  <div class="page-header">
+    <button type="button" class="back-btn" (click)="goBack()">
+      <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+      Vissza
+    </button>
+    <h1>
+      <lucide-icon [name]="ICONS.CLOCK" [size]="24" />
+      Előkészítő ütemezés
+    </h1>
+  </div>
+
+  <p class="description">
+    Állítsd be, mikor fusson automatikusan az előkészítő. Minden ütemezés a megadott időpontban ellenőrzi a változásokat, és ha van tennivaló, elindítja a munkafolyamatot.
+  </p>
+
+  @if (loading()) {
+    <div class="skeleton-container">
+      @for (i of [1,2]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else {
+    <!-- Meglévő ütemezések -->
+    @if (schedules().length > 0) {
+      <div class="schedule-list">
+        @for (schedule of schedules(); track schedule.id) {
+          <div class="schedule-item" [class.schedule-item--inactive]="!schedule.is_active">
+            <div class="schedule-item__info">
+              <span class="schedule-item__type">{{ WORKFLOW_TYPE_LABELS[schedule.workflow_type] }}</span>
+              <span class="schedule-item__time">
+                <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                {{ schedule.schedule_time }}
+              </span>
+              @if (schedule.conditions?.min_changed_photos) {
+                <span class="schedule-item__condition">
+                  Min. {{ schedule.conditions.min_changed_photos }} változás
+                </span>
+              }
+            </div>
+            <div class="schedule-item__actions">
+              <button
+                type="button"
+                class="toggle-btn"
+                [class.toggle-btn--active]="schedule.is_active"
+                (click)="toggleActive(schedule)"
+              >
+                {{ schedule.is_active ? 'Aktív' : 'Szüneteltetve' }}
+              </button>
+              <button type="button" class="delete-btn" (click)="deleteSchedule(schedule)">
+                <lucide-icon [name]="ICONS.TRASH_2" [size]="16" />
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="32" />
+        <p>Nincs ütemezés beállítva</p>
+      </div>
+    }
+
+    <!-- Új ütemezés form -->
+    @if (showAddForm()) {
+      <div class="add-form">
+        <h3>Új ütemezés</h3>
+        <div class="form-row">
+          <label>Típus</label>
+          <select [ngModel]="newSchedule().workflow_type" (ngModelChange)="updateNewType($event)">
+            <option value="photo_swap">Fotócsere</option>
+            <option value="finalization">Véglegesítés</option>
+            <option value="reminder">Emlékeztető</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Időpont</label>
+          <input type="time" [ngModel]="newSchedule().schedule_time" (ngModelChange)="updateNewTime($event)" />
+        </div>
+        <div class="form-row">
+          <label>Minimum változás</label>
+          <input
+            type="number"
+            min="0"
+            [ngModel]="newSchedule().conditions?.min_changed_photos"
+            (ngModelChange)="updateNewMinPhotos($event)"
+          />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="saveNewSchedule()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            Mentés
+          </button>
+          <button type="button" class="btn btn--ghost" (click)="showAddForm.set(false)">Mégsem</button>
+        </div>
+      </div>
+    } @else {
+      <button type="button" class="add-btn" (click)="showAddForm.set(true)">
+        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        Új ütemezés
+      </button>
+    }
+  }
+</div>

@@ -13,12 +13,19 @@ import { initSentryMain, setSentryUser, captureMainException, addMainBreadcrumb 
 initSentryMain();
 
 // Modularis IPC handlerek
-import { registerPhotoshopHandlers } from './handlers/photoshop.handler';
+import { registerPhotoshopHandlers, jsxRunner } from './handlers/photoshop.handler';
 import { registerSampleGeneratorHandlers } from './handlers/sample-generator.handler';
 import { registerFinalizerHandlers } from './handlers/finalizer.handler';
 import { registerOverlayHandlers } from './handlers/overlay.handler';
 import { registerPortraitHandlers } from './handlers/portrait.handler';
 import { registerSyncHandlers } from './handlers/sync.handler';
+
+// Background mód service-ek
+import { TrayManagerService } from './services/tray-manager.service';
+import { WorkflowPollerService } from './services/workflow-poller.service';
+
+// --background mód: nincs UI ablak, csak tray + polling
+const isBackgroundMode = process.argv.includes('--background');
 
 const { TouchBarButton, TouchBarLabel, TouchBarSpacer, TouchBarSegmentedControl, TouchBarSlider } = TouchBar;
 
@@ -655,7 +662,27 @@ if (!gotTheLock) {
 }
 
 // App lifecycle
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // ============ Background mód: csak tray + polling ============
+  if (isBackgroundMode) {
+    log.info('PhotoStack indul BACKGROUND modban');
+    app.dock?.hide(); // macOS: nincs dock ikon
+
+    const trayManager = new TrayManagerService();
+    const poller = new WorkflowPollerService(jsxRunner, trayManager);
+    await poller.start();
+
+    // Kecses leallas
+    app.on('before-quit', () => {
+      poller.stop();
+    });
+
+    return; // A normal mod tobbi resze nem fut le
+  }
+
+  // ============ Normal mód: ablak + Angular UI ============
+  log.info('PhotoStack indul NORMAL modban');
+
   // Start network monitoring
   startNetworkMonitoring();
 
@@ -746,6 +773,17 @@ app.whenReady().then(() => {
 
   // LAN szinkronizálás IPC handlerek regisztralasa
   registerSyncHandlers(mainWindow || undefined);
+
+  // Normal modban is: daemon token mentes login utan (IPC)
+  ipcMain.handle('workflow:store-daemon-token', async (_event, token: string) => {
+    try {
+      await keytar.setPassword(KEYCHAIN_SERVICE, '__daemon_token__', token);
+      return true;
+    } catch (error) {
+      log.error('Daemon token mentes sikertelen:', error);
+      return false;
+    }
+  });
 
   // macOS: recreate window when dock icon is clicked
   app.on('activate', () => {

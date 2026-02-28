@@ -2,28 +2,10 @@ import { ipcMain, dialog, BrowserWindow, app, shell } from 'electron';
 import { execFile, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as https from 'https';
-import * as http from 'http';
 import * as crypto from 'crypto';
 import Store from 'electron-store';
 import log from 'electron-log/main';
-import sharp from 'sharp';
-
-interface PhotoshopSchema {
-  photoshopPath: string | null;
-  workDirectory: string | null;
-  tabloMarginCm: number;
-  tabloStudentSizeCm: number;
-  tabloTeacherSizeCm: number;
-  tabloGapHCm: number;
-  tabloGapVCm: number;
-  tabloNameGapCm: number;
-  tabloNameBreakAfter: number;
-  tabloTextAlign: string;
-  tabloGridAlign: string;
-  tabloPositionGapCm: number;
-  tabloPositionFontSize: number;
-}
+import { JsxRunnerService, PhotoshopSchema } from '../services/jsx-runner.service';
 
 // ============ Placed Photos JSON helpers ============
 
@@ -126,43 +108,8 @@ const psStore = new Store<PhotoshopSchema>({
   },
 });
 
-/** Default Photoshop install helyek (macOS + Windows) */
-const DEFAULT_PS_PATHS_MAC = [
-  '/Applications/Adobe Photoshop 2026/Adobe Photoshop 2026.app',
-  '/Applications/Adobe Photoshop 2025/Adobe Photoshop 2025.app',
-  '/Applications/Adobe Photoshop 2024/Adobe Photoshop 2024.app',
-  '/Applications/Adobe Photoshop CC 2024/Adobe Photoshop CC 2024.app',
-];
-
-const DEFAULT_PS_PATHS_WIN = [
-  'C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\Photoshop.exe',
-  'C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Photoshop.exe',
-  'C:\\Program Files\\Adobe\\Adobe Photoshop 2024\\Photoshop.exe',
-  'C:\\Program Files\\Adobe\\Adobe Photoshop CC 2024\\Photoshop.exe',
-];
-
-function isValidPhotoshopPath(psPath: string): boolean {
-  if (!fs.existsSync(psPath)) return false;
-
-  if (process.platform === 'darwin') {
-    // macOS: .app bundle = directory
-    return psPath.endsWith('.app') && fs.statSync(psPath).isDirectory();
-  } else {
-    // Windows: .exe file
-    return psPath.endsWith('.exe') && fs.statSync(psPath).isFile();
-  }
-}
-
-function findPhotoshopInstallation(): string | null {
-  const paths = process.platform === 'darwin' ? DEFAULT_PS_PATHS_MAC : DEFAULT_PS_PATHS_WIN;
-
-  for (const psPath of paths) {
-    if (isValidPhotoshopPath(psPath)) {
-      return psPath;
-    }
-  }
-  return null;
-}
+// JsxRunnerService instance — exportálva a background mód számára is
+export const jsxRunner = new JsxRunnerService(psStore);
 
 export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   // Get saved path
@@ -177,7 +124,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         return { success: false, error: 'Ervenytelen eleresi ut' };
       }
 
-      if (!isValidPhotoshopPath(psPath)) {
+      if (!jsxRunner.isValidPhotoshopPath(psPath)) {
         return { success: false, error: 'A megadott eleresi uton nem talalhato Photoshop' };
       }
 
@@ -198,7 +145,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         return { success: false, error: 'Nincs beallitva Photoshop eleresi ut' };
       }
 
-      if (!isValidPhotoshopPath(psPath)) {
+      if (!jsxRunner.isValidPhotoshopPath(psPath)) {
         return { success: false, error: 'A Photoshop nem talalhato a beallitott helyen' };
       }
 
@@ -225,12 +172,12 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     try {
       // Elobb nezzuk a mentett path-ot
       const savedPath = psStore.get('photoshopPath', null);
-      if (savedPath && isValidPhotoshopPath(savedPath)) {
+      if (savedPath && jsxRunner.isValidPhotoshopPath(savedPath)) {
         return { found: true, path: savedPath };
       }
 
       // Ha a mentett path nem valid, keressuk a default helyeken
-      const foundPath = findPhotoshopInstallation();
+      const foundPath = jsxRunner.findPhotoshopInstallation();
       if (foundPath) {
         psStore.set('photoshopPath', foundPath);
         log.info(`Photoshop auto-detektalva: ${foundPath}`);
@@ -723,603 +670,22 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
-  // ============ JSX ExtendScript futtatás ============
+  // ============ JSX — JsxRunnerService delegálás ============
 
-  // JSX scriptek kihelyezese a workDir/scripts/ mappaba
-  // Ha a mappa nem letezik → friss masolas
-  // Ha a forrasfajl ujabb mint a cel → feluliras
-  function deployJsxScripts(workDir: string): void {
-    const sourceBase = app.isPackaged
-      ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'extendscript')
-      : path.join(__dirname, '..', '..', 'scripts', 'photoshop', 'extendscript');
-
-    const targetBase = path.join(workDir, 'scripts');
-
-    // Rekurzivan masol egy mappat, csak ujabb fajlokat irja felul
-    function syncDir(srcDir: string, dstDir: string): void {
-      if (!fs.existsSync(dstDir)) {
-        fs.mkdirSync(dstDir, { recursive: true });
-      }
-
-      const entries = fs.readdirSync(srcDir, { withFileTypes: true });
-      for (const entry of entries) {
-        const srcPath = path.join(srcDir, entry.name);
-        const dstPath = path.join(dstDir, entry.name);
-
-        if (entry.isDirectory()) {
-          syncDir(srcPath, dstPath);
-        } else if (entry.isFile() && entry.name.endsWith('.jsx')) {
-          let needsCopy = true;
-          if (fs.existsSync(dstPath)) {
-            const srcMtime = fs.statSync(srcPath).mtimeMs;
-            const dstMtime = fs.statSync(dstPath).mtimeMs;
-            if (srcMtime <= dstMtime) {
-              needsCopy = false;
-            }
-          }
-          if (needsCopy) {
-            fs.copyFileSync(srcPath, dstPath);
-            log.info(`JSX deploy: ${path.relative(targetBase, dstPath)}`);
-          }
-        }
-      }
-    }
-
-    try {
-      syncDir(sourceBase, targetBase);
-      log.info(`JSX scriptek kihelyezve: ${targetBase}`);
-    } catch (error) {
-      log.error('JSX deploy hiba:', error);
-    }
-  }
-
-  // Ekezetmentes slug (layerName generalashoz)
-  // Unicode NFD normalizacio: ekezetes → alap + combining mark, majd mark strip
-  // Univerzalis: magyar, nemet, francia, stb. mind mukodik
-  function sanitizeNameForLayer(text: string, personId?: number): string {
-    let result = text
-      .normalize('NFD')                    // pl. "á" → "a" + combining acute
-      .replace(/[\u0300-\u036f]/g, '')     // combining diacritical marks torlese
-      .replace(/\u0150/g, 'O').replace(/\u0151/g, 'o')  // Ő/ő (kettős ékezet — NFD nem bontja)
-      .replace(/\u0170/g, 'U').replace(/\u0171/g, 'u')  // Ű/ű (kettős ékezet — NFD nem bontja)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    if (personId !== undefined) {
-      result += `---${personId}`;
-    }
-    return result;
-  }
-
-  // Nev tordelese:
-  // Rovid prefix (Dr., Cs., Id., Ifj. — max 2 betu pont nelkul) a kovetkezo szohoz tartozik,
-  // NEM onallo nevresz. A "valodi" nevreszek szama dont: <3 → nem tor.
-  // Kotojeles szo utan torjuk ha 3+ valodi nevresz van.
-  // Photoshop \r-t hasznal sortoresnek (nem \n!)
-  function breakName(name: string, breakAfter: number): string {
-    if (breakAfter <= 0) return name;
-    const words = name.split(' ');
-    if (words.length < 2) return name;
-    // "Valodi" nevreszek szamolasa (rovid prefix nem szamit)
-    const isPrefix = (w: string) => w.replace(/\./g, '').length <= 2;
-    const realCount = words.filter(w => !isPrefix(w)).length;
-    // Kevesebb mint 3 valodi nevresz → nem tordelunk
-    if (realCount < 3) return name;
-    // Kotojeles nev: a kotojeles szo utan torjuk
-    const hyphenIndex = words.findIndex(w => w.indexOf('-') !== -1);
-    if (hyphenIndex !== -1 && hyphenIndex < words.length - 1) {
-      return words.slice(0, hyphenIndex + 1).join(' ') + '\r' + words.slice(hyphenIndex + 1).join(' ');
-    }
-    // Normal nev: breakAfter valodi szo utan
-    let realWordCount = 0;
-    let breakIndex = -1;
-    for (let i = 0; i < words.length; i++) {
-      if (!isPrefix(words[i])) realWordCount++;
-      if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
-    }
-    if (breakIndex === -1) return name;
-    return words.slice(0, breakIndex).join(' ') + '\r' + words.slice(breakIndex).join(' ');
-  }
-
-  // PersonsData előkészítése a JSX számára
-  // Python logika: számolás, szétválogatás, elnevezések — JSX csak végrehajtó
-  function preparePersonsForJsx(personsData: Array<{ id: number; name: string; type: string }>) {
-    const breakAfter = psStore.get('tabloNameBreakAfter', 1);
-    const textAlign = psStore.get('tabloTextAlign', 'center');
-    const students = personsData.filter(p => p.type !== 'teacher');
-    const teachers = personsData.filter(p => p.type === 'teacher');
-
-    const layers = [
-      ...students.map(p => ({
-        layerName: sanitizeNameForLayer(p.name, p.id),
-        displayText: breakName(p.name, breakAfter),
-        group: 'Students',
-      })),
-      ...teachers.map(p => ({
-        layerName: sanitizeNameForLayer(p.name, p.id),
-        displayText: breakName(p.name, breakAfter),
-        group: 'Teachers',
-      })),
-    ];
-
-    return {
-      layers,
-      textAlign,
-      stats: { students: students.length, teachers: teachers.length, total: personsData.length },
-    };
-  }
-
-  // Foto letoltese URL-rol temp mappaba + opcionalis sharp elomeretezes
-  // targetSize megadasa eseten cover logika: kitolti a celmeretet (crop kozeprol)
-  function downloadPhoto(url: string, fileName: string, targetSize?: { width: number; height: number }): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const tempDir = path.join(app.getPath('temp'), 'psd-photos');
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-
-      // Ha van targetSize, a vegso fajl a resized/ almappaba kerul
-      const resizedDir = path.join(tempDir, 'resized');
-      const rawPath = path.join(tempDir, fileName);
-      const finalPath = targetSize ? path.join(resizedDir, fileName) : rawPath;
-
-      // Ha a vegso fajl mar letezik es friss (5 perc), hasznaljuk
-      if (fs.existsSync(finalPath)) {
-        const stats = fs.statSync(finalPath);
-        const FIVE_MINUTES = 5 * 60 * 1000;
-        if (Date.now() - stats.mtimeMs < FIVE_MINUTES && stats.size > 0) {
-          log.info(`Cached foto: ${fileName}`);
-          resolve(finalPath);
-          return;
-        }
-      }
-
-      const protocol = url.startsWith('https') ? https : http;
-      const file = fs.createWriteStream(rawPath);
-
-      log.info(`Foto letoltese: ${url} → ${fileName}`);
-
-      protocol.get(url, (response) => {
-        // Redirect kezeles
-        if (response.statusCode === 301 || response.statusCode === 302) {
-          const redirectUrl = response.headers.location;
-          if (redirectUrl) {
-            file.close();
-            fs.unlinkSync(rawPath);
-            downloadPhoto(redirectUrl, fileName, targetSize).then(resolve).catch(reject);
-            return;
-          }
-        }
-
-        if (response.statusCode !== 200) {
-          file.close();
-          fs.unlink(rawPath, () => {});
-          reject(new Error(`Foto letoltes sikertelen: HTTP ${response.statusCode}`));
-          return;
-        }
-
-        response.pipe(file);
-
-        file.on('finish', () => {
-          file.close();
-
-          // Ha nincs meretezes, kesz
-          if (!targetSize) {
-            log.info(`Foto letoltve: ${fileName}`);
-            resolve(rawPath);
-            return;
-          }
-
-          // Sharp cover resize: kitolti a celmeretet, kozeprol vagja
-          if (!fs.existsSync(resizedDir)) {
-            fs.mkdirSync(resizedDir, { recursive: true });
-          }
-
-          sharp(rawPath)
-            .resize(targetSize.width, targetSize.height, { fit: 'cover', position: 'centre' })
-            .jpeg({ quality: 95 })
-            .toFile(finalPath)
-            .then(() => {
-              log.info(`Foto meretezve: ${fileName} → ${targetSize.width}x${targetSize.height}`);
-              resolve(finalPath);
-            })
-            .catch((err: Error) => {
-              log.warn(`Sharp meretezes sikertelen (${fileName}), eredeti kep hasznalata:`, err.message);
-              resolve(rawPath); // fallback: eredeti kep
-            });
-        });
-      }).on('error', (err) => {
-        fs.unlink(rawPath, () => {});
-        reject(err);
-      });
-    });
-  }
-
-  // Image layerek előkészítése a JSX számára
-  // Méretek cm → px átszámítása, elnevezések, csoportosítás, fotó letöltés
-  // FONTOS: a pixelszámítás a DOKUMENTUM DPI-jével történik (200),
-  // nem a kép DPI-jével (300), mert a placeholder a PSD-ben lesz!
-  async function prepareImageLayersForJsx(
-    personsData: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
-    imageSizeCm: { widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number },
-    docDpi: number = 200,
-  ) {
-    const students = personsData.filter(p => p.type !== 'teacher');
-    const teachers = personsData.filter(p => p.type === 'teacher');
-
-    // cm → px: a DOKUMENTUM DPI-jével szamolunk, hogy a PSD-ben helyes meretu legyen
-    const widthPx = Math.round((imageSizeCm.widthCm / 2.54) * docDpi);
-    const heightPx = Math.round((imageSizeCm.heightCm / 2.54) * docDpi);
-
-    // Fotok parhuzamos letoltese (csak ahol van photoUrl)
-    const allPersons = [...students, ...teachers];
-    const downloadResults = await Promise.all(
-      allPersons.map(async (p) => {
-        if (!p.photoUrl) return null;
-        try {
-          const layerName = sanitizeNameForLayer(p.name, p.id);
-          const ext = p.photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
-          const fileName = `${layerName}.${ext}`;
-          return await downloadPhoto(p.photoUrl, fileName, { width: widthPx, height: heightPx });
-        } catch (err) {
-          log.warn(`Foto letoltes sikertelen (${p.name}):`, err);
-          return null;
-        }
-      }),
-    );
-
-    // Layers felepitese a letoltesi eredmenyekkel
-    const layers = allPersons.map((p, idx) => ({
-      layerName: sanitizeNameForLayer(p.name, p.id),
-      group: p.type === 'teacher' ? 'Teachers' : 'Students',
-      widthPx,
-      heightPx,
-      photoPath: downloadResults[idx] || null,
-    }));
-
-    const withPhoto = downloadResults.filter(r => r !== null).length;
-
-    return {
-      layers,
-      stats: { students: students.length, teachers: teachers.length, total: personsData.length, withPhoto },
-      imageSizeCm,
-      studentSizeCm: imageSizeCm.studentSizeCm || 0,
-      teacherSizeCm: imageSizeCm.teacherSizeCm || 0,
-    };
-  }
-
-  // JSX script utvonal feloldasa: workDir/scripts/ elsodleges, Electron fallback
-  function resolveJsxPath(scriptName: string): string {
-    // 1. Ha van workDir es a fajl letezik benne → onnan olvassuk
-    const workDir = psStore.get('workDirectory', null);
-    if (workDir) {
-      const workDirPath = path.join(workDir, 'scripts', scriptName);
-      if (fs.existsSync(workDirPath)) {
-        return workDirPath;
-      }
-    }
-
-    // 2. Fallback: eredeti Electron scripts/ hely
-    return app.isPackaged
-      ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'extendscript', scriptName)
-      : path.join(__dirname, '..', '..', 'scripts', 'photoshop', 'extendscript', scriptName);
-  }
-
-  // JSX #include direktívák feloldása (inline-olja a fájl tartalmát)
-  function resolveIncludes(scriptContent: string, scriptDir: string): string {
-    return scriptContent.replace(
-      /\/\/\s*#include\s+"([^"]+)"/g,
-      (_match, includePath) => {
-        const fullPath = path.resolve(scriptDir, includePath);
-        if (!fs.existsSync(fullPath)) {
-          log.warn(`JSX #include fajl nem talalhato: ${fullPath}`);
-          return `// HIBA: #include fajl nem talalhato: ${includePath}`;
-        }
-        const includeContent = fs.readFileSync(fullPath, 'utf-8');
-        // Rekurzív #include feloldás
-        return resolveIncludes(includeContent, path.dirname(fullPath));
-      },
-    );
-  }
-
-  // JSX script osszeallitasa: deploy + CONFIG beallitasok + #include feloldas + action kod
-  function buildJsxScript(scriptName: string, dataFilePath?: string, targetDocName?: string, psdFilePath?: string, extraConfig?: Record<string, string>): string {
-    // Scriptek kihelyezese a workDir-be (ha van beallitva)
-    const workDir = psStore.get('workDirectory', null);
-    if (workDir) {
-      deployJsxScripts(workDir);
-    }
-
-    const scriptPath = resolveJsxPath(scriptName);
-    if (!fs.existsSync(scriptPath)) {
-      throw new Error(`JSX script nem talalhato: ${scriptPath}`);
-    }
-
-    let scriptContent = fs.readFileSync(scriptPath, 'utf-8');
-    const scriptDir = path.dirname(scriptPath);
-
-    // #include direktívák feloldása
-    scriptContent = resolveIncludes(scriptContent, scriptDir);
-
-    // CONFIG override-ok beallitasa a CONFIG blokk UTAN
-    const configOverrides: string[] = [];
-    if (dataFilePath) {
-      const escapedPath = dataFilePath.replace(/\\/g, '/');
-      configOverrides.push(`CONFIG.DATA_FILE_PATH = "${escapedPath}";`);
-    }
-    if (targetDocName) {
-      const escapedName = targetDocName.replace(/"/g, '\\"');
-      configOverrides.push(`CONFIG.TARGET_DOC_NAME = "${escapedName}";`);
-    }
-    if (psdFilePath) {
-      const escapedPsd = psdFilePath.replace(/\\/g, '/');
-      configOverrides.push(`CONFIG.PSD_FILE_PATH = "${escapedPsd}";`);
-    }
-    if (extraConfig) {
-      for (const [key, val] of Object.entries(extraConfig)) {
-        const escaped = val.replace(/"/g, '\\"');
-        configOverrides.push(`CONFIG.${key} = "${escaped}";`);
-      }
-    }
-
-    if (configOverrides.length > 0) {
-      const overrideBlock = '\n' + configOverrides.join('\n') + '\n';
-      const configStart = scriptContent.indexOf('var CONFIG');
-      if (configStart > -1) {
-        const configEnd = scriptContent.indexOf('};', configStart);
-        if (configEnd > -1) {
-          scriptContent = scriptContent.slice(0, configEnd + 2) + overrideBlock + scriptContent.slice(configEnd + 2);
-        }
-      }
-    }
-
-    return scriptContent;
-  }
-
-  // AppleScript: JSX futtatasa fokusz-valtas nelkul
-  // A do javascript file NEM igenyel activate-et, igy nem zavarja a fokuszt
-  function buildFocusPreservingAppleScript(jsxFilePath: string): string {
-    return [
-      'tell application id "com.adobe.Photoshop"',
-      `  set _result to do javascript file "${jsxFilePath}"`,
-      'end tell',
-      'return _result',
-    ].join('\n');
-  }
-
-  // Run JSX script (non-streaming) via osascript
-  ipcMain.handle('photoshop:run-jsx', async (_event, params: {
-    scriptName: string;
-    dataFilePath?: string;
-    targetDocName?: string;
-    psdFilePath?: string;
-    personsData?: Array<{ id: number; name: string; type: string }>;
-    imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number };
-    jsonData?: Record<string, unknown>;
-  }) => {
-    let tempJsonPath: string | null = null;
-
-    try {
-      if (typeof params.scriptName !== 'string' || params.scriptName.length > 200) {
-        return { success: false, error: 'Ervenytelen script nev' };
-      }
-
-      // Biztonsag: script nev nem tartalmazhat path traversal-t
-      if (params.scriptName.includes('..') || params.scriptName.startsWith('/')) {
-        return { success: false, error: 'Ervenytelen script utvonal' };
-      }
-
-      // Ha personsData-t kaptunk, előkészítjük és temp JSON fajlba irjuk
-      let dataFilePath = params.dataFilePath;
-      if (!dataFilePath && params.personsData && params.personsData.length > 0) {
-        const prepared = preparePersonsForJsx(params.personsData);
-        tempJsonPath = path.join(app.getPath('temp'), `jsx-persons-${Date.now()}.json`);
-        fs.writeFileSync(tempJsonPath, JSON.stringify(prepared), 'utf-8');
-        dataFilePath = tempJsonPath;
-        log.info(`JSX persons JSON irva: ${tempJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`);
-      }
-
-      // Ha imageData-t kaptunk, image layerek előkészítése (async — fotó letöltéssel)
-      if (!dataFilePath && params.imageData && params.imageData.persons.length > 0) {
-        const prepared = await prepareImageLayersForJsx(params.imageData.persons, {
-          widthCm: params.imageData.widthCm,
-          heightCm: params.imageData.heightCm,
-          dpi: params.imageData.dpi,
-          studentSizeCm: params.imageData.studentSizeCm,
-          teacherSizeCm: params.imageData.teacherSizeCm,
-        });
-        tempJsonPath = path.join(app.getPath('temp'), `jsx-images-${Date.now()}.json`);
-        fs.writeFileSync(tempJsonPath, JSON.stringify(prepared), 'utf-8');
-        dataFilePath = tempJsonPath;
-        log.info(`JSX images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.stats.withPhoto} fotoval, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`);
-      }
-
-      // Ha jsonData-t kaptunk (altalanos JSON adat, pl. guide margo), temp fajlba irjuk
-      // Egyszeru string ertekeket CONFIG override-kent is atadhatjuk
-      let extraConfig: Record<string, string> | undefined;
-      if (!dataFilePath && params.jsonData) {
-        // Ellenorizzuk, hogy CSAK egyszeru string ertekek vannak-e
-        const allSimple = Object.values(params.jsonData).every(v => typeof v === 'string');
-        if (allSimple) {
-          extraConfig = params.jsonData as Record<string, string>;
-          log.info(`JSX jsonData mint CONFIG override: ${JSON.stringify(extraConfig)}`);
-        } else {
-          tempJsonPath = path.join(app.getPath('temp'), `jsx-data-${Date.now()}.json`);
-          fs.writeFileSync(tempJsonPath, JSON.stringify(params.jsonData), 'utf-8');
-          dataFilePath = tempJsonPath;
-          log.info(`JSX jsonData irva: ${tempJsonPath}`);
-        }
-      }
-
-      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName, params.psdFilePath, extraConfig);
-      log.info(`JSX script futtatasa: ${params.scriptName} (${jsxCode.length} karakter)`);
-
-      if (process.platform !== 'darwin') {
-        return { success: false, error: 'JSX futtatás csak macOS-en támogatott (osascript)' };
-      }
-
-      // A JSX kodot temp fajlba irjuk, mert tul hosszu lenne a parancssorba
-      const tempJsxPath = path.join(app.getPath('temp'), `jsx-script-${Date.now()}.jsx`);
-      fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
-
-      const appleScript = buildFocusPreservingAppleScript(tempJsxPath);
-
-      return new Promise<{ success: boolean; error?: string; output?: string }>((resolve) => {
-        execFile('osascript', ['-e', appleScript], { timeout: 60000 }, (error, stdout, stderr) => {
-          // Temp fajlok torlese
-          try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
-          if (tempJsonPath && fs.existsSync(tempJsonPath)) {
-            try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
-          }
-
-          if (error) {
-            log.error('JSX futtatasi hiba:', error.message, stderr);
-            resolve({ success: false, error: stderr || error.message });
-            return;
-          }
-          log.info('JSX sikeresen lefutott:', stdout.trim().slice(0, 500));
-          resolve({ success: true, output: stdout || '' });
-        });
-      });
-    } catch (error) {
-      if (tempJsonPath && fs.existsSync(tempJsonPath)) {
-        try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
-      }
-      log.error('JSX futtatasi hiba:', error);
-      const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
-      return { success: false, error: errMsg };
-    }
+  // Run JSX script (non-streaming) via osascript — delegálva JsxRunnerService-nek
+  ipcMain.handle('photoshop:run-jsx', async (_event, params) => {
+    return jsxRunner.runJsx(params);
   });
 
-  // Run JSX script with streaming debug logs
-  ipcMain.handle('photoshop:run-jsx-debug', async (_event, params: {
-    scriptName: string;
-    dataFilePath?: string;
-    targetDocName?: string;
-    psdFilePath?: string;
-    personsData?: Array<{ id: number; name: string; type: string }>;
-    imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number };
-    jsonData?: Record<string, unknown>;
-  }) => {
+  // Run JSX script with streaming debug logs — delegálva JsxRunnerService-nek
+  ipcMain.handle('photoshop:run-jsx-debug', async (_event, params) => {
     const win = _mainWindow;
-    let tempJsonPath: string | null = null;
-
-    const sendLog = (line: string, stream: 'stdout' | 'stderr') => {
-      try { win.webContents.send('jsx-debug-log', { line, stream }); } catch (_) { /* ignore */ }
-    };
-
-    try {
-      if (typeof params.scriptName !== 'string' || params.scriptName.length > 200) {
-        return { success: false, error: 'Ervenytelen script nev' };
-      }
-
-      if (params.scriptName.includes('..') || params.scriptName.startsWith('/')) {
-        return { success: false, error: 'Ervenytelen script utvonal' };
-      }
-
-      // Ha personsData-t kaptunk, előkészítjük és temp JSON fajlba irjuk
-      let dataFilePath = params.dataFilePath;
-      if (!dataFilePath && params.personsData && params.personsData.length > 0) {
-        const prepared = preparePersonsForJsx(params.personsData);
-        tempJsonPath = path.join(app.getPath('temp'), `jsx-persons-debug-${Date.now()}.json`);
-        const jsonStr = JSON.stringify(prepared);
-        fs.writeFileSync(tempJsonPath, jsonStr, 'utf-8');
-        dataFilePath = tempJsonPath;
-        sendLog(`[DEBUG] Persons JSON irva: ${tempJsonPath} (${prepared.stats.total} fo: ${prepared.stats.students} diak, ${prepared.stats.teachers} tanar)`, 'stdout');
-      }
-
-      // Ha imageData-t kaptunk, image layerek előkészítése (async — fotó letöltéssel)
-      if (!dataFilePath && params.imageData && params.imageData.persons.length > 0) {
-        sendLog(`[DEBUG] Fotok letoltese...`, 'stdout');
-        const prepared = await prepareImageLayersForJsx(params.imageData.persons, {
-          widthCm: params.imageData.widthCm,
-          heightCm: params.imageData.heightCm,
-          dpi: params.imageData.dpi,
-          studentSizeCm: params.imageData.studentSizeCm,
-          teacherSizeCm: params.imageData.teacherSizeCm,
-        });
-        tempJsonPath = path.join(app.getPath('temp'), `jsx-images-debug-${Date.now()}.json`);
-        const jsonStr = JSON.stringify(prepared);
-        fs.writeFileSync(tempJsonPath, jsonStr, 'utf-8');
-        dataFilePath = tempJsonPath;
-        sendLog(`[DEBUG] Images JSON irva: ${tempJsonPath} (${prepared.stats.total} fo, ${prepared.stats.withPhoto} fotoval, ${prepared.layers[0]?.widthPx}x${prepared.layers[0]?.heightPx} px)`, 'stdout');
-      }
-
-      // Ha jsonData-t kaptunk, temp fajlba irjuk
-      if (!dataFilePath && params.jsonData) {
-        tempJsonPath = path.join(app.getPath('temp'), `jsx-data-debug-${Date.now()}.json`);
-        fs.writeFileSync(tempJsonPath, JSON.stringify(params.jsonData), 'utf-8');
-        dataFilePath = tempJsonPath;
-        sendLog(`[DEBUG] JSON data irva: ${tempJsonPath}`, 'stdout');
-      }
-
-      const jsxCode = buildJsxScript(params.scriptName, dataFilePath, params.targetDocName, params.psdFilePath);
-      sendLog(`[DEBUG] JSX script: ${params.scriptName} (${jsxCode.length} karakter)`, 'stdout');
-
-      if (process.platform !== 'darwin') {
-        return { success: false, error: 'JSX futtatás csak macOS-en támogatott (osascript)' };
-      }
-
-      // Temp JSX fajl
-      const tempJsxPath = path.join(app.getPath('temp'), `jsx-debug-${Date.now()}.jsx`);
-      fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
-      sendLog(`[DEBUG] Temp JSX irva: ${tempJsxPath}`, 'stdout');
-
-      const appleScript = buildFocusPreservingAppleScript(tempJsxPath);
-
-      return new Promise<{ success: boolean; error?: string }>((resolve) => {
-        const child = spawn('osascript', ['-e', appleScript], { timeout: 60000 });
-        let stderrBuf = '';
-
-        child.stdout.on('data', (data: Buffer) => {
-          const text = data.toString('utf-8');
-          for (const line of text.split('\n')) {
-            if (line.trim()) sendLog(line, 'stdout');
-          }
-        });
-
-        child.stderr.on('data', (data: Buffer) => {
-          const text = data.toString('utf-8');
-          stderrBuf += text;
-          for (const line of text.split('\n')) {
-            if (line.trim()) sendLog(line, 'stderr');
-          }
-        });
-
-        child.on('close', (code) => {
-          // Temp fajlok torlese
-          try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
-          if (tempJsonPath && fs.existsSync(tempJsonPath)) {
-            try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
-          }
-
-          if (code !== 0) {
-            log.error(`JSX debug hiba (exit ${code}):`, stderrBuf);
-            resolve({ success: false, error: stderrBuf || `Exit code: ${code}` });
-          } else {
-            log.info('JSX debug sikeresen lefutott');
-            resolve({ success: true });
-          }
-        });
-
-        child.on('error', (err) => {
-          try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
-          if (tempJsonPath && fs.existsSync(tempJsonPath)) {
-            try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
-          }
-          sendLog(`[DEBUG] HIBA: ${err.message}`, 'stderr');
-          log.error('JSX debug spawn hiba:', err);
-          resolve({ success: false, error: err.message });
-        });
-      });
-    } catch (error) {
-      if (tempJsonPath && fs.existsSync(tempJsonPath)) {
-        try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
-      }
-      log.error('JSX debug futtatasi hiba:', error);
-      const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
-      return { success: false, error: errMsg };
-    }
+    return jsxRunner.runJsxStreaming({
+      ...params,
+      onLog: (line, stream) => {
+        try { win.webContents.send('jsx-debug-log', { line, stream }); } catch (_) { /* ignore */ }
+      },
+    });
   });
 
   // Generate PSD with streaming debug logs (soronkent kuldi a logokat a renderernek)
@@ -1958,12 +1324,12 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       }
 
       // 2. Jelenlegi dokumentum layout kiolvasasa
-      const readJsxPath = resolveJsxPath('actions/read-layout.jsx');
+      const readJsxPath = jsxRunner.resolveJsxPath('actions/read-layout.jsx');
       if (!fs.existsSync(readJsxPath)) {
         return { success: false, error: 'read-layout.jsx nem talalhato' };
       }
 
-      const readJsxCode = buildJsxScript('actions/read-layout.jsx', undefined, params.targetDocName, params.psdFilePath);
+      const readJsxCode = jsxRunner.buildJsxScript('actions/read-layout.jsx', undefined, params.targetDocName, params.psdFilePath);
 
       if (process.platform !== 'darwin') {
         return { success: false, error: 'JSX futtatás csak macOS-en támogatott' };
@@ -1973,7 +1339,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const tempReadJsxPath = path.join(app.getPath('temp'), `jsx-read-tmpl-${Date.now()}.jsx`);
       fs.writeFileSync(tempReadJsxPath, readJsxCode, 'utf-8');
 
-      const readAppleScript = buildFocusPreservingAppleScript(tempReadJsxPath);
+      const readAppleScript = jsxRunner.buildFocusPreservingAppleScript(tempReadJsxPath);
 
       const readOutput = await new Promise<string>((resolve, reject) => {
         execFile('osascript', ['-e', readAppleScript], { timeout: 30000 }, (error, stdout, stderr) => {
@@ -2127,11 +1493,11 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const tempJsonPath = path.join(app.getPath('temp'), `jsx-tmpl-moves-${Date.now()}.json`);
       fs.writeFileSync(tempJsonPath, JSON.stringify({ moves }), 'utf-8');
 
-      const applyJsxCode = buildJsxScript('actions/apply-template.jsx', tempJsonPath, params.targetDocName, params.psdFilePath);
+      const applyJsxCode = jsxRunner.buildJsxScript('actions/apply-template.jsx', tempJsonPath, params.targetDocName, params.psdFilePath);
       const tempApplyJsxPath = path.join(app.getPath('temp'), `jsx-apply-tmpl-${Date.now()}.jsx`);
       fs.writeFileSync(tempApplyJsxPath, applyJsxCode, 'utf-8');
 
-      const applyAppleScript = buildFocusPreservingAppleScript(tempApplyJsxPath);
+      const applyAppleScript = jsxRunner.buildFocusPreservingAppleScript(tempApplyJsxPath);
 
       const applyOutput = await new Promise<string>((resolve, reject) => {
         execFile('osascript', ['-e', applyAppleScript], { timeout: 60000 }, (error, stdout, stderr) => {
@@ -2179,7 +1545,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
             // URL hash a fájlnévben — ha a fotó URL megváltozik (pl. aktív fotó csere), a cache invalidálódik
             const urlHash = crypto.createHash('md5').update(item.photoUrl).digest('hex').substring(0, 8);
             const fileName = `${item.layerName}-${urlHash}.${ext}`;
-            const localPath = await downloadPhoto(item.photoUrl, fileName);
+            const localPath = await jsxRunner.downloadPhoto(item.photoUrl, fileName);
             return { layerName: item.layerName, photoPath: localPath };
           } catch (err) {
             log.warn(`Foto letoltes sikertelen (${item.layerName}):`, err);
@@ -2205,11 +1571,11 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
       // JSX futtatasa
       const extraConfig = params.syncBorder ? { SYNC_BORDER: 'true' } : undefined;
-      const jsxCode = buildJsxScript('actions/place-photos.jsx', tempJsonPath, params.targetDocName, params.psdFilePath, extraConfig);
+      const jsxCode = jsxRunner.buildJsxScript('actions/place-photos.jsx', tempJsonPath, params.targetDocName, params.psdFilePath, extraConfig);
       const tempJsxPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.jsx`);
       fs.writeFileSync(tempJsxPath, jsxCode, 'utf-8');
 
-      const appleScript = buildFocusPreservingAppleScript(tempJsxPath);
+      const appleScript = jsxRunner.buildFocusPreservingAppleScript(tempJsxPath);
 
       return new Promise<{ success: boolean; error?: string; output?: string }>((resolve) => {
         execFile('osascript', ['-e', appleScript], { timeout: 120000 }, (error, stdout, stderr) => {

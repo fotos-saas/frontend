@@ -11,7 +11,9 @@ import {
   inject,
   DestroyRef,
   AfterViewInit,
+  NgZone,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { LightboxMediaItem } from './media-lightbox.types';
 import { ZoomDirective } from '../../directives/zoom';
@@ -36,12 +38,12 @@ import { DecimalPipe } from '@angular/common';
   templateUrl: './media-lightbox.component.html',
   styleUrls: ['./media-lightbox.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(document:keydown)': 'onKeydown($event)',
-  }
 })
 export class MediaLightboxComponent implements AfterViewInit {
   private readonly focusTrapFactory = inject(FocusTrapFactory);
+  private readonly doc = inject(DOCUMENT);
+  private readonly ngZone = inject(NgZone);
+  private readonly keydownHandler = this.onKeydown.bind(this);
 
   /** Input: Média elemek */
   readonly media = input.required<LightboxMediaItem[]>();
@@ -82,6 +84,7 @@ export class MediaLightboxComponent implements AfterViewInit {
 
   constructor() {
     this.destroyRef.onDestroy(() => {
+      this.doc.removeEventListener('keydown', this.keydownHandler, true);
       this.focusTrap?.destroy();
       if (this.previousActiveElement?.focus) {
         setTimeout(() => this.previousActiveElement?.focus(), 0);
@@ -112,25 +115,31 @@ export class MediaLightboxComponent implements AfterViewInit {
       this.focusTrap = this.focusTrapFactory.create(element);
       this.focusTrap.focusInitialElementWhenReady();
     }
+
+    // Capture fázisú keydown — a dialog ESC handlere előtt fut le
+    this.doc.addEventListener('keydown', this.keydownHandler, true);
   }
 
   /**
-   * Keyboard event handler
+   * Keyboard event handler (capture fázisban fut — dialog előtt)
    */
-  onKeydown(event: Event): void {
+  private onKeydown(event: Event): void {
     if (!(event instanceof KeyboardEvent)) return;
 
     switch (event.key) {
       case 'Escape':
-        this.close.emit();
+        // Capture fázisban stopoljuk → a dialog ESC handlere nem fut le
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        this.ngZone.run(() => this.close.emit());
         break;
       case 'ArrowLeft':
         event.preventDefault();
-        this.prev();
+        this.ngZone.run(() => this.prev());
         break;
       case 'ArrowRight':
         event.preventDefault();
-        this.next();
+        this.ngZone.run(() => this.next());
         break;
     }
   }

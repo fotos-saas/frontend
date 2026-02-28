@@ -277,7 +277,7 @@ export class LayoutLayerComponent implements AfterViewInit {
    * hanem konstans értékből: név ~40px, pozíció ~28px a PSD-ben.
    */
   readonly textFontSize = computed(() => {
-    const basePsdPx = this.isPosition() ? 28 : 40;
+    const basePsdPx = this.isPosition() ? 38 : 55;
     return Math.max(4, basePsdPx * this.scale());
   });
 

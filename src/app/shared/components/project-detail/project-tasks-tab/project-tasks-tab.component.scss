@@ -158,6 +158,38 @@
     color: #64748b;
     margin-top: 2px;
     word-break: break-word;
+
+    // innerHTML-be injektált tartalom — ::ng-deep kell az encapsulation miatt
+    ::ng-deep {
+      p {
+        margin: 0 0 2px;
+        min-height: 1.4em;
+        &:last-child { margin-bottom: 0; }
+      }
+
+      a {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+        border-bottom: 1px dashed #93c5fd;
+        transition: border-color 0.15s ease, color 0.15s ease;
+
+        &:hover {
+          color: #2563eb;
+          border-bottom-style: solid;
+          border-bottom-color: #2563eb;
+        }
+      }
+
+      strong, b {
+        font-weight: 600;
+        color: #475569;
+      }
+
+      em, i {
+        font-style: italic;
+      }
+    }
   }
 
   &__actions {
@@ -227,6 +259,85 @@
   &--sm {
     padding: 6px 12px;
     font-size: 0.8125rem;
+  }
+}
+
+// Csatolmányok a feladat sorban
+.task-row__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  // gap nem Safari-kompatibilis flexben, negatív margin trükk
+  margin-left: -4px;
+  margin-right: -4px;
+
+  > * {
+    margin: 4px;
+  }
+}
+
+.att-thumb {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:hover {
+    border-color: #3b82f6;
+    opacity: 0.9;
+  }
+}
+
+.att-file {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #475569;
+  font-size: 0.75rem;
+  transition: all 0.15s ease;
+
+  lucide-icon {
+    flex-shrink: 0;
+    margin-right: 5px;
+    color: #64748b;
+  }
+
+  &__name {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+
+  &__size {
+    margin-left: 4px;
+    color: #94a3b8;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #2563eb;
+
+    lucide-icon {
+      color: #3b82f6;
+    }
   }
 }
 

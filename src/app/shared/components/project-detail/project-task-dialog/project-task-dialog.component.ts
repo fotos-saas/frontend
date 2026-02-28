@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, OnInit, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -7,15 +7,17 @@ import { DialogWrapperComponent } from '../../dialog-wrapper/dialog-wrapper.comp
 import { PsInputComponent } from '../../form/ps-input/ps-input.component';
 import { PsEditorComponent } from '../../form/ps-editor/ps-editor.component';
 import { PsSelectComponent } from '../../form/ps-select/ps-select.component';
+import { PsFileUploadComponent } from '../../form/ps-file-upload/ps-file-upload.component';
 import { PartnerTaskService } from '../../../../features/partner/services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { getFileTypeIcon, formatAttachmentSize } from '../../../utils/file-type-icon.util';
 import type { PsSelectOption } from '../../form/form.types';
-import type { ProjectTask } from '../../../../features/partner/models/partner.models';
+import type { ProjectTask, TaskAttachment } from '../../../../features/partner/models/partner.models';
 
 @Component({
   selector: 'app-project-task-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent, PsEditorComponent, PsSelectComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent, PsEditorComponent, PsSelectComponent, PsFileUploadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-task-dialog.component.html',
   styleUrls: ['./project-task-dialog.component.scss'],
@@ -37,7 +39,15 @@ export class ProjectTaskDialogComponent implements OnInit {
   description = '';
   assignedToUserId: string | number = '';
 
+  // Csatolmányok
+  newAttachments = signal<File[]>([]);
+  existingAttachments = signal<TaskAttachment[]>([]);
+  removedAttachmentIds: number[] = [];
+
   readonly canSave = computed(() => !this.saving() && this.title.trim().length > 0);
+
+  readonly getFileTypeIcon = getFileTypeIcon;
+  readonly formatAttachmentSize = formatAttachmentSize;
 
   ngOnInit(): void {
     const task = this.editTask();
@@ -45,9 +55,63 @@ export class ProjectTaskDialogComponent implements OnInit {
       this.title = task.title;
       this.description = task.description ?? '';
       this.assignedToUserId = task.assigned_to?.id ?? '';
+      this.existingAttachments.set(task.attachments ?? []);
     }
 
     this.loadAssignees();
+  }
+
+  /** Ctrl+V clipboard paste — kép fájl hozzáadása */
+  @HostListener('paste', ['$event'])
+  onPaste(event: ClipboardEvent): void {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    const imageFiles: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) {
+          // Generálunk nevet ha a clipboard nem adott
+          const ext = file.type.split('/')[1] || 'png';
+          const named = new File([file], `beillesztett-kép-${Date.now()}.${ext}`, { type: file.type });
+          imageFiles.push(named);
+        }
+      }
+    }
+
+    if (imageFiles.length > 0) {
+      event.preventDefault();
+      const current = this.newAttachments();
+      const existingCount = this.existingAttachments().length - this.removedAttachmentIds.length;
+      const totalAfter = current.length + existingCount + imageFiles.length;
+
+      if (totalAfter > 5) {
+        this.toast.error('Hiba', 'Maximum 5 csatolmány engedélyezett.');
+        return;
+      }
+
+      this.newAttachments.set([...current, ...imageFiles]);
+    }
+  }
+
+  onFilesChanged(files: File[]): void {
+    this.newAttachments.set(files);
+  }
+
+  onUploadError(msg: string): void {
+    this.toast.error('Feltöltési hiba', msg);
+  }
+
+  removeExistingAttachment(att: TaskAttachment): void {
+    this.removedAttachmentIds.push(att.id);
+    this.existingAttachments.update(list => list.filter(a => a.id !== att.id));
+  }
+
+  remainingSlots(): number {
+    const existing = this.existingAttachments().length;
+    return 5 - existing;
   }
 
   private loadAssignees(): void {
@@ -86,10 +150,11 @@ export class ProjectTaskDialogComponent implements OnInit {
       assigned_to_user_id: this.assignedToUserId ? Number(this.assignedToUserId) : null,
     };
     const editing = this.editTask();
+    const files = this.newAttachments();
 
     const obs = editing
-      ? this.taskService.updateTask(this.projectId(), editing.id, data)
-      : this.taskService.createTask(this.projectId(), data);
+      ? this.taskService.updateTask(this.projectId(), editing.id, data, files, this.removedAttachmentIds)
+      : this.taskService.createTask(this.projectId(), data, files);
 
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {

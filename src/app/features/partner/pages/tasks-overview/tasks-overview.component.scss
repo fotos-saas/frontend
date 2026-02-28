@@ -266,6 +266,51 @@
     color: #64748b;
     margin-top: 2px;
     word-break: break-word;
+
+    ::ng-deep {
+      p {
+        margin: 0 0 2px;
+        min-height: 1.4em;
+        &:last-child { margin-bottom: 0; }
+      }
+
+      a {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+        border-bottom: 1px dashed #93c5fd;
+        transition: border-color 0.15s ease, color 0.15s ease;
+
+        &:hover {
+          color: #2563eb;
+          border-bottom-style: solid;
+          border-bottom-color: #2563eb;
+        }
+      }
+
+      strong, b {
+        font-weight: 600;
+        color: #475569;
+      }
+
+      em, i {
+        font-style: italic;
+      }
+    }
+  }
+}
+
+// Csatolmány számláló az overview nézetben
+.task-row__att-count {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  color: #64748b;
+  margin-top: 3px;
+
+  lucide-icon {
+    margin-right: 3px;
+    color: #94a3b8;
   }
 }
 

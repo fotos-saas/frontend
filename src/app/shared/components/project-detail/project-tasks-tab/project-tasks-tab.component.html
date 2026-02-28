@@ -54,6 +54,24 @@
               @if (task.description) {
                 <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
               }
+              <!-- Csatolmányok -->
+              @if (task.attachments && task.attachments.length > 0) {
+                <div class="task-row__attachments">
+                  @for (att of task.attachments; track att.id) {
+                    @if (att.mime_type.startsWith('image/')) {
+                      <a [href]="att.url" target="_blank" class="att-thumb" [title]="att.original_filename">
+                        <img [src]="att.url" [alt]="att.original_filename" loading="lazy" />
+                      </a>
+                    } @else {
+                      <a [href]="att.url" target="_blank" class="att-file" [title]="att.original_filename">
+                        <lucide-icon [name]="getFileTypeIcon(att.mime_type)" [size]="14" />
+                        <span class="att-file__name">{{ att.original_filename }}</span>
+                        <span class="att-file__size">{{ formatAttachmentSize(att.size_bytes) }}</span>
+                      </a>
+                    }
+                  }
+                </div>
+              }
             </div>
 
             <div class="task-row__actions">
@@ -94,6 +112,24 @@
               }
               @if (task.description) {
                 <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
+              }
+              <!-- Csatolmányok -->
+              @if (task.attachments && task.attachments.length > 0) {
+                <div class="task-row__attachments">
+                  @for (att of task.attachments; track att.id) {
+                    @if (att.mime_type.startsWith('image/')) {
+                      <a [href]="att.url" target="_blank" class="att-thumb" [title]="att.original_filename">
+                        <img [src]="att.url" [alt]="att.original_filename" loading="lazy" />
+                      </a>
+                    } @else {
+                      <a [href]="att.url" target="_blank" class="att-file" [title]="att.original_filename">
+                        <lucide-icon [name]="getFileTypeIcon(att.mime_type)" [size]="14" />
+                        <span class="att-file__name">{{ att.original_filename }}</span>
+                        <span class="att-file__size">{{ formatAttachmentSize(att.size_bytes) }}</span>
+                      </a>
+                    }
+                  }
+                </div>
               }
             </div>
 

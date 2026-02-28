@@ -3,7 +3,7 @@
   [icon]="ICONS.LIST_TODO"
   headerStyle="flat"
   theme="blue"
-  size="sm"
+  size="md"
   [isSubmitting]="saving()"
   (closeEvent)="close.emit()"
   (submitEvent)="save()"
@@ -22,6 +22,7 @@
       placeholder="Opcionális leírás..."
       mode="basic"
       size="full"
+      [maxHeight]="400"
       [(ngModel)]="description"
     />
 
@@ -31,6 +32,54 @@
       size="full"
       [options]="assigneeOptions()"
       [(ngModel)]="assignedToUserId"
+    />
+
+    <!-- Meglévő csatolmányok (szerkesztésnél) -->
+    @if (existingAttachments().length > 0) {
+      <div class="existing-attachments">
+        <label class="ps-field__label">Meglévő csatolmányok</label>
+        <div class="existing-attachments__list">
+          @for (att of existingAttachments(); track att.id) {
+            <div class="existing-att">
+              @if (att.mime_type.startsWith('image/')) {
+                <img [src]="att.url" [alt]="att.original_filename" class="existing-att__thumb" />
+              } @else {
+                <div class="existing-att__icon">
+                  <lucide-icon [name]="getFileTypeIcon(att.mime_type)" [size]="18" />
+                </div>
+              }
+              <div class="existing-att__info">
+                <span class="existing-att__name" [title]="att.original_filename">{{ att.original_filename }}</span>
+                <span class="existing-att__size">{{ formatAttachmentSize(att.size_bytes) }}</span>
+              </div>
+              <button
+                type="button"
+                class="existing-att__remove"
+                (click)="removeExistingAttachment(att)"
+                aria-label="Csatolmány eltávolítása"
+              >
+                <lucide-icon [name]="ICONS.X" [size]="14" />
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Új csatolmányok -->
+    <ps-file-upload
+      label="Csatolmányok (max 5, max 20 MB/fájl)"
+      variant="compact"
+      accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.zip,.rar,.doc,.docx,.xls,.xlsx,.pptx,.txt,.csv"
+      acceptLabel="Kép, PDF, ZIP, Office, TXT"
+      [maxFiles]="remainingSlots()"
+      [maxSizeMB]="20"
+      [multiple]="true"
+      dropzoneText="Húzd ide a fájlokat, vagy kattints a tallózáshoz"
+      dropzoneHint="Ctrl+V beillesztés is működik"
+      (ngModelChange)="onFilesChanged($event)"
+      [ngModel]="newAttachments()"
+      (uploadError)="onUploadError($event)"
     />
   </div>
 

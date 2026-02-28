@@ -759,6 +759,19 @@ export interface TaskAssignee {
 }
 
 /**
+ * Feladat csatolmány
+ */
+export interface TaskAttachment {
+  id: number;
+  original_filename: string;
+  mime_type: string;
+  size_bytes: number;
+  url: string;
+  width: number | null;
+  height: number | null;
+}
+
+/**
  * Projekt feladat
  */
 export interface ProjectTask {
@@ -771,6 +784,7 @@ export interface ProjectTask {
   created_at: string;
   created_by: TaskUser | null;
   assigned_to: TaskUser | null;
+  attachments: TaskAttachment[];
 }
 
 /**

@@ -15,6 +15,7 @@ import { ICONS } from '../../../constants/icons.constants';
 import { SafeHtmlPipe } from '../../../pipes/safe-html.pipe';
 import { PartnerTaskService } from '../../../../features/partner/services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { getFileTypeIcon, formatAttachmentSize } from '../../../utils/file-type-icon.util';
 import type { ProjectTask } from '../../../../features/partner/models/partner.models';
 
 @Component({
@@ -38,6 +39,8 @@ export class ProjectTasksTabComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+  readonly getFileTypeIcon = getFileTypeIcon;
+  readonly formatAttachmentSize = formatAttachmentSize;
 
   myTasks = signal<ProjectTask[]>([]);
   assignedToMe = signal<ProjectTask[]>([]);

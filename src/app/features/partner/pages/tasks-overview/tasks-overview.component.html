@@ -86,6 +86,12 @@
                         @if (task.description) {
                           <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
                         }
+                        @if (task.attachments && task.attachments.length > 0) {
+                          <span class="task-row__att-count">
+                            <lucide-icon [name]="ICONS.PAPERCLIP" [size]="12" />
+                            {{ task.attachments.length }} csatolmány
+                          </span>
+                        }
                       </div>
                     </div>
                   }

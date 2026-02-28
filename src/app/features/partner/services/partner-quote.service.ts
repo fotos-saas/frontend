@@ -5,10 +5,16 @@ import { environment } from '../../../../environments/environment';
 import { Quote, QuoteEmail, QuoteTemplate, EmailSnippet } from '../models/quote.models';
 
 interface PaginatedResponse<T> {
-  data: T[];
-  current_page: number;
-  last_page: number;
-  total: number;
+  data: {
+    items: T[];
+    pagination: {
+      current_page: number;
+      last_page: number;
+      per_page: number;
+      total: number;
+    };
+  };
+  message: string;
 }
 
 interface ApiResponse<T> {

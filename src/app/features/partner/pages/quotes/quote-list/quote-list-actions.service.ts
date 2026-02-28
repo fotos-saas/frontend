@@ -30,10 +30,10 @@ export class QuoteListActionsService {
       page: this.currentPage(),
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
-        this.quotes.set(res.data);
-        this.currentPage.set(res.current_page);
-        this.lastPage.set(res.last_page);
-        this.total.set(res.total);
+        this.quotes.set(res.data.items);
+        this.currentPage.set(res.data.pagination.current_page);
+        this.lastPage.set(res.data.pagination.last_page);
+        this.total.set(res.data.pagination.total);
         this.loading.set(false);
       },
       error: () => {

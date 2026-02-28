@@ -1,17 +1,21 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, DestroyRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
 import { DialogWrapperComponent } from '../../dialog-wrapper/dialog-wrapper.component';
+import { PsInputComponent } from '../../form/ps-input/ps-input.component';
+import { PsTextareaComponent } from '../../form/ps-textarea/ps-textarea.component';
+import { PsSelectComponent } from '../../form/ps-select/ps-select.component';
 import { PartnerTaskService } from '../../../../features/partner/services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import type { ProjectTask, TaskAssignee } from '../../../../features/partner/models/partner.models';
+import type { PsSelectOption } from '../../form/form.types';
+import type { ProjectTask } from '../../../../features/partner/models/partner.models';
 
 @Component({
   selector: 'app-project-task-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent],
+  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsInputComponent, PsTextareaComponent, PsSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-task-dialog.component.html',
   styleUrls: ['./project-task-dialog.component.scss'],
@@ -28,17 +32,19 @@ export class ProjectTaskDialogComponent implements OnInit {
 
   readonly ICONS = ICONS;
   saving = signal(false);
-  assignees = signal<TaskAssignee[]>([]);
+  assigneeOptions = signal<PsSelectOption[]>([]);
   title = '';
   description = '';
-  assignedToUserId: number | null = null;
+  assignedToUserId: string | number = '';
+
+  readonly canSave = computed(() => !this.saving() && this.title.trim().length > 0);
 
   ngOnInit(): void {
     const task = this.editTask();
     if (task) {
       this.title = task.title;
       this.description = task.description ?? '';
-      this.assignedToUserId = task.assigned_to?.id ?? null;
+      this.assignedToUserId = task.assigned_to?.id ?? '';
     }
 
     this.loadAssignees();
@@ -49,13 +55,25 @@ export class ProjectTaskDialogComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.assignees.set(res.data);
+          this.assigneeOptions.set(
+            res.data.map(a => ({ id: a.id, label: a.name, sublabel: this.roleLabel(a.role) }))
+          );
         },
         error: () => {
-          // Ha nem sikerül, a dialog még használható — csak a kiosztási dropdown üres
-          this.assignees.set([]);
+          this.assigneeOptions.set([]);
         },
       });
+  }
+
+  private roleLabel(role: string): string {
+    const labels: Record<string, string> = {
+      partner: 'Partner',
+      designer: 'Grafikus',
+      marketer: 'Ügyintéző',
+      printer: 'Nyomdász',
+      assistant: 'Asszisztens',
+    };
+    return labels[role] ?? role;
   }
 
   save(): void {
@@ -65,7 +83,7 @@ export class ProjectTaskDialogComponent implements OnInit {
     const data: { title: string; description: string | null; assigned_to_user_id: number | null } = {
       title: this.title.trim(),
       description: this.description.trim() || null,
-      assigned_to_user_id: this.assignedToUserId || null,
+      assigned_to_user_id: this.assignedToUserId ? Number(this.assignedToUserId) : null,
     };
     const editing = this.editTask();
 

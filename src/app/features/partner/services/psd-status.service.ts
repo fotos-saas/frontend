@@ -103,7 +103,9 @@ export class PsdStatusService {
     brandName: string | null,
   ): Promise<PsdStatus> {
     try {
-      const size = selectTabloSize(project.personsCount, sizes, threshold);
+      const size = project.tabloSize
+        ? (sizes.find(s => s.value === project.tabloSize) ?? selectTabloSize(project.personsCount, sizes, threshold))
+        : selectTabloSize(project.personsCount, sizes, threshold);
       if (!size) return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
 
       const psdPath = await this.ps.computePsdPath(size.value, {

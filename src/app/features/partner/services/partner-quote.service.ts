@@ -96,4 +96,9 @@ export class PartnerQuoteService {
   getEmailSnippets(): Observable<ApiResponse<EmailSnippet[]>> {
     return this.http.get<ApiResponse<EmailSnippet[]>>(`${environment.apiUrl}/partner/quote-email-snippets`);
   }
+
+  /** PDF előnézet URL (iframe-hez) */
+  getPdfPreviewUrl(id: number): string {
+    return `${this.baseUrl}/${id}/pdf/preview`;
+  }
 }

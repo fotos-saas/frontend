@@ -1,14 +1,20 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '@shared/constants';
 import { QuoteEditorActionsService } from './quote-editor-actions.service';
+import { PartnerQuoteService } from '../../../services/partner-quote.service';
 import { Quote, QUOTE_STATUS_CONFIG, ContentItem, PriceListItem, VolumeDiscount } from '../../../models/quote.models';
 import { SendQuoteEmailDialogComponent } from '../components/send-quote-email-dialog/send-quote-email-dialog.component';
 import { QuoteEmailHistoryComponent } from '../components/quote-email-history/quote-email-history.component';
+
+type EditorTab = 'data' | 'content' | 'pricing' | 'preview';
 
 @Component({
   selector: 'app-quote-editor',
@@ -27,13 +33,28 @@ import { QuoteEmailHistoryComponent } from '../components/quote-email-history/qu
   styleUrl: './quote-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class QuoteEditorComponent implements OnInit {
+export class QuoteEditorComponent implements OnInit, OnDestroy {
   protected readonly actions = inject(QuoteEditorActionsService);
   private readonly route = inject(ActivatedRoute);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly quoteService = inject(PartnerQuoteService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
   protected readonly STATUS_CONFIG = QUOTE_STATUS_CONFIG;
 
   protected showEmailDialog = signal(false);
+  protected activeTab = signal<EditorTab>('data');
+  protected pdfPreviewUrl = signal<SafeResourceUrl>(
+    this.sanitizer.bypassSecurityTrustResourceUrl('about:blank')
+  );
+  protected pdfLoading = signal(false);
+  private currentBlobUrl: string | null = null;
+
+  private readonly tabEffect = effect(() => {
+    if (this.activeTab() === 'preview' && this.actions.quote()) {
+      this.loadPdfPreview();
+    }
+  });
 
   // Form model
   protected form = signal<Partial<Quote>>({
@@ -75,11 +96,9 @@ export class QuoteEditorComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    const templateId = this.route.snapshot.queryParamMap.get('template');
 
     if (id) {
       this.actions.loadQuote(+id);
-      // Amikor a quote betöltődik, töltsük be a formot
       const checkInterval = setInterval(() => {
         const q = this.actions.quote();
         if (q) {
@@ -125,8 +144,42 @@ export class QuoteEditorComponent implements OnInit {
     this.form.update(f => ({ ...f, [field]: value }));
   }
 
+  ngOnDestroy(): void {
+    this.revokeBlobUrl();
+  }
+
   save(): void {
     this.actions.save(this.form());
+  }
+
+  refreshPdfPreview(): void {
+    this.loadPdfPreview();
+  }
+
+  private loadPdfPreview(): void {
+    const quote = this.actions.quote();
+    if (!quote) return;
+    this.pdfLoading.set(true);
+    this.revokeBlobUrl();
+    this.quoteService.downloadPdf(quote.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.currentBlobUrl = URL.createObjectURL(blob);
+          this.pdfPreviewUrl.set(
+            this.sanitizer.bypassSecurityTrustResourceUrl(this.currentBlobUrl)
+          );
+          this.pdfLoading.set(false);
+        },
+        error: () => this.pdfLoading.set(false),
+      });
+  }
+
+  private revokeBlobUrl(): void {
+    if (this.currentBlobUrl) {
+      URL.revokeObjectURL(this.currentBlobUrl);
+      this.currentBlobUrl = null;
+    }
   }
 
   // --- Tartalom szekció ---

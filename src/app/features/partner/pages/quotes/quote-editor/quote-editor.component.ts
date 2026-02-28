@@ -156,6 +156,23 @@ export class QuoteEditorComponent implements OnInit, OnDestroy {
     this.loadPdfPreview();
   }
 
+  openPdfInNewTab(): void {
+    const quote = this.actions.quote();
+    if (!quote) return;
+    this.pdfLoading.set(true);
+    this.quoteService.downloadPdf(quote.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank');
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+          this.pdfLoading.set(false);
+        },
+        error: () => this.pdfLoading.set(false),
+      });
+  }
+
   private loadPdfPreview(): void {
     const quote = this.actions.quote();
     if (!quote) return;
@@ -165,7 +182,7 @@ export class QuoteEditorComponent implements OnInit, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
-          this.currentBlobUrl = URL.createObjectURL(blob);
+          this.currentBlobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
           this.pdfPreviewUrl.set(
             this.sanitizer.bypassSecurityTrustResourceUrl(this.currentBlobUrl)
           );

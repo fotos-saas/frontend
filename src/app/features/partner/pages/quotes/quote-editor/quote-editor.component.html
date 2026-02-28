@@ -300,6 +300,10 @@
               <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
               {{ pdfLoading() ? 'Betöltés...' : 'Frissítés' }}
             </button>
+            <button class="btn-outline btn-outline--sm" [disabled]="pdfLoading()" (click)="openPdfInNewTab()">
+              <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
+              Új ablak
+            </button>
             <button class="btn-outline btn-outline--sm" (click)="actions.downloadPdf()">
               <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
               Letöltés

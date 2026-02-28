@@ -283,6 +283,7 @@ export class OverlayComponent implements OnInit {
   readonly sampleUseLargeSize = signal(false);
   readonly sampleWatermarkColor = signal<'white' | 'black'>('white');
   readonly sampleWatermarkOpacity = signal(0.15);
+  readonly sampleVersion = signal('');
   readonly generating = signal<'sample' | 'final' | null>(null);
   readonly generateResult = signal<{ success: boolean; message: string } | null>(null);
 
@@ -662,6 +663,16 @@ export class OverlayComponent implements OnInit {
     this.saveSampleSettingsToBackend({ sample_watermark_opacity: Math.round(next * 100) });
   }
 
+  cycleSampleVersion(direction: 1 | -1 = 1): void {
+    const current = this.sampleVersion();
+    const num = current ? parseInt(current, 10) : 0;
+    const next = Math.max(0, (isNaN(num) ? 0 : num) + direction);
+    const val = next === 0 ? '' : String(next);
+    this.sampleVersion.set(val);
+    window.electronAPI?.sample.setSettings({ sampleVersion: val });
+    this.saveSampleSettingsToBackend({ sample_version: val });
+  }
+
   private async doGenerateSample(): Promise<void> {
     const api = window.electronAPI!;
 
@@ -719,6 +730,7 @@ export class OverlayComponent implements OnInit {
       watermarkText: 'MINTA',
       watermarkColor: this.sampleWatermarkColor(),
       watermarkOpacity: this.sampleWatermarkOpacity(),
+      sampleVersion: this.sampleVersion(),
       sizes: [{ name: 'minta', width: sizeWidth }],
     });
 
@@ -1902,6 +1914,7 @@ export class OverlayComponent implements OnInit {
           this.sampleUseLargeSize.set(s.useLargeSize);
           this.sampleWatermarkColor.set(s.watermarkColor);
           this.sampleWatermarkOpacity.set(s.watermarkOpacity);
+          this.sampleVersion.set(s.sampleVersion ?? '');
         }
         this.nameSettingsLoaded = true;
       });
@@ -1928,6 +1941,7 @@ export class OverlayComponent implements OnInit {
         sample_use_large_size: boolean | null;
         sample_watermark_color: 'white' | 'black' | null;
         sample_watermark_opacity: number | null;
+        sample_version: string | null;
       };
     }>(`${environment.apiUrl}/partner/projects/${projectId}/sample-settings`)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -1939,6 +1953,8 @@ export class OverlayComponent implements OnInit {
           this.sampleWatermarkOpacity.set(
             d.sample_watermark_opacity !== null ? d.sample_watermark_opacity / 100 : 0.15,
           );
+          this.sampleVersion.set(d.sample_version ?? '');
+          window.electronAPI?.sample.setSettings({ sampleVersion: d.sample_version ?? '' });
         },
       });
   }
@@ -1947,6 +1963,7 @@ export class OverlayComponent implements OnInit {
     sample_use_large_size?: boolean;
     sample_watermark_color?: 'white' | 'black';
     sample_watermark_opacity?: number;
+    sample_version?: string;
   }): void {
     const pid = this.context().projectId || this.lastProjectId;
     if (!pid) return;

@@ -29,6 +29,7 @@ interface SampleSchema {
   sampleWatermarkColor: 'white' | 'black';
   sampleWatermarkOpacity: number;
   sampleUseLargeSize: boolean;
+  sampleVersion: string;
 }
 
 const sampleStore = new Store<SampleSchema>({
@@ -40,6 +41,7 @@ const sampleStore = new Store<SampleSchema>({
     sampleWatermarkColor: 'white',
     sampleWatermarkOpacity: 0.15,
     sampleUseLargeSize: false,
+    sampleVersion: '',
   },
 });
 
@@ -203,6 +205,7 @@ export function registerSampleGeneratorHandlers(): void {
           watermarkColor: sampleStore.get('sampleWatermarkColor', 'white'),
           watermarkOpacity: sampleStore.get('sampleWatermarkOpacity', 0.15),
           useLargeSize: sampleStore.get('sampleUseLargeSize', false),
+          sampleVersion: sampleStore.get('sampleVersion', ''),
         },
       };
     } catch (error) {
@@ -219,8 +222,13 @@ export function registerSampleGeneratorHandlers(): void {
     watermarkColor: 'white' | 'black';
     watermarkOpacity: number;
     useLargeSize: boolean;
+    sampleVersion: string;
   }>) => {
     try {
+      if (settings.sampleVersion !== undefined) {
+        const v = String(settings.sampleVersion).trim();
+        if (v.length <= 10) sampleStore.set('sampleVersion', v);
+      }
       if (settings.sizeLarge !== undefined) {
         const v = Number(settings.sizeLarge);
         if (v >= 500 && v <= 10000) sampleStore.set('sampleSizeLarge', v);
@@ -265,6 +273,7 @@ export function registerSampleGeneratorHandlers(): void {
     watermarkText?: string;
     watermarkColor?: 'white' | 'black';
     watermarkOpacity?: number;
+    sampleVersion?: string;
     sizes?: Array<{ name: string; width: number }>;
   }) => {
     const tempFiles: string[] = [];
@@ -330,10 +339,12 @@ export function registerSampleGeneratorHandlers(): void {
 
           log.info(`Resize kesz: ${size.name} (${size.width}px)`);
 
-          // Watermark
+          // Fájlnév: MINTA_ vagy MINTA_v1_ ha verzió van
+          const version = params.sampleVersion || sampleStore.get('sampleVersion', '');
+          const versionPrefix = version ? `MINTA_v${version}_` : 'MINTA_';
           const watermarkedFileName = sizes.length === 1
-            ? `MINTA_${sanitizedName}.jpg`
-            : `MINTA_${sanitizedName}_${size.name}.jpg`;
+            ? `${versionPrefix}${sanitizedName}.jpg`
+            : `${versionPrefix}${sanitizedName}_${size.name}.jpg`;
           const watermarkedPath = path.join(app.getPath('temp'), `sample-watermarked-${size.name}-${Date.now()}.jpg`);
           tempFiles.push(watermarkedPath);
 

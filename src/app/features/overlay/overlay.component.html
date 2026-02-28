@@ -218,6 +218,16 @@
                 >
                   <span class="toolbar__label-text">{{ (sampleWatermarkOpacity() * 100).toFixed(0) }}%</span>
                 </button>
+                <!-- Verzió szám -->
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--label"
+                  [class.toolbar__btn--toggle-on]="sampleVersion()"
+                  (click)="cycleSampleVersion(1); $event.stopPropagation()"
+                  (contextmenu)="cycleSampleVersion(-1); $event.preventDefault(); $event.stopPropagation()"
+                  [matTooltip]="'Minta verzió (jobb klikk: csökkent)'"
+                >
+                  <span class="toolbar__label-text">{{ sampleVersion() ? 'v' + sampleVersion() : '—' }}</span>
+                </button>
                 <div class="toolbar__collapse-sep"></div>
                 <!-- Indítás -->
                 <button class="toolbar__btn toolbar__btn--sm toolbar__btn--green" (click)="confirmGenerate('sample')" matTooltip="Indítás">

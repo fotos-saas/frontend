@@ -225,6 +225,7 @@ interface PhotoshopAPI {
   runJsxDebug: (params: { scriptName: string; dataFilePath?: string; targetDocName?: string; psdFilePath?: string; personsData?: Array<{ id: number; name: string; type: string }>; imageData?: { persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>; widthCm: number; heightCm: number; dpi: number; studentSizeCm?: number; teacherSizeCm?: number }; jsonData?: Record<string, unknown> }) => Promise<{ success: boolean; error?: string }>;
   onJsxDebugLog: (callback: (data: { line: string; stream: 'stdout' | 'stderr' }) => void) => () => void;
   checkPsdExists: (params: { psdPath: string }) => Promise<{ success: boolean; exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean }>;
+  refreshPlacedJson: (params: { psdFilePath: string; layers: Array<{ layerName: string; photoUrl: string }>; syncBorder?: boolean }) => Promise<{ success: boolean; count?: number; error?: string }>;
   backupPsd: (params: { psdPath: string }) => Promise<{ success: boolean; error?: string; backupPath?: string }>;
   saveLayoutJson: (params: { psdPath: string; layoutData: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; jsonPath?: string }>;
   saveSnapshot: (params: { psdPath: string; snapshotData: Record<string, unknown>; fileName: string }) => Promise<{ success: boolean; error?: string; snapshotPath?: string }>;

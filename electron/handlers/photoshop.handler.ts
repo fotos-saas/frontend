@@ -1599,6 +1599,24 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // Placed-photos.json újragenerálása PS megnyitása nélkül (csak JSON frissítés)
+  ipcMain.handle('photoshop:refresh-placed-json', (_event, params: {
+    psdFilePath: string;
+    layers: Array<{ layerName: string; photoUrl: string }>;
+    syncBorder?: boolean;
+  }) => {
+    try {
+      if (typeof params.psdFilePath !== 'string' || params.psdFilePath.includes('..') || params.psdFilePath.length > 500) {
+        return { success: false, error: 'Érvénytelen PSD útvonal' };
+      }
+      updatePlacedPhotosJson(params.psdFilePath, undefined, params.layers, !!params.syncBorder);
+      return { success: true, count: params.layers.length };
+    } catch (error) {
+      log.error('Placed JSON refresh hiba:', error);
+      return { success: false, error: 'JSON frissítés sikertelen' };
+    }
+  });
+
   // Backup PSD file (meglévő PSD + layouts/ mappa másolása _backup_YYYYMMDD_HHmmss suffixszel)
   ipcMain.handle('photoshop:backup-psd', (_event, params: { psdPath: string }) => {
     try {

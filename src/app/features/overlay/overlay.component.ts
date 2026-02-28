@@ -216,6 +216,7 @@ export class OverlayComponent implements OnInit {
       items: [
         { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Fotó feltöltése', accent: 'green' },
         { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', accent: 'green' },
+        { id: 'refresh-placed-json', icon: ICONS.REFRESH, label: 'Placed JSON frissítése', tooltip: 'Placed-photos.json újragenerálása az aktuális API adatokból (Photoshop nem kell)', accent: 'blue' },
         { id: 'rename-layer-ids', icon: ICONS.REPLACE, label: 'Layer ID frissítés', tooltip: 'Régi layer ID-k cseréje az új DB ID-kra', accent: 'amber' },
         { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
         { id: 'sort-menu', icon: ICONS.ARROW_DOWN_AZ, label: 'Rendezés', tooltip: 'ABC / fiú-lány / rácsba rendezés', accent: 'blue' },
@@ -306,6 +307,10 @@ export class OverlayComponent implements OnInit {
 
     if (commandId === 'rename-layer-ids') {
       this.renameLayerIds();
+      return;
+    }
+    if (commandId === 'refresh-placed-json') {
+      this.refreshPlacedJson();
       return;
     }
     if (commandId === 'link-layers') {
@@ -798,6 +803,65 @@ export class OverlayComponent implements OnInit {
     console.log('🔴 syncPhotos CALLED, mode:', mode);
     this.closeSubmenu();
     this.doSyncPhotos(mode);
+  }
+
+  refreshPlacedJson(): void {
+    this.closeSubmenu();
+    this.doRefreshPlacedJson();
+  }
+
+  private async doRefreshPlacedJson(): Promise<void> {
+    if (!window.electronAPI) return;
+
+    const psdFilePath = this.activeDoc().path;
+    if (!psdFilePath) { console.log('[REFRESH-JSON] nincs PSD útvonal'); return; }
+
+    // Person ID-k kinyerése a layer nevekből
+    const layerNames = await this.getImageLayerNames();
+    const layerPersonMap = new Map<number, string>();
+    for (const name of layerNames) {
+      const match = name.match(/---(\d+)$/);
+      if (match) layerPersonMap.set(parseInt(match[1], 10), name);
+    }
+    if (layerPersonMap.size === 0) { console.log('[REFRESH-JSON] nincs person ID a layerekben'); return; }
+
+    // Persons betöltése API-ból
+    let pid = this.context().projectId || this.lastProjectId;
+    if (!pid) {
+      try {
+        const r = await window.electronAPI.overlay.getProjectId();
+        if (r.projectId) { pid = r.projectId; this.lastProjectId = pid; }
+      } catch { /* ignore */ }
+    }
+    if (!pid) { console.log('[REFRESH-JSON] nincs projectId'); return; }
+
+    let persons = this.persons();
+    try {
+      const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
+      const res = await firstValueFrom(this.http.get<{ data: PersonItem[] }>(url));
+      persons = res.data || [];
+      this.ngZone.run(() => this.persons.set(persons));
+    } catch (e) { console.log('[REFRESH-JSON] persons betöltés hiba:', e); }
+
+    // Fotó URL-ek összegyűjtése
+    const layers: Array<{ layerName: string; photoUrl: string }> = [];
+    for (const [personId, layerName] of layerPersonMap) {
+      const person = persons.find(p => p.id === personId);
+      if (person?.photoUrl) layers.push({ layerName, photoUrl: person.photoUrl });
+    }
+    if (layers.length === 0) { console.log('[REFRESH-JSON] nincs fotó'); return; }
+
+    this.busyCommand.set('refresh-placed-json');
+    try {
+      const result = await window.electronAPI.photoshop.refreshPlacedJson({
+        psdFilePath,
+        layers,
+        syncBorder: this.syncWithBorder(),
+      });
+      console.log('[REFRESH-JSON] kész:', result);
+    } finally {
+      this.ngZone.run(() => this.busyCommand.set(null));
+    }
   }
 
   private async renameLayerIds(): Promise<void> {

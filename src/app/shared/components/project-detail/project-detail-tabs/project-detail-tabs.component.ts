@@ -3,7 +3,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
 import { DragScrollDirective } from '../../../directives/drag-scroll/drag-scroll.directive';
 
-export type ProjectDetailTab = 'overview' | 'emails' | 'users' | 'samples' | 'settings' | 'print' | 'activity';
+export type ProjectDetailTab = 'overview' | 'emails' | 'users' | 'samples' | 'tasks' | 'settings' | 'print' | 'activity';
 
 export interface TabDefinition {
   id: ProjectDetailTab;
@@ -16,6 +16,7 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
   { id: 'emails', label: 'E-mailek', icon: ICONS.MAIL },
   { id: 'users', label: 'Felhasználók', icon: ICONS.USERS },
   { id: 'samples', label: 'Minták', icon: ICONS.PALETTE },
+  { id: 'tasks', label: 'Feladatok', icon: ICONS.LIST_TODO },
   { id: 'activity', label: 'Aktivitás', icon: ICONS.ACTIVITY },
   { id: 'print', label: 'Nyomda', icon: ICONS.PRINTER },
   { id: 'settings', label: 'Beállítások', icon: ICONS.SETTINGS },

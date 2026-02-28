@@ -1,0 +1,76 @@
+<div class="tasks-overview page-card">
+  <!-- Fejléc -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <lucide-icon [name]="ICONS.LIST_TODO" [size]="24" class="page-header__icon" />
+      <h1 class="page-header__title">Összes feladat</h1>
+      @if (totalTasks() > 0) {
+        <span class="page-header__badge">{{ totalCompleted() }}/{{ totalTasks() }} kész</span>
+      }
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="flex justify-center py-12">
+      <div class="w-10 h-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  } @else if (groups().length === 0) {
+    <!-- Üres állapot -->
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.LIST_TODO" [size]="56" class="empty-state__icon" />
+      <h3 class="empty-state__title">Nincsenek feladatok</h3>
+      <p class="empty-state__text">Adj hozzá feladatokat a projektek Feladatok fülén.</p>
+    </div>
+  } @else {
+    <!-- Projekt csoportok -->
+    <div class="groups">
+      @for (group of groups(); track group.project_id) {
+        <div class="group">
+          <!-- Csoport fejléc -->
+          <button class="group__header" (click)="toggleGroup(group.project_id)">
+            <lucide-icon
+              [name]="isExpanded(group.project_id) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
+              [size]="18"
+              class="group__chevron"
+            />
+            <div class="group__info">
+              <span class="group__name" (click)="navigateToProject(group.project_id); $event.stopPropagation()">
+                {{ group.project_name }}
+              </span>
+              @if (group.school_name) {
+                <span class="group__school">{{ group.school_name }}</span>
+              }
+            </div>
+            <span class="group__badge" [class.group__badge--done]="group.completed_count === group.total_count">
+              {{ group.completed_count }}/{{ group.total_count }} kész
+            </span>
+          </button>
+
+          <!-- Feladatok -->
+          @if (isExpanded(group.project_id)) {
+            <div class="group__tasks">
+              @for (task of group.tasks; track task.id) {
+                <div class="task-row" [class.task-row--completed]="task.is_completed">
+                  <button class="task-row__checkbox" (click)="toggleTask(group, task)" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
+                    @if (task.is_completed) {
+                      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18" class="task-row__check--done" />
+                    } @else {
+                      <lucide-icon [name]="ICONS.CIRCLE" [size]="18" class="task-row__check" />
+                    }
+                  </button>
+                  <div class="task-row__content">
+                    <span class="task-row__title">{{ task.title }}</span>
+                    @if (task.description) {
+                      <span class="task-row__desc">{{ task.description }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

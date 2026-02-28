@@ -1,0 +1,119 @@
+<!-- Fejléc -->
+<div class="tasks-header">
+  <div class="tasks-header__left">
+    <h3 class="tasks-header__title">Feladatok</h3>
+    @if (totalCount() > 0) {
+      <span class="tasks-header__badge">{{ completedCount() }}/{{ totalCount() }} kész</span>
+    }
+  </div>
+  <button class="btn btn--primary btn--sm" (click)="openCreateDialog()">
+    <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+    Új feladat
+  </button>
+</div>
+
+<!-- Loading -->
+@if (loading()) {
+  <div class="flex justify-center py-8">
+    <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+  </div>
+} @else if (tasks().length === 0) {
+  <!-- Üres állapot -->
+  <div class="empty-state">
+    <lucide-icon [name]="ICONS.LIST_TODO" [size]="48" class="empty-state__icon" />
+    <p class="empty-state__text">Még nincsenek feladatok ehhez a projekthez.</p>
+    <button class="btn btn--primary btn--sm" (click)="openCreateDialog()">
+      <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+      Feladat hozzáadása
+    </button>
+  </div>
+} @else {
+  <!-- Feladat lista -->
+  <div class="task-list">
+    @for (task of tasks(); track task.id) {
+      <div class="task-row" [class.task-row--completed]="task.is_completed">
+        <button class="task-row__checkbox" (click)="toggleTask(task)" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
+          @if (task.is_completed) {
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="task-row__check-icon--done" />
+          } @else {
+            <lucide-icon [name]="ICONS.CIRCLE" [size]="20" class="task-row__check-icon" />
+          }
+        </button>
+
+        <div class="task-row__content">
+          <span class="task-row__title">{{ task.title }}</span>
+          @if (task.description) {
+            <span class="task-row__desc">{{ task.description }}</span>
+          }
+        </div>
+
+        <div class="task-row__actions">
+          <button class="action-btn" (click)="openEditDialog(task)" aria-label="Szerkesztés">
+            <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+          </button>
+          <button class="action-btn action-btn--danger" (click)="confirmDelete(task)" aria-label="Törlés">
+            <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Feladat dialógus -->
+@if (showDialog()) {
+  <app-dialog-wrapper
+    [title]="editingTask() ? 'Feladat szerkesztése' : 'Új feladat'"
+    [icon]="ICONS.LIST_TODO"
+    headerStyle="flat"
+    theme="blue"
+    size="sm"
+    (closeEvent)="closeDialog()"
+  >
+    <div dialogBody>
+      <div class="field">
+        <label class="field__label" for="taskTitle">Cím *</label>
+        <input
+          id="taskTitle"
+          type="text"
+          class="field__input"
+          [(ngModel)]="dialogTitle"
+          placeholder="Feladat címe"
+          maxlength="255"
+          autofocus
+        />
+      </div>
+      <div class="field">
+        <label class="field__label" for="taskDesc">Leírás</label>
+        <textarea
+          id="taskDesc"
+          class="field__input field__textarea"
+          [(ngModel)]="dialogDescription"
+          placeholder="Opcionális leírás..."
+          maxlength="2000"
+          rows="3"
+        ></textarea>
+      </div>
+    </div>
+    <div dialogFooter>
+      <button class="btn btn--ghost" (click)="closeDialog()">Mégse</button>
+      <button class="btn btn--primary" [disabled]="!dialogTitle.trim() || saving()" (click)="saveTask()">
+        @if (saving()) {
+          Mentés...
+        } @else {
+          {{ editingTask() ? 'Mentés' : 'Létrehozás' }}
+        }
+      </button>
+    </div>
+  </app-dialog-wrapper>
+}
+
+<!-- Törlés megerősítés -->
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Feladat törlése"
+    [message]="'Biztosan törölni szeretnéd a \'' + (deletingTask()?.title ?? '') + '\' feladatot?'"
+    confirmText="Törlés"
+    (resultEvent)="onDeleteResult($event)"
+  />
+}

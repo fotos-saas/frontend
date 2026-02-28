@@ -224,6 +224,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/student-detail/student-detail.component').then(m => m.PartnerStudentDetailComponent)
       },
       {
+        path: 'projects/tasks',
+        loadComponent: () => import('./features/partner/pages/tasks-overview/tasks-overview.component').then(m => m.TasksOverviewComponent),
+        title: 'Feladatok'
+      },
+      {
         path: 'projects/:id',
         loadComponent: () => import('./features/partner/pages/project-detail/project-detail.component').then(m => m.PartnerProjectDetailComponent)
       },
@@ -520,6 +525,11 @@ export const routes: Routes = [
       {
         path: 'projects/students/:id',
         loadComponent: () => import('./features/partner/pages/student-detail/student-detail.component').then(m => m.PartnerStudentDetailComponent)
+      },
+      {
+        path: 'projects/tasks',
+        loadComponent: () => import('./features/partner/pages/tasks-overview/tasks-overview.component').then(m => m.TasksOverviewComponent),
+        title: 'Feladatok'
       },
       {
         path: 'projects/:id',

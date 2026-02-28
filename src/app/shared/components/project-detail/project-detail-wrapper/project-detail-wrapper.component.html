@@ -92,6 +92,11 @@
           />
         }
       }
+      @case ('tasks') {
+        @defer {
+          <app-project-tasks-tab [projectId]="projectData()?.id ?? 0" />
+        }
+      }
       @case ('activity') {
         @defer {
           <app-project-activity-tab

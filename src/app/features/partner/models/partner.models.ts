@@ -741,5 +741,30 @@ export interface EmailAccountTestResult {
   imap: { ok: boolean; error: string | null };
 }
 
+/**
+ * Projekt feladat
+ */
+export interface ProjectTask {
+  id: number;
+  project_id: number;
+  title: string;
+  description: string | null;
+  is_completed: boolean;
+  completed_at: string | null;
+  created_at: string;
+}
+
+/**
+ * Projekt feladat csoport (összesítő nézethez)
+ */
+export interface ProjectTaskGroup {
+  project_id: number;
+  project_name: string;
+  school_name: string | null;
+  tasks: ProjectTask[];
+  completed_count: number;
+  total_count: number;
+}
+
 // Re-export QrCode from shared
 export type { QrCode } from '../../../shared/interfaces/qr-code.interface';

@@ -265,10 +265,8 @@ function measureBaselineOffsetForSize(doc, fontSize) {
 }
 
 // --- Pozicio layer pozicionalasa a nev ala ---
-function positionPositionLayerUnderName(doc, posLayer, nameLayer, imageLayer, textAlign) {
-  var nameBounds = getBoundsNoEffects(nameLayer.id);
-  var nameBottom = nameBounds.bottom;
-
+// imgBounds es nameBottom parameterkent jon — NEM kerdezzuk le ujra (gyorsabb)
+function positionPositionLayerUnderName(doc, posLayer, nameBottom, imgBounds, textAlign) {
   // Gap cm → px
   var dpi = doc.resolution;
   var posGapCm = typeof CONFIG !== "undefined" && CONFIG.POSITION_GAP_CM ? CONFIG.POSITION_GAP_CM : 0.15;
@@ -283,8 +281,7 @@ function positionPositionLayerUnderName(doc, posLayer, nameLayer, imageLayer, te
   var posBoundsTop = nameBottom + posGapPx;
   var posBaselineY = posBoundsTop + _baselineOffsetPosSel;
 
-  // Vizszintes pozicio: a kep alapjan (ugyanugy mint a nevnel)
-  var imgBounds = getBoundsNoEffects(imageLayer.id);
+  // Vizszintes pozicio: a kep alapjan
   var desiredX;
   if (textAlign === "left") {
     desiredX = imgBounds.left;
@@ -313,6 +310,7 @@ function positionPositionLayerUnderName(doc, posLayer, nameLayer, imageLayer, te
 // textItem.position (baseline anchor) alapu pozicionalas:
 // A baseline pont NEM fugg a szoveg tartalmatol, ezert az ekezetes
 // es ekezetmentes nevek ugyanarra a vonalra kerulnek.
+// Return: { imgBounds, nameBottom } — a position layer-hez is felhasznalhato (nem kell ujra lekerdezni)
 function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, breakAfter) {
   var imgBounds = getBoundsNoEffects(imageLayer.id);
   var imgCenterX = (imgBounds.left + imgBounds.right) / 2;
@@ -345,7 +343,7 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
       textItem.contents = newText;
     }
   } catch (e) {
-    return false;
+    return null;
   }
 
   // Vertikalis pozicio: bounds.top = imgBottom + gap → baseline = boundsTop + offset
@@ -364,7 +362,10 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
 
   // Position beallitasa — a baseline anchor pont
   textItem.position = [new UnitValue(Math.round(desiredX), "px"), new UnitValue(Math.round(desiredBaselineY), "px")];
-  return true;
+
+  // Nev bounds lekeres (a position layer-nek kell a nameBottom)
+  var nameBounds = getBoundsNoEffects(nameLayer.id);
+  return { imgBounds: imgBounds, nameBottom: nameBounds.bottom };
 }
 
 (function () {
@@ -422,13 +423,14 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
       // Unlink a rendezés elott (hogy szabadon mozgatható legyen)
       unlinkByName(doc, nl.name);
 
-      if (positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter)) {
+      var result = positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter);
+      if (result) {
         arranged++;
 
-        // Pozicio (beosztás) layer mozgatasa a nev ala
+        // Pozicio (beosztás) layer mozgatasa a nev ala — bounds-ok ujrahasznositasa
         var posLayer = findPositionLayerByName(doc, nl.name);
         if (posLayer) {
-          positionPositionLayerUnderName(doc, posLayer, nl, imgLayer, textAlign);
+          positionPositionLayerUnderName(doc, posLayer, result.nameBottom, result.imgBounds, textAlign);
         }
       }
     }

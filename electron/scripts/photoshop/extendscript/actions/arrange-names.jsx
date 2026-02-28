@@ -185,6 +185,7 @@ function _measureBaselineOffset(container, fontSize) {
 //   - LEFT: position.x = kep bal szele
 //   - CENTER: position.x = kep kozepe
 //   - RIGHT: position.x = kep jobb szele
+// Return: { imgBounds, nameBottom } — a position layer-hez is felhasznalhato
 function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakAfter) {
   // Kep bounds EFFEKTEK NELKUL — a gap a kep szelétől indul, NEM a stroke-tol
   var imgBounds = _getBoundsNoEffects(imageLayer);
@@ -212,18 +213,14 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakA
     }
   } catch (e) {
     // nem text layer — skip
-    return;
+    return null;
   }
 
   // --- Pozicionalas: textItem.position (baseline anchor) ---
-  // A desiredBoundsTop az, ahova a szoveg felso szelet akarjuk:
   var desiredBoundsTop = imgBottom + gapPx;
-  // A baseline ehhez kepest _baselineOffset-tel lejjebb van:
   var desiredBaselineY = desiredBoundsTop + _baselineOffset;
 
-  // Vizszintes pozicio a justification alapjan:
-  // A textItem.position.x a justification anchor pontja:
-  //   LEFT → bal szeltol, CENTER → kozeptol, RIGHT → jobb szeltol
+  // Vizszintes pozicio a justification alapjan
   var desiredX;
   if (textAlign === "left") {
     desiredX = imgBounds.left;
@@ -235,13 +232,15 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakA
 
   // Position beallitasa — a baseline anchor pont
   textItem.position = [new UnitValue(Math.round(desiredX), "px"), new UnitValue(Math.round(desiredBaselineY), "px")];
+
+  // Nev bounds lekeres (a position layer-nek kell a nameBottom)
+  var nameBounds = _getBoundsNoEffects(nameLayer);
+  return { imgBounds: imgBounds, nameBottom: nameBounds.bottom };
 }
 
 // --- Pozicio (beosztás) layer pozicionalasa a nev ala ---
-function _positionPositionLayerUnderName(posLayer, nameLayer, imageLayer, textAlign) {
-  var nameBounds = _getBoundsNoEffects(nameLayer);
-  var nameBottom = nameBounds.bottom;
-
+// nameBottom es imgBounds parameterkent jon — NEM kerdezzuk le ujra
+function _positionPositionLayerUnderName(posLayer, nameBottom, imgBounds, textAlign) {
   var posGapPx = _cm2px(CONFIG.POSITION_GAP_CM);
 
   // Baseline offset meres a kisebb fonthoz (egyszer)
@@ -255,7 +254,6 @@ function _positionPositionLayerUnderName(posLayer, nameLayer, imageLayer, textAl
   var posBaselineY = posBoundsTop + _baselineOffsetPos;
 
   // Vizszintes pozicio: a kep alapjan
-  var imgBounds = _getBoundsNoEffects(imageLayer);
   var desiredX;
   if (textAlign === "left") {
     desiredX = imgBounds.left;
@@ -310,13 +308,15 @@ function _arrangeNameGroup(nameGroupPath) {
         continue;
       }
 
-      _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakAfter);
-      _moved++;
+      var result = _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakAfter);
+      if (result) {
+        _moved++;
 
-      // Pozicio (beosztás) layer mozgatasa a nev ala
-      var posLayer = _findPositionLayer(nameLayer.name);
-      if (posLayer) {
-        _positionPositionLayerUnderName(posLayer, nameLayer, imageLayer, textAlign);
+        // Pozicio (beosztás) layer mozgatasa a nev ala — bounds ujrahasznositasa
+        var posLayer = _findPositionLayer(nameLayer.name);
+        if (posLayer) {
+          _positionPositionLayerUnderName(posLayer, result.nameBottom, result.imgBounds, textAlign);
+        }
       }
     } catch (e) {
       log("[JSX] WARN: Nev pozicionalas sikertelen (" + nameLayer.name + "): " + e.message);

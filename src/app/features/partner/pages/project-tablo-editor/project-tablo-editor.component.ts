@@ -821,7 +821,7 @@ export class ProjectTabloEditorComponent implements OnInit {
 
     if (result.success) {
       this.psdHasLayouts.set(true);
-      this.successMessage.set('Pillanatkép létrehozva a meglévő PSD-ből!');
+      await this.openLayoutDesigner();
     } else {
       this.error.set(result.error || 'Nem sikerült kiolvasni az elrendezést. Győződj meg, hogy a PSD meg van nyitva a Photoshop-ban!');
     }

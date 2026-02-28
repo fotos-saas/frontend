@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { SafeHtmlPipe } from '../../../../shared/pipes/safe-html.pipe';
+import { getFileTypeIcon, formatAttachmentSize } from '../../../../shared/utils/file-type-icon.util';
 import { PartnerTaskService } from '../../services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -42,6 +43,8 @@ export class TasksOverviewComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+  readonly getFileTypeIcon = getFileTypeIcon;
+  readonly formatAttachmentSize = formatAttachmentSize;
 
   rawGroups = signal<ProjectTaskGroup[]>([]);
   loading = signal(true);

@@ -7,12 +7,13 @@ import { ElectronCacheService } from './electron-cache.service';
 import { ElectronPaymentService } from './electron-payment.service';
 import { ElectronDragService } from './electron-drag.service';
 import { ElectronPortraitService } from './electron-portrait.service';
+import { ElectronSyncService } from './electron-sync.service';
 
 // Re-export tipusok backward kompatibilitashoz
 export type { NotificationOptions, NotificationResult } from './electron-notification.service';
 export type { QueuedRequest } from './electron-cache.service';
 export type { NativeDragFile, TouchBarItem, TouchBarItemType, TouchBarContext } from './electron-drag.service';
-export type { UpdateState, PortraitProcessResult, PortraitBatchResult, PortraitProcessingSettings } from './electron.types';
+export type { UpdateState, PortraitProcessResult, PortraitBatchResult, PortraitProcessingSettings, SyncPeer, SyncPairedPeer, SyncProgressData, SyncState, SyncSettings } from './electron.types';
 
 // Window.electronAPI tipus deklaracio importalasa (side-effect)
 import './electron.types';
@@ -26,6 +27,7 @@ import './electron.types';
  * - ElectronPaymentService: Stripe fizetes, deep link
  * - ElectronDragService: native drag & drop, Touch Bar
  * - ElectronPortraitService: portre hatter feldolgozas
+ * - ElectronSyncService: LAN szinkronizalas
  */
 @Injectable({
   providedIn: 'root'
@@ -38,6 +40,7 @@ export class ElectronService {
   private readonly paymentService = inject(ElectronPaymentService);
   private readonly dragService = inject(ElectronDragService);
   private readonly portraitService = inject(ElectronPortraitService);
+  private readonly syncService = inject(ElectronSyncService);
 
   private readonly _darkMode = signal<boolean>(false);
   private readonly _onlineStatus = signal<boolean>(true);
@@ -262,4 +265,7 @@ export class ElectronService {
   }
   getPortraitTempDir() { return this.portraitService.getTempDir(); }
   cleanupPortraitTemp(paths: string[]) { return this.portraitService.cleanupTemp(paths); }
+
+  // --- LAN Sync ---
+  get sync() { return this.syncService; }
 }

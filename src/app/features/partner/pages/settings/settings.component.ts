@@ -8,6 +8,8 @@ import { DeleteAccountDialogComponent } from './components/delete-account-dialog
 import { StorageUsageCardComponent } from './components/storage-usage-card/storage-usage-card.component';
 import { StoragePurchaseDialogComponent } from './components/storage-purchase-dialog/storage-purchase-dialog.component';
 import { AddonsCardComponent } from './components/addons-card/addons-card.component';
+import { SyncSettingsCardComponent } from './components/sync-settings-card/sync-settings-card.component';
+import { ElectronService } from '../../../../core/services/electron.service';
 import { SettingsStateService } from './settings-state.service';
 
 /**
@@ -30,6 +32,7 @@ import { SettingsStateService } from './settings-state.service';
     StorageUsageCardComponent,
     StoragePurchaseDialogComponent,
     AddonsCardComponent,
+    SyncSettingsCardComponent,
   ],
   template: `
     <div class="settings-page page-card">
@@ -91,6 +94,13 @@ import { SettingsStateService } from './settings-state.service';
           </div>
         }
       </section>
+
+      <!-- LAN szinkronizálás szekció (csak Electron) -->
+      @if (isElectron) {
+        <section class="settings-section">
+          <app-sync-settings-card />
+        </section>
+      }
 
       <!-- Kiegészítők szekció -->
       <section class="settings-section">
@@ -266,7 +276,9 @@ import { SettingsStateService } from './settings-state.service';
 })
 export class PartnerSettingsComponent implements OnInit {
   protected readonly state = inject(SettingsStateService);
+  private readonly electronService = inject(ElectronService);
   protected readonly ICONS = ICONS;
+  readonly isElectron = this.electronService.isElectron;
 
   // Signal delegálás a template-nek
   readonly subscriptionInfo = this.state.subscriptionInfo;

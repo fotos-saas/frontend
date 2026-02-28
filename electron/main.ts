@@ -18,6 +18,7 @@ import { registerSampleGeneratorHandlers } from './handlers/sample-generator.han
 import { registerFinalizerHandlers } from './handlers/finalizer.handler';
 import { registerOverlayHandlers } from './handlers/overlay.handler';
 import { registerPortraitHandlers } from './handlers/portrait.handler';
+import { registerSyncHandlers } from './handlers/sync.handler';
 
 const { TouchBarButton, TouchBarLabel, TouchBarSpacer, TouchBarSegmentedControl, TouchBarSlider } = TouchBar;
 
@@ -742,6 +743,9 @@ app.whenReady().then(() => {
 
   // Portrait háttér feldolgozás IPC handlerek regisztralasa
   registerPortraitHandlers();
+
+  // LAN szinkronizálás IPC handlerek regisztralasa
+  registerSyncHandlers(mainWindow || undefined);
 
   // macOS: recreate window when dock icon is clicked
   app.on('activate', () => {

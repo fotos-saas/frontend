@@ -360,6 +360,7 @@ export const ICONS = {
   // Marketplace modulok (backend config ikonok)
   BAR_CHART: 'bar-chart-3',
   MONITOR: 'monitor',
+  LAPTOP: 'laptop',
   GLOBE: 'globe',
   ERASER: 'eraser',
   CROP: 'crop',

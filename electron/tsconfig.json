@@ -14,6 +14,6 @@
     "declaration": false,
     "sourceMap": true
   },
-  "include": ["*.ts", "handlers/**/*.ts"],
+  "include": ["*.ts", "handlers/**/*.ts", "utils/**/*.ts"],
   "exclude": ["node_modules"]
 }

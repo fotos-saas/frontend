@@ -22,6 +22,7 @@ import { ContactEditDialogComponent, ContactEditResult, ContactData } from '../.
 import { PokeReceivedDialogComponent } from '../../../../shared/components/poke-received-dialog/poke-received-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TopBarActionsComponent } from './components/top-bar-actions/top-bar-actions.component';
+import { SyncStatusIndicatorComponent } from '../../../../shared/components/sync-status-indicator/sync-status-indicator.component';
 import { TopBarUserBadgesComponent } from './components/top-bar-user-badges/top-bar-user-badges.component';
 import { PartnerSwitcherDropdownComponent } from '../../../../shared/components/partner-switcher-dropdown/partner-switcher-dropdown.component';
 
@@ -45,6 +46,7 @@ import { PartnerSwitcherDropdownComponent } from '../../../../shared/components/
     TopBarActionsComponent,
     TopBarUserBadgesComponent,
     PartnerSwitcherDropdownComponent,
+    SyncStatusIndicatorComponent,
   ],
   templateUrl: './top-bar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

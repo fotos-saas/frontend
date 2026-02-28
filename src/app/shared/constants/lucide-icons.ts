@@ -128,9 +128,10 @@ import {
   Fingerprint,
   ShieldCheck,
   Lock,
-  // Network / Offline
+  // Network / Offline / LAN Sync
   Wifi,
   WifiOff,
+  Laptop,
   // Help & Documentation
   HelpCircle,
   BookOpen,
@@ -369,9 +370,10 @@ export const LUCIDE_ICONS_MAP = {
   Fingerprint,
   ShieldCheck,
   Lock,
-  // Network / Offline
+  // Network / Offline / LAN Sync
   Wifi,
   WifiOff,
+  Laptop,
   // Help & Documentation
   HelpCircle,
   BookOpen,

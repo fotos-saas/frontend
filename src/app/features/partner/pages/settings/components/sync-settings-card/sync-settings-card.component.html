@@ -1,0 +1,180 @@
+<!-- LAN Szinkronizálás beállítások -->
+<div class="card">
+  <div class="card-header">
+    <div class="flex items-center gap-3">
+      <div class="p-2 bg-blue-50 rounded-lg">
+        <lucide-icon [name]="ICONS.WIFI" [size]="20" class="text-blue-600" />
+      </div>
+      <div>
+        <h3 class="text-base font-semibold text-gray-900">LAN szinkronizálás</h3>
+        <p class="text-sm text-gray-500">Fájlok automatikus szinkronizálása a helyi hálózaton</p>
+      </div>
+    </div>
+    <label class="toggle-switch">
+      <input
+        type="checkbox"
+        [checked]="syncService.syncEnabled()"
+        (change)="toggleSync()"
+      />
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+
+  @if (syncService.syncEnabled()) {
+    <!-- Állapot -->
+    <div class="card-section">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="status-dot" [class]="statusDotClass()"></span>
+        <span class="text-sm font-medium text-gray-700">{{ statusText() }}</span>
+      </div>
+
+      <!-- Hiba üzenet -->
+      @if (syncService.hasError() && syncService.lastError()) {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+          <p class="text-sm text-red-700">{{ syncService.lastError() }}</p>
+          <button
+            class="text-xs text-red-600 underline mt-1"
+            (click)="syncService.clearError()"
+            type="button"
+          >Bezárás</button>
+        </div>
+      }
+
+      <!-- Átviteli progress -->
+      @if (syncService.isSyncing() && syncService.currentTransfer(); as transfer) {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+          <div class="flex justify-between text-sm text-blue-700 mb-1">
+            <span class="truncate max-w-[200px]">{{ transfer.fileName }}</span>
+            <span>{{ transfer.percent }}%</span>
+          </div>
+          <div class="h-1.5 bg-blue-200 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-blue-600 rounded-full transition-all duration-300"
+              [style.width.%]="transfer.percent"
+            ></div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Felfedezett eszközök -->
+    <div class="card-section">
+      <h4 class="text-sm font-medium text-gray-700 mb-2">Felfedezett eszközök</h4>
+
+      @if (syncService.discoveredPeers().length === 0) {
+        <p class="text-sm text-gray-400 italic">Keresés folyamatban...</p>
+      } @else {
+        <div class="space-y-2">
+          @for (peer of syncService.discoveredPeers(); track peer.id) {
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+              <div class="flex items-center gap-2">
+                <lucide-icon [name]="ICONS.LAPTOP" [size]="16" class="text-gray-500" />
+                <div>
+                  <span class="text-sm font-medium text-gray-800">{{ peer.name }}</span>
+                  <span class="text-xs text-gray-400 ml-2">{{ peer.ip }}</span>
+                </div>
+              </div>
+              @if (peer.paired) {
+                <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Párosítva</span>
+              } @else {
+                <button
+                  class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-md hover:bg-blue-200 transition-colors"
+                  (click)="startPairing(peer.id)"
+                  type="button"
+                >Párosítás</button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Párosított eszközök -->
+    @if (syncService.pairedPeers().length > 0) {
+      <div class="card-section">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">Párosított eszközök</h4>
+        <div class="space-y-2">
+          @for (peer of syncService.pairedPeers(); track peer.peerId) {
+            <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+              <div class="flex items-center gap-2">
+                <lucide-icon [name]="ICONS.LAPTOP" [size]="16" class="text-green-600" />
+                <div>
+                  <span class="text-sm font-medium text-gray-800">{{ peer.deviceName }}</span>
+                  <span class="text-xs text-gray-400 ml-2">
+                    {{ peer.pairedAt | date:'yyyy.MM.dd. HH:mm' }}
+                  </span>
+                </div>
+              </div>
+              <button
+                class="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-md transition-colors"
+                (click)="unpairPeer(peer.peerId)"
+                type="button"
+              >Párosítás törlése</button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Párosítás dialógus -->
+    @if (showPairingDialog()) {
+      <div class="card-section">
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          @if (pairingMode() === 'generate') {
+            <p class="text-sm text-purple-700 mb-2">Írd be ezt a kódot a másik gépen:</p>
+            <div class="text-3xl font-mono font-bold text-purple-900 tracking-[0.3em] text-center my-3">
+              {{ syncService.pairingCode() }}
+            </div>
+            <p class="text-xs text-purple-500 text-center">A kód 5 percig érvényes</p>
+          } @else {
+            <p class="text-sm text-purple-700 mb-2">Írd be a másik gépen megjelenő kódot:</p>
+            <div class="flex gap-2 mt-2">
+              <input
+                type="text"
+                maxlength="6"
+                placeholder="000000"
+                class="flex-1 px-3 py-2 text-center text-lg font-mono tracking-[0.2em]
+                       border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                #codeInput
+                (keyup.enter)="submitPairingCode(codeInput.value)"
+              />
+              <button
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                (click)="submitPairingCode(codeInput.value)"
+                type="button"
+              >OK</button>
+            </div>
+          }
+          <button
+            class="w-full mt-3 text-xs text-purple-600 hover:text-purple-700"
+            (click)="cancelPairing()"
+            type="button"
+          >Mégse</button>
+        </div>
+      </div>
+    }
+
+    <!-- Műveletek -->
+    <div class="card-section flex gap-2">
+      <button
+        class="flex-1 px-3 py-2 text-sm font-medium bg-gray-100 text-gray-700
+               hover:bg-gray-200 rounded-lg transition-colors
+               disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="syncService.isSyncing() || syncService.pairedPeers().length === 0"
+        (click)="syncService.forceSync()"
+        type="button"
+      >
+        <lucide-icon [name]="ICONS.REFRESH" [size]="14" class="inline mr-1" />
+        Kézi szinkronizálás
+      </button>
+      <button
+        class="px-3 py-2 text-sm font-medium bg-blue-100 text-blue-700
+               hover:bg-blue-200 rounded-lg transition-colors"
+        (click)="showPairActions()"
+        type="button"
+      >
+        Pár létrehozása
+      </button>
+    </div>
+  }
+</div>

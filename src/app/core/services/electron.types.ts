@@ -348,6 +348,74 @@ export interface PortraitProcessingSettings {
   output_quality: number;
 }
 
+// ============ LAN Sync API ============
+
+export interface SyncPeer {
+  id: string;
+  name: string;
+  host: string;
+  ip: string;
+  port: number;
+  userId: string;
+  version: string;
+  paired: boolean;
+}
+
+export interface SyncPairedPeer {
+  peerId: string;
+  deviceName: string;
+  psk: string;
+  pairedAt: number;
+}
+
+export interface SyncProgressData {
+  fileName: string;
+  percent: number;
+  bytesTransferred: number;
+  totalBytes: number;
+  overallPercent?: number;
+}
+
+export type SyncState = 'disabled' | 'searching' | 'idle' | 'syncing' | 'error';
+
+export interface SyncSettings {
+  enabled: boolean;
+  ignorePatterns: string[];
+  autoSync: boolean;
+}
+
+export interface SyncStatusResult {
+  success: boolean;
+  state: SyncState;
+  enabled: boolean;
+  deviceId: string;
+  deviceName: string;
+  serverPort: number;
+  workspacePath: string;
+  pairedPeers: SyncPairedPeer[];
+  discoveredPeers: SyncPeer[];
+  error?: string;
+}
+
+interface SyncAPI {
+  getStatus: () => Promise<SyncStatusResult>;
+  enable: (params: { userId: string; workspacePath: string }) => Promise<{ success: boolean; port?: number; error?: string }>;
+  disable: () => Promise<{ success: boolean; error?: string }>;
+  pair: (code?: string) => Promise<{ success: boolean; mode: 'generate' | 'accept'; code: string; error?: string }>;
+  pairWithPeer: (params: { peerId: string; code: string }) => Promise<{ success: boolean; error?: string }>;
+  acceptPair: (params: { peerId: string; code: string }) => Promise<{ success: boolean; error?: string }>;
+  unpair: (peerId: string) => Promise<{ success: boolean; error?: string }>;
+  getPeers: () => Promise<{ success: boolean; discovered: SyncPeer[]; paired: SyncPairedPeer[]; error?: string }>;
+  forceSync: () => Promise<{ success: boolean; error?: string }>;
+  getSettings: () => Promise<{ success: boolean; settings?: SyncSettings; error?: string }>;
+  setSettings: (settings: { ignorePatterns?: string[] }) => Promise<{ success: boolean; error?: string }>;
+  onStatusChanged: (callback: (data: { state: SyncState }) => void) => CleanupFn;
+  onPeerDiscovered: (callback: (peer: SyncPeer) => void) => CleanupFn;
+  onPeerLost: (callback: (peer: SyncPeer) => void) => CleanupFn;
+  onProgress: (callback: (progress: SyncProgressData) => void) => CleanupFn;
+  onError: (callback: (data: { message: string }) => void) => CleanupFn;
+}
+
 interface PortraitAPI {
   checkPython: () => Promise<{ available: boolean; error?: string }>;
   processSingle: (params: {
@@ -411,6 +479,7 @@ export interface ElectronAPI {
   sample: SampleAPI;
   finalizer: FinalizerAPI;
   portrait: PortraitAPI;
+  sync: SyncAPI;
 }
 
 declare global {

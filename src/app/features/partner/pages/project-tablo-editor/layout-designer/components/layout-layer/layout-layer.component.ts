@@ -46,7 +46,7 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
           </div>
         }
       } @else if (isText()) {
-        <div class="designer-layer__text">
+        <div class="designer-layer__text" [style.font-size.px]="textFontSize()">
           @for (line of textLines(); track $index) {
             <div class="designer-layer__text-line">{{ line }}</div>
           }
@@ -138,7 +138,6 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
       flex-direction: column;
       align-items: center;
       color: #1e293b;
-      font-size: 10px;
       line-height: 1.2;
     }
 
@@ -254,6 +253,12 @@ export class LayoutLayerComponent implements AfterViewInit {
   readonly placeholderIconSize = computed(() =>
     Math.max(12, Math.min(24, this.displayWidth() * 0.4)),
   );
+
+  /** Szöveg méret: arányosan skálázódik a PSD méretéhez (25pt alap a PSD-ben) */
+  readonly textFontSize = computed(() => {
+    const basePx = 30; // ~25pt a PSD-ben pixel-ben
+    return Math.max(6, Math.round(basePx * this.scale()));
+  });
 
   ngAfterViewInit(): void {
     // DOM elem regisztrálása a drag service-ben

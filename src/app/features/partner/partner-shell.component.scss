@@ -341,8 +341,10 @@
   line-height: 1;
 }
 
-.flyout-item .child-badge {
+.flyout-item .child-badge,
+.flyout-item .dev-badge {
   margin-left: 8px;
+  display: inline-flex;
 }
 
 /* ============ Sidebar Partner Switcher ============ */

@@ -98,6 +98,7 @@ const PHOTO_CACHE_TTL_MS = 5 * 60 * 1000; // 5 perc
 /** AppleScript string escape — megakadályozza az injection-t */
 export function appleScriptEscape(str: string): string {
   return str
+    .replace(/\0/g, '')     // null byte eltávolítás
     .replace(/\\/g, '\\\\')
     .replace(/"/g, '\\"')
     .replace(/\n/g, '\\n')
@@ -108,6 +109,7 @@ export function appleScriptEscape(str: string): string {
 /** JSX (ExtendScript) string escape — külön kontextus az AppleScript-től */
 export function jsxStringEscape(str: string): string {
   return str
+    .replace(/\0/g, '')     // null byte eltávolítás
     .replace(/\\/g, '\\\\')
     .replace(/"/g, '\\"')
     .replace(/'/g, "\\'")
@@ -116,11 +118,16 @@ export function jsxStringEscape(str: string): string {
 }
 
 /** Allowed domains for photo downloads (SSRF protection) */
-const ALLOWED_DOWNLOAD_DOMAINS = [
+const PRODUCTION_DOWNLOAD_DOMAINS = [
   'api.tablostudio.hu',
   'cdn.tablostudio.hu',
   'storage.tablostudio.hu',
   'tablostudio.hu',
+];
+
+/** Localhost csak dev módban engedélyezett */
+const DEV_DOWNLOAD_DOMAINS = [
+  ...PRODUCTION_DOWNLOAD_DOMAINS,
   'localhost',
   '127.0.0.1',
 ];
@@ -323,9 +330,10 @@ export class JsxRunnerService {
     try {
       const parsed = new URL(url);
       if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
-      return ALLOWED_DOWNLOAD_DOMAINS.some(
-        (d) => parsed.hostname === d || parsed.hostname.endsWith('.' + d),
-      );
+      // Localhost csak dev módban engedélyezett
+      const allowedDomains = app.isPackaged ? PRODUCTION_DOWNLOAD_DOMAINS : DEV_DOWNLOAD_DOMAINS;
+      // Strict domain match — NEM enged subdomain bypass-t (pl. evil.localhost)
+      return allowedDomains.some((d) => parsed.hostname === d);
     } catch {
       return false;
     }
@@ -444,19 +452,45 @@ export class JsxRunnerService {
       : path.join(__dirname, '..', '..', 'scripts', 'photoshop', 'extendscript', scriptName);
   }
 
-  resolveIncludes(scriptContent: string, scriptDir: string): string {
+  resolveIncludes(scriptContent: string, scriptDir: string, depth = 0): string {
+    const MAX_INCLUDE_DEPTH = 10;
+    if (depth >= MAX_INCLUDE_DEPTH) {
+      log.warn(`JSX #include max mélység elérve (${MAX_INCLUDE_DEPTH})`);
+      return scriptContent;
+    }
+
+    // A script base könyvtár: a munkakönytár/scripts vagy a beépített scripts
+    const scriptBaseDir = this.getScriptBaseDir();
+
     return scriptContent.replace(
       /\/\/\s*#include\s+"([^"]+)"/g,
       (_match, includePath) => {
         const fullPath = path.resolve(scriptDir, includePath);
-        if (!fs.existsSync(fullPath)) {
-          log.warn(`JSX #include fajl nem talalhato: ${fullPath}`);
-          return `// HIBA: #include fajl nem talalhato: ${includePath}`;
+        const realPath = fs.existsSync(fullPath) ? fs.realpathSync(fullPath) : null;
+
+        // Path traversal védelem: az include-nak a script base-en belül kell lennie
+        // Strict check: path separator kötelező a base dir után (megelőzi /scripts-evil/ bypass-t)
+        if (!realPath || !(realPath === scriptBaseDir || realPath.startsWith(scriptBaseDir + path.sep))) {
+          log.warn(`JSX #include path traversal blokkolva: ${includePath} → ${fullPath}`);
+          return `// HIBA: #include fajl nem engedelyezett: ${includePath}`;
         }
-        const includeContent = fs.readFileSync(fullPath, 'utf-8');
-        return this.resolveIncludes(includeContent, path.dirname(fullPath));
+
+        const includeContent = fs.readFileSync(realPath, 'utf-8');
+        return this.resolveIncludes(includeContent, path.dirname(realPath), depth + 1);
       },
     );
+  }
+
+  private getScriptBaseDir(): string {
+    const workDir = this.psStore.get('workDirectory', null);
+    if (workDir) {
+      const scriptsDir = path.join(workDir, 'scripts');
+      if (fs.existsSync(scriptsDir)) return fs.realpathSync(scriptsDir);
+    }
+    const builtInDir = app.isPackaged
+      ? path.join(process.resourcesPath, 'scripts', 'photoshop', 'extendscript')
+      : path.join(__dirname, '..', '..', 'scripts', 'photoshop', 'extendscript');
+    return fs.existsSync(builtInDir) ? fs.realpathSync(builtInDir) : builtInDir;
   }
 
   buildJsxScript(
@@ -494,7 +528,12 @@ export class JsxRunnerService {
       configOverrides.push(`CONFIG.PSD_FILE_PATH = "${escapedPsd}";`);
     }
     if (extraConfig) {
+      const SAFE_KEY_PATTERN = /^[A-Z_][A-Z0-9_]*$/;
       for (const [key, val] of Object.entries(extraConfig)) {
+        if (!SAFE_KEY_PATTERN.test(key)) {
+          log.warn(`extraConfig érvénytelen kulcs kihagyva: ${key}`);
+          continue;
+        }
         configOverrides.push(`CONFIG.${key} = "${jsxStringEscape(val)}";`);
       }
     }

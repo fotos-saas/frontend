@@ -17,8 +17,11 @@ import { TrayManagerService } from './tray-manager.service';
 
 const KEYCHAIN_SERVICE = 'hu.tablostudio.app';
 const KEYCHAIN_DAEMON_KEY = '__daemon_token__';
+const KEYCHAIN_EXPIRES_KEY = '__daemon_token_expires__';
 const BASE_POLL_INTERVAL = 30_000;
 const MAX_POLL_INTERVAL = 300_000;
+const MAX_RESPONSE_BODY_SIZE = 1_048_576; // 1MB
+const TOKEN_PROACTIVE_REFRESH_MS = 24 * 60 * 60 * 1000; // 24h before expiry
 // Production default — lokálisan felülírható a daemon tokennel együtt
 const DEFAULT_API_BASE = 'https://api.tablostudio.hu';
 
@@ -41,6 +44,7 @@ export class WorkflowPollerService {
   private isPaused = false;
   private isProcessing = false;
   private token: string | null = null;
+  private tokenExpiresAt: number | null = null;
   private apiBase = DEFAULT_API_BASE;
 
   constructor(
@@ -52,6 +56,7 @@ export class WorkflowPollerService {
     log.info('WorkflowPoller indul...');
 
     this.token = await this.loadToken();
+    this.tokenExpiresAt = await this.loadTokenExpiry();
     if (!this.token) {
       log.warn('WorkflowPoller: nincs daemon token, polling nem indul');
       this.trayManager.showNotification(
@@ -101,6 +106,12 @@ export class WorkflowPollerService {
       return;
     }
 
+    // Proaktív token frissítés (lejárat előtt 24 órával)
+    if (this.shouldProactivelyRefreshToken()) {
+      log.info('WorkflowPoller: proaktív token frissítés (lejárat közelít)');
+      await this.refreshToken();
+    }
+
     try {
       const response = await this.apiGet<TasksResponse>('/partner/desktop/workflow-tasks');
 
@@ -117,23 +128,28 @@ export class WorkflowPollerService {
       log.error('WorkflowPoller polling hiba:', errMsg);
 
       if (errMsg.includes('401')) {
-        log.warn('WorkflowPoller: token lejart, megprobal frissiteni');
-        const refreshed = await this.refreshToken();
-        if (!refreshed) {
-          this.trayManager.showNotification(
-            'PhotoStack Előkészítő',
-            'A bejelentkezés lejárt. Kérjük, jelentkezzen be újra.',
-          );
-          this.stop();
-          return;
-        }
+        // Lejárt tokennel NEM próbálunk refresh-t — újra bejelentkezés kell
+        log.warn('WorkflowPoller: token lejárt, újra bejelentkezés szükséges');
+        this.trayManager.showNotification(
+          'PhotoStack Előkészítő',
+          'A bejelentkezés lejárt. Kérjük, jelentkezzen be újra az alkalmazásban.',
+        );
+        this.stop();
+        return;
       }
 
-      this.pollInterval = Math.min(this.pollInterval * 2, MAX_POLL_INTERVAL);
-      log.info(`WorkflowPoller backoff: ${this.pollInterval / 1000}s`);
+      // Exponenciális backoff jitter-rel
+      const jitter = Math.random() * 0.3 + 0.85; // 0.85–1.15x
+      this.pollInterval = Math.min(this.pollInterval * 2 * jitter, MAX_POLL_INTERVAL);
+      log.info(`WorkflowPoller backoff: ${Math.round(this.pollInterval / 1000)}s`);
     }
 
     this.schedulePoll();
+  }
+
+  private shouldProactivelyRefreshToken(): boolean {
+    if (!this.tokenExpiresAt || !this.token) return false;
+    return Date.now() > this.tokenExpiresAt - TOKEN_PROACTIVE_REFRESH_MS;
   }
 
   private async processTask(task: WorkflowTask): Promise<void> {
@@ -270,17 +286,38 @@ export class WorkflowPollerService {
     }
   }
 
+  private async loadTokenExpiry(): Promise<number | null> {
+    try {
+      const expiresStr = await keytar.getPassword(KEYCHAIN_SERVICE, KEYCHAIN_EXPIRES_KEY);
+      if (!expiresStr) return null;
+      const ts = new Date(expiresStr).getTime();
+      return isNaN(ts) ? null : ts;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Proaktív token frissítés — CSAK érvényes tokennel hívható.
+   * Ha a token már lejárt, nem próbálkozunk (401 → stop + re-login).
+   */
   private async refreshToken(): Promise<boolean> {
     try {
-      const response = await this.apiPost<{ token: string }>('/partner/auth/refresh-daemon-token', {});
-      if (response?.token) {
-        this.token = response.token;
-        await keytar.setPassword(KEYCHAIN_SERVICE, KEYCHAIN_DAEMON_KEY, response.token);
-        log.info('WorkflowPoller: token frissitve');
+      const response = await this.apiPost<{ data: { token: string; expires_at: string } }>(
+        '/partner/auth/refresh-daemon-token',
+        {},
+      );
+      const data = response?.data;
+      if (data?.token) {
+        this.token = data.token;
+        this.tokenExpiresAt = new Date(data.expires_at).getTime();
+        await keytar.setPassword(KEYCHAIN_SERVICE, KEYCHAIN_DAEMON_KEY, data.token);
+        await keytar.setPassword(KEYCHAIN_SERVICE, KEYCHAIN_EXPIRES_KEY, data.expires_at);
+        log.info('WorkflowPoller: token proaktívan frissítve');
         return true;
       }
     } catch (error) {
-      log.error('WorkflowPoller: token frissites sikertelen:', error);
+      log.error('WorkflowPoller: token frissítés sikertelen:', error);
     }
     return false;
   }
@@ -315,7 +352,16 @@ export class WorkflowPollerService {
       const protocol = isHttps ? https : http;
       const req = protocol.request(options, (res) => {
         let data = '';
-        res.on('data', (chunk: Buffer) => { data += chunk.toString(); });
+        let dataSize = 0;
+        res.on('data', (chunk: Buffer) => {
+          dataSize += chunk.length;
+          if (dataSize > MAX_RESPONSE_BODY_SIZE) {
+            req.destroy();
+            reject(new Error(`Válasz mérete meghaladja az 1MB limitet`));
+            return;
+          }
+          data += chunk.toString();
+        });
         res.on('end', () => {
           if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
             try {

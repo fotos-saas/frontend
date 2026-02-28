@@ -195,15 +195,31 @@ export function registerOverlayHandlers(
    */
   function readProjectIdFromJson(psdPath: string): number | null {
     try {
-      // 1. PSD melletti .json
-      const jsonPath = psdPath.replace(/\.(psd|psb)$/i, '.json');
-      if (fs.existsSync(jsonPath)) {
-        const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-        if (typeof data.projectId === 'number' && data.projectId > 0) return data.projectId;
+      const psdDir = path.dirname(psdPath);
+
+      // Helper: projectId kinyerése egy JSON objektumból (projectId vagy id mező, string vagy number)
+      const extractId = (data: Record<string, unknown>): number | null => {
+        const raw = data.projectId ?? data.id;
+        if (raw == null) return null;
+        const num = typeof raw === 'number' ? raw : parseInt(String(raw), 10);
+        return num > 0 ? num : null;
+      };
+
+      // 1. PSD melletti data.json (leggyakoribb)
+      const dataJsonPath = path.join(psdDir, 'data.json');
+      if (fs.existsSync(dataJsonPath)) {
+        const id = extractId(JSON.parse(fs.readFileSync(dataJsonPath, 'utf-8')));
+        if (id) return id;
       }
 
-      // 2. layouts/ mappaban levo legujabb snapshot
-      const psdDir = path.dirname(psdPath);
+      // 2. PSD melletti azonos nevű .json
+      const jsonPath = psdPath.replace(/\.(psd|psb)$/i, '.json');
+      if (fs.existsSync(jsonPath)) {
+        const id = extractId(JSON.parse(fs.readFileSync(jsonPath, 'utf-8')));
+        if (id) return id;
+      }
+
+      // 3. layouts/ mappaban levo legujabb snapshot
       const layoutsDir = path.join(psdDir, 'layouts');
       if (fs.existsSync(layoutsDir)) {
         const files = fs.readdirSync(layoutsDir)
@@ -211,8 +227,8 @@ export function registerOverlayHandlers(
           .sort()
           .reverse(); // legujabb elol (datummal kezdodo fajlnev)
         for (const file of files) {
-          const data = JSON.parse(fs.readFileSync(path.join(layoutsDir, file), 'utf-8'));
-          if (typeof data.projectId === 'number' && data.projectId > 0) return data.projectId;
+          const id = extractId(JSON.parse(fs.readFileSync(path.join(layoutsDir, file), 'utf-8')));
+          if (id) return id;
         }
       }
 

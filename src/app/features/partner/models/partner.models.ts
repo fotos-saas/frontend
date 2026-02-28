@@ -782,6 +782,9 @@ export interface ProjectTask {
   description: string | null;
   is_completed: boolean;
   completed_at: string | null;
+  is_reviewed: boolean;
+  reviewed_at: string | null;
+  reviewed_by: TaskUser | null;
   created_at: string;
   created_by: TaskUser | null;
   assigned_to: TaskUser | null;

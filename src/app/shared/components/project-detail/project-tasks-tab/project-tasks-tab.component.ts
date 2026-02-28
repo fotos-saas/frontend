@@ -96,6 +96,31 @@ export class ProjectTasksTabComponent implements OnInit {
       });
   }
 
+  toggleReview(task: ProjectTask, section: 'my' | 'assigned'): void {
+    if (!task.is_completed) return;
+
+    const signalRef = section === 'my' ? this.myTasks : this.assignedToMe;
+    const prev = signalRef();
+
+    signalRef.update(tasks =>
+      tasks.map(t => t.id === task.id ? { ...t, is_reviewed: !t.is_reviewed } : t)
+    );
+
+    this.taskService.toggleReview(this.projectId(), task.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          signalRef.update(tasks =>
+            tasks.map(t => t.id === task.id ? res.data : t)
+          );
+        },
+        error: () => {
+          signalRef.set(prev);
+          this.toast.error('Hiba', 'Nem sikerült frissíteni a jóváhagyást.');
+        },
+      });
+  }
+
   /** Wrapper hívja a dialógus saved után */
   onTaskSaved(task: ProjectTask, wasEdit: boolean): void {
     // Újratöltjük a szekciós listát, mert kiosztás változhatott

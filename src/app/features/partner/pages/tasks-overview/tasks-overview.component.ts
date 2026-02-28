@@ -210,6 +210,41 @@ export class TasksOverviewComponent implements OnInit {
       });
   }
 
+  toggleReview(group: ProjectTaskGroup, task: ProjectTask): void {
+    if (!task.is_completed) return;
+
+    const prev = this.rawGroups();
+    this.rawGroups.update(groups =>
+      groups.map(g => {
+        if (g.project_id !== group.project_id) return g;
+        return {
+          ...g,
+          tasks: g.tasks.map(t => t.id === task.id ? { ...t, is_reviewed: !t.is_reviewed } : t),
+        };
+      })
+    );
+
+    this.taskService.toggleReview(group.project_id, task.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.rawGroups.update(groups =>
+            groups.map(g => {
+              if (g.project_id !== group.project_id) return g;
+              return {
+                ...g,
+                tasks: g.tasks.map(t => t.id === task.id ? res.data : t),
+              };
+            })
+          );
+        },
+        error: () => {
+          this.rawGroups.set(prev);
+          this.toast.error('Hiba', 'Nem sikerült frissíteni a jóváhagyást.');
+        },
+      });
+  }
+
   navigateToProject(projectId: number): void {
     const base = this.authService.isMarketer() ? '/marketer' : '/partner';
     this.router.navigateByUrl(`${base}/projects/${projectId}#tasks`);

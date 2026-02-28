@@ -45,6 +45,11 @@ export class PartnerTaskService {
     return this.http.patch<{ data: ProjectTask }>(`${this.baseUrl}/projects/${projectId}/tasks/${taskId}/toggle`, {});
   }
 
+  /** Jóváhagyás toggle */
+  toggleReview(projectId: number, taskId: number): Observable<{ data: ProjectTask }> {
+    return this.http.patch<{ data: ProjectTask }>(`${this.baseUrl}/projects/${projectId}/tasks/${taskId}/review`, {});
+  }
+
   /** Feladat törlése */
   deleteTask(projectId: number, taskId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/projects/${projectId}/tasks/${taskId}`);

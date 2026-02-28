@@ -88,6 +88,12 @@
                           {{ task.assigned_to.name }}
                         </span>
                       }
+                      @if (section.key === 'assigned_to_me' && task.is_reviewed) {
+                        <span class="task-row__reviewed-badge">
+                          <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="12" />
+                          Jóváhagyva
+                        </span>
+                      }
                       @if (task.description) {
                         <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
                       }
@@ -109,6 +115,21 @@
                         </div>
                       }
                     </div>
+                    @if (section.key === 'i_gave_others' && task.is_completed && task.assigned_to) {
+                      <button
+                        class="task-row__review-btn"
+                        [class.task-row__review-btn--active]="task.is_reviewed"
+                        (click)="toggleReview(group, task)"
+                        [attr.aria-label]="task.is_reviewed ? 'Jóváhagyás visszavonása' : 'Átnéztem'"
+                      >
+                        <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="14" />
+                        @if (task.is_reviewed) {
+                          <span>Jóváhagyva</span>
+                        } @else {
+                          <span>Átnéztem</span>
+                        }
+                      </button>
+                    }
                   </div>
                 }
               </div>

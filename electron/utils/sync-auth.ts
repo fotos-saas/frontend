@@ -69,9 +69,8 @@ export function getSyncStore(): Store<SyncStoreSchema> {
 let activePairingCode: PairingCode | null = null;
 
 export function generatePairingCode(): string {
-  const code = Array.from({ length: PAIRING_CODE_LENGTH }, () =>
-    Math.floor(Math.random() * 10).toString()
-  ).join('');
+  const bytes = crypto.randomBytes(PAIRING_CODE_LENGTH);
+  const code = Array.from(bytes, (b) => (b % 10).toString()).join('');
   activePairingCode = { code, createdAt: Date.now() };
   log.info('Párosítási kód generálva (érvényesség: 5 perc)');
   return code;
@@ -83,7 +82,11 @@ export function validatePairingCode(code: string): boolean {
     activePairingCode = null;
     return false;
   }
-  const isValid = activePairingCode.code === code;
+  // Timing-safe összehasonlítás
+  const codeBuffer = Buffer.from(code.padEnd(PAIRING_CODE_LENGTH, '0').slice(0, PAIRING_CODE_LENGTH));
+  const expectedBuffer = Buffer.from(activePairingCode.code);
+  const isValid = codeBuffer.length === expectedBuffer.length &&
+    crypto.timingSafeEqual(codeBuffer, expectedBuffer);
   if (isValid) {
     activePairingCode = null; // Egyszeri használat
   }
@@ -149,10 +152,11 @@ export function verifyHmac(
     .update(message)
     .digest('hex');
 
-  return crypto.timingSafeEqual(
-    Buffer.from(receivedHmac, 'hex'),
-    Buffer.from(expectedHmac, 'hex'),
-  );
+  const receivedBuf = Buffer.from(receivedHmac, 'hex');
+  const expectedBuf = Buffer.from(expectedHmac, 'hex');
+  if (receivedBuf.length !== expectedBuf.length) return false;
+
+  return crypto.timingSafeEqual(receivedBuf, expectedBuf);
 }
 
 // ============ Peer kezelés ============
@@ -177,6 +181,11 @@ export function removePairedPeer(peerId: string): void {
 
 export function getPairedPeers(): PairedPeer[] {
   return syncStore.get('pairedPeers');
+}
+
+/** PSK nélküli peer lista — renderer felé küldéshez */
+export function getPairedPeersPublic(): Omit<PairedPeer, 'psk'>[] {
+  return syncStore.get('pairedPeers').map(({ psk: _psk, ...rest }) => rest);
 }
 
 export function findPeerPsk(peerId: string): string | null {

@@ -365,7 +365,6 @@ export interface SyncPeer {
 export interface SyncPairedPeer {
   peerId: string;
   deviceName: string;
-  psk: string;
   pairedAt: number;
 }
 

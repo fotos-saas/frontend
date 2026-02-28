@@ -23,83 +23,87 @@
       <p class="empty-state__text">Adj hozzá feladatokat a projektek Feladatok fülén.</p>
     </div>
   } @else {
-    <!-- Szekciók -->
-    @for (section of sections(); track section.key) {
-      <div class="section">
-        <div class="section__header">
-          <lucide-icon [name]="section.icon" [size]="18" class="section__icon" />
-          <h2 class="section__title">{{ section.title }}</h2>
-          <span class="section__badge" [class.section__badge--done]="section.completedCount === section.totalCount">
-            {{ section.completedCount }}/{{ section.totalCount }} kész
+    <!-- Tab-ok -->
+    <div class="tabs">
+      @for (section of sections(); track section.key) {
+        <button
+          class="tabs__btn"
+          [class.tabs__btn--active]="activeTab() === section.key"
+          (click)="activeTab.set(section.key)"
+        >
+          <lucide-icon [name]="section.icon" [size]="16" class="tabs__icon" />
+          <span class="tabs__label">{{ section.title }}</span>
+          <span class="tabs__badge" [class.tabs__badge--done]="section.completedCount === section.totalCount">
+            {{ section.completedCount }}/{{ section.totalCount }}
           </span>
-        </div>
+        </button>
+      }
+    </div>
 
-        <div class="groups">
-          @for (group of section.groups; track group.project_id) {
-            <div class="group">
-              <!-- Csoport fejléc -->
-              <button class="group__header" (click)="toggleGroup(section.key, group.project_id)">
-                <lucide-icon
-                  [name]="isExpanded(section.key, group.project_id) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
-                  [size]="18"
-                  class="group__chevron"
-                />
-                <div class="group__info">
-                  <span class="group__name" (click)="navigateToProject(group.project_id); $event.stopPropagation()">
-                    {{ group.project_name }}
-                  </span>
-                  @if (group.school_name) {
-                    <span class="group__school">{{ group.school_name }}</span>
-                  }
-                </div>
-                <span class="group__badge" [class.group__badge--done]="group.completed_count === group.total_count">
-                  {{ group.completed_count }}/{{ group.total_count }} kész
+    <!-- Aktív tab tartalom -->
+    @if (activeSection(); as section) {
+      <div class="groups">
+        @for (group of section.groups; track group.project_id) {
+          <div class="group">
+            <!-- Csoport fejléc -->
+            <button class="group__header" (click)="toggleGroup(section.key, group.project_id)">
+              <lucide-icon
+                [name]="isExpanded(section.key, group.project_id) ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
+                [size]="18"
+                class="group__chevron"
+              />
+              <div class="group__info">
+                <span class="group__name" (click)="navigateToProject(group.project_id); $event.stopPropagation()">
+                  {{ group.project_name }}
                 </span>
-              </button>
+                @if (group.school_name) {
+                  <span class="group__school">{{ group.school_name }}</span>
+                }
+              </div>
+              <span class="group__badge" [class.group__badge--done]="group.completed_count === group.total_count">
+                {{ group.completed_count }}/{{ group.total_count }} kész
+              </span>
+            </button>
 
-              <!-- Feladatok -->
-              @if (isExpanded(section.key, group.project_id)) {
-                <div class="group__tasks">
-                  @for (task of group.tasks; track task.id) {
-                    <div class="task-row" [class.task-row--completed]="task.is_completed">
-                      <button class="task-row__checkbox" (click)="toggleTask(group, task)" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
-                        @if (task.is_completed) {
-                          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18" class="task-row__check--done" />
-                        } @else {
-                          <lucide-icon [name]="ICONS.CIRCLE" [size]="18" class="task-row__check" />
-                        }
-                      </button>
-                      <div class="task-row__content">
-                        <span class="task-row__title">{{ task.title }}</span>
-                        @if (section.key === 'assigned_to_me' && task.created_by) {
-                          <span class="task-row__creator">Kiadta: {{ task.created_by.name }}</span>
-                        }
-                        @if (section.key === 'i_gave_others' && task.assigned_to) {
-                          <span class="task-row__assignee">
-                            <lucide-icon [name]="ICONS.USER_CHECK" [size]="12" />
-                            {{ task.assigned_to.name }}
-                          </span>
-                        }
-                        @if (section.key === 'my_own' && task.assigned_to && task.assigned_to.id === currentUserId()) {
-                          <!-- saját feladatnál nem kell extra info -->
-                        }
-                        @if (task.description) {
-                          <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
-                        }
-                        @if (task.attachments && task.attachments.length > 0) {
-                          <span class="task-row__att-count">
-                            <lucide-icon [name]="ICONS.PAPERCLIP" [size]="12" />
-                            {{ task.attachments.length }} csatolmány
-                          </span>
-                        }
-                      </div>
+            <!-- Feladatok -->
+            @if (isExpanded(section.key, group.project_id)) {
+              <div class="group__tasks">
+                @for (task of group.tasks; track task.id) {
+                  <div class="task-row" [class.task-row--completed]="task.is_completed">
+                    <button class="task-row__checkbox" (click)="toggleTask(group, task)" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
+                      @if (task.is_completed) {
+                        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18" class="task-row__check--done" />
+                      } @else {
+                        <lucide-icon [name]="ICONS.CIRCLE" [size]="18" class="task-row__check" />
+                      }
+                    </button>
+                    <div class="task-row__content">
+                      <span class="task-row__title">{{ task.title }}</span>
+                      @if (section.key === 'assigned_to_me' && task.created_by) {
+                        <span class="task-row__creator">Kiadta: {{ task.created_by.name }}</span>
+                      }
+                      @if (section.key === 'i_gave_others' && task.assigned_to) {
+                        <span class="task-row__assignee">
+                          <lucide-icon [name]="ICONS.USER_CHECK" [size]="12" />
+                          {{ task.assigned_to.name }}
+                        </span>
+                      }
+                      @if (task.description) {
+                        <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
+                      }
+                      @if (task.attachments && task.attachments.length > 0) {
+                        <span class="task-row__att-count">
+                          <lucide-icon [name]="ICONS.PAPERCLIP" [size]="12" />
+                          {{ task.attachments.length }} csatolmány
+                        </span>
+                      }
                     </div>
-                  }
-                </div>
-              }
-            </div>
-          }
-        </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
       </div>
     }
   }

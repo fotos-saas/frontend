@@ -46,8 +46,14 @@ export class TasksOverviewComponent implements OnInit {
   rawGroups = signal<ProjectTaskGroup[]>([]);
   loading = signal(true);
   expandedGroups = signal<Set<string>>(new Set());
+  activeTab = signal<string>('');
 
   currentUserId = computed(() => this.authService.currentUserSignal()?.id ?? 0);
+
+  activeSection = computed(() => {
+    const tab = this.activeTab();
+    return this.sections().find(s => s.key === tab) ?? null;
+  });
 
   sections = computed<TaskSection[]>(() => {
     const groups = this.rawGroups();
@@ -138,6 +144,13 @@ export class TasksOverviewComponent implements OnInit {
           }
           this.expandedGroups.set(keys);
           this.loading.set(false);
+          // Első tab kiválasztása ha még nincs
+          if (!this.activeTab()) {
+            const secs = this.sections();
+            if (secs.length > 0) {
+              this.activeTab.set(secs[0].key);
+            }
+          }
         },
         error: () => {
           this.toast.error('Hiba', 'Nem sikerült betölteni a feladatokat.');

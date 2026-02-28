@@ -1,3 +1,7 @@
+@use '../../../../shared/styles/workflow-common' as wf;
+
+@include wf.btn-base;
+
 .approval-card {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -108,49 +112,6 @@
     margin: 4px 0 0;
     font-size: 0.8125rem;
     color: #6b7280;
-  }
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &--primary {
-    background: #6366f1;
-    color: #fff;
-    &:hover:not(:disabled) { background: #4f46e5; }
-  }
-
-  &--red {
-    background: #ef4444;
-    color: #fff;
-    &:hover:not(:disabled) { background: #dc2626; }
-  }
-
-  &--outline-red {
-    background: transparent;
-    border: 1px solid #fca5a5;
-    color: #dc2626;
-    &:hover:not(:disabled) { background: #fef2f2; }
-  }
-
-  &--ghost {
-    background: transparent;
-    color: #6b7280;
-    &:hover:not(:disabled) { background: #f3f4f6; }
   }
 }
 

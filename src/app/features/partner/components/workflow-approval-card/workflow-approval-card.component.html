@@ -48,7 +48,7 @@
         <div class="approval-card__approve-section">
           <textarea
             class="approval-card__notes"
-            [(ngModel)]="approveNotes"
+            [ngModel]="approveNotes()" (ngModelChange)="approveNotes.set($event)"
             placeholder="Megjegyzés (opcionális)..."
             rows="2"
           ></textarea>
@@ -77,7 +77,7 @@
         <div class="approval-card__reject-section">
           <textarea
             class="approval-card__reason"
-            [(ngModel)]="rejectReason"
+            [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
             placeholder="Elutasítás oka (kötelező)..."
             rows="3"
           ></textarea>

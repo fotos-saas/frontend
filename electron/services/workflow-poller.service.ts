@@ -19,7 +19,8 @@ const KEYCHAIN_SERVICE = 'hu.tablostudio.app';
 const KEYCHAIN_DAEMON_KEY = '__daemon_token__';
 const BASE_POLL_INTERVAL = 30_000;
 const MAX_POLL_INTERVAL = 300_000;
-const API_BASE = 'https://api.tablostudio.hu';
+// Production default — lokálisan felülírható a daemon tokennel együtt
+const DEFAULT_API_BASE = 'https://api.tablostudio.hu';
 
 interface WorkflowTask {
   step_id: number;
@@ -30,7 +31,7 @@ interface WorkflowTask {
 }
 
 interface TasksResponse {
-  tasks: WorkflowTask[];
+  task: WorkflowTask | null;
   pending_approval_count: number;
 }
 
@@ -40,6 +41,7 @@ export class WorkflowPollerService {
   private isPaused = false;
   private isProcessing = false;
   private token: string | null = null;
+  private apiBase = DEFAULT_API_BASE;
 
   constructor(
     private readonly jsxRunner: JsxRunnerService,
@@ -102,11 +104,13 @@ export class WorkflowPollerService {
     try {
       const response = await this.apiGet<TasksResponse>('/partner/desktop/workflow-tasks');
 
-      this.trayManager.setPendingCount(response.pending_approval_count);
+      this.trayManager.setPendingCount(response.pending_approval_count ?? 0);
       this.pollInterval = BASE_POLL_INTERVAL;
 
-      if (response.tasks.length > 0) {
-        await this.processTasks(response.tasks);
+      if (response.task) {
+        await this.processTask(response.task);
+        // Gyors follow-up: ha volt feladat, hamarabb kérdezzünk újra
+        this.pollInterval = 5_000;
       }
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
@@ -132,32 +136,30 @@ export class WorkflowPollerService {
     this.schedulePoll();
   }
 
-  private async processTasks(tasks: WorkflowTask[]): Promise<void> {
+  private async processTask(task: WorkflowTask): Promise<void> {
     this.isProcessing = true;
 
-    for (const task of tasks) {
-      try {
-        log.info(`Workflow step feldolgozas: ${task.step_key} (step #${task.step_id})`);
+    try {
+      log.info(`Workflow step feldolgozas: ${task.step_key} (step #${task.step_id})`);
 
-        const result = await this.executeStep(task);
+      const result = await this.executeStep(task);
 
-        await this.apiPost(`/partner/desktop/workflow-tasks/${task.step_id}/result`, {
-          success: result.success,
-          output_data: result.outputData ?? {},
-          error_message: result.error ?? null,
-        });
+      await this.apiPost(`/partner/desktop/workflow-tasks/${task.step_id}/result`, {
+        success: result.success,
+        output_data: result.outputData ?? {},
+        error_message: result.error ?? null,
+      });
 
-        log.info(`Workflow step kesz: ${task.step_key} — ${result.success ? 'siker' : 'hiba'}`);
-      } catch (error) {
-        const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
-        log.error(`Workflow step hiba (${task.step_key}):`, errMsg);
+      log.info(`Workflow step kesz: ${task.step_key} — ${result.success ? 'siker' : 'hiba'}`);
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
+      log.error(`Workflow step hiba (${task.step_key}):`, errMsg);
 
-        await this.apiPost(`/partner/desktop/workflow-tasks/${task.step_id}/result`, {
-          success: false,
-          output_data: {},
-          error_message: errMsg,
-        }).catch(e => log.error('Eredmeny kuldes sikertelen:', e));
-      }
+      await this.apiPost(`/partner/desktop/workflow-tasks/${task.step_id}/result`, {
+        success: false,
+        output_data: {},
+        error_message: errMsg,
+      }).catch(e => log.error('Eredmeny kuldes sikertelen:', e));
     }
 
     this.isProcessing = false;
@@ -295,7 +297,7 @@ export class WorkflowPollerService {
 
   private apiRequest<T>(method: string, endpoint: string, body?: unknown): Promise<T> {
     return new Promise((resolve, reject) => {
-      const url = new URL(endpoint, API_BASE);
+      const url = new URL(endpoint, this.apiBase);
       const isHttps = url.protocol === 'https:';
       const options: https.RequestOptions = {
         hostname: url.hostname,

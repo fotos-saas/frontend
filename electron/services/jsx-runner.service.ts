@@ -97,8 +97,35 @@ const PHOTO_CACHE_TTL_MS = 5 * 60 * 1000; // 5 perc
 
 /** AppleScript string escape — megakadályozza az injection-t */
 export function appleScriptEscape(str: string): string {
-  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');
 }
+
+/** JSX (ExtendScript) string escape — külön kontextus az AppleScript-től */
+export function jsxStringEscape(str: string): string {
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
+}
+
+/** Allowed domains for photo downloads (SSRF protection) */
+const ALLOWED_DOWNLOAD_DOMAINS = [
+  'api.tablostudio.hu',
+  'cdn.tablostudio.hu',
+  'storage.tablostudio.hu',
+  'tablostudio.hu',
+  'localhost',
+  '127.0.0.1',
+];
+
+const MAX_REDIRECTS = 3;
 
 // ============ JsxRunnerService ============
 
@@ -291,16 +318,47 @@ export class JsxRunnerService {
 
   // ---- Fotó letöltés ----
 
-  downloadPhoto(url: string, fileName: string, targetSize?: { width: number; height: number }): Promise<string> {
+  /** URL domain whitelist ellenőrzés (SSRF védelem) */
+  private isAllowedDownloadUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+      return ALLOWED_DOWNLOAD_DOMAINS.some(
+        (d) => parsed.hostname === d || parsed.hostname.endsWith('.' + d),
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  downloadPhoto(
+    url: string,
+    fileName: string,
+    targetSize?: { width: number; height: number },
+    _redirectCount = 0,
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
+      // SSRF védelem: csak engedélyezett domainekről töltünk le
+      if (!this.isAllowedDownloadUrl(url)) {
+        reject(new Error(`Nem engedélyezett letöltési URL domain: ${url}`));
+        return;
+      }
+
+      // Path traversal védelem: csak a fájlnevet használjuk
+      const safeName = path.basename(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
+      if (!safeName || safeName === '.' || safeName === '..') {
+        reject(new Error(`Érvénytelen fájlnév: ${fileName}`));
+        return;
+      }
+
       const tempDir = path.join(app.getPath('temp'), 'psd-photos');
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
 
       const resizedDir = path.join(tempDir, 'resized');
-      const rawPath = path.join(tempDir, fileName);
-      const finalPath = targetSize ? path.join(resizedDir, fileName) : rawPath;
+      const rawPath = path.join(tempDir, safeName);
+      const finalPath = targetSize ? path.join(resizedDir, safeName) : rawPath;
 
       if (fs.existsSync(finalPath)) {
         const stats = fs.statSync(finalPath);
@@ -322,7 +380,11 @@ export class JsxRunnerService {
           if (redirectUrl) {
             file.close();
             fs.unlinkSync(rawPath);
-            this.downloadPhoto(redirectUrl, fileName, targetSize).then(resolve).catch(reject);
+            if (_redirectCount >= MAX_REDIRECTS) {
+              reject(new Error(`Túl sok átirányítás (max ${MAX_REDIRECTS})`));
+              return;
+            }
+            this.downloadPhoto(redirectUrl, safeName, targetSize, _redirectCount + 1).then(resolve).catch(reject);
             return;
           }
         }
@@ -421,19 +483,19 @@ export class JsxRunnerService {
 
     const configOverrides: string[] = [];
     if (dataFilePath) {
-      const escapedPath = dataFilePath.replace(/\\/g, '/');
+      const escapedPath = jsxStringEscape(dataFilePath.replace(/\\/g, '/'));
       configOverrides.push(`CONFIG.DATA_FILE_PATH = "${escapedPath}";`);
     }
     if (targetDocName) {
-      configOverrides.push(`CONFIG.TARGET_DOC_NAME = "${appleScriptEscape(targetDocName)}";`);
+      configOverrides.push(`CONFIG.TARGET_DOC_NAME = "${jsxStringEscape(targetDocName)}";`);
     }
     if (psdFilePath) {
-      const escapedPsd = psdFilePath.replace(/\\/g, '/');
+      const escapedPsd = jsxStringEscape(psdFilePath.replace(/\\/g, '/'));
       configOverrides.push(`CONFIG.PSD_FILE_PATH = "${escapedPsd}";`);
     }
     if (extraConfig) {
       for (const [key, val] of Object.entries(extraConfig)) {
-        configOverrides.push(`CONFIG.${key} = "${appleScriptEscape(val)}";`);
+        configOverrides.push(`CONFIG.${key} = "${jsxStringEscape(val)}";`);
       }
     }
 

@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, viewChild, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -32,6 +32,8 @@ export class WorkflowDetailComponent implements OnInit {
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
   readonly ICONS = ICONS;
+
+  private approvalCard = viewChild(WorkflowApprovalCardComponent);
 
   workflow = signal<WorkflowDetail | null>(null);
   loading = signal(true);
@@ -86,7 +88,10 @@ export class WorkflowDetailComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => this.workflow.set(updated),
-        error: () => this.error.set('A jóváhagyás sikertelen.'),
+        error: () => {
+          this.error.set('A jóváhagyás sikertelen.');
+          this.approvalCard()?.resetSubmitting();
+        },
       });
   }
 
@@ -98,7 +103,10 @@ export class WorkflowDetailComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => this.workflow.set(updated),
-        error: () => this.error.set('Az elutasítás sikertelen.'),
+        error: () => {
+          this.error.set('Az elutasítás sikertelen.');
+          this.approvalCard()?.resetSubmitting();
+        },
       });
   }
 }

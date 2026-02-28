@@ -10,7 +10,7 @@
 // ============================================
 
 export type WorkflowType = 'photo_swap' | 'finalization' | 'reminder';
-export type WorkflowStatus = 'pending' | 'running' | 'awaiting_approval' | 'approved' | 'rejected' | 'completed' | 'failed';
+export type WorkflowStatus = 'pending' | 'running' | 'awaiting_approval' | 'approved' | 'rejected' | 'completed' | 'failed' | 'cancelled';
 export type WorkflowStepStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
 export type WorkflowExecutor = 'backend' | 'electron';
 export type WorkflowTriggerType = 'event' | 'schedule' | 'manual';
@@ -40,6 +40,8 @@ export interface WorkflowDetail extends WorkflowListItem {
   approval_data: WorkflowApprovalData | null;
   approved_by: { id: number; name: string } | null;
   approved_at: string | null;
+  rejected_by: { id: number; name: string } | null;
+  rejected_at: string | null;
   rejected_reason: string | null;
   error_message: string | null;
   steps: WorkflowStep[];
@@ -131,6 +133,7 @@ export const WORKFLOW_STATUS_LABELS: Record<WorkflowStatus, string> = {
   rejected: 'Elutasítva',
   completed: 'Befejezve',
   failed: 'Hiba',
+  cancelled: 'Visszavonva',
 };
 
 export const WORKFLOW_STATUS_COLORS: Record<WorkflowStatus, string> = {
@@ -141,6 +144,7 @@ export const WORKFLOW_STATUS_COLORS: Record<WorkflowStatus, string> = {
   rejected: 'red',
   completed: 'green',
   failed: 'red',
+  cancelled: 'gray',
 };
 
 export const WORKFLOW_STEP_LABELS: Record<string, string> = {

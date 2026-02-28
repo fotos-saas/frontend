@@ -1,4 +1,4 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { WorkflowStatus, WORKFLOW_STATUS_LABELS, WORKFLOW_STATUS_COLORS } from '../../models/workflow.models';
 
@@ -32,6 +32,6 @@ import { WorkflowStatus, WORKFLOW_STATUS_LABELS, WORKFLOW_STATUS_COLORS } from '
 export class WorkflowStatusBadgeComponent {
   status = input.required<WorkflowStatus>();
 
-  label = () => WORKFLOW_STATUS_LABELS[this.status()] ?? this.status();
-  color = () => WORKFLOW_STATUS_COLORS[this.status()] ?? 'gray';
+  label = computed(() => WORKFLOW_STATUS_LABELS[this.status()] ?? this.status());
+  color = computed(() => WORKFLOW_STATUS_COLORS[this.status()] ?? 'gray');
 }

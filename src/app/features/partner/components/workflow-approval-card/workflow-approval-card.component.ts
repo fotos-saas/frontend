@@ -49,4 +49,9 @@ export class WorkflowApprovalCardComponent {
   toggleRejectForm(): void {
     this.showRejectForm.update(v => !v);
   }
+
+  /** Szülő komponens hívja hiba esetén */
+  resetSubmitting(): void {
+    this.isSubmitting.set(false);
+  }
 }

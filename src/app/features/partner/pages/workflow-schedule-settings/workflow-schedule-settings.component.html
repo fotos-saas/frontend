@@ -47,7 +47,7 @@
               >
                 {{ schedule.is_active ? 'Aktív' : 'Szüneteltetve' }}
               </button>
-              <button type="button" class="delete-btn" (click)="deleteSchedule(schedule)">
+              <button type="button" class="delete-btn" (click)="confirmDeleteSchedule(schedule)">
                 <lucide-icon [name]="ICONS.DELETE" [size]="16" />
               </button>
             </div>
@@ -102,3 +102,12 @@
     }
   }
 </div>
+
+@if (scheduleToDelete()) {
+  <app-confirm-dialog
+    title="Ütemezés törlése"
+    message="Biztosan törölni szeretnéd ezt az ütemezést?"
+    confirmText="Törlés"
+    (resultEvent)="onDeleteResult($event)"
+  />
+}

@@ -1,3 +1,9 @@
+@use '../../../../shared/styles/workflow-common' as wf;
+
+@include wf.back-btn;
+@include wf.btn-base;
+@include wf.skeleton-loading;
+
 .page-header {
   margin-bottom: 8px;
 
@@ -9,20 +15,6 @@
     font-weight: 700;
     margin: 12px 0 0;
   }
-}
-
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: none;
-  background: transparent;
-  color: #6b7280;
-  font-size: 0.875rem;
-  cursor: pointer;
-  border-radius: 6px;
-  &:hover { background: #f3f4f6; color: #374151; }
 }
 
 .description {
@@ -159,22 +151,6 @@
   margin-top: 16px;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
-  &--primary { background: #6366f1; color: #fff; &:hover:not(:disabled) { background: #4f46e5; } }
-  &--ghost { background: transparent; color: #6b7280; &:hover:not(:disabled) { background: #f3f4f6; } }
-}
-
 .add-btn {
   display: flex;
   align-items: center;
@@ -203,12 +179,5 @@
   p { font-size: 0.875rem; }
 }
 
-.skeleton-container { display: flex; flex-direction: column; gap: 8px; }
-.skeleton-row {
-  height: 48px;
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-  background-size: 200% 100%;
-  border-radius: 8px;
-  animation: shimmer 1.5s infinite;
-}
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+// skeleton-row height override
+.skeleton-row { height: 48px; }

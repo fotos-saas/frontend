@@ -742,6 +742,23 @@ export interface EmailAccountTestResult {
 }
 
 /**
+ * Feladat felhasználó (created_by, assigned_to)
+ */
+export interface TaskUser {
+  id: number;
+  name: string;
+}
+
+/**
+ * Feladat kiosztás dropdown elem
+ */
+export interface TaskAssignee {
+  id: number;
+  name: string;
+  email: string;
+}
+
+/**
  * Projekt feladat
  */
 export interface ProjectTask {
@@ -752,6 +769,16 @@ export interface ProjectTask {
   is_completed: boolean;
   completed_at: string | null;
   created_at: string;
+  created_by: TaskUser | null;
+  assigned_to: TaskUser | null;
+}
+
+/**
+ * Projekt feladatok szekciókra bontva
+ */
+export interface ProjectTaskSections {
+  my_tasks: ProjectTask[];
+  assigned_to_me: ProjectTask[];
 }
 
 /**

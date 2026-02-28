@@ -17,7 +17,7 @@
   <div class="flex justify-center py-8">
     <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
   </div>
-} @else if (tasks().length === 0) {
+} @else if (totalCount() === 0) {
   <!-- Üres állapot -->
   <div class="empty-state">
     <lucide-icon [name]="ICONS.LIST_TODO" [size]="48" class="empty-state__icon" />
@@ -28,34 +28,84 @@
     </button>
   </div>
 } @else {
-  <!-- Feladat lista -->
-  <div class="task-list">
-    @for (task of tasks(); track task.id) {
-      <div class="task-row" [class.task-row--completed]="task.is_completed">
-        <button class="task-row__checkbox" (click)="toggleTask(task)" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
-          @if (task.is_completed) {
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="task-row__check-icon--done" />
-          } @else {
-            <lucide-icon [name]="ICONS.CIRCLE" [size]="20" class="task-row__check-icon" />
-          }
-        </button>
+  <!-- Saját feladatok szekció -->
+  @if (myTasks().length > 0) {
+    <div class="section">
+      <h4 class="section__title">Saját feladatok</h4>
+      <div class="task-list">
+        @for (task of myTasks(); track task.id) {
+          <div class="task-row" [class.task-row--completed]="task.is_completed">
+            <button class="task-row__checkbox" (click)="toggleTask(task, 'my')" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
+              @if (task.is_completed) {
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="task-row__check-icon--done" />
+              } @else {
+                <lucide-icon [name]="ICONS.CIRCLE" [size]="20" class="task-row__check-icon" />
+              }
+            </button>
 
-        <div class="task-row__content">
-          <span class="task-row__title">{{ task.title }}</span>
-          @if (task.description) {
-            <span class="task-row__desc">{{ task.description }}</span>
-          }
-        </div>
+            <div class="task-row__content">
+              <span class="task-row__title">{{ task.title }}</span>
+              @if (task.assigned_to) {
+                <span class="task-row__assignee">
+                  <lucide-icon [name]="ICONS.USER_CHECK" [size]="12" />
+                  {{ task.assigned_to.name }}
+                </span>
+              }
+              @if (task.description) {
+                <span class="task-row__desc">{{ task.description }}</span>
+              }
+            </div>
 
-        <div class="task-row__actions">
-          <button class="action-btn" (click)="dialogRequested.emit(task)" aria-label="Szerkesztés">
-            <lucide-icon [name]="ICONS.EDIT" [size]="15" />
-          </button>
-          <button class="action-btn action-btn--danger" (click)="deleteRequested.emit(task)" aria-label="Törlés">
-            <lucide-icon [name]="ICONS.DELETE" [size]="15" />
-          </button>
-        </div>
+            <div class="task-row__actions">
+              <button class="action-btn" (click)="dialogRequested.emit(task)" aria-label="Szerkesztés">
+                <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+              </button>
+              <button class="action-btn action-btn--danger" (click)="deleteRequested.emit(task)" aria-label="Törlés">
+                <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+              </button>
+            </div>
+          </div>
+        }
       </div>
-    }
-  </div>
+    </div>
+  }
+
+  <!-- Rám bízott feladatok szekció -->
+  @if (assignedToMe().length > 0) {
+    <div class="section">
+      <h4 class="section__title">Rám bízott feladatok</h4>
+      <div class="task-list">
+        @for (task of assignedToMe(); track task.id) {
+          <div class="task-row" [class.task-row--completed]="task.is_completed">
+            <button class="task-row__checkbox" (click)="toggleTask(task, 'assigned')" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
+              @if (task.is_completed) {
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="task-row__check-icon--done" />
+              } @else {
+                <lucide-icon [name]="ICONS.CIRCLE" [size]="20" class="task-row__check-icon" />
+              }
+            </button>
+
+            <div class="task-row__content">
+              <span class="task-row__title">{{ task.title }}</span>
+              @if (task.created_by) {
+                <span class="task-row__creator">
+                  Kiadta: {{ task.created_by.name }}
+                </span>
+              }
+              @if (task.description) {
+                <span class="task-row__desc">{{ task.description }}</span>
+              }
+            </div>
+
+            <div class="task-row__actions">
+              <button class="action-btn" (click)="dialogRequested.emit(task)" aria-label="Szerkesztés">
+                <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+              </button>
+              <!-- Rám bízott feladatnál nincs törlés gomb -->
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
 }

@@ -38,11 +38,15 @@ export class ProjectTasksTabComponent implements OnInit {
 
   readonly ICONS = ICONS;
 
-  tasks = signal<ProjectTask[]>([]);
+  myTasks = signal<ProjectTask[]>([]);
+  assignedToMe = signal<ProjectTask[]>([]);
   loading = signal(true);
 
-  completedCount = computed(() => this.tasks().filter(t => t.is_completed).length);
-  totalCount = computed(() => this.tasks().length);
+  completedCount = computed(() => {
+    const all = [...this.myTasks(), ...this.assignedToMe()];
+    return all.filter(t => t.is_completed).length;
+  });
+  totalCount = computed(() => this.myTasks().length + this.assignedToMe().length);
 
   ngOnInit(): void {
     this.loadTasks();
@@ -54,7 +58,8 @@ export class ProjectTasksTabComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.tasks.set(res.data);
+          this.myTasks.set(res.data.my_tasks);
+          this.assignedToMe.set(res.data.assigned_to_me);
           this.loading.set(false);
         },
         error: () => {
@@ -64,9 +69,11 @@ export class ProjectTasksTabComponent implements OnInit {
       });
   }
 
-  toggleTask(task: ProjectTask): void {
-    const prev = this.tasks();
-    this.tasks.update(tasks =>
+  toggleTask(task: ProjectTask, section: 'my' | 'assigned'): void {
+    const signalRef = section === 'my' ? this.myTasks : this.assignedToMe;
+    const prev = signalRef();
+
+    signalRef.update(tasks =>
       tasks.map(t => t.id === task.id ? { ...t, is_completed: !t.is_completed } : t)
     );
 
@@ -74,12 +81,12 @@ export class ProjectTasksTabComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.tasks.update(tasks =>
+          signalRef.update(tasks =>
             tasks.map(t => t.id === task.id ? res.data : t)
           );
         },
         error: () => {
-          this.tasks.set(prev);
+          signalRef.set(prev);
           this.toast.error('Hiba', 'Nem sikerült frissíteni a feladatot.');
         },
       });
@@ -87,11 +94,8 @@ export class ProjectTasksTabComponent implements OnInit {
 
   /** Wrapper hívja a dialógus saved után */
   onTaskSaved(task: ProjectTask, wasEdit: boolean): void {
-    if (wasEdit) {
-      this.tasks.update(tasks => tasks.map(t => t.id === task.id ? task : t));
-    } else {
-      this.tasks.update(tasks => [task, ...tasks]);
-    }
+    // Újratöltjük a szekciós listát, mert kiosztás változhatott
+    this.loadTasks();
   }
 
   /** Wrapper hívja a törlés confirm után */
@@ -100,7 +104,8 @@ export class ProjectTasksTabComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.tasks.update(tasks => tasks.filter(t => t.id !== task.id));
+          this.myTasks.update(tasks => tasks.filter(t => t.id !== task.id));
+          this.assignedToMe.update(tasks => tasks.filter(t => t.id !== task.id));
           this.toast.success('Siker', 'Feladat törölve.');
         },
         error: () => this.toast.error('Hiba', 'Nem sikerült törölni a feladatot.'),

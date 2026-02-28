@@ -37,6 +37,7 @@ export class TasksOverviewComponent implements OnInit {
   loading = signal(true);
   expandedGroups = signal<Set<number>>(new Set());
 
+  currentUserId = computed(() => this.authService.currentUserSignal()?.id ?? 0);
   totalCompleted = computed(() => this.groups().reduce((sum, g) => sum + g.completed_count, 0));
   totalTasks = computed(() => this.groups().reduce((sum, g) => sum + g.total_count, 0));
 

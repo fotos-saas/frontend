@@ -61,6 +61,15 @@
                   </button>
                   <div class="task-row__content">
                     <span class="task-row__title">{{ task.title }}</span>
+                    @if (task.assigned_to) {
+                      <span class="task-row__assignee">
+                        <lucide-icon [name]="ICONS.USER_CHECK" [size]="12" />
+                        {{ task.assigned_to.name }}
+                      </span>
+                    }
+                    @if (task.created_by && task.assigned_to && task.created_by.id !== currentUserId()) {
+                      <span class="task-row__creator">Kiadta: {{ task.created_by.name }}</span>
+                    }
                     @if (task.description) {
                       <span class="task-row__desc">{{ task.description }}</span>
                     }

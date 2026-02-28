@@ -27,6 +27,21 @@
   }
 }
 
+.section {
+  margin-bottom: 20px;
+
+  &__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -116,6 +131,25 @@
     font-weight: 500;
     color: #1e293b;
     word-break: break-word;
+  }
+
+  &__assignee {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #3b82f6;
+    margin-top: 2px;
+
+    lucide-icon {
+      margin-right: 3px;
+    }
+  }
+
+  &__creator {
+    display: block;
+    font-size: 0.75rem;
+    color: #8b5cf6;
+    margin-top: 2px;
   }
 
   &__desc {

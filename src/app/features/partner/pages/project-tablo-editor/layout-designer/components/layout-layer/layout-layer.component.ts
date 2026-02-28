@@ -272,20 +272,13 @@ export class LayoutLayerComponent implements AfterViewInit {
   );
 
   /**
-   * Szöveg méret: a layer PSD-beli height-jéből számolva, scale-elve.
-   * A text layer height a PSD-ben a font magasságával arányos (~30-40px névnél).
-   * Ha height=0 (nincs bounds adat), fallback: scale * 30.
+   * Szöveg méret: fix PSD-beli font magasság × scale.
+   * NEM a layer height-ból (az inconsistent a sortörés miatt),
+   * hanem konstans értékből: név ~40px, pozíció ~28px a PSD-ben.
    */
   readonly textFontSize = computed(() => {
-    const h = this.layer().height;
-    const s = this.scale();
-    if (h > 0) {
-      // A PSD-beli text height ~= font magasság, skálázva megjelenítjük
-      return Math.max(4, Math.round(h * s * 0.8));
-    }
-    // Fallback: scale-arányos
-    const basePx = this.isPosition() ? 22 : 30;
-    return Math.max(4, Math.round(basePx * s));
+    const basePsdPx = this.isPosition() ? 28 : 40;
+    return Math.max(4, basePsdPx * this.scale());
   });
 
   ngAfterViewInit(): void {

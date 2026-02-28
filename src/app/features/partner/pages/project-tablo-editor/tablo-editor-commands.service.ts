@@ -2,7 +2,6 @@ import { Injectable, inject, signal } from '@angular/core';
 import { PhotoshopService } from '../../services/photoshop.service';
 import { BrandingService } from '../../services/branding.service';
 import { TabloEditorSnapshotService } from './tablo-editor-snapshot.service';
-import { TabloEditorDebugService, DebugLogEntry } from './tablo-editor-debug.service';
 import { TabloSize, TabloPersonItem } from '../../models/partner.models';
 import { PartnerProjectDetails } from '../../services/partner.service';
 import { TabloLayoutConfig } from './layout-designer/layout-designer.types';
@@ -28,7 +27,6 @@ export class TabloEditorCommandsService {
   private readonly ps = inject(PhotoshopService);
   private readonly branding = inject(BrandingService);
   private readonly snapshotService = inject(TabloEditorSnapshotService);
-  private readonly debugService = inject(TabloEditorDebugService);
 
   private config!: CommandsConfig;
 
@@ -225,28 +223,6 @@ export class TabloEditorCommandsService {
     const psdPath = this.config.getCurrentPsdPath();
     if (!psdPath) return;
     this.ps.revealInFinder(psdPath);
-  }
-
-  /** Debug PSD generálás */
-  async generatePsdDebug(): Promise<void> {
-    const size = this.config.getSelectedSize();
-    if (!size) {
-      this.debugService.addLog('Méret', 'Nincs méret kiválasztva!', 'error');
-      return;
-    }
-
-    this.generating.set(true);
-    try {
-      await this.debugService.runDebugGeneration({
-        size,
-        project: this.config.getProject(),
-        persons: this.config.getPersons(),
-      });
-    } catch (err) {
-      this.debugService.addLog('Váratlan hiba', String(err), 'error');
-    } finally {
-      this.generating.set(false);
-    }
   }
 
   /** Automatikus snapshot frissítés (csendes — nem jelenít meg hibaüzenetet) */

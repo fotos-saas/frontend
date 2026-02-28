@@ -284,14 +284,36 @@ function _unlinkByNames(doc, layerNames) {
 }
 
 // --- Linked layerek visszalinkelese nev alapjan ---
-// Nev alapjan: adott layerName osszes elofordulasa (Images + Names) ossze lesz linkelve
+// OPTIMALIZALT: egyetlen rekurziv bejaras az osszes nevhez, utana nev-csoportonkent linkel
 function _relinkByNames(doc, layerNames) {
-  for (var n = 0; n < layerNames.length; n++) {
-    var found = [];
-    _findLayersByNames(doc, [layerNames[n]], found);
-    if (found.length < 2) continue;
+  // 1. Egyetlen bejarassal gyujtsuk ossze az osszes layert
+  var allFound = [];
+  _findLayersByNames(doc, layerNames, allFound);
+
+  // 2. Nev szerinti csoportositas (ES3: parhuzamos tombok)
+  var groupKeys = [];
+  var groupLayers = [];
+  for (var i = 0; i < allFound.length; i++) {
+    var lName = allFound[i].name;
+    var idx = -1;
+    for (var k = 0; k < groupKeys.length; k++) {
+      if (groupKeys[k] === lName) { idx = k; break; }
+    }
+    if (idx === -1) {
+      groupKeys.push(lName);
+      groupLayers.push([allFound[i]]);
+    } else {
+      groupLayers[idx].push(allFound[i]);
+    }
+  }
+
+  // 3. Csoportonkent linkelés (csak ha 2+ layer van)
+  for (var g = 0; g < groupKeys.length; g++) {
+    if (groupLayers[g].length < 2) continue;
     var ids = [];
-    for (var i = 0; i < found.length; i++) { ids.push(found[i].id); }
+    for (var j = 0; j < groupLayers[g].length; j++) {
+      ids.push(groupLayers[g][j].id);
+    }
     _selectMultipleLayersById(ids);
     var linkDesc = new ActionDescriptor();
     var linkRef = new ActionReference();
@@ -352,6 +374,56 @@ function _doRestore() {
     return false;
   }
 
+  // OPTIMALIZACIO: moveAllSiblings modban egyetlen bejarassal gyujtsuk ossze
+  // az osszes releváns layert nev alapjan (ahelyett hogy iteracionkent bejarnank a doksit)
+  var _siblingCacheKeys = [];
+  var _siblingCacheValues = [];
+  if (moveAllSiblings) {
+    // Egyedi nevek osszegyujtese
+    var uniqueNames = [];
+    var _nameSet = [];
+    for (var u = 0; u < layers.length; u++) {
+      var ln = layers[u].layerName;
+      if (!ln) continue;
+      var found = false;
+      for (var ns = 0; ns < _nameSet.length; ns++) {
+        if (_nameSet[ns] === ln) { found = true; break; }
+      }
+      if (!found) {
+        _nameSet.push(ln);
+        uniqueNames.push(ln);
+      }
+    }
+
+    // Egyetlen rekurziv bejaras az osszes nevvel
+    var allSiblings = [];
+    _findLayersByNames(_doc, uniqueNames, allSiblings);
+
+    // Nev szerinti csoportositas (ES3: parhuzamos tombok)
+    for (var as = 0; as < allSiblings.length; as++) {
+      var sName = allSiblings[as].name;
+      var cIdx = -1;
+      for (var ck = 0; ck < _siblingCacheKeys.length; ck++) {
+        if (_siblingCacheKeys[ck] === sName) { cIdx = ck; break; }
+      }
+      if (cIdx === -1) {
+        _siblingCacheKeys.push(sName);
+        _siblingCacheValues.push([allSiblings[as]]);
+      } else {
+        _siblingCacheValues[cIdx].push(allSiblings[as]);
+      }
+    }
+    log("[JSX] Sibling cache: " + allSiblings.length + " layer, " + _siblingCacheKeys.length + " nev");
+  }
+
+  // Cache lookup helper
+  function _getCachedSiblings(name) {
+    for (var sc = 0; sc < _siblingCacheKeys.length; sc++) {
+      if (_siblingCacheKeys[sc] === name) return _siblingCacheValues[sc];
+    }
+    return [];
+  }
+
   for (var i = 0; i < layers.length; i++) {
     var layerData = layers[i];
     var groupPath = layerData.groupPath || [];
@@ -394,12 +466,10 @@ function _doRestore() {
     try {
       // moveAllSiblings: minden azonos nevu layert mozgatunk az egesz dokumentumban
       if (moveAllSiblings && layerData.layerName) {
-        var siblings = [];
-        _findLayersByNames(_doc, [layerData.layerName], siblings);
+        var siblings = _getCachedSiblings(layerData.layerName);
 
         if (siblings.length > 0) {
           // Delta szamitas: a layerData-ban megadott layerId-s layer poziciojabol
-          // Ez biztositja, hogy a referencia a HELYES layer (image vs name)
           var refLayer = null;
           if (layerData.layerId && layerData.layerId > 0) {
             for (var r = 0; r < siblings.length; r++) {

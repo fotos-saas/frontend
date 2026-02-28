@@ -146,6 +146,16 @@ function findNameLayerByName(doc, layerName) {
   return null;
 }
 
+// --- Pozicio layer keresese nev alapjan (Positions/Students vagy Positions/Teachers) ---
+function findPositionLayerByName(doc, layerName) {
+  var groups = [["Positions", "Students"], ["Positions", "Teachers"]];
+  for (var g = 0; g < groups.length; g++) {
+    var found = findLayerInGroup(doc, groups[g], layerName);
+    if (found) return found;
+  }
+  return null;
+}
+
 // --- Osszes nev layer osszegyujtese ---
 function getAllNameLayers(doc) {
   var result = [];
@@ -216,6 +226,7 @@ function unlinkByName(doc, layerName) {
 // --- Referencia: baseline offset (position.y - bounds.top) ---
 // Adott font/merethez konstans — egyszer merjuk, minden nevnel hasznaljuk.
 var _baselineOffsetSel = null;
+var _baselineOffsetPosSel = null;
 
 function measureBaselineOffset(doc) {
   var refLayer = doc.artLayers.add();
@@ -233,6 +244,69 @@ function measureBaselineOffset(doc) {
 
   refLayer.remove();
   return offset;
+}
+
+function measureBaselineOffsetForSize(doc, fontSize) {
+  var refLayer = doc.artLayers.add();
+  refLayer.kind = LayerKind.TEXT;
+  refLayer.name = "__ref_measure_pos__";
+  var ti = refLayer.textItem;
+  ti.contents = "Hg";
+  ti.font = typeof CONFIG !== "undefined" && CONFIG.FONT_NAME ? CONFIG.FONT_NAME : "ArialMT";
+  ti.size = new UnitValue(fontSize, "pt");
+  ti.justification = Justification.LEFT;
+
+  var posY = ti.position[1].as("px");
+  var b = getBoundsNoEffects(refLayer.id);
+  var offset = posY - b.top;
+
+  refLayer.remove();
+  return offset;
+}
+
+// --- Pozicio layer pozicionalasa a nev ala ---
+function positionPositionLayerUnderName(doc, posLayer, nameLayer, imageLayer, textAlign) {
+  var nameBounds = getBoundsNoEffects(nameLayer.id);
+  var nameBottom = nameBounds.bottom;
+
+  // Gap cm → px
+  var dpi = doc.resolution;
+  var posGapCm = typeof CONFIG !== "undefined" && CONFIG.POSITION_GAP_CM ? CONFIG.POSITION_GAP_CM : 0.15;
+  var posGapPx = Math.round((posGapCm / 2.54) * dpi);
+
+  // Baseline offset meres (egyszer)
+  var posFontSize = typeof CONFIG !== "undefined" && CONFIG.POSITION_FONT_SIZE ? CONFIG.POSITION_FONT_SIZE : 18;
+  if (_baselineOffsetPosSel === null) {
+    _baselineOffsetPosSel = measureBaselineOffsetForSize(doc, posFontSize);
+  }
+
+  var posBoundsTop = nameBottom + posGapPx;
+  var posBaselineY = posBoundsTop + _baselineOffsetPosSel;
+
+  // Vizszintes pozicio: a kep alapjan (ugyanugy mint a nevnel)
+  var imgBounds = getBoundsNoEffects(imageLayer.id);
+  var desiredX;
+  if (textAlign === "left") {
+    desiredX = imgBounds.left;
+  } else if (textAlign === "right") {
+    desiredX = imgBounds.right;
+  } else {
+    desiredX = (imgBounds.left + imgBounds.right) / 2;
+  }
+
+  // Justification igazitas
+  selectLayerById(posLayer.id);
+  doc.activeLayer = posLayer;
+  try {
+    var posTextItem = posLayer.textItem;
+    var alignMap = { left: Justification.LEFT, center: Justification.CENTER, right: Justification.RIGHT };
+    if (alignMap[textAlign]) {
+      posTextItem.justification = alignMap[textAlign];
+    }
+    posTextItem.position = [new UnitValue(Math.round(desiredX), "px"), new UnitValue(Math.round(posBaselineY), "px")];
+  } catch (e) {
+    // nem text layer — skip
+  }
 }
 
 // --- Nev pozicionalasa a kep ala ---
@@ -350,6 +424,12 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
 
       if (positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter)) {
         arranged++;
+
+        // Pozicio (beosztás) layer mozgatasa a nev ala
+        var posLayer = findPositionLayerByName(doc, nl.name);
+        if (posLayer) {
+          positionPositionLayerUnderName(doc, posLayer, nl, imgLayer, textAlign);
+        }
       }
     }
 

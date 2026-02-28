@@ -51,7 +51,7 @@ export interface UploadIndividualFormData {
           (dragleave)="isDragging.set(false)"
           (drop)="onDrop($event)"
           (click)="fileInput.click()">
-          <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp"
+          <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp,.psd,.psb"
             (change)="onFileInput($event)" class="sr-only" />
           <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
           <span>{{ files().length > 0 ? 'Tovabbi kepek...' : 'Kepek valasztasa' }}</span>
@@ -167,7 +167,7 @@ export class UploadIndividualFormComponent {
     };
   });
 
-  private readonly ACCEPTED = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+  private readonly ACCEPTED = new Set(['.jpg', '.jpeg', '.png', '.webp', '.psd', '.psb']);
 
   getFileKey(file: File): string {
     return file.name + '|' + file.size;

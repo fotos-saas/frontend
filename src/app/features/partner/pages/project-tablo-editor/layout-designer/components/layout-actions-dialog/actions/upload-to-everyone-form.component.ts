@@ -57,7 +57,7 @@ export interface UploadToEveryoneFormData {
           (dragleave)="isDragging.set(false)"
           (drop)="onDrop($event)"
           (click)="fileInput.click()">
-          <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp"
+          <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp,.psd,.psb"
             (change)="onFileInput($event)" class="sr-only" />
           <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
           <span>{{ files().length > 0 ? 'Tovabbi kepek...' : 'Kepek valasztasa' }}</span>
@@ -218,7 +218,7 @@ export class UploadToEveryoneFormComponent {
 
   readonly formDataChange = output<UploadToEveryoneFormData | null>();
 
-  private readonly ACCEPTED = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+  private readonly ACCEPTED = new Set(['.jpg', '.jpeg', '.png', '.webp', '.psd', '.psb']);
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();

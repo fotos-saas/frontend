@@ -1,0 +1,101 @@
+@use 'styles/colors' as *;
+@use 'styles/mixins' as mix;
+@use 'buttons' as *;
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: get-color('slate', 600);
+  }
+
+  input, textarea {
+    padding: 10px 12px;
+    border: 1px solid get-color('slate', 200);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    @include mix.transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary, #1e3a5f);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  textarea { resize: vertical; }
+}
+
+.snippet-section {
+  margin-bottom: 14px;
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: get-color('slate', 600);
+    margin-bottom: 6px;
+    display: block;
+  }
+}
+
+.snippet-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.snippet-btn {
+  padding: 4px 12px;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+  @include mix.transition-fast;
+
+  &:hover {
+    border-color: get-color('primary', 400);
+    background: get-color('primary', 50);
+    color: get-color('primary', 700);
+  }
+}
+
+.pdf-notice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: get-color('primary', 50);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: get-color('primary', 700);
+  margin-top: 8px;
+}
+
+// Footer buttons
+.btn-cancel {
+  padding: 10px 20px;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.875rem;
+  cursor: pointer;
+  @include mix.transition-fast;
+  &:hover { background: get-color('slate', 50); }
+}
+
+.btn-send {
+  @include btn-primary($radius: 8px);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,281 @@
+<div class="quote-editor page-card page-card--narrow">
+  @if (actions.loading()) {
+    <div class="loading-state">
+      <div class="skeleton-row skeleton-shimmer" style="height: 40px;"></div>
+      <div class="skeleton-row skeleton-shimmer" style="height: 200px; margin-top: 16px;"></div>
+      <div class="skeleton-row skeleton-shimmer" style="height: 200px; margin-top: 16px;"></div>
+    </div>
+  } @else {
+    <!-- Fejléc -->
+    <div class="editor-header">
+      <div class="header-left">
+        <a routerLink="/partner/quotes" class="back-link">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="18" />
+        </a>
+        <div>
+          <h1>{{ actions.pageTitle() }}</h1>
+          @if (actions.quote(); as q) {
+            <div class="header-meta">
+              <span class="quote-number">{{ q.quote_number }}</span>
+              <span class="status-badge" [ngClass]="STATUS_CONFIG[q.status].bgClass">
+                {{ STATUS_CONFIG[q.status].label }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="header-actions">
+        @if (!actions.isNew()) {
+          <button class="btn-outline" matTooltip="PDF letöltés" (click)="actions.downloadPdf()">
+            <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+            PDF
+          </button>
+          <button class="btn-outline btn-outline--blue" matTooltip="Email küldés" (click)="showEmailDialog.set(true)">
+            <lucide-icon [name]="ICONS.MAIL" [size]="16" />
+            Küldés
+          </button>
+        }
+        <button class="btn-primary" [disabled]="actions.saving()" (click)="save()">
+          <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+          {{ actions.saving() ? 'Mentés...' : 'Mentés' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Státusz gombok (ha nem új) -->
+    @if (!actions.isNew() && actions.quote(); as q) {
+      @if (q.status === 'sent') {
+        <div class="status-actions">
+          <button class="btn-sm btn-sm--green" (click)="actions.updateStatus('accepted')">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            Elfogadva
+          </button>
+          <button class="btn-sm btn-sm--red" (click)="actions.updateStatus('rejected')">
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+            Elutasítva
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Ügyfél szekció -->
+    <section class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [name]="ICONS.USER" [size]="18" />
+        Ügyfél adatok
+      </h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Ügyfél neve *</label>
+          <input type="text" [ngModel]="form().customer_name" (ngModelChange)="updateField('customer_name', $event)" placeholder="Pl. Kovács János" />
+        </div>
+        <div class="form-group">
+          <label>Megszólítás</label>
+          <input type="text" [ngModel]="form().customer_title" (ngModelChange)="updateField('customer_title', $event)" placeholder="Pl. Igazgató úr" />
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" [ngModel]="form().customer_email" (ngModelChange)="updateField('customer_email', $event)" placeholder="email@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Telefon</label>
+          <input type="tel" [ngModel]="form().customer_phone" (ngModelChange)="updateField('customer_phone', $event)" placeholder="+36 30 123 4567" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Típus szekció -->
+    <section class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="18" />
+        Árajánlat típusa
+      </h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Kategória</label>
+          <select [ngModel]="form().quote_category" (ngModelChange)="updateField('quote_category', $event)">
+            <option value="custom">Egyedi</option>
+            <option value="photographer">Fotós</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Típus</label>
+          <select [ngModel]="form().quote_type" (ngModelChange)="updateField('quote_type', $event)">
+            <option value="repro">Repro</option>
+            <option value="full_production">Teljes kivitelezés</option>
+            <option value="digital">Digitális</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Méret</label>
+          <input type="text" [ngModel]="form().size" (ngModelChange)="updateField('size', $event)" placeholder="Pl. 40x50 cm" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Tartalom szekció -->
+    <section class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [name]="ICONS.LIST" [size]="18" />
+        Tartalom
+      </h2>
+      <div class="form-group">
+        <label>Bevezető szöveg</label>
+        <textarea rows="3" [ngModel]="form().intro_text" (ngModelChange)="updateField('intro_text', $event)" placeholder="Bevezető szöveg az árajánlathoz..."></textarea>
+      </div>
+
+      @if (form().quote_category === 'custom') {
+        <!-- Egyedi: tartalmi pontok -->
+        <div class="repeater">
+          <label class="repeater-label">Tartalmi pontok</label>
+          @for (item of form().content_items || []; track $index; let i = $index) {
+            <div class="repeater-row">
+              <input type="text" [value]="item.title" (input)="updateContentItem(i, 'title', $any($event.target).value)" placeholder="Pont címe" />
+              <input type="text" [value]="item.description || ''" (input)="updateContentItem(i, 'description', $any($event.target).value)" placeholder="Leírás (opcionális)" />
+              <button class="btn-icon btn-icon--danger" (click)="removeContentItem(i)" matTooltip="Törlés">
+                <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              </button>
+            </div>
+          }
+          <button class="btn-add" (click)="addContentItem()">
+            <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+            Pont hozzáadása
+          </button>
+        </div>
+      } @else {
+        <!-- Fotós: árlista elemek -->
+        <div class="repeater">
+          <label class="repeater-label">Árlista elemek</label>
+          @for (item of form().price_list_items || []; track $index; let i = $index) {
+            <div class="repeater-row repeater-row--3">
+              <input type="text" [value]="item.size" (input)="updatePriceListItem(i, 'size', $any($event.target).value)" placeholder="Méret" />
+              <input type="text" [value]="item.description || ''" (input)="updatePriceListItem(i, 'description', $any($event.target).value)" placeholder="Leírás" />
+              <input type="number" [value]="item.price" (input)="updatePriceListItem(i, 'price', $any($event.target).value)" placeholder="Ár" />
+              <button class="btn-icon btn-icon--danger" (click)="removePriceListItem(i)" matTooltip="Törlés">
+                <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              </button>
+            </div>
+          }
+          <button class="btn-add" (click)="addPriceListItem()">
+            <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+            Elem hozzáadása
+          </button>
+        </div>
+
+        <!-- Mennyiségi kedvezmények -->
+        <div class="repeater">
+          <label class="repeater-label">Mennyiségi kedvezmények</label>
+          @for (item of form().volume_discounts || []; track $index; let i = $index) {
+            <div class="repeater-row">
+              <input type="number" [value]="item.min_quantity" (input)="updateVolumeDiscount(i, 'min_quantity', $any($event.target).value)" placeholder="Min. db" />
+              <input type="number" [value]="item.discount_percent" (input)="updateVolumeDiscount(i, 'discount_percent', $any($event.target).value)" placeholder="Kedvezmény %" />
+              <button class="btn-icon btn-icon--danger" (click)="removeVolumeDiscount(i)" matTooltip="Törlés">
+                <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+              </button>
+            </div>
+          }
+          <button class="btn-add" (click)="addVolumeDiscount()">
+            <lucide-icon [name]="ICONS.PLUS" [size]="14" />
+            Kedvezmény hozzáadása
+          </button>
+        </div>
+      }
+    </section>
+
+    <!-- Árazás szekció -->
+    <section class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [name]="ICONS.BANKNOTE" [size]="18" />
+        Árazás
+      </h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Alapár (Ft)</label>
+          <input type="number" [ngModel]="form().base_price" (ngModelChange)="updateField('base_price', +$event)" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Kedvezményes ár (Ft)</label>
+          <input type="number" [ngModel]="form().discount_price" (ngModelChange)="updateField('discount_price', +$event)" min="0" />
+        </div>
+      </div>
+      @if (form().discount_price && form().discount_price! > 0) {
+        <div class="form-group">
+          <label>Kedvezmény szöveg</label>
+          <input type="text" [ngModel]="form().discount_text" (ngModelChange)="updateField('discount_text', $event)" placeholder="Pl. Korai foglalási kedvezmény" />
+        </div>
+      }
+
+      <!-- Opcionális sorok -->
+      <div class="option-toggles">
+        <label class="toggle-row">
+          <input type="checkbox" [ngModel]="form().has_small_tablo" (ngModelChange)="updateField('has_small_tablo', $event)" />
+          <span>Kistabló</span>
+        </label>
+        @if (form().has_small_tablo) {
+          <div class="option-fields">
+            <input type="number" [ngModel]="form().small_tablo_price" (ngModelChange)="updateField('small_tablo_price', +$event)" placeholder="Kistabló ár" min="0" />
+            <input type="text" [ngModel]="form().small_tablo_text" (ngModelChange)="updateField('small_tablo_text', $event)" placeholder="Kistabló szöveg" />
+          </div>
+        }
+
+        <label class="toggle-row">
+          <input type="checkbox" [ngModel]="form().has_production" (ngModelChange)="updateField('has_production', $event)" />
+          <span>Kivitelezés</span>
+        </label>
+        @if (form().has_production) {
+          <div class="option-fields">
+            <input type="number" [ngModel]="form().production_price" (ngModelChange)="updateField('production_price', +$event)" placeholder="Kivitelezés ár" min="0" />
+            <input type="text" [ngModel]="form().production_text" (ngModelChange)="updateField('production_text', $event)" placeholder="Kivitelezés szöveg" />
+          </div>
+        }
+
+        <label class="toggle-row">
+          <input type="checkbox" [ngModel]="form().has_shipping" (ngModelChange)="updateField('has_shipping', $event)" />
+          <span>Szállítás</span>
+        </label>
+        @if (form().has_shipping) {
+          <div class="option-fields">
+            <input type="number" [ngModel]="form().shipping_price" (ngModelChange)="updateField('shipping_price', +$event)" placeholder="Szállítási díj" min="0" />
+          </div>
+        }
+      </div>
+
+      <!-- Összesítő -->
+      <div class="total-bar">
+        <span>Végösszeg:</span>
+        <strong>{{ formatPrice(totalPrice()) }}</strong>
+      </div>
+    </section>
+
+    <!-- Megjegyzések -->
+    <section class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [name]="ICONS.EDIT" [size]="18" />
+        Megjegyzések
+      </h2>
+      <div class="form-group">
+        <label>Megjegyzések</label>
+        <textarea rows="3" [ngModel]="form().notes" (ngModelChange)="updateField('notes', $event)" placeholder="Belső megjegyzések..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Érvényesség</label>
+        <input type="date" [ngModel]="form().valid_until" (ngModelChange)="updateField('valid_until', $event)" />
+      </div>
+    </section>
+
+    <!-- Email történelem -->
+    @if (actions.emailHistory().length > 0) {
+      <app-quote-email-history [emails]="actions.emailHistory()" />
+    }
+  }
+</div>
+
+<!-- Email küldés dialógus -->
+@if (showEmailDialog()) {
+  <app-send-quote-email-dialog
+    [customerEmail]="form().customer_email || ''"
+    [quoteNumber]="actions.quote()?.quote_number || ''"
+    (send)="onEmailSent($event)"
+    (close)="showEmailDialog.set(false)"
+  />
+}

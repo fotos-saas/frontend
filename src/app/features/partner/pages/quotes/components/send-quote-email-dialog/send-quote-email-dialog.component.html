@@ -1,0 +1,52 @@
+<app-dialog-wrapper
+  title="Árajánlat küldése"
+  icon="mail"
+  headerStyle="flat"
+  theme="blue"
+  size="md"
+  (closeEvent)="close.emit()"
+  (submitEvent)="onSubmit()"
+>
+  <div dialogBody>
+    <div class="form-group">
+      <label>Címzett *</label>
+      <input type="email" [ngModel]="toEmail()" (ngModelChange)="toEmail.set($event)" placeholder="email@example.com" />
+    </div>
+
+    <div class="form-group">
+      <label>Tárgy *</label>
+      <input type="text" [ngModel]="subject()" (ngModelChange)="subject.set($event)" />
+    </div>
+
+    @if (snippets().length > 0) {
+      <div class="snippet-section">
+        <label>Sablon beszúrása</label>
+        <div class="snippet-list">
+          @for (snippet of snippets(); track snippet.id) {
+            <button class="snippet-btn" (click)="applySnippet(snippet)">
+              {{ snippet.name }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="form-group">
+      <label>Szövegtörzs</label>
+      <textarea rows="6" [ngModel]="body()" (ngModelChange)="body.set($event)" placeholder="Email szövege..."></textarea>
+    </div>
+
+    <div class="pdf-notice">
+      <lucide-icon [name]="ICONS.PAPERCLIP" [size]="14" />
+      <span>A PDF automatikusan csatolva lesz</span>
+    </div>
+  </div>
+
+  <div dialogFooter>
+    <button class="btn-cancel" (click)="close.emit()">Mégse</button>
+    <button class="btn-send" [disabled]="!toEmail() || !subject()" (click)="onSubmit()">
+      <lucide-icon [name]="ICONS.SEND" [size]="16" />
+      Küldés
+    </button>
+  </div>
+</app-dialog-wrapper>

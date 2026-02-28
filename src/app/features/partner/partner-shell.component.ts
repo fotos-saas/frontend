@@ -169,6 +169,7 @@ export class PartnerShellComponent implements OnInit {
         ]
       },
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
+      { id: 'quotes', route: `${base}/quotes`, label: 'Árajánlatok', icon: 'file-text' },
       {
         id: 'booking',
         label: 'Naptar',

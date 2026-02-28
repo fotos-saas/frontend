@@ -1,0 +1,162 @@
+<div class="quote-list page-card">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Árajánlatok</h1>
+      <p class="subtitle">Árajánlatok kezelése, PDF generálás és küldés</p>
+    </div>
+    <div class="header-buttons">
+      @if (actions.templates().length > 0) {
+        <button class="btn-secondary" (click)="showTemplateChooser.set(true)">
+          <lucide-icon [name]="ICONS.COPY" [size]="16" />
+          Sablonból
+        </button>
+      }
+      <a class="btn-primary" routerLink="/partner/quotes/new">
+        <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        Új árajánlat
+      </a>
+    </div>
+  </div>
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="search-icon" />
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Keresés név vagy szám alapján..."
+        (input)="onSearch($event)"
+      />
+    </div>
+    <select class="filter-select" (change)="onStatusFilter($event)">
+      <option value="">Minden státusz</option>
+      <option value="draft">Piszkozat</option>
+      <option value="sent">Elküldve</option>
+      <option value="accepted">Elfogadva</option>
+      <option value="rejected">Elutasítva</option>
+    </select>
+  </div>
+
+  <!-- Loading -->
+  @if (actions.loading()) {
+    <div class="loading-state">
+      @for (_ of [1,2,3,4,5]; track $index) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (actions.quotes().length === 0) {
+    <!-- Üres állapot -->
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.FILE_TEXT" [size]="48" class="empty-icon" />
+      <h3>Még nincsenek árajánlatok</h3>
+      <p>Hozz létre egy új árajánlatot a kezdéshez</p>
+    </div>
+  } @else {
+    <!-- Táblázat -->
+    <div class="table-header">
+      <span class="th">Szám</span>
+      <span class="th">Ügyfél</span>
+      <span class="th">Kategória</span>
+      <span class="th">Összeg</span>
+      <span class="th">Státusz</span>
+      <span class="th">Dátum</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <div class="row-grid">
+      @for (quote of actions.quotes(); track quote.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+          <span class="cell-number">{{ quote.quote_number }}</span>
+          <span class="cell-name">{{ quote.customer_name || '—' }}</span>
+          <span class="cell-category">{{ quote.quote_category === 'photographer' ? 'Fotós' : 'Egyedi' }}</span>
+          <span class="cell-price">{{ formatPrice(quote.discount_price || quote.base_price) }}</span>
+          <span>
+            <span class="status-badge" [ngClass]="STATUS_CONFIG[quote.status].bgClass">
+              {{ STATUS_CONFIG[quote.status].label }}
+            </span>
+          </span>
+          <span class="cell-date">{{ formatDate(quote.created_at) }}</span>
+          <div class="cell-actions">
+            <a
+              class="action-btn"
+              [routerLink]="['/partner/quotes', quote.id]"
+              matTooltip="Szerkesztés"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </a>
+            <button
+              class="action-btn"
+              matTooltip="PDF letöltés"
+              (click)="actions.downloadPdf(quote)"
+            >
+              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+            </button>
+            <button
+              class="action-btn"
+              matTooltip="Duplikálás"
+              (click)="actions.duplicate(quote)"
+            >
+              <lucide-icon [name]="ICONS.COPY" [size]="16" />
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              matTooltip="Törlés"
+              [disabled]="quote.status !== 'draft' && quote.status !== 'template'"
+              (click)="confirmDelete(quote)"
+            >
+              <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Lapozás -->
+    @if (actions.lastPage() > 1) {
+      <div class="pagination">
+        <button
+          class="page-btn"
+          [disabled]="actions.currentPage() <= 1"
+          (click)="goToPage(actions.currentPage() - 1)"
+        >
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+          Előző
+        </button>
+        <span class="page-info">
+          {{ actions.currentPage() }} / {{ actions.lastPage() }}
+          <span class="total-count">({{ actions.total() }} db)</span>
+        </span>
+        <button
+          class="page-btn"
+          [disabled]="actions.currentPage() >= actions.lastPage()"
+          (click)="goToPage(actions.currentPage() + 1)"
+        >
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Törlés megerősítő dialógus -->
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Árajánlat törlése"
+    message="Biztosan törölni szeretnéd ezt az árajánlatot?"
+    confirmText="Törlés"
+    confirmType="danger"
+    (resultEvent)="$event.action === 'confirm' ? onDeleteConfirmed() : showDeleteConfirm.set(false)"
+  />
+}
+
+<!-- Sablon választó -->
+@if (showTemplateChooser()) {
+  <app-template-chooser-dialog
+    [templates]="actions.templates()"
+    (select)="actions.createFromTemplate($event); showTemplateChooser.set(false)"
+    (close)="showTemplateChooser.set(false)"
+  />
+}

@@ -1,0 +1,69 @@
+@use 'app/shared/styles/list-page' as list;
+
+:host {
+  display: block;
+}
+
+.quote-list {
+  --table-cols: 130px 1fr 90px 110px 100px 90px 140px;
+}
+
+.cell-number {
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: var(--color-primary, #1e3a5f);
+  font-weight: 600;
+}
+
+.cell-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-category {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.cell-price {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-date {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.cell-actions {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .quote-list {
+    --table-cols: 1fr;
+  }
+
+  .list-row {
+    grid-template-columns: 1fr !important;
+    gap: 4px;
+  }
+
+  .cell-actions {
+    justify-content: flex-start;
+  }
+}

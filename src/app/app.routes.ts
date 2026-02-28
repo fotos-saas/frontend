@@ -251,6 +251,22 @@ export const routes: Routes = [
         path: 'contacts',
         loadComponent: () => import('./features/partner/pages/contact-list/contact-list.component').then(m => m.PartnerContactListComponent)
       },
+      // Árajánlatok
+      {
+        path: 'quotes',
+        loadComponent: () => import('./features/partner/pages/quotes/quote-list/quote-list.component').then(m => m.QuoteListComponent),
+        title: 'Árajánlatok'
+      },
+      {
+        path: 'quotes/new',
+        loadComponent: () => import('./features/partner/pages/quotes/quote-editor/quote-editor.component').then(m => m.QuoteEditorComponent),
+        title: 'Új árajánlat'
+      },
+      {
+        path: 'quotes/:id',
+        loadComponent: () => import('./features/partner/pages/quotes/quote-editor/quote-editor.component').then(m => m.QuoteEditorComponent),
+        title: 'Árajánlat szerkesztése'
+      },
       // Team - Csapatkezelés
       {
         path: 'team',
@@ -553,6 +569,22 @@ export const routes: Routes = [
       {
         path: 'contacts',
         loadComponent: () => import('./features/partner/pages/contact-list/contact-list.component').then(m => m.PartnerContactListComponent)
+      },
+      // Árajánlatok (designer)
+      {
+        path: 'quotes',
+        loadComponent: () => import('./features/partner/pages/quotes/quote-list/quote-list.component').then(m => m.QuoteListComponent),
+        title: 'Árajánlatok'
+      },
+      {
+        path: 'quotes/new',
+        loadComponent: () => import('./features/partner/pages/quotes/quote-editor/quote-editor.component').then(m => m.QuoteEditorComponent),
+        title: 'Új árajánlat'
+      },
+      {
+        path: 'quotes/:id',
+        loadComponent: () => import('./features/partner/pages/quotes/quote-editor/quote-editor.component').then(m => m.QuoteEditorComponent),
+        title: 'Árajánlat szerkesztése'
       },
       {
         path: 'orders/clients',

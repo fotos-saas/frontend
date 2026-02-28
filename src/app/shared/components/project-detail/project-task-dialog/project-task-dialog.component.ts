@@ -63,12 +63,13 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
 
     this.loadAssignees();
 
-    // Document-szintű paste listener — elkapja a Cmd+V / Ctrl+V-t bárhol a dialógusban
-    this.doc.addEventListener('paste', this.pasteHandler);
+    // Capture fázisban figyeljük — így a Quill editor előtt fut le,
+    // és preventDefault()-tal megakadályozza, hogy a kép a szövegbe kerüljön
+    this.doc.addEventListener('paste', this.pasteHandler, true);
   }
 
   ngOnDestroy(): void {
-    this.doc.removeEventListener('paste', this.pasteHandler);
+    this.doc.removeEventListener('paste', this.pasteHandler, true);
   }
 
   /** Cmd+V / Ctrl+V clipboard paste — kép fájl hozzáadása */

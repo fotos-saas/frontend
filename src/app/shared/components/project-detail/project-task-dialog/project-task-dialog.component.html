@@ -32,24 +32,22 @@
         rows="3"
       ></textarea>
     </div>
-    @if (assignees().length > 0) {
-      <div class="field">
-        <label class="field__label" for="taskAssignee">
-          <lucide-icon [name]="ICONS.USER_CHECK" [size]="14" class="field__label-icon" />
-          Kiosztás
-        </label>
-        <select
-          id="taskAssignee"
-          class="field__select"
-          [(ngModel)]="assignedToUserId"
-        >
-          <option [ngValue]="null">Saját feladat</option>
-          @for (assignee of assignees(); track assignee.id) {
-            <option [ngValue]="assignee.id">{{ assignee.name }}</option>
-          }
-        </select>
-      </div>
-    }
+    <div class="field">
+      <label class="field__label" for="taskAssignee">
+        <lucide-icon [name]="ICONS.USER_CHECK" [size]="14" class="field__label-icon" />
+        Kiosztás
+      </label>
+      <select
+        id="taskAssignee"
+        class="field__select"
+        [(ngModel)]="assignedToUserId"
+      >
+        <option [ngValue]="null">Saját feladat</option>
+        @for (assignee of assignees(); track assignee.id) {
+          <option [ngValue]="assignee.id">{{ assignee.name }}</option>
+        }
+      </select>
+    </div>
   </div>
 
   <div dialogFooter>

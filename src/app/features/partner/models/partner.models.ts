@@ -755,7 +755,6 @@ export interface TaskUser {
 export interface TaskAssignee {
   id: number;
   name: string;
-  email: string;
 }
 
 /**

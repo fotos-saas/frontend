@@ -6,7 +6,6 @@ import { ICONS } from '../../../constants/icons.constants';
 import { DialogWrapperComponent } from '../../dialog-wrapper/dialog-wrapper.component';
 import { PartnerTaskService } from '../../../../features/partner/services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { AuthService } from '../../../../core/services/auth.service';
 import type { ProjectTask, TaskAssignee } from '../../../../features/partner/models/partner.models';
 
 @Component({
@@ -25,7 +24,6 @@ export class ProjectTaskDialogComponent implements OnInit {
 
   private readonly taskService = inject(PartnerTaskService);
   private readonly toast = inject(ToastService);
-  private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
@@ -51,9 +49,11 @@ export class ProjectTaskDialogComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          // Saját user kiszűrése (nem magadnak osztod ki)
-          const currentUserId = this.authService.currentUserSignal()?.id;
-          this.assignees.set(res.data.filter(a => a.id !== currentUserId));
+          this.assignees.set(res.data);
+        },
+        error: () => {
+          // Ha nem sikerül, a dialog még használható — csak a kiosztási dropdown üres
+          this.assignees.set([]);
         },
       });
   }

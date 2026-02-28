@@ -46,7 +46,11 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
           </div>
         }
       } @else if (isText()) {
-        <div class="designer-layer__text" [style.font-size.px]="textFontSize()">
+        <div
+          class="designer-layer__text"
+          [class.designer-layer__text--position]="isPosition()"
+          [style.font-size.px]="textFontSize()"
+        >
           @for (line of textLines(); track $index) {
             <div class="designer-layer__text-line">{{ line }}</div>
           }
@@ -141,6 +145,11 @@ import { LayoutDesignerSwapService } from '../../layout-designer-swap.service';
       line-height: 1.2;
     }
 
+    .designer-layer__text--position {
+      color: #64748b;
+      font-style: italic;
+    }
+
     .designer-layer__text-line {
       white-space: nowrap;
     }
@@ -198,10 +207,12 @@ export class LayoutLayerComponent implements AfterViewInit {
     return ds?.active === true && this.isSelected();
   });
 
-  /** Megjelenítendő név: person match neve, vagy layerName fallback */
-  readonly displayName = computed(() =>
-    this.layer().personMatch?.name ?? this.layer().layerName,
-  );
+  /** Megjelenítendő szöveg: position → text mező, név → person match neve, egyéb → layerName */
+  readonly displayName = computed(() => {
+    const l = this.layer();
+    if (this.isPosition()) return l.text || l.layerName;
+    return l.personMatch?.name ?? l.layerName;
+  });
 
   /** Szöveg sorok: 3+ névrésznél (kötőjel is számít) a 2. névrész után tör */
   readonly textLines = computed(() => {
@@ -229,7 +240,13 @@ export class LayoutLayerComponent implements AfterViewInit {
 
   readonly isText = computed(() => {
     const cat = this.layer().category;
-    return cat === 'student-name' || cat === 'teacher-name';
+    return cat === 'student-name' || cat === 'teacher-name'
+      || cat === 'student-position' || cat === 'teacher-position';
+  });
+
+  readonly isPosition = computed(() => {
+    const cat = this.layer().category;
+    return cat === 'student-position' || cat === 'teacher-position';
   });
 
   readonly displayX = computed(() => {
@@ -254,10 +271,10 @@ export class LayoutLayerComponent implements AfterViewInit {
     Math.max(12, Math.min(24, this.displayWidth() * 0.4)),
   );
 
-  /** Szöveg méret: arányosan skálázódik a PSD méretéhez (25pt alap a PSD-ben) */
+  /** Szöveg méret: arányosan skálázódik a PSD méretéhez */
   readonly textFontSize = computed(() => {
-    const basePx = 30; // ~25pt a PSD-ben pixel-ben
-    return Math.max(6, Math.round(basePx * this.scale()));
+    const basePx = this.isPosition() ? 22 : 30; // position: 18pt, név: 25pt
+    return Math.max(5, Math.round(basePx * this.scale()));
   });
 
   ngAfterViewInit(): void {

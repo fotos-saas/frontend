@@ -149,6 +149,8 @@ export class DialogWrapperComponent implements AfterViewInit {
     if (this.isSubmitting()) return;
     const target = event.target as HTMLElement;
     if (target.tagName === 'TEXTAREA') return;
+    if (target.getAttribute('contenteditable') === 'true') return;
+    if (target.closest('.ql-editor')) return;
     this.submitEvent.emit();
   }
 

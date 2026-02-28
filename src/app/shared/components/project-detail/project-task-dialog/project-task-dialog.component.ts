@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, OnInit, HostListener } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, OnInit, OnDestroy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -22,7 +23,7 @@ import type { ProjectTask, TaskAttachment } from '../../../../features/partner/m
   templateUrl: './project-task-dialog.component.html',
   styleUrls: ['./project-task-dialog.component.scss'],
 })
-export class ProjectTaskDialogComponent implements OnInit {
+export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
   projectId = input.required<number>();
   editTask = input<ProjectTask | null>(null);
   close = output<void>();
@@ -31,6 +32,8 @@ export class ProjectTaskDialogComponent implements OnInit {
   private readonly taskService = inject(PartnerTaskService);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly doc = inject(DOCUMENT);
+  private readonly pasteHandler = this.onPaste.bind(this);
 
   readonly ICONS = ICONS;
   saving = signal(false);
@@ -59,11 +62,17 @@ export class ProjectTaskDialogComponent implements OnInit {
     }
 
     this.loadAssignees();
+
+    // Document-szintű paste listener — elkapja a Cmd+V / Ctrl+V-t bárhol a dialógusban
+    this.doc.addEventListener('paste', this.pasteHandler);
   }
 
-  /** Ctrl+V clipboard paste — kép fájl hozzáadása */
-  @HostListener('paste', ['$event'])
-  onPaste(event: ClipboardEvent): void {
+  ngOnDestroy(): void {
+    this.doc.removeEventListener('paste', this.pasteHandler);
+  }
+
+  /** Cmd+V / Ctrl+V clipboard paste — kép fájl hozzáadása */
+  private onPaste(event: ClipboardEvent): void {
     const items = event.clipboardData?.items;
     if (!items) return;
 

@@ -6,7 +6,7 @@ import { PhotoshopService } from './photoshop.service';
 import { BrandingService } from './branding.service';
 import { PartnerProjectService } from './partner-project.service';
 import { PartnerProjectListItem, TabloSize, TabloSizeThreshold } from '../models/partner.models';
-import { selectTabloSize } from '@shared/utils/tablo-size.util';
+import { resolveProjectTabloSize } from '@shared/utils/tablo-size.util';
 
 export interface PsdStatus {
   exists: boolean;
@@ -103,9 +103,7 @@ export class PsdStatusService {
     brandName: string | null,
   ): Promise<PsdStatus> {
     try {
-      const size = project.tabloSize
-        ? (sizes.find(s => s.value === project.tabloSize) ?? selectTabloSize(project.personsCount, sizes, threshold))
-        : selectTabloSize(project.personsCount, sizes, threshold);
+      const size = resolveProjectTabloSize(project, sizes, threshold);
       if (!size) return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
 
       const psdPath = await this.ps.computePsdPath(size.value, {

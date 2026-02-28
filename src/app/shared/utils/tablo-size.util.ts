@@ -24,3 +24,22 @@ export function selectTabloSize(
 
   return sizes[0];
 }
+
+/**
+ * Projekt meretanak megallapitasa — SINGLE SOURCE OF TRUTH.
+ *
+ * Prioritas:
+ * 1. project.tabloSize (manuálisan mentett méret)
+ * 2. selectTabloSize(personsCount) (automatikus szamitas)
+ */
+export function resolveProjectTabloSize(
+  project: { tabloSize?: string | null; personsCount: number },
+  sizes: TabloSize[],
+  threshold: TabloSizeThreshold | null,
+): TabloSize | null {
+  if (project.tabloSize) {
+    const found = sizes.find(s => s.value === project.tabloSize);
+    if (found) return found;
+  }
+  return selectTabloSize(project.personsCount, sizes, threshold);
+}

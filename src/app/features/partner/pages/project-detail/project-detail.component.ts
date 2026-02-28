@@ -73,6 +73,7 @@ export class PartnerProjectDetailComponent {
     printSmallTablo: project.printSmallTablo,
     printFlat: project.printFlat,
     tags: project.tags ?? [],
+    pendingTaskCount: project.pendingTaskCount,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

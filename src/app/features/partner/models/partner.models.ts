@@ -97,6 +97,7 @@ export interface PartnerProjectListItem {
   tags: ProjectTag[];
   lastActivityAt: string | null;
   emailMetrics: ProjectEmailMetrics | null;
+  pendingTaskCount: number;
 }
 
 /**

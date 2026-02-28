@@ -138,6 +138,7 @@ export interface ProjectDetailData {
     uploadedAt: string;
   } | null;
   tags?: Array<{ id: number; name: string; color: string }>;
+  pendingTaskCount?: number;
   createdAt: string;
   updatedAt: string;
 }

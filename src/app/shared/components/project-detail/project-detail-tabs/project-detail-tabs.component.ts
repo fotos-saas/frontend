@@ -37,6 +37,9 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
         >
           <lucide-icon [name]="tab.icon" [size]="16" />
           <span>{{ tab.label }}</span>
+          @if (getBadge(tab.id); as badge) {
+            <span class="tab-badge">{{ badge }}</span>
+          }
         </button>
       }
     </nav>
@@ -85,6 +88,22 @@ export const PROJECT_DETAIL_TABS: TabDefinition[] = [
       }
     }
 
+    .tab-badge {
+      margin-left: 6px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: #b45309;
+      background: #fef3c7;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
     @media (max-width: 480px) {
       .tab-btn {
         padding: 8px 10px;
@@ -110,9 +129,17 @@ export class ProjectDetailTabsComponent {
   /** Ha megadva, csak ezek a tab-ok jelennek meg */
   hiddenTabs = input<ProjectDetailTab[]>([]);
 
+  /** Badge számok tab-onként (pl. { tasks: 3 }) */
+  badges = input<Partial<Record<ProjectDetailTab, number>>>({});
+
   visibleTabs = computed(() => {
     const hidden = this.hiddenTabs();
     if (hidden.length === 0) return PROJECT_DETAIL_TABS;
     return PROJECT_DETAIL_TABS.filter(tab => !hidden.includes(tab.id));
   });
+
+  getBadge(tabId: ProjectDetailTab): number | null {
+    const val = this.badges()[tabId];
+    return val && val > 0 ? val : null;
+  }
 }

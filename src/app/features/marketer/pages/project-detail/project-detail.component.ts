@@ -57,6 +57,7 @@ export class ProjectDetailComponent {
     doneAt: (project as any).doneAt,
     printSmallTablo: (project as any).printSmallTablo,
     printFlat: (project as any).printFlat,
+    pendingTaskCount: (project as any).pendingTaskCount,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

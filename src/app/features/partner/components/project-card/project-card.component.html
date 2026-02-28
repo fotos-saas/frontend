@@ -55,6 +55,15 @@
           {{ project().emailMetrics!.unansweredCount }}
         </span>
       }
+      @if (project().pendingTaskCount > 0) {
+        <span
+          class="task-badge"
+          [matTooltip]="project().pendingTaskCount + ' elvégzetlen feladat'"
+        >
+          <lucide-icon [name]="ICONS.LIST_TODO" [size]="10" />
+          {{ project().pendingTaskCount }}
+        </span>
+      }
       @if (project().orderSubmittedAt && !isMarketer()) {
         <button
           type="button"

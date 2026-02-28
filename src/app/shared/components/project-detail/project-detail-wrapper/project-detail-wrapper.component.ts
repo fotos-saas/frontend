@@ -126,6 +126,14 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   readonly isMarketer = this.authService.isMarketer;
   readonly showTabloEditorBtn = computed(() => this.electronService.isElectron && !this.isMarketer());
 
+  /** Tab badge-ek (pl. Feladatok tab-on a pending count) */
+  readonly tabBadges = computed<Partial<Record<ProjectDetailTab, number>>>(() => {
+    const data = this.projectData();
+    const badges: Partial<Record<ProjectDetailTab, number>> = {};
+    if (data?.pendingTaskCount) badges['tasks'] = data.pendingTaskCount;
+    return badges;
+  });
+
   activeTab = signal<ProjectDetailTab>('overview');
   hiddenTabs = computed<ProjectDetailTab[]>(() => {
     const hidden: ProjectDetailTab[] = [];

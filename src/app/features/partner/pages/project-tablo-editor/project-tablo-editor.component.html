@@ -149,15 +149,13 @@
                   <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
                   Projekt mappa megnyitása
                 </button>
-                @if (snapshotService.snapshots().length > 0) {
-                  <button
-                    class="btn btn--outline"
-                    (click)="openLayoutDesigner()"
-                  >
-                    <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="16" />
-                    Vizuális szerkesztő
-                  </button>
-                }
+                <button
+                  class="btn btn--outline"
+                  (click)="openLayoutDesigner()"
+                >
+                  <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="16" />
+                  Vizuális szerkesztő
+                </button>
               </div>
             }
           } @else {

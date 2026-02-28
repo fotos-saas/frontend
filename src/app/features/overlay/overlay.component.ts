@@ -807,35 +807,45 @@ export class OverlayComponent implements OnInit {
   }
 
   private async doRefreshPlacedJson(): Promise<void> {
-    if (!window.electronAPI) return;
+    console.log('[REFRESH-JSON] START');
+    if (!window.electronAPI) { console.log('[REFRESH-JSON] ABORT: no electronAPI'); return; }
 
     const psdFilePath = this.activeDoc().path;
-    if (!psdFilePath) { console.log('[REFRESH-JSON] nincs PSD útvonal'); return; }
+    console.log('[REFRESH-JSON] psdFilePath:', psdFilePath);
+    if (!psdFilePath) { console.log('[REFRESH-JSON] ABORT: nincs PSD útvonal'); return; }
 
     // Person ID-k kinyerése a layer nevekből
+    console.log('[REFRESH-JSON] getImageLayerNames hívás...');
     const layerNames = await this.getImageLayerNames();
+    console.log('[REFRESH-JSON] layerNames:', layerNames.length, layerNames.slice(0, 3));
     const layerPersonMap = new Map<number, string>();
     for (const name of layerNames) {
       const match = name.match(/---(\d+)$/);
       if (match) layerPersonMap.set(parseInt(match[1], 10), name);
     }
-    if (layerPersonMap.size === 0) { console.log('[REFRESH-JSON] nincs person ID a layerekben'); return; }
+    console.log('[REFRESH-JSON] layerPersonMap size:', layerPersonMap.size);
+    if (layerPersonMap.size === 0) { console.log('[REFRESH-JSON] ABORT: nincs person ID a layerekben'); return; }
 
     // Persons betöltése API-ból
     let pid = this.context().projectId || this.lastProjectId;
+    console.log('[REFRESH-JSON] pid (context/lastProjectId):', pid);
     if (!pid) {
       try {
         const r = await window.electronAPI.overlay.getProjectId();
+        console.log('[REFRESH-JSON] getProjectId result:', r);
         if (r.projectId) { pid = r.projectId; this.lastProjectId = pid; }
-      } catch { /* ignore */ }
+      } catch (e) { console.log('[REFRESH-JSON] getProjectId error:', e); }
     }
-    if (!pid) { console.log('[REFRESH-JSON] nincs projectId'); return; }
+    if (!pid) { console.log('[REFRESH-JSON] ABORT: nincs projectId'); return; }
 
     let persons = this.persons();
+    console.log('[REFRESH-JSON] cached persons:', persons.length);
     try {
       const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
+      console.log('[REFRESH-JSON] fetching persons from:', url);
       const res = await firstValueFrom(this.http.get<{ data: PersonItem[] }>(url));
       persons = res.data || [];
+      console.log('[REFRESH-JSON] fetched persons:', persons.length);
       this.ngZone.run(() => this.persons.set(persons));
     } catch (e) { console.log('[REFRESH-JSON] persons betöltés hiba:', e); }
 
@@ -845,16 +855,20 @@ export class OverlayComponent implements OnInit {
       const person = persons.find(p => p.id === personId);
       if (person?.photoUrl) layers.push({ layerName, photoUrl: person.photoUrl });
     }
-    if (layers.length === 0) { console.log('[REFRESH-JSON] nincs fotó'); return; }
+    console.log('[REFRESH-JSON] layers to write:', layers.length);
+    if (layers.length === 0) { console.log('[REFRESH-JSON] ABORT: nincs fotó'); return; }
 
     this.ngZone.run(() => this.busyCommand.set('refresh-placed-json'));
     try {
+      console.log('[REFRESH-JSON] calling refreshPlacedJson IPC...');
       const result = await window.electronAPI.photoshop.refreshPlacedJson({
         psdFilePath,
         layers,
         syncBorder: this.syncWithBorder(),
       });
-      console.log('[REFRESH-JSON] kész:', result);
+      console.log('[REFRESH-JSON] IPC result:', result);
+    } catch (e) {
+      console.error('[REFRESH-JSON] IPC error:', e);
     } finally {
       this.ngZone.run(() => this.busyCommand.set(null));
     }

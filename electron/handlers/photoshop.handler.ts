@@ -1605,14 +1605,18 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     layers: Array<{ layerName: string; photoUrl: string }>;
     syncBorder?: boolean;
   }) => {
+    log.info('[REFRESH-JSON-HANDLER] hívás érkezett, psdFilePath:', params.psdFilePath, 'layers:', params.layers?.length);
     try {
       if (typeof params.psdFilePath !== 'string' || params.psdFilePath.includes('..') || params.psdFilePath.length > 500) {
+        log.warn('[REFRESH-JSON-HANDLER] érvénytelen PSD útvonal');
         return { success: false, error: 'Érvénytelen PSD útvonal' };
       }
+      log.info('[REFRESH-JSON-HANDLER] updatePlacedPhotosJson hívás...');
       updatePlacedPhotosJson(params.psdFilePath, undefined, params.layers, !!params.syncBorder);
+      log.info('[REFRESH-JSON-HANDLER] kész, count:', params.layers.length);
       return { success: true, count: params.layers.length };
     } catch (error) {
-      log.error('Placed JSON refresh hiba:', error);
+      log.error('[REFRESH-JSON-HANDLER] hiba:', error);
       return { success: false, error: 'JSON frissítés sikertelen' };
     }
   });

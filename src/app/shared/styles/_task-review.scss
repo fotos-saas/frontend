@@ -1,0 +1,56 @@
+/// Feladat jóváhagyás (review) gombok és badge-ek közös stílusai.
+/// Használat: @use 'shared/styles/task-review' as review;
+///   &__review-btn { @include review.review-btn; }
+///   &__reviewed-badge { @include review.reviewed-badge; }
+
+@mixin review-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 8px;
+  white-space: nowrap;
+
+  lucide-icon {
+    margin-right: 4px;
+  }
+
+  &:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #16a34a;
+  }
+
+  &--active {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #16a34a;
+
+    &:hover {
+      background: #fef2f2;
+      border-color: #fca5a5;
+      color: #dc2626;
+    }
+  }
+}
+
+@mixin reviewed-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #16a34a;
+  margin-top: 2px;
+
+  lucide-icon {
+    margin-right: 3px;
+  }
+}

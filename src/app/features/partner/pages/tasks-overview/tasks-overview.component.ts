@@ -8,6 +8,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
@@ -176,73 +177,58 @@ export class TasksOverviewComponent implements OnInit {
   }
 
   toggleTask(group: ProjectTaskGroup, task: ProjectTask): void {
-    const prev = this.rawGroups();
-    this.rawGroups.update(groups =>
-      groups.map(g => {
-        if (g.project_id !== group.project_id) return g;
-        return {
-          ...g,
-          completed_count: task.is_completed ? g.completed_count - 1 : g.completed_count + 1,
-          tasks: g.tasks.map(t => t.id === task.id ? { ...t, is_completed: !t.is_completed } : t),
-        };
-      })
-    );
-
-    this.taskService.toggleComplete(group.project_id, task.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.rawGroups.update(groups =>
-            groups.map(g => {
-              if (g.project_id !== group.project_id) return g;
-              return {
-                ...g,
-                tasks: g.tasks.map(t => t.id === task.id ? res.data : t),
-                completed_count: g.tasks.filter(t => t.id === task.id ? res.data.is_completed : t.is_completed).length,
-              };
-            })
-          );
-        },
-        error: () => {
-          this.rawGroups.set(prev);
-          this.toast.error('Hiba', 'Nem sikerült frissíteni a feladatot.');
-        },
-      });
+    this.optimisticGroupToggle(group, task, 'is_completed',
+      this.taskService.toggleComplete(group.project_id, task.id),
+      'Nem sikerült frissíteni a feladatot.');
   }
 
   toggleReview(group: ProjectTaskGroup, task: ProjectTask): void {
     if (!task.is_completed) return;
+    this.optimisticGroupToggle(group, task, 'is_reviewed',
+      this.taskService.toggleReview(group.project_id, task.id),
+      'Nem sikerült frissíteni a jóváhagyást.');
+  }
 
+  private optimisticGroupToggle(
+    group: ProjectTaskGroup,
+    task: ProjectTask,
+    field: keyof Pick<ProjectTask, 'is_completed' | 'is_reviewed'>,
+    serviceCall: Observable<{ data: ProjectTask }>,
+    errorMsg: string,
+  ): void {
     const prev = this.rawGroups();
+
     this.rawGroups.update(groups =>
       groups.map(g => {
         if (g.project_id !== group.project_id) return g;
+        const updatedTasks = g.tasks.map(t => t.id === task.id ? { ...t, [field]: !t[field] } : t);
         return {
           ...g,
-          tasks: g.tasks.map(t => t.id === task.id ? { ...t, is_reviewed: !t.is_reviewed } : t),
+          tasks: updatedTasks,
+          completed_count: updatedTasks.filter(t => t.is_completed).length,
         };
       })
     );
 
-    this.taskService.toggleReview(group.project_id, task.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.rawGroups.update(groups =>
-            groups.map(g => {
-              if (g.project_id !== group.project_id) return g;
-              return {
-                ...g,
-                tasks: g.tasks.map(t => t.id === task.id ? res.data : t),
-              };
-            })
-          );
-        },
-        error: () => {
-          this.rawGroups.set(prev);
-          this.toast.error('Hiba', 'Nem sikerült frissíteni a jóváhagyást.');
-        },
-      });
+    serviceCall.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.rawGroups.update(groups =>
+          groups.map(g => {
+            if (g.project_id !== group.project_id) return g;
+            const updatedTasks = g.tasks.map(t => t.id === task.id ? res.data : t);
+            return {
+              ...g,
+              tasks: updatedTasks,
+              completed_count: updatedTasks.filter(t => t.is_completed).length,
+            };
+          })
+        );
+      },
+      error: () => {
+        this.rawGroups.set(prev);
+        this.toast.error('Hiba', errorMsg);
+      },
+    });
   }
 
   navigateToProject(projectId: number): void {

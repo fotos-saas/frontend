@@ -10,6 +10,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
 import { SafeHtmlPipe } from '../../../pipes/safe-html.pipe';
@@ -74,51 +75,41 @@ export class ProjectTasksTabComponent implements OnInit {
   }
 
   toggleTask(task: ProjectTask, section: 'my' | 'assigned'): void {
-    const signalRef = section === 'my' ? this.myTasks : this.assignedToMe;
-    const prev = signalRef();
-
-    signalRef.update(tasks =>
-      tasks.map(t => t.id === task.id ? { ...t, is_completed: !t.is_completed } : t)
-    );
-
-    this.taskService.toggleComplete(this.projectId(), task.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          signalRef.update(tasks =>
-            tasks.map(t => t.id === task.id ? res.data : t)
-          );
-        },
-        error: () => {
-          signalRef.set(prev);
-          this.toast.error('Hiba', 'Nem sikerült frissíteni a feladatot.');
-        },
-      });
+    this.optimisticToggle(task, section, 'is_completed',
+      this.taskService.toggleComplete(this.projectId(), task.id),
+      'Nem sikerült frissíteni a feladatot.');
   }
 
   toggleReview(task: ProjectTask, section: 'my' | 'assigned'): void {
     if (!task.is_completed) return;
+    this.optimisticToggle(task, section, 'is_reviewed',
+      this.taskService.toggleReview(this.projectId(), task.id),
+      'Nem sikerült frissíteni a jóváhagyást.');
+  }
 
+  private optimisticToggle(
+    task: ProjectTask,
+    section: 'my' | 'assigned',
+    field: keyof Pick<ProjectTask, 'is_completed' | 'is_reviewed'>,
+    serviceCall: Observable<{ data: ProjectTask }>,
+    errorMsg: string,
+  ): void {
     const signalRef = section === 'my' ? this.myTasks : this.assignedToMe;
     const prev = signalRef();
 
     signalRef.update(tasks =>
-      tasks.map(t => t.id === task.id ? { ...t, is_reviewed: !t.is_reviewed } : t)
+      tasks.map(t => t.id === task.id ? { ...t, [field]: !t[field] } : t)
     );
 
-    this.taskService.toggleReview(this.projectId(), task.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          signalRef.update(tasks =>
-            tasks.map(t => t.id === task.id ? res.data : t)
-          );
-        },
-        error: () => {
-          signalRef.set(prev);
-          this.toast.error('Hiba', 'Nem sikerült frissíteni a jóváhagyást.');
-        },
-      });
+    serviceCall.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => signalRef.update(tasks =>
+        tasks.map(t => t.id === task.id ? res.data : t)
+      ),
+      error: () => {
+        signalRef.set(prev);
+        this.toast.error('Hiba', errorMsg);
+      },
+    });
   }
 
   /** Wrapper hívja a dialógus saved után */

@@ -1,10 +1,9 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, effect } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '@shared/constants';
@@ -13,6 +12,7 @@ import { PartnerQuoteService } from '../../../services/partner-quote.service';
 import { Quote, QUOTE_STATUS_CONFIG, ContentItem, PriceListItem, VolumeDiscount } from '../../../models/quote.models';
 import { SendQuoteEmailDialogComponent } from '../components/send-quote-email-dialog/send-quote-email-dialog.component';
 import { QuoteEmailHistoryComponent } from '../components/quote-email-history/quote-email-history.component';
+import { PdfPreviewComponent } from '../components/pdf-preview/pdf-preview.component';
 
 type EditorTab = 'data' | 'content' | 'pricing' | 'preview';
 
@@ -27,16 +27,16 @@ type EditorTab = 'data' | 'content' | 'pricing' | 'preview';
     NgClass,
     SendQuoteEmailDialogComponent,
     QuoteEmailHistoryComponent,
+    PdfPreviewComponent,
   ],
   providers: [QuoteEditorActionsService],
   templateUrl: './quote-editor.component.html',
   styleUrl: './quote-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class QuoteEditorComponent implements OnInit, OnDestroy {
+export class QuoteEditorComponent implements OnInit {
   protected readonly actions = inject(QuoteEditorActionsService);
   private readonly route = inject(ActivatedRoute);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly quoteService = inject(PartnerQuoteService);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
@@ -44,11 +44,8 @@ export class QuoteEditorComponent implements OnInit, OnDestroy {
 
   protected showEmailDialog = signal(false);
   protected activeTab = signal<EditorTab>('data');
-  protected pdfPreviewUrl = signal<SafeResourceUrl>(
-    this.sanitizer.bypassSecurityTrustResourceUrl('about:blank')
-  );
+  protected pdfBlob = signal<Blob | null>(null);
   protected pdfLoading = signal(false);
-  private currentBlobUrl: string | null = null;
 
   private readonly tabEffect = effect(() => {
     if (this.activeTab() === 'preview' && this.actions.quote()) {
@@ -144,10 +141,6 @@ export class QuoteEditorComponent implements OnInit, OnDestroy {
     this.form.update(f => ({ ...f, [field]: value }));
   }
 
-  ngOnDestroy(): void {
-    this.revokeBlobUrl();
-  }
-
   save(): void {
     this.actions.save(this.form());
   }
@@ -157,46 +150,27 @@ export class QuoteEditorComponent implements OnInit, OnDestroy {
   }
 
   openPdfInNewTab(): void {
-    const quote = this.actions.quote();
-    if (!quote) return;
-    this.pdfLoading.set(true);
-    this.quoteService.downloadPdf(quote.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => {
-          const url = URL.createObjectURL(blob);
-          window.open(url, '_blank');
-          setTimeout(() => URL.revokeObjectURL(url), 60000);
-          this.pdfLoading.set(false);
-        },
-        error: () => this.pdfLoading.set(false),
-      });
+    const blob = this.pdfBlob();
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
 
   private loadPdfPreview(): void {
     const quote = this.actions.quote();
     if (!quote) return;
     this.pdfLoading.set(true);
-    this.revokeBlobUrl();
+    this.pdfBlob.set(null);
     this.quoteService.downloadPdf(quote.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
-          this.currentBlobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-          this.pdfPreviewUrl.set(
-            this.sanitizer.bypassSecurityTrustResourceUrl(this.currentBlobUrl)
-          );
+          this.pdfBlob.set(blob);
           this.pdfLoading.set(false);
         },
         error: () => this.pdfLoading.set(false),
       });
-  }
-
-  private revokeBlobUrl(): void {
-    if (this.currentBlobUrl) {
-      URL.revokeObjectURL(this.currentBlobUrl);
-      this.currentBlobUrl = null;
-    }
   }
 
   // --- Tartalom szekció ---

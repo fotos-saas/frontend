@@ -314,12 +314,8 @@
           <div class="pdf-loading">
             <div class="skeleton-row skeleton-shimmer" style="height: 100%;"></div>
           </div>
-        } @else {
-          <iframe
-            class="pdf-iframe"
-            [src]="pdfPreviewUrl()"
-            title="PDF előnézet"
-          ></iframe>
+        } @else if (pdfBlob()) {
+          <app-pdf-preview [pdfBlob]="pdfBlob()" />
         }
       </div>
     }

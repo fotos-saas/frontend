@@ -249,8 +249,8 @@ export class PsFileUploadComponent implements ControlValueAccessor, OnDestroy {
     this.clearAllPreviews();
   }
 
-  // --- Privat ---
-  private addFiles(newFiles: File[]): void {
+  /** Fájlok programatikus hozzáadása (pl. clipboard paste külső handlerből). */
+  addFiles(newFiles: File[]): void {
     const current = this.files();
     const max = this.multiple() ? this.maxFiles() : 1;
     const remaining = max - current.length;

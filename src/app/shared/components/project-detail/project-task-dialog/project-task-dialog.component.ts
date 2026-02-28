@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef, OnInit, OnDestroy, viewChild, NgZone } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -33,7 +33,10 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly doc = inject(DOCUMENT);
+  private readonly ngZone = inject(NgZone);
   private readonly pasteHandler = this.onPaste.bind(this);
+
+  private readonly fileUpload = viewChild<PsFileUploadComponent>('fileUpload');
 
   readonly ICONS = ICONS;
   saving = signal(false);
@@ -72,7 +75,7 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
     this.doc.removeEventListener('paste', this.pasteHandler, true);
   }
 
-  /** Cmd+V / Ctrl+V clipboard paste — kép fájl hozzáadása */
+  /** Cmd+V / Ctrl+V clipboard paste — kép csatolmányként hozzáadása */
   private onPaste(event: ClipboardEvent): void {
     const items = event.clipboardData?.items;
     if (!items) return;
@@ -83,7 +86,6 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
       if (item.type.startsWith('image/')) {
         const file = item.getAsFile();
         if (file) {
-          // Generálunk nevet ha a clipboard nem adott
           const ext = file.type.split('/')[1] || 'png';
           const named = new File([file], `beillesztett-kép-${Date.now()}.${ext}`, { type: file.type });
           imageFiles.push(named);
@@ -91,19 +93,19 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (imageFiles.length > 0) {
-      event.preventDefault();
-      const current = this.newAttachments();
-      const existingCount = this.existingAttachments().length - this.removedAttachmentIds.length;
-      const totalAfter = current.length + existingCount + imageFiles.length;
+    if (imageFiles.length === 0) return;
 
-      if (totalAfter > 5) {
-        this.toast.error('Hiba', 'Maximum 5 csatolmány engedélyezett.');
-        return;
+    // Megakadályozzuk, hogy a Quill editor berakja a képet base64-ként
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    // NgZone.run() kell mert capture fázisú natív event → OnPush CD nem fut le
+    this.ngZone.run(() => {
+      const upload = this.fileUpload();
+      if (upload) {
+        upload.addFiles(imageFiles);
       }
-
-      this.newAttachments.set([...current, ...imageFiles]);
-    }
+    });
   }
 
   onFilesChanged(files: File[]): void {

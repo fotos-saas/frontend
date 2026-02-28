@@ -13,6 +13,7 @@ import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.co
 import { MenuItem } from '../../core/layout/models/menu-item.model';
 import { SubscriptionService, SubscriptionInfo } from './services/subscription.service';
 import { PartnerFinalizationService } from './services/partner-finalization.service';
+import { PartnerTaskService } from './services/partner-task.service';
 import { BrandingService } from './services/branding.service';
 import { ICONS, TEAM_MEMBER_ROLES, getSubscriptionStatusLabel } from '../../shared/constants';
 import { environment } from '../../../environments/environment';
@@ -72,6 +73,7 @@ export class PartnerShellComponent implements OnInit {
   private authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
   private finalizationService = inject(PartnerFinalizationService);
+  private taskService = inject(PartnerTaskService);
   protected readonly brandingService = inject(BrandingService);
   private router = inject(Router);
   protected sidebarState = inject(SidebarStateService);
@@ -102,6 +104,8 @@ export class PartnerShellComponent implements OnInit {
   isPaused = computed(() => this.subscriptionInfo()?.status === 'paused');
   // Nyomdában lévő projektek száma (badge)
   inPrintCount = signal(0);
+  // Hátralévő feladatok száma (badge)
+  pendingTaskCount = signal(0);
 
   // User role info - azonnal inicializálva a computed-ok miatt
   private userRoles = signal<string[]>(this.authService.getCurrentUser()?.roles ?? []);
@@ -156,7 +160,7 @@ export class PartnerShellComponent implements OnInit {
         children: [
           { id: 'projects-list', route: `${base}/projects`, label: 'Projektek' },
           { id: 'finalizations', route: `${base}/projects/finalizations`, label: 'Véglegesítések', badge: this.inPrintCount() || undefined },
-          { id: 'project-tasks', route: `${base}/projects/tasks`, label: 'Feladatok' },
+          { id: 'project-tasks', route: `${base}/projects/tasks`, label: 'Feladatok', badge: this.pendingTaskCount() || undefined },
           { id: 'schools', route: `${base}/projects/schools`, label: 'Iskolák' },
           { id: 'teachers', route: `${base}/projects/teachers`, label: 'Tanárok' },
           { id: 'students', route: `${base}/projects/students`, label: 'Diákok' },
@@ -359,6 +363,7 @@ export class PartnerShellComponent implements OnInit {
     this.loadSubscriptionInfo();
     this.loadBranding();
     this.loadInPrintCount();
+    this.loadPendingTaskCount();
   }
 
   private loadSubscriptionInfo(): void {
@@ -379,6 +384,15 @@ export class PartnerShellComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => this.inPrintCount.set(res.count),
+        error: () => {},
+      });
+  }
+
+  private loadPendingTaskCount(): void {
+    this.taskService.getPendingCount()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => this.pendingTaskCount.set(res.data.count),
         error: () => {},
       });
   }

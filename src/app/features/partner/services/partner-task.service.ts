@@ -60,6 +60,11 @@ export class PartnerTaskService {
     return this.http.get<{ data: ProjectTaskGroup[] }>(`${this.baseUrl}/projects/tasks/all`);
   }
 
+  /** Hátralévő feladatok száma (sidebar badge) */
+  getPendingCount(): Observable<{ data: { count: number } }> {
+    return this.http.get<{ data: { count: number } }>(`${this.baseUrl}/projects/tasks/pending-count`);
+  }
+
   /** Kiosztható csapattagok listája */
   getAssignees(): Observable<{ data: TaskAssignee[] }> {
     return this.http.get<{ data: TaskAssignee[] }>(`${this.baseUrl}/task-assignees`);

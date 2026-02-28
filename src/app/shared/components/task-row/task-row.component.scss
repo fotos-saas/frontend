@@ -1,0 +1,257 @@
+@use '../../styles/task-review' as review;
+
+.task-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  &--completed {
+    .task-row__title {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+    .task-row__desc {
+      color: #cbd5e1;
+    }
+  }
+
+  &__checkbox {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #f1f5f9;
+    }
+  }
+
+  &__check {
+    color: #cbd5e1;
+  }
+
+  &__check--done {
+    color: #22c55e;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+    padding-top: 2px;
+  }
+
+  &__title {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #1e293b;
+    word-break: break-word;
+  }
+
+  &__assignee {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.6875rem;
+    color: #3b82f6;
+    margin-top: 2px;
+
+    lucide-icon {
+      margin-right: 3px;
+    }
+  }
+
+  &__creator {
+    display: block;
+    font-size: 0.6875rem;
+    color: #8b5cf6;
+    margin-top: 1px;
+  }
+
+  &__desc {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 2px;
+    word-break: break-word;
+
+    ::ng-deep {
+      p {
+        margin: 0 0 2px;
+        min-height: 1.4em;
+        &:last-child { margin-bottom: 0; }
+      }
+
+      a {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+        border-bottom: 1px dashed #93c5fd;
+        transition: border-color 0.15s ease, color 0.15s ease;
+
+        &:hover {
+          color: #2563eb;
+          border-bottom-style: solid;
+          border-bottom-color: #2563eb;
+        }
+      }
+
+      strong, b {
+        font-weight: 600;
+        color: #475569;
+      }
+
+      em, i {
+        font-style: italic;
+      }
+    }
+  }
+
+  &__review-btn {
+    @include review.review-btn;
+  }
+
+  &__reviewed-badge {
+    @include review.reviewed-badge;
+  }
+
+  &__actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    margin-left: 8px;
+  }
+
+  &:hover &__actions {
+    opacity: 1;
+  }
+}
+
+// Csatolmányok
+.task-row__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  margin-left: -4px;
+  margin-right: -4px;
+
+  > * {
+    margin: 4px;
+  }
+}
+
+.att-thumb {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:hover {
+    border-color: #3b82f6;
+    opacity: 0.9;
+  }
+}
+
+.att-file {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #475569;
+  font-size: 0.6875rem;
+  transition: all 0.15s ease;
+
+  lucide-icon {
+    flex-shrink: 0;
+    margin-right: 4px;
+    color: #64748b;
+  }
+
+  &__name {
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+
+  &__size {
+    margin-left: 4px;
+    color: #94a3b8;
+    font-size: 0.625rem;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #2563eb;
+
+    lucide-icon {
+      color: #3b82f6;
+    }
+  }
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #94a3b8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  &--danger:hover {
+    background: #fef2f2;
+    color: #ef4444;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

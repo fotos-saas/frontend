@@ -69,68 +69,13 @@
             @if (isExpanded(section.key, group.project_id)) {
               <div class="group__tasks">
                 @for (task of group.tasks; track task.id) {
-                  <div class="task-row" [class.task-row--completed]="task.is_completed">
-                    <button class="task-row__checkbox" (click)="toggleTask(group, task)" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
-                      @if (task.is_completed) {
-                        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18" class="task-row__check--done" />
-                      } @else {
-                        <lucide-icon [name]="ICONS.CIRCLE" [size]="18" class="task-row__check" />
-                      }
-                    </button>
-                    <div class="task-row__content">
-                      <span class="task-row__title">{{ task.title }}</span>
-                      @if (section.key === 'assigned_to_me' && task.created_by) {
-                        <span class="task-row__creator">Kiadta: {{ task.created_by.name }}</span>
-                      }
-                      @if (section.key === 'i_gave_others' && task.assigned_to) {
-                        <span class="task-row__assignee">
-                          <lucide-icon [name]="ICONS.USER_CHECK" [size]="12" />
-                          {{ task.assigned_to.name }}
-                        </span>
-                      }
-                      @if (section.key === 'assigned_to_me' && task.is_reviewed) {
-                        <span class="task-row__reviewed-badge">
-                          <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="12" />
-                          Jóváhagyva
-                        </span>
-                      }
-                      @if (task.description) {
-                        <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
-                      }
-                      @if (task.attachments && task.attachments.length > 0) {
-                        <div class="task-row__attachments">
-                          @for (att of task.attachments; track att.id) {
-                            @if (att.mime_type.startsWith('image/')) {
-                              <a [href]="att.url" target="_blank" class="att-thumb" [title]="att.original_filename">
-                                <img [src]="att.url" [alt]="att.original_filename" loading="lazy" />
-                              </a>
-                            } @else {
-                              <a [href]="att.url" target="_blank" class="att-file" [title]="att.original_filename">
-                                <lucide-icon [name]="getFileTypeIcon(att.mime_type)" [size]="14" />
-                                <span class="att-file__name">{{ att.original_filename }}</span>
-                                <span class="att-file__size">{{ formatAttachmentSize(att.size_bytes) }}</span>
-                              </a>
-                            }
-                          }
-                        </div>
-                      }
-                    </div>
-                    @if (section.key === 'i_gave_others' && task.is_completed && task.assigned_to) {
-                      <button
-                        class="task-row__review-btn"
-                        [class.task-row__review-btn--active]="task.is_reviewed"
-                        (click)="toggleReview(group, task)"
-                        [attr.aria-label]="task.is_reviewed ? 'Jóváhagyás visszavonása' : 'Átnéztem'"
-                      >
-                        <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="14" />
-                        @if (task.is_reviewed) {
-                          <span>Jóváhagyva</span>
-                        } @else {
-                          <span>Átnéztem</span>
-                        }
-                      </button>
-                    }
-                  </div>
+                  <app-task-row
+                    [task]="task"
+                    [section]="section.key"
+                    [showActions]="false"
+                    (toggleComplete)="toggleTask(group, task)"
+                    (toggleReview)="toggleReview(group, task)"
+                  />
                 }
               </div>
             }

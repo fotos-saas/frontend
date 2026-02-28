@@ -34,71 +34,14 @@
       <h4 class="section__title">Saját feladatok</h4>
       <div class="task-list">
         @for (task of myTasks(); track task.id) {
-          <div class="task-row" [class.task-row--completed]="task.is_completed">
-            <button class="task-row__checkbox" (click)="toggleTask(task, 'my')" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
-              @if (task.is_completed) {
-                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="task-row__check-icon--done" />
-              } @else {
-                <lucide-icon [name]="ICONS.CIRCLE" [size]="20" class="task-row__check-icon" />
-              }
-            </button>
-
-            <div class="task-row__content">
-              <span class="task-row__title">{{ task.title }}</span>
-              @if (task.assigned_to) {
-                <span class="task-row__assignee">
-                  <lucide-icon [name]="ICONS.USER_CHECK" [size]="12" />
-                  {{ task.assigned_to.name }}
-                </span>
-              }
-              @if (task.description) {
-                <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
-              }
-              <!-- Csatolmányok -->
-              @if (task.attachments && task.attachments.length > 0) {
-                <div class="task-row__attachments">
-                  @for (att of task.attachments; track att.id) {
-                    @if (att.mime_type.startsWith('image/')) {
-                      <a [href]="att.url" target="_blank" class="att-thumb" [title]="att.original_filename">
-                        <img [src]="att.url" [alt]="att.original_filename" loading="lazy" />
-                      </a>
-                    } @else {
-                      <a [href]="att.url" target="_blank" class="att-file" [title]="att.original_filename">
-                        <lucide-icon [name]="getFileTypeIcon(att.mime_type)" [size]="14" />
-                        <span class="att-file__name">{{ att.original_filename }}</span>
-                        <span class="att-file__size">{{ formatAttachmentSize(att.size_bytes) }}</span>
-                      </a>
-                    }
-                  }
-                </div>
-              }
-            </div>
-
-            @if (task.is_completed && task.assigned_to) {
-              <button
-                class="task-row__review-btn"
-                [class.task-row__review-btn--active]="task.is_reviewed"
-                (click)="toggleReview(task, 'my')"
-                [attr.aria-label]="task.is_reviewed ? 'Jóváhagyás visszavonása' : 'Átnéztem'"
-              >
-                <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="14" />
-                @if (task.is_reviewed) {
-                  <span>Jóváhagyva</span>
-                } @else {
-                  <span>Átnéztem</span>
-                }
-              </button>
-            }
-
-            <div class="task-row__actions">
-              <button class="action-btn" (click)="dialogRequested.emit(task)" aria-label="Szerkesztés">
-                <lucide-icon [name]="ICONS.EDIT" [size]="15" />
-              </button>
-              <button class="action-btn action-btn--danger" (click)="deleteRequested.emit(task)" aria-label="Törlés">
-                <lucide-icon [name]="ICONS.DELETE" [size]="15" />
-              </button>
-            </div>
-          </div>
+          <app-task-row
+            [task]="task"
+            section="my_own"
+            (toggleComplete)="toggleTask(task, 'my')"
+            (toggleReview)="toggleReview(task, 'my')"
+            (edit)="dialogRequested.emit(task)"
+            (delete)="deleteRequested.emit(task)"
+          />
         }
       </div>
     </div>
@@ -110,58 +53,12 @@
       <h4 class="section__title">Rám bízott feladatok</h4>
       <div class="task-list">
         @for (task of assignedToMe(); track task.id) {
-          <div class="task-row" [class.task-row--completed]="task.is_completed">
-            <button class="task-row__checkbox" (click)="toggleTask(task, 'assigned')" [attr.aria-label]="task.is_completed ? 'Visszavonás' : 'Kész jelölés'">
-              @if (task.is_completed) {
-                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" class="task-row__check-icon--done" />
-              } @else {
-                <lucide-icon [name]="ICONS.CIRCLE" [size]="20" class="task-row__check-icon" />
-              }
-            </button>
-
-            <div class="task-row__content">
-              <span class="task-row__title">{{ task.title }}</span>
-              @if (task.created_by) {
-                <span class="task-row__creator">
-                  Kiadta: {{ task.created_by.name }}
-                </span>
-              }
-              @if (task.is_reviewed) {
-                <span class="task-row__reviewed-badge">
-                  <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="12" />
-                  Jóváhagyva
-                </span>
-              }
-              @if (task.description) {
-                <span class="task-row__desc" [innerHTML]="task.description | safeHtml"></span>
-              }
-              <!-- Csatolmányok -->
-              @if (task.attachments && task.attachments.length > 0) {
-                <div class="task-row__attachments">
-                  @for (att of task.attachments; track att.id) {
-                    @if (att.mime_type.startsWith('image/')) {
-                      <a [href]="att.url" target="_blank" class="att-thumb" [title]="att.original_filename">
-                        <img [src]="att.url" [alt]="att.original_filename" loading="lazy" />
-                      </a>
-                    } @else {
-                      <a [href]="att.url" target="_blank" class="att-file" [title]="att.original_filename">
-                        <lucide-icon [name]="getFileTypeIcon(att.mime_type)" [size]="14" />
-                        <span class="att-file__name">{{ att.original_filename }}</span>
-                        <span class="att-file__size">{{ formatAttachmentSize(att.size_bytes) }}</span>
-                      </a>
-                    }
-                  }
-                </div>
-              }
-            </div>
-
-            <div class="task-row__actions">
-              <button class="action-btn" (click)="dialogRequested.emit(task)" aria-label="Szerkesztés">
-                <lucide-icon [name]="ICONS.EDIT" [size]="15" />
-              </button>
-              <!-- Rám bízott feladatnál nincs törlés gomb -->
-            </div>
-          </div>
+          <app-task-row
+            [task]="task"
+            section="assigned_to_me"
+            (toggleComplete)="toggleTask(task, 'assigned')"
+            (edit)="dialogRequested.emit(task)"
+          />
         }
       </div>
     </div>

@@ -13,16 +13,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../constants/icons.constants';
-import { SafeHtmlPipe } from '../../../pipes/safe-html.pipe';
+import { TaskRowComponent } from '../../task-row';
 import { PartnerTaskService } from '../../../../features/partner/services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { getFileTypeIcon, formatAttachmentSize } from '../../../utils/file-type-icon.util';
 import type { ProjectTask } from '../../../../features/partner/models/partner.models';
 
 @Component({
   selector: 'app-project-tasks-tab',
   standalone: true,
-  imports: [LucideAngularModule, SafeHtmlPipe],
+  imports: [LucideAngularModule, TaskRowComponent],
   templateUrl: './project-tasks-tab.component.html',
   styleUrls: ['./project-tasks-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,8 +39,6 @@ export class ProjectTasksTabComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
-  readonly getFileTypeIcon = getFileTypeIcon;
-  readonly formatAttachmentSize = formatAttachmentSize;
 
   myTasks = signal<ProjectTask[]>([]);
   assignedToMe = signal<ProjectTask[]>([]);

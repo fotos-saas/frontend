@@ -1,0 +1,93 @@
+<div class="task-row" [class.task-row--completed]="task().is_completed">
+  <button
+    class="task-row__checkbox"
+    (click)="toggleComplete.emit()"
+    [attr.aria-label]="task().is_completed ? 'Visszavonás' : 'Kész jelölés'"
+  >
+    @if (task().is_completed) {
+      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18" class="task-row__check--done" />
+    } @else {
+      <lucide-icon [name]="ICONS.CIRCLE" [size]="18" class="task-row__check" />
+    }
+  </button>
+
+  <div class="task-row__content">
+    <span class="task-row__title">{{ task().title }}</span>
+
+    <!-- Kiadta (rám bízott szekcióban) -->
+    @if (section() === 'assigned_to_me' && task().created_by) {
+      <span class="task-row__creator">Kiadta: {{ task().created_by!.name }}</span>
+    }
+
+    <!-- Assignee (saját/én adtam másnak szekcióban) -->
+    @if ((section() === 'my_own' || section() === 'i_gave_others') && task().assigned_to) {
+      <span class="task-row__assignee">
+        <lucide-icon [name]="ICONS.USER_CHECK" [size]="12" />
+        {{ task().assigned_to!.name }}
+      </span>
+    }
+
+    <!-- Jóváhagyva badge (assignee oldalán) -->
+    @if (section() === 'assigned_to_me' && task().is_reviewed) {
+      <span class="task-row__reviewed-badge">
+        <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="12" />
+        Jóváhagyva
+      </span>
+    }
+
+    <!-- Leírás -->
+    @if (task().description) {
+      <span class="task-row__desc" [innerHTML]="task().description | safeHtml"></span>
+    }
+
+    <!-- Csatolmányok -->
+    @if (task().attachments && task().attachments.length > 0) {
+      <div class="task-row__attachments">
+        @for (att of task().attachments; track att.id) {
+          @if (att.mime_type.startsWith('image/')) {
+            <a [href]="att.url" target="_blank" class="att-thumb" [title]="att.original_filename">
+              <img [src]="att.url" [alt]="att.original_filename" loading="lazy" />
+            </a>
+          } @else {
+            <a [href]="att.url" target="_blank" class="att-file" [title]="att.original_filename">
+              <lucide-icon [name]="getFileTypeIcon(att.mime_type)" [size]="14" />
+              <span class="att-file__name">{{ att.original_filename }}</span>
+              <span class="att-file__size">{{ formatAttachmentSize(att.size_bytes) }}</span>
+            </a>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Átnéztem gomb (feladat kiadója számára, kész feladatnál) -->
+  @if ((section() === 'i_gave_others' || section() === 'my_own') && task().is_completed && task().assigned_to) {
+    <button
+      class="task-row__review-btn"
+      [class.task-row__review-btn--active]="task().is_reviewed"
+      (click)="toggleReview.emit()"
+      [attr.aria-label]="task().is_reviewed ? 'Jóváhagyás visszavonása' : 'Átnéztem'"
+    >
+      <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="14" />
+      @if (task().is_reviewed) {
+        <span>Jóváhagyva</span>
+      } @else {
+        <span>Átnéztem</span>
+      }
+    </button>
+  }
+
+  <!-- Szerkesztés/törlés gombok -->
+  @if (showActions()) {
+    <div class="task-row__actions">
+      <button class="action-btn" (click)="edit.emit()" aria-label="Szerkesztés">
+        <lucide-icon [name]="ICONS.EDIT" [size]="15" />
+      </button>
+      @if (section() !== 'assigned_to_me') {
+        <button class="action-btn action-btn--danger" (click)="delete.emit()" aria-label="Törlés">
+          <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+        </button>
+      }
+    </div>
+  }
+</div>

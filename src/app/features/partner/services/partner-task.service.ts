@@ -82,10 +82,10 @@ export class PartnerTaskService {
   ): FormData {
     const fd = new FormData();
     fd.append('title', data.title);
-    if (data.description) {
+    if (data.description !== undefined && data.description !== null) {
       fd.append('description', data.description);
     }
-    if (data.assigned_to_user_id) {
+    if (data.assigned_to_user_id !== undefined && data.assigned_to_user_id !== null) {
       fd.append('assigned_to_user_id', String(data.assigned_to_user_id));
     }
     for (const file of attachments) {

@@ -12,15 +12,14 @@ import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../shared/constants/icons.constants';
-import { SafeHtmlPipe } from '../../../../shared/pipes/safe-html.pipe';
-import { getFileTypeIcon, formatAttachmentSize } from '../../../../shared/utils/file-type-icon.util';
+import { TaskRowComponent, type TaskRowSection } from '../../../../shared/components/task-row';
 import { PartnerTaskService } from '../../services/partner-task.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import type { ProjectTaskGroup, ProjectTask } from '../../models/partner.models';
 
 interface TaskSection {
-  key: string;
+  key: TaskRowSection;
   title: string;
   icon: string;
   groups: ProjectTaskGroup[];
@@ -31,7 +30,7 @@ interface TaskSection {
 @Component({
   selector: 'app-tasks-overview',
   standalone: true,
-  imports: [LucideAngularModule, SafeHtmlPipe],
+  imports: [LucideAngularModule, TaskRowComponent],
   templateUrl: './tasks-overview.component.html',
   styleUrls: ['./tasks-overview.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,8 +43,6 @@ export class TasksOverviewComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
-  readonly getFileTypeIcon = getFileTypeIcon;
-  readonly formatAttachmentSize = formatAttachmentSize;
 
   rawGroups = signal<ProjectTaskGroup[]>([]);
   loading = signal(true);

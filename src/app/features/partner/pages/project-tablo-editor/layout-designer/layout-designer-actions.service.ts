@@ -88,9 +88,9 @@ export class LayoutDesignerActionsService {
     if (!doc) return;
 
     // Csak image/fixed layerek alapján számolunk bounding box-ot
-    const images = selected.filter(l =>
-      l.category !== 'student-name' && l.category !== 'teacher-name',
-    );
+    const isTextLayer = (c: string) =>
+      c === 'student-name' || c === 'teacher-name' || c === 'student-position' || c === 'teacher-position';
+    const images = selected.filter(l => !isTextLayer(l.category));
     if (images.length === 0) return;
 
     const minX = Math.min(...images.map(l => l.editedX ?? l.x));
@@ -259,10 +259,11 @@ export class LayoutDesignerActionsService {
     }));
   }
 
-  /** Kijelölt image/fixed layerek (name layerek nélkül) */
+  /** Kijelölt image/fixed layerek (name/position layerek nélkül) */
   private getSelectedImages(): DesignerLayer[] {
     return this.state.selectedLayers().filter(l =>
-      l.category !== 'student-name' && l.category !== 'teacher-name',
+      l.category !== 'student-name' && l.category !== 'teacher-name'
+      && l.category !== 'student-position' && l.category !== 'teacher-position',
     );
   }
 
@@ -277,8 +278,9 @@ export class LayoutDesignerActionsService {
     const updates = new Map<number, { x: number; y: number }>();
 
     for (const sel of selected) {
-      // Name layereket kihagyjuk — realignNamesToImages kezeli
-      if (sel.category === 'student-name' || sel.category === 'teacher-name') continue;
+      // Name + position layereket kihagyjuk — realignNamesToImages kezeli
+      if (sel.category === 'student-name' || sel.category === 'teacher-name'
+        || sel.category === 'student-position' || sel.category === 'teacher-position') continue;
       updates.set(sel.layerId, positionFn(sel));
     }
 

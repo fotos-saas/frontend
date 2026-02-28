@@ -178,8 +178,9 @@ export class LayoutDesignerStateService {
     const updatedLayers = this.layers().map(l => {
       if (!expandedIds.has(l.layerId)) return l;
 
-      // Name layereket kihagyjuk — az updateLayers/realignNamesToImages kezeli
-      if (l.category === 'student-name' || l.category === 'teacher-name') return l;
+      // Name + position layereket kihagyjuk — az updateLayers/realignNamesToImages kezeli
+      if (l.category === 'student-name' || l.category === 'teacher-name'
+        || l.category === 'student-position' || l.category === 'teacher-position') return l;
 
       const currentX = l.editedX ?? l.x;
       const currentY = l.editedY ?? l.y;
@@ -208,27 +209,50 @@ export class LayoutDesignerStateService {
    */
   realignNamesToImages(layers: DesignerLayer[]): DesignerLayer[] {
     const GAP = 8;
-    const pairs: Array<[LayerCategory, LayerCategory]> = [
-      ['student-image', 'student-name'],
-      ['teacher-image', 'teacher-name'],
-    ];
+    const POS_GAP = 4; // gap a név és a pozíció (beosztás) között
 
-    return layers.map(l => {
-      for (const [imageCat, textCat] of pairs) {
-        if (l.category !== textCat || !l.personMatch) continue;
+    // 1. Név layerek igazítása a kép alá
+    const afterNames = layers.map(l => {
+      if (l.category !== 'student-name' && l.category !== 'teacher-name') return l;
+      if (!l.personMatch) return l;
 
-        // Párosított image keresése
-        const imageLayer = layers.find(
-          img => img.category === imageCat && img.personMatch?.id === l.personMatch!.id,
-        );
-        if (!imageLayer) continue;
+      const imageCat = l.category === 'student-name' ? 'student-image' : 'teacher-image';
+      const imageLayer = layers.find(
+        img => img.category === imageCat && img.personMatch?.id === l.personMatch!.id,
+      );
+      if (!imageLayer) return l;
 
-        const imgX = imageLayer.editedX ?? imageLayer.x;
-        const imgY = imageLayer.editedY ?? imageLayer.y;
+      const imgX = imageLayer.editedX ?? imageLayer.x;
+      const imgY = imageLayer.editedY ?? imageLayer.y;
+      return { ...l, editedX: imgX, editedY: imgY + imageLayer.height + GAP };
+    });
 
-        return { ...l, editedX: imgX, editedY: imgY + imageLayer.height + GAP };
+    // 2. Position layerek igazítása a NÉV alá
+    return afterNames.map(l => {
+      if (l.category !== 'student-position' && l.category !== 'teacher-position') return l;
+      if (!l.personMatch) return l;
+
+      const nameCat = l.category === 'student-position' ? 'student-name' : 'teacher-name';
+      const nameLayer = afterNames.find(
+        n => n.category === nameCat && n.personMatch?.id === l.personMatch!.id,
+      );
+
+      if (nameLayer) {
+        const nameX = nameLayer.editedX ?? nameLayer.x;
+        const nameY = nameLayer.editedY ?? nameLayer.y;
+        return { ...l, editedX: nameX, editedY: nameY + nameLayer.height + POS_GAP };
       }
-      return l;
+
+      // Fallback: ha nincs név layer, a kép alá
+      const imageCat = l.category === 'student-position' ? 'student-image' : 'teacher-image';
+      const imageLayer = afterNames.find(
+        img => img.category === imageCat && img.personMatch?.id === l.personMatch!.id,
+      );
+      if (!imageLayer) return l;
+
+      const imgX = imageLayer.editedX ?? imageLayer.x;
+      const imgY = imageLayer.editedY ?? imageLayer.y;
+      return { ...l, editedX: imgX, editedY: imgY + imageLayer.height + GAP };
     });
   }
 

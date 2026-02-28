@@ -43,7 +43,8 @@ export class LayoutDesignerSelectionService {
 
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (const l of selected) {
-      if (l.category === 'student-name' || l.category === 'teacher-name') continue;
+      if (l.category === 'student-name' || l.category === 'teacher-name'
+        || l.category === 'student-position' || l.category === 'teacher-position') continue;
       const lx = l.editedX ?? l.x;
       const ly = l.editedY ?? l.y;
       minX = Math.min(minX, lx);

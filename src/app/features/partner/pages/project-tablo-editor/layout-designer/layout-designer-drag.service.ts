@@ -201,8 +201,9 @@ export class LayoutDesignerDragService {
     const updatedLayers = layers.map(l => {
       if (!ids.has(l.layerId)) return l;
 
-      // Name layereket kihagyjuk — realignNamesToImages kezeli
-      if (l.category === 'student-name' || l.category === 'teacher-name') return l;
+      // Name + position layereket kihagyjuk — realignNamesToImages kezeli
+      if (l.category === 'student-name' || l.category === 'teacher-name'
+        || l.category === 'student-position' || l.category === 'teacher-position') return l;
 
       const currentX = l.editedX ?? l.x;
       const currentY = l.editedY ?? l.y;

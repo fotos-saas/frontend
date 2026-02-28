@@ -193,10 +193,10 @@ export class LayoutDesignerGridService {
 
   /** Grid konfiguráció a kategória alapján */
   private getGridForCategory(category: LayerCategory): GroupGridConfig | null {
-    if (category === 'student-image' || category === 'student-name') {
+    if (category === 'student-image' || category === 'student-name' || category === 'student-position') {
       return this.studentGrid();
     }
-    if (category === 'teacher-image' || category === 'teacher-name') {
+    if (category === 'teacher-image' || category === 'teacher-name' || category === 'teacher-position') {
       return this.teacherGrid();
     }
     return null;

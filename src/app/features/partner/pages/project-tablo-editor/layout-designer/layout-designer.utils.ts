@@ -26,12 +26,14 @@ export function overlapPercent(a: Rect, b: Rect): number {
   return minArea > 0 ? overlapArea / minArea : 0;
 }
 
-/** Coupled kategória pár map: image ↔ name */
-const COUPLED_MAP: Partial<Record<LayerCategory, LayerCategory>> = {
-  'student-image': 'student-name',
-  'student-name': 'student-image',
-  'teacher-image': 'teacher-name',
-  'teacher-name': 'teacher-image',
+/** Coupled kategória pár map: image ↔ name/position */
+const COUPLED_MAP: Partial<Record<LayerCategory, LayerCategory[]>> = {
+  'student-image': ['student-name', 'student-position'],
+  'student-name': ['student-image'],
+  'student-position': ['student-image'],
+  'teacher-image': ['teacher-name', 'teacher-position'],
+  'teacher-name': ['teacher-image'],
+  'teacher-position': ['teacher-image'],
 };
 
 /**
@@ -46,14 +48,16 @@ export function expandWithCoupledLayers(layerIds: Set<number>, layers: DesignerL
     const layer = layers.find(l => l.layerId === id);
     if (!layer || !layer.personMatch) continue;
 
-    const coupledCat = COUPLED_MAP[layer.category];
-    if (!coupledCat) continue;
+    const coupledCats = COUPLED_MAP[layer.category];
+    if (!coupledCats) continue;
 
-    const coupled = layers.find(
-      l => l.category === coupledCat && l.personMatch?.id === layer.personMatch!.id,
-    );
-    if (coupled) {
-      expanded.add(coupled.layerId);
+    for (const coupledCat of coupledCats) {
+      const coupled = layers.find(
+        l => l.category === coupledCat && l.personMatch?.id === layer.personMatch!.id,
+      );
+      if (coupled) {
+        expanded.add(coupled.layerId);
+      }
     }
   }
 
@@ -172,15 +176,16 @@ export function normalizeLayerSizes(layers: DesignerLayer[]): void {
  * FIGYELEM: helyben módosítja a tömb elemeit (mutáció)!
  */
 export function alignTextToImageLayers(layers: DesignerLayer[]): void {
-  const pairs: Array<[LayerCategory, LayerCategory]> = [
+  const GAP = 8;
+  const POS_GAP = 4;
+
+  // 1. Név layerek igazítása a kép alá
+  const namePairs: Array<[LayerCategory, LayerCategory]> = [
     ['student-image', 'student-name'],
     ['teacher-image', 'teacher-name'],
   ];
 
-  /** Kis gap a kép alja és a név teteje között (PSD px) */
-  const GAP = 8;
-
-  for (const [imageCat, textCat] of pairs) {
+  for (const [imageCat, textCat] of namePairs) {
     const imageMap = new Map<number, DesignerLayer>();
     for (const l of layers) {
       if (l.category === imageCat && l.personMatch) {
@@ -194,12 +199,35 @@ export function alignTextToImageLayers(layers: DesignerLayer[]): void {
       const imageLayer = imageMap.get(textLayer.personMatch.id);
       if (!imageLayer) continue;
 
-      // X és width: kép pozíciójára és szélességére igazítás
       textLayer.x = imageLayer.x;
       textLayer.width = imageLayer.width;
-
-      // Y: kép alja + gap
       textLayer.y = imageLayer.y + imageLayer.height + GAP;
+    }
+  }
+
+  // 2. Position layerek igazítása a NÉV alá
+  const posPairs: Array<[LayerCategory, LayerCategory]> = [
+    ['student-name', 'student-position'],
+    ['teacher-name', 'teacher-position'],
+  ];
+
+  for (const [nameCat, posCat] of posPairs) {
+    const nameMap = new Map<number, DesignerLayer>();
+    for (const l of layers) {
+      if (l.category === nameCat && l.personMatch) {
+        nameMap.set(l.personMatch.id, l);
+      }
+    }
+
+    for (const posLayer of layers) {
+      if (posLayer.category !== posCat || !posLayer.personMatch) continue;
+
+      const nameLayer = nameMap.get(posLayer.personMatch.id);
+      if (!nameLayer) continue;
+
+      posLayer.x = nameLayer.x;
+      posLayer.width = nameLayer.width;
+      posLayer.y = nameLayer.y + nameLayer.height + POS_GAP;
     }
   }
 }

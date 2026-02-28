@@ -94,7 +94,11 @@
       }
       @case ('tasks') {
         @defer {
-          <app-project-tasks-tab [projectId]="projectData()?.id ?? 0" />
+          <app-project-tasks-tab
+            [projectId]="projectData()?.id ?? 0"
+            (dialogRequested)="openTaskDialog($event)"
+            (deleteRequested)="confirmDeleteTask($event)"
+          />
         }
       }
       @case ('activity') {
@@ -239,5 +243,25 @@
     [message]="'Biztosan törölni szeretnéd a ' + (deletingPrintFileType() === 'small_tablo' ? 'Kistabló' : 'Nyomdai flat') + ' fájlt?'"
     confirmText="Törlés"
     (resultEvent)="onDeletePrintFileResult($event)"
+  />
+}
+
+<!-- Task Dialog - page-card-on KÍVÜL -->
+@if (showTaskDialog()) {
+  <app-project-task-dialog
+    [projectId]="projectData()?.id ?? 0"
+    [editTask]="editingTaskData()"
+    (close)="closeTaskDialog()"
+    (saved)="onTaskSaved($event)"
+  />
+}
+
+<!-- Task Delete Confirmation - page-card-on KÍVÜL -->
+@if (showTaskDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Feladat törlése"
+    [message]="'Biztosan törölni szeretnéd a \'' + (deletingTask()?.title ?? '') + '\' feladatot?'"
+    confirmText="Törlés"
+    (resultEvent)="onTaskDeleteResult($event)"
   />
 }

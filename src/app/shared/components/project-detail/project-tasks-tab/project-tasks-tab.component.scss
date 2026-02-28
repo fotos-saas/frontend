@@ -165,39 +165,7 @@
   }
 }
 
-// Dialog field stílusok
-.field {
-  margin-bottom: 14px;
-
-  &__label {
-    display: block;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #475569;
-    margin-bottom: 4px;
-  }
-
-  &__input {
-    width: 100%;
-    padding: 8px 12px;
-    font-size: 0.875rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    outline: none;
-    transition: border-color 0.15s ease;
-
-    &:focus {
-      border-color: var(--color-primary, #1e3a5f);
-    }
-  }
-
-  &__textarea {
-    resize: vertical;
-    min-height: 60px;
-  }
-}
-
-// Gomb stílusok
+// Gomb stílusok (tab fejléc + üres állapot gombokhoz)
 .btn {
   display: inline-flex;
   align-items: center;
@@ -219,20 +187,6 @@
 
     &:hover {
       opacity: 0.9;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  &--ghost {
-    background: none;
-    color: #64748b;
-
-    &:hover {
-      background: #f1f5f9;
     }
   }
 

@@ -32,6 +32,7 @@ import { ProjectPrintTabComponent, PrintFileUploadEvent, PrintFileDownloadEvent,
 import { ProjectEmailsTabComponent } from '../project-emails-tab/project-emails-tab.component';
 import { ProjectActivityTabComponent } from '../project-activity-tab/project-activity-tab.component';
 import { ProjectTasksTabComponent } from '../project-tasks-tab/project-tasks-tab.component';
+import { ProjectTaskDialogComponent } from '../project-task-dialog/project-task-dialog.component';
 import {
   ProjectSamplesTabComponent,
   PackageDialogRequest,
@@ -51,6 +52,7 @@ import {
   ProjectDataMapper,
 } from '../project-detail.tokens';
 import { ICONS } from '../../../constants/icons.constants';
+import type { ProjectTask } from '../../../../features/partner/models/partner.models';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../confirm-dialog/confirm-dialog.component';
 import { ProjectTagManagerComponent } from '../../../../features/partner/components/project-tag-manager/project-tag-manager.component';
 import { GuestSession, SamplePackage } from '../../../../features/partner/services/partner.service';
@@ -77,6 +79,7 @@ import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persiste
     ProjectEmailsTabComponent,
     ProjectActivityTabComponent,
     ProjectTasksTabComponent,
+    ProjectTaskDialogComponent,
     ConfirmDialogComponent,
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
@@ -161,6 +164,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly usersTab = viewChild(ProjectUsersTabComponent);
   private readonly samplesTab = viewChild(ProjectSamplesTabComponent);
   private readonly printTab = viewChild(ProjectPrintTabComponent);
+  readonly tasksTab = viewChild(ProjectTasksTabComponent);
 
   ngOnInit(): void {
     this.facade.init({
@@ -275,6 +279,43 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   confirmDeleteUser(session: GuestSession): void { this.facade.confirmDeleteUser(session); }
   onDeleteUserResult(result: ConfirmDialogResult): void {
     this.facade.onDeleteUserResult(result, (s) => this.usersTab()?.executeDelete(s));
+  }
+
+  // === TASK DELEGATIONS ===
+
+  readonly showTaskDialog = signal(false);
+  readonly editingTaskData = signal<ProjectTask | null>(null);
+  readonly showTaskDeleteConfirm = signal(false);
+  readonly deletingTask = signal<ProjectTask | null>(null);
+
+  openTaskDialog(task: ProjectTask | null): void {
+    this.editingTaskData.set(task);
+    this.showTaskDialog.set(true);
+  }
+
+  closeTaskDialog(): void {
+    this.showTaskDialog.set(false);
+    this.editingTaskData.set(null);
+  }
+
+  onTaskSaved(task: ProjectTask): void {
+    const wasEdit = !!this.editingTaskData();
+    this.closeTaskDialog();
+    this.tasksTab()?.onTaskSaved(task, wasEdit);
+  }
+
+  confirmDeleteTask(task: ProjectTask): void {
+    this.deletingTask.set(task);
+    this.showTaskDeleteConfirm.set(true);
+  }
+
+  onTaskDeleteResult(result: ConfirmDialogResult): void {
+    if (result.action === 'confirm') {
+      const task = this.deletingTask();
+      if (task) this.tasksTab()?.executeDelete(task);
+    }
+    this.showTaskDeleteConfirm.set(false);
+    this.deletingTask.set(null);
   }
 
   // === PERSONS MODAL ===

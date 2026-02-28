@@ -98,6 +98,7 @@ export interface PartnerProjectListItem {
   lastActivityAt: string | null;
   emailMetrics: ProjectEmailMetrics | null;
   pendingTaskCount: number;
+  tabloSize: string | null;
 }
 
 /**

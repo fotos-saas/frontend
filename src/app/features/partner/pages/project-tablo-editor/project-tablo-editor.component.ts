@@ -302,13 +302,6 @@ export class ProjectTabloEditorComponent implements OnInit {
     // 3. Fallback: első méret
     if (!resolved) resolved = sizes[0];
     this.selectedSize.set(resolved);
-
-    // Automatikus méretválasztás mentése, hogy a lista nézet is konzisztens legyen
-    if (project.id && resolved) {
-      this.finalizationService.updateTabloSize(project.id, resolved.value).pipe(
-        takeUntilDestroyed(this.destroyRef),
-      ).subscribe();
-    }
   }
 
   goBack(): void {

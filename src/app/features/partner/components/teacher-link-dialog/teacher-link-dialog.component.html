@@ -68,6 +68,7 @@
               class="teacher-item"
               [class.teacher-item--selected]="isSelected(t.id)"
               [class.teacher-item--current]="isCurrent(t.id)"
+              [class.teacher-item--deleting]="deletingTeacherId() === t.id"
             >
               <input
                 type="checkbox"
@@ -97,6 +98,22 @@
                   [size]="14"
                   class="teacher-item__linked-icon"
                 />
+              }
+              @if (isElectron && !isCurrent(t.id) && deletingTeacherId() !== t.id) {
+                <button
+                  type="button"
+                  class="teacher-item__delete-btn"
+                  (click)="$event.stopPropagation(); confirmDeleteTeacher(t.id)"
+                >
+                  <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+                </button>
+              }
+              @if (deletingTeacherId() === t.id) {
+                <div class="teacher-item__confirm-delete" (click)="$event.stopPropagation()">
+                  <span>Törlöd?</span>
+                  <button type="button" class="teacher-item__confirm-yes" (click)="executeDeleteTeacher(t.id)">Igen</button>
+                  <button type="button" class="teacher-item__confirm-no" (click)="cancelDeleteTeacher()">Mégse</button>
+                </div>
               }
             </label>
           }

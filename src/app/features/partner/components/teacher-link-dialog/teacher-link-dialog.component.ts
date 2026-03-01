@@ -17,6 +17,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PsInputComponent } from '@shared/components/form';
+import { ElectronService } from '@core/services/electron.service';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import type { TeacherListItem, LinkTeachersResponse } from '../../models/teacher.models';
 
@@ -30,9 +31,11 @@ import type { TeacherListItem, LinkTeachersResponse } from '../../models/teacher
 })
 export class TeacherLinkDialogComponent implements OnInit {
   private readonly teacherService = inject(PartnerTeacherService);
+  private readonly electronService = inject(ElectronService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+  readonly isElectron = this.electronService.isElectron;
 
   /** A tanár, amiből a dialog nyílt */
   readonly teacher = input.required<TeacherListItem>();
@@ -43,11 +46,13 @@ export class TeacherLinkDialogComponent implements OnInit {
   readonly closeEvent = output<void>();
   readonly savedEvent = output<LinkTeachersResponse | void>();
   readonly photoChooserEvent = output<string>();
+  readonly deletedEvent = output<void>();
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly searchQuery = signal('');
   readonly searchLoading = signal(false);
+  readonly deletingTeacherId = signal<number | null>(null);
 
   /** Szerver-oldali keresés eredménye */
   readonly searchResults = signal<TeacherListItem[]>([]);
@@ -178,6 +183,35 @@ export class TeacherLinkDialogComponent implements OnInit {
       for (const t of filtered) current.add(t.id);
       this.selectedIds.set(current);
     }
+  }
+
+  confirmDeleteTeacher(id: number): void {
+    this.deletingTeacherId.set(id);
+  }
+
+  cancelDeleteTeacher(): void {
+    this.deletingTeacherId.set(null);
+  }
+
+  executeDeleteTeacher(id: number): void {
+    this.teacherService.deleteTeacher(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.deletingTeacherId.set(null);
+          this.searchResults.update(list => list.filter(t => t.id !== id));
+          this.selectedIds.update(ids => {
+            const next = new Set(ids);
+            next.delete(id);
+            return next;
+          });
+          this.deletedEvent.emit();
+        },
+        error: () => {
+          this.deletingTeacherId.set(null);
+          this.errorMessage.set('Hiba a tanár törlése során.');
+        },
+      });
   }
 
   onOpenPhotoChooser(): void {

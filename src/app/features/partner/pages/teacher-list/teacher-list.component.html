@@ -263,6 +263,7 @@
     (closeEvent)="closeLinkDialog()"
     (savedEvent)="onTeacherLinked($event)"
     (photoChooserEvent)="onOpenPhotoChooserFromLink($event)"
+    (deletedEvent)="state.loadTeachers()"
   />
 }
 

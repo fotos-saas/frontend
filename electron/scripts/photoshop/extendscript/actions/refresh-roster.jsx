@@ -46,23 +46,21 @@ function _removeLayerFromGroup(doc, groupPath, layerName) {
 }
 
 /**
- * Meglevo SO layer meretenek kiolvasasa a megadott csoportbol (elso talalt).
+ * Meglevo SO layer VIZUALIS szelesseget kiolvassa a megadott csoportbol (elso talalt).
+ * Ez az atmeretezett (vegleges) meret — a resize fazishoz kell celkent.
  */
-function _getExistingSoSize(doc, groupPath) {
+function _getExistingLayerWidth(doc, groupPath) {
   var group = getGroupByPath(doc, groupPath);
-  if (!group) return null;
+  if (!group) return 0;
   try {
     for (var i = 0; i < group.artLayers.length; i++) {
       var layer = group.artLayers[i];
       var bounds = layer.bounds;
       var w = Math.round(bounds[2].as("px") - bounds[0].as("px"));
-      var h = Math.round(bounds[3].as("px") - bounds[1].as("px"));
-      if (w > 10 && h > 10) {
-        return { widthPx: w, heightPx: h };
-      }
+      if (w > 10) return w;
     }
   } catch (e) { /* ignore */ }
-  return null;
+  return 0;
 }
 
 /**
@@ -118,31 +116,43 @@ function _doRefreshRoster() {
   }
 
   // --- 2. Hozzaadas ---
-  // Alapertelmezett SO meret (9x13cm @ 339 DPI)
-  var defaultSize = { widthPx: 1228, heightPx: 1819 };
+  // SO belso meret: UGYANAZ mint az eredeti generalaskor (9x13cm @ 339 DPI).
+  // A vegleges vizualis meretet a resize fazis allitja be (lasd lentebb).
+  var soCreationSize = { widthPx: 1228, heightPx: 1819 };
+
+  // Meglevo layerek vizualis szelessege csoportonkent (resize celmerethez)
+  var existingWidth = {};
+  existingWidth["Students"] = _getExistingLayerWidth(_doc, ["Images", "Students"]);
+  existingWidth["Teachers"] = _getExistingLayerWidth(_doc, ["Images", "Teachers"]);
 
   // Referencia name stilus csoportonkent
   var refStyles = {};
   refStyles["Students"] = _getRefNameStyle(_doc, ["Names", "Students"]);
   refStyles["Teachers"] = _getRefNameStyle(_doc, ["Names", "Teachers"]);
 
+  // Uj layerek ID-i csoportonkent (resize fazishoz)
+  var newLayersByGroup = {};
+  newLayersByGroup["Students"] = [];
+  newLayersByGroup["Teachers"] = [];
+
   for (var a = 0; a < _data.toAdd.length; a++) {
     var item = _data.toAdd[a];
     var groupName = item.group || "Students";
 
-    // 2a. Image (SO placeholder) layer — meglevo merettel
+    // 2a. Image (SO placeholder) layer — NAGY meret (mint eredetileg)
     try {
       var imagesGroup = getGroupByPath(_doc, ["Images", groupName]);
       if (imagesGroup) {
-        var refSize = _getExistingSoSize(_doc, ["Images", groupName]) || defaultSize;
         var newImgLayer = createSmartObjectPlaceholder(_doc, imagesGroup, {
           name: item.layerName,
-          widthPx: refSize.widthPx,
-          heightPx: refSize.heightPx
+          widthPx: soCreationSize.widthPx,
+          heightPx: soCreationSize.heightPx
         });
         _addedImages++;
-        // ID megjegyzese a vegen torteno kijeloleshez
-        try { _newImageLayerIds.push(newImgLayer.id); } catch (e2) { /* ignore */ }
+        try {
+          _newImageLayerIds.push(newImgLayer.id);
+          newLayersByGroup[groupName].push(newImgLayer);
+        } catch (e2) { /* ignore */ }
       } else {
         log("[JSX] FIGYELEM: Images/" + groupName + " csoport nem talalhato");
       }
@@ -185,7 +195,37 @@ function _doRefreshRoster() {
     }
   }
 
-  // --- 3. Uj Image layerek kijelolese (a user igy rogton arrange-names-t nyomhat) ---
+  // --- 3. Uj Image layerek atmeretezese a meglevo layerek vizualis meretere ---
+  // Ugyanaz a 2-fazisu logika mint az add-image-layers.jsx-ben:
+  // SO letrehozas nagy meret → resize a vegleges vizualis meretre
+  var groupNames = ["Students", "Teachers"];
+  for (var rg = 0; rg < groupNames.length; rg++) {
+    var gn = groupNames[rg];
+    var targetW = existingWidth[gn];
+    if (targetW > 0 && newLayersByGroup[gn].length > 0) {
+      for (var rl = 0; rl < newLayersByGroup[gn].length; rl++) {
+        var resizeLayer = newLayersByGroup[gn][rl];
+        try {
+          selectLayerById(resizeLayer.id);
+          _doc.activeLayer = resizeLayer;
+          var rBounds = resizeLayer.bounds;
+          var rCurrentW = rBounds[2].as("px") - rBounds[0].as("px");
+          if (rCurrentW > 0 && Math.abs(rCurrentW - targetW) > 1) {
+            var rCurrentH = rBounds[3].as("px") - rBounds[1].as("px");
+            var rScaleW = (targetW / rCurrentW) * 100;
+            var rRatio = rCurrentH / rCurrentW;
+            var rScaleH = ((targetW * rRatio) / rCurrentH) * 100;
+            resizeLayer.resize(rScaleW, rScaleH, AnchorPosition.MIDDLECENTER);
+            log("[JSX] Resize: " + resizeLayer.name + " " + Math.round(rCurrentW) + " → " + targetW + " px");
+          }
+        } catch (e) {
+          log("[JSX] FIGYELEM: resize sikertelen: " + resizeLayer.name + " - " + e.message);
+        }
+      }
+    }
+  }
+
+  // --- 4. Uj Image layerek kijelolese (a user igy rogton arrange-names-t nyomhat) ---
   if (_newImageLayerIds.length > 0) {
     try {
       // Elso layer kivalasztasa

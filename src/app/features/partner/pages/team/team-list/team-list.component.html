@@ -183,9 +183,8 @@
     [message]="'Biztosan eltávolítod ' + selectedMember()?.name + ' nevű csapattagot?'"
     confirmText="Eltávolítás"
     cancelText="Mégse"
-    variant="danger"
-    (confirm)="removeMember()"
-    (cancel)="closeRemoveConfirm()"
+    confirmType="danger"
+    (resultEvent)="$event.action === 'confirm' ? removeMember() : closeRemoveConfirm()"
   />
 }
 
@@ -196,9 +195,8 @@
     [message]="'Biztosan visszavonod a meghívót? (' + selectedInvitation()?.email + ')'"
     confirmText="Visszavonás"
     cancelText="Mégse"
-    variant="warning"
-    (confirm)="revokeInvitation()"
-    (cancel)="closeRevokeConfirm()"
+    confirmType="warning"
+    (resultEvent)="$event.action === 'confirm' ? revokeInvitation() : closeRevokeConfirm()"
   />
 }
 

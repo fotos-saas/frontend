@@ -68,12 +68,48 @@ function _getExistingSoSize(doc, groupPath) {
   return null;
 }
 
+/**
+ * Elso text layer keresese a megadott csoportban — referencia stilushoz es poziciohoz.
+ * Visszaadja a layer stilusat (font, size, color, justification) es poziciojat (bounds).
+ */
+function _getRefNameLayer(doc, groupPath) {
+  var group = getGroupByPath(doc, groupPath);
+  if (!group) return null;
+  try {
+    for (var i = 0; i < group.artLayers.length; i++) {
+      var layer = group.artLayers[i];
+      if (layer.kind === LayerKind.TEXT) {
+        var ti = layer.textItem;
+        var col = ti.color;
+        return {
+          font: ti.font,
+          size: ti.size.as("pt"),
+          color: { r: col.rgb.red, g: col.rgb.green, b: col.rgb.blue },
+          justification: ti.justification,
+          bounds: layer.bounds, // [x0, y0, x1, y1]
+          position: layer.bounds[0].as("px") + "," + layer.bounds[1].as("px")
+        };
+      }
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+/**
+ * Justification enum → string (createTextLayer szamara)
+ */
+function _justificationToString(j) {
+  if (j === Justification.LEFT) return "left";
+  if (j === Justification.RIGHT) return "right";
+  return "center";
+}
+
 function _doRefreshRoster() {
   // --- 1. Torles ---
   for (var r = 0; r < _data.toRemove.length; r++) {
     var removeName = _data.toRemove[r];
     var removedAny = false;
-    // Keresés minden lehetseges csoportban
+    // Kereses minden lehetseges csoportban
     var groups = ["Students", "Teachers"];
     for (var g = 0; g < groups.length; g++) {
       if (_removeLayerFromGroup(_doc, ["Images", groups[g]], removeName)) {
@@ -92,25 +128,56 @@ function _doRefreshRoster() {
   }
 
   // --- 2. Hozzaadas ---
-  // Meglevo SO mereteket kiolvassuk referenciaként
   // Alapertelmezett SO meret (9x13cm @ 339 DPI)
   var defaultSize = _data.imageSizePx || { widthPx: 1228, heightPx: 1819 };
+
+  // Referencia name layerek kiolvasasa csoportonkent (stilus + pozicio masolashoz)
+  var refNames = {};
+  refNames["Students"] = _getRefNameLayer(_doc, ["Names", "Students"]);
+  refNames["Teachers"] = _getRefNameLayer(_doc, ["Names", "Teachers"]);
 
   for (var a = 0; a < _data.toAdd.length; a++) {
     var item = _data.toAdd[a];
     var groupName = item.group || "Students";
 
-    // 2a. Name layer
+    // 2a. Name layer — meglevo stilust es poziciot masolja
     try {
       var namesGroup = getGroupByPath(_doc, ["Names", groupName]);
       if (namesGroup) {
-        createTextLayer(namesGroup, item.displayText, {
-          name: item.layerName,
-          font: CONFIG.FONT_NAME,
-          size: CONFIG.FONT_SIZE,
-          color: CONFIG.TEXT_COLOR,
-          alignment: "center"
-        });
+        var ref = refNames[groupName];
+        var nameOpts;
+        if (ref) {
+          nameOpts = {
+            name: item.layerName,
+            font: ref.font,
+            size: ref.size,
+            color: ref.color,
+            alignment: _justificationToString(ref.justification)
+          };
+        } else {
+          nameOpts = {
+            name: item.layerName,
+            font: CONFIG.FONT_NAME,
+            size: CONFIG.FONT_SIZE,
+            color: CONFIG.TEXT_COLOR,
+            alignment: "center"
+          };
+        }
+
+        var newTextLayer = createTextLayer(namesGroup, item.displayText, nameOpts);
+
+        // Pozicio masolasa: a referencia layer poziciojara mozgatjuk
+        if (ref) {
+          var refX = ref.bounds[0].as("px");
+          var refY = ref.bounds[1].as("px");
+          var newBounds = newTextLayer.bounds;
+          var newX = newBounds[0].as("px");
+          var newY = newBounds[1].as("px");
+          var dx = new UnitValue(refX - newX, "px");
+          var dy = new UnitValue(refY - newY, "px");
+          newTextLayer.translate(dx, dy);
+        }
+
         _addedNames++;
       } else {
         log("[JSX] FIGYELEM: Names/" + groupName + " csoport nem talalhato");

@@ -78,7 +78,9 @@ export class CreateProjectModalComponent {
 
   readonly selectedContactOption = computed<DropdownOption | null>(() => {
     const contact = this.selectedContact();
-    return contact?.id ? { id: contact.id, name: contact.name, subtitle: contact.email || undefined } : null;
+    if (!contact) return null;
+    // Új kapcsolattartónál nincs id, használjunk -1-et placeholder-nek
+    return { id: contact.id ?? -1, name: contact.name, subtitle: contact.email || undefined };
   });
 
   formData: CreateProjectRequest = {

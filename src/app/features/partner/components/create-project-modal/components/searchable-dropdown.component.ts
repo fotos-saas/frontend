@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
@@ -227,6 +227,16 @@ export class SearchableDropdownComponent {
   readonly ICONS = ICONS;
   readonly showDropdown = signal(false);
   readonly searchText = signal('');
+
+  constructor() {
+    // Ha kívülről beállítják a selectedItem-et (pl. modal-ból), frissítsük a searchText-et
+    effect(() => {
+      const item = this.selectedItem();
+      if (item) {
+        this.searchText.set(item.name + (item.subtitle ? ` (${item.subtitle})` : ''));
+      }
+    });
+  }
 
   onFocus(): void {
     this.showDropdown.set(true);

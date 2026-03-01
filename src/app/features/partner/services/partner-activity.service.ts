@@ -63,6 +63,36 @@ export interface ActivityLogFilters {
   page?: number;
 }
 
+export interface ProjectActivitySummary {
+  project_id: number;
+  project_name: string;
+  activity_count: number;
+  new_activity_count: number;
+  last_activity_at: string | null;
+  reviewed_at: string | null;
+}
+
+export interface ActivitySummaryResponse {
+  items: ProjectActivitySummary[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
+export interface ActivitySummaryFilters {
+  search?: string;
+  date_from?: string;
+  date_to?: string;
+  reviewed?: 'yes' | 'no' | '';
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+  per_page?: number;
+  page?: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -73,6 +103,18 @@ export class PartnerActivityService {
   getActivityLog(filters: ActivityLogFilters = {}): Observable<ActivityLogResponse> {
     const params = buildHttpParams(filters as Record<string, string | number | boolean | null | undefined>);
     return this.http.get<ActivityLogResponse>(this.apiUrl, { params });
+  }
+
+  getActivitySummary(filters: ActivitySummaryFilters = {}): Observable<ActivitySummaryResponse> {
+    const params = buildHttpParams(filters as Record<string, string | number | boolean | null | undefined>);
+    return this.http.get<ActivitySummaryResponse>(`${this.apiUrl}/summary`, { params });
+  }
+
+  toggleProjectReview(projectIds: number[], reviewed: boolean): Observable<{ message: string; count: number }> {
+    return this.http.post<{ message: string; count: number }>(
+      `${this.apiUrl}/review`,
+      { project_ids: projectIds, reviewed },
+    );
   }
 
   getProjectActivity(projectId: number, page = 1, perPage = 20): Observable<ProjectActivityResponse> {

@@ -1,0 +1,121 @@
+<app-smart-filter-bar
+  [filterState]="filterState"
+  [searchConfig]="searchConfig"
+  [filterConfigs]="filterConfigs()"
+  [sortConfig]="sortDef"
+  [visibleFilterCount]="1"
+/>
+
+<!-- Batch műveletek -->
+@if (hasSelection()) {
+  <div class="batch-bar">
+    <span class="batch-bar__count">{{ selectedIds().size }} kijelölve</span>
+    <button type="button" class="batch-bar__btn" (click)="markSelectedReviewed()">
+      <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+      Átnéztem
+    </button>
+  </div>
+}
+
+@if (filterState.loading()) {
+  <div class="skeleton-container">
+    @for (i of [1,2,3,4,5]; track i) {
+      <div class="skeleton-row"></div>
+    }
+  </div>
+} @else if (items().length === 0) {
+  <div class="empty-state">
+    <lucide-icon [name]="ICONS.LAYERS" [size]="48" />
+    <p>Nincs aktivitással rendelkező projekt</p>
+  </div>
+} @else {
+  <div class="table-header">
+    <span class="th th-check">
+      <input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" />
+    </span>
+    <span class="th th-project">Projekt</span>
+    <span class="th th-new-count">Új aktivitások</span>
+    <span class="th th-total-count">Összes</span>
+    <span class="th th-date">Utolsó aktivitás</span>
+    <span class="th th-status">Állapot</span>
+    <span class="th th-actions">Művelet</span>
+  </div>
+
+  <div class="row-grid">
+    @for (item of items(); track item.project_id; let i = $index) {
+      <div
+        class="list-row"
+        [class.list-row--has-new]="item.new_activity_count > 0"
+        [style.animation-delay]="i * 0.03 + 's'"
+      >
+        <span class="cell cell-check">
+          <input
+            type="checkbox"
+            [checked]="selectedIds().has(item.project_id)"
+            (change)="toggleSelect(item.project_id)"
+          />
+        </span>
+        <span class="cell cell-project">
+          <button type="button" class="project-link" (click)="goToProject(item.project_id)">
+            {{ item.project_name }}
+          </button>
+        </span>
+        <span class="cell cell-new-count">
+          @if (item.new_activity_count > 0) {
+            <span class="count-badge count-badge--new">{{ item.new_activity_count }}</span>
+          } @else {
+            <span class="count-badge count-badge--zero">0</span>
+          }
+        </span>
+        <span class="cell cell-total-count">
+          <span class="count-badge count-badge--total">{{ item.activity_count }}</span>
+        </span>
+        <span class="cell cell-date">
+          {{ item.last_activity_at | date:'yyyy.MM.dd HH:mm' }}
+        </span>
+        <span class="cell cell-status">
+          @if (item.new_activity_count === 0 && item.reviewed_at) {
+            <span class="status-badge status-badge--reviewed">
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+              Átnézve
+            </span>
+          } @else if (item.new_activity_count > 0) {
+            <span class="status-badge status-badge--new">
+              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+              Új!
+            </span>
+          }
+        </span>
+        <span class="cell cell-actions">
+          @if (item.new_activity_count > 0 || !item.reviewed_at) {
+            <button
+              type="button"
+              class="action-btn action-btn--review"
+              matTooltip="Megjelölés átnézettként"
+              (click)="markReviewed([item.project_id])"
+            >
+              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="action-btn action-btn--undo"
+              matTooltip="Visszavonás"
+              (click)="unmarkReviewed([item.project_id])"
+            >
+              <lucide-icon [name]="ICONS.UNDO" [size]="14" />
+            </button>
+          }
+        </span>
+      </div>
+    }
+  </div>
+}
+
+<app-list-pagination
+  [currentPage]="filterState.page()"
+  [totalPages]="lastPage()"
+  [totalItems]="total()"
+  itemLabel="projekt"
+  (pageChange)="filterState.setPage($event)"
+/>

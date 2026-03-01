@@ -4,139 +4,33 @@
       <lucide-icon [name]="ICONS.SCROLL_TEXT" [size]="24" />
       Tevékenységnapló
     </h1>
-    <span class="total-badge">{{ total() }} bejegyzés</span>
   </div>
 
-  <app-smart-filter-bar
-    [filterState]="filterState"
-    [searchConfig]="searchConfig"
-    [filterConfigs]="filterConfigs()"
-    [searchableFilters]="[projectSearchFilter()]"
-    [visibleFilterCount]="0"
-  >
-    <div filterBarExtra class="date-filter-wrapper">
-      <button
-        type="button"
-        class="date-filter-btn"
-        [class.date-filter-btn--active]="hasDateFilter()"
-        (click)="dateDropdownOpen.set(!dateDropdownOpen())"
-      >
-        <lucide-icon [name]="ICONS.CALENDAR" [size]="14" />
-        <span class="date-filter-btn__text">
-          @if (hasDateFilter()) {
-            {{ filterState.filters()['date_from'] || '…' }} – {{ filterState.filters()['date_to'] || '…' }}
-          } @else {
-            Időszak
-          }
-        </span>
-        <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="14" class="date-filter-btn__chevron" />
-      </button>
+  <!-- Tabok -->
+  <nav class="tabs-nav">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.tab-btn--active]="activeTab() === 'detail'"
+      (click)="activeTab.set('detail')"
+    >
+      <lucide-icon [name]="ICONS.LIST" [size]="16" />
+      <span>Részletes</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.tab-btn--active]="activeTab() === 'summary'"
+      (click)="activeTab.set('summary')"
+    >
+      <lucide-icon [name]="ICONS.LAYERS" [size]="16" />
+      <span>Projektek összesítve</span>
+    </button>
+  </nav>
 
-      @if (dateDropdownOpen()) {
-        <div class="date-dropdown">
-          <label class="date-dropdown__label">Dátumtól</label>
-          <ps-input
-            type="date"
-            [ngModel]="filterState.filters()['date_from']"
-            (ngModelChange)="filterState.setFilter('date_from', $event)"
-            placeholder="éééé-hh-nn"
-          />
-          <label class="date-dropdown__label">Dátumig</label>
-          <ps-input
-            type="date"
-            [ngModel]="filterState.filters()['date_to']"
-            (ngModelChange)="filterState.setFilter('date_to', $event)"
-            placeholder="éééé-hh-nn"
-          />
-          @if (hasDateFilter()) {
-            <button type="button" class="date-dropdown__clear" (click)="clearDateFilter()">
-              <lucide-icon [name]="ICONS.X" [size]="12" />
-              Törlés
-            </button>
-          }
-        </div>
-      }
-    </div>
-  </app-smart-filter-bar>
-
-  <!-- Táblázat -->
-  @if (filterState.loading()) {
-    <div class="skeleton-container">
-      @for (i of [1,2,3,4,5]; track i) {
-        <div class="skeleton-row"></div>
-      }
-    </div>
-  } @else if (items().length === 0) {
-    <div class="empty-state">
-      <lucide-icon [name]="ICONS.SCROLL_TEXT" [size]="48" />
-      <p>Nincs tevékenységnapló bejegyzés</p>
-    </div>
+  @if (activeTab() === 'detail') {
+    <app-activity-detail-tab />
   } @else {
-    <div class="table-header">
-      <span class="th th-date">Dátum</span>
-      <span class="th th-project">Projekt</span>
-      <span class="th th-category">Kategória</span>
-      <span class="th th-event">Esemény</span>
-      <span class="th th-subject">Tárgy</span>
-      <span class="th th-user">Felhasználó</span>
-      <span class="th th-changes">Változások</span>
-    </div>
-
-    <div class="row-grid">
-      @for (item of items(); track item.id; let i = $index) {
-        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
-          <span class="cell cell-date">{{ item.created_at | date:'yyyy.MM.dd HH:mm' }}</span>
-          <span class="cell cell-project">
-            @if (item.project) {
-              <button type="button" class="project-link" (click)="goToProject(item.project.id); $event.stopPropagation()">
-                {{ item.project.name }}
-              </button>
-            } @else {
-              <span class="text-muted">–</span>
-            }
-          </span>
-          <span class="cell cell-category">
-            <span class="category-badge">{{ getCategoryLabel(item.log_name) }}</span>
-          </span>
-          <span class="cell cell-event">
-            @if (item.event) {
-              <span class="event-badge" [class]="getEventClass(item.event)">
-                {{ getEventLabel(item.event) }}
-              </span>
-            } @else {
-              <span class="event-badge badge-gray">{{ item.description }}</span>
-            }
-          </span>
-          <span class="cell cell-subject">
-            @if (item.subject_name && item.subject_name !== item.project?.name) {
-              <span class="subject-name">{{ item.subject_name }}</span>
-            } @else if (!item.subject_name) {
-              <span class="text-muted">–</span>
-            }
-          </span>
-          <span class="cell cell-user">
-            @if (item.causer) {
-              {{ item.causer.name }}
-            } @else {
-              <span class="text-muted">Rendszer</span>
-            }
-          </span>
-          <span class="cell cell-changes">
-            @if (item.changes) {
-              <span class="changes-text">{{ formatChanges(item.changes) }}</span>
-            }
-          </span>
-        </div>
-      }
-    </div>
+    <app-activity-summary-tab />
   }
-
-  <!-- Lapozás -->
-  <app-list-pagination
-    [currentPage]="filterState.page()"
-    [totalPages]="lastPage()"
-    [totalItems]="total()"
-    itemLabel="bejegyzés"
-    (pageChange)="filterState.setPage($event)"
-  />
 </div>

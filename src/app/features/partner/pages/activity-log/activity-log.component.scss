@@ -1,5 +1,3 @@
-@use '../../../../shared/styles/list-page' as list;
-
 :host {
   display: block;
 }
@@ -8,7 +6,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 
   h1 {
     display: flex;
@@ -18,262 +16,38 @@
     font-weight: 600;
     margin: 0;
   }
-
-  .total-badge {
-    background: var(--surface-secondary, #f1f5f9);
-    color: var(--text-secondary, #64748b);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
 }
 
-// Táblázat
-.table-header {
-  display: grid;
-  grid-template-columns: 140px minmax(100px, 180px) 100px 100px 1fr 120px 1fr;
-  gap: 8px;
-  padding: 8px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--text-secondary, #64748b);
+// Tabok
+.tabs-nav {
+  display: flex;
+  margin: -4px; // gap workaround
+  margin-bottom: 20px;
   border-bottom: 1px solid var(--border-color, #e2e8f0);
 }
 
-.list-row {
-  display: grid;
-  grid-template-columns: 140px minmax(100px, 180px) 100px 100px 1fr 120px 1fr;
-  gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border-color, #f1f5f9);
-  font-size: 0.85rem;
-  animation: fadeInUp 0.3s ease-out both;
-  transition: background 0.15s;
-
-  &:hover {
-    background: var(--surface-secondary, #f8fafc);
-  }
-}
-
-.cell {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cell-date {
-  color: var(--text-secondary, #64748b);
-  font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.category-badge {
-  background: var(--surface-secondary, #f1f5f9);
-  color: var(--text-secondary, #475569);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.event-badge {
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.badge-green { background: #dcfce7; color: #166534; }
-.badge-blue  { background: #dbeafe; color: #1e40af; }
-.badge-red   { background: #fee2e2; color: #991b1b; }
-.badge-gray  { background: #f1f5f9; color: #475569; }
-
-.subject-name {
-  font-weight: 500;
-  margin-right: 4px;
-}
-
-.subject-type {
-  color: var(--text-tertiary, #94a3b8);
-  font-size: 0.75rem;
-}
-
-.project-link {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--primary, #8b5cf6);
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.text-muted {
-  color: var(--text-tertiary, #94a3b8);
-  font-style: italic;
-}
-
-.changes-text {
-  color: var(--text-secondary, #64748b);
-  font-size: 0.8rem;
-}
-
-// Dátum szűrő gomb
-.date-filter-wrapper {
-  position: relative;
-}
-
-.date-filter-btn {
+.tab-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 42px;
-  padding: 0 12px;
-  border: 2px solid var(--ps-field-border, #e5e7eb);
-  border-radius: 8px;
-  background: var(--ps-field-bg, #ffffff);
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition:
-    border-color 200ms cubic-bezier(0.33, 1, 0.68, 1),
-    background-color 200ms cubic-bezier(0.33, 1, 0.68, 1);
+  padding: 10px 16px;
+  margin: 4px; // gap workaround
+  border: none;
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--text-secondary, #64748b);
-  white-space: nowrap;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
 
   &:hover {
-    border-color: var(--ps-field-border-hover, #6b7280);
+    color: var(--text-primary, #1e293b);
   }
 
   &--active {
-    border-color: var(--ps-focus-border, #2563eb);
-    background: #f0f7ff;
-    color: var(--ps-focus-border, #2563eb);
+    color: var(--primary, #8b5cf6);
+    border-bottom-color: var(--primary, #8b5cf6);
   }
-
-  &__text {
-    font-weight: 500;
-    font-size: 0.875rem;
-  }
-
-  &__chevron {
-    opacity: 0.7;
-    margin-left: 2px;
-  }
-}
-
-.date-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 240px;
-  background: var(--ps-field-bg, #ffffff);
-  border: 2px solid var(--ps-field-border, #e5e7eb);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  padding: 16px;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  animation: dropdownFadeIn 0.15s ease;
-
-  &__label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary, #64748b);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-top: 4px;
-
-    &:first-child { margin-top: 0; }
-  }
-
-  &__clear {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 6px 12px;
-    border: none;
-    background: transparent;
-    color: #dc2626;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 6px;
-    margin-top: 4px;
-    transition: background 0.15s ease;
-
-    &:hover { background: #fee2e2; }
-  }
-}
-
-@keyframes dropdownFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-// Skeleton
-.skeleton-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.skeleton-row {
-  height: 44px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 64px 20px;
-  color: var(--text-tertiary, #94a3b8);
-
-  p {
-    margin-top: 12px;
-    font-size: 0.95rem;
-  }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-@media (max-width: 900px) {
-  .table-header { display: none; }
-
-  .list-row {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 12px;
-  }
-
-  .cell { white-space: normal; }
 }

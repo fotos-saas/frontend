@@ -5,16 +5,47 @@
   <!-- Iskola és Város sor -->
   <div class="form-row">
     <!-- Iskola neve -->
-    <ps-input
-      label="Iskola neve"
-      placeholder="Példa Általános Iskola"
-      [required]="true"
-      [ngModel]="data().schoolName"
-      (ngModelChange)="updateField('schoolName', $event)"
-      (blur)="touched.schoolName = true"
-      [state]="hasError('schoolName') ? 'error' : 'default'"
-      [errorMessage]="getFieldError('schoolName') ?? ''"
-    />
+    @if (partnerMode()) {
+      <div class="form-field school-field">
+        <div class="school-field__row">
+          <ps-autocomplete
+            class="school-field__autocomplete"
+            label="Iskola neve"
+            placeholder="Kezdj el gépelni az iskola nevét..."
+            [required]="true"
+            [suggestions]="schoolSuggestions()"
+            [loading]="schoolLoading()"
+            [allowFreeText]="true"
+            [minChars]="2"
+            [ngModel]="data().schoolName"
+            (ngModelChange)="updateField('schoolName', $event)"
+            (search)="onSchoolSearch($event)"
+            (selected)="onSchoolSelected($event)"
+            [state]="hasError('schoolName') ? 'error' : 'default'"
+            [errorMessage]="getFieldError('schoolName') ?? ''"
+          />
+          <button
+            type="button"
+            class="school-field__add-btn"
+            (click)="addSchool.emit()"
+            matTooltip="Új iskola hozzáadása"
+          >
+            <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+          </button>
+        </div>
+      </div>
+    } @else {
+      <ps-input
+        label="Iskola neve"
+        placeholder="Példa Általános Iskola"
+        [required]="true"
+        [ngModel]="data().schoolName"
+        (ngModelChange)="updateField('schoolName', $event)"
+        (blur)="touched.schoolName = true"
+        [state]="hasError('schoolName') ? 'error' : 'default'"
+        [errorMessage]="getFieldError('schoolName') ?? ''"
+      />
+    }
 
     <!-- Város -->
     <ps-input

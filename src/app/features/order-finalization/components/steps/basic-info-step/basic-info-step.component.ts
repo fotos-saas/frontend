@@ -7,7 +7,11 @@ import {
   computed
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PsInputComponent, PsTextareaComponent } from '@shared/components/form';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { LucideAngularModule } from 'lucide-angular';
+import { PsInputComponent, PsTextareaComponent, PsAutocompleteComponent } from '@shared/components/form';
+import { PsSelectOption } from '@shared/components/form/form.types';
+import { ICONS } from '@shared/constants/icons.constants';
 import { BasicInfoData } from '../../../models/order-finalization.models';
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
 
@@ -15,11 +19,8 @@ import { OrderValidationService, ValidationError } from '../../../services/order
  * Basic Info Step Component (Step 2)
  * Iskola és osztály adatok form
  *
- * @description
- * - Input signal: data (BasicInfoData)
- * - Output: dataChange (BasicInfoData változás)
- * - Saját validációs hibaüzenetek
- * - ARIA akadálymentesség
+ * Partner módban: iskola autocomplete + "Új iskola" gomb
+ * Guest módban: sima szöveges input
  */
 @Component({
   selector: 'app-basic-info-step',
@@ -27,19 +28,36 @@ import { OrderValidationService, ValidationError } from '../../../services/order
   styleUrls: ['./basic-info-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule, PsInputComponent, PsTextareaComponent]
+  imports: [FormsModule, MatTooltipModule, LucideAngularModule, PsInputComponent, PsTextareaComponent, PsAutocompleteComponent]
 })
 export class BasicInfoStepComponent {
   private readonly validationService = inject(OrderValidationService);
 
+  readonly ICONS = ICONS;
+
   /** Input: Alap adatok */
   data = input.required<BasicInfoData>();
 
-  /** Input: Partner mód (város nem kötelező) */
+  /** Input: Partner mód (város nem kötelező, iskola autocomplete) */
   partnerMode = input<boolean>(false);
+
+  /** Input: Iskola autocomplete javaslatok (partner mód) */
+  schoolSuggestions = input<PsSelectOption[]>([]);
+
+  /** Input: Iskola keresés loading (partner mód) */
+  schoolLoading = input(false);
 
   /** Output: Adatok változása */
   dataChange = output<BasicInfoData>();
+
+  /** Output: Iskola keresés (partner mód autocomplete) */
+  schoolSearch = output<string>();
+
+  /** Output: Iskola kiválasztva az autocomplete-ből (id, label, sublabel=city) */
+  schoolSelected = output<PsSelectOption>();
+
+  /** Output: "Új iskola" gomb kattintás */
+  addSchool = output<void>();
 
   /** Validációs hibák (computed) */
   errors = computed<ValidationError[]>(() => {
@@ -60,8 +78,6 @@ export class BasicInfoStepComponent {
 
   /**
    * Mező frissítése
-   * @param field - Mező neve
-   * @param value - Új érték
    */
   updateField<K extends keyof BasicInfoData>(field: K, value: BasicInfoData[K]): void {
     this.touched[field] = true;
@@ -69,9 +85,29 @@ export class BasicInfoStepComponent {
   }
 
   /**
+   * Iskola keresés (autocomplete search event)
+   */
+  onSchoolSearch(query: string): void {
+    this.schoolSearch.emit(query);
+  }
+
+  /**
+   * Iskola kiválasztva az autocomplete-ből
+   * Frissíti a schoolName + city mezőket
+   */
+  onSchoolSelected(option: PsSelectOption): void {
+    this.touched.schoolName = true;
+    const updatedData = {
+      ...this.data(),
+      schoolName: option.label,
+      city: option.sublabel || this.data().city,
+    };
+    this.dataChange.emit(updatedData);
+    this.schoolSelected.emit(option);
+  }
+
+  /**
    * Mező hibaüzenetének lekérése
-   * @param field - Mező neve
-   * @returns Hibaüzenet vagy null
    */
   getFieldError(field: string): string | null {
     if (!this.touched[field as keyof typeof this.touched]) return null;
@@ -80,8 +116,6 @@ export class BasicInfoStepComponent {
 
   /**
    * Mező hibás-e (touched + error)
-   * @param field - Mező neve
-   * @returns true ha hibás
    */
   hasError(field: string): boolean {
     return !!this.getFieldError(field);

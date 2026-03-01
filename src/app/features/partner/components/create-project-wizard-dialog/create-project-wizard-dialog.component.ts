@@ -13,16 +13,18 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, of } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
-import { PartnerService, PartnerProjectListItem } from '../../services/partner.service';
+import { PartnerService, PartnerProjectListItem, SchoolItem } from '../../services/partner.service';
 import { PartnerFileUploadService } from '../../services/partner-file-upload.service';
 import { OrderValidationService } from '../../../order-finalization/services/order-validation.service';
 import { ContactStepComponent } from '../../../order-finalization/components/steps/contact-step/contact-step.component';
 import { BasicInfoStepComponent } from '../../../order-finalization/components/steps/basic-info-step/basic-info-step.component';
 import { DesignStepComponent } from '../../../order-finalization/components/steps/design-step/design-step.component';
 import { RosterStepComponent } from '../../../order-finalization/components/steps/roster-step/roster-step.component';
+import { AddSchoolModalComponent } from '../add-school-modal/add-school-modal.component';
 import {
   OrderFinalizationData,
   EMPTY_ORDER_FINALIZATION_DATA,
@@ -47,6 +49,7 @@ import {
     BasicInfoStepComponent,
     DesignStepComponent,
     RosterStepComponent,
+    AddSchoolModalComponent,
   ],
 })
 export class CreateProjectWizardDialogComponent {
@@ -72,8 +75,14 @@ export class CreateProjectWizardDialogComponent {
   backgroundFileName = signal<string | null>(null);
   attachmentFileNames = signal<string[]>([]);
 
+  /** Iskola autocomplete */
+  schoolSuggestions = signal<PsSelectOption[]>([]);
+  schoolLoading = signal(false);
+  showAddSchoolModal = signal(false);
+
   /** A létrehozott projekt ID-ja (design step fájlfeltöltéshez kell) */
   private createdProjectId = signal<number | null>(null);
+  private schoolSearchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   isStepValid = computed(() => {
     const data = this.formData();
@@ -81,7 +90,7 @@ export class CreateProjectWizardDialogComponent {
     switch (step) {
       case 0: return this.validation.isContactDataValidForPartner(data.contact);
       case 1: return this.validation.isBasicInfoValidForPartner(data.basicInfo);
-      case 2: return true; // Design step opcionális
+      case 2: return true;
       case 3: return this.validation.isRosterDataValidForPartner(data.roster);
       default: return false;
     }
@@ -94,7 +103,7 @@ export class CreateProjectWizardDialogComponent {
       && this.validation.isRosterDataValidForPartner(data.roster);
   });
 
-  /** Upload callback-ek – csak a projekt létrehozása után működnek */
+  /** Upload callback-ek */
   uploadBackgroundFn = (file: File): Observable<FileUploadResponse> => {
     const projectId = this.createdProjectId();
     if (!projectId) {
@@ -113,6 +122,8 @@ export class CreateProjectWizardDialogComponent {
 
   deleteFileFn = (fileId: string): Observable<{ success: boolean }> =>
     this.fileUpload.deleteFile(fileId);
+
+  // --- Step data change handlers ---
 
   onContactChange(data: ContactData): void {
     this.formData.update(fd => ({ ...fd, contact: data }));
@@ -138,6 +149,69 @@ export class CreateProjectWizardDialogComponent {
     this.attachmentFileNames.set(names);
   }
 
+  // --- Iskola keresés ---
+
+  onSchoolSearch(query: string): void {
+    if (this.schoolSearchTimeout) clearTimeout(this.schoolSearchTimeout);
+    this.schoolLoading.set(true);
+    this.schoolSearchTimeout = setTimeout(() => this.loadSchools(query), 300);
+  }
+
+  onSchoolSelected(option: PsSelectOption): void {
+    // Város kitöltése ha van sublabel (city)
+    if (option.sublabel) {
+      this.formData.update(fd => ({
+        ...fd,
+        basicInfo: { ...fd.basicInfo, schoolName: option.label, city: option.sublabel! }
+      }));
+    }
+  }
+
+  openAddSchoolModal(): void {
+    this.showAddSchoolModal.set(true);
+  }
+
+  closeAddSchoolModal(): void {
+    this.showAddSchoolModal.set(false);
+  }
+
+  onSchoolCreated(school: SchoolItem): void {
+    this.closeAddSchoolModal();
+    // Auto-kitöltés a létrehozott iskolával
+    this.formData.update(fd => ({
+      ...fd,
+      basicInfo: {
+        ...fd.basicInfo,
+        schoolName: school.name,
+        city: school.city || fd.basicInfo.city,
+      }
+    }));
+    this.toast.success('Siker', `"${school.name}" iskola hozzáadva!`);
+  }
+
+  private loadSchools(query: string): void {
+    this.partnerService.getAllSchools(query)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (schools) => {
+          this.schoolSuggestions.set(
+            schools.map(s => ({
+              id: s.id,
+              label: s.name,
+              sublabel: s.city || undefined,
+            }))
+          );
+          this.schoolLoading.set(false);
+        },
+        error: () => {
+          this.schoolSuggestions.set([]);
+          this.schoolLoading.set(false);
+        }
+      });
+  }
+
+  // --- Navigation ---
+
   prevStep(): void {
     this.currentStep.update(s => Math.max(0, s - 1));
     this.scrollContentToTop();
@@ -160,6 +234,8 @@ export class CreateProjectWizardDialogComponent {
   private scrollContentToTop(): void {
     this.wizardContent()?.nativeElement.scrollTo({ top: 0 });
   }
+
+  // --- Submit ---
 
   submit(): void {
     if (!this.canFinalize() || this.submitting()) return;

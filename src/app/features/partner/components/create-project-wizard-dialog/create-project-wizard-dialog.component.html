@@ -45,7 +45,12 @@
           <app-basic-info-step
             [data]="formData().basicInfo"
             [partnerMode]="true"
+            [schoolSuggestions]="schoolSuggestions()"
+            [schoolLoading]="schoolLoading()"
             (dataChange)="onBasicInfoChange($event)"
+            (schoolSearch)="onSchoolSearch($event)"
+            (schoolSelected)="onSchoolSelected($event)"
+            (addSchool)="openAddSchoolModal()"
           />
         }
         @case (2) {
@@ -110,3 +115,11 @@
     </div>
   </div>
 </app-dialog-wrapper>
+
+<!-- Új iskola modal -->
+@if (showAddSchoolModal()) {
+  <app-add-school-modal
+    (close)="closeAddSchoolModal()"
+    (schoolCreated)="onSchoolCreated($event)"
+  />
+}

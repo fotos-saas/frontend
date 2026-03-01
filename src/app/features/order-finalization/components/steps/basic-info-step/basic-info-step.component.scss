@@ -2,3 +2,42 @@
 // Import shared form element styles
 
 @import '../../../styles/form-elements';
+
+// Iskola keresés + Új iskola gomb elrendezés
+.school-field {
+  &__row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  &__autocomplete {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border: 2px solid get-color('primary', 400);
+    border-radius: 10px;
+    background: get-color('primary', 50);
+    color: get-color('primary', 600);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: get-color('primary', 100);
+      border-color: get-color('primary', 500);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}

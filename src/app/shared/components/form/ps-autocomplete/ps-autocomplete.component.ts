@@ -49,6 +49,7 @@ export class PsAutocompleteComponent extends PsFormFieldBase<string> implements 
   readonly allowFreeText = input(true);
 
   readonly search = output<string>();
+  readonly selected = output<PsSelectOption>();
 
   private readonly hostEl = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
@@ -108,6 +109,7 @@ export class PsAutocompleteComponent extends PsFormFieldBase<string> implements 
     this.value.set(option.label);
     this.onChange(option.label);
     this.onTouched();
+    this.selected.emit(option);
     this.close();
   }
 

@@ -69,10 +69,10 @@ function _getExistingSoSize(doc, groupPath) {
 }
 
 /**
- * Elso text layer keresese a megadott csoportban — referencia stilushoz es poziciohoz.
- * Visszaadja a layer stilusat (font, size, color, justification) es poziciojat (bounds).
+ * Elso text layer keresese a megadott csoportban — referencia stilushoz.
+ * Visszaadja a layer stilusat (font, size, color, justification).
  */
-function _getRefNameLayer(doc, groupPath) {
+function _getRefNameStyle(doc, groupPath) {
   var group = getGroupByPath(doc, groupPath);
   if (!group) return null;
   try {
@@ -85,14 +85,40 @@ function _getRefNameLayer(doc, groupPath) {
           font: ti.font,
           size: ti.size.as("pt"),
           color: { r: col.rgb.red, g: col.rgb.green, b: col.rgb.blue },
-          justification: ti.justification,
-          bounds: layer.bounds, // [x0, y0, x1, y1]
-          position: layer.bounds[0].as("px") + "," + layer.bounds[1].as("px")
+          justification: ti.justification
         };
       }
     }
   } catch (e) { /* ignore */ }
   return null;
+}
+
+/**
+ * Referencia gap merese: meglevo Image-Name par kozotti tavolsag (px).
+ * Az elso talalt Image layer aljatol az azonos nevu Name layer tetejeig meri.
+ */
+function _measureRefGap(doc, groupName) {
+  var imgGroup = getGroupByPath(doc, ["Images", groupName]);
+  var nameGroup = getGroupByPath(doc, ["Names", groupName]);
+  if (!imgGroup || !nameGroup) return -1;
+  try {
+    for (var i = 0; i < imgGroup.artLayers.length; i++) {
+      var imgLayer = imgGroup.artLayers[i];
+      var imgName = imgLayer.name;
+      // Keressuk az azonos nevu name layert
+      for (var j = 0; j < nameGroup.artLayers.length; j++) {
+        if (nameGroup.artLayers[j].name === imgName) {
+          var imgBounds = imgLayer.bounds;
+          var nameBounds = nameGroup.artLayers[j].bounds;
+          var imgBottom = imgBounds[3].as("px");
+          var nameTop = nameBounds[1].as("px");
+          var gap = nameTop - imgBottom;
+          if (gap >= 0) return gap;
+        }
+      }
+    }
+  } catch (e) { /* ignore */ }
+  return -1;
 }
 
 /**
@@ -131,28 +157,52 @@ function _doRefreshRoster() {
   // Alapertelmezett SO meret (9x13cm @ 339 DPI)
   var defaultSize = _data.imageSizePx || { widthPx: 1228, heightPx: 1819 };
 
-  // Referencia name layerek kiolvasasa csoportonkent (stilus + pozicio masolashoz)
-  var refNames = {};
-  refNames["Students"] = _getRefNameLayer(_doc, ["Names", "Students"]);
-  refNames["Teachers"] = _getRefNameLayer(_doc, ["Names", "Teachers"]);
+  // Referencia stilus es gap kiolvasasa csoportonkent
+  var refStyles = {};
+  refStyles["Students"] = _getRefNameStyle(_doc, ["Names", "Students"]);
+  refStyles["Teachers"] = _getRefNameStyle(_doc, ["Names", "Teachers"]);
+
+  var refGaps = {};
+  refGaps["Students"] = _measureRefGap(_doc, "Students");
+  refGaps["Teachers"] = _measureRefGap(_doc, "Teachers");
 
   for (var a = 0; a < _data.toAdd.length; a++) {
     var item = _data.toAdd[a];
     var groupName = item.group || "Students";
+    var newImageLayer = null;
 
-    // 2a. Name layer — meglevo stilust es poziciot masolja
+    // 2a. Image (SO placeholder) layer — ELOSZOR, hogy a Name layer poziciojat tudjuk szamolni
+    try {
+      var imagesGroup = getGroupByPath(_doc, ["Images", groupName]);
+      if (imagesGroup) {
+        var refSize = _getExistingSoSize(_doc, ["Images", groupName]) || defaultSize;
+        newImageLayer = createSmartObjectPlaceholder(_doc, imagesGroup, {
+          name: item.layerName,
+          widthPx: refSize.widthPx,
+          heightPx: refSize.heightPx
+        });
+        _addedImages++;
+      } else {
+        log("[JSX] FIGYELEM: Images/" + groupName + " csoport nem talalhato");
+      }
+    } catch (e) {
+      log("[JSX] HIBA image layer (" + item.layerName + "): " + e.message);
+      _errors++;
+    }
+
+    // 2b. Name layer — meglevo stilussal, a sajat Image layer ala pozicionalva
     try {
       var namesGroup = getGroupByPath(_doc, ["Names", groupName]);
       if (namesGroup) {
-        var ref = refNames[groupName];
+        var style = refStyles[groupName];
         var nameOpts;
-        if (ref) {
+        if (style) {
           nameOpts = {
             name: item.layerName,
-            font: ref.font,
-            size: ref.size,
-            color: ref.color,
-            alignment: _justificationToString(ref.justification)
+            font: style.font,
+            size: style.size,
+            color: style.color,
+            alignment: _justificationToString(style.justification)
           };
         } else {
           nameOpts = {
@@ -166,15 +216,40 @@ function _doRefreshRoster() {
 
         var newTextLayer = createTextLayer(namesGroup, item.displayText, nameOpts);
 
-        // Pozicio masolasa: a referencia layer poziciojara mozgatjuk
-        if (ref) {
-          var refX = ref.bounds[0].as("px");
-          var refY = ref.bounds[1].as("px");
-          var newBounds = newTextLayer.bounds;
-          var newX = newBounds[0].as("px");
-          var newY = newBounds[1].as("px");
-          var dx = new UnitValue(refX - newX, "px");
-          var dy = new UnitValue(refY - newY, "px");
+        // Pozicionalas: a sajat Image layer ala (ha letrejott)
+        if (newImageLayer) {
+          var imgBounds = newImageLayer.bounds;
+          var imgBottom = imgBounds[3].as("px");
+          var imgCenterX = (imgBounds[0].as("px") + imgBounds[2].as("px")) / 2;
+
+          // Gap: referencia parbol, vagy kep szelesseg 8%-a
+          var gap = refGaps[groupName];
+          if (gap < 0) {
+            gap = Math.round((imgBounds[2].as("px") - imgBounds[0].as("px")) * 0.08);
+          }
+
+          var targetNameY = imgBottom + gap;
+
+          // Name layer poziciojanak beallitasa
+          var nameBounds = newTextLayer.bounds;
+          var nameX = nameBounds[0].as("px");
+          var nameY = nameBounds[1].as("px");
+
+          // Vizszintes: a kep kozepere igazitjuk (justification alapjan)
+          var align = style ? _justificationToString(style.justification) : "center";
+          var targetX;
+          if (align === "left") {
+            targetX = imgBounds[0].as("px");
+          } else if (align === "right") {
+            targetX = imgBounds[2].as("px");
+          } else {
+            // Center: a nev kozepet a kep kozepere
+            var nameW = nameBounds[2].as("px") - nameBounds[0].as("px");
+            targetX = imgCenterX - nameW / 2;
+          }
+
+          var dx = new UnitValue(targetX - nameX, "px");
+          var dy = new UnitValue(targetNameY - nameY, "px");
           newTextLayer.translate(dx, dy);
         }
 
@@ -184,26 +259,6 @@ function _doRefreshRoster() {
       }
     } catch (e) {
       log("[JSX] HIBA name layer (" + item.displayText + "): " + e.message);
-      _errors++;
-    }
-
-    // 2b. Image (SO placeholder) layer
-    try {
-      var imagesGroup = getGroupByPath(_doc, ["Images", groupName]);
-      if (imagesGroup) {
-        // Meglevo layer meretbol indulunk ki
-        var refSize = _getExistingSoSize(_doc, ["Images", groupName]) || defaultSize;
-        createSmartObjectPlaceholder(_doc, imagesGroup, {
-          name: item.layerName,
-          widthPx: refSize.widthPx,
-          heightPx: refSize.heightPx
-        });
-        _addedImages++;
-      } else {
-        log("[JSX] FIGYELEM: Images/" + groupName + " csoport nem talalhato");
-      }
-    } catch (e) {
-      log("[JSX] HIBA image layer (" + item.layerName + "): " + e.message);
       _errors++;
     }
   }

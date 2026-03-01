@@ -55,8 +55,8 @@ export class PartnerProfileComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.profileForm.patchValue({
-            name: res.data.name,
-            email: res.data.email,
+            name: res.name,
+            email: res.email,
           });
           this.profileForm.markAsPristine();
           this.loading.set(false);
@@ -95,8 +95,8 @@ export class PartnerProfileComponent implements OnInit {
 
           // AuthService currentUser frissítése
           this.authService.updateCurrentUser({
-            name: res.data.name,
-            email: res.data.email,
+            name: res.name,
+            email: res.email,
           });
         },
         error: (err) => {

@@ -9,10 +9,6 @@ export interface ProfileData {
   phone?: string | null;
 }
 
-export interface ProfileResponse {
-  data: ProfileData;
-}
-
 export interface ChangePasswordPayload {
   current_password: string;
   password: string;
@@ -25,12 +21,12 @@ export interface ChangePasswordPayload {
 export class PartnerProfileService {
   private http = inject(HttpClient);
 
-  getProfile(): Observable<ProfileResponse> {
-    return this.http.get<ProfileResponse>(`${environment.apiUrl}/profile`);
+  getProfile(): Observable<ProfileData> {
+    return this.http.get<ProfileData>(`${environment.apiUrl}/profile`);
   }
 
-  updateProfile(data: Partial<ProfileData>): Observable<ProfileResponse> {
-    return this.http.put<ProfileResponse>(`${environment.apiUrl}/profile`, data);
+  updateProfile(data: Partial<ProfileData>): Observable<ProfileData> {
+    return this.http.put<ProfileData>(`${environment.apiUrl}/profile`, data);
   }
 
   changePassword(data: ChangePasswordPayload): Observable<{ message: string }> {

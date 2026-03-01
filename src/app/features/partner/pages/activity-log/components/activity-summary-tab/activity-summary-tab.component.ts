@@ -16,6 +16,7 @@ import {
   ProjectActivitySummary,
   ActivitySummaryFilters,
 } from '../../../../services/partner-activity.service';
+import { generateYearOptions, getCurrentGraduationYear } from '@shared/utils/year-options.util';
 
 @Component({
   selector: 'app-activity-summary-tab',
@@ -49,7 +50,15 @@ export class ActivitySummaryTabComponent implements OnInit {
     placeholder: 'Projekt keresése...',
   };
 
+  readonly yearOptions = generateYearOptions();
+
   readonly filterConfigs = signal<FilterConfig[]>([
+    {
+      id: 'graduation_year',
+      label: 'Évfolyam',
+      icon: 'calendar',
+      options: [{ value: '', label: 'Mind' }, ...this.yearOptions],
+    },
     {
       id: 'reviewed',
       label: 'Állapot',
@@ -72,7 +81,7 @@ export class ActivitySummaryTabComponent implements OnInit {
 
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'activity-summary' },
-    defaultFilters: { reviewed: '' },
+    defaultFilters: { reviewed: '', graduation_year: getCurrentGraduationYear().toString() },
     defaultSortBy: 'last_activity_at',
     defaultSortDir: 'desc',
     onStateChange: () => this.loadData(),
@@ -95,6 +104,7 @@ export class ActivitySummaryTabComponent implements OnInit {
     };
 
     if (this.filterState.search()) filters.search = this.filterState.search();
+    if (f['graduation_year']) filters.graduation_year = parseInt(f['graduation_year'], 10);
     if (f['reviewed']) filters.reviewed = f['reviewed'] as 'yes' | 'no';
 
     this.loadSub = this.activityService.getActivitySummary(filters)

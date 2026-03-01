@@ -46,6 +46,7 @@ export class DesignStepComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
+  readonly MAX_ATTACHMENTS = 5;
 
   /** Input: Design adatok */
   data = input.required<DesignData>();
@@ -174,6 +175,11 @@ export class DesignStepComponent implements OnInit {
   onAttachmentFileChange(files: File[]): void {
     const file = files[0];
     if (!file) return;
+
+    if (this.attachmentFileNames().length >= this.MAX_ATTACHMENTS) {
+      this.toastService.error('Limit', `Maximum ${this.MAX_ATTACHMENTS} csatolmány tölthető fel!`);
+      return;
+    }
 
     const upload$ = this.uploadAttachmentFn()
       ? this.uploadAttachmentFn()!(file)

@@ -92,7 +92,7 @@
         <div class="spinner spinner--small" aria-hidden="true"></div>
         <span>Feltöltés...</span>
       </div>
-    } @else {
+    } @else if (attachmentFileNames().length < MAX_ATTACHMENTS) {
       <ps-file-upload
         variant="mini"
         label="Csatolmányok (opcionális)"
@@ -100,10 +100,13 @@
         accept=".zip,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.txt,.csv,.jpg,.jpeg,.png,.bmp,.tif,.tiff"
         acceptLabel="Dokumentumok, képek, tömörített fájlok"
         [maxSizeMB]="64"
-        hint="PDF, DOC, XLSX, JPG, ZIP stb. max. 64MB"
+        [hint]="'PDF, DOC, XLSX, JPG, ZIP stb. max. 64MB (' + attachmentFileNames().length + '/' + MAX_ATTACHMENTS + ')'"
         [ngModel]="[]"
         (ngModelChange)="onAttachmentFileChange($event)"
       />
+    } @else {
+      <div class="form-label">Csatolmányok (opcionális)</div>
+      <div class="form-hint">Maximum {{ MAX_ATTACHMENTS }} csatolmány feltöltve</div>
     }
     @if (attachmentFileNames().length > 0) {
       <div class="file-list" role="list" aria-label="Feltöltött csatolmányok">

@@ -214,10 +214,11 @@ export class PartnerShellComponent implements OnInit {
         id: 'prepayment',
         label: 'Előlegfizetés',
         icon: 'banknote',
+        devBadge: true,
         children: [
-          { id: 'prepayment-list', route: `${base}/prepayment`, label: 'Előlegek' },
-          { id: 'prepayment-settings', route: `${base}/prepayment/settings`, label: 'Beállítások' },
-          { id: 'prepayment-stats', route: `${base}/prepayment/stats`, label: 'Statisztikák' },
+          { id: 'prepayment-list', route: `${base}/prepayment`, label: 'Előlegek', devBadge: true },
+          { id: 'prepayment-settings', route: `${base}/prepayment/settings`, label: 'Beállítások', devBadge: true },
+          { id: 'prepayment-stats', route: `${base}/prepayment/stats`, label: 'Statisztikák', devBadge: true },
         ]
       },
       {

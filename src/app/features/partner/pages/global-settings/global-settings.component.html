@@ -253,6 +253,33 @@
 
     </div>
 
+    <!-- Projekt létrehozás mód -->
+    <div class="settings-section">
+      <div class="section-title">
+        <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        <h2>Projekt létrehozás</h2>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Létrehozás módja</span>
+            <span class="setting-description">
+              Egyszerű módban egy gyors modal jelenik meg. Varázsló módban 4 lépéses
+              részletes űrlap (kapcsolattartó, alap adatok, elképzelés, névsor).
+            </span>
+          </div>
+          <div class="setting-control">
+            <ps-toggle
+              [label]="projectCreationMode() === 'wizard' ? 'Varázsló' : 'Egyszerű'"
+              [ngModel]="projectCreationMode() === 'wizard'"
+              (ngModelChange)="projectCreationMode.set($event ? 'wizard' : 'simple')"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="action-row">
       <button
         class="save-btn"

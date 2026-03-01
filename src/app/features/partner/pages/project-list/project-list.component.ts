@@ -20,6 +20,7 @@ import { LinkPreliminaryDialogComponent } from '../../components/link-preliminar
 import { ProjectCardComponent } from '../../components/project-card/project-card.component';
 import { PersonsModalComponent } from '../../components/persons-modal';
 import { CreateProjectModalComponent } from '../../components/create-project-modal/create-project-modal.component';
+import { CreateProjectWizardDialogComponent } from '../../components/create-project-wizard-dialog/create-project-wizard-dialog.component';
 import { SharedQrCodeModalComponent } from '../../../../shared/components/qr-code-modal/qr-code-modal.component';
 import { IQrCodeService } from '../../../../shared/interfaces/qr-code.interface';
 import { PhotoUploadWizardComponent } from '../../components/photo-upload-wizard/photo-upload-wizard/photo-upload-wizard.component';
@@ -48,6 +49,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     ProjectCardComponent,
     PersonsModalComponent,
     CreateProjectModalComponent,
+    CreateProjectWizardDialogComponent,
     SharedQrCodeModalComponent,
     PhotoUploadWizardComponent,
     SamplesLightboxComponent,
@@ -179,6 +181,10 @@ export class PartnerProjectListComponent implements OnInit {
     options: this.sortOptions,
   };
 
+  // Projekt létrehozás módja
+  projectCreationMode = signal<'simple' | 'wizard'>('simple');
+  showCreateWizard = signal(false);
+
   // Modals
   showMissingModal = signal(false);
   showCreateModal = signal(false);
@@ -265,6 +271,17 @@ export class PartnerProjectListComponent implements OnInit {
     this.loadProjects();
     this.checkSyncInBackground();
     this.loadTagsForFilter();
+    this.loadProjectCreationMode();
+  }
+
+  private loadProjectCreationMode(): void {
+    this.partnerService.getGlobalSettings()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.projectCreationMode.set(res.data.project_creation_mode ?? 'simple');
+        },
+      });
   }
 
   private loadTagsForFilter(): void {
@@ -427,15 +444,24 @@ export class PartnerProjectListComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    this.showCreateModal.set(true);
+    if (this.projectCreationMode() === 'wizard') {
+      this.showCreateWizard.set(true);
+    } else {
+      this.showCreateModal.set(true);
+    }
   }
 
   closeCreateModal(): void {
     this.showCreateModal.set(false);
   }
 
+  closeCreateWizard(): void {
+    this.showCreateWizard.set(false);
+  }
+
   onProjectCreated(project: PartnerProjectListItem): void {
     this.closeCreateModal();
+    this.closeCreateWizard();
     this.loadProjects();
   }
 

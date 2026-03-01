@@ -100,6 +100,10 @@ export class PartnerService {
     return this.projectService.createProject(data);
   }
 
+  createProjectWithWizard(data: Parameters<PartnerProjectService['createProjectWithWizard']>[0]): Observable<{ success: boolean; message: string; data: PartnerProjectListItem }> {
+    return this.projectService.createProjectWithWizard(data);
+  }
+
   updateProject(projectId: number, data: Partial<CreateProjectRequest> & { status?: string }): Observable<{
     success: boolean;
     message: string;

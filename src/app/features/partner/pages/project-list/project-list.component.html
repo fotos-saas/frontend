@@ -228,10 +228,18 @@
   />
 }
 
-<!-- Create Project Modal -->
+<!-- Create Project Modal (egyszerű mód) -->
 @if (showCreateModal()) {
   <app-create-project-modal
     (close)="closeCreateModal()"
+    (projectCreated)="onProjectCreated($event)"
+  />
+}
+
+<!-- Create Project Wizard (varázsló mód) -->
+@if (showCreateWizard()) {
+  <app-create-project-wizard-dialog
+    (close)="closeCreateWizard()"
     (projectCreated)="onProjectCreated($event)"
   />
 }

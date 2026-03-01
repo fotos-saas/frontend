@@ -528,6 +528,7 @@ export class PartnerProjectService {
       default_zip_content: string;
       default_file_naming: string;
       export_always_ask: boolean;
+      project_creation_mode: 'simple' | 'wizard';
     };
   }> {
     return this.http.get<{
@@ -538,6 +539,7 @@ export class PartnerProjectService {
         default_zip_content: string;
         default_file_naming: string;
         export_always_ask: boolean;
+        project_creation_mode: 'simple' | 'wizard';
       };
     }>(`${this.baseUrl}/settings`);
   }
@@ -552,6 +554,7 @@ export class PartnerProjectService {
     default_zip_content?: string;
     default_file_naming?: string;
     export_always_ask?: boolean;
+    project_creation_mode?: 'simple' | 'wizard';
   }): Observable<{
     success: boolean;
     message: string;
@@ -562,6 +565,7 @@ export class PartnerProjectService {
       default_zip_content: string;
       default_file_naming: string;
       export_always_ask: boolean;
+      project_creation_mode: 'simple' | 'wizard';
     };
   }> {
     return this.http.put<{
@@ -574,8 +578,39 @@ export class PartnerProjectService {
         default_zip_content: string;
         default_file_naming: string;
         export_always_ask: boolean;
+        project_creation_mode: 'simple' | 'wizard';
       };
     }>(`${this.baseUrl}/settings`, data);
+  }
+
+  /**
+   * Projekt létrehozása wizard módban
+   */
+  createProjectWithWizard(data: {
+    contact_name: string;
+    contact_email: string;
+    contact_phone?: string;
+    school_name: string;
+    city?: string;
+    class_name: string;
+    class_year: string;
+    quote?: string;
+    font_family?: string;
+    font_color?: string;
+    description?: string;
+    sort_type?: string;
+    student_roster?: string;
+    teacher_roster?: string;
+  }): Observable<{
+    success: boolean;
+    message: string;
+    data: PartnerProjectListItem;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: PartnerProjectListItem;
+    }>(`${this.baseUrl}/projects/wizard`, data);
   }
 
 }

@@ -45,6 +45,7 @@ export class GlobalSettingsComponent implements OnInit {
   defaultZipContent = signal('all');
   defaultFileNaming = signal('original');
   exportAlwaysAsk = signal(true);
+  projectCreationMode = signal<'simple' | 'wizard'>('simple');
   // Tablóméretek
   tabloSizes = signal<TabloSize[]>([]);
   defaultTabloSizes = signal<TabloSize[]>([]);
@@ -70,6 +71,7 @@ export class GlobalSettingsComponent implements OnInit {
         this.defaultZipContent.set(res.data.default_zip_content ?? 'all');
         this.defaultFileNaming.set(res.data.default_file_naming ?? 'original');
         this.exportAlwaysAsk.set(res.data.export_always_ask ?? true);
+        this.projectCreationMode.set(res.data.project_creation_mode ?? 'simple');
         this.loading.set(false);
       },
       error: () => {
@@ -162,6 +164,7 @@ export class GlobalSettingsComponent implements OnInit {
       default_zip_content: this.defaultZipContent(),
       default_file_naming: this.defaultFileNaming(),
       export_always_ask: this.exportAlwaysAsk(),
+      project_creation_mode: this.projectCreationMode(),
     }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -173,6 +176,7 @@ export class GlobalSettingsComponent implements OnInit {
         this.defaultZipContent.set(res.data.default_zip_content ?? 'all');
         this.defaultFileNaming.set(res.data.default_file_naming ?? 'original');
         this.exportAlwaysAsk.set(res.data.export_always_ask ?? true);
+        this.projectCreationMode.set(res.data.project_creation_mode ?? 'simple');
         this.toast.success('Siker', 'Beállítások mentve');
       },
       error: () => {

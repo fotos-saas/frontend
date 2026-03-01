@@ -279,6 +279,63 @@ $blue-600: get-color('primary', 600);
   margin: 0.25rem;
 }
 
+// Attachments
+.order-dialog__attachments {
+  display: flex;
+  flex-direction: column;
+
+  > .order-dialog__attachment + .order-dialog__attachment {
+    margin-top: 0.5rem;
+  }
+}
+
+.order-dialog__attachment {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+
+  > lucide-icon {
+    color: get-color('slate', 500);
+    flex-shrink: 0;
+  }
+}
+
+.order-dialog__attachment-name {
+  font-size: 0.85rem;
+  color: get-color('slate', 700);
+  margin-left: 0.5rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-dialog__attachment-btn {
+  display: inline-flex;
+  align-items: center;
+  background: get-color('primary', 100);
+  color: get-color('primary', 700);
+  border: none;
+  border-radius: 6px;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+  transition: background 0.15s;
+
+  lucide-icon {
+    margin-right: 0.25rem;
+  }
+
+  &:hover {
+    background: get-color('primary', 200);
+  }
+}
+
 // Summary
 .order-dialog__summary {
   color: get-color('slate', 600);

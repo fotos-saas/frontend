@@ -108,4 +108,14 @@ export class OrderDataDialogComponent implements OnInit {
   get hasTags(): boolean {
     return !!this.orderData?.tags && this.orderData.tags.length > 0;
   }
+
+  get hasAttachments(): boolean {
+    return !!this.orderData?.backgroundUrl || (this.orderData?.otherFiles?.length ?? 0) > 0;
+  }
+
+  downloadFile(url: string): void {
+    if (isSecureUrl(url)) {
+      openSecureUrl(url);
+    }
+  }
 }

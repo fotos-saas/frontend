@@ -216,6 +216,35 @@
             <p class="order-dialog__summary">{{ orderData.aiSummary }}</p>
           </section>
         }
+
+        <!-- Csatolmányok -->
+        @if (hasAttachments) {
+          <section class="order-dialog__section">
+            <h3 class="order-dialog__section-title">Csatolmányok</h3>
+            <div class="order-dialog__attachments">
+              @if (orderData.backgroundUrl) {
+                <div class="order-dialog__attachment">
+                  <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+                  <span class="order-dialog__attachment-name">Háttérkép</span>
+                  <button class="order-dialog__attachment-btn" (click)="downloadFile(orderData.backgroundUrl!)">
+                    <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+                    Letöltés
+                  </button>
+                </div>
+              }
+              @for (file of orderData.otherFiles; track file.url) {
+                <div class="order-dialog__attachment">
+                  <lucide-icon [name]="ICONS.PAPERCLIP" [size]="16" />
+                  <span class="order-dialog__attachment-name">{{ file.filename }}</span>
+                  <button class="order-dialog__attachment-btn" (click)="downloadFile(file.url)">
+                    <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+                    Letöltés
+                  </button>
+                </div>
+              }
+            </div>
+          </section>
+        }
       </div>
     }
     }

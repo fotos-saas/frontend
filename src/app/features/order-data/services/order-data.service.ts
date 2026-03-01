@@ -40,6 +40,10 @@ export interface OrderData {
   // PDF
   pdfUrl: string | null;
 
+  // Csatolmányok
+  otherFiles: { filename: string; url: string }[];
+  backgroundUrl: string | null;
+
   // Dátum
   orderDate: string | null;
 }

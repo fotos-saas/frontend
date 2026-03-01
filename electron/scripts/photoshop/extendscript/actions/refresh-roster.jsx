@@ -48,10 +48,10 @@ function _removeLayerFromGroup(doc, groupPath, layerName) {
 }
 
 /**
- * Meglevo SO layerek mereteit kiolvassa a megadott csoportbol.
+ * Meglevo SO layerek mereteit ES poziciojat kiolvassa a megadott csoportbol.
  * Az elso talalt layer bounds-ait hasznalja referenciaként.
  */
-function _getExistingSoSize(doc, groupPath) {
+function _getExistingSoRef(doc, groupPath) {
   var group = getGroupByPath(doc, groupPath);
   if (!group) return null;
   try {
@@ -61,7 +61,12 @@ function _getExistingSoSize(doc, groupPath) {
       var w = Math.round(bounds[2].as("px") - bounds[0].as("px"));
       var h = Math.round(bounds[3].as("px") - bounds[1].as("px"));
       if (w > 10 && h > 10) {
-        return { widthPx: w, heightPx: h };
+        return {
+          widthPx: w,
+          heightPx: h,
+          x: bounds[0].as("px"),
+          y: bounds[1].as("px")
+        };
       }
     }
   } catch (e) { /* ignore */ }
@@ -175,12 +180,22 @@ function _doRefreshRoster() {
     try {
       var imagesGroup = getGroupByPath(_doc, ["Images", groupName]);
       if (imagesGroup) {
-        var refSize = _getExistingSoSize(_doc, ["Images", groupName]) || defaultSize;
+        var soRef = _getExistingSoRef(_doc, ["Images", groupName]) || defaultSize;
         newImageLayer = createSmartObjectPlaceholder(_doc, imagesGroup, {
           name: item.layerName,
-          widthPx: refSize.widthPx,
-          heightPx: refSize.heightPx
+          widthPx: soRef.widthPx,
+          heightPx: soRef.heightPx
         });
+
+        // SO a [0,0]-ra jon letre — athelyezes a referencia layer poziciojara
+        if (soRef.x !== undefined) {
+          _doc.activeLayer = newImageLayer;
+          newImageLayer.translate(
+            new UnitValue(soRef.x, "px"),
+            new UnitValue(soRef.y, "px")
+          );
+        }
+
         _addedImages++;
       } else {
         log("[JSX] FIGYELEM: Images/" + groupName + " csoport nem talalhato");

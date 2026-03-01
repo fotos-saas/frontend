@@ -103,7 +103,9 @@ export class PartnerSwitcherDropdownComponent implements OnInit {
           sessionStorage.setItem('marketer_token', response.token);
           sessionStorage.setItem('marketer_user', JSON.stringify(response.user));
           this.partnerSwitched.emit();
-          window.location.reload();
+          // Hard reload: cache-bust-tal, hogy a régi partner adatok ne maradjanak
+          const base = window.location.pathname;
+          window.location.href = `${base}?_sw=${Date.now()}`;
         },
         error: () => {
           this.switching.set(false);

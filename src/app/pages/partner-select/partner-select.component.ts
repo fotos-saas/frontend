@@ -86,8 +86,8 @@ export class PartnerSelectComponent implements OnInit {
           sessionStorage.setItem('marketer_token', response.token);
           sessionStorage.setItem('marketer_user', JSON.stringify(response.user));
 
-          // Full reload a kontextus frissítéséhez
-          window.location.href = '/partner/dashboard';
+          // Hard reload cache-bust-tal, hogy a régi partner adatok ne maradjanak
+          window.location.href = `/partner/dashboard?_sw=${Date.now()}`;
         },
         error: (err: Error) => {
           this.switching.set(false);

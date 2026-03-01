@@ -173,28 +173,30 @@ export class PartnerShellComponent implements OnInit {
         ]
       },
       { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
-      { id: 'quotes', route: `${base}/quotes`, label: 'Árajánlatok', icon: 'file-text' },
+      { id: 'quotes', route: `${base}/quotes`, label: 'Árajánlatok', icon: 'file-text', devBadge: true },
       {
         id: 'booking',
         label: 'Naptar',
         icon: 'calendar',
+        devBadge: true,
         children: [
-          { id: 'booking-calendar', route: `${base}/booking/calendar`, label: 'Naptar' },
-          { id: 'booking-list', route: `${base}/booking/bookings`, label: 'Foglalasok' },
-          { id: 'booking-types', route: `${base}/booking/session-types`, label: 'Fotozasi tipusok' },
-          { id: 'booking-availability', route: `${base}/booking/availability`, label: 'Elerhetoseg' },
-          { id: 'booking-import', route: `${base}/booking/batch-import`, label: 'CSV Import' },
-          { id: 'booking-page', route: `${base}/booking/page-settings`, label: 'Foglalasi oldal' },
-          { id: 'booking-stats', route: `${base}/booking/stats`, label: 'Statisztikak' },
+          { id: 'booking-calendar', route: `${base}/booking/calendar`, label: 'Naptar', devBadge: true },
+          { id: 'booking-list', route: `${base}/booking/bookings`, label: 'Foglalasok', devBadge: true },
+          { id: 'booking-types', route: `${base}/booking/session-types`, label: 'Fotozasi tipusok', devBadge: true },
+          { id: 'booking-availability', route: `${base}/booking/availability`, label: 'Elerhetoseg', devBadge: true },
+          { id: 'booking-import', route: `${base}/booking/batch-import`, label: 'CSV Import', devBadge: true },
+          { id: 'booking-page', route: `${base}/booking/page-settings`, label: 'Foglalasi oldal', devBadge: true },
+          { id: 'booking-stats', route: `${base}/booking/stats`, label: 'Statisztikak', devBadge: true },
         ]
       },
       {
         id: 'workflows',
         label: 'Előkészítő',
         icon: 'workflow',
+        devBadge: true,
         children: [
-          { id: 'workflow-list', route: `${base}/workflows`, label: 'Munkafolyamatok', badge: this.pendingApprovalCount() || undefined },
-          { id: 'workflow-settings', route: `${base}/workflows/settings`, label: 'Ütemezés' },
+          { id: 'workflow-list', route: `${base}/workflows`, label: 'Munkafolyamatok', badge: this.pendingApprovalCount() || undefined, devBadge: true },
+          { id: 'workflow-settings', route: `${base}/workflows/settings`, label: 'Ütemezés', devBadge: true },
         ]
       },
       { id: 'team', route: `${base}/team`, label: 'Csapatom', icon: 'user-plus' },

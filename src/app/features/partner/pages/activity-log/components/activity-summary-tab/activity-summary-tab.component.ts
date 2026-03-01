@@ -16,6 +16,7 @@ import {
   ProjectActivitySummary,
   ActivitySummaryFilters,
 } from '../../../../services/partner-activity.service';
+import { TeamService } from '../../../../services/team.service';
 import { generateYearOptions, getCurrentGraduationYear } from '@shared/utils/year-options.util';
 
 @Component({
@@ -28,6 +29,7 @@ import { generateYearOptions, getCurrentGraduationYear } from '@shared/utils/yea
 })
 export class ActivitySummaryTabComponent implements OnInit {
   private activityService = inject(PartnerActivityService);
+  private teamService = inject(TeamService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   readonly ICONS = ICONS;
@@ -60,6 +62,12 @@ export class ActivitySummaryTabComponent implements OnInit {
       options: [{ value: '', label: 'Mind' }, ...this.yearOptions],
     },
     {
+      id: 'causer_id',
+      label: 'Felhasználó',
+      icon: 'user',
+      options: [{ value: '', label: 'Mindenki' }],
+    },
+    {
       id: 'reviewed',
       label: 'Állapot',
       icon: 'check-circle',
@@ -81,14 +89,33 @@ export class ActivitySummaryTabComponent implements OnInit {
 
   readonly filterState = useFilterState({
     context: { type: 'partner', page: 'activity-summary' },
-    defaultFilters: { reviewed: '', graduation_year: getCurrentGraduationYear().toString() },
+    defaultFilters: { reviewed: '', graduation_year: getCurrentGraduationYear().toString(), causer_id: '' },
     defaultSortBy: 'last_activity_at',
     defaultSortDir: 'desc',
     onStateChange: () => this.loadData(),
   });
 
   ngOnInit(): void {
+    this.loadTeamMembers();
     this.loadData();
+  }
+
+  private loadTeamMembers(): void {
+    this.teamService.getTeam()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          const memberOptions = res.members.map(m => ({
+            value: String(m.userId),
+            label: m.name,
+          }));
+          this.filterConfigs.update(configs => configs.map(c =>
+            c.id === 'causer_id'
+              ? { ...c, options: [{ value: '', label: 'Mindenki' }, ...memberOptions] }
+              : c,
+          ));
+        },
+      });
   }
 
   loadData(): void {
@@ -105,6 +132,7 @@ export class ActivitySummaryTabComponent implements OnInit {
 
     if (this.filterState.search()) filters.search = this.filterState.search();
     if (f['graduation_year']) filters.graduation_year = parseInt(f['graduation_year'], 10);
+    if (f['causer_id']) filters.causer_id = parseInt(f['causer_id'], 10);
     if (f['reviewed']) filters.reviewed = f['reviewed'] as 'yes' | 'no';
 
     this.loadSub = this.activityService.getActivitySummary(filters)

@@ -85,6 +85,7 @@ export interface ActivitySummaryResponse {
 export interface ActivitySummaryFilters {
   search?: string;
   graduation_year?: number;
+  causer_id?: number;
   date_from?: string;
   date_to?: string;
   reviewed?: 'yes' | 'no' | '';

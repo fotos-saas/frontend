@@ -149,10 +149,7 @@ export class OrderValidationService {
       errors.push({ field: 'email', message: 'Kérlek, adj meg egy érvényes email címet' });
     }
 
-    // Telefon opcionális, de ha meg van adva, valid kell legyen
-    if (this.isNotEmpty(data.phone) && !this.isValidPhone(data.phone)) {
-      errors.push({ field: 'phone', message: 'Kérlek, adj meg egy érvényes magyar telefonszámot (pl. +36 30 123 4567)' });
-    }
+    // Telefon opcionális partner módban — backend validálja submit-kor
 
     return {
       valid: errors.length === 0,

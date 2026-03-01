@@ -240,9 +240,9 @@ export class PartnerShellComponent implements OnInit {
           { id: 'subscription-overview', route: `${base}/subscription/overview`, label: 'Előfizetés' },
           { id: 'subscription-invoices', route: `${base}/subscription/invoices`, label: 'Számlák' },
           { id: 'subscription-addons', route: `${base}/subscription/addons`, label: 'Kiegészítők' },
-          { id: 'subscription-marketplace', route: `${base}/subscription/marketplace`, label: 'Marketplace' },
-          { id: 'subscription-usage', route: `${base}/subscription/marketplace/usage`, label: 'Használat' },
-          { id: 'subscription-pause', route: `${base}/subscription/pause`, label: 'Szüneteltetés' },
+          { id: 'subscription-marketplace', route: `${base}/subscription/marketplace`, label: 'Marketplace', devBadge: true },
+          { id: 'subscription-usage', route: `${base}/subscription/marketplace/usage`, label: 'Használat', devBadge: true },
+          { id: 'subscription-pause', route: `${base}/subscription/pause`, label: 'Szüneteltetés', devBadge: true },
           { id: 'subscription-account', route: `${base}/subscription/account`, label: 'Fiók törlése' },
         ]
       },

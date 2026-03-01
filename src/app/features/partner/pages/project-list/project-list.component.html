@@ -9,38 +9,40 @@
       </p>
     </div>
     <div class="header-actions">
-      <button
-        type="button"
-        class="btn-secondary btn-with-badge"
-        [disabled]="syncing()"
-        (click)="triggerSync()"
-        [matTooltip]="pendingSyncCount() !== null && pendingSyncCount()! > 0
-          ? pendingSyncCount() + ' új projekt szinkronizálható'
-          : 'Megrendeléses projektek szinkronizálása a régi rendszerből'"
-      >
-        @if (syncing()) {
-          <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-        } @else {
-          <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
-        }
-        @if (pendingSyncCount() !== null && pendingSyncCount()! > 0) {
-          Szinkronizálás indítása
-          <span class="btn-badge">{{ pendingSyncCount() }}</span>
-        } @else {
-          Szinkronizálás
-        }
-      </button>
-      <button
-        type="button"
-        class="btn-secondary btn-with-badge"
-        (click)="openCreatePreliminaryModal()"
-      >
-        <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
-        Új előzetes
-        @if (projectLimits()?.preliminary_count) {
-          <span class="btn-badge">{{ projectLimits()!.preliminary_count }}</span>
-        }
-      </button>
+      @if (isDevPartner()) {
+        <button
+          type="button"
+          class="btn-secondary btn-with-badge"
+          [disabled]="syncing()"
+          (click)="triggerSync()"
+          [matTooltip]="pendingSyncCount() !== null && pendingSyncCount()! > 0
+            ? pendingSyncCount() + ' új projekt szinkronizálható'
+            : 'Megrendeléses projektek szinkronizálása a régi rendszerből'"
+        >
+          @if (syncing()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+          } @else {
+            <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
+          }
+          @if (pendingSyncCount() !== null && pendingSyncCount()! > 0) {
+            Szinkronizálás indítása
+            <span class="btn-badge">{{ pendingSyncCount() }}</span>
+          } @else {
+            Szinkronizálás
+          }
+        </button>
+        <button
+          type="button"
+          class="btn-secondary btn-with-badge"
+          (click)="openCreatePreliminaryModal()"
+        >
+          <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
+          Új előzetes
+          @if (projectLimits()?.preliminary_count) {
+            <span class="btn-badge">{{ projectLimits()!.preliminary_count }}</span>
+          }
+        </button>
+      }
       <button
         type="button"
         class="btn-primary"

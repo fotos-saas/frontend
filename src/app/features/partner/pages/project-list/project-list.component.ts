@@ -12,6 +12,7 @@ import { PsdStatusService } from '../../services/psd-status.service';
 import { BatchWorkspaceService } from '../../services/batch-workspace.service';
 import { BatchWorkflowType } from '../../models/batch.types';
 import { ElectronService } from '../../../../core/services/electron.service';
+import { AuthService } from '@core/services/auth.service';
 import { PartnerPreliminaryService } from '../../services/partner-preliminary.service';
 import { PartnerOrderSyncService } from '../../services/partner-order-sync.service';
 import { CreatePreliminaryModalComponent } from '../../components/create-preliminary-modal/create-preliminary-modal.component';
@@ -73,8 +74,10 @@ export class PartnerProjectListComponent implements OnInit {
   private readonly psdStatusService = inject(PsdStatusService);
   private readonly batchWorkspaceService = inject(BatchWorkspaceService);
   private readonly electronService = inject(ElectronService);
+  private readonly authService = inject(AuthService);
 
   readonly ICONS = ICONS;
+  readonly isDevPartner = computed(() => this.authService.currentUserSignal()?.partner_id === 24);
   readonly isElectron = this.electronService.isElectron;
 
   readonly tableCols: TableColumn[] = [

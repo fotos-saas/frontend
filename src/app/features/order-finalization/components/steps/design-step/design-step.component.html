@@ -97,10 +97,10 @@
         variant="mini"
         label="Csatolmányok (opcionális)"
         [multiple]="false"
-        accept=".zip,.rar,.7z"
-        acceptLabel="ZIP, RAR, 7Z"
+        accept=".zip,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.txt,.csv,.jpg,.jpeg,.png,.bmp,.tif,.tiff"
+        acceptLabel="Dokumentumok, képek, tömörített fájlok"
         [maxSizeMB]="64"
-        hint="ZIP, RAR vagy 7Z, max. 64MB"
+        hint="PDF, DOC, XLSX, JPG, ZIP stb. max. 64MB"
         [ngModel]="[]"
         (ngModelChange)="onAttachmentFileChange($event)"
       />

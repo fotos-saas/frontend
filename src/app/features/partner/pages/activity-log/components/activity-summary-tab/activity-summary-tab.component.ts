@@ -177,18 +177,24 @@ export class ActivitySummaryTabComponent implements OnInit {
   markReviewed(ids: number[]): void {
     this.activityService.toggleProjectReview(ids, true)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.selectedIds.set(new Set());
-        this.loadData();
+      .subscribe({
+        next: () => {
+          this.selectedIds.set(new Set());
+          this.loadData();
+        },
+        error: (err) => console.error('[ActivitySummary] markReviewed hiba:', err),
       });
   }
 
   unmarkReviewed(ids: number[]): void {
     this.activityService.toggleProjectReview(ids, false)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.selectedIds.set(new Set());
-        this.loadData();
+      .subscribe({
+        next: () => {
+          this.selectedIds.set(new Set());
+          this.loadData();
+        },
+        error: (err) => console.error('[ActivitySummary] unmarkReviewed hiba:', err),
       });
   }
 

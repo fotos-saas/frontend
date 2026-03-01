@@ -173,35 +173,42 @@ export class DesignStepComponent implements OnInit {
    * Csatolmány feltöltése (ps-file-upload-ból)
    */
   onAttachmentFileChange(files: File[]): void {
-    const file = files[0];
-    if (!file) return;
+    if (!files.length) return;
 
-    if (this.attachmentFileNames().length >= this.MAX_ATTACHMENTS) {
+    const remaining = this.MAX_ATTACHMENTS - this.attachmentFileNames().length;
+    if (remaining <= 0) {
       this.toastService.error('Limit', `Maximum ${this.MAX_ATTACHMENTS} csatolmány tölthető fel!`);
       return;
     }
 
-    const upload$ = this.uploadAttachmentFn()
-      ? this.uploadAttachmentFn()!(file)
-      : this.fileUploadService.uploadAttachment(file);
+    const filesToUpload = files.slice(0, remaining);
+    if (filesToUpload.length < files.length) {
+      this.toastService.warning('Figyelem', `Csak ${remaining} csatolmány fér még, ${files.length - filesToUpload.length} fájl kihagyva.`);
+    }
 
-    upload$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.dataChange.emit({
-              ...this.data(),
-              attachmentIds: [...this.data().attachmentIds, response.fileId]
-            });
-            this.attachmentFileNamesChange.emit([
-              ...this.attachmentFileNames(),
-              response.filename
-            ]);
-            this.toastService.success('Siker', 'Csatolmány sikeresen feltöltve!');
+    for (const file of filesToUpload) {
+      const upload$ = this.uploadAttachmentFn()
+        ? this.uploadAttachmentFn()!(file)
+        : this.fileUploadService.uploadAttachment(file);
+
+      upload$
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.dataChange.emit({
+                ...this.data(),
+                attachmentIds: [...this.data().attachmentIds, response.fileId]
+              });
+              this.attachmentFileNamesChange.emit([
+                ...this.attachmentFileNames(),
+                response.filename
+              ]);
+              this.toastService.success('Siker', 'Csatolmány sikeresen feltöltve!');
+            }
           }
-        }
-      });
+        });
+    }
   }
 
   /**

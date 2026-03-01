@@ -81,6 +81,7 @@ export class TopBarComponent {
   readonly externalUserInfo = input<{ name: string; email?: string } | null>(null);
   readonly homeRoute = input<string>('/home');
   readonly useExternalLogout = input<boolean>(false);
+  readonly profileRoute = input<string | null>(null);
   readonly showPartnerSwitcher = input<boolean>(false);
   readonly currentPartnerId = input<number | null>(null);
 

@@ -317,6 +317,17 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Profil adatok frissítése (név, email) — signal + sessionStorage
+   */
+  updateCurrentUser(data: { name: string; email: string }): void {
+    const current = this.getCurrentUser();
+    if (!current) return;
+    const updated = { ...current, name: data.name, email: data.email };
+    this._currentUser.set(updated);
+    sessionStorage.setItem('marketer_user', JSON.stringify(updated));
+  }
+
   initializeMarketerSession(): boolean {
     const result = this.sessionService.initializeMarketerSession();
     if (result.success && result.user) {

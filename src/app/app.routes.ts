@@ -178,6 +178,11 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
+        path: 'profile',
+        loadComponent: () => import('./features/partner/pages/partner-profile/partner-profile.component').then(m => m.PartnerProfileComponent),
+        title: 'Fiókom'
+      },
+      {
         path: 'dashboard',
         loadComponent: () => import('./features/partner/pages/dashboard/dashboard.component').then(m => m.PartnerDashboardComponent)
       },
@@ -512,6 +517,11 @@ export const routes: Routes = [
     canActivate: [partnerGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'profile',
+        loadComponent: () => import('./features/partner/pages/partner-profile/partner-profile.component').then(m => m.PartnerProfileComponent),
+        title: 'Fiókom'
+      },
       {
         path: 'dashboard',
         loadComponent: () => import('./features/partner/pages/dashboard/dashboard.component').then(m => m.PartnerDashboardComponent)

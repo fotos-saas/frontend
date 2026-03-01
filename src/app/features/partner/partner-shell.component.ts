@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit, DestroyRef, ElementRef } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit, DestroyRef, ElementRef, effect } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
 import { NgClass } from '@angular/common';
 import { Router, RouterModule, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
@@ -252,6 +252,7 @@ export class PartnerShellComponent implements OnInit {
         label: 'Beállítások',
         icon: 'settings',
         children: [
+          { id: 'profile', route: `${base}/profile`, label: 'Fiókom' },
           { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere', visible: () => this.electronService.isElectron },
           { id: 'billing', route: `${base}/settings/billing`, label: 'Számlázás és fizetés', devBadge: true },
           { id: 'email-account', route: `${base}/settings/email-account`, label: 'E-mail fiók' },
@@ -273,6 +274,7 @@ export class PartnerShellComponent implements OnInit {
             label: 'Beállítások',
             icon: 'settings',
             children: [
+              { id: 'profile', route: `${base}/profile`, label: 'Fiókom' },
               { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
               { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere', visible: () => this.electronService.isElectron },
             ]
@@ -321,6 +323,7 @@ export class PartnerShellComponent implements OnInit {
     '/subscription': 'subscription',
     '/customization': 'customization',
     '/settings': 'partner-settings',
+    '/profile': 'partner-settings',
     '/webshop': 'webshop',
     '/prepayment': 'prepayment',
     '/booking': 'booking',
@@ -361,6 +364,15 @@ export class PartnerShellComponent implements OnInit {
       this.userEmail.set(user.email ?? '');
       // userRoles már inicializálva van a deklarációnál
     }
+
+    // Profil módosítás után frissíti a top-bar megjelenítést
+    effect(() => {
+      const currentUser = this.authService.currentUserSignal();
+      if (currentUser) {
+        this.userName.set(currentUser.name);
+        this.userEmail.set(currentUser.email ?? '');
+      }
+    });
   }
 
   ngOnInit(): void {

@@ -1,0 +1,135 @@
+<div class="partner-profile page-card page-card--narrow">
+  <!-- Oldal fejléc -->
+  <div class="page-header">
+    <div class="page-header__title">
+      <lucide-icon [name]="ICONS.USER" [size]="22" />
+      <h1>Fiókom</h1>
+    </div>
+    <p class="page-header__subtitle">Profil adatok és jelszó módosítása</p>
+  </div>
+
+  <!-- Profil adatok szekció -->
+  <div class="settings-section">
+    <h2 class="settings-section__title">
+      <lucide-icon [name]="ICONS.USER" [size]="18" />
+      Profil adatok
+    </h2>
+
+    @if (loading()) {
+      <div class="skeleton-container">
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+      </div>
+    } @else {
+      @if (profileError()) {
+        <div class="error-banner">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+          {{ profileError() }}
+        </div>
+      }
+
+      @if (profileSuccess()) {
+        <div class="success-banner">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+          {{ profileSuccess() }}
+        </div>
+      }
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="form-grid">
+          <div class="form-row form-row--two">
+            <ps-input
+              label="Név"
+              formControlName="name"
+              [required]="true"
+              placeholder="Teljes neved"
+            />
+            <ps-input
+              label="E-mail"
+              formControlName="email"
+              type="email"
+              [required]="true"
+              placeholder="email@pelda.hu"
+            />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button
+            type="submit"
+            class="btn btn--primary"
+            [disabled]="savingProfile() || profileForm.invalid || profileForm.pristine"
+          >
+            @if (savingProfile()) {
+              <span class="spinner"></span>
+            }
+            Mentés
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+
+  <!-- Jelszócsere szekció -->
+  <div class="settings-section">
+    <h2 class="settings-section__title">
+      <lucide-icon [name]="ICONS.LOCK" [size]="18" />
+      Jelszó módosítása
+    </h2>
+
+    @if (passwordError()) {
+      <div class="error-banner">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+        {{ passwordError() }}
+      </div>
+    }
+
+    @if (passwordSuccess()) {
+      <div class="success-banner">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+        {{ passwordSuccess() }}
+      </div>
+    }
+
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+      <div class="form-grid">
+        <ps-input
+          label="Jelenlegi jelszó"
+          formControlName="current_password"
+          type="password"
+          [required]="true"
+          placeholder="Jelenlegi jelszavad"
+        />
+        <div class="form-row form-row--two">
+          <ps-input
+            label="Új jelszó"
+            formControlName="password"
+            type="password"
+            [required]="true"
+            placeholder="Minimum 8 karakter"
+          />
+          <ps-input
+            label="Új jelszó megerősítése"
+            formControlName="password_confirmation"
+            type="password"
+            [required]="true"
+            placeholder="Jelszó újra"
+          />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="savingPassword() || passwordForm.invalid"
+        >
+          @if (savingPassword()) {
+            <span class="spinner"></span>
+          }
+          Jelszó módosítása
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

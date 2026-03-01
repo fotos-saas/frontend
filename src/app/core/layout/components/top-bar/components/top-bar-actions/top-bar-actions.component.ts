@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { NotificationBellComponent } from '../../../../../../shared/components/notification-bell/notification-bell.component';
 
 /**
@@ -7,18 +8,27 @@ import { NotificationBellComponent } from '../../../../../../shared/components/n
 @Component({
   selector: 'app-top-bar-actions',
   standalone: true,
-  imports: [NotificationBellComponent],
+  imports: [NotificationBellComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex items-center gap-1 md:gap-2 flex-shrink-0">
       <!-- Inline user info -->
       @if (userInfoMode() === 'inline' && externalUserInfo()) {
-        <div class="hidden md:flex flex-col items-end mr-2">
-          <span class="font-semibold text-sm text-gray-700">{{ externalUserInfo()!.name }}</span>
-          @if (externalUserInfo()!.email) {
-            <span class="text-xs text-gray-500">{{ externalUserInfo()!.email }}</span>
-          }
-        </div>
+        @if (profileRoute()) {
+          <a [routerLink]="profileRoute()" class="hidden md:flex flex-col items-end mr-2 no-underline hover:opacity-75 transition-opacity cursor-pointer" title="Fiókom">
+            <span class="font-semibold text-sm text-gray-700">{{ externalUserInfo()!.name }}</span>
+            @if (externalUserInfo()!.email) {
+              <span class="text-xs text-gray-500">{{ externalUserInfo()!.email }}</span>
+            }
+          </a>
+        } @else {
+          <div class="hidden md:flex flex-col items-end mr-2">
+            <span class="font-semibold text-sm text-gray-700">{{ externalUserInfo()!.name }}</span>
+            @if (externalUserInfo()!.email) {
+              <span class="text-xs text-gray-500">{{ externalUserInfo()!.email }}</span>
+            }
+          </div>
+        }
       }
 
       <!-- Poke Badge -->
@@ -93,6 +103,7 @@ export class TopBarActionsComponent {
   // Inputs
   readonly userInfoMode = input<'badges' | 'inline'>('badges');
   readonly externalUserInfo = input<{ name: string; email?: string } | null>(null);
+  readonly profileRoute = input<string | null>(null);
   readonly showPokeBadge = input<boolean>(true);
   readonly showNotifications = input<boolean>(true);
   readonly showAccountSwitch = input<boolean>(true);

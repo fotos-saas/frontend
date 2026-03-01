@@ -185,14 +185,7 @@ export class PartnerService {
     return this.projectService.getGlobalSettings();
   }
 
-  updateGlobalSettings(data: {
-    default_max_retouch_photos: number | null;
-    default_free_edit_window_hours?: number | null;
-    billing_enabled?: boolean;
-    default_zip_content?: string;
-    default_file_naming?: string;
-    export_always_ask?: boolean;
-  }) {
+  updateGlobalSettings(data: Parameters<PartnerProjectService['updateGlobalSettings']>[0]) {
     return this.projectService.updateGlobalSettings(data);
   }
 

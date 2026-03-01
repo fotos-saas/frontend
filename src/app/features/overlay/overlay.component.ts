@@ -97,6 +97,12 @@ export class OverlayComponent implements OnInit {
     return this.renameUnmatched().some(u => u.newId.trim().length > 0);
   });
 
+  // Refresh roster dialog state
+  readonly refreshRosterDialogOpen = signal(false);
+  readonly refreshRosterToRemove = signal<Array<{ name: string; layerName: string }>>([]);
+  readonly refreshRosterToAdd = signal<Array<{ name: string; type: string; layerName: string; displayText: string; group: string }>>([]);
+  readonly refreshRosterApplying = signal(false);
+
   // Teacher link & photo chooser dialog state
   readonly showTeacherLinkDialog = signal(false);
   readonly showPhotoChooserDialog = signal(false);
@@ -218,6 +224,7 @@ export class OverlayComponent implements OnInit {
         { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', accent: 'green' },
         { id: 'refresh-placed-json', icon: ICONS.REFRESH, label: 'Placed JSON frissítése', tooltip: 'Placed-photos.json újragenerálása az aktuális API adatokból (Photoshop nem kell)', accent: 'blue' },
         { id: 'rename-layer-ids', icon: ICONS.REPLACE, label: 'Layer ID frissítés', tooltip: 'Régi layer ID-k cseréje az új DB ID-kra', accent: 'amber' },
+        { id: 'refresh-roster', icon: ICONS.USERS, label: 'Névsor frissítés', tooltip: 'Új személyek hozzáadása, régiek törlése a PSD-ből', accent: 'blue' },
         { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
         { id: 'sort-menu', icon: ICONS.ARROW_DOWN_AZ, label: 'Rendezés', tooltip: 'ABC / fiú-lány / rácsba rendezés', accent: 'blue' },
         { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },
@@ -308,6 +315,10 @@ export class OverlayComponent implements OnInit {
 
     if (commandId === 'rename-layer-ids') {
       this.renameLayerIds();
+      return;
+    }
+    if (commandId === 'refresh-roster') {
+      this.refreshRoster();
       return;
     }
     if (commandId === 'link-layers') {
@@ -872,6 +883,140 @@ export class OverlayComponent implements OnInit {
     } finally {
       this.ngZone.run(() => this.busyCommand.set(null));
     }
+  }
+
+  private async refreshRoster(): Promise<void> {
+    this.busyCommand.set('refresh-roster');
+    try {
+      await this.doRefreshRoster();
+    } finally {
+      this.ngZone.run(() => this.busyCommand.set(null));
+    }
+  }
+
+  private async doRefreshRoster(): Promise<void> {
+    // 1. PSD layer nevek lekérése
+    const allNames = await this.getImageLayerNames();
+    if (allNames.length === 0) {
+      console.log('[REFRESH-ROSTER] Nincs PSD layer');
+      return;
+    }
+
+    // 2. ProjectId meghatározás
+    let pid = this.context().projectId || this.lastProjectId;
+    if (!pid && window.electronAPI) {
+      try {
+        const result = await window.electronAPI.overlay.getProjectId();
+        if (result.projectId) {
+          pid = result.projectId;
+          this.lastProjectId = pid;
+        }
+      } catch { /* ignore */ }
+    }
+    if (!pid) {
+      console.error('[REFRESH-ROSTER] Nincs projectId');
+      return;
+    }
+
+    // 3. API persons lekérése
+    let personList: PersonItem[] = [];
+    try {
+      const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
+      const res = await firstValueFrom(
+        this.http.get<{ data: PersonItem[] }>(url),
+      );
+      personList = res.data || [];
+    } catch (e) {
+      console.error('[REFRESH-ROSTER] fetch persons error:', e);
+      return;
+    }
+
+    // 4. Diff számítás
+    const layerPersonIds = new Set<number>();
+    const layerNameById = new Map<number, string>();
+    for (const name of allNames) {
+      const match = name.match(/---(\d+)$/);
+      if (match) {
+        const id = parseInt(match[1], 10);
+        layerPersonIds.add(id);
+        layerNameById.set(id, name);
+      }
+    }
+
+    const dbPersonIds = new Set(personList.map(p => p.id));
+
+    // Törlendő: PSD-ben van, DB-ben nincs
+    const toRemove: Array<{ name: string; layerName: string }> = [];
+    for (const [id, layerName] of layerNameById) {
+      if (!dbPersonIds.has(id)) {
+        const slug = layerName.replace(/---\d+$/, '').replace(/-/g, ' ');
+        toRemove.push({ name: slug, layerName });
+      }
+    }
+
+    // Hozzáadandó: DB-ben van, PSD-ben nincs
+    const toAdd: Array<{ name: string; type: string; layerName: string; displayText: string; group: string }> = [];
+    for (const person of personList) {
+      if (!layerPersonIds.has(person.id)) {
+        const slug = person.name
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase().replace(/\s+/g, '-');
+        toAdd.push({
+          name: person.name,
+          type: person.type,
+          layerName: `${slug}---${person.id}`,
+          displayText: person.name,
+          group: person.type === 'teacher' ? 'Teachers' : 'Students',
+        });
+      }
+    }
+
+    // 5. Ha nincs változás
+    if (toRemove.length === 0 && toAdd.length === 0) {
+      console.log('[REFRESH-ROSTER] Nincs eltérés');
+      return;
+    }
+
+    // 6. Dialógus megjelenítése
+    this.ngZone.run(() => {
+      this.refreshRosterToRemove.set(toRemove);
+      this.refreshRosterToAdd.set(toAdd);
+      this.refreshRosterDialogOpen.set(true);
+    });
+  }
+
+  async applyRefreshRoster(): Promise<void> {
+    this.refreshRosterApplying.set(true);
+    try {
+      const toRemove = this.refreshRosterToRemove().map(r => r.layerName);
+      const toAdd = this.refreshRosterToAdd().map(a => ({
+        layerName: a.layerName,
+        displayText: a.displayText,
+        group: a.group,
+      }));
+
+      await this.runJsxAction('refresh-roster', 'actions/refresh-roster.jsx', {
+        toRemove,
+        toAdd,
+      });
+
+      this.ngZone.run(() => {
+        this.refreshRosterDialogOpen.set(false);
+        this.refreshRosterToRemove.set([]);
+        this.refreshRosterToAdd.set([]);
+      });
+    } catch (e) {
+      console.error('[REFRESH-ROSTER] apply error:', e);
+    } finally {
+      this.ngZone.run(() => this.refreshRosterApplying.set(false));
+    }
+  }
+
+  closeRefreshRosterDialog(): void {
+    if (this.refreshRosterApplying()) return;
+    this.refreshRosterDialogOpen.set(false);
+    this.refreshRosterToRemove.set([]);
+    this.refreshRosterToAdd.set([]);
   }
 
   private async renameLayerIds(): Promise<void> {

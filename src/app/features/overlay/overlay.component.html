@@ -728,6 +728,74 @@
 </div>
 }
 
+<!-- Refresh Roster Dialog -->
+@if (refreshRosterDialogOpen()) {
+<div class="rename-panel">
+  <div class="rename-panel__header">
+    <lucide-icon [name]="ICONS.USERS" [size]="14" />
+    <span>Névsor frissítés</span>
+    <button class="rename-panel__close" (click)="closeRefreshRosterDialog()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+
+  <div class="rename-panel__body">
+    @if (refreshRosterToRemove().length > 0) {
+      <div class="rename-panel__section">
+        <span class="rename-panel__section-label rename-panel__section-label--warn">
+          <lucide-icon [name]="ICONS.DELETE" [size]="12" />
+          Törlendő ({{ refreshRosterToRemove().length }})
+        </span>
+        @for (item of refreshRosterToRemove(); track item.layerName) {
+          <div class="rename-panel__row rename-panel__row--warn">
+            <span class="rename-panel__name">{{ item.name }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    @if (refreshRosterToAdd().length > 0) {
+      <div class="rename-panel__section">
+        <span class="rename-panel__section-label rename-panel__section-label--ok">
+          <lucide-icon [name]="ICONS.PLUS" [size]="12" />
+          Hozzáadandó ({{ refreshRosterToAdd().length }})
+        </span>
+        @for (item of refreshRosterToAdd(); track item.layerName) {
+          <div class="rename-panel__row rename-panel__row--ok">
+            <span class="rename-panel__name">{{ item.name }}</span>
+            <span class="rename-panel__id">{{ item.type === 'teacher' ? 'Tanár' : 'Diák' }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="rename-panel__footer">
+    <button
+      class="rename-panel__btn rename-panel__btn--cancel"
+      (click)="closeRefreshRosterDialog()"
+      type="button"
+    >
+      Mégse
+    </button>
+    <button
+      class="rename-panel__btn rename-panel__btn--submit"
+      [disabled]="refreshRosterApplying()"
+      (click)="applyRefreshRoster()"
+      type="button"
+    >
+      @if (refreshRosterApplying()) {
+        <span class="toolbar__spinner toolbar__spinner--sm"></span>
+        Alkalmazás...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+        Alkalmazás
+      }
+    </button>
+  </div>
+</div>
+}
+
 @if (showTeacherLinkDialog() && linkDialogTeacher()) {
   <app-teacher-link-dialog
     [teacher]="linkDialogTeacher()!"

@@ -69,30 +69,31 @@ export class FileUploadService {
 
   /**
    * Csatolmány konfiguráció
-   * ZIP, RAR, 7Z - max 64MB
+   * Dokumentumok, képek, tömörített fájlok - max 64MB
    */
   readonly attachmentConfig: FileTypeConfig = {
     maxSize: 64 * 1024 * 1024, // 64MB
     allowedMimeTypes: [
-      'application/zip',
-      'application/x-zip-compressed',
-      'application/x-rar-compressed',
-      'application/x-7z-compressed',
-      'application/octet-stream' // Néhány böngésző ezt használja
+      // Tömörített
+      'application/zip', 'application/x-zip-compressed',
+      'application/x-rar-compressed', 'application/x-7z-compressed',
+      // Dokumentumok
+      'application/pdf',
+      'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.oasis.opendocument.text', 'application/vnd.oasis.opendocument.spreadsheet',
+      'text/plain', 'text/csv',
+      // Képek
+      'image/jpeg', 'image/png', 'image/bmp', 'image/tiff',
+      // Fallback
+      'application/octet-stream',
     ],
-    allowedExtensions: /\.(zip|rar|7z)$/i,
-    magicBytes: [
-      // ZIP: 50 4B 03 04 (PK..)
-      { bytes: [0x50, 0x4B, 0x03, 0x04] },
-      // RAR: 52 61 72 21 1A 07 (Rar!..)
-      { bytes: [0x52, 0x61, 0x72, 0x21, 0x1A, 0x07] },
-      // 7Z: 37 7A BC AF 27 1C
-      { bytes: [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C] }
-    ],
+    allowedExtensions: /\.(zip|rar|7z|pdf|doc|docx|xls|xlsx|ppt|pptx|odt|ods|txt|csv|jpg|jpeg|png|bmp|tif|tiff)$/i,
+    // Magic bytes check kihagyva — túl sok fájltípus, backend validál
     errorMessages: {
       size: 'A csatolmány maximum 64MB lehet!',
-      type: 'Csak ZIP, RAR vagy 7Z fájl tölthető fel!',
-      magicBytes: 'A fájl tartalma nem felel meg a várt archív formátumnak!'
+      type: 'Nem megengedett fájltípus! Elfogadott: PDF, DOC, XLSX, JPG, ZIP stb.',
     }
   };
 

@@ -46,6 +46,10 @@ export interface OrderData {
 
   // Dátum
   orderDate: string | null;
+
+  // Névsor szinkronizáció
+  rosterSyncStatus: 'processing' | 'completed' | 'failed' | null;
+  rosterSyncResult: { created: number; updated: number; deleted: number; warnings: string[] } | null;
 }
 
 /**

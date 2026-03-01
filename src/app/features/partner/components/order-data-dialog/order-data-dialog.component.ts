@@ -8,9 +8,12 @@ import {
   input,
   output,
   signal,
+  computed,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
+import { timer } from 'rxjs';
+import { switchMap, takeWhile } from 'rxjs/operators';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerService } from '../../services/partner.service';
 import { LoggerService } from '../../../../core/services/logger.service';
@@ -43,6 +46,19 @@ export class OrderDataDialogComponent implements OnInit {
   error: string | null = null;
   generatingPdf = false;
 
+  readonly rosterSyncStatus = signal<string | null>(null);
+  readonly rosterSyncResult = signal<{ created: number; updated: number; deleted: number; warnings: string[] } | null>(null);
+
+  readonly syncBannerText = computed(() => {
+    const result = this.rosterSyncResult();
+    if (!result) return '';
+    const parts: string[] = [];
+    if (result.created > 0) parts.push(`${result.created} hozzáadva`);
+    if (result.updated > 0) parts.push(`${result.updated} frissítve`);
+    if (result.deleted > 0) parts.push(`${result.deleted} törölve`);
+    return parts.join(', ');
+  });
+
   private destroyRef = inject(DestroyRef);
   private partnerService = inject(PartnerService);
   private cdr = inject(ChangeDetectorRef);
@@ -63,19 +79,53 @@ export class OrderDataDialogComponent implements OnInit {
         next: (response) => {
           if (response.success) {
             this.orderData = response.data as OrderData;
+            this.updateSyncState(this.orderData);
           } else {
-            this.error = response.message || 'Nem sikerult betolteni az adatokat';
+            this.error = response.message || 'Nem sikerült betölteni az adatokat';
           }
           this.loading = false;
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = 'Hiba tortent az adatok betoltesekor';
+          this.error = 'Hiba történt az adatok betöltésekor';
           this.loading = false;
           this.cdr.markForCheck();
           this.logger.error('Partner order data load error', err);
         },
       });
+  }
+
+  private updateSyncState(data: OrderData | null): void {
+    if (!data) return;
+    this.rosterSyncStatus.set(data.rosterSyncStatus);
+    this.rosterSyncResult.set(data.rosterSyncResult);
+    if (data.rosterSyncStatus === 'processing') {
+      this.startSyncPolling();
+    }
+  }
+
+  private startSyncPolling(): void {
+    let elapsed = 0;
+    const intervalMs = 3000;
+    const maxMs = 60000;
+
+    timer(intervalMs, intervalMs).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      takeWhile(() => elapsed < maxMs && this.rosterSyncStatus() === 'processing'),
+      switchMap(() => {
+        elapsed += intervalMs;
+        return this.partnerService.getProjectOrderData(this.projectId());
+      }),
+    ).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const data = response.data as OrderData;
+          this.rosterSyncStatus.set(data.rosterSyncStatus);
+          this.rosterSyncResult.set(data.rosterSyncResult);
+          this.cdr.markForCheck();
+        }
+      },
+    });
   }
 
   openPdf(): void {

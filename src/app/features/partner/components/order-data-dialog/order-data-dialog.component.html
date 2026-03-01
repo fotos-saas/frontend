@@ -36,6 +36,34 @@
 
     <!-- Megrendelési adatok tab -->
     @if (activeTab() === 'order') {
+
+    <!-- Névsor szinkronizáció banner -->
+    @if (rosterSyncStatus() === 'processing') {
+      <div class="order-dialog__sync-banner order-dialog__sync-banner--processing" role="status" aria-live="polite">
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+        <span>Névsor feldolgozása folyamatban...</span>
+      </div>
+    }
+    @if (rosterSyncStatus() === 'completed' && rosterSyncResult()) {
+      <div class="order-dialog__sync-banner order-dialog__sync-banner--completed" role="status" aria-live="polite">
+        <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        <span>Névsor szinkronizálva: {{ syncBannerText() }}</span>
+        @if (rosterSyncResult()!.warnings.length > 0) {
+          <ul class="order-dialog__sync-warnings">
+            @for (warning of rosterSyncResult()!.warnings; track warning) {
+              <li>{{ warning }}</li>
+            }
+          </ul>
+        }
+      </div>
+    }
+    @if (rosterSyncStatus() === 'failed') {
+      <div class="order-dialog__sync-banner order-dialog__sync-banner--failed" role="alert" aria-live="assertive">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+        <span>Névsor feldolgozás sikertelen</span>
+      </div>
+    }
+
     <!-- Loading -->
     @if (loading) {
       <div class="order-dialog__loading">

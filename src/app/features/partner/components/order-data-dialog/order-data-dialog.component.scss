@@ -42,6 +42,51 @@ $blue-600: get-color('primary', 600);
   }
 }
 
+// Sync banner
+.order-dialog__sync-banner {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+
+  > lucide-icon {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+  }
+
+  &--processing {
+    background: get-color('primary', 50);
+    color: get-color('primary', 700);
+    border: 1px solid get-color('primary', 100);
+  }
+
+  &--completed {
+    background: get-color('success', 50);
+    color: get-color('success', 700);
+    border: 1px solid get-color('success', 100);
+    flex-wrap: wrap;
+  }
+
+  &--failed {
+    background: get-color('error', 50);
+    color: get-color('error', 700);
+    border: 1px solid get-color('error', 100);
+  }
+}
+
+.order-dialog__sync-warnings {
+  width: 100%;
+  margin: 0.375rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: get-color('warning', 700);
+  list-style: disc;
+}
+
 // Loading
 .order-dialog__loading {
   display: flex;

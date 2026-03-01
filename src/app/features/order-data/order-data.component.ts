@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject, computed, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
+import { timer } from 'rxjs';
+import { switchMap, takeWhile } from 'rxjs/operators';
 import { OrderDataService, OrderData } from './services/order-data.service';
 import { LoggerService } from '../../core/services/logger.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -36,6 +38,10 @@ export class OrderDataComponent implements OnInit {
   /** PDF generation in progress */
   generatingPdf = false;
 
+  /** Névsor szinkronizáció állapota */
+  readonly rosterSyncStatus = signal<string | null>(null);
+  readonly rosterSyncResult = signal<{ created: number; updated: number; deleted: number; warnings: string[] } | null>(null);
+
   /** DestroyRef for automatic subscription cleanup */
   private destroyRef = inject(DestroyRef);
 
@@ -63,6 +69,7 @@ export class OrderDataComponent implements OnInit {
         next: (response) => {
           if (response.success) {
             this.orderData.set(response.data);
+            this.updateSyncState(response.data);
           } else {
             this.error = response.message || 'Nem sikerült betölteni az adatokat';
           }
@@ -76,6 +83,46 @@ export class OrderDataComponent implements OnInit {
           this.logger.error('Order data load error', err);
         }
       });
+  }
+
+  /**
+   * Szinkronizációs állapot frissítése és polling indítása ha kell
+   */
+  private updateSyncState(data: OrderData | null): void {
+    if (!data) return;
+
+    this.rosterSyncStatus.set(data.rosterSyncStatus);
+    this.rosterSyncResult.set(data.rosterSyncResult);
+
+    if (data.rosterSyncStatus === 'processing') {
+      this.startSyncPolling();
+    }
+  }
+
+  /**
+   * Polling: 3 mp-enként amíg processing, max 60 mp
+   */
+  private startSyncPolling(): void {
+    let elapsed = 0;
+    const intervalMs = 3000;
+    const maxMs = 60000;
+
+    timer(intervalMs, intervalMs).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      takeWhile(() => elapsed < maxMs && this.rosterSyncStatus() === 'processing'),
+      switchMap(() => {
+        elapsed += intervalMs;
+        return this.orderDataService.getOrderData();
+      }),
+    ).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.rosterSyncStatus.set(response.data.rosterSyncStatus);
+          this.rosterSyncResult.set(response.data.rosterSyncResult);
+          this.cdr.markForCheck();
+        }
+      },
+    });
   }
 
   /**
@@ -109,6 +156,17 @@ export class OrderDataComponent implements OnInit {
         }
       });
   }
+
+  /** Sync banner szöveg */
+  readonly syncBannerText = computed(() => {
+    const result = this.rosterSyncResult();
+    if (!result) return '';
+    const parts: string[] = [];
+    if (result.created > 0) parts.push(`${result.created} hozzáadva`);
+    if (result.updated > 0) parts.push(`${result.updated} frissítve`);
+    if (result.deleted > 0) parts.push(`${result.deleted} törölve`);
+    return parts.join(', ');
+  });
 
   /**
    * Whether the order sheet view button should be visible

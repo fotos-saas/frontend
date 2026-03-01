@@ -48,6 +48,31 @@
     </div>
   }
 
+  <!-- Névsor szinkronizáció banner -->
+  @if (rosterSyncStatus() === 'processing') {
+    <div class="order-data__sync-banner order-data__sync-banner--processing" role="status" aria-live="polite">
+      <div class="order-data__sync-spinner" aria-hidden="true"></div>
+      <span>Névsor feldolgozása folyamatban...</span>
+    </div>
+  }
+  @if (rosterSyncStatus() === 'completed' && rosterSyncResult()) {
+    <div class="order-data__sync-banner order-data__sync-banner--completed" role="status" aria-live="polite">
+      <span>Névsor szinkronizálva: {{ syncBannerText() }}</span>
+      @if (rosterSyncResult()!.warnings.length > 0) {
+        <ul class="order-data__sync-warnings">
+          @for (warning of rosterSyncResult()!.warnings; track warning) {
+            <li>{{ warning }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+  @if (rosterSyncStatus() === 'failed') {
+    <div class="order-data__sync-banner order-data__sync-banner--failed" role="alert" aria-live="assertive">
+      <span>Névsor feldolgozás sikertelen</span>
+    </div>
+  }
+
   <!-- Content -->
   @if (!loading && !error && orderData()) {
     <div class="order-data__content">

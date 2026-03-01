@@ -224,7 +224,7 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
         next: (response) => {
           this.submitting.set(false);
           if (response.success) {
-            this.toast.success('Siker', response.message || 'Megrendelés sikeresen véglegesítve!');
+            this.toast.success('Siker', 'Megrendelés véglegesítve! A névsor feldolgozása háttérben folyamatban — a személyek hamarosan megjelennek.');
             this.saved.emit();
             this.close.emit();
           } else {

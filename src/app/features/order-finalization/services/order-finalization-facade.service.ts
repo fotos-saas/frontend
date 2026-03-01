@@ -202,7 +202,7 @@ export class OrderFinalizationFacadeService {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.toastService.success('Siker!', response.message || 'Megrendelés sikeresen véglegesítve!');
+            this.toastService.success('Siker!', 'Megrendelés véglegesítve! A névsor feldolgozása háttérben folyamatban — a személyek hamarosan megjelennek.');
             this.router.navigate(['/order-data']);
           } else {
             this.toastService.error('Hiba', response.message || 'Hiba történt a véglegesítéskor');

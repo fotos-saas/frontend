@@ -721,12 +721,12 @@ export interface PartnerEmailAccount {
   smtp_password?: string;
   smtp_from_address: string;
   smtp_from_name: string;
-  imap_host: string;
-  imap_port: number;
-  imap_encryption: string;
-  imap_username: string;
+  imap_host: string | null;
+  imap_port: number | null;
+  imap_encryption: string | null;
+  imap_username: string | null;
   imap_password?: string;
-  imap_sent_folder: string;
+  imap_sent_folder: string | null;
   imap_save_sent: boolean;
   is_active: boolean;
   last_test_at: string | null;
@@ -740,7 +740,7 @@ export interface PartnerEmailAccount {
  */
 export interface EmailAccountTestResult {
   smtp: { ok: boolean; error: string | null; info?: string | null };
-  imap: { ok: boolean; error: string | null };
+  imap?: { ok: boolean; error: string | null };
 }
 
 /**

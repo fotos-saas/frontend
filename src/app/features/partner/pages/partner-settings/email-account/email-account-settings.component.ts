@@ -9,6 +9,8 @@ import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confir
 import { PartnerEmailAccountService } from '../../../services/partner-email-account.service';
 import type { PartnerEmailAccount, EmailAccountTestResult } from '../../../models/partner.models';
 
+export type EmailAccountTab = 'smtp' | 'imap';
+
 @Component({
   selector: 'app-email-account-settings',
   standalone: true,
@@ -22,6 +24,9 @@ export class EmailAccountSettingsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   readonly ICONS = ICONS;
 
+  // Tab
+  readonly activeTab = signal<EmailAccountTab>('smtp');
+
   // Státusz
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -34,7 +39,7 @@ export class EmailAccountSettingsComponent implements OnInit {
   // Meglévő fiók adatai
   readonly existingAccount = signal<PartnerEmailAccount | null>(null);
 
-  // Form mezők
+  // Form mezők — SMTP
   name = '';
   smtpHost = '';
   smtpPort = 587;
@@ -43,6 +48,8 @@ export class EmailAccountSettingsComponent implements OnInit {
   smtpPassword = '';
   smtpFromAddress = '';
   smtpFromName = '';
+
+  // Form mezők — IMAP
   imapHost = '';
   imapPort = 993;
   imapEncryption = 'ssl';
@@ -87,17 +94,16 @@ export class EmailAccountSettingsComponent implements OnInit {
     this.smtpUsername = account.smtp_username;
     this.smtpFromAddress = account.smtp_from_address;
     this.smtpFromName = account.smtp_from_name;
-    this.imapHost = account.imap_host;
-    this.imapPort = account.imap_port;
-    this.imapEncryption = account.imap_encryption;
-    this.imapUsername = account.imap_username;
-    this.imapSentFolder = account.imap_sent_folder;
+    this.imapHost = account.imap_host ?? '';
+    this.imapPort = account.imap_port ?? 993;
+    this.imapEncryption = account.imap_encryption ?? 'ssl';
+    this.imapUsername = account.imap_username ?? '';
+    this.imapSentFolder = account.imap_sent_folder ?? 'Sent';
     this.imapSaveSent = account.imap_save_sent;
-    // Jelszavakat nem töltjük be (hidden a backend-en)
   }
 
   private buildPayload(): Record<string, unknown> {
-    return {
+    const payload: Record<string, unknown> = {
       name: this.name,
       smtp_host: this.smtpHost,
       smtp_port: this.smtpPort,
@@ -106,14 +112,28 @@ export class EmailAccountSettingsComponent implements OnInit {
       smtp_password: this.smtpPassword,
       smtp_from_address: this.smtpFromAddress,
       smtp_from_name: this.smtpFromName,
-      imap_host: this.imapHost,
-      imap_port: this.imapPort,
-      imap_encryption: this.imapEncryption,
-      imap_username: this.imapUsername,
-      imap_password: this.imapPassword,
-      imap_sent_folder: this.imapSentFolder,
-      imap_save_sent: this.imapSaveSent,
     };
+
+    // IMAP adatok csak ha ki van töltve
+    if (this.imapHost) {
+      payload['imap_host'] = this.imapHost;
+      payload['imap_port'] = this.imapPort;
+      payload['imap_encryption'] = this.imapEncryption;
+      payload['imap_username'] = this.imapUsername;
+      payload['imap_password'] = this.imapPassword;
+      payload['imap_sent_folder'] = this.imapSentFolder;
+      payload['imap_save_sent'] = this.imapSaveSent;
+    } else {
+      payload['imap_host'] = null;
+      payload['imap_port'] = null;
+      payload['imap_encryption'] = null;
+      payload['imap_username'] = null;
+      payload['imap_password'] = null;
+      payload['imap_sent_folder'] = null;
+      payload['imap_save_sent'] = false;
+    }
+
+    return payload;
   }
 
   save(): void {
@@ -187,5 +207,6 @@ export class EmailAccountSettingsComponent implements OnInit {
     this.imapSentFolder = 'Sent';
     this.imapSaveSent = true;
     this.testResult.set(null);
+    this.activeTab.set('smtp');
   }
 }

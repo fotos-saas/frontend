@@ -5,7 +5,7 @@
       <h1>E-mail fiók beállítások</h1>
     </div>
     <p class="page-header__subtitle">
-      Saját IMAP/SMTP fiók beállítása az e-mail szinkronizáláshoz és válaszküldéshez.
+      Saját SMTP és IMAP fiók beállítása az e-mail küldéshez és szinkronizáláshoz.
     </p>
   </div>
 
@@ -31,132 +31,152 @@
       }
     }
 
-    <!-- SMTP szekció -->
-    <section class="settings-section">
-      <h2 class="settings-section__title">
-        <lucide-icon [name]="ICONS.SEND" [size]="18" />
-        SMTP (kimenő e-mail)
-      </h2>
+    <!-- Fiók neve (közös) -->
+    <div class="form-grid" style="margin-bottom: 1rem;">
+      <ps-input
+        label="Fiók neve"
+        placeholder="pl. Stúdió email"
+        [(ngModel)]="name"
+        [required]="true"
+      />
+    </div>
 
-      <div class="form-grid">
-        <ps-input
-          label="Fiók neve"
-          placeholder="pl. Stúdió email"
-          [(ngModel)]="name"
-          [required]="true"
-        />
+    <!-- Fülek -->
+    <nav class="tabs-nav">
+      <button
+        class="tab-btn"
+        [class.tab-btn--active]="activeTab() === 'smtp'"
+        (click)="activeTab.set('smtp')"
+      >
+        <lucide-icon [name]="ICONS.SEND" [size]="16" />
+        <span>SMTP (kimenő)</span>
+      </button>
+      <button
+        class="tab-btn"
+        [class.tab-btn--active]="activeTab() === 'imap'"
+        (click)="activeTab.set('imap')"
+      >
+        <lucide-icon [name]="ICONS.INBOX" [size]="16" />
+        <span>IMAP (bejövő)</span>
+        @if (!imapHost) {
+          <span class="tab-badge">Opcionális</span>
+        }
+      </button>
+    </nav>
 
-        <ps-input
-          label="SMTP szerver"
-          placeholder="pl. smtp.gmail.com"
-          [(ngModel)]="smtpHost"
-          [required]="true"
-        />
-
-        <div class="form-row form-row--two">
+    <!-- SMTP fül -->
+    @if (activeTab() === 'smtp') {
+      <section class="settings-section">
+        <div class="form-grid">
           <ps-input
-            label="Port"
-            type="number"
-            [(ngModel)]="smtpPort"
+            label="SMTP szerver"
+            placeholder="pl. smtp.gmail.com"
+            [(ngModel)]="smtpHost"
             [required]="true"
           />
-          <ps-select
-            label="Titkosítás"
-            [(ngModel)]="smtpEncryption"
-            [options]="encryptionOptions"
-          />
-        </div>
 
-        <ps-input
-          label="Felhasználónév"
-          placeholder="pl. email@example.com"
-          [(ngModel)]="smtpUsername"
-          [required]="true"
-        />
-        <ps-input
-          label="Jelszó"
-          type="password"
-          [placeholder]="existingAccount() ? '(változatlan - csak ha módosítani szeretnéd)' : 'SMTP jelszó'"
-          [(ngModel)]="smtpPassword"
-          [required]="!existingAccount()"
-        />
+          <div class="form-row form-row--two">
+            <ps-input
+              label="Port"
+              type="number"
+              [(ngModel)]="smtpPort"
+              [required]="true"
+            />
+            <ps-select
+              label="Titkosítás"
+              [(ngModel)]="smtpEncryption"
+              [options]="encryptionOptions"
+            />
+          </div>
 
-        <div class="form-row form-row--two">
           <ps-input
-            label="Feladó e-mail"
-            type="email"
-            placeholder="info@example.com"
-            [(ngModel)]="smtpFromAddress"
+            label="Felhasználónév"
+            placeholder="pl. email@example.com"
+            [(ngModel)]="smtpUsername"
             [required]="true"
           />
           <ps-input
-            label="Feladó neve"
-            placeholder="Stúdió Neve"
-            [(ngModel)]="smtpFromName"
-            [required]="true"
+            label="Jelszó"
+            type="password"
+            [placeholder]="existingAccount() ? '(változatlan - csak ha módosítani szeretnéd)' : 'SMTP jelszó'"
+            [(ngModel)]="smtpPassword"
+            [required]="!existingAccount()"
           />
-        </div>
-      </div>
-    </section>
 
-    <!-- IMAP szekció -->
-    <section class="settings-section">
-      <h2 class="settings-section__title">
-        <lucide-icon [name]="ICONS.INBOX" [size]="18" />
-        IMAP (bejövő e-mail)
-      </h2>
-
-      <div class="form-grid">
-        <ps-input
-          label="IMAP szerver"
-          placeholder="pl. imap.gmail.com"
-          [(ngModel)]="imapHost"
-          [required]="true"
-        />
-
-        <div class="form-row form-row--two">
-          <ps-input
-            label="Port"
-            type="number"
-            [(ngModel)]="imapPort"
-            [required]="true"
-          />
-          <ps-select
-            label="Titkosítás"
-            [(ngModel)]="imapEncryption"
-            [options]="encryptionOptions"
-          />
-        </div>
-
-        <ps-input
-          label="Felhasználónév"
-          placeholder="pl. email@example.com"
-          [(ngModel)]="imapUsername"
-          [required]="true"
-        />
-        <ps-input
-          label="Jelszó"
-          type="password"
-          [placeholder]="existingAccount() ? '(változatlan - csak ha módosítani szeretnéd)' : 'IMAP jelszó'"
-          [(ngModel)]="imapPassword"
-          [required]="!existingAccount()"
-        />
-
-        <div class="form-row form-row--two">
-          <ps-input
-            label="Elküldött mappa"
-            placeholder="Sent"
-            [(ngModel)]="imapSentFolder"
-          />
-          <div class="toggle-field">
-            <ps-toggle
-              label="Mentés az elküldött mappába"
-              [(ngModel)]="imapSaveSent"
+          <div class="form-row form-row--two">
+            <ps-input
+              label="Feladó e-mail"
+              type="email"
+              placeholder="info@example.com"
+              [(ngModel)]="smtpFromAddress"
+              [required]="true"
+            />
+            <ps-input
+              label="Feladó neve"
+              placeholder="Stúdió Neve"
+              [(ngModel)]="smtpFromName"
+              [required]="true"
             />
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    }
+
+    <!-- IMAP fül -->
+    @if (activeTab() === 'imap') {
+      <section class="settings-section">
+        <p class="settings-section__hint">
+          Az IMAP beállítás opcionális. Ha nem adod meg, az e-mail küldés akkor is működik, de az elküldött levelek nem kerülnek mentésre az IMAP fiókodba.
+        </p>
+
+        <div class="form-grid">
+          <ps-input
+            label="IMAP szerver"
+            placeholder="pl. imap.gmail.com"
+            [(ngModel)]="imapHost"
+          />
+
+          <div class="form-row form-row--two">
+            <ps-input
+              label="Port"
+              type="number"
+              [(ngModel)]="imapPort"
+            />
+            <ps-select
+              label="Titkosítás"
+              [(ngModel)]="imapEncryption"
+              [options]="encryptionOptions"
+            />
+          </div>
+
+          <ps-input
+            label="Felhasználónév"
+            placeholder="pl. email@example.com"
+            [(ngModel)]="imapUsername"
+          />
+          <ps-input
+            label="Jelszó"
+            type="password"
+            [placeholder]="existingAccount() ? '(változatlan - csak ha módosítani szeretnéd)' : 'IMAP jelszó'"
+            [(ngModel)]="imapPassword"
+          />
+
+          <div class="form-row form-row--two">
+            <ps-input
+              label="Elküldött mappa"
+              placeholder="Sent"
+              [(ngModel)]="imapSentFolder"
+            />
+            <div class="toggle-field">
+              <ps-toggle
+                label="Mentés az elküldött mappába"
+                [(ngModel)]="imapSaveSent"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    }
 
     <!-- Teszt eredmény -->
     @if (testResult(); as result) {
@@ -166,10 +186,12 @@
           <lucide-icon [name]="result.smtp.ok ? ICONS.CHECK_CIRCLE : ICONS.X_CIRCLE" [size]="16" />
           <span>SMTP: {{ result.smtp.ok ? 'Sikeres' : result.smtp.error }}{{ result.smtp.info }}</span>
         </div>
-        <div class="test-results__row" [class.test-results__row--ok]="result.imap.ok" [class.test-results__row--fail]="!result.imap.ok">
-          <lucide-icon [name]="result.imap.ok ? ICONS.CHECK_CIRCLE : ICONS.X_CIRCLE" [size]="16" />
-          <span>IMAP: {{ result.imap.ok ? 'Sikeres' : result.imap.error }}</span>
-        </div>
+        @if (result.imap) {
+          <div class="test-results__row" [class.test-results__row--ok]="result.imap.ok" [class.test-results__row--fail]="!result.imap.ok">
+            <lucide-icon [name]="result.imap.ok ? ICONS.CHECK_CIRCLE : ICONS.X_CIRCLE" [size]="16" />
+            <span>IMAP: {{ result.imap.ok ? 'Sikeres' : result.imap.error }}</span>
+          </div>
+        }
       </div>
     }
 

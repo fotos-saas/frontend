@@ -38,6 +38,7 @@ export class RosterStepComponent {
 
   data = input.required<RosterData>();
   partnerMode = input<boolean>(false);
+  projectId = input<number | undefined>(undefined);
   dataChange = output<RosterData>();
 
   readonly sortTypeOptions = SORT_TYPE_OPTIONS;
@@ -140,7 +141,7 @@ export class RosterStepComponent {
         this.matchLoading.set(true);
         this.matchResults.set([]);
 
-        return this.teacherMatchService.matchTeacherNames(names).pipe(
+        return this.teacherMatchService.matchTeacherNames(names, this.projectId()).pipe(
           catchError(() => {
             this.matchLoading.set(false);
             return of([]);

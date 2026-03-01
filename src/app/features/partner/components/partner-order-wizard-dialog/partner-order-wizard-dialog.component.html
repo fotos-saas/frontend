@@ -71,6 +71,7 @@
             <app-roster-step
               [data]="formData().roster"
               [partnerMode]="true"
+              [projectId]="projectId()"
               (dataChange)="onRosterChange($event)"
             />
           }

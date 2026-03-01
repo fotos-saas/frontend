@@ -143,6 +143,7 @@ const ALLOWED_EXTERNAL_DOMAINS = [
   'github.com',
   'stripe.com',
   'checkout.stripe.com',
+  ...(isDev ? ['localhost'] : []),
 ];
 
 // Deep link protocol for the app

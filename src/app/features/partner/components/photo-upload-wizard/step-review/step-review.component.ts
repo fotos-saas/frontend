@@ -83,7 +83,7 @@ import { StepReviewService } from './step-review.service';
               <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
               Párosítva ({{ pairedPersons().length }})
             </h4>
-            <div class="persons-grid persons-grid--paired">
+            <div class="persons-grid">
               @for (person of pairedPersons(); track person.id; let i = $index) {
                 <app-review-person-card
                   [person]="person"

@@ -157,14 +157,15 @@
 }
 
 .person-name {
-  display: block;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-size: 0.8125rem;
   font-weight: 500;
   color: get-color('slate', 800);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   cursor: default;
+  word-break: break-word;
 }
 
 .photo-filename {

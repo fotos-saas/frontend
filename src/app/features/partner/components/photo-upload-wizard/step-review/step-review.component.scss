@@ -65,13 +65,9 @@
 
 .persons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 150px);
+  grid-template-columns: repeat(auto-fill, 120px);
   gap: 12px;
   justify-content: center;
-}
-
-.persons-grid--paired {
-  grid-template-columns: repeat(auto-fill, 120px);
 }
 
 .empty-state {

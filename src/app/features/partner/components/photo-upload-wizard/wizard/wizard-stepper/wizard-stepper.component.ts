@@ -40,7 +40,7 @@ import { WizardStep, StepDefinition, VISIBLE_STEPS } from '../wizard.types';
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px 24px;
+      padding: 12px 24px;
       gap: 8px;
     }
 

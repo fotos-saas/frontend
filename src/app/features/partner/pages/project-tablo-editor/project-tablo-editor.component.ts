@@ -120,8 +120,6 @@ export class ProjectTabloEditorComponent implements OnInit {
   readonly sampleResult = signal<{ localPaths: string[]; uploadedCount: number; generatedAt: string } | null>(null);
 
   /** Véglegesítés */
-  readonly generatingFinal = signal(false);
-  readonly finalResult = signal<{ localPath: string; uploadedCount: number; generatedAt: string } | null>(null);
   readonly projectStatus = computed(() => this.project()?.status ?? null);
 
   /** Minta beállítások (signal referenciák a ps service-ből) */
@@ -1025,35 +1023,6 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
   }
 
-  async generateFinal(): Promise<void> {
-    if (this.generatingFinal()) return;
-    const p = this.project();
-    if (!p) return;
-
-    this.clearMessages();
-    this.generatingFinal.set(true);
-    try {
-      const result = await this.ps.generateFinal(p.id, p.name, {
-        schoolName: p.school?.name ?? null,
-        className: p.className ?? null,
-      });
-      if (result.success) {
-        const now = new Date();
-        const pad = (n: number) => n.toString().padStart(2, '0');
-        const timeStr = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-        this.finalResult.set({
-          localPath: result.localPath || '',
-          uploadedCount: result.uploadedCount || 0,
-          generatedAt: timeStr,
-        });
-        this.successMessage.set(`Véglegesítés kész! Feltöltve: ${result.uploadedCount || 0} fájl.`);
-      } else {
-        this.error.set(result.error || 'Véglegesítés sikertelen.');
-      }
-    } finally {
-      this.generatingFinal.set(false);
-    }
-  }
 
   setSampleSizeLargeValue(e: Event) {
     const v = Number((e.target as HTMLInputElement).value);

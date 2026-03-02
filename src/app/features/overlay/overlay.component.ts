@@ -796,20 +796,50 @@ export class OverlayComponent implements OnInit {
     const authToken = sessionStorage.getItem('marketer_token') || '';
     const projectName = this.activeDoc().name?.replace(/\.(psd|psb|pdd)$/i, '') || 'tablo';
 
-    const result = await api.finalizer.upload({
+    const apiUrl = (window as { __env__?: { apiUrl?: string } }).__env__?.apiUrl || this.getApiUrl();
+    const results: string[] = [];
+    const errors: string[] = [];
+
+    // Flat feltöltés
+    const flatResult = await api.finalizer.upload({
       flattenedJpgPath: tempJpg,
       outputDir: psdDir,
       projectId: pid,
       projectName,
-      apiBaseUrl: (window as { __env__?: { apiUrl?: string } }).__env__?.apiUrl || this.getApiUrl(),
+      apiBaseUrl: apiUrl,
       authToken,
+      type: 'flat',
     });
+    if (flatResult.success && (flatResult.uploadedCount ?? 0) > 0) {
+      results.push('Flat');
+    } else {
+      errors.push(flatResult.error || 'Flat feltöltés sikertelen');
+    }
+
+    // Kistabló feltöltés (ugyanabból a flatten-elt JPG-ből, 3000px resize)
+    const smallResult = await api.finalizer.upload({
+      flattenedJpgPath: tempJpg,
+      outputDir: psdDir,
+      projectId: pid,
+      projectName,
+      apiBaseUrl: apiUrl,
+      authToken,
+      type: 'small_tablo',
+      maxSize: 3000,
+    });
+    if (smallResult.success && (smallResult.uploadedCount ?? 0) > 0) {
+      results.push('Kistabló');
+    } else {
+      errors.push(smallResult.error || 'Kistabló feltöltés sikertelen');
+    }
+
+    const totalUploaded = (flatResult.uploadedCount ?? 0) + (smallResult.uploadedCount ?? 0);
 
     this.ngZone.run(() => {
-      if (result.success && (result.uploadedCount ?? 0) > 0) {
-        this.generateResult.set({ success: true, message: `Véglegesítve, ${result.uploadedCount ?? 0} feltöltve` });
+      if (results.length > 0) {
+        this.generateResult.set({ success: true, message: `Véglegesítve: ${results.join(' + ')} (${totalUploaded} feltöltve)` });
       } else {
-        this.generateResult.set({ success: false, message: result.error || 'Feltöltés sikertelen — a szerver nem érthető el' });
+        this.generateResult.set({ success: false, message: errors.join('; ') || 'Feltöltés sikertelen' });
       }
     });
   }

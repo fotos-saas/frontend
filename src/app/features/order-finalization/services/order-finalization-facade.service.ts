@@ -50,6 +50,7 @@ export class OrderFinalizationFacadeService {
 
   private readonly autoSaveTrigger$ = new Subject<void>();
   private autoSaveResetTimer?: ReturnType<typeof setTimeout>;
+  private lastSavedSnapshot = '';
 
   /** Auto-save allapot */
   autoSaveStatus: WritableSignal<'idle' | 'saving' | 'saved' | 'error'> | null = null;
@@ -102,12 +103,18 @@ export class OrderFinalizationFacadeService {
 
   private performAutoSave(): void {
     if (this.signals.submitting()) return;
+
+    const data = this.collectFormData();
+    const snapshot = JSON.stringify(data);
+    if (snapshot === this.lastSavedSnapshot) return;
+
     this.autoSaveStatus!.set('saving');
 
-    this.orderService.autoSaveDraft(this.collectFormData())
+    this.orderService.autoSaveDraft(data)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
+          this.lastSavedSnapshot = snapshot;
           this.autoSaveStatus!.set('saved');
           clearTimeout(this.autoSaveResetTimer);
           this.autoSaveResetTimer = setTimeout(() => {
@@ -161,6 +168,7 @@ export class OrderFinalizationFacadeService {
           if (mapped.design.backgroundImageId) {
             this.signals.backgroundFileName.set('Korábban feltöltött háttérkép');
           }
+          this.lastSavedSnapshot = JSON.stringify(mapped);
           this.signals.loading.set(false);
         },
         error: () => this.signals.loading.set(false)

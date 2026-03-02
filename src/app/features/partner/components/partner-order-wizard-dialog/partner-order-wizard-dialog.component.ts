@@ -12,7 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, Subject, debounceTime, switchMap, catchError, of } from 'rxjs';
+import { Observable, Subject, debounceTime, switchMap, filter, catchError, of, tap } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -79,6 +79,7 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
   attachmentFileNames = signal<string[]>([]);
 
   private readonly draftSave$ = new Subject<void>();
+  private lastSavedSnapshot = '';
 
   dialogTitle = computed(() => 'Megrendelés leadása');
   dialogDescription = computed(() => this.projectName() || '');
@@ -140,6 +141,7 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
             this.isEditMode.set(true);
           }
 
+          this.lastSavedSnapshot = JSON.stringify(data);
           this.loading.set(false);
         },
         error: () => {
@@ -151,8 +153,15 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
   private setupAutoSave(): void {
     this.draftSave$.pipe(
       debounceTime(2000),
+      filter(() => {
+        const current = JSON.stringify(this.formData());
+        return current !== this.lastSavedSnapshot;
+      }),
       switchMap(() =>
         this.api.autoSaveDraft(this.projectId(), this.formData()).pipe(
+          tap(() => {
+            this.lastSavedSnapshot = JSON.stringify(this.formData());
+          }),
           catchError(err => {
             this.logger.error('Draft auto-save failed', err);
             return of({ success: false });

@@ -96,23 +96,43 @@ export class TabloEditorSampleActionsService {
 
     this.config.clearMessages();
     this.generatingFinal.set(true);
+
+    const ctx = { schoolName: p.school?.name ?? null, className: p.className ?? null };
+    const results: string[] = [];
+    const errors: string[] = [];
+
     try {
-      const result = await this.ps.generateFinal(p.id, p.name, {
-        schoolName: p.school?.name ?? null,
-        className: p.className ?? null,
-      });
-      if (result.success) {
-        const now = new Date();
-        const pad = (n: number) => n.toString().padStart(2, '0');
-        const timeStr = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-        this.finalResult.set({
-          localPath: result.localPath || '',
-          uploadedCount: result.uploadedCount || 0,
-          generatedAt: timeStr,
-        });
-        this.config.setSuccess(`Véglegesítés kész! Feltöltve: ${result.uploadedCount || 0} fájl.`);
+      // Flat
+      const flatResult = await this.ps.generateFinal(p.id, p.name, ctx);
+      if (flatResult.success && flatResult.uploadedCount && flatResult.uploadedCount > 0) {
+        results.push('Flat');
       } else {
-        this.config.setError(result.error || 'Véglegesítés sikertelen.');
+        errors.push(flatResult.error || 'Flat feltöltés sikertelen');
+      }
+
+      // Kistabló
+      const smallResult = await this.ps.generateSmallTablo(p.id, p.name, ctx);
+      if (smallResult.success && smallResult.uploadedCount && smallResult.uploadedCount > 0) {
+        results.push('Kistabló');
+      } else {
+        errors.push(smallResult.error || 'Kistabló feltöltés sikertelen');
+      }
+
+      const totalUploaded = (flatResult.uploadedCount || 0) + (smallResult.uploadedCount || 0);
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const timeStr = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      this.finalResult.set({
+        localPath: flatResult.localPath || '',
+        uploadedCount: totalUploaded,
+        generatedAt: timeStr,
+      });
+
+      if (results.length > 0) {
+        this.config.setSuccess(`Véglegesítés kész! Feltöltve: ${results.join(' + ')} (${totalUploaded} fájl)`);
+      }
+      if (errors.length > 0 && results.length === 0) {
+        this.config.setError(errors.join('; '));
       }
     } finally {
       this.generatingFinal.set(false);

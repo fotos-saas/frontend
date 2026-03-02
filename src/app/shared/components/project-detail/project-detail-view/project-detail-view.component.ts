@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ClipboardService } from '../../../../core/services/clipboard.service';
+import { FeatureToggleService } from '../../../../core/services/feature-toggle.service';
 import { environment } from '../../../../../environments/environment';
 import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
 import {
@@ -42,6 +43,7 @@ import { ProjectPersonsSectionComponent } from '../project-persons-section/proje
 })
 export class ProjectDetailViewComponent {
   private readonly clipboardService = inject(ClipboardService);
+  protected readonly featureToggle = inject(FeatureToggleService);
   readonly ICONS = ICONS;
 
   readonly project = input<ProjectDetailData | null>(null);

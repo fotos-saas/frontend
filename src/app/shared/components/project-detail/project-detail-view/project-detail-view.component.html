@@ -2,9 +2,11 @@
   <div class="overview-header">
     <app-info-box storageKey="overview-tab" title="Projekt áttekintés" mode="dialog">
       <div dialogContent class="info-help-grid">
-        <app-info-help-item [icon]="ICONS.QR_CODE" title="Hozzáférések" color="purple">
-          QR kód és hozzáférés létrehozás a regisztrációs linkekhez. Többféle típus érhető el: koordinátor, szülő, diák.
-        </app-info-help-item>
+        @if (featureToggle.isEnabled('feature.share-qr')) {
+          <app-info-help-item [icon]="ICONS.QR_CODE" title="Hozzáférések" color="purple">
+            QR kód és hozzáférés létrehozás a regisztrációs linkekhez. Többféle típus érhető el: koordinátor, szülő, diák.
+          </app-info-help-item>
+        }
         <app-info-help-item [icon]="ICONS.IMAGES" title="Galéria" color="indigo">
           Fotók száma és a képválasztási határidő. A határidőt gyorsan meghosszabbíthatod az előre definiált gombokkal.
         </app-info-help-item>
@@ -31,22 +33,24 @@
   <!-- === MOBIL: Kompakt gyorsműveletek lista === -->
   <div class="quick-actions">
     <!-- Hozzáférések sor -->
-    <button type="button" class="quick-action" (click)="openQrModal.emit()">
-      <div class="quick-action__icon quick-action__icon--purple">
-        <lucide-icon [name]="ICONS.QR_CODE" [size]="16" />
-      </div>
-      <div class="quick-action__text">
-        <span class="quick-action__title">Hozzáférések</span>
-        <span class="quick-action__desc">
-          @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {
-            {{ project()!.activeQrCodes.length }} aktív kód
-          } @else {
-            Nincs generálva
-          }
-        </span>
-      </div>
-      <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" class="quick-action__arrow" />
-    </button>
+    @if (featureToggle.isEnabled('feature.share-qr')) {
+      <button type="button" class="quick-action" (click)="openQrModal.emit()">
+        <div class="quick-action__icon quick-action__icon--purple">
+          <lucide-icon [name]="ICONS.QR_CODE" [size]="16" />
+        </div>
+        <div class="quick-action__text">
+          <span class="quick-action__title">Hozzáférések</span>
+          <span class="quick-action__desc">
+            @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {
+              {{ project()!.activeQrCodes.length }} aktív kód
+            } @else {
+              Nincs generálva
+            }
+          </span>
+        </div>
+        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" class="quick-action__arrow" />
+      </button>
+    }
 
     <!-- Megrendelési adatok sor -->
     @if (!isMarketer()) {
@@ -111,6 +115,7 @@
   <!-- === DESKTOP: Eredeti szekciók === -->
 
   <!-- Hozzáférések szekció -->
+  @if (featureToggle.isEnabled('feature.share-qr')) {
   <section class="mb-6 desktop-section">
     @if (project()!.activeQrCodes && project()!.activeQrCodes.length > 0) {
       <!-- Van aktív hozzáférés(ek) -->
@@ -170,6 +175,7 @@
       </div>
     }
   </section>
+  }
 
   <!-- Megrendelési adatok szekció (nem marketinges) -->
   @if (!isMarketer()) {
@@ -373,7 +379,7 @@
   </section>
 
   <!-- QR History -->
-  @if (project()!.qrCodesHistory && project()!.qrCodesHistory.length > 0) {
+  @if (featureToggle.isEnabled('feature.share-qr') && project()!.qrCodesHistory && project()!.qrCodesHistory.length > 0) {
     <section class="mt-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
       <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <h2 class="font-semibold text-gray-900">Hozzáférés előzmények</h2>

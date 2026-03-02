@@ -45,54 +45,26 @@ import { StepReviewService } from './step-review.service';
   providers: [StepReviewService],
   template: `
     <div class="step-review">
-      <!-- Stats Bar + Search -->
-      <app-review-stats-bar
-        [assignedCount]="assignedCount()"
-        [missingCount]="missingCount()"
-        [unassignedCount]="unassignedPhotos().length"
-        [(searchQuery)]="searchQuery"
-      />
+      <!-- Fő tartalom (bal oldal) -->
+      <div class="step-review__main">
+        <!-- Stats Bar + Search -->
+        <app-review-stats-bar
+          [assignedCount]="assignedCount()"
+          [missingCount]="missingCount()"
+          [unassignedCount]="unassignedPhotos().length"
+          [(searchQuery)]="searchQuery"
+        />
 
-      <!-- HIÁNYZÓ SZEMÉLYEK (akiknek NINCS képük) -->
-      @if (missingPersonsList().length > 0) {
-        <div class="section section--missing">
-          <h4 class="section-title section-title--warning">
-            <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-            Hiányzik ({{ missingPersonsList().length }})
-            <span class="section-hint">Húzd ide a megfelelő képet</span>
-          </h4>
-          <div class="persons-grid">
-            @for (person of missingPersonsList(); track person.id; let i = $index) {
-              <app-review-person-card
-                [person]="person"
-                [animationDelay]="i * 0.02 + 's'"
-                [connectedDropLists]="allDropListIds()"
-                (photoClick)="openLightbox($event)"
-                (removeClick)="removeAssignment(person)"
-                (drop)="onDropOnPersonCard($event, person)"
-              />
-            }
-          </div>
-        </div>
-      }
-
-      <!-- PÁROSÍTOTT SZEMÉLYEK (akiknek VAN képük) -->
-      @if (pairedPersons().length > 0) {
-        <div class="section section--paired">
-          <h4 class="section-title section-title--success section-title--collapsible"
-              (click)="togglePairedCollapsed()">
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-            Párosítva ({{ pairedPersons().length }})
-            <span class="section-hint">Húzz új képet a cseréhez</span>
-            <lucide-icon
-              [name]="pairedCollapsed() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_UP"
-              [size]="16"
-              class="collapse-icon"
-            />
-          </h4>
-          @if (!pairedCollapsed()) {
-            <div class="persons-grid persons-grid--paired">
-              @for (person of pairedPersons(); track person.id; let i = $index) {
+        <!-- HIÁNYZÓ SZEMÉLYEK (akiknek NINCS képük) -->
+        @if (missingPersonsList().length > 0) {
+          <div class="section section--missing">
+            <h4 class="section-title section-title--warning">
+              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+              Hiányzik ({{ missingPersonsList().length }})
+              <span class="section-hint">Húzd ide a megfelelő képet</span>
+            </h4>
+            <div class="persons-grid">
+              @for (person of missingPersonsList(); track person.id; let i = $index) {
                 <app-review-person-card
                   [person]="person"
                   [animationDelay]="i * 0.02 + 's'"
@@ -103,34 +75,67 @@ import { StepReviewService } from './step-review.service';
                 />
               }
             </div>
-          }
-        </div>
-      }
+          </div>
+        }
 
-      <!-- Empty State -->
-      @if (filteredPersonsWithPhotos().length === 0 && searchQuery()) {
-        <div class="empty-state">
-          <lucide-icon [name]="ICONS.SEARCH" [size]="32" />
-          <p>Nincs találat: "{{ searchQuery() }}"</p>
-        </div>
-      }
+        <!-- PÁROSÍTOTT SZEMÉLYEK (akiknek VAN képük) -->
+        @if (pairedPersons().length > 0) {
+          <div class="section section--paired">
+            <h4 class="section-title section-title--success section-title--collapsible"
+                (click)="togglePairedCollapsed()">
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+              Párosítva ({{ pairedPersons().length }})
+              <span class="section-hint">Húzz új képet a cseréhez</span>
+              <lucide-icon
+                [name]="pairedCollapsed() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_UP"
+                [size]="16"
+                class="collapse-icon"
+              />
+            </h4>
+            @if (!pairedCollapsed()) {
+              <div class="persons-grid persons-grid--paired">
+                @for (person of pairedPersons(); track person.id; let i = $index) {
+                  <app-review-person-card
+                    [person]="person"
+                    [animationDelay]="i * 0.02 + 's'"
+                    [connectedDropLists]="allDropListIds()"
+                    (photoClick)="openLightbox($event)"
+                    (removeClick)="removeAssignment(person)"
+                    (drop)="onDropOnPersonCard($event, person)"
+                  />
+                }
+              </div>
+            }
+          </div>
+        }
 
-      <!-- Unassigned Photos Panel -->
+        <!-- Empty State -->
+        @if (filteredPersonsWithPhotos().length === 0 && searchQuery()) {
+          <div class="empty-state">
+            <lucide-icon [name]="ICONS.SEARCH" [size]="32" />
+            <p>Nincs találat: "{{ searchQuery() }}"</p>
+          </div>
+        }
+
+        <!-- All Assigned Message -->
+        @if (unassignedPhotos().length === 0 && assignedCount() > 0) {
+          <div class="all-assigned-message">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
+            <span>Minden kép párosítva!</span>
+          </div>
+        }
+      </div>
+
+      <!-- Jobb oldali sidebar: Párosítatlan képek -->
       @if (unassignedPhotos().length > 0) {
-        <app-review-unassigned-panel
-          [photos]="unassignedPhotos()"
-          [connectedDropLists]="allDropListIds()"
-          (photoClick)="openLightbox($event)"
-          (deleteAll)="deleteAllUnassigned.emit()"
-          (drop)="onDropOnUnassigned($event)"
-        />
-      }
-
-      <!-- All Assigned Message -->
-      @if (unassignedPhotos().length === 0 && assignedCount() > 0) {
-        <div class="all-assigned-message">
-          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
-          <span>Minden kép párosítva!</span>
+        <div class="step-review__sidebar">
+          <app-review-unassigned-panel
+            [photos]="unassignedPhotos()"
+            [connectedDropLists]="allDropListIds()"
+            (photoClick)="openLightbox($event)"
+            (deleteAll)="deleteAllUnassigned.emit()"
+            (drop)="onDropOnUnassigned($event)"
+          />
         </div>
       }
     </div>

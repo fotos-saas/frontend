@@ -58,6 +58,7 @@ export class PsAutocompleteComponent extends PsFormFieldBase<string> implements 
   readonly value = signal('');
   readonly isOpen = signal(false);
   readonly highlightedIndex = signal(-1);
+  private selectedValue: string | null = null;
 
   readonly filteredSuggestions = computed(() => {
     const query = this.value().toLowerCase().trim();
@@ -95,7 +96,15 @@ export class PsAutocompleteComponent extends PsFormFieldBase<string> implements 
   onInput(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
     this.value.set(val);
-    this.onChange(val);
+
+    // Ha nem engedünk szabad szöveget, a kiválasztás törlődik gépeléskor
+    if (!this.allowFreeText() && this.selectedValue !== null) {
+      this.selectedValue = null;
+      this.onChange('');
+    } else if (this.allowFreeText()) {
+      this.onChange(val);
+    }
+
     this.searchSubject.next(val);
     if (val.length >= this.minChars()) {
       this.isOpen.set(true);
@@ -107,6 +116,7 @@ export class PsAutocompleteComponent extends PsFormFieldBase<string> implements 
 
   selectSuggestion(option: PsSelectOption): void {
     this.value.set(option.label);
+    this.selectedValue = option.label;
     this.onChange(option.label);
     this.onTouched();
     this.selected.emit(option);

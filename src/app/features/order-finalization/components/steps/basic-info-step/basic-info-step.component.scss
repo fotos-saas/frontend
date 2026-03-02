@@ -3,41 +3,27 @@
 
 @import '../../../styles/form-elements';
 
-// Iskola keresés + Új iskola gomb elrendezés
+// Iskola keresés + "Új iskola hozzáadása" link
 .school-field {
-  &__row {
-    display: flex;
-    align-items: flex-end;
-    gap: 0.5rem;
-  }
-
-  &__autocomplete {
-    flex: 1;
-    min-width: 0;
-  }
-
-  &__add-btn {
-    display: flex;
+  &__add-link {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    border: 2px solid get-color('primary', 400);
-    border-radius: 10px;
-    background: get-color('primary', 50);
-    color: get-color('primary', 600);
+    margin-top: 6px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 0.8125rem;
+    color: var(--color-primary, #1e3a5f);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: color 0.15s ease;
 
-    &:hover {
-      background: get-color('primary', 100);
-      border-color: get-color('primary', 500);
-      transform: scale(1.05);
+    lucide-icon {
+      margin-right: 4px;
     }
 
-    &:active {
-      transform: scale(0.95);
+    &:hover {
+      color: var(--color-primary-dark, #152a45);
+      text-decoration: underline;
     }
   }
 }

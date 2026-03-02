@@ -20,11 +20,14 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { PartnerFinalizationApiService } from '../../services/partner-finalization-api.service';
 import { PartnerFileUploadService } from '../../services/partner-file-upload.service';
+import { PartnerService, SchoolItem } from '../../services/partner.service';
 import { OrderValidationService } from '../../../order-finalization/services/order-validation.service';
+import { PsSelectOption } from '@shared/components/form/form.types';
 import { ContactStepComponent } from '../../../order-finalization/components/steps/contact-step/contact-step.component';
 import { BasicInfoStepComponent } from '../../../order-finalization/components/steps/basic-info-step/basic-info-step.component';
 import { DesignStepComponent } from '../../../order-finalization/components/steps/design-step/design-step.component';
 import { RosterStepComponent } from '../../../order-finalization/components/steps/roster-step/roster-step.component';
+import { AddSchoolModalComponent } from '../add-school-modal/add-school-modal.component';
 import {
   OrderFinalizationData,
   EMPTY_ORDER_FINALIZATION_DATA,
@@ -49,11 +52,13 @@ import {
     BasicInfoStepComponent,
     DesignStepComponent,
     RosterStepComponent,
+    AddSchoolModalComponent,
   ],
 })
 export class PartnerOrderWizardDialogComponent implements OnInit {
   private readonly api = inject(PartnerFinalizationApiService);
   private readonly fileUpload = inject(PartnerFileUploadService);
+  private readonly partnerService = inject(PartnerService);
   private readonly validation = inject(OrderValidationService);
   private readonly toast = inject(ToastService);
   private readonly logger = inject(LoggerService);
@@ -77,6 +82,11 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
 
   backgroundFileName = signal<string | null>(null);
   attachmentFileNames = signal<string[]>([]);
+
+  // Iskola autocomplete
+  schoolSuggestions = signal<PsSelectOption[]>([]);
+  schoolLoading = signal(false);
+  showAddSchoolModal = signal(false);
 
   private readonly draftSave$ = new Subject<void>();
   private lastSavedSnapshot = '';
@@ -189,6 +199,42 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
 
   onRosterChange(data: RosterData): void {
     this.formData.update(fd => ({ ...fd, roster: data }));
+    this.draftSave$.next();
+  }
+
+  // Iskola keresés
+  onSchoolSearch(query: string): void {
+    this.schoolLoading.set(true);
+    this.partnerService.getAllSchools(query)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (schools) => {
+          this.schoolSuggestions.set(
+            schools.map(s => ({ id: s.id, label: s.name, sublabel: s.city || undefined }))
+          );
+          this.schoolLoading.set(false);
+        },
+        error: () => {
+          this.schoolSuggestions.set([]);
+          this.schoolLoading.set(false);
+        },
+      });
+  }
+
+  onSchoolSelected(option: PsSelectOption): void {
+    this.formData.update(fd => ({
+      ...fd,
+      basicInfo: { ...fd.basicInfo, schoolName: option.label, city: option.sublabel || fd.basicInfo.city }
+    }));
+    this.draftSave$.next();
+  }
+
+  onSchoolCreated(school: SchoolItem): void {
+    this.showAddSchoolModal.set(false);
+    this.formData.update(fd => ({
+      ...fd,
+      basicInfo: { ...fd.basicInfo, schoolName: school.name, city: school.city || fd.basicInfo.city }
+    }));
     this.draftSave$.next();
   }
 

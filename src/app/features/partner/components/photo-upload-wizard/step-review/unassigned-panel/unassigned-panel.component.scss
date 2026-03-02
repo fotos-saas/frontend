@@ -2,7 +2,6 @@
 @use 'styles/colors' as *;
 
 .unassigned-section {
-  height: 100%;
   display: flex;
   flex-direction: column;
   background: get-color('warning', 50);
@@ -52,9 +51,9 @@
 }
 
 .unassigned-grid {
-  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  max-height: 60vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
   // Safari gap-kompatibilitás: negatív margin + padding

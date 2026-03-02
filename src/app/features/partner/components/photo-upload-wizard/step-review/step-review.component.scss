@@ -33,8 +33,11 @@
 .step-review__sidebar {
   width: 200px;
   flex-shrink: 0;
-  overflow-y: auto;
   margin-left: 16px;
+  align-self: flex-start;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
 }
 
 .section {

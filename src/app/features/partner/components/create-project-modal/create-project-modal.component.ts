@@ -83,6 +83,10 @@ export class CreateProjectModalComponent {
     return { id: contact.id ?? -1, name: contact.name, subtitle: contact.email || undefined };
   });
 
+  readonly canSubmit = computed(() =>
+    !!this.selectedSchool() && !!this.selectedContact() && !this.submitting()
+  );
+
   formData: CreateProjectRequest = {
     school_id: null,
     class_name: null,
@@ -207,6 +211,7 @@ export class CreateProjectModalComponent {
   }
 
   onSubmit(): void {
+    if (!this.canSubmit()) return;
     this.error.set(null);
     this.submitting.set(true);
 

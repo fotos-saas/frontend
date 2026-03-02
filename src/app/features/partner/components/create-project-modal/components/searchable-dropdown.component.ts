@@ -255,6 +255,10 @@ export class SearchableDropdownComponent {
 
   onSearchChange(value: string): void {
     this.searchText.set(value);
+    // Ha volt kiválasztott elem és a user módosítja a szöveget, érvénytelenítjük
+    if (this.selectedItem()) {
+      this.cleared.emit();
+    }
     if (value.length > 0) {
       this.showDropdown.set(true);
       this.searchChange.emit(value);

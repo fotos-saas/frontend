@@ -59,10 +59,7 @@ export class DropZoneComponent {
     const d = this.detailedProgress();
     if (!d) return 'Feltöltés folyamatban...';
     if (d.phase === 'uploading') {
-      if (d.totalChunks > 1) {
-        return `Feltöltés... ${d.currentChunk}/${d.totalChunks} csomag`;
-      }
-      return 'Feltöltés folyamatban...';
+      return 'Feltöltés...';
     }
     if (d.phase === 'processing') return `ZIP feldolgozás... ${d.uploadedCount}/${d.totalCount} kép`;
     if (d.phase === 'completed') return 'Kész!';

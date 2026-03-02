@@ -6,6 +6,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { PsInputComponent, PsSelectComponent, PsToggleComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerService } from '../../services/partner.service';
+import { FeatureToggleService } from '../../../../core/services/feature-toggle.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { TabloSize } from '../../models/partner.models';
 
@@ -21,6 +22,7 @@ export class GlobalSettingsComponent implements OnInit {
   private partnerService = inject(PartnerService);
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
+  protected readonly featureToggle = inject(FeatureToggleService);
 
   readonly ICONS = ICONS;
 

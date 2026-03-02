@@ -13,6 +13,7 @@
       <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
     </div>
   } @else {
+    @if (featureToggle.isEnabled('feature.gallery.selection')) {
     <div class="settings-section">
       <div class="section-title">
         <lucide-icon [name]="ICONS.IMAGE" [size]="18" />
@@ -89,6 +90,7 @@
       </div>
 
     </div>
+    }
 
     <!-- Elérhető tablóméretek szekció -->
     <div class="settings-section">
@@ -188,6 +190,7 @@
     </div>
 
     <!-- Export beállítások szekció -->
+    @if (featureToggle.isEnabled('feature.gallery.export')) {
     <div class="settings-section">
       <div class="section-title">
         <lucide-icon [name]="ICONS.DOWNLOAD" [size]="18" />
@@ -252,6 +255,7 @@
       </div>
 
     </div>
+    }
 
     <!-- Projekt létrehozás mód -->
     <div class="settings-section">

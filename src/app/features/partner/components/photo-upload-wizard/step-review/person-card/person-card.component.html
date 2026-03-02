@@ -72,12 +72,12 @@
   <!-- Person Info -->
   <div class="person-info">
     <span class="person-name" [matTooltip]="person().name" matTooltipPosition="below">{{ person().name }}</span>
-    @if (person().assignedPhoto) {
+    @if (photoFilename()) {
       <span
         class="photo-filename"
-        [matTooltip]="person().assignedPhoto!.iptcTitle || person().assignedPhoto!.filename"
+        [matTooltip]="photoFilename()!"
         matTooltipPosition="below"
-      >{{ person().assignedPhoto!.iptcTitle || person().assignedPhoto!.filename }}</span>
+      >{{ photoFilename() }}</span>
     }
   </div>
 </div>

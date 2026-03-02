@@ -88,6 +88,10 @@ export class PersonsModalComponent implements OnInit {
   // Törlés megerősítés
   deleteConfirmPerson = signal<TabloPersonItem | null>(null);
 
+  // Batch törlés megerősítés
+  batchDeleteConfirm = signal(false);
+  batchDeleting = signal(false);
+
   // Batch portrait dialógus
   batchPortraitPersons = signal<TabloPersonItem[] | null>(null);
 
@@ -352,13 +356,47 @@ export class PersonsModalComponent implements OnInit {
 
   get isElectron(): boolean { return this.electronService.isElectron; }
 
-  /** Kártya kattintás: CMD/Ctrl → kijelölés, egyébként → lightbox */
+  /** Kártya kattintás: CMD/Ctrl → kijelölés, sima kattintás → lightbox (vagy kijelölés törlése) */
   onCardClick(person: TabloPersonItem, event: MouseEvent): void {
-    if (this.isElectron && (event.metaKey || event.ctrlKey) && person.hasPhoto) {
+    if (event.metaKey || event.ctrlKey) {
       this.batchActions.togglePersonSelection(person.id);
+    } else if (this.batchActions.selectedCount() > 0) {
+      this.batchActions.resetSelection();
     } else {
       this.openLightbox(person);
     }
+  }
+
+  // --- Batch törlés ---
+
+  batchDeletePersons(): void {
+    if (this.batchActions.selectedCount() === 0) return;
+    this.batchDeleteConfirm.set(true);
+  }
+
+  confirmBatchDelete(): void {
+    const ids = Array.from(this.batchActions.selectedPersonIds());
+    if (ids.length === 0) return;
+    this.batchDeleting.set(true);
+    this.projectService.deletePersonsBatch(this.projectId(), ids)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          const deletedSet = new Set(ids);
+          this.allPersons.set(this.allPersons().filter(p => !deletedSet.has(p.id)));
+          this.batchActions.resetSelection();
+          this.batchDeleteConfirm.set(false);
+          this.batchDeleting.set(false);
+        },
+        error: () => {
+          this.batchDeleteConfirm.set(false);
+          this.batchDeleting.set(false);
+        },
+      });
+  }
+
+  cancelBatchDelete(): void {
+    this.batchDeleteConfirm.set(false);
   }
 
   startBatchPortrait(): void {

@@ -271,16 +271,22 @@
           Új {{ typeFilter() === 'teacher' ? 'tanár' : 'diák' }}
         </button>
 
-        @if (isElectron && batchActions.selectedCount() > 0) {
-          <button type="button" class="btn btn--purple" (click)="startBatchPortrait()">
-            <lucide-icon [name]="ICONS.SCAN_FACE" [size]="14" />
-            Háttércsere ({{ batchActions.selectedCount() }})
+        @if (batchActions.selectedCount() > 0) {
+          <button type="button" class="btn btn--danger" (click)="batchDeletePersons()">
+            <lucide-icon [name]="ICONS.DELETE" [size]="14" />
+            Törlés ({{ batchActions.selectedCount() }})
           </button>
-          @if (cropEnabled()) {
-            <button type="button" class="btn btn--primary" (click)="startBatchCrop()">
-              <lucide-icon [name]="ICONS.CROP" [size]="14" />
-              Vágás ({{ batchActions.selectedCount() }})
+          @if (isElectron) {
+            <button type="button" class="btn btn--purple" (click)="startBatchPortrait()">
+              <lucide-icon [name]="ICONS.SCAN_FACE" [size]="14" />
+              Háttércsere ({{ batchActions.selectedCount() }})
             </button>
+            @if (cropEnabled()) {
+              <button type="button" class="btn btn--primary" (click)="startBatchCrop()">
+                <lucide-icon [name]="ICONS.CROP" [size]="14" />
+                Vágás ({{ batchActions.selectedCount() }})
+              </button>
+            }
           }
           <button type="button" class="btn btn--outline" matTooltip="Kijelölés törlése" (click)="batchActions.resetSelection()">
             <lucide-icon [name]="ICONS.X" [size]="14" />
@@ -337,6 +343,17 @@
     confirmText="Törlés"
     confirmType="danger"
     (resultEvent)="$event.action === 'confirm' ? confirmDeletePerson() : cancelDeletePerson()"
+  />
+}
+
+<!-- Batch törlés megerősítő dialógus -->
+@if (batchDeleteConfirm()) {
+  <app-confirm-dialog
+    [title]="'Személyek törlése'"
+    [message]="'Biztosan törlöd a kijelölt ' + batchActions.selectedCount() + ' személyt?'"
+    confirmText="Törlés"
+    confirmType="danger"
+    (resultEvent)="$event.action === 'confirm' ? confirmBatchDelete() : cancelBatchDelete()"
   />
 }
 

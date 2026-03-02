@@ -238,6 +238,21 @@ export class PartnerProjectService {
   }
 
   /**
+   * Több személy törlése egyszerre (batch)
+   */
+  deletePersonsBatch(projectId: number, ids: number[]): Observable<{
+    success: boolean;
+    message: string;
+    data: { deleted_count: number };
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: { deleted_count: number };
+    }>(`${this.baseUrl}/projects/${projectId}/persons/batch-delete`, { ids });
+  }
+
+  /**
    * Override: projekt-specifikus fotó beállítása
    */
   overridePersonPhoto(projectId: number, personId: number, photoId: number): Observable<{

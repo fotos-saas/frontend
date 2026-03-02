@@ -150,4 +150,12 @@ export class ElectronCropService {
     }
     return window.electronAPI!.crop.readProcessedFile({ filePath });
   }
+
+  /** Böngésző File objektum mentése temp könyvtárba (kalibráció) */
+  async saveTempFile(fileName: string, data: ArrayBuffer): Promise<{ success: boolean; path?: string; error?: string }> {
+    if (!this.isElectron) {
+      return { success: false, error: 'Csak Electron alkalmazásban érhető el' };
+    }
+    return window.electronAPI!.crop.saveTempFile({ fileName, data });
+  }
 }

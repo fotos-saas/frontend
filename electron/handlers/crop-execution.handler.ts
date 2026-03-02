@@ -302,4 +302,39 @@ export function registerCropExecutionHandlers(): void {
       return { success: false, error: 'Fajl olvasasi hiba' };
     }
   });
+
+  // ============ Save temp file (browser file → temp dir) ============
+  ipcMain.handle('crop:save-temp-file', async (_event, params: { fileName: string; data: ArrayBuffer }) => {
+    if (!params || typeof params.fileName !== 'string' || !params.data) {
+      return { success: false, error: 'Ervenytelen parameterek' };
+    }
+
+    const ext = path.extname(params.fileName).toLowerCase();
+    if (!SUPPORTED_EXTENSIONS.has(ext)) {
+      return { success: false, error: 'Nem tamogatott fajlformatum' };
+    }
+
+    // Fájlnév sanitizálás
+    const safeName = `calib_${Date.now()}${ext}`;
+    const tempDir = path.join(os.tmpdir(), TEMP_DIR_NAME);
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    const outputPath = path.join(tempDir, safeName);
+    if (!isAllowedWritePath(outputPath)) {
+      return { success: false, error: 'Nem engedelyezett celmappa' };
+    }
+
+    try {
+      const buffer = Buffer.from(params.data);
+      if (buffer.length === 0 || buffer.length > MAX_READ_SIZE) {
+        return { success: false, error: 'Ervenytelen fajlmeret' };
+      }
+      fs.writeFileSync(outputPath, buffer);
+      return { success: true, path: outputPath };
+    } catch {
+      return { success: false, error: 'Fajl irasi hiba' };
+    }
+  });
 }

@@ -149,24 +149,19 @@ export class CropCalibrationDialogComponent {
     };
     img.src = url;
 
-    // Temp könyvtárba írjuk a fájlt az Electron-os detektáláshoz
-    const tempDir = await this.cropService.getTempDir();
-    if (!tempDir) {
-      this.error.set('Temp könyvtár nem elérhető');
-      return;
-    }
-
-    this.logger.info('Kalibráció: fájl kiválasztva, detektálás...');
+    this.logger.info('Kalibráció: fájl kiválasztva, temp mentés + detektálás...');
     this.detecting.set(true);
 
-    // A fájl path csak Electron-ban érhető el
-    const filePath = (file as unknown as { path?: string }).path;
-    if (!filePath) {
-      this.error.set('Fájl útvonal nem elérhető (csak Electron alkalmazásban)');
+    // Fájl beolvasása ArrayBuffer-ként és mentése temp könyvtárba
+    const arrayBuffer = await file.arrayBuffer();
+    const saveResult = await this.cropService.saveTempFile(file.name, arrayBuffer);
+    if (!saveResult.success || !saveResult.path) {
+      this.error.set(saveResult.error || 'Temp fájl mentés sikertelen');
       this.detecting.set(false);
       return;
     }
 
+    const filePath = saveResult.path;
     this.imagePath.set(filePath);
     const result = await this.cropService.detectFaces(filePath);
     this.detecting.set(false);

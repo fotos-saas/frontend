@@ -522,6 +522,7 @@ interface CropAPI {
   getTempDir: () => Promise<string>;
   cleanupTemp: (filePaths: string[]) => Promise<{ success: boolean; cleaned?: number }>;
   readProcessedFile: (params: { filePath: string }) => Promise<{ success: boolean; data?: ArrayBuffer; error?: string }>;
+  saveTempFile: (params: { fileName: string; data: ArrayBuffer }) => Promise<{ success: boolean; path?: string; error?: string }>;
 }
 
 interface PortraitAPI {

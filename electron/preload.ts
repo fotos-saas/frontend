@@ -559,6 +559,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('crop:read-processed-file', params) as Promise<{
         success: boolean; data?: ArrayBuffer; error?: string;
       }>,
+    saveTempFile: (params: { fileName: string; data: ArrayBuffer }) =>
+      ipcRenderer.invoke('crop:save-temp-file', params) as Promise<{
+        success: boolean; path?: string; error?: string;
+      }>,
   },
 
   // ============ LAN Szinkronizálás ============

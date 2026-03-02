@@ -58,22 +58,21 @@ export function computeCropRect(
   const faceW = face.face_width;
   const faceCX = face.face_center.x;
 
-  // Teljes "fej + váll" magasság: fej + padding top + padding bottom
-  const totalContentH = faceH * (1 + headPad + chinPad);
+  // A crop magassága az arc pozíciójából számítva:
+  // Az arc teteje (homlok) fölött headPad * faceH padding
+  // Az arc alja (áll) alatt chinPad * faceH padding
+  const topPadding = headPad * faceH;
+  const bottomPadding = chinPad * faceH;
+  const cropH = topPadding + faceH + bottomPadding;
 
-  // A crop magassága: az arcközép a face_position_y arányban legyen
-  const cropH = totalContentH / (1 - (1 - facePosY) * 0.3);
-
-  // A crop szélessége: aspect ratio alapján
+  // A crop szélessége: aspect ratio alapján, vagy min. váll arány
   const cropW = cropH * ar;
-
-  // Minimális szélesség: váll arány * arcszélesség
-  const minW = faceW * shoulderW * 2.2;
+  const minW = faceW * (1 + shoulderW);
   const finalW = Math.max(cropW, minW);
   const finalH = finalW / ar;
 
   // Az arc teteje (homlok) a crop tetejétől headPaddingTop * faceH-ra legyen
-  const cropTop = face.forehead.y - headPad * faceH;
+  const cropTop = face.forehead.y - topPadding;
 
   // Középre igazítás vízszintesen
   const cropLeft = faceCX - finalW / 2;

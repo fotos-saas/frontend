@@ -123,15 +123,13 @@
 }
 
 .unassigned-name {
-  padding: 3px 4px;
+  padding: 4px 4px 2px;
   font-size: 0.5625rem;
-  background: get-color('slate', 800);
-  color: #ffffff;
+  color: get-color('slate', 600);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
-  border-radius: 0 0 4px 4px;
 }
 
 .drag-preview-img {

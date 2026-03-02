@@ -85,7 +85,7 @@
     }
 
     <!-- Galéria sor -->
-    @if (!isMarketer()) {
+    @if (!isMarketer() && featureToggle.isEnabled('feature.gallery')) {
       @if (project()!.tabloGalleryId) {
         <a [routerLink]="'gallery'" class="quick-action">
           <div class="quick-action__icon quick-action__icon--indigo">
@@ -236,7 +236,7 @@
   }
 
   <!-- Galéria szekció (csak partner - nem marketer) -->
-  @if (!isMarketer()) {
+  @if (!isMarketer() && featureToggle.isEnabled('feature.gallery')) {
     <section class="mb-6 desktop-section">
       @if (project()!.tabloGalleryId) {
         <!-- Van galéria -->

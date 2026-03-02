@@ -277,7 +277,6 @@ export class PartnerShellComponent implements OnInit {
             icon: 'settings',
             children: [
               { id: 'profile', route: `${base}/profile`, label: 'Fiókom' },
-              { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
               { id: 'portrait', route: `${base}/settings/portrait`, label: 'Portré háttércsere', visible: () => this.electronService.isElectron },
             ]
           },

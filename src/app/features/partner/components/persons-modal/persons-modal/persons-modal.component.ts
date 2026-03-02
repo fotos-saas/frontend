@@ -93,6 +93,7 @@ export class PersonsModalComponent implements OnInit {
 
   // Batch crop dialógus
   batchCropPersons = signal<TabloPersonItem[] | null>(null);
+  cropEnabled = signal(false);
 
   // Teacher link & photo chooser dialog
   showTeacherLinkDialog = signal(false);
@@ -173,6 +174,11 @@ export class PersonsModalComponent implements OnInit {
     const initial = this.initialTypeFilter();
     if (initial) this.typeFilter.set(initial);
     this.loadPersons();
+    if (this.isElectron) {
+      this.partnerService.getCropSettings().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (res) => { if (res.success) this.cropEnabled.set(res.data.enabled); },
+      });
+    }
   }
 
   loadPersons(silent = false): void {

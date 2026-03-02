@@ -17,12 +17,11 @@ import {
   MatchResult,
   PhotoAssignment
 } from '../../../services/partner.service';
+import { AlbumType } from '../../../models/partner.models';
 import { SamplesLightboxComponent } from '../../../../../shared/components/samples-lightbox';
 import {
   PersonWithPhoto,
   ReviewStatsBarComponent,
-  ReviewFilterTabsComponent,
-  ReviewSearchBoxComponent,
   ReviewPersonCardComponent,
   ReviewUnassignedPanelComponent,
 } from './index';
@@ -40,30 +39,19 @@ import { StepReviewService } from './step-review.service';
     LucideAngularModule,
     SamplesLightboxComponent,
     ReviewStatsBarComponent,
-    ReviewFilterTabsComponent,
-    ReviewSearchBoxComponent,
     ReviewPersonCardComponent,
     ReviewUnassignedPanelComponent,
   ],
   providers: [StepReviewService],
   template: `
     <div class="step-review">
-      <!-- Stats Bar -->
+      <!-- Stats Bar + Search -->
       <app-review-stats-bar
         [assignedCount]="assignedCount()"
         [missingCount]="missingCount()"
         [unassignedCount]="unassignedPhotos().length"
+        [(searchQuery)]="searchQuery"
       />
-
-      <!-- Type Filter Tabs -->
-      <app-review-filter-tabs
-        [(selected)]="typeFilter"
-        [studentStats]="studentStats()"
-        [teacherStats]="teacherStats()"
-      />
-
-      <!-- Search -->
-      <app-review-search-box [(query)]="searchQuery" />
 
       <!-- HIÁNYZÓ SZEMÉLYEK (akiknek NINCS képük) -->
       @if (missingPersonsList().length > 0) {
@@ -172,6 +160,7 @@ export class StepReviewComponent {
   readonly assignments = input<PhotoAssignment[]>([]);
   readonly unassignedPhotos = input<UploadedPhoto[]>([]);
   readonly saving = input(false);
+  readonly albumType = input<AlbumType | null>(null);
 
   // === OUTPUTS ===
   readonly assignmentsChange = output<PhotoAssignment[]>();
@@ -185,6 +174,14 @@ export class StepReviewComponent {
     effect(() => this.svc.setUploadedPhotos(this.uploadedPhotos()));
     effect(() => this.svc.setAssignments(this.assignments()));
     effect(() => this.svc.setUnassignedPhotos(this.unassignedPhotos()));
+
+    // Album típus alapján állítsd be az aktív tabot
+    effect(() => {
+      const album = this.albumType();
+      if (album) {
+        this.svc.typeFilter.set(album === 'teachers' ? 'teacher' : 'student');
+      }
+    });
 
     // Alapból csukva ha van hiányzó (egyszer fut)
     let initialSet = false;
@@ -206,7 +203,6 @@ export class StepReviewComponent {
 
   // === Template-delegálás: signal-ek ===
   readonly searchQuery = this.svc.searchQuery;
-  readonly typeFilter = this.svc.typeFilter;
   readonly lightboxOpen = this.svc.lightboxOpen;
   readonly lightboxIndex = this.svc.lightboxIndex;
 
@@ -216,8 +212,6 @@ export class StepReviewComponent {
   readonly allDropListIds = this.svc.allDropListIds;
   readonly lightboxItems = this.svc.lightboxItems;
   readonly filteredPersonsWithPhotos = this.svc.filteredPersonsWithPhotos;
-  readonly studentStats = this.svc.studentStats;
-  readonly teacherStats = this.svc.teacherStats;
   readonly assignedCount = this.svc.assignedCount;
   readonly missingCount = this.svc.missingCount;
 

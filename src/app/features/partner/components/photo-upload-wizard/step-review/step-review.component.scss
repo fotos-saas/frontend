@@ -38,53 +38,29 @@
 }
 
 .section {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
-.section-title {
+.section-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin: 0 0 12px 0;
-  padding: 6px 12px;
-  border-radius: 8px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 8px 4px;
 
-.section-title--collapsible {
-  cursor: pointer;
-  user-select: none;
-  transition: opacity 0.15s;
-
-  &:hover {
-    opacity: 0.85;
+  lucide-icon {
+    margin-right: 6px;
   }
 }
 
-.collapse-icon {
-  margin-left: 4px;
-  opacity: 0.6;
+.section-label--success {
+  color: #059669;
 }
 
-.section-title--success {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.section-title--warning {
-  background: #fef3c7;
-  color: get-color('warning', 800);
-}
-
-.section-hint {
-  font-size: 0.75rem;
-  font-weight: 400;
-  opacity: 0.8;
-  margin-left: auto;
+.section-label--warning {
+  color: get-color('warning', 700);
 }
 
 .persons-grid {

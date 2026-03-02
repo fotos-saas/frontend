@@ -4,7 +4,6 @@ import {
   input,
   output,
   effect,
-  signal,
   computed,
   ChangeDetectionStrategy
 } from '@angular/core';
@@ -58,10 +57,9 @@ import { StepReviewService } from './step-review.service';
         <!-- HIÁNYZÓ SZEMÉLYEK (akiknek NINCS képük) -->
         @if (missingPersonsList().length > 0) {
           <div class="section section--missing">
-            <h4 class="section-title section-title--warning">
-              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
+            <h4 class="section-label section-label--warning">
+              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
               Hiányzik ({{ missingPersonsList().length }})
-              <span class="section-hint">Húzd ide a megfelelő képet</span>
             </h4>
             <div class="persons-grid">
               @for (person of missingPersonsList(); track person.id; let i = $index) {
@@ -81,31 +79,22 @@ import { StepReviewService } from './step-review.service';
         <!-- PÁROSÍTOTT SZEMÉLYEK (akiknek VAN képük) -->
         @if (pairedPersons().length > 0) {
           <div class="section section--paired">
-            <h4 class="section-title section-title--success section-title--collapsible"
-                (click)="togglePairedCollapsed()">
-              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+            <h4 class="section-label section-label--success">
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
               Párosítva ({{ pairedPersons().length }})
-              <span class="section-hint">Húzz új képet a cseréhez</span>
-              <lucide-icon
-                [name]="pairedCollapsed() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_UP"
-                [size]="16"
-                class="collapse-icon"
-              />
             </h4>
-            @if (!pairedCollapsed()) {
-              <div class="persons-grid persons-grid--paired">
-                @for (person of pairedPersons(); track person.id; let i = $index) {
-                  <app-review-person-card
-                    [person]="person"
-                    [animationDelay]="i * 0.02 + 's'"
-                    [connectedDropLists]="allDropListIds()"
-                    (photoClick)="openLightbox($event)"
-                    (removeClick)="removeAssignment(person)"
-                    (drop)="onDropOnPersonCard($event, person)"
-                  />
-                }
-              </div>
-            }
+            <div class="persons-grid persons-grid--paired">
+              @for (person of pairedPersons(); track person.id; let i = $index) {
+                <app-review-person-card
+                  [person]="person"
+                  [animationDelay]="i * 0.02 + 's'"
+                  [connectedDropLists]="allDropListIds()"
+                  (photoClick)="openLightbox($event)"
+                  (removeClick)="removeAssignment(person)"
+                  (drop)="onDropOnPersonCard($event, person)"
+                />
+              }
+            </div>
           </div>
         }
 
@@ -188,22 +177,6 @@ export class StepReviewComponent {
       }
     });
 
-    // Alapból csukva ha van hiányzó (egyszer fut)
-    let initialSet = false;
-    effect(() => {
-      const missing = this.missingPersonsList();
-      if (!initialSet && missing.length > 0) {
-        this.pairedCollapsed.set(true);
-        initialSet = true;
-      }
-    });
-  }
-
-  // === Collapse state: alapból becsukva ha van hiányzó ===
-  readonly pairedCollapsed = signal(false);
-
-  togglePairedCollapsed(): void {
-    this.pairedCollapsed.update(v => !v);
   }
 
   // === Template-delegálás: signal-ek ===

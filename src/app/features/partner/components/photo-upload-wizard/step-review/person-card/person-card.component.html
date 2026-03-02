@@ -48,18 +48,12 @@
       }
     } @else if (person().hasExistingPhoto) {
       <!-- Meglévő kép (DB-ből) -->
-      <div class="existing-photo-indicator">
-        <img
-          [src]="person().photoThumbUrl"
-          [alt]="person().name"
-          class="person-photo person-photo--existing"
-          loading="lazy"
-        />
-        <div class="existing-badge">
-          <lucide-icon [name]="ICONS.CHECK" [size]="10" />
-          Megvan
-        </div>
-      </div>
+      <img
+        [src]="person().photoThumbUrl"
+        [alt]="person().name"
+        class="person-photo"
+        loading="lazy"
+      />
     } @else {
       <!-- Üres - kép hiányzik -->
       <div class="empty-photo">

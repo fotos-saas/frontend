@@ -63,7 +63,11 @@ export class PsdStatusService {
     if (!this.ps.workDir()) {
       await this.ps.detectPhotoshop();
     }
-    if (!this.ps.workDir()) return;
+    if (!this.ps.workDir()) {
+      this.logger.warn('[PSD] workDir nem elérhető, PSD ellenőrzés kihagyva');
+      return;
+    }
+    this.logger.info(`[PSD] checkProjects: ${projects.length} projekt, workDir=${this.ps.workDir()}`);
 
     this.loading.set(true);
 
@@ -103,22 +107,36 @@ export class PsdStatusService {
     brandName: string | null,
   ): Promise<PsdStatus> {
     try {
-      const size = resolveProjectTabloSize(project, sizes, threshold);
-      if (!size) return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
-
-      const psdPath = await this.ps.computePsdPath(size.value, {
+      const context = {
         projectName: project.name,
         schoolName: project.schoolName,
         className: project.className,
         brandName,
-      });
-      if (!psdPath) return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
+      };
 
-      const result = await this.ps.checkPsdExists(psdPath);
-      const folderPath = psdPath.substring(0, psdPath.lastIndexOf('/'));
+      // 1. Preferált méret (mentett vagy automatikus)
+      const preferredSize = resolveProjectTabloSize(project, sizes, threshold);
 
-      return { exists: result.exists, psdPath, folderPath, hasPlacedPhotos: result.hasPlacedPhotos };
-    } catch {
+      // Méretek sorrendje: preferált először, majd a többi
+      const orderedSizes = preferredSize
+        ? [preferredSize, ...sizes.filter(s => s.value !== preferredSize.value)]
+        : sizes;
+
+      // 2. Összes méreten végigmegyünk, az elsőt visszaadjuk ami létezik
+      for (const size of orderedSizes) {
+        const psdPath = await this.ps.computePsdPath(size.value, context);
+        if (!psdPath) continue;
+
+        const result = await this.ps.checkPsdExists(psdPath);
+        if (result.exists) {
+          const folderPath = psdPath.substring(0, psdPath.lastIndexOf('/'));
+          return { exists: true, psdPath, folderPath, hasPlacedPhotos: result.hasPlacedPhotos };
+        }
+      }
+
+      return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
+    } catch (err) {
+      this.logger.error(`[PSD] #${project.id} hiba`, err);
       return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
     }
   }

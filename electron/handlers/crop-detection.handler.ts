@@ -71,6 +71,8 @@ export function registerCropDetectionHandlers(): void {
         return;
       }
 
+      ensureVenv();
+
       const scriptPath = path.join(getScriptsPath(), 'auto_crop.py');
       if (!fs.existsSync(scriptPath)) {
         resolve({ success: false, error: 'Python script nem talalhato' });
@@ -111,6 +113,8 @@ export function registerCropDetectionHandlers(): void {
         resolve({ success: false, error: 'Tul sok elem (max 500)' });
         return;
       }
+
+      ensureVenv();
 
       const scriptPath = path.join(getScriptsPath(), 'auto_crop.py');
       if (!fs.existsSync(scriptPath)) {

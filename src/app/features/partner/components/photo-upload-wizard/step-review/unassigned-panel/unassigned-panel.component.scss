@@ -83,6 +83,7 @@
 
 .unassigned-photo {
   margin: 3px; // Safari gap-kompatibilitás
+  min-width: 0;
   background: #ffffff;
   border: 2px solid get-color('warning', 200);
   border-radius: 6px;
@@ -124,8 +125,8 @@
 
 .unassigned-name {
   padding: 4px 4px 2px;
-  font-size: 0.5625rem;
-  color: get-color('slate', 600);
+  font-size: 0.6875rem;
+  color: get-color('slate', 700);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

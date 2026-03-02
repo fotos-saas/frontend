@@ -9,35 +9,37 @@
       }
     </div>
     <div class="header-actions">
-      <button
-        type="button"
-        class="btn-secondary btn-icon-text"
-        matTooltip="Excel export"
-        [disabled]="exporting()"
-        (click)="exportExcel()"
-      >
-        <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
-        <span class="btn-label">Excel</span>
-      </button>
-      <button
-        type="button"
-        class="btn-secondary btn-icon-text"
-        matTooltip="vCard export (iPhone/Android)"
-        [disabled]="exporting()"
-        (click)="exportVcard()"
-      >
-        <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-        <span class="btn-label">vCard</span>
-      </button>
-      <ps-file-upload
-        variant="mini"
-        [multiple]="false"
-        accept=".xlsx,.xls"
-        acceptLabel="Excel"
-        [disabled]="importing()"
-        [ngModel]="importFile()"
-        (ngModelChange)="onImportFileChange($event)"
-      />
+      @if (featureToggle.isEnabled('feature.contacts-export')) {
+        <button
+          type="button"
+          class="btn-secondary btn-icon-text"
+          matTooltip="Excel export"
+          [disabled]="exporting()"
+          (click)="exportExcel()"
+        >
+          <lucide-icon [name]="ICONS.FILE_SPREADSHEET" [size]="16" />
+          <span class="btn-label">Excel</span>
+        </button>
+        <button
+          type="button"
+          class="btn-secondary btn-icon-text"
+          matTooltip="vCard export (iPhone/Android)"
+          [disabled]="exporting()"
+          (click)="exportVcard()"
+        >
+          <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
+          <span class="btn-label">vCard</span>
+        </button>
+        <ps-file-upload
+          variant="mini"
+          [multiple]="false"
+          accept=".xlsx,.xls"
+          acceptLabel="Excel"
+          [disabled]="importing()"
+          [ngModel]="importFile()"
+          (ngModelChange)="onImportFileChange($event)"
+        />
+      }
       <button
         type="button"
         class="btn-primary"

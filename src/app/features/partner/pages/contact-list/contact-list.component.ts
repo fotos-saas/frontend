@@ -17,6 +17,7 @@ import { ListPaginationComponent } from '../../../../shared/components/list-pagi
 import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsFileUploadComponent } from '@shared/components/form';
+import { FeatureToggleService } from '../../../../core/services/feature-toggle.service';
 
 /**
  * Partner Contact List - Kapcsolattartók listája a partner felületen.
@@ -49,6 +50,7 @@ export class PartnerContactListComponent implements OnInit {
   private readonly clipboardService = inject(ClipboardService);
 
   readonly ICONS = ICONS;
+  protected readonly featureToggle = inject(FeatureToggleService);
 
   readonly tableCols: TableColumn[] = [
     { key: 'name', label: 'Név' },

@@ -169,6 +169,7 @@ import {
   File,
   // More menu
   MoreVertical,
+  MoreHorizontal,
   // Code editor
   Code,
   // Batch automatizálás
@@ -413,6 +414,7 @@ export const LUCIDE_ICONS_MAP = {
   File,
   // More menu
   MoreVertical,
+  MoreHorizontal,
   // Code editor
   Code,
   // Batch automatizálás

@@ -168,6 +168,7 @@ export const ICONS = {
   X: 'x',
   MENU: 'menu',
   MORE_VERTICAL: 'more-vertical',
+  MORE_HORIZONTAL: 'more-horizontal',
 
   // Általános műveletek
   PLUS: 'plus',

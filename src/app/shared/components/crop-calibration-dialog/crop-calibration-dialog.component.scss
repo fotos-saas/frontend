@@ -18,6 +18,8 @@
   max-height: 90vh;
   overflow-y: auto;
   animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .dialog-header {
@@ -56,6 +58,7 @@
 
 .dialog-body {
   padding: 20px;
+  flex: 1;
 }
 
 .dialog-footer {
@@ -74,7 +77,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: 48px 20px;
+  min-height: 300px;
   color: var(--text-muted);
   text-align: center;
 

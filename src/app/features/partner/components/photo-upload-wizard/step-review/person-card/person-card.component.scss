@@ -190,6 +190,17 @@
   cursor: default;
 }
 
+.photo-filename {
+  display: block;
+  font-size: 0.6875rem;
+  color: get-color('slate', 500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+  margin-top: 1px;
+}
+
 /* Drag Preview */
 .drag-preview-img {
   width: 60px;

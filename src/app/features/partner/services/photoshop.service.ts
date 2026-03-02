@@ -1745,13 +1745,21 @@ export class PhotoshopService {
     }
 
     try {
-      const result = await this.runJsx({
-        scriptName: 'actions/link-layers.jsx',
-        jsonData: { layerNames },
-        targetDocName,
-      });
+      // Nemenként külön linkelés (1 név = kép + név layer összelinkelése)
+      // Egy nagy batch-ben a Photoshop ActionManager megbízhatatlan sok layernél
+      let failCount = 0;
+      for (const name of layerNames) {
+        const result = await this.runJsx({
+          scriptName: 'actions/link-layers.jsx',
+          jsonData: { layerNames: [name] },
+          targetDocName,
+        });
+        if (!result.success) failCount++;
+      }
 
-      return { success: result.success, error: result.error };
+      return failCount === 0
+        ? { success: true }
+        : { success: true, error: `${failCount} layer linkelése sikertelen` };
     } catch (err) {
       this.logger.error('JSX linkLayers hiba', err);
       return { success: false, error: 'Váratlan hiba a layerek összelinkelésekor' };

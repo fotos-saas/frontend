@@ -5,319 +5,181 @@
   </h1>
   <p class="page-subtitle">Photoshop integráció a tablókép-készítéshez.</p>
 
-  <!-- Tab navigáció -->
-  <nav class="tab-nav" role="tablist">
-    <button
-      class="tab-nav__item"
-      [class.tab-nav__item--active]="activeTab() === 'test'"
-      (click)="activeTab.set('test')"
-      role="tab"
-      [attr.aria-selected]="activeTab() === 'test'"
-    >
-      <lucide-icon [name]="ICONS.PLAY" [size]="16" />
-      Teszt
-    </button>
-    <button
-      class="tab-nav__item"
-      [class.tab-nav__item--active]="activeTab() === 'settings'"
-      (click)="activeTab.set('settings')"
-      role="tab"
-      [attr.aria-selected]="activeTab() === 'settings'"
-    >
-      <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
-      Beállítások
-    </button>
-  </nav>
+  <!-- ============ Beállítások ============ -->
+  <div class="tab-content" role="tabpanel">
+    <!-- Munka mappa -->
+    <div class="settings-section">
+      <h3 class="settings-section__title">
+        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
+        Munka mappa
+      </h3>
+      <p class="settings-section__desc">
+        A mappa, ahová a tablók PSD fájljai kerülnek. Minden projekt egy almappát kap.
+      </p>
 
-  <!-- ============ Teszt tab ============ -->
-  @if (activeTab() === 'test') {
-    <div class="tab-content" role="tabpanel">
-      <div class="ps-card" [class.ps-card--configured]="isConfigured()" [class.ps-card--unconfigured]="!isConfigured()">
-        <div class="ps-card__header">
-          <div class="ps-card__status-icon">
-            @if (checking()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
-            } @else if (isConfigured()) {
-              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
-            } @else {
-              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
-            }
-          </div>
-          <div class="ps-card__title">
-            @if (checking()) {
-              Photoshop keresése...
-            } @else if (isConfigured()) {
-              Photoshop konfigurálva
-            } @else {
-              Photoshop nincs beállítva
-            }
-          </div>
-        </div>
-
-        @if (psPath()) {
-          <div class="ps-card__path">
+      <div class="settings-path-row">
+        @if (workDir()) {
+          <div class="settings-path-row__current">
             <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
-            <span>{{ psPath() }}</span>
+            <span>{{ workDir() }}</span>
           </div>
+        } @else {
+          <div class="settings-path-row__empty">Nincs beállítva</div>
         }
 
-        <div class="ps-card__actions">
-          @if (isConfigured()) {
-            <button
-              class="btn btn--primary"
-              [disabled]="launching()"
-              (click)="launchPs()"
-            >
-              @if (launching()) {
-                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-                Indítás...
-              } @else {
-                <lucide-icon [name]="ICONS.PLAY" [size]="16" />
-                Photoshop indítása
-              }
-            </button>
-          } @else {
-            <p class="ps-card__hint">
-              A Photoshop indításához először állítsd be az elérési utat a
-              <button class="link-btn" (click)="activeTab.set('settings')">Beállítások</button>
-              fülön.
-            </p>
-          }
-        </div>
-      </div>
-
-      <!-- PSD generálás szekció -->
-      @if (isConfigured()) {
-        <div class="psd-section">
-          <h3 class="psd-section__title">
-            <lucide-icon [name]="ICONS.FILE_PLUS" [size]="18" />
-            PSD generálás
-          </h3>
-          <p class="psd-section__desc">
-            Válaszd ki a tablóméretet, és generálj egy üres PSD fájlt (200 DPI, RGB).
-          </p>
-
-          @if (loadingSizes()) {
-            <div class="size-loading">
-              <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-              Méretek betöltése...
-            </div>
-          } @else if (tabloSizes().length === 0) {
-            <div class="size-empty">
-              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="16" />
-              Nincsenek beállított tablóméretek. Állíts be méreteket a
-              <a href="/partner/settings" class="link-btn">Beállítások</a> oldalon.
-            </div>
-          } @else {
-            <div class="size-grid">
-              @for (size of tabloSizes(); track size.value) {
-                <button
-                  class="size-card"
-                  [class.size-card--selected]="selectedSize()?.value === size.value"
-                  (click)="selectSize(size)"
-                >
-                  <span class="size-card__label">{{ size.label }}</span>
-                  <span class="size-card__pixels">{{ getSizePixels(size) }}</span>
-                </button>
-              }
-            </div>
-
-            <button
-              class="btn btn--primary btn--generate"
-              [disabled]="!selectedSize() || generating()"
-              (click)="generatePsd()"
-            >
-              @if (generating()) {
-                <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-                Generálás...
-              } @else {
-                <lucide-icon [name]="ICONS.FILE_PLUS" [size]="16" />
-                PSD generálás és megnyitás
-              }
-            </button>
-          }
-        </div>
-      }
-    </div>
-  }
-
-  <!-- ============ Beállítások tab ============ -->
-  @if (activeTab() === 'settings') {
-    <div class="tab-content" role="tabpanel">
-      <!-- Munka mappa -->
-      <div class="settings-section">
-        <h3 class="settings-section__title">
-          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
-          Munka mappa
-        </h3>
-        <p class="settings-section__desc">
-          A mappa, ahová a tablók PSD fájljai kerülnek. Minden projekt egy almappát kap.
-        </p>
-
-        <div class="settings-path-row">
-          @if (workDir()) {
-            <div class="settings-path-row__current">
-              <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
-              <span>{{ workDir() }}</span>
-            </div>
-          } @else {
-            <div class="settings-path-row__empty">Nincs beállítva</div>
-          }
-
-          <button class="btn btn--outline" (click)="selectWorkDir()">
-            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
-            Tallózás
-          </button>
-        </div>
-      </div>
-
-      <!-- Tabló margó -->
-      <div class="settings-section">
-        <h3 class="settings-section__title">
-          <lucide-icon [name]="ICONS.RULER" [size]="18" />
-          Tabló margó
-        </h3>
-        <p class="settings-section__desc">
-          A tablókép külső margója (alapértelmezetten 2 cm).
-        </p>
-
-        <div class="threshold-row">
-          <label class="threshold-label">Margó</label>
-          <input
-            type="number"
-            class="threshold-input"
-            [ngModel]="pendingMarginCm()"
-            (ngModelChange)="pendingMarginCm.set($event)"
-            min="0"
-            max="10"
-            step="0.5"
-          />
-          <span class="threshold-hint">cm</span>
-        </div>
-      </div>
-
-      <!-- Tablóméret küszöbérték -->
-      <div class="settings-section">
-        <h3 class="settings-section__title">
-          <lucide-icon [name]="ICONS.RULER" [size]="18" />
-          Automatikus tablóméret
-        </h3>
-        <p class="settings-section__desc">
-          Állítsd be, hogy a diáklétszám alapján melyik tablóméret legyen az alapértelmezett.
-        </p>
-
-        <div class="threshold-toggle">
-          <label class="toggle-label">
-            <input
-              type="checkbox"
-              class="toggle-checkbox"
-              [checked]="thresholdEnabled()"
-              (change)="toggleThreshold(!thresholdEnabled())"
-            />
-            <span class="toggle-text">Automatikus méretválasztás engedélyezése</span>
-          </label>
-        </div>
-
-        @if (thresholdEnabled()) {
-          <div class="threshold-config">
-            <div class="threshold-row">
-              <label class="threshold-label">Küszöbérték (diáklétszám)</label>
-              <input
-                type="number"
-                class="threshold-input"
-                [ngModel]="thresholdValue()"
-                (ngModelChange)="thresholdValue.set($event)"
-                min="1"
-                max="200"
-              />
-              <span class="threshold-hint">fő</span>
-            </div>
-
-            <div class="threshold-rules">
-              <div class="threshold-rule">
-                <div class="threshold-rule__label">
-                  <lucide-icon [name]="ICONS.USERS" [size]="14" />
-                  {{ thresholdValue() }} fő alatt
-                </div>
-                <select
-                  class="threshold-select"
-                  [ngModel]="sizeBelowThreshold()"
-                  (ngModelChange)="sizeBelowThreshold.set($event)"
-                >
-                  <option value="">— Válassz méretet —</option>
-                  @for (size of tabloSizes(); track size.value) {
-                    <option [value]="size.value">{{ size.label }}</option>
-                  }
-                </select>
-              </div>
-
-              <div class="threshold-rule">
-                <div class="threshold-rule__label">
-                  <lucide-icon [name]="ICONS.USERS" [size]="14" />
-                  {{ thresholdValue() }} főtől
-                </div>
-                <select
-                  class="threshold-select"
-                  [ngModel]="sizeAboveThreshold()"
-                  (ngModelChange)="sizeAboveThreshold.set($event)"
-                >
-                  <option value="">— Válassz méretet —</option>
-                  @for (size of tabloSizes(); track size.value) {
-                    <option [value]="size.value">{{ size.label }}</option>
-                  }
-                </select>
-              </div>
-            </div>
-
-          </div>
-        }
-      </div>
-
-      <!-- Photoshop elérési út -->
-      <div class="settings-section">
-        <h3 class="settings-section__title">
-          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
-          Photoshop elérési út
-        </h3>
-        <p class="settings-section__desc">
-          Add meg a Photoshop alkalmazás elérési útját a számítógépeden.
-        </p>
-
-        <div class="settings-path-row">
-          @if (psPath()) {
-            <div class="settings-path-row__current">
-              <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
-              <span>{{ psPath() }}</span>
-            </div>
-          } @else {
-            <div class="settings-path-row__empty">Nincs beállítva</div>
-          }
-
-          <button class="btn btn--outline" (click)="selectPsPath()">
-            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
-            Tallózás
-          </button>
-        </div>
-      </div>
-
-      <!-- Közös mentés gomb -->
-      <div class="settings-save-bar">
-        <button
-          class="btn btn--primary btn--save"
-          [disabled]="savingAll()"
-          (click)="saveAllSettings()"
-        >
-          @if (savingAll()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-            Mentés...
-          } @else {
-            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-            Mentés
-          }
+        <button class="btn btn--outline" (click)="selectWorkDir()">
+          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+          Tallózás
         </button>
       </div>
     </div>
-  }
+
+    <!-- Tabló margó -->
+    <div class="settings-section">
+      <h3 class="settings-section__title">
+        <lucide-icon [name]="ICONS.RULER" [size]="18" />
+        Tabló margó
+      </h3>
+      <p class="settings-section__desc">
+        A tablókép külső margója (alapértelmezetten 2 cm).
+      </p>
+
+      <div class="threshold-row">
+        <label class="threshold-label">Margó</label>
+        <input
+          type="number"
+          class="threshold-input"
+          [ngModel]="pendingMarginCm()"
+          (ngModelChange)="pendingMarginCm.set($event)"
+          min="0"
+          max="10"
+          step="0.5"
+        />
+        <span class="threshold-hint">cm</span>
+      </div>
+    </div>
+
+    <!-- Tablóméret küszöbérték -->
+    <div class="settings-section">
+      <h3 class="settings-section__title">
+        <lucide-icon [name]="ICONS.RULER" [size]="18" />
+        Automatikus tablóméret
+      </h3>
+      <p class="settings-section__desc">
+        Állítsd be, hogy a diáklétszám alapján melyik tablóméret legyen az alapértelmezett.
+      </p>
+
+      <div class="threshold-toggle">
+        <label class="toggle-label">
+          <input
+            type="checkbox"
+            class="toggle-checkbox"
+            [checked]="thresholdEnabled()"
+            (change)="toggleThreshold(!thresholdEnabled())"
+          />
+          <span class="toggle-text">Automatikus méretválasztás engedélyezése</span>
+        </label>
+      </div>
+
+      @if (thresholdEnabled()) {
+        <div class="threshold-config">
+          <div class="threshold-row">
+            <label class="threshold-label">Küszöbérték (diáklétszám)</label>
+            <input
+              type="number"
+              class="threshold-input"
+              [ngModel]="thresholdValue()"
+              (ngModelChange)="thresholdValue.set($event)"
+              min="1"
+              max="200"
+            />
+            <span class="threshold-hint">fő</span>
+          </div>
+
+          <div class="threshold-rules">
+            <div class="threshold-rule">
+              <div class="threshold-rule__label">
+                <lucide-icon [name]="ICONS.USERS" [size]="14" />
+                {{ thresholdValue() }} fő alatt
+              </div>
+              <select
+                class="threshold-select"
+                [ngModel]="sizeBelowThreshold()"
+                (ngModelChange)="sizeBelowThreshold.set($event)"
+              >
+                <option value="">— Válassz méretet —</option>
+                @for (size of tabloSizes(); track size.value) {
+                  <option [value]="size.value">{{ size.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="threshold-rule">
+              <div class="threshold-rule__label">
+                <lucide-icon [name]="ICONS.USERS" [size]="14" />
+                {{ thresholdValue() }} főtől
+              </div>
+              <select
+                class="threshold-select"
+                [ngModel]="sizeAboveThreshold()"
+                (ngModelChange)="sizeAboveThreshold.set($event)"
+              >
+                <option value="">— Válassz méretet —</option>
+                @for (size of tabloSizes(); track size.value) {
+                  <option [value]="size.value">{{ size.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+
+    <!-- Photoshop elérési út -->
+    <div class="settings-section">
+      <h3 class="settings-section__title">
+        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
+        Photoshop elérési út
+      </h3>
+      <p class="settings-section__desc">
+        Add meg a Photoshop alkalmazás elérési útját a számítógépeden.
+      </p>
+
+      <div class="settings-path-row">
+        @if (psPath()) {
+          <div class="settings-path-row__current">
+            <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+            <span>{{ psPath() }}</span>
+          </div>
+        } @else {
+          <div class="settings-path-row__empty">Nincs beállítva</div>
+        }
+
+        <button class="btn btn--outline" (click)="selectPsPath()">
+          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+          Tallózás
+        </button>
+      </div>
+    </div>
+
+    <!-- Közös mentés gomb -->
+    <div class="settings-save-bar">
+      <button
+        class="btn btn--primary btn--save"
+        [disabled]="savingAll()"
+        (click)="saveAllSettings()"
+      >
+        @if (savingAll()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+          Mentés...
+        } @else {
+          <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+          Mentés
+        }
+      </button>
+    </div>
+  </div>
 
   <!-- Üzenetek -->
   @if (error()) {

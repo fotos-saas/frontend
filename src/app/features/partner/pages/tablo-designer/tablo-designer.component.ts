@@ -7,7 +7,6 @@ import { PhotoshopService } from '../../services/photoshop.service';
 import { PartnerService } from '../../services/partner.service';
 import { TabloSize } from '../../models/partner.models';
 
-type TabloTab = 'test' | 'settings';
 
 @Component({
   selector: 'app-tablo-designer',
@@ -23,9 +22,6 @@ export class TabloDesignerComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
-  /** Aktív tab */
-  readonly activeTab = signal<TabloTab>('test');
-
   /** PhotoshopService signal-ek */
   readonly psPath = this.ps.path;
   readonly workDir = this.ps.workDir;
@@ -33,15 +29,12 @@ export class TabloDesignerComponent implements OnInit {
   readonly checking = this.ps.checking;
 
   /** Lokális állapot */
-  readonly launching = signal(false);
   readonly error = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
 
   /** Tablóméretek */
   readonly tabloSizes = signal<TabloSize[]>([]);
-  readonly selectedSize = signal<TabloSize | null>(null);
   readonly loadingSizes = signal(false);
-  readonly generating = signal(false);
 
   /** Tabló margó */
   readonly marginCm = this.ps.marginCm;
@@ -68,9 +61,6 @@ export class TabloDesignerComponent implements OnInit {
     ).subscribe({
       next: (res) => {
         this.tabloSizes.set(res.sizes);
-        if (res.sizes.length > 0) {
-          this.selectedSize.set(res.sizes[0]);
-        }
         // Küszöbérték betöltése
         if (res.threshold) {
           this.thresholdEnabled.set(true);
@@ -84,10 +74,6 @@ export class TabloDesignerComponent implements OnInit {
         this.loadingSizes.set(false);
       },
     });
-  }
-
-  selectSize(size: TabloSize): void {
-    this.selectedSize.set(size);
   }
 
   async selectWorkDir(): Promise<void> {
@@ -117,43 +103,6 @@ export class TabloDesignerComponent implements OnInit {
       this.successMessage.set('Photoshop sikeresen beállítva!');
     } else {
       this.error.set('A kiválasztott fájl nem egy érvényes Photoshop alkalmazás.');
-    }
-  }
-
-  async launchPs(): Promise<void> {
-    this.error.set(null);
-    this.successMessage.set(null);
-    this.launching.set(true);
-
-    try {
-      const result = await this.ps.launchPhotoshop();
-      if (result.success) {
-        this.successMessage.set('Photoshop elindítva!');
-      } else {
-        this.error.set(result.error || 'Nem sikerült elindítani a Photoshop-ot.');
-      }
-    } finally {
-      this.launching.set(false);
-    }
-  }
-
-  async generatePsd(): Promise<void> {
-    const size = this.selectedSize();
-    if (!size) return;
-
-    this.error.set(null);
-    this.successMessage.set(null);
-    this.generating.set(true);
-
-    try {
-      const result = await this.ps.generateAndOpenPsd(size);
-      if (result.success) {
-        this.successMessage.set(`PSD generálva és megnyitva: ${size.label}`);
-      } else {
-        this.error.set(result.error || 'PSD generálás sikertelen.');
-      }
-    } finally {
-      this.generating.set(false);
     }
   }
 
@@ -226,12 +175,4 @@ export class TabloDesignerComponent implements OnInit {
     return size?.label ?? value;
   }
 
-  /** Meret szamitas megjelenitkeshez */
-  getSizePixels(size: TabloSize): string {
-    const dims = this.ps.parseSizeValue(size.value);
-    if (!dims) return '';
-    const w = Math.round(dims.widthCm * 200 / 2.54);
-    const h = Math.round(dims.heightCm * 200 / 2.54);
-    return `${w}×${h} px`;
-  }
 }

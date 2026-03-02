@@ -18,6 +18,13 @@
   min-height: 400px;
 }
 
+// Review step: a wizard-content NEM scrolloz, a step-review kezeli belülről
+.wizard-content--review {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .loading-state {
   display: flex;
   flex-direction: column;

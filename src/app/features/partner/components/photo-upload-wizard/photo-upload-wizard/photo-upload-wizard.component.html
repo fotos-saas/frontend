@@ -18,7 +18,7 @@
     }
 
     <!-- Content -->
-    <div class="wizard-content">
+    <div class="wizard-content" [class.wizard-content--review]="currentStep() === 'review'">
       @switch (currentStep()) {
         @case ('albums') {
           @if (loadingAlbums()) {

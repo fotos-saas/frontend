@@ -1,8 +1,16 @@
 @use 'styles/colors' as *;
+
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
 .step-review {
   display: flex;
   flex-direction: row;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .step-review__main {

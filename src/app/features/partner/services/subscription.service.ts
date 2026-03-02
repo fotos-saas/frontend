@@ -80,6 +80,7 @@ export interface SubscriptionInfo {
     estimated_total: number;
     total: number;
   };
+  disabled_features?: string[];
 }
 
 /**

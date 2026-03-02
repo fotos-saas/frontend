@@ -24,6 +24,7 @@ import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-
 import { InviteBannerComponent } from '../../shared/components/invite-banner/invite-banner.component';
 import { PartnerSwitcherDropdownComponent } from '../../shared/components/partner-switcher-dropdown/partner-switcher-dropdown.component';
 import { BatchWorkspacePanelComponent } from './components/batch-workspace-panel/batch-workspace-panel.component';
+import { FeatureToggleService } from '../../core/services/feature-toggle.service';
 
 
 /** Role badge nevek */
@@ -73,6 +74,7 @@ export class PartnerShellComponent implements OnInit {
   private readonly electronService = inject(ElectronService);
   private authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
+  private featureToggleService = inject(FeatureToggleService);
   private finalizationService = inject(PartnerFinalizationService);
   private taskService = inject(PartnerTaskService);
   private workflowService = inject(PartnerWorkflowService);
@@ -309,6 +311,18 @@ export class PartnerShellComponent implements OnInit {
       })
       .filter((item): item is MenuItem => item !== null);
 
+    // disabled_features szűrés (partner-szintű denylist)
+    items = items
+      .filter(item => this.featureToggleService.isEnabled(`sidebar.${item.id}`))
+      .map(item => {
+        if (item.children) {
+          const filtered = item.children.filter(c => this.featureToggleService.isEnabled(`sidebar.${c.id}`));
+          return filtered.length ? { ...item, children: filtered } : null;
+        }
+        return item;
+      })
+      .filter((item): item is MenuItem => item !== null);
+
     return items;
   });
 
@@ -401,6 +415,7 @@ export class PartnerShellComponent implements OnInit {
     this.subscriptionService.getSubscription().subscribe({
       next: (info) => {
         this.subscriptionInfo.set(info);
+        this.featureToggleService.setDisabledFeatures(info.disabled_features ?? []);
         // Partner név beállítása (csapattagoknak a főnök neve)
         if (info.partner_name) {
           this.partnerName.set(info.partner_name);

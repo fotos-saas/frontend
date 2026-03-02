@@ -161,7 +161,7 @@
 
       <!-- Kalibráció gomb -->
       <div class="setting-card setting-card--action">
-        <button class="btn btn--outline" (click)="showCalibration.set(true)">
+        <button class="btn btn--outline" (click)="openCalibration.emit()">
           <lucide-icon [name]="ICONS.SLIDERS_HORIZONTAL" [size]="16" />
           Kalibráció tesztfotóval
         </button>
@@ -183,11 +183,4 @@
       </div>
     }
   </div>
-}
-
-@if (showCalibration()) {
-  <app-crop-calibration-dialog
-    [initialSettings]="settings()"
-    (close)="showCalibration.set(false)"
-    (apply)="onCalibrationApply($event)" />
 }

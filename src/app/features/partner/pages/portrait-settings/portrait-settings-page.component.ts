@@ -1,15 +1,17 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, viewChild } from '@angular/core';
 import { PortraitSettingsComponent } from '@shared/components/portrait-settings';
 import { CropSettingsComponent } from '@shared/components/crop-settings';
+import { CropCalibrationDialogComponent } from '@shared/components/crop-calibration-dialog/crop-calibration-dialog.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import type { CropSettings } from '../../models/crop.models';
 
 type SettingsTab = 'portrait' | 'crop';
 
 @Component({
   selector: 'app-portrait-settings-page',
   standalone: true,
-  imports: [PortraitSettingsComponent, CropSettingsComponent, LucideAngularModule],
+  imports: [PortraitSettingsComponent, CropSettingsComponent, CropCalibrationDialogComponent, LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="portrait-settings-page page-card page-card--narrow">
@@ -31,9 +33,16 @@ type SettingsTab = 'portrait' | 'crop';
       @if (activeTab() === 'portrait') {
         <app-portrait-settings />
       } @else {
-        <app-crop-settings />
+        <app-crop-settings (openCalibration)="showCalibration.set(true)" />
       }
     </div>
+
+    @if (showCalibration()) {
+      <app-crop-calibration-dialog
+        [initialSettings]="cropSettingsRef()?.settings() ?? defaultSettings"
+        (close)="showCalibration.set(false)"
+        (apply)="onCalibrationApply($event)" />
+    }
   `,
   styles: [`
     .tab-bar {
@@ -74,4 +83,19 @@ type SettingsTab = 'portrait' | 'crop';
 export class PortraitSettingsPageComponent {
   readonly ICONS = ICONS;
   readonly activeTab = signal<SettingsTab>('portrait');
+  readonly showCalibration = signal(false);
+  readonly cropSettingsRef = viewChild(CropSettingsComponent);
+
+  readonly defaultSettings: CropSettings = {
+    enabled: false, preset: 'school_portrait',
+    head_padding_top: 0.25, chin_padding_bottom: 0.40,
+    shoulder_width: 0.85, face_position_y: 0.38,
+    aspect_ratio: '4:5', output_quality: 95,
+    no_face_action: 'skip', multi_face_action: 'largest',
+  };
+
+  onCalibrationApply(calibrated: CropSettings): void {
+    this.cropSettingsRef()?.applyCalibration(calibrated);
+    this.showCalibration.set(false);
+  }
 }

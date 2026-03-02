@@ -1,16 +1,15 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, computed, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, computed, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { CropSettingsActionsService } from './crop-settings-actions.service';
-import { CropCalibrationDialogComponent } from '@shared/components/crop-calibration-dialog/crop-calibration-dialog.component';
 import type { CropPreset, CropSettings, AspectRatio, NoFaceAction, MultiFaceAction } from '@features/partner/models/crop.models';
 
 @Component({
   selector: 'app-crop-settings',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, CropCalibrationDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule],
   providers: [CropSettingsActionsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './crop-settings.component.html',
@@ -21,8 +20,8 @@ export class CropSettingsComponent implements OnInit {
   readonly settings = computed(() => this.actions.settings());
   readonly ICONS = ICONS;
 
-  /** Kalibráció dialógus */
-  readonly showCalibration = signal(false);
+  /** Kalibráció dialógus megnyitás kérése (szülő rendereli a page-card-on kívül) */
+  readonly openCalibration = output<void>();
 
   readonly PRESETS: Array<{ value: CropPreset; label: string; description: string }> = [
     { value: 'school_portrait', label: 'Iskolai portré', description: 'Klasszikus igazolványkép-stílusú vágás' },
@@ -92,8 +91,8 @@ export class CropSettingsComponent implements OnInit {
     this.actions.updateSetting('output_quality', quality);
   }
 
-  onCalibrationApply(calibrated: CropSettings): void {
+  /** Kalibráció eredményének alkalmazása (szülő hívja) */
+  applyCalibration(calibrated: CropSettings): void {
     this.actions.settings.set({ ...this.actions.settings(), ...calibrated });
-    this.showCalibration.set(false);
   }
 }

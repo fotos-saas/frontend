@@ -797,42 +797,20 @@ export class OverlayComponent implements OnInit {
     const projectName = this.activeDoc().name?.replace(/\.(psd|psb|pdd)$/i, '') || 'tablo';
 
     const apiUrl = (window as { __env__?: { apiUrl?: string } }).__env__?.apiUrl || this.getApiUrl();
+    const commonParams = { flattenedJpgPath: tempJpg, outputDir: psdDir, projectId: pid, projectName, apiBaseUrl: apiUrl, authToken };
+
+    // Flat + Kistabló párhuzamosan (egyetlen flatten-ből)
+    const [flatResult, smallResult] = await Promise.all([
+      api.finalizer.upload({ ...commonParams, type: 'flat' as const }),
+      api.finalizer.upload({ ...commonParams, type: 'small_tablo' as const, maxSize: 3000 }),
+    ]);
+
     const results: string[] = [];
     const errors: string[] = [];
-
-    // Flat feltöltés
-    const flatResult = await api.finalizer.upload({
-      flattenedJpgPath: tempJpg,
-      outputDir: psdDir,
-      projectId: pid,
-      projectName,
-      apiBaseUrl: apiUrl,
-      authToken,
-      type: 'flat',
-    });
-    if (flatResult.success && (flatResult.uploadedCount ?? 0) > 0) {
-      results.push('Flat');
-    } else {
-      errors.push(flatResult.error || 'Flat feltöltés sikertelen');
-    }
-
-    // Kistabló feltöltés (ugyanabból a flatten-elt JPG-ből, 3000px resize)
-    const smallResult = await api.finalizer.upload({
-      flattenedJpgPath: tempJpg,
-      outputDir: psdDir,
-      projectId: pid,
-      projectName,
-      apiBaseUrl: apiUrl,
-      authToken,
-      type: 'small_tablo',
-      maxSize: 3000,
-    });
-    if (smallResult.success && (smallResult.uploadedCount ?? 0) > 0) {
-      results.push('Kistabló');
-    } else {
-      errors.push(smallResult.error || 'Kistabló feltöltés sikertelen');
-    }
-
+    if (flatResult.success && (flatResult.uploadedCount ?? 0) > 0) results.push('Flat');
+    else errors.push(flatResult.error || 'Flat feltöltés sikertelen');
+    if (smallResult.success && (smallResult.uploadedCount ?? 0) > 0) results.push('Kistabló');
+    else errors.push(smallResult.error || 'Kistabló feltöltés sikertelen');
     const totalUploaded = (flatResult.uploadedCount ?? 0) + (smallResult.uploadedCount ?? 0);
 
     this.ngZone.run(() => {

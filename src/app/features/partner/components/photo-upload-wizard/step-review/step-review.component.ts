@@ -106,13 +106,6 @@ import { StepReviewService } from './step-review.service';
           </div>
         }
 
-        <!-- All Assigned Message -->
-        @if (unassignedPhotos().length === 0 && assignedCount() > 0) {
-          <div class="all-assigned-message">
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="20" />
-            <span>Minden kép párosítva!</span>
-          </div>
-        }
       </div>
 
       <!-- Jobb oldali sidebar: Párosítatlan képek -->

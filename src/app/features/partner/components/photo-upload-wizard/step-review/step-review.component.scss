@@ -81,18 +81,6 @@
   font-size: 0.875rem;
 }
 
-.all-assigned-message {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  background: #d1fae5;
-  border-radius: 8px;
-  color: #065f46;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
 
 @media (max-width: 640px) {
   .step-review {

@@ -239,9 +239,9 @@ export class SearchableDropdownComponent {
   }
 
   onFocus(): void {
-    this.showDropdown.set(true);
-    if (this.options().length === 0) {
-      this.searchChange.emit('');
+    // Csak akkor nyissuk ki, ha már van keresőszöveg (ne üres fókuszra)
+    if (this.searchText().length > 0 && !this.selectedItem()) {
+      this.showDropdown.set(true);
     }
   }
 
@@ -255,7 +255,12 @@ export class SearchableDropdownComponent {
 
   onSearchChange(value: string): void {
     this.searchText.set(value);
-    this.searchChange.emit(value);
+    if (value.length > 0) {
+      this.showDropdown.set(true);
+      this.searchChange.emit(value);
+    } else {
+      this.showDropdown.set(false);
+    }
   }
 
   select(option: DropdownOption): void {

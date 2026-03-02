@@ -162,6 +162,8 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-size: 0.8125rem;
+  line-height: 1.25;
+  min-height: calc(0.8125rem * 1.25 * 2); // 2 sor fix magasság
   font-weight: 500;
   color: get-color('slate', 800);
   cursor: default;

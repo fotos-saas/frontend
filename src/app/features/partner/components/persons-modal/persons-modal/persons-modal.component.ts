@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, input, output, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -355,6 +355,27 @@ export class PersonsModalComponent implements OnInit {
   // --- Batch portré háttércsere (CMD/Ctrl+kattintás kijelölés) ---
 
   get isElectron(): boolean { return this.electronService.isElectron; }
+
+  /** CMD/Ctrl+A → összes kijelölése (vagy kijelölés törlése ha már mind ki van jelölve) */
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'a' && !this.editMode()) {
+      event.preventDefault();
+      this.selectAll();
+    }
+  }
+
+  selectAll(): void {
+    const persons = this.filteredPersons();
+    if (persons.length === 0) return;
+    const allSelected = persons.every(p => this.batchActions.selectedPersonIds().has(p.id));
+    if (allSelected) {
+      this.batchActions.resetSelection();
+    } else {
+      const ids = new Set(persons.map(p => p.id));
+      this.batchActions.selectedPersonIds.set(ids);
+    }
+  }
 
   /** Kártya kattintás: CMD/Ctrl → kijelölés, sima kattintás → lightbox (vagy kijelölés törlése) */
   onCardClick(person: TabloPersonItem, event: MouseEvent): void {

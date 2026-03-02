@@ -74,7 +74,7 @@ export class PartnerShellComponent implements OnInit {
   private readonly electronService = inject(ElectronService);
   private authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
-  private featureToggleService = inject(FeatureToggleService);
+  protected featureToggleService = inject(FeatureToggleService);
   private finalizationService = inject(PartnerFinalizationService);
   private taskService = inject(PartnerTaskService);
   private workflowService = inject(PartnerWorkflowService);

@@ -20,7 +20,7 @@
     (logoutEvent)="logout()"
   >
     <!-- Subscription badge slot (csak tulajdonosnak) -->
-    @if (subscriptionInfo() && isOwner()) {
+    @if (subscriptionInfo() && isOwner() && featureToggleService.isEnabled('feature.subscription-badge')) {
       <a
         routerLink="/partner/subscription"
         class="subscription-badge"

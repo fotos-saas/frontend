@@ -55,7 +55,7 @@
             <div class="preview-label">Vágott kép (előnézet)</div>
             <div class="crop-preview-container">
               @if (cropCss(); as css) {
-                <div class="crop-preview" [style.aspect-ratio]="aspectRatio().replace(':', '/')">
+                <div class="crop-preview" [style.padding-bottom]="aspectRatioPadding()">
                   <img [src]="imageUrl()" alt="Vágott"
                        [style.object-position]="(previewStyle()?.objectPosition) || '50% 50%'" />
                 </div>

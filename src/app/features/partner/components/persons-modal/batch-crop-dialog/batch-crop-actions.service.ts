@@ -5,28 +5,10 @@ import { ElectronCropService } from '../../../../../core/services/electron-crop.
 import { LoggerService } from '../../../../../core/services/logger.service';
 import { TabloPersonItem } from '../persons-modal.types';
 import { CropSettings } from '../../../models/crop.models';
-import type { CropFaceLandmarks, CropQualityScores } from '../../../../../core/services/electron.types';
+import type { CropFaceLandmarks } from '../../../../../core/services/electron.types';
+import { type CropPhase, type CropReviewItem, type CropUploadResult, UPLOAD_CONCURRENCY } from './batch-crop.types';
 
-/** Batch crop fázisok */
-export type CropPhase = 'idle' | 'downloading' | 'detecting' | 'cropping' | 'review' | 'uploading' | 'done' | 'error';
-
-/** Review item: egy személy vágás eredménye */
-export interface CropReviewItem {
-  personId: number;
-  personName: string;
-  inputPath: string;
-  outputPath: string;
-  thumbnailPath: string;
-  face: CropFaceLandmarks | null;
-  quality: CropQualityScores | null;
-  hasFace: boolean;
-  eyesClosed: boolean;
-  isBlurry: boolean;
-  excluded: boolean;
-  error?: string;
-}
-
-const UPLOAD_CONCURRENCY = 3;
+export type { CropPhase, CropReviewItem } from './batch-crop.types';
 
 @Injectable()
 export class BatchCropActionsService {
@@ -38,12 +20,11 @@ export class BatchCropActionsService {
   readonly progress = signal(0);
   readonly currentStep = signal('');
   readonly reviewItems = signal<CropReviewItem[]>([]);
-  readonly uploadResults = signal<Array<{ personId: number; personName: string; success: boolean; error?: string }>>([]);
+  readonly uploadResults = signal<CropUploadResult[]>([]);
 
   readonly includedCount = computed(() => this.reviewItems().filter(i => !i.excluded && i.hasFace).length);
   readonly excludedCount = computed(() => this.reviewItems().filter(i => i.excluded || !i.hasFace).length);
 
-  /** Is closable? */
   readonly isClosable = computed(() => {
     const p = this.phase();
     return p === 'idle' || p === 'review' || p === 'done' || p === 'error';
@@ -55,7 +36,6 @@ export class BatchCropActionsService {
   private cropSettings: CropSettings | null = null;
   private allTempFiles: string[] = [];
 
-  /** Teljes batch: letöltés → detektálás → vágás → review */
   async detectAndCrop(persons: TabloPersonItem[], projectId: number): Promise<void> {
     this.phase.set('downloading');
     this.progress.set(0);
@@ -65,7 +45,6 @@ export class BatchCropActionsService {
     this.allTempFiles = [];
 
     try {
-      // 1. Crop settings betöltése
       const settingsResponse = await firstValueFrom(this.partnerService.getCropSettings());
       if (!settingsResponse.success || !settingsResponse.data.enabled) {
         this.phase.set('error');
@@ -74,7 +53,6 @@ export class BatchCropActionsService {
       }
       this.cropSettings = settingsResponse.data.settings;
 
-      // 2. Temp könyvtár
       const tempDir = await this.cropService.getTempDir();
       if (!tempDir) {
         this.phase.set('error');
@@ -83,7 +61,6 @@ export class BatchCropActionsService {
       }
       this.tempDir = tempDir;
 
-      // 3. Fotók letöltése
       this.currentStep.set('Fotók letöltése...');
       const downloadedItems: Array<{
         person: TabloPersonItem;
@@ -115,7 +92,6 @@ export class BatchCropActionsService {
         return;
       }
 
-      // 4. Arc detektálás (batch)
       this.phase.set('detecting');
       this.progress.set(25);
       this.currentStep.set('Arc detektálás...');
@@ -132,7 +108,6 @@ export class BatchCropActionsService {
         return;
       }
 
-      // 5. Vágás (Sharp, batch)
       this.phase.set('cropping');
       this.currentStep.set('Képek vágása...');
 
@@ -150,7 +125,6 @@ export class BatchCropActionsService {
         const item = downloadedItems[i];
 
         if (!detectResult.success || !detectResult.faces?.length) {
-          // Nincs arc
           reviewList.push({
             personId: item.person.id,
             personName: item.person.name,
@@ -168,7 +142,6 @@ export class BatchCropActionsService {
           continue;
         }
 
-        // Legnagyobb (vagy első) arc kiválasztása
         const faceIdx = this.cropSettings?.multi_face_action === 'first' ? 0 : 0; // Már rendezve van (largest first)
         const face = detectResult.faces[faceIdx];
 
@@ -199,13 +172,11 @@ export class BatchCropActionsService {
         });
       }
 
-      // Sharp batch vágás
       if (cropItems.length > 0) {
         const cropResult = await this.cropService.executeBatchCrop(cropItems, this.cropSettings!);
         this.progress.set(80);
 
         if (cropResult.success && cropResult.results) {
-          // Crop eredmények párosítása
           for (let i = 0; i < cropResult.results.length; i++) {
             const result = cropResult.results[i];
             if (!result.success) {
@@ -223,7 +194,6 @@ export class BatchCropActionsService {
         }
       }
 
-      // 6. Review fázis
       this.reviewItems.set(reviewList);
       this.phase.set('review');
       this.progress.set(100);
@@ -236,7 +206,6 @@ export class BatchCropActionsService {
     }
   }
 
-  /** Review: elem kizárása / visszavétele */
   toggleExclude(personId: number): void {
     this.reviewItems.update(items =>
       items.map(item =>
@@ -247,7 +216,6 @@ export class BatchCropActionsService {
     );
   }
 
-  /** Feltöltés: az elfogadott (nem kizárt) képek feltöltése */
   async uploadAccepted(projectId: number, archiveMode: 'archive' | 'project_only' = 'archive'): Promise<void> {
     const accepted = this.reviewItems().filter(i => !i.excluded && i.hasFace && i.outputPath);
     if (accepted.length === 0) {
@@ -310,7 +278,6 @@ export class BatchCropActionsService {
       this.progress.set(Math.round(((i + chunk.length) / accepted.length) * 100));
     }
 
-    // Cleanup
     await this.cropService.cleanupTemp(this.allTempFiles);
 
     this.phase.set('done');

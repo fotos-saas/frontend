@@ -1,19 +1,13 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, output, input, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, output, input, effect, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { computeCropRect, parseAspectRatio, type CropRect } from '@shared/utils/crop-math.util';
 import { ElectronCropService } from '@core/services/electron-crop.service';
 import { LoggerService } from '@core/services/logger.service';
-import type { CropFaceLandmarks, CropProcessingSettings } from '@core/services/electron.types';
+import type { CropFaceLandmarks } from '@core/services/electron.types';
 import type { CropSettings } from '@features/partner/models/crop.models';
-
-interface CropRect {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-}
 
 @Component({
   selector: 'app-crop-calibration-dialog',
@@ -26,6 +20,7 @@ interface CropRect {
 export class CropCalibrationDialogComponent {
   private readonly cropService = inject(ElectronCropService);
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Aktuális beállítások (szülőtől) */
   readonly initialSettings = input.required<CropSettings>();
@@ -58,6 +53,12 @@ export class CropCalibrationDialogComponent {
   /** Computed: van-e betöltött kép + arc */
   readonly hasDetection = computed(() => this.face() !== null && this.imageUrl() !== null);
 
+  /** Computed: aspect ratio padding-bottom % (Safari 14 compat, aspect-ratio helyett) */
+  readonly aspectRatioPadding = computed(() => {
+    const ar = parseAspectRatio(this.aspectRatio());
+    return ar > 0 ? `${(1 / ar) * 100}%` : '125%';
+  });
+
   /** Computed: crop téglalap pixelben (az eredeti képre vetítve) */
   readonly cropRect = computed<CropRect | null>(() => {
     const f = this.face();
@@ -65,7 +66,13 @@ export class CropCalibrationDialogComponent {
     const imgH = this.imageHeight();
     if (!f || imgW === 0 || imgH === 0) return null;
 
-    return this.computeCropRect(f, imgW, imgH);
+    return computeCropRect(f, imgW, imgH, {
+      head_padding_top: this.headPaddingTop(),
+      chin_padding_bottom: this.chinPaddingBottom(),
+      shoulder_width: this.shoulderWidth(),
+      face_position_y: this.facePositionY(),
+      aspect_ratio: this.aspectRatio(),
+    });
   });
 
   /** Computed: crop keret % az eredeti képhez (CSS-hez) */
@@ -103,7 +110,7 @@ export class CropCalibrationDialogComponent {
   private readonly settingsInitialized = signal(false);
 
   constructor() {
-    // Iniciális értékek beállítása az input-ból (effect, mert required input nem elérhető constructor-ban)
+    // Iniciális értékek beállítása az input-ból
     effect(() => {
       const settings = this.initialSettings();
       if (settings && !this.settingsInitialized()) {
@@ -115,12 +122,18 @@ export class CropCalibrationDialogComponent {
         this.settingsInitialized.set(true);
       }
     });
+
+    // Object URL cleanup destroy-kor
+    this.destroyRef.onDestroy(() => this.revokeCurrentUrl());
   }
 
   async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+
+    // Előző URL felszabadítása
+    this.revokeCurrentUrl();
 
     // Local URL preview
     const url = URL.createObjectURL(file);
@@ -143,13 +156,10 @@ export class CropCalibrationDialogComponent {
       return;
     }
 
-    // ArrayBuffer → temp file → detektálás
-    // Sajnos a File API-val nem tudunk közvetlenül temp fájlt írni Electron-ban
-    // Helyette a File path-t használjuk (ha elérhető) vagy a preview-t
     this.logger.info('Kalibráció: fájl kiválasztva, detektálás...');
     this.detecting.set(true);
 
-    // Note: a fájl path csak Electron-ban érhető el
+    // A fájl path csak Electron-ban érhető el
     const filePath = (file as unknown as { path?: string }).path;
     if (!filePath) {
       this.error.set('Fájl útvonal nem elérhető (csak Electron alkalmazásban)');
@@ -182,60 +192,10 @@ export class CropCalibrationDialogComponent {
     this.apply.emit(settings);
   }
 
-  private parseAspectRatio(ratio: string): number {
-    const parts = ratio.split(':');
-    if (parts.length !== 2) return 0.8;
-    const w = parseFloat(parts[0]);
-    const h = parseFloat(parts[1]);
-    if (isNaN(w) || isNaN(h) || h === 0) return 0.8;
-    return w / h;
-  }
-
-  private computeCropRect(face: CropFaceLandmarks, imgW: number, imgH: number): CropRect {
-    const headPad = this.headPaddingTop();
-    const chinPad = this.chinPaddingBottom();
-    const shoulderW = this.shoulderWidth();
-    const facePosY = this.facePositionY();
-    const ar = this.parseAspectRatio(this.aspectRatio());
-
-    const faceH = face.face_height;
-    const faceW = face.face_width;
-    const faceCX = face.face_center.x;
-
-    const totalContentH = faceH * (1 + headPad + chinPad);
-    const cropH = totalContentH / (1 - (1 - facePosY) * 0.3);
-    const cropW = cropH * ar;
-    const minW = faceW * shoulderW * 2.2;
-    const finalW = Math.max(cropW, minW);
-    const finalH = finalW / ar;
-
-    const cropTop = face.forehead.y - headPad * faceH;
-    const cropLeft = faceCX - finalW / 2;
-
-    let left = Math.round(Math.max(0, cropLeft));
-    let top = Math.round(Math.max(0, cropTop));
-    let width = Math.round(Math.min(finalW, imgW - left));
-    let height = Math.round(Math.min(finalH, imgH - top));
-
-    if (top + height > imgH) top = Math.max(0, imgH - height);
-    if (left + width > imgW) left = Math.max(0, imgW - width);
-
-    const targetRatio = ar;
-    const currentRatio = width / height;
-    if (currentRatio > targetRatio) {
-      width = Math.round(height * targetRatio);
-      left = Math.round(Math.max(0, faceCX - width / 2));
-      if (left + width > imgW) left = imgW - width;
-    } else if (currentRatio < targetRatio) {
-      height = Math.round(width / targetRatio);
-      if (top + height > imgH) top = Math.max(0, imgH - height);
+  private revokeCurrentUrl(): void {
+    const currentUrl = this.imageUrl();
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl);
     }
-
-    return {
-      left: Math.max(0, left),
-      top: Math.max(0, top),
-      width: Math.max(1, Math.min(width, imgW)),
-      height: Math.max(1, Math.min(height, imgH)),
-    };
   }
 }

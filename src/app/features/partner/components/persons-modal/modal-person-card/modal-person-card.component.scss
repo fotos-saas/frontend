@@ -142,6 +142,20 @@
   color: #fff;
 }
 
+.crop-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #3b82f6;
+  color: #fff;
+}
+
 // --- Card info ---
 .card-info {
   padding: 6px 8px;

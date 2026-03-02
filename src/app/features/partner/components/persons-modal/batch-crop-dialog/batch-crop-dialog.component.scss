@@ -1,0 +1,428 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
+// --- Választó nézet ---
+.mode-chooser {
+  padding: 8px 0 4px;
+  text-align: center;
+
+  &__description {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 16px;
+  }
+
+  &__cards {
+    display: flex;
+    // Safari gap fallback
+    > * + * { margin-left: 12px; }
+  }
+}
+
+.mode-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #60a5fa;
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+  }
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+
+    &--archive {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+
+    &--project {
+      background: #e0e7ff;
+      color: #4f46e5;
+    }
+  }
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  &__desc {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+}
+
+// --- Fázis lépések ---
+.phase-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0 20px;
+}
+
+.phase-step {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: get-color('slate', 400);
+  @include transition-fast;
+
+  // Safari gap fallback
+  > * + * { margin-left: 6px; }
+
+  &--active {
+    color: #2563eb;
+    background: #eff6ff;
+  }
+
+  &--done {
+    color: #16a34a;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// --- Progress ---
+.progress-section {
+  padding: 0 0 16px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: get-color('slate', 100);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  border-radius: 3px;
+  @include transition-fast;
+  min-width: 2%;
+}
+
+.progress-text {
+  display: block;
+  font-size: 0.8125rem;
+  color: get-color('slate', 500);
+  text-align: center;
+}
+
+// --- Review ---
+.review-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid get-color('slate', 200);
+  margin-bottom: 16px;
+}
+
+.review-stats {
+  display: flex;
+  justify-content: center;
+  // Safari gap fallback
+  > * + * { margin-left: 16px; }
+}
+
+.review-stat {
+  display: flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 500;
+
+  // Safari gap fallback
+  > lucide-icon { margin-right: 4px; }
+
+  &--included { color: #16a34a; }
+  &--excluded { color: #dc2626; }
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  // Safari gap fallback
+  margin: -6px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.review-card {
+  margin: 6px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid get-color('slate', 200);
+  transition: opacity 0.2s ease;
+
+  &--excluded {
+    opacity: 0.45;
+    border-color: get-color('slate', 300);
+  }
+
+  &__image {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    background: get-color('slate', 100);
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__no-face {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: get-color('slate', 400);
+    background: get-color('slate', 50);
+  }
+
+  &__name {
+    display: block;
+    padding: 6px 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: get-color('slate', 700);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__error {
+    display: block;
+    padding: 0 8px 6px;
+    font-size: 0.6875rem;
+    color: #dc2626;
+    text-align: center;
+  }
+}
+
+// --- Quality badge ---
+.quality-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.quality--good {
+  background: rgba(22, 163, 74, 0.9);
+  color: #fff;
+}
+
+.quality--warn {
+  background: rgba(245, 158, 11, 0.9);
+  color: #fff;
+}
+
+.quality--bad {
+  background: rgba(220, 38, 38, 0.9);
+  color: #fff;
+}
+
+// --- Exclude toggle ---
+.exclude-toggle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  color: get-color('slate', 600);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  &--active {
+    background: rgba(220, 38, 38, 0.85);
+    color: #fff;
+
+    &:hover {
+      background: rgba(220, 38, 38, 1);
+    }
+  }
+}
+
+// --- Done ---
+.done-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+}
+
+.done-icon {
+  margin-bottom: 12px;
+
+  &--success { color: #16a34a; }
+  &--error { color: #dc2626; }
+}
+
+.done-text {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: get-color('slate', 700);
+  margin-bottom: 12px;
+}
+
+.results-summary {
+  display: flex;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+  // Safari gap fallback
+  > * + * { margin-left: 12px; }
+
+  &__success { color: #16a34a; font-weight: 600; }
+  &__fail { color: #dc2626; font-weight: 600; }
+}
+
+.results-list {
+  max-height: 160px;
+  overflow-y: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  // Safari gap fallback
+  > * + * { margin-top: 4px; }
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+
+  // Safari gap fallback
+  > * + * { margin-left: 8px; }
+
+  &--fail {
+    background: #fef2f2;
+  }
+
+  &--fail &__icon {
+    color: #dc2626;
+  }
+
+  &__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: get-color('slate', 700);
+  }
+
+  &__error {
+    font-size: 0.75rem;
+    color: #dc2626;
+    flex-shrink: 0;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// --- Footer gombok ---
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+
+  // Safari gap fallback
+  > lucide-icon { margin-right: 6px; }
+
+  &--primary {
+    background: #2563eb;
+    color: #fff;
+
+    &:hover { background: #1d4ed8; }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &--outline {
+    background: transparent;
+    border: 1px solid get-color('slate', 200);
+    color: get-color('slate', 700);
+
+    &:hover { background: get-color('slate', 50); }
+  }
+}
+
+// --- Spin animáció ---
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// --- Accessibility ---
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

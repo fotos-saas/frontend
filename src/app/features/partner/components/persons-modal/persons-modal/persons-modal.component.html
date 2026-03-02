@@ -276,6 +276,10 @@
             <lucide-icon [name]="ICONS.SCAN_FACE" [size]="14" />
             Háttércsere ({{ batchActions.selectedCount() }})
           </button>
+          <button type="button" class="btn btn--primary" (click)="startBatchCrop()">
+            <lucide-icon [name]="ICONS.CROP" [size]="14" />
+            Vágás ({{ batchActions.selectedCount() }})
+          </button>
           <button type="button" class="btn btn--outline" matTooltip="Kijelölés törlése" (click)="batchActions.resetSelection()">
             <lucide-icon [name]="ICONS.X" [size]="14" />
           </button>
@@ -340,6 +344,15 @@
     [persons]="batchPersons"
     [projectId]="projectId()"
     (close)="onBatchPortraitCompleted()"
+  />
+}
+
+<!-- Batch crop (automatikus vágás) dialógus -->
+@if (batchCropPersons(); as cropPersons) {
+  <app-batch-crop-dialog
+    [persons]="cropPersons"
+    [projectId]="projectId()"
+    (close)="onBatchCropCompleted()"
   />
 }
 

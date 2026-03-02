@@ -419,6 +419,111 @@ interface SyncAPI {
   onError: (callback: (data: { message: string }) => void) => CleanupFn;
 }
 
+// ============ Crop API ============
+
+export interface CropFaceLandmarks {
+  forehead: { x: number; y: number };
+  chin: { x: number; y: number };
+  left_ear: { x: number; y: number };
+  right_ear: { x: number; y: number };
+  face_center: { x: number; y: number };
+  face_width: number;
+  face_height: number;
+  face_area_ratio: number;
+  bbox: { x: number; y: number; width: number; height: number };
+  ear: number;
+  eyes_closed: boolean;
+}
+
+export interface CropQualityScores {
+  blur_score: number;
+  exposure_mean: number;
+  is_blurry: boolean;
+  is_dark: boolean;
+  is_overexposed: boolean;
+}
+
+export interface CropDetectResult {
+  success: boolean;
+  error?: string;
+  input?: string;
+  original_width?: number;
+  original_height?: number;
+  faces?: CropFaceLandmarks[];
+  face_count?: number;
+  quality?: CropQualityScores;
+  processing_time?: number;
+}
+
+export interface CropExecuteResult {
+  success: boolean;
+  error?: string;
+  outputPath?: string;
+  thumbnailPath?: string;
+  crop?: { left: number; top: number; width: number; height: number };
+}
+
+export interface CropBatchDetectResult {
+  success: boolean;
+  error?: string;
+  results?: CropDetectResult[];
+  total?: number;
+  successful?: number;
+}
+
+export interface CropBatchExecuteResult {
+  success: boolean;
+  error?: string;
+  results?: Array<{
+    success: boolean;
+    inputPath: string;
+    outputPath?: string;
+    thumbnailPath?: string;
+    crop?: { left: number; top: number; width: number; height: number };
+    error?: string;
+  }>;
+  total?: number;
+  successful?: number;
+}
+
+export interface CropProcessingSettings {
+  preset: 'school_portrait' | 'yearbook' | 'passport' | 'headshot' | 'custom';
+  head_padding_top: number;
+  chin_padding_bottom: number;
+  shoulder_width: number;
+  face_position_y: number;
+  aspect_ratio: '3:4' | '4:5' | '2:3' | '1:1' | '5:7';
+  output_quality: number;
+  no_face_action: 'skip' | 'center_crop' | 'original';
+  multi_face_action: 'largest' | 'first' | 'skip';
+}
+
+interface CropAPI {
+  checkPython: () => Promise<{ available: boolean; error?: string }>;
+  detectFaces: (params: { inputPath: string }) => Promise<CropDetectResult>;
+  detectBatch: (params: { items: Array<{ input: string }> }) => Promise<CropBatchDetectResult>;
+  executeCrop: (params: {
+    inputPath: string;
+    outputPath: string;
+    thumbnailPath?: string;
+    face: CropFaceLandmarks;
+    settings: Partial<CropProcessingSettings>;
+  }) => Promise<CropExecuteResult>;
+  executeBatchCrop: (params: {
+    items: Array<{
+      inputPath: string;
+      outputPath: string;
+      thumbnailPath: string;
+      face: CropFaceLandmarks;
+    }>;
+    settings: Partial<CropProcessingSettings>;
+  }) => Promise<CropBatchExecuteResult>;
+  downloadPhoto: (params: { url: string; outputPath: string }) => Promise<{ success: boolean; error?: string; path?: string }>;
+  getTempDir: () => Promise<string>;
+  cleanupTemp: (filePaths: string[]) => Promise<{ success: boolean; cleaned?: number }>;
+  readProcessedFile: (params: { filePath: string }) => Promise<{ success: boolean; data?: ArrayBuffer; error?: string }>;
+}
+
 interface PortraitAPI {
   checkPython: () => Promise<{ available: boolean; error?: string }>;
   processSingle: (params: {
@@ -482,6 +587,7 @@ export interface ElectronAPI {
   sample: SampleAPI;
   finalizer: FinalizerAPI;
   portrait: PortraitAPI;
+  crop: CropAPI;
   sync: SyncAPI;
 }
 

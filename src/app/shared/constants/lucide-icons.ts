@@ -249,6 +249,8 @@ import {
   ScrollText,
   // Workflow
   Workflow,
+  // Crop kalibráció
+  SlidersHorizontal,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -494,4 +496,6 @@ export const LUCIDE_ICONS_MAP = {
   ScrollText,
   // Workflow
   Workflow,
+  // Crop kalibráció
+  SlidersHorizontal,
 };

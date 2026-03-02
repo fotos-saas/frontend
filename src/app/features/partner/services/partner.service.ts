@@ -29,6 +29,9 @@ import type {
   PortraitSettingsResponse, UpdatePortraitSettingsResponse,
   UploadPortraitBackgroundResponse, DeletePortraitBackgroundResponse,
 } from '../models/portrait.models';
+import type {
+  CropSettings, CropSettingsResponse, UpdateCropSettingsResponse,
+} from '../models/crop.models';
 // Import sub-service-ek
 import { PartnerProjectService } from './partner-project.service';
 import { PartnerQrService } from './partner-qr.service';
@@ -353,7 +356,7 @@ export class PartnerService {
     projectId: number,
     personId: number,
     photo: File,
-    options?: { archiveMode?: string; isPortraitProcessed?: boolean },
+    options?: { archiveMode?: string; isPortraitProcessed?: boolean; isCropProcessed?: boolean },
   ) {
     return this.albumService.uploadPersonPhoto(projectId, personId, photo, options);
   }
@@ -470,6 +473,18 @@ export class PartnerService {
 
   deletePortraitBackground(): Observable<DeletePortraitBackgroundResponse> {
     return this.http.delete<DeletePortraitBackgroundResponse>(`${this.baseUrl}/portrait-background`);
+  }
+
+  // ============================================
+  // CROP SETTINGS (partner szintű)
+  // ============================================
+
+  getCropSettings(): Observable<CropSettingsResponse> {
+    return this.http.get<CropSettingsResponse>(`${this.baseUrl}/crop-settings`);
+  }
+
+  updateCropSettings(settings: CropSettings): Observable<UpdateCropSettingsResponse> {
+    return this.http.put<UpdateCropSettingsResponse>(`${this.baseUrl}/crop-settings`, settings);
   }
 
   // ============================================

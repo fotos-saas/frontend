@@ -19,6 +19,7 @@ import { registerFinalizerHandlers } from './handlers/finalizer.handler';
 import { registerOverlayHandlers } from './handlers/overlay.handler';
 import { registerPortraitHandlers } from './handlers/portrait.handler';
 import { registerSyncHandlers } from './handlers/sync.handler';
+import { registerCropHandlers } from './handlers/crop.handler';
 
 // Background mód service-ek
 import { TrayManagerService } from './services/tray-manager.service';
@@ -771,6 +772,9 @@ app.whenReady().then(async () => {
 
   // Portrait háttér feldolgozás IPC handlerek regisztralasa
   registerPortraitHandlers();
+
+  // Auto Crop IPC handlerek regisztralasa
+  registerCropHandlers();
 
   // LAN szinkronizálás IPC handlerek regisztralasa
   registerSyncHandlers(mainWindow || undefined);

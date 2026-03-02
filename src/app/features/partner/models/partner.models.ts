@@ -191,6 +191,7 @@ export interface TabloPersonItem {
   note: string | null;
   linkedGroup: string | null;
   isPortraitProcessed?: boolean;
+  isCropProcessed?: boolean;
 }
 
 /**

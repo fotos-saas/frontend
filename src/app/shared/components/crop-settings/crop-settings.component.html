@@ -1,0 +1,186 @@
+@if (actions.loading()) {
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <span>Beállítások betöltése...</span>
+  </div>
+} @else {
+  <div class="settings-section">
+
+    <!-- Header -->
+    <div class="section-header">
+      <lucide-icon [name]="ICONS.CROP" [size]="20" />
+      <h3>Automatikus portrévágás</h3>
+    </div>
+
+    <div class="info-box">
+      <lucide-icon [name]="ICONS.INFO" [size]="14" />
+      <span>MediaPipe Face Mesh (468 pont) alapú arcdetektálás, automatikus vágás konzisztens keretezéssel. Csak az Electron desktop alkalmazásban érhető el.</span>
+    </div>
+
+    <!-- Engedélyezés toggle -->
+    <div class="setting-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Automatikus vágás engedélyezése</span>
+          <span class="setting-description">Ha bekapcsolt, a személyeknél elérhető lesz a "Vágás" gomb</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox"
+                 [checked]="settings().enabled"
+                 (change)="onToggleEnabled($any($event.target).checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    @if (settings().enabled) {
+      <!-- Preset választó -->
+      <div class="setting-card">
+        <div class="setting-label">Preset</div>
+        <div class="preset-grid">
+          @for (preset of PRESETS; track preset.value) {
+            <button class="preset-card"
+                    [class.preset-card--active]="settings().preset === preset.value"
+                    (click)="onPresetChange(preset.value)"
+                    [matTooltip]="preset.description">
+              <span class="preset-name">{{ preset.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Haladó beállítások (preset = custom, vagy slider módosítás) -->
+      <div class="setting-card">
+        <div class="setting-label">Keretezési beállítások</div>
+        <div class="sub-settings">
+
+          <!-- Head padding top -->
+          <div class="slider-row">
+            <div class="slider-info">
+              <span class="slider-label">Fejfeletti tér</span>
+              <span class="slider-value">{{ (settings().head_padding_top * 100).toFixed(0) }}%</span>
+            </div>
+            <input type="range" class="slider"
+                   min="0" max="0.6" step="0.01"
+                   [value]="settings().head_padding_top"
+                   (input)="onSliderChange('head_padding_top', +$any($event.target).value)" />
+          </div>
+
+          <!-- Chin padding bottom -->
+          <div class="slider-row">
+            <div class="slider-info">
+              <span class="slider-label">Áll alatti tér</span>
+              <span class="slider-value">{{ (settings().chin_padding_bottom * 100).toFixed(0) }}%</span>
+            </div>
+            <input type="range" class="slider"
+                   min="0" max="0.8" step="0.01"
+                   [value]="settings().chin_padding_bottom"
+                   (input)="onSliderChange('chin_padding_bottom', +$any($event.target).value)" />
+          </div>
+
+          <!-- Shoulder width -->
+          <div class="slider-row">
+            <div class="slider-info">
+              <span class="slider-label">Váll szélesség</span>
+              <span class="slider-value">{{ (settings().shoulder_width * 100).toFixed(0) }}%</span>
+            </div>
+            <input type="range" class="slider"
+                   min="0.3" max="1.5" step="0.01"
+                   [value]="settings().shoulder_width"
+                   (input)="onSliderChange('shoulder_width', +$any($event.target).value)" />
+          </div>
+
+          <!-- Face position Y -->
+          <div class="slider-row">
+            <div class="slider-info">
+              <span class="slider-label">Arc pozíció (függőleges)</span>
+              <span class="slider-value">{{ (settings().face_position_y * 100).toFixed(0) }}%</span>
+            </div>
+            <input type="range" class="slider"
+                   min="0.1" max="0.7" step="0.01"
+                   [value]="settings().face_position_y"
+                   (input)="onSliderChange('face_position_y', +$any($event.target).value)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Képarány -->
+      <div class="setting-card">
+        <div class="setting-label">Képarány</div>
+        <div class="ratio-grid">
+          @for (ratio of ASPECT_RATIOS; track ratio.value) {
+            <button class="ratio-btn"
+                    [class.ratio-btn--active]="settings().aspect_ratio === ratio.value"
+                    (click)="onAspectRatioChange(ratio.value)">
+              {{ ratio.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Arc nélküli / többarcos kezelés -->
+      <div class="setting-card">
+        <div class="setting-label">Speciális esetek</div>
+        <div class="sub-settings">
+          <div class="select-row">
+            <span class="select-label">Ha nincs arc a képen</span>
+            <select class="select-input"
+                    [ngModel]="settings().no_face_action"
+                    (ngModelChange)="onNoFaceChange($event)">
+              @for (action of NO_FACE_ACTIONS; track action.value) {
+                <option [value]="action.value">{{ action.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="select-row">
+            <span class="select-label">Ha több arc van a képen</span>
+            <select class="select-input"
+                    [ngModel]="settings().multi_face_action"
+                    (ngModelChange)="onMultiFaceChange($event)">
+              @for (action of MULTI_FACE_ACTIONS; track action.value) {
+                <option [value]="action.value">{{ action.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Minőség -->
+      <div class="setting-card">
+        <div class="slider-row">
+          <div class="slider-info">
+            <span class="slider-label">Kimeneti minőség (JPEG)</span>
+            <span class="slider-value">{{ settings().output_quality }}%</span>
+          </div>
+          <input type="range" class="slider"
+                 min="50" max="100" step="1"
+                 [value]="settings().output_quality"
+                 (input)="onQualityChange(+$any($event.target).value)" />
+        </div>
+      </div>
+
+      <!-- Kalibráció gomb -->
+      <div class="setting-card setting-card--action">
+        <button class="btn btn--outline" (click)="openCalibration.emit()">
+          <lucide-icon [name]="ICONS.SLIDERS_HORIZONTAL" [size]="16" />
+          Kalibráció tesztfotóval
+        </button>
+      </div>
+
+      <!-- Mentés gomb -->
+      <div class="save-row">
+        <button class="btn btn--primary"
+                [disabled]="actions.saving()"
+                (click)="actions.save()">
+          @if (actions.saving()) {
+            <div class="spinner spinner--sm"></div>
+            Mentés...
+          } @else {
+            <lucide-icon [name]="ICONS.SAVE" [size]="16" />
+            Beállítások mentése
+          }
+        </button>
+      </div>
+    }
+  </div>
+}

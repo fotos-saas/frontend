@@ -18,6 +18,7 @@ import { PhotoLightboxComponent } from '../photo-lightbox/photo-lightbox.compone
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { BatchPortraitDialogComponent } from '../batch-portrait-dialog/batch-portrait-dialog.component';
 import { BatchPortraitActionsService } from '../batch-portrait-dialog/batch-portrait-actions.service';
+import { BatchCropDialogComponent } from '../batch-crop-dialog/batch-crop-dialog.component';
 import {
   LayoutPhotoUploadDialogComponent,
   PhotoUploadPerson,
@@ -41,7 +42,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, BatchCropDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
   providers: [BatchPortraitActionsService],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
@@ -89,6 +90,9 @@ export class PersonsModalComponent implements OnInit {
 
   // Batch portrait dialógus
   batchPortraitPersons = signal<TabloPersonItem[] | null>(null);
+
+  // Batch crop dialógus
+  batchCropPersons = signal<TabloPersonItem[] | null>(null);
 
   // Teacher link & photo chooser dialog
   showTeacherLinkDialog = signal(false);
@@ -360,6 +364,21 @@ export class PersonsModalComponent implements OnInit {
 
   onBatchPortraitCompleted(): void {
     this.batchPortraitPersons.set(null);
+    this.batchActions.resetSelection();
+    this.loadPersons(true);
+  }
+
+  // --- Batch crop (automatikus vágás) ---
+
+  startBatchCrop(): void {
+    const selectedIds = this.batchActions.selectedPersonIds();
+    const persons = this.filteredPersons().filter(p => selectedIds.has(p.id));
+    if (persons.length === 0) return;
+    this.batchCropPersons.set(persons);
+  }
+
+  onBatchCropCompleted(): void {
+    this.batchCropPersons.set(null);
     this.batchActions.resetSelection();
     this.loadPersons(true);
   }

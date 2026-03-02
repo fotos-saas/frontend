@@ -295,7 +295,7 @@ export class PartnerAlbumService {
     projectId: number,
     personId: number,
     photo: File,
-    options?: { archiveMode?: string; isPortraitProcessed?: boolean },
+    options?: { archiveMode?: string; isPortraitProcessed?: boolean; isCropProcessed?: boolean },
   ): Observable<{
     success: boolean;
     message: string;
@@ -313,6 +313,9 @@ export class PartnerAlbumService {
     }
     if (options?.isPortraitProcessed) {
       formData.append('is_portrait_processed', '1');
+    }
+    if (options?.isCropProcessed) {
+      formData.append('is_crop_processed', '1');
     }
 
     return this.http.post<{

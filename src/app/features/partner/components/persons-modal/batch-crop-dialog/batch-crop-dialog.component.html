@@ -1,0 +1,193 @@
+<app-dialog-wrapper
+  variant="info"
+  headerStyle="hero"
+  theme="blue"
+  [icon]="ICONS.CROP"
+  [title]="'Automatikus vágás'"
+  [description]="persons().length + ' személy feldolgozása'"
+  size="lg"
+  [closable]="isClosable()"
+  (closeEvent)="onClose()"
+>
+  <div dialogBody>
+    @if (archiveMode() === null) {
+      <!-- Választó nézet -->
+      <div class="mode-chooser">
+        <p class="mode-chooser__description">Hová mentse a vágott fotókat?</p>
+
+        <div class="mode-chooser__cards">
+          <button type="button" class="mode-card" (click)="startProcessing('archive')">
+            <div class="mode-card__icon mode-card__icon--archive">
+              <lucide-icon [name]="ICONS.ARCHIVE" [size]="24" />
+            </div>
+            <strong class="mode-card__title">Archívba mentés</strong>
+            <span class="mode-card__desc">Minden tablón frissül a fotó</span>
+          </button>
+
+          <button type="button" class="mode-card" (click)="startProcessing('project_only')">
+            <div class="mode-card__icon mode-card__icon--project">
+              <lucide-icon [name]="ICONS.IMAGE" [size]="24" />
+            </div>
+            <strong class="mode-card__title">Csak erre a tablóra</strong>
+            <span class="mode-card__desc">Csak itt változik, máshol marad a régi</span>
+          </button>
+        </div>
+      </div>
+    } @else if (phase() !== 'review' && !isDone) {
+      <!-- Feldolgozás nézet -->
+      <div class="phase-steps">
+        @for (step of phaseSteps; track step) {
+          @let isActive = phase() === step;
+          @let isPast = getPhaseOrder(phase()) > getPhaseOrder(step);
+          <div class="phase-step" [class.phase-step--active]="isActive" [class.phase-step--done]="isPast">
+            <div class="phase-step__icon">
+              @if (isPast) {
+                <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+              } @else if (isActive) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+              } @else {
+                <lucide-icon [name]="ICONS.CIRCLE" [size]="14" />
+              }
+            </div>
+            <span class="phase-step__label">{{ getPhaseLabel(step) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-bar__fill" [style.width.%]="progress()"></div>
+        </div>
+        <span class="progress-text">{{ currentStep() }}</span>
+      </div>
+    } @else if (phase() === 'review') {
+      <!-- Review nézet -->
+      <div class="review-header">
+        <div class="review-stats">
+          <span class="review-stat review-stat--included">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
+            {{ includedCount() }} elfogadva
+          </span>
+          <span class="review-stat review-stat--excluded">
+            <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" />
+            {{ excludedCount() }} kizárva
+          </span>
+        </div>
+      </div>
+
+      <div class="review-grid">
+        @for (item of reviewItems(); track item.personId) {
+          <div class="review-card" [class.review-card--excluded]="item.excluded || !item.hasFace">
+            <!-- Thumbnail -->
+            <div class="review-card__image">
+              @if (item.thumbnailPath && item.hasFace) {
+                <img [src]="'file://' + item.thumbnailPath" [alt]="item.personName" loading="lazy" />
+              } @else {
+                <div class="review-card__no-face">
+                  <lucide-icon [name]="ICONS.USER_X" [size]="24" />
+                </div>
+              }
+
+              <!-- Quality badge -->
+              <span class="quality-badge" [class]="getQualityClass(item)">
+                {{ getQualityLabel(item) }}
+              </span>
+
+              <!-- Exclude toggle -->
+              @if (item.hasFace) {
+                <button type="button" class="exclude-toggle"
+                  [class.exclude-toggle--active]="item.excluded"
+                  (click)="toggleExclude(item.personId)">
+                  <lucide-icon [name]="item.excluded ? ICONS.EYE_OFF : ICONS.EYE" [size]="14" />
+                </button>
+              }
+            </div>
+
+            <!-- Név -->
+            <span class="review-card__name">{{ item.personName }}</span>
+
+            @if (item.error && !item.hasFace) {
+              <span class="review-card__error">{{ item.error }}</span>
+            }
+          </div>
+        }
+      </div>
+    } @else if (phase() === 'uploading') {
+      <!-- Feltöltés -->
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-bar__fill" [style.width.%]="progress()"></div>
+        </div>
+        <span class="progress-text">{{ currentStep() }}</span>
+      </div>
+    } @else if (isDone) {
+      <!-- Eredmények -->
+      <div class="done-section">
+        @if (phase() === 'done') {
+          <div class="done-icon done-icon--success">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="40" />
+          </div>
+        } @else {
+          <div class="done-icon done-icon--error">
+            <lucide-icon [name]="ICONS.X_CIRCLE" [size]="40" />
+          </div>
+        }
+
+        <p class="done-text">{{ currentStep() }}</p>
+
+        @if (uploadResults().length > 0) {
+          <div class="results-summary">
+            @if (successCount > 0) {
+              <span class="results-summary__success">{{ successCount }} sikeres</span>
+            }
+            @if (failCount > 0) {
+              <span class="results-summary__fail">{{ failCount }} sikertelen</span>
+            }
+          </div>
+
+          @if (failCount > 0) {
+            <div class="results-list">
+              @for (item of uploadResults(); track item.personId) {
+                @if (!item.success) {
+                  <div class="result-row result-row--fail">
+                    <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" class="result-row__icon" />
+                    <span class="result-row__name">{{ item.personName }}</span>
+                    <span class="result-row__error">{{ item.error }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  @if (phase() === 'review') {
+    <div dialogFooter>
+      <button type="button" class="btn btn--outline" (click)="onClose()">Mégse</button>
+      <button type="button" class="btn btn--primary" [disabled]="includedCount() === 0" (click)="uploadAccepted()">
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+        Feltöltés ({{ includedCount() }} db)
+      </button>
+    </div>
+  }
+  @if (isDone) {
+    <div dialogFooter>
+      <button type="button" class="btn btn--outline" (click)="onClose()">Bezárás</button>
+    </div>
+  }
+</app-dialog-wrapper>
+
+<!-- Close confirm -->
+@if (showCloseConfirm()) {
+  <app-confirm-dialog
+    title="Vágás bezárása"
+    message="Biztosan bezárod? Az átnézett eredmények elvesznek."
+    confirmText="Bezárás"
+    cancelText="Maradok"
+    confirmType="warning"
+    (resultEvent)="onConfirmClose($event)"
+  />
+}

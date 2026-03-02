@@ -444,6 +444,9 @@ export const ICONS = {
   BLEND: 'blend',
   SCROLL_TEXT: 'scroll-text',
 
+  // Crop
+  SLIDERS_HORIZONTAL: 'sliders-horizontal',
+
   // Workflow
   WORKFLOW: 'workflow',
 } as const;

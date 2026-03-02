@@ -33,6 +33,11 @@
           <lucide-icon [name]="ICONS.SCAN_FACE" [size]="12" />
         </div>
       }
+      @if (person().isCropProcessed) {
+        <div class="crop-badge" matTooltip="Automatikusan vágott fotó">
+          <lucide-icon [name]="ICONS.CROP" [size]="12" />
+        </div>
+      }
     } @else {
       <div class="card-placeholder">
         <lucide-icon [name]="ICONS.USER_X" [size]="24" />

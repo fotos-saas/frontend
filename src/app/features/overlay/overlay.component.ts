@@ -4,42 +4,26 @@ import {
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { firstValueFrom, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
 import { environment } from '../../../environments/environment';
 import { OverlayUploadService, PsLayerPerson, BatchProgress } from './overlay-upload.service';
+import { OverlayProjectService, PersonItem } from './overlay-project.service';
+import { OverlayPhotoshopService } from './overlay-photoshop.service';
+import { OverlayPollingService } from './overlay-polling.service';
+import { OverlaySettingsService } from './overlay-settings.service';
+import { OverlaySortService } from './overlay-sort.service';
+import { OverlaySyncService } from './overlay-sync.service';
+import { OverlayLayerManagementService } from './overlay-layer-management.service';
+import { OverlayGenerateService } from './overlay-generate.service';
+import { TOOLBAR_GROUPS, ALIGN_MAP, SUBMENU_IDS } from './overlay-toolbar.const';
 import { PartnerTeacherService } from '../partner/services/partner-teacher.service';
 import { TeacherLinkDialogComponent } from '../partner/components/teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../partner/components/teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
 import { TeacherListItem, LinkedGroupPhoto } from '../partner/models/teacher.models';
-
-interface ToolbarItem {
-  id: string;
-  icon: string;
-  label: string;
-  tooltip?: string;
-  accent?: 'green' | 'purple' | 'amber' | 'red' | 'blue';
-}
-
-interface ToolbarGroup {
-  id: string;
-  items: ToolbarItem[];
-  designerOnly?: boolean;
-}
-
-interface PersonItem {
-  id: number;
-  name: string;
-  type: 'student' | 'teacher';
-  hasPhoto: boolean;
-  photoThumbUrl: string | null;
-  photoUrl: string | null;
-  archiveId: number | null;
-  linkedGroup: string | null;
-}
 
 interface UploadResult {
   success: boolean;
@@ -47,9 +31,6 @@ interface UploadResult {
   photo?: { thumbUrl: string; url?: string };
 }
 
-const POLL_NORMAL = 5000;
-const POLL_TURBO = 1000;
-const TURBO_DURATION = 2 * 60 * 1000;
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 
@@ -57,7 +38,11 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   selector: 'app-overlay',
   standalone: true,
   imports: [LucideAngularModule, MatTooltipModule, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
-  providers: [OverlayUploadService],
+  providers: [
+    OverlayUploadService, OverlayProjectService, OverlayPhotoshopService,
+    OverlayPollingService, OverlaySettingsService, OverlaySortService,
+    OverlaySyncService, OverlayLayerManagementService, OverlayGenerateService,
+  ],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,13 +58,52 @@ export class OverlayComponent implements OnInit {
   private readonly uploadService = inject(OverlayUploadService);
   private readonly teacherService = inject(PartnerTeacherService);
 
+  // Kiemelt service-ek
+  readonly projectService = inject(OverlayProjectService);
+  readonly ps = inject(OverlayPhotoshopService);
+  readonly polling = inject(OverlayPollingService);
+  readonly settings = inject(OverlaySettingsService);
+  readonly sortService = inject(OverlaySortService);
+  readonly syncService = inject(OverlaySyncService);
+  readonly layerMgmt = inject(OverlayLayerManagementService);
+  readonly generateService = inject(OverlayGenerateService);
+
+  // ============ Service signal alias-ok (template backward compat) ============
   readonly context = signal<OverlayContext>({ mode: 'normal' });
-  readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
   readonly isDesignerMode = computed(() => this.context().mode === 'designer');
-  readonly isTurbo = signal(false);
-  readonly busyCommand = signal<string | null>(null);
   readonly openSubmenu = signal<string | null>(null);
   private collapseTimer: ReturnType<typeof setTimeout> | null = null;
+  private collapseHover = false;
+
+  // Alias-ok a service signal-ekre (template compatibility)
+  readonly activeDoc = this.polling.activeDoc;
+  readonly isTurbo = this.polling.isTurbo;
+  readonly busyCommand = this.ps.busyCommand;
+  readonly persons = this.projectService.persons;
+  readonly loadingPersons = this.projectService.loadingPersons;
+  readonly isLoggedOut = this.projectService.isLoggedOut;
+  readonly sorting = this.sortService.sorting;
+  readonly syncWithBorder = this.settings.syncWithBorder;
+  readonly nameBreakAfter = this.settings.nameBreakAfter;
+  readonly nameGapCm = this.settings.nameGapCm;
+  readonly sampleUseLargeSize = this.settings.sampleUseLargeSize;
+  readonly sampleWatermarkColor = this.settings.sampleWatermarkColor;
+  readonly sampleWatermarkOpacity = this.settings.sampleWatermarkOpacity;
+  readonly sampleVersion = this.settings.sampleVersion;
+  readonly renameDialogOpen = this.layerMgmt.renameDialogOpen;
+  readonly renameMatched = this.layerMgmt.renameMatched;
+  readonly renameUnmatched = this.layerMgmt.renameUnmatched;
+  readonly renameApplying = this.layerMgmt.renameApplying;
+  readonly refreshRosterDialogOpen = this.layerMgmt.refreshRosterDialogOpen;
+  readonly refreshRosterToRemove = this.layerMgmt.refreshRosterToRemove;
+  readonly refreshRosterToAdd = this.layerMgmt.refreshRosterToAdd;
+  readonly refreshRosterApplying = this.layerMgmt.refreshRosterApplying;
+
+  readonly renameCanApply = computed(() => {
+    if (this.renameApplying()) return false;
+    if (this.renameMatched().length > 0) return true;
+    return this.renameUnmatched().some(u => u.newId.trim().length > 0);
+  });
 
   // Quick actions panel state
   readonly quickActionsPanelOpen = signal(false);
@@ -94,54 +118,21 @@ export class OverlayComponent implements OnInit {
   readonly customOrderText = signal('');
   readonly customOrderResult = signal<{ success: boolean; message: string } | null>(null);
 
-  // Rename layer IDs dialog state
-  readonly renameDialogOpen = signal(false);
-  readonly renameMatched = signal<Array<{ old: string; new: string; personName: string }>>([]);
-  readonly renameUnmatched = signal<Array<{ layerName: string; newId: string }>>([]);
-  readonly renameApplying = signal(false);
-  readonly renameCanApply = computed(() => {
-    if (this.renameApplying()) return false;
-    if (this.renameMatched().length > 0) return true;
-    return this.renameUnmatched().some(u => u.newId.trim().length > 0);
-  });
-
-  // Refresh roster dialog state
-  readonly refreshRosterDialogOpen = signal(false);
-  readonly refreshRosterToRemove = signal<Array<{ name: string; layerName: string }>>([]);
-  readonly refreshRosterToAdd = signal<Array<{ name: string; type: string; layerName: string; displayText: string; group: string }>>([]);
-  readonly refreshRosterApplying = signal(false);
-
-  // Teacher link & photo chooser dialog state
-  readonly showTeacherLinkDialog = signal(false);
-  readonly showPhotoChooserDialog = signal(false);
-  readonly linkDialogTeacher = signal<TeacherListItem | null>(null);
-  readonly linkDialogAllTeachers = signal<TeacherListItem[]>([]);
-  readonly photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
-  readonly photoChooserLinkedGroup = signal('');
-
   // Upload panel state
   readonly uploadPanelOpen = signal(false);
-  readonly persons = signal<PersonItem[]>([]);
   readonly selectedPerson = signal<PersonItem | null>(null);
   readonly searchQuery = signal('');
   readonly uploading = signal(false);
   readonly uploadResult = signal<UploadResult | null>(null);
   readonly dragOver = signal(false);
-  readonly loadingPersons = signal(false);
   readonly selectedFile = signal<File | null>(null);
-  readonly panelHeight = signal(300); // default panel magasság
+  readonly panelHeight = signal(300);
   private resizing = false;
   private resizeStartY = 0;
   private resizeStartH = 0;
   private filePreviewCache = new Map<File, string>();
-
   private static readonly PANEL_MIN_H = 200;
-  private static readonly PANEL_MAX_H_OFFSET = 120; // toolbar + padding + margó
-
-  // Auth state — ha 401 jön, login gomb jelenik meg
-  readonly isLoggedOut = signal(false);
-  // Utolsó ismert projectId (fallback ha a context frissül közben)
-  private lastProjectId: number | null = null;
+  private static readonly PANEL_MAX_H_OFFSET = 120;
 
   // v2 — PS layer-alapú batch upload
   readonly psLayers = signal<PsLayerPerson[]>([]);
@@ -152,28 +143,30 @@ export class OverlayComponent implements OnInit {
   readonly selectedUnmatchedFile = signal<File | null>(null);
   readonly matching = signal(false);
   readonly batchResult = signal<{ success: boolean; message: string } | null>(null);
-  /** Ha true, a polling NEM őrzi meg a korábbi upload státuszokat (reset után) */
   private skipLayerMerge = false;
 
-  readonly hasPsLayers = computed(() => this.psLayers().length > 0);
-  readonly uploadableLayers = computed(() =>
-    this.psLayers().filter(l => l.file && l.uploadStatus !== 'done')
-  );
-  readonly placableLayers = computed(() =>
-    this.psLayers().filter(l => l.uploadStatus === 'done' && l.photoUrl)
-  );
+  // Generate state (alias)
+  readonly generating = this.generateService.generating;
+  readonly generateResult = this.generateService.generateResult;
 
+  // Teacher link & photo chooser dialog state
+  readonly showTeacherLinkDialog = signal(false);
+  readonly showPhotoChooserDialog = signal(false);
+  readonly linkDialogTeacher = signal<TeacherListItem | null>(null);
+  readonly linkDialogAllTeachers = signal<TeacherListItem[]>([]);
+  readonly photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
+  readonly photoChooserLinkedGroup = signal('');
+
+  readonly hasPsLayers = computed(() => this.psLayers().length > 0);
+  readonly uploadableLayers = computed(() => this.psLayers().filter(l => l.file && l.uploadStatus !== 'done'));
+  readonly placableLayers = computed(() => this.psLayers().filter(l => l.uploadStatus === 'done' && l.photoUrl));
   readonly filteredPersons = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     const list = this.persons();
     if (!q) return list;
     return list.filter(p => p.name.toLowerCase().includes(q));
   });
-
-  readonly canUpload = computed(() =>
-    !!this.selectedPerson() && !!this.selectedFile() && !this.uploading()
-  );
-
+  readonly canUpload = computed(() => !!this.selectedPerson() && !!this.selectedFile() && !this.uploading());
   readonly activeDocLabel = computed(() => {
     const name = this.activeDoc().name;
     if (!name) return null;
@@ -181,88 +174,11 @@ export class OverlayComponent implements OnInit {
     if (base.length <= 30) return base;
     return base.slice(0, 12) + '...' + base.slice(-12);
   });
-
   readonly selectedLayers = computed(() => this.activeDoc().selectedLayers ?? 0);
 
-  private readonly allGroups: ToolbarGroup[] = [
-    {
-      id: 'align',
-      designerOnly: true,
-      items: [
-        { id: 'align-left', icon: ICONS.ALIGN_START_V, label: 'Balra igazítás' },
-        { id: 'align-center-h', icon: ICONS.ALIGN_CENTER_V, label: 'Vízszintes középre' },
-        { id: 'align-right', icon: ICONS.ALIGN_END_V, label: 'Jobbra igazítás' },
-        { id: 'align-top', icon: ICONS.ALIGN_START_H, label: 'Felülre igazítás' },
-        { id: 'align-center-v', icon: ICONS.ALIGN_CENTER_H, label: 'Függőleges középre' },
-        { id: 'align-bottom', icon: ICONS.ALIGN_END_H, label: 'Alulra igazítás' },
-      ],
-    },
-    {
-      id: 'distribute',
-      designerOnly: true,
-      items: [
-        { id: 'distribute-h', icon: ICONS.ALIGN_H_DISTRIBUTE, label: 'Vízszintes elosztás' },
-        { id: 'distribute-v', icon: ICONS.ALIGN_V_DISTRIBUTE, label: 'Függőleges elosztás' },
-        { id: 'center-document', icon: ICONS.MOVE, label: 'Dokumentum középre' },
-      ],
-    },
-    {
-      id: 'sort',
-      designerOnly: true,
-      items: [
-        { id: 'arrange-grid', icon: ICONS.LAYOUT_GRID, label: 'Rácsba rendezés', accent: 'purple' },
-        { id: 'sort-abc', icon: ICONS.ARROW_DOWN_AZ, label: 'ABC sorrend', accent: 'blue' },
-        { id: 'sort-gender', icon: ICONS.USERS, label: 'Felváltva fiú-lány' },
-        { id: 'sort-custom', icon: ICONS.LIST_ORDERED, label: 'Egyedi sorrend' },
-      ],
-    },
-    {
-      id: 'layers',
-      designerOnly: true,
-      items: [
-        { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés' },
-        { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés' },
-        { id: 'extra-names', icon: ICONS.FILE_TEXT, label: 'Extra nevek' },
-      ],
-    },
-    {
-      id: 'photoshop',
-      items: [
-        { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Fotó feltöltése', accent: 'green' },
-        { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', accent: 'green' },
-        { id: 'refresh-placed-json', icon: ICONS.REFRESH, label: 'Placed JSON frissítése', tooltip: 'Placed-photos.json újragenerálása az aktuális API adatokból (Photoshop nem kell)', accent: 'blue' },
-        { id: 'rename-layer-ids', icon: ICONS.REPLACE, label: 'Layer ID frissítés', tooltip: 'Régi layer ID-k cseréje az új DB ID-kra', accent: 'amber' },
-        { id: 'refresh-roster', icon: ICONS.USERS, label: 'Névsor frissítés', tooltip: 'Új személyek hozzáadása, régiek törlése a PSD-ből', accent: 'blue' },
-        { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
-        { id: 'sort-menu', icon: ICONS.ARROW_DOWN_AZ, label: 'Rendezés', tooltip: 'ABC / fiú-lány / rácsba rendezés', accent: 'blue' },
-        { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },
-        { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés', tooltip: 'Kijelölt layerek linkelésének megszüntetése' },
-      ],
-    },
-    {
-      id: 'generate',
-      items: [
-        { id: 'generate-sample', icon: ICONS.IMAGE, label: 'Minta generálása', accent: 'amber' },
-        { id: 'generate-final', icon: ICONS.CHECK_CIRCLE, label: 'Véglegesítés', accent: 'green' },
-      ],
-    },
-    {
-      id: 'view',
-      designerOnly: true,
-      items: [
-        { id: 'toggle-grid', icon: ICONS.GRID, label: 'Rács be/ki' },
-        { id: 'snap-grid', icon: ICONS.WAND, label: 'Rácsba igazít' },
-        { id: 'save', icon: ICONS.SAVE, label: 'Mentés', accent: 'purple' },
-      ],
-    },
-  ];
+  readonly groups = computed(() => TOOLBAR_GROUPS.filter(g => !g.designerOnly));
 
-  readonly groups = computed(() => {
-    return this.allGroups.filter(g => !g.designerOnly);
-  });
-
-  private pollTimer: ReturnType<typeof setInterval> | null = null;
-  private turboTimeout: ReturnType<typeof setTimeout> | null = null;
+  // ============ Lifecycle ============
 
   ngOnInit(): void {
     document.body.classList.add('overlay-mode');
@@ -270,50 +186,18 @@ export class OverlayComponent implements OnInit {
     this.listenContextChanges();
     this.loadActiveDoc();
     this.listenActiveDocChanges();
-    this.startPolling(POLL_NORMAL);
+    this.polling.startPolling(this.destroyRef, () => this.pollActiveDoc());
     this.setupClickThrough();
-    this.listenVisibility();
-    this.loadNameSettings();
+    this.polling.listenVisibility(this.destroyRef);
+    this.settings.loadSettings(this.context().projectId || this.projectService.getLastProjectId());
+    this.settings.syncWithBorder.set(this.settings.loadSyncBorderForProject(this.context().projectId));
   }
 
-  private static readonly ALIGN_MAP: Record<string, string> = {
-    'align-left': 'left',
-    'align-center-h': 'centerH',
-    'align-right': 'right',
-    'align-top': 'top',
-    'align-center-v': 'centerV',
-    'align-bottom': 'bottom',
-  };
-
-  private static readonly SUBMENU_IDS = new Set(['arrange-names', 'sync-photos', 'generate-sample', 'generate-final', 'sort-menu', 'refresh-placed-json']);
-
-  readonly syncWithBorder = signal(this.loadSyncBorder());
-
-  // Név beállítások (overlay-ből is elérhetőek)
-  readonly nameBreakAfter = signal(1);
-  readonly nameGapCm = signal(0.5);
-  private nameSettingsLoaded = false;
-
-  // Minta generálás beállítások
-  readonly sampleUseLargeSize = signal(false);
-  readonly sampleWatermarkColor = signal<'white' | 'black'>('white');
-  readonly sampleWatermarkOpacity = signal(0.15);
-  readonly sampleVersion = signal('');
-  readonly generating = signal<'sample' | 'final' | null>(null);
-  readonly generateResult = signal<{ success: boolean; message: string } | null>(null);
-
-  // Rendezés
-  readonly sorting = signal(false);
+  // ============ Command router ============
 
   onCommand(commandId: string): void {
-    // Upload-photo → panel toggle
-    if (commandId === 'upload-photo') {
-      this.toggleUploadPanel();
-      return;
-    }
-
-    // Submenu-s gomb → inline collapse toggle
-    if (OverlayComponent.SUBMENU_IDS.has(commandId)) {
+    if (commandId === 'upload-photo') { this.toggleUploadPanel(); return; }
+    if (SUBMENU_IDS.has(commandId)) {
       const isOpen = this.openSubmenu() === commandId;
       this.openSubmenu.set(isOpen ? null : commandId);
       this.resetCollapseTimer(isOpen ? null : commandId);
@@ -321,27 +205,12 @@ export class OverlayComponent implements OnInit {
     }
     this.closeSubmenu();
 
-    if (commandId === 'rename-layer-ids') {
-      this.renameLayerIds();
-      return;
-    }
-    if (commandId === 'refresh-roster') {
-      this.refreshRoster();
-      return;
-    }
-    if (commandId === 'link-layers') {
-      this.runJsxAction(commandId, 'actions/link-selected.jsx');
-      return;
-    }
-    if (commandId === 'unlink-layers') {
-      this.runJsxAction(commandId, 'actions/unlink-selected.jsx');
-      return;
-    }
-    const alignType = OverlayComponent.ALIGN_MAP[commandId];
-    if (alignType) {
-      this.runJsxAction(commandId, 'actions/align-linked.jsx', { ALIGN_TYPE: alignType });
-      return;
-    }
+    if (commandId === 'rename-layer-ids') { this.layerMgmt.renameLayerIds(this.context()); return; }
+    if (commandId === 'refresh-roster') { this.layerMgmt.refreshRoster(this.context()); return; }
+    if (commandId === 'link-layers') { this.ps.runJsx(commandId, 'actions/link-selected.jsx'); return; }
+    if (commandId === 'unlink-layers') { this.ps.runJsx(commandId, 'actions/unlink-selected.jsx'); return; }
+    const alignType = ALIGN_MAP[commandId];
+    if (alignType) { this.ps.runJsx(commandId, 'actions/align-linked.jsx', { ALIGN_TYPE: alignType }); return; }
     window.electronAPI?.overlay.executeCommand(commandId);
   }
 
@@ -355,998 +224,110 @@ export class OverlayComponent implements OnInit {
     }
   }
 
-  arrangeNames(textAlign: string): void {
-    this.closeSubmenu();
-    this.runJsxAction('arrange-names', 'actions/arrange-names-selected.jsx', {
-      TEXT_ALIGN: textAlign,
-      BREAK_AFTER: String(this.nameBreakAfter()),
-      NAME_GAP_CM: String(this.nameGapCm()),
-    });
-  }
+  // ============ Rendezés delegálás ============
 
-  /** Sortörés ciklikus váltás: 0 → 1 → 2 → 0 */
-  cycleBreakAfter(): void {
-    const current = this.nameBreakAfter();
-    const next = current >= 2 ? 0 : current + 1;
-    this.nameBreakAfter.set(next);
-    this.saveNameSetting('nameBreakAfter', next);
-  }
-
-  /** Gap növelés/csökkentés */
-  adjustGap(delta: number): void {
-    const current = this.nameGapCm();
-    const next = Math.round(Math.max(0, Math.min(5, current + delta)) * 10) / 10;
-    this.nameGapCm.set(next);
-    this.saveNameSetting('nameGapCm', next);
-  }
-
-  async confirmGenerate(type: 'sample' | 'final'): Promise<void> {
-    this.closeSubmenu();
-    if (!window.electronAPI || this.generating()) return;
-
-    this.generating.set(type);
-    this.generateResult.set(null);
-
-    try {
-      if (type === 'sample') {
-        await this.doGenerateSample();
-      } else {
-        await this.doGenerateFinal();
-      }
-    } catch {
-      this.ngZone.run(() => {
-        this.generateResult.set({ success: false, message: 'Váratlan hiba' });
-      });
-    } finally {
-      this.ngZone.run(() => this.generating.set(null));
-    }
-  }
-
-  cancelGenerate(): void {
-    this.closeSubmenu();
-  }
-
-  /** ABC rendezés — lokális magyar collator + JSX pozíció csere */
-  async sortAbc(): Promise<void> {
-    this.closeSubmenu();
-    if (this.sorting()) return;
-    const names = await this.getSortableNames();
-    if (names.length < 2) return;
-
-    this.sorting.set(true);
-    try {
-      const collator = new Intl.Collator('hu', { sensitivity: 'base' });
-      const prefixRe = /^(dr\.?\s*|ifj\.?\s*|id\.?\s*|prof\.?\s*|özv\.?\s*)/i;
-      const sortKey = (n: string) => n.replace(prefixRe, '').trim();
-      const sorted = [...names].sort((a, b) => collator.compare(sortKey(a), sortKey(b)));
-      await this.reorderLayersByNames(sorted);
-    } catch { /* ignore */ }
-    this.ngZone.run(() => this.sorting.set(false));
-  }
-
-  /** Felváltva fiú-lány rendezés — API gender classification + JSX */
-  async sortGender(): Promise<void> {
-    this.closeSubmenu();
-    if (this.sorting()) return;
-    const slugNames = await this.getSortableNames();
-    if (slugNames.length < 2) return;
-
-    // Slug→human map a gender API-hoz és visszamapeléshez
-    const humanToSlug = new Map<string, string>();
-    const humanNames = slugNames.map(slug => {
-      const human = this.slugToHumanName(slug);
-      humanToSlug.set(human, slug);
-      return human;
-    });
-
-    this.sorting.set(true);
-    try {
-      const res = await firstValueFrom(
-        this.http.post<{ success: boolean; classifications: Array<{ name: string; gender: 'boy' | 'girl' }> }>(
-          `${environment.apiUrl}/partner/ai/classify-name-genders`,
-          { names: humanNames },
-        ),
-      );
-      if (res.success && res.classifications) {
-        const collator = new Intl.Collator('hu', { sensitivity: 'base' });
-        const genderMap = new Map(res.classifications.map(c => [c.name, c.gender]));
-        const boys = humanNames.filter(n => genderMap.get(n) === 'boy').sort(collator.compare);
-        const girls = humanNames.filter(n => genderMap.get(n) === 'girl').sort(collator.compare);
-        const orderedHuman = this.interleave(boys, girls);
-        // Human nevek visszamapelése slug-okra a reorder JSX-hez
-        const orderedSlugs = orderedHuman.map(h => humanToSlug.get(h) || h);
-        await this.reorderLayersByNames(orderedSlugs);
-      }
-    } catch { /* ignore */ }
-    this.ngZone.run(() => this.sorting.set(false));
-  }
-
-  /** Rácsba rendezés — arrange-grid JSX közvetlen futtatás */
-  async sortGrid(): Promise<void> {
-    this.closeSubmenu();
-    if (this.sorting()) return;
-    this.sorting.set(true);
-    // Grid paramétereket a PS beállításokból olvassuk
-    if (window.electronAPI) {
-      try {
-        const [margin, gapH, gapV, studentSize, teacherSize, gridAlign] = await Promise.all([
-          window.electronAPI.photoshop.getMargin(),
-          window.electronAPI.photoshop.getGapH(),
-          window.electronAPI.photoshop.getGapV(),
-          window.electronAPI.photoshop.getStudentSize(),
-          window.electronAPI.photoshop.getTeacherSize(),
-          window.electronAPI.photoshop.getGridAlign(),
-        ]);
-        const doc = this.activeDoc();
-        // boardWidthCm/heightCm a PSD méretéből
-        await this.runJsxAction('arrange-grid', 'actions/arrange-grid.jsx', {
-          boardWidthCm: 120, // fallback — a JSX a doc szélességet is használhatja
-          boardHeightCm: 80,
-          marginCm: margin || 2,
-          gapHCm: gapH || 2,
-          gapVCm: gapV || 3,
-          studentSizeCm: studentSize || 6,
-          teacherSizeCm: teacherSize || 6,
-          gridAlign: gridAlign || 'center',
-        });
-      } catch { /* ignore */ }
-    }
-    this.ngZone.run(() => this.sorting.set(false));
-  }
+  arrangeNames(textAlign: string): void { this.closeSubmenu(); this.sortService.arrangeNames(textAlign); }
+  cycleBreakAfter(): void { this.settings.cycleBreakAfter(); }
+  adjustGap(delta: number): void { this.settings.adjustGap(delta); }
+  async sortAbc(): Promise<void> { this.closeSubmenu(); await this.sortService.sortAbc(); }
+  async sortGender(): Promise<void> { this.closeSubmenu(); await this.sortService.sortGender(); }
+  async sortGrid(): Promise<void> { this.closeSubmenu(); await this.sortService.sortGrid(this.activeDoc()); }
 
   // ============ Custom Order Panel ============
 
   toggleCustomOrderPanel(): void {
-    if (this.customOrderPanelOpen()) {
-      this.closeCustomOrderPanel();
-    } else {
+    if (this.customOrderPanelOpen()) { this.closeCustomOrderPanel(); } else {
       this.customOrderPanelOpen.set(true);
       this.customOrderResult.set(null);
       this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
     }
   }
-
-  closeCustomOrderPanel(): void {
-    this.customOrderPanelOpen.set(false);
-    this.customOrderResult.set(null);
-  }
+  closeCustomOrderPanel(): void { this.customOrderPanelOpen.set(false); this.customOrderResult.set(null); }
 
   async submitCustomOrder(): Promise<void> {
-    const text = this.customOrderText().trim();
-    if (!text || this.sorting()) return;
-
-    const slugNames = await this.getSortableNames();
-    if (slugNames.length < 2) {
-      this.customOrderResult.set({ success: false, message: 'Legalább 2 kijelölt kép layer kell a rendezéshez.' });
-      return;
-    }
-
-    // Slug→human map: "piller-csenge---14668" → "Piller Csenge"
-    const slugToHuman = new Map<string, string>();
-    const humanNames = slugNames.map(slug => {
-      const human = this.slugToHumanName(slug);
-      slugToHuman.set(human.toLowerCase(), slug);
-      return human;
-    });
-
-    this.sorting.set(true);
-    this.customOrderResult.set(null);
-    try {
-      const res = await firstValueFrom(
-        this.http.post<{ success: boolean; ordered_names: string[]; unmatched: string[] }>(
-          `${environment.apiUrl}/partner/ai/match-custom-order`,
-          { layer_names: humanNames, custom_order: text },
-        ),
-      );
-      if (res.success && res.ordered_names) {
-        // AI human neveket ad vissza → visszamapeljük slug-okra a reorderhez
-        const orderedSlugs = res.ordered_names.map(human => {
-          return slugToHuman.get(human.toLowerCase()) || slugNames.find(s => this.slugToHumanName(s).toLowerCase() === human.toLowerCase()) || human;
-        });
-        await this.reorderLayersByNames(orderedSlugs);
-        const orderList = res.ordered_names.map((n, i) => `${i + 1}. ${n}`).join(' → ');
-        const msg = `Rendezve: ${orderList}`;
-        this.ngZone.run(() => this.customOrderResult.set({ success: true, message: msg }));
-      } else {
-        this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' }));
-      }
-    } catch {
-      this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' }));
-    }
-    this.ngZone.run(() => this.sorting.set(false));
+    const result = await this.sortService.submitCustomOrder(this.customOrderText().trim());
+    if (result.message) this.ngZone.run(() => this.customOrderResult.set(result));
   }
 
-  /** Rendezéshez a nevek: FRISSEN lekéri a kijelölt layereket PS-ből, nem a stale polling adatot */
-  private async getSortableNames(): Promise<string[]> {
-    // Mindig frissen kérjük le a PS-ből a kijelölt layereket
-    const freshSelected = await this.getFreshSelectedLayerNames();
-    if (freshSelected.length >= 2) return freshSelected;
-    return this.getImageLayerNames();
-  }
-
-  /** PS-ből frissen lekéri a kijelölt layerek neveit (get-active-doc.jsx) */
-  private async getFreshSelectedLayerNames(): Promise<string[]> {
-    if (!window.electronAPI) return [];
-    try {
-      const result = await window.electronAPI.photoshop.runJsx({
-        scriptName: 'actions/get-active-doc.jsx',
-      });
-      if (!result.success || !result.output) return [];
-      const cleaned = result.output.trim();
-      if (!cleaned.startsWith('{')) return [];
-      const data = JSON.parse(cleaned);
-      console.log('[FRESH-SELECTED] selectedLayerNames:', data.selectedLayerNames, 'count:', data.selectedLayers);
-      // Frissítsük az activeDoc signal-t is
-      this.ngZone.run(() => this.activeDoc.set(data));
-      return data.selectedLayerNames || [];
-    } catch { return []; }
-  }
-
-  /** Slug layer névből human-readable nevet csinál: "piller-csenge---14668" → "Piller Csenge" */
-  private slugToHumanName(slug: string): string {
-    // Levágja a ---SZÁM szuffixot
-    const withoutId = slug.replace(/---\d+$/, '');
-    // Kötőjeleket szóközre cseréli, szavakat nagybetűsíti
-    return withoutId
-      .split('-')
-      .filter(Boolean)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-  }
-
-  /** PS-ből kiszedi az összes Images layerek neveit */
-  private async getImageLayerNames(): Promise<string[]> {
-    if (!window.electronAPI) return [];
-    try {
-      const result = await window.electronAPI.photoshop.runJsx({
-        scriptName: 'actions/get-image-names.jsx',
-      });
-      if (!result.success || !result.output) return [];
-      const cleaned = result.output.trim();
-      if (!cleaned.startsWith('{')) return [];
-      const data = JSON.parse(cleaned);
-      return data.names || [];
-    } catch { return []; }
-  }
-
-  /** Names csoport text layerek nevét és szöveges tartalmát olvassa ki */
-  private async getNamesTextContent(): Promise<Map<string, string>> {
-    const map = new Map<string, string>();
-    if (!window.electronAPI) return map;
-    try {
-      const result = await window.electronAPI.photoshop.runJsx({
-        scriptName: 'actions/get-names-text-content.jsx',
-      });
-      if (!result.success || !result.output) return map;
-      const cleaned = result.output.trim();
-      if (!cleaned.startsWith('{')) return map;
-      const data = JSON.parse(cleaned);
-      for (const item of data.items || []) {
-        // \r sortörést szóközre cseréljük
-        const text = (item.textContent || '').replace(/[\r\n]+/g, ' ').trim();
-        if (text) map.set(item.layerName, text);
-      }
-      return map;
-    } catch { return map; }
-  }
-
-  /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket */
-  private async reorderLayersByNames(orderedNames: string[]): Promise<any> {
-    console.log('[REORDER] orderedNames:', orderedNames);
-    const result = await this.runJsxAction('reorder-layers', 'actions/reorder-layers.jsx', {
-      ORDERED_NAMES: JSON.stringify(orderedNames),
-      GROUP: 'All',
-    });
-    console.log('[REORDER] JSX result:', result);
-    return result;
-  }
-
-  /** Két tömb váltogatásos összefűzése */
-  private interleave(a: string[], b: string[]): string[] {
-    const first = a.length >= b.length ? a : b;
-    const second = a.length >= b.length ? b : a;
-    const result: string[] = [];
-    let fi = 0;
-    let si = 0;
-    for (let i = 0; i < first.length + second.length; i++) {
-      if (i % 2 === 0 && fi < first.length) {
-        result.push(first[fi++]);
-      } else if (si < second.length) {
-        result.push(second[si++]);
-      } else if (fi < first.length) {
-        result.push(first[fi++]);
-      }
-    }
-    return result;
-  }
-
-  toggleSampleSize(): void {
-    this.sampleUseLargeSize.update(v => !v);
-    window.electronAPI?.sample.setSettings({ useLargeSize: this.sampleUseLargeSize() });
-    this.saveSampleSettingsToBackend({ sample_use_large_size: this.sampleUseLargeSize() });
-  }
-
-  toggleWatermarkColor(): void {
-    const next = this.sampleWatermarkColor() === 'white' ? 'black' : 'white';
-    this.sampleWatermarkColor.set(next);
-    window.electronAPI?.sample.setSettings({ watermarkColor: next });
-    this.saveSampleSettingsToBackend({ sample_watermark_color: next });
-  }
-
-  cycleOpacity(direction: 1 | -1 = 1): void {
-    const pct = Math.round(this.sampleWatermarkOpacity() * 100);
-    const next = Math.min(50, Math.max(5, pct + direction)) / 100;
-    this.sampleWatermarkOpacity.set(next);
-    window.electronAPI?.sample.setSettings({ watermarkOpacity: next });
-    this.saveSampleSettingsToBackend({ sample_watermark_opacity: Math.round(next * 100) });
-  }
-
-  cycleSampleVersion(direction: 1 | -1 = 1): void {
-    const current = this.sampleVersion();
-    const num = current ? parseInt(current, 10) : 0;
-    const next = Math.max(0, (isNaN(num) ? 0 : num) + direction);
-    const val = next === 0 ? '' : String(next);
-    this.sampleVersion.set(val);
-    window.electronAPI?.sample.setSettings({ sampleVersion: val });
-    this.saveSampleSettingsToBackend({ sample_version: val });
-  }
-
-  private async doGenerateSample(): Promise<void> {
-    const api = window.electronAPI!;
-
-    // 1. PSD path a pollolt activeDoc-ból
-    const psdPath = this.activeDoc().path;
-    if (!psdPath) {
-      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Nincs megnyitott PSD' }));
-      return;
-    }
-    const psdDir = psdPath.replace(/[/\\][^/\\]+$/, '');
-
-    // 2. projectId
-    let pid = this.context().projectId || this.lastProjectId;
-    if (!pid) {
-      try {
-        const r = await api.overlay.getProjectId();
-        if (r.projectId) pid = r.projectId;
-      } catch { /* ignore */ }
-    }
-    if (!pid) {
-      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Nincs projekt azonosító' }));
-      return;
-    }
-
-    // 3. Flatten export JSX
-    const flattenResult = await api.photoshop.runJsx({
-      scriptName: 'actions/flatten-export.jsx',
-      jsonData: { quality: 95 },
-    });
-    if (!flattenResult.success) {
-      this.ngZone.run(() => this.generateResult.set({ success: false, message: flattenResult.error || 'Flatten hiba' }));
-      return;
-    }
-    const output = flattenResult.output || '';
-    const okMatch = output.match(/__FLATTEN_RESULT__OK:(.+)/);
-    if (!okMatch) {
-      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Flatten nem adott eredményt' }));
-      return;
-    }
-    const tempJpg = okMatch[1].trim();
-
-    // 4. Sample generálás (resize + watermark + upload)
-    const authToken = sessionStorage.getItem('marketer_token') || '';
-    const projectName = this.activeDoc().name?.replace(/\.(psd|psb|pdd)$/i, '') || 'tablo';
-    const largeSize = this.sampleUseLargeSize();
-    const sizeWidth = largeSize ? 4000 : 2000;
-
-    const result = await api.sample.generate({
-      psdFilePath: tempJpg,
-      outputDir: psdDir,
-      projectId: pid,
-      projectName,
-      apiBaseUrl: (window as { __env__?: { apiUrl?: string } }).__env__?.apiUrl || this.getApiUrl(),
-      authToken,
-      watermarkText: 'MINTA',
-      watermarkColor: this.sampleWatermarkColor(),
-      watermarkOpacity: this.sampleWatermarkOpacity(),
-      sampleVersion: this.sampleVersion(),
-      sizes: [{ name: 'minta', width: sizeWidth }],
-    });
-
-    this.ngZone.run(() => {
-      if (result.success) {
-        this.generateResult.set({ success: true, message: `${result.localPaths?.length || 0} mentve, ${result.uploadedCount || 0} feltöltve` });
-      } else {
-        this.generateResult.set({ success: false, message: result.error || 'Minta generálás sikertelen' });
-      }
-    });
-  }
-
-  private async doGenerateFinal(): Promise<void> {
-    const api = window.electronAPI!;
-
-    const psdPath = this.activeDoc().path;
-    if (!psdPath) {
-      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Nincs megnyitott PSD' }));
-      return;
-    }
-    const psdDir = psdPath.replace(/[/\\][^/\\]+$/, '');
-
-    let pid = this.context().projectId || this.lastProjectId;
-    if (!pid) {
-      try {
-        const r = await api.overlay.getProjectId();
-        if (r.projectId) pid = r.projectId;
-      } catch { /* ignore */ }
-    }
-    if (!pid) {
-      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Nincs projekt azonosító' }));
-      return;
-    }
-
-    // Flatten
-    const flattenResult = await api.photoshop.runJsx({
-      scriptName: 'actions/flatten-export.jsx',
-      jsonData: { quality: 95 },
-    });
-    if (!flattenResult.success) {
-      this.ngZone.run(() => this.generateResult.set({ success: false, message: flattenResult.error || 'Flatten hiba' }));
-      return;
-    }
-    const output = flattenResult.output || '';
-    const okMatch = output.match(/__FLATTEN_RESULT__OK:(.+)/);
-    if (!okMatch) {
-      this.ngZone.run(() => this.generateResult.set({ success: false, message: 'Flatten nem adott eredményt' }));
-      return;
-    }
-    const tempJpg = okMatch[1].trim();
-
-    const authToken = sessionStorage.getItem('marketer_token') || '';
-    const projectName = this.activeDoc().name?.replace(/\.(psd|psb|pdd)$/i, '') || 'tablo';
-
-    const apiUrl = (window as { __env__?: { apiUrl?: string } }).__env__?.apiUrl || this.getApiUrl();
-    const commonParams = { flattenedJpgPath: tempJpg, outputDir: psdDir, projectId: pid, projectName, apiBaseUrl: apiUrl, authToken };
-
-    // Flat + Kistabló párhuzamosan (egyetlen flatten-ből)
-    const [flatResult, smallResult] = await Promise.all([
-      api.finalizer.upload({ ...commonParams, type: 'flat' as const }),
-      api.finalizer.upload({ ...commonParams, type: 'small_tablo' as const, maxSize: 3000 }),
-    ]);
-
-    const results: string[] = [];
-    const errors: string[] = [];
-    if (flatResult.success && (flatResult.uploadedCount ?? 0) > 0) results.push('Flat');
-    else errors.push(flatResult.error || 'Flat feltöltés sikertelen');
-    if (smallResult.success && (smallResult.uploadedCount ?? 0) > 0) results.push('Kistabló');
-    else errors.push(smallResult.error || 'Kistabló feltöltés sikertelen');
-    const totalUploaded = (flatResult.uploadedCount ?? 0) + (smallResult.uploadedCount ?? 0);
-
-    this.ngZone.run(() => {
-      if (results.length > 0) {
-        this.generateResult.set({ success: true, message: `Véglegesítve: ${results.join(' + ')} (${totalUploaded} feltöltve)` });
-      } else {
-        this.generateResult.set({ success: false, message: errors.join('; ') || 'Feltöltés sikertelen' });
-      }
-    });
-  }
-
-  private getApiUrl(): string {
-    return environment.apiUrl;
-  }
+  // ============ Sync & Generate delegálás ============
 
   syncPhotos(mode: 'all' | 'missing' | 'selected'): void {
     console.log('🔴 syncPhotos CALLED, mode:', mode);
     this.closeSubmenu();
-    this.doSyncPhotos(mode);
+    this.syncService.syncPhotos(mode, this.context());
   }
 
-  confirmRefreshPlacedJson(): void {
-    this.closeSubmenu();
-    this.doRefreshPlacedJson();
-  }
+  confirmRefreshPlacedJson(): void { this.closeSubmenu(); this.syncService.refreshPlacedJson(this.context()); }
 
-  private async doRefreshPlacedJson(): Promise<void> {
-    console.log('[REFRESH-JSON] START');
-    if (!window.electronAPI) { console.log('[REFRESH-JSON] ABORT: no electronAPI'); return; }
+  toggleSyncBorder(): void { this.settings.toggleSyncBorder(this.context().projectId); }
 
-    const psdFilePath = this.activeDoc().path;
-    console.log('[REFRESH-JSON] psdFilePath:', psdFilePath);
-    if (!psdFilePath) { console.log('[REFRESH-JSON] ABORT: nincs PSD útvonal'); return; }
-
-    // ProjectId: context → lastProjectId → overlay IPC (project-info.json fallback)
-    let pid = this.context().projectId || this.lastProjectId;
-    console.log('[REFRESH-JSON] pid (context/lastProjectId):', pid);
-    if (!pid) {
-      try {
-        const r = await window.electronAPI.overlay.getProjectId();
-        console.log('[REFRESH-JSON] getProjectId result:', r);
-        if (r.projectId) { pid = r.projectId; this.lastProjectId = pid; }
-      } catch (e) { console.log('[REFRESH-JSON] getProjectId error:', e); }
-    }
-    if (!pid) { console.log('[REFRESH-JSON] ABORT: nincs projectId'); return; }
-
-    this.ngZone.run(() => this.busyCommand.set('refresh-placed-json'));
-    try {
-      // Persons betöltése API-ból
-      const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
-      console.log('[REFRESH-JSON] fetching persons from:', url);
-      const res = await firstValueFrom(this.http.get<{ data: PersonItem[] }>(url));
-      const persons = res.data || [];
-      console.log('[REFRESH-JSON] fetched persons:', persons.length);
-      this.ngZone.run(() => this.persons.set(persons));
-
-      // Minden személy akit fotóval rendelkezik → layers tömbbe (personId mint layerName)
-      const layers: Array<{ layerName: string; photoUrl: string }> = [];
-      for (const person of persons) {
-        if (person.photoUrl) {
-          // Layer név: slug---personId (az updatePlacedPhotosJson a ---ID részt parszolja)
-          const slug = person.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
-          layers.push({ layerName: `${slug}---${person.id}`, photoUrl: person.photoUrl });
-        }
-      }
-      console.log('[REFRESH-JSON] layers to write:', layers.length);
-      if (layers.length === 0) { console.log('[REFRESH-JSON] ABORT: nincs fotó'); return; }
-
-      console.log('[REFRESH-JSON] calling refreshPlacedJson IPC...');
-      const result = await window.electronAPI.photoshop.refreshPlacedJson({
-        psdFilePath,
-        layers,
-        syncBorder: this.syncWithBorder(),
-      });
-      console.log('[REFRESH-JSON] IPC result:', result);
-    } catch (e) {
-      console.error('[REFRESH-JSON] error:', e);
-    } finally {
-      this.ngZone.run(() => this.busyCommand.set(null));
-    }
-  }
-
-  private async refreshRoster(): Promise<void> {
-    this.busyCommand.set('refresh-roster');
-    try {
-      await this.doRefreshRoster();
-    } finally {
-      this.ngZone.run(() => this.busyCommand.set(null));
-    }
-  }
-
-  private async doRefreshRoster(): Promise<void> {
-    // 1. PSD layer nevek lekérése
-    const allNames = await this.getImageLayerNames();
-    if (allNames.length === 0) {
-      console.log('[REFRESH-ROSTER] Nincs PSD layer');
-      return;
-    }
-
-    // 2. ProjectId meghatározás
-    let pid = this.context().projectId || this.lastProjectId;
-    if (!pid && window.electronAPI) {
-      try {
-        const result = await window.electronAPI.overlay.getProjectId();
-        if (result.projectId) {
-          pid = result.projectId;
-          this.lastProjectId = pid;
-        }
-      } catch { /* ignore */ }
-    }
-    if (!pid) {
-      console.error('[REFRESH-ROSTER] Nincs projectId');
-      return;
-    }
-
-    // 3. API persons lekérése
-    let personList: PersonItem[] = [];
-    try {
-      const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
-      const res = await firstValueFrom(
-        this.http.get<{ data: PersonItem[] }>(url),
-      );
-      personList = res.data || [];
-    } catch (e) {
-      console.error('[REFRESH-ROSTER] fetch persons error:', e);
-      return;
-    }
-
-    // 4. Diff számítás
-    const layerPersonIds = new Set<number>();
-    const layerNameById = new Map<number, string>();
-    for (const name of allNames) {
-      const match = name.match(/---(\d+)$/);
-      if (match) {
-        const id = parseInt(match[1], 10);
-        layerPersonIds.add(id);
-        layerNameById.set(id, name);
-      }
-    }
-
-    const dbPersonIds = new Set(personList.map(p => p.id));
-
-    // Törlendő: PSD-ben van, DB-ben nincs
-    const toRemove: Array<{ name: string; layerName: string }> = [];
-    for (const [id, layerName] of layerNameById) {
-      if (!dbPersonIds.has(id)) {
-        const slug = layerName.replace(/---\d+$/, '').replace(/-/g, ' ');
-        toRemove.push({ name: slug, layerName });
-      }
-    }
-
-    // Hozzáadandó: DB-ben van, PSD-ben nincs
-    const toAdd: Array<{ name: string; type: string; layerName: string; displayText: string; group: string }> = [];
-    for (const person of personList) {
-      if (!layerPersonIds.has(person.id)) {
-        const slug = person.name
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase().replace(/\s+/g, '-');
-        toAdd.push({
-          name: person.name,
-          type: person.type,
-          layerName: `${slug}---${person.id}`,
-          displayText: person.name,
-          group: person.type === 'teacher' ? 'Teachers' : 'Students',
-        });
-      }
-    }
-
-    // 5. Ha nincs változás
-    if (toRemove.length === 0 && toAdd.length === 0) {
-      console.log('[REFRESH-ROSTER] Nincs eltérés');
-      return;
-    }
-
-    // 6. Dialógus megjelenítése
-    this.ngZone.run(() => {
-      this.refreshRosterToRemove.set(toRemove);
-      this.refreshRosterToAdd.set(toAdd);
-      this.refreshRosterDialogOpen.set(true);
-    });
-  }
-
-  async applyRefreshRoster(): Promise<void> {
-    this.refreshRosterApplying.set(true);
-    try {
-      const toRemove = this.refreshRosterToRemove().map(r => r.layerName);
-      const toAdd = this.refreshRosterToAdd().map(a => ({
-        layerName: a.layerName,
-        displayText: a.displayText,
-        group: a.group,
-      }));
-
-      await this.runJsxAction('refresh-roster', 'actions/refresh-roster.jsx', {
-        toRemove,
-        toAdd,
-      });
-
-      this.ngZone.run(() => {
-        this.refreshRosterDialogOpen.set(false);
-        this.refreshRosterToRemove.set([]);
-        this.refreshRosterToAdd.set([]);
-      });
-    } catch (e) {
-      console.error('[REFRESH-ROSTER] apply error:', e);
-    } finally {
-      this.ngZone.run(() => this.refreshRosterApplying.set(false));
-    }
-  }
-
-  closeRefreshRosterDialog(): void {
-    if (this.refreshRosterApplying()) return;
-    this.refreshRosterDialogOpen.set(false);
-    this.refreshRosterToRemove.set([]);
-    this.refreshRosterToAdd.set([]);
-  }
-
-  private async renameLayerIds(): Promise<void> {
-    this.busyCommand.set('rename-layer-ids');
-    try {
-      await this.doRenameLayerIds();
-    } finally {
-      this.ngZone.run(() => this.busyCommand.set(null));
-    }
-  }
-
-  private async doRenameLayerIds(): Promise<void> {
-    // 1. Összes layer név lekérése a PSD-ből (nem csak kijelöltek)
-    const allNames = await this.getImageLayerNames();
-    if (allNames.length === 0) return;
-
-    // 2. Persons betöltése — MINDIG frissen az aktuális projektből
-    let pid = this.context().projectId || this.lastProjectId;
-
-    // Fallback: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
-    if (!pid && window.electronAPI) {
-      try {
-        const result = await window.electronAPI.overlay.getProjectId();
-        if (result.projectId) {
-          pid = result.projectId;
-          this.lastProjectId = pid;
-        }
-      } catch { /* ignore */ }
-    }
-
-    let personList: PersonItem[] = [];
-    if (pid) {
-      try {
-        const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
-        console.log('[RENAME] fetching persons from:', url, 'projectId:', pid);
-        const res = await firstValueFrom(
-          this.http.get<{ data: PersonItem[] }>(url),
-        );
-        personList = res.data || [];
-        console.log('[RENAME] fetched persons:', personList.length);
-        this.ngZone.run(() => this.persons.set(personList));
-      } catch (e) { console.error('[RENAME] fetch persons error:', e); }
-    }
-
-    // 3. Matching: slug → person (exact → startsWith → fuzzy fallback)
-    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[._\-]+/g, ' ').replace(/\s+/g, ' ').trim();
-
-    // Levenshtein distance — max 2 karakter eltérésnél matchel
-    const levenshtein = (a: string, b: string): number => {
-      const m = a.length, n = b.length;
-      if (Math.abs(m - n) > 2) return 3; // early exit
-      const dp: number[][] = Array.from({ length: m + 1 }, (_, i) => [i]);
-      for (let j = 1; j <= n; j++) dp[0][j] = j;
-      for (let i = 1; i <= m; i++) {
-        for (let j = 1; j <= n; j++) {
-          dp[i][j] = a[i - 1] === b[j - 1]
-            ? dp[i - 1][j - 1]
-            : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-        }
-      }
-      return dp[m][n];
-    };
-
-    const matched: Array<{ old: string; new: string; personName: string }> = [];
-    const unmatched: Array<{ layerName: string; newId: string }> = [];
-    const usedPersonIds = new Set<number>();
-
-    for (const layerName of allNames) {
-      const slug = layerName.replace(/---\d+$/, '');
-      const normalizedSlug = normalize(slug);
-
-      // Exact → startsWith → fuzzy (max 2 karakter eltérés)
-      const available = personList.filter(p => !usedPersonIds.has(p.id));
-      const person =
-        available.find(p => normalize(p.name) === normalizedSlug) ||
-        available.find(p => normalize(p.name).startsWith(normalizedSlug + ' ')) ||
-        available.find(p => normalizedSlug.startsWith(normalize(p.name) + ' ')) ||
-        available.find(p => levenshtein(normalize(p.name), normalizedSlug) <= 2);
-
-      if (person) {
-        usedPersonIds.add(person.id);
-        const newName = `${slug}---${person.id}`;
-        if (newName !== layerName) {
-          matched.push({ old: layerName, new: newName, personName: person.name });
-        }
-      } else {
-        unmatched.push({ layerName, newId: '' });
-      }
-    }
-
-    // 3b. Fallback: Names text content alapján matchelés az unmatched layerekre
-    if (unmatched.length > 0 && personList.length > 0) {
-      const namesTextMap = await this.getNamesTextContent();
-      if (namesTextMap.size > 0) {
-        const stillUnmatched: typeof unmatched = [];
-        for (const um of unmatched) {
-          const textContent = namesTextMap.get(um.layerName);
-          if (!textContent) { stillUnmatched.push(um); continue; }
-          const normalizedText = normalize(textContent);
-          const available = personList.filter(p => !usedPersonIds.has(p.id));
-          const person =
-            available.find(p => normalize(p.name) === normalizedText) ||
-            available.find(p => levenshtein(normalize(p.name), normalizedText) <= 2);
-          if (person) {
-            usedPersonIds.add(person.id);
-            const slug = um.layerName.replace(/---\d+$/, '');
-            const newName = `${slug}---${person.id}`;
-            if (newName !== um.layerName) {
-              matched.push({ old: um.layerName, new: newName, personName: person.name });
-            }
-          } else {
-            stillUnmatched.push(um);
-          }
-        }
-        unmatched.length = 0;
-        unmatched.push(...stillUnmatched);
-        console.log('[RENAME] Names fallback matched:', matched.length, 'still unmatched:', unmatched.length);
-      }
-    }
-
-    // 4. Ha nincs nem matchelt ÉS van átnevezhető → azonnal futtatjuk
-    if (unmatched.length === 0 && matched.length > 0) {
-      await this.executeRename(matched.map(m => ({ old: m.old, new: m.new })));
-      return;
-    }
-
-    // 5. Ha nincs átnevezhető sem → nincs teendő
-    if (unmatched.length === 0 && matched.length === 0) return;
-
-    // 6. Dialógus megnyitása — a user kézzel megadhatja a nem matchelt ID-kat
-    this.ngZone.run(() => {
-      this.renameMatched.set(matched);
-      this.renameUnmatched.set(unmatched);
-      this.renameDialogOpen.set(true);
-    });
-  }
-
-  /** Rename dialógus: kézi ID módosítás az unmatched listán */
-  updateUnmatchedId(index: number, newId: string): void {
-    this.renameUnmatched.update(list => {
-      const copy = [...list];
-      copy[index] = { ...copy[index], newId };
-      return copy;
-    });
-  }
-
-  /** Rename dialógus: "Alkalmazás" gomb */
-  async applyRename(): Promise<void> {
-    this.renameApplying.set(true);
-    try {
-      const renameMap: Array<{ old: string; new: string }> = [];
-
-      // Matchelt layerek (auto)
-      for (const m of this.renameMatched()) {
-        renameMap.push({ old: m.old, new: m.new });
-      }
-
-      // Kézzel megadott ID-k
-      for (const u of this.renameUnmatched()) {
-        const id = u.newId.trim();
-        if (id) {
-          const slug = u.layerName.replace(/---\d+$/, '');
-          renameMap.push({ old: u.layerName, new: `${slug}---${id}` });
-        }
-      }
-
-      if (renameMap.length > 0) {
-        await this.executeRename(renameMap);
-      }
-
-      this.renameDialogOpen.set(false);
-    } finally {
-      this.renameApplying.set(false);
-    }
-  }
-
-  closeRenameDialog(): void {
-    this.renameDialogOpen.set(false);
-  }
-
-  private async executeRename(renameMap: Array<{ old: string; new: string }>): Promise<void> {
-    const result = await window.electronAPI?.photoshop.runJsx({
-      scriptName: 'actions/rename-layers.jsx',
-      jsonData: { renameMap },
-    });
-    console.log('[RENAME] result:', result);
-  }
-
-  /** Fotó szinkronizálás — az overlay önállóan kezeli, PS JSX + backend API */
-  private async doSyncPhotos(mode: 'all' | 'missing' | 'selected'): Promise<void> {
-    if (!window.electronAPI) { console.log('[SYNC] no electronAPI'); return; }
-
-    // 1. Layer nevek lekérése PS-ből
-    console.log('[SYNC] mode:', mode);
-    let layerNames: string[];
-    if (mode === 'selected') {
-      layerNames = await this.getFreshSelectedLayerNames();
-      console.log('[SYNC] selected layerNames:', layerNames);
-      if (layerNames.length === 0) { console.log('[SYNC] ABORT: no selected layers'); return; }
-    } else {
-      layerNames = await this.getImageLayerNames();
-      console.log('[SYNC] all/missing layerNames count:', layerNames.length);
-    }
-
-    // 2. Layer névből person ID kinyerése (slug---ID formátum)
-    const layerPersonMap = new Map<number, string>();
-    for (const name of layerNames) {
-      const match = name.match(/---(\d+)$/);
-      if (match) {
-        layerPersonMap.set(parseInt(match[1], 10), name);
-      }
-    }
-    console.log('[SYNC] layerPersonMap size:', layerPersonMap.size);
-    if (layerPersonMap.size === 0) { console.log('[SYNC] ABORT: no person IDs in layer names'); return; }
-
-    // 3. Person-ök fotó URL-jének lekérése
-    const personIds = Array.from(layerPersonMap.keys());
-    let persons = this.persons();
-    console.log('[SYNC] cached persons:', persons.length, 'needed IDs:', personIds);
-
-    // Ha nincs betöltve vagy hiányzik valaki, töltsük be a backendről
-    let pid = this.context().projectId || this.lastProjectId;
-
-    // Fallback: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
-    if (!pid && window.electronAPI) {
-      try {
-        const result = await window.electronAPI.overlay.getProjectId();
-        if (result.projectId) {
-          pid = result.projectId;
-          this.lastProjectId = pid;
-        }
-      } catch { /* ignore */ }
-    }
-
-    console.log('[SYNC] projectId:', pid);
-    if (pid) {
-      try {
-        const url = `${environment.apiUrl}/partner/projects/${pid}/persons`;
-        console.log('[SYNC] fetching persons from:', url);
-        const res = await firstValueFrom(this.http.get<{ data: PersonItem[] }>(url));
-        persons = res.data || [];
-        console.log('[SYNC] fetched persons:', persons.length);
-        this.ngZone.run(() => this.persons.set(persons));
-      } catch (e) { console.log('[SYNC] fetch persons error:', e); }
-    }
-
-    // 4. Fotó URL-ek összegyűjtése
-    const photosToSync: Array<{ layerName: string; photoUrl: string }> = [];
-    for (const [personId, layerName] of layerPersonMap) {
-      const person = persons.find(p => p.id === personId);
-      console.log('[SYNC] person', personId, '→', person?.name, 'photoUrl:', person?.photoUrl?.substring(0, 50));
-      if (person?.photoUrl) {
-        photosToSync.push({ layerName, photoUrl: person.photoUrl });
-      }
-    }
-
-    console.log('[SYNC] photosToSync:', photosToSync.length);
-    if (photosToSync.length === 0) { console.log('[SYNC] ABORT: no photos to sync'); return; }
-
-    // 5. Behelyezés a Photoshopba
-    this.busyCommand.set('sync-photos');
-    try {
-      await window.electronAPI.photoshop.placePhotos({ layers: photosToSync, syncBorder: this.syncWithBorder(), psdFilePath: this.activeDoc().path ?? undefined });
-    } finally {
-      this.ngZone.run(() => this.busyCommand.set(null));
-    }
-  }
-
-  toggleSyncBorder(): void {
-    this.syncWithBorder.update(v => !v);
-    this.saveSyncBorder(this.syncWithBorder());
-    window.electronAPI?.overlay.executeCommand(
-      this.syncWithBorder() ? 'sync-border-on' : 'sync-border-off',
+  toggleSampleSize(): void {
+    this.settings.toggleSampleSize();
+    this.settings.saveSampleSettingsToBackend(
+      this.context().projectId || this.projectService.getLastProjectId(),
+      { sample_use_large_size: this.sampleUseLargeSize() },
     );
   }
+
+  toggleWatermarkColor(): void {
+    this.settings.toggleWatermarkColor();
+    this.settings.saveSampleSettingsToBackend(
+      this.context().projectId || this.projectService.getLastProjectId(),
+      { sample_watermark_color: this.sampleWatermarkColor() },
+    );
+  }
+
+  cycleOpacity(direction: 1 | -1 = 1): void {
+    this.settings.cycleOpacity(direction);
+    this.settings.saveSampleSettingsToBackend(
+      this.context().projectId || this.projectService.getLastProjectId(),
+      { sample_watermark_opacity: Math.round(this.sampleWatermarkOpacity() * 100) },
+    );
+  }
+
+  cycleSampleVersion(direction: 1 | -1 = 1): void {
+    this.settings.cycleSampleVersion(direction);
+    this.settings.saveSampleSettingsToBackend(
+      this.context().projectId || this.projectService.getLastProjectId(),
+      { sample_version: this.sampleVersion() },
+    );
+  }
+
+  async confirmGenerate(type: 'sample' | 'final'): Promise<void> {
+    this.closeSubmenu();
+    this.generateService.confirmGenerate(type, this.context());
+  }
+  cancelGenerate(): void { this.closeSubmenu(); }
+
+  // ============ Rename & Roster delegálás ============
+
+  updateUnmatchedId(index: number, newId: string): void { this.layerMgmt.updateUnmatchedId(index, newId); }
+  applyRename(): Promise<void> { return this.layerMgmt.applyRename(); }
+  closeRenameDialog(): void { this.layerMgmt.closeRenameDialog(); }
+  applyRefreshRoster(): Promise<void> { return this.layerMgmt.applyRefreshRoster(); }
+  closeRefreshRosterDialog(): void { this.layerMgmt.closeRefreshRosterDialog(); }
 
   // ============ Upload Panel ============
 
   toggleUploadPanel(): void {
-    if (this.uploadPanelOpen()) {
-      this.closeUploadPanel();
-    } else {
-      this.openUploadPanel();
-    }
+    if (this.uploadPanelOpen()) { this.closeUploadPanel(); } else { this.openUploadPanel(); }
   }
 
   private async openUploadPanel(): Promise<void> {
     this.uploadPanelOpen.set(true);
     this.closeSubmenu();
-    let pid = this.context().projectId || this.lastProjectId;
+    let pid = await this.projectService.resolveProjectId(this.context());
 
-    // Fallback 1: Electron-tól kérjük a projectId-t (PSD melletti JSON-ból)
-    if (!pid && window.electronAPI) {
-      try {
-        const result = await window.electronAPI.overlay.getProjectId();
-        if (result.projectId) {
-          pid = result.projectId;
-          this.lastProjectId = pid;
-        }
-      } catch { /* ignore */ }
-    }
-
-    // Fallback 2: PS layerek personId-jéből API lookup
     if (!pid) {
       await this.loadPsLayers();
       const layers = this.psLayers();
       if (layers.length > 0) {
-        pid = await this.lookupProjectIdFromPerson(layers[0].personId);
+        pid = await this.projectService.lookupProjectIdFromPerson(layers[0].personId);
       }
     }
 
-    if (pid) {
-      this.loadPersons(pid);
-    }
+    if (pid) this.projectService.loadPersons(pid);
     this.loadPsLayers();
   }
 
@@ -1358,93 +339,53 @@ export class OverlayComponent implements OnInit {
     this.searchQuery.set('');
     this.batchResult.set(null);
     this.selectedUnmatchedFile.set(null);
-    // Blob URL-ek felszabadítása
     this.filePreviewCache.forEach(url => URL.revokeObjectURL(url));
     this.filePreviewCache.clear();
   }
 
   // ============ Resize panel ============
-
   onResizeStart(event: MouseEvent): void {
     event.preventDefault();
     this.resizing = true;
     this.resizeStartY = event.clientY;
     this.resizeStartH = this.panelHeight();
-
     const onMove = (e: MouseEvent) => {
       if (!this.resizing) return;
-      const delta = this.resizeStartY - e.clientY; // felfelé húzás = pozitív
+      const delta = this.resizeStartY - e.clientY;
       const maxH = window.innerHeight - OverlayComponent.PANEL_MAX_H_OFFSET;
       const newH = Math.max(OverlayComponent.PANEL_MIN_H, Math.min(maxH, this.resizeStartH + delta));
       this.ngZone.run(() => this.panelHeight.set(newH));
     };
-
     const onUp = () => {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
-      // Kis késleltetés, hogy a mouseup utáni click ne zárja be a panelt
       setTimeout(() => { this.resizing = false; }, 200);
     };
-
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
-    // Window blur = egér kiment az ablakból resize közben
-    const onBlur = () => {
-      onUp();
-      window.removeEventListener('blur', onBlur);
-    };
+    const onBlur = () => { onUp(); window.removeEventListener('blur', onBlur); };
     window.addEventListener('blur', onBlur);
   }
 
-  onSearchInput(event: Event): void {
-    this.searchQuery.set((event.target as HTMLInputElement).value);
-  }
-
-  selectPerson(person: PersonItem): void {
-    this.selectedPerson.set(person);
-    this.uploadResult.set(null);
-  }
-
+  onSearchInput(event: Event): void { this.searchQuery.set((event.target as HTMLInputElement).value); }
+  selectPerson(person: PersonItem): void { this.selectedPerson.set(person); this.uploadResult.set(null); }
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files?.length) {
-      this.setFile(input.files[0]);
-    }
+    if (input.files?.length) this.setFile(input.files[0]);
   }
-
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.dragOver.set(true);
-  }
-
-  onDragLeave(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.dragOver.set(false);
-  }
-
+  onDragOver(event: DragEvent): void { event.preventDefault(); event.stopPropagation(); this.dragOver.set(true); }
+  onDragLeave(event: DragEvent): void { event.preventDefault(); event.stopPropagation(); this.dragOver.set(false); }
   onDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.dragOver.set(false);
+    event.preventDefault(); event.stopPropagation(); this.dragOver.set(false);
     const files = event.dataTransfer?.files;
     if (!files?.length) return;
-
-    // v2 mód: ha vannak PS layerek, batch matching
-    if (this.hasPsLayers()) {
-      this.matchDroppedFiles(files);
-    } else {
-      this.setFile(files[0]);
-    }
+    if (this.hasPsLayers()) { this.matchDroppedFiles(files); } else { this.setFile(files[0]); }
   }
-
-  /** Multi-file tallózás (v2 batch módhoz) */
   onBatchFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
     this.matchDroppedFiles(input.files);
-    input.value = ''; // reset, hogy ugyanaz a fájl újra kiválasztható legyen
+    input.value = '';
   }
 
   upload(): void {
@@ -1452,60 +393,36 @@ export class OverlayComponent implements OnInit {
     const file = this.selectedFile();
     const pid = this.context().projectId;
     if (!person || !file || !pid) return;
-
     this.uploading.set(true);
     this.uploadResult.set(null);
-
     const formData = new FormData();
     formData.append('photo', file);
-
     const url = `${environment.apiUrl}/partner/projects/${pid}/persons/${person.id}/photo`;
-
-    this.http.post<UploadResult>(url, formData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.ngZone.run(() => {
-            this.uploading.set(false);
-            this.uploadResult.set(res);
-            this.selectedFile.set(null);
-            if (res.success) {
-              this.persons.update(list =>
-                list.map(p => p.id === person.id
-                  ? { ...p, hasPhoto: true, photoThumbUrl: res.photo?.thumbUrl ?? p.photoThumbUrl }
-                  : p
-                )
-              );
-            }
-          });
-        },
-        error: (err) => {
-          this.ngZone.run(() => {
-            this.uploading.set(false);
-            this.uploadResult.set({
-              success: false,
-              message: err.error?.message || 'Hiba történt a feltöltés során.',
-            });
-          });
-        },
-      });
+    this.http.post<UploadResult>(url, formData).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => this.ngZone.run(() => {
+        this.uploading.set(false);
+        this.uploadResult.set(res);
+        this.selectedFile.set(null);
+        if (res.success) {
+          this.projectService.persons.update(list =>
+            list.map(p => p.id === person.id ? { ...p, hasPhoto: true, photoThumbUrl: res.photo?.thumbUrl ?? p.photoThumbUrl } : p)
+          );
+        }
+      }),
+      error: (err) => this.ngZone.run(() => {
+        this.uploading.set(false);
+        this.uploadResult.set({ success: false, message: err.error?.message || 'Hiba történt a feltöltés során.' });
+      }),
+    });
   }
 
   // ============ v2 — PS Layer batch upload ============
+  refreshPsLayers(): void { this.loadPsLayers(); }
 
-  refreshPsLayers(): void {
-    this.loadPsLayers();
-  }
-
-  /** Teljes upload state reset — fájlok, státuszok, eredmények törlése */
   resetUploadState(event?: MouseEvent): void {
-    // Tooltip elrejtése (Electron overlay hover beragadás ellen)
     if (event) {
       const btn = (event.target as HTMLElement).closest('button');
-      if (btn) {
-        btn.removeAttribute('data-tip');
-        setTimeout(() => btn.setAttribute('data-tip', 'Reset'), 500);
-      }
+      if (btn) { btn.removeAttribute('data-tip'); setTimeout(() => btn.setAttribute('data-tip', 'Reset'), 500); }
     }
     this.filePreviewCache.forEach(url => URL.revokeObjectURL(url));
     this.filePreviewCache.clear();
@@ -1515,32 +432,20 @@ export class OverlayComponent implements OnInit {
     this.batchUploading.set(false);
     this.placing.set(false);
     this.batchProgress.set({ done: 0, total: 0 });
-    // Flag: a polling NE állítsa vissza a régi upload adatokat
     this.skipLayerMerge = true;
-    // Layer-ek reset: fájlok és státuszok törlése, layerek megtartása
-    this.psLayers.update(layers =>
-      layers.map(l => ({
-        ...l,
-        file: undefined,
-        uploadStatus: 'pending' as const,
-        photoUrl: undefined,
-        errorMsg: undefined,
-        matchType: undefined,
-        matchConfidence: undefined,
-      }))
-    );
+    this.psLayers.update(layers => layers.map(l => ({
+      ...l, file: undefined, uploadStatus: 'pending' as const,
+      photoUrl: undefined, errorMsg: undefined, matchType: undefined, matchConfidence: undefined,
+    })));
   }
 
   matchDroppedFiles(fileList: FileList): void {
     const files: File[] = [];
     for (let i = 0; i < fileList.length; i++) {
       const f = fileList[i];
-      if (ALLOWED_TYPES.includes(f.type) && f.size <= MAX_FILE_SIZE) {
-        files.push(f);
-      }
+      if (ALLOWED_TYPES.includes(f.type) && f.size <= MAX_FILE_SIZE) files.push(f);
     }
     if (files.length === 0) return;
-
     const { matched, unmatched } = this.uploadService.matchFilesToLayers(files, this.psLayers(), this.persons());
     this.psLayers.set(matched);
     this.unmatchedFiles.set(unmatched);
@@ -1548,19 +453,11 @@ export class OverlayComponent implements OnInit {
   }
 
   assignFileToLayer(layerIndex: number, file: File): void {
-    this.psLayers.update(layers =>
-      layers.map((l, i) => i === layerIndex ? { ...l, file, matchType: 'manual' as const, matchConfidence: 100 } : l)
-    );
+    this.psLayers.update(layers => layers.map((l, i) => i === layerIndex ? { ...l, file, matchType: 'manual' as const, matchConfidence: 100 } : l));
     this.unmatchedFiles.update(files => files.filter(f => f !== file));
     this.selectedUnmatchedFile.set(null);
   }
-
-  /** Nem párosított fájl kiválasztása manuális hozzárendeléshez */
-  selectUnmatchedFile(file: File): void {
-    this.selectedUnmatchedFile.update(current => current === file ? null : file);
-  }
-
-  /** Layer sorra kattintás — ha van kiválasztott unmatched fájl, hozzárendeli */
+  selectUnmatchedFile(file: File): void { this.selectedUnmatchedFile.update(current => current === file ? null : file); }
   onLayerRowClick(index: number): void {
     const file = this.selectedUnmatchedFile();
     if (!file) return;
@@ -1568,130 +465,78 @@ export class OverlayComponent implements OnInit {
     if (layer.file || layer.uploadStatus === 'done') return;
     this.assignFileToLayer(index, file);
   }
-
-  /** Nem párosított fájlok újra-matchelése a persons lista alapján */
   retrySmartMatch(): void {
     const files = this.unmatchedFiles();
     if (files.length === 0 || this.matching()) return;
     this.matching.set(true);
-    // Kis delay hogy a spinner látható legyen
-    setTimeout(() => {
-      this.ngZone.run(() => {
-        const { matched, unmatched } = this.uploadService.matchFilesToLayers(files, this.psLayers(), this.persons());
-        this.psLayers.set(matched);
-        this.unmatchedFiles.set(unmatched);
-        this.matching.set(false);
-      });
-    }, 300);
+    setTimeout(() => this.ngZone.run(() => {
+      const { matched, unmatched } = this.uploadService.matchFilesToLayers(files, this.psLayers(), this.persons());
+      this.psLayers.set(matched);
+      this.unmatchedFiles.set(unmatched);
+      this.matching.set(false);
+    }), 300);
   }
-
   clearUnmatchedFiles(): void {
     this.unmatchedFiles().forEach(f => this.revokeFilePreview(f));
     this.unmatchedFiles.set([]);
     this.selectedUnmatchedFile.set(null);
   }
-
   getFilePreview(file: File): string {
     let url = this.filePreviewCache.get(file);
-    if (!url) {
-      url = URL.createObjectURL(file);
-      this.filePreviewCache.set(file, url);
-    }
+    if (!url) { url = URL.createObjectURL(file); this.filePreviewCache.set(file, url); }
     return url;
   }
-
-  private revokeFilePreview(file: File): void {
-    const url = this.filePreviewCache.get(file);
-    if (url) {
-      URL.revokeObjectURL(url);
-      this.filePreviewCache.delete(file);
-    }
-  }
-
   removeFileFromLayer(layerIndex: number): void {
     const layer = this.psLayers()[layerIndex];
     if (!layer?.file) return;
     const removedFile = layer.file;
     this.revokeFilePreview(removedFile);
-    this.psLayers.update(layers =>
-      layers.map((l, i) => i === layerIndex ? { ...l, file: undefined } : l)
-    );
+    this.psLayers.update(layers => layers.map((l, i) => i === layerIndex ? { ...l, file: undefined } : l));
     this.unmatchedFiles.update(files => [...files, removedFile]);
   }
 
-  /** Feltöltés + PS behelyezés egy lépésben */
   async uploadAndPlace(): Promise<void> {
-    let pid = this.context().projectId || this.lastProjectId;
+    let pid = this.context().projectId || this.projectService.getLastProjectId();
     if (this.batchUploading() || this.placing()) return;
-
-    // Ha nincs projectId, próbáljuk a personId-ből kinyerni
     if (!pid) {
       const layers = this.psLayers();
       if (layers.length > 0) {
         this.batchUploading.set(true);
-        pid = await this.lookupProjectIdFromPerson(layers[0].personId);
-        if (!pid) {
-          this.batchUploading.set(false);
-          this.batchResult.set({ success: false, message: 'Nem sikerült a projekt azonosítása' });
-          return;
-        }
-      } else {
-        this.batchResult.set({ success: false, message: 'Nincsenek PS layerek kijelölve' });
-        return;
-      }
+        pid = await this.projectService.lookupProjectIdFromPerson(layers[0].personId);
+        if (!pid) { this.batchUploading.set(false); this.batchResult.set({ success: false, message: 'Nem sikerült a projekt azonosítása' }); return; }
+      } else { this.batchResult.set({ success: false, message: 'Nincsenek PS layerek kijelölve' }); return; }
     }
-
     this.batchUploading.set(true);
     this.batchResult.set(null);
     this.batchProgress.set({ done: 0, total: this.uploadableLayers().length });
-
     this.uploadService.uploadBatch(
-      pid,
-      this.psLayers(),
+      pid, this.psLayers(),
       (progress) => this.ngZone.run(() => this.batchProgress.set(progress)),
-      (index, update) => this.ngZone.run(() => {
-        this.psLayers.update(layers =>
-          layers.map((l, i) => i === index ? { ...l, ...update } : l)
-        );
-      }),
-    ).pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (updated) => {
-          const doneCount = updated.filter(l => l.uploadStatus === 'done').length;
-          const errCount = updated.filter(l => l.uploadStatus === 'error').length;
-
-          this.ngZone.run(() => {
-            this.psLayers.set(updated);
-            this.batchUploading.set(false);
-          });
-
-          // Ha van sikeres feltöltés, behelyezés PS-be
-          if (doneCount > 0) {
-            this.ngZone.run(() => this.placing.set(true));
-            this.uploadService.placePhotosInPs(updated, this.syncWithBorder(), this.activeDoc().path ?? undefined).then(result => {
-              this.ngZone.run(() => {
-                this.placing.set(false);
-                this.batchResult.set({
-                  success: result.success && errCount === 0,
-                  message: result.success
-                    ? (errCount > 0 ? `${doneCount} behelyezve, ${errCount} hibás` : `${doneCount} fotó behelyezve`)
-                    : (result.error || 'Hiba a behelyezés során'),
-                });
-              });
-            });
-          } else {
+      (index, update) => this.ngZone.run(() => this.psLayers.update(layers => layers.map((l, i) => i === index ? { ...l, ...update } : l))),
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (updated) => {
+        const doneCount = updated.filter(l => l.uploadStatus === 'done').length;
+        const errCount = updated.filter(l => l.uploadStatus === 'error').length;
+        this.ngZone.run(() => { this.psLayers.set(updated); this.batchUploading.set(false); });
+        if (doneCount > 0) {
+          this.ngZone.run(() => this.placing.set(true));
+          this.uploadService.placePhotosInPs(updated, this.syncWithBorder(), this.activeDoc().path ?? undefined).then(result => {
             this.ngZone.run(() => {
+              this.placing.set(false);
               this.batchResult.set({
-                success: false,
-                message: errCount > 0 ? `${errCount} feltöltés hibás` : 'Nincs feltölthető fotó',
+                success: result.success && errCount === 0,
+                message: result.success
+                  ? (errCount > 0 ? `${doneCount} behelyezve, ${errCount} hibás` : `${doneCount} fotó behelyezve`)
+                  : (result.error || 'Hiba a behelyezés során'),
               });
             });
-          }
-        },
-        error: () => {
-          this.ngZone.run(() => this.batchUploading.set(false));
-        },
-      });
+          });
+        } else {
+          this.ngZone.run(() => this.batchResult.set({ success: false, message: errCount > 0 ? `${errCount} feltöltés hibás` : 'Nincs feltölthető fotó' }));
+        }
+      },
+      error: () => this.ngZone.run(() => this.batchUploading.set(false)),
+    });
   }
 
   async placeInPs(): Promise<void> {
@@ -1700,528 +545,33 @@ export class OverlayComponent implements OnInit {
     const result = await this.uploadService.placePhotosInPs(this.psLayers(), this.syncWithBorder(), this.activeDoc().path ?? undefined);
     this.ngZone.run(() => {
       this.placing.set(false);
-      this.batchResult.set({
-        success: result.success,
-        message: result.success
-          ? 'Fotók behelyezve a Photoshopba'
-          : (result.error || 'Hiba a behelyezés során'),
-      });
+      this.batchResult.set({ success: result.success, message: result.success ? 'Fotók behelyezve a Photoshopba' : (result.error || 'Hiba a behelyezés során') });
     });
   }
 
-  private async loadPsLayers(): Promise<void> {
-    // Először az activeDoc-ból próbáljuk (ha a polling már beszerezte)
-    const doc = this.activeDoc();
-    if (doc.selectedLayerNames && doc.selectedLayerNames.length > 0) {
-      this.updatePsLayersFromDoc(doc);
-      return;
-    }
-    // Ha nincs, frissítsük a PS-ből
-    if (!window.electronAPI) return;
-    try {
-      const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
-      if (result.success && result.output) {
-        const cleaned = result.output.trim();
-        if (cleaned.startsWith('{')) {
-          const freshDoc: ActiveDocInfo = JSON.parse(cleaned);
-          this.ngZone.run(() => {
-            this.activeDoc.set(freshDoc);
-            this.updatePsLayersFromDoc(freshDoc);
-          });
-        }
-      }
-    } catch { /* PS nem elérhető */ }
-  }
-
-  // ============ Private helpers ============
-
-  private setFile(file: File): void {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      this.uploadResult.set({ success: false, message: 'Csak képfájlok engedélyezettek (JPG, PNG, WebP, HEIC).' });
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      this.uploadResult.set({ success: false, message: `A fájl túl nagy (max 100 MB).` });
-      return;
-    }
-    this.selectedFile.set(file);
-    this.uploadResult.set(null);
-  }
-
-  private loadPersons(projectId: number): void {
-    this.lastProjectId = projectId;
-    this.loadingPersons.set(true);
-    const url = `${environment.apiUrl}/partner/projects/${projectId}/persons`;
-
-    this.http.get<{ data: PersonItem[] }>(url)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.ngZone.run(() => {
-            const personsList = res.data || [];
-            this.persons.set(personsList);
-            this.loadingPersons.set(false);
-            this.isLoggedOut.set(false);
-            // PS layerek enrichelése az új személylistával
-            const current = this.psLayers();
-            if (current.length > 0 && personsList.length > 0) {
-              this.psLayers.set(this.uploadService.enrichWithPersons(current, personsList));
-            }
-          });
-        },
-        error: (err) => {
-          this.ngZone.run(() => {
-            this.loadingPersons.set(false);
-            if (err.status === 401 || err.status === 419) {
-              this.isLoggedOut.set(true);
-            }
-          });
-        },
-      });
-  }
-
-  private syncBorderKey(): string {
-    const projectId = this.context().projectId ?? 'default';
-    return `sync-border-${projectId}`;
-  }
-
-  private loadSyncBorder(): boolean {
-    return this.loadSyncBorderForProject(this.context().projectId);
-  }
-
-  private loadSyncBorderForProject(projectId?: number): boolean {
-    try {
-      const key = `sync-border-${projectId ?? 'default'}`;
-      return localStorage.getItem(key) !== 'false';
-    } catch {
-      return true;
-    }
-  }
-
-  private saveSyncBorder(value: boolean): void {
-    try {
-      localStorage.setItem(this.syncBorderKey(), String(value));
-    } catch { /* ignore */ }
-  }
-
-  private setupClickThrough(): void {
-    if (!window.electronAPI) return;
-    document.addEventListener('mousemove', (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target === document.documentElement || target === document.body) {
-        window.electronAPI!.overlay.setIgnoreMouseEvents(true);
-      }
-    });
-    document.addEventListener('mouseenter', () => {
-      window.electronAPI!.overlay.setIgnoreMouseEvents(false);
-    }, true);
-  }
-
-  private collapseHover = false;
-
-  onCollapseEnter(): void {
-    this.collapseHover = true;
-    this.clearCollapseTimer();
-  }
-
-  onCollapseLeave(): void {
-    this.collapseHover = false;
-    if (this.openSubmenu()) {
-      this.resetCollapseTimer(this.openSubmenu());
-    }
-  }
-
-  private closeSubmenu(): void {
-    if (this.openSubmenu()) {
-      this.openSubmenu.set(null);
-      this.clearCollapseTimer();
-    }
-  }
-
-  private resetCollapseTimer(submenuId: string | null): void {
-    this.clearCollapseTimer();
-    if (submenuId && !this.collapseHover) {
-      this.collapseTimer = setTimeout(() => {
-        this.ngZone.run(() => this.closeSubmenu());
-      }, 5000);
-    }
-  }
-
-  private clearCollapseTimer(): void {
-    if (this.collapseTimer) {
-      clearTimeout(this.collapseTimer);
-      this.collapseTimer = null;
-    }
-  }
-
-  private async runJsxAction(commandId: string, scriptName: string, jsonData?: Record<string, unknown>): Promise<any> {
-    if (!window.electronAPI) return null;
-    this.busyCommand.set(commandId);
-    try {
-      const result = await window.electronAPI.photoshop.runJsx({ scriptName, jsonData });
-      console.log(`[JSX:${commandId}] result:`, result);
-      this.pollActiveDoc();
-      return result;
-    } catch (err) {
-      console.error(`[JSX:${commandId}] error:`, err);
-      return null;
-    } finally {
-      this.ngZone.run(() => this.busyCommand.set(null));
-    }
-  }
-
-  hide(): void {
-    window.electronAPI?.overlay.hide();
-  }
-
-  showLogin(): void {
-    window.electronAPI?.overlay.showMainWindow();
-  }
-
-  openActiveDocDir(): void {
-    this.onCommand('ps-open-workdir');
-  }
-
-  toggleQuickActions(): void {
-    this.quickActionsPanelOpen.update(v => !v);
-  }
-
-  closeQuickActions(): void {
-    this.quickActionsPanelOpen.set(false);
-  }
-
+  // ============ Quick actions ============
+  toggleQuickActions(): void { this.quickActionsPanelOpen.update(v => !v); }
+  closeQuickActions(): void { this.quickActionsPanelOpen.set(false); }
   toggleQaType(action: 'refresh' | 'position', type: 'names' | 'positions'): void {
-    if (action === 'refresh') {
-      if (type === 'names') this.qaRefreshNames.update(v => !v);
-      else this.qaRefreshPositions.update(v => !v);
-    } else {
-      if (type === 'names') this.qaPositionNames.update(v => !v);
-      else this.qaPositionPositions.update(v => !v);
-    }
+    if (action === 'refresh') { if (type === 'names') this.qaRefreshNames.update(v => !v); else this.qaRefreshPositions.update(v => !v); }
+    else { if (type === 'names') this.qaPositionNames.update(v => !v); else this.qaPositionPositions.update(v => !v); }
   }
-
-  onQuickAction(action: string, target: string): void {
-    // Típus info összegyűjtése
-    let types: string[] = [];
-    if (action === 'refresh-labels') {
-      if (this.qaRefreshNames()) types.push('names');
-      if (this.qaRefreshPositions()) types.push('positions');
-    } else if (action === 'position-labels') {
-      if (this.qaPositionNames()) types.push('names');
-      if (this.qaPositionPositions()) types.push('positions');
-    }
-    this.qaConfirm.set({ action, target });
-    console.log('[QuickAction] confirm', action, target, types);
-  }
-
+  onQuickAction(action: string, target: string): void { this.qaConfirm.set({ action, target }); }
   confirmQuickAction(): void {
     const c = this.qaConfirm();
     if (!c) return;
-    let types: string[] = [];
-    if (c.action === 'refresh-labels') {
-      if (this.qaRefreshNames()) types.push('names');
-      if (this.qaRefreshPositions()) types.push('positions');
-    } else if (c.action === 'position-labels') {
-      if (this.qaPositionNames()) types.push('names');
-      if (this.qaPositionPositions()) types.push('positions');
-    }
-    console.log('[QuickAction] EXECUTE', c.action, c.target, types);
-    // TODO: tényleges implementáció
+    console.log('[QuickAction] EXECUTE', c.action, c.target);
     this.qaConfirm.set(null);
   }
+  cancelQuickAction(): void { this.qaConfirm.set(null); }
 
-  cancelQuickAction(): void {
-    this.qaConfirm.set(null);
-  }
+  // ============ Turbo & UI ============
+  toggleTurbo(): void { this.polling.toggleTurbo(); }
+  hide(): void { window.electronAPI?.overlay.hide(); }
+  showLogin(): void { window.electronAPI?.overlay.showMainWindow(); }
+  openActiveDocDir(): void { this.onCommand('ps-open-workdir'); }
 
-  toggleTurbo(): void {
-    if (this.isTurbo()) {
-      this.stopTurbo();
-    } else {
-      this.isTurbo.set(true);
-      this.restartPolling(POLL_TURBO);
-      this.turboTimeout = setTimeout(() => this.stopTurbo(), TURBO_DURATION);
-    }
-  }
-
-  private stopTurbo(): void {
-    this.isTurbo.set(false);
-    if (this.turboTimeout) {
-      clearTimeout(this.turboTimeout);
-      this.turboTimeout = null;
-    }
-    this.restartPolling(POLL_NORMAL);
-  }
-
-  private restartPolling(interval: number): void {
-    this.lastPollInterval = interval;
-    if (this.pollTimer) clearInterval(this.pollTimer);
-    if (this.isVisible) {
-      this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
-    }
-  }
-
-  private async loadContext(): Promise<void> {
-    if (!window.electronAPI) return;
-    try {
-      const ctx = await window.electronAPI.overlay.getContext();
-      this.ngZone.run(() => this.context.set(ctx));
-    } catch { /* default: normal */ }
-  }
-
-  private listenContextChanges(): void {
-    if (!window.electronAPI) return;
-    const cleanup = window.electronAPI.overlay.onContextChanged((ctx) => {
-      this.ngZone.run(() => {
-        this.context.set(ctx);
-        this.syncWithBorder.set(this.loadSyncBorderForProject(ctx.projectId));
-        // Projekt váltáskor → sample settings betöltés
-        if (ctx.projectId) {
-          this.loadSampleSettingsForProject(ctx.projectId);
-        }
-        // Context change → auth recovery próba
-        if (this.isLoggedOut() && ctx.projectId) {
-          this.isLoggedOut.set(false);
-          this.loadPersons(ctx.projectId);
-        } else if (ctx.projectId && this.uploadPanelOpen()) {
-          this.loadPersons(ctx.projectId);
-        }
-      });
-    });
-    this.destroyRef.onDestroy(cleanup);
-  }
-
-  private async loadActiveDoc(): Promise<void> {
-    if (!window.electronAPI) return;
-    try {
-      const doc = await window.electronAPI.overlay.getActiveDoc();
-      this.ngZone.run(() => this.mergeActiveDoc(doc));
-    } catch { /* ignore */ }
-  }
-
-  private listenActiveDocChanges(): void {
-    if (!window.electronAPI) return;
-    const cleanup = window.electronAPI.overlay.onActiveDocChanged((doc) => {
-      this.ngZone.run(() => this.mergeActiveDoc(doc));
-    });
-    this.destroyRef.onDestroy(cleanup);
-  }
-
-  private mergeActiveDoc(doc: ActiveDocInfo): void {
-    const current = this.activeDoc();
-    this.activeDoc.set({
-      ...doc,
-      selectedLayers: doc.selectedLayers ?? current.selectedLayers,
-    });
-  }
-
-  /** Ablak lathato-e (Electron hide/show esemenyek) */
-  private isVisible = true;
-  private lastPollInterval = POLL_NORMAL;
-
-  /** Ha az Electron overlay ablak elrejtodik, szuneteltetjuk a pollingot */
-  private listenVisibility(): void {
-    const handler = (): void => {
-      const hidden = document.hidden;
-      if (hidden && this.isVisible) {
-        this.isVisible = false;
-        this.pausePolling();
-      } else if (!hidden && !this.isVisible) {
-        this.isVisible = true;
-        this.resumePolling();
-      }
-    };
-    document.addEventListener('visibilitychange', handler);
-    this.destroyRef.onDestroy(() => document.removeEventListener('visibilitychange', handler));
-  }
-
-  private pausePolling(): void {
-    if (this.pollTimer) {
-      clearInterval(this.pollTimer);
-      this.pollTimer = null;
-    }
-  }
-
-  private resumePolling(): void {
-    const interval = this.isTurbo() ? POLL_TURBO : this.lastPollInterval;
-    this.pollActiveDoc();
-    this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
-  }
-
-  private startPolling(interval: number): void {
-    if (!window.electronAPI) return;
-    this.lastPollInterval = interval;
-    this.pollActiveDoc();
-    this.pollTimer = setInterval(() => this.pollActiveDoc(), interval);
-    this.destroyRef.onDestroy(() => {
-      if (this.pollTimer) clearInterval(this.pollTimer);
-      if (this.turboTimeout) clearTimeout(this.turboTimeout);
-    });
-  }
-
-  private async pollActiveDoc(): Promise<void> {
-    if (!window.electronAPI || !this.isVisible) return;
-
-    // Ha kijelentkezve vagyunk, periodikusan próbáljuk a visszaállítást
-    if (this.isLoggedOut()) {
-      this.tryAuthRecovery();
-    }
-
-    try {
-      const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
-      if (result.success && result.output) {
-        const cleaned = result.output.trim();
-        if (cleaned.startsWith('{')) {
-          const doc: ActiveDocInfo = JSON.parse(cleaned);
-          this.ngZone.run(() => {
-            this.activeDoc.set(doc);
-            // Ha a panel nyitva van, frissítsük a PS layereket is
-            if (this.uploadPanelOpen()) {
-              this.updatePsLayersFromDoc(doc);
-            }
-          });
-          window.electronAPI.overlay.setActiveDoc(doc);
-        }
-      }
-    } catch { /* PS nem elerheto — skip */ }
-  }
-
-  /**
-   * PersonId-ből lekéri a projectId-t a backend API-ból.
-   * Régi projekteknél is működik, ahol nincs JSON-ban tárolva a projectId.
-   */
-  private async lookupProjectIdFromPerson(personId: number): Promise<number | null> {
-    try {
-      const url = `${environment.apiUrl}/persons/${personId}/project-id`;
-      const res = await firstValueFrom(this.http.get<{ projectId: number | null }>(url));
-      if (res?.projectId) {
-        this.lastProjectId = res.projectId;
-        return res.projectId;
-      }
-    } catch { /* API nem elérhető */ }
-    return null;
-  }
-
-  private tryAuthRecovery(): void {
-    const pid = this.context().projectId;
-    if (!pid) return;
-    // Próbáljuk meg betölteni a személyeket — ha sikerül, a loadPersons reseteli az isLoggedOut-ot
-    if (!this.loadingPersons()) {
-      this.loadPersons(pid);
-    }
-  }
-
-  private async loadNameSettings(): Promise<void> {
-    if (!window.electronAPI || this.nameSettingsLoaded) return;
-    try {
-      const [gap, breakAfter, sampleSettings] = await Promise.all([
-        window.electronAPI.photoshop.getNameGap(),
-        window.electronAPI.photoshop.getNameBreakAfter(),
-        window.electronAPI.sample.getSettings(),
-      ]);
-      this.ngZone.run(() => {
-        if (gap !== undefined) this.nameGapCm.set(gap);
-        if (breakAfter !== undefined) this.nameBreakAfter.set(breakAfter);
-        if (sampleSettings.success && sampleSettings.settings) {
-          const s = sampleSettings.settings;
-          this.sampleUseLargeSize.set(s.useLargeSize);
-          this.sampleWatermarkColor.set(s.watermarkColor);
-          this.sampleWatermarkOpacity.set(s.watermarkOpacity);
-          this.sampleVersion.set(s.sampleVersion ?? '');
-        }
-        this.nameSettingsLoaded = true;
-      });
-      // Electron settings betöltve → felülírás backend értékekkel ha van aktív projekt
-      const pid = this.context().projectId || this.lastProjectId;
-      if (pid) {
-        this.loadSampleSettingsForProject(pid);
-      }
-    } catch { /* ignore */ }
-  }
-
-  private saveNameSetting(key: string, value: number): void {
-    if (!window.electronAPI) return;
-    if (key === 'nameBreakAfter') {
-      window.electronAPI.photoshop.setNameBreakAfter(value);
-    } else if (key === 'nameGapCm') {
-      window.electronAPI.photoshop.setNameGap(value);
-    }
-  }
-
-  private loadSampleSettingsForProject(projectId: number): void {
-    this.http.get<{
-      data: {
-        sample_use_large_size: boolean | null;
-        sample_watermark_color: 'white' | 'black' | null;
-        sample_watermark_opacity: number | null;
-        sample_version: string | null;
-      };
-    }>(`${environment.apiUrl}/partner/projects/${projectId}/sample-settings`)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          const d = res.data;
-          this.sampleUseLargeSize.set(d.sample_use_large_size ?? false);
-          this.sampleWatermarkColor.set(d.sample_watermark_color ?? 'white');
-          this.sampleWatermarkOpacity.set(
-            d.sample_watermark_opacity !== null ? d.sample_watermark_opacity / 100 : 0.15,
-          );
-          this.sampleVersion.set(d.sample_version ?? '');
-          window.electronAPI?.sample.setSettings({ sampleVersion: d.sample_version ?? '' });
-        },
-      });
-  }
-
-  private saveSampleSettingsToBackend(data: {
-    sample_use_large_size?: boolean;
-    sample_watermark_color?: 'white' | 'black';
-    sample_watermark_opacity?: number;
-    sample_version?: string;
-  }): void {
-    const pid = this.context().projectId || this.lastProjectId;
-    if (!pid) return;
-    this.http.put(
-      `${environment.apiUrl}/partner/projects/${pid}/sample-settings`,
-      data,
-    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
-  }
-
-  private updatePsLayersFromDoc(doc: ActiveDocInfo): void {
-    const names = doc.selectedLayerNames || [];
-    const parsed = this.uploadService.parseLayerNames(names);
-    if (parsed.length === 0) {
-      this.psLayers.set([]);
-      return;
-    }
-
-    // Reset után NE állítsuk vissza a régi upload adatokat
-    if (this.skipLayerMerge) {
-      this.skipLayerMerge = false;
-      // Enrich persons-ból ha van, de upload state nélkül
-      const persons = this.persons();
-      const result = persons.length > 0
-        ? this.uploadService.enrichWithPersons(parsed, persons)
-        : parsed;
-      this.psLayers.set(result);
-      return;
-    }
-
-    // Meglévő feltöltési státusz megőrzése (file, uploadStatus, photoUrl)
-    const existing = new Map(this.psLayers().map(l => [l.personId, l]));
-    const merged = parsed.map(p => {
-      const prev = existing.get(p.personId);
-      return prev ? { ...p, file: prev.file, uploadStatus: prev.uploadStatus, photoUrl: prev.photoUrl, personName: prev.personName, photoThumbUrl: prev.photoThumbUrl, errorMsg: prev.errorMsg } : p;
-    });
-    // Enrich persons-ból ha van
-    const persons = this.persons();
-    const result = persons.length > 0
-      ? this.uploadService.enrichWithPersons(merged, persons)
-      : merged;
-    this.psLayers.set(result);
-  }
-
-  // ---- Teacher link & photo chooser ----
-
+  // ============ Teacher link & photo chooser ============
   openLinkDialog(person: PersonItem): void {
     if (!person.archiveId) return;
     forkJoin({
@@ -2239,8 +589,7 @@ export class OverlayComponent implements OnInit {
           photosCount: t.photos?.length ?? 0, linkedGroup: t.linkedGroup ?? null,
           groupSize: 0, projectsCount: t.projects?.length ?? 0,
         };
-        const enriched = allTeachers.some(at => at.id === teacherListItem.id)
-          ? allTeachers : [teacherListItem, ...allTeachers];
+        const enriched = allTeachers.some(at => at.id === teacherListItem.id) ? allTeachers : [teacherListItem, ...allTeachers];
         this.ngZone.run(() => {
           this.linkDialogTeacher.set(teacherListItem);
           this.linkDialogAllTeachers.set(enriched);
@@ -2249,50 +598,169 @@ export class OverlayComponent implements OnInit {
       },
     });
   }
-
-  onTeacherLinked(): void {
-    this.showTeacherLinkDialog.set(false);
-    this.reloadPersons();
-  }
-
+  onTeacherLinked(): void { this.showTeacherLinkDialog.set(false); this.reloadPersons(); }
   openPhotoChooser(person: PersonItem): void {
     if (!person.linkedGroup) return;
-    const group = person.linkedGroup;
-    this.teacherService.getLinkedGroupPhotos(group).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (res) => {
-        this.ngZone.run(() => {
-          this.photoChooserPhotos.set(res.data || []);
-          this.photoChooserLinkedGroup.set(group);
-          this.showPhotoChooserDialog.set(true);
-        });
-      },
+    this.teacherService.getLinkedGroupPhotos(person.linkedGroup).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => this.ngZone.run(() => {
+        this.photoChooserPhotos.set(res.data || []);
+        this.photoChooserLinkedGroup.set(person.linkedGroup!);
+        this.showPhotoChooserDialog.set(true);
+      }),
     });
   }
-
   onOpenPhotoChooserFromLink(groupId: string): void {
     this.showTeacherLinkDialog.set(false);
-    this.teacherService.getLinkedGroupPhotos(groupId).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (res) => {
-        this.ngZone.run(() => {
-          this.photoChooserPhotos.set(res.data || []);
-          this.photoChooserLinkedGroup.set(groupId);
-          this.showPhotoChooserDialog.set(true);
-        });
-      },
+    this.teacherService.getLinkedGroupPhotos(groupId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => this.ngZone.run(() => {
+        this.photoChooserPhotos.set(res.data || []);
+        this.photoChooserLinkedGroup.set(groupId);
+        this.showPhotoChooserDialog.set(true);
+      }),
     });
   }
+  onPhotoChosen(): void { this.showPhotoChooserDialog.set(false); this.reloadPersons(); }
 
-  onPhotoChosen(): void {
-    this.showPhotoChooserDialog.set(false);
-    this.reloadPersons();
+  // ============ Submenu / collapse ============
+  onCollapseEnter(): void { this.collapseHover = true; this.clearCollapseTimer(); }
+  onCollapseLeave(): void {
+    this.collapseHover = false;
+    if (this.openSubmenu()) this.resetCollapseTimer(this.openSubmenu());
+  }
+
+  // ============ Private helpers ============
+
+  private closeSubmenu(): void { if (this.openSubmenu()) { this.openSubmenu.set(null); this.clearCollapseTimer(); } }
+  private resetCollapseTimer(submenuId: string | null): void {
+    this.clearCollapseTimer();
+    if (submenuId && !this.collapseHover) {
+      this.collapseTimer = setTimeout(() => this.ngZone.run(() => this.closeSubmenu()), 5000);
+    }
+  }
+  private clearCollapseTimer(): void { if (this.collapseTimer) { clearTimeout(this.collapseTimer); this.collapseTimer = null; } }
+
+  private setFile(file: File): void {
+    if (!ALLOWED_TYPES.includes(file.type)) { this.uploadResult.set({ success: false, message: 'Csak képfájlok engedélyezettek (JPG, PNG, WebP, HEIC).' }); return; }
+    if (file.size > MAX_FILE_SIZE) { this.uploadResult.set({ success: false, message: 'A fájl túl nagy (max 100 MB).' }); return; }
+    this.selectedFile.set(file);
+    this.uploadResult.set(null);
+  }
+
+  private revokeFilePreview(file: File): void {
+    const url = this.filePreviewCache.get(file);
+    if (url) { URL.revokeObjectURL(url); this.filePreviewCache.delete(file); }
   }
 
   private reloadPersons(): void {
-    const pid = this.lastProjectId || this.context().projectId;
-    if (pid) this.loadPersons(pid);
+    const pid = this.projectService.getLastProjectId() || this.context().projectId;
+    if (pid) this.projectService.loadPersons(pid);
   }
+
+  private setupClickThrough(): void {
+    if (!window.electronAPI) return;
+    document.addEventListener('mousemove', (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target === document.documentElement || target === document.body) {
+        window.electronAPI!.overlay.setIgnoreMouseEvents(true);
+      }
+    });
+    document.addEventListener('mouseenter', () => { window.electronAPI!.overlay.setIgnoreMouseEvents(false); }, true);
+  }
+
+  private async loadContext(): Promise<void> {
+    if (!window.electronAPI) return;
+    try {
+      const ctx = await window.electronAPI.overlay.getContext();
+      this.ngZone.run(() => this.context.set(ctx));
+    } catch { /* default: normal */ }
+  }
+
+  private listenContextChanges(): void {
+    if (!window.electronAPI) return;
+    const cleanup = window.electronAPI.overlay.onContextChanged((ctx) => {
+      this.ngZone.run(() => {
+        this.context.set(ctx);
+        this.settings.syncWithBorder.set(this.settings.loadSyncBorderForProject(ctx.projectId));
+        if (ctx.projectId) this.settings.loadSampleSettingsForProject(ctx.projectId);
+        if (this.isLoggedOut() && ctx.projectId) {
+          this.isLoggedOut.set(false);
+          this.projectService.loadPersons(ctx.projectId);
+        } else if (ctx.projectId && this.uploadPanelOpen()) {
+          this.projectService.loadPersons(ctx.projectId);
+        }
+      });
+    });
+    this.destroyRef.onDestroy(cleanup);
+  }
+
+  private async loadActiveDoc(): Promise<void> {
+    if (!window.electronAPI) return;
+    try {
+      const doc = await window.electronAPI.overlay.getActiveDoc();
+      this.ngZone.run(() => this.polling.mergeActiveDoc(doc));
+    } catch { /* ignore */ }
+  }
+
+  private listenActiveDocChanges(): void {
+    if (!window.electronAPI) return;
+    const cleanup = window.electronAPI.overlay.onActiveDocChanged((doc) => {
+      this.ngZone.run(() => this.polling.mergeActiveDoc(doc));
+    });
+    this.destroyRef.onDestroy(cleanup);
+  }
+
+  private async pollActiveDoc(): Promise<void> {
+    if (!window.electronAPI || !this.polling.getIsVisible()) return;
+    if (this.isLoggedOut()) this.projectService.tryAuthRecovery(this.context());
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
+      if (result.success && result.output) {
+        const cleaned = result.output.trim();
+        if (cleaned.startsWith('{')) {
+          const doc: ActiveDocInfo = JSON.parse(cleaned);
+          this.ngZone.run(() => {
+            this.polling.activeDoc.set(doc);
+            if (this.uploadPanelOpen()) this.updatePsLayersFromDoc(doc);
+          });
+          window.electronAPI.overlay.setActiveDoc(doc);
+        }
+      }
+    } catch { /* PS nem elerheto */ }
+  }
+
+  private async loadPsLayers(): Promise<void> {
+    const doc = this.activeDoc();
+    if (doc.selectedLayerNames && doc.selectedLayerNames.length > 0) { this.updatePsLayersFromDoc(doc); return; }
+    if (!window.electronAPI) return;
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({ scriptName: 'actions/get-active-doc.jsx' });
+      if (result.success && result.output) {
+        const cleaned = result.output.trim();
+        if (cleaned.startsWith('{')) {
+          const freshDoc: ActiveDocInfo = JSON.parse(cleaned);
+          this.ngZone.run(() => { this.polling.activeDoc.set(freshDoc); this.updatePsLayersFromDoc(freshDoc); });
+        }
+      }
+    } catch { /* PS nem elérhető */ }
+  }
+
+  private updatePsLayersFromDoc(doc: ActiveDocInfo): void {
+    const names = doc.selectedLayerNames || [];
+    const parsed = this.uploadService.parseLayerNames(names);
+    if (parsed.length === 0) { this.psLayers.set([]); return; }
+    if (this.skipLayerMerge) {
+      this.skipLayerMerge = false;
+      const persons = this.persons();
+      this.psLayers.set(persons.length > 0 ? this.uploadService.enrichWithPersons(parsed, persons) : parsed);
+      return;
+    }
+    const existing = new Map(this.psLayers().map(l => [l.personId, l]));
+    const merged = parsed.map(p => {
+      const prev = existing.get(p.personId);
+      return prev ? { ...p, file: prev.file, uploadStatus: prev.uploadStatus, photoUrl: prev.photoUrl, personName: prev.personName, photoThumbUrl: prev.photoThumbUrl, errorMsg: prev.errorMsg } : p;
+    });
+    const persons = this.persons();
+    this.psLayers.set(persons.length > 0 ? this.uploadService.enrichWithPersons(merged, persons) : merged);
+  }
+
 }

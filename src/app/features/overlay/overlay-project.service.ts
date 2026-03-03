@@ -74,7 +74,7 @@ export class OverlayProjectService {
    * Személylista betöltése observable-ként (subscribe-olja magát).
    * Loading state + auth error kezelés.
    */
-  loadPersons(projectId: number, destroyRef?: import('@angular/core').DestroyRef): void {
+  loadPersons(projectId: number): void {
     this.lastProjectId = projectId;
     this.loadingPersons.set(true);
     const url = `${environment.apiUrl}/partner/projects/${projectId}/persons`;

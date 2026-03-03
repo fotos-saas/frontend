@@ -262,37 +262,12 @@ export class OverlayComponent implements OnInit {
 
   toggleSyncBorder(): void { this.settings.toggleSyncBorder(this.context().projectId); }
 
-  toggleSampleSize(): void {
-    this.settings.toggleSampleSize();
-    this.settings.saveSampleSettingsToBackend(
-      this.context().projectId || this.projectService.getLastProjectId(),
-      { sample_use_large_size: this.sampleUseLargeSize() },
-    );
-  }
+  private get pid(): number | null { return this.context().projectId || this.projectService.getLastProjectId(); }
 
-  toggleWatermarkColor(): void {
-    this.settings.toggleWatermarkColor();
-    this.settings.saveSampleSettingsToBackend(
-      this.context().projectId || this.projectService.getLastProjectId(),
-      { sample_watermark_color: this.sampleWatermarkColor() },
-    );
-  }
-
-  cycleOpacity(direction: 1 | -1 = 1): void {
-    this.settings.cycleOpacity(direction);
-    this.settings.saveSampleSettingsToBackend(
-      this.context().projectId || this.projectService.getLastProjectId(),
-      { sample_watermark_opacity: Math.round(this.sampleWatermarkOpacity() * 100) },
-    );
-  }
-
-  cycleSampleVersion(direction: 1 | -1 = 1): void {
-    this.settings.cycleSampleVersion(direction);
-    this.settings.saveSampleSettingsToBackend(
-      this.context().projectId || this.projectService.getLastProjectId(),
-      { sample_version: this.sampleVersion() },
-    );
-  }
+  toggleSampleSize(): void { this.settings.toggleSampleSize(this.pid); }
+  toggleWatermarkColor(): void { this.settings.toggleWatermarkColor(this.pid); }
+  cycleOpacity(direction: 1 | -1 = 1): void { this.settings.cycleOpacity(direction, this.pid); }
+  cycleSampleVersion(direction: 1 | -1 = 1): void { this.settings.cycleSampleVersion(direction, this.pid); }
 
   async confirmGenerate(type: 'sample' | 'final'): Promise<void> {
     this.closeSubmenu();

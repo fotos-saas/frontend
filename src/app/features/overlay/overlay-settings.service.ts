@@ -1,6 +1,5 @@
-import { Injectable, inject, NgZone, DestroyRef, signal } from '@angular/core';
+import { Injectable, inject, NgZone, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -100,31 +99,35 @@ export class OverlaySettingsService {
 
   // ============ Minta generálás beállítások ============
 
-  toggleSampleSize(): void {
+  toggleSampleSize(projectId?: number | null): void {
     this.sampleUseLargeSize.update(v => !v);
     window.electronAPI?.sample.setSettings({ useLargeSize: this.sampleUseLargeSize() });
+    this.saveSampleSettingsToBackend(projectId ?? null, { sample_use_large_size: this.sampleUseLargeSize() });
   }
 
-  toggleWatermarkColor(): void {
+  toggleWatermarkColor(projectId?: number | null): void {
     const next = this.sampleWatermarkColor() === 'white' ? 'black' : 'white';
     this.sampleWatermarkColor.set(next);
     window.electronAPI?.sample.setSettings({ watermarkColor: next });
+    this.saveSampleSettingsToBackend(projectId ?? null, { sample_watermark_color: next });
   }
 
-  cycleOpacity(direction: 1 | -1 = 1): void {
+  cycleOpacity(direction: 1 | -1 = 1, projectId?: number | null): void {
     const pct = Math.round(this.sampleWatermarkOpacity() * 100);
     const next = Math.min(50, Math.max(5, pct + direction)) / 100;
     this.sampleWatermarkOpacity.set(next);
     window.electronAPI?.sample.setSettings({ watermarkOpacity: next });
+    this.saveSampleSettingsToBackend(projectId ?? null, { sample_watermark_opacity: Math.round(next * 100) });
   }
 
-  cycleSampleVersion(direction: 1 | -1 = 1): void {
+  cycleSampleVersion(direction: 1 | -1 = 1, projectId?: number | null): void {
     const current = this.sampleVersion();
     const num = current ? parseInt(current, 10) : 0;
     const next = Math.max(0, (isNaN(num) ? 0 : num) + direction);
     const val = next === 0 ? '' : String(next);
     this.sampleVersion.set(val);
     window.electronAPI?.sample.setSettings({ sampleVersion: val });
+    this.saveSampleSettingsToBackend(projectId ?? null, { sample_version: val });
   }
 
   /** Minta beállítások mentése a backend-re */

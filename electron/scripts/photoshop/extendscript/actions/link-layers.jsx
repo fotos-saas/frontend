@@ -38,19 +38,28 @@ function _findLayersByNames(container, nameSet, result) {
   } catch (e) { /* nincs layerSets */ }
 }
 
-// --- BATCH: Tobb layer kijelolese egyetlen ActionList-tel ---
+// --- Tobb layer kijelolese ID alapjan (ActionManager) ---
 function _selectMultipleLayersById(layerIds) {
   if (layerIds.length === 0) return;
 
   var desc = new ActionDescriptor();
-  var refs = new ActionList();
-  for (var i = 0; i < layerIds.length; i++) {
-    var ref = new ActionReference();
-    ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
-    refs.putReference(ref);
-  }
-  desc.putList(charIDToTypeID("null"), refs);
+  var ref = new ActionReference();
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
+  desc.putReference(charIDToTypeID("null"), ref);
   executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+
+  for (var i = 1; i < layerIds.length; i++) {
+    var addDesc = new ActionDescriptor();
+    var addRef = new ActionReference();
+    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
+    addDesc.putReference(charIDToTypeID("null"), addRef);
+    addDesc.putEnumerated(
+      stringIDToTypeID("selectionModifier"),
+      stringIDToTypeID("selectionModifierType"),
+      stringIDToTypeID("addToSelection")
+    );
+    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  }
 }
 
 (function () {

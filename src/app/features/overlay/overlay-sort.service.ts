@@ -143,6 +143,49 @@ export class OverlaySortService {
     }
   }
 
+  /** Egyedi sorrend scope-olva — QA panelből, előre megkapja a slug neveket */
+  async submitCustomOrderScoped(
+    text: string,
+    scopedSlugs: string[],
+    group: string,
+  ): Promise<{ success: boolean; message: string }> {
+    if (!text.trim() || this.sorting()) {
+      return { success: false, message: '' };
+    }
+
+    const slugToHuman = new Map<string, string>();
+    const humanNames = scopedSlugs.map(slug => {
+      const human = this.slugToHumanName(slug);
+      slugToHuman.set(human.toLowerCase(), slug);
+      return human;
+    });
+
+    this.sorting.set(true);
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ success: boolean; ordered_names: string[]; unmatched: string[] }>(
+          `${environment.apiUrl}/partner/ai/match-custom-order`,
+          { layer_names: humanNames, custom_order: text },
+        ),
+      );
+      if (res.success && res.ordered_names) {
+        const orderedSlugs = res.ordered_names.map(human => {
+          return slugToHuman.get(human.toLowerCase()) || scopedSlugs.find(s => this.slugToHumanName(s).toLowerCase() === human.toLowerCase()) || human;
+        });
+        const groupLabel = group === 'teachers' ? 'Teachers' : group === 'students' ? 'Students' : 'All';
+        await this.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
+        const orderList = res.ordered_names.map((n, i) => `${i + 1}. ${n}`).join(' → ');
+        this.ngZone.run(() => this.sorting.set(false));
+        return { success: true, message: `Rendezve: ${orderList}` };
+      }
+      this.ngZone.run(() => this.sorting.set(false));
+      return { success: false, message: 'Hiba a nevek párosításakor.' };
+    } catch {
+      this.ngZone.run(() => this.sorting.set(false));
+      return { success: false, message: 'Hiba a nevek párosításakor.' };
+    }
+  }
+
   /** Nevek igazítása — delegálás a PS service-nek */
   arrangeNames(textAlign: string): void {
     this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
@@ -172,6 +215,17 @@ export class OverlaySortService {
       GROUP: 'All',
     });
     console.log('[REORDER] JSX result:', result);
+    return result;
+  }
+
+  /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket (scope-olt GROUP-pal) */
+  private async reorderLayersByNamesScoped(orderedNames: string[], group: string): Promise<any> {
+    console.log('[REORDER-SCOPED] orderedNames:', orderedNames, 'group:', group);
+    const result = await this.ps.runJsx('reorder-layers', 'actions/reorder-layers.jsx', {
+      ORDERED_NAMES: JSON.stringify(orderedNames),
+      GROUP: group,
+    });
+    console.log('[REORDER-SCOPED] JSX result:', result);
     return result;
   }
 

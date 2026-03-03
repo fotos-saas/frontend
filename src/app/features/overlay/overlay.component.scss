@@ -1490,6 +1490,27 @@
     gap: 4px;
     flex-wrap: wrap;
   }
+
+  &__textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 6px 8px;
+    margin-top: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    font-size: 11px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &::placeholder { color: rgba(255, 255, 255, 0.2); }
+    &:focus { border-color: rgba(245, 158, 11, 0.4); }
+  }
 }
 
 // --- Action Button ---
@@ -1550,6 +1571,21 @@
     padding: 3px 8px;
     font-size: 10px;
     gap: 3px;
+  }
+
+  &--amber {
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    &:hover { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.5); color: #fbbf24; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  &--full {
+    width: 100%;
+    justify-content: center;
+    margin-top: 6px;
+    padding: 5px 10px;
+    gap: 5px;
   }
 }
 

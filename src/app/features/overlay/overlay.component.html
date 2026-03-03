@@ -890,6 +890,42 @@
         </div>
       </div>
     </div>
+
+    <!-- Sorrend -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="11" />
+        Sorrend
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Célcsoport</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaReorderTarget() === 'all'" (click)="qaReorderTarget.set('all')">Mind</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaReorderTarget() === 'teachers'" (click)="qaReorderTarget.set('teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaReorderTarget() === 'students'" (click)="qaReorderTarget.set('students')">Diákok</button>
+        </div>
+      </div>
+      <textarea
+        class="qa-section__textarea"
+        [value]="qaReorderText()"
+        (input)="qaReorderText.set($any($event.target).value)"
+        placeholder="Soronként 1 név a kívánt sorrendben..."
+        rows="5"
+      ></textarea>
+      <button
+        class="qa-btn qa-btn--amber qa-btn--full"
+        [disabled]="sortService.sorting() || !qaReorderText().trim()"
+        (click)="executeReorderQuickAction()"
+      >
+        @if (sortService.sorting()) {
+          <span class="toolbar__spinner toolbar__spinner--sm"></span>
+          Rendezés...
+        } @else {
+          <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="12" />
+          Rendezés
+        }
+      </button>
+    </div>
   </div>
 
   <!-- Confirm bar -->

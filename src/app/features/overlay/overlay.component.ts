@@ -112,6 +112,8 @@ export class OverlayComponent implements OnInit {
   readonly qaPositionNames = signal(true);
   readonly qaPositionPositions = signal(false);
   readonly qaConfirm = signal<{ action: string; target: string } | null>(null);
+  readonly qaReorderTarget = signal<'all' | 'students' | 'teachers'>('all');
+  readonly qaReorderText = signal('');
 
   // Custom order panel state
   readonly customOrderPanelOpen = signal(false);
@@ -550,6 +552,19 @@ export class OverlayComponent implements OnInit {
     }
   }
   cancelQuickAction(): void { this.qaConfirm.set(null); }
+
+  async executeReorderQuickAction(): Promise<void> {
+    const text = this.qaReorderText().trim();
+    if (!text || this.sortService.sorting()) return;
+    const target = this.qaReorderTarget();
+    const data = await this.ps.getImageLayerData();
+    const slugNames = target === 'teachers' ? data.teachers
+      : target === 'students' ? data.students : data.names;
+    if (slugNames.length < 2) { this.setLinkResult(false, 'Legalább 2 layer kell.'); return; }
+
+    const result = await this.sortService.submitCustomOrderScoped(text, slugNames, target);
+    if (result.message) this.ngZone.run(() => this.setLinkResult(result.success, result.message));
+  }
 
   // ============ Turbo & UI ============
   toggleTurbo(): void { this.polling.toggleTurbo(); }

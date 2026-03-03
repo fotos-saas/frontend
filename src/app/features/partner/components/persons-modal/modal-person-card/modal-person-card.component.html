@@ -2,6 +2,8 @@
   class="person-card"
   [class.person-card--no-photo]="!person().hasPhoto"
   [class.person-card--clickable]="person().photoUrl || person().photoThumbUrl"
+  [class.person-card--leadership]="category() === 'leadership'"
+  [class.person-card--class-teacher]="category() === 'classTeacher'"
   [style.animation-delay]="animationDelay()"
   (click)="onCardClick()"
 >
@@ -51,7 +53,11 @@
     <span class="card-name">{{ person().name }}</span>
     <div class="card-meta">
       @if (person().type === 'student' || person().title) {
-        <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">
+        <span class="card-type"
+          [class.card-type--teacher]="person().type === 'teacher'"
+          [class.card-type--leadership]="category() === 'leadership'"
+          [class.card-type--class-teacher]="category() === 'classTeacher'"
+        >
           {{ person().type === 'student' ? 'Diák' : person().title }}
         </span>
       }

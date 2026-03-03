@@ -26,6 +26,7 @@ import {
 } from '../../../pages/project-tablo-editor/layout-designer/components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
 import { TeacherLinkDialogComponent } from '../../teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
+import { getPersonCategory, getCategoryOrder } from '../person-category.util';
 
 /** Szerkesztési sor state */
 interface EditRow {
@@ -151,6 +152,7 @@ export class PersonsModalComponent implements OnInit {
   readonly filteredPersons = computed(() => {
     let result = this.allPersons();
     const query = this.searchQuery().trim().toLowerCase();
+    const isTeacherTab = this.typeFilter() === 'teacher';
     if (!query) {
       result = result.filter(p => p.type === this.typeFilter());
     } else {
@@ -158,6 +160,12 @@ export class PersonsModalComponent implements OnInit {
     }
     if (this.showOnlyWithoutPhoto()) {
       result = result.filter(p => !p.hasPhoto);
+    }
+    // Tanár tab: kategória szerinti rendezés (vezetőség → osztályfőnök → többi)
+    if (isTeacherTab) {
+      result = [...result].sort((a, b) =>
+        getCategoryOrder(getPersonCategory(a.title)) - getCategoryOrder(getPersonCategory(b.title))
+      );
     }
     return result;
   });

@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TabloPersonItem } from '../persons-modal.types';
+import { getPersonCategory, PersonCategory } from '../person-category.util';
 
 /**
  * Személy kártya a személyek listájában.
@@ -28,6 +29,11 @@ export class ModalPersonCardComponent {
   readonly linkClick = output<TabloPersonItem>();
   readonly photoChooserClick = output<TabloPersonItem>();
   readonly idCopied = signal(false);
+
+  /** Tanár kategória (vezetőség/osztályfőnök/sima) */
+  readonly category = computed<PersonCategory>(() =>
+    this.person().type === 'teacher' ? getPersonCategory(this.person().title) : 'regular'
+  );
 
   onCardClick(): void {
     if (this.person().photoUrl || this.person().photoThumbUrl) {

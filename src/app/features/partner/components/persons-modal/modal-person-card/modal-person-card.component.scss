@@ -6,6 +6,9 @@
   transition: all 0.15s ease;
   animation: cardEntry 0.3s ease forwards;
   opacity: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .person-card--clickable {
@@ -38,6 +41,14 @@
 
 .person-card--no-photo {
   border-color: #fecaca;
+}
+
+.person-card--leadership {
+  border: 2px solid #f97316;
+}
+
+.person-card--class-teacher {
+  border: 2px solid #3b82f6;
 }
 
 .card-photo {
@@ -204,6 +215,9 @@
   padding: 6px 8px;
   text-align: center;
   cursor: pointer;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     background: #f1f5f9;
@@ -233,6 +247,16 @@
 
 .card-type--teacher {
   color: #7c3aed;
+  font-weight: 500;
+}
+
+.card-type--leadership {
+  color: #f97316;
+  font-weight: 500;
+}
+
+.card-type--class-teacher {
+  color: #3b82f6;
   font-weight: 500;
 }
 
@@ -268,7 +292,8 @@
 .card-actions {
   display: flex;
   justify-content: center;
-  margin-top: 2px;
+  margin-top: auto;
+  padding-top: 2px;
 
   // Safari gap fallback
   > * + * { margin-left: 4px; }

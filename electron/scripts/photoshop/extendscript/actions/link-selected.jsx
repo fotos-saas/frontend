@@ -83,13 +83,17 @@ function linkSelected() {
   executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
 }
 
+// Globalis valtozo az eredmenyhez (suspendHistory nem ad vissza return-t)
+var _linkResult = '{"linked":0,"names":[]}';
+
 // --- Fo logika ---
 function doLinkAll() {
   var doc = app.activeDocument;
   // 1. Kijelolt layerek nevei
   var selectedNames = getSelectedLayerNames();
   if (selectedNames.length === 0) {
-    return '{"linked":0,"names":[]}';
+    _linkResult = '{"linked":0,"names":[]}';
+    return;
   }
 
   // 2. Egyedi nevek + nameSet (O(1) lookup)
@@ -131,7 +135,7 @@ function doLinkAll() {
   }
   namesJson += "]";
 
-  return '{"linked":' + totalLinked + ',"names":' + namesJson + '}';
+  _linkResult = '{"linked":' + totalLinked + ',"names":' + namesJson + '}';
 }
 
 (function () {
@@ -143,8 +147,8 @@ function doLinkAll() {
     var doc = app.activeDocument;
 
     // suspendHistory: egyetlen Undo lepes az egesz muvelethez
-    var resultStr = doc.suspendHistory("Összelinkelés", "doLinkAll()");
-    resultStr;
+    doc.suspendHistory("Link layers", "doLinkAll()");
+    _linkResult;
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);

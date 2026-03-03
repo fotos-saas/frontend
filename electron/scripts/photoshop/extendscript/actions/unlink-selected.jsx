@@ -60,12 +60,16 @@ function findLayersByNames(container, nameSet, resultMap) {
   } catch (e) {}
 }
 
+// Globalis valtozo az eredmenyhez (suspendHistory nem ad vissza return-t)
+var _unlinkResult = '{"unlinked":0,"names":[]}';
+
 // --- Fo logika ---
 function doUnlinkAll() {
   var doc = app.activeDocument;
   var selectedNames = getSelectedLayerNames();
   if (selectedNames.length === 0) {
-    return '{"unlinked":0,"names":[]}';
+    _unlinkResult = '{"unlinked":0,"names":[]}';
+    return;
   }
 
   // Egyedi nevek + nameSet
@@ -108,7 +112,7 @@ function doUnlinkAll() {
   }
   namesJson += "]";
 
-  return '{"unlinked":' + totalUnlinked + ',"names":' + namesJson + '}';
+  _unlinkResult = '{"unlinked":' + totalUnlinked + ',"names":' + namesJson + '}';
 }
 
 (function () {
@@ -120,8 +124,8 @@ function doUnlinkAll() {
     var doc = app.activeDocument;
 
     // suspendHistory: egyetlen Undo lepes
-    var resultStr = doc.suspendHistory("Szétlinkelés", "doUnlinkAll()");
-    resultStr;
+    doc.suspendHistory("Unlink layers", "doUnlinkAll()");
+    _unlinkResult;
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);

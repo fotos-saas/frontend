@@ -5,7 +5,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TeacherListItem, TeacherGroupRow, SyncResultItem, LinkTeachersResponse, LinkedGroupPhoto } from '../../models/teacher.models';
+import { TeacherListItem, TeacherGroupRow, SyncResultItem, LinkTeachersResponse, LinkedGroupPhoto, PhotoChooserMode } from '../../models/teacher.models';
 import { ARCHIVE_SERVICE, ArchiveConfig, ArchivePersonInSchool, ArchiveSchoolGroup } from '../../models/archive.models';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { ArchiveEditModalComponent } from '../../components/archive/archive-edit-modal/archive-edit-modal.component';
@@ -137,7 +137,7 @@ export class PartnerTeacherListComponent implements OnInit {
   noPhotoTarget = signal<ArchivePersonInSchool | null>(null);
   downloadSchoolTarget = signal<ArchiveSchoolGroup | null>(null);
   showPhotoChooser = signal(false);
-  photoChooserData = signal<{ photos: LinkedGroupPhoto[]; linkedGroup: string } | null>(null);
+  photoChooserData = signal<{ photos: LinkedGroupPhoto[]; mode: PhotoChooserMode } | null>(null);
   private readonly projectView = viewChild(ArchiveProjectViewComponent);
 
   ngOnInit(): void { this.state.init(); }
@@ -188,7 +188,7 @@ export class PartnerTeacherListComponent implements OnInit {
     this.closeLinkDialog();
     this.state.loadTeachers();
     if (data && data.photos && data.photos.length > 1) {
-      this.photoChooserData.set({ photos: data.photos, linkedGroup: data.linkedGroup });
+      this.photoChooserData.set({ photos: data.photos, mode: { kind: 'linkedGroup', linkedGroup: data.linkedGroup } });
       this.showPhotoChooser.set(true);
     }
   }
@@ -198,7 +198,7 @@ export class PartnerTeacherListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(res => {
         if (res.data?.length > 0) {
-          this.photoChooserData.set({ photos: res.data, linkedGroup: groupId });
+          this.photoChooserData.set({ photos: res.data, mode: { kind: 'linkedGroup', linkedGroup: groupId } });
           this.showPhotoChooser.set(true);
         }
       });

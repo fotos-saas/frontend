@@ -197,6 +197,19 @@ export class PartnerTeacherService implements ArchiveService {
     );
   }
 
+  // ============ Egyedi tanár fotókezelés ============
+
+  getTeacherPhotos(teacherId: number): Observable<{ success: boolean; data: LinkedGroupPhoto[] }> {
+    return this.http.get<{ success: boolean; data: LinkedGroupPhoto[] }>(`${this.baseUrl}/${teacherId}/photos/list`);
+  }
+
+  setActivePhotoByMedia(teacherId: number, mediaId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.baseUrl}/${teacherId}/set-active-photo`,
+      { media_id: mediaId }
+    );
+  }
+
   // ============ Teacher Linking (Tanár összekapcsolás) ============
 
   linkTeachers(teacherIds: number[]): Observable<{ success: boolean; message: string; data: LinkTeachersResponse }> {

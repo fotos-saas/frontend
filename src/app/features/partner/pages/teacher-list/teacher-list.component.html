@@ -271,7 +271,7 @@
 @if (showPhotoChooser() && photoChooserData(); as chooserData) {
   <app-teacher-photo-chooser-dialog
     [photos]="chooserData.photos"
-    [linkedGroup]="chooserData.linkedGroup"
+    [mode]="chooserData.mode"
     (closeEvent)="closePhotoChooser()"
     (savedEvent)="onPhotoChosen()"
   />

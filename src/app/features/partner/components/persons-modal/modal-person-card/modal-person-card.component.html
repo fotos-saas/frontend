@@ -69,7 +69,7 @@
         <button type="button" class="card-action-btn" matTooltip="Összekapcsolás" (click)="onLinkClick($event)">
           <lucide-icon [name]="ICONS.LINK" [size]="12" />
         </button>
-        @if (person().linkedGroup) {
+        @if (person().linkedGroup || (person().photosCount ?? 0) > 1) {
           <button type="button" class="card-action-btn" matTooltip="Fotó csere archívumból" (click)="onPhotoChooserClick($event)">
             <lucide-icon [name]="ICONS.IMAGE" [size]="12" />
           </button>

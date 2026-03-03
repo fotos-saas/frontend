@@ -806,10 +806,10 @@
   />
 }
 
-@if (showPhotoChooserDialog() && photoChooserPhotos().length > 0) {
+@if (showPhotoChooserDialog() && photoChooserPhotos().length > 0 && photoChooserMode(); as mode) {
   <app-teacher-photo-chooser-dialog
     [photos]="photoChooserPhotos()"
-    [linkedGroup]="photoChooserLinkedGroup()"
+    [mode]="mode"
     (closeEvent)="showPhotoChooserDialog.set(false)"
     (savedEvent)="onPhotoChosen()"
   />

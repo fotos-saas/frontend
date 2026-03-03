@@ -14,7 +14,7 @@ import { OverlayUploadService, PsLayerPerson, BatchProgress } from './overlay-up
 import { PartnerTeacherService } from '../partner/services/partner-teacher.service';
 import { TeacherLinkDialogComponent } from '../partner/components/teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../partner/components/teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
-import { TeacherListItem, LinkedGroupPhoto } from '../partner/models/teacher.models';
+import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../partner/models/teacher.models';
 
 interface ToolbarItem {
   id: string;
@@ -109,7 +109,7 @@ export class OverlayComponent implements OnInit {
   readonly linkDialogTeacher = signal<TeacherListItem | null>(null);
   readonly linkDialogAllTeachers = signal<TeacherListItem[]>([]);
   readonly photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
-  readonly photoChooserLinkedGroup = signal('');
+  readonly photoChooserMode = signal<PhotoChooserMode | null>(null);
 
   // Upload panel state
   readonly uploadPanelOpen = signal(false);
@@ -2204,7 +2204,7 @@ export class OverlayComponent implements OnInit {
       next: (res) => {
         this.ngZone.run(() => {
           this.photoChooserPhotos.set(res.data || []);
-          this.photoChooserLinkedGroup.set(group);
+          this.photoChooserMode.set({ kind: 'linkedGroup', linkedGroup: group });
           this.showPhotoChooserDialog.set(true);
         });
       },
@@ -2219,7 +2219,7 @@ export class OverlayComponent implements OnInit {
       next: (res) => {
         this.ngZone.run(() => {
           this.photoChooserPhotos.set(res.data || []);
-          this.photoChooserLinkedGroup.set(groupId);
+          this.photoChooserMode.set({ kind: 'linkedGroup', linkedGroup: groupId });
           this.showPhotoChooserDialog.set(true);
         });
       },

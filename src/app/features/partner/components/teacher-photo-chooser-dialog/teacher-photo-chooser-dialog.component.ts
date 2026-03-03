@@ -17,7 +17,7 @@ import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog
 import { ICONS } from '@shared/constants/icons.constants';
 import { MediaLightboxComponent, LightboxMediaItem } from '@shared/components/media-lightbox';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
-import type { LinkedGroupPhoto } from '../../models/teacher.models';
+import type { LinkedGroupPhoto, PhotoChooserMode } from '../../models/teacher.models';
 
 @Component({
   selector: 'app-teacher-photo-chooser-dialog',
@@ -34,7 +34,7 @@ export class TeacherPhotoChooserDialogComponent {
   readonly ICONS = ICONS;
 
   readonly photos = input.required<LinkedGroupPhoto[]>();
-  readonly linkedGroup = input.required<string>();
+  readonly mode = input.required<PhotoChooserMode>();
 
   readonly closeEvent = output<void>();
   readonly savedEvent = output<void>();
@@ -51,6 +51,24 @@ export class TeacherPhotoChooserDialogComponent {
   });
 
   readonly hasSelection = computed(() => this.selectedMediaId() !== null);
+
+  readonly dialogTitle = computed(() =>
+    this.mode().kind === 'linkedGroup'
+      ? 'Egységes fotó választása'
+      : 'Aktív fotó választása'
+  );
+
+  readonly dialogDescription = computed(() =>
+    this.mode().kind === 'linkedGroup'
+      ? 'Az összekapcsolt tanárnak több fotója van. Válaszd ki, melyik legyen az egységes fotó minden iskolánál.'
+      : 'A tanárnak több fotója van. Válaszd ki, melyik legyen az aktív fotó.'
+  );
+
+  readonly submitButtonText = computed(() =>
+    this.mode().kind === 'linkedGroup'
+      ? 'Alkalmazás mindenkire'
+      : 'Kiválasztott fotó beállítása'
+  );
 
   readonly lightboxMedia = computed<LightboxMediaItem[]>(() =>
     this.photos()
@@ -86,18 +104,21 @@ export class TeacherPhotoChooserDialogComponent {
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
-    this.teacherService.setGroupActivePhoto(this.linkedGroup(), mediaId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.savedEvent.emit();
-        },
-        error: (err) => {
-          this.isSubmitting.set(false);
-          this.errorMessage.set(err?.error?.message ?? 'Hiba a fotó beállítása során.');
-        },
-      });
+    const m = this.mode();
+    const request$ = m.kind === 'linkedGroup'
+      ? this.teacherService.setGroupActivePhoto(m.linkedGroup, mediaId)
+      : this.teacherService.setActivePhotoByMedia(m.archiveId, mediaId);
+
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.savedEvent.emit();
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.errorMessage.set(err?.error?.message ?? 'Hiba a fotó beállítása során.');
+      },
+    });
   }
 
   onSkip(): void {

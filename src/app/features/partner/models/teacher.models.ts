@@ -103,6 +103,13 @@ export interface LinkedGroupPhoto {
   isPortraitProcessed?: boolean;
 }
 
+/**
+ * Fotóválasztó mód: linked group vagy egyedi tanár.
+ */
+export type PhotoChooserMode =
+  | { kind: 'linkedGroup'; linkedGroup: string }
+  | { kind: 'individual'; archiveId: number; teacherName: string };
+
 export interface LinkTeachersResponse {
   linkedGroup: string;
   photos: LinkedGroupPhoto[];

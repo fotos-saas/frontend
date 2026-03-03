@@ -190,6 +190,7 @@ export interface TabloPersonItem {
   photoType: string | null;
   note: string | null;
   linkedGroup: string | null;
+  photosCount?: number;
   isPortraitProcessed?: boolean;
   isCropProcessed?: boolean;
 }

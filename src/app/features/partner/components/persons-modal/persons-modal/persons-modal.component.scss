@@ -587,7 +587,7 @@ ps-toggle {
 }
 
 // --- Footer (csak a saját dialog-wrapper-re, NEM a gyermek dialogokra) ---
-:host > app-dialog-wrapper ::ng-deep .dw__footer {
+.persons-modal-main ::ng-deep .dw__footer {
   flex-direction: column;
   align-items: stretch;
   padding: 12px 1.5rem;

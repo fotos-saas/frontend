@@ -9,31 +9,49 @@
 // #include "../lib/config.jsx"
 // #include "../lib/utils.jsx"
 
+function escJsonStr(s) {
+  s = s.replace(/\\/g, '\\\\');
+  s = s.replace(/"/g, '\\"');
+  s = s.replace(/\n/g, '\\n');
+  s = s.replace(/\r/g, '\\r');
+  s = s.replace(/\t/g, '\\t');
+  return s;
+}
+
+function buildJsonArray(arr) {
+  var json = "[";
+  for (var n = 0; n < arr.length; n++) {
+    if (n > 0) json += ",";
+    json += '"' + escJsonStr(arr[n]) + '"';
+  }
+  json += "]";
+  return json;
+}
+
 var __result = (function () {
   if (app.documents.length === 0) {
-    return '{"names":[],"count":0}';
+    return '{"names":[],"students":[],"teachers":[],"count":0}';
   }
   var doc = app.activeDocument;
-  var names = [];
+  var students = [];
+  var teachers = [];
 
-  function collectFromGroup(groupPath) {
+  function collectFromGroup(groupPath, target) {
     var grp = getGroupByPath(doc, groupPath);
     if (!grp) return;
     for (var i = 0; i < grp.artLayers.length; i++) {
-      names.push(grp.artLayers[i].name);
+      target.push(grp.artLayers[i].name);
     }
   }
 
-  collectFromGroup(["Images", "Students"]);
-  collectFromGroup(["Images", "Teachers"]);
+  collectFromGroup(["Images", "Students"], students);
+  collectFromGroup(["Images", "Teachers"], teachers);
 
-  var namesJson = "[";
-  for (var n = 0; n < names.length; n++) {
-    if (n > 0) namesJson += ",";
-    namesJson += '"' + names[n].replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
-  }
-  namesJson += "]";
+  var all = students.concat(teachers);
 
-  return '{"names":' + namesJson + ',"count":' + names.length + '}';
+  return '{"names":' + buildJsonArray(all) +
+    ',"students":' + buildJsonArray(students) +
+    ',"teachers":' + buildJsonArray(teachers) +
+    ',"count":' + all.length + '}';
 })();
 __result;

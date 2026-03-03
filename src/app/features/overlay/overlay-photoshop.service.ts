@@ -53,17 +53,30 @@ export class OverlayPhotoshopService {
    * 4× hívva a komponensben.
    */
   async getImageLayerNames(): Promise<string[]> {
-    if (!window.electronAPI) return [];
+    const data = await this.getImageLayerData();
+    return data.names;
+  }
+
+  /**
+   * PS-ből kiszedi az Images layerek neveit csoportonként.
+   */
+  async getImageLayerData(): Promise<{ names: string[]; students: string[]; teachers: string[] }> {
+    const empty = { names: [], students: [], teachers: [] };
+    if (!window.electronAPI) return empty;
     try {
       const result = await window.electronAPI.photoshop.runJsx({
         scriptName: 'actions/get-image-names.jsx',
       });
-      if (!result.success || !result.output) return [];
+      if (!result.success || !result.output) return empty;
       const cleaned = result.output.trim();
-      if (!cleaned.startsWith('{')) return [];
+      if (!cleaned.startsWith('{')) return empty;
       const data = JSON.parse(cleaned);
-      return data.names || [];
-    } catch { return []; }
+      return {
+        names: data.names || [],
+        students: data.students || [],
+        teachers: data.teachers || [],
+      };
+    } catch { return empty; }
   }
 
   /**

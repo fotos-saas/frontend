@@ -615,29 +615,17 @@ export class OverlayComponent implements OnInit {
   // ============ Private helpers ============
 
   private async executeLinkQuickAction(target: string): Promise<void> {
-    // 1. Összes image layer név lekérése PS-ből
-    const allNames = await this.ps.getImageLayerNames();
-    if (allNames.length === 0) { this.setLinkResult(false, 'Nincsenek image layerek'); return; }
+    const data = await this.ps.getImageLayerData();
+    const layerNames = target === 'teachers' ? data.teachers
+      : target === 'students' ? data.students
+      : data.names;
 
-    // 2. Szűrés target alapján
-    let layerNames: string[];
-    if (target === 'all') {
-      layerNames = allNames;
-    } else {
-      const persons = this.persons();
-      const typeFilter = target === 'teachers' ? 'teacher' : 'student';
-      const personIds = new Set(persons.filter(p => p.type === typeFilter).map(p => p.id));
-      layerNames = allNames.filter(name => {
-        const match = name.match(/---(\d+)$/);
-        return match && personIds.has(Number(match[1]));
-      });
-    }
     if (layerNames.length === 0) {
-      this.setLinkResult(false, target === 'teachers' ? 'Nincsenek tanár layerek' : 'Nincsenek diák layerek');
+      const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'image';
+      this.setLinkResult(false, `Nincsenek ${label} layerek`);
       return;
     }
 
-    // 3. JSX hívás — pipe-separated nevek CONFIG.LAYER_NAMES-ben
     const result = await this.ps.runJsx(
       'link-layers',
       'actions/link-selected.jsx',

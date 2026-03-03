@@ -665,7 +665,11 @@ export class OverlayComponent implements OnInit {
     // NAME_MAP: layer név → DB-beli helyes név (person ID alapján)
     let nameMapJson = '';
     if (doNames) {
-      const persons = this.projectService.persons();
+      let persons = this.projectService.persons();
+      if (persons.length === 0) {
+        const pid = this.projectService.getLastProjectId() || this.context().projectId;
+        if (pid) persons = await this.projectService.fetchPersons(pid);
+      }
       const personById = new Map(persons.map(p => [p.id, p.name]));
       const data = await this.ps.getImageLayerData();
       const layerNames = target === 'teachers' ? data.teachers
@@ -713,8 +717,15 @@ export class OverlayComponent implements OnInit {
     }
 
     // CSAK nevek frissítése — új script, NEM pozícionál
-    const persons = this.projectService.persons();
-    if (persons.length === 0) { this.setLinkResult(false, 'Nincsenek személyek betöltve'); return; }
+    let persons = this.projectService.persons();
+    if (persons.length === 0) {
+      // Persons nincs betöltve — megpróbáljuk lekérni
+      const pid = this.projectService.getLastProjectId() || this.context().projectId;
+      if (pid) {
+        persons = await this.projectService.fetchPersons(pid);
+      }
+      if (persons.length === 0) { this.setLinkResult(false, 'Nincsenek személyek betöltve'); return; }
+    }
 
     const personById = new Map(persons.map(p => [p.id, p.name]));
     const data = await this.ps.getImageLayerData();

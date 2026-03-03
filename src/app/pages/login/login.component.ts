@@ -279,6 +279,11 @@ export class LoginComponent implements OnInit {
       return;
     }
 
+    if (roles?.includes('print_shop')) {
+      this.router.navigate(['/print-shop/dashboard']);
+      return;
+    }
+
     // Multi-partner csapattag → partner-select oldal
     if (partnersCount && partnersCount > 1) {
       this.router.navigate(['/partner-select']);

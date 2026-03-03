@@ -295,7 +295,7 @@ export class SessionService {
     const token = this.getMarketerToken();
     const user = this.getStoredMarketerUser();
     // Partner, csapattagok és admin role-ok
-    const validRoles = ['marketer', 'partner', 'super_admin', 'designer', 'printer', 'assistant'];
+    const validRoles = ['marketer', 'partner', 'super_admin', 'designer', 'printer', 'assistant', 'print_shop'];
     if (token && user && validRoles.some(role => user.roles?.includes(role))) {
       return { success: true, user };
     }

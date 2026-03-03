@@ -1,0 +1,61 @@
+<div class="print-shop-layout">
+  <!-- Top Bar -->
+  <app-top-bar
+    position="sticky"
+    logoIcon="🖨️"
+    roleBadge="Nyomda"
+    [showNotifications]="false"
+    [showPokeBadge]="false"
+    [showUserBadges]="false"
+    [showAccountSwitch]="false"
+    [showPartnerSwitcher]="false"
+    userInfoMode="inline"
+    [externalUserInfo]="userInfo()"
+    homeRoute="/print-shop/dashboard"
+    [useExternalLogout]="true"
+    (logoutEvent)="logout()"
+  />
+
+  <!-- Content with Sidebar -->
+  <div class="main-container">
+    <!-- Desktop/Tablet Sidebar -->
+    <nav
+      class="sidebar"
+      [ngClass]="{
+        'sidebar--collapsed': sidebarState.isTablet(),
+        'sidebar--hidden': sidebarState.isMobile()
+      }"
+    >
+      @for (item of navItems; track item.id) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-item"
+          [title]="sidebarState.isTablet() ? item.label : ''"
+        >
+          <lucide-icon [name]="item.icon!" [size]="20" class="nav-icon"></lucide-icon>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <!-- Mobile Overlay -->
+    <app-mobile-nav-overlay
+      [customMenuItems]="mobileMenuItems()"
+      [userInfo]="{ name: userName(), email: userEmail() }"
+      [showPartnerSwitcher]="false"
+      (logoutEvent)="logout()"
+    />
+
+    <!-- Main Content -->
+    <main
+      class="content"
+      [ngClass]="{
+        'content--full': sidebarState.isMobile(),
+        'content--with-collapsed': sidebarState.isTablet() && !sidebarState.isMobile()
+      }"
+    >
+      <router-outlet />
+    </main>
+  </div>
+</div>

@@ -81,7 +81,7 @@ export class PasswordAuthService {
       .pipe(
         tap(response => {
           // Partner, csapattagok és admin role-ok
-          const partnerRoles = ['super_admin', 'marketer', 'partner', 'designer', 'printer', 'assistant'];
+          const partnerRoles = ['super_admin', 'marketer', 'partner', 'designer', 'printer', 'assistant', 'print_shop'];
           const hasPartnerAccess = partnerRoles.some(role => response.user.roles?.includes(role));
 
           if (hasPartnerAccess) {

@@ -9,6 +9,7 @@ import { marketerGuard } from './core/guards/marketer.guard';
 import { partnerGuard } from './core/guards/partner.guard';
 import { clientGuard } from './core/guards/client.guard';
 import { superAdminGuard } from './core/guards/super-admin.guard';
+import { printShopGuard } from './core/guards/print-shop.guard';
 
 export const routes: Routes = [
   // Overlay route (Electron always-on-top command palette — kulon BrowserWindow)
@@ -128,6 +129,24 @@ export const routes: Routes = [
         path: 'bugs/:id',
         loadComponent: () => import('./features/super-admin/pages/bug-report-detail/bug-report-detail.component').then(m => m.AdminBugReportDetailComponent)
       },
+    ]
+  },
+
+  // Print Shop routes - nyomdai felület
+  {
+    path: 'print-shop',
+    loadComponent: () => import('./features/print-shop/print-shop-shell.component').then(m => m.PrintShopShellComponent),
+    canActivate: [printShopGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/print-shop/pages/dashboard/print-shop-dashboard.component').then(m => m.PrintShopDashboardComponent)
+      },
+      {
+        path: 'projects',
+        loadComponent: () => import('./features/print-shop/pages/projects/print-shop-projects.component').then(m => m.PrintShopProjectsComponent)
+      }
     ]
   },
 

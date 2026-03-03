@@ -175,6 +175,13 @@ export class AuthService {
   });
 
   /**
+   * Computed signal: true ha nyomda felhasználó
+   */
+  public readonly isPrintShop = computed<boolean>(() => {
+    return this._currentUser()?.roles?.includes('print_shop') ?? false;
+  });
+
+  /**
    * Computed signal: true ha super admin felhasználó
    */
   public readonly isSuperAdmin = computed<boolean>(() => {

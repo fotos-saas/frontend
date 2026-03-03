@@ -1,0 +1,40 @@
+<div class="print-shop-dashboard page-card">
+  <!-- Üdvözlő fejléc -->
+  <div class="welcome-section">
+    <h1 class="welcome-title">Üdvözöljük, {{ partnerName() }}!</h1>
+    <p class="welcome-subtitle">Nyomdai vezérlőpult</p>
+  </div>
+
+  <!-- Statisztika kártyák -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <lucide-icon name="clock" [size]="24"></lucide-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ stats().pending_orders }}</span>
+        <span class="stat-label">Függőben lévő megrendelés</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--blue">
+        <lucide-icon name="folder-open" [size]="24"></lucide-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ stats().active_projects }}</span>
+        <span class="stat-label">Aktív projekt</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--green">
+        <lucide-icon name="check-circle" [size]="24"></lucide-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ stats().completed_this_month }}</span>
+        <span class="stat-label">Befejezett (hónap)</span>
+      </div>
+    </div>
+  </div>
+</div>

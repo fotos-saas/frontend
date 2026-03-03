@@ -50,13 +50,11 @@
   <div class="card-info" (click)="onEditClick($event)">
     <span class="card-name">{{ person().name }}</span>
     <div class="card-meta">
-      <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">
-        @if (person().type === 'teacher' && person().title) {
-          {{ person().title }}
-        } @else {
-          {{ person().type === 'student' ? 'Diák' : 'Tanár' }}
-        }
-      </span>
+      @if (person().type === 'student' || person().title) {
+        <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">
+          {{ person().type === 'student' ? 'Diák' : person().title }}
+        </span>
+      }
       @if (person().linkedGroup) {
         <span class="card-badge card-badge--linked" matTooltip="Összekapcsolva">
           <lucide-icon [name]="ICONS.LINK" [size]="10" />

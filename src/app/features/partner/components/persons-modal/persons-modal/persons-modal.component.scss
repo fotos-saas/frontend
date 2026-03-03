@@ -178,29 +178,46 @@ ps-toggle {
   pointer-events: none;
 }
 
-// --- Inline edit panel (grid nézet) ---
-.inline-edit {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  background: #fff;
-  border-radius: 0 0 6px 6px;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
-  padding: 8px;
+// --- Személy szerkesztő dialógus ---
+.edit-dialog {
+  padding: 20px;
+}
+
+.edit-dialog__title {
+  display: flex;
+  align-items: center;
+  // Safari gap fallback
+  > * + * { margin-left: 8px; }
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.edit-dialog__fields {
   display: flex;
   flex-direction: column;
   // Safari gap fallback
-  > * + * { margin-top: 5px; }
+  > * + * { margin-top: 4px; }
 }
 
-.inline-edit__field {
-  width: 100%;
-  padding: 5px 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 5px;
+.edit-dialog__label {
   font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 12px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.edit-dialog__input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.875rem;
   outline: none;
   transition: border-color 0.15s ease;
 
@@ -208,51 +225,18 @@ ps-toggle {
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
   }
+
+  &::placeholder {
+    color: #94a3b8;
+  }
 }
 
-.inline-edit__actions {
+.edit-dialog__actions {
   display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
   // Safari gap fallback
-  > * + * { margin-left: 4px; }
-}
-
-.inline-edit__btn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  // Safari gap fallback
-  > * + * { margin-left: 4px; }
-  padding: 4px 8px;
-  border: none;
-  border-radius: 5px;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.inline-edit__btn--save {
-  background: #2563eb;
-  color: #fff;
-
-  &:hover:not(:disabled) {
-    background: #1d4ed8;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.inline-edit__btn--cancel {
-  background: #f1f5f9;
-  color: #64748b;
-
-  &:hover {
-    background: #e2e8f0;
-  }
+  > * + * { margin-left: 8px; }
 }
 
 // --- Szerkesztő lista nézet ---

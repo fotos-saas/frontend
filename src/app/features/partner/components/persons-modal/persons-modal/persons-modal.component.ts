@@ -79,10 +79,14 @@ export class PersonsModalComponent implements OnInit {
   editMode = signal(false);
   editData = signal<Map<number, EditRow>>(new Map());
 
-  // Inline edit (grid nézetben)
+  // Személy szerkesztő dialógus
   inlineEditPersonId = signal<number | null>(null);
   inlineEditData = signal<{ name: string; title: string; note: string } | null>(null);
   inlineEditSaving = signal(false);
+  readonly inlineEditPerson = computed(() => {
+    const id = this.inlineEditPersonId();
+    return id ? this.allPersons().find(p => p.id === id) ?? null : null;
+  });
 
   // Lightbox
   lightboxPerson = signal<TabloPersonItem | null>(null);

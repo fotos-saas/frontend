@@ -174,7 +174,7 @@
         }
       } @else {
         <!-- Grid nézet -->
-        <div class="persons-grid" (click)="inlineEditPersonId() ? closeInlineEdit() : $event">
+        <div class="persons-grid">
           @for (person of filteredPersons(); track person.id; let i = $index) {
             @let isSelected = batchActions.selectedPersonIds().has(person.id);
             <div
@@ -196,54 +196,6 @@
                 (linkClick)="openLinkDialog($event)"
                 (photoChooserClick)="openPhotoChooser($event)"
               />
-              <!-- Inline edit panel -->
-              @if (inlineEditPersonId() === person.id) {
-                @let editData = inlineEditData();
-                <div class="inline-edit" (click)="$event.stopPropagation()">
-                  <input
-                    type="text"
-                    class="inline-edit__field"
-                    placeholder="Név"
-                    [value]="editData?.name ?? ''"
-                    (input)="inlineEditData.set({ ...editData!, name: $any($event.target).value })"
-                    (keydown.enter)="saveInlineEdit()"
-                    (keydown.escape)="closeInlineEdit()"
-                  />
-                  @if (person.type === 'teacher') {
-                    <input
-                      type="text"
-                      class="inline-edit__field"
-                      placeholder="Pozíció/tantárgy"
-                      [value]="editData?.title ?? ''"
-                      (input)="inlineEditData.set({ ...editData!, title: $any($event.target).value })"
-                      (keydown.enter)="saveInlineEdit()"
-                      (keydown.escape)="closeInlineEdit()"
-                    />
-                  }
-                  <input
-                    type="text"
-                    class="inline-edit__field"
-                    placeholder="Megjegyzés"
-                    [value]="editData?.note ?? ''"
-                    (input)="inlineEditData.set({ ...editData!, note: $any($event.target).value })"
-                    (keydown.enter)="saveInlineEdit()"
-                    (keydown.escape)="closeInlineEdit()"
-                  />
-                  <div class="inline-edit__actions">
-                    <button type="button" class="inline-edit__btn inline-edit__btn--save" (click)="saveInlineEdit()" [disabled]="inlineEditSaving()">
-                      @if (inlineEditSaving()) {
-                        <lucide-icon [name]="ICONS.LOADER" [size]="12" class="spin" />
-                      } @else {
-                        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-                      }
-                      Mentés
-                    </button>
-                    <button type="button" class="inline-edit__btn inline-edit__btn--cancel" (click)="closeInlineEdit()">
-                      Mégse
-                    </button>
-                  </div>
-                </div>
-              }
             </div>
           }
         </div>
@@ -372,6 +324,69 @@
   (navigate)="lightboxPerson.set($event)"
   (photoChanged)="onPhotoChanged($event)"
 />
+
+<!-- Személy szerkesztő dialógus -->
+@if (inlineEditPersonId(); as editPersonId) {
+  @let editData = inlineEditData();
+  @let editPerson = inlineEditPerson();
+  <div class="dialog-backdrop" (mousedown)="closeInlineEdit()">
+    <div class="dialog-panel" (mousedown)="$event.stopPropagation()">
+      <div class="edit-dialog">
+        <h3 class="edit-dialog__title">
+          <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
+          Személy szerkesztése
+        </h3>
+        <div class="edit-dialog__fields">
+          <label class="edit-dialog__label">Név</label>
+          <input
+            type="text"
+            class="edit-dialog__input"
+            placeholder="Név"
+            [value]="editData?.name ?? ''"
+            (input)="inlineEditData.set({ ...editData!, name: $any($event.target).value })"
+            (keydown.enter)="saveInlineEdit()"
+            (keydown.escape)="closeInlineEdit()"
+          />
+          @if (editPerson?.type === 'teacher') {
+            <label class="edit-dialog__label">Pozíció / tantárgy</label>
+            <input
+              type="text"
+              class="edit-dialog__input"
+              placeholder="Pozíció/tantárgy"
+              [value]="editData?.title ?? ''"
+              (input)="inlineEditData.set({ ...editData!, title: $any($event.target).value })"
+              (keydown.enter)="saveInlineEdit()"
+              (keydown.escape)="closeInlineEdit()"
+            />
+          }
+          <label class="edit-dialog__label">Megjegyzés</label>
+          <input
+            type="text"
+            class="edit-dialog__input"
+            placeholder="Megjegyzés"
+            [value]="editData?.note ?? ''"
+            (input)="inlineEditData.set({ ...editData!, note: $any($event.target).value })"
+            (keydown.enter)="saveInlineEdit()"
+            (keydown.escape)="closeInlineEdit()"
+          />
+        </div>
+        <div class="edit-dialog__actions">
+          <button type="button" class="btn btn--primary" (click)="saveInlineEdit()" [disabled]="inlineEditSaving()">
+            @if (inlineEditSaving()) {
+              <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+            } @else {
+              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+            }
+            Mentés
+          </button>
+          <button type="button" class="btn btn--outline" (click)="closeInlineEdit()">
+            Mégse
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- Fotó feltöltés dialógus -->
 @if (photoUploadPerson(); as uploadPerson) {

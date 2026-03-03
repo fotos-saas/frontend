@@ -302,12 +302,13 @@
 
     <!-- Gyors akciók gomb -->
     <button
-      class="toolbar__btn toolbar__btn--purple"
+      class="toolbar__btn toolbar__btn--purple toolbar__btn--labeled"
       [class.toolbar__btn--active]="quickActionsPanelOpen()"
       (click)="toggleQuickActions()"
       matTooltip="Gyors akciók"
     >
-      <lucide-icon [name]="ICONS.SPARKLE" [size]="16" />
+      <lucide-icon [name]="ICONS.SPARKLE" [size]="14" />
+      <span class="toolbar__btn-label">Gyors akciók</span>
     </button>
 
     <div class="toolbar__sep"></div>

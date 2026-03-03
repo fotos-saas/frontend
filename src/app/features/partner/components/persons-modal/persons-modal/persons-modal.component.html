@@ -102,30 +102,28 @@
                 </button>
               </div>
 
-              <!-- Mezők -->
+              <!-- Mezők (1 sorban: Név + Pozíció + Megjegyzés) -->
               <div class="edit-fields">
-                <div class="edit-fields-top">
-                  <!-- Név input -->
+                <!-- Név input -->
+                <input
+                  type="text"
+                  class="edit-field edit-field--name"
+                  placeholder="Név"
+                  [value]="row?.name ?? person.name"
+                  (input)="onEditFieldChange(person.id, 'name', $any($event.target).value)"
+                  (keydown.enter)="saveRow(person.id)"
+                />
+                <!-- Title input (csak tanárnál) -->
+                @if (person.type === 'teacher') {
                   <input
                     type="text"
-                    class="edit-field edit-field--name"
-                    placeholder="Név"
-                    [value]="row?.name ?? person.name"
-                    (input)="onEditFieldChange(person.id, 'name', $any($event.target).value)"
+                    class="edit-field edit-field--title"
+                    placeholder="Pozíció/tantárgy"
+                    [value]="row?.title ?? (person.title || '')"
+                    (input)="onEditFieldChange(person.id, 'title', $any($event.target).value)"
                     (keydown.enter)="saveRow(person.id)"
                   />
-                  <!-- Title input (csak tanárnál) -->
-                  @if (person.type === 'teacher') {
-                    <input
-                      type="text"
-                      class="edit-field edit-field--title"
-                      placeholder="Pozíció/tantárgy"
-                      [value]="row?.title ?? (person.title || '')"
-                      (input)="onEditFieldChange(person.id, 'title', $any($event.target).value)"
-                      (keydown.enter)="saveRow(person.id)"
-                    />
-                  }
-                </div>
+                }
                 <!-- Megjegyzés -->
                 <input
                   type="text"

@@ -46,27 +46,8 @@
     }
   </div>
 
-  <!-- Col 5: Fájl státusz -->
-  <div class="col col-file">
-    @if (item().printSmallTablo || item().printFlat) {
-      <div class="file-badges">
-        @if (item().printSmallTablo) {
-          <span class="file-badge file-badge--ready" [matTooltip]="'Kistabló: ' + item().printSmallTablo!.fileName">KT</span>
-        }
-        @if (item().printFlat) {
-          <span class="file-badge file-badge--ready" [matTooltip]="'Flat: ' + item().printFlat!.fileName">FL</span>
-        }
-      </div>
-    } @else {
-      <span class="file-status file-status--empty">
-        <lucide-icon [name]="ICONS.FILE" [size]="12" />
-        Nincs fájl
-      </span>
-    }
-  </div>
-
-  <!-- Col 6: Műveletek -->
-  <div class="col col-actions">
+  <!-- Col 5: Műveletek -->
+  <div class="col col-actions" (click)="$event.stopPropagation()">
     @if (item().status === 'in_print') {
       <button
         type="button"
@@ -75,27 +56,44 @@
         matTooltip="Készre állítás"
       >
         <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+        <span class="action-label">Kész</span>
+      </button>
+    }
+    @if (item().printSmallTablo) {
+      <button
+        type="button"
+        class="action-btn action-btn--download"
+        [class.action-btn--spinning]="downloadingType() === 'small_tablo'"
+        [disabled]="!!downloadingType()"
+        (click)="onDownloadSmallTabloClick($event)"
+        [matTooltip]="downloadingType() === 'small_tablo' ? 'Letöltés folyamatban...' : 'Kistabló letöltése'"
+      >
+        <lucide-icon [name]="downloadingType() === 'small_tablo' ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="14" />
+        <span class="action-label">Kistabló</span>
       </button>
     }
     @if (item().printFlat) {
       <button
         type="button"
         class="action-btn action-btn--download"
-        [class.action-btn--spinning]="downloading()"
-        [disabled]="downloading()"
+        [class.action-btn--spinning]="downloadingType() === 'flat'"
+        [disabled]="!!downloadingType()"
         (click)="onDownloadClick($event)"
-        [matTooltip]="downloading() ? 'Letöltés folyamatban...' : 'Flat letöltése'"
+        [matTooltip]="downloadingType() === 'flat' ? 'Letöltés folyamatban...' : 'Nagytabló letöltése'"
       >
-        <lucide-icon [name]="downloading() ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="14" />
+        <lucide-icon [name]="downloadingType() === 'flat' ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="14" />
+        <span class="action-label">Nagytabló</span>
       </button>
     }
-    <button
-      type="button"
-      class="action-btn action-btn--upload"
-      (click)="onUploadClick($event)"
-      [matTooltip]="(item().printSmallTablo || item().printFlat) ? 'Fájl cseréje' : 'Fájl feltöltése'"
-    >
-      <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
-    </button>
+    @if (!item().printSmallTablo && !item().printFlat) {
+      <button
+        type="button"
+        class="action-btn action-btn--upload"
+        (click)="onUploadClick($event)"
+        matTooltip="Fájl feltöltése"
+      >
+        <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+      </button>
+    }
   </div>
 </div>

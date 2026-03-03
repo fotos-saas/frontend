@@ -80,56 +80,6 @@
   color: get-color('slate', 400);
 }
 
-/* Col: Fájl státusz */
-.col-file {
-  justify-content: center;
-}
-
-.file-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.6875rem;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.file-status--ready {
-  color: get-color('success', 600);
-  font-weight: 500;
-}
-
-.file-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.file-status--empty {
-  color: get-color('slate', 400);
-}
-
-.file-badges {
-  display: flex;
-  gap: 4px;
-}
-
-.file-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.file-badge--ready {
-  background: get-color('success', 100);
-  color: get-color('success', 600);
-}
 
 /* Col: Sample thumbnail */
 .col-sample {
@@ -186,8 +136,17 @@
 }
 
 .action-btn--download {
+  width: auto;
+  padding: 0 6px;
+  gap: 3px;
   background: #10b981;
   color: #ffffff;
+}
+
+.action-label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .action-btn--download:hover:not(:disabled) {
@@ -218,6 +177,9 @@
 }
 
 .action-btn--done {
+  width: auto;
+  padding: 0 6px;
+  gap: 3px;
   background: get-color('warning', 500);
   color: #ffffff;
 }

@@ -2,8 +2,8 @@
   headerStyle="flat"
   theme="green"
   [icon]="ICONS.IMAGE"
-  [title]="'Egységes fotó választása'"
-  [description]="'Az összekapcsolt tanárnak több fotója van. Válaszd ki, melyik legyen az egységes fotó minden iskolánál.'"
+  [title]="dialogTitle()"
+  [description]="dialogDescription()"
   size="lg"
   [isSubmitting]="isSubmitting()"
   [errorMessage]="errorMessage()"
@@ -12,7 +12,7 @@
 >
   <ng-container dialogBody>
     @if (photos().length === 0) {
-      <p class="empty-state">Nincs elérhető fotó a csoportban.</p>
+      <p class="empty-state">Nincs elérhető fotó.</p>
     } @else {
       <div class="photo-grid">
         @for (photo of photos(); track photo.mediaId) {
@@ -71,7 +71,7 @@
       @if (isSubmitting()) {
         <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
       }
-      Alkalmazás mindenkire
+      {{ submitButtonText() }}
     </button>
   </ng-container>
 </app-dialog-wrapper>

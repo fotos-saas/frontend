@@ -8,7 +8,7 @@ import { PartnerProjectService } from '../../../services/partner-project.service
 import { ElectronService } from '../../../../../core/services/electron.service';
 import { forkJoin } from 'rxjs';
 import { PartnerTeacherService } from '../../../services/partner-teacher.service';
-import { TeacherListItem, LinkedGroupPhoto } from '../../../models/teacher.models';
+import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../../../models/teacher.models';
 import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -115,7 +115,7 @@ export class PersonsModalComponent implements OnInit {
   linkDialogTeacher = signal<TeacherListItem | null>(null);
   linkDialogAllTeachers = signal<TeacherListItem[]>([]);
   photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
-  photoChooserLinkedGroup = signal('');
+  photoChooserMode = signal<PhotoChooserMode | null>(null);
 
   // Extra nevek (tanítottak még)
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
@@ -555,15 +555,26 @@ export class PersonsModalComponent implements OnInit {
   }
 
   openPhotoChooser(person: TabloPersonItem): void {
-    if (!person.linkedGroup) return;
-    const group = person.linkedGroup;
-    this.teacherService.getLinkedGroupPhotos(group).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => {
-        this.photoChooserPhotos.set(res.data || []);
-        this.photoChooserLinkedGroup.set(group);
-        this.showPhotoChooserDialog.set(true);
-      },
-    });
+    if (person.linkedGroup) {
+      // Linked group flow — csoport összes fotója
+      const group = person.linkedGroup;
+      this.teacherService.getLinkedGroupPhotos(group).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (res) => {
+          this.photoChooserPhotos.set(res.data || []);
+          this.photoChooserMode.set({ kind: 'linkedGroup', linkedGroup: group });
+          this.showPhotoChooserDialog.set(true);
+        },
+      });
+    } else if (person.archiveId && (person.photosCount ?? 0) > 1) {
+      // Egyedi tanár flow — saját fotói
+      this.teacherService.getTeacherPhotos(person.archiveId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (res) => {
+          this.photoChooserPhotos.set(res.data || []);
+          this.photoChooserMode.set({ kind: 'individual', archiveId: person.archiveId!, teacherName: person.name });
+          this.showPhotoChooserDialog.set(true);
+        },
+      });
+    }
   }
 
   onOpenPhotoChooserFromLink(groupId: string): void {
@@ -571,7 +582,7 @@ export class PersonsModalComponent implements OnInit {
     this.teacherService.getLinkedGroupPhotos(groupId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.photoChooserPhotos.set(res.data || []);
-        this.photoChooserLinkedGroup.set(groupId);
+        this.photoChooserMode.set({ kind: 'linkedGroup', linkedGroup: groupId });
         this.showPhotoChooserDialog.set(true);
       },
     });

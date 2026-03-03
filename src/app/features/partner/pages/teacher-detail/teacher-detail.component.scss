@@ -191,22 +191,40 @@
   &:hover { background: get-color('slate', 50); }
 }
 
-.profile-notes {
-  display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  width: 100%;
-  text-align: left;
-  margin-top: 8px;
-  padding: 8px 10px;
+// === MEGJEGYZÉS SZEKCIÓ ===
+.notes-display {
+  padding: 6px 8px;
   background: #fff;
-  border-radius: 6px;
   border: 1px solid get-color('slate', 200);
-  color: get-color('slate', 600);
-  font-size: 0.75rem;
-  line-height: 1.5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s;
 
-  lucide-icon { flex-shrink: 0; margin-top: 1px; color: get-color('slate', 400); }
+  &:hover { border-color: get-color('slate', 300); }
+}
+
+.notes-text {
+  font-size: 0.6875rem;
+  color: get-color('slate', 700);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-primary, #1e3a5f);
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-family: inherit;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+  min-height: 50px;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1);
+
+  &:focus { outline: none; }
 }
 
 // === SIDEBAR SZEKCIÓ (Aliasok) ===
@@ -269,45 +287,6 @@
   font-style: italic;
 }
 
-.alias-add {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.alias-input {
-  flex: 1;
-  min-width: 0;
-  padding: 5px 8px;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 6px;
-  font-size: 0.75rem;
-  background: #fff;
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary, #1e3a5f);
-    box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1);
-  }
-}
-
-.alias-add-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: var(--color-primary, #1e3a5f);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.15s;
-
-  &:hover:not(:disabled) { background: var(--color-primary-dark, #152a45); }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
-}
 
 // === JOBB FŐ TARTALOM ===
 .detail-content {

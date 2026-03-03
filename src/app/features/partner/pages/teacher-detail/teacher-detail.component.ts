@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, afterNextRender, Injector, ElementRef, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -38,6 +38,7 @@ export class PartnerTeacherDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly teacherService = inject(PartnerTeacherService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
 
   readonly ICONS = ICONS;
 
@@ -56,6 +57,12 @@ export class PartnerTeacherDetailComponent implements OnInit {
   // Inline alias edit
   newAlias = '';
   savingAlias = signal(false);
+
+  // Inline notes edit
+  editingNotes = signal(false);
+  noteText = '';
+  savingNote = signal(false);
+  private readonly notesTextarea = viewChild<ElementRef<HTMLTextAreaElement>>('notesTextarea');
 
   // Profil szerkesztés
   editing = signal(false);
@@ -209,6 +216,51 @@ export class PartnerTeacherDetailComponent implements OnInit {
     this.lightboxIndex.set(-1);
   }
 
+  // === Megjegyzés ===
+
+  startNoteEdit(): void {
+    this.noteText = this.teacher()?.notes ?? '';
+    this.editingNotes.set(true);
+    afterNextRender(() => {
+      this.notesTextarea()?.nativeElement.focus();
+    }, { injector: this.injector });
+  }
+
+  private noteEditCancelled = false;
+
+  cancelNoteEdit(): void {
+    this.noteEditCancelled = true;
+    this.editingNotes.set(false);
+  }
+
+  saveNote(): void {
+    if (this.noteEditCancelled) {
+      this.noteEditCancelled = false;
+      return;
+    }
+    if (this.savingNote()) return;
+
+    const notes = this.noteText.trim() || null;
+    const current = this.teacher()?.notes ?? null;
+    if (notes === current) {
+      this.editingNotes.set(false);
+      return;
+    }
+
+    this.savingNote.set(true);
+    this.teacherService.updateTeacher(this.teacherId, { notes })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.teacher.set(res.data);
+          this.editingNotes.set(false);
+          this.savingNote.set(false);
+          this.loadChangelog();
+        },
+        error: () => this.savingNote.set(false),
+      });
+  }
+
   // === Aliasok ===
 
   addAlias(): void {
@@ -253,6 +305,8 @@ export class PartnerTeacherDetailComponent implements OnInit {
       photo_deleted: 'Fotó törölve',
       active_photo_changed: 'Aktív fotó módosítva',
       group_photo_unified: 'Csoport fotó egységesítve',
+      orphan_relinked: 'Árva referencia javítva',
+      notes_changed: 'Megjegyzés módosítva',
     };
     return labels[type] ?? type;
   }

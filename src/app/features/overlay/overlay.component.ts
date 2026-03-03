@@ -23,7 +23,7 @@ import { TOOLBAR_GROUPS, ALIGN_MAP, SUBMENU_IDS } from './overlay-toolbar.const'
 import { PartnerTeacherService } from '../partner/services/partner-teacher.service';
 import { TeacherLinkDialogComponent } from '../partner/components/teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../partner/components/teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
-import { TeacherListItem, LinkedGroupPhoto } from '../partner/models/teacher.models';
+import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../partner/models/teacher.models';
 
 interface UploadResult {
   success: boolean;
@@ -124,6 +124,14 @@ export class OverlayComponent implements OnInit {
   readonly linkResult = signal<{ success: boolean; message: string } | null>(null);
   private linkResultTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // Teacher link & photo chooser dialog state
+  readonly showTeacherLinkDialog = signal(false);
+  readonly showPhotoChooserDialog = signal(false);
+  readonly linkDialogTeacher = signal<TeacherListItem | null>(null);
+  readonly linkDialogAllTeachers = signal<TeacherListItem[]>([]);
+  readonly photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
+  readonly photoChooserMode = signal<PhotoChooserMode | null>(null);
+
   // Upload panel state
   readonly uploadPanelOpen = signal(false);
   readonly selectedPerson = signal<PersonItem | null>(null);
@@ -161,7 +169,7 @@ export class OverlayComponent implements OnInit {
   readonly linkDialogTeacher = signal<TeacherListItem | null>(null);
   readonly linkDialogAllTeachers = signal<TeacherListItem[]>([]);
   readonly photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
-  readonly photoChooserLinkedGroup = signal('');
+
 
   readonly hasPsLayers = computed(() => this.psLayers().length > 0);
   readonly uploadableLayers = computed(() => this.psLayers().filter(l => l.file && l.uploadStatus !== 'done'));
@@ -611,22 +619,31 @@ export class OverlayComponent implements OnInit {
   onTeacherLinked(): void { this.showTeacherLinkDialog.set(false); this.reloadPersons(); }
   openPhotoChooser(person: PersonItem): void {
     if (!person.linkedGroup) return;
-    this.teacherService.getLinkedGroupPhotos(person.linkedGroup).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => this.ngZone.run(() => {
-        this.photoChooserPhotos.set(res.data || []);
-        this.photoChooserLinkedGroup.set(person.linkedGroup!);
-        this.showPhotoChooserDialog.set(true);
-      }),
+    const group = person.linkedGroup;
+    this.teacherService.getLinkedGroupPhotos(group).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (res) => {
+        this.ngZone.run(() => {
+          this.photoChooserPhotos.set(res.data || []);
+          this.photoChooserMode.set({ kind: 'linkedGroup', linkedGroup: group });
+          this.showPhotoChooserDialog.set(true);
+        });
+      },
     });
   }
   onOpenPhotoChooserFromLink(groupId: string): void {
     this.showTeacherLinkDialog.set(false);
-    this.teacherService.getLinkedGroupPhotos(groupId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => this.ngZone.run(() => {
-        this.photoChooserPhotos.set(res.data || []);
-        this.photoChooserLinkedGroup.set(groupId);
-        this.showPhotoChooserDialog.set(true);
-      }),
+    this.teacherService.getLinkedGroupPhotos(groupId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (res) => {
+        this.ngZone.run(() => {
+          this.photoChooserPhotos.set(res.data || []);
+          this.photoChooserMode.set({ kind: 'linkedGroup', linkedGroup: groupId });
+          this.showPhotoChooserDialog.set(true);
+        });
+      },
     });
   }
   onPhotoChosen(): void { this.showPhotoChooserDialog.set(false); this.reloadPersons(); }

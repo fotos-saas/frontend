@@ -81,12 +81,29 @@
 
         }
 
-        @if (t.notes) {
-          <div class="profile-notes">
-            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
-            <span>{{ t.notes }}</span>
-          </div>
-        }
+        <!-- Megjegyzés -->
+        <div class="sidebar-section">
+          <span class="section-label">Megjegyzés</span>
+          @if (editingNotes()) {
+            <textarea
+              class="notes-textarea"
+              #notesTextarea
+              [(ngModel)]="noteText"
+              placeholder="Pl. lett képe, nem lett képe..."
+              rows="3"
+              (blur)="saveNote()"
+              (keydown.escape)="cancelNoteEdit()"
+            ></textarea>
+          } @else {
+            <div class="notes-display" (click)="startNoteEdit()">
+              @if (t.notes) {
+                <span class="notes-text">{{ t.notes }}</span>
+              } @else {
+                <span class="no-data">Kattints ide...</span>
+              }
+            </div>
+          }
+        </div>
 
         <!-- Aliasok -->
         <div class="sidebar-section">
@@ -105,16 +122,12 @@
             }
           </div>
           @if (t.aliases.length < 10) {
-            <div class="alias-add">
-              <ps-input
-                [(ngModel)]="newAlias"
-                placeholder="Új variáns..."
-                size="sm"
-              />
-              <button class="alias-add-btn" matTooltip="Hozzáadás" (click)="addAlias()" [disabled]="!newAlias.trim() || savingAlias()">
-                <lucide-icon [name]="ICONS.PLUS" [size]="14" />
-              </button>
-            </div>
+            <ps-input
+              [(ngModel)]="newAlias"
+              placeholder="Új variáns hozzáadása..."
+              size="sm"
+              (keydown.enter)="addAlias()"
+            />
           }
         </div>
       </aside>

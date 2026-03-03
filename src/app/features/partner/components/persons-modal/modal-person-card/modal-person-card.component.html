@@ -20,6 +20,9 @@
       <button type="button" class="card-camera" matTooltip="Kép feltöltése" (click)="onPhotoUploadClick($event)">
         <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
       </button>
+      <button type="button" class="card-edit-icon" matTooltip="Szerkesztés" (click)="onEditClick($event)">
+        <lucide-icon [name]="ICONS.SETTINGS" [size]="12" />
+      </button>
 
       @if (person().isPortraitProcessed) {
         <div class="portrait-badge" matTooltip="Háttércserés fotó">
@@ -37,6 +40,9 @@
       </div>
       <button type="button" class="card-camera card-camera--always" matTooltip="Kép feltöltése" (click)="onPhotoUploadClick($event)">
         <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
+      </button>
+      <button type="button" class="card-edit-icon card-edit-icon--always" matTooltip="Szerkesztés" (click)="onEditClick($event)">
+        <lucide-icon [name]="ICONS.SETTINGS" [size]="12" />
       </button>
     }
   </div>

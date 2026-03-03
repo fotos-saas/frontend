@@ -163,14 +163,6 @@ export class OverlayComponent implements OnInit {
   readonly generating = this.generateService.generating;
   readonly generateResult = this.generateService.generateResult;
 
-  // Teacher link & photo chooser dialog state
-  readonly showTeacherLinkDialog = signal(false);
-  readonly showPhotoChooserDialog = signal(false);
-  readonly linkDialogTeacher = signal<TeacherListItem | null>(null);
-  readonly linkDialogAllTeachers = signal<TeacherListItem[]>([]);
-  readonly photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
-
-
   readonly hasPsLayers = computed(() => this.psLayers().length > 0);
   readonly uploadableLayers = computed(() => this.psLayers().filter(l => l.file && l.uploadStatus !== 'done'));
   readonly placableLayers = computed(() => this.psLayers().filter(l => l.uploadStatus === 'done' && l.photoUrl));

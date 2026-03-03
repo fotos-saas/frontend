@@ -83,6 +83,11 @@ export class OverlayComponent implements OnInit {
 
   // Quick actions panel state
   readonly quickActionsPanelOpen = signal(false);
+  readonly qaRefreshNames = signal(true);
+  readonly qaRefreshPositions = signal(false);
+  readonly qaPositionNames = signal(true);
+  readonly qaPositionPositions = signal(false);
+  readonly qaConfirm = signal<{ action: string; target: string } | null>(null);
 
   // Custom order panel state
   readonly customOrderPanelOpen = signal(false);
@@ -1885,9 +1890,48 @@ export class OverlayComponent implements OnInit {
     this.quickActionsPanelOpen.set(false);
   }
 
+  toggleQaType(action: 'refresh' | 'position', type: 'names' | 'positions'): void {
+    if (action === 'refresh') {
+      if (type === 'names') this.qaRefreshNames.update(v => !v);
+      else this.qaRefreshPositions.update(v => !v);
+    } else {
+      if (type === 'names') this.qaPositionNames.update(v => !v);
+      else this.qaPositionPositions.update(v => !v);
+    }
+  }
+
   onQuickAction(action: string, target: string): void {
-    console.log('[QuickAction]', action, target);
-    // TODO: implementáció később
+    // Típus info összegyűjtése
+    let types: string[] = [];
+    if (action === 'refresh-labels') {
+      if (this.qaRefreshNames()) types.push('names');
+      if (this.qaRefreshPositions()) types.push('positions');
+    } else if (action === 'position-labels') {
+      if (this.qaPositionNames()) types.push('names');
+      if (this.qaPositionPositions()) types.push('positions');
+    }
+    this.qaConfirm.set({ action, target });
+    console.log('[QuickAction] confirm', action, target, types);
+  }
+
+  confirmQuickAction(): void {
+    const c = this.qaConfirm();
+    if (!c) return;
+    let types: string[] = [];
+    if (c.action === 'refresh-labels') {
+      if (this.qaRefreshNames()) types.push('names');
+      if (this.qaRefreshPositions()) types.push('positions');
+    } else if (c.action === 'position-labels') {
+      if (this.qaPositionNames()) types.push('names');
+      if (this.qaPositionPositions()) types.push('positions');
+    }
+    console.log('[QuickAction] EXECUTE', c.action, c.target, types);
+    // TODO: tényleges implementáció
+    this.qaConfirm.set(null);
+  }
+
+  cancelQuickAction(): void {
+    this.qaConfirm.set(null);
   }
 
   toggleTurbo(): void {

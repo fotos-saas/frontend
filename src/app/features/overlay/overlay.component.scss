@@ -1508,6 +1508,40 @@
     color: #a78bfa;
     &:hover { background: rgba(167, 139, 250, 0.12); border-color: rgba(167, 139, 250, 0.35); }
   }
+
+  &--toggle {
+    border-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &--active {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+
+  &--sm {
+    padding: 3px 8px;
+    font-size: 10px;
+    gap: 3px;
+  }
+}
+
+.quick-actions-panel__confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0 0 12px 12px;
+  animation: qa-slide-up 0.1s ease-out;
+
+  &-text {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-right: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

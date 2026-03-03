@@ -841,18 +841,18 @@
         Feliratok frissítése
       </div>
       <div class="qa-section__row">
-        <span class="qa-section__row-label">Célcsoport</span>
+        <span class="qa-section__row-label">Típus</span>
         <div class="qa-section__buttons">
-          <button class="qa-btn qa-btn--blue" (click)="onQuickAction('refresh-labels', 'all')">Mind</button>
-          <button class="qa-btn" (click)="onQuickAction('refresh-labels', 'teachers')">Tanárok</button>
-          <button class="qa-btn" (click)="onQuickAction('refresh-labels', 'students')">Diákok</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaRefreshNames()" (click)="toggleQaType('refresh', 'names')">Nevek</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaRefreshPositions()" (click)="toggleQaType('refresh', 'positions')">Pozíciók</button>
         </div>
       </div>
       <div class="qa-section__row">
-        <span class="qa-section__row-label">Típus</span>
+        <span class="qa-section__row-label">Célcsoport</span>
         <div class="qa-section__buttons">
-          <button class="qa-btn" (click)="onQuickAction('refresh-labels', 'names')">Nevek</button>
-          <button class="qa-btn" (click)="onQuickAction('refresh-labels', 'positions')">Pozíciók</button>
+          <button class="qa-btn qa-btn--blue" (click)="onQuickAction('refresh-labels', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--blue" (click)="onQuickAction('refresh-labels', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--blue" (click)="onQuickAction('refresh-labels', 'students')">Diákok</button>
         </div>
       </div>
     </div>
@@ -864,22 +864,36 @@
         Feliratok pozícionálása
       </div>
       <div class="qa-section__row">
-        <span class="qa-section__row-label">Célcsoport</span>
+        <span class="qa-section__row-label">Típus</span>
         <div class="qa-section__buttons">
-          <button class="qa-btn qa-btn--purple" (click)="onQuickAction('position-labels', 'all')">Mind</button>
-          <button class="qa-btn" (click)="onQuickAction('position-labels', 'teachers')">Tanárok</button>
-          <button class="qa-btn" (click)="onQuickAction('position-labels', 'students')">Diákok</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaPositionNames()" (click)="toggleQaType('position', 'names')">Nevek</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaPositionPositions()" (click)="toggleQaType('position', 'positions')">Pozíciók</button>
         </div>
       </div>
       <div class="qa-section__row">
-        <span class="qa-section__row-label">Típus</span>
+        <span class="qa-section__row-label">Célcsoport</span>
         <div class="qa-section__buttons">
-          <button class="qa-btn" (click)="onQuickAction('position-labels', 'names')">Nevek</button>
-          <button class="qa-btn" (click)="onQuickAction('position-labels', 'positions')">Pozíciók</button>
+          <button class="qa-btn qa-btn--purple" (click)="onQuickAction('position-labels', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--purple" (click)="onQuickAction('position-labels', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--purple" (click)="onQuickAction('position-labels', 'students')">Diákok</button>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Confirm bar -->
+  @if (qaConfirm()) {
+    <div class="quick-actions-panel__confirm">
+      <span class="quick-actions-panel__confirm-text">Biztosan indítod?</span>
+      <button class="qa-btn qa-btn--green qa-btn--sm" (click)="confirmQuickAction()">
+        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+        Igen
+      </button>
+      <button class="qa-btn qa-btn--sm" (click)="cancelQuickAction()">
+        Mégse
+      </button>
+    </div>
+  }
 </div>
 }
 

@@ -5,9 +5,9 @@
  *
  * Mukodes:
  * 1. Lekerdezi a kijelolt layerek neveit (ActionManager)
- * 2. Minden nevre megkeresi az OSSZES azonos nevu layert a dokumentumban
- *    (Images + Names csoportokban is, igy a kep es a nev ossze lesz linkelve)
- * 3. Nev-csoportonkent kijeloli oket es linkeli
+ * 2. EGYETLEN bejarassal megkeresi az OSSZES azonos nevu layert (batch)
+ * 3. Nev-csoportonkent batch kijeloles + linkeles
+ * 4. suspendHistory: egyetlen Undo lepes
  *
  * Kimenet: JSON { "linked": 5, "names": ["bela---2342", "agi---2243"] }
  */
@@ -29,7 +29,6 @@ function getSelectedLayerNames() {
 
     for (var i = 0; i < idList.count; i++) {
       var layerId = idList.getReference(i).getIdentifier();
-      // Layer nev lekerdezese ID alapjan
       var layerRef = new ActionReference();
       layerRef.putProperty(charIDToTypeID("Prpr"), charIDToTypeID("Nm  "));
       layerRef.putIdentifier(charIDToTypeID("Lyr "), layerId);
@@ -43,43 +42,36 @@ function getSelectedLayerNames() {
   return names;
 }
 
-// --- Rekurziv layer kereses nev alapjan ---
-function findLayersByName(container, targetName, result) {
+// --- BATCH: Egyetlen bejarassal tobb nevet keres, resultMap-be gyujt ---
+function findLayersByNames(container, nameSet, resultMap) {
   try {
     for (var i = 0; i < container.artLayers.length; i++) {
-      if (container.artLayers[i].name === targetName) {
-        result.push(container.artLayers[i]);
+      var name = container.artLayers[i].name;
+      if (nameSet[name]) {
+        if (!resultMap[name]) resultMap[name] = [];
+        resultMap[name].push(container.artLayers[i]);
       }
     }
   } catch (e) {}
   try {
     for (var j = 0; j < container.layerSets.length; j++) {
-      findLayersByName(container.layerSets[j], targetName, result);
+      findLayersByNames(container.layerSets[j], nameSet, resultMap);
     }
   } catch (e) {}
 }
 
-// --- Tobb layer kijelolese ID alapjan ---
-function selectLayersById(layerIds) {
-  if (layerIds.length === 0) return;
+// --- BATCH: Tobb layer kijelolese egyetlen ActionList-tel ---
+function selectLayersById(ids) {
+  if (ids.length === 0) return;
   var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
-  desc.putReference(charIDToTypeID("null"), ref);
-  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-
-  for (var i = 1; i < layerIds.length; i++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  var refs = new ActionList();
+  for (var i = 0; i < ids.length; i++) {
+    var ref = new ActionReference();
+    ref.putIdentifier(charIDToTypeID("Lyr "), ids[i]);
+    refs.putReference(ref);
   }
+  desc.putList(charIDToTypeID("null"), refs);
+  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
 }
 
 // --- Link action ---
@@ -91,6 +83,57 @@ function linkSelected() {
   executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
 }
 
+// --- Fo logika ---
+function doLinkAll() {
+  var doc = app.activeDocument;
+  // 1. Kijelolt layerek nevei
+  var selectedNames = getSelectedLayerNames();
+  if (selectedNames.length === 0) {
+    return '{"linked":0,"names":[]}';
+  }
+
+  // 2. Egyedi nevek + nameSet (O(1) lookup)
+  var uniqueNames = [];
+  var nameSet = {};
+  for (var i = 0; i < selectedNames.length; i++) {
+    if (!nameSet[selectedNames[i]]) {
+      nameSet[selectedNames[i]] = true;
+      uniqueNames.push(selectedNames[i]);
+    }
+  }
+
+  // 3. EGYETLEN bejaras — osszes nev egyszerre
+  var resultMap = {};
+  findLayersByNames(doc, nameSet, resultMap);
+
+  // 4. Nev-csoportonkent batch kijeloles + linkeles
+  var totalLinked = 0;
+  var linkedNames = [];
+  for (var n = 0; n < uniqueNames.length; n++) {
+    var found = resultMap[uniqueNames[n]];
+    if (found && found.length >= 2) {
+      var ids = [];
+      for (var f = 0; f < found.length; f++) {
+        ids.push(found[f].id);
+      }
+      selectLayersById(ids);
+      linkSelected();
+      totalLinked += found.length;
+      linkedNames.push(uniqueNames[n]);
+    }
+  }
+
+  // JSON stringify kezzel (ES3)
+  var namesJson = "[";
+  for (var k = 0; k < linkedNames.length; k++) {
+    if (k > 0) namesJson += ",";
+    namesJson += "\"" + linkedNames[k].replace(/"/g, '\\"') + "\"";
+  }
+  namesJson += "]";
+
+  return '{"linked":' + totalLinked + ',"names":' + namesJson + '}';
+}
+
 (function () {
   try {
     if (app.documents.length === 0) {
@@ -99,52 +142,9 @@ function linkSelected() {
     }
     var doc = app.activeDocument;
 
-    // 1. Kijelolt layerek nevei
-    var selectedNames = getSelectedLayerNames();
-    if (selectedNames.length === 0) {
-      '{"linked":0,"names":[]}';
-      return;
-    }
-
-    // 2. Egyedi nevek (duplikaciok kiszurese)
-    var uniqueNames = [];
-    var nameMap = {};
-    for (var i = 0; i < selectedNames.length; i++) {
-      if (!nameMap[selectedNames[i]]) {
-        nameMap[selectedNames[i]] = true;
-        uniqueNames.push(selectedNames[i]);
-      }
-    }
-
-    // 3. Nevenként megkeressuk az osszes azonos nevu layert es linkeljuk
-    var totalLinked = 0;
-    var linkedNames = [];
-    for (var n = 0; n < uniqueNames.length; n++) {
-      var found = [];
-      findLayersByName(doc, uniqueNames[n], found);
-
-      if (found.length >= 2) {
-        var ids = [];
-        for (var f = 0; f < found.length; f++) {
-          ids.push(found[f].id);
-        }
-        selectLayersById(ids);
-        linkSelected();
-        totalLinked += found.length;
-        linkedNames.push(uniqueNames[n]);
-      }
-    }
-
-    // JSON stringify kezzel (ES3)
-    var namesJson = "[";
-    for (var k = 0; k < linkedNames.length; k++) {
-      if (k > 0) namesJson += ",";
-      namesJson += "\"" + linkedNames[k].replace(/"/g, '\\"') + "\"";
-    }
-    namesJson += "]";
-
-    var result = '{"linked":' + totalLinked + ',"names":' + namesJson + '}';
-    result;
+    // suspendHistory: egyetlen Undo lepes az egesz muvelethez
+    var resultStr = doc.suspendHistory("Összelinkelés", "doLinkAll()");
+    resultStr;
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);

@@ -118,6 +118,10 @@ export class OverlayComponent implements OnInit {
   readonly customOrderText = signal('');
   readonly customOrderResult = signal<{ success: boolean; message: string } | null>(null);
 
+  // Link/unlink eredmény visszajelzés
+  readonly linkResult = signal<{ success: boolean; message: string } | null>(null);
+  private linkResultTimer: ReturnType<typeof setTimeout> | null = null;
+
   // Upload panel state
   readonly uploadPanelOpen = signal(false);
   readonly selectedPerson = signal<PersonItem | null>(null);
@@ -207,8 +211,8 @@ export class OverlayComponent implements OnInit {
 
     if (commandId === 'rename-layer-ids') { this.layerMgmt.renameLayerIds(this.context()); return; }
     if (commandId === 'refresh-roster') { this.layerMgmt.refreshRoster(this.context()); return; }
-    if (commandId === 'link-layers') { this.ps.runJsx(commandId, 'actions/link-selected.jsx'); return; }
-    if (commandId === 'unlink-layers') { this.ps.runJsx(commandId, 'actions/unlink-selected.jsx'); return; }
+    if (commandId === 'link-layers') { this.runLinkCommand(commandId, 'actions/link-selected.jsx', 'link'); return; }
+    if (commandId === 'unlink-layers') { this.runLinkCommand(commandId, 'actions/unlink-selected.jsx', 'unlink'); return; }
     const alignType = ALIGN_MAP[commandId];
     if (alignType) { this.ps.runJsx(commandId, 'actions/align-linked.jsx', { ALIGN_TYPE: alignType }); return; }
     window.electronAPI?.overlay.executeCommand(commandId);
@@ -604,6 +608,32 @@ export class OverlayComponent implements OnInit {
   }
 
   // ============ Private helpers ============
+
+  private async runLinkCommand(commandId: string, script: string, type: 'link' | 'unlink'): Promise<void> {
+    const result = await this.ps.runJsx(commandId, script);
+    this.showLinkResult(result, type);
+  }
+
+  private showLinkResult(result: any, type: 'link' | 'unlink'): void {
+    if (this.linkResultTimer) { clearTimeout(this.linkResultTimer); this.linkResultTimer = null; }
+    try {
+      if (!result?.output) { this.setLinkResult(false, 'Nincs válasz a Photoshoptól'); return; }
+      const cleaned = result.output.trim();
+      if (!cleaned.startsWith('{')) { this.setLinkResult(false, 'Érvénytelen válasz'); return; }
+      const data = JSON.parse(cleaned);
+      if (data.error) { this.setLinkResult(false, data.error); return; }
+      const count = type === 'link' ? data.linked : data.unlinked;
+      const verb = type === 'link' ? 'linkelve' : 'szétlinkelve';
+      const nameCount = data.names?.length || 0;
+      if (count === 0) { this.setLinkResult(false, 'Nem találtam linkelhető layereket'); return; }
+      this.setLinkResult(true, `${count} layer ${verb} (${nameCount} név)`);
+    } catch { this.setLinkResult(false, 'Hiba a válasz feldolgozásában'); }
+  }
+
+  private setLinkResult(success: boolean, message: string): void {
+    this.ngZone.run(() => this.linkResult.set({ success, message }));
+    this.linkResultTimer = setTimeout(() => this.ngZone.run(() => this.linkResult.set(null)), 3000);
+  }
 
   private closeSubmenu(): void { if (this.openSubmenu()) { this.openSubmenu.set(null); this.clearCollapseTimer(); } }
   private resetCollapseTimer(submenuId: string | null): void {

@@ -5,7 +5,7 @@
  * { "layerNames": ["zombori-tamas---14537", "kiss-janos---14500"] }
  *
  * Mukodes:
- * 1. Minden megadott layerName-hez megkeresi az OSSZES azonos nevu layert a dokumentumban
+ * 1. nameSet-tel O(1) lookup — egyetlen bejaras
  * 2. Mindegyiken futtatja a layer.unlink() DOM metodust
  *
  * Futtatas: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
@@ -19,23 +19,20 @@ function log(msg) {
   _logLines.push(msg);
 }
 
-// --- Rekurziv layer kereses nev alapjan ---
-function _findLayersByNames(container, targetNames, result) {
+// --- BATCH: Egyetlen bejaras, nameSet O(1) lookup ---
+function _findLayersByNames(container, nameSet, result) {
   try {
     for (var i = 0; i < container.artLayers.length; i++) {
       var layer = container.artLayers[i];
-      for (var n = 0; n < targetNames.length; n++) {
-        if (layer.name === targetNames[n]) {
-          result.push(layer);
-          break;
-        }
+      if (nameSet[layer.name]) {
+        result.push(layer);
       }
     }
   } catch (e) { /* nincs artLayers */ }
 
   try {
     for (var j = 0; j < container.layerSets.length; j++) {
-      _findLayersByNames(container.layerSets[j], targetNames, result);
+      _findLayersByNames(container.layerSets[j], nameSet, result);
     }
   } catch (e) { /* nincs layerSets */ }
 }
@@ -56,9 +53,15 @@ function _findLayersByNames(container, targetNames, result) {
       throw new Error("Nincs megadott layerName!");
     }
 
+    // nameSet felepitese O(1) lookup-hoz
+    var nameSet = {};
+    for (var n = 0; n < layerNames.length; n++) {
+      nameSet[layerNames[n]] = true;
+    }
+
     // Osszes megfelelo layer megkeresese a dokumentumban
     var foundLayers = [];
-    _findLayersByNames(doc, layerNames, foundLayers);
+    _findLayersByNames(doc, nameSet, foundLayers);
 
     if (foundLayers.length === 0) {
       log("__UNLINK_RESULT__0");

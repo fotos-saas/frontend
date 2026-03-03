@@ -352,6 +352,32 @@
 
 /* Tooltip: matTooltip (Angular Material) kezeli */
 
+// ============ Link/Unlink Eredmény ============
+.toolbar__link-result {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 12px;
+  margin-top: 4px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+  background: rgba(30, 30, 58, 0.9);
+  border: 1px solid rgba(167, 139, 250, 0.15);
+  animation: linkResultFadeIn 0.2s ease;
+
+  &--success { color: #22c55e; }
+  &--error { color: #ef4444; }
+}
+
+@keyframes linkResultFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 // ============ Upload Panel ============
 .upload-panel {
   pointer-events: auto;

@@ -330,6 +330,17 @@
   </button>
 </div>
 
+<!-- Link/Unlink eredmény visszajelzés -->
+@if (linkResult()) {
+  <div class="toolbar__link-result"
+    [class.toolbar__link-result--success]="linkResult()!.success"
+    [class.toolbar__link-result--error]="!linkResult()!.success"
+  >
+    <lucide-icon [name]="linkResult()!.success ? ICONS.CHECK : ICONS.X" [size]="13" />
+    <span>{{ linkResult()!.message }}</span>
+  </div>
+}
+
 <!-- Upload Panel (toolbar FELETT, a flex flow-ban előtte) -->
 @if (uploadPanelOpen()) {
 <div class="upload-panel" [style.height.px]="panelHeight()">

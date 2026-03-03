@@ -5,8 +5,9 @@
  *
  * Mukodes:
  * 1. Lekerdezi a kijelolt layerek neveit (ActionManager)
- * 2. Minden nevre megkeresi az OSSZES azonos nevu layert a dokumentumban
+ * 2. EGYETLEN bejarassal megkeresi az OSSZES azonos nevu layert (batch)
  * 3. Mindegyiken futtatja a layer.unlink() DOM metodust
+ * 4. suspendHistory: egyetlen Undo lepes
  *
  * Kimenet: JSON { "unlinked": 5, "names": ["bela---2342", "agi---2243"] }
  */
@@ -41,20 +42,73 @@ function getSelectedLayerNames() {
   return names;
 }
 
-// --- Rekurziv layer kereses nev alapjan ---
-function findLayersByName(container, targetName, result) {
+// --- BATCH: Egyetlen bejarassal tobb nevet keres, resultMap-be gyujt ---
+function findLayersByNames(container, nameSet, resultMap) {
   try {
     for (var i = 0; i < container.artLayers.length; i++) {
-      if (container.artLayers[i].name === targetName) {
-        result.push(container.artLayers[i]);
+      var name = container.artLayers[i].name;
+      if (nameSet[name]) {
+        if (!resultMap[name]) resultMap[name] = [];
+        resultMap[name].push(container.artLayers[i]);
       }
     }
   } catch (e) {}
   try {
     for (var j = 0; j < container.layerSets.length; j++) {
-      findLayersByName(container.layerSets[j], targetName, result);
+      findLayersByNames(container.layerSets[j], nameSet, resultMap);
     }
   } catch (e) {}
+}
+
+// --- Fo logika ---
+function doUnlinkAll() {
+  var doc = app.activeDocument;
+  var selectedNames = getSelectedLayerNames();
+  if (selectedNames.length === 0) {
+    return '{"unlinked":0,"names":[]}';
+  }
+
+  // Egyedi nevek + nameSet
+  var uniqueNames = [];
+  var nameSet = {};
+  for (var i = 0; i < selectedNames.length; i++) {
+    if (!nameSet[selectedNames[i]]) {
+      nameSet[selectedNames[i]] = true;
+      uniqueNames.push(selectedNames[i]);
+    }
+  }
+
+  // EGYETLEN bejaras
+  var resultMap = {};
+  findLayersByNames(doc, nameSet, resultMap);
+
+  // Unlink minden talalatra
+  var totalUnlinked = 0;
+  var unlinkedNames = [];
+  for (var n = 0; n < uniqueNames.length; n++) {
+    var found = resultMap[uniqueNames[n]];
+    if (!found) continue;
+    var count = 0;
+    for (var f = 0; f < found.length; f++) {
+      try {
+        found[f].unlink();
+        count++;
+      } catch (e) { /* nem linkelt — skip */ }
+    }
+    if (count > 0) {
+      totalUnlinked += count;
+      unlinkedNames.push(uniqueNames[n]);
+    }
+  }
+
+  var namesJson = "[";
+  for (var k = 0; k < unlinkedNames.length; k++) {
+    if (k > 0) namesJson += ",";
+    namesJson += "\"" + unlinkedNames[k].replace(/"/g, '\\"') + "\"";
+  }
+  namesJson += "]";
+
+  return '{"unlinked":' + totalUnlinked + ',"names":' + namesJson + '}';
 }
 
 (function () {
@@ -65,51 +119,9 @@ function findLayersByName(container, targetName, result) {
     }
     var doc = app.activeDocument;
 
-    var selectedNames = getSelectedLayerNames();
-    if (selectedNames.length === 0) {
-      '{"unlinked":0,"names":[]}';
-      return;
-    }
-
-    // Egyedi nevek
-    var uniqueNames = [];
-    var nameMap = {};
-    for (var i = 0; i < selectedNames.length; i++) {
-      if (!nameMap[selectedNames[i]]) {
-        nameMap[selectedNames[i]] = true;
-        uniqueNames.push(selectedNames[i]);
-      }
-    }
-
-    // Nevenként megkeressuk az osszes azonos nevu layert es unlinkeljuk
-    var totalUnlinked = 0;
-    var unlinkedNames = [];
-    for (var n = 0; n < uniqueNames.length; n++) {
-      var found = [];
-      findLayersByName(doc, uniqueNames[n], found);
-
-      var count = 0;
-      for (var f = 0; f < found.length; f++) {
-        try {
-          found[f].unlink();
-          count++;
-        } catch (e) { /* nem linkelt — skip */ }
-      }
-      if (count > 0) {
-        totalUnlinked += count;
-        unlinkedNames.push(uniqueNames[n]);
-      }
-    }
-
-    var namesJson = "[";
-    for (var k = 0; k < unlinkedNames.length; k++) {
-      if (k > 0) namesJson += ",";
-      namesJson += "\"" + unlinkedNames[k].replace(/"/g, '\\"') + "\"";
-    }
-    namesJson += "]";
-
-    var result = '{"unlinked":' + totalUnlinked + ',"names":' + namesJson + '}';
-    result;
+    // suspendHistory: egyetlen Undo lepes
+    var resultStr = doc.suspendHistory("Szétlinkelés", "doUnlinkAll()");
+    resultStr;
 
   } catch (e) {
     log("[JSX] HIBA: " + e.message);

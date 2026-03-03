@@ -1354,6 +1354,16 @@
 }
 
 // ============ Reduced Motion ============
+// ============ Quick Actions Panel ============
+.quick-actions-panel {
+  &__desc {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    text-align: center;
+    padding: 16px 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

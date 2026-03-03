@@ -81,6 +81,9 @@ export class OverlayComponent implements OnInit {
   readonly openSubmenu = signal<string | null>(null);
   private collapseTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // Quick actions panel state
+  readonly quickActionsPanelOpen = signal(false);
+
   // Custom order panel state
   readonly customOrderPanelOpen = signal(false);
   readonly customOrderText = signal('');
@@ -1872,6 +1875,14 @@ export class OverlayComponent implements OnInit {
 
   openActiveDocDir(): void {
     this.onCommand('ps-open-workdir');
+  }
+
+  toggleQuickActions(): void {
+    this.quickActionsPanelOpen.update(v => !v);
+  }
+
+  closeQuickActions(): void {
+    this.quickActionsPanelOpen.set(false);
   }
 
   toggleTurbo(): void {

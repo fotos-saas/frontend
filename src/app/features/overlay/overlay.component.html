@@ -300,6 +300,18 @@
       <div class="toolbar__sep"></div>
     }
 
+    <!-- Gyors akciók gomb -->
+    <button
+      class="toolbar__btn toolbar__btn--purple"
+      [class.toolbar__btn--active]="quickActionsPanelOpen()"
+      (click)="toggleQuickActions()"
+      matTooltip="Gyors akciók"
+    >
+      <lucide-icon [name]="ICONS.SPARKLE" [size]="16" />
+    </button>
+
+    <div class="toolbar__sep"></div>
+
     <!-- Turbo gomb -->
     <button
       class="toolbar__btn"
@@ -792,6 +804,23 @@
         Alkalmazás
       }
     </button>
+  </div>
+</div>
+}
+
+<!-- Quick Actions Panel -->
+@if (quickActionsPanelOpen()) {
+<div class="rename-panel quick-actions-panel">
+  <div class="rename-panel__header">
+    <lucide-icon [name]="ICONS.SPARKLE" [size]="14" />
+    <span>Gyors akciók</span>
+    <button class="rename-panel__close" (click)="closeQuickActions()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+
+  <div class="rename-panel__body">
+    <p class="quick-actions-panel__desc">Hamarosan itt lesznek a gyors akciók!</p>
   </div>
 </div>
 }

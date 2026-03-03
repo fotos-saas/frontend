@@ -329,63 +329,62 @@
 @if (inlineEditPersonId(); as editPersonId) {
   @let editData = inlineEditData();
   @let editPerson = inlineEditPerson();
-  <div class="dialog-backdrop" (mousedown)="closeInlineEdit()">
-    <div class="dialog-panel" (mousedown)="$event.stopPropagation()">
-      <div class="edit-dialog">
-        <h3 class="edit-dialog__title">
-          <lucide-icon [name]="ICONS.SETTINGS" [size]="16" />
-          Személy szerkesztése
-        </h3>
-        <div class="edit-dialog__fields">
-          <label class="edit-dialog__label">Név</label>
-          <input
-            type="text"
-            class="edit-dialog__input"
-            placeholder="Név"
-            [value]="editData?.name ?? ''"
-            (input)="inlineEditData.set({ ...editData!, name: $any($event.target).value })"
-            (keydown.enter)="saveInlineEdit()"
-            (keydown.escape)="closeInlineEdit()"
-          />
-          @if (editPerson?.type === 'teacher') {
-            <label class="edit-dialog__label">Pozíció / tantárgy</label>
-            <input
-              type="text"
-              class="edit-dialog__input"
-              placeholder="Pozíció/tantárgy"
-              [value]="editData?.title ?? ''"
-              (input)="inlineEditData.set({ ...editData!, title: $any($event.target).value })"
-              (keydown.enter)="saveInlineEdit()"
-              (keydown.escape)="closeInlineEdit()"
-            />
-          }
-          <label class="edit-dialog__label">Megjegyzés</label>
-          <input
-            type="text"
-            class="edit-dialog__input"
-            placeholder="Megjegyzés"
-            [value]="editData?.note ?? ''"
-            (input)="inlineEditData.set({ ...editData!, note: $any($event.target).value })"
-            (keydown.enter)="saveInlineEdit()"
-            (keydown.escape)="closeInlineEdit()"
-          />
-        </div>
-        <div class="edit-dialog__actions">
-          <button type="button" class="btn btn--primary" (click)="saveInlineEdit()" [disabled]="inlineEditSaving()">
-            @if (inlineEditSaving()) {
-              <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
-            } @else {
-              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
-            }
-            Mentés
-          </button>
-          <button type="button" class="btn btn--outline" (click)="closeInlineEdit()">
-            Mégse
-          </button>
-        </div>
-      </div>
+  <app-dialog-wrapper
+    variant="info"
+    headerStyle="flat"
+    theme="blue"
+    [icon]="ICONS.SETTINGS"
+    [title]="'Személy szerkesztése'"
+    [description]="editPerson?.name ?? ''"
+    size="sm"
+    [closable]="true"
+    (closeEvent)="closeInlineEdit()"
+  >
+    <div dialogBody class="edit-dialog__fields">
+      <label class="edit-dialog__label">Név</label>
+      <input
+        type="text"
+        class="edit-dialog__input"
+        placeholder="Név"
+        [value]="editData?.name ?? ''"
+        (input)="inlineEditData.set({ ...editData!, name: $any($event.target).value })"
+        (keydown.enter)="saveInlineEdit()"
+      />
+      @if (editPerson?.type === 'teacher') {
+        <label class="edit-dialog__label">Pozíció / tantárgy</label>
+        <input
+          type="text"
+          class="edit-dialog__input"
+          placeholder="Pozíció/tantárgy"
+          [value]="editData?.title ?? ''"
+          (input)="inlineEditData.set({ ...editData!, title: $any($event.target).value })"
+          (keydown.enter)="saveInlineEdit()"
+        />
+      }
+      <label class="edit-dialog__label">Megjegyzés</label>
+      <input
+        type="text"
+        class="edit-dialog__input"
+        placeholder="Megjegyzés"
+        [value]="editData?.note ?? ''"
+        (input)="inlineEditData.set({ ...editData!, note: $any($event.target).value })"
+        (keydown.enter)="saveInlineEdit()"
+      />
     </div>
-  </div>
+    <div dialogFooter class="edit-dialog__actions">
+      <button type="button" class="btn btn--outline" (click)="closeInlineEdit()">
+        Mégse
+      </button>
+      <button type="button" class="btn btn--primary" (click)="saveInlineEdit()" [disabled]="inlineEditSaving()">
+        @if (inlineEditSaving()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+        } @else {
+          <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+        }
+        Mentés
+      </button>
+    </div>
+  </app-dialog-wrapper>
 }
 
 <!-- Fotó feltöltés dialógus -->

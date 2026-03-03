@@ -179,26 +179,9 @@ ps-toggle {
 }
 
 // --- Személy szerkesztő dialógus ---
-.edit-dialog {
-  padding: 20px;
-}
-
-.edit-dialog__title {
-  display: flex;
-  align-items: center;
-  // Safari gap fallback
-  > * + * { margin-left: 8px; }
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 16px 0;
-}
-
 .edit-dialog__fields {
   display: flex;
   flex-direction: column;
-  // Safari gap fallback
-  > * + * { margin-top: 4px; }
 }
 
 .edit-dialog__label {
@@ -215,6 +198,7 @@ ps-toggle {
 .edit-dialog__input {
   width: 100%;
   padding: 8px 12px;
+  margin-top: 4px;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -234,7 +218,6 @@ ps-toggle {
 .edit-dialog__actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
   // Safari gap fallback
   > * + * { margin-left: 8px; }
 }

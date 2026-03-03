@@ -138,27 +138,6 @@
   opacity: 0.7;
 }
 
-// --- Photo type badge (csak fotós kártyáknál) ---
-.photo-type-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-}
-
-.photo-type-badge--camera {
-  background: #3b82f6;
-}
-
-.photo-type-badge--pen {
-  background: #94a3b8;
-}
 
 .portrait-badge {
   position: absolute;

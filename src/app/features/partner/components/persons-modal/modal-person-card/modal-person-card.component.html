@@ -20,17 +20,7 @@
       <button type="button" class="card-camera" matTooltip="Kép feltöltése" (click)="onPhotoUploadClick($event)">
         <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
       </button>
-      <!-- photo_type badge — csak fotós kártyáknál -->
-      @if (person().type === 'teacher' && person().photoType) {
-        <div
-          class="photo-type-badge"
-          [class.photo-type-badge--camera]="person().photoType === 'with_photo'"
-          [class.photo-type-badge--pen]="person().photoType === 'name_only'"
-          [matTooltip]="person().photoType === 'with_photo' ? 'Fotóval' : 'Csak név'"
-        >
-          <lucide-icon [name]="person().photoType === 'with_photo' ? ICONS.CAMERA : ICONS.EDIT" [size]="12" />
-        </div>
-      }
+
       @if (person().isPortraitProcessed) {
         <div class="portrait-badge" matTooltip="Háttércserés fotó">
           <lucide-icon [name]="ICONS.SCAN_FACE" [size]="12" />

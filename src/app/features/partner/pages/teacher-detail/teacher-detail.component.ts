@@ -57,6 +57,11 @@ export class PartnerTeacherDetailComponent implements OnInit {
   newAlias = '';
   savingAlias = signal(false);
 
+  // Inline notes edit
+  editingNotes = signal(false);
+  noteText = '';
+  savingNote = signal(false);
+
   // Profil szerkesztés
   editing = signal(false);
   saving = signal(false);
@@ -209,6 +214,35 @@ export class PartnerTeacherDetailComponent implements OnInit {
     this.lightboxIndex.set(-1);
   }
 
+  // === Megjegyzés ===
+
+  startNoteEdit(): void {
+    this.noteText = this.teacher()?.notes ?? '';
+    this.editingNotes.set(true);
+  }
+
+  cancelNoteEdit(): void {
+    this.editingNotes.set(false);
+  }
+
+  saveNote(): void {
+    if (this.savingNote()) return;
+
+    const notes = this.noteText.trim() || null;
+    this.savingNote.set(true);
+    this.teacherService.updateTeacher(this.teacherId, { notes })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.teacher.set(res.data);
+          this.editingNotes.set(false);
+          this.savingNote.set(false);
+          this.loadChangelog();
+        },
+        error: () => this.savingNote.set(false),
+      });
+  }
+
   // === Aliasok ===
 
   addAlias(): void {
@@ -253,6 +287,8 @@ export class PartnerTeacherDetailComponent implements OnInit {
       photo_deleted: 'Fotó törölve',
       active_photo_changed: 'Aktív fotó módosítva',
       group_photo_unified: 'Csoport fotó egységesítve',
+      orphan_relinked: 'Árva referencia javítva',
+      notes_changed: 'Megjegyzés módosítva',
     };
     return labels[type] ?? type;
   }

@@ -81,12 +81,39 @@
 
         }
 
-        @if (t.notes) {
-          <div class="profile-notes">
-            <lucide-icon [name]="ICONS.FILE_TEXT" [size]="13" />
-            <span>{{ t.notes }}</span>
-          </div>
-        }
+        <!-- Megjegyzés -->
+        <div class="sidebar-section">
+          <span class="section-label">Megjegyzés</span>
+          @if (editingNotes()) {
+            <div class="notes-edit">
+              <textarea
+                class="notes-textarea"
+                [(ngModel)]="noteText"
+                placeholder="Pl. lett képe, nem lett képe..."
+                rows="3"
+              ></textarea>
+              <div class="notes-actions">
+                <button class="alias-add-btn" matTooltip="Mentés" (click)="saveNote()" [disabled]="savingNote()">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                </button>
+                <button class="notes-cancel-btn" matTooltip="Mégse" (click)="cancelNoteEdit()">
+                  <lucide-icon [name]="ICONS.X" [size]="14" />
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="notes-display" (click)="startNoteEdit()">
+              @if (t.notes) {
+                <span class="notes-text">{{ t.notes }}</span>
+              } @else {
+                <span class="no-data">Kattints a megjegyzés hozzáadásához...</span>
+              }
+              <button class="notes-edit-btn" matTooltip="Szerkesztés">
+                <lucide-icon [name]="ICONS.EDIT" [size]="11" />
+              </button>
+            </div>
+          }
+        </div>
 
         <!-- Aliasok -->
         <div class="sidebar-section">

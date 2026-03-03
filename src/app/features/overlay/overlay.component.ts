@@ -622,7 +622,8 @@ export class OverlayComponent implements OnInit {
       if (!result) { this.setLinkResult(false, `[DBG] result=null/undefined`); return; }
       if (!result.output) { this.setLinkResult(false, `[DBG] no output, success=${result.success}, keys=${Object.keys(result).join(',')}`); return; }
       const cleaned = result.output.trim();
-      console.log('[LINK-DEBUG] cleaned output:', cleaned.substring(0, 200));
+      console.log('[LINK-DEBUG] cleaned output:', cleaned.substring(0, 500));
+      console.log('[LINK-DEBUG] charCodes around 124:', Array.from(cleaned.substring(120, 130)).map((c, i) => `${120+i}:'${c}'=${c.charCodeAt(0)}`).join(' '));
       if (!cleaned.startsWith('{')) { this.setLinkResult(false, `[DBG] output nem JSON: "${cleaned.substring(0, 80)}"`); return; }
       const data = JSON.parse(cleaned);
       if (data.error) { this.setLinkResult(false, data.error); return; }

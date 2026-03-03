@@ -17,6 +17,16 @@
 var _logLines = [];
 function log(msg) { _logLines.push(msg); }
 
+// --- JSON string escape (ES3) ---
+function escapeJsonStr(s) {
+  s = s.replace(/\\/g, '\\\\');
+  s = s.replace(/"/g, '\\"');
+  s = s.replace(/\n/g, '\\n');
+  s = s.replace(/\r/g, '\\r');
+  s = s.replace(/\t/g, '\\t');
+  return s;
+}
+
 // --- Kijelolt layerek neveinek lekerdezese ActionManager-rel ---
 function getSelectedLayerNames() {
   var names = [];
@@ -131,7 +141,7 @@ function doLinkAll() {
   var namesJson = "[";
   for (var k = 0; k < linkedNames.length; k++) {
     if (k > 0) namesJson += ",";
-    namesJson += "\"" + linkedNames[k].replace(/"/g, '\\"') + "\"";
+    namesJson += "\"" + escapeJsonStr(linkedNames[k]) + "\"";
   }
   namesJson += "]";
 
@@ -143,7 +153,7 @@ try {
     app.activeDocument.suspendHistory("Link layers", "doLinkAll()");
   }
 } catch (e) {
-  _linkResult = '{"linked":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
+  _linkResult = '{"linked":0,"error":"' + escapeJsonStr(e.message) + '"}';
 }
 
 _linkResult;

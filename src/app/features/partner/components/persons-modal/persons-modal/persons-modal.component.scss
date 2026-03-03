@@ -215,12 +215,6 @@ ps-toggle {
   }
 }
 
-.edit-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  // Safari gap fallback
-  > * + * { margin-left: 8px; }
-}
 
 // --- Szerkesztő lista nézet ---
 .edit-list {

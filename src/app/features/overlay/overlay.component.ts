@@ -252,7 +252,14 @@ export class OverlayComponent implements OnInit {
   closeCustomOrderPanel(): void { this.customOrderPanelOpen.set(false); this.customOrderResult.set(null); }
 
   async submitCustomOrder(): Promise<void> {
-    const result = await this.sortService.submitCustomOrder(this.customOrderText().trim());
+    const text = this.customOrderText().trim();
+    if (!text || this.sortService.sorting()) return;
+    const target = this.qaReorderTarget();
+    const data = await this.ps.getImageLayerData();
+    const slugNames = target === 'teachers' ? data.teachers
+      : target === 'students' ? data.students : data.names;
+    if (slugNames.length < 2) { this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Legalább 2 layer kell.' })); return; }
+    const result = await this.sortService.submitCustomOrderScoped(text, slugNames, target);
     if (result.message) this.ngZone.run(() => this.customOrderResult.set(result));
   }
 

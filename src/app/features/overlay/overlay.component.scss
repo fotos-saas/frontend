@@ -1146,6 +1146,24 @@
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+.custom-order-panel__scope {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.custom-order-panel__scope-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.custom-order-panel__scope-buttons {
+  display: flex;
+  gap: 4px;
+}
+
 .custom-order-panel__textarea {
   width: 100%;
   min-height: 120px;

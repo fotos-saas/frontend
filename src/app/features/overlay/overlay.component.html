@@ -639,6 +639,14 @@
     <p class="custom-order-panel__desc">
       Írd be a kívánt sorrendben a neveket, soronként egyet. Az AI párosítja a layer nevekkel.
     </p>
+    <div class="custom-order-panel__scope">
+      <span class="custom-order-panel__scope-label">Célcsoport</span>
+      <div class="custom-order-panel__scope-buttons">
+        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaReorderTarget() === 'all'" (click)="qaReorderTarget.set('all')">Mind</button>
+        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaReorderTarget() === 'teachers'" (click)="qaReorderTarget.set('teachers')">Tanárok</button>
+        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qaReorderTarget() === 'students'" (click)="qaReorderTarget.set('students')">Diákok</button>
+      </div>
+    </div>
     <textarea
       class="custom-order-panel__textarea"
       [value]="customOrderText()"

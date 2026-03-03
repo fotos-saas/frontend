@@ -76,7 +76,17 @@ var _unlinkResult = '{"unlinked":0,"names":[]}';
 // --- Fo logika ---
 function doUnlinkAll() {
   var doc = app.activeDocument;
-  var selectedNames = getSelectedLayerNames();
+
+  // Layer nevek: CONFIG.LAYER_NAMES-bol VAGY kijelolt layerekbol
+  var selectedNames;
+  try {
+    if (typeof CONFIG !== 'undefined' && CONFIG.LAYER_NAMES) {
+      selectedNames = CONFIG.LAYER_NAMES.split('|');
+    }
+  } catch (e) {}
+  if (!selectedNames || selectedNames.length === 0) {
+    selectedNames = getSelectedLayerNames();
+  }
   if (selectedNames.length === 0) {
     _unlinkResult = '{"unlinked":0,"names":[]}';
     return;

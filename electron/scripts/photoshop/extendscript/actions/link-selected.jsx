@@ -108,8 +108,17 @@ var _linkResult = '{"linked":0,"names":[]}';
 // --- Fo logika ---
 function doLinkAll() {
   var doc = app.activeDocument;
-  // 1. Kijelolt layerek nevei
-  var selectedNames = getSelectedLayerNames();
+
+  // 1. Layer nevek: CONFIG.LAYER_NAMES-bol VAGY kijelolt layerekbol
+  var selectedNames;
+  try {
+    if (typeof CONFIG !== 'undefined' && CONFIG.LAYER_NAMES) {
+      selectedNames = CONFIG.LAYER_NAMES.split('|');
+    }
+  } catch (e) {}
+  if (!selectedNames || selectedNames.length === 0) {
+    selectedNames = getSelectedLayerNames();
+  }
   if (selectedNames.length === 0) {
     _linkResult = '{"linked":0,"names":[]}';
     return;

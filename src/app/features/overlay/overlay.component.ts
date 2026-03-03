@@ -536,11 +536,16 @@ export class OverlayComponent implements OnInit {
     else { if (type === 'names') this.qaPositionNames.update(v => !v); else this.qaPositionPositions.update(v => !v); }
   }
   onQuickAction(action: string, target: string): void { this.qaConfirm.set({ action, target }); }
-  confirmQuickAction(): void {
+  async confirmQuickAction(): Promise<void> {
     const c = this.qaConfirm();
     if (!c) return;
-    console.log('[QuickAction] EXECUTE', c.action, c.target);
     this.qaConfirm.set(null);
+
+    if (c.action === 'link') {
+      await this.executeLinkQuickAction(c.target);
+    } else {
+      console.log('[QuickAction] TODO:', c.action, c.target);
+    }
   }
   cancelQuickAction(): void { this.qaConfirm.set(null); }
 
@@ -608,6 +613,38 @@ export class OverlayComponent implements OnInit {
   }
 
   // ============ Private helpers ============
+
+  private async executeLinkQuickAction(target: string): Promise<void> {
+    // 1. Összes image layer név lekérése PS-ből
+    const allNames = await this.ps.getImageLayerNames();
+    if (allNames.length === 0) { this.setLinkResult(false, 'Nincsenek image layerek'); return; }
+
+    // 2. Szűrés target alapján
+    let layerNames: string[];
+    if (target === 'all') {
+      layerNames = allNames;
+    } else {
+      const persons = this.persons();
+      const typeFilter = target === 'teachers' ? 'teacher' : 'student';
+      const personIds = new Set(persons.filter(p => p.type === typeFilter).map(p => p.id));
+      layerNames = allNames.filter(name => {
+        const match = name.match(/---(\d+)$/);
+        return match && personIds.has(Number(match[1]));
+      });
+    }
+    if (layerNames.length === 0) {
+      this.setLinkResult(false, target === 'teachers' ? 'Nincsenek tanár layerek' : 'Nincsenek diák layerek');
+      return;
+    }
+
+    // 3. JSX hívás — pipe-separated nevek CONFIG.LAYER_NAMES-ben
+    const result = await this.ps.runJsx(
+      'link-layers',
+      'actions/link-selected.jsx',
+      { LAYER_NAMES: layerNames.join('|') },
+    );
+    this.showLinkResult(result, 'link');
+  }
 
   private async runLinkCommand(commandId: string, script: string, type: 'link' | 'unlink'): Promise<void> {
     const result = await this.ps.runJsx(commandId, script);

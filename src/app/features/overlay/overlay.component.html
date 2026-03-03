@@ -811,17 +811,74 @@
 
 <!-- Quick Actions Panel -->
 @if (quickActionsPanelOpen()) {
-<div class="rename-panel quick-actions-panel">
-  <div class="rename-panel__header">
+<div class="quick-actions-panel">
+  <div class="quick-actions-panel__header">
     <lucide-icon [name]="ICONS.SPARKLE" [size]="14" />
     <span>Gyors akciók</span>
-    <button class="rename-panel__close" (click)="closeQuickActions()" type="button">
+    <button class="quick-actions-panel__close" (click)="closeQuickActions()" type="button">
       <lucide-icon [name]="ICONS.X" [size]="14" />
     </button>
   </div>
 
-  <div class="rename-panel__body">
-    <p class="quick-actions-panel__desc">Hamarosan itt lesznek a gyors akciók!</p>
+  <div class="quick-actions-panel__body">
+    <!-- Link -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.LINK" [size]="11" />
+        Link
+      </div>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--green" (click)="onQuickAction('link', 'all')">Mind</button>
+        <button class="qa-btn" (click)="onQuickAction('link', 'teachers')">Tanárok</button>
+        <button class="qa-btn" (click)="onQuickAction('link', 'students')">Diákok</button>
+      </div>
+    </div>
+
+    <!-- Feliratok frissítése -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.REFRESH" [size]="11" />
+        Feliratok frissítése
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Célcsoport</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--blue" (click)="onQuickAction('refresh-labels', 'all')">Mind</button>
+          <button class="qa-btn" (click)="onQuickAction('refresh-labels', 'teachers')">Tanárok</button>
+          <button class="qa-btn" (click)="onQuickAction('refresh-labels', 'students')">Diákok</button>
+        </div>
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Típus</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn" (click)="onQuickAction('refresh-labels', 'names')">Nevek</button>
+          <button class="qa-btn" (click)="onQuickAction('refresh-labels', 'positions')">Pozíciók</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feliratok pozícionálása -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="11" />
+        Feliratok pozícionálása
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Célcsoport</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--purple" (click)="onQuickAction('position-labels', 'all')">Mind</button>
+          <button class="qa-btn" (click)="onQuickAction('position-labels', 'teachers')">Tanárok</button>
+          <button class="qa-btn" (click)="onQuickAction('position-labels', 'students')">Diákok</button>
+        </div>
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Típus</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn" (click)="onQuickAction('position-labels', 'names')">Nevek</button>
+          <button class="qa-btn" (click)="onQuickAction('position-labels', 'positions')">Pozíciók</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 }

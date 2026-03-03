@@ -1885,6 +1885,11 @@ export class OverlayComponent implements OnInit {
     this.quickActionsPanelOpen.set(false);
   }
 
+  onQuickAction(action: string, target: string): void {
+    console.log('[QuickAction]', action, target);
+    // TODO: implementáció később
+  }
+
   toggleTurbo(): void {
     if (this.isTurbo()) {
       this.stopTurbo();

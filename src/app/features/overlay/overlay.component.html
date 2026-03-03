@@ -899,6 +899,22 @@
       </div>
     </div>
 
+    <!-- Pozíciók pótlása -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.BRIEFCASE" [size]="11" />
+        Pozíciók pótlása
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Célcsoport</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--amber" (click)="onQuickAction('sync-positions', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--amber" (click)="onQuickAction('sync-positions', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--amber" (click)="onQuickAction('sync-positions', 'students')">Diákok</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Confirm bar -->

@@ -7,6 +7,7 @@ import { OverlayContext } from '../../core/services/electron.types';
 export interface PersonItem {
   id: number;
   name: string;
+  title: string | null;
   type: 'student' | 'teacher';
   hasPhoto: boolean;
   photoThumbUrl: string | null;

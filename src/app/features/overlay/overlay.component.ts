@@ -556,6 +556,8 @@ export class OverlayComponent implements OnInit {
       await this.executeArrangeQuickAction(c.target, this.qaPositionNames(), this.qaPositionPositions());
     } else if (c.action === 'refresh-labels') {
       await this.executeRefreshLabelsAction(c.target, this.qaRefreshNames(), this.qaRefreshPositions());
+    } else if (c.action === 'sync-positions') {
+      await this.executeSyncPositionsAction(c.target);
     }
   }
   cancelQuickAction(): void { this.qaConfirm.set(null); }
@@ -758,6 +760,70 @@ export class OverlayComponent implements OnInit {
         this.setLinkResult(true, `Frissítés kész (${label})`);
       }
     } catch { this.setLinkResult(true, `Frissítés kész (${label})`); }
+  }
+
+  private async executeSyncPositionsAction(target: string): Promise<void> {
+    // 1. Persons betöltés ha üres
+    let persons = this.projectService.persons();
+    if (persons.length === 0) {
+      const pid = this.projectService.getLastProjectId() || this.context().projectId;
+      if (pid) persons = await this.projectService.fetchPersons(pid);
+      if (persons.length === 0) { this.setLinkResult(false, 'Nincsenek személyek betöltve'); return; }
+    }
+
+    // 2. Image layer nevek lekérése PS-ből
+    const data = await this.ps.getImageLayerData();
+    const layerNames = target === 'teachers' ? data.teachers
+      : target === 'students' ? data.students : data.names;
+
+    if (layerNames.length === 0) {
+      const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'image';
+      this.setLinkResult(false, `Nincsenek ${label} layerek`);
+      return;
+    }
+
+    // 3. Layer nevek → person adatok (title + name + group)
+    const personById = new Map(persons.map(p => [p.id, p]));
+    const personsData: { layerName: string; displayText: string; position: string | null; group: string }[] = [];
+
+    for (const ln of layerNames) {
+      const sepIdx = ln.indexOf('---');
+      if (sepIdx === -1) continue;
+      const pid = parseInt(ln.substring(sepIdx + 3), 10);
+      if (pid <= 0) continue;
+      const person = personById.get(pid);
+      if (!person) continue;
+      personsData.push({
+        layerName: ln,
+        displayText: person.name,
+        position: person.title || null,
+        group: person.type === 'teacher' ? 'Teachers' : 'Students',
+      });
+    }
+
+    if (personsData.length === 0) { this.setLinkResult(false, 'Nem találtam párosítható személyeket'); return; }
+
+    // 4. JSX futtatás
+    const jsonData = {
+      persons: personsData,
+      nameBreakAfter: this.settings.nameBreakAfter(),
+      textAlign: 'center',
+      nameGapCm: this.settings.nameGapCm(),
+      positionGapCm: 0.15,
+      positionFontSize: 18,
+    };
+
+    const result = await this.ps.runJsx('sync-positions', 'actions/update-positions.jsx', jsonData);
+    const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'összes';
+    try {
+      if (result?.output) {
+        const lines = result.output.trim().split('\n');
+        const lastLine = lines[lines.length - 1];
+        this.setLinkResult(true, `Pozíciók frissítve (${label}): ${lastLine}`);
+      } else {
+        this.setLinkResult(true, `Pozíciók frissítve (${label})`);
+      }
+    } catch { this.setLinkResult(true, `Pozíciók frissítve (${label})`); }
   }
 
   private async runLinkCommand(commandId: string, script: string, type: 'link' | 'unlink'): Promise<void> {

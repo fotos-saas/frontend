@@ -156,6 +156,33 @@ function findPositionLayerByName(doc, layerName) {
   return null;
 }
 
+// --- CACHE: Eloepiti a nev→layer Map-eket (1 bejaras csoportonkent) ---
+// Visszaad { images: {}, positions: {} } objektumot a gyors lookup-hoz
+function buildLayerCaches(doc) {
+  var images = {};
+  var positions = {};
+  var imgGroups = [["Images", "Students"], ["Images", "Teachers"]];
+  var posGroups = [["Positions", "Students"], ["Positions", "Teachers"]];
+
+  for (var g = 0; g < imgGroups.length; g++) {
+    var grp = getGroupByPath(doc, imgGroups[g]);
+    if (!grp) continue;
+    for (var i = 0; i < grp.artLayers.length; i++) {
+      var name = grp.artLayers[i].name;
+      if (!images[name]) images[name] = grp.artLayers[i];
+    }
+  }
+  for (var p = 0; p < posGroups.length; p++) {
+    var pGrp = getGroupByPath(doc, posGroups[p]);
+    if (!pGrp) continue;
+    for (var j = 0; j < pGrp.artLayers.length; j++) {
+      var pName = pGrp.artLayers[j].name;
+      if (!positions[pName]) positions[pName] = pGrp.artLayers[j];
+    }
+  }
+  return { images: images, positions: positions };
+}
+
 // --- Osszes nev layer osszegyujtese ---
 function getAllNameLayers(doc) {
   var result = [];
@@ -368,131 +395,149 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
   return { imgBounds: imgBounds, nameBottom: nameBounds.bottom };
 }
 
-(function () {
-  try {
-    if (app.documents.length === 0) {
-      '{"arranged":0}';
-      return;
-    }
-    var doc = app.activeDocument;
+// --- JSON escape (ES3) ---
+function escapeJsonStr(s) {
+  s = s.replace(/\\/g, '\\\\');
+  s = s.replace(/"/g, '\\"');
+  s = s.replace(/\n/g, '\\n');
+  s = s.replace(/\r/g, '\\r');
+  s = s.replace(/\t/g, '\\t');
+  return s;
+}
 
-    var textAlign = typeof CONFIG !== "undefined" && CONFIG.TEXT_ALIGN ? CONFIG.TEXT_ALIGN : "center";
-    var breakAfter = typeof CONFIG !== "undefined" && CONFIG.BREAK_AFTER ? parseInt(CONFIG.BREAK_AFTER, 10) : 0;
+// Globalis eredmeny (suspendHistory nem ad vissza return-t)
+var _arrangeResult = '{"arranged":0}';
 
-    // Gap: ha cm-ben kapjuk, konvertaljuk px-re; ha px-ben, hasznaljuk kozvetlenul
-    var nameGapPx = 0;
-    if (typeof CONFIG !== "undefined" && CONFIG.NAME_GAP_CM) {
-      var dpi = doc.resolution;
-      nameGapPx = Math.round((parseFloat(CONFIG.NAME_GAP_CM) / 2.54) * dpi);
-    } else if (typeof CONFIG !== "undefined" && CONFIG.NAME_GAP_PX) {
-      nameGapPx = parseInt(CONFIG.NAME_GAP_PX, 10);
-    }
+function doArrangeNames() {
+  var doc = app.activeDocument;
 
-    // Ruler pixelre
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
+  var textAlign = typeof CONFIG !== "undefined" && CONFIG.TEXT_ALIGN ? CONFIG.TEXT_ALIGN : "center";
+  var breakAfter = typeof CONFIG !== "undefined" && CONFIG.BREAK_AFTER ? parseInt(CONFIG.BREAK_AFTER, 10) : 0;
 
-    // Kijelolt layerek
-    var selected = getSelectedLayerInfo();
+  // Gap: ha cm-ben kapjuk, konvertaljuk px-re; ha px-ben, hasznaljuk kozvetlenul
+  var nameGapPx = 0;
+  if (typeof CONFIG !== "undefined" && CONFIG.NAME_GAP_CM) {
+    var dpi = doc.resolution;
+    nameGapPx = Math.round((parseFloat(CONFIG.NAME_GAP_CM) / 2.54) * dpi);
+  } else if (typeof CONFIG !== "undefined" && CONFIG.NAME_GAP_PX) {
+    nameGapPx = parseInt(CONFIG.NAME_GAP_PX, 10);
+  }
 
-    var nameLayers = [];
+  // Ruler pixelre
+  var oldRulerUnits = app.preferences.rulerUnits;
+  app.preferences.rulerUnits = Units.PIXELS;
 
-    // Csak ha Images csoportbeli layer van kijelolve → szukites
-    // Egyebkent (nincs kijeloles VAGY nem Images layer) → mindenkit rendez
-    var imageNames = (selected.length > 0) ? getImageSelectionNames(doc, selected) : [];
+  // Kijelolt layerek
+  var selected = getSelectedLayerInfo();
 
-    // TARGET_GROUP szures: "students", "teachers", vagy "all" (default)
-    var targetGroup = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "all";
+  var nameLayers = [];
 
-    if (imageNames.length > 0) {
-      // Csak a kijelolt kepek nevparjait rendezzuk
-      for (var i = 0; i < imageNames.length; i++) {
-        var nameLayer = findNameLayerByName(doc, imageNames[i]);
-        if (nameLayer) {
-          nameLayers.push(nameLayer);
-        }
+  // Csak ha Images csoportbeli layer van kijelolve → szukites
+  // Egyebkent (nincs kijeloles VAGY nem Images layer) → mindenkit rendez
+  var imageNames = (selected.length > 0) ? getImageSelectionNames(doc, selected) : [];
+
+  // TARGET_GROUP szures: "students", "teachers", vagy "all" (default)
+  var targetGroup = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "all";
+
+  if (imageNames.length > 0) {
+    // Csak a kijelolt kepek nevparjait rendezzuk
+    for (var i = 0; i < imageNames.length; i++) {
+      var nameLayer = findNameLayerByName(doc, imageNames[i]);
+      if (nameLayer) {
+        nameLayers.push(nameLayer);
       }
-    } else if (targetGroup === "students") {
-      var sGrp = getGroupByPath(doc, ["Names", "Students"]);
-      if (sGrp) { for (var si = 0; si < sGrp.artLayers.length; si++) nameLayers.push(sGrp.artLayers[si]); }
-    } else if (targetGroup === "teachers") {
-      var tGrp = getGroupByPath(doc, ["Names", "Teachers"]);
-      if (tGrp) { for (var ti2 = 0; ti2 < tGrp.artLayers.length; ti2++) nameLayers.push(tGrp.artLayers[ti2]); }
-    } else {
-      // all — osszes nev layer
-      nameLayers = getAllNameLayers(doc);
     }
+  } else if (targetGroup === "students") {
+    var sGrp = getGroupByPath(doc, ["Names", "Students"]);
+    if (sGrp) { for (var si = 0; si < sGrp.artLayers.length; si++) nameLayers.push(sGrp.artLayers[si]); }
+  } else if (targetGroup === "teachers") {
+    var tGrp = getGroupByPath(doc, ["Names", "Teachers"]);
+    if (tGrp) { for (var ti2 = 0; ti2 < tGrp.artLayers.length; ti2++) nameLayers.push(tGrp.artLayers[ti2]); }
+  } else {
+    // all — osszes nev layer
+    nameLayers = getAllNameLayers(doc);
+  }
 
-    // Tipusok: nevek es/vagy poziciok mozgatasa
-    var doNames = typeof CONFIG === "undefined" || !CONFIG.SKIP_NAMES || CONFIG.SKIP_NAMES !== "true";
-    var doPositions = typeof CONFIG === "undefined" || !CONFIG.SKIP_POSITIONS || CONFIG.SKIP_POSITIONS !== "true";
+  // Tipusok: nevek es/vagy poziciok mozgatasa
+  var doNames = typeof CONFIG === "undefined" || !CONFIG.SKIP_NAMES || CONFIG.SKIP_NAMES !== "true";
+  var doPositions = typeof CONFIG === "undefined" || !CONFIG.SKIP_POSITIONS || CONFIG.SKIP_POSITIONS !== "true";
 
-    var arranged = 0;
-    for (var j = 0; j < nameLayers.length; j++) {
-      var nl = nameLayers[j];
-      var imgLayer = findImageLayerByName(doc, nl.name);
-      if (!imgLayer) continue;
+  // CACHE: eloepitjuk a nev→layer Map-eket (1 bejaras/csoport az egesz futasra)
+  var cache = buildLayerCaches(doc);
 
-      // Unlink a rendezés elott (hogy szabadon mozgatható legyen)
-      unlinkByName(doc, nl.name);
+  var arranged = 0;
+  for (var j = 0; j < nameLayers.length; j++) {
+    var nl = nameLayers[j];
+    // Cache lookup a csoportbejaras helyett
+    var imgLayer = cache.images[nl.name] || null;
+    if (!imgLayer) continue;
 
-      if (doNames) {
-        var result = positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter);
-        if (result) {
-          arranged++;
-          // Pozicio (beosztás) layer mozgatasa a nev ala
-          if (doPositions) {
-            var posLayer = findPositionLayerByName(doc, nl.name);
-            if (posLayer) {
-              positionPositionLayerUnderName(doc, posLayer, result.nameBottom, result.imgBounds, textAlign);
-            }
+    // Unlink a rendezes elott (hogy szabadon mozgathato legyen)
+    unlinkByName(doc, nl.name);
+
+    if (doNames) {
+      var result = positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter);
+      if (result) {
+        arranged++;
+        // Pozicio (beosztas) layer mozgatasa a nev ala
+        if (doPositions) {
+          var posLayer = cache.positions[nl.name] || null;
+          if (posLayer) {
+            positionPositionLayerUnderName(doc, posLayer, result.nameBottom, result.imgBounds, textAlign);
           }
         }
-      } else if (doPositions) {
-        // Csak poziciokat mozgatjuk — a nev layert nem, de a kep bounds kell
-        var imgBoundsOnly = getBoundsNoEffects(imgLayer.id);
-        var nameLayerBounds = getBoundsNoEffects(nl.id);
-        var posLayerOnly = findPositionLayerByName(doc, nl.name);
-        if (posLayerOnly) {
-          positionPositionLayerUnderName(doc, posLayerOnly, nameLayerBounds.bottom, imgBoundsOnly, textAlign);
-          arranged++;
-        }
+      }
+    } else if (doPositions) {
+      // Csak poziciokat mozgatjuk — a nev layert nem, de a kep bounds kell
+      var imgBoundsOnly = getBoundsNoEffects(imgLayer.id);
+      var nameLayerBounds = getBoundsNoEffects(nl.id);
+      var posLayerOnly = cache.positions[nl.name] || null;
+      if (posLayerOnly) {
+        positionPositionLayerUnderName(doc, posLayerOnly, nameLayerBounds.bottom, imgBoundsOnly, textAlign);
+        arranged++;
       }
     }
-
-    // Eredeti kijeloles visszaallitasa
-    if (selected.length > 0) {
-      var selIds = [];
-      for (var s = 0; s < selected.length; s++) {
-        selIds.push(selected[s].id);
-      }
-      // Elso layer kivalasztasa
-      var selDesc = new ActionDescriptor();
-      var selRef = new ActionReference();
-      selRef.putIdentifier(charIDToTypeID("Lyr "), selIds[0]);
-      selDesc.putReference(charIDToTypeID("null"), selRef);
-      executeAction(charIDToTypeID("slct"), selDesc, DialogModes.NO);
-      // Tobbi hozzaadasa
-      for (var k = 1; k < selIds.length; k++) {
-        var addDesc = new ActionDescriptor();
-        var addRef = new ActionReference();
-        addRef.putIdentifier(charIDToTypeID("Lyr "), selIds[k]);
-        addDesc.putReference(charIDToTypeID("null"), addRef);
-        addDesc.putEnumerated(
-          stringIDToTypeID("selectionModifier"),
-          stringIDToTypeID("selectionModifierType"),
-          stringIDToTypeID("addToSelection")
-        );
-        executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-      }
-    }
-
-    // Ruler visszaallitasa
-    app.preferences.rulerUnits = oldRulerUnits;
-
-    '{"arranged":' + arranged + '}';
-
-  } catch (e) {
-    '{"arranged":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
   }
-})();
+
+  // Eredeti kijeloles visszaallitasa
+  if (selected.length > 0) {
+    var selIds = [];
+    for (var s = 0; s < selected.length; s++) {
+      selIds.push(selected[s].id);
+    }
+    // Elso layer kivalasztasa
+    var selDesc = new ActionDescriptor();
+    var selRef = new ActionReference();
+    selRef.putIdentifier(charIDToTypeID("Lyr "), selIds[0]);
+    selDesc.putReference(charIDToTypeID("null"), selRef);
+    executeAction(charIDToTypeID("slct"), selDesc, DialogModes.NO);
+    // Tobbi hozzaadasa
+    for (var k = 1; k < selIds.length; k++) {
+      var addDesc = new ActionDescriptor();
+      var addRef = new ActionReference();
+      addRef.putIdentifier(charIDToTypeID("Lyr "), selIds[k]);
+      addDesc.putReference(charIDToTypeID("null"), addRef);
+      addDesc.putEnumerated(
+        stringIDToTypeID("selectionModifier"),
+        stringIDToTypeID("selectionModifierType"),
+        stringIDToTypeID("addToSelection")
+      );
+      executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+    }
+  }
+
+  // Ruler visszaallitasa
+  app.preferences.rulerUnits = oldRulerUnits;
+
+  _arrangeResult = '{"arranged":' + arranged + '}';
+}
+
+try {
+  if (app.documents.length > 0) {
+    app.activeDocument.suspendHistory("Arrange names", "doArrangeNames()");
+  }
+} catch (e) {
+  _arrangeResult = '{"arranged":0,"error":"' + escapeJsonStr(e.message) + '"}';
+}
+
+_arrangeResult;

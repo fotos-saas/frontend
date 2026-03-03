@@ -138,20 +138,12 @@ function doLinkAll() {
   _linkResult = '{"linked":' + totalLinked + ',"names":' + namesJson + '}';
 }
 
-(function () {
-  try {
-    if (app.documents.length === 0) {
-      '{"linked":0,"names":[]}';
-      return;
-    }
-    var doc = app.activeDocument;
-
-    // suspendHistory: egyetlen Undo lepes az egesz muvelethez
-    doc.suspendHistory("Link layers", "doLinkAll()");
-    _linkResult;
-
-  } catch (e) {
-    log("[JSX] HIBA: " + e.message);
-    '{"linked":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
+try {
+  if (app.documents.length > 0) {
+    app.activeDocument.suspendHistory("Link layers", "doLinkAll()");
   }
-})();
+} catch (e) {
+  _linkResult = '{"linked":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
+}
+
+_linkResult;

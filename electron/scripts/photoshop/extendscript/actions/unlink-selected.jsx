@@ -115,20 +115,12 @@ function doUnlinkAll() {
   _unlinkResult = '{"unlinked":' + totalUnlinked + ',"names":' + namesJson + '}';
 }
 
-(function () {
-  try {
-    if (app.documents.length === 0) {
-      '{"unlinked":0,"names":[]}';
-      return;
-    }
-    var doc = app.activeDocument;
-
-    // suspendHistory: egyetlen Undo lepes
-    doc.suspendHistory("Unlink layers", "doUnlinkAll()");
-    _unlinkResult;
-
-  } catch (e) {
-    log("[JSX] HIBA: " + e.message);
-    '{"unlinked":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
+try {
+  if (app.documents.length > 0) {
+    app.activeDocument.suspendHistory("Unlink layers", "doUnlinkAll()");
   }
-})();
+} catch (e) {
+  _unlinkResult = '{"unlinked":0,"error":"' + e.message.replace(/"/g, '\\"') + '"}';
+}
+
+_unlinkResult;

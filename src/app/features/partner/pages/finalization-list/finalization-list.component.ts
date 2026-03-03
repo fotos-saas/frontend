@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { LoggerService } from '@core/services/logger.service';
 import { ToastService } from '@core/services/toast.service';
-import { PartnerFinalizationService } from '../../services/partner-finalization.service';
+import { PartnerFinalizationService, PrintFileType } from '../../services/partner-finalization.service';
 import { FinalizationListItem, TabloSize } from '../../models/partner.models';
 import { FinalizationCardComponent } from '../../components/finalization-card/finalization-card.component';
 import { PrintReadyUploadDialogComponent } from '../../components/print-ready-upload-dialog/print-ready-upload-dialog.component';
@@ -50,8 +50,7 @@ export class FinalizationListComponent implements OnInit {
     { key: 'school_name', label: 'Iskola / Osztály', sortable: true },
     { key: 'finalized_at', label: 'Véglegesítve', width: '100px', align: 'center', sortable: true },
     { key: 'size', label: 'Méret', width: '100px', align: 'center' },
-    { key: 'file', label: 'Fájl', width: '140px', align: 'center' },
-    { key: 'actions', label: '', width: '88px' },
+    { key: 'actions', label: '', width: '200px' },
   ];
   readonly gridTemplate = this.tableCols.map(c => c.width ?? '1fr').join(' ');
 
@@ -97,6 +96,7 @@ export class FinalizationListComponent implements OnInit {
 
   // Download state
   downloadingId = signal<number | null>(null);
+  downloadingFileType = signal<'flat' | 'small_tablo' | null>(null);
 
   // Upload dialog
   showUploadDialog = signal(false);
@@ -149,6 +149,10 @@ export class FinalizationListComponent implements OnInit {
     this.router.navigate(['/partner/projects', item.id]);
   }
 
+  viewPrintTab(item: FinalizationListItem): void {
+    this.router.navigate(['/partner/projects', item.id], { fragment: 'print' });
+  }
+
   openLightbox(item: FinalizationListItem): void {
     if (!item.samplePreviewUrl) return;
     this.lightboxMedia.set([{
@@ -181,23 +185,26 @@ export class FinalizationListComponent implements OnInit {
     this.toast.success('Feltöltve', 'Nyomdakész fájl sikeresen feltöltve.');
   }
 
-  downloadFile(item: FinalizationListItem): void {
-    const file = item.printFlat;
+  downloadFile(item: FinalizationListItem, type: PrintFileType): void {
+    const file = type === 'small_tablo' ? item.printSmallTablo : item.printFlat;
     if (!file || this.downloadingId() === item.id) return;
 
     this.downloadingId.set(item.id);
+    this.downloadingFileType.set(type);
     const fileName = file.fileName;
-    this.finalizationService.downloadPrintReady(item.id, 'flat')
+    this.finalizationService.downloadPrintReady(item.id, type)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
           saveFile(blob, fileName);
           this.downloadingId.set(null);
+          this.downloadingFileType.set(null);
         },
         error: (err) => {
           this.logger.error('Failed to download print ready file', err);
           this.toast.error('Hiba', 'Nem sikerült letölteni a fájlt.');
           this.downloadingId.set(null);
+          this.downloadingFileType.set(null);
         },
       });
   }

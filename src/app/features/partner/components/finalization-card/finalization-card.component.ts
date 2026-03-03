@@ -21,11 +21,12 @@ export class FinalizationCardComponent {
 
   readonly item = input.required<FinalizationListItem>();
   readonly availableSizes = input<TabloSize[]>([]);
-  readonly downloading = input(false);
+  readonly downloadingType = input<'flat' | 'small_tablo' | null>(null);
 
   readonly cardClick = output<FinalizationListItem>();
   readonly thumbnailClick = output<FinalizationListItem>();
   readonly downloadClick = output<FinalizationListItem>();
+  readonly downloadSmallTabloClick = output<FinalizationListItem>();
   readonly uploadClick = output<FinalizationListItem>();
   readonly markDoneClick = output<FinalizationListItem>();
   readonly tabloSizeChange = output<{ item: FinalizationListItem; size: string }>();
@@ -45,6 +46,12 @@ export class FinalizationCardComponent {
     event.stopPropagation();
     this.downloadClick.emit(this.item());
   }
+
+  onDownloadSmallTabloClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.downloadSmallTabloClick.emit(this.item());
+  }
+
 
   onUploadClick(event: MouseEvent): void {
     event.stopPropagation();

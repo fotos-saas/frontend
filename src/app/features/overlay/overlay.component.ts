@@ -616,10 +616,14 @@ export class OverlayComponent implements OnInit {
 
   private showLinkResult(result: any, type: 'link' | 'unlink'): void {
     if (this.linkResultTimer) { clearTimeout(this.linkResultTimer); this.linkResultTimer = null; }
+    // DEBUG: nyers result kiírása
+    console.log('[LINK-DEBUG] raw result:', JSON.stringify(result, null, 2));
     try {
-      if (!result?.output) { this.setLinkResult(false, 'Nincs válasz a Photoshoptól'); return; }
+      if (!result) { this.setLinkResult(false, `[DBG] result=null/undefined`); return; }
+      if (!result.output) { this.setLinkResult(false, `[DBG] no output, success=${result.success}, keys=${Object.keys(result).join(',')}`); return; }
       const cleaned = result.output.trim();
-      if (!cleaned.startsWith('{')) { this.setLinkResult(false, 'Érvénytelen válasz'); return; }
+      console.log('[LINK-DEBUG] cleaned output:', cleaned.substring(0, 200));
+      if (!cleaned.startsWith('{')) { this.setLinkResult(false, `[DBG] output nem JSON: "${cleaned.substring(0, 80)}"`); return; }
       const data = JSON.parse(cleaned);
       if (data.error) { this.setLinkResult(false, data.error); return; }
       const count = type === 'link' ? data.linked : data.unlinked;
@@ -627,7 +631,7 @@ export class OverlayComponent implements OnInit {
       const nameCount = data.names?.length || 0;
       if (count === 0) { this.setLinkResult(false, 'Nem találtam linkelhető layereket'); return; }
       this.setLinkResult(true, `${count} layer ${verb} (${nameCount} név)`);
-    } catch { this.setLinkResult(false, 'Hiba a válasz feldolgozásában'); }
+    } catch (e) { this.setLinkResult(false, `[DBG] parse error: ${(e as Error).message}`); }
   }
 
   private setLinkResult(success: boolean, message: string): void {

@@ -17,6 +17,9 @@
       <div class="card-zoom-icon">
         <lucide-icon [name]="ICONS.ZOOM_IN" [size]="16" />
       </div>
+      <button type="button" class="card-camera" matTooltip="Kép feltöltése" (click)="onPhotoUploadClick($event)">
+        <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
+      </button>
       <!-- photo_type badge — csak fotós kártyáknál -->
       @if (person().type === 'teacher' && person().photoType) {
         <div
@@ -42,10 +45,13 @@
       <div class="card-placeholder">
         <lucide-icon [name]="ICONS.USER_X" [size]="24" />
       </div>
+      <button type="button" class="card-camera card-camera--always" matTooltip="Kép feltöltése" (click)="onPhotoUploadClick($event)">
+        <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
+      </button>
     }
   </div>
 
-  <div class="card-info">
+  <div class="card-info" (click)="onEditClick($event)">
     <span class="card-name">{{ person().name }}</span>
     <div class="card-meta">
       <span class="card-type" [class.card-type--teacher]="person().type === 'teacher'">

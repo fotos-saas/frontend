@@ -21,6 +21,10 @@
   opacity: 1;
 }
 
+.person-card:hover .card-camera {
+  opacity: 1;
+}
+
 @keyframes cardEntry {
   from {
     opacity: 0;
@@ -63,6 +67,34 @@
   color: #fff;
   opacity: 0;
   transition: opacity 0.15s ease;
+}
+
+// --- Kamera ikon (hover-re jelenik meg) ---
+.card-camera {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(37, 99, 235, 0.85);
+  border: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  z-index: 1;
+
+  &:hover {
+    background: rgba(29, 78, 216, 0.95);
+  }
+}
+
+.card-camera--always {
+  opacity: 0.7;
 }
 
 .card-placeholder {
@@ -160,6 +192,11 @@
 .card-info {
   padding: 6px 8px;
   text-align: center;
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f5f9;
+  }
 }
 
 .card-name {

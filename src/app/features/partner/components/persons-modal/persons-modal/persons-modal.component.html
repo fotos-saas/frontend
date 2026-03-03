@@ -174,7 +174,7 @@
         }
       } @else {
         <!-- Grid nézet -->
-        <div class="persons-grid" (click)="$event">
+        <div class="persons-grid" (click)="inlineEditPersonId() ? closeInlineEdit() : $event">
           @for (person of filteredPersons(); track person.id; let i = $index) {
             @let isSelected = batchActions.selectedPersonIds().has(person.id);
             <div
@@ -191,9 +191,59 @@
                 [person]="person"
                 [animationDelay]="i * 0.05 + 's'"
                 (cardClick)="$event"
+                (editClick)="onInlineEdit($event)"
+                (photoUploadClick)="openPhotoUploadDialog($event)"
                 (linkClick)="openLinkDialog($event)"
                 (photoChooserClick)="openPhotoChooser($event)"
               />
+              <!-- Inline edit panel -->
+              @if (inlineEditPersonId() === person.id) {
+                @let editData = inlineEditData();
+                <div class="inline-edit" (click)="$event.stopPropagation()">
+                  <input
+                    type="text"
+                    class="inline-edit__field"
+                    placeholder="Név"
+                    [value]="editData?.name ?? ''"
+                    (input)="inlineEditData.set({ ...editData!, name: $any($event.target).value })"
+                    (keydown.enter)="saveInlineEdit()"
+                    (keydown.escape)="closeInlineEdit()"
+                  />
+                  @if (person.type === 'teacher') {
+                    <input
+                      type="text"
+                      class="inline-edit__field"
+                      placeholder="Pozíció/tantárgy"
+                      [value]="editData?.title ?? ''"
+                      (input)="inlineEditData.set({ ...editData!, title: $any($event.target).value })"
+                      (keydown.enter)="saveInlineEdit()"
+                      (keydown.escape)="closeInlineEdit()"
+                    />
+                  }
+                  <input
+                    type="text"
+                    class="inline-edit__field"
+                    placeholder="Megjegyzés"
+                    [value]="editData?.note ?? ''"
+                    (input)="inlineEditData.set({ ...editData!, note: $any($event.target).value })"
+                    (keydown.enter)="saveInlineEdit()"
+                    (keydown.escape)="closeInlineEdit()"
+                  />
+                  <div class="inline-edit__actions">
+                    <button type="button" class="inline-edit__btn inline-edit__btn--save" (click)="saveInlineEdit()" [disabled]="inlineEditSaving()">
+                      @if (inlineEditSaving()) {
+                        <lucide-icon [name]="ICONS.LOADER" [size]="12" class="spin" />
+                      } @else {
+                        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+                      }
+                      Mentés
+                    </button>
+                    <button type="button" class="inline-edit__btn inline-edit__btn--cancel" (click)="closeInlineEdit()">
+                      Mégse
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
           }
         </div>

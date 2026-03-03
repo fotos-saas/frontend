@@ -79,6 +79,11 @@ export class PersonsModalComponent implements OnInit {
   editMode = signal(false);
   editData = signal<Map<number, EditRow>>(new Map());
 
+  // Inline edit (grid nézetben)
+  inlineEditPersonId = signal<number | null>(null);
+  inlineEditData = signal<{ name: string; title: string; note: string } | null>(null);
+  inlineEditSaving = signal(false);
+
   // Lightbox
   lightboxPerson = signal<TabloPersonItem | null>(null);
 
@@ -251,6 +256,37 @@ export class PersonsModalComponent implements OnInit {
 
   saveAllDirty(): void {
     for (const [id, row] of this.editData()) { if (row.dirty && !row.saving) this.saveRow(id); }
+  }
+
+  // --- Inline edit (grid nézetben) ---
+
+  onInlineEdit(person: TabloPersonItem): void {
+    this.inlineEditPersonId.set(person.id);
+    this.inlineEditData.set({ name: person.name, title: person.title || '', note: person.note || '' });
+    this.inlineEditSaving.set(false);
+  }
+
+  closeInlineEdit(): void {
+    this.inlineEditPersonId.set(null);
+    this.inlineEditData.set(null);
+    this.inlineEditSaving.set(false);
+  }
+
+  saveInlineEdit(): void {
+    const personId = this.inlineEditPersonId();
+    const data = this.inlineEditData();
+    if (!personId || !data || !data.name.trim() || this.inlineEditSaving()) return;
+
+    this.inlineEditSaving.set(true);
+    this.projectService.updatePerson(this.projectId(), personId, {
+      name: data.name.trim(), title: data.title.trim() || null, note: data.note.trim() || null,
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.updatePersonInList(personId, { name: res.data.name, title: res.data.title, note: res.data.note });
+        this.closeInlineEdit();
+      },
+      error: () => this.inlineEditSaving.set(false),
+    });
   }
 
   openPhotoUploadDialog(person: TabloPersonItem): void {

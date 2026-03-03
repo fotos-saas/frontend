@@ -23,6 +23,8 @@ export class ModalPersonCardComponent {
   readonly animationDelay = input<string>('0s');
 
   readonly cardClick = output<TabloPersonItem>();
+  readonly editClick = output<TabloPersonItem>();
+  readonly photoUploadClick = output<TabloPersonItem>();
   readonly linkClick = output<TabloPersonItem>();
   readonly photoChooserClick = output<TabloPersonItem>();
   readonly idCopied = signal(false);
@@ -48,5 +50,15 @@ export class ModalPersonCardComponent {
   onPhotoChooserClick(event: Event): void {
     event.stopPropagation();
     this.photoChooserClick.emit(this.person());
+  }
+
+  onEditClick(event: Event): void {
+    event.stopPropagation();
+    this.editClick.emit(this.person());
+  }
+
+  onPhotoUploadClick(event: Event): void {
+    event.stopPropagation();
+    this.photoUploadClick.emit(this.person());
   }
 }

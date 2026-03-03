@@ -555,7 +555,7 @@ export class OverlayComponent implements OnInit {
     } else if (c.action === 'position-labels') {
       await this.executeArrangeQuickAction(c.target, this.qaPositionNames(), this.qaPositionPositions());
     } else if (c.action === 'refresh-labels') {
-      await this.executeArrangeQuickAction(c.target, this.qaRefreshNames(), this.qaRefreshPositions());
+      await this.executeRefreshLabelsAction(c.target, this.qaRefreshNames(), this.qaRefreshPositions());
     }
   }
   cancelQuickAction(): void { this.qaConfirm.set(null); }
@@ -700,6 +700,53 @@ export class OverlayComponent implements OnInit {
         this.setLinkResult(true, `Rendezés kész (${label})`);
       }
     } catch { this.setLinkResult(true, `Rendezés kész (${label})`); }
+  }
+
+  private async executeRefreshLabelsAction(target: string, doNames: boolean, doPositions: boolean): Promise<void> {
+    if (!doNames && !doPositions) { this.setLinkResult(false, 'Válassz típust (Nevek és/vagy Pozíciók)'); return; }
+    const targetGroup = target === 'teachers' ? 'teachers' : target === 'students' ? 'students' : 'all';
+
+    // Ha pozíciók is kellenek → az arrange script csinálja (pozícionálással)
+    if (doPositions) {
+      await this.executeArrangeQuickAction(target, doNames, doPositions);
+      return;
+    }
+
+    // CSAK nevek frissítése — új script, NEM pozícionál
+    const persons = this.projectService.persons();
+    if (persons.length === 0) { this.setLinkResult(false, 'Nincsenek személyek betöltve'); return; }
+
+    const personById = new Map(persons.map(p => [p.id, p.name]));
+    const data = await this.ps.getImageLayerData();
+    const layerNames = target === 'teachers' ? data.teachers
+      : target === 'students' ? data.students : data.names;
+
+    const nameMap: Record<string, string> = {};
+    for (const ln of layerNames) {
+      const sepIdx = ln.indexOf('---');
+      if (sepIdx === -1) continue;
+      const pid = parseInt(ln.substring(sepIdx + 3), 10);
+      if (pid > 0 && personById.has(pid)) nameMap[ln] = personById.get(pid)!;
+    }
+
+    if (Object.keys(nameMap).length === 0) { this.setLinkResult(false, 'Nem találtam párosítható neveket'); return; }
+
+    const result = await this.ps.runJsx('refresh-names', 'actions/refresh-name-texts.jsx', {
+      NAME_MAP: JSON.stringify(nameMap),
+      TARGET_GROUP: targetGroup,
+      BREAK_AFTER: String(this.settings.nameBreakAfter()),
+    });
+
+    const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'összes';
+    try {
+      if (result?.output) {
+        const r = JSON.parse(result.output.trim());
+        if (r.error) { this.setLinkResult(false, r.error); return; }
+        this.setLinkResult(true, `${r.refreshed} felirat frissítve (${label}) [map:${r.nameMapCount}]`);
+      } else {
+        this.setLinkResult(true, `Frissítés kész (${label})`);
+      }
+    } catch { this.setLinkResult(true, `Frissítés kész (${label})`); }
   }
 
   private async runLinkCommand(commandId: string, script: string, type: 'link' | 'unlink'): Promise<void> {

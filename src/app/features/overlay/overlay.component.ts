@@ -661,6 +661,25 @@ export class OverlayComponent implements OnInit {
   private async executeArrangeQuickAction(target: string, doNames: boolean, doPositions: boolean): Promise<void> {
     if (!doNames && !doPositions) { this.setLinkResult(false, 'Válassz típust (Nevek és/vagy Pozíciók)'); return; }
     const targetGroup = target === 'teachers' ? 'teachers' : target === 'students' ? 'students' : 'all';
+
+    // NAME_MAP: layer név → DB-beli helyes név (person ID alapján)
+    let nameMapJson = '';
+    if (doNames) {
+      const persons = this.projectService.persons();
+      const personById = new Map(persons.map(p => [p.id, p.name]));
+      const data = await this.ps.getImageLayerData();
+      const layerNames = target === 'teachers' ? data.teachers
+        : target === 'students' ? data.students : data.names;
+      const nameMap: Record<string, string> = {};
+      for (const ln of layerNames) {
+        const sepIdx = ln.indexOf('---');
+        if (sepIdx === -1) continue;
+        const pid = parseInt(ln.substring(sepIdx + 3), 10);
+        if (pid > 0 && personById.has(pid)) nameMap[ln] = personById.get(pid)!;
+      }
+      nameMapJson = JSON.stringify(nameMap);
+    }
+
     const result = await this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
       TEXT_ALIGN: 'center',
       BREAK_AFTER: String(this.settings.nameBreakAfter()),
@@ -668,6 +687,7 @@ export class OverlayComponent implements OnInit {
       TARGET_GROUP: targetGroup,
       SKIP_NAMES: doNames ? 'false' : 'true',
       SKIP_POSITIONS: doPositions ? 'false' : 'true',
+      NAME_MAP: nameMapJson,
     });
     const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'összes';
     const typeLabel = doNames && doPositions ? 'név+pozíció' : doNames ? 'név' : 'pozíció';

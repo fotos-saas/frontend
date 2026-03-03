@@ -8,6 +8,7 @@
  *   CONFIG.TEXT_ALIGN = "left" | "center" | "right" (default: "center")
  *   CONFIG.NAME_GAP_PX = szam (default: kep szelesseg * 0.08)
  *   CONFIG.BREAK_AFTER = szam (default: 0 — nincs sortores)
+ *   CONFIG.NAME_MAP = JSON object string {"layerName":"DB nev",...} (optional)
  *
  * Kimenet: JSON { "arranged": 5 }
  */
@@ -338,7 +339,7 @@ function positionPositionLayerUnderName(doc, posLayer, nameBottom, imgBounds, te
 // A baseline pont NEM fugg a szoveg tartalmatol, ezert az ekezetes
 // es ekezetmentes nevek ugyanarra a vonalra kerulnek.
 // Return: { imgBounds, nameBottom } — a position layer-hez is felhasznalhato (nem kell ujra lekerdezni)
-function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, breakAfter) {
+function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, breakAfter, nameMap) {
   var imgBounds = getBoundsNoEffects(imageLayer.id);
   var imgCenterX = (imgBounds.left + imgBounds.right) / 2;
   var imgBottom = imgBounds.bottom;
@@ -364,7 +365,13 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
     if (alignMap[textAlign]) {
       textItem.justification = alignMap[textAlign];
     }
-    var plainName = textItem.contents.replace(/[\r\n]/g, " ").replace(/  +/g, " ");
+    // Ha van NAME_MAP es tartalmazza a layer nevet → DB-bol vett helyes nev
+    var plainName;
+    if (nameMap && nameMap[nameLayer.name]) {
+      plainName = nameMap[nameLayer.name];
+    } else {
+      plainName = textItem.contents.replace(/[\r\n]/g, " ").replace(/  +/g, " ");
+    }
     var newText = breakName(plainName, breakAfter);
     if (textItem.contents !== newText) {
       textItem.contents = newText;
@@ -393,6 +400,26 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
   // Nev bounds lekeres (a position layer-nek kell a nameBottom)
   var nameBounds = getBoundsNoEffects(nameLayer.id);
   return { imgBounds: imgBounds, nameBottom: nameBounds.bottom };
+}
+
+// --- Egyszeru JSON object parser (ES3, nincs JSON.parse) ---
+// Formatum: {"key":"value","key2":"value2"}
+// Tamogatja az escaped \" es \\ karaktereket az ertekekben
+function parseSimpleJsonObject(str) {
+  var obj = {};
+  if (!str || str.length < 2) return obj;
+  // Kulso kapcsos zarojelek eltavolitasa
+  str = str.replace(/^\s*\{/, "").replace(/\}\s*$/, "");
+  if (str.length === 0) return obj;
+  // Key-value parok keresese: "key":"value"
+  var re = /"([^"\\]*(?:\\.[^"\\]*)*)"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/g;
+  var match;
+  while ((match = re.exec(str)) !== null) {
+    var key = match[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+    var val = match[2].replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+    obj[key] = val;
+  }
+  return obj;
 }
 
 // --- JSON escape (ES3) ---
@@ -462,6 +489,12 @@ function doArrangeNames() {
   var doNames = typeof CONFIG === "undefined" || !CONFIG.SKIP_NAMES || CONFIG.SKIP_NAMES !== "true";
   var doPositions = typeof CONFIG === "undefined" || !CONFIG.SKIP_POSITIONS || CONFIG.SKIP_POSITIONS !== "true";
 
+  // NAME_MAP: layer nev → DB-beli helyes nev (egyszer parse-olva)
+  var _nameMap = null;
+  if (doNames && typeof CONFIG !== "undefined" && CONFIG.NAME_MAP && CONFIG.NAME_MAP !== "") {
+    _nameMap = parseSimpleJsonObject(CONFIG.NAME_MAP);
+  }
+
   // CACHE: eloepitjuk a nev→layer Map-eket (1 bejaras/csoport az egesz futasra)
   var cache = buildLayerCaches(doc);
 
@@ -476,7 +509,7 @@ function doArrangeNames() {
     unlinkByName(doc, nl.name);
 
     if (doNames) {
-      var result = positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter);
+      var result = positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter, _nameMap);
       if (result) {
         arranged++;
         // Pozicio (beosztas) layer mozgatasa a nev ala

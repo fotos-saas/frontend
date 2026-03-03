@@ -401,6 +401,9 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
     // Egyebkent (nincs kijeloles VAGY nem Images layer) → mindenkit rendez
     var imageNames = (selected.length > 0) ? getImageSelectionNames(doc, selected) : [];
 
+    // TARGET_GROUP szures: "students", "teachers", vagy "all" (default)
+    var targetGroup = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "all";
+
     if (imageNames.length > 0) {
       // Csak a kijelolt kepek nevparjait rendezzuk
       for (var i = 0; i < imageNames.length; i++) {
@@ -409,10 +412,20 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
           nameLayers.push(nameLayer);
         }
       }
+    } else if (targetGroup === "students") {
+      var sGrp = getGroupByPath(doc, ["Names", "Students"]);
+      if (sGrp) { for (var si = 0; si < sGrp.artLayers.length; si++) nameLayers.push(sGrp.artLayers[si]); }
+    } else if (targetGroup === "teachers") {
+      var tGrp = getGroupByPath(doc, ["Names", "Teachers"]);
+      if (tGrp) { for (var ti2 = 0; ti2 < tGrp.artLayers.length; ti2++) nameLayers.push(tGrp.artLayers[ti2]); }
     } else {
-      // Nincs Images kijeloles → osszes nev layer
+      // all — osszes nev layer
       nameLayers = getAllNameLayers(doc);
     }
+
+    // Tipusok: nevek es/vagy poziciok mozgatasa
+    var doNames = typeof CONFIG === "undefined" || !CONFIG.SKIP_NAMES || CONFIG.SKIP_NAMES !== "true";
+    var doPositions = typeof CONFIG === "undefined" || !CONFIG.SKIP_POSITIONS || CONFIG.SKIP_POSITIONS !== "true";
 
     var arranged = 0;
     for (var j = 0; j < nameLayers.length; j++) {
@@ -423,14 +436,26 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
       // Unlink a rendezés elott (hogy szabadon mozgatható legyen)
       unlinkByName(doc, nl.name);
 
-      var result = positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter);
-      if (result) {
-        arranged++;
-
-        // Pozicio (beosztás) layer mozgatasa a nev ala — bounds-ok ujrahasznositasa
-        var posLayer = findPositionLayerByName(doc, nl.name);
-        if (posLayer) {
-          positionPositionLayerUnderName(doc, posLayer, result.nameBottom, result.imgBounds, textAlign);
+      if (doNames) {
+        var result = positionNameUnderImage(doc, nl, imgLayer, nameGapPx, textAlign, breakAfter);
+        if (result) {
+          arranged++;
+          // Pozicio (beosztás) layer mozgatasa a nev ala
+          if (doPositions) {
+            var posLayer = findPositionLayerByName(doc, nl.name);
+            if (posLayer) {
+              positionPositionLayerUnderName(doc, posLayer, result.nameBottom, result.imgBounds, textAlign);
+            }
+          }
+        }
+      } else if (doPositions) {
+        // Csak poziciokat mozgatjuk — a nev layert nem, de a kep bounds kell
+        var imgBoundsOnly = getBoundsNoEffects(imgLayer.id);
+        var nameLayerBounds = getBoundsNoEffects(nl.id);
+        var posLayerOnly = findPositionLayerByName(doc, nl.name);
+        if (posLayerOnly) {
+          positionPositionLayerUnderName(doc, posLayerOnly, nameLayerBounds.bottom, imgBoundsOnly, textAlign);
+          arranged++;
         }
       }
     }

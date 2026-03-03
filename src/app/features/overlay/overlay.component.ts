@@ -543,8 +543,10 @@ export class OverlayComponent implements OnInit {
 
     if (c.action === 'link') {
       await this.executeLinkQuickAction(c.target);
-    } else {
-      console.log('[QuickAction] TODO:', c.action, c.target);
+    } else if (c.action === 'position-labels') {
+      await this.executeArrangeQuickAction(c.target, this.qaPositionNames(), this.qaPositionPositions());
+    } else if (c.action === 'refresh-labels') {
+      await this.executeArrangeQuickAction(c.target, this.qaRefreshNames(), this.qaRefreshPositions());
     }
   }
   cancelQuickAction(): void { this.qaConfirm.set(null); }
@@ -632,6 +634,30 @@ export class OverlayComponent implements OnInit {
       { LAYER_NAMES: layerNames.join('|') },
     );
     this.showLinkResult(result, 'link');
+  }
+
+  private async executeArrangeQuickAction(target: string, doNames: boolean, doPositions: boolean): Promise<void> {
+    if (!doNames && !doPositions) { this.setLinkResult(false, 'Válassz típust (Nevek és/vagy Pozíciók)'); return; }
+    const targetGroup = target === 'teachers' ? 'teachers' : target === 'students' ? 'students' : 'all';
+    const result = await this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
+      TEXT_ALIGN: 'center',
+      BREAK_AFTER: String(this.settings.nameBreakAfter()),
+      NAME_GAP_CM: String(this.settings.nameGapCm()),
+      TARGET_GROUP: targetGroup,
+      SKIP_NAMES: doNames ? 'false' : 'true',
+      SKIP_POSITIONS: doPositions ? 'false' : 'true',
+    });
+    const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'összes';
+    const typeLabel = doNames && doPositions ? 'név+pozíció' : doNames ? 'név' : 'pozíció';
+    try {
+      if (result?.output) {
+        const data = JSON.parse(result.output.trim());
+        if (data.error) { this.setLinkResult(false, data.error); return; }
+        this.setLinkResult(true, `${data.arranged} ${typeLabel} rendezve (${label})`);
+      } else {
+        this.setLinkResult(true, `Rendezés kész (${label})`);
+      }
+    } catch { this.setLinkResult(true, `Rendezés kész (${label})`); }
   }
 
   private async runLinkCommand(commandId: string, script: string, type: 'link' | 'unlink'): Promise<void> {

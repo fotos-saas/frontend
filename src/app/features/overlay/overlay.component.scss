@@ -1302,11 +1302,19 @@
   -webkit-app-region: no-drag;
 }
 
-.drag-order-panel__scope {
+.drag-order-panel__controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.drag-order-panel__scope,
+.drag-order-panel__presets {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
 }
 
 .drag-order-panel__scope-label {

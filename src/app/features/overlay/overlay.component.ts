@@ -314,6 +314,69 @@ export class OverlayComponent implements OnInit {
     return this.dragOrderSelected().has(personId);
   }
 
+  /** Magyar ABC rendezés — lokális Intl.Collator, AI nélkül */
+  dragOrderSortAbc(): void {
+    const list = [...this.dragOrderList()];
+    const collator = new Intl.Collator('hu', { sensitivity: 'base' });
+    const prefixRe = /^(dr\.?\s*|ifj\.?\s*|id\.?\s*|prof\.?\s*|özv\.?\s*)/i;
+    const sortKey = (n: string) => n.replace(prefixRe, '').trim();
+    list.sort((a, b) => collator.compare(sortKey(a.name), sortKey(b.name)));
+    this.dragOrderList.set(list);
+  }
+
+  /** Fiú-lány felváltva — API gender classification */
+  async dragOrderSortGender(): Promise<void> {
+    const list = this.dragOrderList();
+    if (list.length < 2) return;
+    try {
+      const names = list.map(p => p.name);
+      const res = await firstValueFrom(
+        this.http.post<{ success: boolean; classifications: Array<{ name: string; gender: 'boy' | 'girl' }> }>(
+          `${environment.apiUrl}/partner/ai/classify-name-genders`,
+          { names },
+        ),
+      );
+      if (!res.success || !res.classifications) return;
+      const genderMap = new Map(res.classifications.map(c => [c.name, c.gender]));
+      const collator = new Intl.Collator('hu', { sensitivity: 'base' });
+      const boys = [...list].filter(p => genderMap.get(p.name) === 'boy').sort((a, b) => collator.compare(a.name, b.name));
+      const girls = [...list].filter(p => genderMap.get(p.name) === 'girl').sort((a, b) => collator.compare(a.name, b.name));
+      // Felváltva
+      const result: PersonItem[] = [];
+      const first = boys.length >= girls.length ? boys : girls;
+      const second = boys.length >= girls.length ? girls : boys;
+      let fi = 0, si = 0;
+      for (let i = 0; i < first.length + second.length; i++) {
+        if (i % 2 === 0 && fi < first.length) result.push(first[fi++]);
+        else if (si < second.length) result.push(second[si++]);
+        else if (fi < first.length) result.push(first[fi++]);
+      }
+      this.dragOrderList.set(result);
+    } catch { /* ignore */ }
+  }
+
+  /** Vezetőség előre — title alapján (igazgató, helyettes, stb.) */
+  dragOrderSortLeadership(): void {
+    const list = [...this.dragOrderList()];
+    const leadershipOrder = ['igazgató', 'intézményvezető', 'iskola igazgató', 'iskolaigazgató', 'igazgatóhelyettes', 'helyettes', 'aligazgató', 'tagozatvezető', 'munkaközösség-vezető', 'osztályfőnök'];
+    const getPriority = (title: string | null): number => {
+      if (!title) return 999;
+      const t = title.toLowerCase().trim();
+      for (let i = 0; i < leadershipOrder.length; i++) {
+        if (t.includes(leadershipOrder[i])) return i;
+      }
+      return 999;
+    };
+    const collator = new Intl.Collator('hu', { sensitivity: 'base' });
+    list.sort((a, b) => {
+      const pa = getPriority(a.title);
+      const pb = getPriority(b.title);
+      if (pa !== pb) return pa - pb;
+      return collator.compare(a.name, b.name);
+    });
+    this.dragOrderList.set(list);
+  }
+
   onDragOrderDrop(event: CdkDragDrop<PersonItem[]>): void {
     const list = [...this.dragOrderList()];
     const selected = this.dragOrderSelected();

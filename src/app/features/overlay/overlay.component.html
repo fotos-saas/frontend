@@ -710,12 +710,24 @@
     </button>
   </div>
   <div class="drag-order-panel__body">
-    <div class="drag-order-panel__scope">
-      <span class="drag-order-panel__scope-label">Célcsoport</span>
-      <div class="drag-order-panel__scope-buttons">
-        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'students'" (click)="setDragOrderScope('students')">Diákok</button>
-        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'teachers'" (click)="setDragOrderScope('teachers')">Tanárok</button>
-        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'all'" (click)="setDragOrderScope('all')">Mind</button>
+    <div class="drag-order-panel__controls">
+      <div class="drag-order-panel__scope">
+        <span class="drag-order-panel__scope-label">Célcsoport</span>
+        <div class="drag-order-panel__scope-buttons">
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'students'" (click)="setDragOrderScope('students')">Diákok</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'teachers'" (click)="setDragOrderScope('teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'all'" (click)="setDragOrderScope('all')">Mind</button>
+        </div>
+      </div>
+      <div class="drag-order-panel__presets">
+        <span class="drag-order-panel__scope-label">Rendezés</span>
+        <div class="drag-order-panel__scope-buttons">
+          <button class="qa-btn qa-btn--blue" (click)="dragOrderSortAbc()" matTooltip="Magyar ABC sorrend">ABC</button>
+          <button class="qa-btn qa-btn--purple" (click)="dragOrderSortGender()" matTooltip="Fiú-lány felváltva">Fiú-lány</button>
+          @if (dragOrderScope() === 'teachers' || dragOrderScope() === 'all') {
+            <button class="qa-btn qa-btn--amber" (click)="dragOrderSortLeadership()" matTooltip="Vezetőség (igazgató, helyettes) előre">Vezetőség</button>
+          }
+        </div>
       </div>
     </div>
     <div class="drag-order-panel__list" cdkDropList (cdkDropListDropped)="onDragOrderDrop($event)">

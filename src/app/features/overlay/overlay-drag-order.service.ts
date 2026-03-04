@@ -631,16 +631,14 @@ export class OverlayDragOrderService {
   // === Mentés ===
 
   async save(): Promise<void> {
-    this.logger.info('[DRAG-ORDER] save() called');
     const pid = this.projectIdResolver();
-    this.logger.info('[DRAG-ORDER] pid:', pid, 'groups:', this.groups().length, 'ungrouped:', this.ungrouped().length);
-    if (!pid) { this.logger.warn('[DRAG-ORDER] ABORT: no pid'); return; }
+    if (!pid) return;
 
-    // Flat lista a csoportok sorrendjéből
+    // Csoportok kibontása flat listára: csoport1 → csoport2 → ... → ungrouped
     const items = this.buildFlatList();
-    this.logger.info('[DRAG-ORDER] flat list items:', items.length, items.map(p => p.name).slice(0, 5));
-    if (items.length === 0) { this.logger.warn('[DRAG-ORDER] ABORT: empty list'); return; }
+    if (items.length === 0) return;
 
+    // Innentől ugyanaz, mint a régi flat lista mentés
     this.saving.set(true);
     try {
       const currentScope = this.scope();
@@ -668,7 +666,7 @@ export class OverlayDragOrderService {
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
       }
 
-      // 3. JSON mentés
+      // 3. Csoport-állapot mentés JSON-ba (PSD mellé)
       await this.saveToJson();
 
       // 4. Személylista újratöltés

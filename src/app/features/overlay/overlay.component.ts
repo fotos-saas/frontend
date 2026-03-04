@@ -453,13 +453,14 @@ export class OverlayComponent implements OnInit {
           LAYER_NAMES: layerNamesParam,
         });
 
-        // 2c. Reorder — rendezett sorrendben
+        // 2c. Reorder — rendezett sorrendben (ékezet-mentes matching)
+        const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         const humanToSlug = new Map<string, string>();
         for (const slug of slugNames) {
           const human = this.sortService.slugToHumanName(slug);
-          humanToSlug.set(human.toLowerCase(), slug);
+          humanToSlug.set(normalize(human), slug);
         }
-        const orderedSlugs = list.map(p => humanToSlug.get(p.name.toLowerCase()) || p.name);
+        const orderedSlugs = list.map(p => humanToSlug.get(normalize(p.name)) || p.name);
         const groupLabel = scope === 'teachers' ? 'Teachers' : scope === 'students' ? 'Students' : 'All';
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
       }

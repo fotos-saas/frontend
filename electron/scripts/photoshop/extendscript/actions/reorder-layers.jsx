@@ -1,10 +1,11 @@
 /**
  * reorder-layers.jsx — Layer atrendezes ORDERED_NAMES sorrend alapjan
  *
- * 1:1 a fotocms-admin.prod PRODUCTION logikaja:
- *   Fazis 1: moveLayersToBottomInGroup — CSAK Images layer STACK sorrend (Names-t NEM!)
- *   Fazis 2: rearrangeGroupLayersAndPositions — fizikai poziciok atrendezese
- *            (ROW_THRESHOLD: 20px — azonos sorban levo layerek csoportositasa)
+ * Fazis 0: linkLayers — Image + Names + Positions layerek osszelinkelese nev alapjan
+ * Fazis 1: moveLayersToBottomInGroup — Images layer STACK sorrend
+ * Fazis 2: rearrangeGroupLayersAndPositions — fizikai poziciok atrendezese
+ *          A linkeles miatt a Names/Positions layerek automatikusan kovetik a kepeket
+ * A linkelés megmarad — a layerek össze vannak kapcsolva a rendezés után is
  *
  * CONFIG bemenet:
  *   ORDERED_NAMES = JSON string tomb: ["slug1---123", "slug2---456", ...]
@@ -59,6 +60,82 @@ function moveLayersToBottomInGroup(group, layers) {
   tempGroup.remove();
 }
 
+// ========== Tobb layer kijelolese ID alapjan (ActionManager) ==========
+
+function _selectMultipleLayersById(layerIds) {
+  if (layerIds.length === 0) return;
+  var desc = new ActionDescriptor();
+  var ref = new ActionReference();
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
+  desc.putReference(charIDToTypeID("null"), ref);
+  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+  for (var i = 1; i < layerIds.length; i++) {
+    var addDesc = new ActionDescriptor();
+    var addRef = new ActionReference();
+    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
+    addDesc.putReference(charIDToTypeID("null"), addRef);
+    addDesc.putEnumerated(
+      stringIDToTypeID("selectionModifier"),
+      stringIDToTypeID("selectionModifierType"),
+      stringIDToTypeID("addToSelection")
+    );
+    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  }
+}
+
+// ========== FAZIS 0: Image + Names + Positions layerek osszelinkelese ==========
+// Minden image layer-hez megkeresi az azonos nevu Names es Positions layert,
+// majd PS nativ "Link Layers" funkcio-val osszekapcsolja oket.
+// A linkeles megmarad — a felhasznalo igy latja a Layers panelen is.
+
+function _linkLayersForGroup(subName) {
+  var imgGrp = getGroupByPath(_doc, ["Images", subName]);
+  if (!imgGrp) return;
+
+  var namesGrp = getGroupByPath(_doc, ["Names", subName]);
+  var posGrp = getGroupByPath(_doc, ["Positions", subName]);
+
+  for (var i = 0; i < imgGrp.artLayers.length; i++) {
+    var imgLayer = imgGrp.artLayers[i];
+    var lName = imgLayer.name;
+    var ids = [imgLayer.id];
+
+    // Names par keresese
+    if (namesGrp) {
+      try {
+        for (var n = 0; n < namesGrp.artLayers.length; n++) {
+          if (namesGrp.artLayers[n].name === lName) {
+            ids.push(namesGrp.artLayers[n].id);
+            break;
+          }
+        }
+      } catch(e) {}
+    }
+
+    // Positions par keresese
+    if (posGrp) {
+      try {
+        for (var p = 0; p < posGrp.artLayers.length; p++) {
+          if (posGrp.artLayers[p].name === lName) {
+            ids.push(posGrp.artLayers[p].id);
+            break;
+          }
+        }
+      } catch(e) {}
+    }
+
+    // Linkelés: csak ha 2+ layer van (image + legalabb egy par)
+    if (ids.length >= 2) {
+      _selectMultipleLayersById(ids);
+      var linkDesc = new ActionDescriptor();
+      var linkRef = new ActionReference();
+      linkRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+      linkDesc.putReference(charIDToTypeID("null"), linkRef);
+      executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
+    }
+  }
+}
+
 // ========== PRODUCTION: rearrangeGroupLayersAndPositions (organize-layers-by-current-position.jsx:35) ==========
 
 function rearrangeGroupLayersAndPositions(imageLayerGroup) {
@@ -81,7 +158,7 @@ function rearrangeGroupLayersAndPositions(imageLayerGroup) {
   // 3. Reverse (production minta: layerPositions = layerPositions.reverse())
   layerPositions = layerPositions.reverse();
 
-  // 4. Image layerek mozgatasa (production: moveLayerToPosition)
+  // 4. Image layerek mozgatasa — a linkeles miatt Names/Positions is kovetik
   for (var k = 0; k < layerPositions.length; k++) {
     moveLayerToPosition(imageLayers[k], layerPositions[k].x, layerPositions[k].y);
   }
@@ -122,8 +199,10 @@ function _doReorderLayers() {
     var imageLayers = imgGrp.artLayers;
     if (imageLayers.length < 2) continue;
 
-    // --- FAZIS 1: CSAK Images layer STACK sorrend csere ---
-    // (production: Names-t NEM rendezzuk stack-ben! arrange-by-custom-order.jsx 40. sor kikommentelve)
+    // --- FAZIS 0: Linkelés — Image + Names + Positions osszekapcsolasa ---
+    _linkLayersForGroup(subName);
+
+    // --- FAZIS 1: Images layer STACK sorrend csere ---
     var matchedLayers = [];
     var nameToLayer = {};
     for (var li = 0; li < imageLayers.length; li++) {
@@ -139,8 +218,8 @@ function _doReorderLayers() {
     // Production minta: reverse + moveLayersToBottomInGroup
     moveLayersToBottomInGroup(imgGrp, matchedLayers.reverse());
 
-    // --- FAZIS 2: Fizikai poziciok atrendezese (CSAK image layerek) ---
-    // (production: a Names layerek poziciojat az updateNamesAndPositions kezeli kulon)
+    // --- FAZIS 2: Fizikai poziciok atrendezese ---
+    // A linkeles miatt a Names + Positions layerek automatikusan kovetik a kepeket
     rearrangeGroupLayersAndPositions(imgGrp);
 
     totalReordered += matchedLayers.length;

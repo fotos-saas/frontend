@@ -126,6 +126,31 @@ export class OverlayPhotoshopService {
   }
 
   /**
+   * PS-ből kiszedi az Images layerek pozícióit (x, y) csoportonként.
+   * A drag order panel sor-szeparátor detektálásához használjuk.
+   */
+  async getImageLayerPositions(): Promise<{
+    students: Array<{ name: string; x: number; y: number }>;
+    teachers: Array<{ name: string; x: number; y: number }>;
+  }> {
+    const empty = { students: [], teachers: [] };
+    if (!window.electronAPI) return empty;
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({
+        scriptName: 'actions/get-image-positions.jsx',
+      });
+      if (!result.success || !result.output) return empty;
+      const cleaned = result.output.trim();
+      if (!cleaned.startsWith('{')) return empty;
+      const data = JSON.parse(cleaned);
+      return {
+        students: data.students || [],
+        teachers: data.teachers || [],
+      };
+    } catch { return empty; }
+  }
+
+  /**
    * PS-ből frissen lekéri a kijelölt layerek neveit (get-active-doc.jsx).
    * Visszaadja a nyers parsed doc-ot is a caller-nek.
    */

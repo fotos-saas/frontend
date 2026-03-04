@@ -187,8 +187,8 @@ export class OverlaySortService {
   }
 
   /** Nevek igazítása — delegálás a PS service-nek */
-  arrangeNames(textAlign: string): void {
-    this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
+  arrangeNames(textAlign: string): Promise<any> {
+    return this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
       TEXT_ALIGN: textAlign,
       BREAK_AFTER: String(this.settings.nameBreakAfter()),
       NAME_GAP_CM: String(this.settings.nameGapCm()),

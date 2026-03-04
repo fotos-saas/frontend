@@ -56,6 +56,9 @@ export class OverlayDragOrderService {
   readonly groups = signal<DragOrderGroup[]>([]);
   readonly ungrouped = signal<PersonItem[]>([]);
 
+  /** Person ID → PS canvas sor index (0-based). Sor-szeparátor megjelenítéshez. */
+  readonly rowBreaks = signal<Map<number, number>>(new Map());
+
   /** Person ID → PS slug mapping, save() használja a PS reorderhez */
   private personSlugMap = new Map<number, string>();
 
@@ -94,6 +97,47 @@ export class OverlayDragOrderService {
 
   /** Van-e csoport? */
   readonly hasGroups = computed(() => this.groups().length > 0);
+
+  /**
+   * Sor-szeparátor info: az ungrouped és csoport-listákon belül melyik elem előtt van sor-határ.
+   * Map<personId, { rowIndex: number; rowSize: number; isFirstInRow: boolean }>
+   */
+  readonly rowInfo = computed(() => {
+    const breaks = this.rowBreaks();
+    const result = new Map<number, { rowIndex: number; rowSize: number; isFirstInRow: boolean }>();
+    if (breaks.size === 0) return result;
+
+    // Végigmegyünk az ungrouped + csoportokon, és összeszámoljuk a sor-infókat
+    const processItems = (items: PersonItem[]) => {
+      let lastRow = -1;
+      // Előbb összeszámoljuk az egyes sorokhoz hány elem tartozik
+      const rowCounts = new Map<number, number>();
+      for (const item of items) {
+        const row = breaks.get(item.id);
+        if (row !== undefined) {
+          rowCounts.set(row, (rowCounts.get(row) || 0) + 1);
+        }
+      }
+      for (const item of items) {
+        const row = breaks.get(item.id);
+        if (row !== undefined) {
+          const isFirst = row !== lastRow;
+          result.set(item.id, {
+            rowIndex: row,
+            rowSize: rowCounts.get(row) || 0,
+            isFirstInRow: isFirst,
+          });
+          lastRow = row;
+        }
+      }
+    };
+
+    for (const g of this.groups()) {
+      processItems(g.items);
+    }
+    processItems(this.ungrouped());
+    return result;
+  });
 
   // Projekt ID resolver — komponens állítja be init-kor
   private projectIdResolver: () => number | null = () => null;
@@ -162,6 +206,7 @@ export class OverlayDragOrderService {
     if (slugList.length === 0) {
       this.refreshListFromDb_internal();
       await this.enrichTitlesFromPS();
+      this.rowBreaks.set(new Map());
       return;
     }
 
@@ -206,6 +251,9 @@ export class OverlayDragOrderService {
 
     this.ngZone.run(() => this.list.set(items));
     await this.enrichTitlesFromPS();
+
+    // Sor-szeparátor pozíciók betöltése PS-ből
+    await this.loadRowPositions(items);
   }
 
   /** DB-ből építi a listát — fallback ha nincs PS */
@@ -703,6 +751,76 @@ export class OverlayDragOrderService {
   /** Az összes elem (csoportokból + ungrouped) */
   private getAllItems(): PersonItem[] {
     return this.buildFlatList();
+  }
+
+  /** PS-ből betölti a layer pozíciókat és felépíti a sor-map-et */
+  private async loadRowPositions(items: PersonItem[]): Promise<void> {
+    const posData = await this.ps.getImageLayerPositions();
+    const s = this.scope();
+    const positions = s === 'teachers' ? posData.teachers
+      : s === 'students' ? posData.students
+      : [...posData.students, ...posData.teachers];
+    this.buildRowMap(positions, items);
+  }
+
+  /**
+   * PS layer pozíciók alapján sor-map építése.
+   * ROW_THRESHOLD=20px — konzisztens a reorder-layers.jsx-szel.
+   * Y koordináta alapján sorokba csoportosítja, majd X szerint rendezi.
+   */
+  private buildRowMap(
+    positions: Array<{ name: string; x: number; y: number }>,
+    items: PersonItem[],
+  ): void {
+    if (positions.length === 0) {
+      this.rowBreaks.set(new Map());
+      return;
+    }
+
+    const ROW_THRESHOLD = 20;
+
+    // slug → position map
+    const posMap = new Map<string, { x: number; y: number }>();
+    for (const p of positions) {
+      posMap.set(p.name, { x: p.x, y: p.y });
+    }
+
+    // Items-et kiegészítjük pozícióval, slug alapján
+    type ItemWithPos = { id: number; x: number; y: number };
+    const withPos: ItemWithPos[] = [];
+    for (const item of items) {
+      const slug = this.personSlugMap.get(item.id);
+      if (!slug) continue;
+      const pos = posMap.get(slug);
+      if (!pos) continue;
+      withPos.push({ id: item.id, x: pos.x, y: pos.y });
+    }
+
+    if (withPos.length === 0) {
+      this.rowBreaks.set(new Map());
+      return;
+    }
+
+    // Y szerint rendezés, azonos Y-on belül X szerint
+    withPos.sort((a, b) => {
+      if (Math.abs(a.y - b.y) <= ROW_THRESHOLD) return a.x - b.x;
+      return a.y - b.y;
+    });
+
+    // Sorokba csoportosítás
+    const result = new Map<number, number>();
+    let currentRow = 0;
+    let currentRowY = withPos[0].y;
+
+    for (const item of withPos) {
+      if (Math.abs(item.y - currentRowY) > ROW_THRESHOLD) {
+        currentRow++;
+        currentRowY = item.y;
+      }
+      result.set(item.id, currentRow);
+    }
+
+    this.rowBreaks.set(result);
   }
 
   /** Csoport ID kinyerése a CDK drop list container id-jéből */

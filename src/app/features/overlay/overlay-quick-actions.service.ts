@@ -6,6 +6,21 @@ import { OverlaySortService } from './overlay-sort.service';
 
 type QaTarget = 'all' | 'students' | 'teachers';
 
+/** Photoshop JSX script futtatasi eredmeny */
+interface JsxResult {
+  success?: boolean;
+  output?: string;
+  error?: string;
+}
+
+/** Photoshop link/unlink muvelet parse-olt valasza */
+interface JsxLinkData {
+  linked?: number;
+  unlinked?: number;
+  names?: string[];
+  error?: string;
+}
+
 /**
  * Gyors akciók üzleti logikája (link, arrange, refresh, sync-positions, reorder).
  * Kiemelve az overlay.component.ts-ből a redundancia csökkentése érdekében.
@@ -96,12 +111,12 @@ export class OverlayQuickActionsService {
     );
   }
 
-  showLinkResult(result: any, type: 'link' | 'unlink'): void {
+  showLinkResult(result: JsxResult | null, type: 'link' | 'unlink'): void {
     try {
       if (!result?.output) { this.setResult(false, 'Nincs válasz a Photoshoptól'); return; }
       const cleaned = result.output.trim();
       if (!cleaned.startsWith('{')) { this.setResult(false, 'Érvénytelen válasz'); return; }
-      const data = JSON.parse(cleaned);
+      const data: JsxLinkData = JSON.parse(cleaned);
       if (data.error) { this.setResult(false, data.error); return; }
       const count = type === 'link' ? data.linked : data.unlinked;
       const verb = type === 'link' ? 'linkelve' : 'szétlinkelve';
@@ -293,16 +308,16 @@ export class OverlayQuickActionsService {
     return nameMap;
   }
 
-  /** JSX eredmény feldolgozás egységes mintával */
+  /** JSX eredmeny feldolgozas egyseres mintaval */
   private handleJsxResult(
-    result: any,
-    formatSuccess: (data: any) => string,
+    result: JsxResult | null,
+    formatSuccess: (data: Record<string, unknown>) => string,
     fallbackMessage: string,
   ): void {
     try {
       if (result?.output) {
-        const data = JSON.parse(result.output.trim());
-        if (data.error) { this.setResult(false, data.error); return; }
+        const data: Record<string, unknown> = JSON.parse(result.output.trim());
+        if (data['error']) { this.setResult(false, String(data['error'])); return; }
         this.setResult(true, formatSuccess(data));
       } else {
         this.setResult(true, fallbackMessage);

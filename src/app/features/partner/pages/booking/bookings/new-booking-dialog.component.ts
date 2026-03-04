@@ -66,9 +66,9 @@ export class NewBookingDialogComponent implements OnInit {
     }
 
     this.bookingService.getSessionTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res: any) => {
-        const types = res.data?.session_types ?? res.data ?? [];
-        const active = types.filter((t: any) => t.is_active);
+      next: (res) => {
+        const types: SessionType[] = res.data ?? [];
+        const active = types.filter((t) => t.is_active);
         this.sessionTypes.set(active);
 
         // Ha van prefill dátum, auto-select első típus + slot betöltés

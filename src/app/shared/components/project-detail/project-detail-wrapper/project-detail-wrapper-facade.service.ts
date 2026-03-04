@@ -4,6 +4,7 @@ import {
   ViewContainerRef,
   ComponentRef,
   DestroyRef,
+  Type,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -24,6 +25,13 @@ import {
   DeleteVersionRequest,
 } from '../project-samples-tab/project-samples-tab.component';
 
+/** Dinamikusan betoltheto modal komponens output interface */
+interface ModalOutputs {
+  close?: { subscribe: (fn: () => void) => void };
+  saved?: { subscribe: (fn: (data: unknown) => void) => void };
+  qrCodeChanged?: { subscribe: (fn: (qr: QrCode | null) => void) => void };
+}
+
 /**
  * Project Detail Wrapper Facade Service
  *
@@ -37,19 +45,19 @@ import {
 export class ProjectDetailWrapperFacadeService<T> {
   private projectService!: IProjectDetailService;
   private backRoute!: string;
-  private contactModalComponent!: any;
-  private projectEditModalComponent: any | null = null;
-  private orderDataDialogComponent: any | null = null;
+  private contactModalComponent!: Type<unknown>;
+  private projectEditModalComponent: Type<unknown> | null = null;
+  private orderDataDialogComponent: Type<unknown> | null = null;
   private partnerService: PartnerService | null = null;
   private destroyRef!: DestroyRef;
   private router!: Router;
   private toast!: ToastService;
 
   // Dynamic component refs
-  private qrModalRef: ComponentRef<any> | null = null;
-  private contactModalRef: ComponentRef<any> | null = null;
-  private projectEditModalRef: ComponentRef<any> | null = null;
-  private orderDataDialogRef: ComponentRef<any> | null = null;
+  private qrModalRef: ComponentRef<unknown> | null = null;
+  private contactModalRef: ComponentRef<unknown> | null = null;
+  private projectEditModalRef: ComponentRef<unknown> | null = null;
+  private orderDataDialogRef: ComponentRef<unknown> | null = null;
 
   // State signals
   readonly loading = signal(true);
@@ -94,9 +102,9 @@ export class ProjectDetailWrapperFacadeService<T> {
   init(deps: {
     projectService: IProjectDetailService;
     backRoute: string;
-    contactModalComponent: any;
-    projectEditModalComponent: any | null;
-    orderDataDialogComponent: any | null;
+    contactModalComponent: Type<unknown>;
+    projectEditModalComponent: Type<unknown> | null;
+    orderDataDialogComponent: Type<unknown> | null;
     partnerService: PartnerService | null;
     destroyRef: DestroyRef;
     router: Router;
@@ -171,8 +179,8 @@ export class ProjectDetailWrapperFacadeService<T> {
     this.qrModalRef.setInput('projectName', projectData.name ?? '');
     this.qrModalRef.setInput('qrService', this.projectService as unknown as IQrCodeService);
 
-    (this.qrModalRef.instance as any).close.subscribe(() => this.closeQrModal());
-    (this.qrModalRef.instance as any).qrCodeChanged.subscribe((qr: QrCode | null) => {
+    (this.qrModalRef.instance as ModalOutputs).close?.subscribe(() => this.closeQrModal());
+    (this.qrModalRef.instance as ModalOutputs).qrCodeChanged?.subscribe((qr: QrCode | null) => {
       const id = this.projectData()?.id;
       if (id) this.loadProject(id, this.currentMapFn!);
     });
@@ -196,8 +204,8 @@ export class ProjectDetailWrapperFacadeService<T> {
     this.contactModalRef = container.createComponent(this.contactModalComponent);
     this.contactModalRef.setInput('projectId', projectData.id);
     this.contactModalRef.setInput('contact', contact);
-    (this.contactModalRef.instance as any).close?.subscribe(() => this.closeContactModal());
-    (this.contactModalRef.instance as any).saved?.subscribe((c: ProjectContact) => {
+    (this.contactModalRef.instance as ModalOutputs).close?.subscribe(() => this.closeContactModal());
+    (this.contactModalRef.instance as ModalOutputs).saved?.subscribe(() => {
       this.closeContactModal();
       const id = this.projectData()?.id;
       if (id) this.loadProject(id, this.currentMapFn!);
@@ -224,8 +232,8 @@ export class ProjectDetailWrapperFacadeService<T> {
     container.clear();
     this.projectEditModalRef = container.createComponent(this.projectEditModalComponent);
     this.projectEditModalRef.setInput('project', projectData);
-    (this.projectEditModalRef.instance as any).close?.subscribe(() => this.closeEditProjectModal());
-    (this.projectEditModalRef.instance as any).saved?.subscribe(() => {
+    (this.projectEditModalRef.instance as ModalOutputs).close?.subscribe(() => this.closeEditProjectModal());
+    (this.projectEditModalRef.instance as ModalOutputs).saved?.subscribe(() => {
       this.closeEditProjectModal();
       const id = this.projectData()?.id;
       if (id) this.loadProject(id, this.currentMapFn!);
@@ -247,7 +255,7 @@ export class ProjectDetailWrapperFacadeService<T> {
     container.clear();
     this.orderDataDialogRef = container.createComponent(this.orderDataDialogComponent);
     this.orderDataDialogRef.setInput('projectId', projectData.id);
-    (this.orderDataDialogRef.instance as any).close?.subscribe(() => this.closeOrderDataDialog());
+    (this.orderDataDialogRef.instance as ModalOutputs).close?.subscribe(() => this.closeOrderDataDialog());
   }
 
   closeOrderDataDialog(): void {

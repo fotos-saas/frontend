@@ -28,6 +28,7 @@ import {
   PsSelectComponent,
 } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
+import { ProjectListResponse, TabloPersonItem } from '../../../models/partner.models';
 
 interface ClassGroup {
   name: string;
@@ -105,9 +106,8 @@ export class BulkPrepaymentDialogComponent implements OnInit {
     this.projectService.getProjects()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res: any) => {
-          const list = res.data ?? res;
-          this.projects.set(list.map((p: any) => ({ id: p.id, label: p.name })));
+        next: (res: ProjectListResponse) => {
+          this.projects.set(res.data.map((p) => ({ id: p.id, label: p.name })));
         },
       });
   }
@@ -124,8 +124,8 @@ export class BulkPrepaymentDialogComponent implements OnInit {
     this.projectService.getProjectPersons(projectId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res: any) => {
-          const persons = res.data ?? res;
+        next: (res) => {
+          const persons: TabloPersonItem[] = res.data;
           const grouped = new Map<string, ClassGroup>();
           for (const p of persons) {
             const className = p.class_name || 'Osztály nélkül';

@@ -20,6 +20,7 @@ import {
 import { PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { PartnerProjectService } from '../../../services/partner-project.service';
+import { ProjectListResponse } from '../../../models/partner.models';
 
 interface StatCard {
   label: string;
@@ -99,11 +100,10 @@ export class PrepaymentStatsComponent implements OnInit {
     this.projectService.getProjects()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res: any) => {
-          const list = res.data ?? res;
+        next: (res: ProjectListResponse) => {
           this.projects.set([
             { id: '', label: 'Összes projekt' },
-            ...list.map((p: any) => ({ id: p.id.toString(), label: p.name })),
+            ...res.data.map((p) => ({ id: p.id.toString(), label: p.name })),
           ]);
         },
       });

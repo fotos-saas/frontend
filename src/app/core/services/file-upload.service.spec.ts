@@ -266,31 +266,4 @@ describe('FileUploadService', () => {
     });
   });
 
-  // ============================================================================
-  // formatFileSize
-  // ============================================================================
-  describe('formatFileSize', () => {
-    it('should format 0 bytes', () => {
-      expect(service.formatFileSize(0)).toBe('0 B');
-    });
-
-    it('should format bytes', () => {
-      expect(service.formatFileSize(500)).toBe('500 B');
-    });
-
-    it('should format kilobytes', () => {
-      expect(service.formatFileSize(1024)).toBe('1 KB');
-      expect(service.formatFileSize(2560)).toBe('2.5 KB');
-    });
-
-    it('should format megabytes', () => {
-      expect(service.formatFileSize(1024 * 1024)).toBe('1 MB');
-      expect(service.formatFileSize(5.5 * 1024 * 1024)).toBe('5.5 MB');
-    });
-
-    it('should format gigabytes', () => {
-      expect(service.formatFileSize(1024 * 1024 * 1024)).toBe('1 GB');
-      expect(service.formatFileSize(2.5 * 1024 * 1024 * 1024)).toBe('2.5 GB');
-    });
-  });
 });

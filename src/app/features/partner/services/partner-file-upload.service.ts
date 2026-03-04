@@ -97,10 +97,6 @@ export class PartnerFileUploadService {
       : this.attachmentUploading();
   }
 
-  formatFileSize(bytes: number): string {
-    return this.coreFileUpload.formatFileSize(bytes);
-  }
-
   get backgroundConfig() {
     return this.coreFileUpload.backgroundConfig;
   }

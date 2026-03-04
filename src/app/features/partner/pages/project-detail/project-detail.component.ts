@@ -9,7 +9,7 @@ import {
   PROJECT_ORDER_DATA_DIALOG_COMPONENT,
 } from '../../../../shared/components/project-detail';
 import { PartnerService, PartnerProjectDetails } from '../../services/partner.service';
-import { ContactEditorModalComponent } from '../../components/contact-editor-modal/contact-editor-modal.component';
+import { ContactEditorModalComponent } from '@shared/components/contact-editor-modal/contact-editor-modal.component';
 import { ProjectEditModalComponent } from '../../components/project-edit-modal/project-edit-modal.component';
 import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
 

@@ -96,13 +96,6 @@ export class MediaUploadService {
   }
 
   /**
-   * Fájl méret formázás (delegate to validator)
-   */
-  formatFileSize(bytes: number): string {
-    return this.validator.formatFileSize(bytes);
-  }
-
-  /**
    * Max fájlok száma
    */
   get maxFiles(): number {

@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { formatPrice as formatPriceUtil } from '../../../shared/utils/formatters.util';
 
 /**
  * Addon definíció
@@ -105,14 +104,6 @@ export class AddonService {
    */
   cancel(key: string): Observable<AddonCancelResponse> {
     return this.http.delete<AddonCancelResponse>(`${this.baseUrl}/${key}`);
-  }
-
-  /**
-   * Ár formázás HUF-ban
-   * @deprecated Használd a formatPrice() függvényt a '@shared/utils/formatters.util'-ból
-   */
-  formatPrice(price: number): string {
-    return formatPriceUtil(price);
   }
 
   /**

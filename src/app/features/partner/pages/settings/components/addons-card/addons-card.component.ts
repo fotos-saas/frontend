@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AddonService, Addon, AddonListResponse } from '../../../../services/addon.service';
+import { formatPrice } from '@shared/utils/formatters.util';
 import { ToastService } from '../../../../../../core/services/toast.service';
 import { LoggerService } from '../../../../../../core/services/logger.service';
 import { ICONS } from '../../../../../../shared/constants/icons.constants';
@@ -140,7 +141,7 @@ export class AddonsCardComponent implements OnInit {
   }
 
   formatPrice(price: number): string {
-    return this.addonService.formatPrice(price);
+    return formatPrice(price);
   }
 
   getFeatureIcon(feature: string): string {

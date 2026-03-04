@@ -7,7 +7,7 @@ import {
   PROJECT_CONTACT_MODAL_COMPONENT,
 } from '../../../../shared/components/project-detail';
 import { MarketerService, ProjectDetails } from '../../services/marketer.service';
-import { ContactEditorModalComponent } from '../../components/contact-editor-modal/contact-editor-modal.component';
+import { ContactEditorModalComponent } from '@shared/components/contact-editor-modal/contact-editor-modal.component';
 
 /**
  * Marketer Project Detail - Smart wrapper komponens.

@@ -134,16 +134,6 @@ export class FileUploadService {
   }
 
   /**
-   * Fájlméret formázása olvasható formátumban
-   * Delegálja a core service-nek.
-   * @param bytes - Méret byte-ban
-   * @returns Formázott string (pl. "2.5 MB")
-   */
-  formatFileSize(bytes: number): string {
-    return this.coreFileUpload.formatFileSize(bytes);
-  }
-
-  /**
    * Háttérkép konfiguráció lekérése
    */
   get backgroundConfig() {

@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { formatFileSize as formatFileSizeUtil } from '@shared/utils/formatters.util';
-
 /**
  * Magic bytes konfiguráció
  */
@@ -207,13 +205,4 @@ export class FileUploadService {
     });
   }
 
-  /**
-   * Fájlméret formázása olvasható formátumban
-   * @deprecated Használd a `formatFileSize` függvényt a `@shared/utils/formatters.util`-ból
-   * @param bytes - Méret byte-ban
-   * @returns Formázott string (pl. "2.5 MB")
-   */
-  formatFileSize(bytes: number): string {
-    return formatFileSizeUtil(bytes);
-  }
 }

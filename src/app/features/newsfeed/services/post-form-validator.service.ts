@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { formatFileSize } from '@shared/utils/formatters.util';
 
 /**
  * Validációs hibák típus
@@ -156,14 +155,6 @@ export class PostFormValidatorService {
     }
 
     return { valid: true };
-  }
-
-  /**
-   * Fájl méret formázás
-   * @deprecated Használd a `formatFileSize` függvényt a `@shared/utils/formatters.util`-ból
-   */
-  formatFileSize(bytes: number): string {
-    return formatFileSize(bytes);
   }
 
   /**

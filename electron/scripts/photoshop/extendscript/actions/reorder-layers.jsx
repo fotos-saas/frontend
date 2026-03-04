@@ -1,16 +1,15 @@
 /**
  * reorder-layers.jsx — Layer poziciok atrendezese megadott nevsorrendben
  *
- * Bemeneti JSON (CONFIG-ban):
- *   ORDERED_NAMES = JSON string tomb: ["Nev1", "Nev2", "Nev3", ...]
- *   GROUP = "Students" | "Teachers" | "All" (default: "All")
+ * Production (fotocms-admin.prod) mintajara epul:
+ *   1. Slot poziciok kimentese (image layerek aktualis X,Y koordinatai, Y->X sorrendben)
+ *   2. moveLayersToBottomInGroup — PS layer STACK SORREND atrendezese (nem fizikai mozgatas!)
+ *   3. Fizikai poziciok atrendezese: az uj stack sorrend szerint az image layereket a slotokba mozgatja
+ *   4. Names layereket KULON, ugyanazzal a deltaval mozgatja (nem linkelt!)
  *
- * Mukodese (production minta alapjan):
- *   1. Kiszedi az Images/Students es/vagy Images/Teachers layerek pozicioit (slot-ok)
- *   2. A slot-okat sor-oszlop sorrendbe rendezi (Y->X)
- *   3. Az ORDERED_NAMES alapjan az image layereket a slot poziciokba mozgatja
- *   4. A Names layereket KULON mozgatja ugyanazzal a deltaval (nem linkelt!)
- *   5. Az egesz muvelet egyetlen history lepes (suspendHistory)
+ * Bemeneti JSON (CONFIG-ban):
+ *   ORDERED_NAMES = JSON string tomb: ["slug1---123", "slug2---456", ...]
+ *   GROUP = "Students" | "Teachers" | "All" (default: "All")
  *
  * Kimenet: JSON { "reordered": N }
  */
@@ -18,17 +17,16 @@
 // #include "../lib/config.jsx"
 // #include "../lib/utils.jsx"
 
-var ROW_THRESHOLD = 20; // px
+var ROW_THRESHOLD = 20; // px — ezen belul azonos sor
 
-// --- Globalis valtozok (suspendHistory string-eval miatt) ---
 var _doc, _orderedNames, _groupFilter, _reorderResult;
 
+// --- Bounds lekerese effect nelkul (ActionManager, gyors) ---
 function getBoundsNoEffects(layerId) {
   selectLayerById(layerId);
   var ref = new ActionReference();
   ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
   var desc = executeActionGet(ref);
-
   var boundsKey = stringIDToTypeID("boundsNoEffects");
   var b;
   if (desc.hasKey(boundsKey)) {
@@ -44,7 +42,8 @@ function getBoundsNoEffects(layerId) {
   };
 }
 
-function collectLayers(doc, groupPath) {
+// --- Image layerek osszegyujtese egy csoportbol ---
+function collectLayerInfos(doc, groupPath) {
   var grp = getGroupByPath(doc, groupPath);
   if (!grp) return [];
   var result = [];
@@ -56,36 +55,15 @@ function collectLayers(doc, groupPath) {
       layerId: layer.id,
       name: layer.name,
       x: b.left,
-      y: b.top,
-      w: b.right - b.left,
-      h: b.bottom - b.top
+      y: b.top
     });
   }
   return result;
 }
 
-/** Names csoportbol az azonos nevu layereket gyujti ki */
-function collectNameLayers(doc) {
-  var groups = [
-    ["Names", "Students"],
-    ["Names", "Teachers"]
-  ];
-  var nameMap = {};
-  for (var g = 0; g < groups.length; g++) {
-    var grp = getGroupByPath(doc, groups[g]);
-    if (!grp) continue;
-    for (var i = 0; i < grp.artLayers.length; i++) {
-      var layer = grp.artLayers[i];
-      var name = layer.name;
-      if (!nameMap[name]) nameMap[name] = [];
-      nameMap[name].push({ layerId: layer.id, layer: layer });
-    }
-  }
-  return nameMap;
-}
-
-function getPositionSlots(layers) {
-  var sorted = layers.slice(0);
+// --- Slot poziciok kiszedese (Y->X sorrend) ---
+function getPositionSlots(layerInfos) {
+  var sorted = layerInfos.slice(0);
   sorted.sort(function (a, b) { return a.y - b.y; });
 
   var rows = [];
@@ -115,27 +93,41 @@ function getPositionSlots(layers) {
   return slots;
 }
 
-function moveLayerTo(layerId, targetX, targetY) {
-  selectLayerById(layerId);
-  var b = getBoundsNoEffects(layerId);
-  var dx = targetX - b.left;
-  var dy = targetY - b.top;
-  if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-    app.activeDocument.activeLayer.translate(
-      new UnitValue(Math.round(dx), "px"),
-      new UnitValue(Math.round(dy), "px")
-    );
+// --- Layer stack sorrend atrendezese csoporton belul (production minta) ---
+// Temp group trukk: atrakja a layereket temp-be, majd PLACEATEND-del visszarakja
+function moveLayersToBottomInGroup(group, layers) {
+  var tempGroup = group.layerSets.add();
+  tempGroup.name = "TempReorder";
+
+  for (var i = 0; i < layers.length; i++) {
+    layers[i].move(tempGroup, ElementPlacement.INSIDE);
   }
-  return { dx: dx, dy: dy };
+
+  // Fordított sorrendben visszarakjuk — igy az elso layer lesz "legfelul"
+  for (var j = layers.length - 1; j >= 0; j--) {
+    tempGroup.artLayers[j].move(group, ElementPlacement.PLACEATEND);
+  }
+
+  tempGroup.remove();
 }
 
-function moveLayerByDelta(layerId, dx, dy) {
-  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
-  selectLayerById(layerId);
-  app.activeDocument.activeLayer.translate(
-    new UnitValue(Math.round(dx), "px"),
-    new UnitValue(Math.round(dy), "px")
-  );
+// --- Names layerek osszegyujtese nev alapjan ---
+function collectNameLayerMap(doc) {
+  var groups = [
+    ["Names", "Students"],
+    ["Names", "Teachers"]
+  ];
+  var map = {};
+  for (var g = 0; g < groups.length; g++) {
+    var grp = getGroupByPath(doc, groups[g]);
+    if (!grp) continue;
+    for (var i = 0; i < grp.artLayers.length; i++) {
+      var layer = grp.artLayers[i];
+      if (!map[layer.name]) map[layer.name] = [];
+      map[layer.name].push(layer);
+    }
+  }
+  return map;
 }
 
 function parseJsonArray(str) {
@@ -150,95 +142,171 @@ function parseJsonArray(str) {
   return result;
 }
 
-// --- Fo reorder logika (suspendHistory-bol hivva) ---
+// --- Fo logika ---
 function _doReorderLayers() {
-  // 1. Image layerek osszegyujtese a scope alapjan
-  var allLayers = [];
+  // 1. Image layerek osszegyujtese
+  var imgGroups = [];
   if (_groupFilter === "All" || _groupFilter === "Students") {
-    allLayers = allLayers.concat(collectLayers(_doc, ["Images", "Students"]));
+    imgGroups.push(["Images", "Students"]);
   }
   if (_groupFilter === "All" || _groupFilter === "Teachers") {
-    allLayers = allLayers.concat(collectLayers(_doc, ["Images", "Teachers"]));
+    imgGroups.push(["Images", "Teachers"]);
   }
 
-  if (allLayers.length < 2) {
+  var allInfos = [];
+  for (var g = 0; g < imgGroups.length; g++) {
+    allInfos = allInfos.concat(collectLayerInfos(_doc, imgGroups[g]));
+  }
+
+  if (allInfos.length < 2) {
     _reorderResult = '{"reordered":0}';
     return;
   }
 
-  // 2. Name layerek osszegyujtese (kulon kezeljuk, nem linkelt!)
-  var nameLayers = collectNameLayers(_doc);
-
-  // 3. Nev -> layer mapping
-  var nameToLayer = {};
-  for (var i = 0; i < allLayers.length; i++) {
-    var n = allLayers[i].name;
-    if (n && !nameToLayer[n]) {
-      nameToLayer[n] = allLayers[i];
+  // 2. Nev -> layerInfo mapping
+  var nameToInfo = {};
+  for (var i = 0; i < allInfos.length; i++) {
+    if (allInfos[i].name && !nameToInfo[allInfos[i].name]) {
+      nameToInfo[allInfos[i].name] = allInfos[i];
     }
   }
 
-  // 4. Csak a matchelt layerekbol szedunk slot-okat
-  var involvedLayers = [];
+  // 3. Matchelt layerek kigyujtese (ORDERED_NAMES sorrendben)
+  var matchedInfos = [];
   for (var k = 0; k < _orderedNames.length; k++) {
-    if (nameToLayer[_orderedNames[k]]) {
-      involvedLayers.push(nameToLayer[_orderedNames[k]]);
+    if (nameToInfo[_orderedNames[k]]) {
+      matchedInfos.push(nameToInfo[_orderedNames[k]]);
     }
   }
 
-  if (involvedLayers.length < 2) {
-    _reorderResult = '{"reordered":0,"error":"not enough matches"}';
+  if (matchedInfos.length < 2) {
+    _reorderResult = '{"reordered":0,"error":"not enough matches, got ' + matchedInfos.length + '"}';
     return;
   }
 
-  // 5. Slot poziciok kiszedese (Y->X sorrend)
-  var slots = getPositionSlots(involvedLayers);
+  // 4. Slot poziciok kimentese (az EREDETI poziciokbol, MIELOTT barmi mozogna)
+  var slots = getPositionSlots(matchedInfos);
 
-  // 6. Melyik layernek hova kell mennie
-  var moves = [];
-  for (var j = 0; j < Math.min(_orderedNames.length, slots.length); j++) {
-    var layerInfo = nameToLayer[_orderedNames[j]];
-    if (!layerInfo) continue;
-    moves.push({
-      layerId: layerInfo.layerId,
-      name: layerInfo.name,
-      fromX: layerInfo.x,
-      fromY: layerInfo.y,
-      targetX: slots[j].x,
-      targetY: slots[j].y
-    });
-  }
+  // 5. Layer STACK sorrend atrendezese csoportonkent
+  //    (ez NEM mozgatja fizikailag a layereket, csak a PS panel sorrendjuket allitja)
+  for (var gi = 0; gi < imgGroups.length; gi++) {
+    var grp = getGroupByPath(_doc, imgGroups[gi]);
+    if (!grp) continue;
 
-  // 7. Eloszor MINDEN image layer eredeti poziciojat elmentjuk
-  //    (mert a mozgatas kozben valtoznak a poziciok)
-  var savedPositions = {};
-  for (var sp = 0; sp < moves.length; sp++) {
-    var spb = getBoundsNoEffects(moves[sp].layerId);
-    savedPositions[moves[sp].layerId] = { x: spb.left, y: spb.top };
-  }
+    // Melyik ORDERED layerek vannak ebben a csoportban?
+    var orderedInGroup = [];
+    var otherInGroup = [];
+    var existingNames = {};
 
-  // 8. Image layerek mozgatasa a cel slot-okba
-  //    A Names layereket KULON mozgatjuk ugyanazzal a deltaval
-  var reordered = 0;
-  for (var m = 0; m < moves.length; m++) {
-    // Friss pozicio lekerese (korabbi mozgatasok utan valtozhatott)
-    var curBounds = getBoundsNoEffects(moves[m].layerId);
-    var dx = moves[m].targetX - curBounds.left;
-    var dy = moves[m].targetY - curBounds.top;
-
-    // Image layer mozgatasa
-    if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-      moveLayerByDelta(moves[m].layerId, dx, dy);
-
-      // Names layerek mozgatasa UGYANAZZAL a deltaval (KULON, nem linkelt!)
-      var nameGroup = nameLayers[moves[m].name];
-      if (nameGroup) {
-        for (var nl = 0; nl < nameGroup.length; nl++) {
-          moveLayerByDelta(nameGroup[nl].layerId, dx, dy);
+    // Eloszor az ORDERED_NAMES sorrendben
+    for (var oi = 0; oi < _orderedNames.length; oi++) {
+      for (var li = 0; li < grp.artLayers.length; li++) {
+        if (grp.artLayers[li].name === _orderedNames[oi] && !existingNames[_orderedNames[oi]]) {
+          orderedInGroup.push(grp.artLayers[li]);
+          existingNames[_orderedNames[oi]] = true;
+          break;
         }
       }
     }
 
+    // ORDERED_NAMES-ben nem szereplo layerek a vegere
+    for (var xi = 0; xi < grp.artLayers.length; xi++) {
+      if (!existingNames[grp.artLayers[xi].name]) {
+        otherInGroup.push(grp.artLayers[xi]);
+      }
+    }
+
+    var finalOrder = orderedInGroup.concat(otherInGroup);
+    if (finalOrder.length > 1) {
+      moveLayersToBottomInGroup(grp, finalOrder);
+    }
+  }
+
+  // 6. Names layerek STACK sorrendjét is atrendezzuk (parhuzamos kezeleshez)
+  var nameGroups = [];
+  if (_groupFilter === "All" || _groupFilter === "Students") {
+    nameGroups.push(["Names", "Students"]);
+  }
+  if (_groupFilter === "All" || _groupFilter === "Teachers") {
+    nameGroups.push(["Names", "Teachers"]);
+  }
+
+  for (var ngi = 0; ngi < nameGroups.length; ngi++) {
+    var ngrp = getGroupByPath(_doc, nameGroups[ngi]);
+    if (!ngrp) continue;
+
+    var orderedNameLayers = [];
+    var otherNameLayers = [];
+    var usedNameLayers = {};
+
+    for (var oni = 0; oni < _orderedNames.length; oni++) {
+      for (var nli = 0; nli < ngrp.artLayers.length; nli++) {
+        if (ngrp.artLayers[nli].name === _orderedNames[oni] && !usedNameLayers[_orderedNames[oni]]) {
+          orderedNameLayers.push(ngrp.artLayers[nli]);
+          usedNameLayers[_orderedNames[oni]] = true;
+          break;
+        }
+      }
+    }
+
+    for (var xni = 0; xni < ngrp.artLayers.length; xni++) {
+      if (!usedNameLayers[ngrp.artLayers[xni].name]) {
+        otherNameLayers.push(ngrp.artLayers[xni]);
+      }
+    }
+
+    var finalNameOrder = orderedNameLayers.concat(otherNameLayers);
+    if (finalNameOrder.length > 1) {
+      moveLayersToBottomInGroup(ngrp, finalNameOrder);
+    }
+  }
+
+  // 7. Fizikai poziciok atrendezese
+  //    Most mar a stack sorrend megegyezik az ORDERED_NAMES sorrenddel.
+  //    Az image layereket (uj stack sorrendben) a slot poziciokba mozgatjuk.
+  //    A Name layereket UGYANAZZAL a deltaval mozgatjuk.
+  var nameLayerMap = collectNameLayerMap(_doc);
+
+  // Ujra begyujtjuk az image layereket (stack sorrend mar atrendezve!)
+  var freshInfos = [];
+  for (var fg = 0; fg < imgGroups.length; fg++) {
+    freshInfos = freshInfos.concat(collectLayerInfos(_doc, imgGroups[fg]));
+  }
+
+  // Slot index — a freshInfos-t a stack sorrendben kapjuk, a slots-t Y->X sorrendben
+  // A stack sorrend mar ORDERED_NAMES szerinti, tehat freshInfos[0] = elso rendezett layer
+  var reordered = 0;
+  var slotIdx = 0;
+  for (var fi = 0; fi < freshInfos.length && slotIdx < slots.length; fi++) {
+    var info = freshInfos[fi];
+    var slot = slots[slotIdx];
+
+    // Friss pozicio lekerese
+    var curB = getBoundsNoEffects(info.layerId);
+    var dx = slot.x - curB.left;
+    var dy = slot.y - curB.top;
+
+    if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+      // Image layer mozgatasa
+      selectLayerById(info.layerId);
+      _doc.activeLayer.translate(
+        new UnitValue(Math.round(dx), "px"),
+        new UnitValue(Math.round(dy), "px")
+      );
+
+      // Names layer(ek) mozgatasa UGYANAZZAL a deltaval
+      var nameSiblings = nameLayerMap[info.name];
+      if (nameSiblings) {
+        for (var ns = 0; ns < nameSiblings.length; ns++) {
+          nameSiblings[ns].translate(
+            new UnitValue(Math.round(dx), "px"),
+            new UnitValue(Math.round(dy), "px")
+          );
+        }
+      }
+    }
+
+    slotIdx++;
     reordered++;
   }
 
@@ -248,20 +316,14 @@ function _doReorderLayers() {
 // --- Entry point ---
 var __result = (function () {
   try {
-    if (app.documents.length === 0) {
-      return '{"reordered":0}';
-    }
+    if (app.documents.length === 0) return '{"reordered":0}';
     _doc = app.activeDocument;
 
     var orderedNamesStr = typeof CONFIG !== "undefined" && CONFIG.ORDERED_NAMES ? CONFIG.ORDERED_NAMES : "";
-    if (!orderedNamesStr) {
-      return '{"reordered":0,"error":"No ORDERED_NAMES"}';
-    }
+    if (!orderedNamesStr) return '{"reordered":0,"error":"No ORDERED_NAMES"}';
 
     _orderedNames = parseJsonArray(orderedNamesStr);
-    if (_orderedNames.length === 0) {
-      return '{"reordered":0}';
-    }
+    if (_orderedNames.length === 0) return '{"reordered":0}';
 
     _groupFilter = typeof CONFIG !== "undefined" && CONFIG.GROUP ? CONFIG.GROUP : "All";
     _reorderResult = '{"reordered":0}';
@@ -269,7 +331,6 @@ var __result = (function () {
     var oldRulerUnits = app.preferences.rulerUnits;
     app.preferences.rulerUnits = Units.PIXELS;
 
-    // Egyetlen history lepes — Ctrl+Z-vel visszavonhato
     _doc.suspendHistory("Layerek atrendezese", "_doReorderLayers()");
 
     app.preferences.rulerUnits = oldRulerUnits;

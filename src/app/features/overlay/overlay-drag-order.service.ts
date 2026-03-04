@@ -34,6 +34,9 @@ export class OverlayDragOrderService {
   /** Person ID → PS slug mapping, save() használja a PS reorderhez */
   private personSlugMap = new Map<number, string>();
 
+  /** Cachelt PS layer data — scope váltáskor nem kell újra lekérni */
+  private psLayerDataCache: { names: string[]; students: string[]; teachers: string[] } | null = null;
+
   /** Szűrt lista — keresés alapján (drag & drop a teljes listán működik, a keresés csak vizuálisan szűr) */
   readonly filteredList = computed(() => {
     const items = this.list();
@@ -64,6 +67,7 @@ export class OverlayDragOrderService {
     this.panelOpen.set(false);
     this.searchQuery.set('');
     this.clearSelection();
+    this.psLayerDataCache = null;
   }
 
   clearSelection(): void { this.selected.set(new Set()); }
@@ -74,11 +78,12 @@ export class OverlayDragOrderService {
     this.refreshListFromPS();
   }
 
-  /** DB-ből újratölti a személyeket, frissíti a listát PS-ből */
+  /** DB-ből újratölti a személyeket, PS cache-t törli, frissíti a listát PS-ből */
   async refreshFromDb(): Promise<void> {
     const pid = this.projectIdResolver();
     if (!pid) return;
     this.refreshing.set(true);
+    this.psLayerDataCache = null;
     try {
       await this.projectService.fetchPersons(pid);
       await this.refreshListFromPS();
@@ -93,7 +98,10 @@ export class OverlayDragOrderService {
    * Ha nincs PS (nem Electron) → DB fallback.
    */
   private async refreshListFromPS(): Promise<void> {
-    const data = await this.ps.getImageLayerData();
+    if (!this.psLayerDataCache) {
+      this.psLayerDataCache = await this.ps.getImageLayerData();
+    }
+    const data = this.psLayerDataCache;
     const s = this.scope();
     const slugList = s === 'teachers' ? data.teachers
       : s === 'students' ? data.students : data.names;

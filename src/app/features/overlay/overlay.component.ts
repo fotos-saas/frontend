@@ -425,6 +425,7 @@ export class OverlayComponent implements OnInit {
     this.dragOrderSaving.set(true);
     try {
       const positions = list.map((p, i) => ({ id: p.id, position: i + 1 }));
+      const scope = this.dragOrderScope();
 
       // 1. Backend position mentés
       await firstValueFrom(
@@ -435,12 +436,24 @@ export class OverlayComponent implements OnInit {
       );
 
       // 2. PS layer átrendezés — slug mapping
-      const scope = this.dragOrderScope();
       const data = await this.ps.getImageLayerData();
       const slugNames = scope === 'teachers' ? data.teachers
         : scope === 'students' ? data.students : data.names;
 
       if (slugNames.length >= 2) {
+        const layerNamesParam = slugNames.join('|');
+
+        // 2a. Unlink all scope-ban
+        await this.ps.runJsx('unlink-layers', 'actions/unlink-selected.jsx', {
+          LAYER_NAMES: layerNamesParam,
+        });
+
+        // 2b. Relink all scope-ban
+        await this.ps.runJsx('link-layers', 'actions/link-selected.jsx', {
+          LAYER_NAMES: layerNamesParam,
+        });
+
+        // 2c. Reorder — rendezett sorrendben
         const humanToSlug = new Map<string, string>();
         for (const slug of slugNames) {
           const human = this.sortService.slugToHumanName(slug);

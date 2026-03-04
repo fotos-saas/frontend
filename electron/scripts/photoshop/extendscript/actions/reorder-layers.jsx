@@ -5,12 +5,11 @@
  *   ORDERED_NAMES = JSON string tomb: ["Nev1", "Nev2", "Nev3", ...]
  *   GROUP = "Students" | "Teachers" | "All" (default: "All")
  *
- * Mukodese:
+ * Mukodese (production minta alapjan):
  *   1. Kiszedi az Images/Students es/vagy Images/Teachers layerek pozicioit (slot-ok)
  *   2. A slot-okat sor-oszlop sorrendbe rendezi (Y->X)
- *   3. Az ORDERED_NAMES alapjan a layereket a slot-okba mozgatja
- *      (ket menetes: eloszor off-screen parkol, aztan cel pozicioba tesz)
- *   4. Az azonos nevu layereket is mozgatja (Names csoport, stb.) — linkelt mozgas
+ *   3. Az ORDERED_NAMES alapjan az image layereket a slot poziciokba mozgatja
+ *   4. A Names layereket KULON mozgatja ugyanazzal a deltaval (nem linkelt!)
  *   5. Az egesz muvelet egyetlen history lepes (suspendHistory)
  *
  * Kimenet: JSON { "reordered": N }
@@ -65,23 +64,24 @@ function collectLayers(doc, groupPath) {
   return result;
 }
 
-function collectLinkedLayers(doc) {
+/** Names csoportbol az azonos nevu layereket gyujti ki */
+function collectNameLayers(doc) {
   var groups = [
     ["Names", "Students"],
     ["Names", "Teachers"]
   ];
-  var linked = {};
+  var nameMap = {};
   for (var g = 0; g < groups.length; g++) {
     var grp = getGroupByPath(doc, groups[g]);
     if (!grp) continue;
     for (var i = 0; i < grp.artLayers.length; i++) {
       var layer = grp.artLayers[i];
       var name = layer.name;
-      if (!linked[name]) linked[name] = [];
-      linked[name].push({ layerId: layer.id, layer: layer });
+      if (!nameMap[name]) nameMap[name] = [];
+      nameMap[name].push({ layerId: layer.id, layer: layer });
     }
   }
-  return linked;
+  return nameMap;
 }
 
 function getPositionSlots(layers) {
@@ -115,22 +115,27 @@ function getPositionSlots(layers) {
   return slots;
 }
 
-function translateLayerTo(layerId, targetX, targetY) {
+function moveLayerTo(layerId, targetX, targetY) {
   selectLayerById(layerId);
-  var layer = app.activeDocument.activeLayer;
-  var bnfe = getBoundsNoEffects(layerId);
-  var dx = targetX - bnfe.left;
-  var dy = targetY - bnfe.top;
+  var b = getBoundsNoEffects(layerId);
+  var dx = targetX - b.left;
+  var dy = targetY - b.top;
   if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-    layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
+    app.activeDocument.activeLayer.translate(
+      new UnitValue(Math.round(dx), "px"),
+      new UnitValue(Math.round(dy), "px")
+    );
   }
+  return { dx: dx, dy: dy };
 }
 
-function translateLayerByDelta(layerId, dx, dy) {
+function moveLayerByDelta(layerId, dx, dy) {
   if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
   selectLayerById(layerId);
-  var layer = app.activeDocument.activeLayer;
-  layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
+  app.activeDocument.activeLayer.translate(
+    new UnitValue(Math.round(dx), "px"),
+    new UnitValue(Math.round(dy), "px")
+  );
 }
 
 function parseJsonArray(str) {
@@ -147,6 +152,7 @@ function parseJsonArray(str) {
 
 // --- Fo reorder logika (suspendHistory-bol hivva) ---
 function _doReorderLayers() {
+  // 1. Image layerek osszegyujtese a scope alapjan
   var allLayers = [];
   if (_groupFilter === "All" || _groupFilter === "Students") {
     allLayers = allLayers.concat(collectLayers(_doc, ["Images", "Students"]));
@@ -160,8 +166,10 @@ function _doReorderLayers() {
     return;
   }
 
-  var linkedLayers = collectLinkedLayers(_doc);
+  // 2. Name layerek osszegyujtese (kulon kezeljuk, nem linkelt!)
+  var nameLayers = collectNameLayers(_doc);
 
+  // 3. Nev -> layer mapping
   var nameToLayer = {};
   for (var i = 0; i < allLayers.length; i++) {
     var n = allLayers[i].name;
@@ -170,6 +178,7 @@ function _doReorderLayers() {
     }
   }
 
+  // 4. Csak a matchelt layerekbol szedunk slot-okat
   var involvedLayers = [];
   for (var k = 0; k < _orderedNames.length; k++) {
     if (nameToLayer[_orderedNames[k]]) {
@@ -182,8 +191,10 @@ function _doReorderLayers() {
     return;
   }
 
+  // 5. Slot poziciok kiszedese (Y->X sorrend)
   var slots = getPositionSlots(involvedLayers);
 
+  // 6. Melyik layernek hova kell mennie
   var moves = [];
   for (var j = 0; j < Math.min(_orderedNames.length, slots.length); j++) {
     var layerInfo = nameToLayer[_orderedNames[j]];
@@ -191,42 +202,40 @@ function _doReorderLayers() {
     moves.push({
       layerId: layerInfo.layerId,
       name: layerInfo.name,
+      fromX: layerInfo.x,
+      fromY: layerInfo.y,
       targetX: slots[j].x,
       targetY: slots[j].y
     });
   }
 
-  // 1. menet: off-screen parkolo (image + linkelt)
-  var parkX = _doc.width.as("px") + 10000;
-  for (var m1 = 0; m1 < moves.length; m1++) {
-    var origBnfe = getBoundsNoEffects(moves[m1].layerId);
-    var parkTargetX = parkX + m1 * 500;
-    var parkDx = parkTargetX - origBnfe.left;
-    var parkDy = -origBnfe.top;
-
-    translateLayerTo(moves[m1].layerId, parkTargetX, 0);
-
-    var siblings = linkedLayers[moves[m1].name];
-    if (siblings) {
-      for (var s1 = 0; s1 < siblings.length; s1++) {
-        translateLayerByDelta(siblings[s1].layerId, parkDx, parkDy);
-      }
-    }
+  // 7. Eloszor MINDEN image layer eredeti poziciojat elmentjuk
+  //    (mert a mozgatas kozben valtoznak a poziciok)
+  var savedPositions = {};
+  for (var sp = 0; sp < moves.length; sp++) {
+    var spb = getBoundsNoEffects(moves[sp].layerId);
+    savedPositions[moves[sp].layerId] = { x: spb.left, y: spb.top };
   }
 
-  // 2. menet: cel pozicioba (image + linkelt)
+  // 8. Image layerek mozgatasa a cel slot-okba
+  //    A Names layereket KULON mozgatjuk ugyanazzal a deltaval
   var reordered = 0;
-  for (var m2 = 0; m2 < moves.length; m2++) {
-    var curBnfe = getBoundsNoEffects(moves[m2].layerId);
-    var finalDx = moves[m2].targetX - curBnfe.left;
-    var finalDy = moves[m2].targetY - curBnfe.top;
+  for (var m = 0; m < moves.length; m++) {
+    // Friss pozicio lekerese (korabbi mozgatasok utan valtozhatott)
+    var curBounds = getBoundsNoEffects(moves[m].layerId);
+    var dx = moves[m].targetX - curBounds.left;
+    var dy = moves[m].targetY - curBounds.top;
 
-    translateLayerTo(moves[m2].layerId, moves[m2].targetX, moves[m2].targetY);
+    // Image layer mozgatasa
+    if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+      moveLayerByDelta(moves[m].layerId, dx, dy);
 
-    var siblings2 = linkedLayers[moves[m2].name];
-    if (siblings2) {
-      for (var s2 = 0; s2 < siblings2.length; s2++) {
-        translateLayerByDelta(siblings2[s2].layerId, finalDx, finalDy);
+      // Names layerek mozgatasa UGYANAZZAL a deltaval (KULON, nem linkelt!)
+      var nameGroup = nameLayers[moves[m].name];
+      if (nameGroup) {
+        for (var nl = 0; nl < nameGroup.length; nl++) {
+          moveLayerByDelta(nameGroup[nl].layerId, dx, dy);
+        }
       }
     }
 

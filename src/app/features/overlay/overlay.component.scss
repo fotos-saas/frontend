@@ -1670,8 +1670,21 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
-  cursor: default;
-  padding: 0 4px;
+  cursor: text;
+  padding: 1px 4px;
+  border-radius: 3px;
+  outline: none;
+  border: 1px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:focus {
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:hover:not(:focus) {
+    background: rgba(255, 255, 255, 0.04);
+  }
 }
 
 .drag-order-panel__group-count {

@@ -268,18 +268,20 @@ export class OverlayComponent implements OnInit {
   saveDragOrder(): Promise<void> { return this.dragOrder.save(); }
   refreshDragOrder(): Promise<void> { return this.dragOrder.refreshFromDb(); }
   setDragOrderSearch(value: string): void { this.dragOrder.searchQuery.set(value); }
-  createDragOrderGroup(): void {
-    const name = prompt('Csoport neve:');
-    if (name?.trim()) this.dragOrder.createGroup(name.trim());
-  }
-  createDragOrderGroupFromSelection(): void {
-    const name = prompt('Csoport neve:');
-    if (name?.trim()) this.dragOrder.createGroupFromSelection(name.trim());
-  }
+  createDragOrderGroup(): void { this.dragOrder.createGroup('Új csoport'); }
+  createDragOrderGroupFromSelection(): void { this.dragOrder.createGroupFromSelection('Új csoport'); }
   removeDragOrderGroup(id: string): void { this.dragOrder.removeGroup(id); }
-  renameDragOrderGroup(id: string): void {
-    const name = prompt('Új név:');
-    if (name?.trim()) this.dragOrder.renameGroup(id, name.trim());
+  onDragOrderGroupNameBlur(event: FocusEvent, groupId: string): void {
+    const el = event.target as HTMLElement;
+    const name = el.textContent?.trim();
+    if (name) this.dragOrder.renameGroup(groupId, name);
+    else el.textContent = this.dragOrder.groups().find(g => g.id === groupId)?.name ?? 'Csoport';
+  }
+  onDragOrderGroupNameKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      (event.target as HTMLElement).blur();
+    }
   }
   toggleDragOrderGroupCollapse(id: string): void { this.dragOrder.toggleGroupCollapse(id); }
   onDropToGroup(event: CdkDragDrop<PersonItem[]>, groupId: string): void { this.dragOrder.onDropToGroup(event, groupId); }

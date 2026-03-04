@@ -794,7 +794,13 @@
             <button class="drag-order-panel__group-collapse" (click)="toggleDragOrderGroupCollapse(group.id)" type="button">
               <lucide-icon [name]="group.collapsed ? ICONS.CHEVRON_RIGHT : ICONS.CHEVRON_DOWN" [size]="12" />
             </button>
-            <span class="drag-order-panel__group-name" (dblclick)="renameDragOrderGroup(group.id)">{{ group.name }}</span>
+            <span
+              class="drag-order-panel__group-name"
+              contenteditable="true"
+              spellcheck="false"
+              (blur)="onDragOrderGroupNameBlur($event, group.id)"
+              (keydown)="onDragOrderGroupNameKeydown($event)"
+            >{{ group.name }}</span>
             <span class="drag-order-panel__group-count">{{ group.items.length }}</span>
             <button class="drag-order-panel__group-remove" (click)="removeDragOrderGroup(group.id)" type="button" matTooltip="Csoport feloszlatása">
               <lucide-icon [name]="ICONS.X" [size]="10" />

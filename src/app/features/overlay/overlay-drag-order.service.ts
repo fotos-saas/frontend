@@ -4,7 +4,6 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { OverlayProjectService, PersonItem } from './overlay-project.service';
 import { OverlayPhotoshopService } from './overlay-photoshop.service';
-import { OverlaySettingsService } from './overlay-settings.service';
 import { OverlaySortService } from './overlay-sort.service';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
@@ -20,7 +19,6 @@ export class OverlayDragOrderService {
   private readonly ngZone = inject(NgZone);
   private readonly projectService = inject(OverlayProjectService);
   private readonly ps = inject(OverlayPhotoshopService);
-  private readonly settings = inject(OverlaySettingsService);
   private readonly sortService = inject(OverlaySortService);
 
   // === Signals ===
@@ -32,6 +30,9 @@ export class OverlayDragOrderService {
   readonly searchQuery = signal('');
   readonly selected = signal<Set<number>>(new Set());
   readonly genderLoading = signal(false);
+
+  /** Person ID → PS slug mapping, save() használja a PS reorderhez */
+  private personSlugMap = new Map<number, string>();
 
   /** Szűrt lista — keresés alapján (drag & drop a teljes listán működik, a keresés csak vizuálisan szűr) */
   readonly filteredList = computed(() => {
@@ -56,8 +57,7 @@ export class OverlayDragOrderService {
     if (pid && this.projectService.persons().length === 0) {
       await this.projectService.fetchPersons(pid);
     }
-    this.refreshList();
-    this.enrichTitlesFromPS();
+    await this.refreshListFromPS();
   }
 
   closePanel(): void {
@@ -71,25 +71,85 @@ export class OverlayDragOrderService {
   setScope(scope: DragOrderScope): void {
     this.scope.set(scope);
     this.selected.set(new Set());
-    this.refreshList();
-    this.enrichTitlesFromPS();
+    this.refreshListFromPS();
   }
 
-  /** DB-ből újratölti a személyeket, frissíti a listát, majd PS-ből kiegészíti a title-ket */
+  /** DB-ből újratölti a személyeket, frissíti a listát PS-ből */
   async refreshFromDb(): Promise<void> {
     const pid = this.projectIdResolver();
     if (!pid) return;
     this.refreshing.set(true);
     try {
       await this.projectService.fetchPersons(pid);
-      this.refreshList();
-      await this.enrichTitlesFromPS();
+      await this.refreshListFromPS();
     } finally {
       this.ngZone.run(() => this.refreshing.set(false));
     }
   }
 
-  private refreshList(): void {
+  /**
+   * PS image layerekből építi a listát. A slug tartalmazza a person ID-t (pl. kiss-janos---42).
+   * Ha van DB match → enricheli a PersonItem-et. Ha nincs → placeholder negatív ID-vel.
+   * Ha nincs PS (nem Electron) → DB fallback.
+   */
+  private async refreshListFromPS(): Promise<void> {
+    const data = await this.ps.getImageLayerData();
+    const s = this.scope();
+    const slugList = s === 'teachers' ? data.teachers
+      : s === 'students' ? data.students : data.names;
+
+    // Ha nincs PS (üres lista) → DB fallback
+    if (slugList.length === 0) {
+      this.refreshListFromDb();
+      await this.enrichTitlesFromPS();
+      return;
+    }
+
+    // DB persons map ID alapján
+    const dbPersonsById = new Map<number, PersonItem>();
+    for (const p of this.projectService.persons()) {
+      dbPersonsById.set(p.id, p);
+    }
+
+    // PS slug-okból PersonItem lista + slug map építése
+    this.personSlugMap.clear();
+    let placeholderId = -1;
+    const items: PersonItem[] = [];
+
+    for (const slug of slugList) {
+      const idMatch = slug.match(/---(\d+)$/);
+      const personId = idMatch ? parseInt(idMatch[1], 10) : null;
+      const humanName = this.sortService.slugToHumanName(slug);
+
+      if (personId && dbPersonsById.has(personId)) {
+        // DB-ből enrichelt PersonItem
+        const dbPerson = dbPersonsById.get(personId)!;
+        items.push({ ...dbPerson });
+        this.personSlugMap.set(dbPerson.id, slug);
+      } else {
+        // Nincs DB match → placeholder
+        const id = placeholderId--;
+        items.push({
+          id,
+          name: humanName,
+          title: null,
+          type: s === 'teachers' ? 'teacher' : 'student',
+          hasPhoto: false,
+          photoThumbUrl: null,
+          photoUrl: null,
+          archiveId: null,
+          linkedGroup: null,
+        });
+        this.personSlugMap.set(id, slug);
+      }
+    }
+
+    this.ngZone.run(() => this.list.set(items));
+    await this.enrichTitlesFromPS();
+  }
+
+  /** DB-ből építi a listát — fallback ha nincs PS */
+  private refreshListFromDb(): void {
     const all = this.projectService.persons();
     const s = this.scope();
     const filtered = s === 'teachers' ? all.filter(p => p.type === 'teacher')
@@ -242,47 +302,28 @@ export class OverlayDragOrderService {
 
     this.saving.set(true);
     try {
-      const positions = items.map((p, i) => ({ id: p.id, position: i + 1 }));
       const currentScope = this.scope();
 
-      // 1. Backend position mentés
-      await firstValueFrom(
-        this.http.patch<any>(
-          `${environment.apiUrl}/partner/projects/${pid}/persons/reorder`,
-          { positions },
-        ),
-      );
-      // 2. PS layer átrendezés — slug mapping
-      const data = await this.ps.getImageLayerData();
-      const slugNames = currentScope === 'teachers' ? data.teachers
-        : currentScope === 'students' ? data.students : data.names;
-      if (slugNames.length >= 2) {
-        const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-        const humanToSlug = new Map<string, string>();
-        for (const slug of slugNames) {
-          const human = this.sortService.slugToHumanName(slug);
-          humanToSlug.set(normalize(human), slug);
-        }
-        const usedSlugs = new Set<string>();
-        const orderedSlugs: string[] = [];
-        for (const p of items) {
-          const slug = humanToSlug.get(normalize(p.name));
-          if (slug && !usedSlugs.has(slug)) {
-            orderedSlugs.push(slug);
-            usedSlugs.add(slug);
-          }
-        }
-        for (const slug of slugNames) {
-          if (!usedSlugs.has(slug)) {
-            orderedSlugs.push(slug);
-            usedSlugs.add(slug);
-          }
-        }
-        const groupLabel = currentScope === 'teachers' ? 'Teachers' : currentScope === 'students' ? 'Students' : 'All';
+      // 1. Backend position mentés — csak valódi DB személyek (pozitív ID)
+      const dbItems = items.filter(p => p.id > 0);
+      if (dbItems.length > 0) {
+        const positions = dbItems.map((p, i) => ({ id: p.id, position: i + 1 }));
+        await firstValueFrom(
+          this.http.patch<any>(
+            `${environment.apiUrl}/partner/projects/${pid}/persons/reorder`,
+            { positions },
+          ),
+        );
+      }
 
-        // 2a. Reorder — image layerek stack + pozíció átrendezés
-        // Ha linkelve vannak → translate() magával viszi a Names/Positions layereket is
-        // NEM kell arrange-names, mert az egyedi elrendezést felülírná!
+      // 2. PS layer átrendezés — personSlugMap-ből veszi a slugokat
+      const orderedSlugs: string[] = [];
+      for (const p of items) {
+        const slug = this.personSlugMap.get(p.id);
+        if (slug) orderedSlugs.push(slug);
+      }
+      if (orderedSlugs.length >= 2) {
+        const groupLabel = currentScope === 'teachers' ? 'Teachers' : currentScope === 'students' ? 'Students' : 'All';
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
       }
 

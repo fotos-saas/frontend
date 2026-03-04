@@ -738,6 +738,14 @@
           @if (person.title) {
             <span class="drag-order-panel__title">{{ person.title }}</span>
           }
+          <!-- Drag preview: kijelöltek száma badge-dzsel -->
+          <div class="drag-order-panel__preview" *cdkDragPreview>
+            <lucide-icon [name]="ICONS.GRIP" [size]="12" />
+            <span>{{ person.name }}</span>
+            @if (dragOrderSelected().size > 1 && isDragOrderSelected(person.id)) {
+              <span class="drag-order-panel__preview-badge">+{{ dragOrderSelected().size - 1 }}</span>
+            }
+          </div>
           <div class="drag-order-panel__placeholder" *cdkDragPlaceholder></div>
         </div>
       }

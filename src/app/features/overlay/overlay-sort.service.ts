@@ -219,7 +219,7 @@ export class OverlaySortService {
   }
 
   /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket (scope-olt GROUP-pal) */
-  private async reorderLayersByNamesScoped(orderedNames: string[], group: string): Promise<any> {
+  async reorderLayersByNamesScoped(orderedNames: string[], group: string): Promise<any> {
     console.log('[REORDER-SCOPED] orderedNames:', orderedNames, 'group:', group);
     const result = await this.ps.runJsx('reorder-layers', 'actions/reorder-layers.jsx', {
       ORDERED_NAMES: JSON.stringify(orderedNames),

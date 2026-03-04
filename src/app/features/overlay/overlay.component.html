@@ -5,7 +5,7 @@
 <div
   class="toolbar"
   [class.toolbar--has-collapse]="openSubmenu()"
-  [class.toolbar--panel-open]="uploadPanelOpen() || customOrderPanelOpen()"
+  [class.toolbar--panel-open]="uploadPanelOpen() || customOrderPanelOpen() || dragOrderPanelOpen()"
   (mouseenter)="onCollapseEnter()"
   (mouseleave)="onCollapseLeave()"
 >
@@ -180,6 +180,17 @@
                   matTooltip="Egyedi sorrend"
                 >
                   <lucide-icon [name]="ICONS.LIST_ORDERED" [size]="15" />
+                </button>
+                <div class="toolbar__collapse-sep"></div>
+                <button
+                  class="toolbar__btn toolbar__btn--sm toolbar__btn--green"
+                  [class.toolbar__btn--busy]="dragOrderSaving()"
+                  [class.toolbar__btn--active]="dragOrderPanelOpen()"
+                  [disabled]="sorting() || dragOrderSaving()"
+                  (click)="toggleDragOrderPanel(); $event.stopPropagation()"
+                  matTooltip="Drag & Drop sorrend"
+                >
+                  <lucide-icon [name]="ICONS.GRIP" [size]="15" />
                 </button>
               </div>
             </div>
@@ -680,6 +691,16 @@
     </div>
   }
 </div>
+}
+
+<!-- Drag Order Panel -->
+@if (dragOrderPanelOpen()) {
+  <app-drag-order-panel
+    [persons]="persons()"
+    [saving]="dragOrderSaving()"
+    (close)="closeDragOrderPanel()"
+    (saved)="onDragOrderSaved($event)"
+  />
 }
 
 <!-- Rename Layer IDs Dialog -->

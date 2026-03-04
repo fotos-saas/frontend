@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -24,6 +24,7 @@ import { PartnerTeacherService } from '../partner/services/partner-teacher.servi
 import { TeacherLinkDialogComponent } from '../partner/components/teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../partner/components/teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
 import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../partner/models/teacher.models';
+import { DragOrderPanelComponent, DragOrderSavedEvent } from './drag-order-panel/drag-order-panel.component';
 
 interface UploadResult {
   success: boolean;
@@ -37,7 +38,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 @Component({
   selector: 'app-overlay',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
+  imports: [LucideAngularModule, MatTooltipModule, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent, DragOrderPanelComponent],
   providers: [
     OverlayUploadService, OverlayProjectService, OverlayPhotoshopService,
     OverlayPollingService, OverlaySettingsService, OverlaySortService,
@@ -119,6 +120,10 @@ export class OverlayComponent implements OnInit {
   readonly customOrderPanelOpen = signal(false);
   readonly customOrderText = signal('');
   readonly customOrderResult = signal<{ success: boolean; message: string } | null>(null);
+
+  // Drag order panel state
+  readonly dragOrderPanelOpen = signal(false);
+  readonly dragOrderSaving = signal(false);
 
   // Link/unlink eredmény visszajelzés
   readonly linkResult = signal<{ success: boolean; message: string } | null>(null);
@@ -227,6 +232,7 @@ export class OverlayComponent implements OnInit {
       if (this.openSubmenu()) this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
       if (this.customOrderPanelOpen()) this.closeCustomOrderPanel();
+      if (this.dragOrderPanelOpen()) this.closeDragOrderPanel();
     }
   }
 
@@ -250,6 +256,72 @@ export class OverlayComponent implements OnInit {
     }
   }
   closeCustomOrderPanel(): void { this.customOrderPanelOpen.set(false); this.customOrderResult.set(null); }
+
+  // ============ Drag Order Panel ============
+
+  toggleDragOrderPanel(): void {
+    if (this.dragOrderPanelOpen()) {
+      this.closeDragOrderPanel();
+    } else {
+      this.dragOrderPanelOpen.set(true);
+      this.closeSubmenu();
+      if (this.uploadPanelOpen()) this.closeUploadPanel();
+      if (this.customOrderPanelOpen()) this.closeCustomOrderPanel();
+      if (this.quickActionsPanelOpen()) this.closeQuickActions();
+    }
+  }
+
+  closeDragOrderPanel(): void { this.dragOrderPanelOpen.set(false); }
+
+  async onDragOrderSaved(event: DragOrderSavedEvent): Promise<void> {
+    const pid = this.pid;
+    if (!pid) return;
+
+    this.dragOrderSaving.set(true);
+    try {
+      // 1. Backend position mentés
+      await firstValueFrom(
+        this.http.patch<any>(
+          `${environment.apiUrl}/partner/projects/${pid}/persons/reorder`,
+          { positions: event.positions },
+        ),
+      );
+
+      // 2. PS layer átrendezés — slug mapping
+      const scope = event.scope;
+      const data = await this.ps.getImageLayerData();
+      const slugNames = scope === 'teachers' ? data.teachers
+        : scope === 'students' ? data.students : data.names;
+
+      if (slugNames.length >= 2) {
+        // Human-to-slug map építése
+        const humanToSlug = new Map<string, string>();
+        for (const slug of slugNames) {
+          const human = this.sortService.slugToHumanName(slug);
+          humanToSlug.set(human.toLowerCase(), slug);
+        }
+
+        // Rendezett nevek slug-okra konvertálása
+        const orderedSlugs = event.orderedNames.map(name =>
+          humanToSlug.get(name.toLowerCase()) || name,
+        );
+
+        const groupLabel = scope === 'teachers' ? 'Teachers' : scope === 'students' ? 'Students' : 'All';
+        await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
+      }
+
+      // 3. Személylista újratöltés
+      await this.projectService.fetchPersons(pid);
+
+      // 4. Panel bezárás
+      this.ngZone.run(() => {
+        this.dragOrderSaving.set(false);
+        this.closeDragOrderPanel();
+      });
+    } catch {
+      this.ngZone.run(() => this.dragOrderSaving.set(false));
+    }
+  }
 
   async submitCustomOrder(): Promise<void> {
     const text = this.customOrderText().trim();

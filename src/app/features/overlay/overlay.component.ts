@@ -443,17 +443,13 @@ export class OverlayComponent implements OnInit {
       if (slugNames.length >= 2) {
         const layerNamesParam = slugNames.join('|');
 
-        // 2a. Unlink all scope-ban
-        await this.ps.runJsx('unlink-layers', 'actions/unlink-selected.jsx', {
-          LAYER_NAMES: layerNamesParam,
-        });
-
-        // 2b. Relink all scope-ban
+        // 2a. Link all — minden személy layerjeit összelinkelni (kép + név + keret stb.)
         await this.ps.runJsx('link-layers', 'actions/link-selected.jsx', {
           LAYER_NAMES: layerNamesParam,
         });
 
-        // 2c. Reorder — rendezett sorrendben (ékezet-mentes matching)
+        // 2b. Reorder — a kép layereket az új sorrendben a slotokba mozgatja
+        //     (a Names layereket a JSX maga mozgatja ugyanazzal a deltával)
         const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         const humanToSlug = new Map<string, string>();
         for (const slug of slugNames) {

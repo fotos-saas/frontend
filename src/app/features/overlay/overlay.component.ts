@@ -113,6 +113,7 @@ export class OverlayComponent implements OnInit {
   readonly qaPositionNames = signal(true);
   readonly qaPositionPositions = signal(false);
   readonly qaConfirm = signal<{ action: string; target: string } | null>(null);
+  readonly qaLoading = signal(false);
   readonly qaReorderTarget = signal<'all' | 'students' | 'teachers'>('all');
   readonly qaReorderText = signal('');
 
@@ -790,17 +791,22 @@ export class OverlayComponent implements OnInit {
   onQuickAction(action: string, target: string): void { this.qaConfirm.set({ action, target }); }
   async confirmQuickAction(): Promise<void> {
     const c = this.qaConfirm();
-    if (!c) return;
+    if (!c || this.qaLoading()) return;
     this.qaConfirm.set(null);
+    this.qaLoading.set(true);
 
-    if (c.action === 'link') {
-      await this.executeLinkQuickAction(c.target);
-    } else if (c.action === 'position-labels') {
-      await this.executeArrangeQuickAction(c.target, this.qaPositionNames(), this.qaPositionPositions());
-    } else if (c.action === 'refresh-labels') {
-      await this.executeRefreshLabelsAction(c.target, this.qaRefreshNames(), this.qaRefreshPositions());
-    } else if (c.action === 'sync-positions') {
-      await this.executeSyncPositionsAction(c.target);
+    try {
+      if (c.action === 'link') {
+        await this.executeLinkQuickAction(c.target);
+      } else if (c.action === 'position-labels') {
+        await this.executeArrangeQuickAction(c.target, this.qaPositionNames(), this.qaPositionPositions());
+      } else if (c.action === 'refresh-labels') {
+        await this.executeRefreshLabelsAction(c.target, this.qaRefreshNames(), this.qaRefreshPositions());
+      } else if (c.action === 'sync-positions') {
+        await this.executeSyncPositionsAction(c.target);
+      }
+    } finally {
+      this.qaLoading.set(false);
     }
   }
   cancelQuickAction(): void { this.qaConfirm.set(null); }

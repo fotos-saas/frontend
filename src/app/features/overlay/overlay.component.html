@@ -958,9 +958,9 @@
         Link
       </div>
       <div class="qa-section__buttons">
-        <button class="qa-btn qa-btn--green" (click)="onQuickAction('link', 'all')">Mind</button>
-        <button class="qa-btn" (click)="onQuickAction('link', 'teachers')">Tanárok</button>
-        <button class="qa-btn" (click)="onQuickAction('link', 'students')">Diákok</button>
+        <button class="qa-btn qa-btn--green" [disabled]="qaLoading()" (click)="onQuickAction('link', 'all')">Mind</button>
+        <button class="qa-btn" [disabled]="qaLoading()" (click)="onQuickAction('link', 'teachers')">Tanárok</button>
+        <button class="qa-btn" [disabled]="qaLoading()" (click)="onQuickAction('link', 'students')">Diákok</button>
       </div>
     </div>
 
@@ -980,9 +980,9 @@
       <div class="qa-section__row">
         <span class="qa-section__row-label">Célcsoport</span>
         <div class="qa-section__buttons">
-          <button class="qa-btn qa-btn--blue" (click)="onQuickAction('refresh-labels', 'all')">Mind</button>
-          <button class="qa-btn qa-btn--blue" (click)="onQuickAction('refresh-labels', 'teachers')">Tanárok</button>
-          <button class="qa-btn qa-btn--blue" (click)="onQuickAction('refresh-labels', 'students')">Diákok</button>
+          <button class="qa-btn qa-btn--blue" [disabled]="qaLoading()" (click)="onQuickAction('refresh-labels', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--blue" [disabled]="qaLoading()" (click)="onQuickAction('refresh-labels', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--blue" [disabled]="qaLoading()" (click)="onQuickAction('refresh-labels', 'students')">Diákok</button>
         </div>
       </div>
     </div>
@@ -1003,9 +1003,9 @@
       <div class="qa-section__row">
         <span class="qa-section__row-label">Célcsoport</span>
         <div class="qa-section__buttons">
-          <button class="qa-btn qa-btn--purple" (click)="onQuickAction('position-labels', 'all')">Mind</button>
-          <button class="qa-btn qa-btn--purple" (click)="onQuickAction('position-labels', 'teachers')">Tanárok</button>
-          <button class="qa-btn qa-btn--purple" (click)="onQuickAction('position-labels', 'students')">Diákok</button>
+          <button class="qa-btn qa-btn--purple" [disabled]="qaLoading()" (click)="onQuickAction('position-labels', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--purple" [disabled]="qaLoading()" (click)="onQuickAction('position-labels', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--purple" [disabled]="qaLoading()" (click)="onQuickAction('position-labels', 'students')">Diákok</button>
         </div>
       </div>
     </div>
@@ -1019,17 +1019,25 @@
       <div class="qa-section__row">
         <span class="qa-section__row-label">Célcsoport</span>
         <div class="qa-section__buttons">
-          <button class="qa-btn qa-btn--amber" (click)="onQuickAction('sync-positions', 'all')">Mind</button>
-          <button class="qa-btn qa-btn--amber" (click)="onQuickAction('sync-positions', 'teachers')">Tanárok</button>
-          <button class="qa-btn qa-btn--amber" (click)="onQuickAction('sync-positions', 'students')">Diákok</button>
+          <button class="qa-btn qa-btn--amber" [disabled]="qaLoading()" (click)="onQuickAction('sync-positions', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--amber" [disabled]="qaLoading()" (click)="onQuickAction('sync-positions', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--amber" [disabled]="qaLoading()" (click)="onQuickAction('sync-positions', 'students')">Diákok</button>
         </div>
       </div>
     </div>
 
   </div>
 
+  <!-- Loading bar -->
+  @if (qaLoading()) {
+    <div class="quick-actions-panel__confirm quick-actions-panel__confirm--loading">
+      <span class="qa-spinner"></span>
+      <span class="quick-actions-panel__confirm-text">Feldolgozás...</span>
+    </div>
+  }
+
   <!-- Confirm bar -->
-  @if (qaConfirm()) {
+  @if (qaConfirm() && !qaLoading()) {
     <div class="quick-actions-panel__confirm">
       <span class="quick-actions-panel__confirm-text">Biztosan indítod?</span>
       <button class="qa-btn qa-btn--green qa-btn--sm" (click)="confirmQuickAction()">

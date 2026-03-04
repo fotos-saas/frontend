@@ -201,7 +201,7 @@ export class OverlaySortService {
   slugToHumanName(slug: string): string {
     const withoutId = slug.replace(/---\d+$/, '');
     return withoutId
-      .split('-')
+      .split(/[-_]/)
       .filter(Boolean)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');

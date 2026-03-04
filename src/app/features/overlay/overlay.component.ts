@@ -127,6 +127,7 @@ export class OverlayComponent implements OnInit {
   readonly dragOrderScope = signal<'all' | 'teachers' | 'students'>('students');
   readonly dragOrderList = signal<PersonItem[]>([]);
   readonly dragOrderSelected = signal<Set<number>>(new Set());
+  readonly dragOrderGenderLoading = signal(false);
 
   // Link/unlink eredmény visszajelzés
   readonly linkResult = signal<{ success: boolean; message: string } | null>(null);
@@ -327,7 +328,8 @@ export class OverlayComponent implements OnInit {
   /** Fiú-lány felváltva — API gender classification */
   async dragOrderSortGender(): Promise<void> {
     const list = this.dragOrderList();
-    if (list.length < 2) return;
+    if (list.length < 2 || this.dragOrderGenderLoading()) return;
+    this.dragOrderGenderLoading.set(true);
     try {
       const names = list.map(p => p.name);
       const res = await firstValueFrom(
@@ -351,8 +353,10 @@ export class OverlayComponent implements OnInit {
         else if (si < second.length) result.push(second[si++]);
         else if (fi < first.length) result.push(first[fi++]);
       }
-      this.dragOrderList.set(result);
-    } catch { /* ignore */ }
+      this.ngZone.run(() => this.dragOrderList.set(result));
+    } catch { /* ignore */ } finally {
+      this.ngZone.run(() => this.dragOrderGenderLoading.set(false));
+    }
   }
 
   /** Vezetőség előre — title alapján (igazgató, helyettes, stb.) */

@@ -1397,15 +1397,7 @@
 }
 
 .drag-order-panel__list {
-  max-height: 350px;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 2px;
-  }
+  min-height: 2px;
 }
 
 .drag-order-panel__item {
@@ -1571,6 +1563,191 @@
   padding: 1px 5px;
   border-radius: 8px;
   margin-left: 2px;
+}
+
+// ============ Csoport stílusok ============
+
+.drag-order-panel__groups-container {
+  max-height: 350px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+  }
+}
+
+.drag-order-panel__group-actions {
+  display: flex;
+  margin-top: 6px;
+  margin-left: -3px;
+  margin-right: -3px;
+
+  .qa-btn { margin: 0 3px; }
+}
+
+.drag-order-panel__group-list {
+  min-height: 2px;
+}
+
+.drag-order-panel__group {
+  margin-bottom: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+
+  &.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.drag-order-panel__group-header {
+  display: flex;
+  align-items: center;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.drag-order-panel__group-color {
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-right: 6px;
+}
+
+.drag-order-panel__group-order-btns {
+  display: flex;
+  flex-direction: column;
+  margin-right: 2px;
+  margin-left: -2px;
+}
+
+.drag-order-panel__group-order-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+
+  &:hover { color: #fff; }
+}
+
+.drag-order-panel__group-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+
+  &:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+}
+
+.drag-order-panel__group-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  cursor: default;
+  padding: 0 4px;
+}
+
+.drag-order-panel__group-count {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 8px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.drag-order-panel__group-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+
+  &:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+}
+
+.drag-order-panel__group-items {
+  min-height: 28px;
+  padding: 2px 4px;
+}
+
+.drag-order-panel__ungrouped-label {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  margin: 4px 0;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &::before { margin-right: 8px; }
+  &::after { margin-left: 8px; }
+}
+
+.drag-order-panel__item {
+  border-left: 3px solid transparent;
+}
+
+.drag-order-panel__empty--group {
+  padding: 6px 8px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.25);
+  font-style: italic;
+}
+
+.drag-order-panel__placeholder--group {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  min-height: 40px;
+  margin-bottom: 6px;
 }
 
 // ============ Rename Panel ============

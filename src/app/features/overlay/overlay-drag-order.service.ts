@@ -5,9 +5,27 @@ import { environment } from '../../../environments/environment';
 import { OverlayProjectService, PersonItem } from './overlay-project.service';
 import { OverlayPhotoshopService } from './overlay-photoshop.service';
 import { OverlaySortService } from './overlay-sort.service';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { OverlayPollingService } from './overlay-polling.service';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 type DragOrderScope = 'all' | 'teachers' | 'students';
+
+export const GROUP_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+
+export interface DragOrderGroup {
+  id: string;
+  name: string;
+  colorIndex: number;
+  collapsed: boolean;
+  items: PersonItem[];
+}
+
+interface DragOrderJson {
+  version: number;
+  scope: string;
+  groups: Array<{ id: string; name: string; colorIndex: number; items: string[] }>;
+  ungrouped: string[];
+}
 
 /**
  * Drag & Drop sorrend panel üzleti logikája.
@@ -20,6 +38,7 @@ export class OverlayDragOrderService {
   private readonly projectService = inject(OverlayProjectService);
   private readonly ps = inject(OverlayPhotoshopService);
   private readonly sortService = inject(OverlaySortService);
+  private readonly polling = inject(OverlayPollingService);
 
   // === Signals ===
   readonly panelOpen = signal(false);
@@ -31,11 +50,18 @@ export class OverlayDragOrderService {
   readonly selected = signal<Set<number>>(new Set());
   readonly genderLoading = signal(false);
 
+  // === Csoport signals ===
+  readonly groups = signal<DragOrderGroup[]>([]);
+  readonly ungrouped = signal<PersonItem[]>([]);
+
   /** Person ID → PS slug mapping, save() használja a PS reorderhez */
   private personSlugMap = new Map<number, string>();
 
   /** Cachelt PS layer data — scope váltáskor nem kell újra lekérni */
   private psLayerDataCache: { names: string[]; students: string[]; teachers: string[] } | null = null;
+
+  /** Következő csoport szín index */
+  private nextColorIndex = 0;
 
   /** Szűrt lista — keresés alapján (drag & drop a teljes listán működik, a keresés csak vizuálisan szűr) */
   readonly filteredList = computed(() => {
@@ -44,6 +70,28 @@ export class OverlayDragOrderService {
     if (!q) return items;
     return items.filter(p => p.name.toLowerCase().includes(q) || (p.title && p.title.toLowerCase().includes(q)));
   });
+
+  /** Szűrt ungrouped — keresés alapján */
+  readonly filteredUngrouped = computed(() => {
+    const items = this.ungrouped();
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return items;
+    return items.filter(p => p.name.toLowerCase().includes(q) || (p.title && p.title.toLowerCase().includes(q)));
+  });
+
+  /** Szűrt csoportok — keresés alapján */
+  readonly filteredGroups = computed(() => {
+    const grps = this.groups();
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return grps;
+    return grps.map(g => ({
+      ...g,
+      items: g.items.filter(p => p.name.toLowerCase().includes(q) || (p.title && p.title.toLowerCase().includes(q))),
+    }));
+  });
+
+  /** Van-e csoport? */
+  readonly hasGroups = computed(() => this.groups().length > 0);
 
   // Projekt ID resolver — komponens állítja be init-kor
   private projectIdResolver: () => number | null = () => null;
@@ -61,6 +109,7 @@ export class OverlayDragOrderService {
       await this.projectService.fetchPersons(pid);
     }
     await this.refreshListFromPS();
+    await this.loadFromJson();
   }
 
   closePanel(): void {
@@ -75,7 +124,7 @@ export class OverlayDragOrderService {
   setScope(scope: DragOrderScope): void {
     this.scope.set(scope);
     this.selected.set(new Set());
-    this.refreshListFromPS();
+    this.refreshListFromPS().then(() => this.loadFromJson());
   }
 
   /** DB-ből újratölti a személyeket, PS cache-t törli, frissíti a listát PS-ből */
@@ -87,6 +136,7 @@ export class OverlayDragOrderService {
     try {
       await this.projectService.fetchPersons(pid);
       await this.refreshListFromPS();
+      await this.loadFromJson();
     } finally {
       this.ngZone.run(() => this.refreshing.set(false));
     }
@@ -108,7 +158,7 @@ export class OverlayDragOrderService {
 
     // Ha nincs PS (üres lista) → DB fallback
     if (slugList.length === 0) {
-      this.refreshListFromDb();
+      this.refreshListFromDb_internal();
       await this.enrichTitlesFromPS();
       return;
     }
@@ -157,7 +207,7 @@ export class OverlayDragOrderService {
   }
 
   /** DB-ből építi a listát — fallback ha nincs PS */
-  private refreshListFromDb(): void {
+  private refreshListFromDb_internal(): void {
     const all = this.projectService.persons();
     const s = this.scope();
     const filtered = s === 'teachers' ? all.filter(p => p.type === 'teacher')
@@ -207,20 +257,25 @@ export class OverlayDragOrderService {
   // === Rendezés ===
 
   sortAbc(): void {
-    const items = [...this.list()];
     const collator = new Intl.Collator('hu', { sensitivity: 'base' });
     const prefixRe = /^(dr\.?\s*|ifj\.?\s*|id\.?\s*|prof\.?\s*|özv\.?\s*)/i;
     const sortKey = (n: string) => n.replace(prefixRe, '').trim();
-    items.sort((a, b) => collator.compare(sortKey(a.name), sortKey(b.name)));
-    this.list.set(items);
+    const sortFn = (a: PersonItem, b: PersonItem) => collator.compare(sortKey(a.name), sortKey(b.name));
+
+    // Csoportokon belül + ungrouped-ben is rendezünk
+    const grps = this.groups().map(g => ({ ...g, items: [...g.items].sort(sortFn) }));
+    const ung = [...this.ungrouped()].sort(sortFn);
+    this.groups.set(grps);
+    this.ungrouped.set(ung);
+    this.rebuildFlatList();
   }
 
   async sortGender(): Promise<void> {
-    const items = this.list();
-    if (items.length < 2 || this.genderLoading()) return;
+    const allItems = this.getAllItems();
+    if (allItems.length < 2 || this.genderLoading()) return;
     this.genderLoading.set(true);
     try {
-      const names = items.map(p => p.name);
+      const names = allItems.map(p => p.name);
       const res = await firstValueFrom(
         this.http.post<{ success: boolean; classifications: Array<{ name: string; gender: 'boy' | 'girl' }> }>(
           `${environment.apiUrl}/partner/ai/classify-name-genders`,
@@ -230,26 +285,35 @@ export class OverlayDragOrderService {
       if (!res.success || !res.classifications) return;
       const genderMap = new Map(res.classifications.map(c => [c.name, c.gender]));
       const collator = new Intl.Collator('hu', { sensitivity: 'base' });
-      const boys = [...items].filter(p => genderMap.get(p.name) === 'boy').sort((a, b) => collator.compare(a.name, b.name));
-      const girls = [...items].filter(p => genderMap.get(p.name) === 'girl').sort((a, b) => collator.compare(a.name, b.name));
-      // Felváltva
-      const result: PersonItem[] = [];
-      const first = boys.length >= girls.length ? boys : girls;
-      const second = boys.length >= girls.length ? girls : boys;
-      let fi = 0, si = 0;
-      for (let i = 0; i < first.length + second.length; i++) {
-        if (i % 2 === 0 && fi < first.length) result.push(first[fi++]);
-        else if (si < second.length) result.push(second[si++]);
-        else if (fi < first.length) result.push(first[fi++]);
-      }
-      this.ngZone.run(() => this.list.set(result));
+      const interleave = (items: PersonItem[]): PersonItem[] => {
+        const boys = [...items].filter(p => genderMap.get(p.name) === 'boy').sort((a, b) => collator.compare(a.name, b.name));
+        const girls = [...items].filter(p => genderMap.get(p.name) === 'girl').sort((a, b) => collator.compare(a.name, b.name));
+        const result: PersonItem[] = [];
+        const first = boys.length >= girls.length ? boys : girls;
+        const second = boys.length >= girls.length ? girls : boys;
+        let fi = 0, si = 0;
+        for (let i = 0; i < first.length + second.length; i++) {
+          if (i % 2 === 0 && fi < first.length) result.push(first[fi++]);
+          else if (si < second.length) result.push(second[si++]);
+          else if (fi < first.length) result.push(first[fi++]);
+        }
+        return result;
+      };
+
+      // Csoportokon belül + ungrouped-ben is rendezünk
+      const grps = this.groups().map(g => ({ ...g, items: interleave(g.items) }));
+      const ung = interleave(this.ungrouped());
+      this.ngZone.run(() => {
+        this.groups.set(grps);
+        this.ungrouped.set(ung);
+        this.rebuildFlatList();
+      });
     } catch { /* ignore */ } finally {
       this.ngZone.run(() => this.genderLoading.set(false));
     }
   }
 
   sortLeadership(): void {
-    const items = [...this.list()];
     const leadershipOrder = ['igazgató', 'intézményvezető', 'iskola igazgató', 'iskolaigazgató', 'igazgatóhelyettes', 'helyettes', 'aligazgató', 'tagozatvezető', 'munkaközösség-vezető', 'osztályfőnök'];
     const getPriority = (title: string | null): number => {
       if (!title) return 999;
@@ -260,16 +324,21 @@ export class OverlayDragOrderService {
       return 999;
     };
     const collator = new Intl.Collator('hu', { sensitivity: 'base' });
-    items.sort((a, b) => {
+    const sortFn = (a: PersonItem, b: PersonItem) => {
       const pa = getPriority(a.title);
       const pb = getPriority(b.title);
       if (pa !== pb) return pa - pb;
       return collator.compare(a.name, b.name);
-    });
-    this.list.set(items);
+    };
+
+    const grps = this.groups().map(g => ({ ...g, items: [...g.items].sort(sortFn) }));
+    const ung = [...this.ungrouped()].sort(sortFn);
+    this.groups.set(grps);
+    this.ungrouped.set(ung);
+    this.rebuildFlatList();
   }
 
-  // === Drag & Drop ===
+  // === Drag & Drop — régi flat lista (backward compat, ha nincs csoport) ===
 
   onDrop(event: CdkDragDrop<PersonItem[]>): void {
     const items = [...this.list()];
@@ -301,12 +370,271 @@ export class OverlayDragOrderService {
     }
   }
 
+  // === Csoportkezelés ===
+
+  createGroup(name: string): void {
+    const id = 'g' + Date.now();
+    const colorIndex = this.nextColorIndex;
+    this.nextColorIndex = (this.nextColorIndex + 1) % GROUP_COLORS.length;
+    const newGroup: DragOrderGroup = { id, name, colorIndex, collapsed: false, items: [] };
+    this.groups.update(gs => [...gs, newGroup]);
+  }
+
+  createGroupFromSelection(name: string): void {
+    const sel = this.selected();
+    if (sel.size === 0) return;
+
+    const id = 'g' + Date.now();
+    const colorIndex = this.nextColorIndex;
+    this.nextColorIndex = (this.nextColorIndex + 1) % GROUP_COLORS.length;
+
+    // Kijelölt személyek összegyűjtése csoportokból + ungrouped-ből
+    const selectedItems: PersonItem[] = [];
+
+    // Ungrouped-ből kiszedés
+    const ung = this.ungrouped().filter(p => {
+      if (sel.has(p.id)) { selectedItems.push(p); return false; }
+      return true;
+    });
+
+    // Csoportokból kiszedés
+    const grps = this.groups().map(g => ({
+      ...g,
+      items: g.items.filter(p => {
+        if (sel.has(p.id)) { selectedItems.push(p); return false; }
+        return true;
+      }),
+    }));
+
+    const newGroup: DragOrderGroup = { id, name, colorIndex, collapsed: false, items: selectedItems };
+    this.groups.set([...grps, newGroup]);
+    this.ungrouped.set(ung);
+    this.selected.set(new Set());
+    this.rebuildFlatList();
+  }
+
+  removeGroup(groupId: string): void {
+    const grps = this.groups();
+    const target = grps.find(g => g.id === groupId);
+    if (!target) return;
+    const remaining = grps.filter(g => g.id !== groupId);
+    // Csoport elemei ungrouped-be kerülnek
+    this.groups.set(remaining);
+    this.ungrouped.update(ung => [...ung, ...target.items]);
+    this.rebuildFlatList();
+  }
+
+  renameGroup(groupId: string, name: string): void {
+    this.groups.update(gs => gs.map(g => g.id === groupId ? { ...g, name } : g));
+  }
+
+  toggleGroupCollapse(groupId: string): void {
+    this.groups.update(gs => gs.map(g => g.id === groupId ? { ...g, collapsed: !g.collapsed } : g));
+  }
+
+  // === Csoport Drag & Drop ===
+
+  /** Elem mozgatás csoportba */
+  onDropToGroup(event: CdkDragDrop<PersonItem[]>, groupId: string): void {
+    if (event.previousContainer === event.container) {
+      // Csoporton belüli mozgatás
+      const grps = this.groups().map(g => {
+        if (g.id !== groupId) return g;
+        const items = [...g.items];
+        moveItemInArray(items, event.previousIndex, event.currentIndex);
+        return { ...g, items };
+      });
+      this.groups.set(grps);
+    } else {
+      // Másik listából ide húzás — saját tömbökön dolgozunk
+      const sourceGroupId = this.getGroupIdFromContainerId(event.previousContainer.id);
+      const currGroup = this.groups().find(g => g.id === groupId);
+      if (!currGroup) return;
+
+      if (sourceGroupId) {
+        // Forrás: másik csoport
+        const sourceGroup = this.groups().find(g => g.id === sourceGroupId);
+        if (!sourceGroup) return;
+        const srcItems = [...sourceGroup.items];
+        const dstItems = [...currGroup.items];
+        transferArrayItem(srcItems, dstItems, event.previousIndex, event.currentIndex);
+        this.groups.update(gs => gs.map(g => {
+          if (g.id === sourceGroupId) return { ...g, items: srcItems };
+          if (g.id === groupId) return { ...g, items: dstItems };
+          return g;
+        }));
+      } else {
+        // Forrás: ungrouped
+        const srcItems = [...this.ungrouped()];
+        const dstItems = [...currGroup.items];
+        transferArrayItem(srcItems, dstItems, event.previousIndex, event.currentIndex);
+        this.ungrouped.set(srcItems);
+        this.groups.update(gs => gs.map(g => g.id === groupId ? { ...g, items: dstItems } : g));
+      }
+    }
+    this.rebuildFlatList();
+  }
+
+  /** Elem mozgatás az ungrouped-be */
+  onDropToUngrouped(event: CdkDragDrop<PersonItem[]>): void {
+    if (event.previousContainer === event.container) {
+      const items = [...this.ungrouped()];
+      moveItemInArray(items, event.previousIndex, event.currentIndex);
+      this.ungrouped.set(items);
+    } else {
+      const sourceGroupId = this.getGroupIdFromContainerId(event.previousContainer.id);
+      const currData = [...this.ungrouped()];
+
+      if (sourceGroupId) {
+        const sourceGroup = this.groups().find(g => g.id === sourceGroupId);
+        if (!sourceGroup) return;
+        const srcItems = [...sourceGroup.items];
+        transferArrayItem(srcItems, currData, event.previousIndex, event.currentIndex);
+        this.groups.update(gs => gs.map(g => g.id === sourceGroupId ? { ...g, items: srcItems } : g));
+      } else {
+        // Ugyan az a lista
+        moveItemInArray(currData, event.previousIndex, event.currentIndex);
+      }
+      this.ungrouped.set(currData);
+    }
+    this.rebuildFlatList();
+  }
+
+  /** Csoport mozgatása fel/le */
+  moveGroup(groupId: string, direction: -1 | 1): void {
+    const grps = [...this.groups()];
+    const idx = grps.findIndex(g => g.id === groupId);
+    if (idx < 0) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= grps.length) return;
+    moveItemInArray(grps, idx, newIdx);
+    this.groups.set(grps);
+    this.rebuildFlatList();
+  }
+
+  // === JSON mentés/betöltés ===
+
+  async loadFromJson(): Promise<void> {
+    const psdPath = this.polling.activeDoc().path;
+    if (!psdPath || !window.electronAPI) {
+      // Nincs PSD / nem Electron → flat lista, minden ungrouped
+      this.ungrouped.set([...this.list()]);
+      this.groups.set([]);
+      return;
+    }
+
+    try {
+      const result = await window.electronAPI.photoshop.loadDragOrder({ psdPath });
+      if (!result.success || !result.data) {
+        // Nincs JSON → flat lista
+        this.ungrouped.set([...this.list()]);
+        this.groups.set([]);
+        return;
+      }
+
+      const json = result.data as unknown as DragOrderJson;
+      if (json.version !== 1 || !Array.isArray(json.groups)) {
+        this.ungrouped.set([...this.list()]);
+        this.groups.set([]);
+        return;
+      }
+
+      // Slug → PersonItem map
+      const slugToItem = new Map<string, PersonItem>();
+      for (const item of this.list()) {
+        const slug = this.personSlugMap.get(item.id);
+        if (slug) slugToItem.set(slug, item);
+      }
+      const usedIds = new Set<number>();
+
+      // Csoportok felépítése JSON-ból
+      const groups: DragOrderGroup[] = [];
+      let maxColorIndex = 0;
+      for (const jg of json.groups) {
+        const items: PersonItem[] = [];
+        for (const slug of jg.items) {
+          const item = slugToItem.get(slug);
+          if (item && !usedIds.has(item.id)) {
+            items.push(item);
+            usedIds.add(item.id);
+          }
+        }
+        groups.push({
+          id: jg.id,
+          name: jg.name,
+          colorIndex: jg.colorIndex,
+          collapsed: false,
+          items,
+        });
+        if (jg.colorIndex >= maxColorIndex) maxColorIndex = jg.colorIndex + 1;
+      }
+      this.nextColorIndex = maxColorIndex % GROUP_COLORS.length;
+
+      // Ungrouped: JSON ungrouped + listából maradó (új PS layerek)
+      const ungroupedItems: PersonItem[] = [];
+      if (Array.isArray(json.ungrouped)) {
+        for (const slug of json.ungrouped) {
+          const item = slugToItem.get(slug);
+          if (item && !usedIds.has(item.id)) {
+            ungroupedItems.push(item);
+            usedIds.add(item.id);
+          }
+        }
+      }
+      // Maradék: új layerek amik nincsenek a JSON-ban
+      for (const item of this.list()) {
+        if (!usedIds.has(item.id)) {
+          ungroupedItems.push(item);
+        }
+      }
+
+      this.ngZone.run(() => {
+        this.groups.set(groups);
+        this.ungrouped.set(ungroupedItems);
+        this.rebuildFlatList();
+      });
+    } catch (err) {
+      console.error('[DRAG-ORDER] loadFromJson error:', err);
+      this.ungrouped.set([...this.list()]);
+      this.groups.set([]);
+    }
+  }
+
+  private async saveToJson(): Promise<void> {
+    const psdPath = this.polling.activeDoc().path;
+    if (!psdPath || !window.electronAPI) return;
+
+    const grps = this.groups();
+    const ung = this.ungrouped();
+
+    const json: DragOrderJson = {
+      version: 1,
+      scope: this.scope(),
+      groups: grps.map(g => ({
+        id: g.id,
+        name: g.name,
+        colorIndex: g.colorIndex,
+        items: g.items.map(p => this.personSlugMap.get(p.id) || '').filter(Boolean),
+      })),
+      ungrouped: ung.map(p => this.personSlugMap.get(p.id) || '').filter(Boolean),
+    };
+
+    try {
+      await window.electronAPI.photoshop.saveDragOrder({ psdPath, dragOrderData: json as unknown as Record<string, unknown> });
+    } catch (err) {
+      console.error('[DRAG-ORDER] saveToJson error:', err);
+    }
+  }
+
   // === Mentés ===
 
   async save(): Promise<void> {
     const pid = this.projectIdResolver();
-    const items = this.list();
-    if (!pid || items.length === 0) return;
+    if (!pid) return;
+
+    // Flat lista a csoportok sorrendjéből
+    const items = this.buildFlatList();
+    if (items.length === 0) return;
 
     this.saving.set(true);
     try {
@@ -335,10 +663,13 @@ export class OverlayDragOrderService {
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
       }
 
-      // 3. Személylista újratöltés
+      // 3. JSON mentés
+      await this.saveToJson();
+
+      // 4. Személylista újratöltés
       await this.projectService.fetchPersons(pid);
 
-      // 4. Panel bezárás
+      // 5. Panel bezárás
       this.ngZone.run(() => {
         this.saving.set(false);
         this.closePanel();
@@ -347,5 +678,35 @@ export class OverlayDragOrderService {
       console.error('[DRAG-ORDER] save error:', err);
       this.ngZone.run(() => this.saving.set(false));
     }
+  }
+
+  // === Segéd metódusok ===
+
+  /** Csoportok + ungrouped sorrendjében flat lista */
+  buildFlatList(): PersonItem[] {
+    const result: PersonItem[] = [];
+    for (const g of this.groups()) {
+      result.push(...g.items);
+    }
+    result.push(...this.ungrouped());
+    return result;
+  }
+
+  /** Flat list frissítése a csoportok alapján */
+  private rebuildFlatList(): void {
+    this.list.set(this.buildFlatList());
+  }
+
+  /** Az összes elem (csoportokból + ungrouped) */
+  private getAllItems(): PersonItem[] {
+    return this.buildFlatList();
+  }
+
+  /** Csoport ID kinyerése a CDK drop list container id-jéből */
+  private getGroupIdFromContainerId(containerId: string): string | null {
+    // Container id formátum: "drag-group-{groupId}" vagy "drag-group-ungrouped"
+    if (!containerId.startsWith('drag-group-')) return null;
+    const groupId = containerId.slice('drag-group-'.length);
+    return groupId === 'ungrouped' ? null : groupId;
   }
 }

@@ -1649,5 +1649,65 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
     }
   });
 
+  // ============ Drag Order JSON (PSD melle) ============
+
+  // Save drag-order.json next to PSD
+  ipcMain.handle('photoshop:save-drag-order', (_event, params: {
+    psdPath: string;
+    dragOrderData: Record<string, unknown>;
+  }) => {
+    try {
+      if (typeof params.psdPath !== 'string' || params.psdPath.length > 500) {
+        return { success: false, error: 'Ervenytelen PSD eleresi ut' };
+      }
+      if (!params.psdPath.endsWith('.psd')) {
+        return { success: false, error: 'A fajlnak .psd kiterjesztesunek kell lennie' };
+      }
+      if (params.psdPath.includes('..')) {
+        return { success: false, error: 'Ervenytelen fajl utvonal' };
+      }
+
+      const psdDir = path.dirname(params.psdPath);
+      const jsonPath = path.join(psdDir, 'drag-order.json');
+      const jsonContent = JSON.stringify(params.dragOrderData, null, 2);
+
+      fs.writeFileSync(jsonPath, jsonContent, 'utf-8');
+      log.info(`Drag order JSON mentve: ${jsonPath} (${jsonContent.length} byte)`);
+
+      return { success: true, jsonPath };
+    } catch (error) {
+      log.error('Drag order JSON mentesi hiba:', error);
+      return { success: false, error: 'Nem sikerult menteni a drag order JSON-t' };
+    }
+  });
+
+  // Load drag-order.json from PSD directory
+  ipcMain.handle('photoshop:load-drag-order', (_event, params: { psdPath: string }) => {
+    try {
+      if (typeof params.psdPath !== 'string' || params.psdPath.length > 500) {
+        return { success: false, error: 'Ervenytelen PSD eleresi ut', data: null };
+      }
+      if (params.psdPath.includes('..')) {
+        return { success: false, error: 'Ervenytelen utvonal', data: null };
+      }
+
+      const psdDir = path.dirname(params.psdPath);
+      const jsonPath = path.join(psdDir, 'drag-order.json');
+
+      if (!fs.existsSync(jsonPath)) {
+        return { success: true, data: null };
+      }
+
+      const content = fs.readFileSync(jsonPath, 'utf-8');
+      const data = JSON.parse(content);
+      log.info(`Drag order JSON betoltve: ${jsonPath}`);
+
+      return { success: true, data };
+    } catch (error) {
+      log.error('Drag order JSON betoltesi hiba:', error);
+      return { success: false, error: 'Nem sikerult betolteni a drag order JSON-t', data: null };
+    }
+  });
+
   log.info('Photoshop IPC handlerek regisztralva');
 }

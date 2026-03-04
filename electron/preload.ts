@@ -409,6 +409,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('photoshop:place-photos', params) as Promise<{ success: boolean; error?: string; output?: string }>,
     saveTempFiles: (params: { files: Array<{ name: string; data: ArrayBuffer }> }) =>
       ipcRenderer.invoke('photoshop:save-temp-files', params) as Promise<{ success: boolean; paths: string[]; error?: string }>,
+    saveDragOrder: (params: { psdPath: string; dragOrderData: Record<string, unknown> }) =>
+      ipcRenderer.invoke('photoshop:save-drag-order', params) as Promise<{ success: boolean; error?: string; jsonPath?: string }>,
+    loadDragOrder: (params: { psdPath: string }) =>
+      ipcRenderer.invoke('photoshop:load-drag-order', params) as Promise<{ success: boolean; error?: string; data: Record<string, unknown> | null }>,
   },
 
   // ============ Minta generálás ============

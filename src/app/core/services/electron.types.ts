@@ -242,6 +242,8 @@ interface PhotoshopAPI {
   applyTemplate: (params: { templateId: string; targetDocName?: string; psdFilePath?: string }) => Promise<{ success: boolean; error?: string; output?: string }>;
   placePhotos: (params: { layers: Array<{ layerName: string; photoUrl: string }>; targetDocName?: string; psdFilePath?: string; syncBorder?: boolean }) => Promise<{ success: boolean; error?: string; output?: string }>;
   saveTempFiles: (params: { files: Array<{ name: string; data: ArrayBuffer }> }) => Promise<{ success: boolean; paths: string[]; error?: string }>;
+  saveDragOrder: (params: { psdPath: string; dragOrderData: Record<string, unknown> }) => Promise<{ success: boolean; error?: string; jsonPath?: string }>;
+  loadDragOrder: (params: { psdPath: string }) => Promise<{ success: boolean; error?: string; data: Record<string, unknown> | null }>;
 }
 
 interface SampleAPI {

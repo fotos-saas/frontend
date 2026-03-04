@@ -26,11 +26,12 @@ import { TeacherPhotoChooserDialogComponent } from '../partner/components/teache
 import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../partner/models/teacher.models';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { OverlayDragOrderService } from './overlay-drag-order.service';
+import { DragOrderColorPipe } from '@shared/pipes/drag-order-color.pipe';
 
 @Component({
   selector: 'app-overlay',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule, DragDropModule, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
+  imports: [LucideAngularModule, MatTooltipModule, DragDropModule, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent, DragOrderColorPipe],
   providers: [
     OverlayUploadService, OverlayProjectService, OverlayPhotoshopService,
     OverlayPollingService, OverlaySettingsService, OverlaySortService,
@@ -116,6 +117,11 @@ export class OverlayComponent implements OnInit {
   readonly dragOrderSearchQuery = this.dragOrder.searchQuery;
   readonly dragOrderSelected = this.dragOrder.selected;
   readonly dragOrderGenderLoading = this.dragOrder.genderLoading;
+  readonly dragOrderGroups = this.dragOrder.filteredGroups;
+  readonly dragOrderUngrouped = this.dragOrder.filteredUngrouped;
+  readonly dragOrderHasGroups = this.dragOrder.hasGroups;
+  readonly dragOrderGroupsRaw = this.dragOrder.groups;
+  readonly dragOrderUngroupedRaw = this.dragOrder.ungrouped;
 
   // Link/unlink eredmény — delegálva qa service-be, alias a template-hez
   readonly linkResult = this.qa.result;
@@ -262,6 +268,23 @@ export class OverlayComponent implements OnInit {
   saveDragOrder(): Promise<void> { return this.dragOrder.save(); }
   refreshDragOrder(): Promise<void> { return this.dragOrder.refreshFromDb(); }
   setDragOrderSearch(value: string): void { this.dragOrder.searchQuery.set(value); }
+  createDragOrderGroup(): void {
+    const name = prompt('Csoport neve:');
+    if (name?.trim()) this.dragOrder.createGroup(name.trim());
+  }
+  createDragOrderGroupFromSelection(): void {
+    const name = prompt('Csoport neve:');
+    if (name?.trim()) this.dragOrder.createGroupFromSelection(name.trim());
+  }
+  removeDragOrderGroup(id: string): void { this.dragOrder.removeGroup(id); }
+  renameDragOrderGroup(id: string): void {
+    const name = prompt('Új név:');
+    if (name?.trim()) this.dragOrder.renameGroup(id, name.trim());
+  }
+  toggleDragOrderGroupCollapse(id: string): void { this.dragOrder.toggleGroupCollapse(id); }
+  onDropToGroup(event: CdkDragDrop<PersonItem[]>, groupId: string): void { this.dragOrder.onDropToGroup(event, groupId); }
+  onDropToUngrouped(event: CdkDragDrop<PersonItem[]>): void { this.dragOrder.onDropToUngrouped(event); }
+  moveDragOrderGroup(id: string, direction: -1 | 1): void { this.dragOrder.moveGroup(id, direction); }
 
   async submitCustomOrder(): Promise<void> {
     const text = this.customOrderText().trim();

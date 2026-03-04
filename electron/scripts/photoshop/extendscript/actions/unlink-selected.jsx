@@ -125,6 +125,51 @@ function doUnlinkAll() {
     }
   }
 
+  // Vegso kijeles: CSAK Images csoport layerei maradjanak kijelelve
+  var imagesGroup = null;
+  try { imagesGroup = doc.layerSets.getByName("Images"); } catch (e) {}
+  if (imagesGroup && unlinkedNames.length > 0) {
+    var finalIds = [];
+    var selectLayersById = function(layerIds) {
+      if (layerIds.length === 0) return;
+      var d = new ActionDescriptor();
+      var r = new ActionReference();
+      r.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
+      d.putReference(charIDToTypeID("null"), r);
+      executeAction(charIDToTypeID("slct"), d, DialogModes.NO);
+      for (var si = 1; si < layerIds.length; si++) {
+        var ad = new ActionDescriptor();
+        var ar = new ActionReference();
+        ar.putIdentifier(charIDToTypeID("Lyr "), layerIds[si]);
+        ad.putReference(charIDToTypeID("null"), ar);
+        ad.putEnumerated(
+          stringIDToTypeID("selectionModifier"),
+          stringIDToTypeID("selectionModifierType"),
+          stringIDToTypeID("addToSelection")
+        );
+        executeAction(charIDToTypeID("slct"), ad, DialogModes.NO);
+      }
+    };
+    var collectImageIds = function(container) {
+      try {
+        for (var ci = 0; ci < container.artLayers.length; ci++) {
+          if (nameSet[container.artLayers[ci].name]) {
+            finalIds.push(container.artLayers[ci].id);
+          }
+        }
+      } catch (e) {}
+      try {
+        for (var si2 = 0; si2 < container.layerSets.length; si2++) {
+          collectImageIds(container.layerSets[si2]);
+        }
+      } catch (e) {}
+    };
+    collectImageIds(imagesGroup);
+    if (finalIds.length > 0) {
+      selectLayersById(finalIds);
+    }
+  }
+
   var namesJson = "[";
   for (var k = 0; k < unlinkedNames.length; k++) {
     if (k > 0) namesJson += ",";

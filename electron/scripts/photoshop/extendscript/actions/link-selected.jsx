@@ -155,6 +155,31 @@ function doLinkAll() {
     }
   }
 
+  // 5. Vegso kijeles: CSAK Images csoport layerei maradjanak kijelelve
+  var imagesGroup = null;
+  try { imagesGroup = doc.layerSets.getByName("Images"); } catch (e) {}
+  if (imagesGroup && linkedNames.length > 0) {
+    var finalIds = [];
+    var collectImageIds = function(container) {
+      try {
+        for (var ci = 0; ci < container.artLayers.length; ci++) {
+          if (nameSet[container.artLayers[ci].name]) {
+            finalIds.push(container.artLayers[ci].id);
+          }
+        }
+      } catch (e) {}
+      try {
+        for (var si = 0; si < container.layerSets.length; si++) {
+          collectImageIds(container.layerSets[si]);
+        }
+      } catch (e) {}
+    };
+    collectImageIds(imagesGroup);
+    if (finalIds.length > 0) {
+      selectLayersById(finalIds);
+    }
+  }
+
   // JSON stringify kezzel (ES3)
   var namesJson = "[";
   for (var k = 0; k < linkedNames.length; k++) {

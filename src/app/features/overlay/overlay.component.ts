@@ -261,16 +261,21 @@ export class OverlayComponent implements OnInit {
 
   // ============ Drag Order Panel ============
 
-  toggleDragOrderPanel(): void {
+  async toggleDragOrderPanel(): Promise<void> {
     if (this.dragOrderPanelOpen()) {
       this.closeDragOrderPanel();
     } else {
       this.dragOrderPanelOpen.set(true);
-      this.refreshDragOrderList();
       this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
       if (this.customOrderPanelOpen()) this.closeCustomOrderPanel();
       if (this.quickActionsPanelOpen()) this.closeQuickActions();
+      // Személylista betöltése ha üres
+      const pid = this.pid;
+      if (pid && this.persons().length === 0) {
+        await this.projectService.fetchPersons(pid);
+      }
+      this.refreshDragOrderList();
     }
   }
 

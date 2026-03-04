@@ -1361,6 +1361,26 @@
   margin-right: 5px;
 }
 
+.drag-order-panel__avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-right: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.25);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
 .drag-order-panel__name {
   flex: 1;
   overflow: hidden;

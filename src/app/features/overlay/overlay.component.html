@@ -719,6 +719,13 @@
             <lucide-icon [name]="ICONS.GRIP" [size]="12" />
           </div>
           <span class="drag-order-panel__index">{{ i + 1 }}.</span>
+          <div class="drag-order-panel__avatar">
+            @if (person.photoThumbUrl) {
+              <img [src]="person.photoThumbUrl" [alt]="person.name" />
+            } @else {
+              <lucide-icon [name]="ICONS.USER" [size]="12" />
+            }
+          </div>
           <span class="drag-order-panel__name">{{ person.name }}</span>
           @if (person.title) {
             <span class="drag-order-panel__title">{{ person.title }}</span>

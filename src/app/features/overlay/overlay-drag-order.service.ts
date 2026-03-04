@@ -634,7 +634,6 @@ export class OverlayDragOrderService {
 
     // Flat lista a csoportok sorrendjéből
     const items = this.buildFlatList();
-    console.log('[DRAG-ORDER] save() items:', items.length, 'groups:', this.groups().length, 'ungrouped:', this.ungrouped().length);
     if (items.length === 0) return;
 
     this.saving.set(true);
@@ -645,7 +644,6 @@ export class OverlayDragOrderService {
       const dbItems = items.filter(p => p.id > 0);
       if (dbItems.length > 0) {
         const positions = dbItems.map((p, i) => ({ id: p.id, position: i + 1 }));
-        console.log('[DRAG-ORDER] backend reorder positions:', positions.map(p => `${p.id}→${p.position}`).join(', '));
         await firstValueFrom(
           this.http.patch<any>(
             `${environment.apiUrl}/partner/projects/${pid}/persons/reorder`,
@@ -660,10 +658,8 @@ export class OverlayDragOrderService {
         const slug = this.personSlugMap.get(p.id);
         if (slug) orderedSlugs.push(slug);
       }
-      console.log('[DRAG-ORDER] orderedSlugs:', orderedSlugs.length, 'first 5:', orderedSlugs.slice(0, 5));
       if (orderedSlugs.length >= 2) {
         const groupLabel = currentScope === 'teachers' ? 'Teachers' : currentScope === 'students' ? 'Students' : 'All';
-        console.log('[DRAG-ORDER] calling reorderLayersByNamesScoped, group:', groupLabel);
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
       }
 

@@ -456,7 +456,15 @@ export class OverlayComponent implements OnInit {
           const human = this.sortService.slugToHumanName(slug);
           humanToSlug.set(normalize(human), slug);
         }
-        const orderedSlugs = list.map(p => humanToSlug.get(normalize(p.name)) || p.name);
+        const orderedSlugs = list.map(p => {
+          const key = normalize(p.name);
+          const slug = humanToSlug.get(key);
+          if (!slug) console.warn('[DRAG-ORDER] NEM MATCHELT:', p.name, '→ key:', key);
+          return slug || p.name;
+        });
+        console.log('[DRAG-ORDER] slugNames (PS):', slugNames);
+        console.log('[DRAG-ORDER] orderedSlugs:', orderedSlugs);
+        console.log('[DRAG-ORDER] humanToSlug map:', [...humanToSlug.entries()]);
         const groupLabel = scope === 'teachers' ? 'Teachers' : scope === 'students' ? 'Students' : 'All';
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
       }

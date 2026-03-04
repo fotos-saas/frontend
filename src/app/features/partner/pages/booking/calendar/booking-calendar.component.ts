@@ -11,6 +11,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { CalendarResponse, CalendarCellClick } from '../../../models/booking.models';
 import { PartnerBookingService } from '../../../services/partner-booking.service';
+import { LoggerService } from '../../../../../core/services/logger.service';
 import { BookingCalendarStateService } from '../../../services/booking-calendar-state.service';
 import { DailyViewComponent } from './views/daily-view.component';
 import { WeeklyViewComponent } from './views/weekly-view.component';
@@ -191,6 +192,7 @@ export class BookingCalendarComponent {
 
   private readonly bookingService = inject(PartnerBookingService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
     // Dátum tartomány változáskor automatikus betöltés
@@ -202,7 +204,7 @@ export class BookingCalendarComponent {
 
   onBookingClick(bookingId: number): void {
     // TODO: foglalás részletek megnyitása (Sprint 5)
-    console.log('Foglalás kiválasztva:', bookingId);
+    this.logger.debug('Foglalás kiválasztva:', bookingId);
   }
 
   onDayClick(date: Date): void {

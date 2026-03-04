@@ -1,4 +1,5 @@
 import { Injectable, inject, NgZone, signal } from '@angular/core';
+import { LoggerService } from '../../core/services/logger.service';
 
 /**
  * Photoshop JSX futtatás és busy state kezelés.
@@ -7,6 +8,7 @@ import { Injectable, inject, NgZone, signal } from '@angular/core';
 @Injectable()
 export class OverlayPhotoshopService {
   private readonly ngZone = inject(NgZone);
+  private readonly logger = inject(LoggerService);
 
   /** Melyik parancs fut éppen — busy spinner megjelenítéshez */
   readonly busyCommand = signal<string | null>(null);
@@ -25,11 +27,11 @@ export class OverlayPhotoshopService {
     this.busyCommand.set(commandId);
     try {
       const result = await window.electronAPI.photoshop.runJsx({ scriptName, jsonData });
-      console.log(`[JSX:${commandId}] result:`, result);
+      this.logger.debug(`[JSX:${commandId}] result:`, result);
       pollCallback?.();
       return result;
     } catch (err) {
-      console.error(`[JSX:${commandId}] error:`, err);
+      this.logger.error(`[JSX:${commandId}] error:`, err);
       return null;
     } finally {
       this.ngZone.run(() => this.busyCommand.set(null));
@@ -164,7 +166,7 @@ export class OverlayPhotoshopService {
       const cleaned = result.output.trim();
       if (!cleaned.startsWith('{')) return { names: [], doc: null };
       const data = JSON.parse(cleaned);
-      console.log('[FRESH-SELECTED] selectedLayerNames:', data.selectedLayerNames, 'count:', data.selectedLayers);
+      this.logger.debug('[FRESH-SELECTED] selectedLayerNames:', data.selectedLayerNames, 'count:', data.selectedLayers);
       return { names: data.selectedLayerNames || [], doc: data };
     } catch { return { names: [], doc: null }; }
   }

@@ -2,6 +2,7 @@ import { Injectable, inject, NgZone, signal } from '@angular/core';
 import { OverlayProjectService, PersonItem } from './overlay-project.service';
 import { OverlayPhotoshopService } from './overlay-photoshop.service';
 import { OverlayContext } from '../../core/services/electron.types';
+import { LoggerService } from '../../core/services/logger.service';
 
 /**
  * Layer átnevezés (rename IDs) + névsor frissítés (refresh roster).
@@ -11,6 +12,7 @@ export class OverlayLayerManagementService {
   private readonly ngZone = inject(NgZone);
   private readonly project = inject(OverlayProjectService);
   private readonly ps = inject(OverlayPhotoshopService);
+  private readonly logger = inject(LoggerService);
 
   // Rename dialog state
   readonly renameDialogOpen = signal(false);
@@ -96,7 +98,7 @@ export class OverlayLayerManagementService {
         }
         unmatched.length = 0;
         unmatched.push(...stillUnmatched);
-        console.log('[RENAME] Names fallback matched:', matched.length, 'still unmatched:', unmatched.length);
+        this.logger.debug('[RENAME] Names fallback matched:', matched.length, 'still unmatched:', unmatched.length);
       }
     }
 
@@ -166,13 +168,13 @@ export class OverlayLayerManagementService {
   private async doRefreshRoster(context: OverlayContext): Promise<void> {
     const allNames = await this.ps.getImageLayerNames();
     if (allNames.length === 0) {
-      console.log('[REFRESH-ROSTER] Nincs PSD layer');
+      this.logger.debug('[REFRESH-ROSTER] Nincs PSD layer');
       return;
     }
 
     const pid = await this.project.resolveProjectId(context);
     if (!pid) {
-      console.error('[REFRESH-ROSTER] Nincs projectId');
+      this.logger.error('[REFRESH-ROSTER] Nincs projectId');
       return;
     }
 
@@ -219,7 +221,7 @@ export class OverlayLayerManagementService {
     }
 
     if (toRemove.length === 0 && toAdd.length === 0) {
-      console.log('[REFRESH-ROSTER] Nincs eltérés');
+      this.logger.debug('[REFRESH-ROSTER] Nincs eltérés');
       return;
     }
 
@@ -251,7 +253,7 @@ export class OverlayLayerManagementService {
         this.refreshRosterToAdd.set([]);
       });
     } catch (e) {
-      console.error('[REFRESH-ROSTER] apply error:', e);
+      this.logger.error('[REFRESH-ROSTER] apply error:', e);
     } finally {
       this.ngZone.run(() => this.refreshRosterApplying.set(false));
     }
@@ -271,7 +273,7 @@ export class OverlayLayerManagementService {
       scriptName: 'actions/rename-layers.jsx',
       jsonData: { renameMap },
     });
-    console.log('[RENAME] result:', result);
+    this.logger.debug('[RENAME] result:', result);
   }
 
   /** DB person névből layer slug: ékezet eltávolítás + lowercase + alulvonás szeparátor */

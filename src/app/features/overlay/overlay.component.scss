@@ -1346,7 +1346,7 @@
   transition: background 0.15s;
   cursor: grab;
 
-  &:hover {
+  &:hover:not(&--selected) {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.1);
   }
@@ -1354,6 +1354,11 @@
   &--selected {
     background: rgba(34, 197, 94, 0.1);
     border-color: rgba(34, 197, 94, 0.4);
+
+    &:hover {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.5);
+    }
   }
 
   &.cdk-drag-animating {

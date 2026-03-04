@@ -95,7 +95,9 @@ export class OverlaySyncService {
       const layers: Array<{ layerName: string; photoUrl: string }> = [];
       for (const person of persons) {
         if (person.photoUrl) {
-          const slug = person.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
+          const slug = person.name
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
           layers.push({ layerName: `${slug}---${person.id}`, photoUrl: person.photoUrl });
         }
       }

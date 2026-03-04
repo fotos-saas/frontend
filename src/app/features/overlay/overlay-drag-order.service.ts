@@ -629,12 +629,15 @@ export class OverlayDragOrderService {
   // === Mentés ===
 
   async save(): Promise<void> {
+    console.log('[DRAG-ORDER] save() called');
     const pid = this.projectIdResolver();
-    if (!pid) return;
+    console.log('[DRAG-ORDER] pid:', pid, 'groups:', this.groups().length, 'ungrouped:', this.ungrouped().length);
+    if (!pid) { console.log('[DRAG-ORDER] ABORT: no pid'); return; }
 
     // Flat lista a csoportok sorrendjéből
     const items = this.buildFlatList();
-    if (items.length === 0) return;
+    console.log('[DRAG-ORDER] flat list items:', items.length, items.map(p => p.name).slice(0, 5));
+    if (items.length === 0) { console.log('[DRAG-ORDER] ABORT: empty list'); return; }
 
     this.saving.set(true);
     try {
